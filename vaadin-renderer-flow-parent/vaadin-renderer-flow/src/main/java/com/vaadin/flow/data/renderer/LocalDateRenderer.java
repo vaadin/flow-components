@@ -172,8 +172,8 @@ public class LocalDateRenderer<SOURCE>
      * @param formatter
      *            the formatter to use, not <code>null</code>
      * @deprecated Via this constructor renderer is not serializable, use
-     *             {@link LocalDateRenderer(ValueProvider, SerializableSupplier)}
-     *             instead.
+     *             {@link LocalDateRenderer(ValueProvider,
+     *             SerializableSupplier)} instead.
      */
     @Deprecated
     public LocalDateRenderer(ValueProvider<SOURCE, LocalDate> valueProvider,
