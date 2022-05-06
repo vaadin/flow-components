@@ -37,7 +37,7 @@ public interface GridSelectionModel<T> extends SelectionModel<Grid<T>, T> {
      * Handles the deselection of an item that originates from the client.
      *
      * @param item
-     *            the item beign deselected
+     *            the item being deselected
      */
     void deselectFromClient(T item);
 }

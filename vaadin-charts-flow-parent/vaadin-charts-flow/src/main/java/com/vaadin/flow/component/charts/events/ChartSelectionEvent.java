@@ -68,7 +68,7 @@ public class ChartSelectionEvent extends ComponentEvent<Chart> {
      * This value is undefined and shouldn't be considered if
      * {@link ChartModel#setZoomType(Dimension)} was set to {@link Dimension#Y}
      *
-     * @return the X coordinate where the selection endedif ZoomType is
+     * @return the X coordinate where the selection ended if ZoomType is
      *         {@link Dimension#X} or {@link Dimension#XY}.
      */
     public Double getSelectionEnd() {
