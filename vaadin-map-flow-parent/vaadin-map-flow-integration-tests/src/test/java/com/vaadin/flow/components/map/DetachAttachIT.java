@@ -8,8 +8,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.List;
-
 @TestPath("vaadin-map/detach-attach")
 public class DetachAttachIT extends AbstractComponentIT {
     private TestBenchElement detachMap;

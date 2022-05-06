@@ -16,12 +16,10 @@
 package com.vaadin.flow.component.grid;
 
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.data.selection.SelectionListener;
 import com.vaadin.flow.dom.Element;
 import org.junit.Assert;
 import org.junit.Before;
@@ -29,7 +27,6 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
-import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.DataCommunicatorTest;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.Query;
