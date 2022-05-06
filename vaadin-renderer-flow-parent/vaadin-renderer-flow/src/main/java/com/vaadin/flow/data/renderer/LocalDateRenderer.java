@@ -195,7 +195,7 @@ public class LocalDateRenderer<SOURCE>
      *            the textual representation of the <code>null</code> value
      * @deprecated Via this constructor renderer is not serializable, use
      *             {@link LocalDateRenderer(ValueProvider, SerializableSupplier,
-     *             String} instead.
+     *             String)} instead.
      *
      */
     @Deprecated
