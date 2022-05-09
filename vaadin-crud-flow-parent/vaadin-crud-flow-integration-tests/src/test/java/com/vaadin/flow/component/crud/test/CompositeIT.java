@@ -2,7 +2,6 @@ package com.vaadin.flow.component.crud.test;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.crud.testbench.CrudElement;
-import com.vaadin.flow.component.dialog.testbench.DialogElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.testbench.TestBenchElement;
 
