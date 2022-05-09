@@ -65,7 +65,7 @@ public class MenuManager<C extends Component, I extends MenuItemBase<?, I, S>, S
      * @param itemType
      *            the item type
      * @param parentMenuItem
-     *            the parent menu item of the subemnu
+     *            the parent menu item of the submenu
      */
     public MenuManager(C menu, SerializableRunnable contentReset,
             SerializableBiFunction<C, SerializableRunnable, I> itemGenerator,
