@@ -289,6 +289,29 @@ public class NotificationTest {
                 .contains(notification));
     }
 
+    @Test
+    public void showNotification_addManually_dontDetachOnParentDetach() {
+        // Use Notification.show() helper to create a notification.
+        Notification notification = Notification.show("foo");
+
+        // Manually add the notification to a parent
+        Div parent = new Div(notification);
+        ui.add(parent);
+        // Flush
+        flushBeforeClientResponse();
+
+        // Check that the notification is attached to the parent container
+        Assert.assertEquals(notification.getParent().get(), parent);
+
+        // Remove the modal parent container from the UI
+        ui.remove(parent);
+
+        // Even though the notification was created using Notification.show(),
+        // it got was manually added to the parent container so it should not
+        // have been automatically removed from it.
+        Assert.assertEquals(notification.getParent().get(), parent);
+    }
+
     private void flushBeforeClientResponse() {
         UIInternals internals = ui.getInternals();
         VaadinSession session = Mockito.mock(VaadinSession.class);
