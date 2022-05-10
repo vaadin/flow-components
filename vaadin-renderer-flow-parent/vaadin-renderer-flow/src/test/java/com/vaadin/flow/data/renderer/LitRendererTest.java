@@ -17,6 +17,7 @@ package com.vaadin.flow.data.renderer;
 
 import com.vaadin.flow.component.UI;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -57,6 +58,15 @@ public class LitRendererTest {
     public void allowAlphaNumericFunctionNames() {
         LitRenderer.of("<div></div>").withFunction("legalName1", item -> {
         });
+    }
+
+    @Test
+    public void supportGettingValueProviders() {
+        LitRenderer<?> renderer = LitRenderer.of("<div></div>").withProperty("foo", item -> 1).withProperty("bar", item -> 2);
+
+        Assert.assertTrue(renderer.getValueProviders().keySet().contains("foo"));
+        Assert.assertTrue(renderer.getValueProviders().keySet().contains("bar"));
+        Assert.assertTrue(renderer.getValueProviders().size() == 2);
     }
 
 }
