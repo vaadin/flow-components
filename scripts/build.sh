@@ -39,7 +39,7 @@ then
   modifiedComponent=`curl -s "https://api.github.com/repos/vaadin/flow-components/pulls/$PR/files" \
     | jq -r '.[] | .filename' | grep 'vaadin.*flow-parent' | sort -u | tr -d '[:space:]'`
   modified=`curl -s "https://api.github.com/repos/vaadin/flow-components/pulls/$PR/files" \
-    | jq -r '.[] | .filename' | grep 'vaadin.*flow-parent' | perl -pe 's,^vaadin-(.*)-parent.*,$1,g' | sort -u`
+    | jq -r '.[] | .filename' | grep 'vaadin.*flow-parent' | perl -pe 's,^vaadin-(.*)-flow-parent.*,$1,g' | sort -u`
 
   nmods=`echo "$modified" | wc -w`
   [ "$nmods" -eq 1 ] && echo "$title" | grep -q " vaadin-$modified-flow " && partial=yes
