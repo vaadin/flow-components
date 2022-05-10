@@ -700,7 +700,7 @@ public class ConditionalFormatter implements Serializable {
             return ((BoolEval) eval).getBooleanValue();
         } else {
             if (eval instanceof NumericValueEval) {
-                return ((NumberEval) eval).getNumberValue() != 0;
+                return ((NumericValueEval) eval).getNumberValue() != 0;
             } else {
                 return false;
             }
@@ -781,7 +781,8 @@ public class ConditionalFormatter implements Serializable {
         }
 
         // other than numerical types
-        if (cell.getCellType() == CellType.STRING || isFormulaStringType) {
+        if (eval instanceof StringEval && (cell.getCellType() == CellType.STRING
+                || isFormulaStringType)) {
 
             String formulaValue = ((StringEval) eval).getStringValue();
             String stringValue = cell.getStringCellValue();
@@ -794,7 +795,8 @@ public class ConditionalFormatter implements Serializable {
                 return !stringValue.equalsIgnoreCase(formulaValue);
             }
         }
-        if (cell.getCellType() == CellType.BOOLEAN || isFormulaBooleanType) {
+        if (eval instanceof BoolEval && (cell.getCellType() == CellType.BOOLEAN
+                || isFormulaBooleanType)) {
             // not sure if this is used, since no boolean option exists in
             // Excel..
 
