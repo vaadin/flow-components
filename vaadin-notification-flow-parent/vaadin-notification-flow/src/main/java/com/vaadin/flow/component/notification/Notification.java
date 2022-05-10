@@ -204,6 +204,13 @@ public class Notification extends GeneratedVaadinNotification<Notification>
 
         getElement().addEventListener("opened-changed",
                 event -> removeAutoAdded());
+
+        addDetachListener(event -> {
+            // If the notification gets detached, it needs to be marked
+            // as closed so it won't auto-open when reattached.
+            setOpened(false);
+            removeAutoAdded();
+        });
     }
 
     /**
@@ -529,16 +536,6 @@ public class Notification extends GeneratedVaadinNotification<Notification>
     public Registration addDetachListener(
             ComponentEventListener<DetachEvent> listener) {
         return super.addDetachListener(listener);
-    }
-
-    @Override
-    protected void onDetach(DetachEvent detachEvent) {
-        super.onDetach(detachEvent);
-
-        // If the notification gets detached, it needs to be marked as closed so
-        // it won't auto-open when reattached.
-        setOpened(false);
-        removeAutoAdded();
     }
 
     /**
