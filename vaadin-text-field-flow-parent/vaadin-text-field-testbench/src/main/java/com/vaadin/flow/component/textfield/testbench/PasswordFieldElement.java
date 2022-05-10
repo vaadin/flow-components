@@ -49,7 +49,7 @@ public class PasswordFieldElement extends TestBenchElement
      *
      * @param passwordVisible
      *            <code>true</code> to show the password in clear text,
-     *            <code>false</code> to hide the passwors from view
+     *            <code>false</code> to hide the password from view
      */
     public void setPasswordVisible(boolean passwordVisible) {
         callFunction("_setPasswordVisible", passwordVisible);

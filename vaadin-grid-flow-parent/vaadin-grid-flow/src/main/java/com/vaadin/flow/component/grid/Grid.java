@@ -128,7 +128,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/vaadin-grid", version = "5.9.4")
+@NpmPackage(value = "@vaadin/vaadin-grid", version = "5.9.5")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid.js")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/vaadin-grid/src/vaadin-grid-sorter.js")
@@ -3782,17 +3782,17 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     /**
      * Sets whether the user can drag the grid rows or not.
      *
-     * @param rowsRraggable
+     * @param rowsDraggable
      *            {@code true} if the rows can be dragged by the user;
      *            {@code false} if not
      */
-    public void setRowsDraggable(boolean rowsRraggable) {
+    public void setRowsDraggable(boolean rowsDraggable) {
         // We need to add DnD mobile polyfill here by invoking
         // DndUtil.addMobileDndPolyfillIfNeeded. But, since DndUtil is in a Flow
         // internal package, DragSource.create is called to invoke
         // addMobileDndPolyfillIfNeeded indirectly.
         DragSource.create(this).setDraggable(false);
-        getElement().setProperty("rowsDraggable", rowsRraggable);
+        getElement().setProperty("rowsDraggable", rowsDraggable);
     }
 
     /**
