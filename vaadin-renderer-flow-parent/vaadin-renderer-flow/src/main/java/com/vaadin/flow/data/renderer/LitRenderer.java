@@ -17,6 +17,7 @@
 package com.vaadin.flow.data.renderer;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -446,5 +447,16 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
         }
         clientCallables.put(functionName, handler);
         return this;
+    }
+
+    /**
+     * Gets the property mapped to {@link ValueProvider}s in this renderer. The
+     * returned map is immutable.
+     *
+     * @return the mapped properties, never <code>null</code>
+     */
+    @Override
+    public Map<String, ValueProvider<SOURCE, ?>> getValueProviders() {
+        return Collections.unmodifiableMap(valueProviders);
     }
 }
