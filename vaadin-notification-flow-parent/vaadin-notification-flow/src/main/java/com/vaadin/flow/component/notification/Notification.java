@@ -438,12 +438,14 @@ public class Notification extends GeneratedVaadinNotification<Notification>
                     + "That may happen if you call the method from the custom thread without "
                     + "'UI::access' or from tests without proper initialization.");
         }
-        if (opened && getElement().getNode().getParent() == null) {
-            ui.beforeClientResponse(ui, context -> {
+
+        ui.beforeClientResponse(ui, context -> {
+            if (opened && getElement().getNode().getParent() == null) {
                 ui.addToModalComponent(this);
                 autoAddedToTheUi = true;
-            });
-        }
+            }
+        });
+
         super.setOpened(opened);
     }
 
