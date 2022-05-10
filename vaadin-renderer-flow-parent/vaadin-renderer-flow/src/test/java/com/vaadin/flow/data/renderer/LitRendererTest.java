@@ -62,10 +62,13 @@ public class LitRendererTest {
 
     @Test
     public void supportGettingValueProviders() {
-        LitRenderer<?> renderer = LitRenderer.of("<div></div>").withProperty("foo", item -> 1).withProperty("bar", item -> 2);
+        LitRenderer<?> renderer = LitRenderer.of("<div></div>")
+                .withProperty("foo", item -> 1).withProperty("bar", item -> 2);
 
-        Assert.assertTrue(renderer.getValueProviders().keySet().contains("foo"));
-        Assert.assertTrue(renderer.getValueProviders().keySet().contains("bar"));
+        Assert.assertTrue(
+                renderer.getValueProviders().keySet().contains("foo"));
+        Assert.assertTrue(
+                renderer.getValueProviders().keySet().contains("bar"));
         Assert.assertTrue(renderer.getValueProviders().size() == 2);
     }
 
