@@ -527,9 +527,9 @@ public class Notification extends GeneratedVaadinNotification<Notification>
     @Override
     protected void onDetach(DetachEvent detachEvent) {
         super.onDetach(detachEvent);
-        
-        // If the notificaiton gets detached, it needs to be marked as closed so it
-        // won't auto-open when reattached.
+
+        // If the notificaiton gets detached, it needs to be marked as closed so
+        // it won't auto-open when reattached.
         setOpened(false);
     }
 

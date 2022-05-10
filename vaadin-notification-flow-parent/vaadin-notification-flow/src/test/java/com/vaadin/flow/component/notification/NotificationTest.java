@@ -264,15 +264,18 @@ public class NotificationTest {
         Div parent = new Div();
         ui.add(parent);
         ui.setChildComponentModal(parent, true);
-    
+
         // Use Notification.show() helper to create a notification.
-        // It will be automatically added to the modal parent container (before client response)
+        // It will be automatically added to the modal parent container (before
+        // client response)
         Notification notification = Notification.show("foo");
         flushBeforeClientResponse();
-        
-        // Check that the notificaiton is opened and attached to the parent container
+
+        // Check that the notificaiton is opened and attached to the parent
+        // container
         Assert.assertTrue(notification.isOpened());
-        Assert.assertTrue(parent.getChildren().collect(Collectors.toList()).contains(notification));
+        Assert.assertTrue(parent.getChildren().collect(Collectors.toList())
+                .contains(notification));
 
         // Remove the modal parent container from the UI
         ui.remove(parent);
@@ -280,8 +283,10 @@ public class NotificationTest {
         // The notification should have been closed on detach, even if it was
         // the parent that was removed
         Assert.assertFalse(notification.isOpened());
-        // The notification should have been automatically removed from the parent container
-        Assert.assertFalse(parent.getChildren().collect(Collectors.toList()).contains(notification));
+        // The notification should have been automatically removed from the
+        // parent container
+        Assert.assertFalse(parent.getChildren().collect(Collectors.toList())
+                .contains(notification));
     }
 
     private void flushBeforeClientResponse() {
