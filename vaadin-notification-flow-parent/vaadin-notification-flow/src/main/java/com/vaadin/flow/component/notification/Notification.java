@@ -202,13 +202,14 @@ public class Notification extends GeneratedVaadinNotification<Notification>
         getElement().appendChild(templateElement);
         getElement().appendVirtualChild(container);
 
-        getElement().addEventListener("opened-changed", event -> removeAutoOpened());
+        getElement().addEventListener("opened-changed",
+                event -> removeAutoAdded());
     }
 
     /**
      * Removes the notification from its parent if it was added automatically.
      */
-    private void removeAutoOpened() {
+    private void removeAutoAdded() {
         if (autoAddedToTheUi && !isOpened()) {
             autoAddedToTheUi = false;
             getElement().removeFromParent();
@@ -535,7 +536,7 @@ public class Notification extends GeneratedVaadinNotification<Notification>
         // If the notificaiton gets detached, it needs to be marked as closed so
         // it won't auto-open when reattached.
         setOpened(false);
-        removeAutoOpened();
+        removeAutoAdded();
     }
 
     /**

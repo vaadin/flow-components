@@ -77,7 +77,7 @@ public class NotificationView extends Div {
                 "This is a notification created with static convenience method");
         notification.setId("static-notification");
         addCard("Notification using static convenience method");
-        
+
     }
 
     private void createNotificationWithComponents() {
