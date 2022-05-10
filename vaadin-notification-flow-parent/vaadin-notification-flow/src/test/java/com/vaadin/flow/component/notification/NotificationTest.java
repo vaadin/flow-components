@@ -185,10 +185,7 @@ public class NotificationTest {
 
         notification.open();
 
-        UIInternals internals = ui.getInternals();
-        VaadinSession session = Mockito.mock(VaadinSession.class);
-        internals.setSession(session);
-        internals.getStateTree().runExecutionsBeforeClientResponse();
+        flushBeforeClientResponse();
 
         Element templateElement = notification.getElement().getChildren()
                 .findFirst().get();
@@ -206,10 +203,7 @@ public class NotificationTest {
 
         notification.open();
 
-        UIInternals internals = ui.getInternals();
-        VaadinSession session = Mockito.mock(VaadinSession.class);
-        internals.setSession(session);
-        internals.getStateTree().runExecutionsBeforeClientResponse();
+        flushBeforeClientResponse();
 
         Element templateElement = notification.getElement().getChildren()
                 .findFirst().get();
@@ -240,5 +234,60 @@ public class NotificationTest {
     public void hasStyle() {
         Notification notification = new Notification();
         Assert.assertTrue(notification instanceof HasStyle);
+    }
+
+    @Test
+    public void createNotificationh_closeOnParentDetach() {
+        // Create a Notification manually and add it to a parent container
+        Notification notification = new Notification();
+        notification.open();
+        Div parent = new Div(notification);
+        // Add the parent to the UI
+        ui.add(parent);
+
+        // The notification was opened manually. Check that it's still open.
+        Assert.assertTrue(notification.isOpened());
+
+        // Remove the parent container from the UI
+        ui.remove(parent);
+
+        // The notification should have been closed on detach, even if it was
+        // the parent that was removed
+        Assert.assertFalse(notification.isOpened());
+        // The parent reference should not have changed
+        Assert.assertEquals(notification.getParent().get(), parent);
+    }
+
+    @Test
+    public void showNotification_closeAndDetachOnParentDetach() {
+        // Create a modal parent container and add it to the UI
+        Div parent = new Div();
+        ui.add(parent);
+        ui.setChildComponentModal(parent, true);
+    
+        // Use Notification.show() helper to create a notification.
+        // It will be automatically added to the modal parent container (before client response)
+        Notification notification = Notification.show("foo");
+        flushBeforeClientResponse();
+        
+        // Check that the notificaiton is opened and attached to the parent container
+        Assert.assertTrue(notification.isOpened());
+        Assert.assertTrue(parent.getChildren().collect(Collectors.toList()).contains(notification));
+
+        // Remove the modal parent container from the UI
+        ui.remove(parent);
+
+        // The notification should have been closed on detach, even if it was
+        // the parent that was removed
+        Assert.assertFalse(notification.isOpened());
+        // The notification should have been automatically removed from the parent container
+        Assert.assertFalse(parent.getChildren().collect(Collectors.toList()).contains(notification));
+    }
+
+    private void flushBeforeClientResponse() {
+        UIInternals internals = ui.getInternals();
+        VaadinSession session = Mockito.mock(VaadinSession.class);
+        internals.setSession(session);
+        internals.getStateTree().runExecutionsBeforeClientResponse();
     }
 }
