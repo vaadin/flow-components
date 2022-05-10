@@ -271,7 +271,7 @@ public class NotificationTest {
         Notification notification = Notification.show("foo");
         flushBeforeClientResponse();
 
-        // Check that the notificaiton is opened and attached to the parent
+        // Check that the notification is opened and attached to the parent
         // container
         Assert.assertTrue(notification.isOpened());
         Assert.assertTrue(parent.getChildren().collect(Collectors.toList())
