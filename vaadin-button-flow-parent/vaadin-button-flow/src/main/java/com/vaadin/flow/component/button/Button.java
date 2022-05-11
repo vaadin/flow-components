@@ -19,6 +19,7 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.html.Image;
@@ -418,8 +419,21 @@ public class Button extends GeneratedVaadinButton<Button>
         }
     }
 
+
+    @Override
+    protected void onDetach(DetachEvent detachEvent) {
+        disableListener.remove();
+    }
+
     @Override
     protected void onAttach(AttachEvent attachEvent) {
+        if (disableListener == null) {
+            disableListener = addClickListener(buttonClickEvent -> {
+                if (disableOnClick) {
+                    doDisableOnClick();
+                }
+            });
+        }
         initDisableOnClick();
     }
 
