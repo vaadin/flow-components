@@ -447,7 +447,7 @@ public class Notification extends GeneratedVaadinNotification<Notification>
         }
 
         ui.beforeClientResponse(ui, context -> {
-            if (opened && getElement().getNode().getParent() == null) {
+            if (isOpened() && getElement().getNode().getParent() == null) {
                 ui.addToModalComponent(this);
                 autoAddedToTheUi = true;
             }
