@@ -84,7 +84,7 @@ public class NotificationView extends DemoView {
                 "This is a notification created with static convenience method");
         // end-source-example
         notification.setId("static-notification");
-        addCard("Notification using static convenience method", notification);
+        addCard("Notification using static convenience method");
     }
 
     private void createNotificationWithComponents() {
