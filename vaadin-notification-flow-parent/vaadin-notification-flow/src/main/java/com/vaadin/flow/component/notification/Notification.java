@@ -202,13 +202,25 @@ public class Notification extends GeneratedVaadinNotification<Notification>
         getElement().appendChild(templateElement);
         getElement().appendVirtualChild(container);
 
-        getElement().addEventListener("opened-changed", event -> {
-            if (autoAddedToTheUi && !isOpened()) {
-                getElement().removeFromParent();
-                autoAddedToTheUi = false;
-            }
-        });
+        getElement().addEventListener("opened-changed",
+                event -> removeAutoAdded());
 
+        addDetachListener(event -> {
+            // If the notification gets detached, it needs to be marked
+            // as closed so it won't auto-open when reattached.
+            setOpened(false);
+            removeAutoAdded();
+        });
+    }
+
+    /**
+     * Removes the notification from its parent if it was added automatically.
+     */
+    private void removeAutoAdded() {
+        if (autoAddedToTheUi && !isOpened()) {
+            autoAddedToTheUi = false;
+            getElement().removeFromParent();
+        }
     }
 
     /**
@@ -433,12 +445,14 @@ public class Notification extends GeneratedVaadinNotification<Notification>
                     + "That may happen if you call the method from the custom thread without "
                     + "'UI::access' or from tests without proper initialization.");
         }
-        if (opened && getElement().getNode().getParent() == null) {
-            ui.beforeClientResponse(ui, context -> {
+
+        ui.beforeClientResponse(ui, context -> {
+            if (isOpened() && getElement().getNode().getParent() == null) {
                 ui.addToModalComponent(this);
                 autoAddedToTheUi = true;
-            });
-        }
+            }
+        });
+
         super.setOpened(opened);
     }
 
