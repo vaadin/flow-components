@@ -18,6 +18,8 @@ package com.vaadin.flow.component.combobox;
 import com.vaadin.flow.component.ComponentEvent;
 import elemental.json.JsonObject;
 
+import java.io.Serializable;
+
 /**
  * <p>
  * Description copied from corresponding location in WebComponent:
@@ -271,7 +273,7 @@ import elemental.json.JsonObject;
  * – how to apply styles for shadow parts</a>
  * </p>
  */
-public abstract class GeneratedVaadinComboBox {
+public abstract class GeneratedVaadinComboBox implements Serializable {
 
     /**
      * @deprecated Use {@link com.vaadin.flow.component.combobox.events.CustomValueSetEvent} instead. This will be removed in a future major version.
