@@ -20,7 +20,7 @@ import com.vaadin.flow.shared.Registration;
  * @param <TValue>
  *            Type of the selection / value of the extending component
  */
-public class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, TItem, TValue>, TItem, TValue>
+public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, TItem, TValue>, TItem, TValue>
         extends AbstractSinglePropertyField<TComponent, TValue>
         implements HasStyle, Focusable<TComponent> {
 
