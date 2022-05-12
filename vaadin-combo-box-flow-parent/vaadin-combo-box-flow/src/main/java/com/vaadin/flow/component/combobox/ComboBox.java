@@ -1252,31 +1252,7 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T> implements
         return null;
     }
 
-    /**
-     * Adds a listener for the event which is fired when user inputs a string
-     * value that does not match any existing items and commits it eg. by
-     * blurring or pressing the enter-key.
-     * <p>
-     * Note that ComboBox doesn't do anything with the custom value string
-     * automatically. Use this method to determine how the custom value should
-     * be handled. For example, when the ComboBox has {@code String} as the
-     * value type, you can add a listener which sets the custom string as the
-     * value of the ComboBox with {@link #setValue(Object)}.
-     * <p>
-     * As a side effect, this makes the ComboBox allow custom values. If you
-     * want to disable the firing of custom value set events once the listener
-     * is added, please disable it explicitly via the
-     * {@link #setAllowCustomValue(boolean)} method.
-     * <p>
-     * The custom value becomes disallowed automatically once the last custom
-     * value set listener is removed.
-     *
-     * @param listener
-     *            the listener to be notified when a new value is filled
-     * @return a {@link Registration} for removing the event listener
-     * @see #setAllowCustomValue(boolean)
-     */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Override
     public Registration addCustomValueSetListener(
             ComponentEventListener<CustomValueSetEvent<ComboBox<T>>> listener) {
         setAllowCustomValue(true);
