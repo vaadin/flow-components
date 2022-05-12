@@ -8,7 +8,6 @@ import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.component.combobox.events.CustomValueSetEvent;
 import com.vaadin.flow.shared.Registration;
-import elemental.json.JsonObject;
 
 /**
  * Provides base functionality for combo box related components, such as {@link ComboBox}
