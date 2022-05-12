@@ -83,14 +83,6 @@ public class ComboBoxTest {
         }
     }
 
-    private class ComboBoxWithInitialValue
-            extends GeneratedVaadinComboBox<ComboBoxWithInitialValue, String> {
-        ComboBoxWithInitialValue() {
-            super("", null, String.class, (combo, value) -> value,
-                    (combo, value) -> value, true);
-        }
-    }
-
     @Test
     public void templateWarningSuppressed() {
         ComboBox<Object> comboBox = new ComboBox<>();
@@ -305,7 +297,7 @@ public class ComboBoxTest {
         Assert.assertNull(
                 "The selectedItem property must be null when there's no value. "
                         + "Otherwise the 'clear value'-button will be shown.",
-                comboBox.getSelectedItemJsonObject());
+                comboBox.getElement().getPropertyRaw("selectedItem"));
     }
 
     @Test
@@ -358,10 +350,10 @@ public class ComboBoxTest {
         Mockito.when(service.getInstantiator()).thenReturn(instantiator);
 
         Mockito.when(
-                instantiator.createComponent(ComboBoxWithInitialValue.class))
-                .thenAnswer(invocation -> new ComboBoxWithInitialValue());
-        ComboBoxWithInitialValue field = Component.from(element,
-                ComboBoxWithInitialValue.class);
+                instantiator.createComponent(ComboBox.class))
+                .thenAnswer(invocation -> new ComboBox());
+        ComboBox field = Component.from(element,
+                ComboBox.class);
         Assert.assertEquals("foo", field.getElement().getPropertyRaw("value"));
     }
 
