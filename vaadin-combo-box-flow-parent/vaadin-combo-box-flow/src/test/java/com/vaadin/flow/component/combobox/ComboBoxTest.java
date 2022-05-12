@@ -349,11 +349,9 @@ public class ComboBoxTest {
 
         Mockito.when(service.getInstantiator()).thenReturn(instantiator);
 
-        Mockito.when(
-                instantiator.createComponent(ComboBox.class))
+        Mockito.when(instantiator.createComponent(ComboBox.class))
                 .thenAnswer(invocation -> new ComboBox());
-        ComboBox field = Component.from(element,
-                ComboBox.class);
+        ComboBox field = Component.from(element, ComboBox.class);
         Assert.assertEquals("foo", field.getElement().getPropertyRaw("value"));
     }
 

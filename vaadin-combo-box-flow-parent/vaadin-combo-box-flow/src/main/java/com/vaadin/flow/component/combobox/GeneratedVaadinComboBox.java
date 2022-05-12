@@ -276,18 +276,23 @@ import java.io.Serializable;
 public abstract class GeneratedVaadinComboBox implements Serializable {
 
     /**
-     * @deprecated Use {@link com.vaadin.flow.component.combobox.events.CustomValueSetEvent} instead. This will be removed in a future major version.
+     * @deprecated Use
+     *             {@link com.vaadin.flow.component.combobox.events.CustomValueSetEvent}
+     *             instead. This will be removed in a future major version.
      * @param <TComponent>
      */
     public static class CustomValueSetEvent<TComponent extends ComboBoxBase<TComponent, ?, ?>>
-            extends com.vaadin.flow.component.combobox.events.CustomValueSetEvent<TComponent> {
-        public CustomValueSetEvent(TComponent source, boolean fromClient, String detail) {
+            extends
+            com.vaadin.flow.component.combobox.events.CustomValueSetEvent<TComponent> {
+        public CustomValueSetEvent(TComponent source, boolean fromClient,
+                String detail) {
             super(source, fromClient, detail);
         }
     }
 
     /**
-     * @deprecated This class is not used in any API, and will be removed in a future major version.
+     * @deprecated This class is not used in any API, and will be removed in a
+     *             future major version.
      * @param <TComponent>
      */
     public static class SelectedItemChangeEvent<TComponent extends ComboBoxBase<TComponent, ?, ?>>
@@ -296,7 +301,8 @@ public abstract class GeneratedVaadinComboBox implements Serializable {
 
         public SelectedItemChangeEvent(TComponent source, boolean fromClient) {
             super(source, fromClient);
-            this.selectedItem = (JsonObject) source.getElement().getPropertyRaw("selectedItem");
+            this.selectedItem = (JsonObject) source.getElement()
+                    .getPropertyRaw("selectedItem");
         }
 
         public JsonObject getSelectedItem() {
@@ -305,7 +311,8 @@ public abstract class GeneratedVaadinComboBox implements Serializable {
     }
 
     /**
-     * @deprecated This class is not used in any API, and will be removed in a future major version.
+     * @deprecated This class is not used in any API, and will be removed in a
+     *             future major version.
      * @param <TComponent>
      */
     public static class OpenedChangeEvent<TComponent extends ComboBoxBase<TComponent, ?, ?>>
@@ -323,7 +330,8 @@ public abstract class GeneratedVaadinComboBox implements Serializable {
     }
 
     /**
-     * @deprecated This class is not used in any API, and will be removed in a future major version.
+     * @deprecated This class is not used in any API, and will be removed in a
+     *             future major version.
      * @param <R>
      */
     public static class FilterChangeEvent<R extends ComboBoxBase<R, ?, ?>>
@@ -341,7 +349,8 @@ public abstract class GeneratedVaadinComboBox implements Serializable {
     }
 
     /**
-     * @deprecated This class is not used in any API, and will be removed in a future major version.
+     * @deprecated This class is not used in any API, and will be removed in a
+     *             future major version.
      * @param <R>
      */
     public static class InvalidChangeEvent<R extends ComboBoxBase<R, ?, ?>>

@@ -114,9 +114,8 @@ import elemental.json.JsonValue;
 @JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./comboBoxConnector.js")
-public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
-        implements HasSize, HasValidation,
-        HasDataView<T, String, ComboBoxDataView<T>>,
+public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T> implements
+        HasSize, HasValidation, HasDataView<T, String, ComboBoxDataView<T>>,
         HasListDataView<T, ComboBoxListDataView<T>>,
         HasLazyDataView<T, String, ComboBoxLazyDataView<T>>, HasHelper,
         HasTheme, HasLabel, HasClearButton {
@@ -299,7 +298,8 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
         dataGenerator.addDataGenerator((item, jsonObject) -> jsonObject
                 .put("label", generateLabel(item)));
 
-        // Configure web component to use key property from the generated wrapper items for identification
+        // Configure web component to use key property from the generated
+        // wrapper items for identification
         getElement().setProperty("itemValuePath", "key");
         getElement().setProperty("itemIdPath", "key");
 
@@ -952,8 +952,8 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
         };
 
         SerializableConsumer<DataCommunicator.Filter<C>> providerFilterSlot = dataCommunicator
-                .setDataProvider(dataProvider,
-                        convertOrNull.apply(getFilter()), false);
+                .setDataProvider(dataProvider, convertOrNull.apply(getFilter()),
+                        false);
 
         filterSlot = filter -> {
             if (!Objects.equals(filter, lastFilter)) {
@@ -1238,7 +1238,7 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
         return itemLabelGenerator;
     }
 
-   @Override
+    @Override
     public void setPageSize(int pageSize) {
         super.setPageSize(pageSize);
         if (dataCommunicator != null) {

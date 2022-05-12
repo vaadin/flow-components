@@ -10,44 +10,61 @@ import com.vaadin.flow.component.combobox.events.CustomValueSetEvent;
 import com.vaadin.flow.shared.Registration;
 
 /**
- * Provides base functionality for combo box related components, such as {@link ComboBox}
+ * Provides base functionality for combo box related components, such as
+ * {@link ComboBox}
  *
- * @param <TComponent> Type of the component that extends from this class
- * @param <TItem>      Type of individual items that are selectable in the combo box
- * @param <TValue>     Type of the selection / value of the extending component
+ * @param <TComponent>
+ *            Type of the component that extends from this class
+ * @param <TItem>
+ *            Type of individual items that are selectable in the combo box
+ * @param <TValue>
+ *            Type of the selection / value of the extending component
  */
-public class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, TItem, TValue>, TItem, TValue> extends AbstractSinglePropertyField<TComponent, TValue> implements HasStyle, Focusable<TComponent> {
+public class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, TItem, TValue>, TItem, TValue>
+        extends AbstractSinglePropertyField<TComponent, TValue>
+        implements HasStyle, Focusable<TComponent> {
 
     private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
     /**
      * Constructs a new ComboBoxBase instance
      *
-     * @param valuePropertyName   name of the value property of the web component that should be used to set values, or listen to value changes
-     * @param defaultValue        the default value of the component
-     * @param valuePropertyType   the class that represents the type of the raw value of the Flow element property
-     * @param presentationToModel a function to convert a raw property value into a value using the user-specified model type
-     * @param modelToPresentation a function to convert a value using the user-specified model type into a raw property value
-     * @param <TValueProperty>    the type of the raw value of the Flow element property
+     * @param valuePropertyName
+     *            name of the value property of the web component that should be
+     *            used to set values, or listen to value changes
+     * @param defaultValue
+     *            the default value of the component
+     * @param valuePropertyType
+     *            the class that represents the type of the raw value of the
+     *            Flow element property
+     * @param presentationToModel
+     *            a function to convert a raw property value into a value using
+     *            the user-specified model type
+     * @param modelToPresentation
+     *            a function to convert a value using the user-specified model
+     *            type into a raw property value
+     * @param <TValueProperty>
+     *            the type of the raw value of the Flow element property
      */
     public <TValueProperty> ComboBoxBase(String valuePropertyName,
-                                         TValue defaultValue,
-                                         Class<TValueProperty> valuePropertyType,
-                                         SerializableBiFunction<TComponent, TValueProperty, TValue> presentationToModel,
-                                         SerializableBiFunction<TComponent, TValue, TValueProperty> modelToPresentation) {
-        super(valuePropertyName, defaultValue, valuePropertyType, presentationToModel,
-                modelToPresentation);
+            TValue defaultValue, Class<TValueProperty> valuePropertyType,
+            SerializableBiFunction<TComponent, TValueProperty, TValue> presentationToModel,
+            SerializableBiFunction<TComponent, TValue, TValueProperty> modelToPresentation) {
+        super(valuePropertyName, defaultValue, valuePropertyType,
+                presentationToModel, modelToPresentation);
     }
 
     /**
-     * Whether the component should automatically receive focus when the page loads.
+     * Whether the component should automatically receive focus when the page
+     * loads.
      */
     public boolean isAutofocus() {
         return getElement().getProperty("autofocus", false);
     }
 
     /**
-     * Sets the whether the component should automatically receive focus when the page loads. Defaults to {@code false}.
+     * Sets the whether the component should automatically receive focus when
+     * the page loads. Defaults to {@code false}.
      */
     public void setAutofocus(boolean autofocus) {
         getElement().setProperty("autofocus", autofocus);
@@ -68,8 +85,9 @@ public class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, TItem, TVa
      * <p>
      * The default page size is 50.
      *
-     * @param pageSize the maximum number of items sent per request, should be
-     *                 greater than zero
+     * @param pageSize
+     *            the maximum number of items sent per request, should be
+     *            greater than zero
      */
     public void setPageSize(int pageSize) {
         if (pageSize < 1) {
@@ -148,8 +166,9 @@ public class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, TItem, TVa
      * {@code false}, an unfocused ComboBox will always display the label of the
      * currently selected item.
      *
-     * @param allowCustomValue {@code true} to enable custom value set events, {@code false}
-     *                         to disable them
+     * @param allowCustomValue
+     *            {@code true} to enable custom value set events, {@code false}
+     *            to disable them
      * @see #addCustomValueSetListener(ComponentEventListener)
      */
     public void setAllowCustomValue(boolean allowCustomValue) {
@@ -169,7 +188,8 @@ public class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, TItem, TVa
      * <p>
      * Setter is only required to allow using @Synchronize
      *
-     * @param filter the String value to set
+     * @param filter
+     *            the String value to set
      */
     protected void setFilter(String filter) {
         getElement().setProperty("filter", filter == null ? "" : filter);
@@ -198,21 +218,24 @@ public class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, TItem, TVa
     }
 
     /**
-     * Sets whether the component requires a value to be considered in a valid state.
+     * Sets whether the component requires a value to be considered in a valid
+     * state.
      */
     public boolean isRequired() {
         return super.isRequiredIndicatorVisible();
     }
 
     /**
-     * Whether the component should block user input that does not match the configured pattern
+     * Whether the component should block user input that does not match the
+     * configured pattern
      */
     public boolean isPreventInvalidInput() {
         return getElement().getProperty("preventInvalidInput", false);
     }
 
     /**
-     * Sets whether the component should block user input that does not match the configured pattern
+     * Sets whether the component should block user input that does not match
+     * the configured pattern
      */
     public void setPreventInvalidInput(boolean preventInvalidInput) {
         getElement().setProperty("preventInvalidInput", preventInvalidInput);
@@ -233,14 +256,16 @@ public class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, TItem, TVa
     }
 
     /**
-     * The error message that should be displayed when the component becomes invalid
+     * The error message that should be displayed when the component becomes
+     * invalid
      */
     public String getErrorMessage() {
         return getElement().getProperty("errorMessage");
     }
 
     /**
-     * Sets the error message that should be displayed when the component becomes invalid
+     * Sets the error message that should be displayed when the component
+     * becomes invalid
      */
     public void setErrorMessage(String errorMessage) {
         getElement().setProperty("errorMessage",
@@ -248,14 +273,16 @@ public class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, TItem, TVa
     }
 
     /**
-     * The placeholder text that should be displayed in the input element, when the user has not entered a value
+     * The placeholder text that should be displayed in the input element, when
+     * the user has not entered a value
      */
     public String getPlaceholder() {
         return getElement().getProperty("placeholder");
     }
 
     /**
-     * Sets the placeholder text that should be displayed in the input element, when the user has not entered a value
+     * Sets the placeholder text that should be displayed in the input element,
+     * when the user has not entered a value
      */
     public void setPlaceholder(String placeholder) {
         getElement().setProperty("placeholder",
@@ -267,8 +294,9 @@ public class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, TItem, TVa
      * the dropdown is only opened when clicking the toggle button or pressing
      * Up or Down arrow keys.
      *
-     * @param autoOpen {@code false} to prevent the dropdown from opening
-     *                 automatically
+     * @param autoOpen
+     *            {@code false} to prevent the dropdown from opening
+     *            automatically
      */
     public void setAutoOpen(boolean autoOpen) {
         getElement().setProperty(PROP_AUTO_OPEN_DISABLED, !autoOpen);
