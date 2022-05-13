@@ -84,6 +84,23 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     }
 
     /**
+     * Gets the page size, which is the number of items fetched at a time from
+     * the data provider.
+     * <p>
+     * The page size is also the largest number of items that can support
+     * client-side filtering. If you provide more items than the page size, the
+     * component has to fall back to server-side filtering.
+     * <p>
+     * The default page size is 50.
+     *
+     * @return the maximum number of items sent per request
+     * @see #setPageSize(int)
+     */
+    public int getPageSize() {
+        return getElement().getProperty("pageSize", 50);
+    }
+
+    /**
      * Sets the page size, which is the number of items requested at a time from
      * the data provider. This does not guarantee a maximum query size to the
      * backend; when the overlay has room to render more new items than the page
@@ -108,23 +125,6 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
                     "Page size should be greater than zero.");
         }
         getElement().setProperty("pageSize", pageSize);
-    }
-
-    /**
-     * Gets the page size, which is the number of items fetched at a time from
-     * the data provider.
-     * <p>
-     * The page size is also the largest number of items that can support
-     * client-side filtering. If you provide more items than the page size, the
-     * component has to fall back to server-side filtering.
-     * <p>
-     * The default page size is 50.
-     *
-     * @return the maximum number of items sent per request
-     * @see #setPageSize(int)
-     */
-    public int getPageSize() {
-        return getElement().getProperty("pageSize", 50);
     }
 
     /**
@@ -224,18 +224,18 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     }
 
     /**
-     * Whether the component requires a value to be considered in a valid state.
-     */
-    public void setRequired(boolean required) {
-        super.setRequiredIndicatorVisible(required);
-    }
-
-    /**
      * Sets whether the component requires a value to be considered in a valid
      * state.
      */
     public boolean isRequired() {
         return super.isRequiredIndicatorVisible();
+    }
+
+    /**
+     * Whether the component requires a value to be considered in a valid state.
+     */
+    public void setRequired(boolean required) {
+        super.setRequiredIndicatorVisible(required);
     }
 
     /**
@@ -273,6 +273,15 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     }
 
     /**
+     * Gets whether dropdown will open automatically or not.
+     *
+     * @return @{code true} if enabled, {@code false} otherwise
+     */
+    public boolean isAutoOpen() {
+        return !getElement().getProperty("autoOpenDisabled", false);
+    }
+
+    /**
      * Enables or disables the dropdown opening automatically. If {@code false}
      * the dropdown is only opened when clicking the toggle button or pressing
      * Up or Down arrow keys.
@@ -283,15 +292,6 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      */
     public void setAutoOpen(boolean autoOpen) {
         getElement().setProperty("autoOpenDisabled", !autoOpen);
-    }
-
-    /**
-     * Gets whether dropdown will open automatically or not.
-     *
-     * @return @{code true} if enabled, {@code false} otherwise
-     */
-    public boolean isAutoOpen() {
-        return !getElement().getProperty("autoOpenDisabled", false);
     }
 
     /**
