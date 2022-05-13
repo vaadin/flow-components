@@ -214,10 +214,11 @@ public class Details extends Component
     }
 
     /**
-     * @return summary section content as string
+     * @return summary section content as string (empty string if nothing was
+     *         set)
      */
     public String getSummaryText() {
-        return summary.getElement().getText();
+        return summary == null ? "" : summary.getElement().getText();
     }
 
     /**
