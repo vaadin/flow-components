@@ -81,7 +81,7 @@ public class Details extends Component
      * Initializes a new Details using the provided summary.
      *
      * @param summary
-     *                the summary component to set.
+     *            the summary component to set.
      * @see #setSummaryText(String)
      */
     public Details(String summary) {
@@ -93,7 +93,7 @@ public class Details extends Component
      * Initializes a new Details using the provided summary.
      *
      * @param summary
-     *                the summary component to set.
+     *            the summary component to set.
      * @see #setSummary(Component)
      */
     public Details(Component summary) {
@@ -105,9 +105,9 @@ public class Details extends Component
      * Initializes a new Details using the provided summary and content.
      *
      * @param summary
-     *                the summary text to set.
+     *            the summary text to set.
      * @param content
-     *                the content component to set.
+     *            the content component to set.
      *
      * @see #setSummaryText(String)
      * @see #setContent(Component)
@@ -122,9 +122,9 @@ public class Details extends Component
      * Initializes a new Details using the provided summary and content.
      *
      * @param summary
-     *                the summary component to set.
+     *            the summary component to set.
      * @param content
-     *                the content component to set.
+     *            the content component to set.
      *
      * @see #setSummary(Component)
      * @see #setContent(Component)
@@ -140,9 +140,9 @@ public class Details extends Component
      * components.
      *
      * @param summary
-     *                   the summary text to set.
+     *            the summary text to set.
      * @param components
-     *                   the content components to set.
+     *            the content components to set.
      *
      * @see #setSummaryText(String)
      * @see #addContent(Component...)
@@ -157,9 +157,9 @@ public class Details extends Component
      * components.
      *
      * @param summary
-     *                   the summary component to set.
+     *            the summary component to set.
      * @param components
-     *                   the content components to set.
+     *            the content components to set.
      *
      * @see #setSummary(Component)
      * @see #addContent(Component...)
@@ -174,8 +174,8 @@ public class Details extends Component
      *
      * @see #getSummary()
      * @param summary
-     *                the summary component to set, or <code>null</code> to remove
-     *                any previously set summary
+     *            the summary component to set, or <code>null</code> to remove
+     *            any previously set summary
      */
     public void setSummary(Component summary) {
         if (this.summary != null) {
@@ -214,7 +214,8 @@ public class Details extends Component
     }
 
     /**
-     * @return summary section content as string (empty string if nothing was set)
+     * @return summary section content as string (empty string if nothing was
+     *         set)
      */
     public String getSummaryText() {
         return summary == null ? "" : summary.getElement().getText();
@@ -225,8 +226,8 @@ public class Details extends Component
      *
      * @see #getContent()
      * @param content
-     *                the content of the component to set, or <code>null</code> to
-     *                remove any previously set content
+     *            the content of the component to set, or <code>null</code> to
+     *            remove any previously set content
      */
     public void setContent(Component content) {
         contentContainer.getElement().removeAllChildren();
@@ -242,7 +243,7 @@ public class Details extends Component
      *
      * @see #getContent()
      * @param components
-     *                   the components to add
+     *            the components to add
      */
     public void addContent(Component... components) {
         contentContainer.add(components);
@@ -274,7 +275,7 @@ public class Details extends Component
      * </p>
      *
      * @param opened
-     *               the boolean value to set
+     *            the boolean value to set
      */
     public void setOpened(boolean opened) {
         getElement().setProperty("opened", opened);
@@ -284,7 +285,7 @@ public class Details extends Component
      * Adds theme variants to the component.
      *
      * @param variants
-     *                 theme variants to add
+     *            theme variants to add
      */
     public void addThemeVariants(DetailsVariant... variants) {
         getThemeNames()
@@ -296,7 +297,7 @@ public class Details extends Component
      * Removes theme variants from the component.
      *
      * @param variants
-     *                 theme variants to remove
+     *            theme variants to remove
      */
     public void removeThemeVariants(DetailsVariant... variants) {
         getThemeNames().removeAll(
@@ -323,7 +324,7 @@ public class Details extends Component
      * webcomponent.
      *
      * @param listener
-     *                 the listener
+     *            the listener
      * @return a {@link Registration} for removing the event listener
      */
     public Registration addOpenedChangeListener(
