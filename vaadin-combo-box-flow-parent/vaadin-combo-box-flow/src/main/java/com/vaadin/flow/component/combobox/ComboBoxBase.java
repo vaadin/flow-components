@@ -39,8 +39,6 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
         extends AbstractSinglePropertyField<TComponent, TValue>
         implements HasStyle, Focusable<TComponent> {
 
-    private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
-
     /**
      * Constructs a new ComboBoxBase instance
      *
@@ -284,7 +282,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      *            automatically
      */
     public void setAutoOpen(boolean autoOpen) {
-        getElement().setProperty(PROP_AUTO_OPEN_DISABLED, !autoOpen);
+        getElement().setProperty("autoOpenDisabled", !autoOpen);
     }
 
     /**
@@ -293,7 +291,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * @return @{code true} if enabled, {@code false} otherwise
      */
     public boolean isAutoOpen() {
-        return !getElement().getProperty(PROP_AUTO_OPEN_DISABLED, false);
+        return !getElement().getProperty("autoOpenDisabled", false);
     }
 
     /**
