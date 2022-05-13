@@ -36,11 +36,14 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.ItemLabelGenerator;
+import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxDataView;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxLazyDataView;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxListDataView;
+import com.vaadin.flow.component.combobox.events.CustomValueSetEvent;
 import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.data.provider.ArrayUpdater;
 import com.vaadin.flow.data.provider.ArrayUpdater.Update;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
@@ -102,11 +105,17 @@ import elemental.json.JsonValue;
  *            the type of the items to be inserted in the combo box
  * @author Vaadin Ltd
  */
+@Tag("vaadin-combo-box")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-beta1")
+@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@NpmPackage(value = "@vaadin/combo-box", version = "23.1.0-beta1")
+@NpmPackage(value = "@vaadin/vaadin-combo-box", version = "23.1.0-beta1")
+@JsModule("@vaadin/combo-box/src/vaadin-combo-box.js")
+@JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./comboBoxConnector.js")
-public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
-        implements HasSize, HasValidation,
-        HasDataView<T, String, ComboBoxDataView<T>>,
+public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T> implements
+        HasSize, HasValidation, HasDataView<T, String, ComboBoxDataView<T>>,
         HasListDataView<T, ComboBoxListDataView<T>>,
         HasLazyDataView<T, String, ComboBoxLazyDataView<T>>, HasHelper,
         HasTheme, HasLabel, HasClearButton {
@@ -128,7 +137,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
     private Registration dataProviderListener = null;
     private boolean shouldForceServerSideFiltering = false;
-    private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
     /**
      * A callback method for fetching items. The callback is provided with a
@@ -285,13 +293,16 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * @see {@link #setPageSize(int)}
      */
     public ComboBox(int pageSize) {
-        super(null, null, String.class, ComboBox::presentationToModel,
-                ComboBox::modelToPresentation, true);
+        super("value", null, String.class, ComboBox::presentationToModel,
+                ComboBox::modelToPresentation);
         dataGenerator.addDataGenerator((item, jsonObject) -> jsonObject
                 .put("label", generateLabel(item)));
 
-        setItemValuePath("key");
-        setItemIdPath("key");
+        // Configure web component to use key property from the generated
+        // wrapper items for identification
+        getElement().setProperty("itemValuePath", "key");
+        getElement().setProperty("itemIdPath", "key");
+
         setPageSize(pageSize);
 
         addAttachListener(e -> initConnector());
@@ -310,7 +321,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         super.addCustomValueSetListener(e -> this.getElement()
                 .setProperty(PROP_INPUT_ELEMENT_VALUE, e.getDetail()));
 
-        super.addValueChangeListener(e -> updateSelectedKey());
+        addValueChangeListener(e -> updateSelectedKey());
     }
 
     /**
@@ -435,6 +446,36 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         return comboBox.getKeyMapper().key(model);
     }
 
+    /**
+     * Whether the component should block user input that does not match the
+     * configured pattern
+     */
+    public boolean isPreventInvalidInput() {
+        return getElement().getProperty("preventInvalidInput", false);
+    }
+
+    /**
+     * Sets whether the component should block user input that does not match
+     * the configured pattern
+     */
+    public void setPreventInvalidInput(boolean preventInvalidInput) {
+        getElement().setProperty("preventInvalidInput", preventInvalidInput);
+    }
+
+    /**
+     * The pattern to validate the input with
+     */
+    public String getPattern() {
+        return getElement().getProperty("pattern");
+    }
+
+    /**
+     * Sets the pattern with which to validate the input
+     */
+    public void setPattern(String pattern) {
+        getElement().setProperty("pattern", pattern == null ? "" : pattern);
+    }
+
     @Override
     public void setValue(T value) {
         if (dataCommunicator == null || dataCommunicator
@@ -472,7 +513,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         JsonObject json = Json.createObject();
         json.put("key", keyMapper.key(value));
         dataGenerator.generateData(value, json);
-        setSelectedItem(json);
+        getElement().setPropertyJson("selectedItem", json);
         getElement().setProperty(PROP_VALUE, keyMapper.key(value));
         getElement().setProperty(PROP_INPUT_ELEMENT_VALUE,
                 generateLabel(value));
@@ -941,8 +982,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         };
 
         SerializableConsumer<DataCommunicator.Filter<C>> providerFilterSlot = dataCommunicator
-                .setDataProvider(dataProvider,
-                        convertOrNull.apply(getFilterString()), false);
+                .setDataProvider(dataProvider, convertOrNull.apply(getFilter()),
+                        false);
 
         filterSlot = filter -> {
             if (!Objects.equals(filter, lastFilter)) {
@@ -989,7 +1030,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
             removeLazyOpenRegistration();
             dataCommunicator.setFetchEnabled(true);
             if (!isAutoOpen()) {
-                setRequestedRange(0, getPageSize(), this.getFilterString());
+                setRequestedRange(0, getPageSize(), this.getFilter());
             }
         }
     }
@@ -1037,7 +1078,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     private void refreshAllData(boolean forceServerSideFiltering) {
         if (dataCommunicator != null) {
             setClientSideFilter(!forceServerSideFiltering
-                    && dataCommunicator.getItemCount() <= getPageSizeDouble());
+                    && dataCommunicator.getItemCount() <= getPageSize());
         }
 
         reset();
@@ -1227,30 +1268,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         return itemLabelGenerator;
     }
 
-    /**
-     * Sets the page size, which is the number of items requested at a time from
-     * the data provider. This does not guarantee a maximum query size to the
-     * backend; when the overlay has room to render more new items than the page
-     * size, multiple "pages" will be requested at once.
-     * <p>
-     * The page size is also the largest number of items that can support
-     * client-side filtering. If you provide more items than the page size, the
-     * component has to fall back to server-side filtering.
-     * <p>
-     * Setting the page size after the ComboBox has been rendered effectively
-     * resets the component, and the current page(s) and sent over again.
-     * <p>
-     * The default page size is 50.
-     *
-     * @param pageSize
-     *            the maximum number of items sent per request, should be
-     *            greater than zero
-     */
+    @Override
     public void setPageSize(int pageSize) {
-        if (pageSize < 1) {
-            throw new IllegalArgumentException(
-                    "Page size should be greater than zero.");
-        }
         super.setPageSize(pageSize);
         if (dataCommunicator != null) {
             dataCommunicator.setPageSize(pageSize);
@@ -1258,272 +1277,11 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         refreshAllData(shouldForceServerSideFiltering);
     }
 
-    /**
-     * Gets the page size, which is the number of items fetched at a time from
-     * the data provider.
-     * <p>
-     * The page size is also the largest number of items that can support
-     * client-side filtering. If you provide more items than the page size, the
-     * component has to fall back to server-side filtering.
-     * <p>
-     * The default page size is 50.
-     *
-     * @return the maximum number of items sent per request
-     * @see {@link #setPageSize(int)}
-     */
-    public int getPageSize() {
-        return getElement().getProperty("pageSize", 50);
-    }
-
-    @Override
-    public void setOpened(boolean opened) {
-        super.setOpened(opened);
-    }
-
-    /**
-     * Gets the states of the drop-down.
-     *
-     * @return {@code true} if the drop-down is opened, {@code false} otherwise
-     */
-    public boolean isOpened() {
-        return isOpenedBoolean();
-    }
-
-    @Override
-    public void setInvalid(boolean invalid) {
-        super.setInvalid(invalid);
-    }
-
-    /**
-     * Gets the validity of the combobox output.
-     * <p>
-     * return true, if the value is invalid.
-     *
-     * @return the {@code validity} property from the component
-     */
-    @Override
-    public boolean isInvalid() {
-        return isInvalidBoolean();
-    }
-
-    @Override
-    public void setErrorMessage(String errorMessage) {
-        super.setErrorMessage(errorMessage);
-    }
-
-    /**
-     * Gets the current error message from the combobox.
-     *
-     * @return the current error message
-     */
-    @Override
-    public String getErrorMessage() {
-        return getErrorMessageString();
-    }
-
-    /**
-     * Enables or disables the component firing events for custom string input.
-     * <p>
-     * When enabled, a {@link CustomValueSetEvent} will be fired when the user
-     * inputs a string value that does not match any existing items and commits
-     * it eg. by blurring or pressing the enter-key.
-     * <p>
-     * Note that ComboBox doesn't do anything with the custom value string
-     * automatically. Use the
-     * {@link #addCustomValueSetListener(ComponentEventListener)} method to
-     * determine how the custom value should be handled. For example, when the
-     * ComboBox has {@code String} as the value type, you can add a listener
-     * which sets the custom string as the value of the ComboBox with
-     * {@link #setValue(Object)}.
-     * <p>
-     * Setting to {@code true} also allows an unfocused ComboBox to display a
-     * string that doesn't match any of its items nor its current value, unless
-     * this is explicitly handled with
-     * {@link #addCustomValueSetListener(ComponentEventListener)}. When set to
-     * {@code false}, an unfocused ComboBox will always display the label of the
-     * currently selected item.
-     *
-     * @param allowCustomValue
-     *            {@code true} to enable custom value set events, {@code false}
-     *            to disable them
-     * @see #addCustomValueSetListener(ComponentEventListener)
-     */
-    @Override
-    public void setAllowCustomValue(boolean allowCustomValue) {
-        super.setAllowCustomValue(allowCustomValue);
-    }
-
-    /**
-     * If {@code true}, the user can input string values that do not match to
-     * any existing item labels, which will fire a {@link CustomValueSetEvent}.
-     *
-     * @return {@code true} if the component fires custom value set events,
-     *         {@code false} otherwise
-     *
-     * @see #setAllowCustomValue(boolean)
-     * @see #addCustomValueSetListener(ComponentEventListener)
-     */
-    public boolean isAllowCustomValue() {
-        return isAllowCustomValueBoolean();
-    }
-
-    /**
-     * Enables or disables the dropdown opening automatically. If {@code false}
-     * the dropdown is only opened when clicking the toggle button or pressing
-     * Up or Down arrow keys.
-     *
-     * @param autoOpen
-     *            {@code false} to prevent the dropdown from opening
-     *            automatically
-     */
-    public void setAutoOpen(boolean autoOpen) {
-        getElement().setProperty(PROP_AUTO_OPEN_DISABLED, !autoOpen);
-    }
-
-    /**
-     * Gets whether dropdown will open automatically or not.
-     *
-     * @return @{code true} if enabled, {@code false} otherwise
-     */
-    public boolean isAutoOpen() {
-        return !getElement().getProperty(PROP_AUTO_OPEN_DISABLED, false);
-    }
-
-    /**
-     * Set the combobox to be input focused when the page loads.
-     *
-     * @param autofocus
-     *            the boolean value to set
-     */
-    @Override
-    public void setAutofocus(boolean autofocus) {
-        super.setAutofocus(autofocus);
-    }
-
-    /**
-     * Get the state for the auto-focus property of the combobox.
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
-     *
-     * @return the {@code autofocus} property from the combobox
-     */
-    public boolean isAutofocus() {
-        return isAutofocusBoolean();
-    }
-
-    @Override
-    public void setPreventInvalidInput(boolean preventInvalidInput) {
-        super.setPreventInvalidInput(preventInvalidInput);
-    }
-
-    /**
-     * Determines whether preventing the user from inputing invalid value.
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
-     *
-     * @return the {@code preventInvalidInput} property of the combobox
-     */
-    public boolean isPreventInvalidInput() {
-        return isPreventInvalidInputBoolean();
-    }
-
-    @Override
-    public void setRequired(boolean required) {
-        super.setRequiredIndicatorVisible(required);
-    }
-
-    /**
-     * Determines whether the combobox is marked as input required.
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
-     *
-     * @return {@code true} if the input is required, {@code false} otherwise
-     */
-    public boolean isRequired() {
-        return isRequiredBoolean();
-    }
-
-    /**
-     * Sets the label for the combobox.
-     *
-     * @param label
-     *            value for the {@code label} property in the combobox
-     */
-    @Override
-    public void setLabel(String label) {
-        super.setLabel(label);
-    }
-
-    /**
-     * Gets the label of the combobox.
-     *
-     * @return the {@code label} property of the combobox
-     */
-    @Override
-    public String getLabel() {
-        return getLabelString();
-    }
-
-    @Override
-    public void setPlaceholder(String placeholder) {
-        super.setPlaceholder(placeholder);
-    }
-
-    /**
-     * Gets the placeholder of the combobox.
-     *
-     * @return the {@code placeholder} property of the combobox
-     */
-    public String getPlaceholder() {
-        return getPlaceholderString();
-    }
-
-    @Override
-    public void setPattern(String pattern) {
-        super.setPattern(pattern);
-    }
-
-    /**
-     * Gets the valid input pattern
-     *
-     * @return the {@code pattern} property of the combobox
-     */
-    public String getPattern() {
-        return getPatternString();
-    }
-
     @Override
     public T getEmptyValue() {
         return null;
     }
 
-    /**
-     * Adds a listener for the event which is fired when user inputs a string
-     * value that does not match any existing items and commits it eg. by
-     * blurring or pressing the enter-key.
-     * <p>
-     * Note that ComboBox doesn't do anything with the custom value string
-     * automatically. Use this method to determine how the custom value should
-     * be handled. For example, when the ComboBox has {@code String} as the
-     * value type, you can add a listener which sets the custom string as the
-     * value of the ComboBox with {@link #setValue(Object)}.
-     * <p>
-     * As a side effect, this makes the ComboBox allow custom values. If you
-     * want to disable the firing of custom value set events once the listener
-     * is added, please disable it explicitly via the
-     * {@link #setAllowCustomValue(boolean)} method.
-     * <p>
-     * The custom value becomes disallowed automatically once the last custom
-     * value set listener is removed.
-     *
-     * @param listener
-     *            the listener to be notified when a new value is filled
-     * @return a {@link Registration} for removing the event listener
-     * @see #setAllowCustomValue(boolean)
-     */
     @Override
     public Registration addCustomValueSetListener(
             ComponentEventListener<CustomValueSetEvent<ComboBox<T>>> listener) {
@@ -1802,4 +1560,5 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
                 Stream.of(variants).map(ComboBoxVariant::getVariantName)
                         .collect(Collectors.toList()));
     }
+
 }
