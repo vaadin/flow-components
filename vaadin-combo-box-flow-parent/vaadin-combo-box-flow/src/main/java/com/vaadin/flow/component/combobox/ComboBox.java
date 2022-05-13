@@ -446,6 +446,36 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T> implements
         return comboBox.getKeyMapper().key(model);
     }
 
+    /**
+     * Whether the component should block user input that does not match the
+     * configured pattern
+     */
+    public boolean isPreventInvalidInput() {
+        return getElement().getProperty("preventInvalidInput", false);
+    }
+
+    /**
+     * Sets whether the component should block user input that does not match
+     * the configured pattern
+     */
+    public void setPreventInvalidInput(boolean preventInvalidInput) {
+        getElement().setProperty("preventInvalidInput", preventInvalidInput);
+    }
+
+    /**
+     * The pattern to validate the input with
+     */
+    public String getPattern() {
+        return getElement().getProperty("pattern");
+    }
+
+    /**
+     * Sets the pattern with which to validate the input
+     */
+    public void setPattern(String pattern) {
+        getElement().setProperty("pattern", pattern == null ? "" : pattern);
+    }
+
     @Override
     public void setValue(T value) {
         if (dataCommunicator == null || dataCommunicator

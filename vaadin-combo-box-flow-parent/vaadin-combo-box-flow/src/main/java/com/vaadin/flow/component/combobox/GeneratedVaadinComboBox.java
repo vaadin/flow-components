@@ -29,7 +29,8 @@ public abstract class GeneratedVaadinComboBox implements Serializable {
     /**
      * @deprecated Use
      *             {@link com.vaadin.flow.component.combobox.events.CustomValueSetEvent}
-     *             instead. This class will be removed in a future major version.
+     *             instead. This class will be removed in a future major
+     *             version.
      * @param <TComponent>
      */
     public static class CustomValueSetEvent<TComponent extends ComboBoxBase<TComponent, ?, ?>>
