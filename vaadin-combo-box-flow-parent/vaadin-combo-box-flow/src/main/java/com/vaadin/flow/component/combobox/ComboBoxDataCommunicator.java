@@ -31,6 +31,7 @@ import java.util.Set;
  * keys of selected items when using lazy-loading.
  *
  * @param <TItem>
+ *            The type of the item selectable in the combo box
  */
 public class ComboBoxDataCommunicator<TItem> extends DataCommunicator<TItem> {
 
@@ -41,12 +42,12 @@ public class ComboBoxDataCommunicator<TItem> extends DataCommunicator<TItem> {
      * @param <TItem>
      *            The type of the item selectable in the combo box
      */
-    private static class SelectionPreservingKeyMapper<TItem>
+    protected static class SelectionPreservingKeyMapper<TItem>
             extends KeyMapper<TItem> {
 
         private final ComboBoxBase<?, TItem, ?> comboBox;
 
-        private final Set<TItem> selectedItemsMarkedForRemoval = new HashSet<>();
+        private final Set<TItem> itemsMarkedForRemoval = new HashSet<>();
 
         public SelectionPreservingKeyMapper(
                 ComboBoxBase<?, TItem, ?> comboBox) {
@@ -59,19 +60,25 @@ public class ComboBoxDataCommunicator<TItem> extends DataCommunicator<TItem> {
             if (!comboBox.isSelected(item)) {
                 super.remove(item);
             } else {
-                selectedItemsMarkedForRemoval.add(item);
+                // Mark item for removal as soon as it is not selected anymore
+                itemsMarkedForRemoval.add(item);
             }
         }
 
-        public void purgeSelectedItems() {
-            // Try purging keys that we were not able to remove before
-            HashSet<TItem> itemsToRemove = new HashSet<>(
-                    selectedItemsMarkedForRemoval);
+        @Override
+        public String key(TItem item) {
+            // Unmark item when it becomes active again
+            itemsMarkedForRemoval.remove(item);
+            return super.key(item);
+        }
+
+        public void purgeItems() {
+            // Try purging items that we were not able to remove before
+            HashSet<TItem> itemsToRemove = new HashSet<>(itemsMarkedForRemoval);
             itemsToRemove.forEach(item -> {
-                remove(item);
-                // Clear item if it has actually been removed
-                if (!has(item)) {
-                    selectedItemsMarkedForRemoval.remove(item);
+                if (!comboBox.isSelected(item)) {
+                    super.remove(item);
+                    itemsMarkedForRemoval.remove(item);
                 }
             });
         }
@@ -88,7 +95,6 @@ public class ComboBoxDataCommunicator<TItem> extends DataCommunicator<TItem> {
     }
 
     public void notifySelectionChanged() {
-        ((SelectionPreservingKeyMapper<TItem>) getKeyMapper())
-                .purgeSelectedItems();
+        ((SelectionPreservingKeyMapper<TItem>) getKeyMapper()).purgeItems();
     }
 }
