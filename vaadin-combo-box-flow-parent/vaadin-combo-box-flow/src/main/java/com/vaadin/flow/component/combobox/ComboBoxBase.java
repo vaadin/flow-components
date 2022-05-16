@@ -15,14 +15,13 @@
  */
 package com.vaadin.flow.component.combobox;
 
-import com.vaadin.flow.component.AbstractSinglePropertyField;
-import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.Focusable;
-import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.Synchronize;
+import com.vaadin.flow.component.*;
+import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.component.combobox.events.CustomValueSetEvent;
 import com.vaadin.flow.shared.Registration;
+
+import java.util.Objects;
 
 /**
  * Provides base functionality for combo box related components, such as
@@ -38,6 +37,8 @@ import com.vaadin.flow.shared.Registration;
 public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, TItem, TValue>, TItem, TValue>
         extends AbstractSinglePropertyField<TComponent, TValue>
         implements HasStyle, Focusable<TComponent> {
+
+    private ItemLabelGenerator<TItem> itemLabelGenerator = String::valueOf;
 
     /**
      * Constructs a new ComboBoxBase instance
@@ -295,6 +296,38 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     }
 
     /**
+     * Sets the item label generator that is used to produce the strings shown
+     * in the combo box for each item. By default,
+     * {@link String#valueOf(Object)} is used.
+     * <p>
+     * When the {@link #setRenderer(Renderer)} is used, the ItemLabelGenerator
+     * is only used to show the selected item label.
+     *
+     * @param itemLabelGenerator
+     *            the item label provider to use, not null
+     */
+    public void setItemLabelGenerator(
+            ItemLabelGenerator<TItem> itemLabelGenerator) {
+        Objects.requireNonNull(itemLabelGenerator,
+                "The item label generator can not be null");
+        this.itemLabelGenerator = itemLabelGenerator;
+        reset();
+        if (getValue() != null) {
+            refreshValue();
+        }
+    }
+
+    /**
+     * Gets the item label generator that is used to produce the strings shown
+     * in the combo box for each item.
+     *
+     * @return the item label generator used, not null
+     */
+    public ItemLabelGenerator<TItem> getItemLabelGenerator() {
+        return itemLabelGenerator;
+    }
+
+    /**
      * Adds a listener for the event which is fired when user inputs a string
      * value that does not match any existing items and commits it eg. by
      * blurring or pressing the enter-key.
@@ -324,4 +357,16 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
         return addListener(CustomValueSetEvent.class,
                 (ComponentEventListener) listener);
     }
+
+    /**
+     * Refresh value / selection of the web component after changes that might
+     * affect the presentation / rendering of items
+     */
+    protected abstract void refreshValue();
+
+    /**
+     * Refresh item data of the web component after changes that might affect
+     * the presentation / rendering of items
+     */
+    protected abstract void reset();
 }

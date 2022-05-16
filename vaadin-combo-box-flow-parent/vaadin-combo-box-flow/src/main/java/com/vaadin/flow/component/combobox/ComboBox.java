@@ -249,8 +249,6 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T> implements
         boolean test(T item, String filterText);
     }
 
-    private ItemLabelGenerator<T> itemLabelGenerator = String::valueOf;
-
     private Renderer<T> renderer;
     private boolean renderScheduled;
 
@@ -493,7 +491,7 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T> implements
         refreshValue();
     }
 
-    private void refreshValue() {
+    protected void refreshValue() {
         T value = getValue();
 
         DataKeyMapper<T> keyMapper = getKeyMapper();
@@ -1236,38 +1234,6 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T> implements
         return null;
     }
 
-    /**
-     * Sets the item label generator that is used to produce the strings shown
-     * in the combo box for each item. By default,
-     * {@link String#valueOf(Object)} is used.
-     * <p>
-     * When the {@link #setRenderer(Renderer)} is used, the ItemLabelGenerator
-     * is only used to show the selected item label.
-     *
-     * @param itemLabelGenerator
-     *            the item label provider to use, not null
-     */
-    public void setItemLabelGenerator(
-            ItemLabelGenerator<T> itemLabelGenerator) {
-        Objects.requireNonNull(itemLabelGenerator,
-                "The item label generator can not be null");
-        this.itemLabelGenerator = itemLabelGenerator;
-        reset();
-        if (getValue() != null) {
-            refreshValue();
-        }
-    }
-
-    /**
-     * Gets the item label generator that is used to produce the strings shown
-     * in the combo box for each item.
-     *
-     * @return the item label generator used, not null
-     */
-    public ItemLabelGenerator<T> getItemLabelGenerator() {
-        return itemLabelGenerator;
-    }
-
     @Override
     public void setPageSize(int pageSize) {
         super.setPageSize(pageSize);
@@ -1505,7 +1471,7 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T> implements
         getElement().setProperty(PROP_CLIENT_SIDE_FILTER, clientSideFilter);
     }
 
-    private void reset() {
+    protected void reset() {
         lastFilter = null;
         if (dataCommunicator != null) {
             dataCommunicator.setRequestedRange(0, 0);
