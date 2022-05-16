@@ -1325,20 +1325,6 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T> implements
         return dataGenerator;
     }
 
-    private String generateLabel(T item) {
-        if (item == null) {
-            return "";
-        }
-        String label = getItemLabelGenerator().apply(item);
-        if (label == null) {
-            throw new IllegalStateException(String.format(
-                    "Got 'null' as a label value for the item '%s'. "
-                            + "'%s' instance may not return 'null' values",
-                    item, ItemLabelGenerator.class.getSimpleName()));
-        }
-        return label;
-    }
-
     private void updateSelectedKey() {
         // Send (possibly updated) key for the selected value
         getElement().executeJs("this._selectedKey=$0",

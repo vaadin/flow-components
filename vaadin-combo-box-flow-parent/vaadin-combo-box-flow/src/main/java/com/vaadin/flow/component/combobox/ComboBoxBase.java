@@ -15,7 +15,13 @@
  */
 package com.vaadin.flow.component.combobox;
 
-import com.vaadin.flow.component.*;
+import com.vaadin.flow.component.AbstractSinglePropertyField;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.ItemLabelGenerator;
+import com.vaadin.flow.component.Synchronize;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.renderer.Renderer;
@@ -331,6 +337,28 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      */
     public ItemLabelGenerator<TItem> getItemLabelGenerator() {
         return itemLabelGenerator;
+    }
+
+    /**
+     * Generates a string label for a data item using the current item label
+     * generator
+     *
+     * @param item
+     *            the data item
+     * @return string label for the data item
+     */
+    protected String generateLabel(TItem item) {
+        if (item == null) {
+            return "";
+        }
+        String label = getItemLabelGenerator().apply(item);
+        if (label == null) {
+            throw new IllegalStateException(String.format(
+                    "Got 'null' as a label value for the item '%s'. "
+                            + "'%s' instance may not return 'null' values",
+                    item, ItemLabelGenerator.class.getSimpleName()));
+        }
+        return label;
     }
 
     /**
