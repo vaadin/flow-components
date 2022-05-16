@@ -16,9 +16,12 @@
 package com.vaadin.flow.component.combobox;
 
 import com.vaadin.flow.component.*;
+import com.vaadin.flow.data.provider.CompositeDataGenerator;
+import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.component.combobox.events.CustomValueSetEvent;
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.shared.Registration;
 
 import java.util.Objects;
@@ -39,6 +42,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
         implements HasStyle, Focusable<TComponent> {
 
     private ItemLabelGenerator<TItem> itemLabelGenerator = String::valueOf;
+    private final ComboBoxRenderManager<TItem> renderManager;
 
     /**
      * Constructs a new ComboBoxBase instance
@@ -66,6 +70,8 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
             SerializableBiFunction<TComponent, TValue, TValueProperty> modelToPresentation) {
         super(valuePropertyName, defaultValue, valuePropertyType,
                 presentationToModel, modelToPresentation);
+
+        renderManager = new ComboBoxRenderManager<>(this);
     }
 
     /**
@@ -328,6 +334,35 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     }
 
     /**
+     * Sets the Renderer responsible to render the individual items in the list
+     * of possible choices of the ComboBox. It doesn't affect how the selected
+     * item is rendered - that can be configured by using
+     * {@link #setItemLabelGenerator(ItemLabelGenerator)}.
+     *
+     * @param renderer
+     *            a renderer for the items in the selection list of the
+     *            ComboBox, not <code>null</code>
+     *
+     *            Note that filtering of the ComboBox is not affected by the
+     *            renderer that is set here. Filtering is done on the original
+     *            values and can be affected by
+     *            {@link #setItemLabelGenerator(ItemLabelGenerator)}.
+     */
+    public void setRenderer(Renderer<TItem> renderer) {
+        Objects.requireNonNull(renderer, "The renderer must not be null");
+
+        renderManager.setRenderer(renderer);
+    }
+
+    /**
+     * Schedules a render of items in the component after changes that might
+     * affect the presentation / rendering of items
+     */
+    protected void scheduleRender() {
+        renderManager.scheduleRender();
+    }
+
+    /**
      * Adds a listener for the event which is fired when user inputs a string
      * value that does not match any existing items and commits it eg. by
      * blurring or pressing the enter-key.
@@ -369,4 +404,25 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * the presentation / rendering of items
      */
     protected abstract void reset();
+
+    /**
+     * Accesses the data communicator used by the combo box
+     */
+    protected abstract DataCommunicator<TItem> getDataCommunicator();
+
+    /**
+     * Accesses the data generator used by the combo box
+     */
+    protected abstract CompositeDataGenerator<TItem> getDataGenerator();
+
+    /**
+     * Helper for running a command in the before client response hook
+     *
+     * @param command
+     *            the command to execute
+     */
+    protected void runBeforeClientResponse(SerializableConsumer<UI> command) {
+        getElement().getNode().runWhenAttached(ui -> ui
+                .beforeClientResponse(this, context -> command.accept(ui)));
+    }
 }
