@@ -25,8 +25,8 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  *
  * @author Vaadin Ltd.
  */
-@NpmPackage(value = "@vaadin/progress-bar", version = "22.0.13")
-@NpmPackage(value = "@vaadin/vaadin-progress-bar", version = "22.0.13")
+@NpmPackage(value = "@vaadin/progress-bar", version = "22.0.15")
+@NpmPackage(value = "@vaadin/vaadin-progress-bar", version = "22.0.15")
 public class ProgressBar extends GeneratedVaadinProgressBar<ProgressBar>
         implements HasSize {
 
