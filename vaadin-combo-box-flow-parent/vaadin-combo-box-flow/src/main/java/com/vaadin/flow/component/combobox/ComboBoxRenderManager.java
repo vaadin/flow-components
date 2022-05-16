@@ -21,6 +21,7 @@ import com.vaadin.flow.data.renderer.Rendering;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.shared.Registration;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -31,7 +32,7 @@ import java.util.Objects;
  * @param <TItem>
  *            Type of individual items that are selectable in the combo box
  */
-class ComboBoxRenderManager<TItem> {
+class ComboBoxRenderManager<TItem> implements Serializable {
 
     private final ComboBoxBase<?, TItem, ?> comboBox;
     private Renderer<TItem> renderer;
