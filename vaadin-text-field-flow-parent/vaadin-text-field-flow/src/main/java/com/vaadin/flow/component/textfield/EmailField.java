@@ -45,7 +45,7 @@ public class EmailField extends GeneratedVaadinEmailField<EmailField, String>
         implements HasSize, HasValidation, HasValueChangeMode,
         HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
         HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper, HasLabel,
-        HasClearButton {
+        HasClearButton, HasSelection {
     private static final String EMAIL_PATTERN = "^" + "([a-zA-Z0-9_\\.\\-+])+" // local
             + "@" + "[a-zA-Z0-9-.]+" // domain
             + "\\." + "[a-zA-Z0-9-]{2,}" // tld

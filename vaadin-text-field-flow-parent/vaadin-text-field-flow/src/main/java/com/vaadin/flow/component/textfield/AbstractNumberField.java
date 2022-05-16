@@ -42,7 +42,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         extends GeneratedVaadinNumberField<C, T> implements HasSize,
         HasValidation, HasValueChangeMode, HasPrefixAndSuffix, InputNotifier,
         KeyNotifier, CompositionNotifier, HasAutocomplete, HasAutocapitalize,
-        HasAutocorrect, HasHelper, HasLabel, HasClearButton {
+        HasAutocorrect, HasHelper, HasLabel, HasClearButton, HasSelection {
 
     private ValueChangeMode currentMode;
 
