@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.textfield;
+package com.vaadin.flow.component;
 
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.function.SerializableConsumer;

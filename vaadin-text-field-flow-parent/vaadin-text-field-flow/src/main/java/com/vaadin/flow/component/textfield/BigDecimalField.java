@@ -15,17 +15,12 @@
  */
 package com.vaadin.flow.component.textfield;
 
-import java.math.BigDecimal;
-import java.text.DecimalFormatSymbols;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.Optional;
-
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.CompositionNotifier;
 import com.vaadin.flow.component.HasClearButton;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
+import com.vaadin.flow.component.HasSelection;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.InputNotifier;
@@ -37,6 +32,12 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.SerializableBiFunction;
+
+import java.math.BigDecimal;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * BigDecimalField is an input field for handling decimal numbers with high

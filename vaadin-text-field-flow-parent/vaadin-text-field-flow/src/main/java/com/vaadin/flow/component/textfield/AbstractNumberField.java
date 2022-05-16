@@ -16,14 +16,12 @@
 
 package com.vaadin.flow.component.textfield;
 
-import java.math.BigDecimal;
-import java.util.Objects;
-
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.CompositionNotifier;
 import com.vaadin.flow.component.HasClearButton;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
+import com.vaadin.flow.component.HasSelection;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.InputNotifier;
@@ -31,6 +29,9 @@ import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.SerializableFunction;
+
+import java.math.BigDecimal;
+import java.util.Objects;
 
 /**
  * Abstract base class for components based on {@code vaadin-number-field}

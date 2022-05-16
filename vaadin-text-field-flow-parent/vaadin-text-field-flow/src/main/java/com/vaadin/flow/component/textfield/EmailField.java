@@ -21,6 +21,7 @@ import com.vaadin.flow.component.CompositionNotifier;
 import com.vaadin.flow.component.HasClearButton;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
+import com.vaadin.flow.component.HasSelection;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.InputNotifier;
