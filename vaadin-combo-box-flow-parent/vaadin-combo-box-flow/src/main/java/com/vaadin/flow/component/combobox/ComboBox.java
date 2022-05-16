@@ -480,6 +480,7 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T> implements
         refreshValue();
     }
 
+    @Override
     protected void refreshValue() {
         T value = getValue();
 
@@ -1379,6 +1380,7 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T> implements
         getElement().setProperty(PROP_CLIENT_SIDE_FILTER, clientSideFilter);
     }
 
+    @Override
     protected void reset() {
         lastFilter = null;
         if (dataCommunicator != null) {
