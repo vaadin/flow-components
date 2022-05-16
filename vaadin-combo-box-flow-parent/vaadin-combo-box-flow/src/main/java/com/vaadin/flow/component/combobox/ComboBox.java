@@ -249,7 +249,7 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T> implements
     // provided.
     private String lastFilter;
 
-    private DataCommunicator<T> dataCommunicator;
+    private ComboBoxDataCommunicator<T> dataCommunicator;
     private Registration lazyOpenRegistration;
     private Registration clearFilterOnCloseRegistration;
     private final CompositeDataGenerator<T> dataGenerator = new CompositeDataGenerator<>();
@@ -308,7 +308,7 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T> implements
         super.addCustomValueSetListener(e -> this.getElement()
                 .setProperty(PROP_INPUT_ELEMENT_VALUE, e.getDetail()));
 
-        addValueChangeListener(e -> updateSelectedKey());
+        addValueChangeListener(e -> dataCommunicator.notifySelectionChanged());
     }
 
     /**
@@ -505,6 +505,16 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T> implements
         getElement().setProperty(PROP_VALUE, keyMapper.key(value));
         getElement().setProperty(PROP_INPUT_ELEMENT_VALUE,
                 generateLabel(value));
+    }
+
+    @Override
+    protected boolean isSelected(T item) {
+        T value = getValue();
+        if (getDataProvider() == null || item == null || value == null)
+            return false;
+
+        return Objects.equals(dataCommunicator.getDataProvider().getId(item),
+                dataCommunicator.getDataProvider().getId(value));
     }
 
     /**
@@ -925,8 +935,8 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T> implements
 
         if (dataCommunicator == null) {
             // Create data communicator with postponed initialisation
-            dataCommunicator = new DataCommunicator<>(dataGenerator,
-                    arrayUpdater, data -> getElement()
+            dataCommunicator = new ComboBoxDataCommunicator<>(this,
+                    dataGenerator, arrayUpdater, data -> getElement()
                             .callJsFunction("$connector.updateData", data),
                     getElement().getNode(), enableFetch);
             dataCommunicator.setPageSize(getPageSize());
@@ -1326,12 +1336,6 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T> implements
         return dataGenerator;
     }
 
-    private void updateSelectedKey() {
-        // Send (possibly updated) key for the selected value
-        getElement().executeJs("this._selectedKey=$0",
-                getValue() != null ? getKeyMapper().key(getValue()) : "");
-    }
-
     @ClientCallable
     private void confirmUpdate(int id) {
         dataCommunicator.confirmUpdate(id);
@@ -1341,7 +1345,6 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T> implements
     private void setRequestedRange(int start, int length, String filter) {
         dataCommunicator.setRequestedRange(start, length);
         filterSlot.accept(filter);
-        updateSelectedKey();
     }
 
     @ClientCallable

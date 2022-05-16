@@ -422,6 +422,15 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     }
 
     /**
+     * Whether the item is currently selected in the combo box.
+     *
+     * @param item
+     *            the item to check
+     * @return {@code true} if the item is selected, {@code false} otherwise
+     */
+    protected abstract boolean isSelected(TItem item);
+
+    /**
      * Refresh value / selection of the web component after changes that might
      * affect the presentation / rendering of items
      */
