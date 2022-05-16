@@ -19,10 +19,18 @@ import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.Synchronize;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.data.provider.CompositeDataGenerator;
+import com.vaadin.flow.data.provider.DataCommunicator;
+import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.component.combobox.events.CustomValueSetEvent;
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.shared.Registration;
+
+import java.util.Objects;
 
 /**
  * Provides base functionality for combo box related components, such as
@@ -38,6 +46,9 @@ import com.vaadin.flow.shared.Registration;
 public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, TItem, TValue>, TItem, TValue>
         extends AbstractSinglePropertyField<TComponent, TValue>
         implements HasStyle, Focusable<TComponent> {
+
+    private ItemLabelGenerator<TItem> itemLabelGenerator = String::valueOf;
+    private final ComboBoxRenderManager<TItem> renderManager;
 
     /**
      * Constructs a new ComboBoxBase instance
@@ -65,6 +76,8 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
             SerializableBiFunction<TComponent, TValue, TValueProperty> modelToPresentation) {
         super(valuePropertyName, defaultValue, valuePropertyType,
                 presentationToModel, modelToPresentation);
+
+        renderManager = new ComboBoxRenderManager<>(this);
     }
 
     /**
@@ -295,6 +308,89 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     }
 
     /**
+     * Sets the item label generator that is used to produce the strings shown
+     * in the combo box for each item. By default,
+     * {@link String#valueOf(Object)} is used.
+     * <p>
+     * When the {@link #setRenderer(Renderer)} is used, the ItemLabelGenerator
+     * is only used to show the selected item label.
+     *
+     * @param itemLabelGenerator
+     *            the item label provider to use, not null
+     */
+    public void setItemLabelGenerator(
+            ItemLabelGenerator<TItem> itemLabelGenerator) {
+        Objects.requireNonNull(itemLabelGenerator,
+                "The item label generator can not be null");
+        this.itemLabelGenerator = itemLabelGenerator;
+        reset();
+        if (getValue() != null) {
+            refreshValue();
+        }
+    }
+
+    /**
+     * Gets the item label generator that is used to produce the strings shown
+     * in the combo box for each item.
+     *
+     * @return the item label generator used, not null
+     */
+    public ItemLabelGenerator<TItem> getItemLabelGenerator() {
+        return itemLabelGenerator;
+    }
+
+    /**
+     * Generates a string label for a data item using the current item label
+     * generator
+     *
+     * @param item
+     *            the data item
+     * @return string label for the data item
+     */
+    protected String generateLabel(TItem item) {
+        if (item == null) {
+            return "";
+        }
+        String label = getItemLabelGenerator().apply(item);
+        if (label == null) {
+            throw new IllegalStateException(String.format(
+                    "Got 'null' as a label value for the item '%s'. "
+                            + "'%s' instance may not return 'null' values",
+                    item, ItemLabelGenerator.class.getSimpleName()));
+        }
+        return label;
+    }
+
+    /**
+     * Sets the Renderer responsible to render the individual items in the list
+     * of possible choices of the ComboBox. It doesn't affect how the selected
+     * item is rendered - that can be configured by using
+     * {@link #setItemLabelGenerator(ItemLabelGenerator)}.
+     *
+     * @param renderer
+     *            a renderer for the items in the selection list of the
+     *            ComboBox, not <code>null</code>
+     *
+     *            Note that filtering of the ComboBox is not affected by the
+     *            renderer that is set here. Filtering is done on the original
+     *            values and can be affected by
+     *            {@link #setItemLabelGenerator(ItemLabelGenerator)}.
+     */
+    public void setRenderer(Renderer<TItem> renderer) {
+        Objects.requireNonNull(renderer, "The renderer must not be null");
+
+        renderManager.setRenderer(renderer);
+    }
+
+    /**
+     * Schedules a render of items in the component after changes that might
+     * affect the presentation / rendering of items
+     */
+    protected void scheduleRender() {
+        renderManager.scheduleRender();
+    }
+
+    /**
      * Adds a listener for the event which is fired when user inputs a string
      * value that does not match any existing items and commits it eg. by
      * blurring or pressing the enter-key.
@@ -323,5 +419,38 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
             ComponentEventListener<CustomValueSetEvent<TComponent>> listener) {
         return addListener(CustomValueSetEvent.class,
                 (ComponentEventListener) listener);
+    }
+
+    /**
+     * Refresh value / selection of the web component after changes that might
+     * affect the presentation / rendering of items
+     */
+    protected abstract void refreshValue();
+
+    /**
+     * Refresh item data of the web component after changes that might affect
+     * the presentation / rendering of items
+     */
+    protected abstract void reset();
+
+    /**
+     * Accesses the data communicator used by the combo box
+     */
+    protected abstract DataCommunicator<TItem> getDataCommunicator();
+
+    /**
+     * Accesses the data generator used by the combo box
+     */
+    protected abstract CompositeDataGenerator<TItem> getDataGenerator();
+
+    /**
+     * Helper for running a command in the before client response hook
+     *
+     * @param command
+     *            the command to execute
+     */
+    protected void runBeforeClientResponse(SerializableConsumer<UI> command) {
+        getElement().getNode().runWhenAttached(ui -> ui
+                .beforeClientResponse(this, context -> command.accept(ui)));
     }
 }
