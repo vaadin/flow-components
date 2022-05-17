@@ -19,9 +19,7 @@ package com.vaadin.flow.component.combobox.dataview;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.combobox.ComboBoxBase;
-import com.vaadin.flow.component.combobox.ComboBoxDataCommunicator;
 import com.vaadin.flow.data.provider.AbstractDataView;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
 import com.vaadin.flow.data.provider.DataCommunicator;
