@@ -37,7 +37,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-class ComboBoxDataManager<TItem>
+class ComboBoxDataController<TItem>
         implements HasDataView<TItem, String, ComboBoxDataView<TItem>>,
         HasListDataView<TItem, ComboBoxListDataView<TItem>>,
         HasLazyDataView<TItem, String, ComboBoxLazyDataView<TItem>> {
@@ -58,15 +58,15 @@ class ComboBoxDataManager<TItem>
             // soon as the user opens the dropdown. Otherwise, the scroller
             // size update would be triggered only after a manual scrolling to
             // the next page, which is a bad UX.
-            ComboBoxDataManager.this.comboBox.getElement().setProperty("size",
-                    size);
+            ComboBoxDataController.this.comboBox.getElement()
+                    .setProperty("size", size);
         }
 
         @Override
         public void set(int start, List<JsonValue> items) {
             enqueue("$connector.set", start,
                     items.stream().collect(JsonUtils.asArray()),
-                    ComboBoxDataManager.this.lastFilter);
+                    ComboBoxDataController.this.lastFilter);
         }
 
         @Override
@@ -77,13 +77,13 @@ class ComboBoxDataManager<TItem>
         @Override
         public void commit(int updateId) {
             enqueue("$connector.confirm", updateId,
-                    ComboBoxDataManager.this.lastFilter);
+                    ComboBoxDataController.this.lastFilter);
             queue.forEach(Runnable::run);
             queue.clear();
         }
 
         private void enqueue(String name, Serializable... arguments) {
-            queue.add(() -> ComboBoxDataManager.this.comboBox.getElement()
+            queue.add(() -> ComboBoxDataController.this.comboBox.getElement()
                     .callJsFunction(name, arguments));
         }
     }
@@ -127,7 +127,7 @@ class ComboBoxDataManager<TItem>
     private Registration clearFilterOnCloseRegistration;
     private Registration dataProviderListener = null;
 
-    ComboBoxDataManager(ComboBoxBase<?, TItem, ?> comboBox,
+    ComboBoxDataController(ComboBoxBase<?, TItem, ?> comboBox,
             Supplier<Locale> localeSupplier) {
         this.comboBox = comboBox;
         this.localeSupplier = localeSupplier;
@@ -380,7 +380,7 @@ class ComboBoxDataManager<TItem>
             dataCommunicator.setFetchEnabled(enableFetch);
         }
 
-        comboBox.scheduleRender();
+        comboBox.getRenderManager().scheduleRender();
         comboBox.setValue(null);
 
         SerializableFunction<String, TComponent> convertOrNull = filterText -> {

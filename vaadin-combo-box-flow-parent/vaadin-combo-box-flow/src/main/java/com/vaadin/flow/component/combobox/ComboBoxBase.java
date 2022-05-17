@@ -49,7 +49,6 @@ import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
 
 import java.util.Collection;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -73,7 +72,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
 
     private ItemLabelGenerator<TItem> itemLabelGenerator = String::valueOf;
     private final ComboBoxRenderManager<TItem> renderManager;
-    private final ComboBoxDataManager<TItem> dataManager;
+    private final ComboBoxDataController<TItem> dataController;
 
     /**
      * Constructs a new ComboBoxBase instance
@@ -103,8 +102,8 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
                 presentationToModel, modelToPresentation);
 
         renderManager = new ComboBoxRenderManager<>(this);
-        dataManager = new ComboBoxDataManager<>(this, this::getLocale);
-        dataManager.getDataGenerator().addDataGenerator((item,
+        dataController = new ComboBoxDataController<>(this, this::getLocale);
+        dataController.getDataGenerator().addDataGenerator((item,
                 jsonObject) -> jsonObject.put("label", generateLabel(item)));
     }
 
@@ -166,7 +165,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
                     "Page size should be greater than zero.");
         }
         getElement().setProperty("pageSize", pageSize);
-        dataManager.setPageSize(pageSize);
+        dataController.setPageSize(pageSize);
     }
 
     /**
@@ -352,7 +351,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
         Objects.requireNonNull(itemLabelGenerator,
                 "The item label generator can not be null");
         this.itemLabelGenerator = itemLabelGenerator;
-        dataManager.reset();
+        dataController.reset();
         if (getValue() != null) {
             refreshValue();
         }
@@ -412,31 +411,23 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     }
 
     /**
-     * Schedules a render of items in the component after changes that might
-     * affect the presentation / rendering of items
-     */
-    protected void scheduleRender() {
-        renderManager.scheduleRender();
-    }
-
-    /**
      * Gets the data provider used by this ComboBox.
      *
      * @return the data provider used by this ComboBox
      */
     public DataProvider<TItem, ?> getDataProvider() {
-        return dataManager.getDataProvider();
+        return dataController.getDataProvider();
     }
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        dataManager.onAttach();
+        dataController.onAttach();
     }
 
     @Override
     protected void onDetach(DetachEvent detachEvent) {
-        dataManager.onDetach();
+        dataController.onDetach();
         super.onDetach(detachEvent);
     }
 
@@ -494,7 +485,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      */
     @Override
     public ComboBoxListDataView<TItem> getListDataView() {
-        return getDataManager().getListDataView();
+        return getDataController().getListDataView();
     }
 
     /**
@@ -514,7 +505,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      */
     @Override
     public ComboBoxListDataView<TItem> setItems(Collection<TItem> items) {
-        return getDataManager().setItems(items);
+        return getDataController().setItems(items);
     }
 
     /**
@@ -543,7 +534,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      */
     public ComboBoxListDataView<TItem> setItems(
             ComboBox.ItemFilter<TItem> itemFilter, Collection<TItem> items) {
-        return getDataManager().setItems(itemFilter, items);
+        return getDataController().setItems(itemFilter, items);
     }
 
     /**
@@ -573,7 +564,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     @SafeVarargs
     public final ComboBoxListDataView<TItem> setItems(
             ComboBox.ItemFilter<TItem> itemFilter, TItem... items) {
-        return getDataManager().setItems(itemFilter, items);
+        return getDataController().setItems(itemFilter, items);
     }
 
     /**
@@ -603,13 +594,13 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     public ComboBoxListDataView<TItem> setItems(
             ComboBox.ItemFilter<TItem> itemFilter,
             ListDataProvider<TItem> listDataProvider) {
-        return getDataManager().setItems(itemFilter, listDataProvider);
+        return getDataController().setItems(itemFilter, listDataProvider);
     }
 
     @Override
     public ComboBoxListDataView<TItem> setItems(
             ListDataProvider<TItem> dataProvider) {
-        return getDataManager().setItems(dataProvider);
+        return getDataController().setItems(dataProvider);
     }
 
     /**
@@ -650,7 +641,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      */
     @Override
     public ComboBoxLazyDataView<TItem> getLazyDataView() {
-        return getDataManager().getLazyDataView();
+        return getDataController().getLazyDataView();
     }
 
     /**
@@ -686,7 +677,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     public <C> ComboBoxLazyDataView<TItem> setItemsWithFilterConverter(
             CallbackDataProvider.FetchCallback<TItem, C> fetchCallback,
             SerializableFunction<String, C> filterConverter) {
-        return getDataManager().setItemsWithFilterConverter(fetchCallback,
+        return getDataController().setItemsWithFilterConverter(fetchCallback,
                 filterConverter);
     }
 
@@ -727,7 +718,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
             CallbackDataProvider.FetchCallback<TItem, C> fetchCallback,
             CallbackDataProvider.CountCallback<TItem, C> countCallback,
             SerializableFunction<String, C> filterConverter) {
-        return getDataManager().setItemsWithFilterConverter(fetchCallback,
+        return getDataController().setItemsWithFilterConverter(fetchCallback,
                 countCallback, filterConverter);
     }
 
@@ -817,7 +808,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     @Override
     public ComboBoxLazyDataView<TItem> setItems(
             BackEndDataProvider<TItem, String> dataProvider) {
-        return getDataManager().setItems(dataProvider);
+        return getDataController().setItems(dataProvider);
     }
 
     // ****************************************************
@@ -836,13 +827,13 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      */
     @Override
     public ComboBoxDataView<TItem> getGenericDataView() {
-        return getDataManager().getGenericDataView();
+        return getDataController().getGenericDataView();
     }
 
     @Override
     public ComboBoxDataView<TItem> setItems(
             DataProvider<TItem, String> dataProvider) {
-        return getDataManager().setItems(dataProvider);
+        return getDataController().setItems(dataProvider);
     }
 
     /**
@@ -900,7 +891,8 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     public ComboBoxDataView<TItem> setItems(
             InMemoryDataProvider<TItem> inMemoryDataProvider,
             SerializableFunction<String, SerializablePredicate<TItem>> filterConverter) {
-        return getDataManager().setItems(inMemoryDataProvider, filterConverter);
+        return getDataController().setItems(inMemoryDataProvider,
+                filterConverter);
     }
 
     // ****************************************************
@@ -928,7 +920,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      */
     @Deprecated
     public void setDataProvider(DataProvider<TItem, String> dataProvider) {
-        getDataManager().setDataProvider(dataProvider);
+        getDataController().setDataProvider(dataProvider);
     }
 
     /**
@@ -955,7 +947,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     @Deprecated
     public <C> void setDataProvider(DataProvider<TItem, C> dataProvider,
             SerializableFunction<String, C> filterConverter) {
-        getDataManager().setDataProvider(dataProvider, filterConverter);
+        getDataController().setDataProvider(dataProvider, filterConverter);
     }
 
     /**
@@ -981,7 +973,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      */
     @Deprecated
     public void setDataProvider(ListDataProvider<TItem> listDataProvider) {
-        getDataManager().setDataProvider(listDataProvider);
+        getDataController().setDataProvider(listDataProvider);
     }
 
     /**
@@ -1009,7 +1001,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     @Deprecated
     public void setDataProvider(ComboBox.FetchItemsCallback<TItem> fetchItems,
             SerializableFunction<String, Integer> sizeCallback) {
-        getDataManager().setDataProvider(fetchItems, sizeCallback);
+        getDataController().setDataProvider(fetchItems, sizeCallback);
     }
 
     /**
@@ -1037,7 +1029,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     @Deprecated
     public void setDataProvider(ComboBox.ItemFilter<TItem> itemFilter,
             ListDataProvider<TItem> listDataProvider) {
-        getDataManager().setDataProvider(itemFilter, listDataProvider);
+        getDataController().setDataProvider(itemFilter, listDataProvider);
     }
 
     /**
@@ -1055,22 +1047,27 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      */
     protected abstract void refreshValue();
 
-    protected ComboBoxDataManager<TItem> getDataManager() {
-        return dataManager;
+    protected ComboBoxDataController<TItem> getDataController() {
+        return dataController;
+    }
+
+    protected ComboBoxRenderManager<TItem> getRenderManager() {
+        return renderManager;
     }
 
     /**
      * Accesses the data communicator used by the combo box
      */
     protected ComboBoxDataCommunicator<TItem> getDataCommunicator() {
-        return dataManager != null ? dataManager.getDataCommunicator() : null;
+        return dataController != null ? dataController.getDataCommunicator()
+                : null;
     }
 
     /**
      * Accesses the data generator used by the combo box
      */
     protected CompositeDataGenerator<TItem> getDataGenerator() {
-        return dataManager.getDataGenerator();
+        return dataController.getDataGenerator();
     }
 
     protected DataKeyMapper<TItem> getKeyMapper() {
@@ -1079,17 +1076,17 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
 
     @ClientCallable
     private void confirmUpdate(int id) {
-        getDataManager().confirmUpdate(id);
+        getDataController().confirmUpdate(id);
     }
 
     @ClientCallable
     private void setRequestedRange(int start, int length, String filter) {
-        getDataManager().setRequestedRange(start, length, filter);
+        getDataController().setRequestedRange(start, length, filter);
     }
 
     @ClientCallable
     private void resetDataCommunicator() {
-        getDataManager().resetDataCommunicator();
+        getDataController().resetDataCommunicator();
     }
 
     /**
