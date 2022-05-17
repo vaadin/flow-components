@@ -19,9 +19,6 @@ import com.vaadin.testbench.parallel.BrowserUtil;
 
 public abstract class AbstractParallelTest extends ParallelTest {
 
-    @Rule
-    public RetryRule maxAttempts = new RetryRule(2);
-
     public static final Dimension WINDOW_SIZE_LARGE = new Dimension(1920, 1080);
     public static final Dimension WINDOW_SIZE_MEDIUM = new Dimension(768, 1024);
     public static final Dimension WINDOW_SIZE_SMALL = new Dimension(375, 667);
