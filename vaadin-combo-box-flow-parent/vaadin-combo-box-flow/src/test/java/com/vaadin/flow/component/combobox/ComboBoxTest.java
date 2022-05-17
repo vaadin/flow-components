@@ -84,7 +84,8 @@ public class ComboBoxTest {
         ComboBox<String> comboBox = new ComboBox<>();
         comboBox.setItems(Arrays.asList("foo", "bar"));
 
-        ListDataProvider<String> dataProvider = (ListDataProvider<String>) comboBox.getDataProvider();
+        ListDataProvider<String> dataProvider = (ListDataProvider<String>) comboBox
+                .getDataProvider();
         Collection<String> items = dataProvider.getItems();
         Assert.assertEquals(2, items.size());
         Assert.assertTrue(items.contains("foo"));

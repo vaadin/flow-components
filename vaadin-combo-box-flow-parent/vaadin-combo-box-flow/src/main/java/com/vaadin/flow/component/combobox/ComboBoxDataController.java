@@ -140,7 +140,7 @@ class ComboBoxDataController<TItem>
      *            supplier for the current locale of the combo box
      */
     ComboBoxDataController(ComboBoxBase<?, TItem, ?> comboBox,
-                           SerializableSupplier<Locale> localeSupplier) {
+            SerializableSupplier<Locale> localeSupplier) {
         this.comboBox = comboBox;
         this.localeSupplier = localeSupplier;
     }

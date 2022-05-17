@@ -231,7 +231,8 @@ public class ComboBoxDataViewTest extends AbstractComponentDataViewTest {
                 dataView.getItems().toArray());
 
         // Finally set the text filter to the ComboBox and fetch the items
-        DataProvider<String, String> genericDataProvider = (DataProvider<String, String>) comboBox.getDataProvider();
+        DataProvider<String, String> genericDataProvider = (DataProvider<String, String>) comboBox
+                .getDataProvider();
 
         List<String> filteredItems = genericDataProvider
                 .fetch(new Query<>(0, Integer.MAX_VALUE, null, null, "ba"))
