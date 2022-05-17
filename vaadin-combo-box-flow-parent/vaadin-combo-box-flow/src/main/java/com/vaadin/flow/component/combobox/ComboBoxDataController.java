@@ -19,10 +19,7 @@ import com.vaadin.flow.data.provider.InMemoryDataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.dom.PropertyChangeEvent;
-import com.vaadin.flow.function.SerializableComparator;
-import com.vaadin.flow.function.SerializableConsumer;
-import com.vaadin.flow.function.SerializableFunction;
-import com.vaadin.flow.function.SerializablePredicate;
+import com.vaadin.flow.function.*;
 import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.shared.Registration;
 import elemental.json.JsonValue;
@@ -111,7 +108,7 @@ class ComboBoxDataController<TItem>
     };
 
     private final ComboBoxBase<?, TItem, ?> comboBox;
-    private final Supplier<Locale> localeSupplier;
+    private final SerializableSupplier<Locale> localeSupplier;
 
     private ComboBoxDataCommunicator<TItem> dataCommunicator;
 
@@ -143,7 +140,7 @@ class ComboBoxDataController<TItem>
      *            supplier for the current locale of the combo box
      */
     ComboBoxDataController(ComboBoxBase<?, TItem, ?> comboBox,
-            Supplier<Locale> localeSupplier) {
+                           SerializableSupplier<Locale> localeSupplier) {
         this.comboBox = comboBox;
         this.localeSupplier = localeSupplier;
     }
