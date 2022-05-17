@@ -292,18 +292,22 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T> implements
 
     private static <T> T presentationToModel(ComboBox<T> comboBox,
             String presentation) {
-        if (presentation == null || comboBox.getDataCommunicator() == null) {
+        DataKeyMapper<T> keyMapper = comboBox.getKeyMapper();
+
+        if (presentation == null || keyMapper == null) {
             return comboBox.getEmptyValue();
         }
-        return comboBox.getKeyMapper().get(presentation);
+        return keyMapper.get(presentation);
     }
 
     private static <T> String modelToPresentation(ComboBox<T> comboBox,
             T model) {
-        if (model == null) {
+        DataKeyMapper<T> keyMapper = comboBox.getKeyMapper();
+
+        if (model == null || keyMapper == null) {
             return null;
         }
-        return comboBox.getKeyMapper().key(model);
+        return keyMapper.key(model);
     }
 
     /**

@@ -28,18 +28,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxDataView;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxLazyDataView;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxListDataView;
-import com.vaadin.flow.data.provider.BackEndDataProvider;
-import com.vaadin.flow.data.provider.CallbackDataProvider;
-import com.vaadin.flow.data.provider.CompositeDataGenerator;
-import com.vaadin.flow.data.provider.DataKeyMapper;
-import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.data.provider.DataView;
-import com.vaadin.flow.data.provider.HasDataView;
-import com.vaadin.flow.data.provider.HasLazyDataView;
-import com.vaadin.flow.data.provider.HasListDataView;
-import com.vaadin.flow.data.provider.InMemoryDataProvider;
-import com.vaadin.flow.data.provider.ListDataProvider;
-import com.vaadin.flow.data.provider.ListDataView;
+import com.vaadin.flow.data.provider.*;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.component.combobox.events.CustomValueSetEvent;
@@ -1048,14 +1037,6 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     protected abstract void refreshValue();
 
     /**
-     * Accesses the data controller that is managing data communication with the
-     * web component
-     */
-    protected ComboBoxDataController<TItem> getDataController() {
-        return dataController;
-    }
-
-    /**
      * Accesses the render manager that is managing the custom renderer
      */
     protected ComboBoxRenderManager<TItem> getRenderManager() {
@@ -1063,7 +1044,20 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     }
 
     /**
+     * Accesses the data controller that is managing data communication with the
+     * web component
+     * <p>
+     * Can be null if the constructor has not run yet
+     */
+    protected ComboBoxDataController<TItem> getDataController() {
+        return dataController;
+    }
+
+    /**
      * Accesses the data communicator that is managed by the data controller
+     * <p>
+     * Can be null if the no data source has been set yet, or if the constructor
+     * has not run yet
      */
     protected ComboBoxDataCommunicator<TItem> getDataCommunicator() {
         return dataController != null ? dataController.getDataCommunicator()
@@ -1072,16 +1066,24 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
 
     /**
      * Accesses the data generator that is managed by the data controller
+     * <p>
+     * Can be null if the constructor has not run yet
      */
     protected CompositeDataGenerator<TItem> getDataGenerator() {
-        return dataController.getDataGenerator();
+        return dataController != null ? dataController.getDataGenerator()
+                : null;
     }
 
     /**
      * Accesses the key mapper that is managed by the data controller
+     * <p>
+     * Can be null if the no data source has been set yet, or if the constructor
+     * has not run yet
      */
     protected DataKeyMapper<TItem> getKeyMapper() {
-        return getDataCommunicator().getKeyMapper();
+        return getDataCommunicator() != null
+                ? getDataCommunicator().getKeyMapper()
+                : null;
     }
 
     /**
