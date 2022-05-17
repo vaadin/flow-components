@@ -37,6 +37,13 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+/**
+ * Internal class that encapsulates the data communication logic with the web
+ * component
+ *
+ * @param <TItem>
+ *            Type of individual items that are selectable in the combo box
+ */
 class ComboBoxDataController<TItem>
         implements HasDataView<TItem, String, ComboBoxDataView<TItem>>,
         HasListDataView<TItem, ComboBoxListDataView<TItem>>,
@@ -127,35 +134,59 @@ class ComboBoxDataController<TItem>
     private Registration clearFilterOnCloseRegistration;
     private Registration dataProviderListener = null;
 
+    /**
+     * Creates a new data controller for that combo box
+     *
+     * @param comboBox
+     *            the combo box that this controller manages
+     * @param localeSupplier
+     *            supplier for the current locale of the combo box
+     */
     ComboBoxDataController(ComboBoxBase<?, TItem, ?> comboBox,
             Supplier<Locale> localeSupplier) {
         this.comboBox = comboBox;
         this.localeSupplier = localeSupplier;
     }
 
-    public ComboBoxDataCommunicator<TItem> getDataCommunicator() {
+    /**
+     * Accesses the data communicator managed by this controller
+     */
+    ComboBoxDataCommunicator<TItem> getDataCommunicator() {
         return dataCommunicator;
     }
 
-    public DataProvider<TItem, ?> getDataProvider() {
+    /**
+     * Accesses the data provider managed by this controller
+     */
+    DataProvider<TItem, ?> getDataProvider() {
         if (dataCommunicator != null) {
             return dataCommunicator.getDataProvider();
         }
         return null;
     }
 
-    public CompositeDataGenerator<TItem> getDataGenerator() {
+    /**
+     * Accesses the data generator managed by this controller
+     */
+    CompositeDataGenerator<TItem> getDataGenerator() {
         return dataGenerator;
     }
 
-    public void setPageSize(int pageSize) {
+    /**
+     * Updates the page size in the data communicator and triggers a full
+     * refresh
+     */
+    void setPageSize(int pageSize) {
         if (dataCommunicator != null) {
             dataCommunicator.setPageSize(pageSize);
         }
         refreshAllData(shouldForceServerSideFiltering);
     }
 
-    public void onAttach() {
+    /**
+     * Called to notify this controller that the component has been attached
+     */
+    void onAttach() {
         DataProvider<TItem, ?> dataProvider = getDataProvider();
         if (dataProvider != null) {
             setupDataProviderListener(dataProvider);
@@ -165,7 +196,10 @@ class ComboBoxDataController<TItem>
                 .addPropertyChangeListener("opened", this::clearFilterOnClose);
     }
 
-    public void onDetach() {
+    /**
+     * Called to notify this controller that the component has been detached
+     */
+    void onDetach() {
         if (dataProviderListener != null) {
             dataProviderListener.remove();
             dataProviderListener = null;
@@ -174,6 +208,64 @@ class ComboBoxDataController<TItem>
         if (clearFilterOnCloseRegistration != null) {
             clearFilterOnCloseRegistration.remove();
             clearFilterOnCloseRegistration = null;
+        }
+    }
+
+    /**
+     * Refresh item data of the web component when data has been updated, or
+     * after changes that might affect the presentation / rendering of items
+     */
+    void reset() {
+        lastFilter = null;
+        if (dataCommunicator != null) {
+            dataCommunicator.setRequestedRange(0, 0);
+            dataCommunicator.reset();
+        }
+        comboBox.runBeforeClientResponse(ui -> ui.getPage().executeJs(
+                // If-statement is needed because on the first attach this
+                // JavaScript is called before initializing the connector.
+                "if($0.$connector) $0.$connector.reset();",
+                comboBox.getElement()));
+    }
+
+    /**
+     * Called to confirm that an update has been processed by the client-side
+     * connector
+     */
+    void confirmUpdate(int id) {
+        dataCommunicator.confirmUpdate(id);
+    }
+
+    /**
+     * Called when the client-side connector requests data
+     */
+    void setRequestedRange(int start, int length, String filter) {
+        dataCommunicator.setRequestedRange(start, length);
+        filterSlot.accept(filter);
+    }
+
+    /**
+     * Called by the client-side connector to reset the data communicator
+     */
+    void resetDataCommunicator() {
+        /*
+         * The client filter from combo box will be used in the data
+         * communicator only within 'setRequestedRange' calls to data provider,
+         * and then will be erased to not affect the data view item count
+         * handling methods. Thus, if the current client filter is not empty,
+         * then we need to re-set it in the data communicator.
+         */
+        if (lastFilter == null || lastFilter.isEmpty()) {
+            dataCommunicator.reset();
+        } else {
+            String filter = lastFilter;
+            lastFilter = null;
+            /*
+             * This filter slot will eventually call the filter consumer in data
+             * communicator and 'DataCommunicator::reset' is done inside this
+             * consumer, so we don't need to explicitly call it.
+             */
+            filterSlot.accept(filter);
         }
     }
 
@@ -445,23 +537,6 @@ class ComboBoxDataController<TItem>
         reset();
     }
 
-    /**
-     * Refresh item data of the web component after changes that might affect
-     * the presentation / rendering of items
-     */
-    protected void reset() {
-        lastFilter = null;
-        if (dataCommunicator != null) {
-            dataCommunicator.setRequestedRange(0, 0);
-            dataCommunicator.reset();
-        }
-        comboBox.runBeforeClientResponse(ui -> ui.getPage().executeJs(
-                // If-statement is needed because on the first attach this
-                // JavaScript is called before initializing the connector.
-                "if($0.$connector) $0.$connector.reset();",
-                comboBox.getElement()));
-    }
-
     private void setClientSideFilter(boolean clientSideFilter) {
         comboBox.getElement().setProperty("_clientSideFilter",
                 clientSideFilter);
@@ -528,36 +603,5 @@ class ComboBoxDataController<TItem>
                 refreshAllData(shouldForceServerSideFiltering);
             }
         });
-    }
-
-    void confirmUpdate(int id) {
-        dataCommunicator.confirmUpdate(id);
-    }
-
-    void setRequestedRange(int start, int length, String filter) {
-        dataCommunicator.setRequestedRange(start, length);
-        filterSlot.accept(filter);
-    }
-
-    void resetDataCommunicator() {
-        /*
-         * The client filter from combo box will be used in the data
-         * communicator only within 'setRequestedRange' calls to data provider,
-         * and then will be erased to not affect the data view item count
-         * handling methods. Thus, if the current client filter is not empty,
-         * then we need to re-set it in the data communicator.
-         */
-        if (lastFilter == null || lastFilter.isEmpty()) {
-            dataCommunicator.reset();
-        } else {
-            String filter = lastFilter;
-            lastFilter = null;
-            /*
-             * This filter slot will eventually call the filter consumer in data
-             * communicator and 'DataCommunicator::reset' is done inside this
-             * consumer, so we don't need to explicitly call it.
-             */
-            filterSlot.accept(filter);
-        }
     }
 }

@@ -1047,16 +1047,23 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      */
     protected abstract void refreshValue();
 
+    /**
+     * Accesses the data controller that is managing data communication with the
+     * web component
+     */
     protected ComboBoxDataController<TItem> getDataController() {
         return dataController;
     }
 
+    /**
+     * Accesses the render manager that is managing the custom renderer
+     */
     protected ComboBoxRenderManager<TItem> getRenderManager() {
         return renderManager;
     }
 
     /**
-     * Accesses the data communicator used by the combo box
+     * Accesses the data communicator that is managed by the data controller
      */
     protected ComboBoxDataCommunicator<TItem> getDataCommunicator() {
         return dataController != null ? dataController.getDataCommunicator()
@@ -1064,26 +1071,38 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     }
 
     /**
-     * Accesses the data generator used by the combo box
+     * Accesses the data generator that is managed by the data controller
      */
     protected CompositeDataGenerator<TItem> getDataGenerator() {
         return dataController.getDataGenerator();
     }
 
+    /**
+     * Accesses the key mapper that is managed by the data controller
+     */
     protected DataKeyMapper<TItem> getKeyMapper() {
         return getDataCommunicator().getKeyMapper();
     }
 
+    /**
+     * Called by the client-side connector, delegates to data controller
+     */
     @ClientCallable
     private void confirmUpdate(int id) {
         getDataController().confirmUpdate(id);
     }
 
+    /**
+     * Called by the client-side connector, delegates to data controller
+     */
     @ClientCallable
     private void setRequestedRange(int start, int length, String filter) {
         getDataController().setRequestedRange(start, length, filter);
     }
 
+    /**
+     * Called by the client-side connector, delegates to data controller
+     */
     @ClientCallable
     private void resetDataCommunicator() {
         getDataController().resetDataCommunicator();
