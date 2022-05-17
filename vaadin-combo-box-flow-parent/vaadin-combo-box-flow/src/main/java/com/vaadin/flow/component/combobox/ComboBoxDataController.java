@@ -177,6 +177,111 @@ class ComboBoxDataController<TItem>
         }
     }
 
+    // ****************************************************
+    // List data view implementation
+    // ****************************************************
+
+    @Override
+    public ComboBoxListDataView<TItem> getListDataView() {
+        return new ComboBoxListDataView<>(getDataCommunicator(), comboBox,
+                this::onInMemoryFilterOrSortingChange);
+    }
+
+    public ComboBoxListDataView<TItem> setItems(
+            ComboBox.ItemFilter<TItem> itemFilter, Collection<TItem> items) {
+        ListDataProvider<TItem> listDataProvider = DataProvider
+                .ofCollection(items);
+        setDataProvider(itemFilter, listDataProvider);
+        return getListDataView();
+    }
+
+    @SafeVarargs
+    public final ComboBoxListDataView<TItem> setItems(
+            ComboBox.ItemFilter<TItem> itemFilter, TItem... items) {
+        return setItems(itemFilter, new ArrayList<>(Arrays.asList(items)));
+    }
+
+    public ComboBoxListDataView<TItem> setItems(
+            ComboBox.ItemFilter<TItem> itemFilter,
+            ListDataProvider<TItem> listDataProvider) {
+        setDataProvider(itemFilter, listDataProvider);
+        return getListDataView();
+    }
+
+    @Override
+    public ComboBoxListDataView<TItem> setItems(
+            ListDataProvider<TItem> dataProvider) {
+        setDataProvider(dataProvider);
+        return getListDataView();
+    }
+
+    // ****************************************************
+    // Lazy data view implementation
+    // ****************************************************
+
+    @Override
+    public ComboBoxLazyDataView<TItem> getLazyDataView() {
+        return new ComboBoxLazyDataView<>(getDataCommunicator(), comboBox);
+    }
+
+    public <TComponent> ComboBoxLazyDataView<TItem> setItemsWithFilterConverter(
+            CallbackDataProvider.FetchCallback<TItem, TComponent> fetchCallback,
+            SerializableFunction<String, TComponent> filterConverter) {
+        Objects.requireNonNull(fetchCallback, "Fetch callback cannot be null");
+        ComboBoxLazyDataView<TItem> lazyDataView = setItemsWithFilterConverter(
+                fetchCallback, query -> {
+                    throw new IllegalStateException(
+                            "Trying to use exact size with a lazy loading component"
+                                    + " without either providing a count callback for the"
+                                    + " component to fetch the count of the items or a data"
+                                    + " provider that implements the size query. Provide the "
+                                    + "callback for fetching item count with%n"
+                                    + "comboBox.getLazyDataView().withDefinedSize(CallbackDataProvider.CountCallback);"
+                                    + "%nor switch to undefined size with%n"
+                                    + "comboBox.getLazyDataView().withUndefinedSize()");
+                }, filterConverter);
+        lazyDataView.setItemCountUnknown();
+        return lazyDataView;
+    }
+
+    public <TComponent> ComboBoxLazyDataView<TItem> setItemsWithFilterConverter(
+            CallbackDataProvider.FetchCallback<TItem, TComponent> fetchCallback,
+            CallbackDataProvider.CountCallback<TItem, TComponent> countCallback,
+            SerializableFunction<String, TComponent> filterConverter) {
+        setDataProvider(DataProvider.fromFilteringCallbacks(fetchCallback,
+                countCallback), filterConverter);
+        return getLazyDataView();
+    }
+
+    @Override
+    public ComboBoxLazyDataView<TItem> setItems(
+            BackEndDataProvider<TItem, String> dataProvider) {
+        setDataProvider(dataProvider);
+        return getLazyDataView();
+    }
+
+    // ****************************************************
+    // Generic data view implementation
+    // ****************************************************
+
+    @Override
+    public ComboBoxDataView<TItem> getGenericDataView() {
+        return new ComboBoxDataView<>(dataCommunicator, comboBox);
+    }
+
+    @Override
+    public ComboBoxDataView<TItem> setItems(
+            DataProvider<TItem, String> dataProvider) {
+        setDataProvider(dataProvider);
+        return getGenericDataView();
+    }
+
+    @Override
+    public ComboBoxDataView<TItem> setItems(
+            InMemoryDataProvider<TItem> dataProvider) {
+        throw new UnsupportedOperationException();
+    }
+
     public ComboBoxDataView<TItem> setItems(
             InMemoryDataProvider<TItem> inMemoryDataProvider,
             SerializableFunction<String, SerializablePredicate<TItem>> filterConverter) {
@@ -209,98 +314,9 @@ class ComboBoxDataController<TItem>
         return setItems(convertedDataProvider);
     }
 
-    public ComboBoxListDataView<TItem> setItems(
-            ComboBox.ItemFilter<TItem> itemFilter, Collection<TItem> items) {
-        ListDataProvider<TItem> listDataProvider = DataProvider
-                .ofCollection(items);
-        setDataProvider(itemFilter, listDataProvider);
-        return getListDataView();
-    }
-
-    public <TComponent> ComboBoxLazyDataView<TItem> setItemsWithFilterConverter(
-            CallbackDataProvider.FetchCallback<TItem, TComponent> fetchCallback,
-            SerializableFunction<String, TComponent> filterConverter) {
-        Objects.requireNonNull(fetchCallback, "Fetch callback cannot be null");
-        ComboBoxLazyDataView<TItem> lazyDataView = setItemsWithFilterConverter(
-                fetchCallback, query -> {
-                    throw new IllegalStateException(
-                            "Trying to use exact size with a lazy loading component"
-                                    + " without either providing a count callback for the"
-                                    + " component to fetch the count of the items or a data"
-                                    + " provider that implements the size query. Provide the "
-                                    + "callback for fetching item count with%n"
-                                    + "comboBox.getLazyDataView().withDefinedSize(CallbackDataProvider.CountCallback);"
-                                    + "%nor switch to undefined size with%n"
-                                    + "comboBox.getLazyDataView().withUndefinedSize()");
-                }, filterConverter);
-        lazyDataView.setItemCountUnknown();
-        return lazyDataView;
-    }
-
-    public <TComponent> ComboBoxLazyDataView<TItem> setItemsWithFilterConverter(
-            CallbackDataProvider.FetchCallback<TItem, TComponent> fetchCallback,
-            CallbackDataProvider.CountCallback<TItem, TComponent> countCallback,
-            SerializableFunction<String, TComponent> filterConverter) {
-        setDataProvider(DataProvider.fromFilteringCallbacks(fetchCallback,
-                countCallback), filterConverter);
-        return getLazyDataView();
-    }
-
-    @SafeVarargs
-    public final ComboBoxListDataView<TItem> setItems(
-            ComboBox.ItemFilter<TItem> itemFilter, TItem... items) {
-        return setItems(itemFilter, new ArrayList<>(Arrays.asList(items)));
-    }
-
-    public ComboBoxListDataView<TItem> setItems(
-            ComboBox.ItemFilter<TItem> itemFilter,
-            ListDataProvider<TItem> listDataProvider) {
-        setDataProvider(itemFilter, listDataProvider);
-        return getListDataView();
-    }
-
-    @Override
-    public ComboBoxDataView<TItem> setItems(
-            DataProvider<TItem, String> dataProvider) {
-        setDataProvider(dataProvider);
-        return getGenericDataView();
-    }
-
-    @Override
-    public ComboBoxDataView<TItem> setItems(
-            InMemoryDataProvider<TItem> dataProvider) {
-        return null;
-    }
-
-    @Override
-    public ComboBoxDataView<TItem> getGenericDataView() {
-        return new ComboBoxDataView<>(dataCommunicator, comboBox);
-    }
-
-    @Override
-    public ComboBoxLazyDataView<TItem> setItems(
-            BackEndDataProvider<TItem, String> dataProvider) {
-        setDataProvider(dataProvider);
-        return getLazyDataView();
-    }
-
-    @Override
-    public ComboBoxLazyDataView<TItem> getLazyDataView() {
-        return new ComboBoxLazyDataView<>(getDataCommunicator(), comboBox);
-    }
-
-    @Override
-    public ComboBoxListDataView<TItem> setItems(
-            ListDataProvider<TItem> dataProvider) {
-        setDataProvider(dataProvider);
-        return getListDataView();
-    }
-
-    @Override
-    public ComboBoxListDataView<TItem> getListDataView() {
-        return new ComboBoxListDataView<>(getDataCommunicator(), comboBox,
-                this::onInMemoryFilterOrSortingChange);
-    }
+    // ****************************************************
+    // Data provider implementation
+    // ****************************************************
 
     public void setDataProvider(DataProvider<TItem, String> dataProvider) {
         setDataProvider(dataProvider, SerializableFunction.identity());
