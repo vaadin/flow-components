@@ -101,8 +101,6 @@ class ComboBoxDataManager<TItem>
         }
     };
 
-    private static final String PROP_CLIENT_SIDE_FILTER = "_clientSideFilter";
-
     private final ComboBoxBase<?, TItem, ?> comboBox;
 
     private ComboBoxDataCommunicator<TItem> dataCommunicator;
@@ -444,7 +442,7 @@ class ComboBoxDataManager<TItem>
     }
 
     private void setClientSideFilter(boolean clientSideFilter) {
-        comboBox.getElement().setProperty(PROP_CLIENT_SIDE_FILTER,
+        comboBox.getElement().setProperty("_clientSideFilter",
                 clientSideFilter);
     }
 
