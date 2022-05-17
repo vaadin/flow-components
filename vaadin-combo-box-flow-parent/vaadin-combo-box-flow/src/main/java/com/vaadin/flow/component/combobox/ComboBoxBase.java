@@ -410,15 +410,6 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
         renderManager.setRenderer(renderer);
     }
 
-    /**
-     * Gets the data provider used by this ComboBox.
-     *
-     * @return the data provider used by this ComboBox
-     */
-    public DataProvider<TItem, ?> getDataProvider() {
-        return dataController.getDataProvider();
-    }
-
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
@@ -896,8 +887,17 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     }
 
     // ****************************************************
-    // Obsolete data provider methods
+    // Data provider implementation
     // ****************************************************
+
+    /**
+     * Gets the data provider used by this ComboBox.
+     *
+     * @return the data provider used by this ComboBox
+     */
+    public DataProvider<TItem, ?> getDataProvider() {
+        return dataController.getDataProvider();
+    }
 
     /**
      * {@inheritDoc}
