@@ -32,8 +32,9 @@ final class ComboBoxDataViewTestHelper {
         try {
             // Reset the client filter on server side as though it's sent from
             // client
-            Method setRequestedRangeMethod = ComboBoxBase.class.getDeclaredMethod(
-                    "setRequestedRange", int.class, int.class, String.class);
+            Method setRequestedRangeMethod = ComboBoxBase.class
+                    .getDeclaredMethod("setRequestedRange", int.class,
+                            int.class, String.class);
             setRequestedRangeMethod.setAccessible(true);
             setRequestedRangeMethod.invoke(comboBox, 0, comboBox.getPageSize(),
                     clientFilter);

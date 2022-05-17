@@ -32,8 +32,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 class ComboBoxDataManager<TItem>
         implements HasDataView<TItem, String, ComboBoxDataView<TItem>>,
@@ -102,6 +104,7 @@ class ComboBoxDataManager<TItem>
     };
 
     private final ComboBoxBase<?, TItem, ?> comboBox;
+    private final Supplier<Locale> localeSupplier;
 
     private ComboBoxDataCommunicator<TItem> dataCommunicator;
 
@@ -124,8 +127,10 @@ class ComboBoxDataManager<TItem>
     private Registration clearFilterOnCloseRegistration;
     private Registration dataProviderListener = null;
 
-    ComboBoxDataManager(ComboBoxBase<?, TItem, ?> comboBox) {
+    ComboBoxDataManager(ComboBoxBase<?, TItem, ?> comboBox,
+            Supplier<Locale> localeSupplier) {
         this.comboBox = comboBox;
+        this.localeSupplier = localeSupplier;
     }
 
     public ComboBoxDataCommunicator<TItem> getDataCommunicator() {
@@ -309,9 +314,9 @@ class ComboBoxDataManager<TItem>
         // Cannot use the case insensitive contains shorthand from
         // ListDataProvider since it wouldn't react to locale changes
         ComboBox.ItemFilter<TItem> defaultItemFilter = (item,
-                filterText) -> comboBox.generateLabel(item)
-                        .toLowerCase(comboBox.getLocale())
-                        .contains(filterText.toLowerCase(comboBox.getLocale()));
+                filterText) -> comboBox.getItemLabelGenerator().apply(item)
+                        .toLowerCase(localeSupplier.get())
+                        .contains(filterText.toLowerCase(localeSupplier.get()));
 
         setDataProvider(defaultItemFilter, listDataProvider);
     }

@@ -103,7 +103,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
                 presentationToModel, modelToPresentation);
 
         renderManager = new ComboBoxRenderManager<>(this);
-        dataManager = new ComboBoxDataManager<>(this);
+        dataManager = new ComboBoxDataManager<>(this, this::getLocale);
         dataManager.getDataGenerator().addDataGenerator((item,
                 jsonObject) -> jsonObject.put("label", generateLabel(item)));
     }
@@ -426,11 +426,6 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      */
     public DataProvider<TItem, ?> getDataProvider() {
         return dataManager.getDataProvider();
-    }
-
-    // Expose getLocale for ComboBoxDataManager
-    protected Locale getLocale() {
-        return super.getLocale();
     }
 
     @Override
