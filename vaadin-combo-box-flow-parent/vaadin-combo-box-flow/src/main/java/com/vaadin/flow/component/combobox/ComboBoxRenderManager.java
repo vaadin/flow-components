@@ -97,6 +97,6 @@ class ComboBoxRenderManager<TItem> implements Serializable {
 
         renderingRegistrations.add(rendering.getRegistration());
 
-        comboBox.reset();
+        comboBox.getDataManager().reset();
     }
 }

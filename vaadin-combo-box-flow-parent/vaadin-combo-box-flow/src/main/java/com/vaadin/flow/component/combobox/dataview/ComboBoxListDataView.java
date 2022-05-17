@@ -20,6 +20,7 @@ import java.util.stream.Stream;
 
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.combobox.ComboBoxBase;
 import com.vaadin.flow.data.provider.AbstractListDataView;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -39,7 +40,7 @@ import com.vaadin.flow.shared.Registration;
  * @since
  */
 public class ComboBoxListDataView<T> extends AbstractListDataView<T> {
-    private DataCommunicator<T> dataCommunicator;
+    private final DataCommunicator<T> dataCommunicator;
 
     /**
      * Creates a new instance of ComboBox in-memory data view and verifies the
@@ -54,7 +55,7 @@ public class ComboBoxListDataView<T> extends AbstractListDataView<T> {
      *            or sorting changes, not <code>null</code>
      */
     public ComboBoxListDataView(DataCommunicator<T> dataCommunicator,
-            ComboBox<T> comboBox,
+            ComboBoxBase<?, T, ?> comboBox,
             SerializableBiConsumer<SerializablePredicate<T>, SerializableComparator<T>> filterOrSortingChangedCallback) {
         super(dataCommunicator::getDataProvider, comboBox,
                 filterOrSortingChangedCallback);

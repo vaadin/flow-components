@@ -20,6 +20,8 @@ import java.util.stream.Stream;
 
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.combobox.ComboBoxBase;
+import com.vaadin.flow.component.combobox.ComboBoxDataCommunicator;
 import com.vaadin.flow.data.provider.AbstractDataView;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
 import com.vaadin.flow.data.provider.DataCommunicator;
@@ -41,7 +43,7 @@ import com.vaadin.flow.shared.Registration;
  */
 public class ComboBoxDataView<T> extends AbstractDataView<T> {
 
-    private DataCommunicator<T> dataCommunicator;
+    private final DataCommunicator<T> dataCommunicator;
 
     /**
      * Creates a new generic data view for ComboBox and verifies the passed data
@@ -53,7 +55,7 @@ public class ComboBoxDataView<T> extends AbstractDataView<T> {
      *            the ComboBox
      */
     public ComboBoxDataView(DataCommunicator<T> dataCommunicator,
-            ComboBox<T> comboBox) {
+            ComboBoxBase<?, T, ?> comboBox) {
         super(dataCommunicator::getDataProvider, comboBox);
         this.dataCommunicator = dataCommunicator;
     }
