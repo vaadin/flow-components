@@ -46,13 +46,8 @@ public class HideIT extends AbstractSpreadsheetIT {
     }
 
     private void assertCellIsHidden(String cell) {
-        try {
-            assertEquals("Cell " + cell + " should be HIDDEN.", "none",
-                    getCellStyle(cell, "display"));
-        } catch (AssertionError error) {
-            assertEquals("Cell " + cell + " should be HIDDEN.", "0px",
-                    getCellStyle(cell, "height"));
-        }
+        assertEquals("Cell " + cell + " should be HIDDEN.", "none",
+                getCellStyle(cell, "display"));
     }
 
     private void assertCellIsVisible(String cell) {
