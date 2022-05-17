@@ -5,6 +5,9 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Workbook;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -57,6 +60,10 @@ public class FormatsFixture implements SpreadsheetFixture {
         spreadsheet.createCell(0, formats.length + 6, "3 = BLANK");
         spreadsheet.createCell(0, formats.length + 7, "4 = BOOLEAN");
 
+        ZoneId helsinki = ZoneId.of("Europe/Helsinki");
+        ZonedDateTime zonedDateTime = ZonedDateTime
+                .ofInstant(Instant.ofEpochMilli(1095379000000L), helsinki);
+
         column = 0;
         for (short format : formats) {
             CellStyle style = wb.createCellStyle();
@@ -68,7 +75,8 @@ public class FormatsFixture implements SpreadsheetFixture {
             spreadsheet.createCell(1, column + formats.length + 1,
                     "" + c.getCellType().ordinal());
 
-            c = spreadsheet.createCell(2, column, new Date(1095379000000L));
+            c = spreadsheet.createCell(2, column,
+                    Date.from(zonedDateTime.toInstant()));
             c.setCellStyle(style);
             spreadsheet.createCell(2, column + formats.length + 1,
                     "" + c.getCellType().ordinal());
