@@ -78,6 +78,7 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
         LogEntries logs = driver.manage().logs().get("browser");
         return logs.getAll().stream()
                 .filter(log -> log.getLevel().equals(Level.WARNING))
+                .filter(log -> !log.getMessage().contains("iron-icon"))
                 .collect(Collectors.toList());
     }
 
