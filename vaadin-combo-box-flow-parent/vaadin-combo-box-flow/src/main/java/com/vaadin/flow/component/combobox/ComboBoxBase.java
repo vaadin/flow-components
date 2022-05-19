@@ -552,8 +552,8 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * @return the in-memory data view instance that provides access to the data
      *         bound to the combo box
      */
-    @SafeVarargs
-    public final ComboBoxListDataView<TItem> setItems(
+    @SuppressWarnings("unchecked")
+    public ComboBoxListDataView<TItem> setItems(
             ComboBox.ItemFilter<TItem> itemFilter, TItem... items) {
         return dataController.setItems(itemFilter, items);
     }
