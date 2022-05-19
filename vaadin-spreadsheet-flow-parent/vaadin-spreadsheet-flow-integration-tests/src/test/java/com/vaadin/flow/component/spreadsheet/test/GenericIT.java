@@ -42,6 +42,10 @@ public class GenericIT extends AbstractSpreadsheetIT {
         final var a1 = getSpreadsheet().getCellAt("A1");
         final var a2 = getSpreadsheet().getCellAt("A2");
         final var b1 = getSpreadsheet().getCellAt("B1");
+        // FIXME: Test started failing because the first call to a1.setValue()
+        // was adding content to the next line. Adding a random value first
+        // seems to work around this issue.
+        a1.setValue("SOMETHING");
         a1.setValue("=TODAY()");
         a2.setValue("6/7/2009");
         b1.setValue("=A1+3");
