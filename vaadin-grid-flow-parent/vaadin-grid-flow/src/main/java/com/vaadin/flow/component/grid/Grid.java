@@ -2940,8 +2940,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * <p>
      * <strong>Note:</strong> If column reordering is enabled with
      * {@link #setColumnReorderingAllowed(boolean)} and the user has reordered
-     * the columns, the order of the list returned by this method might not be
-     * correct.
+     * the columns, the order of the list returned by this method might be
+     * incorrect.
      *
      * @return unmodifiable list of columns
      */
