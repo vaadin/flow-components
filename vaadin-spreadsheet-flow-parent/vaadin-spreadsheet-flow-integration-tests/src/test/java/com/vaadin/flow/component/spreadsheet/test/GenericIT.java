@@ -17,11 +17,11 @@ public class GenericIT extends AbstractSpreadsheetIT {
     @Before
     public void init() {
         getDriver().get(getBaseURL());
+        createNewSpreadsheet();
     }
 
     @Test
     public void testKeyboardNavigation() {
-        createNewSpreadsheet();
         final var a1 = getSpreadsheet().getCellAt("A1");
         a1.setValue("X");
 
@@ -39,7 +39,6 @@ public class GenericIT extends AbstractSpreadsheetIT {
     @Test
     public void testDates() {
         setLocale(Locale.US);
-        createNewSpreadsheet();
         final var a1 = getSpreadsheet().getCellAt("A1");
         final var a2 = getSpreadsheet().getCellAt("A2");
         final var b1 = getSpreadsheet().getCellAt("B1");
@@ -60,7 +59,6 @@ public class GenericIT extends AbstractSpreadsheetIT {
     @Test
     public void numericCell_newPercentageCell_cellStaysNumeric() {
         setLocale(Locale.US);
-        createNewSpreadsheet();
         // need to move selection so that fill indicator is not clicked while
         // selecting A2
         clickCell("F1");
@@ -81,7 +79,6 @@ public class GenericIT extends AbstractSpreadsheetIT {
     @Test
     public void percentageCell_newNumericCell_cellStaysNumeric() {
         setLocale(Locale.US);
-        createNewSpreadsheet();
         // need to move selection so that fill indicator is not clicked while
         // selecting A2
         clickCell("F1");
@@ -104,7 +101,6 @@ public class GenericIT extends AbstractSpreadsheetIT {
     @Test
     public void testFormats() {
         setLocale(Locale.US);
-        createNewSpreadsheet();
         loadTestFixture(TestFixtures.Formats);
         final var a1 = getSpreadsheet().getCellAt("A1");
 
@@ -129,7 +125,6 @@ public class GenericIT extends AbstractSpreadsheetIT {
 
     @Test
     public void testStringCellType() {
-        createNewSpreadsheet();
         loadTestFixture(TestFixtures.Formats);
         final var b2 = getSpreadsheet().getCellAt("B2");
 
