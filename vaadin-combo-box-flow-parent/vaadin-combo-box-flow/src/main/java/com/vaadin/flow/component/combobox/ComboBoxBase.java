@@ -476,7 +476,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      */
     @Override
     public ComboBoxListDataView<TItem> getListDataView() {
-        return getDataController().getListDataView();
+        return dataController.getListDataView();
     }
 
     /**
@@ -496,7 +496,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      */
     @Override
     public ComboBoxListDataView<TItem> setItems(Collection<TItem> items) {
-        return getDataController().setItems(items);
+        return dataController.setItems(items);
     }
 
     /**
@@ -525,7 +525,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      */
     public ComboBoxListDataView<TItem> setItems(
             ComboBox.ItemFilter<TItem> itemFilter, Collection<TItem> items) {
-        return getDataController().setItems(itemFilter, items);
+        return dataController.setItems(itemFilter, items);
     }
 
     /**
@@ -555,7 +555,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     @SafeVarargs
     public final ComboBoxListDataView<TItem> setItems(
             ComboBox.ItemFilter<TItem> itemFilter, TItem... items) {
-        return getDataController().setItems(itemFilter, items);
+        return dataController.setItems(itemFilter, items);
     }
 
     /**
@@ -585,13 +585,13 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     public ComboBoxListDataView<TItem> setItems(
             ComboBox.ItemFilter<TItem> itemFilter,
             ListDataProvider<TItem> listDataProvider) {
-        return getDataController().setItems(itemFilter, listDataProvider);
+        return dataController.setItems(itemFilter, listDataProvider);
     }
 
     @Override
     public ComboBoxListDataView<TItem> setItems(
             ListDataProvider<TItem> dataProvider) {
-        return getDataController().setItems(dataProvider);
+        return dataController.setItems(dataProvider);
     }
 
     /**
@@ -632,7 +632,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      */
     @Override
     public ComboBoxLazyDataView<TItem> getLazyDataView() {
-        return getDataController().getLazyDataView();
+        return dataController.getLazyDataView();
     }
 
     /**
@@ -668,7 +668,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     public <C> ComboBoxLazyDataView<TItem> setItemsWithFilterConverter(
             CallbackDataProvider.FetchCallback<TItem, C> fetchCallback,
             SerializableFunction<String, C> filterConverter) {
-        return getDataController().setItemsWithFilterConverter(fetchCallback,
+        return dataController.setItemsWithFilterConverter(fetchCallback,
                 filterConverter);
     }
 
@@ -709,7 +709,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
             CallbackDataProvider.FetchCallback<TItem, C> fetchCallback,
             CallbackDataProvider.CountCallback<TItem, C> countCallback,
             SerializableFunction<String, C> filterConverter) {
-        return getDataController().setItemsWithFilterConverter(fetchCallback,
+        return dataController.setItemsWithFilterConverter(fetchCallback,
                 countCallback, filterConverter);
     }
 
@@ -799,7 +799,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     @Override
     public ComboBoxLazyDataView<TItem> setItems(
             BackEndDataProvider<TItem, String> dataProvider) {
-        return getDataController().setItems(dataProvider);
+        return dataController.setItems(dataProvider);
     }
 
     // ****************************************************
@@ -818,13 +818,13 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      */
     @Override
     public ComboBoxDataView<TItem> getGenericDataView() {
-        return getDataController().getGenericDataView();
+        return dataController.getGenericDataView();
     }
 
     @Override
     public ComboBoxDataView<TItem> setItems(
             DataProvider<TItem, String> dataProvider) {
-        return getDataController().setItems(dataProvider);
+        return dataController.setItems(dataProvider);
     }
 
     /**
@@ -882,8 +882,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     public ComboBoxDataView<TItem> setItems(
             InMemoryDataProvider<TItem> inMemoryDataProvider,
             SerializableFunction<String, SerializablePredicate<TItem>> filterConverter) {
-        return getDataController().setItems(inMemoryDataProvider,
-                filterConverter);
+        return dataController.setItems(inMemoryDataProvider, filterConverter);
     }
 
     // ****************************************************
@@ -920,7 +919,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      */
     @Deprecated
     public void setDataProvider(DataProvider<TItem, String> dataProvider) {
-        getDataController().setDataProvider(dataProvider);
+        dataController.setDataProvider(dataProvider);
     }
 
     /**
@@ -947,7 +946,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     @Deprecated
     public <C> void setDataProvider(DataProvider<TItem, C> dataProvider,
             SerializableFunction<String, C> filterConverter) {
-        getDataController().setDataProvider(dataProvider, filterConverter);
+        dataController.setDataProvider(dataProvider, filterConverter);
     }
 
     /**
@@ -973,7 +972,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      */
     @Deprecated
     public void setDataProvider(ListDataProvider<TItem> listDataProvider) {
-        getDataController().setDataProvider(listDataProvider);
+        dataController.setDataProvider(listDataProvider);
     }
 
     /**
@@ -1001,7 +1000,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     @Deprecated
     public void setDataProvider(ComboBox.FetchItemsCallback<TItem> fetchItems,
             SerializableFunction<String, Integer> sizeCallback) {
-        getDataController().setDataProvider(fetchItems, sizeCallback);
+        dataController.setDataProvider(fetchItems, sizeCallback);
     }
 
     /**
@@ -1029,7 +1028,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     @Deprecated
     public void setDataProvider(ComboBox.ItemFilter<TItem> itemFilter,
             ListDataProvider<TItem> listDataProvider) {
-        getDataController().setDataProvider(itemFilter, listDataProvider);
+        dataController.setDataProvider(itemFilter, listDataProvider);
     }
 
     /**
@@ -1102,7 +1101,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      */
     @ClientCallable
     private void confirmUpdate(int id) {
-        getDataController().confirmUpdate(id);
+        dataController.confirmUpdate(id);
     }
 
     /**
@@ -1110,7 +1109,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      */
     @ClientCallable
     private void setRequestedRange(int start, int length, String filter) {
-        getDataController().setRequestedRange(start, length, filter);
+        dataController.setRequestedRange(start, length, filter);
     }
 
     /**
@@ -1118,7 +1117,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      */
     @ClientCallable
     private void resetDataCommunicator() {
-        getDataController().resetDataCommunicator();
+        dataController.resetDataCommunicator();
     }
 
     /**
