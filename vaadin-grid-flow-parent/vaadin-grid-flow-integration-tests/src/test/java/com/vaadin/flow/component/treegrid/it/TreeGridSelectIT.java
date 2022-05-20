@@ -41,19 +41,19 @@ public class TreeGridSelectIT extends AbstractTreeGridIT {
         findElementByText("Selection mode - multi").click();
 
         assertAllRowsDeselected(getTreeGrid());
-        getTreeGrid().selectAll();
+        getTreeGrid().clickSelectAll();
         assertAllRowsSelected(getTreeGrid());
         getTreeGrid().expandWithClick(1, 1);
         getTreeGrid().expandWithClick(2, 1);
         assertAllRowsSelected(getTreeGrid());
-        getTreeGrid().deselectAll();
+        getTreeGrid().clickSeselectAll();
         assertAllRowsDeselected(getTreeGrid());
         getTreeGrid().clickSelectAll();
         getTreeGrid().collapseWithClick(2, 1);
         getTreeGrid().expandWithClick(2, 1);
         assertAllRowsSelected(getTreeGrid());
         getTreeGrid().collapseWithClick(2, 1);
-        getTreeGrid().deselectAll();
+        getTreeGrid().clickSeselectAll();
         getTreeGrid().expandWithClick(2, 1);
         assertAllRowsDeselected(getTreeGrid());
     }
