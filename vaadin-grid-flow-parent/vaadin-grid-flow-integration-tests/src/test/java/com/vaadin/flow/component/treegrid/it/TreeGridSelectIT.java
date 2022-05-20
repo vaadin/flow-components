@@ -53,7 +53,7 @@ public class TreeGridSelectIT extends AbstractTreeGridIT {
         getTreeGrid().expandWithClick(2, 1);
         assertAllRowsSelected(getTreeGrid());
         getTreeGrid().collapseWithClick(2, 1);
-        getTreeGrid().clickSeselectAll();
+        getTreeGrid().clickSelectAll();
         getTreeGrid().expandWithClick(2, 1);
         assertAllRowsDeselected(getTreeGrid());
     }
