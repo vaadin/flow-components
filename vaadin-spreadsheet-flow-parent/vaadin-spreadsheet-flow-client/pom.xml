@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.vaadin</groupId>
+    <artifactId>vaadin-spreadsheet-flow-parent</artifactId>
+    <version>23.2-SNAPSHOT</version>
+  </parent>
+  <groupId>com.vaadin</groupId>
+  <artifactId>vaadin-spreadsheet-flow-client</artifactId>
+  <packaging>jar</packaging>
+
+  <properties>
+    <!-- OBF is enabled in CI when releasing for production -->
+    <gwt.style>pretty</gwt.style>
+    <gwt.draft.compile>false</gwt.draft.compile>
+
+    <gwt.name>SpreadsheetApi</gwt.name>
+    <gwt.target>${gwt.name}.html</gwt.target>
+    <gwt.module>com.vaadin.component.spreadsheet.client.SpreadsheetApi</gwt.module>
+    <gwt.hostedWebapp>${project.build.directory}/${project.build.finalName}</gwt.hostedWebapp>
+
+    <!-- optimizations -->
+    <gwt.loglevel>WARN</gwt.loglevel>
+    <gwt.disableCastChecking>true</gwt.disableCastChecking>
+    <gwt.enableAssertions>false</gwt.enableAssertions>
+    <gwt.closure>true</gwt.closure>
+
+    <!-- set to true to get soyc report -->
+    <gwt.report>false</gwt.report>
+
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>com.google.gwt</groupId>
+        <artifactId>gwt</artifactId>
+        <version>${gwt.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.google.gwt</groupId>
+      <artifactId>gwt-servlet</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.google.gwt</groupId>
+      <artifactId>gwt-user</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.google.gwt</groupId>
+      <artifactId>gwt-dev</artifactId>
+    </dependency>
+
+    <!-- Used in ApplicationConfiguration & ApplicationConnection & ConnectorBundleLoaderFactory -->
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>vaadin-client</artifactId>
+    </dependency>
+    <!-- ConnectorBundleLoaderFactory uses ConnectorBundle -->
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>vaadin-client-compiler</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <!-- Output classes directly into the webapp, so that IDEs and "mvn process-classes" update them in DevMode -->
+    <outputDirectory>${project.build.directory}/${project.build.finalName}/WEB-INF/classes</outputDirectory>
+    <plugins>
+      <!-- exclude everything in this artifact -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <includes>
+            <include>META-INF/**</include>
+          </includes>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>gwt-maven-plugin</artifactId>
+        <version>${gwt.version}</version>
+        <executions>
+            <execution>
+                <goals>
+                    <goal>compile</goal>
+                    <!-- <goal>test</goal> -->
+                    <!-- <goal>generateAsync</goal> -->
+                </goals>
+            </execution>
+        </executions>
+        <configuration>
+          <runTarget>${gwt.target}</runTarget>
+          <modules>
+              <module>${gwt.module}</module>
+          </modules>
+          <hostedWebapp>${gwt.hostedWebapp}</hostedWebapp>
+          <generateJsInteropExports>true</generateJsInteropExports>
+          <style>${gwt.style}</style>
+          <extraJvmArgs>-Xmx1g -Xms1g</extraJvmArgs>
+          <draftCompile>${gwt.draft.compile}</draftCompile>
+
+          <logLevel>${gwt.loglevel}</logLevel>
+          <gwtVersion>${gwt.version}</gwtVersion>
+          <compileReport>${gwt.report}</compileReport>
+          <compileMetrics>${gwt.report}</compileMetrics>
+          <webappDirectory>${project.build.directory}/${project.build.finalName}</webappDirectory>
+          <optimizationLevel>9</optimizationLevel>
+          <bindAddress>0.0.0.0</bindAddress>
+          <disableCastChecking>${gwt.disableCastChecking}</disableCastChecking>
+          <disableClassMetadata>${gwt.disableClassMetadata}</disableClassMetadata>
+          <enableAssertions>${gwt.enableAssertions}</enableAssertions>
+          <persistentunitcachedir>${project.build.directory}</persistentunitcachedir>
+          <modulePathPrefix>${modulePathPrefix}</modulePathPrefix>
+          <gen>${project.build.directory}/gen</gen>
+          <workDir>target</workDir>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-maven-plugin</artifactId>
+        <version>${jetty.version}</version>
+        <configuration>
+          <scanIntervalSeconds>-1</scanIntervalSeconds>
+          <stopPort>8081</stopPort>
+          <stopWait>5</stopWait>
+          <stopKey>foo</stopKey>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>3.1.0</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <configuration>
+              <target>
+                  <copy
+                    file="${project.build.directory}/${project.build.finalName}/${gwt.name}/${gwt.name}.cache.js"
+                    tofile="${basedir}/../vaadin-spreadsheet-flow/src/main/resources/META-INF/resources/frontend/vaadin-spreadsheet/spreadsheet-export.js">
+                  </copy>
+              </target>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- Do not deploy to maven repos -->
+      <plugin>
+        <groupId>org.sonatype.plugins</groupId>
+        <artifactId>nexus-staging-maven-plugin</artifactId>
+        <configuration>
+           <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
+        </configuration>
+      </plugin>
+
+    </plugins>
+  </build>
+</project>

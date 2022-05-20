@@ -22,7 +22,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -367,9 +366,11 @@ public class VirtualListViewPage extends Div {
 
     private List<String> getLordOfTheRingsCharacters() {
         Set<String> characters = new HashSet<>();
-
         Faker instance = Faker.instance(new SecureRandom());
-        for (int i = 0; i < 100; i++) {
+
+        // We need to return a fixed size of characters.
+        // 20 is ok, since in database there are only 30 distinct names
+        while (characters.size() < 20) {
             characters.add(instance.lordOfTheRings().character());
         }
 

@@ -22,7 +22,25 @@ import java.util.stream.IntStream;
 import com.vaadin.flow.data.selection.SingleSelect;
 
 /**
- * Server-side component for the {@code vaadin-list-box} element.
+ * List Box allows the user to select one or more values from a scrollable list
+ * of items. Although its functionally similar to Checkbox Group and Radio
+ * Button Group, List Box is designed to be used as a lightweight scrollable
+ * selection list rather than a form input field.
+ * <p>
+ * List Box also supports using dividers to group related items. Use them
+ * sparingly to avoid creating unnecessary visual clutter. List Box supports
+ * both single and multiple selection. The former allows the user to select only
+ * one item while the latter enables multiple items to be selected.
+ * <p>
+ * Items can be rendered with rich content instead of plain text. This can be
+ * useful to provide additional information in a more legible fashion than
+ * appending it to the item text.
+ * <p>
+ * Best Practices:<br>
+ * List Box is not designed to be used as an input field in forms, and lacks
+ * features like label, helper, and validation errors. List Box is best suited
+ * to be used as a lightweight, scrollable, single-column list for single or
+ * multi-selection of items.
  *
  * @author Vaadin Ltd
  *

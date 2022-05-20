@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.vaadin</groupId>
+    <artifactId>vaadin-flow-components</artifactId>
+    <version>23.2-SNAPSHOT</version>
+  </parent>
+  <artifactId>vaadin-flow-components-shared-parent</artifactId>
+  <packaging>pom</packaging>
+  <name>Vaadin Flow Components Shared Parent</name>
+  <modules>
+    <module>vaadin-flow-components-base</module>
+    <module>vaadin-flow-components-test-util</module>
+  </modules>
+</project>

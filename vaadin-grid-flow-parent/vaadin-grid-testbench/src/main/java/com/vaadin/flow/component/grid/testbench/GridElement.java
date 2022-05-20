@@ -18,6 +18,7 @@ package com.vaadin.flow.component.grid.testbench;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
@@ -341,9 +342,14 @@ public class GridElement extends TestBenchElement {
      *            the row to select
      */
     void select(GridTRElement row) {
-        if (isMultiselect()) {
-            executeScript("arguments[0].selectItem(arguments[1]._item);", this,
-                    row);
+        GridColumnElement multiSelectColumn = getMultiSelectColumn();
+        if (multiSelectColumn != null) {
+            GridTHTDElement cell = row.getCell(multiSelectColumn);
+            CheckboxElement checkbox = wrapElement(cell.getFirstChildElement(),
+                    getCommandExecutor()).wrap(CheckboxElement.class);
+            if (!checkbox.isChecked()) {
+                checkbox.click();
+            }
         } else {
             setActiveItem(row);
         }
@@ -366,9 +372,14 @@ public class GridElement extends TestBenchElement {
      *            the row to deselect
      */
     void deselect(GridTRElement row) {
-        if (isMultiselect()) {
-            executeScript("arguments[0].deselectItem(arguments[1]._item);",
-                    this, row);
+        GridColumnElement multiSelectColumn = getMultiSelectColumn();
+        if (multiSelectColumn != null) {
+            GridTHTDElement cell = row.getCell(multiSelectColumn);
+            CheckboxElement checkbox = wrapElement(cell.getFirstChildElement(),
+                    getCommandExecutor()).wrap(CheckboxElement.class);
+            if (checkbox.isChecked()) {
+                checkbox.click();
+            }
         } else {
             removeActiveItem(row);
         }
@@ -385,15 +396,18 @@ public class GridElement extends TestBenchElement {
     }
 
     /**
-     * Checks if the grid is in multi select mode.
+     * Get the multi-select column of the grid. Returns null, if the grid is not
+     * in multi-selection mode, or doesn't have a multi-selection column.
      *
-     * @return <code>true</code> if the grid is in multi select mode as defined
-     *         by the Flow grid, <code>false</code> otherwise
+     * @return the multi-select column, or null
      */
-    private boolean isMultiselect() {
-        return (boolean) executeScript(
-                "return arguments[0]._getColumns().filter(function(col) { return typeof col.selectAll != 'undefined';}).length > 0",
+    private GridColumnElement getMultiSelectColumn() {
+        List<Long> columnIds = (List<Long>) executeScript(
+                "return arguments[0]._getColumns().filter(function(col) { return typeof col.selectAll != 'undefined';}).map(function(column) { return column.__generatedTbId;});",
                 this);
+        if (columnIds.isEmpty())
+            return null;
+        return new GridColumnElement(columnIds.get(0), this);
     }
 
     /**

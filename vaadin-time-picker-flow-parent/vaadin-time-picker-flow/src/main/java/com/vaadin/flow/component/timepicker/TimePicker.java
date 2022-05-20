@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.HasClearButton;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
@@ -40,15 +41,17 @@ import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
 
 /**
- * An input component for selecting time of day, based on
- * {@code vaadin-time-picker} web component.
+ * Time Picker is an input field for entering or selecting a specific time. The
+ * time can be entered directly using a keyboard or by choosing a value from a
+ * set of predefined options presented in an overlay. The overlay opens when the
+ * field is clicked or any input is entered when the field is focused.
  *
  * @author Vaadin Ltd
  */
 @JsModule("./vaadin-time-picker/timepickerConnector.js")
 public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         implements HasSize, HasValidation, HasEnabled, HasHelper, HasLabel,
-        HasTheme {
+        HasTheme, HasClearButton {
 
     private static final SerializableFunction<String, LocalTime> PARSER = valueFromClient -> {
         return valueFromClient == null || valueFromClient.isEmpty() ? null
@@ -607,32 +610,6 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     @Deprecated
     public LocalTime getMaxTime() {
         return this.getMax();
-    }
-
-    /**
-     * Sets displaying a clear button in the time picker when it has value.
-     * <p>
-     * The clear button is an icon, which can be clicked to set the time picker
-     * value to {@code null}.
-     *
-     * @param clearButtonVisible
-     *            {@code true} to display the clear button, {@code false} to
-     *            hide it
-     */
-    @Override
-    public void setClearButtonVisible(boolean clearButtonVisible) {
-        super.setClearButtonVisible(clearButtonVisible);
-    }
-
-    /**
-     * Gets whether this time picker displays a clear button when it has value.
-     *
-     * @return {@code true} if this time picker displays a clear button,
-     *         {@code false} otherwise
-     * @see #setClearButtonVisible(boolean)
-     */
-    public boolean isClearButtonVisible() {
-        return super.isClearButtonVisibleBoolean();
     }
 
     private void runBeforeClientResponse(SerializableConsumer<UI> command) {

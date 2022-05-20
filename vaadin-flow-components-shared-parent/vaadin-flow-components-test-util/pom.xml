@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.vaadin</groupId>
+    <artifactId>vaadin-flow-components-shared-parent</artifactId>
+    <version>23.2-SNAPSHOT</version>
+  </parent>
+  <artifactId>vaadin-flow-components-test-util</artifactId>
+  <packaging>jar</packaging>
+  <name>Vaadin Flow Components Test Utilities</name>
+  <dependencies>
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>vaadin-testbench-core</artifactId>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>flow-test-util</artifactId>
+      <scope>compile</scope>
+    </dependency>
+  </dependencies>
+</project>

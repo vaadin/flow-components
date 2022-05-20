@@ -21,6 +21,7 @@ import java.util.Objects;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.CompositionNotifier;
+import com.vaadin.flow.component.HasClearButton;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
@@ -41,7 +42,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         extends GeneratedVaadinNumberField<C, T> implements HasSize,
         HasValidation, HasValueChangeMode, HasPrefixAndSuffix, InputNotifier,
         KeyNotifier, CompositionNotifier, HasAutocomplete, HasAutocapitalize,
-        HasAutocorrect, HasHelper, HasLabel {
+        HasAutocorrect, HasHelper, HasLabel, HasClearButton {
 
     private ValueChangeMode currentMode;
 
@@ -282,29 +283,6 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     @Override
     public void setAutoselect(boolean autoselect) {
         super.setAutoselect(autoselect);
-    }
-
-    /**
-     * Gets the visibility state of the button which clears the number field.
-     *
-     * @return <code>true</code> if the button is visible, <code>false</code>
-     *         otherwise
-     */
-    public boolean isClearButtonVisible() {
-        return isClearButtonVisibleBoolean();
-    }
-
-    /**
-     * Set to <code>false</code> to hide the clear button which clears the
-     * number field.
-     *
-     * @param clearButtonVisible
-     *            <code>true</code> to set the button visible,
-     *            <code>false</code> otherwise
-     */
-    @Override
-    public void setClearButtonVisible(boolean clearButtonVisible) {
-        super.setClearButtonVisible(clearButtonVisible);
     }
 
     /**

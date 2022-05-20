@@ -51,13 +51,16 @@ import com.vaadin.flow.shared.Registration;
 import elemental.json.JsonValue;
 
 /**
- * Component that encapsulates the functionality of the
- * {@code <vaadin-virtual-list>} web component.
+ * Virtual List allows you to render a long list of items inside a scrollable
+ * container without sacrificing performance. Each item is rendered on the fly
+ * as the user scrolls the list. To use the component, you need to assign it a
+ * set of data items and a renderer that is used for rendering each individual
+ * data item. The height of an item is determined by its content and can change
+ * dynamically.
  * <p>
- * It supports {@link DataProvider}s to load data asynchronously and
+ * This component supports {@link DataProvider}s to load data asynchronously and
  * {@link Renderer}s to render the markup for each item.
  * <p>
- *
  *
  * @author Vaadin Ltd.
  *
@@ -65,11 +68,11 @@ import elemental.json.JsonValue;
  *            the type of the items supported by the list
  */
 @Tag("vaadin-virtual-list")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-alpha3")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-beta4")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
-@NpmPackage(value = "@vaadin/virtual-list", version = "23.1.0-alpha3")
-@NpmPackage(value = "@vaadin/vaadin-virtual-list", version = "23.1.0-alpha3")
+@NpmPackage(value = "@vaadin/virtual-list", version = "23.1.0-beta4")
+@NpmPackage(value = "@vaadin/vaadin-virtual-list", version = "23.1.0-beta4")
 @JsModule("@vaadin/virtual-list/vaadin-virtual-list.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./virtualListConnector.js")

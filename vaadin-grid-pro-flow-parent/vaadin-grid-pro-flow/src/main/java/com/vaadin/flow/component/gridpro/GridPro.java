@@ -50,15 +50,16 @@ import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 
 @Tag("vaadin-grid-pro")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-alpha3")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-beta4")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/grid-pro", version = "23.1.0-alpha3")
-@NpmPackage(value = "@vaadin/vaadin-grid-pro", version = "23.1.0-alpha3")
+@NpmPackage(value = "@vaadin/grid-pro", version = "23.1.0-beta4")
+@NpmPackage(value = "@vaadin/vaadin-grid-pro", version = "23.1.0-beta4")
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro.js")
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro-edit-column.js")
 @JsModule("./gridProConnector.js")
 /**
- * Server-side component for the {@code <vaadin-grid-pro>} element.
+ * Grid Pro is an extension of the Grid component that provides inline editing
+ * with full keyboard navigation.
  *
  * @author Vaadin Ltd
  *
@@ -150,7 +151,7 @@ public class GridPro<E> extends Grid<E> {
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-pro-edit-column")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-alpha3")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-beta4")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class EditColumn<T> extends Column<T> {
 

@@ -23,6 +23,7 @@ import java.util.Optional;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.CompositionNotifier;
+import com.vaadin.flow.component.HasClearButton;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
@@ -38,11 +39,9 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.SerializableBiFunction;
 
 /**
- * Server-side component for the {@code vaadin-big-decimal-field} element. This
- * field uses {@link BigDecimal} as the server-side value type, which allows
- * handling decimal numbers with high precision. The component also prevents
- * users from entering characters which can't be used in a decimal number, such
- * as alphabets.
+ * BigDecimalField is an input field for handling decimal numbers with high
+ * precision. This field uses {@link BigDecimal} as the server-side value type,
+ * and only allows numeric input.
  * <p>
  * When setting values from the server-side, the {@code scale} of the provided
  * {@link BigDecimal} is preserved in the presentation format shown to the user,
@@ -51,14 +50,14 @@ import com.vaadin.flow.function.SerializableBiFunction;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-big-decimal-field")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-alpha3")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-beta4")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("./vaadin-big-decimal-field.js")
 public class BigDecimalField
         extends GeneratedVaadinTextField<BigDecimalField, BigDecimal> implements
         HasSize, HasValidation, HasValueChangeMode, HasPrefixAndSuffix,
         InputNotifier, KeyNotifier, CompositionNotifier, HasAutocomplete,
-        HasAutocapitalize, HasAutocorrect, HasHelper, HasLabel {
+        HasAutocapitalize, HasAutocorrect, HasHelper, HasLabel, HasClearButton {
     private ValueChangeMode currentMode;
 
     private boolean isConnectorAttached;
@@ -305,29 +304,6 @@ public class BigDecimalField
     @Override
     public void setAutoselect(boolean autoselect) {
         super.setAutoselect(autoselect);
-    }
-
-    /**
-     * Gets the visibility state of the button which clears the field.
-     *
-     * @return <code>true</code> if the button is visible, <code>false</code>
-     *         otherwise
-     */
-    public boolean isClearButtonVisible() {
-        return isClearButtonVisibleBoolean();
-    }
-
-    /**
-     * Set to <code>false</code> to hide the clear button which clears the text
-     * field.
-     *
-     * @param clearButtonVisible
-     *            <code>true</code> to set the button visible,
-     *            <code>false</code> otherwise
-     */
-    @Override
-    public void setClearButtonVisible(boolean clearButtonVisible) {
-        super.setClearButtonVisible(clearButtonVisible);
     }
 
     @Override

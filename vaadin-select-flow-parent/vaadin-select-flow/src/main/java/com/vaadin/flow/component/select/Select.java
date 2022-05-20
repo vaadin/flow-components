@@ -64,14 +64,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * A customizable drop-down select component similar to a native browser select.
- * <p>
- * This is a server side Java integration for {@code <vaadin-select>} web
- * component.
- * <p>
- * For usage examples, see
- * <a href="https://vaadin.com/components/vaadin-select/java-examples">the demo
- * in vaadin.com</a>.
+ * Select allows users to choose a single value from a list of options presented
+ * in an overlay. The dropdown can be opened with a click, up/down arrow keys,
+ * or by typing the initial character for one of the options.
  *
  * @param <T>
  *            the type of the items for the select
@@ -245,7 +240,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
      * even though that is not visible from the component level.
      */
     @Tag("vaadin-select-list-box")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-alpha3")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-beta4")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     private class InternalListBox extends Component
             implements HasItemComponents<T> {

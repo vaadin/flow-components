@@ -24,7 +24,9 @@ import java.util.Locale;
 import com.vaadin.flow.function.SerializableFunction;
 
 /**
- * Server-side component for the {@code vaadin-number-field} element.
+ * Number Field sports many of the same features as Text Field but only accepts
+ * numeric input. The input can be decimal, integral or big decimal. You can
+ * specify a unit as a prefix or suffix for the field.
  *
  * @author Vaadin Ltd.
  */

@@ -120,7 +120,14 @@ public class LitRendererIT extends AbstractComponentIT {
     }
 
     private String getClientCallableLogArray() {
-        String message = getLogEntries(Level.WARNING).get(0).getMessage();
+        String message = getLogEntries(Level.WARNING).stream()
+                // Discard lit-element warning lines
+                .filter(m -> !m.getMessage().contains(
+                        "The main 'lit-element' module entrypoint is deprecated."))
+                // Discard iron-icon warning lines
+                .filter(m -> !m.getMessage().contains("iron-icon"))
+                // Return first warning message in console
+                .findFirst().get().getMessage();
         return message.split("\"")[1];
     }
 

@@ -23,15 +23,15 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 
 /**
- * VerticalLayout is a component container, which shows the subcomponents in the
- * order of their addition (vertically). A vertical layout is by default 100%
- * wide.
+ * Vertical Layout places components top-to-bottom in a column. By default, it
+ * has 100% width and undefined height, meaning its width is constrained by its
+ * parent component and its height is determined by the components it contains.
  */
 @Tag("vaadin-vertical-layout")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-alpha3")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-beta4")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/vertical-layout", version = "23.1.0-alpha3")
-@NpmPackage(value = "@vaadin/vaadin-ordered-layout", version = "23.1.0-alpha3")
+@NpmPackage(value = "@vaadin/vertical-layout", version = "23.1.0-beta4")
+@NpmPackage(value = "@vaadin/vaadin-ordered-layout", version = "23.1.0-beta4")
 @JsModule("@vaadin/vertical-layout/src/vaadin-vertical-layout.js")
 public class VerticalLayout extends Component implements ThemableLayout,
         FlexComponent, ClickNotifier<VerticalLayout> {

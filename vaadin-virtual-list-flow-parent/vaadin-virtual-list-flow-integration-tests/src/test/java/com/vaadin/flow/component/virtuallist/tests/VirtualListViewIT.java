@@ -121,7 +121,7 @@ public class VirtualListViewIT extends AbstractComponentIT {
 
     @Test
     public void rankedListWithEventHandling() {
-        validateListSize(findElement(By.id("using-events-with-templates")), 29);
+        validateListSize(findElement(By.id("using-events-with-templates")), 20);
     }
 
     @Test

@@ -58,10 +58,10 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-details")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-alpha3")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-beta4")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/details", version = "23.1.0-alpha3")
-@NpmPackage(value = "@vaadin/vaadin-details", version = "23.1.0-alpha3")
+@NpmPackage(value = "@vaadin/details", version = "23.1.0-beta4")
+@NpmPackage(value = "@vaadin/vaadin-details", version = "23.1.0-beta4")
 @JsModule("@vaadin/details/src/vaadin-details.js")
 public class Details extends Component
         implements HasEnabled, HasTheme, HasStyle, HasSize {
@@ -214,10 +214,11 @@ public class Details extends Component
     }
 
     /**
-     * @return summary section content as string
+     * @return summary section content as string (empty string if nothing was
+     *         set)
      */
     public String getSummaryText() {
-        return summary.getElement().getText();
+        return summary == null ? "" : summary.getElement().getText();
     }
 
     /**

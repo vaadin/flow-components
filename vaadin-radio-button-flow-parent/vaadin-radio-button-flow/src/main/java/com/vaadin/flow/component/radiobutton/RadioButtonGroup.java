@@ -59,19 +59,13 @@ import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
 
 /**
- * A single select component using radio buttons as options.
- * <p>
- * This is a server side Java integration for the {@code vaadin-radio-group}
- * element.
- * <p>
- * Usage examples, see
- * <a href="https://vaadin.com/components/vaadin-radio-button/java-examples">the
- * demo in vaadin.com</a>.
+ * Radio Button Group allows the user to select exactly one value from a list of
+ * related but mutually exclusive options.
  *
  * @author Vaadin Ltd.
  */
-@NpmPackage(value = "@vaadin/radio-group", version = "23.1.0-alpha3")
-@NpmPackage(value = "@vaadin/vaadin-radio-button", version = "23.1.0-alpha3")
+@NpmPackage(value = "@vaadin/radio-group", version = "23.1.0-beta4")
+@NpmPackage(value = "@vaadin/vaadin-radio-button", version = "23.1.0-beta4")
 public class RadioButtonGroup<T>
         extends GeneratedVaadinRadioGroup<RadioButtonGroup<T>, T>
         implements HasItemComponents<T>, SingleSelect<RadioButtonGroup<T>, T>,
