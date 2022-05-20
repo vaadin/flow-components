@@ -36,11 +36,7 @@ public enum TextFieldVariant implements ThemeVariant {
         this.variant = variant;
     }
 
-    /**
-     * Gets the variant name.
-     *
-     * @return variant name
-     */
+    @Override
     public String getVariantName() {
         return variant;
     }
