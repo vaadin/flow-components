@@ -20,6 +20,8 @@ import static org.junit.Assert.assertNull;
 
 import java.util.Arrays;
 
+import com.vaadin.flow.component.textfield.TextFieldVariant;
+import com.vaadin.tests.ThemeVariantTestHelper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -155,6 +157,19 @@ public class NumberFieldTest extends TextFieldTest {
         ComponentFromTest
                 .elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue(
                         1.1d, NumberField.class);
+    }
+
+    @Test
+    public void addThemeVariant_themeAttributeContainsThemeVariant() {
+        ThemeVariantTestHelper.addThemeVariant_themeNamesContainsThemeVariant(
+                new NumberField(), TextFieldVariant.LUMO_SMALL);
+    }
+
+    @Test
+    public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
+        ThemeVariantTestHelper
+                .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
+                        new NumberField(), TextFieldVariant.LUMO_SMALL);
     }
 
     private void assertValidValues(Double... values) {

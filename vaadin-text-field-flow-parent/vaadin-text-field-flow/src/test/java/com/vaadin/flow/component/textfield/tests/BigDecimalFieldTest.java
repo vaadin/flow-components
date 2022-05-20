@@ -21,6 +21,8 @@ import static org.junit.Assert.assertNull;
 import java.math.BigDecimal;
 import java.util.Locale;
 
+import com.vaadin.flow.component.textfield.TextFieldVariant;
+import com.vaadin.tests.ThemeVariantTestHelper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -88,6 +90,19 @@ public class BigDecimalFieldTest extends TextFieldTest {
         ComponentFromTest
                 .elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue(
                         BigDecimal.TEN.toString(), BigDecimalField.class);
+    }
+
+    @Test
+    public void addThemeVariant_themeAttributeContainsThemeVariant() {
+        ThemeVariantTestHelper.addThemeVariant_themeNamesContainsThemeVariant(
+                new BigDecimalField(), TextFieldVariant.LUMO_SMALL);
+    }
+
+    @Test
+    public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
+        ThemeVariantTestHelper
+                .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
+                        new BigDecimalField(), TextFieldVariant.LUMO_SMALL);
     }
 
     private void assertValueFormatting(BigDecimal bigDecimal,

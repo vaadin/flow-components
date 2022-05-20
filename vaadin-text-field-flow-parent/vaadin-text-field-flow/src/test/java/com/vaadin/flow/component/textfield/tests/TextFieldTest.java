@@ -17,6 +17,8 @@ package com.vaadin.flow.component.textfield.tests;
 
 import static org.junit.Assert.assertEquals;
 
+import com.vaadin.flow.component.textfield.TextFieldVariant;
+import com.vaadin.tests.ThemeVariantTestHelper;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -79,6 +81,19 @@ public class TextFieldTest {
         ComponentFromTest
                 .elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue(
                         "foo", TextField.class);
+    }
+
+    @Test
+    public void addThemeVariant_themeAttributeContainsThemeVariant() {
+        ThemeVariantTestHelper.addThemeVariant_themeNamesContainsThemeVariant(
+                new TextField(), TextFieldVariant.LUMO_SMALL);
+    }
+
+    @Test
+    public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
+        ThemeVariantTestHelper
+                .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
+                        new TextField(), TextFieldVariant.LUMO_SMALL);
     }
 
     public void assertAutoselectPropertyValueEquals(TextField textField,
