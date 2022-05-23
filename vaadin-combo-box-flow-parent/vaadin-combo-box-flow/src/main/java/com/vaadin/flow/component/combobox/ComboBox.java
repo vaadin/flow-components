@@ -21,22 +21,13 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.HasClearButton;
-import com.vaadin.flow.component.HasHelper;
-import com.vaadin.flow.component.HasLabel;
-import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.HasTheme;
-import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.combobox.events.CustomValueSetEvent;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.function.SerializableBiPredicate;
-import com.vaadin.flow.shared.Registration;
 
 import elemental.json.Json;
 import elemental.json.JsonObject;
@@ -75,8 +66,7 @@ import elemental.json.JsonObject;
 @JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./comboBoxConnector.js")
-public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T> implements
-        HasSize, HasValidation, HasHelper, HasTheme, HasLabel, HasClearButton {
+public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T> {
 
     private static final String PROP_INPUT_ELEMENT_VALUE = "_inputElementValue";
     private static final String PROP_SELECTED_ITEM = "selectedItem";
@@ -107,28 +97,6 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T> implements
         Stream<T> fetchItems(String filter, int offset, int limit);
     }
 
-    private class CustomValueRegistration implements Registration {
-
-        private Registration delegate;
-
-        private CustomValueRegistration(Registration delegate) {
-            this.delegate = delegate;
-        }
-
-        @Override
-        public void remove() {
-            if (delegate != null) {
-                delegate.remove();
-                customValueListenersCount--;
-
-                if (customValueListenersCount == 0) {
-                    setAllowCustomValue(false);
-                }
-                delegate = null;
-            }
-        }
-    }
-
     /**
      * Predicate to check {@link ComboBox} items against user typed strings.
      */
@@ -137,8 +105,6 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T> implements
         @Override
         boolean test(T item, String filterText);
     }
-
-    private int customValueListenersCount;
 
     /**
      * Creates an empty combo box with the defined page size for lazy loading.
@@ -151,37 +117,13 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T> implements
      *
      * @param pageSize
      *            the amount of items to request at a time for lazy loading
-     * @see {@link #setPageSize(int)}
+     * @see #setPageSize(int)
      */
     public ComboBox(int pageSize) {
         super("value", null, String.class, ComboBox::presentationToModel,
                 ComboBox::modelToPresentation);
-
-        // Configure web component to use key property from the generated
-        // wrapper items for identification
-        getElement().setProperty("itemValuePath", "key");
-        getElement().setProperty("itemIdPath", "key");
-
         setPageSize(pageSize);
-
-        addAttachListener(e -> initConnector());
-
         setItems(new DataCommunicator.EmptyDataProvider<>());
-
-        getElement().setAttribute("suppress-template-warning", true);
-
-        // Synchronize input element value property state when setting a custom
-        // value. This is necessary to allow clearing the input value in
-        // `ComboBox.refreshValue`. If the input element value is not
-        // synchronized here, then setting the property to an empty value would
-        // not trigger a client update. Need to use `super` here, in order to
-        // avoid enabling custom values, which is a side effect of
-        // `ComboBox.addCustomValueSetListener`.
-        super.addCustomValueSetListener(e -> this.getElement()
-                .setProperty(PROP_INPUT_ELEMENT_VALUE, e.getDetail()));
-
-        addValueChangeListener(
-                e -> getDataCommunicator().notifySelectionChanged());
     }
 
     /**
@@ -341,23 +283,6 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T> implements
     }
 
     @Override
-    public void setValue(T value) {
-        if (getDataCommunicator() == null || getDataCommunicator()
-                .getDataProvider() instanceof DataCommunicator.EmptyDataProvider) {
-            if (value == null) {
-                return;
-            } else {
-                throw new IllegalStateException(
-                        "Cannot set a value for a ComboBox without items. "
-                                + "Use setItems to populate items into the "
-                                + "ComboBox before setting a value.");
-            }
-        }
-        super.setValue(value);
-        refreshValue();
-    }
-
-    @Override
     protected void refreshValue() {
         T value = getValue();
 
@@ -400,28 +325,6 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T> implements
         return null;
     }
 
-    @Override
-    public Registration addCustomValueSetListener(
-            ComponentEventListener<CustomValueSetEvent<ComboBox<T>>> listener) {
-        setAllowCustomValue(true);
-        customValueListenersCount++;
-        Registration registration = super.addCustomValueSetListener(listener);
-        return new CustomValueRegistration(registration);
-    }
-
-    @Override
-    public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
-        super.setRequiredIndicatorVisible(requiredIndicatorVisible);
-        runBeforeClientResponse(ui -> getElement().callJsFunction(
-                "$connector.enableClientValidation",
-                !requiredIndicatorVisible));
-    }
-
-    private void initConnector() {
-        getElement().executeJs(
-                "window.Vaadin.Flow.comboBoxConnector.initLazy(this)");
-    }
-
     /**
      * Adds theme variants to the component.
      *
@@ -445,5 +348,4 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T> implements
                 Stream.of(variants).map(ComboBoxVariant::getVariantName)
                         .collect(Collectors.toList()));
     }
-
 }
