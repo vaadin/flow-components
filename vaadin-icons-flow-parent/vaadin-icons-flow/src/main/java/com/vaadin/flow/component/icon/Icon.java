@@ -35,7 +35,6 @@ import com.vaadin.flow.dom.ElementConstants;
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-beta4")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/icons", version = "23.1.0-beta4")
-@NpmPackage(value = "@vaadin/vaadin-icons", version = "23.1.0-beta4")
 @JsModule("@vaadin/icons/vaadin-iconset.js")
 @NpmPackage(value = "@vaadin/icon", version = "23.1.0-beta4")
 @NpmPackage(value = "@vaadin/vaadin-icon", version = "23.1.0-beta4")
