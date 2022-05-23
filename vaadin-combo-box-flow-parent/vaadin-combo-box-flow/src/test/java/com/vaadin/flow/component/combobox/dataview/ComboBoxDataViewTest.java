@@ -149,6 +149,7 @@ public class ComboBoxDataViewTest extends AbstractComponentDataViewTest {
         Assert.assertFalse(keyMapper.has(new Item(1L, "non-present")));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void setInMemoryDataProvider_convertsToGenericDataProviderAndAppliesFilterCorrectly() {
         final String[] items = { "bar", "banana", "iguana" };
@@ -212,10 +213,6 @@ public class ComboBoxDataViewTest extends AbstractComponentDataViewTest {
             }
         };
 
-        // This captor will catch the generic data provider with string filter
-        ArgumentCaptor<DataProvider> dataProviderCaptor = ArgumentCaptor
-                .forClass(DataProvider.class);
-
         // Set IMDP and set the converter for combobox text filter
         ComboBoxDataView<String> dataView = comboBox.setItems(
                 inMemoryDataProvider,
@@ -224,10 +221,6 @@ public class ComboBoxDataViewTest extends AbstractComponentDataViewTest {
         // Open the comboBox explicitly, because it is not initialized
         // eagerly with in-memory data provider
         comboBox.setOpened(true);
-
-        // We expect that the current implementation of 'setItems' with IMDP
-        // will delegate to 'setItems(DataProvider)'
-        Mockito.verify(comboBox).setItems(dataProviderCaptor.capture());
 
         // Verify the predicate filter always returns true and passes all items
         Assert.assertArrayEquals(items, dataView.getItems().toArray());
@@ -238,8 +231,8 @@ public class ComboBoxDataViewTest extends AbstractComponentDataViewTest {
                 dataView.getItems().toArray());
 
         // Finally set the text filter to the ComboBox and fetch the items
-        DataProvider<String, String> genericDataProvider = dataProviderCaptor
-                .getValue();
+        DataProvider<String, String> genericDataProvider = (DataProvider<String, String>) comboBox
+                .getDataProvider();
 
         List<String> filteredItems = genericDataProvider
                 .fetch(new Query<>(0, Integer.MAX_VALUE, null, null, "ba"))
