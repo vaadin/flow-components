@@ -251,8 +251,7 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
      * placeholders and actual items.
      * <p>
      * When no placeholder item is set (or when set to <code>null</code>), an
-     * empty placeholder element is created with <code>100px</code> of width and
-     * <code>18px</code> of height.
+     * empty placeholder element is created.
      * <p>
      * Note: when using {@link ComponentRenderer}s, the component used for the
      * placeholder is statically stamped in the list. It can not be modified,
@@ -317,9 +316,8 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
              * placeholder element with a non 0 size to avoid issues when
              * scrolling.
              */
-            placeholderTemplate = "<div style='width:100px;height:18px'></div>";
+            placeholderTemplate = "<div style='width:100px;'></div>";
         } else if (renderer instanceof ComponentRenderer) {
-            @SuppressWarnings("unchecked")
             ComponentRenderer<?, T> componentRenderer = (ComponentRenderer<?, T>) renderer;
             Component component = componentRenderer
                     .createComponent(placeholderItem);
