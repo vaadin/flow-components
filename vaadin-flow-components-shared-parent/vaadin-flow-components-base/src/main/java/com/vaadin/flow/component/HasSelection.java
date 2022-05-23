@@ -44,27 +44,29 @@ public interface HasSelection extends HasElement {
      * synchronization.
      * </p>
      *
-     * @param selectionStart The 0-based index of the first selected character. An index
-     *                       greater than the length of the element's value is treated as
-     *                       pointing to the end of the value.
-     * @param selectionEnd   The 0-based index for the end of the selection (exclusive). An
-     *                       index greater than the length of the element's value is
-     *                       treated as pointing to the end of the value.
+     * @param selectionStart
+     *            The 0-based index of the first selected character. An index
+     *            greater than the length of the element's value is treated as
+     *            pointing to the end of the value.
+     * @param selectionEnd
+     *            The 0-based index for the end of the selection (exclusive). An
+     *            index greater than the length of the element's value is
+     *            treated as pointing to the end of the value.
      */
     default void setSelectionRange(int selectionStart, int selectionEnd) {
         getElement().executeJs("var origType = this.inputElement.type;"
-                        + "var needsTypeHack = (origType == 'number' || origType == 'email');"
-                        + "if(needsTypeHack) {this.inputElement.type = 'text';}"
-                        + "this.inputElement.setSelectionRange($0,$1);"
-                        + "if(needsTypeHack) {this.inputElement.type = origType;};"
-                        + "this.inputElement.focus();"
-                , selectionStart, selectionEnd);
+                + "var needsTypeHack = (origType == 'number' || origType == 'email');"
+                + "if(needsTypeHack) {this.inputElement.type = 'text';}"
+                + "this.inputElement.setSelectionRange($0,$1);"
+                + "if(needsTypeHack) {this.inputElement.type = origType;};"
+                + "this.inputElement.focus();", selectionStart, selectionEnd);
     }
 
     /**
      * Sets the cursor position to given index.
      *
-     * @param cursorPosition the cursor position
+     * @param cursorPosition
+     *            the cursor position
      */
     default void setCursorPosition(int cursorPosition) {
         setSelectionRange(cursorPosition, cursorPosition);
@@ -74,9 +76,12 @@ public interface HasSelection extends HasElement {
         /**
          * This method is called with the current selection of the field.
          *
-         * @param start   the start of the selection (inclusive)
-         * @param end     the end of the selection (inclusive)
-         * @param content the string content currently selected
+         * @param start
+         *            the start of the selection (inclusive)
+         * @param end
+         *            the end of the selection (inclusive)
+         * @param content
+         *            the string content currently selected
          */
         void selectionRange(int start, int end, String content);
     }
@@ -84,7 +89,8 @@ public interface HasSelection extends HasElement {
     /**
      * Asynchronously gets the current selection for this field.
      *
-     * @param callback the callback to notify the selection
+     * @param callback
+     *            the callback to notify the selection
      */
     default void getSelectionRange(SelectionRangeCallback callback) {
         getElement().executeJs("" + "var res = {};"
@@ -96,19 +102,20 @@ public interface HasSelection extends HasElement {
                 + "res.content = this.inputElement.value.substring(res.start, res.end);"
                 + "if(needsTypeHack) {this.inputElement.type = origType;}"
                 + "return res;").then(jsonValue -> {
-            if (jsonValue instanceof JsonObject) {
-                JsonObject jso = (JsonObject) jsonValue;
-                callback.selectionRange((int) jso.getNumber("start"),
-                        (int) jso.getNumber("end"),
-                        jso.getString("content"));
-            }
-        });
+                    if (jsonValue instanceof JsonObject) {
+                        JsonObject jso = (JsonObject) jsonValue;
+                        callback.selectionRange((int) jso.getNumber("start"),
+                                (int) jso.getNumber("end"),
+                                jso.getString("content"));
+                    }
+                });
     }
 
     /**
      * Asynchronously gets the current cursor position for this field.
      *
-     * @param callback the callback to notify the position
+     * @param callback
+     *            the callback to notify the position
      */
     default void getCursorPosition(SerializableConsumer<Integer> callback) {
         this.getSelectionRange((start, e, c) -> {

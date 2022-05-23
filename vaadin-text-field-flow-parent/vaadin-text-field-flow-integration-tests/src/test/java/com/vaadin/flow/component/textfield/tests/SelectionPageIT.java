@@ -46,7 +46,6 @@ public class SelectionPageIT extends AbstractComponentIT {
         doAssertSelectAll();
     }
 
-
     @Test
     public void assertGetSelectionRange() {
         doAssertGetSelectionRange();
@@ -146,20 +145,24 @@ public class SelectionPageIT extends AbstractComponentIT {
         WebElement display = findElement(By.id("display"));
         final int expectedStart = 1;
         final int expectedEnd = 3;
-        String expectedText = getExpectedText().substring(expectedStart, expectedEnd);
-        Assert.assertEquals(expectedStart+ "," +expectedEnd+ ":" +expectedText, display.getText());
+        String expectedText = getExpectedText().substring(expectedStart,
+                expectedEnd);
+        Assert.assertEquals(
+                expectedStart + "," + expectedEnd + ":" + expectedText,
+                display.getText());
     }
-
 
     private int getSelectionStart() {
         // FIXME
-        Long result = (Long) getCommandExecutor().executeScript("return document.activeElement.selectionStart;");
+        Long result = (Long) getCommandExecutor()
+                .executeScript("return document.activeElement.selectionStart;");
         return result.intValue();
     }
 
     private int getSelectionEnd() {
         // FIXME
-        Long result = (Long) getCommandExecutor().executeScript("return document.activeElement.selectionEnd;");
+        Long result = (Long) getCommandExecutor()
+                .executeScript("return document.activeElement.selectionEnd;");
         return result.intValue();
     }
 

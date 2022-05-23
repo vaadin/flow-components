@@ -122,10 +122,10 @@ public class SelectionPage extends Div {
             addComponentAtIndex(1, f);
         });
 
-        add(textArea, passwordField, integerField, bigDesimalField, numberField, emailField);
+        add(textArea, passwordField, integerField, bigDesimalField, numberField,
+                emailField);
 
-        NativeButton selectAllText = new NativeButton(
-                "Select all text");
+        NativeButton selectAllText = new NativeButton("Select all text");
         selectAllText.setId("selectall");
         selectAllText.addClickListener(event -> {
             field.selectAll();
@@ -135,22 +135,19 @@ public class SelectionPage extends Div {
         NativeButton selectionRange = new NativeButton(
                 "Set selection range 0,4 (exclusive)");
         selectionRange.setId("selectionrange");
-        selectionRange.addClickListener(
-                event -> {
-                    field.setSelectionRange(0, 4);
-                });
+        selectionRange.addClickListener(event -> {
+            field.setSelectionRange(0, 4);
+        });
         add(selectionRange);
 
-        NativeButton selection = new NativeButton(
-                "select 1,3 + get selection");
+        NativeButton selection = new NativeButton("select 1,3 + get selection");
         selection.setId("selection");
-        selection.addClickListener(
-                event -> {
-                    field.setSelectionRange(1, 3);
-                    field.getSelectionRange((start, end, content) -> {
-                        display.setText(start + "," + end + ":" + content);
-                    });
-                });
+        selection.addClickListener(event -> {
+            field.setSelectionRange(1, 3);
+            field.getSelectionRange((start, end, content) -> {
+                display.setText(start + "," + end + ":" + content);
+            });
+        });
         add(selection);
 
     }
