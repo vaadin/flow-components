@@ -145,6 +145,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
         // wrapper items for identification
         getElement().setProperty("itemValuePath", "key");
         getElement().setProperty("itemIdPath", "key");
+        getElement().setProperty("itemLabelPath", "label");
 
         // Disable template warnings
         getElement().setAttribute("suppress-template-warning", true);
