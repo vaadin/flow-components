@@ -15,15 +15,14 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
-import static org.junit.Assert.assertEquals;
-
+import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.tests.ThemeVariantTestHelper;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import com.vaadin.flow.component.textfield.PasswordField;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Tests for the {@link PasswordField}.

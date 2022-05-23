@@ -15,18 +15,17 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-
-import java.util.Arrays;
-
+import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.tests.ThemeVariantTestHelper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.vaadin.flow.component.textfield.IntegerField;
+import java.util.Arrays;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class IntegerFieldTest extends TextFieldTest {
 
