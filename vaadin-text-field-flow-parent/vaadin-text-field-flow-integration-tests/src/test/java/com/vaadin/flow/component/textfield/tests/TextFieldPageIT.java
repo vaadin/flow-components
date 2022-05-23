@@ -202,11 +202,18 @@ public class TextFieldPageIT extends AbstractComponentIT {
         waitUntilTextsEqual("Text field value changed from '' to 'a'",
                 textFieldValueDiv);
 
-        textField.sendKeys(Keys.BACK_SPACE);
+        textField.sendKeys("b");
         if (toggleBlur) {
             blur();
         }
-        waitUntilTextsEqual("Text field value changed from 'a' to ''",
+        waitUntilTextsEqual("Text field value changed from 'a' to 'ab'",
+                textFieldValueDiv);
+
+        textField.sendKeys(Keys.BACK_SPACE, Keys.BACK_SPACE);
+        if (toggleBlur) {
+            blur();
+        }
+        waitUntilTextsEqual("Text field value changed from 'ab' to ''",
                 textFieldValueDiv);
     }
 
