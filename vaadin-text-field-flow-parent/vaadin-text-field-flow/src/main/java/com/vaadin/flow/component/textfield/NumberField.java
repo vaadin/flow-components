@@ -354,4 +354,16 @@ public class NumberField extends AbstractNumberField<NumberField, Double> {
             }
         }
     }
+
+    /**
+     * Note, due to browser incompatibilities, this method is not guaranteed
+     * to work on all browsers.
+     *
+     * @param callback the callback to notify the selection
+     */
+    @Override
+    @Deprecated
+    public void getSelectionRange(SelectionRangeCallback callback) {
+        super.getSelectionRange(callback);
+    }
 }

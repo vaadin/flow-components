@@ -206,4 +206,16 @@ public class IntegerField extends AbstractNumberField<IntegerField, Integer> {
     public int getStep() {
         return (int) getStepDouble();
     }
+
+    /**
+     * Note, due to browser incompatibilities, this method is not guaranteed
+     * to work on all browsers.
+     *
+     * @param callback the callback to notify the selection
+     */
+    @Override
+    @Deprecated
+    public void getSelectionRange(SelectionRangeCallback callback) {
+        super.getSelectionRange(callback);
+    }
 }

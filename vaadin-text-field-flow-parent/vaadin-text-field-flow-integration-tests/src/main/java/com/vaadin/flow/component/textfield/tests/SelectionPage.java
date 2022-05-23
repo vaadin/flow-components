@@ -111,8 +111,8 @@ public class SelectionPage extends Div {
             addComponentAtIndex(1, f);
         });
 
-        var bigDesimalField = new NativeButton("bigDesimalField");
-        bigDesimalField.setId("bigDesimalField");
+        var bigDesimalField = new NativeButton("bigDecimalField");
+        bigDesimalField.setId("bigDecimalField");
         bigDesimalField.addClickListener(e -> {
             var f = new BigDecimalField();
             f.setId("field");
