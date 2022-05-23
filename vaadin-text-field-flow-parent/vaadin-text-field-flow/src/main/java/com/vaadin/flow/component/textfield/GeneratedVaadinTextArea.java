@@ -149,31 +149,7 @@ import com.vaadin.flow.shared.Registration;
 @JsModule("@vaadin/text-area/src/vaadin-text-area.js")
 public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
-        implements HasStyle, Focusable<R>, HasTheme {
-
-    /**
-     * Adds theme variants to the component.
-     *
-     * @param variants
-     *            theme variants to add
-     */
-    public void addThemeVariants(TextAreaVariant... variants) {
-        getThemeNames()
-                .addAll(Stream.of(variants).map(TextAreaVariant::getVariantName)
-                        .collect(Collectors.toList()));
-    }
-
-    /**
-     * Removes theme variants from the component.
-     *
-     * @param variants
-     *            theme variants to remove
-     */
-    public void removeThemeVariants(TextAreaVariant... variants) {
-        getThemeNames().removeAll(
-                Stream.of(variants).map(TextAreaVariant::getVariantName)
-                        .collect(Collectors.toList()));
-    }
+        implements HasStyle, Focusable<R> {
 
     /**
      * <p>

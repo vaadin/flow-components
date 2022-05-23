@@ -173,31 +173,7 @@ import com.vaadin.flow.shared.Registration;
 @JsModule("@vaadin/text-field/src/vaadin-text-field.js")
 public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextField<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
-        implements HasStyle, Focusable<R>, HasTheme {
-
-    /**
-     * Adds theme variants to the component.
-     *
-     * @param variants
-     *            theme variants to add
-     */
-    public void addThemeVariants(TextFieldVariant... variants) {
-        getThemeNames().addAll(
-                Stream.of(variants).map(TextFieldVariant::getVariantName)
-                        .collect(Collectors.toList()));
-    }
-
-    /**
-     * Removes theme variants from the component.
-     *
-     * @param variants
-     *            theme variants to remove
-     */
-    public void removeThemeVariants(TextFieldVariant... variants) {
-        getThemeNames().removeAll(
-                Stream.of(variants).map(TextFieldVariant::getVariantName)
-                        .collect(Collectors.toList()));
-    }
+        implements HasStyle, Focusable<R> {
 
     /**
      * <p>
