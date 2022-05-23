@@ -31,11 +31,39 @@ import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ * MultiSelectComboBox allows the user to select one or more values from a
+ * filterable list of options presented in an overlay. Compared to
+ * {@link ComboBox}, MultiSelectComboBox allows to select multiple values.
+ * <p>
+ * MultiSelectComboBox supports lazy loading. This means that when using large
+ * data sets, items are requested from the server one "page" at a time when the
+ * user scrolls down the overlay. The number of items in one page is by default
+ * 50, and can be changed with {@link #setPageSize(int)}.
+ * <p>
+ * MultiSelectComboBox can do filtering either in the browser or in the server.
+ * When MultiSelectComboBox has only a relatively small set of items, the
+ * filtering will happen in the browser, allowing smooth user-experience. When
+ * the size of the data set is larger than the {@code pageSize}, the
+ * webcomponent doesn't necessarily have all the data available, and it will
+ * make requests to the server to handle the filtering. Also, if you have
+ * defined custom filtering logic, with eg.
+ * {@link #setItems(ComboBox.ItemFilter, Collection)}, filtering will happen in
+ * the server. To enable client-side filtering with larger data sets, you can
+ * override the {@code pageSize} to be bigger than the size of your data set.
+ * However, then the full data set will be sent to the client immediately, and
+ * you will lose the benefits of lazy loading.
+ *
+ * @param <TItem>
+ *            the type of the items to be selectable from the combo box
+ * @author Vaadin Ltd
+ */
 @Tag("vaadin-multi-select-combo-box")
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-beta4")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
@@ -44,14 +72,18 @@ import java.util.Set;
 @JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./comboBoxConnector.js")
-public class MultiSelectComboBox<TItem> extends ComboBoxBase<MultiSelectComboBox<TItem>, TItem, Set<TItem>>
-        implements HasSize, HasValidation, HasHelper, HasTheme, HasLabel, HasClearButton {
+public class MultiSelectComboBox<TItem> extends
+        ComboBoxBase<MultiSelectComboBox<TItem>, TItem, Set<TItem>> implements
+        HasSize, HasValidation, HasHelper, HasTheme, HasLabel, HasClearButton {
 
     public MultiSelectComboBox() {
         this(50);
     }
+
     public MultiSelectComboBox(int pageSize) {
-        super("selectedItems", Collections.emptySet(), JsonArray.class, MultiSelectComboBox::presentationToModel, MultiSelectComboBox::modelToPresentation);
+        super("selectedItems", Collections.emptySet(), JsonArray.class,
+                MultiSelectComboBox::presentationToModel,
+                MultiSelectComboBox::modelToPresentation);
 
         setPageSize(pageSize);
         setItems(new DataCommunicator.EmptyDataProvider<>());
@@ -97,7 +129,7 @@ public class MultiSelectComboBox<TItem> extends ComboBoxBase<MultiSelectComboBox
 
     @Override
     public void setValue(Set<TItem> value) {
-        if(value == null) {
+        if (value == null) {
             value = Collections.emptySet();
         }
         super.setValue(value);
@@ -105,12 +137,14 @@ public class MultiSelectComboBox<TItem> extends ComboBoxBase<MultiSelectComboBox
 
     @Override
     protected boolean isSelected(TItem item) {
-        if( item == null) return false;
+        if (item == null)
+            return false;
 
         DataProvider<TItem, ?> dataProvider = getDataProvider();
         Object itemId = dataProvider.getId(item);
 
-        return getValue().stream().anyMatch(selectedItem -> Objects.equals(itemId, dataProvider.getId(selectedItem)));
+        return getValue().stream().anyMatch(selectedItem -> Objects
+                .equals(itemId, dataProvider.getId(selectedItem)));
     }
 
     @Override
