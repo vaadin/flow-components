@@ -127,12 +127,31 @@ public class MultiSelectComboBox<TItem> extends
         return jsonObject;
     }
 
+    /**
+     * Sets the value of the component, which is a set of selected items.
+     * <p>
+     * Note that it is allowed to pass {@code null} as value to clear the
+     * selection, but that an empty set will be stored as value instead.
+     *
+     * @param value
+     *            the new value
+     */
     @Override
     public void setValue(Set<TItem> value) {
         if (value == null) {
             value = Collections.emptySet();
         }
         super.setValue(value);
+    }
+
+    @Override
+    protected void refreshValue() {
+        Set<TItem> value = getValue();
+        if (value == null || value.isEmpty()) {
+            return;
+        }
+        JsonArray selectedItems = modelToPresentation(this, value);
+        getElement().setPropertyJson("selectedItems", selectedItems);
     }
 
     @Override
@@ -145,15 +164,5 @@ public class MultiSelectComboBox<TItem> extends
 
         return getValue().stream().anyMatch(selectedItem -> Objects
                 .equals(itemId, dataProvider.getId(selectedItem)));
-    }
-
-    @Override
-    protected void refreshValue() {
-        Set<TItem> value = getValue();
-        if (value == null || value.isEmpty()) {
-            return;
-        }
-        JsonArray selectedItems = modelToPresentation(this, value);
-        getElement().setPropertyJson("selectedItems", selectedItems);
     }
 }
