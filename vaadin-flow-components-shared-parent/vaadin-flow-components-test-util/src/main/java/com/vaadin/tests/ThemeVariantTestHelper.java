@@ -15,8 +15,8 @@
  */
 package com.vaadin.tests;
 
-import com.vaadin.flow.component.HasThemeVariant;
-import com.vaadin.flow.component.ThemeVariant;
+import com.vaadin.flow.component.shared.base.HasThemeVariant;
+import com.vaadin.flow.component.shared.base.ThemeVariant;
 import org.junit.Assert;
 
 import java.util.Set;
