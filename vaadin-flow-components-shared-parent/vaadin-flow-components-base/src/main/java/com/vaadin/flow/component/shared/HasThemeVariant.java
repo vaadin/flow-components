@@ -13,10 +13,12 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component;
+package com.vaadin.flow.component.shared;
 
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import com.vaadin.flow.component.HasTheme;
 
 /**
  * Mixin interface that allows adding and removing typed theme variants to /
