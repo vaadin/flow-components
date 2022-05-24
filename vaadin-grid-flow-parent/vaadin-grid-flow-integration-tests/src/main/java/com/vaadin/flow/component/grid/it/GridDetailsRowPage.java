@@ -2,6 +2,7 @@ package com.vaadin.flow.component.grid.it;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.data.bean.Person;
 import com.vaadin.flow.data.provider.ListDataProvider;
@@ -30,7 +31,7 @@ public class GridDetailsRowPage extends Div {
 
         ListDataProvider<Person> ldp = new ListDataProvider<>(items);
         grid.setDataProvider(ldp);
-
+        grid.setSelectionMode(SelectionMode.NONE);
         grid.addColumn(Person::getFirstName).setHeader("name");
         grid.setItemDetailsRenderer(new ComponentRenderer<>(
                 item -> new Button(item.getFirstName())));

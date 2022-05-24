@@ -26,6 +26,7 @@ import java.util.stream.Stream;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.HasClearButton;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
@@ -45,18 +46,25 @@ import elemental.json.JsonObject;
 import elemental.json.JsonType;
 
 /**
- * Server-side component that encapsulates the functionality of the
- * {@code vaadin-date-picker} webcomponent.
+ * Date Picker is an input field that allows the user to enter a date by typing
+ * or by selecting from a calendar overlay.
  * <p>
- * It allows setting and getting {@link LocalDate} objects, setting minimum and
- * maximum date ranges and has internationalization support by using the
- * {@link DatePickerI18n} object.
+ * DatePicker allows setting and getting {@link LocalDate} objects, setting
+ * minimum and maximum date ranges and has internationalization support by using
+ * the {@link DatePickerI18n} object.
+ * <p>
+ * This component allows the date to be entered directly using the keyboard in
+ * the format of the current locale or through the date picker overlay. The
+ * overlay opens when the field is clicked and/or any input is entered when the
+ * field is focused.
  *
+ * @author Vaadin Ltd
  */
 @JsModule("./datepickerConnector.js")
-@NpmPackage(value = "date-fns", version = "2.23.0")
+@NpmPackage(value = "date-fns", version = "2.28.0")
 public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
-        implements HasSize, HasValidation, HasHelper, HasTheme, HasLabel {
+        implements HasSize, HasValidation, HasHelper, HasTheme, HasLabel,
+        HasClearButton {
 
     private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
@@ -476,32 +484,6 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         final boolean isSmallerThenMin = value != null && min != null
                 && value.isBefore(min);
         return isRequiredButEmpty || isGreaterThanMax || isSmallerThenMin;
-    }
-
-    /**
-     * Sets displaying a clear button in the datepicker when it has value.
-     * <p>
-     * The clear button is an icon, which can be clicked to set the datepicker
-     * value to {@code null}.
-     *
-     * @param clearButtonVisible
-     *            {@code true} to display the clear button, {@code false} to
-     *            hide it
-     */
-    @Override
-    public void setClearButtonVisible(boolean clearButtonVisible) {
-        super.setClearButtonVisible(clearButtonVisible);
-    }
-
-    /**
-     * Gets whether this datepicker displays a clear button when it has value.
-     *
-     * @return {@code true} if this datepicker displays a clear button,
-     *         {@code false} otherwise
-     * @see #setClearButtonVisible(boolean)
-     */
-    public boolean isClearButtonVisible() {
-        return super.isClearButtonVisibleBoolean();
     }
 
     /**
@@ -971,8 +953,11 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         /**
          * Gets the translated word for {@code calendar}.
          *
+         * @deprecated the toggle button is no longer announced by screen
+         *             readers, so this property is now unused.
          * @return the translated word for calendar
          */
+        @Deprecated
         public String getCalendar() {
             return calendar;
         }
@@ -980,10 +965,13 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         /**
          * Sets the translated word for {@code calendar}.
          *
+         * @deprecated the toggle button is no longer announced by screen
+         *             readers, so this property is now unused.
          * @param calendar
          *            the translated word for calendar
          * @return this instance for method chaining
          */
+        @Deprecated
         public DatePickerI18n setCalendar(String calendar) {
             this.calendar = calendar;
             return this;
@@ -992,8 +980,11 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         /**
          * Gets the translated word for {@code clear}.
          *
+         * @deprecated the clear button is no longer announced by screen
+         *             readers, so this property is now unused.
          * @return the translated word for clear
          */
+        @Deprecated
         public String getClear() {
             return clear;
         }
@@ -1001,10 +992,13 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         /**
          * Sets the translated word for {@code clear}.
          *
+         * @deprecated the clear button is no longer announced by screen
+         *             readers, so this property is now unused.
          * @param clear
          *            the translated word for clear
          * @return this instance for method chaining
          */
+        @Deprecated
         public DatePickerI18n setClear(String clear) {
             this.clear = clear;
             return this;

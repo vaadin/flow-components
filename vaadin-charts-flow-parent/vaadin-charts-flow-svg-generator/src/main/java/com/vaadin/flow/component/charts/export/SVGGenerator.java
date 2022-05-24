@@ -2,7 +2,7 @@
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2021 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
@@ -63,8 +63,8 @@ public class SVGGenerator implements AutoCloseable {
      * file which contents can be then read by this class.
      */
     private static final String SCRIPT_TEMPLATE = "const exporter = require('%s');\n"
-            + "exporter({\n" + "chartConfiguration: %s,\n" + "outFile: '%s',\n"
-            + "exportOptions: %s,\n" + "})";
+            + "exporter({\n" + "chartConfigurationFile: '%s',\n"
+            + "outFile: '%s',\n" + "exportOptions: %s,\n" + "})";
 
     /**
      * Path to the temporary directory used to hold the temporary bundle file
@@ -122,7 +122,7 @@ public class SVGGenerator implements AutoCloseable {
      *             virtually render the chart.
      * @throws InterruptedException
      *             if the rendering process gets interrupted.
-     * 
+     *
      * @see SVGGenerator#generate(Configuration, ExportOptions)
      */
     public String generate(Configuration chartConfiguration)
@@ -161,12 +161,26 @@ public class SVGGenerator implements AutoCloseable {
                 "Chart configuration must not be null.");
         String jsonConfig = ChartSerialization.toJSON(config);
         String jsonExportOptions = ChartSerialization.toJSON(exportOptions);
+
+        // Pass the configuration json via a temp file instead of passing it
+        // directly via a CLI argument. It allows to avoid the potential
+        // "Argument list too long" exception which can be otherwise thrown when
+        // length of the configuration json exceeds the `ARG_MAX` OS limit.
+        // The `ARG_MAX` limit can be different depending on the platform:
+        // https://www.in-ulm.de/~mascheck/various/argmax/
+        Path chartConfigFilePath = Files.createTempFile(tempDirPath, "config",
+                ".json");
+        String chartConfigFileName = chartConfigFilePath.toFile().getName();
+        Files.writeString(chartConfigFilePath, jsonConfig,
+                StandardCharsets.UTF_8);
+
         Path chartFilePath = Files.createTempFile(tempDirPath, "chart", ".svg");
         String chartFileName = chartFilePath.toFile().getName();
-        String script = String.format(
-                SCRIPT_TEMPLATE, bundleTempPath.toFile().getAbsolutePath()
-                        .replaceAll("\\\\", "/"),
-                jsonConfig, chartFileName, jsonExportOptions);
+
+        String script = String.format(SCRIPT_TEMPLATE,
+                bundleTempPath.toFile().getAbsolutePath().replaceAll("\\\\",
+                        "/"),
+                chartConfigFileName, chartFileName, jsonExportOptions);
         NodeRunner nodeRunner = new NodeRunner();
         nodeRunner.runJavascript(script);
         // when script completes, the chart svg file should exist
@@ -175,6 +189,7 @@ public class SVGGenerator implements AutoCloseable {
                     StandardCharsets.UTF_8);
         } finally {
             Files.delete(chartFilePath);
+            Files.delete(chartConfigFilePath);
         }
     }
 

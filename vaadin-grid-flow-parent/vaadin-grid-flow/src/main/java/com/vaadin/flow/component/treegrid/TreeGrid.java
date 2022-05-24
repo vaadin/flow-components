@@ -18,10 +18,13 @@ package com.vaadin.flow.component.treegrid;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -56,10 +59,12 @@ import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableComparator;
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.JsonUtils;
+import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.JsonArray;
@@ -67,7 +72,9 @@ import elemental.json.JsonObject;
 import elemental.json.JsonValue;
 
 /**
- * A grid component for displaying hierarchical tabular data.
+ * Tree Grid is a component for displaying hierarchical tabular data grouped
+ * into expandable and collapsible nodes. Tree Grid is an extension of the Grid
+ * component and all Grid’s features are available in Tree Grid as well.
  *
  * @param <T>
  *            the grid bean type
@@ -80,14 +87,34 @@ public class TreeGrid<T> extends Grid<T>
     private static final class TreeGridUpdateQueue extends UpdateQueue
             implements HierarchicalUpdate {
 
+        private SerializableConsumer<List<JsonValue>> arrayUpdateListener;
+
         private TreeGridUpdateQueue(UpdateQueueData data, int size) {
             super(data, size);
+        }
+
+        public void setArrayUpdateListener(
+                SerializableConsumer<List<JsonValue>> arrayUpdateListener) {
+            this.arrayUpdateListener = arrayUpdateListener;
+        }
+
+        @Override
+        public void set(int start, List<JsonValue> items) {
+            super.set(start, items);
+
+            if (arrayUpdateListener != null) {
+                arrayUpdateListener.accept(items);
+            }
         }
 
         @Override
         public void set(int start, List<JsonValue> items, String parentKey) {
             enqueue("$connector.set", start,
                     items.stream().collect(JsonUtils.asArray()), parentKey);
+
+            if (arrayUpdateListener != null) {
+                arrayUpdateListener.accept(items);
+            }
         }
 
         @Override
@@ -114,6 +141,12 @@ public class TreeGrid<T> extends Grid<T>
         private UpdateQueueData data;
         private SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueFactory;
 
+        // Approximated size of the viewport. Used for eager fetching.
+        private final int EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE = 40;
+        private int viewportRemaining = 0;
+        private final List<JsonValue> queuedParents = new ArrayList<>();
+        private VaadinRequest previousRequest;
+
         public TreeGridArrayUpdaterImpl(
                 SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueFactory) {
             this.updateQueueFactory = updateQueueFactory;
@@ -121,8 +154,48 @@ public class TreeGrid<T> extends Grid<T>
 
         @Override
         public TreeGridUpdateQueue startUpdate(int sizeChange) {
-            return (TreeGridUpdateQueue) updateQueueFactory.apply(data,
-                    sizeChange);
+            TreeGridUpdateQueue queue = (TreeGridUpdateQueue) updateQueueFactory
+                    .apply(data, sizeChange);
+
+            if (VaadinRequest.getCurrent() != null
+                    && !VaadinRequest.getCurrent().equals(previousRequest)) {
+                // Reset the viewportRemaining once for a server roundtrip.
+                viewportRemaining = EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE;
+                queuedParents.clear();
+                previousRequest = VaadinRequest.getCurrent();
+            }
+
+            queue.setArrayUpdateListener((items) -> {
+                // Prepend the items to the queue of potential parents.
+                queuedParents.addAll(0, items);
+
+                while (viewportRemaining > 0 && !queuedParents.isEmpty()) {
+                    viewportRemaining--;
+                    JsonObject parent = (JsonObject) queuedParents.remove(0);
+                    T parentItem = getDataCommunicator().getKeyMapper()
+                            .get(parent.getString("key"));
+
+                    if (isExpanded(parentItem)) {
+                        int childLength = Math.max(
+                                EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE,
+                                getPageSize());
+
+                        // There's still room left in the viewport and the item
+                        // is expanded. Set parent requested range for it.
+                        getDataCommunicator().setParentRequestedRange(0,
+                                childLength, parentItem);
+
+                        // Stop iterating the items on this level. The request
+                        // for child items above will end up back in this while
+                        // loop, and to processing any parent siblings that
+                        // might be left in the queue.
+                        break;
+                    }
+
+                }
+            });
+
+            return queue;
         }
 
         @Override
@@ -143,8 +216,12 @@ public class TreeGrid<T> extends Grid<T>
         }
     }
 
-    private final ValueProvider<T, String> defaultUniqueKeyProvider = item -> String
-            .valueOf(item.hashCode());
+    private final AtomicLong uniqueKeyCounter = new AtomicLong(0);
+    private final Map<Object, Long> objectUniqueKeyMap = new HashMap<>();
+
+    ValueProvider<T, String> defaultUniqueKeyProvider = item -> String.valueOf(
+            objectUniqueKeyMap.computeIfAbsent(getDataProvider().getId(item),
+                    key -> uniqueKeyCounter.getAndIncrement()));
 
     private Registration dataProviderRegistration;
 
@@ -481,10 +558,10 @@ public class TreeGrid<T> extends Grid<T>
     public Column<T> addHierarchyColumn(ValueProvider<T, ?> valueProvider) {
         Column<T> column = addColumn(TemplateRenderer
                 .<T> of("<vaadin-grid-tree-toggle "
-                        + "leaf='[[item.leaf]]' expanded='{{expanded}}' level='[[level]]'>[[item.name]]"
+                        + "leaf='[[!item.children]]' expanded='{{expanded}}' level='[[level]]'>[[item.name]]"
                         + "</vaadin-grid-tree-toggle>")
-                .withProperty("leaf",
-                        item -> !getDataCommunicator().hasChildren(item))
+                .withProperty("children",
+                        item -> getDataCommunicator().hasChildren(item))
                 .withProperty("name",
                         value -> String.valueOf(valueProvider.apply(value))));
         final SerializableComparator<T> comparator = (a,
@@ -514,8 +591,8 @@ public class TreeGrid<T> extends Grid<T>
     public <V extends Component> Column<T> addComponentHierarchyColumn(
             ValueProvider<T, V> componentProvider) {
         return addColumn(new HierarchyColumnComponentRenderer<V, T>(
-                componentProvider).withProperty("leaf",
-                        item -> !getDataCommunicator().hasChildren(item)));
+                componentProvider).withProperty("children",
+                        item -> getDataCommunicator().hasChildren(item)));
     }
 
     /**

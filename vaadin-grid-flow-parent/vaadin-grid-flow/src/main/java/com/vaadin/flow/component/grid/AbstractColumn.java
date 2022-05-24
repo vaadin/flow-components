@@ -240,9 +240,14 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
     protected String addGridSorter(String templateInnerHtml) {
         String escapedColumnId = HtmlUtils
                 .escape(getBottomLevelColumn().getInternalId());
+
+        String textContent = org.jsoup.Jsoup.parse(templateInnerHtml).text();
+        String sortBy = textContent.isBlank() ? ""
+                : "aria-label='Sort by " + textContent + "'";
+
         return String.format(
-                "<vaadin-grid-sorter path='%s'>%s</vaadin-grid-sorter>",
-                escapedColumnId, templateInnerHtml);
+                "<vaadin-grid-sorter path='%s' %s>%s</vaadin-grid-sorter>",
+                escapedColumnId, sortBy, templateInnerHtml);
     }
 
     /**

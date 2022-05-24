@@ -1,10 +1,13 @@
 package com.vaadin.flow.component.cookieconsent;
 
+import java.util.Arrays;
+import java.util.Locale;
+
 /*
  * #%L
  * Cookie Consent for Vaadin Flow
  * %%
- * Copyright (C) 2017 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
@@ -16,26 +19,36 @@ package com.vaadin.flow.component.cookieconsent;
  * #L%
  */
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.dom.Style;
 
 /**
- * Server-side component for the <code>vaadin-cookie-consent</code> element,
- * used for showing a cookie consent banner the first time a user visits the
- * application, until the banner is dismissed.
+ * Cookie Consent is a component for showing a cookie consent banner the first
+ * time a user visits the application, until the banner is dismissed.
+ * <p>
+ * By default, the banner is shown at the top of the screen with a predefined
+ * text, a link to cookiesandyou.com which explains what cookies are, and a
+ * consent button.
+ * <p>
+ * Cookie Consent is fully customizable. You can customize the message, the
+ * "Learn More" link, the "Dismiss" button, as well as the component’s position.
  *
  * @author Vaadin Ltd
  */
 @SuppressWarnings("serial")
 @Tag("vaadin-cookie-consent")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.0-beta1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-rc1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/cookie-consent", version = "23.0.0-beta1")
-@NpmPackage(value = "@vaadin/vaadin-cookie-consent", version = "23.0.0-beta1")
+@NpmPackage(value = "@vaadin/cookie-consent", version = "23.1.0-rc1")
+@NpmPackage(value = "@vaadin/vaadin-cookie-consent", version = "23.1.0-rc1")
 @JsModule("@vaadin/cookie-consent/src/vaadin-cookie-consent.js")
-public class CookieConsent extends Component {
+@JsModule("./cookieConsentConnector.js")
+public class CookieConsent extends Component implements HasStyle {
 
     /**
      * Creates a banner with default values.
@@ -116,7 +129,7 @@ public class CookieConsent extends Component {
      */
     public void setPosition(Position position) {
         getElement().setProperty("position",
-                position.name().toLowerCase().replace('_', '-'));
+                position.name().toLowerCase(Locale.ENGLISH).replace('_', '-'));
     }
 
     /**
@@ -140,4 +153,36 @@ public class CookieConsent extends Component {
         TOP, BOTTOM, TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT
     }
 
+    /**
+     * @throws UnsupportedOperationException
+     *             CookieConsent does not support adding styles
+     */
+    @Override
+    public Style getStyle() {
+        throw new UnsupportedOperationException(
+                "CookieConsent does not support adding styles");
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+
+        // Store the CSS class names defined in the JS library used by the web
+        // component. Exclude "cc-invisible" class set during the initial 20ms
+        // animation. Preserving this class would incorrectly hide the banner.
+        getElement().executeJs(
+                "return this._getPopup().className.replace('cc-invisible', '').trim();")
+                .then((result) -> {
+                    String classValue = result.asString();
+                    String[] parts = classValue.split("\\s+");
+                    getClassNames().addAll(Arrays.asList(parts));
+
+                    initConnector();
+                });
+    }
+
+    private void initConnector() {
+        getElement().executeJs(
+                "window.Vaadin.Flow.cookieConsentConnector.initLazy(this)");
+    }
 }

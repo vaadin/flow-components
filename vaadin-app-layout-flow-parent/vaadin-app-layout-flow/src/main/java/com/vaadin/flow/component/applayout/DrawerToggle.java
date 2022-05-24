@@ -4,7 +4,7 @@ package com.vaadin.flow.component.applayout;
  * #%L
  * Vaadin App Layout
  * %%
- * Copyright (C) 2018 - 2019 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,10 +35,10 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * </code>
  */
 @Tag("vaadin-drawer-toggle")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.0-beta1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-rc1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/app-layout", version = "23.0.0-beta1")
-@NpmPackage(value = "@vaadin/vaadin-app-layout", version = "23.0.0-beta1")
+@NpmPackage(value = "@vaadin/app-layout", version = "23.1.0-rc1")
+@NpmPackage(value = "@vaadin/vaadin-app-layout", version = "23.1.0-rc1")
 @JsModule("@vaadin/app-layout/src/vaadin-drawer-toggle.js")
 public class DrawerToggle extends Button {
 

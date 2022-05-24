@@ -4,11 +4,11 @@ package com.vaadin.flow.component.charts.events.internal;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -19,7 +19,7 @@ import java.io.Serializable;
 
 /**
  * Base class for series events.
- * 
+ *
  * @since 2.0
  *
  */
@@ -31,7 +31,7 @@ public abstract class AbstractSeriesEvent implements Serializable {
 
     /**
      * Constructs the event, storing the information about the series.
-     * 
+     *
      * @param series
      *            Series the event deals with.
      */
@@ -45,7 +45,7 @@ public abstract class AbstractSeriesEvent implements Serializable {
 
     /**
      * Returns the affected series
-     * 
+     *
      * @return The affected series.
      */
     public Series getSeries() {

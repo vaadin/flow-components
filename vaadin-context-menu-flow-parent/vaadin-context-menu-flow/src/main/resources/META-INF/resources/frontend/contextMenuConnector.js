@@ -1,131 +1,117 @@
-import * as Gestures from "@vaadin/component-base/src/gestures.js";
-(function() {
-  const tryCatchWrapper = function(callback) {
-    return window.Vaadin.Flow.tryCatchWrapper(
-      callback,
-      "Vaadin Context Menu",
-      "vaadin-context-menu-flow"
-    );
-  };
+(function () {
+  function tryCatchWrapper(callback) {
+    return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Context Menu');
+  }
+
+  function getContainer(appId, nodeId) {
+    try {
+      return window.Vaadin.Flow.clients[appId].getByNodeId(nodeId);
+    } catch (error) {
+      console.error('Could not get node %s from app %s', nodeId, appId);
+      console.error(error);
+    }
+  }
+
+  /**
+   * Initializes the connector for a context menu element.
+   *
+   * @param {HTMLElement} contextMenu
+   * @param {string} appId
+   */
+  function initLazy(contextMenu, appId) {
+    if (contextMenu.$connector) {
+      return;
+    }
+
+    contextMenu.$connector = {
+      /**
+       * Generates and assigns the items to the context menu.
+       *
+       * @param {number} nodeId
+       */
+      generateItems: tryCatchWrapper((nodeId) => {
+        const items = generateItemsTree(appId, nodeId);
+
+        contextMenu.items = items;
+      })
+    };
+  }
+
+  /**
+   * Generates an items tree compatible with the context-menu web component
+   * by traversing the given Flow DOM tree of context menu item nodes
+   * whose root node is identified by the `nodeId` argument.
+   *
+   * The app id is required to access the store of Flow DOM nodes.
+   *
+   * @param {string} appId
+   * @param {number} nodeId
+   */
+  function generateItemsTree(appId, nodeId) {
+    const container = getContainer(appId, nodeId);
+    if (!container) {
+      return;
+    }
+
+    return Array.from(container.children).map((child) => {
+      const item = {
+        component: child,
+        checked: child._checked,
+        theme: child.__theme
+      };
+      if (child.localName == 'vaadin-context-menu-item' && child._containerNodeId) {
+        item.children = generateItemsTree(appId, child._containerNodeId);
+      }
+      child._item = item;
+      return item;
+    });
+  }
+
+  /**
+   * Sets the checked state for a context menu item.
+   *
+   * This method is supposed to be called when the context menu item is closed,
+   * so there is no need for triggering a re-render eagarly.
+   *
+   * @param {HTMLElement} component
+   * @param {boolean} checked
+   */
+  function setChecked(component, checked) {
+    if (component._item) {
+      component._item.checked = checked;
+    }
+  }
+
+  /**
+   * Sets the theme for a context menu item.
+   *
+   * This method is supposed to be called when the context menu item is closed,
+   * so there is no need for triggering a re-render eagarly.
+   *
+   * @param {HTMLElement} component
+   * @param {string | undefined | null} theme
+   */
+  function setTheme(component, theme) {
+    if (component._item) {
+      component._item.theme = theme;
+    }
+  }
 
   window.Vaadin.Flow.contextMenuConnector = {
-    // NOTE: This is for the TARGET component, not for the <vaadin-context-menu> itself
-    init: target =>
-      tryCatchWrapper(function(target) {
-        if (target.$contextMenuConnector) {
-          return;
-        }
+    initLazy(...args) {
+      return tryCatchWrapper(initLazy)(...args);
+    },
 
-        target.$contextMenuConnector = {
-          openOnHandler: tryCatchWrapper(function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            this.$contextMenuConnector.openEvent = e;
-            let detail = {};
-            if (target.getContextMenuBeforeOpenDetail) {
-              detail = target.getContextMenuBeforeOpenDetail(e);
-            }
-            target.dispatchEvent(
-              new CustomEvent("vaadin-context-menu-before-open", {
-                detail: detail
-              })
-            );
-          }),
+    generateItemsTree(...args) {
+      return tryCatchWrapper(generateItemsTree)(...args);
+    },
 
-          updateOpenOn: tryCatchWrapper(function(eventType) {
-            this.removeListener();
-            this.openOnEventType = eventType;
+    setChecked(...args) {
+      return tryCatchWrapper(setChecked)(...args);
+    },
 
-            customElements.whenDefined("vaadin-context-menu").then(
-              tryCatchWrapper(() => {
-                if (Gestures.gestures[eventType]) {
-                  Gestures.addListener(target, eventType, this.openOnHandler);
-                } else {
-                  target.addEventListener(eventType, this.openOnHandler);
-                }
-              })
-            );
-          }),
-
-          removeListener: tryCatchWrapper(function() {
-            if (this.openOnEventType) {
-              if (Gestures.gestures[this.openOnEventType]) {
-                Gestures.removeListener(
-                  target,
-                  this.openOnEventType,
-                  this.openOnHandler
-                );
-              } else {
-                target.removeEventListener(
-                  this.openOnEventType,
-                  this.openOnHandler
-                );
-              }
-            }
-          }),
-
-          openMenu: tryCatchWrapper(function(contextMenu) {
-            contextMenu.open(this.openEvent);
-          }),
-
-          removeConnector: tryCatchWrapper(function() {
-            this.removeListener();
-            target.$contextMenuConnector = undefined;
-          })
-        };
-      })(target),
-
-    generateItems: (menu, appId, nodeId) =>
-      tryCatchWrapper(function(menu, appId, nodeId) {
-        menu._containerNodeId = nodeId;
-
-        const getContainer = function(nodeId) {
-          try {
-            return window.Vaadin.Flow.clients[appId].getByNodeId(nodeId);
-          } catch (error) {
-            console.error("Could not get node %s from app %s", nodeId, appId);
-            console.error(error);
-          }
-        };
-
-        const getChildItems = function(parent) {
-          const container = getContainer(parent._containerNodeId);
-          const items =
-            container &&
-            Array.from(container.children).map(child => {
-              const item = {
-                  component: child,
-                  checked: child._checked,
-                  theme: child._theme
-              };
-              if (
-                child.tagName == "VAADIN-CONTEXT-MENU-ITEM" &&
-                child._containerNodeId
-              ) {
-                item.children = getChildItems(child);
-              }
-              child._item = item;
-              return item;
-            });
-          return items;
-        };
-
-        const items = getChildItems(menu);
-        menu.items = items;
-      })(menu, appId, nodeId),
-
-    setChecked: (component, checked) =>
-      tryCatchWrapper(function(component, checked) {
-        if (component._item) {
-          component._item.checked = checked;
-        }
-      })(component, checked),
-
-    setTheme: (component, theme) =>
-        tryCatchWrapper((component, theme) => {
-            if (component._item) {
-                component._item.theme = theme;
-            }
-        })(component, theme)
+    setTheme(...args) {
+      return tryCatchWrapper(setTheme)(...args);
+    }
   };
 })();

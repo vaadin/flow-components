@@ -4,11 +4,11 @@ package com.vaadin.flow.component.charts.model;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -83,7 +83,7 @@ public class Configuration extends AbstractConfigurationObject
 
     /**
      * Sets options for configuring accessibility for the chart.
-     * 
+     *
      * @param accessibility
      */
     public void setAccessibility(Accessibility accessibility) {
@@ -103,7 +103,7 @@ public class Configuration extends AbstractConfigurationObject
     /**
      * Sets options regarding the chart and plot areas as well as general chart
      * options.
-     * 
+     *
      * @param chart
      *            ChartModel to set, not <code>null</code>
      */
@@ -121,7 +121,7 @@ public class Configuration extends AbstractConfigurationObject
 
     /**
      * Adds a single series to the list of series in this configuration.
-     * 
+     *
      * @param series
      */
     public void addSeries(Series series) {
@@ -136,7 +136,7 @@ public class Configuration extends AbstractConfigurationObject
      * the data content (individual points/columns etc.) of the plot. The series
      * object could have data (the content), name, labels, tooltips, markers
      * etc.
-     * 
+     *
      * <br />
      * <br />
      * In addition to the attributes listed above, any member of the plotOptions
@@ -144,15 +144,15 @@ public class Configuration extends AbstractConfigurationObject
      * example, even though a general lineWidth is specified in
      * AbstractPlotOptions, an individual lineWidth can be specified for each
      * series (e.g. to enable each series have different lineWidth).
-     * 
+     *
      * <br />
      * <br />
-     * 
+     *
      * If the chart is already rendered on the client,
      * {@link Chart#drawChart(boolean)} needs to be called with
      * <code>true</code> as parameter so the configuration object is resent to
      * the client.
-     * 
+     *
      * @param series
      */
     public void setSeries(List<Series> series) {
@@ -175,7 +175,7 @@ public class Configuration extends AbstractConfigurationObject
      * If series is a {@link DataSeries} and has drilldown Series that haven't
      * be added to the {@link Drilldown} configuration object they will be added
      * at this point
-     * 
+     *
      * @param series
      */
     private void addSeriesToDrilldownConfiguration(Series series) {
@@ -195,7 +195,7 @@ public class Configuration extends AbstractConfigurationObject
      * Configuration options for drill down, the concept of inspecting
      * increasingly high resolution data through clicking on chart items like
      * columns or pie slices.
-     * 
+     *
      * @return current drilldown configuration
      */
     public Drilldown getDrilldown() {
@@ -218,7 +218,7 @@ public class Configuration extends AbstractConfigurationObject
 
     /**
      * The main title of the chart.
-     * 
+     *
      * @param title
      */
     public void setTitle(Title title) {
@@ -227,7 +227,7 @@ public class Configuration extends AbstractConfigurationObject
 
     /**
      * Sets the new chart's main title to the given string
-     * 
+     *
      * @param text
      *            Text of title
      */
@@ -247,7 +247,7 @@ public class Configuration extends AbstractConfigurationObject
 
     /**
      * Sets the subtitle to the given text
-     * 
+     *
      * @param text
      *            Text of subtitle
      */
@@ -257,7 +257,7 @@ public class Configuration extends AbstractConfigurationObject
 
     /**
      * Sets the chart's subtitle
-     * 
+     *
      * @param subTitle
      */
     public void setSubTitle(Subtitle subTitle) {
@@ -269,7 +269,7 @@ public class Configuration extends AbstractConfigurationObject
      * axis, though if the chart is inverted this is the vertical axis. In case
      * of multiple axes defined, the first axis is returned. An axis will be
      * created if no axis is defined.
-     * 
+     *
      * @return the X-axis or category axis.
      */
     public XAxis getxAxis() {
@@ -318,7 +318,7 @@ public class Configuration extends AbstractConfigurationObject
 
     /**
      * Adds an X-axis to the configuration
-     * 
+     *
      * @param axis
      *            The X-Axis to add.
      * @see #getxAxis()
@@ -338,7 +338,7 @@ public class Configuration extends AbstractConfigurationObject
      * though if the chart is inverted this is the horizontal axis. In case
      * there are multiple axes defined (a list), only the first axis is
      * returned. If none exist, a Y-axis will be created.
-     * 
+     *
      * @return The first Y-axis
      * @see #getyAxes()
      */
@@ -508,7 +508,7 @@ public class Configuration extends AbstractConfigurationObject
     /**
      * Sets the options for the tooltip that appears when the user hovers over a
      * series or point.
-     * 
+     *
      * @param tooltip
      */
     public void setTooltip(Tooltip tooltip) {
@@ -528,7 +528,7 @@ public class Configuration extends AbstractConfigurationObject
     /**
      * Sets/changes the credits label that is added in the lower right corner of
      * the chart.
-     * 
+     *
      * @param credits
      */
     public void setCredits(Credits credits) {
@@ -558,7 +558,7 @@ public class Configuration extends AbstractConfigurationObject
     /**
      * Sets the legend. The legend is a box containing a symbol and name for
      * each series item or point item in the chart.
-     * 
+     *
      * @param legend
      */
     public void setLegend(Legend legend) {
@@ -567,7 +567,7 @@ public class Configuration extends AbstractConfigurationObject
 
     /**
      * Returns all plot options used by this configuration.
-     * 
+     *
      * @see #setPlotOptions(AbstractPlotOptions...)
      */
     public Collection<AbstractPlotOptions> getPlotOptions() {
@@ -599,9 +599,9 @@ public class Configuration extends AbstractConfigurationObject
      * <p>
      * {@link PlotOptionsSeries} is a special plot options type that can be used
      * to define rules for all chart types.
-     * 
+     *
      * @see AbstractPlotOptions
-     * 
+     *
      * @param plotOptions
      */
     public void setPlotOptions(AbstractPlotOptions... plotOptions) {
@@ -613,9 +613,9 @@ public class Configuration extends AbstractConfigurationObject
 
     /**
      * Adds plot options
-     * 
+     *
      * @see #setPlotOptions(AbstractPlotOptions...)
-     * 
+     *
      * @param plotOptions
      */
     public void addPlotOptions(AbstractPlotOptions plotOptions) {
@@ -646,7 +646,7 @@ public class Configuration extends AbstractConfigurationObject
 
     /**
      * Sets whether to enable exporting
-     * 
+     *
      * @param exporting
      * @see Exporting
      * @see #setExporting(Exporting)
@@ -657,7 +657,7 @@ public class Configuration extends AbstractConfigurationObject
 
     /**
      * Sets the exporting module settings.
-     * 
+     *
      * @param exporting
      * @see Exporting
      */
@@ -697,7 +697,7 @@ public class Configuration extends AbstractConfigurationObject
      * Adds a pane. This applies only to polar charts and angular gauges. This
      * configuration object holds general options for the combined X and Y -axes
      * set. Each XAxis or YAxis can reference the pane by index.
-     * 
+     *
      * @param pane
      */
     public void addPane(Pane pane) {
@@ -742,9 +742,9 @@ public class Configuration extends AbstractConfigurationObject
 
     /**
      * Set configuration for the scrollbar.
-     * 
+     *
      * Allows panning over the X axis of the chart
-     * 
+     *
      * @param scrollbar
      */
     public void setScrollbar(Scrollbar scrollbar) {
@@ -763,9 +763,9 @@ public class Configuration extends AbstractConfigurationObject
 
     /**
      * Set options for displaying a message when no data is available.
-     * 
+     *
      * The actual text to display is set in the {@link Lang#setNoData(String)}
-     * 
+     *
      * @param noData
      */
     public void setNoData(NoData noData) {
@@ -784,7 +784,7 @@ public class Configuration extends AbstractConfigurationObject
 
     /**
      * Set options for buttons and menus appearing in the exporting module.
-     * 
+     *
      * @param navigation
      */
     public void setNavigation(Navigation navigation) {
@@ -804,7 +804,7 @@ public class Configuration extends AbstractConfigurationObject
     /**
      * Set loading options control the appearance of the loading screen that
      * covers the plot area on chart operations.
-     * 
+     *
      * @param loading
      */
     public void setLoading(Loading loading) {
@@ -839,7 +839,7 @@ public class Configuration extends AbstractConfigurationObject
 
     /**
      * Set configuration for time options
-     * 
+     *
      * @param time
      */
     public void setTime(Time time) {
@@ -849,7 +849,7 @@ public class Configuration extends AbstractConfigurationObject
     /**
      * Reverses the ListSeries (transposes it such that categories would be
      * series names and vice versa) to help stacking
-     * 
+     *
      * throws {@link IllegalStateException} if series are not ListSeries type
      */
     public void reverseListSeries() {
@@ -876,7 +876,7 @@ public class Configuration extends AbstractConfigurationObject
 
     /**
      * Notifies listeners that a data point has been added
-     * 
+     *
      * @param series
      * @param value
      */
@@ -889,7 +889,7 @@ public class Configuration extends AbstractConfigurationObject
 
     /**
      * Notifies listeners that a data point has been added
-     * 
+     *
      * @param shift
      */
     void fireDataAdded(Series series, DataSeriesItem item, boolean shift) {
@@ -940,7 +940,7 @@ public class Configuration extends AbstractConfigurationObject
 
     /**
      * Notifies listeners that a data series has been updated.
-     * 
+     *
      * @param series
      *            The updated series
      */
@@ -962,7 +962,7 @@ public class Configuration extends AbstractConfigurationObject
 
     /**
      * Gets the axis dimension.
-     * 
+     *
      * @param axis
      *            Axis to check.
      * @return Dimension, as defined in ChartClientRpc.
@@ -983,7 +983,7 @@ public class Configuration extends AbstractConfigurationObject
 
     /**
      * Returns axis index in the dimension.
-     * 
+     *
      * @param dimension
      *            Dimension of the axis.
      * @param axis
@@ -1007,7 +1007,7 @@ public class Configuration extends AbstractConfigurationObject
 
     /**
      * Fires axis rescaled event.
-     * 
+     *
      * @param axis
      *            Axis that is the source of the event.
      * @param minimum
@@ -1043,7 +1043,7 @@ public class Configuration extends AbstractConfigurationObject
 
     /**
      * Reset zoom level by setting axes extremes to null
-     * 
+     *
      * @param redraw
      *            Whether or not to redraw.
      * @param animate
@@ -1057,7 +1057,7 @@ public class Configuration extends AbstractConfigurationObject
 
     /**
      * Fires point sliced event
-     * 
+     *
      * @param series
      * @param index
      * @param sliced
@@ -1079,7 +1079,7 @@ public class Configuration extends AbstractConfigurationObject
      * <p>
      * This method is used internally by the library. Usage by the end user will
      * cause unexpected behavior.
-     * 
+     *
      * @param listener
      *            Listener to add.
      */
@@ -1091,7 +1091,7 @@ public class Configuration extends AbstractConfigurationObject
 
     /**
      * Removes a change listener.
-     * 
+     *
      * @param listener
      *            Listener to remove.
      */

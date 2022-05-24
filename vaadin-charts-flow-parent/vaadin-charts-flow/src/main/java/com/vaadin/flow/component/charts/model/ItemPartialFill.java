@@ -4,11 +4,11 @@ package com.vaadin.flow.component.charts.model;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -33,7 +33,7 @@ public class ItemPartialFill extends AbstractConfigurationObject {
 
     /**
      * Creates a new PartialFill with the defined fill amount
-     * 
+     *
      * @param amount
      *            The amount of the xrange point to be filled.
      */
@@ -43,7 +43,7 @@ public class ItemPartialFill extends AbstractConfigurationObject {
 
     /**
      * Creates a new PartialFill with the defined fill color and amount
-     * 
+     *
      * @param amount
      *            The amount of the xrange point to be filled.
      * @param fill
@@ -56,7 +56,7 @@ public class ItemPartialFill extends AbstractConfigurationObject {
 
     /**
      * @see #setFill(Color)
-     * 
+     *
      * @return the color used for partial fills
      */
     public Color getFill() {
@@ -66,7 +66,7 @@ public class ItemPartialFill extends AbstractConfigurationObject {
     /**
      * The fill color to be used for partial fills. When <code>null</code>, a
      * darker shade of the point's color is used.
-     * 
+     *
      * @param fill
      *            color to be used for partial fills
      */
@@ -76,7 +76,7 @@ public class ItemPartialFill extends AbstractConfigurationObject {
 
     /**
      * @see #setAmount(Number)
-     * 
+     *
      * @return the amount used for partial fill
      */
     public Number getAmount() {
@@ -86,7 +86,7 @@ public class ItemPartialFill extends AbstractConfigurationObject {
     /**
      * The amount of the xrange point to be filled. Values can be 0-1 and are
      * converted to percentages in the default data label formatter.
-     * 
+     *
      * @param amount
      */
     public void setAmount(Number amount) {

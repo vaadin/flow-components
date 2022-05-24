@@ -4,11 +4,11 @@ package com.vaadin.flow.component.charts.model.style;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -39,7 +39,7 @@ public class Style extends AbstractConfigurationObject {
 
     /**
      * Sets the <code>color</code> CSS attribute.
-     * 
+     *
      * @param color
      */
     public void setColor(Color color) {
@@ -55,7 +55,7 @@ public class Style extends AbstractConfigurationObject {
 
     /**
      * Sets the <code>font-weight</code> CSS attribute.
-     * 
+     *
      * @param fontWeight
      */
     public void setFontWeight(FontWeight fontWeight) {
@@ -71,7 +71,7 @@ public class Style extends AbstractConfigurationObject {
 
     /**
      * Sets the <code>font-family</code> CSS attribute.
-     * 
+     *
      * @param fontFamily
      */
     public void setFontFamily(String fontFamily) {
@@ -87,7 +87,7 @@ public class Style extends AbstractConfigurationObject {
 
     /**
      * Sets the <code>font-size</code> CSS attribute.
-     * 
+     *
      * @param fontSize
      */
     public void setFontSize(String fontSize) {
@@ -103,7 +103,7 @@ public class Style extends AbstractConfigurationObject {
 
     /**
      * Sets the <code>left</code> CSS attribute
-     * 
+     *
      * @param left
      */
     public void setLeft(String left) {
@@ -119,7 +119,7 @@ public class Style extends AbstractConfigurationObject {
 
     /**
      * Sets the <code>top</code> CSS attribute
-     * 
+     *
      * @param top
      */
     public void setTop(String top) {
@@ -128,7 +128,7 @@ public class Style extends AbstractConfigurationObject {
 
     /**
      * Sets the <code>position</code> CSS attribute
-     * 
+     *
      * @param position
      */
     public void setPosition(StylePosition position) {

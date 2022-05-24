@@ -4,11 +4,11 @@ package com.vaadin.flow.component.charts.model;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -34,7 +34,7 @@ public class DrillUpButton extends AbstractConfigurationObject {
     /**
      * Positioning options for the button within the
      * {@link #setRelativeTo(DrillUpButtonRelativeTo)} box.
-     * 
+     *
      * @param position
      */
     public void setPosition(ButtonPosition position) {
@@ -54,7 +54,7 @@ public class DrillUpButton extends AbstractConfigurationObject {
      * {@link DrillUpButtonRelativeTo#PLOTBOX} or
      * {@link DrillUpButtonRelativeTo#SPACINGBOX}. Defaults to
      * {@link DrillUpButtonRelativeTo#PLOTBOX}
-     * 
+     *
      * @param relativeTo
      */
     public void setRelativeTo(DrillUpButtonRelativeTo relativeTo) {
@@ -71,7 +71,7 @@ public class DrillUpButton extends AbstractConfigurationObject {
 
     /**
      * A collection of attributes for the button.
-     * 
+     *
      * @param theme
      */
     public void setTheme(DrillUpButtonTheme theme) {

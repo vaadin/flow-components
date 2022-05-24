@@ -132,7 +132,72 @@ import elemental.json.JsonValue;
 import org.slf4j.LoggerFactory;
 
 /**
- * Server-side component for the {@code <vaadin-grid>} element.
+ * Grid is a component for showing tabular data. A basic Grid uses plain text to
+ * display information in rows and columns. However, rich content can be used to
+ * provide additional information in a more legible fashion using component
+ * renderers or Lit renderers. The Grid supports the following features.
+ * <p>
+ * Dynamic Height:<br>
+ * Grid has a default height of 400 pixels. It becomes scrollable when its items
+ * overflow the allocated space. In addition to setting any fixed or relative
+ * value, the height of a grid can be set by the number of items in the dataset,
+ * meaning that the grid will grow and shrink based on the row count.
+ * <p>
+ * Selection:<br>
+ * Grid selection is not enabled by default. Grid supports single and
+ * multi-select. The former allows the user to select exactly one item while the
+ * latter enables multiple items to be selected. In single selection mode, the
+ * user can select and deselect rows by clicking anywhere on the row. In
+ * multi-select mode, the user can use a checkbox column to select and deselect
+ * rows.
+ * <p>
+ * Columns:<br>
+ * Column alignment, freezing (fixed position), grouping, headers & footers,
+ * visibility, and width can be configured. Users can be allowed to resize and
+ * reorder columns.
+ * <p>
+ * Sorting:<br>
+ * Any column can be made sortable. Enable sorting to allow the user to sort
+ * items alphabetically, numerically, by date, etc. You can also sort columns
+ * that contain rich and/or custom content by defining which property to sort
+ * by. For example, you can have a column containing a person’s profile picture,
+ * name and email sorted by the person’s last name. Sorting helps users find and
+ * analyze the data, so it’s generally recommended to enable it for all
+ * applicable columns, except in cases where the order of items is an essential
+ * part of the data itself (such as prioritized lists).
+ * <p>
+ * Filtering:<br>
+ * Filtering allows the user to quickly find a specific item or subset of items.
+ * You can add filters to Grid columns or use external filter fields.
+ * <p>
+ * Item Details:<br>
+ * Item Details are expandable content areas that can be displayed below the
+ * regular content of a row, used to display more information about an item. By
+ * default, an item’s details are toggled by clicking on the item’s row. The
+ * default toggle behavior can be replaced by programmatically toggling the
+ * details visibility, for example, from a button click.
+ * <p>
+ * Context Menu:<br>
+ * You can use Context Menu to provide shortcuts to the user. It appears on
+ * right (default) or left click. In a mobile browser, a long press opens the
+ * menu.
+ * <p>
+ * Drag and Drop:<br>
+ * Grid supports drag and drop, for example to reorder rows and to drag rows
+ * between grids.
+ * <p>
+ * Inline Editing:<br>
+ * Grid can be configured to allow inline editing. Editing can be either
+ * buffered and non-buffered. Buffered means changes must be explicitly
+ * committed, while non-buffered automatically commit changes on blur (when a
+ * field loses focus).
+ * <p>
+ * Styling Rows and Columns:<br>
+ * You can style individual cells based on the data, for example, to highlight
+ * changes or important information.
+ * <p>
+ * Cell Focus:<br>
+ * Cells can be focused by clicking on a cell or with the keyboard.
  *
  * @author Vaadin Ltd
  *
@@ -141,10 +206,10 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.0-beta1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-rc1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/grid", version = "23.0.0-beta1")
-@NpmPackage(value = "@vaadin/vaadin-grid", version = "23.0.0-beta1")
+@NpmPackage(value = "@vaadin/grid", version = "23.1.0-rc1")
+@NpmPackage(value = "@vaadin/vaadin-grid", version = "23.1.0-rc1")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -269,9 +334,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                     @Override
                     public void setDeselectAllowed(boolean deselectAllowed) {
                         super.setDeselectAllowed(deselectAllowed);
-                        grid.getElement().executeJs(
-                                "this.$connector.deselectAllowed = $0",
-                                deselectAllowed);
+                        grid.getElement().setProperty("__deselectDisallowed",
+                                !deselectAllowed);
                     }
                 };
             }
@@ -335,7 +399,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-column")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.0-beta1")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-rc1")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class Column<T> extends AbstractColumn<Column<T>> {
 
@@ -1172,7 +1236,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     private final DetailsManager detailsManager;
     private Element detailsTemplate;
-    private boolean detailsVisibleOnClick = true;
 
     private Map<String, Column<T>> idToColumnMap = new HashMap<>();
     private Map<String, Column<T>> keyToColumnMap = new HashMap<>();
@@ -2877,8 +2940,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * <p>
      * <strong>Note:</strong> If column reordering is enabled with
      * {@link #setColumnReorderingAllowed(boolean)} and the user has reordered
-     * the columns, the order of the list returned by this method might not be
-     * correct.
+     * the columns, the order of the list returned by this method might be
+     * incorrect.
      *
      * @return unmodifiable list of columns
      */
@@ -3033,11 +3096,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @see #setItemDetailsRenderer(Renderer)
      */
     public void setDetailsVisibleOnClick(boolean detailsVisibleOnClick) {
-        if (this.detailsVisibleOnClick != detailsVisibleOnClick) {
-            this.detailsVisibleOnClick = detailsVisibleOnClick;
-            getElement().callJsFunction("$connector.setDetailsVisibleOnClick",
-                    detailsVisibleOnClick);
-        }
+        getElement().setProperty("__disallowDetailsOnClick",
+                !detailsVisibleOnClick);
     }
 
     /**
@@ -3049,7 +3109,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @see #setItemDetailsRenderer(Renderer)
      */
     public boolean isDetailsVisibleOnClick() {
-        return detailsVisibleOnClick;
+        return !getElement().getProperty("__disallowDetailsOnClick", false);
     }
 
     /**
@@ -3364,13 +3424,12 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     protected SerializableComparator<T> createSortingComparator() {
         BinaryOperator<SerializableComparator<T>> operator = (comparator1,
                 comparator2) -> {
-                    /*
-                     * thenComparing is defined to return a serializable
-                     * comparator as long as both original comparators are also
-                     * serializable
-                     */
-                    return comparator1.thenComparing(comparator2)::compare;
-                };
+            /*
+             * thenComparing is defined to return a serializable comparator as
+             * long as both original comparators are also serializable
+             */
+            return comparator1.thenComparing(comparator2)::compare;
+        };
         return sortOrder.stream().map(
                 order -> order.getSorted().getComparator(order.getDirection()))
                 .reduce(operator).orElse(null);
@@ -4019,17 +4078,17 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     /**
      * Sets whether the user can drag the grid rows or not.
      *
-     * @param rowsRraggable
+     * @param rowsDraggable
      *            {@code true} if the rows can be dragged by the user;
      *            {@code false} if not
      */
-    public void setRowsDraggable(boolean rowsRraggable) {
+    public void setRowsDraggable(boolean rowsDraggable) {
         // We need to add DnD mobile polyfill here by invoking
         // DndUtil.addMobileDndPolyfillIfNeeded. But, since DndUtil is in a Flow
         // internal package, DragSource.create is called to invoke
         // addMobileDndPolyfillIfNeeded indirectly.
         DragSource.create(this).setDraggable(false);
-        getElement().setProperty("rowsDraggable", rowsRraggable);
+        getElement().setProperty("rowsDraggable", rowsDraggable);
     }
 
     /**
@@ -4323,7 +4382,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     private void updateInMemoryFiltering(
             SerializablePredicate<T> componentInMemoryFilter) {
-        assert filterSlot != null : "Filter Slot is supposed not to be empty when set the filter";
+        assert filterSlot != null
+                : "Filter Slot is supposed not to be empty when set the filter";
         // As long as the Grid currently contains only in-memory filter
         // and only list data view has a filter setup API, we can safely cast
         // the filter slot type into in-memory filter (predicate).

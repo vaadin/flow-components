@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.vaadin</groupId>
+    <artifactId>vaadin-flow-components</artifactId>
+    <version>23.2-SNAPSHOT</version>
+  </parent>
+  <artifactId>vaadin-flow-components-integration-tests</artifactId>
+  <packaging>pom</packaging>
+  <name>component Integration Tests (dummy)</name>
+  <description>this is a dummy module pom to make it work with dependabot</description>
+</project>

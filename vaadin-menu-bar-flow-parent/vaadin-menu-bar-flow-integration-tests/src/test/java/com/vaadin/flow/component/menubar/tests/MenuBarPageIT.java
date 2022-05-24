@@ -156,6 +156,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
     @Test
     public void buttonsOverflow_itemsMovedToOverflowSubMenu() {
         click("set-width");
+        waitForResizeObserver();
         click("add-root-item");
         TestBenchElement overflowButton = menuBar.getOverflowButton();
         Assert.assertNotNull("Expected the overflow button to be rendered",
@@ -198,6 +199,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
     @Test
     public void buttonWithClickListenerOverflows_clickListenerWorksInSubMenu() {
         click("set-width");
+        waitForResizeObserver();
         menuBar.getOverflowButton().click();
         getOverlayMenuItems().get(0).click();
         assertMessage("clicked item 2");
@@ -206,10 +208,12 @@ public class MenuBarPageIT extends AbstractComponentIT {
     @Test
     public void overflow_openAndClose_unOverflow_clickButton_listenerCalledOnce() {
         click("set-width");
+        waitForResizeObserver();
         menuBar.getOverflowButton().click();
         verifyOpened();
         clickBody();
         click("reset-width");
+        waitForResizeObserver();
         menuBar.getButtons().get(1).click();
         assertMessage("clicked item 2");
     }
@@ -217,10 +221,12 @@ public class MenuBarPageIT extends AbstractComponentIT {
     @Test
     public void overflow_openAndClose_unOverflow_clickItem_listenerCalledOnce() {
         click("set-width");
+        waitForResizeObserver();
         menuBar.getOverflowButton().click();
         verifyOpened();
         clickBody();
         click("reset-width");
+        waitForResizeObserver();
         menuBar.getButtons().get(1).$("vaadin-context-menu-item").first()
                 .click();
         assertMessage("clicked item 2");
@@ -242,6 +248,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
         executeScript("arguments[0].disabled=false;"
                 + "arguments[0].querySelector('vaadin-context-menu-item').disabled=false;",
                 button2);
+        button2 = menuBar.getButtons().get(1);
         button2.click();
         assertMessage("");
     }
@@ -259,6 +266,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
     public void disableItem_overflow_itemDisabled() {
         click("toggle-disable");
         click("set-width");
+        waitForResizeObserver();
         menuBar.getOverflowButton().click();
         verifyOpened();
         assertDisabled(getOverlayMenuItems().get(0), true);
@@ -267,6 +275,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
     @Test
     public void overflow_disableItem_itemDisabled() {
         click("set-width");
+        waitForResizeObserver();
         click("toggle-disable");
         menuBar.getOverflowButton().click();
         verifyOpened();
@@ -282,25 +291,28 @@ public class MenuBarPageIT extends AbstractComponentIT {
     public void disable_overflow_openAndClose_unOverflow_buttonDisabled() {
         click("toggle-disable");
         click("set-width");
+        waitForResizeObserver();
         menuBar.getOverflowButton().click();
         verifyOpened();
         clickBody();
         click("reset-width");
+        waitForResizeObserver();
         assertButtonDisabled(1, true);
     }
 
     @Test
     public void toggleItemVisible_buttonRemovedAndAdded() {
-        click("toggle-visible");
+        click("toggle-item-2-visibility");
         assertButtonContents("item 1");
-        click("toggle-visible");
+        click("toggle-item-2-visibility");
         assertButtonContents("item 1", "<p>item 2</p>");
     }
 
     @Test
     public void hiddenItemOverflows_overflowButtonNotRendered() {
-        click("toggle-visible");
+        click("toggle-item-2-visibility");
         click("set-width");
+        waitForResizeObserver();
         Assert.assertNull(menuBar.getOverflowButton());
     }
 
@@ -308,14 +320,15 @@ public class MenuBarPageIT extends AbstractComponentIT {
     public void itemsOverflow_toggleItemVisible_visibleStateCorrectInOverlay() {
         click("add-root-item");
         click("set-width");
-        click("toggle-visible");
+        waitForResizeObserver();
+        click("toggle-item-2-visibility");
 
         menuBar.getOverflowButton().click();
         assertOverlayContents("added item");
 
         clickBody();
         verifyClosed();
-        click("toggle-visible");
+        click("toggle-item-2-visibility");
 
         menuBar.getOverflowButton().click();
         assertOverlayContents("<p>item 2</p>", "added item");
@@ -324,15 +337,15 @@ public class MenuBarPageIT extends AbstractComponentIT {
     @Test
     public void hideParentButton_noClientError() {
         click("add-sub-item");
-        click("toggle-visible");
+        click("toggle-item-2-visibility");
         checkLogsForErrors();
     }
 
     @Test
     public void hideParentButton_setVisible_subMenuRendered() {
         click("add-sub-item");
-        click("toggle-visible");
-        click("toggle-visible");
+        click("toggle-item-2-visibility");
+        click("toggle-item-2-visibility");
         menuBar.getButtons().get(1).click();
         verifyNumOfOverlays(1);
         assertOverlayContents("added sub item");
@@ -347,7 +360,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
 
         // Verify client-code with setVisible functionality:
         menuBar = $(MenuBarElement.class).first();
-        click("toggle-visible");
+        click("toggle-item-2-visibility");
         assertButtonContents("item 1");
     }
 
@@ -359,13 +372,14 @@ public class MenuBarPageIT extends AbstractComponentIT {
 
         // Verify client-code with setVisible functionality:
         menuBar = $(MenuBarElement.class).first();
-        click("toggle-visible");
+        click("toggle-item-2-visibility");
         assertButtonContents("item 1");
     }
 
     @Test
     public void setI18n_i18nIsUpdated() {
         click("set-width");
+        waitForResizeObserver();
         click("add-root-item");
         TestBenchElement overflowButton = menuBar.getOverflowButton();
 
@@ -381,6 +395,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
     @Test
     public void setI18n_detach_attach_i18nIsPersisted() {
         click("set-width");
+        waitForResizeObserver();
         click("add-root-item");
         click("set-i18n");
         TestBenchElement overflowButton = menuBar.getOverflowButton();
@@ -421,12 +436,32 @@ public class MenuBarPageIT extends AbstractComponentIT {
     public void toggleMenuItemTheme_themeIsToggled() {
         TestBenchElement menuButton1 = menuBar.getButtons().get(0);
         Assert.assertFalse(menuButton1.hasAttribute("theme"));
-        click("toggle-item-theme");
+        click("toggle-item-1-theme");
         menuButton1 = menuBar.getButtons().get(0);
         Assert.assertEquals(menuButton1.getAttribute("theme"),
                 MenuBarTestPage.MENU_ITEM_THEME);
-        click("toggle-item-theme");
+        click("toggle-item-1-theme");
         menuButton1 = menuBar.getButtons().get(0);
+        Assert.assertFalse(menuButton1.hasAttribute("theme"));
+    }
+
+    @Test
+    public void setMenuItemTheme_toggleVisibility_themeIsPreserved() {
+        click("toggle-item-1-theme");
+        click("toggle-item-1-visibility");
+        click("toggle-item-1-visibility");
+        TestBenchElement menuButton1 = menuBar.getButtons().get(0);
+        Assert.assertEquals(menuButton1.getAttribute("theme"),
+                MenuBarTestPage.MENU_ITEM_THEME);
+    }
+
+    @Test
+    public void setMenuItemTheme_hide_resetTheme_show_themeIsUnset() {
+        click("toggle-item-1-theme");
+        click("toggle-item-1-visibility");
+        click("toggle-item-1-theme");
+        click("toggle-item-1-visibility");
+        TestBenchElement menuButton1 = menuBar.getButtons().get(0);
         Assert.assertFalse(menuButton1.hasAttribute("theme"));
     }
 
@@ -452,7 +487,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
     @Test
     public void toggleMenuBarTheme_toggleMenuItemTheme_themeIsOverridden() {
         click("toggle-theme");
-        click("toggle-item-theme");
+        click("toggle-item-1-theme");
 
         TestBenchElement menuButton1 = menuBar.getButtons().get(0);
         Assert.assertEquals(MenuBarTestPage.MENU_ITEM_THEME,
@@ -553,5 +588,12 @@ public class MenuBarPageIT extends AbstractComponentIT {
         executeScript(
                 "arguments[0].dispatchEvent(new Event('mouseover', {bubbles:true}))",
                 hoverTarget);
+    }
+
+    private void waitForResizeObserver() {
+        getCommandExecutor().getDriver().executeAsyncScript(
+                "var callback = arguments[arguments.length - 1];"
+                        + "requestAnimationFrame(callback)");
+
     }
 }

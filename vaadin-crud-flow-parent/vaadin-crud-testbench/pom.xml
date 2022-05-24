@@ -4,7 +4,7 @@
     <parent>
         <artifactId>vaadin-crud-flow-parent</artifactId>
         <groupId>com.vaadin</groupId>
-        <version>23.0-SNAPSHOT</version>
+        <version>23.2-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-crud-testbench</artifactId>
     <packaging>jar</packaging>
@@ -29,6 +29,11 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-text-field-testbench</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-confirm-dialog-testbench</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

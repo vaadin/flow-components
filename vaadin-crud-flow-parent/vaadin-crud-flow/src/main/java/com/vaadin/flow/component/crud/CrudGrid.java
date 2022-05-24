@@ -4,14 +4,14 @@ package com.vaadin.flow.component.crud;
  * #%L
  * Vaadin Crud for Vaadin 10
  * %%
- * Copyright (C) 2018 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * See the file license.html distributed with this software for more
  * information about licensing.
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -23,6 +23,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.shared.util.SharedUtil;
 
 import java.util.List;
 
@@ -80,6 +81,8 @@ public class CrudGrid<E> extends Grid<E> {
         getColumns().forEach(column -> {
             final TextField field = new TextField();
             field.getElement().setAttribute("crud-role", "Search");
+            field.getElement().setAttribute("aria-label", "Filter by "
+                    + SharedUtil.propertyIdToHumanFriendly(column.getKey()));
 
             field.addValueChangeListener(event -> {
                 filter.getConstraints().remove(column.getKey());

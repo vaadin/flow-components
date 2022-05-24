@@ -4,11 +4,11 @@ package com.vaadin.flow.component.charts.events.internal;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -18,9 +18,9 @@ import java.io.Serializable;
 /**
  * Listener interface for events triggered in Configuration. E.g. in DataSeries,
  * events like data add/remove/update.
- * 
+ *
  * @since 2.0
- * 
+ *
  */
 public interface ConfigurationChangeListener extends Serializable {
     /**

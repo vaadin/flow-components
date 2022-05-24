@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2021 Vaadin Ltd.
+ * Copyright 2000-2022 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,19 +15,27 @@
  */
 
 (function () {
-    const tryCatchWrapper = function (callback) {
-        return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Message List', 'vaadin-messages');
-    };
+  const tryCatchWrapper = function (callback) {
+    return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Message List');
+  };
 
-    window.Vaadin.Flow.messageListConnector = {
-        setItems: (list, items, locale) => tryCatchWrapper(function (list, items, locale) {
-            const formatter = new Intl.DateTimeFormat(locale, {
-                year: 'numeric', month: 'short', day: 'numeric',
-                hour: 'numeric', minute: 'numeric'
-            });
-            list.items = items.map(item => item.time ? Object.assign(item, {
+  window.Vaadin.Flow.messageListConnector = {
+    setItems: (list, items, locale) =>
+      tryCatchWrapper(function (list, items, locale) {
+        const formatter = new Intl.DateTimeFormat(locale, {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: 'numeric'
+        });
+        list.items = items.map((item) =>
+          item.time
+            ? Object.assign(item, {
                 time: formatter.format(new Date(item.time))
-            }) : item);
-        })(list, items, locale)
-    };
+              })
+            : item
+        );
+      })(list, items, locale)
+  };
 })();

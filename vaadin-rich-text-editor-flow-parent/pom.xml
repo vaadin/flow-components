@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-flow-components</artifactId>
-        <version>23.0-SNAPSHOT</version>
+        <version>23.2-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-rich-text-editor-flow-parent</artifactId>
     <packaging>pom</packaging>
@@ -18,7 +18,6 @@
     <modules>
         <module>vaadin-rich-text-editor-flow</module>
         <module>vaadin-rich-text-editor-testbench</module>
-        <module>vaadin-rich-text-editor-flow-demo</module>
     </modules>
     <profiles>
         <profile>

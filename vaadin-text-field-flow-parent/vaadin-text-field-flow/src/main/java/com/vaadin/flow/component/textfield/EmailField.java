@@ -18,9 +18,11 @@ package com.vaadin.flow.component.textfield;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.CompositionNotifier;
+import com.vaadin.flow.component.HasClearButton;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasThemeVariant;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.InputNotifier;
 import com.vaadin.flow.component.KeyNotifier;
@@ -29,15 +31,22 @@ import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
 
 /**
- * Server-side component for the {@code vaadin-email-field} element.
+ * Email Field is an extension of Text Field that only accepts email addresses
+ * as input. If the given address is invalid, the field is highlighted in red
+ * and an error message appears underneath the input. The validity of the email
+ * addresses is checked according to the RFC 5322 standard, which includes the
+ * format for email addresses. The component also supports supplying additional
+ * validation criteria using a regular expression (see
+ * {@link #setPattern(String)}). These extra validation criteria can be used,
+ * for example, to require a specific email domain.
  *
  * @author Vaadin Ltd.
  */
 public class EmailField extends GeneratedVaadinEmailField<EmailField, String>
         implements HasSize, HasValidation, HasValueChangeMode,
         HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
-        HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper,
-        HasLabel {
+        HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper, HasLabel,
+        HasClearButton, HasThemeVariant<TextFieldVariant> {
     private static final String EMAIL_PATTERN = "^" + "([a-zA-Z0-9_\\.\\-+])+" // local
             + "@" + "[a-zA-Z0-9-.]+" // domain
             + "\\." + "[a-zA-Z0-9-]{2,}" // tld
@@ -361,29 +370,6 @@ public class EmailField extends GeneratedVaadinEmailField<EmailField, String>
     @Override
     public void setAutoselect(boolean autoselect) {
         super.setAutoselect(autoselect);
-    }
-
-    /**
-     * Gets the visibility state of the button which clears the email field.
-     *
-     * @return <code>true</code> if the button is visible, <code>false</code>
-     *         otherwise
-     */
-    public boolean isClearButtonVisible() {
-        return isClearButtonVisibleBoolean();
-    }
-
-    /**
-     * Set to <code>false</code> to hide the clear button which clears the email
-     * field.
-     *
-     * @param clearButtonVisible
-     *            <code>true</code> to set the button visible,
-     *            <code>false</code> otherwise
-     */
-    @Override
-    public void setClearButtonVisible(boolean clearButtonVisible) {
-        super.setClearButtonVisible(clearButtonVisible);
     }
 
     @Override

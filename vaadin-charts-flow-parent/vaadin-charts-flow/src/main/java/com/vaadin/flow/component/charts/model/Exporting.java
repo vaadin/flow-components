@@ -4,11 +4,11 @@ package com.vaadin.flow.component.charts.model;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -55,7 +55,7 @@ public class Exporting extends AbstractConfigurationObject {
      * allows you to preserve complicated HTML structures like tables or
      * bi-directional text in exported charts.
      * </p>
-     * 
+     *
      * <p>
      * Disclaimer: The HTML is rendered in a <code>foreignObject</code> tag in
      * the generated SVG. The official export server is based on PhantomJS,
@@ -162,7 +162,7 @@ public class Exporting extends AbstractConfigurationObject {
     /**
      * Path where Highcharts will look for export module dependencies to load on
      * demand if they don't already exist on <code>window</code>.
-     * 
+     *
      * Should currently point to location of
      * <a href="https://github.com/canvg/canvg">CanVG</a> library,
      * <a href="https://github.com/canvg/canvg">RGBColor.js</a>,

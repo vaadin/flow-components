@@ -7,11 +7,11 @@ import com.vaadin.flow.component.charts.model.style.Color;
  * #%L
  * Vaadin Charts
  * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -36,7 +36,7 @@ public class Attributes extends AbstractConfigurationObject {
 
     /**
      * SVG fill attribute
-     * 
+     *
      * @param fill
      */
     public void setFill(Color fill) {
@@ -53,7 +53,7 @@ public class Attributes extends AbstractConfigurationObject {
 
     /**
      * SVG stroke attribute
-     * 
+     *
      * @param stroke
      */
     public void setStroke(Color stroke) {
@@ -70,7 +70,7 @@ public class Attributes extends AbstractConfigurationObject {
 
     /**
      * SVG stroke-width attribute
-     * 
+     *
      * @param strokeWidth
      */
     public void setStrokeWidth(Number strokeWidth) {

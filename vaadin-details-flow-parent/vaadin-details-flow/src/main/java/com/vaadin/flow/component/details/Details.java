@@ -4,7 +4,7 @@ package com.vaadin.flow.component.details;
  * #%L
  * Details for Vaadin Flow
  * %%
- * Copyright (C) 2017 - 2019 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,11 +40,28 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.shared.Registration;
 
+/**
+ * Details is an expandable panel for showing and hiding content from the user
+ * to make the UI less crowded. Details consists of a summary and a content
+ * area.
+ * <p>
+ * The Summary is the part that is always visible, and typically describes the
+ * contents, for example, with a title. Clicking on the summary toggles the
+ * content area’s visibility. The summary supports rich content and can contain
+ * any component. This can be utilized for example to indicate the status of the
+ * corresponding content.
+ * <p>
+ * The content area is the collapsible part of Details. It can contain any
+ * component. When the content area is collapsed, the content is invisible and
+ * inaccessible by keyboard or screen reader.
+ *
+ * @author Vaadin Ltd
+ */
 @Tag("vaadin-details")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.0-beta1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-rc1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/details", version = "23.0.0-beta1")
-@NpmPackage(value = "@vaadin/vaadin-details", version = "23.0.0-beta1")
+@NpmPackage(value = "@vaadin/details", version = "23.1.0-rc1")
+@NpmPackage(value = "@vaadin/vaadin-details", version = "23.1.0-rc1")
 @JsModule("@vaadin/details/src/vaadin-details.js")
 public class Details extends Component
         implements HasEnabled, HasTheme, HasStyle, HasSize {
@@ -58,6 +75,30 @@ public class Details extends Component
     public Details() {
         contentContainer = new Div();
         getElement().appendChild(contentContainer.getElement());
+    }
+
+    /**
+     * Initializes a new Details using the provided summary.
+     *
+     * @param summary
+     *            the summary component to set.
+     * @see #setSummaryText(String)
+     */
+    public Details(String summary) {
+        this();
+        setSummaryText(summary);
+    }
+
+    /**
+     * Initializes a new Details using the provided summary.
+     *
+     * @param summary
+     *            the summary component to set.
+     * @see #setSummary(Component)
+     */
+    public Details(Component summary) {
+        this();
+        setSummary(summary);
     }
 
     /**
@@ -92,6 +133,40 @@ public class Details extends Component
         this();
         setSummary(summary);
         setContent(content);
+    }
+
+    /**
+     * Initializes a new Details using the provided summary and content
+     * components.
+     *
+     * @param summary
+     *            the summary text to set.
+     * @param components
+     *            the content components to set.
+     *
+     * @see #setSummaryText(String)
+     * @see #addContent(Component...)
+     */
+    public Details(String summary, Component... components) {
+        this(summary);
+        addContent(components);
+    }
+
+    /**
+     * Initializes a new Details using the provided summary and content
+     * components.
+     *
+     * @param summary
+     *            the summary component to set.
+     * @param components
+     *            the content components to set.
+     *
+     * @see #setSummary(Component)
+     * @see #addContent(Component...)
+     */
+    public Details(Component summary, Component... components) {
+        this(summary);
+        addContent(components);
     }
 
     /**
@@ -139,10 +214,11 @@ public class Details extends Component
     }
 
     /**
-     * @return summary section content as string
+     * @return summary section content as string (empty string if nothing was
+     *         set)
      */
     public String getSummaryText() {
-        return summary.getElement().getText();
+        return summary == null ? "" : summary.getElement().getText();
     }
 
     /**

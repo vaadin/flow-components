@@ -4,11 +4,11 @@ package com.vaadin.flow.component.charts.model;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -185,7 +185,7 @@ public class PlotOptionsSpline extends PointOptions {
      * applies to the bars unless a color is specified per point. The default
      * value is pulled from the <code>options.colors</code> array.
      * </p>
-     * 
+     *
      * <p>
      * In <a href=
      * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
@@ -378,7 +378,7 @@ public class PlotOptionsSpline extends PointOptions {
      * <p>
      * Options for the series data labels, appearing next to each data point.
      * </p>
-     * 
+     *
      * <p>
      * In <a href=
      * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
@@ -523,7 +523,7 @@ public class PlotOptionsSpline extends PointOptions {
 
     /**
      * Adds key to the keys array
-     * 
+     *
      * @param key
      *            to add
      * @see #setKeys(String...)
@@ -537,7 +537,7 @@ public class PlotOptionsSpline extends PointOptions {
 
     /**
      * Removes first occurrence of key in keys array
-     * 
+     *
      * @param key
      *            to remove
      * @see #setKeys(String...)
@@ -613,7 +613,7 @@ public class PlotOptionsSpline extends PointOptions {
      * column series, don't have markers, but have visual options on the series
      * level instead.
      * </p>
-     * 
+     *
      * <p>
      * In <a href=
      * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
@@ -872,7 +872,7 @@ public class PlotOptionsSpline extends PointOptions {
      * plane (or <a href="#plotOptions.series.threshold">threshold</a> option)
      * unless the data actually crosses the plane.
      * </p>
-     * 
+     *
      * <p>
      * For example, if <code>softThreshold</code> is <code>false</code>, a
      * series of 0, 1, 2, 3 will make the Y axis show negative values according
@@ -1050,7 +1050,7 @@ public class PlotOptionsSpline extends PointOptions {
      * axis, Y axis or Z axis for bubbles, according to the
      * <code>zoneAxis</code> option.
      * </p>
-     * 
+     *
      * <p>
      * In <a href=
      * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
@@ -1067,7 +1067,7 @@ public class PlotOptionsSpline extends PointOptions {
 
     /**
      * Adds zone to the zones array
-     * 
+     *
      * @param zone
      *            to add
      * @see #setZones(Zones...)
@@ -1081,7 +1081,7 @@ public class PlotOptionsSpline extends PointOptions {
 
     /**
      * Removes first occurrence of zone in zones array
-     * 
+     *
      * @param zone
      *            to remove
      * @see #setZones(Zones...)
@@ -1147,7 +1147,7 @@ public class PlotOptionsSpline extends PointOptions {
      * points become closer than a certain pixel value, determined by the
      * <code>groupPixelWidth</code> option.
      * </p>
-     * 
+     *
      * <p>
      * If data grouping is applied, the grouping information of grouped points
      * can be read from the <a href="#Point.dataGroup">Point.dataGroup</a>.
@@ -1170,7 +1170,7 @@ public class PlotOptionsSpline extends PointOptions {
      * the distance between two points is greater than five times that of the
      * two closest points, the graph will be broken.
      * </p>
-     * 
+     *
      * <p>
      * In practice, this option is most often used to visualize gaps in time
      * series. In a stock chart, intraday data is available for daytime hours,
@@ -1231,7 +1231,7 @@ public class PlotOptionsSpline extends PointOptions {
      * <a class="internal" href="#plotOptions.series">plotOptions</a> and
      * <a class="internal" href="#series">series</a>.
      * </p>
-     * 
+     *
      * <p>
      * These options are merged with options in
      * <a href="#navigator.series">navigator.series</a>, and will take

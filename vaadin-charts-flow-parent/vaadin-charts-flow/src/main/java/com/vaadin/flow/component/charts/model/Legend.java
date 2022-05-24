@@ -4,11 +4,11 @@ package com.vaadin.flow.component.charts.model;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -74,7 +74,7 @@ public class Legend extends AbstractConfigurationObject {
      * The horizontal alignment of the legend box within the chart area. Valid
      * values are <code>left</code>, <code>center</code> and <code>right</code>.
      * </p>
-     * 
+     *
      * <p>
      * In the case that the legend is aligned in a corner position, the
      * <code>layout</code> option will determine whether to place it above/below
@@ -633,7 +633,7 @@ public class Legend extends AbstractConfigurationObject {
      * <code>middle</code> or <code>bottom</code>. Vertical position can be
      * further determined by the <code>y</code> option.
      * </p>
-     * 
+     *
      * <p>
      * In the case that the legend is aligned in a corner position, the
      * <code>layout</code> option will determine whether to place it above/below

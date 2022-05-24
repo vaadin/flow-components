@@ -4,11 +4,11 @@ package com.vaadin.flow.component.charts.model;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -161,7 +161,7 @@ public class PlotOptionsColumnrange extends ColumnOptions {
      * <p>
      * The color of the border surrounding each column or bar.
      * </p>
-     * 
+     *
      * <p>
      * In <a href=
      * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
@@ -202,7 +202,7 @@ public class PlotOptionsColumnrange extends ColumnOptions {
      * <p>
      * The width of the border surrounding each column or bar.
      * </p>
-     * 
+     *
      * <p>
      * In <a href=
      * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
@@ -261,7 +261,7 @@ public class PlotOptionsColumnrange extends ColumnOptions {
      * applies to the bars unless a color is specified per point. The default
      * value is pulled from the <code>options.colors</code> array.
      * </p>
-     * 
+     *
      * <p>
      * In <a href=
      * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
@@ -356,7 +356,7 @@ public class PlotOptionsColumnrange extends ColumnOptions {
 
     /**
      * Adds color to the colors array
-     * 
+     *
      * @param color
      *            to add
      * @see #setColors(Color...)
@@ -370,7 +370,7 @@ public class PlotOptionsColumnrange extends ColumnOptions {
 
     /**
      * Removes first occurrence of color in colors array
-     * 
+     *
      * @param color
      *            to remove
      * @see #setColors(Color...)
@@ -690,7 +690,7 @@ public class PlotOptionsColumnrange extends ColumnOptions {
 
     /**
      * Adds key to the keys array
-     * 
+     *
      * @param key
      *            to add
      * @see #setKeys(String...)
@@ -704,7 +704,7 @@ public class PlotOptionsColumnrange extends ColumnOptions {
 
     /**
      * Removes first occurrence of key in keys array
-     * 
+     *
      * @param key
      *            to remove
      * @see #setKeys(String...)
@@ -1162,7 +1162,7 @@ public class PlotOptionsColumnrange extends ColumnOptions {
      * axis, Y axis or Z axis for bubbles, according to the
      * <code>zoneAxis</code> option.
      * </p>
-     * 
+     *
      * <p>
      * In <a href=
      * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
@@ -1179,7 +1179,7 @@ public class PlotOptionsColumnrange extends ColumnOptions {
 
     /**
      * Adds zone to the zones array
-     * 
+     *
      * @param zone
      *            to add
      * @see #setZones(Zones...)
@@ -1193,7 +1193,7 @@ public class PlotOptionsColumnrange extends ColumnOptions {
 
     /**
      * Removes first occurrence of zone in zones array
-     * 
+     *
      * @param zone
      *            to remove
      * @see #setZones(Zones...)
@@ -1303,7 +1303,7 @@ public class PlotOptionsColumnrange extends ColumnOptions {
      * <a class="internal" href="#plotOptions.series">plotOptions</a> and
      * <a class="internal" href="#series">series</a>.
      * </p>
-     * 
+     *
      * <p>
      * These options are merged with options in
      * <a href="#navigator.series">navigator.series</a>, and will take

@@ -4,11 +4,11 @@ package com.vaadin.flow.component.charts.model;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -93,7 +93,7 @@ public class Hover extends AbstractConfigurationObject {
      * 0.25. The halo can be disabled by setting the <code>halo</code> option to
      * <code>false</code>.
      * </p>
-     * 
+     *
      * <p>
      * In <a href=
      * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
@@ -229,7 +229,7 @@ public class Hover extends AbstractConfigurationObject {
      * How much to brighten the point on interaction. Requires the main color to
      * be defined in hex or rgb(a) format.
      * </p>
-     * 
+     *
      * <p>
      * In <a href=
      * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"

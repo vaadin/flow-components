@@ -37,6 +37,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
     private ComboBoxElement templateBox;
     private ComboBoxElement emptyCallbackBox;
     private ComboBoxElement lazyCustomPageSize;
+    private ComboBoxElement disabledLazyLoadingBox;
 
     private WebElement lazySizeRequestCountSpan;
 
@@ -59,6 +60,8 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
                 .id("lazy-custom-page-size");
         lazySizeRequestCountSpan = findElement(
                 By.id("callback-dataprovider-size-request-count"));
+        disabledLazyLoadingBox = $(ComboBoxElement.class)
+                .id("disabled-lazy-loading");
     }
 
     @Test
@@ -550,6 +553,25 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         waitUntilTextInContent("300");
         // page size should be 41
         assertMessage("41");
+    }
+
+    @Test
+    public void disabledLazyLoading_reducePageSize_enablesLazyLoading() {
+        disabledLazyLoadingBox.openPopup();
+        assertLoadedItemsCount("Initially all 100 items should be loaded", 100,
+                disabledLazyLoadingBox);
+        lazyCustomPageSize.closePopup();
+
+        clickButton("enable-lazy-loading");
+        disabledLazyLoadingBox.openPopup();
+        assertLoadedItemsCount(
+                "After reducing page size, 50 items should be loaded", 50,
+                disabledLazyLoadingBox);
+
+        scrollToItem(disabledLazyLoadingBox, 100);
+        assertLoadedItemsCount("Scrolling down should load further pages", 100,
+                disabledLazyLoadingBox);
+        assertRendered("99");
     }
 
     private void assertMessage(String expectedMessage) {

@@ -4,11 +4,11 @@ package com.vaadin.flow.component.charts.model;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -144,7 +144,7 @@ public class PlotOptionsGauge extends GaugeOptions {
      * applies to the bars unless a color is specified per point. The default
      * value is pulled from the <code>options.colors</code> array.
      * </p>
-     * 
+     *
      * <p>
      * In <a href=
      * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
@@ -270,7 +270,7 @@ public class PlotOptionsGauge extends GaugeOptions {
      * <p>
      * Options for the dial or arrow pointer of the gauge.
      * </p>
-     * 
+     *
      * <p>
      * In <a href=
      * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
@@ -390,7 +390,7 @@ public class PlotOptionsGauge extends GaugeOptions {
 
     /**
      * Adds key to the keys array
-     * 
+     *
      * @param key
      *            to add
      * @see #setKeys(String...)
@@ -404,7 +404,7 @@ public class PlotOptionsGauge extends GaugeOptions {
 
     /**
      * Removes first occurrence of key in keys array
-     * 
+     *
      * @param key
      *            to remove
      * @see #setKeys(String...)
@@ -495,7 +495,7 @@ public class PlotOptionsGauge extends GaugeOptions {
      * <p>
      * Options for the pivot or the center point of the gauge.
      * </p>
-     * 
+     *
      * <p>
      * In <a href=
      * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"

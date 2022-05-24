@@ -27,7 +27,6 @@ import elemental.json.JsonType;
 import elemental.json.JsonValue;
 import org.junit.Assert;
 import org.junit.Test;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import java.util.HashMap;

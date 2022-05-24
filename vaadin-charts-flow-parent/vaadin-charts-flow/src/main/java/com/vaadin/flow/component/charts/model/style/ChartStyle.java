@@ -4,11 +4,11 @@ package com.vaadin.flow.component.charts.model.style;
  * #%L
  * Vaadin Charts
  * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -78,7 +78,7 @@ public class ChartStyle extends AbstractConfigurationObject {
 
     /**
      * @see #setPlotBackgroundImage(String)
-     * 
+     *
      * @return The background image of the plot, null if not defined
      */
     public String getPlotBackgroundImage() {
@@ -89,7 +89,7 @@ public class ChartStyle extends AbstractConfigurationObject {
      * Sets the background of the plot to an image specified by the provided
      * URL. To set an image as the background for the entire chart, set a CSS
      * background image on the container element. Defaults to null.
-     * 
+     *
      * @param plotBackgroundImage
      *            The URL of the background image
      */
@@ -108,7 +108,7 @@ public class ChartStyle extends AbstractConfigurationObject {
     /**
      * Sets whether to apply a drop shadow to the plot area. Requires that
      * plotBackgroundColor be set.
-     * 
+     *
      * @param plotShadow
      */
     public void setPlotShadow(Boolean plotShadow) {
@@ -144,7 +144,7 @@ public class ChartStyle extends AbstractConfigurationObject {
     /**
      * Sets the CSS class name to apply to the container DIV around the chart,
      * allowing unique CSS styling for each chart. Defaults to "".
-     * 
+     *
      * @param className
      */
     public void setClassName(String className) {
@@ -173,7 +173,7 @@ public class ChartStyle extends AbstractConfigurationObject {
 
     /**
      * @see #setBorderRadius(Number)
-     * 
+     *
      * @return The corner radius of the border, null if not defined
      */
     public Number getBorderRadius() {
@@ -182,7 +182,7 @@ public class ChartStyle extends AbstractConfigurationObject {
 
     /**
      * Sets the corner radius of the outer chart border. Defaults to 5.
-     * 
+     *
      * @param borderRadius
      *            Radius or border
      */
@@ -212,7 +212,7 @@ public class ChartStyle extends AbstractConfigurationObject {
     /**
      * Gets various style defaults used. This can be used to for example define
      * default font family.
-     * 
+     *
      * @see #setStyle(Style)
      */
     public Style getStyle() {
@@ -231,7 +231,7 @@ public class ChartStyle extends AbstractConfigurationObject {
      * }
      * </code>
      * </p>
-     * 
+     *
      * @param style
      */
     public void setStyle(Style style) {

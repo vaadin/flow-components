@@ -4,11 +4,11 @@ package com.vaadin.flow.component.charts.model;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -28,7 +28,7 @@ public class HTMLLabels extends AbstractConfigurationObject {
 
     /**
      * Constructs a HTMLLabels instance with the given label items
-     * 
+     *
      * @param items
      */
     public HTMLLabels(HTMLLabelItem... items) {
@@ -38,7 +38,7 @@ public class HTMLLabels extends AbstractConfigurationObject {
     /**
      * Constructs a HTMLLabels instance with a style shared for all the labels
      * and the given label items
-     * 
+     *
      * @param items
      */
     public HTMLLabels(Style style, HTMLLabelItem... items) {
@@ -55,7 +55,7 @@ public class HTMLLabels extends AbstractConfigurationObject {
 
     /**
      * Sets the label items
-     * 
+     *
      * @param items
      */
     public void setItems(HTMLLabelItem... items) {
@@ -71,7 +71,7 @@ public class HTMLLabels extends AbstractConfigurationObject {
 
     /**
      * Sets the CSS style shared for all the labels.
-     * 
+     *
      * @param style
      */
     public void setStyle(Style style) {

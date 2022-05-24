@@ -6,11 +6,11 @@ import com.vaadin.flow.component.charts.model.style.Color;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -41,7 +41,7 @@ public class Background extends AbstractConfigurationObject {
 
     /**
      * Sets the background color
-     * 
+     *
      * @param backgroundColor
      */
     public void setBackgroundColor(Color backgroundColor) {
@@ -57,7 +57,7 @@ public class Background extends AbstractConfigurationObject {
 
     /**
      * Sets the border color
-     * 
+     *
      * @param borderColor
      */
     public void setBorderColor(Color borderColor) {
@@ -73,7 +73,7 @@ public class Background extends AbstractConfigurationObject {
 
     /**
      * Sets the width of the border
-     * 
+     *
      * @param borderWidth
      */
     public void setBorderWidth(Number borderWidth) {
@@ -104,10 +104,10 @@ public class Background extends AbstractConfigurationObject {
      * Sets the outer radius of the circular shaped background using a string
      * representation of a percentage, e.g. "110%". The percentage is relative
      * to the radius of the chart.
-     * 
+     *
      * <em>This is applicable only to circular {@link ChartType#GAUGE} type
      * charts.</em>
-     * 
+     *
      * @param outerRadius
      */
     public void setOuterRadius(String outerRadius) {
@@ -125,10 +125,10 @@ public class Background extends AbstractConfigurationObject {
      * Sets the inner radius of the circular shaped background using a string
      * representation of a percentage, e.g. "110%". The percentage is relative
      * to the radius of the chart.
-     * 
+     *
      * <em>This is applicable only to circular {@link ChartType#GAUGE} type
      * charts.</em>
-     * 
+     *
      * @param innerRadius
      */
     public void setInnerRadius(String innerRadius) {
@@ -144,7 +144,7 @@ public class Background extends AbstractConfigurationObject {
 
     /**
      * Returns current shape of the background.
-     * 
+     *
      * @return Current shape.
      */
     public BackgroundShape getShape() {
@@ -153,7 +153,7 @@ public class Background extends AbstractConfigurationObject {
 
     /**
      * Sets the current shape of the background.
-     * 
+     *
      * @param shape
      *            New shape.
      */

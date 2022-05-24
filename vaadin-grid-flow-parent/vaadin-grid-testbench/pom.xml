@@ -4,7 +4,7 @@
     <parent>
         <artifactId>vaadin-grid-flow-parent</artifactId>
         <groupId>com.vaadin</groupId>
-        <version>23.0-SNAPSHOT</version>
+        <version>23.2-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-grid-testbench</artifactId>
     <packaging>jar</packaging>
@@ -15,6 +15,11 @@
             <artifactId>vaadin-testbench-core</artifactId>
             <version>${testbench.version}</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-checkbox-testbench</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
     <build>

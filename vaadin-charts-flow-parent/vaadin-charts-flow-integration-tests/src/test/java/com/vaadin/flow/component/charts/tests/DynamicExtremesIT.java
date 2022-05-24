@@ -2,7 +2,7 @@
  * #%L
  * Vaadin Charts
  * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
@@ -12,8 +12,8 @@
  */
 package com.vaadin.flow.component.charts.tests;
 
-import com.vaadin.flow.component.charts.demo.AbstractChartExample;
-import com.vaadin.flow.component.charts.demo.examples.dynamic.DynamicExtremes;
+import com.vaadin.flow.component.charts.examples.AbstractChartExample;
+import com.vaadin.flow.component.charts.examples.dynamic.DynamicExtremes;
 import com.vaadin.flow.component.charts.testbench.ChartElement;
 import org.junit.Test;
 import org.openqa.selenium.By;

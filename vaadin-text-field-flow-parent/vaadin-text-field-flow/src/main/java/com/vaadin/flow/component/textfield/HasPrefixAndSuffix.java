@@ -17,6 +17,7 @@ package com.vaadin.flow.component.textfield;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
+import com.vaadin.flow.component.SlotUtils;
 
 /**
  * Mixin interface for text-field components that have prefix and suffix slots
@@ -32,13 +33,13 @@ public interface HasPrefixAndSuffix extends HasElement {
      * <p>
      * This is most commonly used to add a simple icon or static text into the
      * field.
-     * 
+     *
      * @param component
      *            the component to set, can be {@code null} to remove existing
      *            prefix component
      */
     default void setPrefixComponent(Component component) {
-        SlotHelpers.clearSlot(this, "prefix");
+        SlotUtils.clearSlot(this, "prefix");
 
         if (component != null) {
             component.getElement().setAttribute("slot", "prefix");
@@ -48,13 +49,13 @@ public interface HasPrefixAndSuffix extends HasElement {
 
     /**
      * Gets the component in the prefix slot of this field.
-     * 
+     *
      * @return the prefix component of this field, or {@code null} if no prefix
      *         component has been set
      * @see #setPrefixComponent(Component)
      */
     default Component getPrefixComponent() {
-        return SlotHelpers.getChildInSlot(this, "prefix");
+        return SlotUtils.getChildInSlot(this, "prefix");
     }
 
     /**
@@ -63,13 +64,13 @@ public interface HasPrefixAndSuffix extends HasElement {
      * <p>
      * This is most commonly used to add a simple icon or static text into the
      * field.
-     * 
+     *
      * @param component
      *            the component to set, can be {@code null} to remove existing
      *            suffix component
      */
     default void setSuffixComponent(Component component) {
-        SlotHelpers.clearSlot(this, "suffix");
+        SlotUtils.clearSlot(this, "suffix");
 
         if (component != null) {
             component.getElement().setAttribute("slot", "suffix");
@@ -79,12 +80,12 @@ public interface HasPrefixAndSuffix extends HasElement {
 
     /**
      * Gets the component in the suffix slot of this field.
-     * 
+     *
      * @return the suffix component of this field, or {@code null} if no suffix
      *         component has been set
      * @see #setPrefixComponent(Component)
      */
     default Component getSuffixComponent() {
-        return SlotHelpers.getChildInSlot(this, "suffix");
+        return SlotUtils.getChildInSlot(this, "suffix");
     }
 }

@@ -51,13 +51,16 @@ import com.vaadin.flow.shared.Registration;
 import elemental.json.JsonValue;
 
 /**
- * Component that encapsulates the functionality of the
- * {@code <vaadin-virtual-list>} web component.
+ * Virtual List allows you to render a long list of items inside a scrollable
+ * container without sacrificing performance. Each item is rendered on the fly
+ * as the user scrolls the list. To use the component, you need to assign it a
+ * set of data items and a renderer that is used for rendering each individual
+ * data item. The height of an item is determined by its content and can change
+ * dynamically.
  * <p>
- * It supports {@link DataProvider}s to load data asynchronously and
+ * This component supports {@link DataProvider}s to load data asynchronously and
  * {@link Renderer}s to render the markup for each item.
  * <p>
- *
  *
  * @author Vaadin Ltd.
  *
@@ -65,11 +68,11 @@ import elemental.json.JsonValue;
  *            the type of the items supported by the list
  */
 @Tag("vaadin-virtual-list")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.0-beta1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-rc1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
-@NpmPackage(value = "@vaadin/virtual-list", version = "23.0.0-beta1")
-@NpmPackage(value = "@vaadin/vaadin-virtual-list", version = "23.0.0-beta1")
+@NpmPackage(value = "@vaadin/virtual-list", version = "23.1.0-rc1")
+@NpmPackage(value = "@vaadin/vaadin-virtual-list", version = "23.1.0-rc1")
 @JsModule("@vaadin/virtual-list/vaadin-virtual-list.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./virtualListConnector.js")
@@ -248,8 +251,7 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
      * placeholders and actual items.
      * <p>
      * When no placeholder item is set (or when set to <code>null</code>), an
-     * empty placeholder element is created with <code>100px</code> of width and
-     * <code>18px</code> of height.
+     * empty placeholder element is created.
      * <p>
      * Note: when using {@link ComponentRenderer}s, the component used for the
      * placeholder is statically stamped in the list. It can not be modified,
@@ -314,9 +316,8 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
              * placeholder element with a non 0 size to avoid issues when
              * scrolling.
              */
-            placeholderTemplate = "<div style='width:100px;height:18px'></div>";
+            placeholderTemplate = "<div style='width:100px;'></div>";
         } else if (renderer instanceof ComponentRenderer) {
-            @SuppressWarnings("unchecked")
             ComponentRenderer<?, T> componentRenderer = (ComponentRenderer<?, T>) renderer;
             Component component = componentRenderer
                     .createComponent(placeholderItem);

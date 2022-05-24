@@ -4,11 +4,11 @@ package com.vaadin.flow.component.charts.events.internal;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -18,7 +18,7 @@ import com.vaadin.flow.component.charts.model.Series;
 
 /**
  * Event for updating existing data series.
- * 
+ *
  * @since 2.0
  *
  */
@@ -30,7 +30,7 @@ public class DataUpdatedEvent extends AbstractSeriesItemEvent {
 
     /**
      * Constructs the event with given series, number and point index.
-     * 
+     *
      * @param series
      *            Series.
      * @param value
@@ -45,7 +45,7 @@ public class DataUpdatedEvent extends AbstractSeriesItemEvent {
 
     /**
      * Constructs the event with given series, item and point index.
-     * 
+     *
      * @param series
      *            Series.
      * @param item
@@ -61,7 +61,7 @@ public class DataUpdatedEvent extends AbstractSeriesItemEvent {
 
     /**
      * Returns the point index.
-     * 
+     *
      * @return Point index.
      */
     public int getPointIndex() {

@@ -16,13 +16,20 @@
 package com.vaadin.flow.component.upload.testbench;
 
 import java.io.File;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.openqa.selenium.WebDriver.Timeouts;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chromium.ChromiumDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.WrapsDriver;
 import org.openqa.selenium.WrapsElement;
 import org.openqa.selenium.remote.LocalFileDetector;
 import org.openqa.selenium.remote.RemoteWebElement;
+import org.openqa.selenium.safari.SafariDriver;
 
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
@@ -63,7 +70,12 @@ public class UploadElement extends TestBenchElement {
         if (isMaxFilesReached()) {
             removeFile(0);
         }
-        TestBenchElement uploadElement = setLocalFileDetector();
+        TestBenchElement uploadElement;
+        if (isLocalDriver(getDriver())) {
+            uploadElement = getUploadElement();
+        } else {
+            uploadElement = setLocalFileDetector();
+        }
 
         // Element must be focusable for Edge and Firefox
         Boolean hidden = uploadElement.getPropertyBoolean("hidden");
@@ -81,6 +93,39 @@ public class UploadElement extends TestBenchElement {
         if (maxSeconds > 0) {
             waitForUploads(maxSeconds);
         }
+    }
+
+    /**
+     * Uploads the given local files and waits for the given number of seconds
+     * for the upload to finish.
+     * <p>
+     * Note that Safari webdriver does not support file uploads.
+     * <p>
+     * Technically this temporarily disables the auto-upload feature, schedules
+     * all files for upload, and then starts the upload manually. This is
+     * necessary, because when running tests locally, uploads can finish even
+     * before we can schedule the command through the Selenium API.
+     *
+     * @param files
+     *            the local files to upload, can reference the same file
+     *            multiple times
+     * @param maxSeconds
+     *            the number of seconds to wait for the upload to finish or
+     *            <code>0</code> not to wait
+     */
+    public void uploadMultiple(List<File> files, int maxSeconds) {
+        // Disable auto-upload
+        boolean originalNoAuto = getPropertyBoolean("noAuto");
+        setProperty("noAuto", true);
+        // Schedule individual files
+        files.forEach(file -> upload(file, 0));
+        // Manually start upload, wait for all files to finish
+        startUpload();
+        if (maxSeconds > 0) {
+            waitForUploads(maxSeconds);
+        }
+        // Reset auto-upload to original value
+        setProperty("noAuto", originalNoAuto);
     }
 
     /**
@@ -107,6 +152,10 @@ public class UploadElement extends TestBenchElement {
         executeScript(
                 "arguments[0]._removeFile(arguments[0].files[arguments[1]])",
                 this, i);
+    }
+
+    private void startUpload() {
+        executeScript("arguments[0].uploadFiles()", this);
     }
 
     /**
@@ -159,6 +208,15 @@ public class UploadElement extends TestBenchElement {
         executeScript(
                 "arguments[0].files.forEach(function(file) { return arguments[0].dispatchEvent(new CustomEvent('file-abort', {detail: {file: file}}));})",
                 this);
+    }
+
+    private static boolean isLocalDriver(WebDriver driver) {
+        while (driver instanceof WrapsDriver) {
+            driver = ((WrapsDriver) driver).getWrappedDriver();
+        }
+        return driver instanceof ChromiumDriver
+                || driver instanceof FirefoxDriver
+                || driver instanceof SafariDriver;
     }
 
 }

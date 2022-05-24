@@ -4,11 +4,11 @@ package com.vaadin.flow.component.charts.model;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -338,7 +338,7 @@ public class DataSeriesItem extends AbstractSeriesItem {
      * for a drilldown for this point. If the value doesn't correspond to the ID
      * of a series the point will be shown as if drilldown was enabled and a
      * {@link DrilldownCallback} will be triggered when user clicks in a point.
-     * 
+     *
      * @param drilldown
      */
     void setDrilldown(String drilldown) {
@@ -348,7 +348,7 @@ public class DataSeriesItem extends AbstractSeriesItem {
     /**
      * True to enable drilldown and a {@link DrilldownCallback} will be
      * triggered when user clicks in a point.
-     * 
+     *
      * @param drilldown
      */
     void setDrilldown(Boolean drilldown) {
@@ -365,7 +365,7 @@ public class DataSeriesItem extends AbstractSeriesItem {
 
     /**
      * Set the label configuration for this item
-     * 
+     *
      * @param dataLabels
      */
     public void setDataLabels(DataLabels dataLabels) {

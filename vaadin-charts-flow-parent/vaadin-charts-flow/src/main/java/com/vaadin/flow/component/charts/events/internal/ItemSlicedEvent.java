@@ -4,11 +4,11 @@ package com.vaadin.flow.component.charts.events.internal;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -17,7 +17,7 @@ import com.vaadin.flow.component.charts.model.Series;
 
 /**
  * Event for information about slicing a pie point
- * 
+ *
  * @since 2.0
  */
 public class ItemSlicedEvent extends AbstractSeriesEvent {
@@ -29,7 +29,7 @@ public class ItemSlicedEvent extends AbstractSeriesEvent {
 
     /**
      * Constructs the event.
-     * 
+     *
      * @param index
      * @param sliced
      * @param redraw
@@ -46,7 +46,7 @@ public class ItemSlicedEvent extends AbstractSeriesEvent {
 
     /**
      * Constructs the event with animated transition
-     * 
+     *
      * @param index
      * @param sliced
      * @param redraw
@@ -58,7 +58,7 @@ public class ItemSlicedEvent extends AbstractSeriesEvent {
 
     /**
      * Constructs the event with animated transition, redraws the chart
-     * 
+     *
      * @param index
      * @param sliced
      */
@@ -68,7 +68,7 @@ public class ItemSlicedEvent extends AbstractSeriesEvent {
 
     /**
      * Returns the index of the point to be sliced
-     * 
+     *
      * @return
      */
     public int getIndex() {
@@ -78,7 +78,7 @@ public class ItemSlicedEvent extends AbstractSeriesEvent {
     /**
      * When true, the point is sliced out. When false, the point is set in. When
      * null or undefined, the sliced state is toggled.
-     * 
+     *
      * @return
      */
     public boolean isSliced() {
@@ -87,7 +87,7 @@ public class ItemSlicedEvent extends AbstractSeriesEvent {
 
     /**
      * Whether or not redrawing should be immediate.
-     * 
+     *
      * @return <b>true</b> when redrawing needs to be immediate, <b>false</b>
      *         otherwise.
      */
@@ -97,7 +97,7 @@ public class ItemSlicedEvent extends AbstractSeriesEvent {
 
     /**
      * Whether or not animation should be used.
-     * 
+     *
      * @return <b>true</b> when slicing should be animated, <b>false</b>
      *         otherwise.
      */

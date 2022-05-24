@@ -2,7 +2,7 @@
  * #%L
  * Vaadin Charts
  * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
@@ -15,9 +15,9 @@ package com.vaadin.flow.component.charts.ui;
 import java.util.Optional;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.charts.demo.AbstractChartExample;
-import com.vaadin.flow.component.charts.demo.examples.area.AreaChart;
-import com.vaadin.flow.component.charts.demo.examples.dynamic.ServerSideEvents;
+import com.vaadin.flow.component.charts.examples.AbstractChartExample;
+import com.vaadin.flow.component.charts.examples.area.AreaChart;
+import com.vaadin.flow.component.charts.examples.dynamic.ServerSideEvents;
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.html.Div;
@@ -31,7 +31,7 @@ import com.vaadin.flow.router.WildcardParameter;
 @Uses(ServerSideEvents.class)
 public class MainView extends Div implements HasUrlParameter<String> {
 
-    public static String EXAMPLE_BASE_PACKAGE = "com.vaadin.flow.component.charts.demo.examples.";
+    public static String EXAMPLE_BASE_PACKAGE = "com.vaadin.flow.component.charts.examples.";
 
     @Override
     public void setParameter(BeforeEvent event,

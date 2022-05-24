@@ -4,11 +4,11 @@ package com.vaadin.flow.component.charts.model;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -29,14 +29,14 @@ public interface Series extends Serializable {
     /**
      * Sets the name of the series as shown in the legend, tooltip etc. Defaults
      * to "".
-     * 
+     *
      * @param name
      */
     void setName(String name);
 
     /**
      * Sets the configuration to which this series is linked.
-     * 
+     *
      * @param configuration
      */
     void setConfiguration(Configuration configuration);
@@ -69,7 +69,7 @@ public interface Series extends Serializable {
 
     /**
      * Sets an id for the series
-     * 
+     *
      * @param id
      *            new ID to set
      */

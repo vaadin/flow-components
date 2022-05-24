@@ -4,11 +4,11 @@ package com.vaadin.flow.component.charts.model;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -195,7 +195,7 @@ public class PlotOptionsTreemap extends AbstractPlotOptions {
      * <p>
      * The width of the border surrounding each column or bar.
      * </p>
-     * 
+     *
      * <p>
      * In <a href=
      * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
@@ -301,7 +301,7 @@ public class PlotOptionsTreemap extends AbstractPlotOptions {
 
     /**
      * Adds color to the colors array
-     * 
+     *
      * @param color
      *            to add
      * @see #setColors(Color...)
@@ -315,7 +315,7 @@ public class PlotOptionsTreemap extends AbstractPlotOptions {
 
     /**
      * Removes first occurrence of color in colors array
-     * 
+     *
      * @param color
      *            to remove
      * @see #setColors(Color...)
@@ -562,7 +562,7 @@ public class PlotOptionsTreemap extends AbstractPlotOptions {
 
     /**
      * Adds key to the keys array
-     * 
+     *
      * @param key
      *            to add
      * @see #setKeys(String...)
@@ -576,7 +576,7 @@ public class PlotOptionsTreemap extends AbstractPlotOptions {
 
     /**
      * Removes first occurrence of key in keys array
-     * 
+     *
      * @param key
      *            to remove
      * @see #setKeys(String...)
@@ -661,7 +661,7 @@ public class PlotOptionsTreemap extends AbstractPlotOptions {
 
     /**
      * Adds level to the levels array
-     * 
+     *
      * @param level
      *            to add
      * @see #setLevels(Level...)
@@ -675,7 +675,7 @@ public class PlotOptionsTreemap extends AbstractPlotOptions {
 
     /**
      * Removes first occurrence of level in levels array
-     * 
+     *
      * @param level
      *            to remove
      * @see #setLevels(Level...)
@@ -971,7 +971,7 @@ public class PlotOptionsTreemap extends AbstractPlotOptions {
      * axis, Y axis or Z axis for bubbles, according to the
      * <code>zoneAxis</code> option.
      * </p>
-     * 
+     *
      * <p>
      * In <a href=
      * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
@@ -988,7 +988,7 @@ public class PlotOptionsTreemap extends AbstractPlotOptions {
 
     /**
      * Adds zone to the zones array
-     * 
+     *
      * @param zone
      *            to add
      * @see #setZones(Zones...)
@@ -1002,7 +1002,7 @@ public class PlotOptionsTreemap extends AbstractPlotOptions {
 
     /**
      * Removes first occurrence of zone in zones array
-     * 
+     *
      * @param zone
      *            to remove
      * @see #setZones(Zones...)

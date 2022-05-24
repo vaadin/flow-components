@@ -2,7 +2,7 @@
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2021 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
@@ -18,8 +18,11 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.junit.After;
 import org.junit.Before;
@@ -100,6 +103,17 @@ public class SVGGeneratorTest {
         Configuration conf = createPieChartConfiguration();
         String svg = svgGenerator.generate(conf);
         Path pieChartPath = Paths.get("src", "test", "resources", "pie.svg");
+        String expectedSVG = readUtf8File(pieChartPath);
+        assertEquals(replaceIds(expectedSVG), replaceIds(svg));
+    }
+
+    @Test
+    public void generateSVGFromChartWithoutTitle()
+            throws IOException, InterruptedException {
+        Configuration conf = createColumnWithoutTitle();
+        String svg = svgGenerator.generate(conf);
+        Path pieChartPath = Paths.get("src", "test", "resources",
+                "column-without-title.svg");
         String expectedSVG = readUtf8File(pieChartPath);
         assertEquals(replaceIds(expectedSVG), replaceIds(svg));
     }
@@ -194,6 +208,17 @@ public class SVGGeneratorTest {
         assertEquals(replaceIds(expectedSVG), replaceIds(actualSVG));
     }
 
+    @Test
+    public void exportWithLargeSeries()
+            throws IOException, InterruptedException {
+        Configuration configuration = new Configuration();
+        List<Number> data = IntStream.range(0, 100000).boxed()
+                .collect(Collectors.toList());
+        ListSeries series = new ListSeries(data);
+        configuration.addSeries(series);
+        svgGenerator.generate(configuration);
+    }
+
     private Configuration createPieChartConfiguration() {
         Configuration conf = new Configuration();
         conf.setTitle("Browser market shares in January, 2018");
@@ -224,6 +249,32 @@ public class SVGGeneratorTest {
         series.add(new DataSeriesItem("Others", 2.61));
         conf.setSeries(series);
         return conf;
+    }
+
+    private Configuration createColumnWithoutTitle() {
+        Configuration configuration = new Configuration();
+        configuration.getChart().setType(ChartType.COLUMN);
+
+        configuration.addSeries(new ListSeries("Tokyo", 49.9, 71.5, 106.4,
+                129.2, 144.0, 176.0, 135.6, 148.5, 216.4, 194.1, 95.6, 54.4));
+        configuration.addSeries(new ListSeries("New York", 83.6, 78.8, 98.5,
+                93.4, 106.0, 84.5, 105.0, 104.3, 91.2, 83.5, 106.6, 92.3));
+        configuration.addSeries(new ListSeries("London", 48.9, 38.8, 39.3, 41.4,
+                47.0, 48.3, 59.0, 59.6, 52.4, 65.2, 59.3, 51.2));
+        configuration.addSeries(new ListSeries("Berlin", 42.4, 33.2, 34.5, 39.7,
+                52.6, 75.5, 57.4, 60.4, 47.6, 39.1, 46.8, 51.1));
+
+        XAxis x = new XAxis();
+        x.setCategories("January is a long month", "February is rather boring",
+                "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov",
+                "Dec");
+        configuration.addxAxis(x);
+
+        YAxis y = new YAxis();
+        y.setTitle("Rainfall (mm)");
+        configuration.addyAxis(y);
+
+        return configuration;
     }
 
     private Configuration createAreaChartConfiguration() {

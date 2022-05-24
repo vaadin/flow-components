@@ -4,7 +4,7 @@ package com.vaadin.flow.component.charts.model;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
@@ -49,7 +49,7 @@ public class NodeSeries extends AbstractSeries {
 
     /**
      * Adds both nodes and links then in the series.
-     * 
+     *
      * @param from
      *            see {@link NodeSeriesItem#setFrom(Node)}
      * @param to
@@ -65,7 +65,7 @@ public class NodeSeries extends AbstractSeries {
     /**
      * Adds a node to the chart. To link the added node to other nodes use
      * {@link #add(NodeSeriesItem)}.
-     * 
+     *
      * @param node
      *            {@link Node} to be added. Not null.
      * @throws IllegalArgumentException
@@ -79,7 +79,7 @@ public class NodeSeries extends AbstractSeries {
     /**
      * Removes the nodeSeriesItem. To remove the to and from nodes, use
      * {@link #remove(Node)}
-     * 
+     *
      * @param nodeSeriesItem
      *            item to be removed.
      */
@@ -92,7 +92,7 @@ public class NodeSeries extends AbstractSeries {
     /**
      * Removes the node. To remove the links, use
      * {@link #remove(NodeSeriesItem)}
-     * 
+     *
      * @param node
      *            item to be removed.
      */

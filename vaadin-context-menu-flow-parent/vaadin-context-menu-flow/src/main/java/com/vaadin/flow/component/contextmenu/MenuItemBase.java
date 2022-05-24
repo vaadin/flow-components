@@ -43,12 +43,12 @@ import java.util.stream.Collectors;
  */
 @SuppressWarnings("serial")
 @Tag("vaadin-context-menu-item")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.0-beta1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-rc1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends MenuItemBase<C, I, S>, S extends SubMenuBase<C, I, S>>
         extends Component implements HasText, HasComponents, HasEnabled {
 
-    private static final String PRIVATE_THEME_ATTRIBUTE = "_theme";
+    private static final String PRIVATE_THEME_ATTRIBUTE = "__theme";
 
     private final C contextMenu;
     private S subMenu;

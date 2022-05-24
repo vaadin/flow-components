@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.dialog;
 
+import java.io.Serializable;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -37,16 +38,39 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementConstants;
+import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.shared.Registration;
 
 /**
- * Server-side component for the {@code <vaadin-dialog>} element.
+ * A Dialog is a small window that can be used to present information and user
+ * interface elements in an overlay.
+ * <p>
+ * Dialogs can be made modal or non-modal. A modal Dialog blocks the user from
+ * interacting with the rest of the user interface while the Dialog is open, as
+ * opposed to a non-modal Dialog, which does not block interaction.
+ * <p>
+ * Dialogs can be made draggable and resizable. When draggable, the user is able
+ * to move them around using a pointing device. It is recommended to make
+ * non-modal Dialogs draggable so that the user can interact with content that
+ * might otherwise be obscured by the Dialog. A resizable Dialog allows the user
+ * to resize the Dialog by dragging from the edges of the Dialog with a pointing
+ * device. Dialogs are not resizable by default.
+ * <p>
+ * Dialogs automatically become scrollable when their content overflows. Custom
+ * scrollable areas can be created using the Scroller component.
+ * <p>
+ * Best Practices:<br>
+ * Dialogs are disruptive by nature and should be used sparingly. Do not use
+ * them to communicate nonessential information, such as success messages like
+ * “Logged in”, “Copied”, and so on. Instead, use Notifications when
+ * appropriate.
  *
  * @author Vaadin Ltd
  */
+@JsModule("./dialogConnector.js")
 @JsModule("./flow-component-renderer.js")
 public class Dialog extends GeneratedVaadinDialog<Dialog>
-        implements HasComponents, HasSize, HasTheme {
+        implements HasComponents, HasSize, HasTheme, HasStyle {
 
     private static final String OVERLAY_LOCATOR_JS = "this.$.overlay";
     private Element template;
@@ -59,6 +83,8 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
     private String height;
     private String minHeight;
     private String maxHeight;
+    private DialogHeader dialogHeader;
+    private DialogFooter dialogFooter;
 
     /**
      * Creates an empty dialog.
@@ -87,6 +113,9 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         setOpened(false);
 
         getElement().addEventListener("opened-changed", event -> {
+            if (!isOpened()) {
+                setModality(false);
+            }
             if (autoAddedToTheUi && !isOpened()) {
                 getElement().removeFromParent();
                 autoAddedToTheUi = false;
@@ -438,6 +467,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
      */
     public void setModal(boolean modal) {
         getElement().setProperty("modeless", !modal);
+        getUI().ifPresent(ui -> ui.setChildComponentModal(this, modal));
     }
 
     /**
@@ -501,6 +531,193 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         return getElement().getProperty("resizable", false);
     }
 
+    /**
+     * Sets the title to be rendered on the dialog header.
+     *
+     * @param title
+     *            title to be rendered
+     */
+    public void setHeaderTitle(String title) {
+        getElement().setProperty("headerTitle", title);
+    }
+
+    /**
+     * Gets the title set for the dialog header.
+     *
+     * @return the title or an empty string, if a header title is not defined.
+     */
+    public String getHeaderTitle() {
+        return getElement().getProperty("headerTitle", "");
+    }
+
+    /**
+     * Gets the object from which components can be added or removed from the
+     * dialog header area. The header is displayed only if there's a
+     * {@link #getHeaderTitle()} or at least one component added with
+     * {@link DialogHeaderFooter#add(Component...)}.
+     *
+     * @return the header object
+     */
+    public DialogHeader getHeader() {
+        if (this.dialogHeader == null) {
+            this.dialogHeader = new DialogHeader(this);
+        }
+        return this.dialogHeader;
+    }
+
+    /**
+     * Gets the object from which components can be added or removed from the
+     * dialog footer area. The footer is displayed only if there's at least one
+     * component added with {@link DialogHeaderFooter#add(Component...)}.
+     *
+     * @return the header object
+     */
+    public DialogFooter getFooter() {
+        if (this.dialogFooter == null) {
+            this.dialogFooter = new DialogFooter(this);
+        }
+        return this.dialogFooter;
+    }
+
+    /**
+     * Class for adding and removing components to the header part of a dialog.
+     */
+    final public static class DialogHeader extends DialogHeaderFooter {
+        private DialogHeader(Dialog dialog) {
+            super("headerRenderer", dialog);
+        }
+    }
+
+    /**
+     * Class for adding and removing components to the header part of a dialog.
+     */
+    final public static class DialogFooter extends DialogHeaderFooter {
+        private DialogFooter(Dialog dialog) {
+            super("footerRenderer", dialog);
+        }
+    }
+
+    /**
+     * This class defines the common behavior for adding/removing components to
+     * the header and footer parts. It also creates the root element where the
+     * components will be attached to as well as the renderer function used by
+     * the dialog.
+     */
+    abstract static class DialogHeaderFooter implements Serializable {
+        protected final Element root;
+        private final String rendererFunction;
+        private final Component dialog;
+        boolean rendererCreated = false;
+
+        protected DialogHeaderFooter(String rendererFunction,
+                Component dialog) {
+            this.rendererFunction = rendererFunction;
+            this.dialog = dialog;
+            root = new Element("div");
+            root.getStyle().set("display", "contents");
+        }
+
+        /**
+         * Adds the given components to the container.
+         *
+         * @param components
+         *            the components to be added.
+         */
+        public void add(Component... components) {
+            Objects.requireNonNull(components, "Components should not be null");
+            for (Component component : components) {
+                Objects.requireNonNull(component,
+                        "Component to add cannot be null");
+                root.appendChild(component.getElement());
+            }
+            if (!isRendererCreated()) {
+                initRenderer();
+            }
+        }
+
+        /**
+         * Removes the given components from the container.
+         *
+         * <p>
+         * Note that the component needs to be removed from this method in order
+         * to guarantee the correct state of the component.
+         *
+         * @param components
+         *            the components to be removed.
+         */
+        public void remove(Component... components) {
+            Objects.requireNonNull(components, "Components should not be null");
+            for (Component component : components) {
+                Objects.requireNonNull(component,
+                        "Component to remove cannot be null");
+                if (root.equals(component.getElement().getParent())) {
+                    root.removeChild(component.getElement());
+                }
+            }
+            if (root.getChildCount() == 0) {
+                dialog.getElement()
+                        .executeJs("this." + rendererFunction + " = null;");
+                setRendererCreated(false);
+            }
+        }
+
+        /**
+         * Method called to create the renderer function using
+         * {@link #rendererFunction} as the property name.
+         */
+        void initRenderer() {
+            if (root.getChildCount() == 0) {
+                return;
+            }
+            dialog.getElement().appendChild(root);
+            dialog.getElement().executeJs("this." + rendererFunction
+                    + " = (root) => {" + "if (root.firstChild) { "
+                    + "   return;" + "}" + "root.appendChild($0);" + "}", root);
+            setRendererCreated(true);
+        }
+
+        /**
+         * Gets whether the renderer function exists or not
+         *
+         * @return the renderer function state
+         */
+        boolean isRendererCreated() {
+            return rendererCreated;
+        }
+
+        /**
+         * Sets the renderer function creation state. To avoid making a
+         * JavaScript execution to get the information from the client, this is
+         * done on the server by setting it to <code>true</code> on
+         * {@link #initRenderer()} and to <code>false</code> when the last child
+         * is removed in {@link #remove(Component...)} or when an auto attached
+         * dialog is closed.
+         *
+         * @param rendererCreated
+         */
+        void setRendererCreated(boolean rendererCreated) {
+            this.rendererCreated = rendererCreated;
+        }
+    }
+
+    /**
+     * Set the visibility of the dialog.
+     * <p>
+     * For a modal dialog the server-side modality will be removed when dialog
+     * is not visible so that interactions can be made in the application.
+     *
+     * @see Component#setVisible(boolean)
+     * @param visible
+     *            dialog visibility
+     */
+    @Override
+    public void setVisible(boolean visible) {
+        super.setVisible(visible);
+
+        getUI().ifPresent(
+                ui -> ui.setChildComponentModal(this, visible && isModal()));
+    }
+
     private UI getCurrentUI() {
         UI ui = UI.getCurrent();
         if (ui == null) {
@@ -517,7 +734,8 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         UI ui = getCurrentUI();
         ui.beforeClientResponse(ui, context -> {
             if (getElement().getNode().getParent() == null) {
-                ui.add(this);
+                ui.addToModalComponent(this);
+                ui.setChildComponentModal(this, isModal());
                 autoAddedToTheUi = true;
             }
         });
@@ -566,6 +784,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         if (opened) {
             ensureAttached();
         }
+        setModality(opened && isModal());
         super.setOpened(opened);
     }
 
@@ -576,6 +795,12 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
      */
     public boolean isOpened() {
         return super.isOpenedBoolean();
+    }
+
+    private void setModality(boolean modal) {
+        if (isAttached()) {
+            getUI().ifPresent(ui -> ui.setChildComponentModal(this, modal));
+        }
     }
 
     @Override
@@ -656,6 +881,24 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         // as the locator is stored inside component's attributes, no need to
         // remove the data as it should live as long as the component does
         Shortcuts.setShortcutListenOnElement(OVERLAY_LOCATOR_JS, this);
+        initConnector();
+        initHeaderFooterRenderer();
+    }
+
+    private void initConnector() {
+        getElement()
+                .executeJs("window.Vaadin.Flow.dialogConnector.initLazy(this)");
+    }
+
+    private void initHeaderFooterRenderer() {
+        if (dialogHeader != null) {
+            dialogHeader.setRendererCreated(false);
+            dialogHeader.initRenderer();
+        }
+        if (dialogFooter != null) {
+            dialogFooter.setRendererCreated(false);
+            dialogFooter.initRenderer();
+        }
     }
 
     private void setDimension(String dimension, String value) {
@@ -678,4 +921,15 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         setDimension(ElementConstants.STYLE_MIN_HEIGHT, minHeight);
         setDimension(ElementConstants.STYLE_MAX_HEIGHT, maxHeight);
     }
+
+    /**
+     * @throws UnsupportedOperationException
+     *             Dialog does not support adding styles to overlay
+     */
+    @Override
+    public Style getStyle() {
+        throw new UnsupportedOperationException(
+                "Dialog does not support adding styles to overlay");
+    }
+
 }

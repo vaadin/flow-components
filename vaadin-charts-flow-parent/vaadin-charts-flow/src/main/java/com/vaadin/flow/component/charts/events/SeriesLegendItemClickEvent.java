@@ -4,11 +4,11 @@ package com.vaadin.flow.component.charts.events;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -31,7 +31,7 @@ public class SeriesLegendItemClickEvent extends ComponentEvent<Chart>
 
     /**
      * Constructs a SeriesLegendItemClickEvent
-     * 
+     *
      * @param source
      * @param fromClient
      */

@@ -4,7 +4,7 @@ package com.vaadin.flow.component.crud;
  * #%L
  * Vaadin Crud for Vaadin 10
  * %%
- * Copyright (C) 2017 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
@@ -25,6 +25,7 @@ import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasTheme;
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
@@ -67,13 +68,13 @@ import java.util.stream.Collectors;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-crud")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.0-beta1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-rc1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/crud", version = "23.0.0-beta1")
-@NpmPackage(value = "@vaadin/vaadin-crud", version = "23.0.0-beta1")
+@NpmPackage(value = "@vaadin/crud", version = "23.1.0-rc1")
+@NpmPackage(value = "@vaadin/vaadin-crud", version = "23.1.0-rc1")
 @JsModule("@vaadin/crud/src/vaadin-crud.js")
 @JsModule("@vaadin/crud/src/vaadin-crud-edit-column.js")
-public class Crud<E> extends Component implements HasSize, HasTheme {
+public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
 
     private static final String EDIT_COLUMN_KEY = "vaadin-crud-edit-column";
     private static final String EVENT_PREVENT_DEFAULT_JS = "event.preventDefault()";

@@ -35,19 +35,20 @@ import com.vaadin.flow.internal.JsonUtils;
 import elemental.json.JsonArray;
 
 /**
- * Server-side component for the {@code vaadin-message-list} element. The
- * component displays a list of messages that can be configured with
- * {@link #setItems(Collection)}.
+ * Message List allows you to show a list of messages, for example, a chat log.
+ * You can configure the text content, information about the sender and the time
+ * of sending for each message. The component displays a list of messages that
+ * can be configured with {@link #setItems(Collection)}.
  *
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-message-list")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.0-beta1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-rc1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("./messageListConnector.js")
 @JsModule("@vaadin/message-list/src/vaadin-message-list.js")
-@NpmPackage(value = "@vaadin/message-list", version = "23.0.0-beta1")
-@NpmPackage(value = "@vaadin/vaadin-messages", version = "23.0.0-beta1")
+@NpmPackage(value = "@vaadin/message-list", version = "23.1.0-rc1")
+@NpmPackage(value = "@vaadin/vaadin-messages", version = "23.1.0-rc1")
 public class MessageList extends Component
         implements HasStyle, HasSize, LocaleChangeObserver {
 

@@ -4,11 +4,11 @@ package com.vaadin.flow.component.charts.model;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -119,17 +119,17 @@ public class RangeSelector extends AbstractConfigurationObject {
      * <code>stroke-width</code>, as well as <code>style</code>, a collection of
      * CSS properties for the text.
      * </p>
-     * 
+     *
      * <p>
      * The object can also be extended with states, so you can set
      * presentational options for <code>hover</code>, <code>select</code> or
      * <code>disabled</code> button states.
      * </p>
-     * 
+     *
      * <p>
      * CSS styles for the text label.
      * </p>
-     * 
+     *
      * <p>
      * In <a href=
      * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
@@ -158,9 +158,9 @@ public class RangeSelector extends AbstractConfigurationObject {
      * <p>
      * An array of configuration objects for the buttons.
      * </p>
-     * 
+     *
      * Defaults to
-     * 
+     *
      * <pre>
      * buttons: [{
      * 		type: 'month',
@@ -194,7 +194,7 @@ public class RangeSelector extends AbstractConfigurationObject {
 
     /**
      * Adds button to the buttons array
-     * 
+     *
      * @param button
      *            to add
      * @see #setButtons(RangeSelectorButton...)
@@ -208,7 +208,7 @@ public class RangeSelector extends AbstractConfigurationObject {
 
     /**
      * Removes first occurrence of button in buttons array
-     * 
+     *
      * @param button
      *            to remove
      * @see #setButtons(RangeSelectorButton...)
@@ -394,7 +394,7 @@ public class RangeSelector extends AbstractConfigurationObject {
      * <p>
      * CSS for the HTML inputs in the range selector.
      * </p>
-     * 
+     *
      * <p>
      * In <a href=
      * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
@@ -421,7 +421,7 @@ public class RangeSelector extends AbstractConfigurationObject {
      * <p>
      * CSS styles for the labels - the Zoom, From and To texts.
      * </p>
-     * 
+     *
      * <p>
      * In <a href=
      * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"

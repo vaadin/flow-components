@@ -4,11 +4,11 @@ package com.vaadin.flow.component.charts.model;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -39,7 +39,7 @@ public class DataSeriesItemXrange extends DataSeriesItem {
 
     /**
      * Constructs an item with X, X2 and Y
-     * 
+     *
      * @param x
      * @param x2
      * @param y
@@ -51,7 +51,7 @@ public class DataSeriesItemXrange extends DataSeriesItem {
 
     /**
      * Constructs an item with X, X2 and Y
-     * 
+     *
      * @param x
      * @param x2
      * @param y
@@ -63,7 +63,7 @@ public class DataSeriesItemXrange extends DataSeriesItem {
 
     /**
      * Constructs an item with X, X2, Y and partialFillAmount.
-     * 
+     *
      * @param x
      * @param x2
      * @param y
@@ -77,7 +77,7 @@ public class DataSeriesItemXrange extends DataSeriesItem {
 
     /**
      * Constructs an item with X, X2, Y and partialFillAmount.
-     * 
+     *
      * @param x
      * @param x2
      * @param y
@@ -91,7 +91,7 @@ public class DataSeriesItemXrange extends DataSeriesItem {
 
     /**
      * Constructs an item with X, X2, Y, partialFillAmount and partialFillColor.
-     * 
+     *
      * @param x
      * @param x2
      * @param y
@@ -107,7 +107,7 @@ public class DataSeriesItemXrange extends DataSeriesItem {
 
     /**
      * Constructs an item with X, X2, Y, partialFillAmount and partialFillColor.
-     * 
+     *
      * @param x
      * @param x2
      * @param y

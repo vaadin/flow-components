@@ -4,11 +4,11 @@ package com.vaadin.flow.component.charts.model;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -23,7 +23,7 @@ public class RangeSeries extends DataSeries {
 
     /**
      * Constructs a RangeSeries with the given name
-     * 
+     *
      * @param name
      */
     public RangeSeries(String name) {
@@ -32,7 +32,7 @@ public class RangeSeries extends DataSeries {
 
     /**
      * Constructs a RangeSeries with the given values
-     * 
+     *
      * @param values
      *            low-high pairs, or x-low-high triplets
      */
@@ -73,7 +73,7 @@ public class RangeSeries extends DataSeries {
 
     /**
      * Constructs a RangeSeries with the given name and values
-     * 
+     *
      * @param name
      *            the name of the series
      * @param values
@@ -86,7 +86,7 @@ public class RangeSeries extends DataSeries {
 
     /**
      * Sets the numeric data for this series.
-     * 
+     *
      * @param values
      *            low-high pairs, or x-low-high triplets
      */

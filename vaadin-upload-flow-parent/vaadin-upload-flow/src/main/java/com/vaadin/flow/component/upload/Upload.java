@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.Component;
@@ -38,13 +39,16 @@ import com.vaadin.flow.server.StreamReceiver;
 import com.vaadin.flow.server.StreamVariable;
 import com.vaadin.flow.shared.Registration;
 
+import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonNull;
 import elemental.json.JsonObject;
 import elemental.json.JsonType;
 
 /**
- * Server-side component for the {@code vaadin-upload} element.
+ * Upload is a component for uploading one or more files. It shows the upload
+ * progression and status of each file. Files can be uploaded using the Upload
+ * button or via drag and drop.
  *
  * @author Vaadin Ltd.
  */
@@ -344,6 +348,7 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
     private void removeElementsAtSlot(String slot) {
         getElement().getChildren()
                 .filter(child -> slot.equals(child.getAttribute("slot")))
+                .collect(Collectors.toList())
                 .forEach(Element::removeFromParent);
     }
 
@@ -647,6 +652,13 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
             }
         }
         return result;
+    }
+
+    /**
+     * Clear the list of files being processed, or already uploaded.
+     */
+    public void clearFileList() {
+        setFiles(Json.createArray());
     }
 
     private static class DefaultStreamVariable implements StreamVariable {

@@ -16,6 +16,10 @@
 package com.vaadin.flow.component.button.tests;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchTestCase;
+import com.vaadin.tests.AbstractComponentIT;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,14 +29,20 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import com.vaadin.tests.ComponentDemoTest;
+import java.time.Duration;
 
 /**
  * Integration tests for the ButtonView.
  */
-public class ButtonIT extends ComponentDemoTest {
+@TestPath("vaadin-button")
+public class ButtonIT extends AbstractComponentIT {
+
+    private TestBenchTestCase layout;
+
     @Before
     public void init() {
+        open();
+        layout = this;
         waitForElementPresent(By.tagName("vaadin-button"));
     }
 
@@ -300,7 +310,8 @@ public class ButtonIT extends ComponentDemoTest {
         final String expected = "Button " + messageString + " was clicked.";
         WebElement message = layout.findElement(By.id("buttonMessage"));
 
-        WebDriverWait wait = new WebDriverWait(getDriver(), 5);
+        WebDriverWait wait = new WebDriverWait(getDriver(),
+                Duration.ofSeconds(5));
         wait.until(driver -> {
             String msg = message.getText();
             wait.withMessage("Expected '" + expected + "' but found '"
@@ -311,7 +322,11 @@ public class ButtonIT extends ComponentDemoTest {
 
     @Test
     public void assertVariants() {
-        verifyThemeVariantsBeingToggled();
+        WebElement button = findElement(By.id("button-theme-variants"));
+        Assert.assertEquals("small primary", button.getAttribute("theme"));
+
+        findElement(By.id("remove-theme-variant-button")).click();
+        Assert.assertEquals("primary", button.getAttribute("theme"));
     }
 
     private int getCenterX(WebElement element) {

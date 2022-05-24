@@ -4,11 +4,11 @@ package com.vaadin.flow.component.charts.model;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -25,7 +25,7 @@ public class HTMLLabelItem extends AbstractConfigurationObject {
 
     /**
      * Constructs a HTMLLabelItem with the given HTML content
-     * 
+     *
      * @param html
      */
     public HTMLLabelItem(String html) {
@@ -34,7 +34,7 @@ public class HTMLLabelItem extends AbstractConfigurationObject {
 
     /**
      * Constructs a HTMLLabelItem with the given HTML content and style
-     * 
+     *
      * @param html
      * @param style
      */
@@ -52,7 +52,7 @@ public class HTMLLabelItem extends AbstractConfigurationObject {
 
     /**
      * Sets the inner HTML or text for the label. Defaults to "".
-     * 
+     *
      * @param html
      */
     public void setHtml(String html) {
@@ -69,7 +69,7 @@ public class HTMLLabelItem extends AbstractConfigurationObject {
     /**
      * Sets the CSS style for the label. To position the label, use
      * {@link Style#setLeft(String)} and {@link Style#setTop(String)}.
-     * 
+     *
      * @param style
      */
     public void setStyle(Style style) {

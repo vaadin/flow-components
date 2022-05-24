@@ -18,6 +18,7 @@ package com.vaadin.flow.component.treegrid.it;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -108,9 +109,9 @@ public class TreeGridBasicFeaturesPage extends Div {
             });
         });
 
-        inMemoryDataProvider = new TreeDataProvider<>(data);
+        inMemoryDataProvider = new CustomTreeDataProvider(data);
         lazyDataProvider = new LazyHierarchicalDataProvider(3, 2);
-        loggingDataProvider = new TreeDataProvider<HierarchicalTestBean>(data) {
+        loggingDataProvider = new CustomTreeDataProvider(data) {
 
             @Override
             public Stream<HierarchicalTestBean> fetchChildren(
@@ -246,5 +247,19 @@ public class TreeGridBasicFeaturesPage extends Div {
     private NativeButton setIdByText(NativeButton button) {
         button.setId(button.getText().replace(" ", ""));
         return button;
+    }
+
+    public class CustomTreeDataProvider
+            extends TreeDataProvider<HierarchicalTestBean> {
+        public CustomTreeDataProvider(TreeData<HierarchicalTestBean> treeData) {
+            super(treeData);
+        }
+
+        @Override
+        public Object getId(HierarchicalTestBean item) {
+            Objects.requireNonNull(item,
+                    "Cannot provide an id for a null item.");
+            return item.getId();
+        }
     }
 }

@@ -17,25 +17,28 @@ package com.vaadin.flow.component.orderedlayout.tests;
 
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.radiobutton.testbench.RadioButtonGroupElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.tests.ComponentDemoTest;
-
 /**
  * Tests for the HorizontalLayout.
  */
-public class HorizontalLayoutViewIT extends ComponentDemoTest {
-    @Override
-    protected String getTestPath() {
-        return "/vaadin-ordered-layout/horizontallayout";
+@TestPath("vaadin-ordered-layout")
+public class HorizontalLayoutViewIT extends AbstractComponentIT {
+
+    @Before
+    public void init() {
+        open();
     }
 
     @Test
     public void defaultLayout() {
-        WebElement hLayout = layout.findElement(By.id("default-layout"));
+        WebElement hLayout = findElement(By.id("default-layout"));
         assertBasicFlexPropertiesAreSet(hLayout);
 
         Assert.assertTrue(
@@ -65,8 +68,7 @@ public class HorizontalLayoutViewIT extends ComponentDemoTest {
 
     @Test
     public void layoutWithJustifyContent() {
-        WebElement hLayout = layout
-                .findElement(By.id("layout-with-justify-content"));
+        WebElement hLayout = findElement(By.id("layout-with-justify-content"));
         assertBasicFlexPropertiesAreSet(hLayout);
 
         Assert.assertEquals("space-between",
@@ -102,7 +104,7 @@ public class HorizontalLayoutViewIT extends ComponentDemoTest {
 
     @Test
     public void layoutWithAlignment() {
-        WebElement vlayout = layout.findElement(By.id("layout-with-alignment"));
+        WebElement vlayout = findElement(By.id("layout-with-alignment"));
         assertBasicFlexPropertiesAreSet(vlayout);
 
         Assert.assertEquals("center", vlayout.getCssValue("align-items"));
@@ -132,8 +134,8 @@ public class HorizontalLayoutViewIT extends ComponentDemoTest {
 
     @Test
     public void layoutWithIndividualAlignments() {
-        WebElement vlayout = layout
-                .findElement(By.id("layout-with-individual-alignments"));
+        WebElement vlayout = findElement(
+                By.id("layout-with-individual-alignments"));
         assertBasicFlexPropertiesAreSet(vlayout);
 
         Assert.assertEquals("space-between",
@@ -154,8 +156,7 @@ public class HorizontalLayoutViewIT extends ComponentDemoTest {
 
     @Test
     public void layoutWithExpandRatios() {
-        WebElement vlayout = layout
-                .findElement(By.id("layout-with-expand-ratios"));
+        WebElement vlayout = findElement(By.id("layout-with-expand-ratios"));
         assertBasicFlexPropertiesAreSet(vlayout);
 
         WebElement child = vlayout.findElement(By.id("ratio-1"));
@@ -170,7 +171,7 @@ public class HorizontalLayoutViewIT extends ComponentDemoTest {
 
     @Test
     public void centerComponent() {
-        WebElement hlayout = layout.findElement(By.id("layout-with-center"));
+        WebElement hlayout = findElement(By.id("layout-with-center"));
         assertBasicFlexPropertiesAreSet(hlayout);
 
         Assert.assertEquals("center", hlayout.getCssValue("justify-content"));
@@ -180,8 +181,8 @@ public class HorizontalLayoutViewIT extends ComponentDemoTest {
 
     @Test
     public void boxSizing() {
-        WebElement hlayout = layout
-                .findElement(By.id("horizontal-layout-with-box-sizing"));
+        WebElement hlayout = findElement(
+                By.id("horizontal-layout-with-box-sizing"));
         Assert.assertEquals("border-box", hlayout.getCssValue("box-sizing"));
 
         RadioButtonGroupElement rbg = $(RadioButtonGroupElement.class)
@@ -196,8 +197,7 @@ public class HorizontalLayoutViewIT extends ComponentDemoTest {
 
     private void checkThemeChanges(WebElement layoutToCheck, String themeName,
             boolean shouldPresent) {
-        layout.findElement(By.id(String.format("toggle-%s", themeName)))
-                .click();
+        findElement(By.id(String.format("toggle-%s", themeName))).click();
         if (shouldPresent) {
             waitUntil(dr -> layoutToCheck.getAttribute("theme") != null
                     && layoutToCheck.getAttribute("theme").contains(themeName));

@@ -4,11 +4,11 @@ package com.vaadin.flow.component.charts.model;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -125,7 +125,7 @@ public abstract class ColumnOptions extends AbstractPlotOptions {
 
     /**
      * Adds color to the colors array
-     * 
+     *
      * @param color
      *            to add
      * @see #setColors(Color...)
@@ -134,7 +134,7 @@ public abstract class ColumnOptions extends AbstractPlotOptions {
 
     /**
      * Removes first occurrence of color in colors array
-     * 
+     *
      * @param color
      *            to remove
      * @see #setColors(Color...)
@@ -267,7 +267,7 @@ public abstract class ColumnOptions extends AbstractPlotOptions {
 
     /**
      * Adds key to the keys array
-     * 
+     *
      * @param key
      *            to add
      * @see #setKeys(String...)
@@ -276,7 +276,7 @@ public abstract class ColumnOptions extends AbstractPlotOptions {
 
     /**
      * Removes first occurrence of key in keys array
-     * 
+     *
      * @param key
      *            to remove
      * @see #setKeys(String...)
@@ -553,7 +553,7 @@ public abstract class ColumnOptions extends AbstractPlotOptions {
 
     /**
      * Adds zone to the zones array
-     * 
+     *
      * @param zone
      *            to add
      * @see #setZones(Zones...)
@@ -562,7 +562,7 @@ public abstract class ColumnOptions extends AbstractPlotOptions {
 
     /**
      * Removes first occurrence of zone in zones array
-     * 
+     *
      * @param zone
      *            to remove
      * @see #setZones(Zones...)

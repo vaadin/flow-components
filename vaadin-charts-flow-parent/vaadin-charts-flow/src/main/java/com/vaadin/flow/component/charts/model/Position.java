@@ -4,11 +4,11 @@ package com.vaadin.flow.component.charts.model;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -16,7 +16,7 @@ package com.vaadin.flow.component.charts.model;
 /**
  * Position configuration for the credits label. Supported properties are align,
  * verticalAlign, x and y. Defaults to
- * 
+ *
  * position: { align: 'right', x: -10, verticalAlign: 'bottom', y: -5 }
  */
 public class Position extends AbstractConfigurationObject {
@@ -37,7 +37,7 @@ public class Position extends AbstractConfigurationObject {
      * Sets the vertical alignment of the credits. Can be one of
      * {@link VerticalAlign#TOP}, {@link VerticalAlign#MIDDLE} and
      * {@link VerticalAlign#BOTTOM}. Defaults to {@link VerticalAlign#TOP}.
-     * 
+     *
      * @param verticalAlign
      *            the align to set
      */
@@ -58,7 +58,7 @@ public class Position extends AbstractConfigurationObject {
      * {@link HorizontalAlign#LEFT}, {@link HorizontalAlign#CENTER} and
      * {@link HorizontalAlign#RIGHT}. Defaults to {@link HorizontalAlign#CENTER}
      * .
-     * 
+     *
      * @param horizontalAlign
      *            the alignment to set
      */
@@ -76,7 +76,7 @@ public class Position extends AbstractConfigurationObject {
 
     /**
      * The X position of the credits. Defaults to -10.
-     * 
+     *
      * @param x
      *            the X position to set
      */
@@ -85,7 +85,7 @@ public class Position extends AbstractConfigurationObject {
     }
 
     /**
-     * 
+     *
      * @see #setY(Number)
      * @return the Y position of the credits
      */
@@ -95,7 +95,7 @@ public class Position extends AbstractConfigurationObject {
 
     /**
      * The Y position of the credits. Defaults to -5.
-     * 
+     *
      * @param y
      *            the Y position to set
      */

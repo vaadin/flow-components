@@ -4,11 +4,11 @@ package com.vaadin.flow.component.charts.model.style;
  * #%L
  * Vaadin Charts
  * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -46,7 +46,7 @@ public class AxisStyle extends AbstractConfigurationObject {
      * axis, if {@link TickIntervalStyle#AUTO}, the minor tick interval is
      * calculated as a fifth of the tickInterval. If null, minor ticks are not
      * shown.
-     * 
+     *
      * On logarithmic axes, the unit is the power of the value. For example,
      * setting the minor tick interval to 1 puts one tick on each of 0.1, 1, 10,
      * 100 etc. Setting the minor tick interval to 0.1 produces 9 ticks between
@@ -54,7 +54,7 @@ public class AxisStyle extends AbstractConfigurationObject {
      * {@link TickIntervalStyle#AUTO} on a log axis results in a best guess,
      * attempting to enter approximately 5 minor ticks between each major tick.
      * Defaults to null.
-     * 
+     *
      * @param minorTickInterval
      */
     public void setMinorTickInterval(TickIntervalStyle minorTickInterval) {
@@ -71,7 +71,7 @@ public class AxisStyle extends AbstractConfigurationObject {
     /**
      * Sets the color of the line marking the axis itself. Defaults to
      * "#C0D0E0".
-     * 
+     *
      * @param lineColor
      */
     public void setLineColor(Color lineColor) {
@@ -87,7 +87,7 @@ public class AxisStyle extends AbstractConfigurationObject {
 
     /**
      * Sets the width of the line marking the axis itself. Defaults to 1.
-     * 
+     *
      * @param lineWidth
      */
     public void setLineWidth(Number lineWidth) {
@@ -135,7 +135,7 @@ public class AxisStyle extends AbstractConfigurationObject {
 
     /**
      * Sets the title style
-     * 
+     *
      * @param style
      */
     public void setTitle(Style style) {
@@ -151,7 +151,7 @@ public class AxisStyle extends AbstractConfigurationObject {
 
     /**
      * Sets the subtitle style
-     * 
+     *
      * @param style
      *            Subtitle style
      */
@@ -168,7 +168,7 @@ public class AxisStyle extends AbstractConfigurationObject {
 
     /**
      * Sets the style for labels
-     * 
+     *
      * @param style
      *            Labels style
      */
@@ -197,7 +197,7 @@ public class AxisStyle extends AbstractConfigurationObject {
 
     /**
      * @see #setAlternateGridColor(Color)
-     * 
+     *
      * @return The alternate grid color, null if not defined
      */
     public Color getAlternateGridColor() {
@@ -208,7 +208,7 @@ public class AxisStyle extends AbstractConfigurationObject {
      * Sets the alternate grid color. When using an alternate grid color, a band
      * is painted across the plot area between every other grid line. Defaults
      * to null.
-     * 
+     *
      * @param alternateGridColor
      */
     public void setAlternateGridColor(Color alternateGridColor) {

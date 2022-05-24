@@ -4,11 +4,11 @@ package com.vaadin.flow.component.charts.model;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -58,10 +58,10 @@ public class SeriesTooltip extends AbstractConfigurationObject {
      * overview of the replacement codes, see
      * <a href="#Highcharts.dateFormat">dateFormat</a>.
      * </p>
-     * 
+     *
      * <p>
      * Defaults to:
-     * 
+     *
      * <pre>
      * {
      * 	    millisecond:"%A, %b %e, %H:%M:%S.%L",
@@ -74,7 +74,7 @@ public class SeriesTooltip extends AbstractConfigurationObject {
      * 	    year:"%Y"
      * 	}
      * </pre>
-     * 
+     *
      * </p>
      */
     public void setDateTimeLabelFormats(
@@ -161,7 +161,7 @@ public class SeriesTooltip extends AbstractConfigurationObject {
      * datetime string depending on the type of axis. For datetime axes, the
      * <code>point.key</code> date format can be set using tooltip.xDateFormat.
      * </p>
-     * 
+     *
      * <p>
      * Defaults to
      * <code>&lt;span style="font-size: 10px"&gt;{point.key}&lt;/span&gt;&lt;br/&gt;</code>

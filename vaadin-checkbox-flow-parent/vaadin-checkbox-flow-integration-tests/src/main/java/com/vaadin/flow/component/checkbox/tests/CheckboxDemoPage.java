@@ -1,9 +1,12 @@
 package com.vaadin.flow.component.checkbox.tests;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.NativeButton;
-import com.vaadin.flow.demo.DemoView;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 
 /**
@@ -12,11 +15,9 @@ import com.vaadin.flow.router.Route;
  * @author Vaadin Ltd
  */
 @Route("vaadin-checkbox-test-demo")
-public class CheckboxDemoPage extends DemoView {
+public class CheckboxDemoPage extends Div {
 
-    @Override
-    public void initView() {
-
+    public CheckboxDemoPage() {
         addDefaultCheckbox();
         addDisabledCheckbox();
         addIndeterminateCheckbox();
@@ -24,23 +25,12 @@ public class CheckboxDemoPage extends DemoView {
         addAccessibleCheckbox();
         addCheckboxHtmlLabel();
         addCheckboxLazyHtmlLabel();
-    }
-
-    @Override
-    public void populateSources() {
-        // The body of this method is kept empty because no source population
-        // is needed for integration tests. CheckboxDemoPage is only used for
-        // testing.
-        // Old demos have been moved to integration tests and separated from
-        // demos.
+        addCheckboxImgComponentLabel();
     }
 
     private void addDefaultCheckbox() {
-        // begin-source-example
-        // source-example-heading: Default Checkbox
         Checkbox checkbox = new Checkbox();
         checkbox.setLabel("Default Checkbox");
-        // end-source-example
         checkbox.setId("default-checkbox");
 
         NativeButton button = new NativeButton("Change label", event -> {
@@ -54,12 +44,9 @@ public class CheckboxDemoPage extends DemoView {
     private void addDisabledCheckbox() {
         Div message = new Div();
         message.setId("disabled-checkbox-message");
-        // begin-source-example
-        // source-example-heading: Disabled Checkbox
         Checkbox disabledCheckbox = new Checkbox("Disabled Checkbox");
         disabledCheckbox.setValue(true);
         disabledCheckbox.setEnabled(false);
-        // end-source-example
         disabledCheckbox.addClickListener(evt -> message.setText("Checkbox "
                 + evt.getSource().getLabel()
                 + " was clicked, but the component is disabled and this shouldn't happen!"));
@@ -68,11 +55,8 @@ public class CheckboxDemoPage extends DemoView {
     }
 
     private void addIndeterminateCheckbox() {
-        // begin-source-example
-        // source-example-heading: Indeterminate Checkbox
         Checkbox indeterminateCheckbox = new Checkbox("Indeterminate Checkbox");
         indeterminateCheckbox.setIndeterminate(true);
-        // end-source-example
 
         NativeButton button = new NativeButton("Reset", event -> {
             indeterminateCheckbox.setValue(false);
@@ -85,15 +69,12 @@ public class CheckboxDemoPage extends DemoView {
     }
 
     private void addValueChangeCheckbox() {
-        // begin-source-example
-        // source-example-heading: Checkbox with a ValueChangeListener
         Checkbox valueChangeCheckbox = new Checkbox(
                 "Checkbox with a ValueChangeListener");
         Div message = new Div();
         valueChangeCheckbox.addValueChangeListener(event -> message.setText(
                 String.format("Checkbox value changed from '%s' to '%s'",
                         event.getOldValue(), event.getValue())));
-        // end-source-example
         addCard("Checkbox with a ValueChangeListener", valueChangeCheckbox,
                 message);
         valueChangeCheckbox.setId("value-change-checkbox");
@@ -101,22 +82,16 @@ public class CheckboxDemoPage extends DemoView {
     }
 
     private void addAccessibleCheckbox() {
-        // begin-source-example
-        // source-example-heading: Checkbox with Custom Accessible Label
         Checkbox accessibleCheckbox = new Checkbox("Accessible Checkbox");
         accessibleCheckbox.setAriaLabel("Click me");
-        // end-source-example
         addCard("Checkbox with Custom Accessible Label", accessibleCheckbox);
         accessibleCheckbox.setId("accessible-checkbox");
     }
 
     private void addCheckboxHtmlLabel() {
-        // begin-source-example
-        // source-example-heading: Checkbox with the HTML-content based label
         Checkbox checkbox = new Checkbox();
         checkbox.setLabelAsHtml(
                 "Accept the <a href='https://vaadin.com/privacy-policy'>privacy policy</a>");
-        // end-source-example
         checkbox.setId("html-label-checkbox");
 
         NativeButton button = new NativeButton("Change label", event -> {
@@ -141,5 +116,32 @@ public class CheckboxDemoPage extends DemoView {
 
         addCard("Checkbox with the lazy label that contains HTML markup",
                 checkbox, button);
+    }
+
+    private void addCheckboxImgComponentLabel() {
+        Checkbox checkbox = new Checkbox();
+        Image vaadinImg = new Image("https://vaadin.com/images/vaadin-logo.svg",
+                "");
+        checkbox.setId("img-component-label-checkbox");
+        vaadinImg.setWidth("50px");
+        checkbox.setLabelComponent(vaadinImg);
+
+        NativeButton button = new NativeButton("Change label", event -> {
+            Image newImage = new Image(
+                    "https://vaadin.com/images/vaadin-logo.svg", "");
+            newImage.setWidth("30px");
+            checkbox.setLabelComponent(newImage);
+        });
+        button.setId("change-img-component-label");
+
+        addCard("Checkbox with the image component label", checkbox, button);
+    }
+
+    private void addCard(String title, Component... components) {
+        VerticalLayout layout = new VerticalLayout();
+        layout.setMargin(true);
+        layout.add(new H2(title));
+        layout.add(components);
+        add(layout);
     }
 }

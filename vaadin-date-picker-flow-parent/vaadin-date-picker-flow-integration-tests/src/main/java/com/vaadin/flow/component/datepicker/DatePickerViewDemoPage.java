@@ -16,10 +16,12 @@
  */
 package com.vaadin.flow.component.datepicker;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
-import com.vaadin.flow.demo.DemoView;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 
 import java.time.LocalDate;
@@ -32,14 +34,9 @@ import java.util.Locale;
  * @author Vaadin Ltd
  */
 @Route("vaadin-date-picker-test-demo")
-public class DatePickerViewDemoPage extends DemoView {
+public class DatePickerViewDemoPage extends Div {
 
-    @Override
-    public void populateSources() {
-    }
-
-    @Override
-    public void initView() {
+    public DatePickerViewDemoPage() {
         createSimpleDatePicker();
         createMinAndMaxDatePicker();
         createDisabledDatePicker();
@@ -54,13 +51,10 @@ public class DatePickerViewDemoPage extends DemoView {
     private void createSimpleDatePicker() {
         Div message = createMessageDiv("simple-picker-message");
 
-        // begin-source-example
-        // source-example-heading: Simple date picker
         DatePicker datePicker = new DatePicker();
 
         datePicker.addValueChangeListener(
                 event -> updateMessage(message, datePicker));
-        // end-source-example
 
         datePicker.setId("simple-picker");
         addCard("Simple date picker", datePicker, message);
@@ -69,8 +63,6 @@ public class DatePickerViewDemoPage extends DemoView {
     private void createMinAndMaxDatePicker() {
         Div message = createMessageDiv("min-and-max-picker-message");
 
-        // begin-source-example
-        // source-example-heading: Date picker with min and max
         DatePicker datePicker = new DatePicker();
         datePicker.setLabel("Select a day within this month");
         datePicker.setPlaceholder("Date within this month");
@@ -82,7 +74,6 @@ public class DatePickerViewDemoPage extends DemoView {
 
         datePicker.addValueChangeListener(
                 event -> updateMessage(message, datePicker));
-        // end-source-example
 
         datePicker.setId("min-and-max-picker");
         addCard("Date picker with min and max", datePicker, message);
@@ -91,11 +82,8 @@ public class DatePickerViewDemoPage extends DemoView {
     private void createDisabledDatePicker() {
         Div message = createMessageDiv("disabled-picker-message");
 
-        // begin-source-example
-        // source-example-heading: Disabled date picker
         DatePicker datePicker = new DatePicker();
         datePicker.setEnabled(false);
-        // end-source-example
 
         datePicker.addValueChangeListener(event -> message
                 .setText("This event should not have happened"));
@@ -105,14 +93,11 @@ public class DatePickerViewDemoPage extends DemoView {
     }
 
     private void createWithClearButton() {
-        // begin-source-example
-        // source-example-heading: Clear button
         DatePicker datePicker = new DatePicker();
         datePicker.setValue(LocalDate.now());
 
         // Display an icon which can be clicked to clear the value:
         datePicker.setClearButtonVisible(true);
-        // end-source-example
 
         addCard("Clear button", datePicker);
     }
@@ -120,8 +105,6 @@ public class DatePickerViewDemoPage extends DemoView {
     private void createFinnishDatePicker() {
         Div message = createMessageDiv("finnish-picker-message");
 
-        // begin-source-example
-        // source-example-heading: Internationalized date picker
         DatePicker datePicker = new DatePicker();
         datePicker.setLabel("Finnish date picker");
         datePicker.setPlaceholder("Syntymäpäivä");
@@ -155,7 +138,6 @@ public class DatePickerViewDemoPage extends DemoView {
                 message.setText("No date is selected");
             }
         });
-        // end-source-example
 
         datePicker.setId("finnish-picker");
         addCard("Internationalized date picker", datePicker, message);
@@ -164,8 +146,6 @@ public class DatePickerViewDemoPage extends DemoView {
     private void createStartAndEndDatePickers() {
         Div message = createMessageDiv("start-and-end-message");
 
-        // begin-source-example
-        // source-example-heading: Two linked date pickers
         DatePicker startDatePicker = new DatePicker();
         startDatePicker.setLabel("Start");
         DatePicker endDatePicker = new DatePicker();
@@ -211,7 +191,6 @@ public class DatePickerViewDemoPage extends DemoView {
                 }
             }
         });
-        // end-source-example
 
         startDatePicker.setId("start-picker");
         endDatePicker.setId("end-picker");
@@ -222,8 +201,6 @@ public class DatePickerViewDemoPage extends DemoView {
 
     private void createLocaleChangeDatePicker() {
         Div message = createMessageDiv("Customize-locale-picker-message");
-        // begin-source-example
-        // source-example-heading: Date picker with customize locales
         // By default, the datePicker uses the current UI locale
         DatePicker datePicker = new DatePicker();
         NativeButton locale1 = new NativeButton("Locale: US");
@@ -245,7 +222,6 @@ public class DatePickerViewDemoPage extends DemoView {
 
         datePicker.addValueChangeListener(
                 event -> updateMessage(message, datePicker));
-        // end-source-example
         locale1.setId("Locale-US");
         locale2.setId("Locale-UK");
         locale3.setId("Locale-CHINA");
@@ -254,8 +230,6 @@ public class DatePickerViewDemoPage extends DemoView {
                 locale2, locale3, message);
     }
 
-    // begin-source-example
-    // source-example-heading: Additional code used in the demo
     /**
      * Additional code used in the demo
      */
@@ -277,5 +251,20 @@ public class DatePickerViewDemoPage extends DemoView {
         message.getStyle().set("whiteSpace", "pre");
         return message;
     }
-    // end-source-example
+
+    private void addCard(String title, Component... components) {
+        addCard(title, null, components);
+    }
+
+    private void addCard(String title, String description,
+            Component... components) {
+        if (description != null) {
+            title = title + ": " + description;
+        }
+        VerticalLayout layout = new VerticalLayout();
+        layout.setMargin(true);
+        layout.add(new H2(title));
+        layout.add(components);
+        add(layout);
+    }
 }

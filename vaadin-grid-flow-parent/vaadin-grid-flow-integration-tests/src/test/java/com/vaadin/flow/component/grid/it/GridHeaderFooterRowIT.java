@@ -225,7 +225,7 @@ public class GridHeaderFooterRowIT extends AbstractComponentIT {
         headerContents.forEach(content -> Assert.assertThat(
                 "The text should override the previously set components",
                 content,
-                CoreMatchers.not(CoreMatchers.containsString("label"))));
+                CoreMatchers.not(CoreMatchers.containsString("<label>"))));
     }
 
     @Test

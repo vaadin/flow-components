@@ -4,11 +4,11 @@ package com.vaadin.flow.component.charts.model.style;
  * #%L
  * Vaadin Charts
  * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -36,7 +36,7 @@ public class TooltipStyle extends AbstractConfigurationObject {
 
     /**
      * Sets the background color of tooltips
-     * 
+     *
      * @param backgroundColor
      */
     public void setBackgroundColor(Color backgroundColor) {
@@ -52,7 +52,7 @@ public class TooltipStyle extends AbstractConfigurationObject {
 
     /**
      * Sets the width of the border of tooltips
-     * 
+     *
      * @param borderWidth
      */
     public void setBorderWidth(Number borderWidth) {
@@ -68,7 +68,7 @@ public class TooltipStyle extends AbstractConfigurationObject {
 
     /**
      * Sets the style attributes for tooltips
-     * 
+     *
      * @param style
      *            Style attributes
      */
@@ -85,7 +85,7 @@ public class TooltipStyle extends AbstractConfigurationObject {
 
     /**
      * Sets the border radius of tooltips
-     * 
+     *
      * @param borderRadius
      *            the border radius in pixels
      */

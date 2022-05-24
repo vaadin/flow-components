@@ -22,6 +22,7 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 
 import com.vaadin.tests.AbstractComponentIT;
+import com.vaadin.flow.component.radiobutton.testbench.RadioButtonGroupElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 
@@ -39,5 +40,18 @@ public class RefreshItemsPageIT extends AbstractComponentIT {
 
         Assert.assertEquals("bar", radioButtons.get(0).getText());
         Assert.assertEquals("baz", radioButtons.get(1).getText());
+    }
+
+    @Test
+    public void resetComponentExpectLabel() {
+        open();
+
+        findElement(By.id("reset")).click();
+
+        RadioButtonGroupElement group = $(RadioButtonGroupElement.class)
+                .id("group");
+        String label = group.findElement(By.cssSelector("label[slot='label']"))
+                .getText();
+        Assert.assertEquals("Label", label);
     }
 }

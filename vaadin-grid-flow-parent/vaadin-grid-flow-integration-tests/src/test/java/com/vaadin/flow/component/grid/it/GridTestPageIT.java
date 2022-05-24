@@ -35,9 +35,9 @@ import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
 /**
- * 
+ *
  * Integration tests for the {@link GridTestPage}.
- * 
+ *
  * @author Vaadin Ltd.
  */
 @TestPath("vaadin-grid-test")
@@ -417,6 +417,13 @@ public class GridTestPageIT extends AbstractComponentIT {
                 By.id("current-column-ordering"));
         Assert.assertEquals("name, remove, number, hidden",
                 currentColumnOrdering.getText());
+    }
+
+    @Test
+    public void gridWithNoConnector_noExceptions() {
+        executeScript(
+                "document.body.appendChild(document.createElement('vaadin-grid'));");
+        checkLogsForErrors();
     }
 
     private void assertSelection(WebElement grid, String value) {

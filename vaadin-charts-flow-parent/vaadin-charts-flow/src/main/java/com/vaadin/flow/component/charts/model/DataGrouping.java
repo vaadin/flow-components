@@ -4,11 +4,11 @@ package com.vaadin.flow.component.charts.model;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -24,7 +24,7 @@ import java.util.Arrays;
  * closer than a certain pixel value, determined by the
  * <code>groupPixelWidth</code> option.
  * </p>
- * 
+ *
  * <p>
  * If data grouping is applied, the grouping information of grouped points can
  * be read from the <a href="#Point.dataGroup">Point.dataGroup</a>.
@@ -58,11 +58,11 @@ public class DataGrouping extends AbstractConfigurationObject {
      * format can vary within a chart depending on the currently selected time
      * range and the current data grouping.
      * </p>
-     * 
+     *
      * <p>
      * The default formats are:
      * </p>
-     * 
+     *
      * <pre>
      * {
      * 	   millisecond: ['%A, %b %e, %H:%M:%S.%L', '%A, %b %e, %H:%M:%S.%L', '-%H:%M:%S.%L'],
@@ -75,7 +75,7 @@ public class DataGrouping extends AbstractConfigurationObject {
      * 	   year: ['%Y', '%Y', '-%Y']
      * 	}
      * </pre>
-     * 
+     *
      * <p>
      * For each of these array definitions, the first item is the format used
      * when the active time span is one unit. For instance, if the current data
@@ -191,7 +191,7 @@ public class DataGrouping extends AbstractConfigurationObject {
      * grouped to. Each array item is an array where the first value is the time
      * unit and the second value another array of allowed multiples. Defaults
      * to:
-     * 
+     *
      * <pre>
      * units: [[
      * 		'millisecond', // unit name
@@ -226,7 +226,7 @@ public class DataGrouping extends AbstractConfigurationObject {
 
     /**
      * Adds unit to the units array
-     * 
+     *
      * @param unit
      *            to add
      * @see #setUnits(TimeUnitMultiples...)
@@ -240,7 +240,7 @@ public class DataGrouping extends AbstractConfigurationObject {
 
     /**
      * Removes first occurrence of unit in units array
-     * 
+     *
      * @param unit
      *            to remove
      * @see #setUnits(TimeUnitMultiples...)

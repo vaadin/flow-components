@@ -4,11 +4,11 @@ package com.vaadin.flow.component.charts.events;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -49,7 +49,7 @@ public interface ClickEvent extends Serializable {
      * <p>
      * Legend items are outside of the plot area and legend item click events
      * have no significant yAxisValue.
-     * 
+     *
      * @return the Y coordinate of the click
      */
     default double getyAxisValue() {
@@ -79,7 +79,7 @@ public interface ClickEvent extends Serializable {
      * <p>
      * Note that the charting library only allows MouseButton.LEFT clicks in
      * most cases.
-     * 
+     *
      * @return the {@link MouseEventDetails.MouseButton} of the click event.
      */
     default MouseEventDetails.MouseButton getButton() {

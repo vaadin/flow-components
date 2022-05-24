@@ -4,11 +4,11 @@ package com.vaadin.flow.component.charts.model;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -40,7 +40,7 @@ public class Drilldown extends AbstractConfigurationObject {
      * Adds a series configurations for the drilldown. These drilldown series
      * are hidden by default. The drilldown series is linked to the parent
      * series' point by its {@link Series#getId()}
-     * 
+     *
      * @param series
      */
     void addSeries(Series series) {
@@ -49,7 +49,7 @@ public class Drilldown extends AbstractConfigurationObject {
 
     /**
      * Sets the configuration linked to the drilldown series.
-     * 
+     *
      * @param configuration
      */
     public void setConfiguration(Configuration configuration) {
@@ -76,7 +76,7 @@ public class Drilldown extends AbstractConfigurationObject {
     /**
      * Additional styles to apply to the X axis label for a point that has
      * drilldown data.
-     * 
+     *
      * @param activeAxisLabelStyle
      */
     public void setActiveAxisLabelStyle(Style activeAxisLabelStyle) {
@@ -94,7 +94,7 @@ public class Drilldown extends AbstractConfigurationObject {
     /**
      * Additional styles to apply to the data label of a point that has
      * drilldown data.
-     * 
+     *
      * @param activeDataLabelStyle
      */
     public void setActiveDataLabelStyle(Style activeDataLabelStyle) {
@@ -113,7 +113,7 @@ public class Drilldown extends AbstractConfigurationObject {
      * occurs when drilling between a column point and a column series, or a pie
      * slice and a full pie series. Drilldown can still be used between series
      * and points of different types, but animation will not occur.
-     * 
+     *
      * @param animation
      */
     public void setAnimation(Boolean animation) {
@@ -135,7 +135,7 @@ public class Drilldown extends AbstractConfigurationObject {
      * Options for the drill up button that appears when drilling down on a
      * series. The text for the button is defined in
      * {@link Lang#setDrillUpText(String)}.
-     * 
+     *
      * @param drillUpButton
      */
     public void setDrillUpButton(DrillUpButton drillUpButton) {

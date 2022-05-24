@@ -4,11 +4,11 @@ package com.vaadin.flow.component.charts.model;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -47,7 +47,7 @@ public class RangeSelectorButton extends AbstractConfigurationObject {
 
     /**
      * Defines the timespan for the button
-     * 
+     *
      * @param type
      */
     public void setType(RangeSelectorTimespan type) {
@@ -63,7 +63,7 @@ public class RangeSelectorButton extends AbstractConfigurationObject {
 
     /**
      * Defines how many units of the defined type to use.
-     * 
+     *
      * @param count
      */
     public void setCount(Number count) {
@@ -79,7 +79,7 @@ public class RangeSelectorButton extends AbstractConfigurationObject {
 
     /**
      * Defines the text for the button
-     * 
+     *
      * @param text
      */
     public void setText(String text) {
@@ -95,7 +95,7 @@ public class RangeSelectorButton extends AbstractConfigurationObject {
 
     /**
      * Defines a custom data grouping definition for the button
-     * 
+     *
      * @param dataGrouping
      */
     public void setDataGrouping(DataGrouping dataGrouping) {

@@ -25,7 +25,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import java.util.List;
-import java.util.Locale;
 
 @TestPath("vaadin-grid/grid-details-row")
 public class GridDetailsRowIT extends AbstractComponentIT {
@@ -51,6 +50,14 @@ public class GridDetailsRowIT extends AbstractComponentIT {
         assertElementHasButton(detailsElement.get(1), "Person 2");
     }
 
+    @Test
+    public void shouldNotThrowOnDetailsClick() {
+        open();
+        GridElement grid = $(GridElement.class).first();
+        grid.getRow(1).getDetails().click(0, 0);
+        checkLogsForErrors();
+    }
+
     /**
      * Click on an item, hide the other details
      */
@@ -69,10 +76,10 @@ public class GridDetailsRowIT extends AbstractComponentIT {
                 .findElements(By.tagName("flow-component-renderer"));
         Assert.assertEquals(3, detailsElement.size());
 
-        // detail on row 0 is empty
-        assertElementHasNoButton(detailsElement.get(0));
-        // detail on row 1 is empty
-        assertElementHasNoButton(detailsElement.get(1));
+        // detail on row 0 is not displayed
+        assertElementNotDisplayed(detailsElement.get(0));
+        // detail on row 1 is not displayed
+        assertElementNotDisplayed(detailsElement.get(1));
         // detail on row 3 contains a button
         assertElementHasButton(detailsElement.get(2), "Person 4");
     }
@@ -96,10 +103,10 @@ public class GridDetailsRowIT extends AbstractComponentIT {
         List<WebElement> detailsElement = grid
                 .findElements(By.tagName("flow-component-renderer"));
         Assert.assertEquals(3, detailsElement.size());
-        // detail on row 0 is empty
-        assertElementHasNoButton(detailsElement.get(0));
-        // detail on row 1 is empty
-        assertElementHasNoButton(detailsElement.get(1));
+        // detail on row 0 is not displayed
+        assertElementNotDisplayed(detailsElement.get(0));
+        // detail on row 1 is not displayed
+        assertElementNotDisplayed(detailsElement.get(1));
         // detail on row 3 contains a button
         assertElementHasButton(detailsElement.get(2), "Person 3");
 
@@ -115,10 +122,10 @@ public class GridDetailsRowIT extends AbstractComponentIT {
 
         Assert.assertEquals(3, detailsElement.size());
 
-        // detail on row 0 is empty
-        assertElementHasNoButton(detailsElement.get(0));
-        // detail on row 1 is empty
-        assertElementHasNoButton(detailsElement.get(1));
+        // detail on row 0 is not displayed
+        assertElementNotDisplayed(detailsElement.get(0));
+        // detail on row 1 is not displayed
+        assertElementNotDisplayed(detailsElement.get(1));
         // detail on row 3 contains a button
         assertElementHasButton(detailsElement.get(2), "Person 3 - updates 1");
 
@@ -146,11 +153,8 @@ public class GridDetailsRowIT extends AbstractComponentIT {
         Assert.assertEquals(content, children.get(0).getText());
     }
 
-    private void assertElementHasNoButton(WebElement componentRenderer) {
-
-        List<WebElement> children = componentRenderer
-                .findElements(By.tagName("vaadin-button"));
-        Assert.assertEquals(0, children.size());
+    private void assertElementNotDisplayed(WebElement componentRenderer) {
+        Assert.assertFalse(componentRenderer.isDisplayed());
 
     }
 }

@@ -4,7 +4,7 @@ package com.vaadin.flow.component.confirmdialog;
  * #%L
  * Vaadin Confirm Dialog for Vaadin 10
  * %%
- * Copyright (C) 2017 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
@@ -16,6 +16,7 @@ package com.vaadin.flow.component.confirmdialog;
  * #L%
  */
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -30,19 +31,37 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.shared.Registration;
 
 /**
- * Server-side component for the {@code <vaadin-confirm-dialog>} element.
+ * Confirm Dialog is a modal Dialog used to confirm user actions.
+ * <p>
+ * Confirm Dialog consists of:<br>
+ * <ul>
+ * <li>Title</li>
+ * <li>Message</li>
+ * <li>Footer</li>
+ * <ul>
+ * <li>“Cancel” button</li>
+ * <li>“Reject” button</li>
+ * <li>“Confirm” button</li>
+ * </ul>
+ * </ul>
+ *
+ * Each Confirm Dialog should have a title and/or message. The “Confirm” button
+ * is shown by default, while the two other buttons are not (they must be
+ * explicitly enabled to be displayed).
  *
  * @author Vaadin Ltd
  */
 @Tag("vaadin-confirm-dialog")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.0-beta1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-rc1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/confirm-dialog", version = "23.0.0-beta1")
-@NpmPackage(value = "@vaadin/vaadin-confirm-dialog", version = "23.0.0-beta1")
+@NpmPackage(value = "@vaadin/confirm-dialog", version = "23.1.0-rc1")
+@NpmPackage(value = "@vaadin/vaadin-confirm-dialog", version = "23.1.0-rc1")
 @JsModule("@vaadin/confirm-dialog/src/vaadin-confirm-dialog.js")
+@JsModule("./confirmDialogConnector.js")
 public class ConfirmDialog extends Component
         implements HasSize, HasStyle, HasOrderedComponents {
 
@@ -126,6 +145,27 @@ public class ConfirmDialog extends Component
         this.getElement().executeJs("this._setHeight($0)", this.height);
     }
 
+    /**
+     * @throws UnsupportedOperationException
+     *             ConfirmDialog does not support adding styles to overlay
+     */
+    @Override
+    public Style getStyle() {
+        throw new UnsupportedOperationException(
+                "ConfirmDialog does not support adding styles to overlay");
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        initConnector();
+    }
+
+    private void initConnector() {
+        getElement().executeJs(
+                "window.Vaadin.Flow.confirmDialogConnector.initLazy(this)");
+    }
+
     private boolean autoAddedToTheUi;
 
     /**
@@ -133,6 +173,9 @@ public class ConfirmDialog extends Component
      */
     public ConfirmDialog() {
         getElement().addEventListener("opened-changed", event -> {
+            if (!isOpened()) {
+                setModality(false);
+            }
             if (autoAddedToTheUi && !isOpened()) {
                 getElement().removeFromParent();
                 autoAddedToTheUi = false;
@@ -401,6 +444,11 @@ public class ConfirmDialog extends Component
     }
 
     private void addToSlot(String slotName, Element element) {
+        // Remove existing elements with the same slot name
+        getElement().getChildren()
+                .filter(child -> slotName.equals(child.getAttribute("slot")))
+                .forEach(Element::removeFromParent);
+
         element.setAttribute("slot", slotName);
         getElement().appendChild(element);
     }
@@ -568,7 +616,39 @@ public class ConfirmDialog extends Component
         if (opened) {
             ensureAttached();
         }
+        setModality(opened);
         getElement().setProperty("opened", opened);
+    }
+
+    /**
+     * Gets whether this dialog can be closed by hitting the esc-key or not.
+     * <p>
+     * By default, the dialog is closable with esc.
+     *
+     * @return {@code true} if this dialog can be closed with the esc-key,
+     *         {@code false} otherwise
+     */
+    public boolean isCloseOnEsc() {
+        return !getElement().getProperty("noCloseOnEsc", false);
+    }
+
+    /**
+     * Sets whether this dialog can be closed by hitting the esc-key or not.
+     * <p>
+     * By default, the dialog is closable with esc.
+     *
+     * @param closeOnEsc
+     *            {@code true} to enable closing this dialog with the esc-key,
+     *            {@code false} to disable it
+     */
+    public void setCloseOnEsc(boolean closeOnEsc) {
+        getElement().setProperty("noCloseOnEsc", !closeOnEsc);
+    }
+
+    private void setModality(boolean modal) {
+        if (isAttached()) {
+            getUI().ifPresent(ui -> ui.setChildComponentModal(this, modal));
+        }
     }
 
     private UI getCurrentUI() {
@@ -587,10 +667,11 @@ public class ConfirmDialog extends Component
         UI ui = getCurrentUI();
         ui.beforeClientResponse(ui, context -> {
             if (getElement().getNode().getParent() == null) {
-                ui.add(this);
+                ui.addToModalComponent(this);
                 autoAddedToTheUi = true;
                 updateWidth();
                 updateHeight();
+                ui.setChildComponentModal(this, true);
             }
         });
     }

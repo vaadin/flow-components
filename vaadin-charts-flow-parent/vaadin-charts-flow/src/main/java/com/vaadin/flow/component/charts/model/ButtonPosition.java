@@ -4,11 +4,11 @@ package com.vaadin.flow.component.charts.model;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -34,7 +34,7 @@ public class ButtonPosition extends AbstractConfigurationObject {
      * Sets the vertical alignment of the button. Can be one of
      * {@link VerticalAlign#TOP}, {@link VerticalAlign#MIDDLE} and
      * {@link VerticalAlign#BOTTOM}.
-     * 
+     *
      * @param verticalAlign
      *            the align to set
      */
@@ -54,7 +54,7 @@ public class ButtonPosition extends AbstractConfigurationObject {
      * The horizontal alignment of the button. Can be one of
      * {@link HorizontalAlign#LEFT}, {@link HorizontalAlign#CENTER} and
      * {@link HorizontalAlign#RIGHT}. .
-     * 
+     *
      * @param horizontalAlign
      *            the alignment to set
      */
@@ -72,7 +72,7 @@ public class ButtonPosition extends AbstractConfigurationObject {
 
     /**
      * The X position of the button.
-     * 
+     *
      * @param x
      *            the X position to set
      */
@@ -81,7 +81,7 @@ public class ButtonPosition extends AbstractConfigurationObject {
     }
 
     /**
-     * 
+     *
      * @see #setY(Number)
      * @return the Y position of the button
      */
@@ -91,7 +91,7 @@ public class ButtonPosition extends AbstractConfigurationObject {
 
     /**
      * The Y position of the button.
-     * 
+     *
      * @param y
      *            the Y position to set
      */

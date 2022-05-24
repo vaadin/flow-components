@@ -4,11 +4,11 @@ package com.vaadin.flow.component.charts.model;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -94,7 +94,7 @@ public class Navigator extends AbstractConfigurationObject {
      * <p>
      * Options for the handles for dragging the zoomed area.
      * </p>
-     * 
+     *
      * <p>
      * In <a href=
      * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
@@ -238,16 +238,16 @@ public class Navigator extends AbstractConfigurationObject {
      * <a class="internal" href="#plotOptions.series">plotOptions</a> and
      * <a class="internal" href="#series">series</a>.
      * </p>
-     * 
+     *
      * <p>
      * Unless data is explicitly defined on navigator.series, the data is
      * borrowed from the first series in the chart.
      * </p>
-     * 
+     *
      * <p>
      * Default series options for the navigator series are:
      * </p>
-     * 
+     *
      * <pre>
      * series: {
      * 		type: 'areaspline',
@@ -281,7 +281,7 @@ public class Navigator extends AbstractConfigurationObject {
      * Options for the navigator X axis. Available options are the same as any X
      * axis, documented at <a class="internal" href="#xAxis">xAxis</a>. Default
      * series options for the navigator xAxis are:
-     * 
+     *
      * <pre>
      * xAxis: {
      * 	    tickWidth: 0,
@@ -317,7 +317,7 @@ public class Navigator extends AbstractConfigurationObject {
      * Options for the navigator Y axis. Available options are the same as any y
      * axis, documented at <a class="internal" href="#yAxis">yAxis</a>. Default
      * series options for the navigator yAxis are:
-     * 
+     *
      * <pre>
      * yAxis: {
      * 		gridLineWidth: 0,

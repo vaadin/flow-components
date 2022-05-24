@@ -23,15 +23,15 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 
 /**
- * HorizontalLayout is a component container, which shows the subcomponents in
- * the order of their addition (horizontally). A horizontal layout is doesn't
- * have a predefined size - its size is defined by the components inside it.
+ * Horizontal Layout places components side-by-side in a row. By default, it has
+ * undefined width and height, meaning its size is determined by the components
+ * it contains.
  */
 @Tag("vaadin-horizontal-layout")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.0-beta1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-rc1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/horizontal-layout", version = "23.0.0-beta1")
-@NpmPackage(value = "@vaadin/vaadin-ordered-layout", version = "23.0.0-beta1")
+@NpmPackage(value = "@vaadin/horizontal-layout", version = "23.1.0-rc1")
+@NpmPackage(value = "@vaadin/vaadin-ordered-layout", version = "23.1.0-rc1")
 @JsModule("@vaadin/horizontal-layout/src/vaadin-horizontal-layout.js")
 public class HorizontalLayout extends Component implements ThemableLayout,
         FlexComponent, ClickNotifier<HorizontalLayout> {

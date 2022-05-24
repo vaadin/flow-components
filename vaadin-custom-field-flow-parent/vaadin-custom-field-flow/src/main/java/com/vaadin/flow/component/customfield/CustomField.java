@@ -4,7 +4,7 @@ package com.vaadin.flow.component.customfield;
  * #%L
  * Vaadin CustomField for Vaadin 10
  * %%
- * Copyright (C) 2017 - 2018 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,12 @@ package com.vaadin.flow.component.customfield;
  */
 
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import org.slf4j.LoggerFactory;
@@ -32,6 +35,7 @@ import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Synchronize;
@@ -51,14 +55,14 @@ import com.vaadin.flow.dom.Element;
  *            field value type
  */
 @Tag("vaadin-custom-field")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.0-beta1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-rc1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/custom-field", version = "23.0.0-beta1")
-@NpmPackage(value = "@vaadin/vaadin-custom-field", version = "23.0.0-beta1")
+@NpmPackage(value = "@vaadin/custom-field", version = "23.1.0-rc1")
+@NpmPackage(value = "@vaadin/vaadin-custom-field", version = "23.1.0-rc1")
 @JsModule("@vaadin/custom-field/src/vaadin-custom-field.js")
 public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
         implements HasSize, HasValidation, Focusable<CustomField>, HasHelper,
-        HasLabel {
+        HasLabel, HasTheme, HasStyle {
 
     /**
      * Default constructor.
@@ -229,4 +233,27 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
         getElement().setProperty("label", label);
     }
 
+    /**
+     * Adds theme variants to the component.
+     *
+     * @param variants
+     *            theme variants to add
+     */
+    public void addThemeVariants(CustomFieldVariant... variants) {
+        getThemeNames().addAll(
+                Stream.of(variants).map(CustomFieldVariant::getVariantName)
+                        .collect(Collectors.toList()));
+    }
+
+    /**
+     * Removes theme variants from the component.
+     *
+     * @param variants
+     *            theme variants to remove
+     */
+    public void removeThemeVariants(CustomFieldVariant... variants) {
+        getThemeNames().removeAll(
+                Stream.of(variants).map(CustomFieldVariant::getVariantName)
+                        .collect(Collectors.toList()));
+    }
 }

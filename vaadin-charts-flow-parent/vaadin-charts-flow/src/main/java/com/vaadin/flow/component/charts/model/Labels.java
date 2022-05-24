@@ -4,11 +4,11 @@ package com.vaadin.flow.component.charts.model;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -220,7 +220,7 @@ public class Labels extends AbstractConfigurationObject {
      * To show only every <em>n</em>'th label on the axis, set the step to
      * <em>n</em>. Setting the step to 2 shows every other label.
      * </p>
-     * 
+     *
      * <p>
      * By default, the step is calculated automatically to avoid overlap. To
      * prevent this, set it to 1. This usually only happens on a category axis,
@@ -249,7 +249,7 @@ public class Labels extends AbstractConfigurationObject {
      * prevent wrapping of category labels. Use
      * <code>textOverflow: 'none'</code> to prevent ellipsis (dots).
      * </p>
-     * 
+     *
      * <p>
      * In <a href=
      * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"

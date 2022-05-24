@@ -4,11 +4,11 @@ package com.vaadin.flow.component.charts.model;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -122,7 +122,7 @@ public class PlotOptionsPyramid extends PyramidOptions {
      * together with a <code>borderWidth</code> to fill drawing gaps created by
      * antialiazing artefacts in borderless pies.
      * </p>
-     * 
+     *
      * <p>
      * In <a href=
      * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
@@ -147,14 +147,14 @@ public class PlotOptionsPyramid extends PyramidOptions {
      * <p>
      * The width of the border surrounding each slice.
      * </p>
-     * 
+     *
      * <p>
      * When setting the border width to 0, there may be small gaps between the
      * slices due to SVG antialiasing artefacts. To work around this, keep the
      * border width at 0.5 or 1, but set the <code>borderColor</code> to
      * <code>null</code> instead.
      * </p>
-     * 
+     *
      * <p>
      * In <a href=
      * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
@@ -268,7 +268,7 @@ public class PlotOptionsPyramid extends PyramidOptions {
 
     /**
      * Adds color to the colors array
-     * 
+     *
      * @param color
      *            to add
      * @see #setColors(Color...)
@@ -282,7 +282,7 @@ public class PlotOptionsPyramid extends PyramidOptions {
 
     /**
      * Removes first occurrence of color in colors array
-     * 
+     *
      * @param color
      *            to remove
      * @see #setColors(Color...)
@@ -521,7 +521,7 @@ public class PlotOptionsPyramid extends PyramidOptions {
 
     /**
      * Adds key to the keys array
-     * 
+     *
      * @param key
      *            to add
      * @see #setKeys(String...)
@@ -535,7 +535,7 @@ public class PlotOptionsPyramid extends PyramidOptions {
 
     /**
      * Removes first occurrence of key in keys array
-     * 
+     *
      * @param key
      *            to remove
      * @see #setKeys(String...)
@@ -832,7 +832,7 @@ public class PlotOptionsPyramid extends PyramidOptions {
      * axis, Y axis or Z axis for bubbles, according to the
      * <code>zoneAxis</code> option.
      * </p>
-     * 
+     *
      * <p>
      * In <a href=
      * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
@@ -849,7 +849,7 @@ public class PlotOptionsPyramid extends PyramidOptions {
 
     /**
      * Adds zone to the zones array
-     * 
+     *
      * @param zone
      *            to add
      * @see #setZones(Zones...)
@@ -863,7 +863,7 @@ public class PlotOptionsPyramid extends PyramidOptions {
 
     /**
      * Removes first occurrence of zone in zones array
-     * 
+     *
      * @param zone
      *            to remove
      * @see #setZones(Zones...)

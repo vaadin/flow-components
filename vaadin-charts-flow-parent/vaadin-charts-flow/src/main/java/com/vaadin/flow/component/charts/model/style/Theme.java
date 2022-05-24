@@ -4,11 +4,11 @@ package com.vaadin.flow.component.charts.model.style;
  * #%L
  * Vaadin Charts
  * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -20,7 +20,7 @@ import com.vaadin.flow.component.charts.model.Credits;
  * Theme class for Chart. This is empty theme, and only defines the structure of
  * Theme. Inherit own Theme class, or use Themes inherited from this class to
  * theme your Charts.
- * 
+ *
  * @see VaadinTheme
  */
 public class Theme extends AbstractConfigurationObject {
@@ -38,7 +38,7 @@ public class Theme extends AbstractConfigurationObject {
 
     /**
      * Set colors of items (bars, pie sectors ...) in chart
-     * 
+     *
      * @param colors
      *            Colors of items
      */
@@ -48,7 +48,7 @@ public class Theme extends AbstractConfigurationObject {
 
     /**
      * Get colors of items
-     * 
+     *
      * @return Colors of items, null if not defined
      */
     public Color[] getColors() {
@@ -57,7 +57,7 @@ public class Theme extends AbstractConfigurationObject {
 
     /**
      * Get chart style
-     * 
+     *
      * @return Chart style
      */
     public ChartStyle getChart() {
@@ -66,7 +66,7 @@ public class Theme extends AbstractConfigurationObject {
 
     /**
      * Set new chart style
-     * 
+     *
      * @param style
      *            Chart style
      */
@@ -76,7 +76,7 @@ public class Theme extends AbstractConfigurationObject {
 
     /**
      * Get style of Chart title
-     * 
+     *
      * @return Style of title
      */
     public Style getTitle() {
@@ -85,7 +85,7 @@ public class Theme extends AbstractConfigurationObject {
 
     /**
      * Set style of Chart title
-     * 
+     *
      * @param style
      *            New style of title
      */
@@ -95,7 +95,7 @@ public class Theme extends AbstractConfigurationObject {
 
     /**
      * Get style of Chart subtitle
-     * 
+     *
      * @return Style of subtitle
      */
     public Style getSubtitle() {
@@ -104,7 +104,7 @@ public class Theme extends AbstractConfigurationObject {
 
     /**
      * Set style of Chart subtitle
-     * 
+     *
      * @param style
      *            New style of subtitle
      */
@@ -114,7 +114,7 @@ public class Theme extends AbstractConfigurationObject {
 
     /**
      * Get style of labels
-     * 
+     *
      * @return Labels style
      */
     public Style getLabels() {
@@ -123,7 +123,7 @@ public class Theme extends AbstractConfigurationObject {
 
     /**
      * Set new style of labels
-     * 
+     *
      * @param style
      *            Labels style
      */
@@ -133,7 +133,7 @@ public class Theme extends AbstractConfigurationObject {
 
     /**
      * Get style of legend
-     * 
+     *
      * @return Legend style
      */
     public LegendStyle getLegend() {
@@ -142,7 +142,7 @@ public class Theme extends AbstractConfigurationObject {
 
     /**
      * Set new style legend
-     * 
+     *
      * @param style
      *            Legend style
      */
@@ -152,7 +152,7 @@ public class Theme extends AbstractConfigurationObject {
 
     /**
      * Get style of X axes
-     * 
+     *
      * @return X axis style
      */
     public AxisStyle getxAxis() {
@@ -161,7 +161,7 @@ public class Theme extends AbstractConfigurationObject {
 
     /**
      * Set new style of X axes
-     * 
+     *
      * @param style
      *            X axis style
      */
@@ -171,7 +171,7 @@ public class Theme extends AbstractConfigurationObject {
 
     /**
      * Get style of Y axes
-     * 
+     *
      * @return Y axis style
      */
     public AxisStyle getyAxis() {
@@ -180,7 +180,7 @@ public class Theme extends AbstractConfigurationObject {
 
     /**
      * Set new style of Y axes
-     * 
+     *
      * @param style
      *            Y axis style
      */
@@ -190,7 +190,7 @@ public class Theme extends AbstractConfigurationObject {
 
     /**
      * Get style of tooltips
-     * 
+     *
      * @return Tooltip style
      */
     public TooltipStyle getTooltip() {
@@ -199,7 +199,7 @@ public class Theme extends AbstractConfigurationObject {
 
     /**
      * Set new style of tooltips
-     * 
+     *
      * @param tooltip
      *            Tooltip style
      */
@@ -209,7 +209,7 @@ public class Theme extends AbstractConfigurationObject {
 
     /**
      * Get style of plots
-     * 
+     *
      * @return Plot styles
      */
     public PlotOptionsStyle getPlotOptions() {
@@ -218,7 +218,7 @@ public class Theme extends AbstractConfigurationObject {
 
     /**
      * Set new style of plot
-     * 
+     *
      * @param plotOptions
      *            Plot styles
      */
@@ -228,7 +228,7 @@ public class Theme extends AbstractConfigurationObject {
 
     /**
      * Get credits style
-     * 
+     *
      * @return Credits style
      */
     public Credits getCredits() {
@@ -237,7 +237,7 @@ public class Theme extends AbstractConfigurationObject {
 
     /**
      * Set new style for credits
-     * 
+     *
      * @param credits
      *            Credits style
      */

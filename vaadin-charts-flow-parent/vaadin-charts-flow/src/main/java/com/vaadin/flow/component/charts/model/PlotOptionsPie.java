@@ -4,11 +4,11 @@ package com.vaadin.flow.component.charts.model;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -140,7 +140,7 @@ public class PlotOptionsPie extends AbstractPlotOptions {
      * together with a <code>borderWidth</code> to fill drawing gaps created by
      * antialiazing artefacts in borderless pies.
      * </p>
-     * 
+     *
      * <p>
      * In <a href=
      * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
@@ -165,14 +165,14 @@ public class PlotOptionsPie extends AbstractPlotOptions {
      * <p>
      * The width of the border surrounding each slice.
      * </p>
-     * 
+     *
      * <p>
      * When setting the border width to 0, there may be small gaps between the
      * slices due to SVG antialiasing artefacts. To work around this, keep the
      * border width at 0.5 or 1, but set the <code>borderColor</code> to
      * <code>null</code> instead.
      * </p>
-     * 
+     *
      * <p>
      * In <a href=
      * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
@@ -226,7 +226,7 @@ public class PlotOptionsPie extends AbstractPlotOptions {
      * Note that clipping should be always enabled when chart.zoomType is set
      * <p>
      * Defaults to <code>false</code>.
-     * 
+     *
      * @param clip
      */
     public void setClip(Boolean clip) {
@@ -294,7 +294,7 @@ public class PlotOptionsPie extends AbstractPlotOptions {
 
     /**
      * Adds color to the colors array
-     * 
+     *
      * @param color
      *            to add
      * @see #setColors(Color...)
@@ -308,7 +308,7 @@ public class PlotOptionsPie extends AbstractPlotOptions {
 
     /**
      * Removes first occurrence of color in colors array
-     * 
+     *
      * @param color
      *            to remove
      * @see #setColors(Color...)
@@ -546,7 +546,7 @@ public class PlotOptionsPie extends AbstractPlotOptions {
      * a donut chart. Can be a percentage or pixel value. Percentages are
      * relative to the pie size. Pixel values are given as integers.
      * </p>
-     * 
+     *
      * <p>
      * Note: in Highcharts < 4.1.2, the percentage was relative to the plot
      * area, not the pie size.
@@ -581,7 +581,7 @@ public class PlotOptionsPie extends AbstractPlotOptions {
 
     /**
      * Adds key to the keys array
-     * 
+     *
      * @param key
      *            to add
      * @see #setKeys(String...)
@@ -595,7 +595,7 @@ public class PlotOptionsPie extends AbstractPlotOptions {
 
     /**
      * Removes first occurrence of key in keys array
-     * 
+     *
      * @param key
      *            to remove
      * @see #setKeys(String...)
@@ -895,7 +895,7 @@ public class PlotOptionsPie extends AbstractPlotOptions {
      * axis, Y axis or Z axis for bubbles, according to the
      * <code>zoneAxis</code> option.
      * </p>
-     * 
+     *
      * <p>
      * In <a href=
      * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
@@ -912,7 +912,7 @@ public class PlotOptionsPie extends AbstractPlotOptions {
 
     /**
      * Adds zone to the zones array
-     * 
+     *
      * @param zone
      *            to add
      * @see #setZones(Zones...)
@@ -926,7 +926,7 @@ public class PlotOptionsPie extends AbstractPlotOptions {
 
     /**
      * Removes first occurrence of zone in zones array
-     * 
+     *
      * @param zone
      *            to remove
      * @see #setZones(Zones...)

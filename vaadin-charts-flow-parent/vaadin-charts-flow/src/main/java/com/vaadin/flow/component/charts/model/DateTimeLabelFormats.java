@@ -4,11 +4,11 @@ package com.vaadin.flow.component.charts.model;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -18,9 +18,9 @@ package com.vaadin.flow.component.charts.model;
  * unit. This member gives the default string representations used for each
  * unit. For an overview of the replacement codes, see
  * {@link java.text.DateFormat}. Defaults to:
- * 
+ *
  * <code>
- * { 
+ * {
  *   second: '%H:%M:%S',
  *   minute: '%H:%M',
  *   hour: '%H:%M',
@@ -48,7 +48,7 @@ public class DateTimeLabelFormats extends AbstractConfigurationObject {
     /**
      * Constructs a DateTimeLabelFormats with the given format strings for month
      * and year
-     * 
+     *
      * @param month
      * @param year
      */
@@ -67,7 +67,7 @@ public class DateTimeLabelFormats extends AbstractConfigurationObject {
 
     /**
      * Sets the format String for second resolution.
-     * 
+     *
      * @param second
      */
     public void setSecond(String second) {
@@ -84,7 +84,7 @@ public class DateTimeLabelFormats extends AbstractConfigurationObject {
 
     /**
      * Sets the format String for minute resolution.
-     * 
+     *
      * @param minute
      */
     public void setMinute(String minute) {
@@ -101,7 +101,7 @@ public class DateTimeLabelFormats extends AbstractConfigurationObject {
 
     /**
      * Sets the format String for hour resolution
-     * 
+     *
      * @param hour
      */
     public void setHour(String hour) {
@@ -118,7 +118,7 @@ public class DateTimeLabelFormats extends AbstractConfigurationObject {
 
     /**
      * Sets the format String for day resolution.
-     * 
+     *
      * @param day
      */
     public void setDay(String day) {
@@ -135,7 +135,7 @@ public class DateTimeLabelFormats extends AbstractConfigurationObject {
 
     /**
      * Sets the format String for week resolution.
-     * 
+     *
      * @param week
      */
     public void setWeek(String week) {
@@ -152,7 +152,7 @@ public class DateTimeLabelFormats extends AbstractConfigurationObject {
 
     /**
      * Sets the format String for month resolution.
-     * 
+     *
      * @param month
      */
     public void setMonth(String month) {
@@ -169,7 +169,7 @@ public class DateTimeLabelFormats extends AbstractConfigurationObject {
 
     /**
      * Sets the format String for year resolution.
-     * 
+     *
      * @param year
      */
     public void setYear(String year) {

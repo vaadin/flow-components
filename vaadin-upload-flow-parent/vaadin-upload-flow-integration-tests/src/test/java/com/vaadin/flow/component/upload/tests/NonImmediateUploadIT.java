@@ -3,8 +3,6 @@ package com.vaadin.flow.component.upload.tests;
 import java.io.File;
 
 import org.junit.Assert;
-import org.junit.AssumptionViolatedException;
-import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.WebElement;
 
@@ -14,18 +12,6 @@ import com.vaadin.testbench.TestBenchElement;
 
 @TestPath("vaadin-upload/non-immediate-upload")
 public class NonImmediateUploadIT extends AbstractUploadIT {
-
-    @Before
-    public void init() {
-        if (getRunLocallyBrowser() == null) {
-            // Multiple file upload does not work with Remotewebdriver
-            // and autoUpload=false
-            // Related to
-            // https://github.com/SeleniumHQ/selenium/issues/7408
-            throw new AssumptionViolatedException(
-                    "Skipped <Multiple file upload does not work with Remotewebdriver>");
-        }
-    }
 
     @Test
     public void uploadMultipleFiles_shouldNotThrowException_onStart()
@@ -45,8 +31,8 @@ public class NonImmediateUploadIT extends AbstractUploadIT {
         File file1 = createTempFile();
         File file2 = createTempFile();
         UploadElement upload = $(UploadElement.class).waitForFirst();
-        WebElement input = getInput(upload);
-        fillPathToUploadInput(input, file1.getPath(), file2.getPath());
+        upload.upload(file1);
+        upload.upload(file2);
         WebElement button = findButtonInVaadinUploadFile(upload, buttonType);
         button.click();
         TestBenchElement element = $("span").id("error-handler-message");

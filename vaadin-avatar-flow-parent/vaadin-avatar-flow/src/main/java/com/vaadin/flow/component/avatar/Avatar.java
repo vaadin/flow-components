@@ -33,16 +33,33 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Server-side component for the <code>vaadin-avatar</code> element.
+ * Avatar is a graphical representation of an object or entity, for example a
+ * person or an organisation.
+ * <p>
+ * Avatar has three properties: name, abbreviation and image.
+ * <p>
+ * The name is shown on hover in a tooltip. When a name is set, Avatar will
+ * auto-generate and display an abbreviation of the specified name. For example,
+ * “Allison Torres” becomes “AT”, “John Smith” becomes “JS”, etc.
+ * <p>
+ * The abbreviation can also be set manually. Abbreviations should be kept to a
+ * maximum of 2–3 characters.
+ * <p>
+ * Avatar can be used to display images, such as user profile pictures or
+ * company logos. Abbreviations are not shown when images are used.
+ * <p>
+ * Note that this component is optimized for use with Collaboration Engine — a
+ * simple way to build real-time collaboration into your app — but can also be
+ * used standalone as a regular component.
  *
  * @author Vaadin Ltd
  */
 @Tag("vaadin-avatar")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.0-beta1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-rc1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/avatar/src/vaadin-avatar.js")
-@NpmPackage(value = "@vaadin/avatar", version = "23.0.0-beta1")
-@NpmPackage(value = "@vaadin/vaadin-avatar", version = "23.0.0-beta1")
+@NpmPackage(value = "@vaadin/avatar", version = "23.1.0-rc1")
+@NpmPackage(value = "@vaadin/vaadin-avatar", version = "23.1.0-rc1")
 public class Avatar extends Component implements HasStyle, HasSize, HasTheme {
 
     /**

@@ -4,11 +4,11 @@ package com.vaadin.flow.component.charts.model;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -17,9 +17,9 @@ package com.vaadin.flow.component.charts.model;
  * A DataSeriesItem implementation suitable for
  * <a href="http://en.wikipedia.org/wiki/Box_plot">box plot charts</a>. Plot box
  * charts visualize well some statistical data.
- * 
+ *
  * @see PlotOptionsBoxPlot
- * 
+ *
  */
 public class BoxPlotItem extends DataSeriesItem {
     // high/low already defined in DataSeriesItem
@@ -37,7 +37,7 @@ public class BoxPlotItem extends DataSeriesItem {
 
     /**
      * Constructs an item for box plot with given values.
-     * 
+     *
      * @param low
      * @param q1
      *            lower quartile
@@ -66,7 +66,7 @@ public class BoxPlotItem extends DataSeriesItem {
 
     /**
      * Sets the lower quartile of the item. Often also referred as q1 value.
-     * 
+     *
      * @param lowerQuartile
      *            the lower quartile
      */
@@ -83,7 +83,7 @@ public class BoxPlotItem extends DataSeriesItem {
 
     /**
      * Sets the upper quartile of the item. Often also referred as q3 value.
-     * 
+     *
      * @param upperQuartile
      *            the upper quartile
      */
@@ -100,7 +100,7 @@ public class BoxPlotItem extends DataSeriesItem {
 
     /**
      * Sets the median of the item. Often referred as q2 value.
-     * 
+     *
      * @param median
      */
     public void setMedian(Number median) {

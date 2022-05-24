@@ -40,4 +40,16 @@ public class RefreshDataProviderPageIT extends AbstractComponentIT {
         Assert.assertEquals("bar", radioButtons.get(0).getText());
         Assert.assertEquals("baz", radioButtons.get(1).getText());
     }
+
+    @Test
+    public void resetComponentExpectLabel() {
+        open();
+
+        findElement(By.id("reset")).click();
+
+        TestBenchElement group = $(TestBenchElement.class).id("group");
+        String label = group.findElement(By.cssSelector("label[slot='label']"))
+                .getText();
+        Assert.assertEquals("Label", label);
+    }
 }

@@ -120,6 +120,6 @@ public class GridContextMenuTest {
 
         Mockito.verify(registration).remove();
         Mockito.verify(element)
-                .callJsFunction("$contextMenuConnector.removeConnector");
+                .callJsFunction("$contextMenuTargetConnector.removeConnector");
     }
 }

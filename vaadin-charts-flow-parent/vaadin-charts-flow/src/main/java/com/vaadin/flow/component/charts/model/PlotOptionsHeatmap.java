@@ -4,11 +4,11 @@ package com.vaadin.flow.component.charts.model;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -23,7 +23,7 @@ import com.vaadin.flow.component.charts.model.style.Color;
  * The heatmap series type. This series type is available both in Highcharts and
  * Highmaps.
  * </p>
- * 
+ *
  * <p>
  * The colors of each heat map point is usually determined by its value and
  * controlled by settings on the <a href="#colorAxis">colorAxis</a>.
@@ -144,7 +144,7 @@ public class PlotOptionsHeatmap extends AbstractPlotOptions {
      * <p>
      * The color of the border surrounding each column or bar.
      * </p>
-     * 
+     *
      * <p>
      * In <a href=
      * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
@@ -185,7 +185,7 @@ public class PlotOptionsHeatmap extends AbstractPlotOptions {
      * <p>
      * The width of the border surrounding each column or bar.
      * </p>
-     * 
+     *
      * <p>
      * In <a href=
      * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
@@ -327,7 +327,7 @@ public class PlotOptionsHeatmap extends AbstractPlotOptions {
 
     /**
      * Adds color to the colors array
-     * 
+     *
      * @param color
      *            to add
      * @see #setColors(Color...)
@@ -341,7 +341,7 @@ public class PlotOptionsHeatmap extends AbstractPlotOptions {
 
     /**
      * Removes first occurrence of color in colors array
-     * 
+     *
      * @param color
      *            to remove
      * @see #setColors(Color...)
@@ -441,7 +441,7 @@ public class PlotOptionsHeatmap extends AbstractPlotOptions {
      * <p>
      * Options for the series data labels, appearing next to each data point.
      * </p>
-     * 
+     *
      * <p>
      * In <a href=
      * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
@@ -586,7 +586,7 @@ public class PlotOptionsHeatmap extends AbstractPlotOptions {
 
     /**
      * Adds key to the keys array
-     * 
+     *
      * @param key
      *            to add
      * @see #setKeys(String...)
@@ -600,7 +600,7 @@ public class PlotOptionsHeatmap extends AbstractPlotOptions {
 
     /**
      * Removes first occurrence of key in keys array
-     * 
+     *
      * @param key
      *            to remove
      * @see #setKeys(String...)
@@ -903,7 +903,7 @@ public class PlotOptionsHeatmap extends AbstractPlotOptions {
      * axis, Y axis or Z axis for bubbles, according to the
      * <code>zoneAxis</code> option.
      * </p>
-     * 
+     *
      * <p>
      * In <a href=
      * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
@@ -920,7 +920,7 @@ public class PlotOptionsHeatmap extends AbstractPlotOptions {
 
     /**
      * Adds zone to the zones array
-     * 
+     *
      * @param zone
      *            to add
      * @see #setZones(Zones...)
@@ -934,7 +934,7 @@ public class PlotOptionsHeatmap extends AbstractPlotOptions {
 
     /**
      * Removes first occurrence of zone in zones array
-     * 
+     *
      * @param zone
      *            to remove
      * @see #setZones(Zones...)

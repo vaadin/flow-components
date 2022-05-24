@@ -4,11 +4,11 @@ package com.vaadin.flow.component.charts.model.style;
  * #%L
  * Vaadin Charts
  * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -129,7 +129,7 @@ public class GradientColor implements Color {
 
     /**
      * Adds a color stop to the gradient
-     * 
+     *
      * @param d
      *            The relative point of the color stop, between 0 and 1
      * @param color
@@ -145,7 +145,7 @@ public class GradientColor implements Color {
     /**
      * Creates a new linear gradient between two given points. Use
      * {@link #addColorStop(double, SolidColor)} to define the colors.
-     * 
+     *
      * @param startX
      *            The relative start point on the X-axis, 0..1
      * @param startY
@@ -167,7 +167,7 @@ public class GradientColor implements Color {
      * Creates a radial gradient color at a specified point with the given
      * radius. Use {@link #addColorStop(double, SolidColor)} to define the
      * colors.
-     * 
+     *
      * @param centerX
      *            The X coordinate of the center
      * @param centerY

@@ -448,4 +448,15 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
         clientCallables.put(functionName, handler);
         return this;
     }
+
+    /**
+     * Gets the property mapped to {@link ValueProvider}s in this renderer. The
+     * returned map is immutable.
+     *
+     * @return the mapped properties, never <code>null</code>
+     */
+    @Override
+    public Map<String, ValueProvider<SOURCE, ?>> getValueProviders() {
+        return Collections.unmodifiableMap(valueProviders);
+    }
 }

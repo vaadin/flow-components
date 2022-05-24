@@ -4,7 +4,7 @@ package com.vaadin.flow.component.login;
  * #%L
  * Login for Vaadin Flow
  * %%
- * Copyright (C) 2017 - 2018 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,22 @@ package com.vaadin.flow.component.login;
  * #L%
  */
 
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 
 /**
- * Server-side component for the {@code <vaadin-login-form>} component.
- *
+ * Login is a component that contains a login form. You can use it for
+ * authenticating the user with a username and password. It is compatible with
+ * password managers, supports internationalization and works on all device
+ * sizes.
+ * <p>
+ * The basic Login component consists of a title (Log in), two input fields
+ * (Username and Password), and two buttons (Log in and Forgot password). You
+ * can customize the form’s title, descriptions, labels, and messages using
+ * internationalization.
+ * <p>
  * On {@link LoginForm.LoginEvent} component becomes disabled. Disabled
  * component stops to process login events, however the
  * {@link LoginForm.ForgotPasswordEvent} event is processed anyway. To enable
@@ -37,12 +46,12 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-login-form")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.0-beta1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-rc1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/login", version = "23.0.0-beta1")
-@NpmPackage(value = "@vaadin/vaadin-login", version = "23.0.0-beta1")
+@NpmPackage(value = "@vaadin/login", version = "23.1.0-rc1")
+@NpmPackage(value = "@vaadin/vaadin-login", version = "23.1.0-rc1")
 @JsModule("@vaadin/login/src/vaadin-login-form.js")
-public class LoginForm extends AbstractLogin {
+public class LoginForm extends AbstractLogin implements HasStyle {
 
     public LoginForm() {
     }

@@ -4,11 +4,11 @@ package com.vaadin.flow.component.charts.model;
  * #%L
  * Vaadin Charts for Flow
  * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
+ * Copyright 2000-2022 Vaadin Ltd.
  * %%
  * This program is available under Commercial Vaadin Developer License
  * 4.0 (CVDLv4).
- * 
+ *
  * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
  * #L%
  */
@@ -26,7 +26,7 @@ public class DataSeriesItem3d extends DataSeriesItem {
 
     /**
      * Constructs an item with X, Y and Z values
-     * 
+     *
      * @param x
      * @param y
      * @param z
@@ -38,7 +38,7 @@ public class DataSeriesItem3d extends DataSeriesItem {
 
     /**
      * Sets the z value of the point.
-     * 
+     *
      * @param z
      */
     public void setZ(Number z) {

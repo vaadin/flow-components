@@ -18,14 +18,13 @@ package com.vaadin.flow.component.upload.tests;
 
 import java.io.IOException;
 
+import com.vaadin.flow.component.html.NativeButton;
 import org.apache.commons.io.IOUtils;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.upload.Upload;
-import com.vaadin.flow.component.upload.UploadI18N;
-import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.component.upload.receivers.MultiFileMemoryBuffer;
 import com.vaadin.flow.router.Route;
 
@@ -44,6 +43,7 @@ public class UploadView extends Div {
     private void createSimpleUpload() {
         Div output = new Div();
         Div eventsOutput = new Div();
+        Div fileList = new Div();
 
         MultiFileMemoryBuffer buffer = new MultiFileMemoryBuffer();
         Upload upload = new Upload(buffer);
@@ -60,12 +60,23 @@ public class UploadView extends Div {
         });
         upload.addAllFinishedListener(event -> eventsOutput.add("-finished"));
 
+        NativeButton clearFileListBtn = new NativeButton("Clear file list",
+                e -> upload.clearFileList());
+
+        NativeButton printFileListBtn = new NativeButton("Print file list",
+                e -> fileList
+                        .setText(upload.getElement().getProperty("files")));
+
         upload.setMaxFileSize(500 * 1024);
         upload.setId("test-upload");
+        clearFileListBtn.setId("clear-file-list");
+        printFileListBtn.setId("print-file-list");
+        fileList.setId("file-list");
         output.setId("test-output");
         eventsOutput.setId("test-events-output");
 
-        addCard("Simple in memory receiver", upload, output, eventsOutput);
+        addCard("Simple in memory receiver", upload, output, eventsOutput,
+                fileList, clearFileListBtn, printFileListBtn);
     }
 
     private void addCard(String title, Component... components) {

@@ -4,14 +4,14 @@
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
- * the License. 
+ * the License.
  */
 package com.vaadin.flow.component.treegrid.it;
 
@@ -41,19 +41,19 @@ public class TreeGridSelectIT extends AbstractTreeGridIT {
         findElementByText("Selection mode - multi").click();
 
         assertAllRowsDeselected(getTreeGrid());
-        clickSelectAll(getTreeGrid());
+        getTreeGrid().clickSelectAll();
         assertAllRowsSelected(getTreeGrid());
         getTreeGrid().expandWithClick(1, 1);
         getTreeGrid().expandWithClick(2, 1);
         assertAllRowsSelected(getTreeGrid());
-        clickSelectAll(getTreeGrid());
+        getTreeGrid().clickSelectAll();
         assertAllRowsDeselected(getTreeGrid());
-        clickSelectAll(getTreeGrid());
+        getTreeGrid().clickSelectAll();
         getTreeGrid().collapseWithClick(2, 1);
         getTreeGrid().expandWithClick(2, 1);
         assertAllRowsSelected(getTreeGrid());
         getTreeGrid().collapseWithClick(2, 1);
-        clickSelectAll(getTreeGrid());
+        getTreeGrid().clickSelectAll();
         getTreeGrid().expandWithClick(2, 1);
         assertAllRowsDeselected(getTreeGrid());
     }
@@ -68,9 +68,5 @@ public class TreeGridSelectIT extends AbstractTreeGridIT {
         for (int i = 0; i < grid.getRowCount(); i++) {
             assertFalse(grid.getRow(i).isSelected());
         }
-    }
-
-    private void clickSelectAll(TreeGridElement grid) {
-        grid.findElement(By.id("selectAllCheckbox")).click();
     }
 }

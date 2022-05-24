@@ -130,8 +130,6 @@ public class ComboBoxDemoPage extends VerticalLayout {
     private void createStringComboBox() {
         Div message = createMessageDiv("string-selection-message");
 
-        // begin-source-example
-        // source-example-heading: String selection
         ComboBox<String> comboBox = new ComboBox<>("Browsers");
         comboBox.setItems("Google Chrome", "Mozilla Firefox", "Opera",
                 "Apple Safari", "Microsoft Edge");
@@ -143,7 +141,6 @@ public class ComboBoxDemoPage extends VerticalLayout {
                 message.setText("Selected browser: " + event.getValue());
             }
         });
-        // end-source-example
 
         comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, WIDTH_STRING);
         comboBox.setId("string-selection-box");
@@ -151,8 +148,6 @@ public class ComboBoxDemoPage extends VerticalLayout {
     }
 
     private void createWithClearButton() {
-        // begin-source-example
-        // source-example-heading: Clear button
         ComboBox<String> comboBox = new ComboBox<>("Browsers");
         comboBox.setItems("Google Chrome", "Mozilla Firefox", "Opera",
                 "Apple Safari", "Microsoft Edge");
@@ -160,7 +155,6 @@ public class ComboBoxDemoPage extends VerticalLayout {
 
         // Display an icon which can be clicked to clear the value:
         comboBox.setClearButtonVisible(true);
-        // end-source-example
 
         comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, WIDTH_STRING);
         comboBox.setId("clear-button-box");
@@ -170,8 +164,6 @@ public class ComboBoxDemoPage extends VerticalLayout {
     private void createObjectComboBox() {
         Div message = createMessageDiv("object-selection-message");
 
-        // begin-source-example
-        // source-example-heading: Object selection
         ComboBox<Song> comboBox = new ComboBox<>();
         comboBox.setLabel("Music selection");
         comboBox.setItemLabelGenerator(Song::getName);
@@ -189,7 +181,6 @@ public class ComboBoxDemoPage extends VerticalLayout {
                 message.setText("No song is selected");
             }
         });
-        // end-source-example
 
         comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, WIDTH_STRING);
         comboBox.setId("object-selection-box");
@@ -199,8 +190,6 @@ public class ComboBoxDemoPage extends VerticalLayout {
     private void createComboBoxWithObjectStringSimpleValue() {
         Div message = createMessageDiv("value-selection-message");
 
-        // begin-source-example
-        // source-example-heading: Value selection from objects
         ComboBox<Song> comboBox = new ComboBox<>("Artists");
         comboBox.setItemLabelGenerator(Song::getArtist);
 
@@ -221,7 +210,6 @@ public class ComboBoxDemoPage extends VerticalLayout {
                                 + event.getOldValue().getArtist());
             }
         });
-        // end-source-example
 
         comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, WIDTH_STRING);
         comboBox.setId("value-selection-box");
@@ -230,11 +218,8 @@ public class ComboBoxDemoPage extends VerticalLayout {
 
     private void createDisabledComboBox() {
         Div message = createMessageDiv("disabled-combobox-message");
-        // begin-source-example
-        // source-example-heading: Disabled ComboBox
         ComboBox<String> comboBox = new ComboBox<>("Disabled ComboBox");
         comboBox.setEnabled(false);
-        // end-source-example
         comboBox.setItems("Google Chrome", "Mozilla Firefox", "Opera",
                 "Apple Safari", "Microsoft Edge");
         comboBox.addValueChangeListener(event -> {
@@ -252,22 +237,19 @@ public class ComboBoxDemoPage extends VerticalLayout {
     private void createComboBoxUsingTemplateRenderer() {
         Div message = createMessageDiv("template-selection-message");
 
-        //@formatter:off
-        // begin-source-example
-        // source-example-heading: Rendering items using TemplateRenderer
         ComboBox<Song> comboBox = new ComboBox<>();
 
         List<Song> listOfSongs = createListOfSongs();
 
         /*
-         * Providing a custom item filter allows filtering based on all of
-         * the rendered properties:
+         * Providing a custom item filter allows filtering based on all of the
+         * rendered properties:
          */
-        ItemFilter<Song> filter = (song, filterString) ->
-                song.getName().toLowerCase()
+        ItemFilter<Song> filter = (song,
+                filterString) -> song.getName().toLowerCase()
                         .contains(filterString.toLowerCase())
                         || song.getArtist().toLowerCase()
-                        .contains(filterString.toLowerCase());
+                                .contains(filterString.toLowerCase());
 
         comboBox.setItems(filter, listOfSongs);
         comboBox.setItemLabelGenerator(Song::getName);
@@ -289,8 +271,6 @@ public class ComboBoxDemoPage extends VerticalLayout {
                                 + event.getOldValue().getArtist());
             }
         });
-        // end-source-example
-        //@formatter:on
 
         comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, WIDTH_STRING);
         comboBox.setId("template-selection-box");
@@ -302,22 +282,19 @@ public class ComboBoxDemoPage extends VerticalLayout {
     private void createComboBoxUsingComponentRenderer() {
         Div message = createMessageDiv("component-selection-message");
 
-        //@formatter:off
-        // begin-source-example
-        // source-example-heading: Rendering items using ComponentTemplateRenderer
         ComboBox<Song> comboBox = new ComboBox<>();
 
         List<Song> listOfSongs = createListOfSongs();
 
         /*
-         * Providing a custom item filter allows filtering based on all of
-         * the rendered properties:
+         * Providing a custom item filter allows filtering based on all of the
+         * rendered properties:
          */
-        ItemFilter<Song> filter = (song, filterString) ->
-                song.getName().toLowerCase()
+        ItemFilter<Song> filter = (song,
+                filterString) -> song.getName().toLowerCase()
                         .contains(filterString.toLowerCase())
                         || song.getArtist().toLowerCase()
-                        .contains(filterString.toLowerCase());
+                                .contains(filterString.toLowerCase());
 
         comboBox.setItems(filter, listOfSongs);
 
@@ -349,8 +326,6 @@ public class ComboBoxDemoPage extends VerticalLayout {
                                 + event.getOldValue().getArtist());
             }
         });
-        // end-source-example
-        //@formatter:on
 
         comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, WIDTH_STRING);
         comboBox.setId("component-selection-box");
@@ -360,8 +335,6 @@ public class ComboBoxDemoPage extends VerticalLayout {
     }
 
     private void createComboBoxWithInMemoryLazyLoading() {
-        // begin-source-example
-        // source-example-heading: Lazy loading between client and server
         ComboBox<String> comboBox = new ComboBox<>();
 
         /*
@@ -371,7 +344,6 @@ public class ComboBoxDemoPage extends VerticalLayout {
          */
         List<String> names = getNames(500);
         comboBox.setItems(names);
-        // end-source-example
 
         comboBox.setId("lazy-loading-box");
         add(new Div(new H2("Lazy Loading"),
@@ -379,9 +351,7 @@ public class ComboBoxDemoPage extends VerticalLayout {
     }
 
     private void createComboBoxWithCallbackLazyLoading() {
-        //@formatter:off
-        // begin-source-example
-        // source-example-heading: Lazy loading with callbacks
+
         ComboBox<String> comboBox = new ComboBox<>();
 
         /*
@@ -390,14 +360,10 @@ public class ComboBoxDemoPage extends VerticalLayout {
          * items from the given range with the given filter. The second callback
          * should provide the number of items that match the query.
          */
-        comboBox.setDataProvider(
-                (filter, offset, limit) ->
-                        IntStream.range(offset, offset + limit)
-                                .mapToObj(i -> "Item " + i),
+        comboBox.setDataProvider((filter, offset, limit) -> IntStream
+                .range(offset, offset + limit).mapToObj(i -> "Item " + i),
                 filter -> 500);
 
-        // end-source-example
-        //@formatter:on
         comboBox.setId("callback-box");
         add(new Div(new H2("Lazy Loading"),
                 new H2("Lazy loading with callbacks"), comboBox));
@@ -406,8 +372,6 @@ public class ComboBoxDemoPage extends VerticalLayout {
     private void createComboBoxWithCustomValues() {
         Div message = createMessageDiv("custom-value-message");
 
-        // begin-source-example
-        // source-example-heading: Allow users to input custom values
         ComboBox<String> comboBox = new ComboBox<>("City");
         comboBox.setItems("Turku", "Berlin", "San Jose");
 
@@ -426,7 +390,6 @@ public class ComboBoxDemoPage extends VerticalLayout {
                 message.setText("Selected city: " + event.getValue());
             }
         });
-        // end-source-example
 
         comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, WIDTH_STRING);
         comboBox.setId("custom-value-box");
