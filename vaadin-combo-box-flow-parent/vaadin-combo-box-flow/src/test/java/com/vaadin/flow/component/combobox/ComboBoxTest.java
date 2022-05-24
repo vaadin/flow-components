@@ -15,9 +15,8 @@
  */
 package com.vaadin.flow.component.combobox;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Collection;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
@@ -55,18 +54,6 @@ public class ComboBoxTest {
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
-    private static class TestComboBox extends ComboBox<String> {
-
-        private List<String> items;
-
-        @Override
-        public void setDataProvider(ListDataProvider<String> dataProvider) {
-            super.setDataProvider(dataProvider);
-            items = new ArrayList<>(dataProvider.getItems());
-        }
-
-    }
-
     private enum Category {
         CATEGORY_1, CATEGORY_2, CATEGORY_3;
     }
@@ -91,13 +78,18 @@ public class ComboBoxTest {
                 .getElement().hasAttribute("suppress-template-warning"));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void setItems_jsonItemsAreSet() {
-        TestComboBox comboBox = new TestComboBox();
+        ComboBox<String> comboBox = new ComboBox<>();
         comboBox.setItems(Arrays.asList("foo", "bar"));
-        Assert.assertEquals(2, comboBox.items.size());
-        assertItem(comboBox, 0, "foo");
-        assertItem(comboBox, 1, "bar");
+
+        ListDataProvider<String> dataProvider = (ListDataProvider<String>) comboBox
+                .getDataProvider();
+        Collection<String> items = dataProvider.getItems();
+        Assert.assertEquals(2, items.size());
+        Assert.assertTrue(items.contains("foo"));
+        Assert.assertTrue(items.contains("bar"));
     }
 
     @Test
@@ -137,7 +129,7 @@ public class ComboBoxTest {
     public void labelItemGeneratorReturnsNull_throw() {
         expectIllegalStateException(
                 "Got 'null' as a label value for the item 'foo'. 'ItemLabelGenerator' instance may not return 'null' values");
-        TestComboBox comboBox = new TestComboBox();
+        ComboBox<String> comboBox = new ComboBox<>();
 
         comboBox.setItemLabelGenerator(obj -> null);
         comboBox.setItems(Arrays.asList("foo", "bar"));
@@ -450,11 +442,6 @@ public class ComboBoxTest {
                 .checkOldListenersRemovedOnComponentAttachAndDetach(
                         new ComboBox<>(), 2, 2, new int[] { 1, 3 },
                         new DataCommunicatorTest.MockUI());
-    }
-
-    private void assertItem(TestComboBox comboBox, int index, String caption) {
-        String value1 = comboBox.items.get(index);
-        Assert.assertEquals(caption, value1);
     }
 
     private void expectIllegalArgumentException(String expectedMessage) {
