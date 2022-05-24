@@ -22,6 +22,7 @@ import com.vaadin.flow.component.HasClearButton;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasThemeVariant;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.InputNotifier;
 import com.vaadin.flow.component.KeyNotifier;
@@ -37,10 +38,11 @@ import com.vaadin.flow.data.value.ValueChangeMode;
  * @author Vaadin Ltd.
  */
 public class PasswordField
-        extends GeneratedVaadinPasswordField<PasswordField, String> implements
-        HasSize, HasValidation, HasValueChangeMode, HasPrefixAndSuffix,
-        InputNotifier, KeyNotifier, CompositionNotifier, HasAutocomplete,
-        HasAutocapitalize, HasAutocorrect, HasHelper, HasLabel, HasClearButton {
+        extends GeneratedVaadinPasswordField<PasswordField, String>
+        implements HasSize, HasValidation, HasValueChangeMode,
+        HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
+        HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper, HasLabel,
+        HasClearButton, HasThemeVariant<TextFieldVariant> {
     private ValueChangeMode currentMode;
 
     private boolean isConnectorAttached;

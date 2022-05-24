@@ -79,12 +79,11 @@ public class ListBoxDataViewIT extends AbstractComponentIT {
 
         Assert.assertEquals("ListBox should have items", 2, items.size());
 
-        Assert.assertEquals("First RadioButton should be updated to", CHANGED_1,
+        Assert.assertEquals("First item should be updated to", CHANGED_1,
                 items.get(0).getText());
 
-        Assert.assertEquals(
-                "Second RadioButton should still holds the old value", SECOND,
-                items.get(1).getText());
+        Assert.assertEquals("Second item should still hold the old value",
+                SECOND, items.get(1).getText());
     }
 
     @Test
@@ -97,12 +96,11 @@ public class ListBoxDataViewIT extends AbstractComponentIT {
 
         Assert.assertEquals("ListBox should have items", 2, items.size());
 
-        Assert.assertEquals("First RadioButton should be updated to", CHANGED_1,
+        Assert.assertEquals("First item should be updated to", CHANGED_1,
                 items.get(0).getText());
 
-        Assert.assertEquals(
-                "Second RadioButton should still holds the old value", SECOND,
-                items.get(1).getText());
+        Assert.assertEquals("Second item should still hold the old value",
+                SECOND, items.get(1).getText());
     }
 
     @Test
@@ -122,10 +120,10 @@ public class ListBoxDataViewIT extends AbstractComponentIT {
 
         Assert.assertEquals("ListBox should have items", 2, items.size());
 
-        Assert.assertEquals("First RadioButton should have the text", FIRST,
+        Assert.assertEquals("First item should have the text", FIRST,
                 items.get(0).getText());
 
-        Assert.assertEquals("Second RadioButton should have the text", SECOND,
+        Assert.assertEquals("Second item should have the text", SECOND,
                 items.get(1).getText());
 
         listBox = findElement(By.id(OTHER_LIST_BOX_FOR_ADD_TO_DATA_VIEW));
@@ -152,18 +150,18 @@ public class ListBoxDataViewIT extends AbstractComponentIT {
 
         Assert.assertEquals("ListBox should have items", 1, items.size());
 
-        Assert.assertEquals("First RadioButton should have the text", FIRST,
+        Assert.assertEquals("First item should have the text", FIRST,
                 items.get(0).getText());
 
         listBox = findElement(By.id(OTHER_LIST_BOX_FOR_REMOVE_FROM_DATA_VIEW));
         items = listBox.findElements(By.tagName(VAADIN_ITEM));
 
         Assert.assertEquals("Unexpected item count after removing one item "
-                + "for second radio button group", 1, items.size());
+                + "for second ListBox", 1, items.size());
     }
 
     @Test
-    public void testListDataView_addAndRemoveFilters_shouldProduceCorrectNumberOfRadioButtons() {
+    public void testListDataView_addAndRemoveFilters_shouldProduceCorrectNumberOfItems() {
 
         WebElement listBox = findElement(By.id(LIST_BOX_FOR_FILTER_DATA_VIEW));
         List<WebElement> items = listBox.findElements(By.tagName(VAADIN_ITEM));
@@ -189,8 +187,7 @@ public class ListBoxDataViewIT extends AbstractComponentIT {
         listBox = findElement(By.id(OTHER_LIST_BOX_FOR_FILTER_DATA_VIEW));
         items = listBox.findElements(By.tagName(VAADIN_ITEM));
 
-        Assert.assertEquals(
-                "Unexpected filtering for second radion button group", 10,
+        Assert.assertEquals("Unexpected filtering for second ListBox", 10,
                 items.size());
 
         findElement(By.id(LIST_DATA_VIEW_REMOVE_FILTER_BUTTON)).click();
@@ -271,8 +268,7 @@ public class ListBoxDataViewIT extends AbstractComponentIT {
         listBox = findElement(By.id(OTHER_LIST_BOX_FOR_SORT_DATA_VIEW));
         items = listBox.findElements(By.tagName(VAADIN_ITEM));
 
-        Assert.assertArrayEquals(
-                "Unexpected sorting for second radio button " + "group",
+        Assert.assertArrayEquals("Unexpected sorting for second ListBox",
                 new String[] { "third", "first", "second" },
                 items.stream().map(WebElement::getText).toArray());
     }

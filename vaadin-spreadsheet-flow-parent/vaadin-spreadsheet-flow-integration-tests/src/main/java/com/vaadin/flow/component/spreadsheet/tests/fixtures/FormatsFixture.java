@@ -68,7 +68,7 @@ public class FormatsFixture implements SpreadsheetFixture {
             spreadsheet.createCell(1, column + formats.length + 1,
                     "" + c.getCellType().ordinal());
 
-            c = spreadsheet.createCell(2, column, new Date(1095379000000l));
+            c = spreadsheet.createCell(2, column, new Date(1095379000000L));
             c.setCellStyle(style);
             spreadsheet.createCell(2, column + formats.length + 1,
                     "" + c.getCellType().ordinal());

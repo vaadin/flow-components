@@ -1197,7 +1197,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
     private Set<Component> customComponents = new HashSet<Component>();
 
     /* Disable buttons until table support #826 */
-    private static final boolean popupButtonsEnabled = false;
+    private static final boolean popupButtonsEnabled = true;
 
     private Map<CellReference, PopupButton> sheetPopupButtons = new HashMap<CellReference, PopupButton>();
 

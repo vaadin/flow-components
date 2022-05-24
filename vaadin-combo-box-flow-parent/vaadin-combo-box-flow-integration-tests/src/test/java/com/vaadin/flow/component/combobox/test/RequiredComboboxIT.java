@@ -76,7 +76,6 @@ public class RequiredComboboxIT extends AbstractComponentIT {
                 comboBox.getAttribute("invalid"));
 
         TestBenchElement error = comboBox.$("[part='error-message']").first();
-        Assert.assertTrue(error.getSize().getHeight() > 0);
         Assert.assertEquals("'foo' is invalid value", error.getText());
     }
 }
