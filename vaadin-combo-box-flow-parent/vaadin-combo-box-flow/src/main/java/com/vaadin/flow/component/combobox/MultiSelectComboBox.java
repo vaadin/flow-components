@@ -76,10 +76,26 @@ public class MultiSelectComboBox<TItem> extends
         ComboBoxBase<MultiSelectComboBox<TItem>, TItem, Set<TItem>> implements
         HasSize, HasValidation, HasHelper, HasTheme, HasLabel, HasClearButton {
 
+    /**
+     * Default constructor. Creates an empty combo box.
+     */
     public MultiSelectComboBox() {
         this(50);
     }
 
+    /**
+     * Creates an empty combo box with the defined page size for lazy loading.
+     * <p>
+     * The default page size is 50.
+     * <p>
+     * The page size is also the largest number of items that can support
+     * client-side filtering. If you provide more items than the page size, the
+     * component has to fall back to server-side filtering.
+     *
+     * @param pageSize
+     *            the amount of items to request at a time for lazy loading
+     * @see #setPageSize(int)
+     */
     public MultiSelectComboBox(int pageSize) {
         super("selectedItems", Collections.emptySet(), JsonArray.class,
                 MultiSelectComboBox::presentationToModel,
@@ -87,6 +103,105 @@ public class MultiSelectComboBox<TItem> extends
 
         setPageSize(pageSize);
         setItems(new DataCommunicator.EmptyDataProvider<>());
+    }
+
+    /**
+     * Creates an empty combo box with the defined label.
+     *
+     * @param label
+     *            the label describing the combo box
+     * @see #setLabel(String)
+     */
+    public MultiSelectComboBox(String label) {
+        this();
+        setLabel(label);
+    }
+
+    /**
+     * Creates a combo box with the defined label and populated with the items
+     * in the collection.
+     *
+     * @param label
+     *            the label describing the combo box
+     * @param items
+     *            the items to be shown in the list of the combo box
+     * @see #setLabel(String)
+     * @see #setItems(Collection)
+     */
+    public MultiSelectComboBox(String label, Collection<TItem> items) {
+        this();
+        setLabel(label);
+        setItems(items);
+    }
+
+    /**
+     * Creates a combo box with the defined label and populated with the items
+     * in the array.
+     *
+     * @param label
+     *            the label describing the combo box
+     * @param items
+     *            the items to be shown in the list of the combo box
+     * @see #setLabel(String)
+     * @see #setItems(Object...)
+     */
+    @SafeVarargs
+    public MultiSelectComboBox(String label, TItem... items) {
+        this();
+        setLabel(label);
+        setItems(items);
+    }
+
+    /**
+     * Constructs a combo box with a value change listener.
+     *
+     * @param listener
+     *            the value change listener to add
+     * @see #addValueChangeListener(ValueChangeListener)
+     */
+    public MultiSelectComboBox(
+            ValueChangeListener<ComponentValueChangeEvent<MultiSelectComboBox<TItem>, Set<TItem>>> listener) {
+        this();
+        addValueChangeListener(listener);
+    }
+
+    /**
+     * Constructs a combo box with the defined label and a value change
+     * listener.
+     *
+     * @param label
+     *            the label describing the combo box
+     * @param listener
+     *            the value change listener to add
+     * @see #setLabel(String)
+     * @see #addValueChangeListener(ValueChangeListener)
+     */
+    public MultiSelectComboBox(String label,
+            ValueChangeListener<ComponentValueChangeEvent<MultiSelectComboBox<TItem>, Set<TItem>>> listener) {
+        this(label);
+        addValueChangeListener(listener);
+    }
+
+    /**
+     * Constructs a combo box with the defined label, a value change listener
+     * and populated with the items in the array.
+     *
+     * @param label
+     *            the label describing the combo box
+     * @param listener
+     *            the value change listener to add
+     * @param items
+     *            the items to be shown in the list of the combo box
+     * @see #setLabel(String)
+     * @see #addValueChangeListener(ValueChangeListener)
+     * @see #setItems(Object...)
+     */
+    @SafeVarargs
+    public MultiSelectComboBox(String label,
+            ValueChangeListener<ComponentValueChangeEvent<MultiSelectComboBox<TItem>, Set<TItem>>> listener,
+            TItem... items) {
+        this(label, listener);
+        setItems(items);
     }
 
     private static <T> Set<T> presentationToModel(
