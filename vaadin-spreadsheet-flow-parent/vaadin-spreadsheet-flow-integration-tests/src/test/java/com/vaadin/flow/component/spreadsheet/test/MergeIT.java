@@ -49,6 +49,7 @@ public class MergeIT extends AbstractSpreadsheetIT {
         assertEquals("3", spreadsheetElement.getCellAt("B2").getValue());
 
         final var a1 = spreadsheetElement.getCellAt("A1");
+        a1.setValue("");
         a1.setValue("10");
 
         assertEquals("11", spreadsheetElement.getCellAt("B1").getValue());
