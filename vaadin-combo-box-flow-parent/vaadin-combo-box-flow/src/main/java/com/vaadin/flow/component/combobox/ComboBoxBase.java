@@ -16,21 +16,48 @@
 package com.vaadin.flow.component.combobox;
 
 import com.vaadin.flow.component.AbstractSinglePropertyField;
+import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.shared.HasClearButton;
+import com.vaadin.flow.component.HasHelper;
+import com.vaadin.flow.component.HasLabel;
+import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.HasTheme;
+import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.combobox.dataview.ComboBoxDataView;
+import com.vaadin.flow.component.combobox.dataview.ComboBoxLazyDataView;
+import com.vaadin.flow.component.combobox.dataview.ComboBoxListDataView;
+import com.vaadin.flow.data.provider.BackEndDataProvider;
+import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.DataCommunicator;
+import com.vaadin.flow.data.provider.DataKeyMapper;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.DataView;
+import com.vaadin.flow.data.provider.HasDataView;
+import com.vaadin.flow.data.provider.HasLazyDataView;
+import com.vaadin.flow.data.provider.HasListDataView;
+import com.vaadin.flow.data.provider.InMemoryDataProvider;
+import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.data.provider.ListDataView;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.component.combobox.events.CustomValueSetEvent;
 import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
 
+import java.util.Collection;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 /**
  * Provides base functionality for combo box related components, such as
@@ -45,10 +72,42 @@ import java.util.Objects;
  */
 public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, TItem, TValue>, TItem, TValue>
         extends AbstractSinglePropertyField<TComponent, TValue>
-        implements HasStyle, Focusable<TComponent> {
+        implements HasStyle, Focusable<TComponent>, HasSize, HasValidation,
+        HasHelper, HasTheme, HasLabel, HasClearButton,
+        HasDataView<TItem, String, ComboBoxDataView<TItem>>,
+        HasListDataView<TItem, ComboBoxListDataView<TItem>>,
+        HasLazyDataView<TItem, String, ComboBoxLazyDataView<TItem>> {
+
+    /**
+     * Registration for custom value listeners that disallows entering custom
+     * values as soon as there are no more listeners for the custom value event
+     */
+    private class CustomValueRegistration implements Registration {
+
+        private Registration delegate;
+
+        private CustomValueRegistration(Registration delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void remove() {
+            if (delegate != null) {
+                delegate.remove();
+                customValueListenersCount--;
+
+                if (customValueListenersCount == 0) {
+                    setAllowCustomValue(false);
+                }
+                delegate = null;
+            }
+        }
+    }
 
     private ItemLabelGenerator<TItem> itemLabelGenerator = String::valueOf;
     private final ComboBoxRenderManager<TItem> renderManager;
+    private final ComboBoxDataController<TItem> dataController;
+    private int customValueListenersCount;
 
     /**
      * Constructs a new ComboBoxBase instance
@@ -78,6 +137,34 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
                 presentationToModel, modelToPresentation);
 
         renderManager = new ComboBoxRenderManager<>(this);
+        dataController = new ComboBoxDataController<>(this, this::getLocale);
+        dataController.getDataGenerator().addDataGenerator((item,
+                jsonObject) -> jsonObject.put("label", generateLabel(item)));
+
+        // Configure web component to use key property from the generated
+        // wrapper items for identification
+        getElement().setProperty("itemValuePath", "key");
+        getElement().setProperty("itemIdPath", "key");
+
+        // Disable template warnings
+        getElement().setAttribute("suppress-template-warning", true);
+
+        // Synchronize input element value property state when setting a custom
+        // value. This is necessary to allow clearing the input value in
+        // `ComboBox.refreshValue`. If the input element value is not
+        // synchronized here, then setting the property to an empty value would
+        // not trigger a client update. Need to use
+        // `addInternalCustomValueSetListener` here, in order to avoid enabling
+        // custom values, which is a side effect of
+        // `ComboBoxBase.addCustomValueSetListener`.
+        addInternalCustomValueSetListener(e -> getElement()
+                .setProperty("_inputElementValue", e.getDetail()));
+
+        // Notify data communicator when selection changes, which allows to
+        // free up items / keys in the KeyMapper that are not used anymore in
+        // the selection
+        addValueChangeListener(
+                e -> getDataCommunicator().notifySelectionChanged());
     }
 
     /**
@@ -138,6 +225,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
                     "Page size should be greater than zero.");
         }
         getElement().setProperty("pageSize", pageSize);
+        dataController.setPageSize(pageSize);
     }
 
     /**
@@ -307,6 +395,14 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
         getElement().setProperty("autoOpenDisabled", !autoOpen);
     }
 
+    @Override
+    public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
+        super.setRequiredIndicatorVisible(requiredIndicatorVisible);
+        runBeforeClientResponse(ui -> getElement().callJsFunction(
+                "$connector.enableClientValidation",
+                !requiredIndicatorVisible));
+    }
+
     /**
      * Sets the item label generator that is used to produce the strings shown
      * in the combo box for each item. By default,
@@ -323,7 +419,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
         Objects.requireNonNull(itemLabelGenerator,
                 "The item label generator can not be null");
         this.itemLabelGenerator = itemLabelGenerator;
-        reset();
+        dataController.reset();
         if (getValue() != null) {
             refreshValue();
         }
@@ -370,7 +466,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * @param renderer
      *            a renderer for the items in the selection list of the
      *            ComboBox, not <code>null</code>
-     *
+     *            <p>
      *            Note that filtering of the ComboBox is not affected by the
      *            renderer that is set here. Filtering is done on the original
      *            values and can be affected by
@@ -382,12 +478,34 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
         renderManager.setRenderer(renderer);
     }
 
-    /**
-     * Schedules a render of items in the component after changes that might
-     * affect the presentation / rendering of items
-     */
-    protected void scheduleRender() {
-        renderManager.scheduleRender();
+    @Override
+    public void setValue(TValue value) {
+        if (getDataCommunicator() == null
+                || getDataProvider() instanceof DataCommunicator.EmptyDataProvider) {
+            if (value == getEmptyValue()) {
+                return;
+            } else {
+                throw new IllegalStateException(
+                        "Cannot set a value for a ComboBox without items. "
+                                + "Use setItems to populate items into the "
+                                + "ComboBox before setting a value.");
+            }
+        }
+        super.setValue(value);
+        refreshValue();
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        initConnector();
+        dataController.onAttach();
+    }
+
+    @Override
+    protected void onDetach(DetachEvent detachEvent) {
+        dataController.onDetach();
+        super.onDetach(detachEvent);
     }
 
     /**
@@ -414,11 +532,603 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * @return a {@link Registration} for removing the event listener
      * @see #setAllowCustomValue(boolean)
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     public Registration addCustomValueSetListener(
+            ComponentEventListener<CustomValueSetEvent<TComponent>> listener) {
+        setAllowCustomValue(true);
+        customValueListenersCount++;
+        Registration registration = addInternalCustomValueSetListener(listener);
+        return new CustomValueRegistration(registration);
+    }
+
+    /**
+     * Adds a custom value event listener to the component. Can be used
+     * internally to register a listener without also enabling allowing custom
+     * values, which is a side-effect of
+     * {@link #addCustomValueSetListener(ComponentEventListener)}
+     */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private Registration addInternalCustomValueSetListener(
             ComponentEventListener<CustomValueSetEvent<TComponent>> listener) {
         return addListener(CustomValueSetEvent.class,
                 (ComponentEventListener) listener);
+    }
+
+    // ****************************************************
+    // List data view implementation
+    // ****************************************************
+
+    /**
+     * Gets the list data view for the ComboBox. This data view should only be
+     * used when the items are in-memory set with:
+     * <ul>
+     * <li>{@link #setItems(Collection)}</li>
+     * <li>{@link #setItems(Object[])}</li>
+     * <li>{@link #setItems(ListDataProvider)}</li>
+     * <li>{@link #setItems(ComboBox.ItemFilter, ListDataProvider)}</li>
+     * <li>{@link #setItems(ComboBox.ItemFilter, Object[])}</li>
+     * <li>{@link #setItems(ComboBox.ItemFilter, Collection)}</li>
+     * </ul>
+     * If the items are not in-memory an exception is thrown. When the items are
+     * fetched lazily, use {@link #getLazyDataView()} instead.
+     *
+     * @return the list data view that provides access to the items in the
+     *         ComboBox
+     */
+    @Override
+    public ComboBoxListDataView<TItem> getListDataView() {
+        return dataController.getListDataView();
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Filtering will use a case insensitive match to show all items where the
+     * filter text is a substring of the label displayed for that item, which
+     * you can configure with
+     * {@link #setItemLabelGenerator(ItemLabelGenerator)}.
+     * <p>
+     * Filtering will be handled in the client-side if the size of the data set
+     * is less than the page size. To force client-side filtering with a larger
+     * data set (at the cost of increased network traffic), you can increase the
+     * page size with {@link #setPageSize(int)}.
+     * <p>
+     * Setting the items resets the combo box's value to {@code null}.
+     */
+    @Override
+    public ComboBoxListDataView<TItem> setItems(Collection<TItem> items) {
+        return dataController.setItems(items);
+    }
+
+    /**
+     * Sets the data items of this combo box and a filtering function for
+     * defining which items are displayed when user types into the combo box.
+     * <p>
+     * Note that defining a custom filter will force the component to make
+     * server roundtrips to handle the filtering. Otherwise it can handle
+     * filtering in the client-side, if the size of the data set is less than
+     * the {@link #setPageSize(int) pageSize}.
+     * <p>
+     * Setting the items resets the combo box's value to {@code null}.
+     * <p>
+     * The returned data view object can be used for further access to combo box
+     * items, or later on fetched with {@link #getListDataView()}. For using
+     * lazy data loading, use one of the {@code setItems} methods which take a
+     * fetch callback parameter instead.
+     *
+     * @param itemFilter
+     *            filter to check if an item is shown when user typed some text
+     *            into the ComboBox
+     * @param items
+     *            the data items to display
+     * @return the in-memory data view instance that provides access to the data
+     *         bound to the combo box
+     */
+    public ComboBoxListDataView<TItem> setItems(
+            ComboBox.ItemFilter<TItem> itemFilter, Collection<TItem> items) {
+        return dataController.setItems(itemFilter, items);
+    }
+
+    /**
+     * Sets the data items of this combo box and a filtering function for
+     * defining which items are displayed when user types into the combo box.
+     * <p>
+     * Note that defining a custom filter will force the component to make
+     * server roundtrips to handle the filtering. Otherwise it can handle
+     * filtering in the client-side, if the size of the data set is less than
+     * the {@link #setPageSize(int) pageSize}.
+     * <p>
+     * Setting the items resets the combo box's value to {@code null}.
+     * <p>
+     * The returned data view object can be used for further access to combo box
+     * items, or later on fetched with {@link #getListDataView()}. For using
+     * lazy data loading, use one of the {@code setItems} methods which take a
+     * fetch callback parameter instead.
+     *
+     * @param itemFilter
+     *            filter to check if an item is shown when user typed some text
+     *            into the ComboBox
+     * @param items
+     *            the data items to display
+     * @return the in-memory data view instance that provides access to the data
+     *         bound to the combo box
+     */
+    @SuppressWarnings("unchecked")
+    public ComboBoxListDataView<TItem> setItems(
+            ComboBox.ItemFilter<TItem> itemFilter, TItem... items) {
+        return dataController.setItems(itemFilter, items);
+    }
+
+    /**
+     * Sets a ListDataProvider for this combo box and a filtering function for
+     * defining which items are displayed when user types into the combo box.
+     * <p>
+     * Note that defining a custom filter will force the component to make
+     * server roundtrips to handle the filtering. Otherwise it can handle
+     * filtering in the client-side, if the size of the data set is less than
+     * the {@link #setPageSize(int) pageSize}.
+     * <p>
+     * Setting the items resets the combo box's value to {@code null}.
+     * <p>
+     * The returned data view object can be used for further access to combo box
+     * items, or later on fetched with {@link #getListDataView()}. For using
+     * lazy data loading, use one of the {@code setItems} methods which take a
+     * fetch callback parameter instead.
+     *
+     * @param itemFilter
+     *            filter to check if an item is shown when user typed some text
+     *            into the ComboBox.
+     * @param listDataProvider
+     *            ListDataProvider providing items to the component.
+     * @return the in-memory data view instance that provides access to the data
+     *         bound to the combo box
+     */
+    public ComboBoxListDataView<TItem> setItems(
+            ComboBox.ItemFilter<TItem> itemFilter,
+            ListDataProvider<TItem> listDataProvider) {
+        return dataController.setItems(itemFilter, listDataProvider);
+    }
+
+    @Override
+    public ComboBoxListDataView<TItem> setItems(
+            ListDataProvider<TItem> dataProvider) {
+        return dataController.setItems(dataProvider);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @deprecated Because the stream is collected to a list anyway, use
+     *             {@link #setItems(Collection)} or
+     *             {@link #setItems(CallbackDataProvider.FetchCallback)}
+     *             instead.
+     */
+    @Deprecated
+    public void setItems(Stream<TItem> streamOfItems) {
+        setItems(DataProvider.fromStream(streamOfItems));
+    }
+
+    // ****************************************************
+    // Lazy data view implementation
+    // ****************************************************
+
+    /**
+     * Gets the lazy data view for the ComboBox. This data view should only be
+     * used when the items are provided lazily from the backend with:
+     * <ul>
+     * <li>{@link #setItems(CallbackDataProvider.FetchCallback)}</li>
+     * <li>{@link #setItemsWithFilterConverter(CallbackDataProvider.FetchCallback, SerializableFunction)}</>
+     * <li>{@link #setItems(CallbackDataProvider.FetchCallback, CallbackDataProvider.CountCallback)}</li>
+     * <li>{@link #setItemsWithFilterConverter(CallbackDataProvider.FetchCallback, CallbackDataProvider.CountCallback, SerializableFunction)}
+     * </li>
+     * <li>{@link #setItems(BackEndDataProvider)}</li>
+     * </ul>
+     * If the items are not fetched lazily an exception is thrown. When the
+     * items are in-memory, use {@link #getListDataView()} instead.
+     *
+     * @return the lazy data view that provides access to the data bound to the
+     *         ComboBox
+     * @throws IllegalStateException
+     *             if no items fetch callback(s) set
+     */
+    @Override
+    public ComboBoxLazyDataView<TItem> getLazyDataView() {
+        return dataController.getLazyDataView();
+    }
+
+    /**
+     * Supply items lazily with a callback from a backend, using custom filter
+     * type. The combo box will automatically fetch more items and adjust its
+     * size until the backend runs out of items. Usage example:
+     * <p>
+     * {@code comboBox.setItemsWithFilterConverter(
+     * query -> orderService.getOrdersByCount(query.getFilter(),
+     * query.getOffset,
+     * query.getLimit()),
+     * orderCountStr -> Integer.parseInt(orderCountStr));} Note: Validations for
+     * <code>orderCountStr</code> are omitted for briefness.
+     * <p>
+     * Combo box's client-side filter typed by the user is transformed into a
+     * callback's filter through the given filter converter.
+     * <p>
+     * The returned data view object can be used for further configuration, or
+     * later on fetched with {@link #getLazyDataView()}. For using in-memory
+     * data, like {@link java.util.Collection}, use
+     * {@link #setItems(Collection)} instead.
+     *
+     * @param fetchCallback
+     *            function that returns a stream of items from the backend based
+     *            on the offset, limit and a object filter
+     * @param filterConverter
+     *            a function which converts a combo box's filter-string typed by
+     *            the user into a callback's object filter
+     * @param <C>
+     *            filter type used by a callback
+     * @return ComboBoxLazyDataView instance for further configuration
+     */
+    public <C> ComboBoxLazyDataView<TItem> setItemsWithFilterConverter(
+            CallbackDataProvider.FetchCallback<TItem, C> fetchCallback,
+            SerializableFunction<String, C> filterConverter) {
+        return dataController.setItemsWithFilterConverter(fetchCallback,
+                filterConverter);
+    }
+
+    /**
+     * Supply items lazily with callbacks: the first one fetches the items based
+     * on offset, limit and an optional filter, the second provides the exact
+     * count of items in the backend. Use this only in case getting the count is
+     * cheap and the user benefits from the component showing immediately the
+     * exact size. Usage example:
+     * <p>
+     * {@code comboBox.setItemsWithFilterConverter(
+     * query -> orderService.getOrdersByCount(query.getFilter(),
+     * query.getOffset,
+     * query.getLimit()),
+     * query -> orderService.getSize(query.getFilter()),
+     * orderCountStr -> Integer.parseInt(orderCountStr));} Note: Validations for
+     * <code>orderCountStr</code> are omitted for briefness.
+     * <p>
+     * Combo box's client-side filter typed by the user is transformed into a
+     * custom filter type through the given filter converter.
+     * <p>
+     * The returned data view object can be used for further configuration, or
+     * later on fetched with {@link #getLazyDataView()}. For using in-memory
+     * data, like {@link java.util.Collection}, use
+     * {@link #setItems(Collection)} instead.
+     *
+     * @param fetchCallback
+     *            function that returns a stream of items from the backend based
+     *            on the offset, limit and a object filter
+     * @param filterConverter
+     *            a function which converts a combo box's filter-string typed by
+     *            the user into a callback's object filter
+     * @param <C>
+     *            filter type used by a callbacks
+     * @return ComboBoxLazyDataView instance for further configuration
+     */
+    public <C> ComboBoxLazyDataView<TItem> setItemsWithFilterConverter(
+            CallbackDataProvider.FetchCallback<TItem, C> fetchCallback,
+            CallbackDataProvider.CountCallback<TItem, C> countCallback,
+            SerializableFunction<String, C> filterConverter) {
+        return dataController.setItemsWithFilterConverter(fetchCallback,
+                countCallback, filterConverter);
+    }
+
+    /**
+     * Supply items lazily with a callback from a backend. The ComboBox will
+     * automatically fetch more items and adjust its size until the backend runs
+     * out of items. Usage example without component provided filter:
+     * <p>
+     * {@code comboBox.setItems(query ->
+     * orderService.getOrders(query.getOffset(), query.getLimit());}
+     * <p>
+     * Since ComboBox supports filtering, it can be fetched via
+     * query.getFilter():
+     * <p>
+     * {@code comboBox.setItems(query ->
+     * orderService.getOrders(query.getFilter(), query.getOffset(),
+     * query.getLimit());}
+     * <p>
+     * The returned data view object can be used for further configuration, or
+     * later on fetched with {@link #getLazyDataView()}. For using in-memory
+     * data, like {@link Collection}, use
+     * {@link HasListDataView#setItems(Collection)} instead.
+     * <p>
+     * If item filtering by some value type other than String is preferred and
+     * backend service is able to fetch and filter items by such type, converter
+     * for client side's filter string can be set along with fetch callback.
+     * See:
+     * {@link #setItemsWithFilterConverter(CallbackDataProvider.FetchCallback, SerializableFunction)}
+     *
+     * @param fetchCallback
+     *            function that returns a stream of items from the backend based
+     *            on the offset, limit and an optional filter provided by the
+     *            query object
+     * @return ComboBoxLazyDataView instance for further configuration
+     */
+    @Override
+    public ComboBoxLazyDataView<TItem> setItems(
+            CallbackDataProvider.FetchCallback<TItem, String> fetchCallback) {
+        return HasLazyDataView.super.setItems(fetchCallback);
+    }
+
+    /**
+     * Supply items lazily with callbacks: the first one fetches the items based
+     * on offset, limit and an optional filter, the second provides the exact
+     * count of items in the backend. Use this only in case getting the count is
+     * cheap and the user benefits from the ComboBox showing immediately the
+     * exact size. Usage example without component provided filter:
+     * <p>
+     * {@code comboBox.setItems(
+     * query -> orderService.getOrders(query.getOffset, query.getLimit()),
+     * query -> orderService.getSize());}
+     * <p>
+     * Since ComboBox supports filtering, it can be fetched via
+     * query.getFilter():
+     * <p>
+     * {@code comboBox.setItems(
+     * query -> orderService.getOrders(query.getFilter(), query.getOffset,
+     * query.getLimit()),
+     * query -> orderService.getSize(query.getFilter()));}
+     * <p>
+     * The returned data view object can be used for further configuration, or
+     * later on fetched with {@link #getLazyDataView()}. For using in-memory
+     * data, like {@link Collection}, use
+     * {@link HasListDataView#setItems(Collection)} instead.
+     * <p>
+     * If item filtering by some value type other than String is preferred and
+     * backend service is able to fetch and filter items by such type, converter
+     * for client side's filter string can be set along with fetch callback.
+     * See:
+     * {@link #setItemsWithFilterConverter(CallbackDataProvider.FetchCallback, CallbackDataProvider.CountCallback, SerializableFunction)}
+     *
+     * @param fetchCallback
+     *            function that returns a stream of items from the back end for
+     *            a query
+     * @param countCallback
+     *            function that return the number of items in the back end for a
+     *            query
+     * @return ComboBoxLazyDataView instance for further configuration
+     */
+    @Override
+    public ComboBoxLazyDataView<TItem> setItems(
+            CallbackDataProvider.FetchCallback<TItem, String> fetchCallback,
+            CallbackDataProvider.CountCallback<TItem, String> countCallback) {
+        return HasLazyDataView.super.setItems(fetchCallback, countCallback);
+    }
+
+    @Override
+    public ComboBoxLazyDataView<TItem> setItems(
+            BackEndDataProvider<TItem, String> dataProvider) {
+        return dataController.setItems(dataProvider);
+    }
+
+    // ****************************************************
+    // Generic data view implementation
+    // ****************************************************
+
+    /**
+     * Gets the generic data view for the ComboBox. This data view can be used
+     * when {@link #getListDataView()} or {@link #getLazyDataView()} are not
+     * applicable for the underlying data provider, or you don't want to
+     * distinct between which type of data view to use.
+     *
+     * @return the generic {@link DataView} implementation for ComboBox
+     * @see #getListDataView()
+     * @see #getLazyDataView()
+     */
+    @Override
+    public ComboBoxDataView<TItem> getGenericDataView() {
+        return dataController.getGenericDataView();
+    }
+
+    @Override
+    public ComboBoxDataView<TItem> setItems(
+            DataProvider<TItem, String> dataProvider) {
+        return dataController.setItems(dataProvider);
+    }
+
+    /**
+     * The method is not supported for the {@link ComboBox} component, use
+     * another overloaded method with filter converter
+     * {@link #setItems(InMemoryDataProvider, SerializableFunction)}
+     * <p>
+     * Always throws an {@link UnsupportedOperationException}.
+     *
+     * @throws UnsupportedOperationException
+     * @see #setItems(InMemoryDataProvider, SerializableFunction)
+     * @deprecated does not work so don't use
+     */
+    @Deprecated
+    @Override
+    public ComboBoxDataView<TItem> setItems(
+            InMemoryDataProvider<TItem> dataProvider) {
+        throw new UnsupportedOperationException(
+                String.format("ComboBox does not support "
+                        + "setting a custom in-memory data provider without "
+                        + "knowledge of the rules on how to convert internal text filter "
+                        + "into a predicate applied to the data provider. Please use%n"
+                        + "setItems(InMemoryDataProvider<T>, SerializableFunction<String, "
+                        + "SerializablePredicate<T>>)"
+                        + "%noverloaded method instead"));
+    }
+
+    /**
+     * Sets an in-memory data provider for the combo box to use, taking into
+     * account both in-memory filtering from data provider and combo box's text
+     * filter.
+     * <p>
+     * Text filter is transformed into a predicate filter through the given
+     * filter converter. Example of filter converter which produces the Person's
+     * name predicate:
+     * {@code (String nameFilter) -> person -> person.getName().equalsIgnoreCase
+     * (nameFilter);}
+     * <p>
+     * Filtering will be handled in the client-side if the size of the data set
+     * is less than the page size. To force client-side filtering with a larger
+     * data set (at the cost of increased network traffic), you can increase the
+     * page size with {@link #setPageSize(int)}.
+     * <p>
+     * Note! Using a {@link ListDataProvider} instead of a
+     * {@link InMemoryDataProvider} is recommended to get access to
+     * {@link ListDataView} API by using {@link #setItems(ListDataProvider)}.
+     *
+     * @param inMemoryDataProvider
+     *            InMemoryDataProvider to use, not <code>null</code>
+     * @param filterConverter
+     *            a function which converts a component's internal filter into a
+     *            predicate applied to the data provider
+     * @return DataView providing information on the data
+     */
+    public ComboBoxDataView<TItem> setItems(
+            InMemoryDataProvider<TItem> inMemoryDataProvider,
+            SerializableFunction<String, SerializablePredicate<TItem>> filterConverter) {
+        return dataController.setItems(inMemoryDataProvider, filterConverter);
+    }
+
+    // ****************************************************
+    // Data provider implementation
+    // ****************************************************
+
+    /**
+     * Gets the data provider used by this ComboBox.
+     *
+     * @return the data provider used by this ComboBox
+     */
+    public DataProvider<TItem, ?> getDataProvider() {
+        return dataController.getDataProvider();
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * The filter-type of the given data provider must be String so that it can
+     * handle the filters typed into the ComboBox by users. If your data
+     * provider uses some other type of filter, you can provide a function which
+     * converts the ComboBox's filter-string into that type via
+     * {@link #setDataProvider(DataProvider, SerializableFunction)}. Another way
+     * to do the same thing is to use this method with your data provider
+     * converted with
+     * {@link DataProvider#withConvertedFilter(SerializableFunction)}.
+     * <p>
+     * Changing the combo box's data provider resets its current value to
+     * {@code null}.
+     *
+     * @deprecated use instead one of the {@code setItems} methods which provide
+     *             access to either {@link ComboBoxListDataView} or
+     *             {@link ComboBoxLazyDataView}
+     */
+    @Deprecated
+    public void setDataProvider(DataProvider<TItem, String> dataProvider) {
+        dataController.setDataProvider(dataProvider);
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * ComboBox triggers filtering queries based on the strings users type into
+     * the field. For this reason you need to provide the second parameter, a
+     * function which converts the filter-string typed by the user into
+     * filter-type used by your data provider. If your data provider already
+     * supports String as the filter-type, it can be used without a converter
+     * function via {@link #setDataProvider(DataProvider)}.
+     * <p>
+     * Using this method provides the same result as using a data provider
+     * wrapped with
+     * {@link DataProvider#withConvertedFilter(SerializableFunction)}.
+     * <p>
+     * Changing the combo box's data provider resets its current value to
+     * {@code null}.
+     *
+     * @deprecated use instead one of the {@code setItems} methods which provide
+     *             access to either {@link ComboBoxListDataView} or
+     *             {@link ComboBoxLazyDataView}
+     */
+    @Deprecated
+    public <C> void setDataProvider(DataProvider<TItem, C> dataProvider,
+            SerializableFunction<String, C> filterConverter) {
+        dataController.setDataProvider(dataProvider, filterConverter);
+    }
+
+    /**
+     * Sets a list data provider as the data provider of this combo box.
+     * <p>
+     * Filtering will use a case insensitive match to show all items where the
+     * filter text is a substring of the label displayed for that item, which
+     * you can configure with
+     * {@link #setItemLabelGenerator(ItemLabelGenerator)}.
+     * <p>
+     * Filtering will be handled in the client-side if the size of the data set
+     * is less than the page size. To force client-side filtering with a larger
+     * data set (at the cost of increased network traffic), you can increase the
+     * page size with {@link #setPageSize(int)}.
+     * <p>
+     * Changing the combo box's data provider resets its current value to
+     * {@code null}.
+     *
+     * @param listDataProvider
+     *            the list data provider to use, not <code>null</code>
+     * @deprecated use instead one of the {@code setItems} methods which provide
+     *             access to {@link ComboBoxListDataView}
+     */
+    @Deprecated
+    public void setDataProvider(ListDataProvider<TItem> listDataProvider) {
+        dataController.setDataProvider(listDataProvider);
+    }
+
+    /**
+     * Sets a CallbackDataProvider using the given fetch items callback and a
+     * size callback.
+     * <p>
+     * This method is a shorthand for making a {@link CallbackDataProvider} that
+     * handles a partial {@link com.vaadin.flow.data.provider.Query Query}
+     * object.
+     * <p>
+     * Changing the combo box's data provider resets its current value to
+     * {@code null}.
+     *
+     * @param fetchItems
+     *            a callback for fetching items, not <code>null</code>
+     * @param sizeCallback
+     *            a callback for getting the count of items, not
+     *            <code>null</code>
+     * @see CallbackDataProvider
+     * @see #setDataProvider(DataProvider)
+     * @deprecated use instead
+     *             {@link #setItems(CallbackDataProvider.FetchCallback, CallbackDataProvider.CountCallback)}
+     *             which provide access to {@link ComboBoxLazyDataView}
+     */
+    @Deprecated
+    public void setDataProvider(ComboBox.FetchItemsCallback<TItem> fetchItems,
+            SerializableFunction<String, Integer> sizeCallback) {
+        dataController.setDataProvider(fetchItems, sizeCallback);
+    }
+
+    /**
+     * Sets a list data provider with an item filter as the data provider of
+     * this combo box. The item filter is used to compare each item to the
+     * filter text entered by the user.
+     * <p>
+     * Note that defining a custom filter will force the component to make
+     * server roundtrips to handle the filtering. Otherwise it can handle
+     * filtering in the client-side, if the size of the data set is less than
+     * the {@link #setPageSize(int) pageSize}.
+     * <p>
+     * Changing the combo box's data provider resets its current value to
+     * {@code null}.
+     *
+     * @param itemFilter
+     *            filter to check if an item is shown when user typed some text
+     *            into the ComboBox
+     * @param listDataProvider
+     *            the list data provider to use, not <code>null</code>
+     * @deprecated use instead
+     *             {@link #setItems(ComboBox.ItemFilter, ListDataProvider)}
+     *             which provide access to {@link ComboBoxListDataView}
+     */
+    @Deprecated
+    public void setDataProvider(ComboBox.ItemFilter<TItem> itemFilter,
+            ListDataProvider<TItem> listDataProvider) {
+        dataController.setDataProvider(itemFilter, listDataProvider);
     }
 
     /**
@@ -437,20 +1147,78 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     protected abstract void refreshValue();
 
     /**
-     * Refresh item data of the web component after changes that might affect
-     * the presentation / rendering of items
+     * Accesses the render manager that is managing the custom renderer
      */
-    protected abstract void reset();
+    protected ComboBoxRenderManager<TItem> getRenderManager() {
+        return renderManager;
+    }
 
     /**
-     * Accesses the data communicator used by the combo box
+     * Accesses the data controller that is managing data communication with the
+     * web component
+     * <p>
+     * Can be null if the constructor has not run yet
      */
-    protected abstract DataCommunicator<TItem> getDataCommunicator();
+    protected ComboBoxDataController<TItem> getDataController() {
+        return dataController;
+    }
 
     /**
-     * Accesses the data generator used by the combo box
+     * Accesses the data communicator that is managed by the data controller
+     * <p>
+     * Can be null if the no data source has been set yet, or if the constructor
+     * has not run yet
      */
-    protected abstract CompositeDataGenerator<TItem> getDataGenerator();
+    protected ComboBoxDataCommunicator<TItem> getDataCommunicator() {
+        return dataController != null ? dataController.getDataCommunicator()
+                : null;
+    }
+
+    /**
+     * Accesses the data generator that is managed by the data controller
+     * <p>
+     * Can be null if the constructor has not run yet
+     */
+    protected CompositeDataGenerator<TItem> getDataGenerator() {
+        return dataController != null ? dataController.getDataGenerator()
+                : null;
+    }
+
+    /**
+     * Accesses the key mapper that is managed by the data controller
+     * <p>
+     * Can be null if the no data source has been set yet, or if the constructor
+     * has not run yet
+     */
+    protected DataKeyMapper<TItem> getKeyMapper() {
+        return getDataCommunicator() != null
+                ? getDataCommunicator().getKeyMapper()
+                : null;
+    }
+
+    /**
+     * Called by the client-side connector, delegates to data controller
+     */
+    @ClientCallable
+    private void confirmUpdate(int id) {
+        dataController.confirmUpdate(id);
+    }
+
+    /**
+     * Called by the client-side connector, delegates to data controller
+     */
+    @ClientCallable
+    private void setRequestedRange(int start, int length, String filter) {
+        dataController.setRequestedRange(start, length, filter);
+    }
+
+    /**
+     * Called by the client-side connector, delegates to data controller
+     */
+    @ClientCallable
+    private void resetDataCommunicator() {
+        dataController.resetDataCommunicator();
+    }
 
     /**
      * Helper for running a command in the before client response hook
@@ -461,5 +1229,10 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     protected void runBeforeClientResponse(SerializableConsumer<UI> command) {
         getElement().getNode().runWhenAttached(ui -> ui
                 .beforeClientResponse(this, context -> command.accept(ui)));
+    }
+
+    private void initConnector() {
+        getElement().executeJs(
+                "window.Vaadin.Flow.comboBoxConnector.initLazy(this)");
     }
 }

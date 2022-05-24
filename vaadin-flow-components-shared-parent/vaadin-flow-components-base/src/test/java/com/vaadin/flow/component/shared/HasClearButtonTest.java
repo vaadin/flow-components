@@ -1,8 +1,11 @@
-package com.vaadin.flow.component;
+package com.vaadin.flow.component.shared;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Tag;
 
 public class HasClearButtonTest {
 

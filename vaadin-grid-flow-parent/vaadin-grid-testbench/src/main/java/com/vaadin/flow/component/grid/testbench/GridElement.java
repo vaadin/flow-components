@@ -23,6 +23,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
@@ -407,5 +408,14 @@ public class GridElement extends TestBenchElement {
         if (columnIds.isEmpty())
             return null;
         return new GridColumnElement(columnIds.get(0), this);
+    }
+
+    /**
+     * Click select all check box
+     */
+    public void clickSelectAll() {
+        CheckboxElement selectAllCheckbox = $(CheckboxElement.class)
+                .id("selectAllCheckbox");
+        selectAllCheckbox.click();
     }
 }
