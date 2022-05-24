@@ -11,7 +11,7 @@
   <name>Vaadin Flow Components Base</name>
 
   <properties>
-    <osgi.export.package>com.vaadin.flow.component.shared.base</osgi.export.package>
+    <osgi.export.package>com.vaadin.flow.component.shared</osgi.export.package>
   </properties>
 
   <dependencies>
