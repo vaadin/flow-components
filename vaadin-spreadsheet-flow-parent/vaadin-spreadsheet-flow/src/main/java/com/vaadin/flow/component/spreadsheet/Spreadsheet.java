@@ -1174,8 +1174,6 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
 
     private SpreadsheetDefaultActionHandler defaultActionHandler;
 
-    protected int mergedRegionCounter;
-
     private Workbook workbook;
 
     /** true if the component sheet should be reloaded on client side. */
@@ -3171,7 +3169,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
         return 0;
     }
 
-    private void updateMergedRegions() {
+    void updateMergedRegions() {
         int regions = getActiveSheet().getNumMergedRegions();
         if (regions > 0) {
             ArrayList<MergedRegion> _mergedRegions = new ArrayList<MergedRegion>();
@@ -3184,7 +3182,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
                     mergedRegion.col2 = region.getLastColumn() + 1;
                     mergedRegion.row1 = region.getFirstRow() + 1;
                     mergedRegion.row2 = region.getLastRow() + 1;
-                    mergedRegion.id = mergedRegionCounter++;
+                    mergedRegion.id = i;
                     _mergedRegions.add(i, mergedRegion);
                 } catch (IndexOutOfBoundsException ioobe) {
                     createMergedRegionIntoSheet(region);
@@ -3316,33 +3314,26 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
 
     private void createMergedRegionIntoSheet(CellRangeAddress region) {
         Sheet sheet = getActiveSheet();
-        int addMergedRegionIndex = sheet.addMergedRegion(region);
-        MergedRegion mergedRegion = new MergedRegion();
-        mergedRegion.col1 = region.getFirstColumn() + 1;
-        mergedRegion.col2 = region.getLastColumn() + 1;
-        mergedRegion.row1 = region.getFirstRow() + 1;
-        mergedRegion.row2 = region.getLastRow() + 1;
-        mergedRegion.id = mergedRegionCounter++;
-        ArrayList<MergedRegion> _mergedRegions = getMergedRegions() != null
-                ? new ArrayList<>(getMergedRegions())
-                : new ArrayList<MergedRegion>();
+        sheet.addMergedRegion(region);
+        updateMergedRegions();
 
-        _mergedRegions.add(addMergedRegionIndex - 1, mergedRegion);
-        setMergedRegions(_mergedRegions);
         // update the style & data for the region cells, effects region + 1
         // FIXME POI doesn't seem to care that the other cells inside the merged
         // region should be removed; the values those cells have are still used
         // in formulas..
-        for (int r = mergedRegion.row1; r <= (mergedRegion.row2 + 1); r++) {
+        int col1 = region.getFirstColumn() + 1;
+        int col2 = region.getLastColumn() + 1;
+        int row1 = region.getFirstRow() + 1;
+        int row2 = region.getLastRow() + 1;
+        for (int r = row1; r <= (row2 + 1); r++) {
             Row row = sheet.getRow(r - 1);
-            for (int c = mergedRegion.col1; c <= (mergedRegion.col2 + 1); c++) {
+            for (int c = col1; c <= (col2 + 1); c++) {
                 if (row != null) {
                     Cell cell = row.getCell(c - 1);
                     if (cell != null) {
                         styler.cellStyleUpdated(cell, false);
-                        if ((c != mergedRegion.col1 || r != mergedRegion.row1)
-                                && c <= mergedRegion.col2
-                                && r <= mergedRegion.row2) {
+                        if ((c != col1 || r != row1) && c <= col2
+                                && r <= row2) {
                             getCellValueManager().markCellForRemove(cell);
                         }
                     }

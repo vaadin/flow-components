@@ -70,7 +70,6 @@ import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTOutlinePr;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTSheetProtection;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTWorksheet;
 
-import com.vaadin.flow.component.spreadsheet.client.MergedRegion;
 import com.vaadin.flow.component.spreadsheet.shared.GroupingData;
 
 /**
@@ -994,25 +993,7 @@ public class SpreadsheetFactory implements Serializable {
      *            Target Spreadsheet
      */
     static void loadMergedRegions(Spreadsheet spreadsheet) {
-        final Sheet sheet = spreadsheet.getActiveSheet();
-        spreadsheet.setMergedRegions(null);
-        spreadsheet.mergedRegionCounter = 0;
-        int numMergedRegions = sheet.getNumMergedRegions();
-        if (numMergedRegions > 0) {
-            ArrayList<MergedRegion> _mergedRegions = new ArrayList<MergedRegion>(
-                    numMergedRegions);
-            for (int i = 0; i < numMergedRegions; i++) {
-                CellRangeAddress cra = sheet.getMergedRegion(i);
-                MergedRegion mergedRegion = new MergedRegion();
-                mergedRegion.col1 = cra.getFirstColumn() + 1;
-                mergedRegion.col2 = cra.getLastColumn() + 1;
-                mergedRegion.row1 = cra.getFirstRow() + 1;
-                mergedRegion.row2 = cra.getLastRow() + 1;
-                mergedRegion.id = spreadsheet.mergedRegionCounter++;
-                _mergedRegions.add(mergedRegion);
-            }
-            spreadsheet.setMergedRegions(_mergedRegions);
-        }
+        spreadsheet.updateMergedRegions();
     }
 
     /**
