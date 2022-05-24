@@ -1,12 +1,14 @@
-package com.vaadin.flow.component;
+package com.vaadin.flow.component.shared;
 
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Set;
 
-import com.vaadin.flow.component.shared.base.HasThemeVariant;
-import com.vaadin.flow.component.shared.base.ThemeVariant;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.ThemeVariant;
 
 public class HasThemeVariantTest {
     @Test
