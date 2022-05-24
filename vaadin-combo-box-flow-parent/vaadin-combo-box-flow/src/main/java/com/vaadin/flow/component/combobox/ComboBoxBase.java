@@ -21,7 +21,13 @@ import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.HasClearButton;
+import com.vaadin.flow.component.HasHelper;
+import com.vaadin.flow.component.HasLabel;
+import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.HasTheme;
+import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.UI;
@@ -31,6 +37,7 @@ import com.vaadin.flow.component.combobox.dataview.ComboBoxListDataView;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
+import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataView;
@@ -65,14 +72,42 @@ import java.util.stream.Stream;
  */
 public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, TItem, TValue>, TItem, TValue>
         extends AbstractSinglePropertyField<TComponent, TValue>
-        implements HasStyle, Focusable<TComponent>,
+        implements HasStyle, Focusable<TComponent>, HasSize, HasValidation,
+        HasHelper, HasTheme, HasLabel, HasClearButton,
         HasDataView<TItem, String, ComboBoxDataView<TItem>>,
         HasListDataView<TItem, ComboBoxListDataView<TItem>>,
         HasLazyDataView<TItem, String, ComboBoxLazyDataView<TItem>> {
 
+    /**
+     * Registration for custom value listeners that disallows entering custom
+     * values as soon as there are no more listeners for the custom value event
+     */
+    private class CustomValueRegistration implements Registration {
+
+        private Registration delegate;
+
+        private CustomValueRegistration(Registration delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void remove() {
+            if (delegate != null) {
+                delegate.remove();
+                customValueListenersCount--;
+
+                if (customValueListenersCount == 0) {
+                    setAllowCustomValue(false);
+                }
+                delegate = null;
+            }
+        }
+    }
+
     private ItemLabelGenerator<TItem> itemLabelGenerator = String::valueOf;
     private final ComboBoxRenderManager<TItem> renderManager;
     private final ComboBoxDataController<TItem> dataController;
+    private int customValueListenersCount;
 
     /**
      * Constructs a new ComboBoxBase instance
@@ -105,6 +140,31 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
         dataController = new ComboBoxDataController<>(this, this::getLocale);
         dataController.getDataGenerator().addDataGenerator((item,
                 jsonObject) -> jsonObject.put("label", generateLabel(item)));
+
+        // Configure web component to use key property from the generated
+        // wrapper items for identification
+        getElement().setProperty("itemValuePath", "key");
+        getElement().setProperty("itemIdPath", "key");
+
+        // Disable template warnings
+        getElement().setAttribute("suppress-template-warning", true);
+
+        // Synchronize input element value property state when setting a custom
+        // value. This is necessary to allow clearing the input value in
+        // `ComboBox.refreshValue`. If the input element value is not
+        // synchronized here, then setting the property to an empty value would
+        // not trigger a client update. Need to use
+        // `addInternalCustomValueSetListener` here, in order to avoid enabling
+        // custom values, which is a side effect of
+        // `ComboBoxBase.addCustomValueSetListener`.
+        addInternalCustomValueSetListener(e -> getElement()
+                .setProperty("_inputElementValue", e.getDetail()));
+
+        // Notify data communicator when selection changes, which allows to
+        // free up items / keys in the KeyMapper that are not used anymore in
+        // the selection
+        addValueChangeListener(
+                e -> getDataCommunicator().notifySelectionChanged());
     }
 
     /**
@@ -335,6 +395,14 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
         getElement().setProperty("autoOpenDisabled", !autoOpen);
     }
 
+    @Override
+    public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
+        super.setRequiredIndicatorVisible(requiredIndicatorVisible);
+        runBeforeClientResponse(ui -> getElement().callJsFunction(
+                "$connector.enableClientValidation",
+                !requiredIndicatorVisible));
+    }
+
     /**
      * Sets the item label generator that is used to produce the strings shown
      * in the combo box for each item. By default,
@@ -411,8 +479,26 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     }
 
     @Override
+    public void setValue(TValue value) {
+        if (getDataCommunicator() == null
+                || getDataProvider() instanceof DataCommunicator.EmptyDataProvider) {
+            if (value == getEmptyValue()) {
+                return;
+            } else {
+                throw new IllegalStateException(
+                        "Cannot set a value for a ComboBox without items. "
+                                + "Use setItems to populate items into the "
+                                + "ComboBox before setting a value.");
+            }
+        }
+        super.setValue(value);
+        refreshValue();
+    }
+
+    @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
+        initConnector();
         dataController.onAttach();
     }
 
@@ -446,8 +532,22 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * @return a {@link Registration} for removing the event listener
      * @see #setAllowCustomValue(boolean)
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     public Registration addCustomValueSetListener(
+            ComponentEventListener<CustomValueSetEvent<TComponent>> listener) {
+        setAllowCustomValue(true);
+        customValueListenersCount++;
+        Registration registration = addInternalCustomValueSetListener(listener);
+        return new CustomValueRegistration(registration);
+    }
+
+    /**
+     * Adds a custom value event listener to the component. Can be used
+     * internally to register a listener without also enabling allowing custom
+     * values, which is a side-effect of
+     * {@link #addCustomValueSetListener(ComponentEventListener)}
+     */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private Registration addInternalCustomValueSetListener(
             ComponentEventListener<CustomValueSetEvent<TComponent>> listener) {
         return addListener(CustomValueSetEvent.class,
                 (ComponentEventListener) listener);
@@ -1129,5 +1229,10 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     protected void runBeforeClientResponse(SerializableConsumer<UI> command) {
         getElement().getNode().runWhenAttached(ui -> ui
                 .beforeClientResponse(this, context -> command.accept(ui)));
+    }
+
+    private void initConnector() {
+        getElement().executeJs(
+                "window.Vaadin.Flow.comboBoxConnector.initLazy(this)");
     }
 }
