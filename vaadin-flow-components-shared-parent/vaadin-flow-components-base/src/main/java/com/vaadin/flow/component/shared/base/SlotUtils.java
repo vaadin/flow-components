@@ -40,7 +40,7 @@ public class SlotUtils {
      * @return the child elements of the parent that are inside the slot
      */
     public static Stream<Element> getElementsInSlot(HasElement parent,
-                                                    String slot) {
+            String slot) {
         return parent.getElement().getChildren()
                 .filter(child -> slot.equals(child.getAttribute("slot")));
     }
