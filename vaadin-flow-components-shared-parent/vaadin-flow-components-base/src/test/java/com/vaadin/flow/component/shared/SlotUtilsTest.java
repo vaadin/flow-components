@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.shared;
 
 import com.vaadin.flow.component.HasElement;
-import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementFactory;
 

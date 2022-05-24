@@ -7,8 +7,6 @@ import java.util.Set;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.flow.component.shared.ThemeVariant;
 
 public class HasThemeVariantTest {
     @Test
