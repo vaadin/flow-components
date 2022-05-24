@@ -20,5 +20,11 @@
       <artifactId>flow-test-util</artifactId>
       <scope>compile</scope>
     </dependency>
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>vaadin-flow-components-base</artifactId>
+      <version>${project.version}</version>
+      <scope>compile</scope>
+    </dependency>
   </dependencies>
 </project>

@@ -28,6 +28,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import com.vaadin.tests.AbstractComponentIT;
+import com.vaadin.flow.component.virtuallist.testbench.VirtualListElement;
 import com.vaadin.flow.testutil.TestPath;
 
 import elemental.json.JsonArray;
@@ -66,6 +67,17 @@ public class VirtualListViewIT extends AbstractComponentIT {
     @Test
     public void chuckNorrisFacts() {
         validateListSize(findElement(By.id("chuck-norris-facts")), 1000);
+    }
+
+    @Test
+    public void componentRendererPhysicalItemCount() {
+        VirtualListElement list = $(VirtualListElement.class)
+                .id("chuck-norris-facts");
+        // The count of generated child elements (direct children of type <div>)
+        long physicalItemCount = list.getPropertyElements("children").stream()
+                .filter(el -> "div".equals(el.getTagName())).count();
+        Assert.assertTrue(physicalItemCount > 4);
+        Assert.assertTrue(physicalItemCount < 10);
     }
 
     @Test
