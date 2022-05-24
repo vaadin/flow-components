@@ -13,8 +13,10 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component;
+package com.vaadin.flow.component.shared.base;
 
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.dom.Element;
 
 import java.util.Optional;
@@ -38,7 +40,7 @@ public class SlotUtils {
      * @return the child elements of the parent that are inside the slot
      */
     public static Stream<Element> getElementsInSlot(HasElement parent,
-            String slot) {
+                                                    String slot) {
         return parent.getElement().getChildren()
                 .filter(child -> slot.equals(child.getAttribute("slot")));
     }

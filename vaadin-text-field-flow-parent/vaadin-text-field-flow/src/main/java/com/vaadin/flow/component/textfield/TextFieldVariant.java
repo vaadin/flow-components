@@ -15,7 +15,7 @@
  */
 package com.vaadin.flow.component.textfield;
 
-import com.vaadin.flow.component.ThemeVariant;
+import com.vaadin.flow.component.shared.base.ThemeVariant;
 
 /**
  * Set of theme variants applicable for the {@link TextField} component, as well

@@ -4,6 +4,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.vaadin.flow.component.shared.base.HasClearButton;
+
 public class HasClearButtonTest {
 
     private TestComponent component;

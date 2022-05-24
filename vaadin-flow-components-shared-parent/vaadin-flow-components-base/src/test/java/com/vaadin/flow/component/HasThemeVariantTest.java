@@ -5,6 +5,9 @@ import org.junit.Test;
 
 import java.util.Set;
 
+import com.vaadin.flow.component.shared.base.HasThemeVariant;
+import com.vaadin.flow.component.shared.base.ThemeVariant;
+
 public class HasThemeVariantTest {
     @Test
     public void addThemeVariant_themeNamesContainsThemeVariant() {

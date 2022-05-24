@@ -9,6 +9,11 @@
   <artifactId>vaadin-flow-components-base</artifactId>
   <packaging>jar</packaging>
   <name>Vaadin Flow Components Base</name>
+
+  <properties>
+    <osgi.export.package>com.vaadin.flow.component.shared.base</osgi.export.package>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>com.vaadin</groupId>
