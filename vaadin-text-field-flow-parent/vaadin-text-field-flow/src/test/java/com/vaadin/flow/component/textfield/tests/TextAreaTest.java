@@ -15,13 +15,14 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
-import static org.junit.Assert.assertEquals;
-
+import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.textfield.TextFieldVariant;
+import com.vaadin.tests.ThemeVariantTestHelper;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import com.vaadin.flow.component.textfield.TextArea;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Tests for the {@link TextArea}.
@@ -98,5 +99,18 @@ public class TextAreaTest {
         assertEquals(value, textArea.isAutoselect());
         assertEquals(textArea.isAutoselect(),
                 textArea.getElement().getProperty("autoselect", value));
+    }
+
+    @Test
+    public void addThemeVariant_themeAttributeContainsThemeVariant() {
+        ThemeVariantTestHelper.addThemeVariant_themeNamesContainsThemeVariant(
+                new TextArea(), TextFieldVariant.LUMO_SMALL);
+    }
+
+    @Test
+    public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
+        ThemeVariantTestHelper
+                .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
+                        new TextArea(), TextFieldVariant.LUMO_SMALL);
     }
 }
