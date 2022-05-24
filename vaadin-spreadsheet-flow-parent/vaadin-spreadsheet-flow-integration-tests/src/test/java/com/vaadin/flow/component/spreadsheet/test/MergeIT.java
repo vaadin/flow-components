@@ -19,7 +19,6 @@ public class MergeIT extends AbstractSpreadsheetIT {
         createNewSpreadsheet();
     }
 
-    @Ignore("Ignore until https://github.com/vaadin/flow-components/issues/3186 is fixed")
     @Test
     public void testSelectionBug() {
         final var spreadsheetElement = getSpreadsheet();
@@ -35,7 +34,6 @@ public class MergeIT extends AbstractSpreadsheetIT {
         assertEquals("SELECTED", spreadsheetElement.getCellAt("D2").getValue());
     }
 
-    @Ignore("Ignore until https://github.com/vaadin/flow-components/issues/3186 is fixed")
     @Test
     public void testBasic() {
         final var spreadsheetElement = getSpreadsheet();
@@ -57,7 +55,6 @@ public class MergeIT extends AbstractSpreadsheetIT {
         assertEquals("3", spreadsheetElement.getCellAt("B2").getValue());
     }
 
-    @Ignore("Ignore until https://github.com/vaadin/flow-components/issues/3186 is fixed")
     @Test
     public void testContents() {
         selectCell("A2");
