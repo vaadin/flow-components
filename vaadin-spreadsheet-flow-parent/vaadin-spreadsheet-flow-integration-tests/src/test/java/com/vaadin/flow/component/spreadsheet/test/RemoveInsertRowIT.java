@@ -207,8 +207,8 @@ public class RemoveInsertRowIT extends AbstractSpreadsheetIT {
     }
 
     private void insertRow(SpreadsheetElement spreadsheet, int row) {
-        contextClickOnRowHeader(row);
-        clickItem("Insert new row");
+        clickCell("A" + row);
+        loadTestFixture(TestFixtures.InsertRow);
     }
 
     private void deleteFirstRow(SpreadsheetElement spreadsheet) {
@@ -216,7 +216,7 @@ public class RemoveInsertRowIT extends AbstractSpreadsheetIT {
     }
 
     private void deleteRow(SpreadsheetElement spreadsheet, int row) {
-        contextClickOnRowHeader(row);
-        clickItem("Delete row " + row);
+        clickCell("A" + row);
+        loadTestFixture(TestFixtures.DeleteRow);
     }
 }
