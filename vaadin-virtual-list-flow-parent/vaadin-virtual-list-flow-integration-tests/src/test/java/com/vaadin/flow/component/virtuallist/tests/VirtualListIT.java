@@ -23,6 +23,7 @@ import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
@@ -116,6 +117,7 @@ public class VirtualListIT extends AbstractComponentIT {
         Assert.assertEquals("person_1_updated", person.getString("user"));
     }
 
+    @Ignore("https://github.com/vaadin/flow-components/issues/3222")
     @Test
     public void lazyLoaded() {
         WebElement list = findElement(By.id("lazy-loaded"));

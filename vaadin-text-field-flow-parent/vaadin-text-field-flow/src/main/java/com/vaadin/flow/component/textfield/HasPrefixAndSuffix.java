@@ -17,7 +17,7 @@ package com.vaadin.flow.component.textfield;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
-import com.vaadin.flow.component.SlotUtils;
+import com.vaadin.flow.component.shared.SlotUtils;
 
 /**
  * Mixin interface for text-field components that have prefix and suffix slots
