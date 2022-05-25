@@ -118,8 +118,72 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
                 .perform();
     }
 
+    public void clickCell(String address, Keys... modifiers) {
+        WebElement cell = getSpreadsheet().getCellAt(address);
+        Actions actions = new Actions(driver);
+        actions.moveToElement(cell, 1, 1);
+        for (Keys modifier : modifiers) {
+            actions.keyDown(modifier);
+        }
+        actions.click();
+        for (Keys modifier : modifiers) {
+            actions.keyUp(modifier);
+        }
+        actions.build().perform();
+    }
+
     public String getCellContent(String address) {
         return getSpreadsheet().getCellAt(address).getValue();
+    }
+
+    public void clickOnFormulaField() {
+        getFormulaField().click();
+    }
+
+    public void setFormulaFieldValue(String value) {
+        WebElement formulaField = getFormulaField();
+        formulaField.clear();
+        formulaField.sendKeys(value);
+    }
+
+    public boolean isCellActiveWithinSelection(String address) {
+        SheetCellElement cell = getSpreadsheet().getCellAt(address);
+        return cell.isCellSelected()
+                && !cell.getAttribute("class").contains("cell-range");
+    }
+
+    public void clickOnColumnHeader(String columnAddress, Keys... modifiers) {
+        Point colPoint = AddressUtil.addressToPoint(columnAddress + "1");
+        clickOnColumnHeader(colPoint.x, modifiers);
+    }
+
+    public void clickOnColumnHeader(int column, Keys... modifiers) {
+        Actions actions = new Actions(driver);
+        WebElement header = driver
+                .findElement(By.cssSelector(".ch.col" + column));
+        actions.moveToElement(header, 1, 1);
+        for (Keys modifier : modifiers) {
+            actions.keyDown(modifier);
+        }
+        actions.click(driver.findElement(By.cssSelector(".ch.col" + column)));
+        for (Keys modifier : modifiers) {
+            actions.keyUp(modifier);
+        }
+        actions.build().perform();
+    }
+
+    public void clickOnRowHeader(int row, Keys... modifiers) {
+        Actions actions = new Actions(driver);
+        actions.moveToElement(
+                driver.findElement(By.cssSelector(".rh.row" + row)), 1, 1);
+        for (Keys modifier : modifiers) {
+            actions.keyDown(modifier);
+        }
+        actions.click(driver.findElement(By.cssSelector(".rh.row" + row)));
+        for (Keys modifier : modifiers) {
+            actions.keyUp(modifier);
+        }
+        actions.build().perform();
     }
 
     public void setSpreadsheet(SpreadsheetElement spreadsheet) {
@@ -221,6 +285,27 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
                 findElements(By.className("v-errorindicator")).isEmpty());
     }
 
+    protected void assertAddressFieldValue(String expected, String actual) {
+        Assert.assertEquals(
+                "Expected " + expected + " on addressField, actual:" + actual,
+                expected, actual);
+    }
+
+    protected void assertSelectedCell(String cell, boolean selected) {
+        Assert.assertTrue("Cell " + cell + " should be the selected cell",
+                selected);
+    }
+
+    protected void assertNotSelectedCell(String cell, boolean selected) {
+        Assert.assertFalse("Cell " + cell + " should not be selected cell",
+                selected);
+    }
+
+    protected void assertInRange(double from, double value, double to) {
+        Assert.assertTrue("Value [" + value + "] is not in range: [" + from
+                + " - " + to + "]", value >= from && value <= to);
+    }
+
     public String getAddressFieldValue() {
         return getAddressField().getAttribute("value");
     }
@@ -294,6 +379,10 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
         new Actions(getDriver()).sendKeys(k).build().perform();
     }
 
+    public boolean isCellSelected(String address) {
+        return getSpreadsheet().getCellAt(address).isCellSelected();
+    }
+
     public boolean isCellSelected(int col, int row) {
         return getSpreadsheet().getCellAt(row, col).isCellSelected();
     }
@@ -358,6 +447,13 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
                 + coordinates[1] + " ')" + "]";
     }
 
+    public void dragFromCellToCell(String from, String to) {
+        WebElement fromCell = getSpreadsheet().getCellAt(from);
+        WebElement toCell = getSpreadsheet().getCellAt(to);
+
+        new Actions(driver).dragAndDrop(fromCell, toCell).build().perform();
+    }
+
     public String getMergedCellContent(String topLeftCell) {
         return driver.findElement(mergedCell(topLeftCell)).getText();
     }
@@ -398,6 +494,29 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
     public List<WebElement> getGroupings() {
         return getSpreadsheet()
                 .findElements(By.cssSelector(".col-group-pane .grouping.plus"));
+    }
+
+    protected double getSize(String size) {
+        return Double.parseDouble(size.replaceAll("[^.0-9]", ""));
+    }
+
+    public void putCellContent(String cell, CharSequence value) {
+        openInlineEditor(cell);
+        getCommandExecutor().waitForVaadin();
+        clearInput();
+        getCommandExecutor().waitForVaadin();
+        insertAndTab(value);
+    }
+
+    private void clearInput() {
+        WebElement inlineInput = driver.findElement(By.id("cellinput"));
+        inlineInput.clear();
+    }
+
+    private void insertAndTab(CharSequence k) {
+        action(k);
+        action(Keys.TAB);
+        getCommandExecutor().waitForVaadin();
     }
 
     @Override
