@@ -479,7 +479,7 @@ public class TimePickerLocalizationIT extends AbstractComponentIT {
         }
         return errors.length() > 0 ? errors.toString() : null;
     }
-at
+
     private void selectLocale(Locale locale) {
         NativeSelectElement select = $(NativeSelectElement.class)
                 .id("locale-picker");
