@@ -23,10 +23,15 @@ public class LockCellFixture implements SpreadsheetFixture {
             cell = spreadsheet.getCell(cellRef.getRow(), cellRef.getCol());
             if (cell == null) {
                 cell = spreadsheet.createCell(cellRef.getRow(),
-                        cellRef.getCol(), "unlocked");
+                        cellRef.getCol(), "");
             }
+
+            boolean wasLocked = spreadsheet.isCellLocked(cell);
+
             CellStyle cellStyle = wb.createCellStyle();
-            cellStyle.setLocked(false);
+            // Toggle cell locked state
+            cellStyle.setLocked(!wasLocked);
+            cell.setCellValue(cellStyle.getLocked() ? "locked" : "unlocked");
             cell.setCellStyle(cellStyle);
             updatedCells.add(cell);
         }
