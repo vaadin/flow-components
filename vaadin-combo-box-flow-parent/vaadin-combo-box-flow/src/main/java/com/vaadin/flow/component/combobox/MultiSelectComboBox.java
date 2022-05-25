@@ -15,12 +15,6 @@
  */
 package com.vaadin.flow.component.combobox;
 
-import com.vaadin.flow.component.HasClearButton;
-import com.vaadin.flow.component.HasHelper;
-import com.vaadin.flow.component.HasLabel;
-import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.HasTheme;
-import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
@@ -72,9 +66,8 @@ import java.util.Set;
 @JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./comboBoxConnector.js")
-public class MultiSelectComboBox<TItem> extends
-        ComboBoxBase<MultiSelectComboBox<TItem>, TItem, Set<TItem>> implements
-        HasSize, HasValidation, HasHelper, HasTheme, HasLabel, HasClearButton {
+public class MultiSelectComboBox<TItem>
+        extends ComboBoxBase<MultiSelectComboBox<TItem>, TItem, Set<TItem>> {
 
     /**
      * Default constructor. Creates an empty combo box.
