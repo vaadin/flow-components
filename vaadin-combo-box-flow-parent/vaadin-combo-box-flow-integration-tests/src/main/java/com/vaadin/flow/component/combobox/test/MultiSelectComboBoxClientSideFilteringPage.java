@@ -8,14 +8,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-@Route("vaadin-multi-select-combo-box/server-side-filtering")
-public class MultiSelectComboBoxServerSideFilteringPage extends Div {
-    public MultiSelectComboBoxServerSideFilteringPage() {
+@Route("vaadin-multi-select-combo-box/client-side-filtering")
+public class MultiSelectComboBoxClientSideFilteringPage extends Div {
+    public MultiSelectComboBoxClientSideFilteringPage() {
         MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>(
                 "Items");
-        // By generating more items than the default page size of 50 we
-        // automatically enable server-side filtering
-        List<String> items = IntStream.range(0, 100)
+        // By generating less items than the default page size of 50 we
+        // automatically enable client-side filtering
+        List<String> items = IntStream.range(0, 10)
                 .mapToObj(i -> "Item " + (i + 1)).collect(Collectors.toList());
         comboBox.setItems(items);
 

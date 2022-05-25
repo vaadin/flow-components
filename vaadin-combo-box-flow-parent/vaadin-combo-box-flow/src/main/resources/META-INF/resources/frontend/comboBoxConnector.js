@@ -85,7 +85,7 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
             // filter based on comboBox.filter. While later we only filter clientside data.
 
             if (cache[0]) {
-              performClientSideFilter(cache[0], callback);
+              performClientSideFilter(cache[0], params.filter, callback);
               return;
             } else {
               // If client side filter is enabled then we need to first ask all data
@@ -166,7 +166,7 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
 
         comboBox.$connector.filter = tryCatchWrapper(function (item, filter) {
           filter = filter ? filter.toString().toLowerCase() : '';
-          return comboBox._getItemLabel(item).toString().toLowerCase().indexOf(filter) > -1;
+          return comboBox._getItemLabel(item, comboBox.itemLabelPath).toString().toLowerCase().indexOf(filter) > -1;
         });
 
         comboBox.$connector.set = tryCatchWrapper(function (index, items, filter) {
@@ -296,7 +296,7 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
           let data = cache[page];
 
           if (comboBox._clientSideFilter) {
-            performClientSideFilter(data, callback);
+            performClientSideFilter(data, comboBox.filter, callback);
           } else {
             // Remove the data if server-side filtering, but keep it for client-side
             // filtering
@@ -312,11 +312,11 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
         // and submitting the filtered items to specified callback.
         // The filter used is the one from combobox, not the lastFilter stored since
         // that may not reflect user's input.
-        const performClientSideFilter = tryCatchWrapper(function (page, callback) {
+        const performClientSideFilter = tryCatchWrapper(function (page, filter, callback) {
           let filteredItems = page;
 
-          if (comboBox.filter) {
-            filteredItems = page.filter((item) => comboBox.$connector.filter(item, comboBox.filter));
+          if (filter) {
+            filteredItems = page.filter((item) => comboBox.$connector.filter(item, filter));
           }
 
           callback(filteredItems, filteredItems.length);

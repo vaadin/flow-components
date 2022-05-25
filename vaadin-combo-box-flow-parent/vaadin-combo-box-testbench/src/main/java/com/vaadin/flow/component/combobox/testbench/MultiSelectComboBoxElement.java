@@ -67,9 +67,8 @@ public class MultiSelectComboBoxElement extends TestBenchElement
     @SuppressWarnings("unchecked")
     public List<String> getOptions() {
         openPopup();
-        return (List<String>) executeScript(
-                "const dataProviderMixin=arguments[0];"
-                        + "return dataProviderMixin.filteredItems.map(function(item) { return dataProviderMixin._getItemLabel(item);});",
+        return (List<String>) executeScript("const comboBox=arguments[0];"
+                + "return comboBox.filteredItems.map(function(item) { return comboBox._getItemLabel(item);});",
                 getInternalComboBox());
     }
 
