@@ -21,6 +21,15 @@ public class MultiSelectComboBoxClientSideFilteringIT
     }
 
     @Test
+    public void openPopup_showsAllItems() {
+        comboBox.openPopup();
+        comboBox.waitForLoadingFinished();
+
+        List<String> options = comboBox.getOptions();
+        Assert.assertEquals(10, options.size());
+    }
+
+    @Test
     public void setFilter_noErrors() {
         comboBox.setFilter("Item 10");
         checkLogsForErrors();
@@ -49,5 +58,14 @@ public class MultiSelectComboBoxClientSideFilteringIT
 
         List<String> options = comboBox.getOptions();
         Assert.assertEquals(0, options.size());
+    }
+
+    @Test
+    public void setFilter_clearFilter_showsAllItems() {
+        comboBox.setFilter("Item 10");
+        comboBox.setFilter("");
+
+        List<String> options = comboBox.getOptions();
+        Assert.assertEquals(10, options.size());
     }
 }
