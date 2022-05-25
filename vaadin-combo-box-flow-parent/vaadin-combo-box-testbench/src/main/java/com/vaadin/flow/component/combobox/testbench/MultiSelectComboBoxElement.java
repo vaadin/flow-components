@@ -22,6 +22,7 @@ import com.vaadin.testbench.elementsbase.Element;
 import org.openqa.selenium.By;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * A TestBench element representing a
@@ -70,6 +71,26 @@ public class MultiSelectComboBoxElement extends TestBenchElement
         return (List<String>) executeScript("const comboBox=arguments[0];"
                 + "return comboBox.filteredItems.map(function(item) { return comboBox._getItemLabel(item);});",
                 getInternalComboBox());
+    }
+
+    /**
+     * Gets the labels of the currently displayed chips. The multi select combo
+     * box will display one chip per selected item. The displayed label is
+     * determined by the item label generator of the component.
+     * <p>
+     * Note that multiple chips may be combined into an overflow chip if not all
+     * chips fit into the element. Increase the width of the component to ensure
+     * that all chips are visible.
+     *
+     * @return the labels of the currently displayed chips
+     */
+    public List<String> getVisibleChips() {
+        List<TestBenchElement> chips = $("vaadin-multi-select-combo-box-chip")
+                .all();
+        return chips.stream()
+                // skip overflow chip
+                .skip(1).map(TestBenchElement::getText)
+                .collect(Collectors.toList());
     }
 
     /**
