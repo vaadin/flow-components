@@ -3,6 +3,8 @@ package com.vaadin.flow.component.gridpro;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.HasValueAndElement;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -11,6 +13,7 @@ import org.junit.rules.ExpectedException;
 
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.gridpro.GridPro.EditColumn;
+import org.mockito.Mockito;
 
 public class GridProEditColumnTest {
 
@@ -117,5 +120,16 @@ public class GridProEditColumnTest {
                 });
         Assert.assertNotNull(column);
         Assert.assertEquals(GridPro.EditColumn.class, column.getClass());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void addEditColumn_acceptsImplementationOfHasElementAndValue() {
+        GridPro<Person> gridPro = new GridPro<>();
+        HasValueAndElement<HasValue.ValueChangeEvent<String>, String> mockEditor = Mockito
+                .mock(HasValueAndElement.class);
+        gridPro.addEditColumn(Person::getName).custom(mockEditor,
+                (person, value) -> {
+                });
     }
 }
