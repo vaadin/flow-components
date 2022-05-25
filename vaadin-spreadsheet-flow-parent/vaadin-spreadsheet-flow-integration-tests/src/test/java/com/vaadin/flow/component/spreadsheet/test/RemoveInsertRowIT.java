@@ -3,13 +3,12 @@ package com.vaadin.flow.component.spreadsheet.test;
 import com.vaadin.flow.component.spreadsheet.testbench.SpreadsheetElement;
 import com.vaadin.flow.component.spreadsheet.tests.fixtures.TestFixtures;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.support.ui.ExpectedCondition;
 
 public class RemoveInsertRowIT extends AbstractSpreadsheetIT {
 
@@ -26,13 +25,8 @@ public class RemoveInsertRowIT extends AbstractSpreadsheetIT {
 
         deleteFirstRow(spreadsheet);
 
-        waitUntil(new ExpectedCondition<Object>() {
-            @Override
-            public Object apply(WebDriver webDriver) {
-                return !spreadsheet.getCellAt("A1")
-                        .hasInvalidFormulaIndicator();
-            }
-        });
+        Assert.assertFalse(
+                spreadsheet.getCellAt("A1").hasInvalidFormulaIndicator());
     }
 
     @Test
@@ -42,15 +36,9 @@ public class RemoveInsertRowIT extends AbstractSpreadsheetIT {
 
         deleteRow(spreadsheet, 2);
 
-        waitUntil(new ExpectedCondition<Object>() {
-            @Override
-            public Object apply(WebDriver webDriver) {
-                return spreadsheet
-                        .findElements(
-                                By.className("cell-invalidformula-triangle"))
-                        .isEmpty();
-            }
-        });
+        Assert.assertTrue(spreadsheet
+                .findElements(By.className("cell-invalidformula-triangle"))
+                .isEmpty());
     }
 
     @Test
@@ -60,12 +48,8 @@ public class RemoveInsertRowIT extends AbstractSpreadsheetIT {
 
         insertNewFirstRow(spreadsheet);
 
-        waitUntil(new ExpectedCondition<Object>() {
-            @Override
-            public Object apply(WebDriver webDriver) {
-                return spreadsheet.getCellAt("A2").hasInvalidFormulaIndicator();
-            }
-        });
+        Assert.assertTrue(
+                spreadsheet.getCellAt("A2").hasInvalidFormulaIndicator());
     }
 
     @Test
@@ -75,12 +59,8 @@ public class RemoveInsertRowIT extends AbstractSpreadsheetIT {
 
         deleteFirstRow(spreadsheet);
 
-        waitUntil(new ExpectedCondition<Object>() {
-            @Override
-            public Object apply(WebDriver webDriver) {
-                return spreadsheet.getCellAt("A1").hasInvalidFormulaIndicator();
-            }
-        });
+        Assert.assertTrue(
+                spreadsheet.getCellAt("A1").hasInvalidFormulaIndicator());
     }
 
     @Test
@@ -91,14 +71,10 @@ public class RemoveInsertRowIT extends AbstractSpreadsheetIT {
 
         deleteFirstRow(spreadsheet);
 
-        waitUntil(new ExpectedCondition<Object>() {
-            @Override
-            public Object apply(WebDriver webDriver) {
-                return spreadsheet.getCellAt("A1").hasInvalidFormulaIndicator()
-                        && spreadsheet.getCellAt("A2")
-                                .hasInvalidFormulaIndicator();
-            }
-        });
+        Assert.assertTrue(
+                spreadsheet.getCellAt("A1").hasInvalidFormulaIndicator());
+        Assert.assertTrue(
+                spreadsheet.getCellAt("A2").hasInvalidFormulaIndicator());
     }
 
     @Test
@@ -109,16 +85,12 @@ public class RemoveInsertRowIT extends AbstractSpreadsheetIT {
 
         insertRow(spreadsheet, 2);
 
-        waitUntil(new ExpectedCondition<Object>() {
-            @Override
-            public Object apply(WebDriver webDriver) {
-                return spreadsheet.getCellAt("A1").hasInvalidFormulaIndicator()
-                        && !spreadsheet.getCellAt("A2")
-                                .hasInvalidFormulaIndicator()
-                        && spreadsheet.getCellAt("A3")
-                                .hasInvalidFormulaIndicator();
-            }
-        });
+        Assert.assertTrue(
+                spreadsheet.getCellAt("A1").hasInvalidFormulaIndicator());
+        Assert.assertFalse(
+                spreadsheet.getCellAt("A2").hasInvalidFormulaIndicator());
+        Assert.assertTrue(
+                spreadsheet.getCellAt("A3").hasInvalidFormulaIndicator());
     }
 
     @Test
@@ -128,12 +100,8 @@ public class RemoveInsertRowIT extends AbstractSpreadsheetIT {
 
         deleteRow(spreadsheet, 2);
 
-        waitUntil(new ExpectedCondition<Object>() {
-            @Override
-            public Object apply(WebDriver webDriver) {
-                return spreadsheet.getCellAt("A1").hasInvalidFormulaIndicator();
-            }
-        });
+        Assert.assertTrue(
+                spreadsheet.getCellAt("A1").hasInvalidFormulaIndicator());
     }
 
     @Test
@@ -146,13 +114,8 @@ public class RemoveInsertRowIT extends AbstractSpreadsheetIT {
 
         deleteFirstRow(spreadsheet);
 
-        waitUntil(new ExpectedCondition<Object>() {
-            @Override
-            public Object apply(WebDriver webDriver) {
-                return spreadsheet.findElements(By.cssSelector(".merged-cell"))
-                        .isEmpty();
-            }
-        });
+        Assert.assertTrue(spreadsheet
+                .findElements(By.cssSelector(".merged-cell")).isEmpty());
     }
 
     @Test
@@ -165,14 +128,9 @@ public class RemoveInsertRowIT extends AbstractSpreadsheetIT {
 
         insertNewFirstRow(spreadsheet);
 
-        waitUntil(new ExpectedCondition<Object>() {
-            @Override
-            public Object apply(WebDriver webDriver) {
-                return spreadsheet
-                        .findElement(By.cssSelector(".col1.row2.merged-cell"))
-                        .isDisplayed();
-            }
-        });
+        Assert.assertTrue(spreadsheet
+                .findElement(By.cssSelector(".col1.row2.merged-cell"))
+                .isDisplayed());
     }
 
     @Ignore("Ignore until https://github.com/vaadin/flow-components/issues/3223 is fixed")
@@ -185,12 +143,7 @@ public class RemoveInsertRowIT extends AbstractSpreadsheetIT {
 
         deleteFirstRow(spreadsheet);
 
-        waitUntil(new ExpectedCondition<Object>() {
-            @Override
-            public Object apply(WebDriver webDriver) {
-                return !spreadsheet.getCellAt("A1").hasPopupButton();
-            }
-        });
+        Assert.assertFalse(spreadsheet.getCellAt("A1").hasPopupButton());
     }
 
     @Ignore("Ignore until https://github.com/vaadin/flow-components/issues/3223 is fixed")
@@ -203,13 +156,8 @@ public class RemoveInsertRowIT extends AbstractSpreadsheetIT {
 
         deleteRow(spreadsheet, 2);
 
-        waitUntil(new ExpectedCondition<Object>() {
-            @Override
-            public Object apply(WebDriver webDriver) {
-                return spreadsheet.findElements(By.className("popupbutton"))
-                        .isEmpty();
-            }
-        });
+        Assert.assertTrue(spreadsheet.findElements(By.className("popupbutton"))
+                .isEmpty());
     }
 
     @Ignore("Ignore until https://github.com/vaadin/flow-components/issues/3223 is fixed")
@@ -222,12 +170,7 @@ public class RemoveInsertRowIT extends AbstractSpreadsheetIT {
 
         deleteFirstRow(spreadsheet);
 
-        waitUntil(new ExpectedCondition<Object>() {
-            @Override
-            public Object apply(WebDriver webDriver) {
-                return spreadsheet.getCellAt("A1").hasPopupButton();
-            }
-        });
+        Assert.assertTrue(spreadsheet.getCellAt("A1").hasPopupButton());
     }
 
     @Ignore("Ignore until https://github.com/vaadin/flow-components/issues/3223 is fixed")
@@ -240,12 +183,7 @@ public class RemoveInsertRowIT extends AbstractSpreadsheetIT {
 
         insertNewFirstRow(spreadsheet);
 
-        waitUntil(new ExpectedCondition<Object>() {
-            @Override
-            public Object apply(WebDriver webDriver) {
-                return spreadsheet.getCellAt("A2").hasPopupButton();
-            }
-        });
+        Assert.assertTrue(spreadsheet.getCellAt("A2").hasPopupButton());
     }
 
     @Ignore("This is a known issue which should be fixed. The problem is most likely on client side.")
@@ -259,14 +197,9 @@ public class RemoveInsertRowIT extends AbstractSpreadsheetIT {
 
         insertNewFirstRow(spreadsheet);
 
-        waitUntil(new ExpectedCondition<Object>() {
-            @Override
-            public Object apply(WebDriver webDriver) {
-                return !spreadsheet.getCellAt("A1").hasPopupButton()
-                        && spreadsheet.getCellAt("A2").hasPopupButton()
-                        && spreadsheet.getCellAt("A3").hasPopupButton();
-            }
-        });
+        Assert.assertFalse(spreadsheet.getCellAt("A1").hasPopupButton());
+        Assert.assertTrue(spreadsheet.getCellAt("A2").hasPopupButton());
+        Assert.assertTrue(spreadsheet.getCellAt("A3").hasPopupButton());
     }
 
     private void insertNewFirstRow(SpreadsheetElement spreadsheet) {
