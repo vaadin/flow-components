@@ -17,6 +17,12 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
 
         comboBox.$connector = {};
 
+        // <vaadin-multi-select-combo-box> wraps a regular combo box internally,
+        // to reuse logic between both components we need to identify the
+        // element that implements the data provider mixin
+        const dataProviderMixin =
+          comboBox.localName === 'vaadin-multi-select-combo-box' ? comboBox.$.comboBox : comboBox;
+
         // holds pageIndex -> callback pairs of subsequent indexes (current active range)
         const pageCallbacks = {};
         let cache = {};
@@ -54,17 +60,17 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
         const clearPageCallbacks = (pages = Object.keys(pageCallbacks)) => {
           // Flush and empty the existing requests
           pages.forEach((page) => {
-            pageCallbacks[page]([], comboBox.size);
+            pageCallbacks[page]([], dataProviderMixin.size);
             delete pageCallbacks[page];
 
             // Empty the comboBox's internal cache without invoking observers by filling
             // the filteredItems array with placeholders (comboBox will request for data when it
             // encounters a placeholder)
-            const pageStart = parseInt(page) * comboBox.pageSize;
-            const pageEnd = pageStart + comboBox.pageSize;
-            const end = Math.min(pageEnd, comboBox.filteredItems.length);
+            const pageStart = parseInt(page) * dataProviderMixin.pageSize;
+            const pageEnd = pageStart + dataProviderMixin.pageSize;
+            const end = Math.min(pageEnd, dataProviderMixin.filteredItems.length);
             for (let i = pageStart; i < end; i++) {
-              comboBox.filteredItems[i] = placeHolder;
+              dataProviderMixin.filteredItems[i] = placeHolder;
             }
           });
         };
@@ -221,7 +227,7 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
         comboBox.$connector.reset = tryCatchWrapper(function () {
           clearPageCallbacks();
           cache = {};
-          comboBox.clearCache();
+          dataProviderMixin.clearCache();
         });
 
         comboBox.$connector.confirm = tryCatchWrapper(function (id, filter) {
