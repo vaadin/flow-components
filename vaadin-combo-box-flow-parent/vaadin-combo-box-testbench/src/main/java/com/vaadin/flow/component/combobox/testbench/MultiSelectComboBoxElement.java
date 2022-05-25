@@ -20,6 +20,7 @@ import com.vaadin.testbench.HasLabel;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -91,6 +92,27 @@ public class MultiSelectComboBoxElement extends TestBenchElement
                 // skip overflow chip
                 .skip(1).map(TestBenchElement::getText)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Attempts to select an item from the popup by matching the label. Throws
+     * an {@link IllegalArgumentException} if the popup does not contain the
+     * item.
+     *
+     * @param label
+     *            The label of the item to select from the popup
+     */
+    public void selectByText(String label) {
+        openPopup();
+        sendKeys(label);
+        waitForLoadingFinished();
+        List<String> options = getOptions();
+        if (!options.contains(label)) {
+            throw new IllegalArgumentException(String.format(
+                    "Item with the label '%s' not found in the popup", label));
+        }
+        sendKeys(Keys.ENTER);
+        closePopup();
     }
 
     /**

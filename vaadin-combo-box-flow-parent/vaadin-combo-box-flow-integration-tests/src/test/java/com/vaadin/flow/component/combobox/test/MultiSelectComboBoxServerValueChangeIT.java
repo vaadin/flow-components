@@ -33,13 +33,8 @@ public class MultiSelectComboBoxServerValueChangeIT
 
     @Test
     public void inputValue_valueUpdated() {
-        comboBox.openPopup();
-        comboBox.sendKeys("Item 1");
-        comboBox.waitForLoadingFinished();
-        comboBox.sendKeys(Keys.ENTER);
-        comboBox.sendKeys("Item 10");
-        comboBox.waitForLoadingFinished();
-        comboBox.sendKeys(Keys.ENTER);
+        comboBox.selectByText("Item 1");
+        comboBox.selectByText("Item 10");
 
         assertVisibleChips(Set.of("Item 1", "Item 10"));
         assertValueChange(Set.of("Item 1", "Item 10"), "client");
@@ -47,10 +42,7 @@ public class MultiSelectComboBoxServerValueChangeIT
 
     @Test
     public void inputValue_removeValue_valueUpdated() {
-        comboBox.openPopup();
-        comboBox.sendKeys("Item 1");
-        comboBox.waitForLoadingFinished();
-        comboBox.sendKeys(Keys.ENTER);
+        comboBox.selectByText("Item 1");
         // Popup needs to be closed in order to remove chips with backspace
         comboBox.closePopup();
         // Select the chip
@@ -71,7 +63,7 @@ public class MultiSelectComboBoxServerValueChangeIT
 
         comboBox.openPopup();
         comboBox.waitForLoadingFinished();
-        // Select "Item 3"
+        // Select "Item 3", starting from preselected "Item 1"
         comboBox.sendKeys(Keys.DOWN, Keys.DOWN, Keys.ENTER);
 
         assertVisibleChips(Set.of("Item 1", "Item 3"));
