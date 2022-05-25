@@ -7,7 +7,6 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.HasValueAndElement;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.shared.Registration;
 import org.junit.Assert;
 import org.junit.Before;
@@ -17,7 +16,6 @@ import org.junit.rules.ExpectedException;
 
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.gridpro.GridPro.EditColumn;
-import org.mockito.Mockito;
 
 public class GridProEditColumnTest {
 
