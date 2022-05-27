@@ -59,6 +59,7 @@ public class GridViewSortingPage extends LegacyTestView {
                         person -> person.getAddress().getNumber())
                 .withProperty("postalCode",
                         person -> person.getAddress().getPostalCode()))
+                .setSortProperty("street", "number")
                 .setComparator(addressComparator).setHeader("Address");
 
         Checkbox multiSort = new Checkbox("Multiple column sorting enabled");
