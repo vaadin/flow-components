@@ -1834,7 +1834,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @param sortingProperties
      *            the sorting properties to use for this column
      * @return the created column
+     * @deprecated since 23.2 - use
+     *             <code>addColumn(renderer).setSortProperty(sortingProperties)</code>
+     *             instead.
      */
+    @Deprecated
     public Column<T> addColumn(Renderer<T> renderer,
             String... sortingProperties) {
         BiFunction<Renderer<T>, String, Column<T>> defaultFactory = getDefaultColumnFactory();
@@ -1869,7 +1873,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @param sortingProperties
      *            the sorting properties to use for this column
      * @return the created column
+     * @deprecated since 23.2 - use
+     *             <code>addColumn(renderer, columnFactory).setSortProperty(sortingProperties)</code>
+     *             instead.
      */
+    @Deprecated
     protected <C extends Column<T>> C addColumn(Renderer<T> renderer,
             BiFunction<Renderer<T>, String, C> columnFactory,
             String... sortingProperties) {
