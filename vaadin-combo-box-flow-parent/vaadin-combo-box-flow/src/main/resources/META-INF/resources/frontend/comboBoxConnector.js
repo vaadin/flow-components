@@ -201,9 +201,9 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
           for (let i = 0; i < items.length; i++) {
             let item = items[i];
 
-            for (let j = 0; j < comboBox.filteredItems.length; j++) {
-              if (comboBox.filteredItems[j].key === item.key) {
-                comboBox.set('filteredItems.' + j, item);
+            for (let j = 0; j < dataProviderMixin.filteredItems.length; j++) {
+              if (dataProviderMixin.filteredItems[j].key === item.key) {
+                dataProviderMixin.set('filteredItems.' + j, item);
                 break;
               }
             }
