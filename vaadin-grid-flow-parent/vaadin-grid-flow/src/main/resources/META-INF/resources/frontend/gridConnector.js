@@ -1124,6 +1124,11 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
         );
 
         function _fireClickEvent(event, eventName) {
+          // Click event was handled by the component inside grid, do nothing.
+          if (event.defaultPrevented) {
+            return;
+          }
+
           const target = event.target;
           const eventContext = grid.getEventContext(event);
           const section = eventContext.section;
