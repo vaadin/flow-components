@@ -828,6 +828,8 @@ public class GridViewIT extends GridViewBase {
 
     @Test
     public void itemClickListener_singleClick_preventClickIgnored() {
+        openTabAndCheckForErrors("click-listeners");
+
         GridElement grid = $(GridElement.class).id("item-click-listener");
         scrollToElement(grid);
         waitUntil(driver -> grid.getRowCount() > 0);
