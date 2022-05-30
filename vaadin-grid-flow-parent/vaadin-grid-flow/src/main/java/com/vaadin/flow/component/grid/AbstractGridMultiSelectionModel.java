@@ -159,6 +159,17 @@ public abstract class AbstractGridMultiSelectionModel<T>
                 .unmodifiableSet(new LinkedHashSet<>(selected.values()));
     }
 
+    /**
+     * Returns an unmodifiable view of the selected item ids.
+     *
+     * The returned Set may be a direct view of the internal data structures of this class.
+     * A defensive copy should be made by callers when iterating over this Set and modifying
+     * the selection during iteration to avoid ConcurrentModificationExceptions.
+     */
+    protected final Set<T> getSelectedItems() {
+        return Collections.unmodifiableSet(this.selected.keySet());
+    }
+
     @Override
     public Optional<T> getFirstSelectedItem() {
         return selected.values().stream().findFirst();
