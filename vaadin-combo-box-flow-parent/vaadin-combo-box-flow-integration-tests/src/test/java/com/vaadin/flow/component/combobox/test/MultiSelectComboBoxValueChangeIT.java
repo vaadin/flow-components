@@ -18,6 +18,7 @@ import java.util.Set;
 public class MultiSelectComboBoxValueChangeIT extends AbstractComponentIT {
     private MultiSelectComboBoxElement comboBox;
     private TestBenchElement setServerSideValue;
+    private TestBenchElement clearServerSideValue;
     private TestBenchElement eventValue;
     private TestBenchElement eventOrigin;
 
@@ -26,6 +27,7 @@ public class MultiSelectComboBoxValueChangeIT extends AbstractComponentIT {
         open();
         comboBox = $(MultiSelectComboBoxElement.class).waitForFirst();
         setServerSideValue = $("button").id("set-server-side-value");
+        clearServerSideValue = $("button").id("clear-server-side-value");
         eventValue = $("span").id("event-value");
         eventOrigin = $("span").id("event-origin");
     }
@@ -72,6 +74,16 @@ public class MultiSelectComboBoxValueChangeIT extends AbstractComponentIT {
 
         assertSelectedItems(Set.of("Item 1", "Item 2"));
         assertValueChange(Set.of("Item 1", "Item 2"), "server");
+    }
+
+    @Test
+    public void selectItems_clearValueServerSide_valueCleared() {
+        comboBox.selectByText("Item 1");
+        comboBox.selectByText("Item 10");
+        clearServerSideValue.click();
+
+        assertSelectedItems(Collections.emptySet());
+        assertValueChange(Collections.emptySet(), "server");
     }
 
     private void assertSelectedItems(Set<String> items) {

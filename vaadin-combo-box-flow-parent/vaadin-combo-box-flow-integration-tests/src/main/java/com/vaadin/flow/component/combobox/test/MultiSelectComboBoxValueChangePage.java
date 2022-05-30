@@ -28,6 +28,12 @@ public class MultiSelectComboBoxValueChangePage extends Div {
                 });
         setServerSideValue.setId("set-server-side-value");
 
+        NativeButton clearServerSideValue = new NativeButton(
+                "Clear value server-side", e -> {
+                    comboBox.clear();
+                });
+        clearServerSideValue.setId("clear-server-side-value");
+
         Span eventValue = new Span();
         eventValue.setId("event-value");
         Span eventOrigin = new Span();
@@ -40,7 +46,7 @@ public class MultiSelectComboBoxValueChangePage extends Div {
         });
 
         add(comboBox);
-        add(new Div(setServerSideValue));
+        add(new Div(setServerSideValue, clearServerSideValue));
         add(new Div(new Span("Event value: "), eventValue));
         add(new Div(new Span("Event origin: "), eventOrigin));
     }
