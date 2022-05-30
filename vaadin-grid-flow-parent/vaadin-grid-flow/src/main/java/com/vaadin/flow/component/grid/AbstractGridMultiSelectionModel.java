@@ -159,6 +159,17 @@ public abstract class AbstractGridMultiSelectionModel<T>
                 .unmodifiableSet(new LinkedHashSet<>(selected.values()));
     }
 
+    /**
+     * Returns an unmodifiable view of the selected item ids.
+     *
+     * The returned Set may be a direct view of the internal data structures of this class.
+     * A defensive copy should be made by callers when iterating over this Set and modifying
+     * the selection during iteration to avoid ConcurrentModificationExceptions.
+     */
+    protected Set<Object> getSelectedItemIds() {
+        return Collections.unmodifiableSet(this.selected.keySet());
+    }
+
     @Override
     public Optional<T> getFirstSelectedItem() {
         return selected.values().stream().findFirst();
@@ -215,7 +226,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
 
     @Override
     public boolean isSelected(T item) {
-        return selected.containsKey(getItemId(item));
+        return getSelectedItemIds().contains(getItemId(item));
     }
 
     @Override
@@ -428,9 +439,9 @@ public abstract class AbstractGridMultiSelectionModel<T>
 
     private void doUpdateSelection(Map<Object, T> addedItems,
             Map<Object, T> removedItems, boolean userOriginated) {
-
-        if (selected.keySet().containsAll(addedItems.keySet()) && Collections
-                .disjoint(selected.keySet(), removedItems.keySet())) {
+        Set<Object> selectedIds = getSelectedItemIds();
+        if (selectedIds.containsAll(addedItems.keySet()) && Collections
+                .disjoint(selectedIds, removedItems.keySet())) {
             return;
         }
         Set<T> oldSelection = getSelectedItems();
