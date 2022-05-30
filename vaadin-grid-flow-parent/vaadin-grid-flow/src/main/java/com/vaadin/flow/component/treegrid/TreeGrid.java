@@ -216,13 +216,6 @@ public class TreeGrid<T> extends Grid<T>
         }
     }
 
-    private final AtomicLong uniqueKeyCounter = new AtomicLong(0);
-    private final Map<Object, Long> objectUniqueKeyMap = new HashMap<>();
-
-    ValueProvider<T, String> defaultUniqueKeyProvider = item -> String.valueOf(
-            objectUniqueKeyMap.computeIfAbsent(getDataProvider().getId(item),
-                    key -> uniqueKeyCounter.getAndIncrement()));
-
     private Registration dataProviderRegistration;
 
     /**
@@ -316,17 +309,6 @@ public class TreeGrid<T> extends Grid<T>
         setUniqueKeyProvider(uniqueKeyProvider);
 
         getDataProvider().refreshAll();
-    }
-
-    /**
-     * Gets value provider for unique key in row's generated JSON.
-     *
-     * @return ValueProvider for unique key for row
-     */
-    @Override
-    protected ValueProvider<T, String> getUniqueKeyProvider() {
-        return Optional.ofNullable(super.getUniqueKeyProvider())
-                .orElse(defaultUniqueKeyProvider);
     }
 
     /**
