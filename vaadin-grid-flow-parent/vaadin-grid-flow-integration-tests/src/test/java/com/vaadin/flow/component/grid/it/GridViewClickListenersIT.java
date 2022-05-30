@@ -69,8 +69,8 @@ public class GridViewClickListenersIT extends AbstractComponentIT {
         GridTRElement row = grid.getRow(0);
         GridTHTDElement cell = row.getCell(grid.getColumn("Action"));
 
-        WebElement button = cell.getContext().findElement(By.tagName("button"));
-        button.click();
+        WebElement span = cell.getContext().findElement(By.tagName("span"));
+        span.click();
 
         WebElement clickInfo = findElement(By.id("clicked-item"));
 

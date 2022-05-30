@@ -18,7 +18,7 @@ package com.vaadin.flow.component.grid.it;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.bean.Person;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Route;
@@ -40,10 +40,10 @@ public class GridViewClickListenersPage extends LegacyTestView {
         grid.addColumn(Person::getFirstName).setHeader("Name");
         grid.addColumn(Person::getAge).setHeader("Age");
         grid.addColumn(new ComponentRenderer<>(person -> {
-            NativeButton button = new NativeButton("Action");
-            button.getElement().executeJs(
+            Span span = new Span("Action");
+            span.getElement().executeJs(
                     "$0.addEventListener('click', e => e.preventDefault())");
-            return button;
+            return span;
         })).setHeader("Action");
 
         // Disable selection: will receive only click events instead
