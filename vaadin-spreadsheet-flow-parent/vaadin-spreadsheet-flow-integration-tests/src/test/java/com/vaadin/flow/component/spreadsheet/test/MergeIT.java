@@ -21,8 +21,8 @@ public class MergeIT extends AbstractSpreadsheetIT {
         selectRegion("B2", "C3");
         loadTestFixture(TestFixtures.MergeCells);
 
-        // This is needed to workaround some issue that only occurs when running in
-        // headless mode. Doesn't affect the actual test.
+        // This is needed to workaround some issue that only occurs when running
+        // in headless mode. Doesn't affect the actual test.
         selectCell("A1");
 
         selectRegion("C4", "D3");
@@ -52,8 +52,8 @@ public class MergeIT extends AbstractSpreadsheetIT {
 
         final var a1 = spreadsheetElement.getCellAt("A1");
 
-        // This is needed to workaround some issue that only occurs when running in
-        // headless mode. Doesn't affect the actual test.
+        // This is needed to workaround some issue that only occurs when running
+        // in headless mode. Doesn't affect the actual test.
         selectCell("A1");
 
         a1.setValue("10");
