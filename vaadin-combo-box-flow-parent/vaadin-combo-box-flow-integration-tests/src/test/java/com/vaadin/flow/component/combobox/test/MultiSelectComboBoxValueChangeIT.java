@@ -15,8 +15,7 @@ import java.util.List;
 import java.util.Set;
 
 @TestPath("vaadin-multi-select-combo-box/value-change")
-public class MultiSelectComboBoxValueChangeIT
-        extends AbstractComponentIT {
+public class MultiSelectComboBoxValueChangeIT extends AbstractComponentIT {
     private MultiSelectComboBoxElement comboBox;
     private TestBenchElement setServerSideValue;
     private TestBenchElement eventValue;
@@ -32,30 +31,27 @@ public class MultiSelectComboBoxValueChangeIT
     }
 
     @Test
-    public void inputValue_valueUpdated() {
+    public void selectItem_valueUpdated() {
         comboBox.selectByText("Item 1");
         comboBox.selectByText("Item 10");
 
-        assertVisibleChips(Set.of("Item 1", "Item 10"));
+        assertSelectedItems(Set.of("Item 1", "Item 10"));
         assertValueChange(Set.of("Item 1", "Item 10"), "client");
     }
 
     @Test
-    public void inputValue_removeValue_valueUpdated() {
+    public void selectItem_deselectItem_valueUpdated() {
         comboBox.selectByText("Item 1");
-        // Popup needs to be closed in order to remove chips with backspace
-        comboBox.closePopup();
-        // Select the chip
-        comboBox.sendKeys(Keys.BACK_SPACE);
-        // Delete the chip
-        comboBox.sendKeys(Keys.BACK_SPACE);
+        assertSelectedItems(Set.of("Item 1"));
+        assertValueChange(Set.of("Item 1"), "client");
 
-        assertVisibleChips(Collections.emptySet());
+        comboBox.deselectByText("Item 1");
+        assertSelectedItems(Collections.emptySet());
         assertValueChange(Collections.emptySet(), "client");
     }
 
     @Test
-    public void selectItemsFromPopup_valueUpdated() {
+    public void selectItemsWithKeyboardNavigation_valueUpdated() {
         comboBox.openPopup();
         comboBox.waitForLoadingFinished();
         // Select "Item 1"
@@ -66,7 +62,7 @@ public class MultiSelectComboBoxValueChangeIT
         // Select "Item 3", starting from preselected "Item 1"
         comboBox.sendKeys(Keys.DOWN, Keys.DOWN, Keys.ENTER);
 
-        assertVisibleChips(Set.of("Item 1", "Item 3"));
+        assertSelectedItems(Set.of("Item 1", "Item 3"));
         assertValueChange(Set.of("Item 1", "Item 3"), "client");
     }
 
@@ -74,16 +70,17 @@ public class MultiSelectComboBoxValueChangeIT
     public void setServerSideValue_valueUpdated() {
         setServerSideValue.click();
 
-        assertVisibleChips(Set.of("Item 1", "Item 2"));
+        assertSelectedItems(Set.of("Item 1", "Item 2"));
         assertValueChange(Set.of("Item 1", "Item 2"), "server");
     }
 
-    private void assertVisibleChips(Set<String> items) {
-        List<String> chips = comboBox.getVisibleChips();
+    private void assertSelectedItems(Set<String> items) {
+        List<String> selectedTexts = comboBox.getSelectedTexts();
         Assert.assertEquals("Number of selected items does not match",
-                items.size(), chips.size());
+                items.size(), selectedTexts.size());
         items.forEach(item -> Assert.assertTrue(
-                "Chips do not include item: " + item, chips.contains(item)));
+                "Selection does not include item: " + item,
+                selectedTexts.contains(item)));
     }
 
     private void assertValueChange(Set<String> items, String origin) {

@@ -20,10 +20,8 @@ import com.vaadin.testbench.HasLabel;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * A TestBench element representing a
@@ -38,81 +36,112 @@ public class MultiSelectComboBoxElement extends TestBenchElement
     }
 
     /**
-     * Opens the popup with options, if it is not already open.
+     * Opens the popup, if it is not already open.
      */
     public void openPopup() {
         setProperty("opened", true);
     }
 
     /**
-     * Close the popup with options, if it is open.
+     * Close the popup, if it is open.
      */
     public void closePopup() {
         setProperty("opened", false);
     }
 
     /**
-     * Checks whether the popup with options is open.
+     * Checks whether the popup is open.
      *
      * @return <code>true</code> if the popup is open, <code>false</code>
-     *         otherwiseF
+     *         otherwise
      */
     public boolean isPopupOpen() {
         return getPropertyBoolean("opened");
     }
 
     /**
-     * Gets a list of all available options.
+     * Opens the popup, and gets the labels of the items that are currently
+     * loaded in the popup
      *
-     * @return a list of the options (visible text)
+     * @return labels of the items that are loaded in the popup
      */
     @SuppressWarnings("unchecked")
     public List<String> getOptions() {
         openPopup();
-        return (List<String>) executeScript("const comboBox=arguments[0];"
-                + "return comboBox.filteredItems.map(function(item) { return comboBox._getItemLabel(item);});",
-                getInternalComboBox());
-    }
-
-    /**
-     * Gets the labels of the currently displayed chips. The multi select combo
-     * box will display one chip per selected item. The displayed label is
-     * determined by the item label generator of the component.
-     * <p>
-     * Note that multiple chips may be combined into an overflow chip if not all
-     * chips fit into the element. Increase the width of the component to ensure
-     * that all chips are visible.
-     *
-     * @return the labels of the currently displayed chips
-     */
-    public List<String> getVisibleChips() {
-        List<TestBenchElement> chips = $("vaadin-multi-select-combo-box-chip")
-                .all();
-        return chips.stream()
-                // skip overflow chip
-                .skip(1).map(TestBenchElement::getText)
-                .collect(Collectors.toList());
+        waitForLoadingFinished();
+        //@formatter:off
+        String script =
+                "const comboBox=arguments[0];" +
+                "return comboBox.$.comboBox.filteredItems.map(item => item.label || '')";
+        //@formatter:on
+        return (List<String>) executeScript(script, this);
     }
 
     /**
      * Attempts to select an item from the popup by matching the label. Throws
-     * an {@link IllegalArgumentException} if the popup does not contain the
-     * item.
+     * an {@link IllegalArgumentException} if the popup does not contain an item
+     * with the specified label. Does nothing if the item is already selected.
      *
      * @param label
      *            The label of the item to select from the popup
+     * @throws IllegalArgumentException
+     *             if there is no item with the specified label
      */
     public void selectByText(String label) {
-        openPopup();
-        sendKeys(label);
-        waitForLoadingFinished();
-        List<String> options = getOptions();
-        if (!options.contains(label)) {
-            throw new IllegalArgumentException(String.format(
-                    "Item with the label '%s' not found in the popup", label));
-        }
-        sendKeys(Keys.ENTER);
+        setFilter(label);
+        //@formatter:off
+        String script =
+                "const combobox = arguments[0];" +
+                "const label = arguments[1];" +
+                "const itemToSelect = combobox.$.comboBox.filteredItems.find(item => item.label === label);" +
+                "if (!itemToSelect) return false;" +
+                "const isSelected = combobox.selectedItems.some(item => item.key === itemToSelect.key);" +
+                "if (!isSelected) {" +
+                "  combobox.selectedItems = [...combobox.selectedItems, itemToSelect];" +
+                "}" +
+                "return true;";
+        //@formatter:on
+        Boolean success = (Boolean) executeScript(script, this, label);
         closePopup();
+        if (!success) {
+            throw new IllegalArgumentException("Item with label '" + label
+                    + "' not found in the combobox");
+        }
+    }
+
+    /**
+     * Attempts to deselect an item that is currently selected, by matching the
+     * label. Does nothing if the item is not selected.
+     *
+     * @param label
+     *            The label of the item to deselect
+     */
+    public void deselectByText(String label) {
+        //@formatter:off
+        String script =
+                "const combobox = arguments[0];" +
+                "const label = arguments[1];" +
+                "const isSelected = combobox.selectedItems.some(item => item.label === label);" +
+                "if (isSelected) {" +
+                "  combobox.selectedItems = combobox.selectedItems.filter(item => item.label !== label);" +
+                "}";
+        //@formatter:on
+        executeScript(script, this, label);
+    }
+
+    /**
+     * Gets the labels of the currently selected items.
+     *
+     * @return the labels of the currently selected items
+     */
+    @SuppressWarnings("unchecked")
+    public List<String> getSelectedTexts() {
+        //@formatter:off
+        String script =
+                "const combobox = arguments[0];" +
+                "return combobox.selectedItems.map(item => item.label)";
+        //@formatter:on
+        return (List<String>) executeScript(script, this);
     }
 
     /**
