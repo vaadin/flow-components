@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Set;
 
 @TestPath("vaadin-multi-select-combo-box/value-change")
-public class MultiSelectComboBoxServerValueChangeIT
+public class MultiSelectComboBoxValueChangeIT
         extends AbstractComponentIT {
     private MultiSelectComboBoxElement comboBox;
     private TestBenchElement setServerSideValue;
