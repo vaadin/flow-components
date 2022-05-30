@@ -61,6 +61,23 @@ public class GridViewClickListenersIT extends AbstractComponentIT {
     }
 
     @Test
+    public void itemClickListener_singleClick_preventClickIgnored() {
+        GridElement grid = $(GridElement.class).id("item-click-listener");
+        scrollToElement(grid);
+        waitUntil(driver -> grid.getRowCount() > 0);
+
+        GridTRElement row = grid.getRow(0);
+        GridTHTDElement cell = row.getCell(grid.getColumn("Action"));
+
+        WebElement button = cell.getContext().findElement(By.tagName("button"));
+        button.click();
+
+        WebElement clickInfo = findElement(By.id("clicked-item"));
+
+        Assert.assertEquals("", clickInfo.getText());
+    }
+
+    @Test
     public void itemDoubleClickListener() {
         GridElement grid = $(GridElement.class).id("item-doubleclick-listener");
         scrollToElement(grid);
