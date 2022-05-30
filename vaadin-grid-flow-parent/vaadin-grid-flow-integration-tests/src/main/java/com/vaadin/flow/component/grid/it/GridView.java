@@ -58,6 +58,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
@@ -1207,6 +1208,12 @@ public class GridView extends DemoView {
         grid.setItems(getItems());
         grid.addColumn(Person::getFirstName).setHeader("Name");
         grid.addColumn(Person::getAge).setHeader("Age");
+        grid.addColumn(new ComponentRenderer<>(person -> {
+            Span span = new Span("Action");
+            span.getElement().executeJs(
+                    "$0.addEventListener('click', e => e.preventDefault())");
+            return span;
+        })).setHeader("Action");
 
         // Disable selection: will receive only click events instead
         grid.setSelectionMode(SelectionMode.NONE);
