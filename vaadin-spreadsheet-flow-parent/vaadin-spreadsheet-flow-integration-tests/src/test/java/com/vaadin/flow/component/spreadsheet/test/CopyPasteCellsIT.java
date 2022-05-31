@@ -1,16 +1,10 @@
 package com.vaadin.flow.component.spreadsheet.test;
 
-import java.util.List;
-
 import com.vaadin.flow.component.spreadsheet.testbench.SpreadsheetElement;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 
 public class CopyPasteCellsIT extends AbstractSpreadsheetIT {
@@ -55,31 +49,5 @@ public class CopyPasteCellsIT extends AbstractSpreadsheetIT {
             }
         });
         paste();
-    }
-
-    private String getJson() {
-        Actions actions = new Actions(getDriver());
-        actions.sendKeys(Keys.TAB);
-        actions.sendKeys(Keys.SPACE).perform();
-        findElement(By.className("v-debugwindow-tab")).click();
-
-        List<WebElement> messages = findElements(
-                By.className("v-debugwindow-message"));
-        for (WebElement message : messages) {
-            if (isUpdateCellValuesJSON(message.getAttribute("innerHTML"))) {
-                String text = message.getAttribute("innerHTML");
-                int startIndex = text.indexOf('(') + 1;
-                int endIndex = text.indexOf(')');
-                return text.substring(startIndex, endIndex);
-            }
-        }
-        return "";
-    }
-
-    private boolean isUpdateCellValuesJSON(String json) {
-        final String RPC_START_SUBSTRING = "Server to client RPC call";
-        final String UPDATE_SUBSTRING = "update";
-        return json.startsWith(RPC_START_SUBSTRING)
-                && json.toLowerCase().contains(UPDATE_SUBSTRING);
     }
 }
