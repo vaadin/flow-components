@@ -1,15 +1,10 @@
 package com.vaadin.flow.component.spreadsheet.test;
 
-import static org.junit.Assert.assertEquals;
-import java.io.IOException;
-
 import com.vaadin.flow.component.spreadsheet.tests.fixtures.TestFixtures;
+
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
-
-import com.vaadin.testbench.parallel.Browser;
 
 public class MergeIT extends AbstractSpreadsheetIT {
 
@@ -19,7 +14,6 @@ public class MergeIT extends AbstractSpreadsheetIT {
         createNewSpreadsheet();
     }
 
-    @Ignore("Ignore until https://github.com/vaadin/flow-components/issues/3186 is fixed")
     @Test
     public void testSelectionBug() {
         final var spreadsheetElement = getSpreadsheet();
@@ -27,15 +21,21 @@ public class MergeIT extends AbstractSpreadsheetIT {
         selectRegion("B2", "C3");
         loadTestFixture(TestFixtures.MergeCells);
 
+        // This is needed to workaround some issue that only occurs when running
+        // in headless mode. Doesn't affect the actual test.
+        selectCell("A1");
+
         selectRegion("C4", "D3");
         loadTestFixture(TestFixtures.Selection);
 
-        assertEquals("SELECTED", spreadsheetElement.getCellAt("D4").getValue());
-        assertEquals("SELECTED", spreadsheetElement.getCellAt("B4").getValue());
-        assertEquals("SELECTED", spreadsheetElement.getCellAt("D2").getValue());
+        Assert.assertEquals("SELECTED",
+                spreadsheetElement.getCellAt("D4").getValue());
+        Assert.assertEquals("SELECTED",
+                spreadsheetElement.getCellAt("B4").getValue());
+        Assert.assertEquals("SELECTED",
+                spreadsheetElement.getCellAt("D2").getValue());
     }
 
-    @Ignore("Ignore until https://github.com/vaadin/flow-components/issues/3186 is fixed")
     @Test
     public void testBasic() {
         final var spreadsheetElement = getSpreadsheet();
@@ -47,17 +47,22 @@ public class MergeIT extends AbstractSpreadsheetIT {
 
         selectRegion("A1", "A2");
         loadTestFixture(TestFixtures.MergeCells);
-        assertEquals("2", spreadsheetElement.getCellAt("B1").getValue());
-        assertEquals("3", spreadsheetElement.getCellAt("B2").getValue());
+        Assert.assertEquals("2", spreadsheetElement.getCellAt("B1").getValue());
+        Assert.assertEquals("3", spreadsheetElement.getCellAt("B2").getValue());
 
         final var a1 = spreadsheetElement.getCellAt("A1");
+
+        // This is needed to workaround some issue that only occurs when running
+        // in headless mode. Doesn't affect the actual test.
+        selectCell("A1");
+
         a1.setValue("10");
 
-        assertEquals("11", spreadsheetElement.getCellAt("B1").getValue());
-        assertEquals("3", spreadsheetElement.getCellAt("B2").getValue());
+        Assert.assertEquals("11",
+                spreadsheetElement.getCellAt("B1").getValue());
+        Assert.assertEquals("3", spreadsheetElement.getCellAt("B2").getValue());
     }
 
-    @Ignore("Ignore until https://github.com/vaadin/flow-components/issues/3186 is fixed")
     @Test
     public void testContents() {
         selectCell("A2");
@@ -67,6 +72,6 @@ public class MergeIT extends AbstractSpreadsheetIT {
         selectRegion("A1", "B1");
         loadTestFixture(TestFixtures.MergeCells);
 
-        assertEquals("A1 text", getMergedCellContent("A1"));
+        Assert.assertEquals("A1 text", getMergedCellContent("A1"));
     }
 }

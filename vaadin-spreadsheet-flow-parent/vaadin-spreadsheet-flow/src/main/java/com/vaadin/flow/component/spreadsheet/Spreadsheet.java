@@ -3316,7 +3316,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
 
     private void createMergedRegionIntoSheet(CellRangeAddress region) {
         Sheet sheet = getActiveSheet();
-        int addMergedRegionIndex = sheet.addMergedRegion(region);
+        sheet.addMergedRegion(region);
         MergedRegion mergedRegion = new MergedRegion();
         mergedRegion.col1 = region.getFirstColumn() + 1;
         mergedRegion.col2 = region.getLastColumn() + 1;
@@ -3327,7 +3327,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
                 ? new ArrayList<>(getMergedRegions())
                 : new ArrayList<MergedRegion>();
 
-        _mergedRegions.add(addMergedRegionIndex - 1, mergedRegion);
+        _mergedRegions.add(mergedRegion);
         setMergedRegions(_mergedRegions);
         // update the style & data for the region cells, effects region + 1
         // FIXME POI doesn't seem to care that the other cells inside the merged
