@@ -40,7 +40,7 @@
         <!-- spreadsheet -->
         <poi.version>5.2.2</poi.version>
         <gwt.version>2.9.0</gwt.version>
-        <framework.version>8.15.1</framework.version>
+        <framework.version>8.15.2</framework.version>
     </properties>
     <modules>
         <module>vaadin-renderer-flow-parent</module>
@@ -579,7 +579,7 @@
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
-                <version>4.5.1</version>
+                <version>4.6.0</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
