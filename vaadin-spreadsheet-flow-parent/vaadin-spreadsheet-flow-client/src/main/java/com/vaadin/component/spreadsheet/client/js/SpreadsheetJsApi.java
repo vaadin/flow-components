@@ -175,7 +175,6 @@ public class SpreadsheetJsApi {
     }
 
     public void layout() {
-        spreadsheetConnector.getLayoutManager().layoutNow();
         spreadsheetWidget.relayoutSheet();
         spreadsheetConnector.postLayout();
     }

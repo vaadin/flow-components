@@ -128,8 +128,6 @@ public class ApplicationConnection implements HasHandlers {
     /** Parameters for this application connection loaded from the web-page */
     private ApplicationConfiguration configuration;
 
-    private final LayoutManager layoutManager;
-
     private final RpcManager rpcManager;
 
     /** Event bus for communication events */
@@ -363,7 +361,6 @@ public class ApplicationConnection implements HasHandlers {
                 .loadBundle(ConnectorBundleLoader.EAGER_BUNDLE_NAME, null);
         uIConnector = GWT.create(UIConnector.class);
         rpcManager = GWT.create(RpcManager.class);
-        layoutManager = GWT.create(LayoutManager.class);
         tooltip = GWT.create(VTooltip.class);
         serverRpcQueue = GWT.create(ServerRpcQueue.class);
         connectionStateHandler = GWT.create(ConnectionStateHandler.class);
@@ -388,7 +385,6 @@ public class ApplicationConnection implements HasHandlers {
         this.widgetSet = widgetSet;
         configuration = cnf;
 
-        layoutManager.setConnection(this);
         serverRpcQueue.setConnection(this);
         messageHandler.setConnection(this);
         messageSender.setConnection(this);
@@ -1033,8 +1029,6 @@ public class ApplicationConnection implements HasHandlers {
     public void forceLayout() {
         Duration duration = new Duration();
 
-        layoutManager.forceLayout();
-
         getLogger().info("forceLayout in " + duration.elapsedMillis() + " ms");
     }
 
@@ -1353,7 +1347,7 @@ public class ApplicationConnection implements HasHandlers {
     }
 
     LayoutManager getLayoutManager() {
-        return layoutManager;
+        return null;
     }
 
     /**
