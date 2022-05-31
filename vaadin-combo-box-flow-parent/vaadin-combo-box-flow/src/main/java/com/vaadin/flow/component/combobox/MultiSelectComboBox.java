@@ -20,7 +20,10 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
-import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.selection.MultiSelect;
+import com.vaadin.flow.data.selection.MultiSelectionEvent;
+import com.vaadin.flow.data.selection.MultiSelectionListener;
+import com.vaadin.flow.shared.Registration;
 import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
@@ -67,7 +70,10 @@ import java.util.Set;
 @JsModule("./flow-component-renderer.js")
 @JsModule("./comboBoxConnector.js")
 public class MultiSelectComboBox<TItem>
-        extends ComboBoxBase<MultiSelectComboBox<TItem>, TItem, Set<TItem>> {
+        extends ComboBoxBase<MultiSelectComboBox<TItem>, TItem, Set<TItem>>
+        implements MultiSelect<MultiSelectComboBox<TItem>, TItem> {
+
+    private final MultiSelectComboBoxSelectionModel<TItem> selectionModel;
 
     /**
      * Default constructor. Creates an empty combo box.
@@ -94,6 +100,14 @@ public class MultiSelectComboBox<TItem>
                 MultiSelectComboBox::presentationToModel,
                 MultiSelectComboBox::modelToPresentation);
 
+        // Create the selection model that manages the currently selected items.
+        // The model ensures that items are compared based on their data
+        // provider identify, and that the selection only changes if items
+        // actually have a different identity in the data provider. The second
+        // parameter is a callback for selection changes, on which we delegate
+        // to setting the actual field value.
+        selectionModel = new MultiSelectComboBoxSelectionModel<>(
+                item -> getDataProvider().getId(item), super::setValue);
         setPageSize(pageSize);
         setItems(new DataCommunicator.EmptyDataProvider<>());
     }
@@ -249,7 +263,9 @@ public class MultiSelectComboBox<TItem>
         if (value == null) {
             value = Collections.emptySet();
         }
-        super.setValue(value);
+        // Delegate value update to selection model, which will only call
+        // super.setValue if selection has actually changed
+        selectionModel.setSelectedItems(value);
     }
 
     @Override
@@ -263,14 +279,32 @@ public class MultiSelectComboBox<TItem>
     }
 
     @Override
-    protected boolean isSelected(TItem item) {
-        if (item == null)
-            return false;
+    public boolean isSelected(TItem item) {
+        Objects.requireNonNull(item, "Null can not be selected");
+        // Override the default MultiSelect.isSelected implementation to use the
+        // selection model, which compares items using the identity provider of
+        // the data provider
+        return selectionModel.isSelected(item);
+    }
 
-        DataProvider<TItem, ?> dataProvider = getDataProvider();
-        Object itemId = dataProvider.getId(item);
+    @Override
+    public Set<TItem> getSelectedItems() {
+        return Collections.unmodifiableSet(selectionModel.getSelectedItems());
+    }
 
-        return getValue().stream().anyMatch(selectedItem -> Objects
-                .equals(itemId, dataProvider.getId(selectedItem)));
+    @Override
+    public Registration addSelectionListener(
+            MultiSelectionListener<MultiSelectComboBox<TItem>, TItem> listener) {
+        // Selection is equivalent to the value, so we can reuse the value
+        // change listener here
+        return addValueChangeListener(event -> listener
+                .selectionChange(new MultiSelectionEvent<>(this, this,
+                        event.getOldValue(), event.isFromClient())));
+    }
+
+    @Override
+    public void updateSelection(Set<TItem> addedItems,
+            Set<TItem> removedItems) {
+        selectionModel.updateSelection(addedItems, removedItems);
     }
 }
