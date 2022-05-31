@@ -295,9 +295,7 @@ public class ApplicationConnection implements HasHandlers {
         void onApplicationStopped(ApplicationStoppedEvent event);
     }
 
-    private CommunicationErrorHandler communicationErrorDelegate = null;
-
-    private VLoadingIndicator loadingIndicator;
+    private CommunicationErrorHandler communicationErrorDelegate = null;    
 
     private Heartbeat heartbeat = GWT.create(Heartbeat.class);
 
@@ -367,7 +365,6 @@ public class ApplicationConnection implements HasHandlers {
         rpcManager = GWT.create(RpcManager.class);
         layoutManager = GWT.create(LayoutManager.class);
         tooltip = GWT.create(VTooltip.class);
-        loadingIndicator = GWT.create(VLoadingIndicator.class);
         serverRpcQueue = GWT.create(ServerRpcQueue.class);
         connectionStateHandler = GWT.create(ConnectionStateHandler.class);
         messageHandler = GWT.create(MessageHandler.class);
@@ -392,7 +389,6 @@ public class ApplicationConnection implements HasHandlers {
         configuration = cnf;
 
         layoutManager.setConnection(this);
-        loadingIndicator.setConnection(this);
         serverRpcQueue.setConnection(this);
         messageHandler.setConnection(this);
         messageSender.setConnection(this);
@@ -421,7 +417,6 @@ public class ApplicationConnection implements HasHandlers {
 
         tooltip.setOwner(uIConnector.getWidget());
 
-        getLoadingIndicator().show();
 
         heartbeat.init(this);
 
@@ -651,8 +646,7 @@ public class ApplicationConnection implements HasHandlers {
      * @return
      */
     protected boolean isCSSLoaded() {
-        return cssLoaded
-                || getLoadingIndicator().getElement().getOffsetHeight() != 0;
+        return cssLoaded;
     }
 
     /**
@@ -760,7 +754,7 @@ public class ApplicationConnection implements HasHandlers {
      * @return The loading indicator for this ApplicationConnection
      */
     public VLoadingIndicator getLoadingIndicator() {
-        return loadingIndicator;
+        return null;
     }
 
     /**
@@ -772,7 +766,7 @@ public class ApplicationConnection implements HasHandlers {
      */
     @Deprecated
     public boolean isLoadingIndicatorVisible() {
-        return getLoadingIndicator().isVisible();
+        return false;
     }
 
     private void addVariableToQueue(String connectorId, String variableName,
