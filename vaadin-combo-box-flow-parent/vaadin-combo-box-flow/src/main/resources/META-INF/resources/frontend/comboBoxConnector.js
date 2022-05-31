@@ -17,11 +17,16 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
 
         comboBox.$connector = {};
 
-        // <vaadin-multi-select-combo-box> wraps a regular combo box internally,
-        // to reuse logic between both components we need to identify the
-        // element that implements the data provider mixin
-        const dataProviderMixin =
-          comboBox.localName === 'vaadin-multi-select-combo-box' ? comboBox.$.comboBox : comboBox;
+        /**
+         * Returns the element that implements the data provider mixin.
+         * For <vaadin-combo-box> that is the element itself.
+         * <vaadin-multi-select-combo-box> wraps a regular combo box internally,
+         * which is returned in this case.
+         * @returns {Node|Element|*}
+         */
+        function getDataProviderMixin() {
+          return comboBox.localName === 'vaadin-multi-select-combo-box' ? comboBox.$.comboBox : comboBox;
+        }
 
         // holds pageIndex -> callback pairs of subsequent indexes (current active range)
         const pageCallbacks = {};
@@ -58,6 +63,7 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
         })();
 
         const clearPageCallbacks = (pages = Object.keys(pageCallbacks)) => {
+          const dataProviderMixin = getDataProviderMixin();
           // Flush and empty the existing requests
           pages.forEach((page) => {
             pageCallbacks[page]([], dataProviderMixin.size);
@@ -197,6 +203,7 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
         });
 
         comboBox.$connector.updateData = tryCatchWrapper(function (items) {
+          const dataProviderMixin = getDataProviderMixin();
           // IE11 doesn't work with the transpiled version of the forEach.
           for (let i = 0; i < items.length; i++) {
             let item = items[i];
@@ -225,6 +232,7 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
         });
 
         comboBox.$connector.reset = tryCatchWrapper(function () {
+          const dataProviderMixin = getDataProviderMixin();
           clearPageCallbacks();
           cache = {};
           dataProviderMixin.clearCache();
@@ -313,6 +321,7 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
         // The filter used is the one from combobox, not the lastFilter stored since
         // that may not reflect user's input.
         const performClientSideFilter = tryCatchWrapper(function (page, callback) {
+          const dataProviderMixin = getDataProviderMixin();
           let filteredItems = page;
 
           if (dataProviderMixin.filter) {
