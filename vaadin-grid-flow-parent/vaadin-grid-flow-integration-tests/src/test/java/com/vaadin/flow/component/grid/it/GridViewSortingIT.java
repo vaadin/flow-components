@@ -128,11 +128,10 @@ public class GridViewSortingIT extends AbstractComponentIT {
         assertSortMessageEquals(QuerySortOrder.asc("firstName").build(), true);
 
         clickElementWithJs(toggleFirstColumnButton);
-        assertSortMessageEquals(QuerySortOrder.desc("firstName").build(),
-                false);
+        assertSortMessageEquals(Collections.emptyList(), false);
 
         clickElementWithJs(toggleFirstColumnButton);
-        assertSortMessageEquals(QuerySortOrder.asc("firstName").build(), false);
+        assertSortMessageEquals(Collections.emptyList(), false);
     }
 
     private void assertSortMessageEquals(List<QuerySortOrder> querySortOrders,
