@@ -4,9 +4,7 @@ import java.util.List;
 
 import com.vaadin.flow.component.spreadsheet.testbench.SpreadsheetElement;
 
-import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
@@ -42,31 +40,6 @@ public class CopyPasteCellsIT extends AbstractSpreadsheetIT {
                         .equals(expectedValue);
             }
         });
-    }
-
-    @Ignore("The new test UI does not have v-debugwindow-tab available")
-    @Test
-    public void spreadsheetHandlerOnPaste_PasteCells_SmallServerJsonResponse() {
-        loadFile("500x200test.xlsx");
-        final SpreadsheetElement spreadsheet = $(SpreadsheetElement.class)
-                .first();
-        final int EXPECTED_JSON_LENGTH_LIMIT = 50;
-        spreadsheet.getCellAt("B3").setValue("=A3+1");
-
-        copyPasteRegion("A3", "B3", "D3", true);
-
-        waitUntil(new ExpectedCondition<Boolean>() {
-            @Override
-            public Boolean apply(WebDriver webDriver) {
-                return !getJson().equals("");
-            }
-        });
-        String json = getJson();
-
-        Assert.assertTrue(
-                "Json size is too big expected= " + EXPECTED_JSON_LENGTH_LIMIT
-                        + ", actual = " + json.length(),
-                json.length() <= EXPECTED_JSON_LENGTH_LIMIT);
     }
 
     private void copyPasteRegion(String startCopyCell, String endCopyCell,
