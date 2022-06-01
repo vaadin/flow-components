@@ -132,6 +132,10 @@ public class GridViewSortingIT extends AbstractComponentIT {
 
         clickElementWithJs(toggleFirstColumnButton);
         assertSortMessageEquals(Collections.emptyList(), false);
+
+        WebElement sorter = grid.getHeaderCell(0).$("vaadin-grid-sorter")
+                .first();
+        Assert.assertEquals(null, sorter.getAttribute("direction"));
     }
 
     private void assertSortMessageEquals(List<QuerySortOrder> querySortOrders,
