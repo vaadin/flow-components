@@ -116,6 +116,28 @@ public class GridViewSortingIT extends AbstractComponentIT {
 
     }
 
+    @Test
+    public void gridWithSorting_toggleColumnVisibilityAndReset() {
+        GridElement grid = $(GridElement.class).id("grid-sortable-columns");
+        scrollToElement(grid);
+
+        WebElement toggleFirstColumnButton = findElement(
+                By.id("grid-sortable-columns-toggle-first"));
+
+        getCellContent(grid.getHeaderCell(0)).click();
+        assertSortMessageEquals(QuerySortOrder.asc("firstName").build(), true);
+
+        clickElementWithJs(toggleFirstColumnButton);
+        assertSortMessageEquals(Collections.emptyList(), false);
+
+        clickElementWithJs(toggleFirstColumnButton);
+        assertSortMessageEquals(Collections.emptyList(), false);
+
+        WebElement sorter = grid.getHeaderCell(0).$("vaadin-grid-sorter")
+                .first();
+        Assert.assertEquals(null, sorter.getAttribute("direction"));
+    }
+
     private void assertSortMessageEquals(List<QuerySortOrder> querySortOrders,
             boolean fromClient) {
         String sortOrdersString = querySortOrders.stream()
