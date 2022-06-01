@@ -7,7 +7,7 @@
 ## by default 4 forks are used (set in pom), but it can be changed
 [ -n "$FORKS" ] && args="-Dfailsafe.forkCount=$FORKS";
 ## bu default local tests are runn in headless, but can be disabled
-[ "$HEADLESS" = false ] && args="$args -DdisableHeadless" && quiet="" || quiet="-q"
+[ "$HEADLESS" = false ] && args="$args -DdisableHeadless" && quiet="-ntp" || quiet="-q"
 
 ## Speedup installation of frontend stuff
 verify="verify -Dvaadin.pnpm.enable -Dvaadin.frontend.hotdeploy=true"
@@ -23,7 +23,7 @@ askModule() {
   then
     module=`echo "$modules" | head -$module | tail -1 | awk '{print $2}'`
   else
-   printf "Incorrect option $module it should be in the range 1 - %s\n" $max && exit 1
+    printf "Incorrect option $module it should be in the range 1 - %s\n" $max && exit 1
   fi
 }
 ## Check whether there are sauce credentials, otherwise ask for them
@@ -73,6 +73,18 @@ runFrontend() {
   modified=`[ -f "$bundle" ] && find $folder/src -mnewer "$bundle"`
   [ -f "$bundle" -a -z "$modified" ] && frontend="-DskipFrontend"
 }
+## Run SS SDM
+runSdm() {
+  module=vaadin-spreadsheet
+  cmd="mvn -B -q -pl $module-flow-parent/$module-flow -DskipTests install"
+  printf "\nRunning:\n$cmd"
+  $cmd
+  cmd="mvn -B $quiet -pl $module-flow-parent/$module-flow-client -Psdm"
+  printf "\nRunning:\n$cmd\n\nIf not already you can install SDM bookmark by visiting http://localhost:9876\n\n"
+  $cmd &
+  trap "kill $!" INT
+  sleep 3
+}
 
 ## Ask for run options
 clear
@@ -85,6 +97,8 @@ cat -n <<EOF
   all install  - Install modules in local maven (demos, addons & testbenchs) - mvn install ...
   all test  IT - Verify merged IT's of all component (takes a while)         - mvn verify -pl integration-tests -Dit.Test=...
   all jetty IT - Start Jetty Server on merged IT's module                    - mvn jetty:run -pl integration-tests ...
+  all sauce IT - Run Integration-Tests of all component in SauceLabs         - mvn verify -pl integration-tests -Dsauce.user ...
+  sdm          - Run spreadsheet in SDM
 EOF
 printf "Your option:  "
 read option
@@ -92,11 +106,14 @@ read option
 case $option in
    1) askModule; cmd="mvn clean test-compile -amd -B $quiet -DskipFrontend -pl $module-flow-parent";;
    2) askModule; askITests; askUTests; askJetty; runFrontend; cmd="mvn $verify $quiet -am -B -pl $module-flow-parent/$module-flow-integration-tests $utests $itests $frontend $jetty $args";;
-   3) askModule; cmd="mvn package $jettyrun -am -B $quiet -DskipTests -pl $module-flow-parent/$module-flow-integration-tests"; browser=true;;
-   4) cmd="mvn clean test-compile -DskipFrontend -B $quiet -T 1C";;
-   5) cmd="mvn install -B -DskipTests -Drelease -T 1C";;
-   6) mergeITs; askITests; askUTests; askJetty; runFrontend; cmd="mvn $verify $quiet -am -B -Drun-it -pl integration-tests $utests $itests $frontend $jetty $args";;
-   7) mergeITs; cmd="mvn package $jettyrun -am -B $quiet -DskipTests -Drun-it -pl integration-tests"; browser=true;;
+   3) askModule; cmd="mvn package $jettyrun -B $quiet -DskipTests -pl $module-flow-parent/$module-flow-integration-tests"; browser=true;;
+   4) askSauce; askModule; askITests; askUTests; askJetty; runFrontend; cmd="mvn $verify -am -B $quiet -pl $module-flow-parent/$module-flow-integration-tests $utests $itests $frontend $jetty $args -Dtest.use.hub=true -Psaucelabs -Dsauce.user=$SAUCE_USER -Dsauce.sauceAccessKey=$SAUCE_ACCESS_KEY";;
+   5) cmd="mvn clean test-compile -DskipFrontend -B $quiet -T 1C";;
+   6) cmd="mvn install -B -DskipTests -Drelease -T 1C";;
+   7) mergeITs; askITests; askUTests; askJetty; runFrontend; cmd="mvn $verify $quiet -am -B -Drun-it -pl integration-tests $utests $itests $frontend $jetty $args";;
+   8) mergeITs; cmd="mvn package $jettyrun -am -B $quiet -DskipTests -Drun-it -pl integration-tests"; browser=true;;
+   9) askSauce; mergeITs; askITests; askUTests; askJetty; runFrontend; cmd="mvn $verify -am -B $quiet -pl integration-tests -Drun-it $utests $itests $frontend $jetty $args -Dtest.use.hub=true -Psaucelabs -Dsauce.user=$SAUCE_USER -Dsauce.sauceAccessKey=$SAUCE_ACCESS_KEY";;
+   10) runSdm; cmd="mvn package $jettyrun -B $quiet -DskipTests -pl $module-flow-parent/$module-flow-integration-tests"; browser=true;;
 esac
 
 ## execute mvn command and check error status

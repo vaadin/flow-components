@@ -104,6 +104,24 @@
     </dependency>
   </dependencies>
 
+  <profiles>
+    <profile>
+      <id>sdm</id>
+      <properties>
+        <gwt.module>com.vaadin.component.spreadsheet.client.SpreadsheetApiXSI</gwt.module>
+      </properties>
+      <build>
+        <defaultGoal>gwt:run-codeserver</defaultGoal>
+      </build>
+      <dependencies>
+        <dependency>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-simple</artifactId>
+        </dependency>
+      </dependencies>
+    </profile>
+  </profiles>
+
   <build>
     <!-- Output classes directly into the webapp, so that IDEs and "mvn process-classes" update them in DevMode -->
     <outputDirectory>${project.build.directory}/${project.build.finalName}/WEB-INF/classes</outputDirectory>
