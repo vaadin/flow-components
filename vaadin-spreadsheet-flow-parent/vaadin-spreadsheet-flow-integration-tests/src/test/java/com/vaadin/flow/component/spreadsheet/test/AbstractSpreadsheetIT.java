@@ -6,6 +6,7 @@ import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
 import com.vaadin.flow.component.spreadsheet.testbench.SpreadsheetElement;
 import com.vaadin.flow.component.spreadsheet.tests.fixtures.TestFixtures;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
+import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractParallelTest;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.junit.Assert;
@@ -14,12 +15,11 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.support.ui.Select;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
 
@@ -42,6 +42,18 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
 
     public void selectRow(int row, boolean ctrl, boolean shift) {
         selectElement(getSpreadsheet().getRowHeader(row), ctrl, shift);
+    }
+
+    protected void paste() {
+        new Actions(getDriver()).keyDown(Keys.CONTROL).keyDown(Keys.COMMAND)
+                .sendKeys("v").keyUp(Keys.CONTROL).keyUp(Keys.COMMAND).build()
+                .perform();
+    }
+
+    protected void copy() {
+        new Actions(getDriver()).keyDown(Keys.CONTROL).keyDown(Keys.COMMAND)
+                .sendKeys("c").keyUp(Keys.CONTROL).keyUp(Keys.COMMAND).build()
+                .perform();
     }
 
     public void selectColumn(String column) {
@@ -95,21 +107,19 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
     }
 
     public List<String> getNamedRanges() {
-        final List<WebElement> options = new Select(
-                findElement(By.className("namedrangebox"))).getOptions();
+        final List<WebElement> options = findElement(
+                By.className("namedrangebox"))
+                        .findElements(By.tagName("option"));
 
-        final List<String> optionStrings = new ArrayList<>();
-
-        for (WebElement option : options) {
-            optionStrings.add(option.getText());
-        }
-
-        return optionStrings;
+        return options.stream().map(WebElement::getText)
+                .collect(Collectors.toList());
     }
 
     public void selectNamedRange(String name) {
-        new Select(findElement(By.className("namedrangebox")))
-                .selectByVisibleText(name);
+        TestBenchElement select = ((TestBenchElement) findElement(
+                By.className("namedrangebox")));
+        select.setProperty("value", name);
+        select.dispatchEvent("change");
     }
 
     public void clickCell(String address) {
