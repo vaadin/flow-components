@@ -768,14 +768,24 @@ public class GridView extends DemoView {
 
         NativeButton resetAllSortings = new NativeButton("Reset all sortings",
                 event -> grid.sort(null));
+
+        NativeButton toggleFirstColumnAndReset = new NativeButton(
+                "Toggle first column and reset", event -> {
+                    Grid.Column<Person> firstColumn = grid.getColumns().stream()
+                            .findFirst().get();
+                    firstColumn.setVisible(!firstColumn.isVisible());
+                    grid.sort(null);
+                });
         // end-source-example
         grid.setId("grid-sortable-columns");
         multiSort.setId("grid-multi-sort-toggle");
         invertAllSortings.setId("grid-sortable-columns-invert-sortings");
         resetAllSortings.setId("grid-sortable-columns-reset-sortings");
+        toggleFirstColumnAndReset.setId("grid-sortable-columns-toggle-first");
         messageDiv.setId("grid-sortable-columns-message");
         addCard("Sorting", "Grid with sortable columns", grid, multiSort,
-                invertAllSortings, resetAllSortings, messageDiv);
+                invertAllSortings, resetAllSortings, toggleFirstColumnAndReset,
+                messageDiv);
     }
 
     private void createBeanGrid() {
