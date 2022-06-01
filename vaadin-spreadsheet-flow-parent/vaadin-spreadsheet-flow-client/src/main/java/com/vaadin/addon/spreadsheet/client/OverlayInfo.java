@@ -18,7 +18,7 @@ import java.io.Serializable;
 import jsinterop.annotations.JsType;
 
 @SuppressWarnings("serial")
-@JsType
+@JsType(namespace = "Vaadin.Spreadsheet")
 public class OverlayInfo implements Serializable {
 
     public final static String IMAGE = "IMAGE";
