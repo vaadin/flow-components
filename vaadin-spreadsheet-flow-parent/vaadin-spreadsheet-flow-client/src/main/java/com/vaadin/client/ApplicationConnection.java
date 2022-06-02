@@ -28,12 +28,10 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.event.shared.HasHandlers;
-import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.HasWidgets;
@@ -122,9 +120,6 @@ public class ApplicationConnection implements HasHandlers {
 
     /** Parameters for this application connection loaded from the web-page */
     private ApplicationConfiguration configuration;
-
-    /** Event bus for communication events */
-    private EventBus eventBus = GWT.create(SimpleEventBus.class);
 
     public enum ApplicationState {
         INITIALIZING, RUNNING, TERMINATED;
@@ -415,7 +410,7 @@ public class ApplicationConnection implements HasHandlers {
      */
     private native void initializeClientHooks()
     /*-{
-        alert('initializeClientHooks');
+
     }-*/;
 
     /**
@@ -1208,7 +1203,6 @@ public class ApplicationConnection implements HasHandlers {
         } else if (getApplicationState() == ApplicationState.RUNNING) {
             if (!applicationRunning) {
                 applicationState = ApplicationState.TERMINATED;
-                eventBus.fireEvent(new ApplicationStoppedEvent());
             } else {
                 getLogger().warning(
                         "Tried to start an already running application. This should not be done");
@@ -1229,12 +1223,12 @@ public class ApplicationConnection implements HasHandlers {
 
     public <H extends EventHandler> HandlerRegistration addHandler(
             GwtEvent.Type<H> type, H handler) {
-        return eventBus.addHandler(type, handler);
+        return null;
     }
 
     @Override
     public void fireEvent(GwtEvent<?> event) {
-        eventBus.fireEvent(event);
+
     }
 
     /**
