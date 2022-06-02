@@ -356,7 +356,7 @@ public class ApplicationConnection implements HasHandlers {
         uIConnector = GWT.create(UIConnector.class);
         serverRpcQueue = GWT.create(ServerRpcQueue.class);
         messageHandler = GWT.create(MessageHandler.class);
-        messageSender = GWT.create(MessageSender.class);
+        
     }
 
     public void init(WidgetSet widgetSet, ApplicationConfiguration cnf) {
@@ -378,7 +378,6 @@ public class ApplicationConnection implements HasHandlers {
 
         serverRpcQueue.setConnection(this);
         messageHandler.setConnection(this);
-        messageSender.setConnection(this);
         dependencyLoader.setConnection(this);
 
         ComponentLocator componentLocator = new ComponentLocator(this);
@@ -417,18 +416,7 @@ public class ApplicationConnection implements HasHandlers {
      *
      */
     public void start() {
-        String jsonText = configuration.getUIDL();
-        if (jsonText == null) {
-            // initial UIDL not in DOM, request from server
-            getMessageSender().resynchronize();
-        } else {
-            // initial UIDL provided in DOM, continue as if returned by request
-
-            // Hack to avoid logging an error in endRequest()
-            getMessageSender().startRequest();
-            getMessageHandler()
-                    .handleMessage(MessageHandler.parseJson(jsonText));
-        }
+        
     }
 
     /**
@@ -438,7 +426,6 @@ public class ApplicationConnection implements HasHandlers {
      */
     private boolean isActive() {
         return !getMessageHandler().isInitialUidlHandled() || isWorkPending()
-                || getMessageSender().hasActiveRequest()
                 || isExecutingDeferredCommands();
     }
 
@@ -524,28 +511,7 @@ public class ApplicationConnection implements HasHandlers {
      */
     private native void initializeClientHooks()
     /*-{
-        var app = this;
-        var oldSync;
-        if ($wnd.vaadin.forceSync) {
-                oldSync = $wnd.vaadin.forceSync;
-        }
-        $wnd.vaadin.forceSync = $entry(function() {
-                if (oldSync) {
-                        oldSync();
-                }
-                var sender = app.@com.vaadin.client.ApplicationConnection::messageSender;
-                sender.@com.vaadin.client.communication.MessageSender::resynchronize()();
-        });
-        var oldForceLayout;
-        if ($wnd.vaadin.forceLayout) {
-                oldForceLayout = $wnd.vaadin.forceLayout;
-        }
-        $wnd.vaadin.forceLayout = $entry(function() {
-                if (oldForceLayout) {
-                        oldForceLayout();
-                }
-                app.@com.vaadin.client.ApplicationConnection::forceLayout()();
-        });
+        alert('initializeClientHooks');
     }-*/;
 
     /**
@@ -577,7 +543,6 @@ public class ApplicationConnection implements HasHandlers {
 
     protected ServerRpcQueue serverRpcQueue;
     protected MessageHandler messageHandler;
-    protected MessageSender messageSender;
 
     static final int MAX_CSS_WAITS = 100;
 
@@ -1488,7 +1453,7 @@ public class ApplicationConnection implements HasHandlers {
      * @return the message sender
      */
     public MessageSender getMessageSender() {
-        return messageSender;
+        return null;
     }
 
     /**
