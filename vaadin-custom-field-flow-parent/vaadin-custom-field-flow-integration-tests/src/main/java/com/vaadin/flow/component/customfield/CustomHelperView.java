@@ -7,10 +7,8 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-custom-field/custom-helper")
-public class CustomHelperPage extends Div {
-
-    public CustomHelperPage() {
-
+public class CustomHelperView extends Div {
+    public CustomHelperView() {
         NameField fieldHelper = new NameField();
         fieldHelper.setHelperText("Helper text");
         fieldHelper.setId("custom-field-helper-text");

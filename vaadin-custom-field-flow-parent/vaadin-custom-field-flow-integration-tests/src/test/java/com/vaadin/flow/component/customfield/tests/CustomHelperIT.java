@@ -1,17 +1,19 @@
-package com.vaadin.flow.component.customfield.test;
-
-import com.vaadin.flow.component.customfield.testbench.CustomFieldElement;
-import com.vaadin.tests.AbstractParallelTest;
+package com.vaadin.flow.component.customfield.tests;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-public class CustomHelperIT extends AbstractParallelTest {
-    @Before
-    public void init() {
-        getDriver().get(getBaseURL() + "/vaadin-custom-field/custom-helper");
-    }
+import com.vaadin.tests.AbstractComponentIT;
+import com.vaadin.flow.component.customfield.testbench.CustomFieldElement;
+import com.vaadin.flow.testutil.TestPath;
+
+@TestPath("vaadin-custom-field/custom-helper")
+public class CustomHelperIT extends AbstractComponentIT {
+        @Before
+        public void init() {
+                open();
+        }
 
     @Test
     public void assertHelperText() {

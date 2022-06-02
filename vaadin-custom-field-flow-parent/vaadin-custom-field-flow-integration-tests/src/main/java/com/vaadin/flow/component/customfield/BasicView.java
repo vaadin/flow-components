@@ -5,10 +5,9 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 
-@Route(value = "vaadin-custom-field")
-public class BasicPage extends Div {
-
-    public BasicPage() {
+@Route("vaadin-custom-field")
+public class BasicView extends Div {
+    public BasicView() {
         final Div result = new Div();
         result.setId("result");
         MyField customField = new MyField();

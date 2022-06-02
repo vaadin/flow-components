@@ -3,10 +3,9 @@ package com.vaadin.flow.component.customfield;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.Route;
 
-@Route(value = "vaadin-custom-field/error")
-public class ErrorPage extends Div {
-
-    public ErrorPage() {
+@Route("vaadin-custom-field/error")
+public class ErrorView extends Div {
+    public ErrorView() {
         CustomField<Integer> customField = new CustomField<Integer>() {
             @Override
             protected Integer generateModelValue() {
