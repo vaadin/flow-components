@@ -27,6 +27,8 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.vaadin.tests.ComponentDemoTest;
 
+import java.time.Duration;
+
 /**
  * Integration tests for the ButtonView.
  */
@@ -300,7 +302,8 @@ public class ButtonIT extends ComponentDemoTest {
         final String expected = "Button " + messageString + " was clicked.";
         WebElement message = layout.findElement(By.id("buttonMessage"));
 
-        WebDriverWait wait = new WebDriverWait(getDriver(), 5);
+        WebDriverWait wait = new WebDriverWait(getDriver(),
+                Duration.ofSeconds(5));
         wait.until(driver -> {
             String msg = message.getText();
             wait.withMessage("Expected '" + expected + "' but found '"
