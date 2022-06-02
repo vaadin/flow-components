@@ -355,8 +355,6 @@ public class ApplicationConnection implements HasHandlers {
                 .loadBundle(ConnectorBundleLoader.EAGER_BUNDLE_NAME, null);
         uIConnector = GWT.create(UIConnector.class);
         serverRpcQueue = GWT.create(ServerRpcQueue.class);
-        messageHandler = GWT.create(MessageHandler.class);
-        
     }
 
     public void init(WidgetSet widgetSet, ApplicationConfiguration cnf) {
@@ -377,7 +375,6 @@ public class ApplicationConnection implements HasHandlers {
         configuration = cnf;
 
         serverRpcQueue.setConnection(this);
-        messageHandler.setConnection(this);
         dependencyLoader.setConnection(this);
 
         ComponentLocator componentLocator = new ComponentLocator(this);
@@ -425,58 +422,13 @@ public class ApplicationConnection implements HasHandlers {
      * @return true if the client has some work to be done, false otherwise
      */
     private boolean isActive() {
-        return !getMessageHandler().isInitialUidlHandled() || isWorkPending()
-                || isExecutingDeferredCommands();
+        return false;
     }
 
     private native void initializeTestbenchHooks(
             ComponentLocator componentLocator, String ttAppId)
     /*-{
-        var ap = this;
-        var client = {};
-        client.isActive = $entry(function() {
-            return ap.@com.vaadin.client.ApplicationConnection::isActive()();
-        });
-        var vi = ap.@com.vaadin.client.ApplicationConnection::getVersionInfo()();
-        if (vi) {
-            client.getVersionInfo = function() {
-                return vi;
-            }
-        }
 
-        client.getProfilingData = $entry(function() {
-            var smh = ap.@com.vaadin.client.ApplicationConnection::getMessageHandler()();
-            var pd = [
-                smh.@com.vaadin.client.communication.MessageHandler::lastProcessingTime,
-                    smh.@com.vaadin.client.communication.MessageHandler::totalProcessingTime
-                ];
-            if (null != smh.@com.vaadin.client.communication.MessageHandler::serverTimingInfo) {
-                pd = pd.concat(smh.@com.vaadin.client.communication.MessageHandler::serverTimingInfo);
-            } else {
-                pd = pd.concat(-1, -1);
-            }
-            pd[pd.length] = smh.@com.vaadin.client.communication.MessageHandler::bootstrapTime;
-            return pd;
-        });
-
-        client.getElementByPath = $entry(function(id) {
-            return componentLocator.@com.vaadin.client.componentlocator.ComponentLocator::getElementByPath(Ljava/lang/String;)(id);
-        });
-        client.getElementByPathStartingAt = $entry(function(id, element) {
-            return componentLocator.@com.vaadin.client.componentlocator.ComponentLocator::getElementByPathStartingAt(Ljava/lang/String;Lcom/google/gwt/dom/client/Element;)(id, element);
-        });
-        client.getElementsByPath = $entry(function(id) {
-            return componentLocator.@com.vaadin.client.componentlocator.ComponentLocator::getElementsByPath(Ljava/lang/String;)(id);
-        });
-        client.getElementsByPathStartingAt = $entry(function(id, element) {
-            return componentLocator.@com.vaadin.client.componentlocator.ComponentLocator::getElementsByPathStartingAt(Ljava/lang/String;Lcom/google/gwt/dom/client/Element;)(id, element);
-        });
-        client.getPathForElement = $entry(function(element) {
-            return componentLocator.@com.vaadin.client.componentlocator.ComponentLocator::getPathForElement(Lcom/google/gwt/dom/client/Element;)(element);
-        });
-        client.initializing = false;
-
-        $wnd.vaadin.clients[ttAppId] = client;
     }-*/;
 
     /**
@@ -542,7 +494,6 @@ public class ApplicationConnection implements HasHandlers {
     int cssWaits = 0;
 
     protected ServerRpcQueue serverRpcQueue;
-    protected MessageHandler messageHandler;
 
     static final int MAX_CSS_WAITS = 100;
 
@@ -1433,7 +1384,7 @@ public class ApplicationConnection implements HasHandlers {
      * @return the message handler
      */
     public MessageHandler getMessageHandler() {
-        return messageHandler;
+        return null;
     }
 
     /**
@@ -1465,7 +1416,7 @@ public class ApplicationConnection implements HasHandlers {
     }
 
     public int getLastSeenServerSyncId() {
-        return getMessageHandler().getLastSeenServerSyncId();
+        return 0;
     }
 
     /**
