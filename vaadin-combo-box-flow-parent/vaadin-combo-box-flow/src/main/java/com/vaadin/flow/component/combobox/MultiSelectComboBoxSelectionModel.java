@@ -55,7 +55,7 @@ class MultiSelectComboBoxSelectionModel<TItem> implements Serializable {
     boolean setSelectedItems(Set<TItem> items) {
         Map<Object, TItem> newSelectionMap = mapItemsById(items);
         if (!newSelectionMap.keySet().equals(selection.keySet())) {
-            selection = mapItemsById(items);
+            selection = newSelectionMap;
             return true;
         }
         return false;
