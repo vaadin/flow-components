@@ -295,8 +295,6 @@ public class ApplicationConnection implements HasHandlers {
 
     private CommunicationErrorHandler communicationErrorDelegate = null;    
 
-    private Heartbeat heartbeat = GWT.create(Heartbeat.class);
-
     private final VaadinUriResolver uriResolver = new VaadinUriResolver() {
         @Override
         protected String getVaadinDirUrl() {
@@ -360,7 +358,6 @@ public class ApplicationConnection implements HasHandlers {
         uIConnector = GWT.create(UIConnector.class);
         rpcManager = GWT.create(RpcManager.class);
         serverRpcQueue = GWT.create(ServerRpcQueue.class);
-        connectionStateHandler = GWT.create(ConnectionStateHandler.class);
         messageHandler = GWT.create(MessageHandler.class);
         messageSender = GWT.create(MessageSender.class);
     }
@@ -402,13 +399,6 @@ public class ApplicationConnection implements HasHandlers {
         } else {
             uIConnector.init(cnf.getRootPanelId(), this);
         }
-
-        // Connection state handler preloads the reconnect dialog, which uses
-        // overlay container. This in turn depends on VUI being attached
-        // (done in uiConnector.init)
-        connectionStateHandler.setConnection(this);
-
-        heartbeat.init(this);
 
         // Ensure the overlay container is added to the dom and set as a live
         // area for assistive devices
@@ -589,7 +579,6 @@ public class ApplicationConnection implements HasHandlers {
     int cssWaits = 0;
 
     protected ServerRpcQueue serverRpcQueue;
-    protected ConnectionStateHandler connectionStateHandler;
     protected MessageHandler messageHandler;
     protected MessageSender messageSender;
 
@@ -1331,32 +1320,6 @@ public class ApplicationConnection implements HasHandlers {
         return null;
     }
 
-    /**
-     * Schedules a heartbeat request to occur after the configured heartbeat
-     * interval elapses if the interval is a positive number. Otherwise, does
-     * nothing.
-     *
-     * @deprecated as of 7.2, use {@link Heartbeat#schedule()} instead
-     */
-    @Deprecated
-    protected void scheduleHeartbeat() {
-        heartbeat.schedule();
-    }
-
-    /**
-     * Sends a heartbeat request to the server.
-     * <p>
-     * Heartbeat requests are used to inform the server that the client-side is
-     * still alive. If the client page is closed or the connection lost, the
-     * server will eventually close the inactive UI.
-     *
-     * @deprecated as of 7.2, use {@link Heartbeat#send()} instead
-     */
-    @Deprecated
-    protected void sendHeartbeat() {
-        heartbeat.send();
-    }
-
     public void handleCommunicationError(String details, int statusCode) {
         boolean handled = false;
         if (communicationErrorDelegate != null) {
@@ -1465,7 +1428,7 @@ public class ApplicationConnection implements HasHandlers {
      * Returns the hearbeat instance.
      */
     public Heartbeat getHeartbeat() {
-        return heartbeat;
+        return null;
     }
 
     /**
@@ -1498,7 +1461,7 @@ public class ApplicationConnection implements HasHandlers {
      * @return the server RPC queue
      */
     public ConnectionStateHandler getConnectionStateHandler() {
-        return connectionStateHandler;
+        return null;
     }
 
     /**
