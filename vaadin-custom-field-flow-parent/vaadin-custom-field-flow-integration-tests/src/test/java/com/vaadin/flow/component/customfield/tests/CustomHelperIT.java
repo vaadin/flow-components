@@ -10,10 +10,10 @@ import com.vaadin.flow.testutil.TestPath;
 
 @TestPath("vaadin-custom-field/custom-helper")
 public class CustomHelperIT extends AbstractComponentIT {
-        @Before
-        public void init() {
-                open();
-        }
+    @Before
+    public void init() {
+        open();
+    }
 
     @Test
     public void assertHelperText() {
