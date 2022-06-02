@@ -22,7 +22,7 @@ import jsinterop.annotations.JsType;
  * Shared state for the grouping feature
  */
 @SuppressWarnings("serial")
-@JsType
+@JsType(namespace = "Vaadin.Spreadsheet")
 public class GroupingData implements Serializable {
     public int startIndex;
     public int endIndex;
