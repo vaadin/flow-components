@@ -7,11 +7,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-public class NameFieldViewIT extends AbstractParallelTest {
-
+public class CustomHelperIT extends AbstractParallelTest {
     @Before
     public void init() {
-        getDriver().get(getBaseURL() + "/custom-field-helper");
+        getDriver().get(getBaseURL() + "/vaadin-custom-field/custom-helper");
     }
 
     @Test
