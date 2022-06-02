@@ -329,8 +329,6 @@ public class ApplicationConnection implements HasHandlers {
         this.widgetSet = widgetSet;
         configuration = cnf;
 
-        dependencyLoader.setConnection(this);
-
         ComponentLocator componentLocator = new ComponentLocator(this);
 
         String appRootPanelName = cnf.getRootPanelId();
@@ -1022,9 +1020,6 @@ public class ApplicationConnection implements HasHandlers {
 
     private ConnectorMap connectorMap = GWT.create(ConnectorMap.class);
 
-    private final DependencyLoader dependencyLoader = GWT
-            .create(DependencyLoader.class);
-
     /**
      * Use to notify that the given component's caption has changed; layouts may
      * have to be recalculated.
@@ -1361,7 +1356,7 @@ public class ApplicationConnection implements HasHandlers {
      * @return the dependency loader for this connection
      */
     public DependencyLoader getDependencyLoader() {
-        return dependencyLoader;
+        return null;
     }
 
 }
