@@ -297,8 +297,6 @@ public class ApplicationConnection implements HasHandlers {
 
     private Heartbeat heartbeat = GWT.create(Heartbeat.class);
 
-    private boolean tooltipInitialized = false;
-
     private final VaadinUriResolver uriResolver = new VaadinUriResolver() {
         @Override
         protected String getVaadinDirUrl() {
@@ -361,7 +359,6 @@ public class ApplicationConnection implements HasHandlers {
                 .loadBundle(ConnectorBundleLoader.EAGER_BUNDLE_NAME, null);
         uIConnector = GWT.create(UIConnector.class);
         rpcManager = GWT.create(RpcManager.class);
-        tooltip = GWT.create(VTooltip.class);
         serverRpcQueue = GWT.create(ServerRpcQueue.class);
         connectionStateHandler = GWT.create(ConnectionStateHandler.class);
         messageHandler = GWT.create(MessageHandler.class);
@@ -411,9 +408,6 @@ public class ApplicationConnection implements HasHandlers {
         // (done in uiConnector.init)
         connectionStateHandler.setConnection(this);
 
-        tooltip.setOwner(uIConnector.getWidget());
-
-
         heartbeat.init(this);
 
         // Ensure the overlay container is added to the dom and set as a live
@@ -447,15 +441,6 @@ public class ApplicationConnection implements HasHandlers {
             getMessageSender().startRequest();
             getMessageHandler()
                     .handleMessage(MessageHandler.parseJson(jsonText));
-        }
-
-        // Tooltip can't be created earlier because the
-        // necessary fields are not setup to add it in the
-        // correct place in the DOM
-        if (!tooltipInitialized) {
-            tooltipInitialized = true;
-            ApplicationConfiguration.runWhenDependenciesLoaded(
-                    () -> getVTooltip().initializeAssistiveTooltips());
         }
     }
 
@@ -1197,10 +1182,6 @@ public class ApplicationConnection implements HasHandlers {
                 + getUIConnector().getActiveTheme();
     }
 
-    /* Extended title handling */
-
-    private final VTooltip tooltip;
-
     private ConnectorMap connectorMap = GWT.create(ConnectorMap.class);
 
     private final DependencyLoader dependencyLoader = GWT
@@ -1296,7 +1277,7 @@ public class ApplicationConnection implements HasHandlers {
      * @return VTooltip instance
      */
     public VTooltip getVTooltip() {
-        return tooltip;
+        return null;
     }
 
     /**
