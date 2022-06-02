@@ -1,5 +1,6 @@
 package com.vaadin.flow.component.spreadsheet.testbench;
 
+import java.time.Duration;
 import java.util.List;
 
 import com.vaadin.testbench.elementsbase.Element;
@@ -276,7 +277,7 @@ public class SpreadsheetElement extends TestBenchElement {
     private void findSelectionOutline() {
         // sometimes the spreadsheet takes so long to load that the selection
         // widget elements are not found
-        new WebDriverWait(getDriver(), 10).until(ExpectedConditions
+        new WebDriverWait(getDriver(), Duration.ofSeconds(10)).until(ExpectedConditions
                 .presenceOfElementLocated(By.className("s-top")));
         sTop = findElement(By.className("s-top"));
         sBottom = findElement(By.className("s-bottom"));
