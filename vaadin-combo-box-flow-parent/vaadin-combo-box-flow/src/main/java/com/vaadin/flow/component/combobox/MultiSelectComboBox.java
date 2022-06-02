@@ -254,6 +254,20 @@ public class MultiSelectComboBox<TItem>
     }
 
     /**
+     * Gets the value of the component, which is a set of selected items.
+     * <p>
+     * The returned set is immutable and can not be modified. Use
+     * {@link #select(Object[])} or {@link #deselect(Object[])} to add or remove
+     * individual items.
+     *
+     * @return an unmodifiable set of selected items
+     */
+    @Override
+    public Set<TItem> getValue() {
+        return Collections.unmodifiableSet(super.getValue());
+    }
+
+    /**
      * Sets the value of the component, which is a set of selected items.
      * <p>
      * Note that it is allowed to pass {@code null} as value to clear the
