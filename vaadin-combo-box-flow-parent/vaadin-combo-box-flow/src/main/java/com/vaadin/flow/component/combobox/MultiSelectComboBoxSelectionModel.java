@@ -14,9 +14,9 @@ import java.util.Set;
  * multi-select logic for the component. The model keeps track of the currently
  * selected items, and allows adding and removing items from the selection,
  * while ensuring that items can only be selected once (no duplicates). For
- * identifying items, the model uses an item ID provider, which is supposed to
- * return a unique ID for each item. The provider implementation should be based
- * on the identity provider used by the Flow data classes, for example
+ * identifying items, the model uses an identity provider, which is supposed to
+ * return a unique ID for each item. The identity provider implementation should
+ * be based on the identity provider used by the Flow data classes, for example
  * {@link com.vaadin.flow.data.provider.DataProvider#getId(Object)}.
  *
  * @param <TItem>
@@ -24,12 +24,12 @@ import java.util.Set;
  */
 class MultiSelectComboBoxSelectionModel<TItem> implements Serializable {
     private Map<Object, TItem> selection;
-    private final SerializableFunction<TItem, Object> itemIdProvider;
+    private final SerializableFunction<TItem, Object> identityProvider;
 
     MultiSelectComboBoxSelectionModel(
-            SerializableFunction<TItem, Object> itemIdProvider) {
+            SerializableFunction<TItem, Object> identityProvider) {
         this.selection = new LinkedHashMap<>();
-        this.itemIdProvider = itemIdProvider;
+        this.identityProvider = identityProvider;
     }
 
     /**
@@ -44,7 +44,7 @@ class MultiSelectComboBoxSelectionModel<TItem> implements Serializable {
      * Sets the selected items, for example when the value of the combo box
      * changes. The selection will only be changed if the set of selected items
      * is different from the current selection, where the identity of each item
-     * is checked with the item ID provider. Returns {@code true} if the
+     * is checked with the identity provider. Returns {@code true} if the
      * selection was changed, {@code false} otherwise.
      *
      * @param items
@@ -63,14 +63,14 @@ class MultiSelectComboBoxSelectionModel<TItem> implements Serializable {
 
     /**
      * Checks whether the item is currently selected or not, by comparing the ID
-     * of the item that is provided by the item ID provider
+     * of the item that is provided by the identity provider
      *
      * @param item
      *            the item to check
      * @return {@code true} if the item is selected, {@code false} otherwise
      */
     boolean isSelected(TItem item) {
-        return selection.containsKey(itemIdProvider.apply(item));
+        return selection.containsKey(identityProvider.apply(item));
     }
 
     /**
@@ -110,7 +110,7 @@ class MultiSelectComboBoxSelectionModel<TItem> implements Serializable {
 
     private Map<Object, TItem> mapItemsById(Set<TItem> items) {
         return items.stream().collect(LinkedHashMap::new,
-                (map, item) -> map.put(itemIdProvider.apply(item), item),
+                (map, item) -> map.put(identityProvider.apply(item), item),
                 Map::putAll);
     }
 }
