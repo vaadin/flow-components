@@ -21,7 +21,7 @@ public class ReportModeIT extends AbstractSpreadsheetIT {
         // Toggle report mode off
         reportModeButton.click();
 
-        checkLogsForErrors(m -> m.contains("IllegalArgumentException"));
+        checkLogsForErrors(m -> !m.contains("IllegalArgumentException"));
     }
 
 }
