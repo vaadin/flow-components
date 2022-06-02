@@ -288,7 +288,7 @@ public class ApplicationConnection implements HasHandlers {
         void onApplicationStopped(ApplicationStoppedEvent event);
     }
 
-    private CommunicationErrorHandler communicationErrorDelegate = null;    
+    private CommunicationErrorHandler communicationErrorDelegate = null;
 
     private final VaadinUriResolver uriResolver = new VaadinUriResolver() {
         @Override
@@ -408,7 +408,7 @@ public class ApplicationConnection implements HasHandlers {
      *
      */
     public void start() {
-        
+
     }
 
     /**
@@ -654,7 +654,7 @@ public class ApplicationConnection implements HasHandlers {
      */
     @Deprecated
     public void sendPendingVariableChanges() {
-     
+
     }
 
     /**
