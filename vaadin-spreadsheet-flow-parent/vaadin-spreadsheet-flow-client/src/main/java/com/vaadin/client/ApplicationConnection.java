@@ -34,7 +34,6 @@ import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.event.shared.HasHandlers;
 import com.google.gwt.event.shared.SimpleEventBus;
-import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.HasWidgets;
@@ -57,7 +56,6 @@ import com.vaadin.client.ui.VContextMenu;
 import com.vaadin.client.ui.VNotification;
 import com.vaadin.client.ui.VOverlay;
 import com.vaadin.client.ui.ui.UIConnector;
-import com.vaadin.shared.VaadinUriResolver;
 import com.vaadin.shared.Version;
 import com.vaadin.shared.util.SharedUtil;
 
@@ -289,45 +287,6 @@ public class ApplicationConnection implements HasHandlers {
     }
 
     private CommunicationErrorHandler communicationErrorDelegate = null;
-
-    private final VaadinUriResolver uriResolver = new VaadinUriResolver() {
-        @Override
-        protected String getVaadinDirUrl() {
-            return getConfiguration().getVaadinDirUrl();
-        }
-
-        @Override
-        protected String getServiceUrlParameterName() {
-            return getConfiguration().getServiceUrlParameterName();
-        }
-
-        @Override
-        protected String getServiceUrl() {
-            return getConfiguration().getServiceUrl();
-        }
-
-        @Override
-        protected String getThemeUri() {
-            return ApplicationConnection.this.getThemeUri();
-        }
-
-        @Override
-        protected String encodeQueryStringParameterValue(String queryString) {
-            return URL.encodeQueryString(queryString);
-        }
-
-        @Override
-        protected String getContextRootUrl() {
-            return getConfiguration().getContextRootUrl();
-        }
-
-        @Override
-        protected String getFrontendUrl() {
-            String url = getConfiguration().getFrontendUrl();
-            assert url.endsWith("/");
-            return url;
-        }
-    };
 
     public static class MultiStepDuration extends Duration {
         private int previousStep = elapsedMillis();
@@ -1047,7 +1006,7 @@ public class ApplicationConnection implements HasHandlers {
      * @return translated URI ready for browser
      */
     public String translateVaadinUri(String uidlUri) {
-        return uriResolver.resolveVaadinUri(uidlUri);
+        return null;
     }
 
     /**
