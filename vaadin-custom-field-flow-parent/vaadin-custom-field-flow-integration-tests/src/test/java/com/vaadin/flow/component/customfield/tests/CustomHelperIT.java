@@ -1,12 +1,12 @@
 package com.vaadin.flow.component.customfield.tests;
 
+import com.vaadin.flow.component.customfield.testbench.CustomFieldElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import com.vaadin.tests.AbstractComponentIT;
-import com.vaadin.flow.component.customfield.testbench.CustomFieldElement;
-import com.vaadin.flow.testutil.TestPath;
 
 @TestPath("vaadin-custom-field/custom-helper")
 public class CustomHelperIT extends AbstractComponentIT {
