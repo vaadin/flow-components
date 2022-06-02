@@ -128,8 +128,6 @@ public class ApplicationConnection implements HasHandlers {
     /** Parameters for this application connection loaded from the web-page */
     private ApplicationConfiguration configuration;
 
-    private final RpcManager rpcManager;
-
     /** Event bus for communication events */
     private EventBus eventBus = GWT.create(SimpleEventBus.class);
 
@@ -356,7 +354,6 @@ public class ApplicationConnection implements HasHandlers {
         ConnectorBundleLoader.get()
                 .loadBundle(ConnectorBundleLoader.EAGER_BUNDLE_NAME, null);
         uIConnector = GWT.create(UIConnector.class);
-        rpcManager = GWT.create(RpcManager.class);
         serverRpcQueue = GWT.create(ServerRpcQueue.class);
         messageHandler = GWT.create(MessageHandler.class);
         messageSender = GWT.create(MessageSender.class);
@@ -1481,7 +1478,7 @@ public class ApplicationConnection implements HasHandlers {
      * @return the server rpc manager
      */
     public RpcManager getRpcManager() {
-        return rpcManager;
+        return null;
     }
 
     /**
