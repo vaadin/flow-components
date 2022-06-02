@@ -1,6 +1,5 @@
 package com.vaadin.flow.component.combobox;
 
-import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 
 import java.util.Collections;
@@ -9,59 +8,103 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Selection model for the {@link MultiSelectComboBox}, which implements the
+ * multi-select logic for the component. The model keeps track of the currently
+ * selected items, and allows adding and removing items from the selection,
+ * while ensuring that items can only be selected once (no duplicates). For
+ * identifying items, the model uses an item ID provider, which is supposed to
+ * return a unique ID for each item. The provider implementation should be based
+ * on the identity provider used by the Flow data classes, for example
+ * {@link com.vaadin.flow.data.provider.DataProvider#getId(Object)}.
+ *
+ * @param <TItem>
+ *            the type of the item selectable from the combo box
+ */
 class MultiSelectComboBoxSelectionModel<TItem> {
     private Map<Object, TItem> selection;
     private final SerializableFunction<TItem, Object> itemIdProvider;
-    private final SerializableConsumer<Set<TItem>> selectionChangeHandler;
 
     MultiSelectComboBoxSelectionModel(
-            SerializableFunction<TItem, Object> itemIdProvider,
-            SerializableConsumer<Set<TItem>> selectionChangeHandler) {
+            SerializableFunction<TItem, Object> itemIdProvider) {
         this.selection = new LinkedHashMap<>();
         this.itemIdProvider = itemIdProvider;
-        this.selectionChangeHandler = selectionChangeHandler;
     }
 
+    /**
+     * Gets the currently selected items as an unmodifiable set.
+     */
     Set<TItem> getSelectedItems() {
         return Collections
                 .unmodifiableSet(new LinkedHashSet<>(selection.values()));
     }
 
-    void setSelectedItems(Set<TItem> items) {
+    /**
+     * Sets the selected items, for example when the value of the combo box
+     * changes. The selection will only be changed if the set of selected items
+     * is different from the current selection, where the identity of each item
+     * is checked with the item ID provider. Returns {@code true} if the
+     * selection was changed, {@code false} otherwise.
+     *
+     * @param items
+     *            the new selection
+     * @return {@code true} if the selection was changed, {@code false}
+     *         otherwise
+     */
+    boolean setSelectedItems(Set<TItem> items) {
         Map<Object, TItem> newSelectionMap = mapItemsById(items);
         if (!newSelectionMap.keySet().equals(selection.keySet())) {
             selection = mapItemsById(items);
-            notifySelectionChange();
+            return true;
         }
+        return false;
     }
 
+    /**
+     * Checks whether the item is currently selected or not, by comparing the ID
+     * of the item that is provided by the item ID provider
+     *
+     * @param item
+     *            the item to check
+     * @return {@code true} if the item is selected, {@code false} otherwise
+     */
     boolean isSelected(TItem item) {
         return selection.containsKey(itemIdProvider.apply(item));
     }
 
-    void updateSelection(Set<TItem> addedItems, Set<TItem> removedItems) {
-        doUpdateSelection(mapItemsById(addedItems), mapItemsById(removedItems));
+    /**
+     * Updates the selection, by adding and removing the specified items. If an
+     * item is already selected, it is not added again. Likewise, if an item is
+     * not selected, then nothing is removed. If there are no items to add, and
+     * no items to remove, then the selection is not changed. Returns
+     * {@code true} if the selection was changed, {@code false} otherwise.
+     *
+     * @param addedItems
+     *            the items to add to the selection
+     * @param removedItems
+     *            the items to remove from the selection
+     * @return {@code true} if the selection was changed, {@code false}
+     *         otherwise
+     */
+    boolean updateSelection(Set<TItem> addedItems, Set<TItem> removedItems) {
+        return doUpdateSelection(mapItemsById(addedItems),
+                mapItemsById(removedItems));
     }
 
-    private void doUpdateSelection(Map<Object, TItem> addedItems,
+    private boolean doUpdateSelection(Map<Object, TItem> addedItems,
             Map<Object, TItem> removedItems) {
         // Skip if selection already contains all added items, and excludes all
         // removed items
         if (selection.keySet().containsAll(addedItems.keySet()) && Collections
                 .disjoint(selection.keySet(), removedItems.keySet())) {
-            return;
+            return false;
         }
         // Remove items
         new LinkedHashMap<>(removedItems).forEach(selection::remove);
         // Add items
         selection.putAll(addedItems);
-        // Notify change
-        notifySelectionChange();
-    }
 
-    private void notifySelectionChange() {
-        selectionChangeHandler.accept(Collections
-                .unmodifiableSet(new LinkedHashSet<>(selection.values())));
+        return true;
     }
 
     private Map<Object, TItem> mapItemsById(Set<TItem> items) {

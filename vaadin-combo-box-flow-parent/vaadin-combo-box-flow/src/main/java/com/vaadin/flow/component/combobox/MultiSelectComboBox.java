@@ -103,11 +103,15 @@ public class MultiSelectComboBox<TItem>
         // Create the selection model that manages the currently selected items.
         // The model ensures that items are compared based on their data
         // provider identify, and that the selection only changes if items
-        // actually have a different identity in the data provider. The second
-        // parameter is a callback for selection changes, on which we delegate
-        // to setting the actual field value.
+        // actually have a different identity in the data provider.
         selectionModel = new MultiSelectComboBoxSelectionModel<>(
-                item -> getDataProvider().getId(item), super::setValue);
+                item -> getDataProvider().getId(item));
+        addValueChangeListener(e -> {
+            // Synchronize selection if value is updated from client
+            if (e.isFromClient()) {
+                selectionModel.setSelectedItems(e.getValue());
+            }
+        });
         setPageSize(pageSize);
         setItems(new DataCommunicator.EmptyDataProvider<>());
     }
@@ -263,9 +267,14 @@ public class MultiSelectComboBox<TItem>
         if (value == null) {
             value = Collections.emptySet();
         }
-        // Delegate value update to selection model, which will only call
-        // super.setValue if selection has actually changed
-        selectionModel.setSelectedItems(value);
+        // Update selection first, which returns a boolean indicating whether
+        // the selection (=value) has actually changed
+        boolean hasValueChanged = selectionModel.setSelectedItems(value);
+        if (hasValueChanged) {
+            // Only update field value and generate change event if value has
+            // actually changed
+            super.setValue(value);
+        }
     }
 
     @Override
@@ -305,6 +314,14 @@ public class MultiSelectComboBox<TItem>
     @Override
     public void updateSelection(Set<TItem> addedItems,
             Set<TItem> removedItems) {
-        selectionModel.updateSelection(addedItems, removedItems);
+        // Update the selection, which returns a boolean indicating whether
+        // the selection (=value) has actually changed
+        boolean hasValueChanged = selectionModel.updateSelection(addedItems,
+                removedItems);
+        if (hasValueChanged) {
+            // Only update field value and generate change event if value has
+            // actually changed
+            super.setValue(selectionModel.getSelectedItems());
+        }
     }
 }

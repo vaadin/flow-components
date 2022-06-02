@@ -21,22 +21,20 @@ public class MultiSelectComboBoxMultiSelectPage extends Div {
         // Make component wider, so that we can fit multiple chips
         comboBox.setWidth("500px");
 
-        NativeButton selectItems = new NativeButton(
-                "Select a few items", e -> {
+        NativeButton selectItems = new NativeButton("Select a few items", e -> {
             comboBox.select("Item 1", "Item 2", "Item 3");
-                });
+        });
         selectItems.setId("select-items");
 
-        NativeButton deselectItems = new NativeButton(
-                "Deselect a few items", e -> {
-            comboBox.deselect("Item 1", "Item 2");
+        NativeButton deselectItems = new NativeButton("Deselect a few items",
+                e -> {
+                    comboBox.deselect("Item 1", "Item 2");
                 });
         deselectItems.setId("deselect-items");
 
-        NativeButton deselectAll = new NativeButton(
-                "Deselect all", e -> {
+        NativeButton deselectAll = new NativeButton("Deselect all", e -> {
             comboBox.deselectAll();
-                });
+        });
         deselectAll.setId("deselect-all");
 
         Span eventValue = new Span();

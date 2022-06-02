@@ -55,7 +55,8 @@ public class MultiSelectComboBoxSelectionWithIdProviderTest {
     @Test
     public void selectMultiple_ignoresDuplicates() {
         // Select 3 duplicates of the same person
-        comboBox.select(new Person(2, "Amelia"), new Person(2, "amelia"), new Person(2, "amelai"));
+        comboBox.select(new Person(2, "Amelia"), new Person(2, "amelia"),
+                new Person(2, "amelai"));
 
         // One item selected
         Assert.assertEquals(1, comboBox.getSelectedItems().size());
