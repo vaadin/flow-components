@@ -52,9 +52,7 @@ import com.vaadin.client.componentlocator.ComponentLocator;
 import com.vaadin.client.metadata.ConnectorBundleLoader;
 import com.vaadin.client.ui.AbstractComponentConnector;
 import com.vaadin.client.ui.AbstractConnector;
-import com.vaadin.client.ui.FontIcon;
 import com.vaadin.client.ui.Icon;
-import com.vaadin.client.ui.ImageIcon;
 import com.vaadin.client.ui.VContextMenu;
 import com.vaadin.client.ui.VNotification;
 import com.vaadin.client.ui.VOverlay;
@@ -1036,16 +1034,7 @@ public class ApplicationConnection implements HasHandlers {
      * @return Icon object
      */
     public Icon getIcon(String uri) {
-        Icon icon;
-        if (uri == null) {
-            return null;
-        } else if (FontIcon.isFontIconUri(uri)) {
-            icon = GWT.create(FontIcon.class);
-        } else {
-            icon = GWT.create(ImageIcon.class);
-        }
-        icon.setUri(translateVaadinUri(uri));
-        return icon;
+        return null;
     }
 
     /**
