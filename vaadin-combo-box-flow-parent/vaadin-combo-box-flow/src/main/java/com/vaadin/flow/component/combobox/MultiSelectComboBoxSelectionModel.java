@@ -2,6 +2,7 @@ package com.vaadin.flow.component.combobox;
 
 import com.vaadin.flow.function.SerializableFunction;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -21,7 +22,7 @@ import java.util.Set;
  * @param <TItem>
  *            the type of the item selectable from the combo box
  */
-class MultiSelectComboBoxSelectionModel<TItem> {
+class MultiSelectComboBoxSelectionModel<TItem> implements Serializable {
     private Map<Object, TItem> selection;
     private final SerializableFunction<TItem, Object> itemIdProvider;
 
