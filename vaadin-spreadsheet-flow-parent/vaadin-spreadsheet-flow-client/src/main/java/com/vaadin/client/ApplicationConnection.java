@@ -61,7 +61,6 @@ import com.vaadin.client.ui.VOverlay;
 import com.vaadin.client.ui.ui.UIConnector;
 import com.vaadin.shared.VaadinUriResolver;
 import com.vaadin.shared.Version;
-import com.vaadin.shared.communication.LegacyChangeVariablesInvocation;
 import com.vaadin.shared.util.SharedUtil;
 
 /**
@@ -354,7 +353,6 @@ public class ApplicationConnection implements HasHandlers {
         ConnectorBundleLoader.get()
                 .loadBundle(ConnectorBundleLoader.EAGER_BUNDLE_NAME, null);
         uIConnector = GWT.create(UIConnector.class);
-        serverRpcQueue = GWT.create(ServerRpcQueue.class);
     }
 
     public void init(WidgetSet widgetSet, ApplicationConfiguration cnf) {
@@ -374,7 +372,6 @@ public class ApplicationConnection implements HasHandlers {
         this.widgetSet = widgetSet;
         configuration = cnf;
 
-        serverRpcQueue.setConnection(this);
         dependencyLoader.setConnection(this);
 
         ComponentLocator componentLocator = new ComponentLocator(this);
@@ -492,8 +489,6 @@ public class ApplicationConnection implements HasHandlers {
     }
 
     int cssWaits = 0;
-
-    protected ServerRpcQueue serverRpcQueue;
 
     static final int MAX_CSS_WAITS = 100;
 
@@ -654,13 +649,6 @@ public class ApplicationConnection implements HasHandlers {
 
     private void addVariableToQueue(String connectorId, String variableName,
             Object value, boolean immediate) {
-        boolean lastOnly = !immediate;
-        // note that type is now deduced from value
-        serverRpcQueue.add(new LegacyChangeVariablesInvocation(connectorId,
-                variableName, value), lastOnly);
-        if (immediate) {
-            serverRpcQueue.flush();
-        }
     }
 
     /**
@@ -668,7 +656,7 @@ public class ApplicationConnection implements HasHandlers {
      */
     @Deprecated
     public void sendPendingVariableChanges() {
-        serverRpcQueue.flush();
+     
     }
 
     /**
@@ -1364,7 +1352,7 @@ public class ApplicationConnection implements HasHandlers {
      * @return the server RPC queue
      */
     public ServerRpcQueue getServerRpcQueue() {
-        return serverRpcQueue;
+        return null;
     }
 
     /**
