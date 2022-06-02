@@ -277,8 +277,9 @@ public class SpreadsheetElement extends TestBenchElement {
     private void findSelectionOutline() {
         // sometimes the spreadsheet takes so long to load that the selection
         // widget elements are not found
-        new WebDriverWait(getDriver(), Duration.ofSeconds(10)).until(ExpectedConditions
-                .presenceOfElementLocated(By.className("s-top")));
+        new WebDriverWait(getDriver(), Duration.ofSeconds(10))
+                .until(ExpectedConditions
+                        .presenceOfElementLocated(By.className("s-top")));
         sTop = findElement(By.className("s-top"));
         sBottom = findElement(By.className("s-bottom"));
         // Just to make sure the left element is present
