@@ -1,6 +1,4 @@
-package com.vaadin.flow.component.board.test;
-
-import com.vaadin.flow.component.board.examples.SalesDashboard;
+package com.vaadin.flow.component.board.tests;
 
 public class SalesDashboardIT extends AbstractDemoIT {
 

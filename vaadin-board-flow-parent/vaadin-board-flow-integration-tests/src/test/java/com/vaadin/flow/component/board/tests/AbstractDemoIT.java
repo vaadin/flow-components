@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.board.test;
+package com.vaadin.flow.component.board.tests;
 
 import java.util.List;
 

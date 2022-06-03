@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.board.examples;
+package com.vaadin.flow.component.board.tests;
 
 import com.vaadin.flow.component.board.Board;
 import com.vaadin.flow.component.board.Row;

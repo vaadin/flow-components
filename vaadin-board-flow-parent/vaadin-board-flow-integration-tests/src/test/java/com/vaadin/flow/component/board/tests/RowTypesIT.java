@@ -1,6 +1,4 @@
-package com.vaadin.flow.component.board.test;
-
-import com.vaadin.flow.component.board.examples.RowTypes;
+package com.vaadin.flow.component.board.tests;
 
 public class RowTypesIT extends AbstractDemoIT {
 
