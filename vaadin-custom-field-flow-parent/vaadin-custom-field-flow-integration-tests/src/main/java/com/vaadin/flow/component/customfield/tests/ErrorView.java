@@ -1,5 +1,6 @@
-package com.vaadin.flow.component.customfield;
+package com.vaadin.flow.component.customfield.tests;
 
+import com.vaadin.flow.component.customfield.CustomField;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.Route;
 
