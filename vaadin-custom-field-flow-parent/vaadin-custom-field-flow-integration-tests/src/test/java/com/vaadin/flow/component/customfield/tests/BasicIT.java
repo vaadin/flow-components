@@ -1,20 +1,19 @@
-package com.vaadin.flow.component.customfield.test;
+package com.vaadin.flow.component.customfield.tests;
 
 import com.vaadin.flow.component.customfield.testbench.CustomFieldElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
-import com.vaadin.tests.AbstractParallelTest;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-public class BasicIT extends AbstractParallelTest {
-
+@TestPath("vaadin-custom-field")
+public class BasicIT extends AbstractComponentIT {
     @Before
     public void init() {
-        String url = getBaseURL().replace(super.getBaseURL(),
-                super.getBaseURL() + "/vaadin-custom-field");
-        getDriver().get(url);
+        open();
     }
 
     @Test
