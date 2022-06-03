@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.cookieconsent;
+package com.vaadin.flow.component.cookieconsent.tests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

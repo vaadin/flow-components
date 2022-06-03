@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.cookieconsent;
+package com.vaadin.flow.component.cookieconsent.tests;
 
 import com.vaadin.flow.component.html.testbench.NativeButtonElement;
 import com.vaadin.flow.testutil.TestPath;

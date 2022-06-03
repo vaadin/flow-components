@@ -1,8 +1,7 @@
-package com.vaadin.flow.component.cookieconsent;
+package com.vaadin.flow.component.cookieconsent.tests;
 
 import org.junit.Test;
 
-import com.vaadin.flow.component.cookieconsent.examples.DefaultSettings;
 import com.vaadin.flow.component.cookieconsent.testbench.CookieConsentElement.DefaultValues;
 
 public class DefaultSettingsIT extends AbstractParallelTest {

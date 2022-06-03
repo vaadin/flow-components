@@ -1,8 +1,6 @@
-package com.vaadin.flow.component.cookieconsent;
+package com.vaadin.flow.component.cookieconsent.tests;
 
 import org.junit.Test;
-
-import com.vaadin.flow.component.cookieconsent.examples.CustomMessages;
 
 public class CustomMessagesIT extends AbstractParallelTest {
 
