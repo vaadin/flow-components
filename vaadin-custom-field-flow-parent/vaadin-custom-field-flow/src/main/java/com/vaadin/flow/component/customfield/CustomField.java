@@ -32,6 +32,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasSize;
@@ -83,6 +84,13 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
         super(defaultValue);
         // Force a value update when the change event generated
         getElement().addEventListener("change", e -> this.updateValue());
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+
+        FieldValidationUtil.disableClientValidation(this);
     }
 
     /**
@@ -176,14 +184,10 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
     /**
      * <p>
      * This property is set to true when the control value is invalid.
-     * <p>
-     * This property is synchronized automatically from client side when a
-     * 'invalid-changed' event happens.
      * </p>
      *
      * @return the {@code invalid} property from the webcomponent
      */
-    @Synchronize(property = "invalid", value = "invalid-changed")
     @Override
     public boolean isInvalid() {
         return getElement().getProperty("invalid", false);
