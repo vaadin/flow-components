@@ -1,11 +1,11 @@
-package com.vaadin.flow.component.confirmdialog.test.helpers;
+package com.vaadin.flow.component.confirmdialog.tests.helpers;
 
 import java.util.Optional;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
-import com.vaadin.flow.component.confirmdialog.examples.Features;
 import com.vaadin.flow.component.confirmdialog.testbench.ConfirmDialogElement;
+import com.vaadin.flow.component.confirmdialog.tests.Features;
 import com.vaadin.testbench.ElementQuery;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractParallelTest;

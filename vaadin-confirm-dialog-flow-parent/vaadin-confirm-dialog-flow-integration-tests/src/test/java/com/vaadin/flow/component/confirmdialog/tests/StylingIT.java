@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.confirmdialog.test;
+package com.vaadin.flow.component.confirmdialog.tests;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.confirmdialog.testbench.ConfirmDialogElement;

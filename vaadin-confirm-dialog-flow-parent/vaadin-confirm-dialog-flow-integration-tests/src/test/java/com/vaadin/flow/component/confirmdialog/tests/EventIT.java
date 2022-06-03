@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.confirmdialog.test;
+package com.vaadin.flow.component.confirmdialog.tests;
 
 import org.junit.Assert;
 import org.junit.Before;

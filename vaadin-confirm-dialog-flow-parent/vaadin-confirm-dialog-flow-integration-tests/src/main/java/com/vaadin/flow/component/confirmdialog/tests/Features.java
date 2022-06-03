@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.confirmdialog.examples;
+package com.vaadin.flow.component.confirmdialog.tests;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

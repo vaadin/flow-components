@@ -1,7 +1,6 @@
-package com.vaadin.flow.component.confirmdialog.test;
+package com.vaadin.flow.component.confirmdialog.tests;
 
-import com.vaadin.flow.component.confirmdialog.examples.FeaturesDiy;
-import com.vaadin.flow.component.confirmdialog.test.helpers.Actionwords;
+import com.vaadin.flow.component.confirmdialog.tests.helpers.Actionwords;
 import com.vaadin.tests.AbstractParallelTest;
 
 import org.junit.Assert;
