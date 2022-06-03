@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.crud.examples;
+package com.vaadin.flow.component.crud.tests;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Tag;

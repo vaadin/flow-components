@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.crud.examples;
+package com.vaadin.flow.component.crud.tests;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.crud.Crud;
@@ -7,7 +7,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 
-import static com.vaadin.flow.component.crud.examples.Helper.createPersonEditor;
+import static com.vaadin.flow.component.crud.tests.Helper.createPersonEditor;
 
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.KeyModifier;

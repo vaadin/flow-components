@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.crud.examples;
+package com.vaadin.flow.component.crud.tests;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.crud.Crud;

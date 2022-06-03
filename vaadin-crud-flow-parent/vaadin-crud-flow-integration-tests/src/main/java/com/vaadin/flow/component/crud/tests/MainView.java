@@ -1,4 +1,7 @@
-package com.vaadin.flow.component.crud.examples;
+package com.vaadin.flow.component.crud.tests;
+
+import static com.vaadin.flow.component.crud.tests.Helper.createPersonEditor;
+import static com.vaadin.flow.component.crud.tests.Helper.createYorubaI18n;
 
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.button.Button;
@@ -14,9 +17,6 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
-
-import static com.vaadin.flow.component.crud.examples.Helper.createPersonEditor;
-import static com.vaadin.flow.component.crud.examples.Helper.createYorubaI18n;
 
 @Route(value = "vaadin-crud")
 public class MainView extends VerticalLayout {

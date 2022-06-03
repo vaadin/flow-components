@@ -1,11 +1,11 @@
-package com.vaadin.flow.component.crud.examples;
+package com.vaadin.flow.component.crud.tests;
+
+import static com.vaadin.flow.component.crud.tests.Helper.createPersonEditor;
 
 import com.vaadin.flow.component.crud.Crud;
 import com.vaadin.flow.component.crud.CrudGrid;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
-
-import static com.vaadin.flow.component.crud.examples.Helper.createPersonEditor;
 
 @Route(value = "vaadin-crud/nofilter")
 public class NoFilterView extends VerticalLayout {

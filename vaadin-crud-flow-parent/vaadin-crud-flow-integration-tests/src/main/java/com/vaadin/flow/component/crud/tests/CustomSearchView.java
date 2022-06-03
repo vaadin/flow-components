@@ -1,6 +1,6 @@
-package com.vaadin.flow.component.crud.examples;
+package com.vaadin.flow.component.crud.tests;
 
-import static com.vaadin.flow.component.crud.examples.Helper.createPersonEditor;
+import static com.vaadin.flow.component.crud.tests.Helper.createPersonEditor;
 
 import java.util.List;
 import java.util.Optional;

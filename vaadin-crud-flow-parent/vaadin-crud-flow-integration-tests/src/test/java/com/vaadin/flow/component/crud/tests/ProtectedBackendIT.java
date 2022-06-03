@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.crud.test;
+package com.vaadin.flow.component.crud.tests;
 
 import org.junit.Assert;
 import org.junit.AssumptionViolatedException;

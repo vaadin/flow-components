@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.crud.test;
+package com.vaadin.flow.component.crud.tests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

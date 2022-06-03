@@ -1,8 +1,8 @@
-package com.vaadin.flow.component.crud.test;
+package com.vaadin.flow.component.crud.tests;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
-import com.vaadin.flow.component.crud.examples.EditOnClickView;
 import com.vaadin.flow.component.crud.testbench.CrudElement;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;

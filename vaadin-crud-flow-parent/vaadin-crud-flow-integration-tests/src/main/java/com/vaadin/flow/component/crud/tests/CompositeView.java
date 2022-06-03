@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.crud.examples;
+package com.vaadin.flow.component.crud.tests;
 
 import com.vaadin.flow.component.AbstractCompositeField;
 import com.vaadin.flow.component.button.Button;
@@ -6,7 +6,7 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.crud.BinderCrudEditor;
 import com.vaadin.flow.component.crud.Crud;
 import com.vaadin.flow.component.crud.CrudI18n;
-import com.vaadin.flow.component.crud.examples.CompositeView.Localization.Country;
+import com.vaadin.flow.component.crud.tests.CompositeView.Localization.Country;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;

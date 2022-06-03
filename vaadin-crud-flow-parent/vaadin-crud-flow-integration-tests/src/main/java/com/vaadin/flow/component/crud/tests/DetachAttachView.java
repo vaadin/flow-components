@@ -13,14 +13,14 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.crud.examples;
+package com.vaadin.flow.component.crud.tests;
+
+import static com.vaadin.flow.component.crud.tests.Helper.createPersonEditor;
 
 import com.vaadin.flow.component.crud.Crud;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.router.Route;
-
-import static com.vaadin.flow.component.crud.examples.Helper.createPersonEditor;
 
 @Route("vaadin-crud/detach-attach")
 public class DetachAttachView extends Div {
