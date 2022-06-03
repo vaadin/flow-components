@@ -28,7 +28,7 @@ public class AvatarTest {
     private Avatar avatar;
 
     @Before
-    public void setUp() {
+    public void setup() {
         avatar = new Avatar();
     }
 

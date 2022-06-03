@@ -33,7 +33,7 @@ public class AvatarGroupTest {
     private AvatarGroupItem avatarGroupItem2;
 
     @Before
-    public void setUp() {
+    public void setup() {
         avatarGroup = new AvatarGroup();
         avatarGroupItem1 = new AvatarGroupItem();
         avatarGroupItem2 = new AvatarGroupItem("Foo Bar");
