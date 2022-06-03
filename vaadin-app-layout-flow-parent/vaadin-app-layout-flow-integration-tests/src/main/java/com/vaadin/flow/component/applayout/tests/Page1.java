@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.applayout.examples;
+package com.vaadin.flow.component.applayout.tests;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;

@@ -1,7 +1,7 @@
-package com.vaadin.flow.component.applayout.test;
+package com.vaadin.flow.component.applayout.tests;
 
-import static com.vaadin.flow.component.applayout.examples.AppRouterLayout.CUSTOM_ICON_ID;
-import static com.vaadin.flow.component.applayout.examples.AppRouterLayout.CUSTOM_TOGGLE_ID;
+import static com.vaadin.flow.component.applayout.tests.AppRouterLayout.CUSTOM_ICON_ID;
+import static com.vaadin.flow.component.applayout.tests.AppRouterLayout.CUSTOM_TOGGLE_ID;
 
 import org.junit.Assert;
 import org.junit.Before;

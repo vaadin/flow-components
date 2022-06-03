@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.applayout.examples;
+package com.vaadin.flow.component.applayout.tests;
 
 import com.vaadin.flow.router.ParentLayout;
 import com.vaadin.flow.router.RouteNotFoundError;
