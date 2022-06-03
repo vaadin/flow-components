@@ -67,7 +67,7 @@ public class EditorImplTest {
     }
 
     @Before
-    public void setUp() {
+    public void setup() {
         grid = new Grid<>();
         ui = new MockUI();
         ui.getElement().appendChild(grid.getElement());

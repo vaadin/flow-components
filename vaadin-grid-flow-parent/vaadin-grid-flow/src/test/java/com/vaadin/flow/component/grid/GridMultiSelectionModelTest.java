@@ -54,7 +54,7 @@ public class GridMultiSelectionModelTest {
     private AtomicInteger events;
 
     @Before
-    public void setUp() {
+    public void setup() {
         grid = new Grid<>();
         selectionModel = (GridMultiSelectionModel<Person>) grid
                 .setSelectionMode(SelectionMode.MULTI);

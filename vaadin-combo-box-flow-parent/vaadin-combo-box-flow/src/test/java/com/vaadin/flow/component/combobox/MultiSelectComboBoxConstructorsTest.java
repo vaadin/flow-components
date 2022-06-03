@@ -34,7 +34,7 @@ public class MultiSelectComboBoxConstructorsTest {
 
     @SuppressWarnings("unchecked")
     @Before
-    public void setUp() {
+    public void setup() {
         valueChangeListener = Mockito.mock(HasValue.ValueChangeListener.class);
     }
 
