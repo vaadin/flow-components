@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.login.test;
+package com.vaadin.flow.component.login.tests;
 
 import org.junit.Assert;
 import org.junit.Before;

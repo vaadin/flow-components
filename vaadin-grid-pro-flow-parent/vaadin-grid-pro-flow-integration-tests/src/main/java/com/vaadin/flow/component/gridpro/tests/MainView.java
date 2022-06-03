@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.gridpro.examples;
+package com.vaadin.flow.component.gridpro.tests;
 
 import java.util.ArrayList;
 import java.util.List;

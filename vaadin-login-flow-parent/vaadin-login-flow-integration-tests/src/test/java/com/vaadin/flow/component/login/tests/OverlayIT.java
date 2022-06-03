@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.login.test;
+package com.vaadin.flow.component.login.tests;
 
 import com.vaadin.flow.component.login.testbench.LoginFormElement;
 import com.vaadin.flow.component.login.testbench.LoginOverlayElement;

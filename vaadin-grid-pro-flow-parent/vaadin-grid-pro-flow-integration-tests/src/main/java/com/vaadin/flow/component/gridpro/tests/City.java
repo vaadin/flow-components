@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.gridpro.examples;
+package com.vaadin.flow.component.gridpro.tests;
 
 public class City {
     private int id;

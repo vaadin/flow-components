@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.gridpro.test;
+package com.vaadin.flow.component.gridpro.tests;
 
 import com.vaadin.flow.component.gridpro.testbench.GridProElement;
 import com.vaadin.flow.component.gridpro.testbench.GridTHTDElement;
