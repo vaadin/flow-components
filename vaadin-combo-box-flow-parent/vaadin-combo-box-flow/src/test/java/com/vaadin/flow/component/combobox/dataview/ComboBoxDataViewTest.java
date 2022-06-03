@@ -55,7 +55,7 @@ public class ComboBoxDataViewTest extends AbstractComponentDataViewTest {
     public ExpectedException expectedException = ExpectedException.none();
 
     @Before
-    public void setup() {
+    public void init() {
         items = new ArrayList<>(Arrays.asList("first", "middle", "last"));
         dataProvider = new CustomInMemoryDataProvider<>(items);
         comboBox = getComponent();
