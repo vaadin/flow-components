@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.login.examples;
+package com.vaadin.flow.component.login.tests;
 
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.login.LoginOverlay;

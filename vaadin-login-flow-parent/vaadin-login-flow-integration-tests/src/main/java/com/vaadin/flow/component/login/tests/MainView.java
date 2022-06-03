@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.login.examples;
+package com.vaadin.flow.component.login.tests;
 
 import com.vaadin.flow.component.login.LoginForm;
 import com.vaadin.flow.router.Route;
