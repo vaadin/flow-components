@@ -103,7 +103,7 @@ public class BeanGridSortingTest {
     private Grid<SortableBean> grid;
 
     @Before
-    public void init() {
+    public void setup() {
         grid = new Grid<>(SortableBean.class);
         grid.setItems(createBeans());
     }

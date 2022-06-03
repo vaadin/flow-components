@@ -40,7 +40,7 @@ public class ComboBoxListDataViewTest extends AbstractListDataViewListenerTest {
     private DataCommunicatorTest.MockUI ui;
 
     @Before
-    public void init() {
+    public void setup() {
         items = new ArrayList<>(Arrays.asList("first", "middle", "last"));
         component = new ComboBox<>();
         ui = new DataCommunicatorTest.MockUI();

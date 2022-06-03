@@ -23,7 +23,7 @@ public class GridColumnOrderTest {
     private Grid.Column<String> fourthColumn;
 
     @Before
-    public void init() {
+    public void setup() {
         grid = new Grid<>();
         firstColumn = grid.addColumn(str -> str).setKey("firstColumn");
         secondColumn = grid.addColumn(str -> str).setKey("secondColumn");

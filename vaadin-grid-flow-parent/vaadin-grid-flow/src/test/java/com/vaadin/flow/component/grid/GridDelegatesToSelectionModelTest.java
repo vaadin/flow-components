@@ -37,7 +37,7 @@ public class GridDelegatesToSelectionModelTest {
     }
 
     @Before
-    public void init() {
+    public void setup() {
         selectionModelMock = Mockito.mock(GridSelectionModel.class);
         grid = new CustomGrid();
     }
