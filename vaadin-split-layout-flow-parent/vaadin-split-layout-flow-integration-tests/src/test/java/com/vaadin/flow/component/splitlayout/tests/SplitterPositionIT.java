@@ -42,7 +42,7 @@ public class SplitterPositionIT extends AbstractComponentIT {
     public static final String ELEMENT_API = "ElementApi";
 
     @Before
-    public void setUp() {
+    public void init() {
         open();
     }
 
