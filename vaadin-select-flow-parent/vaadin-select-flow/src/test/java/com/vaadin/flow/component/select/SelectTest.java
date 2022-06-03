@@ -41,7 +41,7 @@ public class SelectTest {
     private Supplier<Select> selectSupplier = () -> select;
 
     @Before
-    public void setUp() {
+    public void setup() {
         select = new Select<>();
     }
 

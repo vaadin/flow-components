@@ -153,7 +153,7 @@ public class GridSortingTest {
     private TestSortListener<Person> testSortListener;
 
     @Before
-    public void init() {
+    public void setup() {
         testSortListener = new TestSortListener<>();
 
         grid = new Grid<>();

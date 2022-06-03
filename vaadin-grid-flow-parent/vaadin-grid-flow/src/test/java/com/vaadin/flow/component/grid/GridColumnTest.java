@@ -49,7 +49,7 @@ public class GridColumnTest {
     public ExpectedException thrown = ExpectedException.none();
 
     @Before
-    public void init() {
+    public void setup() {
         grid = new Grid<>();
         firstColumn = grid.addColumn(str -> str);
         secondColumn = grid.addColumn(str -> str);

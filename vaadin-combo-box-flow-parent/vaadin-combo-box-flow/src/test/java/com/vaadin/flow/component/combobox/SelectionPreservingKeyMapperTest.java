@@ -10,7 +10,7 @@ public class SelectionPreservingKeyMapperTest {
     private ComboBoxDataCommunicator.SelectionPreservingKeyMapper<String> keyMapper;
 
     @Before
-    public void setUp() {
+    public void setup() {
         comboBox = new ComboBox<>();
         comboBox.setItems("1", "2", "3", "4", "5");
         keyMapper = new ComboBoxDataCommunicator.SelectionPreservingKeyMapper<>(

@@ -22,7 +22,7 @@ public class GridProEditColumnConfiguratorTest {
     public ExpectedException thrown = ExpectedException.none();
 
     @Before
-    public void init() {
+    public void setup() {
         GridPro<Person> grid = new GridPro<>();
         configurator = grid.addEditColumn(value -> value);
         column = (EditColumn<Person>) configurator.getColumn();

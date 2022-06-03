@@ -10,7 +10,7 @@ public class DetailsTest {
     private Details details;
 
     @Before
-    public void setUp() {
+    public void setup() {
         details = new Details();
     }
 
