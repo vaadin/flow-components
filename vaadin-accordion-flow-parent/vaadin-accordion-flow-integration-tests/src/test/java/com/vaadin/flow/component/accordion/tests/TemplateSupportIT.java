@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.accordion.test;
+package com.vaadin.flow.component.accordion.tests;
 
 import com.vaadin.flow.component.accordion.testbench.AccordionElement;
 import com.vaadin.flow.component.accordion.testbench.AccordionPanelElement;

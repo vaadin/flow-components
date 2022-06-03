@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.accordion.examples;
+package com.vaadin.flow.component.accordion.tests;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.accordion.Accordion;
