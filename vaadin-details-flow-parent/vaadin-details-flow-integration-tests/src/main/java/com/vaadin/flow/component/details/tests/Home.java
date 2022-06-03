@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.details.examples;
+package com.vaadin.flow.component.details.tests;
 
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.details.Details;

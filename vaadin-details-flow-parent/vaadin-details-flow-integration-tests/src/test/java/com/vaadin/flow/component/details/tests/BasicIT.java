@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.details.test;
+package com.vaadin.flow.component.details.tests;
 
 import java.util.Arrays;
 import java.util.List;
