@@ -21,56 +21,52 @@ import com.vaadin.flow.component.avatar.AvatarGroup.AvatarGroupItem;
 import com.vaadin.flow.component.avatar.AvatarGroupVariant;
 import com.vaadin.tests.ThemeVariantTestHelper;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-/**
- * @author Vaadin Ltd.
- */
 public class AvatarGroupTest {
 
-    private AvatarGroup avatarGroup = new AvatarGroup();
-    private AvatarGroupItem avatarGroupItem = new AvatarGroupItem();
-    private AvatarGroupItem avatarGroupItem2 = new AvatarGroupItem("Foo Bar");
+    private AvatarGroup avatarGroup;
+    private AvatarGroupItem avatarGroupItem1;
+    private AvatarGroupItem avatarGroupItem2;
 
-    private String name = "foo bar";
-    private String abbr = "fb";
-    private String imgUrl = "https://vaadin.com/";
-    private Integer colorIndex = 3;
-
-    private List<AvatarGroupItem> items = new ArrayList<>();
+    @Before
+    public void setUp() {
+        avatarGroup = new AvatarGroup();
+        avatarGroupItem1 = new AvatarGroupItem();
+        avatarGroupItem2 = new AvatarGroupItem("Foo Bar");
+    }
 
     @Test
     public void setName_getName() {
-        avatarGroupItem.setName(name);
-        Assert.assertEquals(avatarGroupItem.getName(), name);
+        avatarGroupItem1.setName("foo bar");
+        Assert.assertEquals(avatarGroupItem1.getName(), "foo bar");
     }
 
     @Test
     public void setAbbr_getAbbr() {
-        avatarGroupItem.setAbbreviation(abbr);
-        Assert.assertEquals(avatarGroupItem.getAbbreviation(), abbr);
+        avatarGroupItem1.setAbbreviation("fb");
+        Assert.assertEquals(avatarGroupItem1.getAbbreviation(), "fb");
     }
 
     @Test
     public void setImgUrl_getImgUrl() {
-        avatarGroupItem.setImage(imgUrl);
-        Assert.assertEquals(avatarGroupItem.getImage(), imgUrl);
+        avatarGroupItem1.setImage("https://vaadin.com/");
+        Assert.assertEquals(avatarGroupItem1.getImage(), "https://vaadin.com/");
     }
 
     @Test
     public void setColorIndex_getColorIndex() {
-        avatarGroupItem.setColorIndex(colorIndex);
-        Assert.assertEquals(avatarGroupItem.getColorIndex(), colorIndex);
+        avatarGroupItem1.setColorIndex(3);
+        Assert.assertEquals(avatarGroupItem1.getColorIndex(), (Integer) 3);
     }
 
     @Test
     public void setCreatedItems_getCreatedItems() {
-        items.add(avatarGroupItem);
-        items.add(avatarGroupItem2);
+        List<AvatarGroupItem> items = List.of(avatarGroupItem1,
+                avatarGroupItem2);
         avatarGroup.setItems(items);
 
         Assert.assertEquals(items, avatarGroup.getItems());
@@ -83,8 +79,8 @@ public class AvatarGroupTest {
 
     @Test
     public void createWithItems_getCreatedItems() {
-        items.add(avatarGroupItem);
-        items.add(avatarGroupItem2);
+        List<AvatarGroupItem> items = List.of(avatarGroupItem1,
+                avatarGroupItem2);
         AvatarGroup createdAvatarGroup = new AvatarGroup(items);
 
         Assert.assertEquals(items, createdAvatarGroup.getItems());
@@ -92,45 +88,37 @@ public class AvatarGroupTest {
 
     @Test
     public void createWithVarargsItems_getCreatedItems() {
-        items.add(avatarGroupItem);
-        items.add(avatarGroupItem2);
-        AvatarGroup createdAvatarGroup = new AvatarGroup(avatarGroupItem,
+        AvatarGroup createdAvatarGroup = new AvatarGroup(avatarGroupItem1,
                 avatarGroupItem2);
 
-        Assert.assertEquals(items, createdAvatarGroup.getItems());
+        Assert.assertEquals(List.of(avatarGroupItem1, avatarGroupItem2),
+                createdAvatarGroup.getItems());
     }
 
     @Test
     public void addItems_getItems() {
-        items.add(avatarGroupItem);
-        items.add(avatarGroupItem2);
-        avatarGroup.setItems(items);
-
+        avatarGroup.setItems(List.of(avatarGroupItem1, avatarGroupItem2));
         AvatarGroupItem addedItem = new AvatarGroupItem("Bar Baz");
         avatarGroup.add(addedItem);
 
         Assert.assertEquals(
-                Arrays.asList(avatarGroupItem, avatarGroupItem2, addedItem),
+                List.of(avatarGroupItem1, avatarGroupItem2, addedItem),
                 avatarGroup.getItems());
     }
 
     @Test
     public void removeItems_getItems() {
-        items.add(avatarGroupItem);
-        items.add(avatarGroupItem2);
-        avatarGroup.setItems(items);
-
+        avatarGroup.setItems(List.of(avatarGroupItem1, avatarGroupItem2));
         avatarGroup.remove(avatarGroupItem2);
-        items.remove(avatarGroupItem2);
 
-        Assert.assertEquals(items, avatarGroup.getItems());
+        Assert.assertEquals(List.of(avatarGroupItem1), avatarGroup.getItems());
     }
 
     @Test
     public void setMaxItemsVisible_getMaxItemsVisible() {
         avatarGroup.setMaxItemsVisible(3);
 
-        Assert.assertEquals(new Integer(3), avatarGroup.getMaxItemsVisible());
+        Assert.assertEquals((Integer) 3, avatarGroup.getMaxItemsVisible());
     }
 
     @Test
