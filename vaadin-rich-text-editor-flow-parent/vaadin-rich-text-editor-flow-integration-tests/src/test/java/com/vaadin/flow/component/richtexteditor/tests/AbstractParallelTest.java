@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.richtexteditor.test;
+package com.vaadin.flow.component.richtexteditor.tests;
 
 public abstract class AbstractParallelTest
         extends com.vaadin.tests.AbstractParallelTest {

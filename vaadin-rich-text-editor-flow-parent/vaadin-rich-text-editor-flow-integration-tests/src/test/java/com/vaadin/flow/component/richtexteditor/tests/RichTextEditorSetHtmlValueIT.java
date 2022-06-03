@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.richtexteditor.test;
+package com.vaadin.flow.component.richtexteditor.tests;
 
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.testutil.TestPath;

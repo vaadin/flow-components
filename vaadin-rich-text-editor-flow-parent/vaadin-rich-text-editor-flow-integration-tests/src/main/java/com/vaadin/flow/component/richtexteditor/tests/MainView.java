@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.richtexteditor.examples;
+package com.vaadin.flow.component.richtexteditor.tests;
 
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.richtexteditor.RichTextEditor;

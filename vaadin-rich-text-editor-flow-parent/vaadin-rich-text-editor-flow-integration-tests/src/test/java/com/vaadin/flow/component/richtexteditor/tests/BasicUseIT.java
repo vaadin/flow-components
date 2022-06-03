@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.richtexteditor.test;
+package com.vaadin.flow.component.richtexteditor.tests;
 
 import org.junit.Assert;
 import org.junit.Before;
