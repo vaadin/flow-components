@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.select.examples;
+package com.vaadin.flow.component.select.tests;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;

@@ -1,10 +1,9 @@
-package com.vaadin.flow.component.select.test;
+package com.vaadin.flow.component.select.tests;
 
 import java.util.List;
 import java.util.function.IntSupplier;
 
 import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
-import com.vaadin.flow.component.select.examples.TestView;
 import com.vaadin.flow.component.select.testbench.SelectElement;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.tests.AbstractComponentIT;

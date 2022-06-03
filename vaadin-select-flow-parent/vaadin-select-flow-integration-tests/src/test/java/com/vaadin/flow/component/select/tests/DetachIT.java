@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.select.test;
+package com.vaadin.flow.component.select.tests;
 
 import static org.junit.Assert.assertFalse;
 

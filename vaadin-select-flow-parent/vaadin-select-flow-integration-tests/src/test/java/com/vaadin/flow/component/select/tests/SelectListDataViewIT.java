@@ -1,8 +1,7 @@
-package com.vaadin.flow.component.select.test;
+package com.vaadin.flow.component.select.tests;
 
 import java.util.stream.Collectors;
 
-import com.vaadin.flow.component.select.examples.SelectListDataViewPage;
 import com.vaadin.flow.component.select.testbench.SelectElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;

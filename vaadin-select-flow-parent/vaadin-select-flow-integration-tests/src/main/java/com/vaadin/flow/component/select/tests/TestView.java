@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.select.examples;
+package com.vaadin.flow.component.select.tests;
 
 import java.io.Serializable;
 import java.util.ArrayList;

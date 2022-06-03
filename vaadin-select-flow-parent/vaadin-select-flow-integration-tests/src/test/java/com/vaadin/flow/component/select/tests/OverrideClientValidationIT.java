@@ -15,10 +15,9 @@
  *
  */
 
-package com.vaadin.flow.component.select.test;
+package com.vaadin.flow.component.select.tests;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.flow.component.select.examples.OverrideClientValidationPage;
 import com.vaadin.flow.component.select.testbench.SelectElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;

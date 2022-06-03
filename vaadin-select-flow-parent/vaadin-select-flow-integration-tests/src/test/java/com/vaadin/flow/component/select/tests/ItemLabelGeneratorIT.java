@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.select.test;
+package com.vaadin.flow.component.select.tests;
 
 import com.vaadin.flow.testutil.TestPath;
 import org.junit.Test;
