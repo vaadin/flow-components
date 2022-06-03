@@ -1,5 +1,6 @@
 package com.vaadin.flow.component.spreadsheet.test;
 
+import com.google.common.base.Predicate;
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.component.spreadsheet.testbench.AddressUtil;
 import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
@@ -15,10 +16,15 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.logging.LogEntry;
+import org.openqa.selenium.logging.LogType;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Locale;
 import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
@@ -508,6 +514,42 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
 
     protected double getSize(String size) {
         return Double.parseDouble(size.replaceAll("[^.0-9]", ""));
+    }
+
+    private static final String WEB_SOCKET_CONNECTION_ERROR_PREFIX = "WebSocket connection to ";
+
+    // Helper adopted from TestBenchHelpers
+    protected void checkLogsForErrors(
+            Predicate<String> acceptableMessagePredicate) {
+        getLogEntries(Level.WARNING).forEach(logEntry -> {
+            if ((Objects.equals(logEntry.getLevel(), Level.SEVERE)
+                    || logEntry.getMessage().contains(" 404 "))
+                    && !logEntry.getMessage()
+                            .contains(WEB_SOCKET_CONNECTION_ERROR_PREFIX)
+                    && !acceptableMessagePredicate
+                            .test(logEntry.getMessage())) {
+                throw new AssertionError(String.format(
+                        "Received error message in browser log console right after opening the page, message: %s",
+                        logEntry));
+            } else {
+                LoggerFactory.getLogger(AbstractSpreadsheetIT.class.getName())
+                        .warn("This message in browser log console may be a potential error: '{}'",
+                                logEntry);
+            }
+        });
+    }
+
+    protected List<LogEntry> getLogEntries(Level level) {
+        // https://github.com/vaadin/testbench/issues/1233
+        getCommandExecutor().waitForVaadin();
+
+        return driver.manage().logs().get(LogType.BROWSER).getAll().stream()
+                .filter(logEntry -> logEntry.getLevel().intValue() >= level
+                        .intValue())
+                // we always have this error
+                .filter(logEntry -> !logEntry.getMessage()
+                        .contains("favicon.ico"))
+                .collect(Collectors.toList());
     }
 
     public void putCellContent(String cell, CharSequence value) {
