@@ -13,6 +13,7 @@
 package com.vaadin.flow.component.charts.tests;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
@@ -33,9 +34,8 @@ public class PieWithLegendEventsIT extends AbstractTBTest {
         return PieWithLegendEvents.class;
     }
 
-    @Override
-    public void setup() throws Exception {
-        super.setup();
+    @Before
+    public void init() {
         lastEvent = $(SpanElement.class).id("lastEvent");
         eventDetails = $(SpanElement.class).id("eventDetails");
     }
