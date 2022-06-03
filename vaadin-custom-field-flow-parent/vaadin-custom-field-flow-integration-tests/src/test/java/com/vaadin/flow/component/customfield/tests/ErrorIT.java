@@ -1,19 +1,19 @@
-package com.vaadin.flow.component.customfield.test;
+package com.vaadin.flow.component.customfield.tests;
 
-import com.vaadin.tests.AbstractParallelTest;
+import com.vaadin.tests.AbstractComponentIT;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.flow.component.customfield.testbench.CustomFieldElement;
 
-public class ErrorIT extends AbstractParallelTest {
+@TestPath("vaadin-custom-field/error")
+public class ErrorIT extends AbstractComponentIT {
     @Before
     public void init() {
-        String url = getBaseURL().replace(super.getBaseURL(),
-                super.getBaseURL() + "/vaadin-custom-field") + "/error";
-        getDriver().get(url);
+        open();
     }
 
     @Test
