@@ -1,15 +1,15 @@
-package com.vaadin.flow.component.customfield.examples;
+package com.vaadin.flow.component.customfield.tests;
 
+import com.vaadin.flow.component.customfield.CustomField;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 
-@Route("custom-field-helper")
-public class NameFieldView extends Div {
-
-    public NameFieldView() {
-
+@Route("vaadin-custom-field/custom-helper")
+public class CustomHelperView extends Div {
+    public CustomHelperView() {
         NameField fieldHelper = new NameField();
         fieldHelper.setHelperText("Helper text");
         fieldHelper.setId("custom-field-helper-text");
@@ -46,4 +46,36 @@ public class NameFieldView extends Div {
         add(fieldHelper, clearText, fieldHelperComponent,
                 fieldHelperComponentLazy, clearComponent, addComponent);
     }
+
+    private class NameField extends CustomField<String> {
+        private final TextField firstName = new TextField();
+        private final TextField lastName = new TextField();
+
+        NameField() {
+            setLabel("Phone number");
+            setHelperText("Your full first and last names");
+            firstName.setMinLength(2);
+            firstName.getStyle().set("width", "7em");
+            lastName.getStyle().set("width", "7em");
+
+            Div layout = new Div();
+            layout.add(firstName, lastName);
+
+            add(layout);
+        }
+
+        @Override
+        protected String generateModelValue() {
+            return firstName.getValue() + " " + lastName.getValue();
+        }
+
+        @Override
+        protected void setPresentationValue(String newPresentationValue) {
+            if (newPresentationValue == null) {
+                firstName.clear();
+                lastName.clear();
+            }
+        }
+    }
+
 }
