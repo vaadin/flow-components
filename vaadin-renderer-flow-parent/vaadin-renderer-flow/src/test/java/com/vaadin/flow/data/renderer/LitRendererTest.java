@@ -24,7 +24,7 @@ import org.junit.Test;
 public class LitRendererTest {
 
     @Before
-    public void init() {
+    public void setup() {
         UI ui = new UI();
         UI.setCurrent(ui);
     }

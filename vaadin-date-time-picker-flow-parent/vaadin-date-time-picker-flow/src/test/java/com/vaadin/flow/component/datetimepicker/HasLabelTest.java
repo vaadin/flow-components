@@ -31,7 +31,7 @@ public class HasLabelTest {
     private UI ui;
 
     @Before
-    public void setUp() {
+    public void setup() {
         ui = new UI();
         UI.setCurrent(ui);
     }

@@ -37,7 +37,7 @@ public class SelectionEventTest {
     private int eventCount;
 
     @Before
-    public void init() {
+    public void setup() {
         tab1 = new Tab("foo");
         tab2 = new Tab("bar");
         tabs = new Tabs(tab1, tab2);

@@ -30,7 +30,7 @@ public class ThemableLayoutTest {
     }
 
     @Before
-    public void setUp() {
+    public void setup() {
         layout = new TestLayout();
     }
 

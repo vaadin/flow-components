@@ -192,6 +192,7 @@ public class DemoUIView extends VerticalLayout implements Receiver {
         hideTop = new Checkbox("hide top bar visibility");
         hideBottom = new Checkbox("hide bottom bar visibility");
         hideBoth = new Checkbox("report mode");
+        hideBoth.setId("report-mode");
         disableCheckboxes();
 
         hideTop.addValueChangeListener(event -> {
