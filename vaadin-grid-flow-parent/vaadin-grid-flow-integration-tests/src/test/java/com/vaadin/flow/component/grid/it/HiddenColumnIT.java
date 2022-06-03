@@ -33,7 +33,7 @@ public class HiddenColumnIT extends AbstractComponentIT {
     private GridElement grid;
 
     @Before
-    public void setUp() {
+    public void init() {
         open();
         grid = $(GridElement.class).first();
         waitUntil(driver -> grid.getRowCount() > 0);

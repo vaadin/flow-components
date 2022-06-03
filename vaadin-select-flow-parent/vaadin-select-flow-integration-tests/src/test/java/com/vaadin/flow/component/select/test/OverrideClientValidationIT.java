@@ -39,7 +39,7 @@ public class OverrideClientValidationIT extends AbstractComponentIT {
     private SelectElement selectInGridElement;
 
     @Before
-    public void setUp() {
+    public void init() {
         open();
         basicSelectElement = $(SelectElement.class)
                 .id(OverrideClientValidationPage.ID_BASIC_SELECT);

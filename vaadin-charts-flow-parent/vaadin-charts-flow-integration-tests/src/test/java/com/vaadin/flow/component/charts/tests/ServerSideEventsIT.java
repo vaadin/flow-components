@@ -25,10 +25,8 @@ import java.util.stream.Collectors;
 
 public class ServerSideEventsIT extends AbstractTBTest {
 
-    @Override
     @Before
-    public void setup() throws Exception {
-        super.setup();
+    public void init() {
         resetHistory();
     }
 
