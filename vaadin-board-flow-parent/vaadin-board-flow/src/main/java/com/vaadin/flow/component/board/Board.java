@@ -45,10 +45,10 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * </pre>
  */
 @Tag("vaadin-board")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.15")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.16")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/board", version = "22.0.15")
-@NpmPackage(value = "@vaadin/vaadin-board", version = "22.0.15")
+@NpmPackage(value = "@vaadin/board", version = "22.0.16")
+@NpmPackage(value = "@vaadin/vaadin-board", version = "22.0.16")
 @JsModule("@vaadin/board/vaadin-board.js")
 public class Board extends Component
         implements HasSize, HasStyle, HasOrderedComponents {
