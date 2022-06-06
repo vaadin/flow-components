@@ -15,8 +15,8 @@
  */
 package com.vaadin.flow.data.bean;
 
+import java.security.SecureRandom;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -96,7 +96,7 @@ public class PeopleGenerator extends BeanGenerator {
         return builder.toString();
     }
 
-    private char generateChar(Random random, boolean lowerCase) {
+    private char generateChar(SecureRandom random, boolean lowerCase) {
         return ((char) ((lowerCase ? 'a' : 'A') + random.nextInt(26)));
     }
 

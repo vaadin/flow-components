@@ -17,10 +17,10 @@ package com.vaadin.flow.component.grid;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -324,13 +324,13 @@ public class GridSortingTest {
     }
 
     private static List<Person> createItems() {
-        Random random = new Random(0);
+        SecureRandom random = new SecureRandom();
         return IntStream.range(1, 500)
                 .mapToObj(index -> createPerson(index, random))
                 .collect(Collectors.toList());
     }
 
-    private static Person createPerson(int index, Random random) {
+    private static Person createPerson(int index, SecureRandom random) {
         Person person = new Person();
         person.setId(index);
         person.setName("Person " + index);

@@ -1,9 +1,9 @@
 package com.vaadin.flow.component.gridpro.tests;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -130,13 +130,13 @@ public class MainView extends VerticalLayout {
     }
 
     private static List<Person> createItems() {
-        Random random = new Random(0);
+        SecureRandom random = new SecureRandom();
         return IntStream.range(1, 500)
                 .mapToObj(index -> createPerson(index, random))
                 .collect(Collectors.toList());
     }
 
-    private static Person createPerson(int index, Random random) {
+    private static Person createPerson(int index, SecureRandom random) {
         Person person = new Person();
         person.setId(index);
         person.setEmail("person" + index + "@vaadin.com");

@@ -16,9 +16,9 @@
 package com.vaadin.flow.data.performance;
 
 import java.math.BigDecimal;
+import java.security.SecureRandom;
 import java.util.Date;
 import java.util.List;
-import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -41,7 +41,7 @@ import com.vaadin.flow.router.HasUrlParameter;
 public abstract class AbstractBeansMemoryTest<T extends Component> extends Div
         implements HasUrlParameter<String> {
 
-    private Random random = new Random();
+    private SecureRandom random = new SecureRandom();
 
     private int dataSize;
     private boolean isInMemory;

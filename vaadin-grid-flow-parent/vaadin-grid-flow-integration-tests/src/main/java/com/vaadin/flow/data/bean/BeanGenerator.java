@@ -15,9 +15,9 @@
  */
 package com.vaadin.flow.data.bean;
 
+import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 
 /**
  * Base class for other random data generators used in the demo.
@@ -32,9 +32,9 @@ abstract class BeanGenerator {
      * ensures that new added fields don't change the values of old fields
      * already present in the bean.
      */
-    private final Map<String, Random> randomMap = new HashMap<>();
+    private final Map<String, SecureRandom> randomMap = new HashMap<>();
 
-    protected Random getRandom(String propertyName) {
-        return randomMap.computeIfAbsent(propertyName, key -> new Random(0));
+    protected SecureRandom getRandom(String propertyName) {
+        return randomMap.computeIfAbsent(propertyName, key -> new SecureRandom());
     }
 }

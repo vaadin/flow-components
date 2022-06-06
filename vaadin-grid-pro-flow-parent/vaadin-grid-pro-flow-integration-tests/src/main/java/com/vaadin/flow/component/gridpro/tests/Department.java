@@ -1,6 +1,6 @@
 package com.vaadin.flow.component.gridpro.tests;
 
-import java.util.Random;
+import java.security.SecureRandom;
 
 public enum Department {
     SERVICES("services"), MARKETING("marketing"), SALES("sales");
@@ -12,7 +12,7 @@ public enum Department {
     }
 
     public static Department getRandomDepartment() {
-        Random random = new Random();
+        SecureRandom random = new SecureRandom();
         return Department.values()[random.nextInt(values().length)];
     }
 
