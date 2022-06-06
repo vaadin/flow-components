@@ -35,6 +35,7 @@ abstract class BeanGenerator {
     private final Map<String, SecureRandom> randomMap = new HashMap<>();
 
     protected SecureRandom getRandom(String propertyName) {
-        return randomMap.computeIfAbsent(propertyName, key -> new SecureRandom());
+        return randomMap.computeIfAbsent(propertyName,
+                key -> new SecureRandom());
     }
 }
