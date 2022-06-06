@@ -45,7 +45,7 @@ public class DialogTest {
     private UI ui = new UI();
 
     @Before
-    public void setUp() {
+    public void setup() {
         UI.setCurrent(ui);
 
         VaadinSession session = Mockito.mock(VaadinSession.class);

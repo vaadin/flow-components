@@ -34,7 +34,7 @@ public class NotificationTest {
     private Notification notification;
 
     @Before
-    public void setUp() {
+    public void setup() {
         UI.setCurrent(new UI());
     }
 

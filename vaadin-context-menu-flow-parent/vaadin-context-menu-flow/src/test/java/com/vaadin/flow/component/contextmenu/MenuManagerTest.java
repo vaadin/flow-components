@@ -63,7 +63,7 @@ public class MenuManagerTest {
     }
 
     @Before
-    public void setUp() {
+    public void setup() {
         manager = new MenuManager<ContextMenu, MenuItem, SubMenu>(menu, reset,
                 factory, MenuItem.class, parent) {
             @Override

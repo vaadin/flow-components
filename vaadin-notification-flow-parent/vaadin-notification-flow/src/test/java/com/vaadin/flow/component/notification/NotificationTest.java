@@ -49,7 +49,7 @@ public class NotificationTest {
     private final UI ui = new UI();
 
     @Before
-    public void setUp() {
+    public void setup() {
         UI.setCurrent(ui);
     }
 

@@ -39,7 +39,7 @@ public class GridNoSelectionModelTest {
     private GridSelectionModel<Person> model;
 
     @Before
-    public void setUp() {
+    public void setup() {
         grid = new Grid<>();
         grid.setItems(PERSON_A, PERSON_B, PERSON_C);
 

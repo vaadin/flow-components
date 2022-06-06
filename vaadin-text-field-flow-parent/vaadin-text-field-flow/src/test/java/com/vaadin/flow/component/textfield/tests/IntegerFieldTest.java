@@ -32,7 +32,7 @@ public class IntegerFieldTest extends TextFieldTest {
     private IntegerField field;
 
     @Before
-    public void init() {
+    public void setup() {
         field = new IntegerField();
     }
 
