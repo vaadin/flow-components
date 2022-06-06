@@ -20,12 +20,12 @@ import java.util.stream.IntStream;
 import static java.util.stream.Collectors.toMap;
 
 @Route(value = "vaadin-accordion")
-public class MainView extends HorizontalLayout {
+public class BasicView extends HorizontalLayout {
 
     public static final String ACCORDION_EVENTS = "accordion-events";
     public static final String PANEL_EVENTS = "panel-events";
 
-    public MainView() {
+    public BasicView() {
         final Accordion accordion = new Accordion();
         accordion.setWidth("400px");
         accordion.getElement().getStyle().set("max-width", "400px");
