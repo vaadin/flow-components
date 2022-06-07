@@ -37,7 +37,7 @@ public class GridMultiSelectionWithIdProviderTest {
 
     @SuppressWarnings("unchecked")
     @Before
-    public void setUp() {
+    public void setup() {
         AARON = new Person(1, "Aaron", "Archer");
         Set<Person> mockPersons = new HashSet<>();
         mockPersons.add(AARON);

@@ -15,17 +15,25 @@
  */
 package com.vaadin.flow.component.button;
 
+import com.vaadin.flow.component.shared.ThemeVariant;
+
 /**
  * Set of theme variants applicable for {@code vaadin-button} component.
  */
-public enum ButtonVariant {
-    LUMO_SMALL("small"), LUMO_LARGE("large"), LUMO_TERTIARY(
-            "tertiary"), LUMO_TERTIARY_INLINE("tertiary-inline"), LUMO_PRIMARY(
-                    "primary"), LUMO_SUCCESS("success"), LUMO_ERROR(
-                            "error"), LUMO_CONTRAST("contrast"), LUMO_ICON(
-                                    "icon"), MATERIAL_CONTAINED(
-                                            "contained"), MATERIAL_OUTLINED(
-                                                    "outlined");
+public enum ButtonVariant implements ThemeVariant {
+    //@formatter:off
+    LUMO_SMALL("small"),
+    LUMO_LARGE("large"),
+    LUMO_TERTIARY("tertiary"),
+    LUMO_TERTIARY_INLINE("tertiary-inline"),
+    LUMO_PRIMARY("primary"),
+    LUMO_SUCCESS("success"),
+    LUMO_ERROR("error"),
+    LUMO_CONTRAST("contrast"),
+    LUMO_ICON("icon"),
+    MATERIAL_CONTAINED("contained"),
+    MATERIAL_OUTLINED("outlined");
+    //@formatter:on
 
     private final String variant;
 

@@ -455,7 +455,8 @@ public class SpreadsheetJsApi {
             spreadsheetWidget.removeStyleName(c);
         }
         // Cache classes for next time
-        serverClasses = classNames.split(" ");
+        serverClasses = classNames.isEmpty() ? new String[0]
+                : classNames.split(" ");
         // Set the new classes
         for (String c : serverClasses) {
             spreadsheetWidget.addStyleName(c);

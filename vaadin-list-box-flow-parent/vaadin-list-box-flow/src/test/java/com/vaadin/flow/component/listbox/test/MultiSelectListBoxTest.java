@@ -59,7 +59,7 @@ public class MultiSelectListBoxTest {
     public ExpectedException thrown = ExpectedException.none();
 
     @Before
-    public void init() {
+    public void setup() {
         listBox = new MultiSelectListBox<>();
 
         foo = new Item("foo");

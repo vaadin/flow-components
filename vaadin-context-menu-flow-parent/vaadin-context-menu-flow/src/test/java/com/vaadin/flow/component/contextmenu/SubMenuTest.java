@@ -38,7 +38,7 @@ public class SubMenuTest {
     private SubMenu subMenu;
 
     @Before
-    public void init() {
+    public void setup() {
         contextMenu = new ContextMenu();
         parentItem = contextMenu.addItem("parent");
         subMenu = parentItem.getSubMenu();

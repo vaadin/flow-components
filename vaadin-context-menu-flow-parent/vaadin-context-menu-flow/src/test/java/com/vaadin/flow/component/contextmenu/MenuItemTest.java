@@ -28,7 +28,7 @@ public class MenuItemTest {
     private MenuItem item;
 
     @Before
-    public void init() {
+    public void setup() {
         contextMenu = new ContextMenu();
         item = contextMenu.addItem("");
     }

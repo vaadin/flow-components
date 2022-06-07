@@ -31,6 +31,7 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.StateNode;
 import com.vaadin.flow.internal.nodefeature.ElementAttributeMap;
+import com.vaadin.tests.ThemeVariantTestHelper;
 
 public class ButtonTest {
 
@@ -217,7 +218,20 @@ public class ButtonTest {
     }
 
     @Test
-    public void addThemeVariant_setIcon_themeAttributeContiansThemeVariantAndIcon() {
+    public void addThemeVariant_themeNamesContainsThemeVariant() {
+        ThemeVariantTestHelper.addThemeVariant_themeNamesContainsThemeVariant(
+                new Button(), ButtonVariant.LUMO_SMALL);
+    }
+
+    @Test
+    public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
+        ThemeVariantTestHelper
+                .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
+                        new Button(), ButtonVariant.LUMO_SMALL);
+    }
+
+    @Test
+    public void addThemeVariant_setIcon_themeAttributeContainsThemeVariantAndIcon() {
         button = new Button();
         button.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
         button.setIcon(new Icon(VaadinIcon.ARROW_RIGHT));
