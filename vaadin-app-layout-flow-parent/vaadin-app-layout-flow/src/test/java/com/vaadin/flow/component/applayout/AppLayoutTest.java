@@ -24,7 +24,7 @@ public class AppLayoutTest {
     private AppLayout systemUnderTest;
 
     @Before
-    public void setUp() {
+    public void setup() {
         systemUnderTest = new AppLayout();
     }
 

@@ -16,7 +16,7 @@
 package com.vaadin.flow.component.textfield.tests;
 
 import com.vaadin.flow.component.textfield.TextArea;
-import com.vaadin.flow.component.textfield.TextFieldVariant;
+import com.vaadin.flow.component.textfield.TextAreaVariant;
 import com.vaadin.tests.ThemeVariantTestHelper;
 import org.junit.Rule;
 import org.junit.Test;
@@ -104,13 +104,13 @@ public class TextAreaTest {
     @Test
     public void addThemeVariant_themeAttributeContainsThemeVariant() {
         ThemeVariantTestHelper.addThemeVariant_themeNamesContainsThemeVariant(
-                new TextArea(), TextFieldVariant.LUMO_SMALL);
+                new TextArea(), TextAreaVariant.LUMO_SMALL);
     }
 
     @Test
     public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
         ThemeVariantTestHelper
                 .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
-                        new TextArea(), TextFieldVariant.LUMO_SMALL);
+                        new TextArea(), TextAreaVariant.LUMO_SMALL);
     }
 }

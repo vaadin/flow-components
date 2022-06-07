@@ -29,7 +29,7 @@ public class MenuBarTest {
     private MenuItem item1, item2;
 
     @Before
-    public void init() {
+    public void setup() {
         menuBar = new MenuBar();
         item1 = menuBar.addItem("foo");
         item2 = menuBar.addItem(new Span("bar"));

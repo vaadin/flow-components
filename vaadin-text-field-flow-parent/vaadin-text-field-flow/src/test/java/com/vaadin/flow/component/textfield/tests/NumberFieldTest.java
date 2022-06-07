@@ -35,7 +35,7 @@ public class NumberFieldTest extends TextFieldTest {
     private NumberField field;
 
     @Before
-    public void init() {
+    public void setup() {
         field = new NumberField();
     }
 

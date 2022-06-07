@@ -39,7 +39,7 @@ public class AbstractGridMultiSelectionModelTest {
     private DataCommunicatorTest.MockUI ui;
 
     @Before
-    public void init() {
+    public void setup() {
         selected = new HashSet<>();
         deselected = new HashSet<>();
         grid = new Grid<String>() {

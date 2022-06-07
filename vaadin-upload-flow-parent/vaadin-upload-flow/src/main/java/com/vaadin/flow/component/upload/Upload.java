@@ -326,7 +326,7 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
      *
      * @param dropLabelIcon
      *            the label icon to show for the users when it's possible to
-     *            drop files, or <code>null</code> to cleat it
+     *            drop files, or <code>null</code> to clear it
      */
     public void setDropLabelIcon(Component dropLabelIcon) {
         removeElementsAtSlot("drop-label-icon");

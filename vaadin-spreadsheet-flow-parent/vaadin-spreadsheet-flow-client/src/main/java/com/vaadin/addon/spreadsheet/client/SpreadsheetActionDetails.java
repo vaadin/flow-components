@@ -18,7 +18,7 @@ import java.io.Serializable;
 import jsinterop.annotations.JsType;
 
 @SuppressWarnings("serial")
-@JsType
+@JsType(namespace = "Vaadin.Spreadsheet")
 public class SpreadsheetActionDetails implements Serializable {
     public String caption;
     public String key;
