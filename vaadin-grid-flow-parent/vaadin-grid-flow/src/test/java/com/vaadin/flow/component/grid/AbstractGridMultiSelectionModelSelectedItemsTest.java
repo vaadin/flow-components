@@ -15,21 +15,14 @@
  */
 package com.vaadin.flow.component.grid;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.data.provider.DataCommunicatorTest;
-import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
-import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.selection.MultiSelect;
-import com.vaadin.flow.dom.Element;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -118,5 +111,9 @@ public class AbstractGridMultiSelectionModelSelectedItemsTest {
     private void verifySelection(String... values) {
         Assert.assertEquals(Set.of(values), selectionModel.getSelectedItems());
         Assert.assertEquals(Stream.of(values).map(grid.getDataProvider()::getId).collect(Collectors.toSet()), selectionModel.getSelectedItemIds());
+        for (String value : values) {
+            Assert.assertTrue(selectionModel.isSelected(value));
+            Assert.assertTrue(selectionModel.isSelectedItemId(grid.getDataProvider().getId(value)));
+        }
     }
 }
