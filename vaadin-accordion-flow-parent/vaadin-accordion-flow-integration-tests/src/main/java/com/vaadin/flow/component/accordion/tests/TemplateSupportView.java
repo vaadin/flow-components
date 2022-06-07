@@ -10,10 +10,10 @@ import com.vaadin.flow.component.polymertemplate.PolymerTemplate;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.templatemodel.TemplateModel;
 
-@Route(value = "vaadin-accordion/accordionintemplate")
+@Route(value = "vaadin-accordion/template-support")
 @Tag("accordion-app")
 @JsModule("./accordion-in-template.js")
-public class AccordionInTemplate extends PolymerTemplate<TemplateModel> {
+public class TemplateSupportView extends PolymerTemplate<TemplateModel> {
 
     @Id
     private Accordion accordion;
