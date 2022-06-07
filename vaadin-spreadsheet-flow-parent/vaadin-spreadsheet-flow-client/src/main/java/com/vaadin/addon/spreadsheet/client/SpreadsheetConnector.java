@@ -263,10 +263,6 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
                     }
                 }, ContextMenuEvent.getType());
 
-        // spreadsheet: no layout manager there
-        if (false)
-            getLayoutManager().addElementResizeListener(
-                    getWidget().getElement(), elementResizeListener);
         getRpcProxy(SpreadsheetServerRpc.class).onConnectorInit();
     }
 
@@ -274,8 +270,6 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
     public void onUnregister() {
         super.onUnregister();
         getWidget().clearSpreadsheet(true);
-        getLayoutManager().removeElementResizeListener(getWidget().getElement(),
-                elementResizeListener);
         if (currentOverlays != null) {
             currentOverlays.clear();
         }
