@@ -205,7 +205,7 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
         comboBox.$connector.updateData = tryCatchWrapper(function (items) {
           const dataProviderMixin = getDataProviderMixin();
 
-          const itemsMap = new Map(items.map(item => [item.key, item]));
+          const itemsMap = new Map(items.map((item) => [item.key, item]));
 
           dataProviderMixin.filteredItems = dataProviderMixin.filteredItems.map((item) => {
             if (itemsMap.has(item.key)) {
