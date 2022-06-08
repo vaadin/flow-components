@@ -208,11 +208,7 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
           const itemsMap = new Map(items.map((item) => [item.key, item]));
 
           dataProviderMixin.filteredItems = dataProviderMixin.filteredItems.map((item) => {
-            if (itemsMap.has(item.key)) {
-              return itemsMap.get(item.key);
-            }
-
-            return item;
+            return itemsMap.get(item.key) || item;
           });
         });
 
