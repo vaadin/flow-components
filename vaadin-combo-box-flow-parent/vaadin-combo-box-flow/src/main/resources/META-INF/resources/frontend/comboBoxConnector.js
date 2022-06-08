@@ -204,17 +204,19 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
 
         comboBox.$connector.updateData = tryCatchWrapper(function (items) {
           const dataProviderMixin = getDataProviderMixin();
-          // IE11 doesn't work with the transpiled version of the forEach.
-          for (let i = 0; i < items.length; i++) {
-            let item = items[i];
 
-            for (let j = 0; j < dataProviderMixin.filteredItems.length; j++) {
-              if (dataProviderMixin.filteredItems[j].key === item.key) {
-                dataProviderMixin.set('filteredItems.' + j, item);
-                break;
-              }
+          const itemsMap = items.reduce((map, item) => {
+            map.set(item.key, item);
+            return map;
+          }, new Map());
+
+          dataProviderMixin.filteredItems = dataProviderMixin.filteredItems.map((item) => {
+            if (itemsMap.has(item.key)) {
+              return itemsMap.get(item.key);
             }
-          }
+
+            return item;
+          });
         });
 
         comboBox.$connector.updateSize = tryCatchWrapper(function (newSize) {
