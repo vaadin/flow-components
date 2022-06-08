@@ -33,8 +33,8 @@ public class TreeGridTest {
 
     @Before
     public void init() {
-        Item item1 = new Item("sensitive data 1");
-        Item item2 = new Item("sensitive data 2");
+        Item item1 = new Item("key 1");
+        Item item2 = new Item("key 2");
         treeGrid = new TreeGrid<>();
         TreeData<Item> treeData = new TreeData<>();
         treeData.addItem(null, item1);
@@ -68,10 +68,10 @@ public class TreeGridTest {
                 treeGrid.getDataCommunicator().getKeyMapper().get("1"));
         Assert.assertNull(
                 treeGrid.getDataCommunicator().getKeyMapper().get("2"));
-        Assert.assertNotNull(treeGrid.getDataCommunicator().getKeyMapper()
-                .get("sensitive data 1"));
-        Assert.assertNotNull(treeGrid.getDataCommunicator().getKeyMapper()
-                .get("sensitive data 2"));
+        Assert.assertNotNull(
+                treeGrid.getDataCommunicator().getKeyMapper().get("key 1"));
+        Assert.assertNotNull(
+                treeGrid.getDataCommunicator().getKeyMapper().get("key 2"));
     }
 
     private void fakeClientCommunication() {
@@ -81,19 +81,19 @@ public class TreeGridTest {
     }
 
     private static class Item {
-        private final String sensitiveData;
+        private final String key;
 
-        public Item(String sensitiveData) {
-            this.sensitiveData = sensitiveData;
+        public Item(String key) {
+            this.key = key;
         }
 
-        public String getSensitiveData() {
-            return sensitiveData;
+        public String getKey() {
+            return key;
         }
 
         @Override
         public String toString() {
-            return sensitiveData;
+            return key;
         }
     }
 
