@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
@@ -829,6 +830,13 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
                 Serializer.serialize(namedRanges));
     }
 
+    public void onPopupButtonClick(int row, int column) {
+        PopupButton popup = sheetPopupButtons.get(SpreadsheetUtil.relativeToAbsolute(this, new CellReference(row - 1, column - 1)));
+        if (popup != null) {
+            popup.openPopup();
+        }
+    }
+
     /*
      * CLIENT RPC
      */
@@ -1195,9 +1203,6 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
     protected String initialSheetSelection = null;
 
     private Set<Component> customComponents = new HashSet<Component>();
-
-    /* Disable buttons until table support #826 */
-    private static final boolean popupButtonsEnabled = true;
 
     private Map<CellReference, PopupButton> sheetPopupButtons = new HashMap<CellReference, PopupButton>();
 
@@ -2230,6 +2235,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
         SpreadsheetFactory.reloadSpreadsheetData(this,
                 workbook.getSheetAt(sheetIndex));
         reloadActiveSheetStyles();
+        loadPopupButtons();
     }
 
     /**
@@ -4804,15 +4810,15 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
     }
 
     private void registerPopupButton(PopupButton button) {
-        if (popupButtonsEnabled) {
-            attachedPopupButtons.add(button);
-            registerCustomComponent(button);
-        }
+        attachedPopupButtons.add(button);
+        registerCustomComponent(button);
+        add(button);
     }
 
     private void unRegisterPopupButton(PopupButton button) {
         attachedPopupButtons.remove(button);
         unRegisterCustomComponent(button);
+        remove(button);
     }
 
     private void registerCustomComponent(PopupButton component) {
@@ -4831,7 +4837,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
     }
 
     private void unRegisterCustomComponent(PopupButton component) {
-        getElement().removeProperty("popupbuttons");
+        registerCustomComponent(component);
     }
 
     private void unRegisterCustomComponent(Component component) {
