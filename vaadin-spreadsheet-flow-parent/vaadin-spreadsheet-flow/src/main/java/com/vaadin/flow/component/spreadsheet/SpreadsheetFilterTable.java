@@ -21,12 +21,10 @@ import java.util.Set;
 
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
-
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
@@ -233,7 +231,7 @@ public class SpreadsheetFilterTable extends SpreadsheetTable
      * added your own SpreadsheetFilter.
      */
     public void onFiltersUpdated() {
-        Set<Integer> filteredRows = new HashSet<Integer>();
+        Set<Integer> filteredRows = new HashSet<>();
         for (Entry<PopupButton, HashSet<SpreadsheetFilter>> entry : popupButtonToFiltersMap
                 .entrySet()) {
             PopupButton popupButton = entry.getKey();

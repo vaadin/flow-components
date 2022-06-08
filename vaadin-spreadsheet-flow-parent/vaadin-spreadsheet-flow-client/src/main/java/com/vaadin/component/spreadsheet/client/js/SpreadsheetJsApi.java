@@ -474,11 +474,12 @@ public class SpreadsheetJsApi {
     }
 
     public void setPopups(String raw) {
-        List<PopupButtonState> popupButtons = Parser.parseListOfPopupButtons(raw);
+        List<PopupButtonState> popupButtons = Parser
+                .parseListOfPopupButtons(raw);
 
         var popupButtonsToRemove = new ArrayList<String>();
 
-        for (var state: popupButtonStates.values()) {
+        for (var state : popupButtonStates.values()) {
             if (!popupButtons.contains(state)) {
                 var key = getPopupKey(state.row, state.col);
                 popupButtonsToRemove.add(key);
