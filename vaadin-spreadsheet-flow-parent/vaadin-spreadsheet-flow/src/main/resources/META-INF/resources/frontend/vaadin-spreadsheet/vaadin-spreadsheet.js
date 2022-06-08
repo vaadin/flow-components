@@ -404,6 +404,10 @@ export class VaadinSpreadsheet extends LitElement {
     this.api.editCellComment(col, row);
   }
 
+  onPopupButtonOpen(row, column, contentId) {
+    this.api.onPopupButtonOpened(row, column, contentId);
+  }
+
   /* SERVER RPC METHOD CALLBACKS */
   createCallbacks() {
     this.api.setGroupingCollapsedCallback(e => {
@@ -561,6 +565,10 @@ export class VaadinSpreadsheet extends LitElement {
     this.api.setActionOnColumnHeaderCallback(e => {
       this.dispatchEvent(this.createEvent('actionOnColumnHeader', e));
     });
+
+    this.api.setPopupButtonClickCallback(e => {
+      this.dispatchEvent(this.createEvent('popupButtonClick', e));
+    })
 
     this.dispatchEvent(this.createEvent('onConnectorInit'), []);
   }

@@ -23,7 +23,6 @@ import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.ClientAnchor;
 import org.apache.poi.ss.usermodel.Comment;
 import org.apache.poi.ss.usermodel.CreationHelper;
@@ -32,10 +31,8 @@ import org.apache.poi.ss.usermodel.RichTextString;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
-import org.apache.poi.xssf.usermodel.XSSFClientAnchor;
 
 import com.vaadin.flow.component.spreadsheet.Spreadsheet.CellValueChangeEvent;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet.ProtectedEditEvent;
@@ -505,5 +502,9 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
     @Override
     public void levelHeaderClicked(boolean isCols, int level) {
         spreadsheet.levelHeaderClicked(isCols, level);
+    }
+
+    public void onPopupButtonClick(int row, int column) {
+        spreadsheet.onPopupButtonClick(row, column);
     }
 }

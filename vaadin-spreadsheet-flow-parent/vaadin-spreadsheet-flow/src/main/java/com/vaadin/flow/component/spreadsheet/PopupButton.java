@@ -53,7 +53,7 @@ import com.vaadin.flow.component.spreadsheet.shared.PopupButtonState;
  */
 @SuppressWarnings("serial")
 @Tag("div")
-public class PopupButton extends Component implements HasComponents {
+public class PopupButton extends Component {
 
     private PopupButtonServerRpc rpc = new PopupButtonServerRpc() {
 
@@ -81,6 +81,7 @@ public class PopupButton extends Component implements HasComponents {
     public PopupButton() {
         setId(UUID.randomUUID().toString());
         registerRpc(rpc);
+        getElement().getStyle().set("display", "none");
     }
 
     private void registerRpc(PopupButtonServerRpc rpc) {
@@ -138,8 +139,11 @@ public class PopupButton extends Component implements HasComponents {
      */
     public void openPopup() {
         setPopupVisible(true);
-        // todo: when getRpcProxy is implemented
-        // getRpcProxy(PopupButtonClientRpc.class).openPopup();
+        getElement().appendChild(getContent().getElement());
+        getUI().get().beforeClientResponse(this, (e) -> getParent().ifPresent(parent -> {
+            parent.getElement().callJsFunction("onPopupButtonOpen",
+                getRow() + 1, getColumn() + 1, getId().orElse(""));
+        }));
     }
 
     private PopupButton getRpcProxy(
