@@ -15,6 +15,9 @@ public class NavigationIT extends AbstractSpreadsheetIT {
 
     @Before
     public void init() {
+        // set window size to large to avoid cells overlapping with the
+        // dev tool popup
+        getDriver().manage().window().setSize(WINDOW_SIZE_LARGE);
         getDriver().get(getBaseURL());
         createNewSpreadsheet();
     }
