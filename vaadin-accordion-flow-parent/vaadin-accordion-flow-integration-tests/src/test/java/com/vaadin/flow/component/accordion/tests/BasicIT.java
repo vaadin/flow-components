@@ -2,24 +2,24 @@ package com.vaadin.flow.component.accordion.tests;
 
 import com.vaadin.flow.component.accordion.testbench.AccordionPanelElement;
 import com.vaadin.flow.component.button.testbench.ButtonElement;
+import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.flow.component.accordion.testbench.AccordionElement;
 import com.vaadin.testbench.TestBenchElement;
-import com.vaadin.tests.AbstractParallelTest;
+import com.vaadin.tests.AbstractComponentIT;
 
-import static com.vaadin.flow.component.accordion.tests.MainView.ACCORDION_EVENTS;
-import static com.vaadin.flow.component.accordion.tests.MainView.PANEL_EVENTS;
+import static com.vaadin.flow.component.accordion.tests.BasicView.ACCORDION_EVENTS;
+import static com.vaadin.flow.component.accordion.tests.BasicView.PANEL_EVENTS;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-public class BasicUseIT extends AbstractParallelTest {
+@TestPath("vaadin-accordion")
+public class BasicIT extends AbstractComponentIT {
 
     @Before
     public void init() {
-        String url = getBaseURL().replace(super.getBaseURL(),
-                super.getBaseURL() + "/vaadin-accordion");
-        getDriver().get(url);
+        open();
     }
 
     @Test

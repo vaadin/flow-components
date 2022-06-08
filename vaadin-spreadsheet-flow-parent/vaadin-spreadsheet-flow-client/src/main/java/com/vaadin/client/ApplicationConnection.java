@@ -25,16 +25,11 @@ import com.google.gwt.aria.client.RelevantValue;
 import com.google.gwt.aria.client.Roles;
 import com.google.gwt.core.client.Duration;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.event.shared.HasHandlers;
-import com.google.gwt.event.shared.SimpleEventBus;
-import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.HasWidgets;
@@ -48,20 +43,15 @@ import com.vaadin.client.communication.MessageHandler;
 import com.vaadin.client.communication.MessageSender;
 import com.vaadin.client.communication.RpcManager;
 import com.vaadin.client.communication.ServerRpcQueue;
-import com.vaadin.client.componentlocator.ComponentLocator;
 import com.vaadin.client.metadata.ConnectorBundleLoader;
 import com.vaadin.client.ui.AbstractComponentConnector;
 import com.vaadin.client.ui.AbstractConnector;
-import com.vaadin.client.ui.FontIcon;
 import com.vaadin.client.ui.Icon;
-import com.vaadin.client.ui.ImageIcon;
 import com.vaadin.client.ui.VContextMenu;
 import com.vaadin.client.ui.VNotification;
 import com.vaadin.client.ui.VOverlay;
 import com.vaadin.client.ui.ui.UIConnector;
-import com.vaadin.shared.VaadinUriResolver;
 import com.vaadin.shared.Version;
-import com.vaadin.shared.communication.LegacyChangeVariablesInvocation;
 import com.vaadin.shared.util.SharedUtil;
 
 /**
@@ -127,13 +117,6 @@ public class ApplicationConnection implements HasHandlers {
 
     /** Parameters for this application connection loaded from the web-page */
     private ApplicationConfiguration configuration;
-
-    private final LayoutManager layoutManager;
-
-    private final RpcManager rpcManager;
-
-    /** Event bus for communication events */
-    private EventBus eventBus = GWT.create(SimpleEventBus.class);
 
     public enum ApplicationState {
         INITIALIZING, RUNNING, TERMINATED;
@@ -297,51 +280,6 @@ public class ApplicationConnection implements HasHandlers {
 
     private CommunicationErrorHandler communicationErrorDelegate = null;
 
-    private VLoadingIndicator loadingIndicator;
-
-    private Heartbeat heartbeat = GWT.create(Heartbeat.class);
-
-    private boolean tooltipInitialized = false;
-
-    private final VaadinUriResolver uriResolver = new VaadinUriResolver() {
-        @Override
-        protected String getVaadinDirUrl() {
-            return getConfiguration().getVaadinDirUrl();
-        }
-
-        @Override
-        protected String getServiceUrlParameterName() {
-            return getConfiguration().getServiceUrlParameterName();
-        }
-
-        @Override
-        protected String getServiceUrl() {
-            return getConfiguration().getServiceUrl();
-        }
-
-        @Override
-        protected String getThemeUri() {
-            return ApplicationConnection.this.getThemeUri();
-        }
-
-        @Override
-        protected String encodeQueryStringParameterValue(String queryString) {
-            return URL.encodeQueryString(queryString);
-        }
-
-        @Override
-        protected String getContextRootUrl() {
-            return getConfiguration().getContextRootUrl();
-        }
-
-        @Override
-        protected String getFrontendUrl() {
-            String url = getConfiguration().getFrontendUrl();
-            assert url.endsWith("/");
-            return url;
-        }
-    };
-
     public static class MultiStepDuration extends Duration {
         private int previousStep = elapsedMillis();
 
@@ -364,14 +302,6 @@ public class ApplicationConnection implements HasHandlers {
         ConnectorBundleLoader.get()
                 .loadBundle(ConnectorBundleLoader.EAGER_BUNDLE_NAME, null);
         uIConnector = GWT.create(UIConnector.class);
-        rpcManager = GWT.create(RpcManager.class);
-        layoutManager = GWT.create(LayoutManager.class);
-        tooltip = GWT.create(VTooltip.class);
-        loadingIndicator = GWT.create(VLoadingIndicator.class);
-        serverRpcQueue = GWT.create(ServerRpcQueue.class);
-        connectionStateHandler = GWT.create(ConnectionStateHandler.class);
-        messageHandler = GWT.create(MessageHandler.class);
-        messageSender = GWT.create(MessageSender.class);
     }
 
     public void init(WidgetSet widgetSet, ApplicationConfiguration cnf) {
@@ -391,39 +321,15 @@ public class ApplicationConnection implements HasHandlers {
         this.widgetSet = widgetSet;
         configuration = cnf;
 
-        layoutManager.setConnection(this);
-        loadingIndicator.setConnection(this);
-        serverRpcQueue.setConnection(this);
-        messageHandler.setConnection(this);
-        messageSender.setConnection(this);
-        dependencyLoader.setConnection(this);
-
-        ComponentLocator componentLocator = new ComponentLocator(this);
-
         String appRootPanelName = cnf.getRootPanelId();
         // remove the end (window name) of autogenerated rootpanel id
         appRootPanelName = appRootPanelName.replaceFirst("-\\d+$", "");
-
-        initializeTestbenchHooks(componentLocator, appRootPanelName);
-
-        initializeClientHooks();
 
         if (cnf.getRootElement() != null) {
             uIConnector.init(cnf.getRootElement(), this);
         } else {
             uIConnector.init(cnf.getRootPanelId(), this);
         }
-
-        // Connection state handler preloads the reconnect dialog, which uses
-        // overlay container. This in turn depends on VUI being attached
-        // (done in uiConnector.init)
-        connectionStateHandler.setConnection(this);
-
-        tooltip.setOwner(uIConnector.getWidget());
-
-        getLoadingIndicator().show();
-
-        heartbeat.init(this);
 
         // Ensure the overlay container is added to the dom and set as a live
         // area for assistive devices
@@ -445,145 +351,8 @@ public class ApplicationConnection implements HasHandlers {
      *
      */
     public void start() {
-        String jsonText = configuration.getUIDL();
-        if (jsonText == null) {
-            // initial UIDL not in DOM, request from server
-            getMessageSender().resynchronize();
-        } else {
-            // initial UIDL provided in DOM, continue as if returned by request
 
-            // Hack to avoid logging an error in endRequest()
-            getMessageSender().startRequest();
-            getMessageHandler()
-                    .handleMessage(MessageHandler.parseJson(jsonText));
-        }
-
-        // Tooltip can't be created earlier because the
-        // necessary fields are not setup to add it in the
-        // correct place in the DOM
-        if (!tooltipInitialized) {
-            tooltipInitialized = true;
-            ApplicationConfiguration.runWhenDependenciesLoaded(
-                    () -> getVTooltip().initializeAssistiveTooltips());
-        }
     }
-
-    /**
-     * Checks if there is some work to be done on the client side
-     *
-     * @return true if the client has some work to be done, false otherwise
-     */
-    private boolean isActive() {
-        return !getMessageHandler().isInitialUidlHandled() || isWorkPending()
-                || getMessageSender().hasActiveRequest()
-                || isExecutingDeferredCommands();
-    }
-
-    private native void initializeTestbenchHooks(
-            ComponentLocator componentLocator, String ttAppId)
-    /*-{
-        var ap = this;
-        var client = {};
-        client.isActive = $entry(function() {
-            return ap.@com.vaadin.client.ApplicationConnection::isActive()();
-        });
-        var vi = ap.@com.vaadin.client.ApplicationConnection::getVersionInfo()();
-        if (vi) {
-            client.getVersionInfo = function() {
-                return vi;
-            }
-        }
-
-        client.getProfilingData = $entry(function() {
-            var smh = ap.@com.vaadin.client.ApplicationConnection::getMessageHandler()();
-            var pd = [
-                smh.@com.vaadin.client.communication.MessageHandler::lastProcessingTime,
-                    smh.@com.vaadin.client.communication.MessageHandler::totalProcessingTime
-                ];
-            if (null != smh.@com.vaadin.client.communication.MessageHandler::serverTimingInfo) {
-                pd = pd.concat(smh.@com.vaadin.client.communication.MessageHandler::serverTimingInfo);
-            } else {
-                pd = pd.concat(-1, -1);
-            }
-            pd[pd.length] = smh.@com.vaadin.client.communication.MessageHandler::bootstrapTime;
-            return pd;
-        });
-
-        client.getElementByPath = $entry(function(id) {
-            return componentLocator.@com.vaadin.client.componentlocator.ComponentLocator::getElementByPath(Ljava/lang/String;)(id);
-        });
-        client.getElementByPathStartingAt = $entry(function(id, element) {
-            return componentLocator.@com.vaadin.client.componentlocator.ComponentLocator::getElementByPathStartingAt(Ljava/lang/String;Lcom/google/gwt/dom/client/Element;)(id, element);
-        });
-        client.getElementsByPath = $entry(function(id) {
-            return componentLocator.@com.vaadin.client.componentlocator.ComponentLocator::getElementsByPath(Ljava/lang/String;)(id);
-        });
-        client.getElementsByPathStartingAt = $entry(function(id, element) {
-            return componentLocator.@com.vaadin.client.componentlocator.ComponentLocator::getElementsByPathStartingAt(Ljava/lang/String;Lcom/google/gwt/dom/client/Element;)(id, element);
-        });
-        client.getPathForElement = $entry(function(element) {
-            return componentLocator.@com.vaadin.client.componentlocator.ComponentLocator::getPathForElement(Lcom/google/gwt/dom/client/Element;)(element);
-        });
-        client.initializing = false;
-
-        $wnd.vaadin.clients[ttAppId] = client;
-    }-*/;
-
-    /**
-     * Helper for tt initialization
-     */
-    private JavaScriptObject getVersionInfo() {
-        return configuration.getVersionInfoJSObject();
-    }
-
-    /**
-     * Publishes a JavaScript API for mash-up applications.
-     * <ul>
-     * <li><code>vaadin.forceSync()</code> sends pending variable changes, in
-     * effect synchronizing the server and client state. This is done for all
-     * applications on host page.</li>
-     * <li><code>vaadin.postRequestHooks</code> is a map of functions which gets
-     * called after each XHR made by vaadin application. Note, that it is
-     * attaching js functions responsibility to create the variable like this:
-     *
-     * <code><pre>
-     * if (!vaadin.postRequestHooks) {vaadin.postRequestHooks = new Object();}
-     * postRequestHooks.myHook = function(appId) {
-     *          if (appId == "MyAppOfInterest") {
-     *                  // do the staff you need on xhr activity
-     *          }
-     * }
-     * </pre></code> First parameter passed to these functions is the identifier
-     * of Vaadin application that made the request.
-     * </ul>
-     *
-     * TODO make this multi-app aware
-     */
-    private native void initializeClientHooks()
-    /*-{
-        var app = this;
-        var oldSync;
-        if ($wnd.vaadin.forceSync) {
-                oldSync = $wnd.vaadin.forceSync;
-        }
-        $wnd.vaadin.forceSync = $entry(function() {
-                if (oldSync) {
-                        oldSync();
-                }
-                var sender = app.@com.vaadin.client.ApplicationConnection::messageSender;
-                sender.@com.vaadin.client.communication.MessageSender::resynchronize()();
-        });
-        var oldForceLayout;
-        if ($wnd.vaadin.forceLayout) {
-                oldForceLayout = $wnd.vaadin.forceLayout;
-        }
-        $wnd.vaadin.forceLayout = $entry(function() {
-                if (oldForceLayout) {
-                        oldForceLayout();
-                }
-                app.@com.vaadin.client.ApplicationConnection::forceLayout()();
-        });
-    }-*/;
 
     /**
      * Requests an analyze of layouts, to find inconsistencies. Exclusively used
@@ -611,11 +380,6 @@ public class ApplicationConnection implements HasHandlers {
     }
 
     int cssWaits = 0;
-
-    protected ServerRpcQueue serverRpcQueue;
-    protected ConnectionStateHandler connectionStateHandler;
-    protected MessageHandler messageHandler;
-    protected MessageSender messageSender;
 
     static final int MAX_CSS_WAITS = 100;
 
@@ -651,8 +415,7 @@ public class ApplicationConnection implements HasHandlers {
      * @return
      */
     protected boolean isCSSLoaded() {
-        return cssLoaded
-                || getLoadingIndicator().getElement().getOffsetHeight() != 0;
+        return cssLoaded;
     }
 
     /**
@@ -705,62 +468,12 @@ public class ApplicationConnection implements HasHandlers {
     }
 
     /**
-     * Checks if the client has running or scheduled commands
-     */
-    private boolean isWorkPending() {
-        ConnectorMap connectorMap = getConnectorMap();
-        JsArrayObject<ServerConnector> connectors = connectorMap
-                .getConnectorsAsJsArray();
-        int size = connectors.size();
-        for (int i = 0; i < size; i++) {
-            ServerConnector conn = connectors.get(i);
-            if (isWorkPending(conn)) {
-                return true;
-            }
-
-            if (conn instanceof ComponentConnector) {
-                ComponentConnector compConn = (ComponentConnector) conn;
-                if (isWorkPending(compConn.getWidget())) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    private static boolean isWorkPending(Object object) {
-        return object instanceof DeferredWorker
-                && ((DeferredWorker) object).isWorkPending();
-    }
-
-    /**
-     * Checks if deferred commands are (potentially) still being executed as a
-     * result of an update from the server. Returns true if a deferred command
-     * might still be executing, false otherwise. This will not work correctly
-     * if a deferred command is added in another deferred command.
-     * <p>
-     * Used by the native "client.isActive" function.
-     * </p>
-     *
-     * @return true if deferred commands are (potentially) being executed, false
-     *         otherwise
-     */
-    private boolean isExecutingDeferredCommands() {
-        Scheduler s = Scheduler.get();
-        if (s instanceof VSchedulerImpl) {
-            return ((VSchedulerImpl) s).hasWorkQueued();
-        } else {
-            return false;
-        }
-    }
-
-    /**
      * Returns the loading indicator used by this ApplicationConnection.
      *
      * @return The loading indicator for this ApplicationConnection
      */
     public VLoadingIndicator getLoadingIndicator() {
-        return loadingIndicator;
+        return null;
     }
 
     /**
@@ -772,18 +485,11 @@ public class ApplicationConnection implements HasHandlers {
      */
     @Deprecated
     public boolean isLoadingIndicatorVisible() {
-        return getLoadingIndicator().isVisible();
+        return false;
     }
 
     private void addVariableToQueue(String connectorId, String variableName,
             Object value, boolean immediate) {
-        boolean lastOnly = !immediate;
-        // note that type is now deduced from value
-        serverRpcQueue.add(new LegacyChangeVariablesInvocation(connectorId,
-                variableName, value), lastOnly);
-        if (immediate) {
-            serverRpcQueue.flush();
-        }
     }
 
     /**
@@ -791,7 +497,7 @@ public class ApplicationConnection implements HasHandlers {
      */
     @Deprecated
     public void sendPendingVariableChanges() {
-        serverRpcQueue.flush();
+
     }
 
     /**
@@ -1039,8 +745,6 @@ public class ApplicationConnection implements HasHandlers {
     public void forceLayout() {
         Duration duration = new Duration();
 
-        layoutManager.forceLayout();
-
         getLogger().info("forceLayout in " + duration.elapsedMillis() + " ms");
     }
 
@@ -1173,16 +877,7 @@ public class ApplicationConnection implements HasHandlers {
      * @return Icon object
      */
     public Icon getIcon(String uri) {
-        Icon icon;
-        if (uri == null) {
-            return null;
-        } else if (FontIcon.isFontIconUri(uri)) {
-            icon = GWT.create(FontIcon.class);
-        } else {
-            icon = GWT.create(ImageIcon.class);
-        }
-        icon.setUri(translateVaadinUri(uri));
-        return icon;
+        return null;
     }
 
     /**
@@ -1195,7 +890,7 @@ public class ApplicationConnection implements HasHandlers {
      * @return translated URI ready for browser
      */
     public String translateVaadinUri(String uidlUri) {
-        return uriResolver.resolveVaadinUri(uidlUri);
+        return null;
     }
 
     /**
@@ -1209,14 +904,7 @@ public class ApplicationConnection implements HasHandlers {
                 + getUIConnector().getActiveTheme();
     }
 
-    /* Extended title handling */
-
-    private final VTooltip tooltip;
-
     private ConnectorMap connectorMap = GWT.create(ConnectorMap.class);
-
-    private final DependencyLoader dependencyLoader = GWT
-            .create(DependencyLoader.class);
 
     /**
      * Use to notify that the given component's caption has changed; layouts may
@@ -1308,7 +996,7 @@ public class ApplicationConnection implements HasHandlers {
      * @return VTooltip instance
      */
     public VTooltip getVTooltip() {
-        return tooltip;
+        return null;
     }
 
     /**
@@ -1359,33 +1047,7 @@ public class ApplicationConnection implements HasHandlers {
     }
 
     LayoutManager getLayoutManager() {
-        return layoutManager;
-    }
-
-    /**
-     * Schedules a heartbeat request to occur after the configured heartbeat
-     * interval elapses if the interval is a positive number. Otherwise, does
-     * nothing.
-     *
-     * @deprecated as of 7.2, use {@link Heartbeat#schedule()} instead
-     */
-    @Deprecated
-    protected void scheduleHeartbeat() {
-        heartbeat.schedule();
-    }
-
-    /**
-     * Sends a heartbeat request to the server.
-     * <p>
-     * Heartbeat requests are used to inform the server that the client-side is
-     * still alive. If the client page is closed or the connection lost, the
-     * server will eventually close the inactive UI.
-     *
-     * @deprecated as of 7.2, use {@link Heartbeat#send()} instead
-     */
-    @Deprecated
-    protected void sendHeartbeat() {
-        heartbeat.send();
+        return null;
     }
 
     public void handleCommunicationError(String details, int statusCode) {
@@ -1432,7 +1094,6 @@ public class ApplicationConnection implements HasHandlers {
         } else if (getApplicationState() == ApplicationState.RUNNING) {
             if (!applicationRunning) {
                 applicationState = ApplicationState.TERMINATED;
-                eventBus.fireEvent(new ApplicationStoppedEvent());
             } else {
                 getLogger().warning(
                         "Tried to start an already running application. This should not be done");
@@ -1453,12 +1114,12 @@ public class ApplicationConnection implements HasHandlers {
 
     public <H extends EventHandler> HandlerRegistration addHandler(
             GwtEvent.Type<H> type, H handler) {
-        return eventBus.addHandler(type, handler);
+        return null;
     }
 
     @Override
     public void fireEvent(GwtEvent<?> event) {
-        eventBus.fireEvent(event);
+
     }
 
     /**
@@ -1496,7 +1157,7 @@ public class ApplicationConnection implements HasHandlers {
      * Returns the hearbeat instance.
      */
     public Heartbeat getHeartbeat() {
-        return heartbeat;
+        return null;
     }
 
     /**
@@ -1519,7 +1180,7 @@ public class ApplicationConnection implements HasHandlers {
      * @return the server RPC queue
      */
     public ServerRpcQueue getServerRpcQueue() {
-        return serverRpcQueue;
+        return null;
     }
 
     /**
@@ -1529,7 +1190,7 @@ public class ApplicationConnection implements HasHandlers {
      * @return the server RPC queue
      */
     public ConnectionStateHandler getConnectionStateHandler() {
-        return connectionStateHandler;
+        return null;
     }
 
     /**
@@ -1539,7 +1200,7 @@ public class ApplicationConnection implements HasHandlers {
      * @return the message handler
      */
     public MessageHandler getMessageHandler() {
-        return messageHandler;
+        return null;
     }
 
     /**
@@ -1549,7 +1210,7 @@ public class ApplicationConnection implements HasHandlers {
      * @return the server rpc manager
      */
     public RpcManager getRpcManager() {
-        return rpcManager;
+        return null;
     }
 
     /**
@@ -1559,7 +1220,7 @@ public class ApplicationConnection implements HasHandlers {
      * @return the message sender
      */
     public MessageSender getMessageSender() {
-        return messageSender;
+        return null;
     }
 
     /**
@@ -1571,7 +1232,7 @@ public class ApplicationConnection implements HasHandlers {
     }
 
     public int getLastSeenServerSyncId() {
-        return getMessageHandler().getLastSeenServerSyncId();
+        return 0;
     }
 
     /**
@@ -1580,7 +1241,7 @@ public class ApplicationConnection implements HasHandlers {
      * @return the dependency loader for this connection
      */
     public DependencyLoader getDependencyLoader() {
-        return dependencyLoader;
+        return null;
     }
 
 }

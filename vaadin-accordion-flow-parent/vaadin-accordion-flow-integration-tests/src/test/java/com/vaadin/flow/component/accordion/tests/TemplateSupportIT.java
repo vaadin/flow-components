@@ -3,23 +3,22 @@ package com.vaadin.flow.component.accordion.tests;
 import com.vaadin.flow.component.accordion.testbench.AccordionElement;
 import com.vaadin.flow.component.accordion.testbench.AccordionPanelElement;
 import com.vaadin.flow.component.orderedlayout.testbench.VerticalLayoutElement;
+import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.ElementQuery;
-import com.vaadin.tests.AbstractParallelTest;
+import com.vaadin.tests.AbstractComponentIT;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-public class TemplateSupportIT extends AbstractParallelTest {
+@TestPath("vaadin-accordion/template-support")
+public class TemplateSupportIT extends AbstractComponentIT {
 
     private static final String APP_ROOT = "accordion-app";
 
     @Before
     public void init() {
-        String url = getBaseURL().replace(super.getBaseURL(),
-                super.getBaseURL() + "/vaadin-accordion")
-                + "/accordionintemplate";
-        getDriver().get(url);
+        open();
     }
 
     @Test
