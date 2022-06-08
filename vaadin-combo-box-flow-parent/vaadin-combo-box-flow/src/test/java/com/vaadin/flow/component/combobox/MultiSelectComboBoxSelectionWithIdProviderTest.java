@@ -104,6 +104,17 @@ public class MultiSelectComboBoxSelectionWithIdProviderTest {
         Assert.assertEquals(0, comboBox.getSelectedItems().size());
     }
 
+    @Test
+    public void selectItem_changeIdentityProvider_itemStillSelected() {
+        // Select Magnus, identified by ID 1
+        comboBox.select(new Person(1, "Magnus"));
+        // Change identifier provider to identify person by name
+        comboBox.getGenericDataView().setIdentifierProvider(Person::getName);
+        // Check if person is now identified by name, while passing a different
+        // ID
+        Assert.assertTrue(comboBox.isSelected(new Person(2, "Magnus")));
+    }
+
     private static class TestDataProvider extends ListDataProvider<Person> {
         public TestDataProvider(Collection<Person> items) {
             super(items);

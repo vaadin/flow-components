@@ -24,7 +24,7 @@ import java.util.Set;
  */
 class MultiSelectComboBoxSelectionModel<TItem> implements Serializable {
     private Map<Object, TItem> selection;
-    private final SerializableFunction<TItem, Object> identityProvider;
+    private SerializableFunction<TItem, Object> identityProvider;
 
     MultiSelectComboBoxSelectionModel(
             SerializableFunction<TItem, Object> identityProvider) {
@@ -59,6 +59,20 @@ class MultiSelectComboBoxSelectionModel<TItem> implements Serializable {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Updates the identity provider used to identify items, and guarantees that
+     * the selection is kept after the identity change.
+     *
+     * @param identityProvider
+     *            the new identity provider
+     */
+    public void setIdentityProvider(
+            SerializableFunction<TItem, Object> identityProvider) {
+        this.identityProvider = identityProvider;
+        // Refresh selection map with new item IDs
+        selection = mapItemsById(new LinkedHashSet<>(selection.values()));
     }
 
     /**

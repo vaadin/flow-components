@@ -15,11 +15,14 @@
  */
 package com.vaadin.flow.component.combobox;
 
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
+import com.vaadin.flow.data.provider.IdentifierProviderChangeEvent;
 import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
@@ -95,6 +98,7 @@ public class MultiSelectComboBox<TItem>
      *            the amount of items to request at a time for lazy loading
      * @see #setPageSize(int)
      */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public MultiSelectComboBox(int pageSize) {
         super("selectedItems", Collections.emptySet(), JsonArray.class,
                 MultiSelectComboBox::presentationToModel,
@@ -112,6 +116,13 @@ public class MultiSelectComboBox<TItem>
                 selectionModel.setSelectedItems(e.getValue());
             }
         });
+        // Pass identifier provider to selection model when it is changed
+        // through a data view
+        ComponentEventListener<IdentifierProviderChangeEvent<TItem, ?>> listener = e -> selectionModel
+                .setIdentityProvider(e.getIdentifierProvider());
+        ComponentUtil.addListener(this, IdentifierProviderChangeEvent.class,
+                (ComponentEventListener) listener);
+        // Initialize page size and data provider
         setPageSize(pageSize);
         setItems(new DataCommunicator.EmptyDataProvider<>());
     }
