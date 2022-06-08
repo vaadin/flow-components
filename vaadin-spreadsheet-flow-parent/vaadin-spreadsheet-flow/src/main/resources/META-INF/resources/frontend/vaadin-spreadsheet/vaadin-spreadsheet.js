@@ -405,7 +405,7 @@ export class VaadinSpreadsheet extends LitElement {
   }
 
   onPopupButtonOpen(row, column, contentId) {
-    this.api.onPopupButtonOpened(row, column, contentId);
+    requestAnimationFrame(() => this.api.onPopupButtonOpened(row, column, contentId));
   }
 
   /* SERVER RPC METHOD CALLBACKS */

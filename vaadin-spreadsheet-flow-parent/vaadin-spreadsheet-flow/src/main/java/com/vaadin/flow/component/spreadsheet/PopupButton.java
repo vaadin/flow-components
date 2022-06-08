@@ -140,11 +140,10 @@ public class PopupButton extends Component {
     public void openPopup() {
         setPopupVisible(true);
         getElement().appendChild(getContent().getElement());
-        getUI().get().beforeClientResponse(this,
-                (e) -> getParent().ifPresent(parent -> {
-                    parent.getElement().callJsFunction("onPopupButtonOpen",
-                            getRow() + 1, getColumn() + 1, getId().orElse(""));
-                }));
+        getParent().ifPresent(parent -> {
+            parent.getElement().callJsFunction("onPopupButtonOpen",
+                    getRow() + 1, getColumn() + 1, getId().orElse(""));
+        });
     }
 
     private PopupButton getRpcProxy(
