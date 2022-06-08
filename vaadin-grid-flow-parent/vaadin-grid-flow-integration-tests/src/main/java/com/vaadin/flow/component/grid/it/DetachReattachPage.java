@@ -28,7 +28,7 @@ public class DetachReattachPage extends Div {
     public DetachReattachPage() {
         Grid<String> grid = new Grid<String>();
         grid.setItems("A", "B", "C");
-        grid.addColumn(x -> x).setHeader("Col");
+        grid.addColumn(x -> x).setHeader("Col").setSortable(true);
 
         grid.setSelectionMode(Grid.SelectionMode.SINGLE);
 
@@ -62,7 +62,13 @@ public class DetachReattachPage extends Div {
         toggleDetailsVisibleOnClick
                 .setId("toggle-details-visible-click-button");
 
+        NativeButton resetSortingButton = new NativeButton("Reset sorting",
+                e -> {
+                    grid.sort(null);
+                });
+        resetSortingButton.setId("reset-sorting-button");
+
         add(btnAttach, btnDetach, btnDisallowDeselect, addItemDetailsButton,
-                toggleDetailsVisibleOnClick, grid);
+                toggleDetailsVisibleOnClick, resetSortingButton, grid);
     }
 }
