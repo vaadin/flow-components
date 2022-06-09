@@ -408,6 +408,10 @@ export class VaadinSpreadsheet extends LitElement {
     requestAnimationFrame(() => this.api.onPopupButtonOpened(row, column, contentId));
   }
 
+  closePopup(row, column) {
+    this.api.closePopup(row, column);
+  }
+
   /* SERVER RPC METHOD CALLBACKS */
   createCallbacks() {
     this.api.setGroupingCollapsedCallback(e => {
@@ -568,7 +572,11 @@ export class VaadinSpreadsheet extends LitElement {
 
     this.api.setPopupButtonClickCallback(e => {
       this.dispatchEvent(this.createEvent('popupButtonClick', e));
-    })
+    });
+
+    this.api.setPopupCloseCallback(e => {
+      this.dispatchEvent(this.createEvent('popupClose', e));
+    });
 
     this.dispatchEvent(this.createEvent('onConnectorInit'), []);
   }

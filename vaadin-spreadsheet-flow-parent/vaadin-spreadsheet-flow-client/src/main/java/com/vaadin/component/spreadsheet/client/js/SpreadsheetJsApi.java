@@ -547,6 +547,15 @@ public class SpreadsheetJsApi {
         }
     }
 
+    public void closePopup(int row, int column) {
+        PopupButtonWidget widget = popupButtonWidgets
+            .get(getPopupKey(row, column));
+        if (widget != null) {
+            widget.closePopup();
+        }
+    }
+
+
     public void setResources(Element element, String resources) {
         ArrayList<String> l = Parser.parseArraylistString(resources);
         l.forEach(k -> spreadsheetConnector.getConnection().setResource(k,

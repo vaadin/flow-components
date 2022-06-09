@@ -157,8 +157,7 @@ public class PopupButton extends Component {
      */
     public void closePopup() {
         setPopupVisible(false);
-        // todo: when getRpcProxy is implemented
-        // getRpcProxy(PopupButtonClientRpc.class).closePopup();
+        getParent().ifPresent(parent -> parent.getElement().callJsFunction("closePopup", getRow() + 1, getColumn() + 1));
     }
 
     /**

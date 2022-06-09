@@ -839,6 +839,16 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
         }
     }
 
+    public void onPopupClose(int row, int column) {
+        PopupButton popup = sheetPopupButtons
+            .get(SpreadsheetUtil.relativeToAbsolute(this,
+                new CellReference(row - 1, column - 1)));
+
+        if (popup != null) {
+            popup.closePopup();
+        }
+    }
+
     /*
      * CLIENT RPC
      */

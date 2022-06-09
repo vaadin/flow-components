@@ -507,4 +507,8 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
     public void onPopupButtonClick(int row, int column) {
         spreadsheet.onPopupButtonClick(row, column);
     }
+
+    public void onPopupClose(int row, int column) {
+        spreadsheet.onPopupClose(row, column);
+    }
 }
