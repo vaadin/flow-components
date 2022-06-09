@@ -158,7 +158,8 @@ public class PopupButton extends Component {
      */
     public void closePopup() {
         setPopupVisible(false);
-        getParent().ifPresent(parent -> parent.getElement().callJsFunction("closePopup", getRow() + 1, getColumn() + 1));
+        getParent().ifPresent(parent -> parent.getElement()
+                .callJsFunction("closePopup", getRow() + 1, getColumn() + 1));
         fireClose();
     }
 
