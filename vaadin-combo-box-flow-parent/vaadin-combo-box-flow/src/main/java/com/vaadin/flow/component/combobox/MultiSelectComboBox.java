@@ -34,6 +34,8 @@ import elemental.json.JsonObject;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -300,6 +302,20 @@ public class MultiSelectComboBox<TItem>
             // actually changed
             super.setValue(value);
         }
+    }
+
+    /**
+     * Sets the value of the component, which is a set of selected items. As
+     * each item can only be selected once, duplicates in the provided items
+     * will be removed. Passing no items will result in an empty selection.
+     *
+     * @param items
+     *            the new value
+     */
+    @SafeVarargs
+    public final void setValue(TItem... items) {
+        Set<TItem> value = new LinkedHashSet<>(List.of(items));
+        setValue(value);
     }
 
     @Override
