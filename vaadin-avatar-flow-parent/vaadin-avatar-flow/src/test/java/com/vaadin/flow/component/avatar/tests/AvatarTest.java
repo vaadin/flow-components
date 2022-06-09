@@ -18,21 +18,19 @@ package com.vaadin.flow.component.avatar.tests;
 
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.avatar.AvatarVariant;
+import com.vaadin.tests.ThemeVariantTestHelper;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Set;
-
-/**
- * @author Vaadin Ltd.
- */
 public class AvatarTest {
 
-    private Avatar avatar = new Avatar();
-    private Avatar constructedAvatar;
-    String name = "foo bar";
-    String abbr = "fb";
-    String url = "https://vaadin.com/";
+    private Avatar avatar;
+
+    @Before
+    public void setup() {
+        avatar = new Avatar();
+    }
 
     @Test
     public void shouldCreateEmptyAvatarWithDefaultState() {
@@ -44,53 +42,47 @@ public class AvatarTest {
 
     @Test
     public void setName_getName() {
-        avatar.setName(name);
-        Assert.assertEquals(avatar.getName(), name);
+        avatar.setName("foo");
+        Assert.assertEquals(avatar.getName(), "foo");
     }
 
     @Test
     public void setAbbr_getAbbr() {
-        avatar.setAbbreviation(abbr);
-        Assert.assertEquals(avatar.getAbbreviation(), abbr);
+        avatar.setAbbreviation("fb");
+        Assert.assertEquals(avatar.getAbbreviation(), "fb");
     }
 
     @Test
     public void setImgLink_getImgLink() {
-        avatar.setImage(url);
-        Assert.assertEquals(avatar.getImage(), url);
+        avatar.setImage("https://vaadin.com/");
+        Assert.assertEquals(avatar.getImage(), "https://vaadin.com/");
     }
 
     @Test
     public void constructAvatarWithName() {
-        constructedAvatar = new Avatar(name);
-        Assert.assertEquals(constructedAvatar.getName(), name);
+        Avatar avatar = new Avatar("foo");
+        Assert.assertEquals(avatar.getName(), "foo");
     }
 
     @Test
     public void constructAvatarWithNameAndImage() {
-        constructedAvatar = new Avatar(name, url);
+        Avatar avatar = new Avatar("foo", "https://vaadin.com/");
 
-        Assert.assertEquals(constructedAvatar.getName(), name);
-        Assert.assertEquals(constructedAvatar.getImage(), url);
+        Assert.assertEquals(avatar.getName(), "foo");
+        Assert.assertEquals(avatar.getImage(), "https://vaadin.com/");
     }
 
     @Test
     public void addThemeVariant_themeAttributeContainsThemeVariant() {
-        avatar.addThemeVariants(AvatarVariant.LUMO_LARGE);
-
-        Set<String> themeNames = avatar.getThemeNames();
-        Assert.assertTrue(
-                themeNames.contains(AvatarVariant.LUMO_LARGE.getVariantName()));
+        ThemeVariantTestHelper.addThemeVariant_themeNamesContainsThemeVariant(
+                new Avatar(), AvatarVariant.LUMO_LARGE);
     }
 
     @Test
     public void addThemeVariant_removeTheme_doesNotContainThemeVariant() {
-        avatar.addThemeVariants(AvatarVariant.LUMO_LARGE);
-        avatar.removeThemeVariants(AvatarVariant.LUMO_LARGE);
-
-        Set<String> themeNames = avatar.getThemeNames();
-        Assert.assertFalse(
-                themeNames.contains(AvatarVariant.LUMO_LARGE.getVariantName()));
+        ThemeVariantTestHelper
+                .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
+                        new Avatar(), AvatarVariant.LUMO_LARGE);
     }
 
     @Test

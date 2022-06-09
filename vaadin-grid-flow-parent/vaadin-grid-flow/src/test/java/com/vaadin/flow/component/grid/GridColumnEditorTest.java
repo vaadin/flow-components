@@ -32,7 +32,7 @@ public class GridColumnEditorTest {
     private Column<Person> nameColumn;
 
     @Before
-    public void init() {
+    public void setup() {
         grid = new Grid<>();
         binder = new Binder<>(Person.class);
         grid.getEditor().setBinder(binder);

@@ -27,6 +27,7 @@ import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.dom.Element;
 
 /**
@@ -104,38 +105,14 @@ import com.vaadin.flow.dom.Element;
  * </p>
  */
 @Tag("vaadin-button")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-rc2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/button", version = "23.1.0-rc2")
-@NpmPackage(value = "@vaadin/vaadin-button", version = "23.1.0-rc2")
+@NpmPackage(value = "@vaadin/button", version = "23.1.0")
+@NpmPackage(value = "@vaadin/vaadin-button", version = "23.1.0")
 @JsModule("@vaadin/button/src/vaadin-button.js")
 public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
-        extends Component
-        implements HasStyle, ClickNotifier<R>, HasText, Focusable<R>, HasTheme {
-
-    /**
-     * Adds theme variants to the component.
-     *
-     * @param variants
-     *            theme variants to add
-     */
-    public void addThemeVariants(ButtonVariant... variants) {
-        getThemeNames()
-                .addAll(Stream.of(variants).map(ButtonVariant::getVariantName)
-                        .collect(Collectors.toList()));
-    }
-
-    /**
-     * Removes theme variants from the component.
-     *
-     * @param variants
-     *            theme variants to remove
-     */
-    public void removeThemeVariants(ButtonVariant... variants) {
-        getThemeNames().removeAll(
-                Stream.of(variants).map(ButtonVariant::getVariantName)
-                        .collect(Collectors.toList()));
-    }
+        extends Component implements HasStyle, ClickNotifier<R>, HasText,
+        Focusable<R>, HasTheme, HasThemeVariant<ButtonVariant> {
 
     /**
      * <p>

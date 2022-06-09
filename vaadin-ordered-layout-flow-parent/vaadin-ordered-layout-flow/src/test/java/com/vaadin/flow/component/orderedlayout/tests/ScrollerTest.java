@@ -30,7 +30,7 @@ public class ScrollerTest {
     private Scroller scroller;
 
     @Before
-    public void init() {
+    public void setup() {
         scroller = new Scroller();
     }
 

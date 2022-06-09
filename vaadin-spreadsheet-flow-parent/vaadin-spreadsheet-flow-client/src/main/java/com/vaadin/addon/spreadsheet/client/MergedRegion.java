@@ -19,7 +19,7 @@ import jsinterop.annotations.JsIgnore;
 import jsinterop.annotations.JsType;
 
 @SuppressWarnings("serial")
-@JsType
+@JsType(namespace = "Vaadin.Spreadsheet")
 public class MergedRegion implements Serializable {
     public int id;
     public int col1;

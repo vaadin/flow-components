@@ -28,7 +28,7 @@ public class GridProTest {
     public ExpectedException thrown = ExpectedException.none();
 
     @Before
-    public void init() {
+    public void setup() {
         grid = createFakeGridPro();
 
         // We should ensure the correct value were passed

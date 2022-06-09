@@ -33,7 +33,7 @@ public class BigDecimalFieldTest extends TextFieldTest {
     private BigDecimalField field;
 
     @Before
-    public void init() {
+    public void setup() {
         field = new BigDecimalField();
         field.setLocale(Locale.US);
     }

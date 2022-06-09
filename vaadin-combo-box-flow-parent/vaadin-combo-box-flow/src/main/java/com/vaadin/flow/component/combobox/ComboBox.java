@@ -45,23 +45,23 @@ import elemental.json.JsonObject;
  * ComboBox has only a relatively small set of items, the filtering will happen
  * in the browser, allowing smooth user-experience. When the size of the data
  * set is larger than the {@code pageSize}, the webcomponent doesn't necessarily
- * have all the data available and it will make requests to the server to handle
- * the filtering. Also, if you have defined custom filtering logic, with eg.
- * {@link #setItems(ItemFilter, Collection)}, filtering will happen in the
+ * have all the data available, and it will make requests to the server to
+ * handle the filtering. Also, if you have defined custom filtering logic, with
+ * eg. {@link #setItems(ItemFilter, Collection)}, filtering will happen in the
  * server. To enable client-side filtering with larger data sets, you can
  * override the {@code pageSize} to be bigger than the size of your data set.
- * However, then the full data set will be sent to the client immediately and
+ * However, then the full data set will be sent to the client immediately, and
  * you will lose the benefits of lazy loading.
  *
  * @param <T>
- *            the type of the items to be inserted in the combo box
+ *            the type of the items to be selectable from the combo box
  * @author Vaadin Ltd
  */
 @Tag("vaadin-combo-box")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-rc2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/combo-box", version = "23.1.0-rc2")
-@NpmPackage(value = "@vaadin/vaadin-combo-box", version = "23.1.0-rc2")
+@NpmPackage(value = "@vaadin/combo-box", version = "23.1.0")
+@NpmPackage(value = "@vaadin/vaadin-combo-box", version = "23.1.0")
 @JsModule("@vaadin/combo-box/src/vaadin-combo-box.js")
 @JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 @JsModule("./flow-component-renderer.js")

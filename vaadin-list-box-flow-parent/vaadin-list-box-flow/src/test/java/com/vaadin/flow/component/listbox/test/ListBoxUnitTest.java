@@ -26,7 +26,7 @@ public class ListBoxUnitTest {
     public ExpectedException thrown = ExpectedException.none();
 
     @Before
-    public void init() {
+    public void setup() {
         listBox = new ListBox<>();
         listBox.setItems(ITEM1, ITEM2);
     }

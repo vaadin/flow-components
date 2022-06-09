@@ -30,7 +30,7 @@ public class GridProEditColumnTest {
     public ExpectedException thrown = ExpectedException.none();
 
     @Before
-    public void init() {
+    public void setup() {
         itemUpdater = (item, newValue) -> {
             Assert.assertNotNull(item);
             Assert.assertNotNull(newValue);

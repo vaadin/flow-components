@@ -16,12 +16,6 @@
             <version>${testbench.version}</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-testbench-api</artifactId>
-            <version>${framework.version}</version>
-            <scope>provided</scope>
-        </dependency>
     </dependencies>
     <build>
         <plugins>

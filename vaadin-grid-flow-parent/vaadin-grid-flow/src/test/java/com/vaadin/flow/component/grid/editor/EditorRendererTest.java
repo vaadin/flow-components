@@ -36,7 +36,7 @@ public class EditorRendererTest {
 
     @SuppressWarnings("unchecked")
     @Before
-    public void init() {
+    public void setup() {
         editor = Mockito.mock(Editor.class);
         renderer = Mockito.spy(new EditorRenderer<>(editor, "col"));
         container = new Element("div");

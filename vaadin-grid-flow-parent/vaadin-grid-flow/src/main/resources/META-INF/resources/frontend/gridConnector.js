@@ -441,6 +441,14 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
               try {
                 const sorters = Array.from(grid.querySelectorAll('vaadin-grid-sorter'));
 
+                // Sorters for hidden columns are removed from DOM but stored in the web component.
+                // We need to ensure that all the sorters are reset when using `grid.sort(null)`.
+                grid._sorters.forEach((sorter) => {
+                  if (!sorters.includes(sorter)) {
+                    sorters.push(sorter);
+                  }
+                });
+
                 sorters.forEach((sorter) => {
                   if (!directions.filter((d) => d.column === sorter.getAttribute('path'))[0]) {
                     sorter.direction = null;
@@ -1124,6 +1132,11 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
         );
 
         function _fireClickEvent(event, eventName) {
+          // Click event was handled by the component inside grid, do nothing.
+          if (event.defaultPrevented) {
+            return;
+          }
+
           const target = event.target;
           const eventContext = grid.getEventContext(event);
           const section = eventContext.section;
