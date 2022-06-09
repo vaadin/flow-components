@@ -18,9 +18,10 @@ package com.vaadin.flow.component.combobox;
 import com.vaadin.flow.component.shared.ThemeVariant;
 
 /**
- * Set of theme variants applicable for {@code vaadin-combo-box} component.
+ * Set of theme variants applicable for {@code vaadin-multi-select-combo-box}
+ * component.
  */
-public enum ComboBoxVariant implements ThemeVariant {
+public enum MultiSelectComboBoxVariant implements ThemeVariant {
     //@formatter:off
     LUMO_SMALL("small"),
     LUMO_ALIGN_LEFT("align-left"),
@@ -32,7 +33,7 @@ public enum ComboBoxVariant implements ThemeVariant {
 
     private final String variant;
 
-    ComboBoxVariant(String variant) {
+    MultiSelectComboBoxVariant(String variant) {
         this.variant = variant;
     }
 
