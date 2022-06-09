@@ -7,7 +7,6 @@ import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.Keys;
 
 import java.util.Arrays;
 import java.util.Collections;
