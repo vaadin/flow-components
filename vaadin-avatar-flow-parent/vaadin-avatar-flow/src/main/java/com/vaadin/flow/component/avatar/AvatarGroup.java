@@ -23,6 +23,7 @@ import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.NodeOwner;
 import com.vaadin.flow.internal.StateTree;
@@ -62,13 +63,13 @@ import java.util.stream.Stream;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-avatar-group")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-rc3")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/avatar-group/src/vaadin-avatar-group.js")
-@NpmPackage(value = "@vaadin/avatar-group", version = "23.1.0-rc3")
-@NpmPackage(value = "@vaadin/vaadin-avatar", version = "23.1.0-rc3")
-public class AvatarGroup extends Component
-        implements HasStyle, HasSize, HasTheme {
+@NpmPackage(value = "@vaadin/avatar-group", version = "23.1.0")
+@NpmPackage(value = "@vaadin/vaadin-avatar", version = "23.1.0")
+public class AvatarGroup extends Component implements HasStyle, HasSize,
+        HasTheme, HasThemeVariant<AvatarGroupVariant> {
 
     /**
      * Item to be set as an avatar for the avatar group.
@@ -651,29 +652,5 @@ public class AvatarGroup extends Component
         }
 
         return null;
-    }
-
-    /**
-     * Adds theme variants to the avatar group component.
-     *
-     * @param variants
-     *            theme variants to add
-     */
-    public void addThemeVariants(AvatarGroupVariant... variants) {
-        getThemeNames().addAll(
-                Stream.of(variants).map(AvatarGroupVariant::getVariantName)
-                        .collect(Collectors.toList()));
-    }
-
-    /**
-     * Removes theme variants from the avatar group component.
-     *
-     * @param variants
-     *            theme variants to remove
-     */
-    public void removeThemeVariants(AvatarGroupVariant... variants) {
-        getThemeNames().removeAll(
-                Stream.of(variants).map(AvatarGroupVariant::getVariantName)
-                        .collect(Collectors.toList()));
     }
 }

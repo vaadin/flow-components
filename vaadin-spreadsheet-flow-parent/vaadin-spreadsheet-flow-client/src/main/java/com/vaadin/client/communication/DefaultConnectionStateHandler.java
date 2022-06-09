@@ -347,10 +347,6 @@ public class DefaultConnectionStateHandler implements ConnectionStateHandler {
     protected void showDialog() {
         reconnectDialog.setReconnecting(true);
         reconnectDialog.show(connection);
-
-        // We never want to show loading indicator and reconnect dialog at the
-        // same time
-        connection.getLoadingIndicator().hide();
     }
 
     /**

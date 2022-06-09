@@ -38,7 +38,7 @@ public class BeanGridTest {
     ExtendedGrid<Person> extendedGrid;
 
     @Before
-    public void init() {
+    public void setup() {
         grid = new Grid<>(Person.class);
         extendedGrid = new ExtendedGrid<>(Person.class);
     }

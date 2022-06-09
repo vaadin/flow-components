@@ -95,6 +95,25 @@ public class DetachReattachIt extends AbstractComponentIT {
 
     }
 
+    @Test
+    public void detachAndReattach_resetSorting_noErrorIsThrown() {
+        open();
+        GridElement grid = $(GridElement.class).first();
+
+        grid.getHeaderCell(0).$("vaadin-grid-sorter").first().click();
+
+        // Detach, reset sorting and re-attach
+        $("button").id("detach-button").click();
+
+        $("button").id("reset-sorting-button").click();
+
+        $("button").id("attach-button").click();
+
+        // Check that there are no new exceptions/errors thrown
+        // after re-attaching the grid when sorting is reset
+        checkLogsForErrors();
+    }
+
     private WebElement getRow(GridElement grid, int row) {
         return grid.$("*").id("items").findElements(By.cssSelector("tr"))
                 .get(row);

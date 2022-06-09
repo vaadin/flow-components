@@ -17,7 +17,7 @@ public class AbstractGridMultiSelectionModelWithHierarchicalDataProviderTest {
     private DataCommunicatorTest.MockUI ui;
 
     @Before
-    public void init() {
+    public void setup() {
         treeGrid = new TreeGrid<>();
         // Data provider with only two root items, we don't need any nested
         // items for the test cases (so far)

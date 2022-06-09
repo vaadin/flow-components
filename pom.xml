@@ -13,7 +13,7 @@
     <url>https://vaadin.com/components</url>
     <properties>
         <flow.version>23.2-SNAPSHOT</flow.version>
-        <testbench.version>8.0.1</testbench.version>
+        <testbench.version>8.0.2</testbench.version>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -32,7 +32,7 @@
         <failIfNoTests>false</failIfNoTests>
         <vaadin.pnpm.enable>false</vaadin.pnpm.enable>
         <sauce-connect.version>2.1.25</sauce-connect.version>
-        <ci-sauce.version>1.157</ci-sauce.version>
+        <ci-sauce.version>1.158</ci-sauce.version>
         <sauce.options>--tunnel-identifier ${maven.build.timestamp}</sauce.options>
         <osgi.bundle.license>http://www.apache.org/licenses/LICENSE-2.0</osgi.bundle.license>
         <osgi.export.package>default</osgi.export.package>
@@ -206,7 +206,7 @@
                 <plugin>
                     <groupId>biz.aQute.bnd</groupId>
                     <artifactId>bnd-maven-plugin</artifactId>
-                    <version>6.2.0</version>
+                    <version>6.3.0</version>
                     <configuration>
                         <bnd><![CDATA[
                           // macro reference: https://bnd.bndtools.org/chapters/855-macros-ref.html
@@ -577,7 +577,7 @@
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
-                <version>4.6.0</version>
+                <version>4.6.1</version>
                 <scope>test</scope>
             </dependency>
             <dependency>

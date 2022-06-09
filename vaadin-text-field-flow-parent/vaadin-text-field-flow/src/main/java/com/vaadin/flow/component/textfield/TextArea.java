@@ -40,7 +40,7 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
         implements HasSize, HasValidation, HasValueChangeMode,
         HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
         HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper, HasLabel,
-        HasClearButton, HasThemeVariant<TextFieldVariant> {
+        HasClearButton, HasThemeVariant<TextAreaVariant> {
     private ValueChangeMode currentMode;
 
     private boolean isConnectorAttached;

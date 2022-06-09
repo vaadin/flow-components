@@ -206,10 +206,10 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-rc3")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/grid", version = "23.1.0-rc3")
-@NpmPackage(value = "@vaadin/vaadin-grid", version = "23.1.0-rc3")
+@NpmPackage(value = "@vaadin/grid", version = "23.1.0")
+@NpmPackage(value = "@vaadin/vaadin-grid", version = "23.1.0")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -399,7 +399,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-column")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-rc3")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class Column<T> extends AbstractColumn<Column<T>> {
 
@@ -1448,8 +1448,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 .getUniqueKeyProperty();
         if (uniqueKeyPropertyName != null
                 && !jsonObject.hasKey(uniqueKeyPropertyName)) {
-            jsonObject.put(uniqueKeyPropertyName,
-                    getUniqueKeyProvider().apply(item));
+            jsonObject.put(uniqueKeyPropertyName, getUniqueKey(item));
         }
     }
 
@@ -3384,8 +3383,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             }
             directions.set(i, direction);
         }
-        getElement().callJsFunction("$connector.setSorterDirections",
-                directions);
+
+        if (getElement().getNode().isAttached()) {
+            getElement().callJsFunction("$connector.setSorterDirections",
+                    directions);
+        }
     }
 
     /**
@@ -4428,5 +4430,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             }
             return result;
         };
+    }
+
+    private String getUniqueKey(T item) {
+        return Optional.ofNullable(getUniqueKeyProvider())
+                .map(provider -> provider.apply(item))
+                .orElse(getDataCommunicator().getKeyMapper().key(item));
     }
 }
