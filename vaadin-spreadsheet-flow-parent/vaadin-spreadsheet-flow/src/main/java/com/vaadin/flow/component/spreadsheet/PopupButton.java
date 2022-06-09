@@ -144,6 +144,7 @@ public class PopupButton extends Component {
             parent.getElement().callJsFunction("onPopupButtonOpen",
                     getRow() + 1, getColumn() + 1, getId().orElse(""));
         });
+        fireOpen();
     }
 
     private PopupButton getRpcProxy(
@@ -158,6 +159,7 @@ public class PopupButton extends Component {
     public void closePopup() {
         setPopupVisible(false);
         getParent().ifPresent(parent -> parent.getElement().callJsFunction("closePopup", getRow() + 1, getColumn() + 1));
+        fireClose();
     }
 
     /**
