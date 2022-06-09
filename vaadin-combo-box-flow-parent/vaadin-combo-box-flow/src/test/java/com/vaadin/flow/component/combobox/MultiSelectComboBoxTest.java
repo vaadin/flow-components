@@ -40,6 +40,15 @@ public class MultiSelectComboBoxTest extends ComboBoxBaseTest {
         Assert.assertEquals(Collections.emptySet(), comboBox.getValue());
     }
 
+    @Test(expected = UnsupportedOperationException.class)
+    public void getValue_returnsImmutableSet() {
+        MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
+        comboBox.setItems(Arrays.asList("foo", "bar", "baz"));
+        comboBox.setValue(Set.of("foo", "bar"));
+
+        comboBox.getValue().add("baz");
+    }
+
     @Test
     public void setValue() {
         MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
@@ -122,5 +131,14 @@ public class MultiSelectComboBoxTest extends ComboBoxBaseTest {
         comboBox.setValue(Set.of("bar"));
         comboBox.setEnabled(false);
         Assert.assertEquals(Set.of("bar"), comboBox.getValue());
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void getSelectedItems_returnsImmutableSet() {
+        MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
+        comboBox.setItems(Arrays.asList("foo", "bar", "baz"));
+        comboBox.setValue(Set.of("foo", "bar"));
+
+        comboBox.getSelectedItems().add("baz");
     }
 }
