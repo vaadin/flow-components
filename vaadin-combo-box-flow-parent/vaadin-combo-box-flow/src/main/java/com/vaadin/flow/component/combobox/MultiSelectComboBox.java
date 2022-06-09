@@ -15,12 +15,18 @@
  */
 package com.vaadin.flow.component.combobox;
 
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
-import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.IdentifierProviderChangeEvent;
+import com.vaadin.flow.data.selection.MultiSelect;
+import com.vaadin.flow.data.selection.MultiSelectionEvent;
+import com.vaadin.flow.data.selection.MultiSelectionListener;
+import com.vaadin.flow.shared.Registration;
 import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
@@ -67,7 +73,10 @@ import java.util.Set;
 @JsModule("./flow-component-renderer.js")
 @JsModule("./comboBoxConnector.js")
 public class MultiSelectComboBox<TItem>
-        extends ComboBoxBase<MultiSelectComboBox<TItem>, TItem, Set<TItem>> {
+        extends ComboBoxBase<MultiSelectComboBox<TItem>, TItem, Set<TItem>>
+        implements MultiSelect<MultiSelectComboBox<TItem>, TItem> {
+
+    private final MultiSelectComboBoxSelectionModel<TItem> selectionModel;
 
     /**
      * Default constructor. Creates an empty combo box.
@@ -89,11 +98,31 @@ public class MultiSelectComboBox<TItem>
      *            the amount of items to request at a time for lazy loading
      * @see #setPageSize(int)
      */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public MultiSelectComboBox(int pageSize) {
         super("selectedItems", Collections.emptySet(), JsonArray.class,
                 MultiSelectComboBox::presentationToModel,
                 MultiSelectComboBox::modelToPresentation);
 
+        // Create the selection model that manages the currently selected items.
+        // The model ensures that items are compared based on their data
+        // provider identify, and that the selection only changes if items
+        // actually have a different identity in the data provider.
+        selectionModel = new MultiSelectComboBoxSelectionModel<>(
+                item -> getDataProvider().getId(item));
+        addValueChangeListener(e -> {
+            // Synchronize selection if value is updated from client
+            if (e.isFromClient()) {
+                selectionModel.setSelectedItems(e.getValue());
+            }
+        });
+        // Pass identifier provider to selection model when it is changed
+        // through a data view
+        ComponentEventListener<IdentifierProviderChangeEvent<TItem, ?>> listener = e -> selectionModel
+                .setIdentityProvider(e.getIdentifierProvider());
+        ComponentUtil.addListener(this, IdentifierProviderChangeEvent.class,
+                (ComponentEventListener) listener);
+        // Initialize page size and data provider
         setPageSize(pageSize);
         setItems(new DataCommunicator.EmptyDataProvider<>());
     }
@@ -236,6 +265,20 @@ public class MultiSelectComboBox<TItem>
     }
 
     /**
+     * Gets the value of the component, which is a set of selected items.
+     * <p>
+     * The returned set is immutable and can not be modified. Use
+     * {@link #select(Object[])} or {@link #deselect(Object[])} to add or remove
+     * individual items.
+     *
+     * @return an unmodifiable set of selected items
+     */
+    @Override
+    public Set<TItem> getValue() {
+        return Collections.unmodifiableSet(super.getValue());
+    }
+
+    /**
      * Sets the value of the component, which is a set of selected items.
      * <p>
      * Note that it is allowed to pass {@code null} as value to clear the
@@ -249,7 +292,14 @@ public class MultiSelectComboBox<TItem>
         if (value == null) {
             value = Collections.emptySet();
         }
-        super.setValue(value);
+        // Update selection first, which returns a boolean indicating whether
+        // the selection (=value) has actually changed
+        boolean hasValueChanged = selectionModel.setSelectedItems(value);
+        if (hasValueChanged) {
+            // Only update field value and generate change event if value has
+            // actually changed
+            super.setValue(value);
+        }
     }
 
     @Override
@@ -263,14 +313,40 @@ public class MultiSelectComboBox<TItem>
     }
 
     @Override
-    protected boolean isSelected(TItem item) {
-        if (item == null)
-            return false;
+    public boolean isSelected(TItem item) {
+        Objects.requireNonNull(item, "Null can not be selected");
+        // Override the default MultiSelect.isSelected implementation to use the
+        // selection model, which compares items using the identity provider of
+        // the data provider
+        return selectionModel.isSelected(item);
+    }
 
-        DataProvider<TItem, ?> dataProvider = getDataProvider();
-        Object itemId = dataProvider.getId(item);
+    @Override
+    public Set<TItem> getSelectedItems() {
+        return Collections.unmodifiableSet(selectionModel.getSelectedItems());
+    }
 
-        return getValue().stream().anyMatch(selectedItem -> Objects
-                .equals(itemId, dataProvider.getId(selectedItem)));
+    @Override
+    public Registration addSelectionListener(
+            MultiSelectionListener<MultiSelectComboBox<TItem>, TItem> listener) {
+        // Selection is equivalent to the value, so we can reuse the value
+        // change listener here
+        return addValueChangeListener(event -> listener
+                .selectionChange(new MultiSelectionEvent<>(this, this,
+                        event.getOldValue(), event.isFromClient())));
+    }
+
+    @Override
+    public void updateSelection(Set<TItem> addedItems,
+            Set<TItem> removedItems) {
+        // Update the selection, which returns a boolean indicating whether
+        // the selection (=value) has actually changed
+        boolean hasValueChanged = selectionModel.updateSelection(addedItems,
+                removedItems);
+        if (hasValueChanged) {
+            // Only update field value and generate change event if value has
+            // actually changed
+            super.setValue(selectionModel.getSelectedItems());
+        }
     }
 }
