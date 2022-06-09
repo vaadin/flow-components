@@ -63,20 +63,19 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
         })();
 
         const clearPageCallbacks = (pages = Object.keys(pageCallbacks)) => {
-          const dataProviderMixin = getDataProviderMixin();
           // Flush and empty the existing requests
           pages.forEach((page) => {
-            pageCallbacks[page]([], dataProviderMixin.size);
+            pageCallbacks[page]([], comboBox.size);
             delete pageCallbacks[page];
 
             // Empty the comboBox's internal cache without invoking observers by filling
             // the filteredItems array with placeholders (comboBox will request for data when it
             // encounters a placeholder)
-            const pageStart = parseInt(page) * dataProviderMixin.pageSize;
-            const pageEnd = pageStart + dataProviderMixin.pageSize;
-            const end = Math.min(pageEnd, dataProviderMixin.filteredItems.length);
+            const pageStart = parseInt(page) * comboBox.pageSize;
+            const pageEnd = pageStart + comboBox.pageSize;
+            const end = Math.min(pageEnd, comboBox.filteredItems.length);
             for (let i = pageStart; i < end; i++) {
-              dataProviderMixin.filteredItems[i] = placeHolder;
+              comboBox.filteredItems[i] = placeHolder;
             }
           });
         };
@@ -203,11 +202,9 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
         });
 
         comboBox.$connector.updateData = tryCatchWrapper(function (items) {
-          const dataProviderMixin = getDataProviderMixin();
-
           const itemsMap = new Map(items.map((item) => [item.key, item]));
 
-          dataProviderMixin.filteredItems = dataProviderMixin.filteredItems.map((item) => {
+          comboBox.filteredItems = comboBox.filteredItems.map((item) => {
             return itemsMap.get(item.key) || item;
           });
         });
@@ -227,9 +224,9 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
         });
 
         comboBox.$connector.reset = tryCatchWrapper(function () {
-          const dataProviderMixin = getDataProviderMixin();
           clearPageCallbacks();
           cache = {};
+          const dataProviderMixin = getDataProviderMixin();
           dataProviderMixin.clearCache();
         });
 
@@ -316,11 +313,10 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
         // The filter used is the one from combobox, not the lastFilter stored since
         // that may not reflect user's input.
         const performClientSideFilter = tryCatchWrapper(function (page, callback) {
-          const dataProviderMixin = getDataProviderMixin();
           let filteredItems = page;
 
-          if (dataProviderMixin.filter) {
-            filteredItems = page.filter((item) => comboBox.$connector.filter(item, dataProviderMixin.filter));
+          if (comboBox.filter) {
+            filteredItems = page.filter((item) => comboBox.$connector.filter(item, comboBox.filter));
           }
 
           callback(filteredItems, filteredItems.length);
