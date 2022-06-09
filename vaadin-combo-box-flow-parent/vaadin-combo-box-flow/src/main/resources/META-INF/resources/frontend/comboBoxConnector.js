@@ -17,17 +17,6 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
 
         comboBox.$connector = {};
 
-        /**
-         * Returns the element that implements the data provider mixin.
-         * For <vaadin-combo-box> that is the element itself.
-         * <vaadin-multi-select-combo-box> wraps a regular combo box internally,
-         * which is returned in this case.
-         * @returns {Node|Element|*}
-         */
-        function getDataProviderMixin() {
-          return comboBox.localName === 'vaadin-multi-select-combo-box' ? comboBox.$.comboBox : comboBox;
-        }
-
         // holds pageIndex -> callback pairs of subsequent indexes (current active range)
         const pageCallbacks = {};
         let cache = {};
@@ -226,8 +215,7 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
         comboBox.$connector.reset = tryCatchWrapper(function () {
           clearPageCallbacks();
           cache = {};
-          const dataProviderMixin = getDataProviderMixin();
-          dataProviderMixin.clearCache();
+          comboBox.clearCache();
         });
 
         comboBox.$connector.confirm = tryCatchWrapper(function (id, filter) {
