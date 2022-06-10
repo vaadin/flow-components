@@ -181,14 +181,15 @@ public class GridElement extends TestBenchElement {
      *
      * @param rowIndex
      *            the row index
-     * @throws IndexOutOfBoundsException
-     *            if no row with given index exists
      * @return the tr element for the row
+     * @throws IndexOutOfBoundsException
+     *             if no row with given index exists
      */
     public GridTRElement getRow(int rowIndex) throws IndexOutOfBoundsException {
         int rowCount = getRowCount();
         if (rowIndex < 0 || rowIndex >= rowCount) {
-            throw new IndexOutOfBoundsException("rowIndex: expected to be 0.." + (rowCount - 1) + " but was " + rowIndex);
+            throw new IndexOutOfBoundsException("rowIndex: expected to be 0.."
+                    + (rowCount - 1) + " but was " + rowIndex);
         }
         String script = "var grid = arguments[0];"
                 + "var rowIndex = arguments[1];"
