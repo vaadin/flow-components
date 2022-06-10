@@ -18,12 +18,12 @@ package com.vaadin.flow.component.combobox;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -66,7 +66,8 @@ import elemental.json.JsonObject;
 @JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./comboBoxConnector.js")
-public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T> {
+public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
+        implements HasThemeVariant<ComboBoxVariant> {
 
     private static final String PROP_INPUT_ELEMENT_VALUE = "_inputElementValue";
     private static final String PROP_SELECTED_ITEM = "selectedItem";
@@ -323,29 +324,5 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T> {
     @Override
     public T getEmptyValue() {
         return null;
-    }
-
-    /**
-     * Adds theme variants to the component.
-     *
-     * @param variants
-     *            theme variants to add
-     */
-    public void addThemeVariants(ComboBoxVariant... variants) {
-        getThemeNames()
-                .addAll(Stream.of(variants).map(ComboBoxVariant::getVariantName)
-                        .collect(Collectors.toList()));
-    }
-
-    /**
-     * Removes theme variants from the component.
-     *
-     * @param variants
-     *            theme variants to remove
-     */
-    public void removeThemeVariants(ComboBoxVariant... variants) {
-        getThemeNames().removeAll(
-                Stream.of(variants).map(ComboBoxVariant::getVariantName)
-                        .collect(Collectors.toList()));
     }
 }
