@@ -20,6 +20,7 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.IdentifierProviderChangeEvent;
@@ -74,7 +75,8 @@ import java.util.Set;
 @JsModule("./comboBoxConnector.js")
 public class MultiSelectComboBox<TItem>
         extends ComboBoxBase<MultiSelectComboBox<TItem>, TItem, Set<TItem>>
-        implements MultiSelect<MultiSelectComboBox<TItem>, TItem> {
+        implements MultiSelect<MultiSelectComboBox<TItem>, TItem>,
+        HasThemeVariant<MultiSelectComboBoxVariant> {
 
     private final MultiSelectComboBoxSelectionModel<TItem> selectionModel;
 

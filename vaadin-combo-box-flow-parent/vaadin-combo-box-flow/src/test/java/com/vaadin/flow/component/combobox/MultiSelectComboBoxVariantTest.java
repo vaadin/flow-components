@@ -18,18 +18,20 @@ package com.vaadin.flow.component.combobox;
 import com.vaadin.tests.ThemeVariantTestHelper;
 import org.junit.Test;
 
-public class ComboBoxVariantTest {
+public class MultiSelectComboBoxVariantTest {
 
     @Test
     public void addThemeVariant_themeNamesContainsThemeVariant() {
         ThemeVariantTestHelper.addThemeVariant_themeNamesContainsThemeVariant(
-                new ComboBox<String>(), ComboBoxVariant.LUMO_SMALL);
+                new MultiSelectComboBox<>(),
+                MultiSelectComboBoxVariant.LUMO_SMALL);
     }
 
     @Test
     public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
         ThemeVariantTestHelper
                 .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
-                        new ComboBox<String>(), ComboBoxVariant.LUMO_SMALL);
+                        new MultiSelectComboBox<>(),
+                        MultiSelectComboBoxVariant.LUMO_SMALL);
     }
 }
