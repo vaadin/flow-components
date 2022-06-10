@@ -224,7 +224,7 @@ public class UndoRedoIT extends AbstractSpreadsheetIT {
         });
     }
 
-    @Ignore("This is a known issue which should be fixed.")
+    @Ignore("This is a known issue which should be fixed: https://github.com/vaadin/spreadsheet/issues/326")
     @Test
     public void undo_theSecondRowWithInvalidFormulaIsRemovedAndUndo_formulaIndicatorIsPresent() {
         final SpreadsheetElement spreadsheet = getSpreadsheet();
@@ -241,7 +241,7 @@ public class UndoRedoIT extends AbstractSpreadsheetIT {
         });
     }
 
-    @Ignore("This is a known issue which should be fixed.")
+    @Ignore("This is a known issue which should be fixed: https://github.com/vaadin/spreadsheet/issues/331")
     @Test
     public void undo_conditionalFormattedCellsRemovedAndUndo_cellsAreStillConditionallyFormatted() {
         loadFile("conditional_formatting.xlsx");
