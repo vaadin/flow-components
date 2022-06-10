@@ -296,7 +296,7 @@ public class TreeGridElement extends GridElement {
     public boolean hasRow(int row) {
         try {
             return getRow(row) != null;
-        } catch (NullPointerException e) {
+        } catch (Exception e) {
             return false;
         }
     }
