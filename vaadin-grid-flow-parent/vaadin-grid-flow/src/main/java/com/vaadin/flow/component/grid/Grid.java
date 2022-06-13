@@ -3271,6 +3271,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * For Grids with multi-sorting, the index of a given column inside the list
      * defines the sort priority. For example, the column at index 0 of the list
      * is sorted first, then on the index 1, and so on.
+     * <p>
+     * When Grid is not configured to have multi-sorting enabled, all the
+     * columns in the list except the first one are ignored.
      *
      * @param order
      *            the list of sort orders to set on the client, or
@@ -3281,6 +3284,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     public void sort(List<GridSortOrder<T>> order) {
         if (order == null) {
             order = Collections.emptyList();
+        }
+        if (!isMultiSort() && order.size() > 1) {
+            LoggerFactory.getLogger(Grid.class).warn(
+                    "Multiple sort columns provided but multi-sorting is not enabled.");
+            order = order.subList(0, 1);
         }
         setSortOrder(order, false);
     }
