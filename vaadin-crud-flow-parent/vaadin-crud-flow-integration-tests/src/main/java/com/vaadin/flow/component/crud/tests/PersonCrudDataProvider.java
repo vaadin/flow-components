@@ -86,7 +86,7 @@ class PersonCrudDataProvider
                         return value != null && value.toString().toLowerCase()
                                 .contains(constraint.getValue().toLowerCase());
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        e.printStackTrace(); // NOSONAR
                         return false;
                     }
                 }).reduce(Predicate::and).orElse(e -> true);
