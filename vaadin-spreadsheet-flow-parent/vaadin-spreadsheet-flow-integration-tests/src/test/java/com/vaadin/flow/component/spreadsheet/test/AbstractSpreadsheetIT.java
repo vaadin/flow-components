@@ -539,6 +539,10 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
         });
     }
 
+    protected void checkLogsForErrors() {
+        checkLogsForErrors(msg -> false);
+    }
+
     protected List<LogEntry> getLogEntries(Level level) {
         // https://github.com/vaadin/testbench/issues/1233
         getCommandExecutor().waitForVaadin();
