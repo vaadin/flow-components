@@ -43,8 +43,10 @@ public class GridViewSortingPage extends LegacyTestView {
         grid.setItems(getItems());
         grid.setSelectionMode(SelectionMode.NONE);
 
-        grid.addColumn(Person::getFirstName, "firstName").setHeader("Name");
-        grid.addColumn(Person::getAge, "age").setHeader("Age");
+        Grid.Column<Person> nameColumn = grid
+                .addColumn(Person::getFirstName, "firstName").setHeader("Name");
+        Grid.Column<Person> ageColumn = grid.addColumn(Person::getAge, "age")
+                .setHeader("Age");
 
         Comparator<Person> addressComparator = Comparator
                 .comparing((Person person) -> person.getAddress().getNumber())
@@ -102,14 +104,21 @@ public class GridViewSortingPage extends LegacyTestView {
                     grid.sort(null);
                 });
 
+        NativeButton sortByTwoColumns = new NativeButton("Sort by 2 columns",
+                event -> {
+                    grid.sort(GridSortOrder.asc(ageColumn).thenDesc(nameColumn)
+                            .build());
+                });
+
         grid.setId("grid-sortable-columns");
         multiSort.setId("grid-multi-sort-toggle");
         invertAllSortings.setId("grid-sortable-columns-invert-sortings");
         resetAllSortings.setId("grid-sortable-columns-reset-sortings");
         toggleFirstColumnAndReset.setId("grid-sortable-columns-toggle-first");
+        sortByTwoColumns.setId("grid-sortable-columns-sort-by-two");
         messageDiv.setId("grid-sortable-columns-message");
         addCard("Sorting", "Grid with sortable columns", grid, multiSort,
                 invertAllSortings, resetAllSortings, toggleFirstColumnAndReset,
-                messageDiv);
+                sortByTwoColumns, messageDiv);
     }
 }
