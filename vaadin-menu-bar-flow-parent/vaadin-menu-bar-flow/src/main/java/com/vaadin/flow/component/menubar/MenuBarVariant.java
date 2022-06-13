@@ -35,22 +35,6 @@ public enum MenuBarVariant {
 
     /**
      * Gets the variant name.
-     * 
-     * @return variant name
-     */
-    public String getVariantName() {
-        return variant;
-    }
-}
-
-    private final String variant;
-
-    MenuBarVariant(String variant) {
-        this.variant = variant;
-    }
-
-    /**
-     * Gets the variant name.
      *
      * @return variant name
      */
