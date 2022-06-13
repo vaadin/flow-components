@@ -20,10 +20,28 @@ package com.vaadin.flow.component.menubar;
  */
 public enum MenuBarVariant {
     LUMO_SMALL("small"), LUMO_LARGE("large"), LUMO_TERTIARY(
-            "tertiary"), LUMO_TERTIARY_INLINE(
-                    "tertiary-inline"), LUMO_PRIMARY("primary"), LUMO_CONTRAST(
-                            "contrast"), LUMO_ICON("icon"), MATERIAL_CONTAINED(
-                                    "contained"), MATERIAL_OUTLINED("outlined");
+            "tertiary"), LUMO_TERTIARY_INLINE("tertiary-inline"), LUMO_PRIMARY(
+                    "primary"), LUMO_CONTRAST("contrast"), LUMO_ICON(
+                            "icon"), MATERIAL_CONTAINED(
+                                    "contained"), MATERIAL_OUTLINED(
+                                            "outlined"), END_ALIGNED(
+                                                    "end-aligned");
+
+    private final String variant;
+
+    MenuBarVariant(String variant) {
+        this.variant = variant;
+    }
+
+    /**
+     * Gets the variant name.
+     * 
+     * @return variant name
+     */
+    public String getVariantName() {
+        return variant;
+    }
+}
 
     private final String variant;
 
