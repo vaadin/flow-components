@@ -130,7 +130,7 @@ public class MainView extends VerticalLayout {
     }
 
     private static List<Person> createItems() {
-        Random random = new Random(0);
+        Random random = new Random(0); // NOSONAR
         return IntStream.range(1, 500)
                 .mapToObj(index -> createPerson(index, random))
                 .collect(Collectors.toList());
