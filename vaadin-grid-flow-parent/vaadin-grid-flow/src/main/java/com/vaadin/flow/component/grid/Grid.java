@@ -3250,6 +3250,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             order = Collections.emptyList();
         }
         if (!isMultiSort() && order.size() > 1) {
+            LoggerFactory.getLogger(Grid.class).warn(
+                    "Multiple sort columns provided but multi-sorting is not enabled.");
             order = order.subList(0, 1);
         }
         setSortOrder(order, false);
