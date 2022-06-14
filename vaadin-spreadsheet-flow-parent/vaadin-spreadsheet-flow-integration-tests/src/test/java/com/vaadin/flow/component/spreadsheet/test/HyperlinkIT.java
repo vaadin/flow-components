@@ -72,16 +72,23 @@ public class HyperlinkIT extends AbstractSpreadsheetIT {
         testExternal("A10", "google");
     }
 
-    @Ignore("Ignore until https://github.com/vaadin/flow-components/issues/3184 is fixed")
     @Test
     public void hyperlinkInFormula_sheetWithHyperLinks_externalFromFormulaOpensPopupToCorrectPage() {
         testExternal("I1", "google");
     }
 
-    @Ignore("Ignore until https://github.com/vaadin/flow-components/issues/3184 is fixed")
     @Test
     public void hyperlinkInSharedFormula_sheetWithHyperLinks_externalFromFormulaOpensPopupToCorrectPage() {
         testExternal("I2", "mail");
+    }
+
+    @Test
+    public void hyperlinkFromAnotherSheetInFormula_sheetWithHyperLinks_externalFromFormulaOpensPopupToCorrectPage() {
+        // Go to "Sheet2"
+        selectSheetAt(1);
+        // Add hyperlink formula referencing cells on another sheet
+        setCellValue("A1", "=HYPERLINK(Sheet1!G1,Sheet1!F1)");
+        testExternal("A1", "google");
     }
 
     @Test
@@ -89,7 +96,7 @@ public class HyperlinkIT extends AbstractSpreadsheetIT {
         testExternal("C7", "google");
     }
 
-    @Ignore("Ignore until https://github.com/vaadin/flow-components/issues/3184 is fixed")
+    @Ignore("Ignore until https://github.com/vaadin/flow-components/issues/3230 is fixed")
     @Test
     public void hyperlink_sheetWithHyperLinks_internalFromFileNameFormulaMovesToCorrectSheetAndCell() {
         loadFile("hyper_links.xlsx");
@@ -101,7 +108,7 @@ public class HyperlinkIT extends AbstractSpreadsheetIT {
                 getFormulaFieldValue());
     }
 
-    @Ignore("Ignore until https://github.com/vaadin/flow-components/issues/3184 is fixed")
+    @Ignore("Ignore until https://github.com/vaadin/flow-components/issues/3230 is fixed")
     @Test
     public void hyperlink_sheetWithNumericSheetName_internalFromFileNameFormulaMovesToCorrectSheetAndCell() {
         loadFile("hyper_links.xlsx");
@@ -113,7 +120,7 @@ public class HyperlinkIT extends AbstractSpreadsheetIT {
                 getFormulaFieldValue());
     }
 
-    @Ignore("Ignore until https://github.com/vaadin/flow-components/issues/3184 is fixed")
+    @Ignore("Ignore until https://github.com/vaadin/flow-components/issues/3230 is fixed")
     @Test
     public void hyperlink_sheetWithSpacesInSheetName_internalFromFileNameFormulaMovesToCorrectSheetAndCell() {
         loadFile("hyper_links.xlsx");
