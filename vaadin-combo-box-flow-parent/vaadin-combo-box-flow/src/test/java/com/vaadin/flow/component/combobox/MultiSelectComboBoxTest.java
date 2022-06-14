@@ -40,6 +40,15 @@ public class MultiSelectComboBoxTest extends ComboBoxBaseTest {
         Assert.assertEquals(Collections.emptySet(), comboBox.getValue());
     }
 
+    @Test(expected = UnsupportedOperationException.class)
+    public void getValue_returnsImmutableSet() {
+        MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
+        comboBox.setItems(Arrays.asList("foo", "bar", "baz"));
+        comboBox.setValue(Set.of("foo", "bar"));
+
+        comboBox.getValue().add("baz");
+    }
+
     @Test
     public void setValue() {
         MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
@@ -58,7 +67,7 @@ public class MultiSelectComboBoxTest extends ComboBoxBaseTest {
         MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
         comboBox.setItems(Arrays.asList("foo", "bar", "baz"));
         comboBox.setValue(Set.of("foo", "bar"));
-        comboBox.setValue(null);
+        comboBox.setValue((Set<String>) null);
 
         // should hold an empty set, rather than null
         Assert.assertEquals(Collections.emptySet(), comboBox.getValue());
@@ -66,6 +75,66 @@ public class MultiSelectComboBoxTest extends ComboBoxBaseTest {
         JsonArray jsonArray = (JsonArray) comboBox.getElement()
                 .getPropertyRaw("selectedItems");
         Assert.assertEquals(0, jsonArray.length());
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Test
+    public void setValue_setSameValue_doesNotTriggerChangeEvent() {
+        MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
+        comboBox.setItems(Arrays.asList("foo", "bar", "baz"));
+        comboBox.setValue(Set.of("foo", "bar"));
+
+        HasValue.ValueChangeListener valueChangeListenerMock = Mockito
+                .mock(HasValue.ValueChangeListener.class);
+        comboBox.addValueChangeListener(valueChangeListenerMock);
+        comboBox.setValue(Set.of("foo", "bar"));
+
+        Mockito.verify(valueChangeListenerMock, Mockito.times(0))
+                .valueChanged(Mockito.any());
+    }
+
+    @Test
+    public void setValueWithVarArgs() {
+        MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
+        comboBox.setItems(Arrays.asList("foo", "bar", "baz"));
+        comboBox.setValue("foo", "bar");
+
+        Assert.assertEquals(Set.of("foo", "bar"), comboBox.getValue());
+    }
+
+    @Test
+    public void setValueWithVarArgs_removesDuplicates() {
+        MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
+        comboBox.setItems(Arrays.asList("foo", "bar", "baz"));
+        comboBox.setValue("foo", "foo", "foo");
+
+        Assert.assertEquals(Set.of("foo"), comboBox.getValue());
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Test
+    public void setValueWithVarArgs_setSameValue_doesNotTriggerChangeEvent() {
+        MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
+        comboBox.setItems(Arrays.asList("foo", "bar", "baz"));
+        comboBox.setValue("foo", "bar");
+
+        HasValue.ValueChangeListener valueChangeListenerMock = Mockito
+                .mock(HasValue.ValueChangeListener.class);
+        comboBox.addValueChangeListener(valueChangeListenerMock);
+        comboBox.setValue("foo", "bar");
+
+        Mockito.verify(valueChangeListenerMock, Mockito.times(0))
+                .valueChanged(Mockito.any());
+    }
+
+    @Test()
+    public void setValueWithEmptyVarArgs_emptySelection() {
+        MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
+        comboBox.setItems(Arrays.asList("foo", "bar", "baz"));
+        comboBox.setValue("foo", "bar");
+        comboBox.setValue();
+
+        Assert.assertEquals(Collections.emptySet(), comboBox.getValue());
     }
 
     @Test
@@ -122,5 +191,14 @@ public class MultiSelectComboBoxTest extends ComboBoxBaseTest {
         comboBox.setValue(Set.of("bar"));
         comboBox.setEnabled(false);
         Assert.assertEquals(Set.of("bar"), comboBox.getValue());
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void getSelectedItems_returnsImmutableSet() {
+        MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
+        comboBox.setItems(Arrays.asList("foo", "bar", "baz"));
+        comboBox.setValue(Set.of("foo", "bar"));
+
+        comboBox.getSelectedItems().add("baz");
     }
 }

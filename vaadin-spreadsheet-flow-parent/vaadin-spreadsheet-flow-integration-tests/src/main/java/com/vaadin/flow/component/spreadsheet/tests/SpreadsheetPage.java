@@ -70,10 +70,10 @@ import java.util.Optional;
 
 @Route("vaadin-spreadsheet")
 @PageTitle("Demo")
-public class DemoUIView extends VerticalLayout implements Receiver {
+public class SpreadsheetPage extends VerticalLayout implements Receiver {
 
     private static final Logger LOGGER = LoggerFactory
-            .getLogger(DemoUIView.class);
+            .getLogger(SpreadsheetPage.class);
 
     private final Div spreadsheetContainer;
 
@@ -108,7 +108,7 @@ public class DemoUIView extends VerticalLayout implements Receiver {
     private Button loadFixtureBtn;
     private ComboBox<TestFixtures> fixtureSelect;
 
-    public DemoUIView() {
+    public SpreadsheetPage() {
         addClassName("demo-view");
         setSizeFull();
 
@@ -128,7 +128,7 @@ public class DemoUIView extends VerticalLayout implements Receiver {
         Button newSpreadsheetButton = createNewButton();
         newSpreadsheetButton.setId("createNewBtn");
 
-        ClassLoader classLoader = DemoUIView.class.getClassLoader();
+        ClassLoader classLoader = SpreadsheetPage.class.getClassLoader();
         URL resource = classLoader.getResource("test_sheets" + File.separator);
         URI uri = null;
         try {

@@ -65,6 +65,9 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
         const clearPageCallbacks = (pages = Object.keys(pageCallbacks)) => {
           const dataProviderMixin = getDataProviderMixin();
           // Flush and empty the existing requests
+
+          const filteredItems = [...dataProviderMixin.filteredItems];
+
           pages.forEach((page) => {
             pageCallbacks[page]([], dataProviderMixin.size);
             delete pageCallbacks[page];
@@ -74,11 +77,13 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
             // encounters a placeholder)
             const pageStart = parseInt(page) * dataProviderMixin.pageSize;
             const pageEnd = pageStart + dataProviderMixin.pageSize;
-            const end = Math.min(pageEnd, dataProviderMixin.filteredItems.length);
+            const end = Math.min(pageEnd, filteredItems.length);
             for (let i = pageStart; i < end; i++) {
-              dataProviderMixin.filteredItems[i] = placeHolder;
+              filteredItems[i] = placeHolder;
             }
           });
+
+          dataProviderMixin.filteredItems = filteredItems;
         };
 
         comboBox.dataProvider = function (params, callback) {
@@ -204,17 +209,12 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
 
         comboBox.$connector.updateData = tryCatchWrapper(function (items) {
           const dataProviderMixin = getDataProviderMixin();
-          // IE11 doesn't work with the transpiled version of the forEach.
-          for (let i = 0; i < items.length; i++) {
-            let item = items[i];
 
-            for (let j = 0; j < dataProviderMixin.filteredItems.length; j++) {
-              if (dataProviderMixin.filteredItems[j].key === item.key) {
-                dataProviderMixin.set('filteredItems.' + j, item);
-                break;
-              }
-            }
-          }
+          const itemsMap = new Map(items.map((item) => [item.key, item]));
+
+          dataProviderMixin.filteredItems = dataProviderMixin.filteredItems.map((item) => {
+            return itemsMap.get(item.key) || item;
+          });
         });
 
         comboBox.$connector.updateSize = tryCatchWrapper(function (newSize) {

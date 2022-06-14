@@ -1804,25 +1804,16 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
-     * Adds a new text column to this {@link Grid} with a template renderer,
-     * sorting properties and default column factory. The values inside the
-     * renderer are converted to JSON values by using
-     * {@link JsonSerializer#toJson(Object)}.
+     * Adds a new column to this {@link Grid} with a renderer, sorting
+     * properties and default column factory. The values inside the renderer are
+     * converted to JSON values by using {@link JsonSerializer#toJson(Object)}.
      * <p>
      * <em>NOTE:</em> You can add component columns easily using the
      * {@link #addComponentColumn(ValueProvider)}, but using
      * {@link ComponentRenderer} is not as efficient as the built in renderers
      * or using {@link TemplateRenderer}.
      * <p>
-     * This constructor attempts to automatically configure both in-memory and
-     * backend sorting using the given sorting properties and matching those
-     * with the property names used in the given renderer.
-     * <p>
-     * <strong>Note:</strong> if a property of the renderer that is used as a
-     * sorting property does not extend Comparable, no in-memory sorting is
-     * configured for it.
      *
-     * <p>
      * Every added column sends data to the client side regardless of its
      * visibility state. Don't add a new column at all or use
      * {@link Grid#removeColumn(Column)} to avoid sending extra data.
@@ -1842,7 +1833,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @param sortingProperties
      *            the sorting properties to use for this column
      * @return the created column
+     * @deprecated since 23.2 - use
+     *             <code>addColumn(renderer).setSortProperty(sortingProperties)</code>
+     *             instead.
      */
+    @Deprecated
     public Column<T> addColumn(Renderer<T> renderer,
             String... sortingProperties) {
         BiFunction<Renderer<T>, String, Column<T>> defaultFactory = getDefaultColumnFactory();
@@ -1850,23 +1845,15 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
-     * Adds a new text column to this {@link Grid} with a template renderer,
-     * sorting properties and column factory provided. The values inside the
-     * renderer are converted to JSON values by using
+     * Adds a new column to this {@link Grid} with a renderer, sorting
+     * properties and column factory provided. The values inside the renderer
+     * are converted to JSON values by using
      * {@link JsonSerializer#toJson(Object)}.
      * <p>
      * <em>NOTE:</em> You can add component columns easily using the
      * {@link #addComponentColumn(ValueProvider)}, but using
      * {@link ComponentRenderer} is not as efficient as the built in renderers
      * or using {@link TemplateRenderer}.
-     * <p>
-     * This constructor attempts to automatically configure both in-memory and
-     * backend sorting using the given sorting properties and matching those
-     * with the property names used in the given renderer.
-     * <p>
-     * <strong>Note:</strong> if a property of the renderer that is used as a
-     * sorting property does not extend Comparable, no in-memory sorting is
-     * configured for it.
      *
      * <p>
      * Every added column sends data to the client side regardless of its
@@ -1885,38 +1872,16 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @param sortingProperties
      *            the sorting properties to use for this column
      * @return the created column
+     * @deprecated since 23.2 - use
+     *             <code>addColumn(renderer, columnFactory).setSortProperty(sortingProperties)</code>
+     *             instead.
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Deprecated
     protected <C extends Column<T>> C addColumn(Renderer<T> renderer,
             BiFunction<Renderer<T>, String, C> columnFactory,
             String... sortingProperties) {
         C column = addColumn(renderer, columnFactory);
-
-        Map<String, ValueProvider<T, ?>> valueProviders = renderer
-                .getValueProviders();
-        Set<String> valueProvidersKeySet = valueProviders.keySet();
-        List<String> matchingSortingProperties = Arrays
-                .stream(sortingProperties)
-                .filter(valueProvidersKeySet::contains)
-                .collect(Collectors.toList());
-
-        column.setSortProperty(matchingSortingProperties
-                .toArray(new String[matchingSortingProperties.size()]));
-        Comparator<T> combinedComparator = (a, b) -> 0;
-        Comparator nullsLastComparator = Comparator
-                .nullsLast(Comparator.naturalOrder());
-        for (String sortProperty : matchingSortingProperties) {
-            ValueProvider<T, ?> provider = valueProviders.get(sortProperty);
-            combinedComparator = combinedComparator.thenComparing((a, b) -> {
-                Object aa = provider.apply(a);
-                if (!(aa instanceof Comparable)) {
-                    return 0;
-                }
-                Object bb = provider.apply(b);
-                return nullsLastComparator.compare(aa, bb);
-            });
-        }
-
+        column.setSortProperty(sortingProperties);
         return column;
     }
 
@@ -3270,6 +3235,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * For Grids with multi-sorting, the index of a given column inside the list
      * defines the sort priority. For example, the column at index 0 of the list
      * is sorted first, then on the index 1, and so on.
+     * <p>
+     * When Grid is not configured to have multi-sorting enabled, all the
+     * columns in the list except the first one are ignored.
      *
      * @param order
      *            the list of sort orders to set on the client, or
@@ -3280,6 +3248,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     public void sort(List<GridSortOrder<T>> order) {
         if (order == null) {
             order = Collections.emptyList();
+        }
+        if (!isMultiSort() && order.size() > 1) {
+            LoggerFactory.getLogger(Grid.class).warn(
+                    "Multiple sort columns provided but multi-sorting is not enabled.");
+            order = order.subList(0, 1);
         }
         setSortOrder(order, false);
     }

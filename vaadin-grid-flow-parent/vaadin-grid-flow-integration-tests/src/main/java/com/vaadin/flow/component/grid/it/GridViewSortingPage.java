@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.grid.it;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,7 +27,7 @@ import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.data.bean.Person;
-import com.vaadin.flow.data.renderer.TemplateRenderer;
+import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-grid-it-demo/sorting")
@@ -42,18 +43,26 @@ public class GridViewSortingPage extends LegacyTestView {
         grid.setItems(getItems());
         grid.setSelectionMode(SelectionMode.NONE);
 
-        grid.addColumn(Person::getFirstName, "firstName").setHeader("Name");
-        grid.addColumn(Person::getAge, "age").setHeader("Age");
+        Grid.Column<Person> nameColumn = grid
+                .addColumn(Person::getFirstName, "firstName").setHeader("Name");
+        Grid.Column<Person> ageColumn = grid.addColumn(Person::getAge, "age")
+                .setHeader("Age");
 
-        grid.addColumn(TemplateRenderer.<Person> of(
-                "<div>[[item.street]], number [[item.number]]<br><small>[[item.postalCode]]</small></div>")
+        Comparator<Person> addressComparator = Comparator
+                .comparing((Person person) -> person.getAddress().getNumber())
+                .thenComparing(
+                        (Person person) -> person.getAddress().getNumber());
+
+        grid.addColumn(LitRenderer.<Person> of(
+                "<div>${item.street}, number ${item.number}<br><small>${item.postalCode}</small></div>")
                 .withProperty("street",
                         person -> person.getAddress().getStreet())
                 .withProperty("number",
                         person -> person.getAddress().getNumber())
                 .withProperty("postalCode",
-                        person -> person.getAddress().getPostalCode()),
-                "street", "number").setHeader("Address");
+                        person -> person.getAddress().getPostalCode()))
+                .setSortProperty("street", "number")
+                .setComparator(addressComparator).setHeader("Address");
 
         Checkbox multiSort = new Checkbox("Multiple column sorting enabled");
         multiSort.addValueChangeListener(
@@ -95,14 +104,21 @@ public class GridViewSortingPage extends LegacyTestView {
                     grid.sort(null);
                 });
 
+        NativeButton sortByTwoColumns = new NativeButton("Sort by 2 columns",
+                event -> {
+                    grid.sort(GridSortOrder.asc(ageColumn).thenDesc(nameColumn)
+                            .build());
+                });
+
         grid.setId("grid-sortable-columns");
         multiSort.setId("grid-multi-sort-toggle");
         invertAllSortings.setId("grid-sortable-columns-invert-sortings");
         resetAllSortings.setId("grid-sortable-columns-reset-sortings");
         toggleFirstColumnAndReset.setId("grid-sortable-columns-toggle-first");
+        sortByTwoColumns.setId("grid-sortable-columns-sort-by-two");
         messageDiv.setId("grid-sortable-columns-message");
         addCard("Sorting", "Grid with sortable columns", grid, multiSort,
                 invertAllSortings, resetAllSortings, toggleFirstColumnAndReset,
-                messageDiv);
+                sortByTwoColumns, messageDiv);
     }
 }
