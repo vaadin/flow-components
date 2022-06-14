@@ -212,7 +212,8 @@ public class DefaultHyperlinkCellClickHandler
 
             if (value instanceof LazyRefEval) {
                 var refEvalValue = (LazyRefEval) value;
-                value = refEvalValue.getInnerValueEval(refEvalValue.getFirstSheetIndex());
+                value = refEvalValue
+                        .getInnerValueEval(refEvalValue.getFirstSheetIndex());
             }
 
             if (value instanceof StringEval) {
