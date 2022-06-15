@@ -18,8 +18,6 @@ public class SheetTabSheetIT extends AbstractSpreadsheetIT {
 
     @Test
     public void focus_createTab_sheetIsFocused() {
-        // Force sheet initial focus
-        clickCell("A1");
         verifySheetFocused();
         getSpreadsheet().addSheet();
         verifySheetFocused();
@@ -28,8 +26,6 @@ public class SheetTabSheetIT extends AbstractSpreadsheetIT {
     @Test
     public void focus_changeTab_sheetIsFocused() {
         SpreadsheetElement spreadsheet = getSpreadsheet();
-        // Force sheet initial focus
-        clickCell("A1");
         verifySheetFocused();
         spreadsheet.addSheet();
         spreadsheet.addSheet();
@@ -44,8 +40,6 @@ public class SheetTabSheetIT extends AbstractSpreadsheetIT {
     public void cellFocus_moveFromSheetOneToSheetTwoAndBack_cellSelectionRemains()
             throws InterruptedException {
         SpreadsheetElement spreadsheet = getSpreadsheet();
-        // Force sheet initial focus
-        clickCell("A1");
 
         clickCell("C8");
         spreadsheet.addSheet();
