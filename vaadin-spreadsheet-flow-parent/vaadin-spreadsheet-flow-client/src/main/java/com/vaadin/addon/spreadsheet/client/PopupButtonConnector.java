@@ -61,10 +61,6 @@ public class PopupButtonConnector extends AbstractHasComponentsConnector
         this.serverRpc = rpc;
     }
 
-    public <T extends ServerRpc> T getProtectedRpcProxy(Class<T> rpcInterface) {
-        return getRpcProxy(rpcInterface);
-    }
-
     @Override
     protected <T extends ServerRpc> T getRpcProxy(Class<T> rpcInterface) {
         return (T) serverRpc;
