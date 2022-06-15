@@ -1,12 +1,11 @@
 package com.vaadin.flow.component.spreadsheet.test;
 
-import static org.junit.Assert.assertEquals;
-
 import java.io.IOException;
 
 import com.vaadin.flow.component.spreadsheet.test.util.PopupHelper;
+
+import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
@@ -20,6 +19,7 @@ import org.openqa.selenium.support.ui.ExpectedCondition;
 public class HyperlinkIT extends AbstractSpreadsheetIT {
 
     private PopupHelper popup;
+    private int CELL_HEIGHT = 21;
 
     @Before
     public void init() {
@@ -72,16 +72,23 @@ public class HyperlinkIT extends AbstractSpreadsheetIT {
         testExternal("A10", "google");
     }
 
-    @Ignore("Ignore until https://github.com/vaadin/flow-components/issues/3184 is fixed")
     @Test
     public void hyperlinkInFormula_sheetWithHyperLinks_externalFromFormulaOpensPopupToCorrectPage() {
         testExternal("I1", "google");
     }
 
-    @Ignore("Ignore until https://github.com/vaadin/flow-components/issues/3184 is fixed")
     @Test
     public void hyperlinkInSharedFormula_sheetWithHyperLinks_externalFromFormulaOpensPopupToCorrectPage() {
         testExternal("I2", "mail");
+    }
+
+    @Test
+    public void hyperlinkFromAnotherSheetInFormula_sheetWithHyperLinks_externalFromFormulaOpensPopupToCorrectPage() {
+        // Go to "Sheet2"
+        selectSheetAt(1);
+        // Add hyperlink formula referencing cells on another sheet
+        setCellValue("A1", "=HYPERLINK(Sheet1!G1,Sheet1!F1)");
+        testExternal("A1", "google");
     }
 
     @Test
@@ -89,19 +96,18 @@ public class HyperlinkIT extends AbstractSpreadsheetIT {
         testExternal("C7", "google");
     }
 
-    @Ignore("Ignore until https://github.com/vaadin/flow-components/issues/3184 is fixed")
     @Test
     public void hyperlink_sheetWithHyperLinks_internalFromFileNameFormulaMovesToCorrectSheetAndCell() {
         loadFile("hyper_links.xlsx");
         // ensure hyperlink switches to correct cell
+        getSpreadsheet().scroll(29 * CELL_HEIGHT);
         testInternal("B30", "B10");
         // ensure correct sheet
         testInternal("A3", "A3");
-        assertEquals("Unexpected formula for cell A3, ", "=5000",
+        Assert.assertEquals("Unexpected formula for cell A3, ", "=5000",
                 getFormulaFieldValue());
     }
 
-    @Ignore("Ignore until https://github.com/vaadin/flow-components/issues/3184 is fixed")
     @Test
     public void hyperlink_sheetWithNumericSheetName_internalFromFileNameFormulaMovesToCorrectSheetAndCell() {
         loadFile("hyper_links.xlsx");
@@ -109,42 +115,38 @@ public class HyperlinkIT extends AbstractSpreadsheetIT {
         testInternal("B9", "B3");
         // ensure correct sheet
         testInternal("B3", "B3");
-        assertEquals("Unexpected formula for cell B3, ", "300",
+        Assert.assertEquals("Unexpected formula for cell B3, ", "300",
                 getFormulaFieldValue());
     }
 
-    @Ignore("Ignore until https://github.com/vaadin/flow-components/issues/3184 is fixed")
     @Test
     public void hyperlink_sheetWithSpacesInSheetName_internalFromFileNameFormulaMovesToCorrectSheetAndCell() {
         loadFile("hyper_links.xlsx");
         // ensure hyperlink switches to correct cell
+        getSpreadsheet().scroll(8 * CELL_HEIGHT);
         testInternal("C9", "C3");
         // ensure correct sheet
         testInternal("C3", "C3");
-        assertEquals("Unexpected formula for cell C3, ", "125",
+        Assert.assertEquals("Unexpected formula for cell C3, ", "125",
                 getFormulaFieldValue());
     }
 
     /**
      * SHEET-86. Test that hyperlinks are immediately updated.
      */
-    @Ignore("Investigate why the second cell.click() does not select the cell")
     @Test
     public void hyperlinkState_hyperlinkModified_hyperlinkUpdated()
             throws IOException {
-        var sheet = getSpreadsheet();
-        var cell = sheet.getCellAt("A9");
-
         // Enter hyperlink and check that it is followed
-        cell.setValue("=HYPERLINK(\"#Sheet1!B9\")");
-        cell.click();
+        setCellValue("A9", "=HYPERLINK(\"#Sheet1!B9\")");
+        clickCell("A9");
         waitUntilSelected("B9");
 
         // Clear hyperlink and check that no link is followed
         action(Keys.LEFT);
         action(Keys.DELETE);
         action(Keys.DOWN);
-        cell.click();
+        clickCell("A9");
         waitUntilSelected("A9");
     }
 
