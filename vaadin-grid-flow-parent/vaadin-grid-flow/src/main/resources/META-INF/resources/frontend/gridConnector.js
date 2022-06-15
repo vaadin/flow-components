@@ -441,10 +441,14 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
               try {
                 const sorters = Array.from(grid.querySelectorAll('vaadin-grid-sorter'));
 
-                // Sorters for hidden columns are removed from DOM but stored in the web component.
-                // We need to ensure that all the sorters are reset when using `grid.sort(null)`.
-                grid._sorters.forEach((sorter) => {
-                  if (!sorters.includes(sorter)) {
+                grid._sorters.forEach((sorter, idx) => {
+                  if (!sorter.parentNode) {
+                    // When setting column order so that the columns are re-attached but their order
+                    // remains the same, orphan sorters are not being removed, so we need to cleanup.
+                    grid._sorters.splice(idx, 1);
+                  } else if (!sorters.includes(sorter)) {
+                    // Sorters for hidden columns are removed from DOM but stored in the web component.
+                    // We need to ensure that all the sorters are reset when using `grid.sort(null)`.
                     sorters.push(sorter);
                   }
                 });

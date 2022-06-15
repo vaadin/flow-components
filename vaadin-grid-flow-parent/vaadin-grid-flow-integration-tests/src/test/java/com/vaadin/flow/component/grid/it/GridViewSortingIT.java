@@ -163,6 +163,29 @@ public class GridViewSortingIT extends AbstractComponentIT {
                 QuerySortOrder.asc("age").thenDesc("firstName").build(), false);
     }
 
+    @Test
+    public void gridWithSorting_columnOrderSetTwice_sorterSizeDoesNotGrow() {
+        GridElement grid = $(GridElement.class).id("grid-sortable-columns");
+        scrollToElement(grid);
+
+        WebElement setColumnOrderButton = findElement(
+                By.id("grid-sortable-columns-set-order"));
+
+        // enable multi sort
+        clickElementWithJs(findElement(By.id("grid-multi-sort-toggle")));
+
+        getCellContent(grid.getHeaderCell(0)).click();
+
+        clickElementWithJs(setColumnOrderButton);
+
+        clickElementWithJs(setColumnOrderButton);
+
+        getCellContent(grid.getHeaderCell(0)).click();
+
+        assertSortMessageEquals(
+                QuerySortOrder.asc("age").thenAsc("firstName").build(), true);
+    }
+
     private void assertSortMessageEquals(List<QuerySortOrder> querySortOrders,
             boolean fromClient) {
         String sortOrdersString = querySortOrders.stream()

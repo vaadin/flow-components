@@ -53,14 +53,15 @@ public class GridViewSortingPage extends LegacyTestView {
                 .thenComparing(
                         (Person person) -> person.getAddress().getNumber());
 
-        grid.addColumn(LitRenderer.<Person> of(
-                "<div>${item.street}, number ${item.number}<br><small>${item.postalCode}</small></div>")
-                .withProperty("street",
-                        person -> person.getAddress().getStreet())
-                .withProperty("number",
-                        person -> person.getAddress().getNumber())
-                .withProperty("postalCode",
-                        person -> person.getAddress().getPostalCode()))
+        Grid.Column<Person> addressColumn = grid
+                .addColumn(LitRenderer.<Person> of(
+                        "<div>${item.street}, number ${item.number}<br><small>${item.postalCode}</small></div>")
+                        .withProperty("street",
+                                person -> person.getAddress().getStreet())
+                        .withProperty("number",
+                                person -> person.getAddress().getNumber())
+                        .withProperty("postalCode",
+                                person -> person.getAddress().getPostalCode()))
                 .setSortProperty("street", "number")
                 .setComparator(addressComparator).setHeader("Address");
 
@@ -110,15 +111,21 @@ public class GridViewSortingPage extends LegacyTestView {
                             .build());
                 });
 
+        NativeButton setColumnOrder = new NativeButton("Set column order",
+                click -> {
+                    grid.setColumnOrder(ageColumn, nameColumn, addressColumn);
+                });
+
         grid.setId("grid-sortable-columns");
         multiSort.setId("grid-multi-sort-toggle");
         invertAllSortings.setId("grid-sortable-columns-invert-sortings");
         resetAllSortings.setId("grid-sortable-columns-reset-sortings");
         toggleFirstColumnAndReset.setId("grid-sortable-columns-toggle-first");
         sortByTwoColumns.setId("grid-sortable-columns-sort-by-two");
+        setColumnOrder.setId("grid-sortable-columns-set-order");
         messageDiv.setId("grid-sortable-columns-message");
         addCard("Sorting", "Grid with sortable columns", grid, multiSort,
                 invertAllSortings, resetAllSortings, toggleFirstColumnAndReset,
-                sortByTwoColumns, messageDiv);
+                sortByTwoColumns, setColumnOrder, messageDiv);
     }
 }
