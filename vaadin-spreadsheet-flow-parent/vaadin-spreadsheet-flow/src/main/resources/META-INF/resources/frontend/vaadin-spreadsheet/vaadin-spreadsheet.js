@@ -341,8 +341,6 @@ export class VaadinSpreadsheet extends LitElement {
         this.api.setClass(newVal);
       } else if ('resources' == name) {
         this.api.setResources(this, newVal);
-      } else if ('popupbuttons' == name) {
-        this.api.setPopups(newVal);
       } else if ('api' == name) {
       } else {
         console.error('<vaadin-spreadsheet> unsupported property received from server: property=' + name);
@@ -405,11 +403,19 @@ export class VaadinSpreadsheet extends LitElement {
   }
 
   onPopupButtonOpen(row, column, contentId) {
-    requestAnimationFrame(() => this.api.onPopupButtonOpened(row, column, contentId));
+    this.api.onPopupButtonOpened(row, column, contentId);
   }
 
   closePopup(row, column) {
     this.api.closePopup(row, column);
+  }
+
+  addPopupButton(rawState) {
+    this.api.addPopupButton(rawState);
+  }
+
+  removePopupButton(rawState) {
+    this.api.removePopupButton(rawState);
   }
 
   /* SERVER RPC METHOD CALLBACKS */

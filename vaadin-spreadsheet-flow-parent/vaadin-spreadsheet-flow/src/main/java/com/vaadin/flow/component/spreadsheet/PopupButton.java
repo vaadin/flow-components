@@ -23,8 +23,6 @@ import org.apache.poi.ss.util.CellReference;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
-import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.spreadsheet.framework.ReflectTools;
 import com.vaadin.flow.component.spreadsheet.rpc.PopupButtonClientRpc;
@@ -79,7 +77,7 @@ public class PopupButton extends Component {
      * Constructs a new PopupButton.
      */
     public PopupButton() {
-        setId(UUID.randomUUID().toString());
+        setId("popupbutton-" + UUID.randomUUID().toString());
         registerRpc(rpc);
         getElement().getStyle().set("display", "none");
     }

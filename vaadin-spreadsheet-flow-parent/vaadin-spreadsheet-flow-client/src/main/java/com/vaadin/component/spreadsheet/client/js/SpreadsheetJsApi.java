@@ -2,17 +2,14 @@ package com.vaadin.component.spreadsheet.client.js;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.DivElement;
-import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.addon.spreadsheet.client.PopupButtonConnector;
-import com.vaadin.addon.spreadsheet.client.PopupButtonServerRpcImpl;
 import com.vaadin.addon.spreadsheet.client.PopupButtonState;
 import com.vaadin.addon.spreadsheet.client.PopupButtonWidget;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetClientRpc;
@@ -39,7 +36,6 @@ public class SpreadsheetJsApi {
     private SpreadsheetWidget spreadsheetWidget;
     protected SpreadsheetConnector spreadsheetConnector;
 
-    private PopupButtonServerRpcImpl popupButtonServerRpc;
     private Map<String, PopupButtonWidget> popupButtonWidgets = new HashMap<>();
     private Map<String, PopupButtonConnector> popupButtonConnectors = new HashMap<>();
     private Map<String, PopupButtonState> popupButtonStates = new HashMap<>();
@@ -60,7 +56,6 @@ public class SpreadsheetJsApi {
         spreadsheetConnector = new SpreadsheetConnector();
         spreadsheetConnector.doInit("1", new ApplicationConnection());
         spreadsheetWidget = spreadsheetConnector.getWidget();
-        popupButtonServerRpc = new PopupButtonServerRpcImpl();
         RootPanel.getForElement(element).add(spreadsheetWidget);
     }
 
@@ -469,57 +464,49 @@ public class SpreadsheetJsApi {
         }
     }
 
-    private static String getPopupKey(int row, int column) {
-        return row + "_" + column;
+    private static String getPopupKey(String sheet, int row, int column) {
+        return sheet + "_" + row + "_" + column;
     }
 
-    public void setPopups(String raw) {
-        List<PopupButtonState> popupButtons = Parser
-                .parseListOfPopupButtons(raw);
+    public void addPopupButton(String rawState) {
+        PopupButtonState state = Parser.parsePopupButtonState(rawState);
+        String key = getPopupKey(state.sheet, state.row, state.col);
 
-        var popupButtonsToRemove = new ArrayList<String>();
+        PopupButtonWidget widget;
 
-        for (var state : popupButtonStates.values()) {
-            if (!popupButtons.contains(state)) {
-                var key = getPopupKey(state.row, state.col);
-                popupButtonsToRemove.add(key);
-            }
+        if (!popupButtonWidgets.containsKey(key)) {
+            PopupButtonConnector connector;
+            popupButtonConnectors.put(key,
+                    connector = new PopupButtonConnector());
+            popupButtonWidgets.put(key, widget = connector.getWidget());
+
+            popupButtonStates.put(key, state);
+            connector.setPopupButtonServerRpc(getServerRpcInstance());
+            connector.init();
+            widget.setCol(state.col);
+            widget.setRow(state.row);
+            widget.setPopupHeaderHidden(state.headerHidden);
+            widget.setSheetWidget(spreadsheetWidget.getSheetWidget(), DivElement
+                    .as(spreadsheetWidget.getSheetWidget().getElement()));
+            widget.setPopupWidth(state.popupWidth);
+            widget.setPopupHeight(state.popupHeight);
+        } else {
+            widget = popupButtonWidgets.get(key);
         }
+        spreadsheetWidget.addPopupButton(widget);
+    }
 
-        popupButtonsToRemove.forEach(key -> {
-            var popupButton = popupButtonWidgets.get(key);
+    public void removePopupButton(String rawState) {
+        PopupButtonState state = Parser.parsePopupButtonState(rawState);
+        String key = getPopupKey(state.sheet, state.row, state.col);
+        PopupButtonWidget popupButton = popupButtonWidgets.get(key);
+
+        if (popupButton != null) {
             spreadsheetWidget.removePopupButton(popupButton);
             popupButtonWidgets.remove(key);
             popupButtonConnectors.remove(key);
             popupButtonStates.remove(key);
-        });
-
-        popupButtons.forEach(state -> {
-            String key = getPopupKey(state.row, state.col);
-            PopupButtonWidget widget;
-
-            if (!popupButtonWidgets.containsKey(key)) {
-                PopupButtonConnector connector;
-                popupButtonConnectors.put(key,
-                        connector = new PopupButtonConnector());
-                popupButtonWidgets.put(key, widget = connector.getWidget());
-
-                popupButtonStates.put(key, state);
-                connector.setPopupButtonServerRpc(popupButtonServerRpc);
-                connector.init();
-                widget.setCol(state.col);
-                widget.setRow(state.row);
-                widget.setPopupHeaderHidden(state.headerHidden);
-                widget.setSheetWidget(spreadsheetWidget.getSheetWidget(),
-                        DivElement.as(spreadsheetWidget.getSheetWidget()
-                                .getElement()));
-                widget.setPopupWidth(state.popupWidth);
-                widget.setPopupHeight(state.popupHeight);
-            } else {
-                widget = popupButtonWidgets.get(key);
-            }
-            spreadsheetWidget.addPopupButton(widget);
-        });
+        }
     }
 
     public static class ContentWidget extends Widget {
@@ -528,8 +515,15 @@ public class SpreadsheetJsApi {
         }
     }
 
-    public void onPopupButtonOpened(int row, int column, String contentId) {
-        Element container = Document.get().getElementById(contentId);
+    private static native Element getPopupContentContainer(
+            Element spreadsheetComponent, String contentParentId) /*-{
+        return spreadsheetComponent.querySelector('#' + contentParentId);
+    }-*/;
+
+    public void onPopupButtonOpened(int row, int column,
+            String contentParentId) {
+        Element container = getPopupContentContainer(
+                spreadsheetWidget.getParent().getElement(), contentParentId);
 
         if (container == null) {
             return;
@@ -538,8 +532,8 @@ public class SpreadsheetJsApi {
                 container.getFirstChildElement());
 
         if (contentWidget.getElement() != null) {
-            PopupButtonWidget widget = popupButtonWidgets
-                    .get(getPopupKey(row, column));
+            PopupButtonWidget widget = popupButtonWidgets.get(getPopupKey(
+                    spreadsheetWidget.getActiveSheetName(), row, column));
             if (!widget.isPopupOpen()) {
                 widget.openPopup();
             }
@@ -548,8 +542,8 @@ public class SpreadsheetJsApi {
     }
 
     public void closePopup(int row, int column) {
-        PopupButtonWidget widget = popupButtonWidgets
-                .get(getPopupKey(row, column));
+        PopupButtonWidget widget = popupButtonWidgets.get(getPopupKey(
+                spreadsheetWidget.getActiveSheetName(), row, column));
         if (widget != null) {
             widget.closePopup();
         }
@@ -811,11 +805,11 @@ public class SpreadsheetJsApi {
     }
 
     public void setPopupButtonClickCallback(JsConsumer<Void> callback) {
-        popupButtonServerRpc.setPopupButtonClickCallback(callback);
+        getServerRpcInstance().setPopupButtonClickCallback(callback);
     }
 
     public void setPopupCloseCallback(JsConsumer<Void> callback) {
-        popupButtonServerRpc.setPopupCloseCallback(callback);
+        getServerRpcInstance().setPopupCloseCallback(callback);
     }
 
     public void load() {

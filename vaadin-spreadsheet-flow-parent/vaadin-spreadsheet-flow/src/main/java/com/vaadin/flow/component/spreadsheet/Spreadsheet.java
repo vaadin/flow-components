@@ -32,12 +32,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 import java.util.WeakHashMap;
-import java.util.stream.Collectors;
 
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -99,7 +97,6 @@ import com.vaadin.flow.component.spreadsheet.rpc.SpreadsheetClientRpc;
 import com.vaadin.flow.component.spreadsheet.shared.ContentMode;
 import com.vaadin.flow.component.spreadsheet.shared.ErrorLevel;
 import com.vaadin.flow.component.spreadsheet.shared.GroupingData;
-import com.vaadin.flow.component.spreadsheet.shared.PopupButtonState;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.pro.licensechecker.LicenseChecker;
@@ -4834,10 +4831,8 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
     }
 
     private void registerCustomComponent(PopupButton component) {
-        List<PopupButtonState> popupButtonStates = attachedPopupButtons.stream()
-                .map(p -> p.getState()).collect(Collectors.toList());
-        getElement().setProperty("popupbuttons",
-                Serializer.serialize(popupButtonStates));
+        getElement().callJsFunction("addPopupButton",
+                Serializer.serialize(component.getState()));
     }
 
     private void registerCustomComponent(Component component) {
@@ -4849,7 +4844,8 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
     }
 
     private void unRegisterCustomComponent(PopupButton component) {
-        registerCustomComponent(component);
+        getElement().callJsFunction("removePopupButton",
+                Serializer.serialize(component.getState()));
     }
 
     private void unRegisterCustomComponent(Component component) {
