@@ -31,6 +31,8 @@ public class ResizeIT extends AbstractSpreadsheetIT {
         double newWidth = getSize(getCellStyle("C1", "width"));
 
         assertInRange(2.5 * originalWidth, newWidth, 3.5 * originalWidth);
+
+        checkLogsForErrors();
     }
 
     @Test
@@ -50,6 +52,8 @@ public class ResizeIT extends AbstractSpreadsheetIT {
         double newHeight = getSize(getCellStyle("A3", "height"));
 
         assertInRange(2.3 * originalHeight, newHeight, 3.5 * originalHeight);
+
+        checkLogsForErrors();
     }
 
     @Test

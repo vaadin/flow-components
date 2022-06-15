@@ -204,6 +204,8 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
 
     public void setSpreadsheet(SpreadsheetElement spreadsheet) {
         this.spreadsheet = spreadsheet;
+        // Force sheet initial focus
+        spreadsheet.findElement(By.className("sheet-tabsheet")).click();
     }
 
     public void setCellValue(String address, String value) {
@@ -537,6 +539,10 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
                                 logEntry);
             }
         });
+    }
+
+    protected void checkLogsForErrors() {
+        checkLogsForErrors(msg -> false);
     }
 
     protected List<LogEntry> getLogEntries(Level level) {
