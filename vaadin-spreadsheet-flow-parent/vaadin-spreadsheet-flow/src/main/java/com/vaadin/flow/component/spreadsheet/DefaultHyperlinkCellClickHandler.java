@@ -143,7 +143,7 @@ public class DefaultHyperlinkCellClickHandler
                 int sheetPOIIndex = getSheetIndex(cell, sheetName);
                 spreadsheet.setActiveSheetWithPOIIndex(sheetPOIIndex);
             }
-            spreadsheet.initialSheetSelection = address;
+            spreadsheet.initialSheetSelection = addressInSheet;
             spreadsheet.getCellSelectionManager()
                     .onSheetAddressChanged(addressInSheet, true);
         } else {
