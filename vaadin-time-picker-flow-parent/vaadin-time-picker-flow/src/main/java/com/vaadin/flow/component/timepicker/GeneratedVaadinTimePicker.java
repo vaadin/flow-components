@@ -124,7 +124,7 @@ import elemental.json.JsonObject;
  * </p>
  */
 @Tag("vaadin-time-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/time-picker", version = "23.1.0")
 @NpmPackage(value = "@vaadin/vaadin-time-picker", version = "23.1.0")
