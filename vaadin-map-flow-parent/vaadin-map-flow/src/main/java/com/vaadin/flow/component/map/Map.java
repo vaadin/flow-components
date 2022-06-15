@@ -62,7 +62,7 @@ import java.util.Objects;
  * through {@link Map#getView()}.
  */
 @Tag("vaadin-map")
-@NpmPackage(value = "@vaadin/map", version = "23.2.0-alpha1")
+@NpmPackage(value = "@vaadin/map", version = "23.2.0-dev.53560527d")
 @JsModule("@vaadin/map/src/vaadin-map.js")
 @JsModule("./vaadin-map/mapConnector.js")
 public class Map extends MapBase {
