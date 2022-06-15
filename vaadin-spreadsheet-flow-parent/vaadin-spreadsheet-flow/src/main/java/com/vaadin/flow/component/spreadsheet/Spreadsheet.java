@@ -3789,7 +3789,12 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
         clearSheetOverlays();
         topLeftCellCommentsLoaded = false;
 
-        setReload(true);
+        UI.getCurrent().beforeClientResponse(this, e -> {
+            if (reload) {
+                this.updateReloadState();
+            }
+        });
+        reload = true;
 
         setSheetIndex(
                 getSpreadsheetSheetIndex(workbook.getActiveSheetIndex()) + 1);
@@ -3985,15 +3990,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
         return clientRpc;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.vaadin.ui.AbstractComponent#beforeClientResponse(boolean)
-     */
-    // @Override
-    public void beforeClientResponse(boolean initial) {
-        // todo: reubicar este código
-        // super.beforeClientResponse(initial);
+    private void updateReloadState() {
         if (reload) {
             setReload(reload);
             reload = false;
