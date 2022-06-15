@@ -105,6 +105,8 @@ public class ItemFilter extends Div implements SpreadsheetFilter {
     protected void initLayouts() {
         layout = new VerticalLayout();
         layout.setMargin(false);
+        layout.setPadding(false);
+        layout.setSpacing(false);
         layout.add(allItems);
         layout.add(filterCheckbox);
 

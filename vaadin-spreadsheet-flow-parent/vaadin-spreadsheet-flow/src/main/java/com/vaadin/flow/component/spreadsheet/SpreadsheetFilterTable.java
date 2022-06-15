@@ -190,6 +190,8 @@ public class SpreadsheetFilterTable extends SpreadsheetTable
         if (popupButton.getContent() == null) {
             VerticalLayout content = new VerticalLayout();
             content.setMargin(false);
+            content.setSpacing(false);
+            content.setPadding(false);
             popupButton.setContent(content);
         }
 
