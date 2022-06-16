@@ -29,7 +29,6 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.spreadsheet.PopupButton.PopupCloseEvent;
 import com.vaadin.flow.component.spreadsheet.PopupButton.PopupCloseListener;
 import com.vaadin.flow.component.spreadsheet.PopupButton.PopupOpenEvent;
@@ -56,7 +55,6 @@ public class ItemFilter extends Div implements SpreadsheetFilter {
     private ArrayList<String> allCellValues;
     private Collection<String> latestFilteredValues;
     private PopupButton popupButton;
-    private VerticalLayout layout;
     private boolean firstUpdate = true;
     private boolean cancelValueChangeUpdate;
     private SpreadsheetFilterTable filterTable;
@@ -103,14 +101,9 @@ public class ItemFilter extends Div implements SpreadsheetFilter {
      * Creates the base layout for the filter components.
      */
     protected void initLayouts() {
-        layout = new VerticalLayout();
-        layout.setMargin(false);
-        layout.setPadding(false);
-        layout.setSpacing(false);
-        layout.add(allItems);
-        layout.add(filterCheckbox);
+        add(allItems);
+        add(filterCheckbox);
 
-        add(layout);
         setClassName(ITEM_FILTER_LAYOUT_CLASSNAME);
     }
 

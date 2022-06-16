@@ -984,6 +984,17 @@
       #spreadsheet-overlays .v-spreadsheet-popupbutton-overlay .v-panel.spreadsheet-item-filter-layout .v-panel-deco {
         background-color: transparent;
         border: none; }
+      #spreadsheet-overlays .spreadsheet-item-filter-layout {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      #spreadsheet-overlays .spreadsheet-filter-table-content {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
   #spreadsheet-overlays .v-spreadsheet-popupbutton-overlay-header {
     background: white;
     height: 18px;
