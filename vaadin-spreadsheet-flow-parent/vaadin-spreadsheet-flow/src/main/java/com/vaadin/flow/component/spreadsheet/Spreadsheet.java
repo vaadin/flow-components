@@ -827,7 +827,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
                 Serializer.serialize(namedRanges));
     }
 
-    public void onPopupButtonClick(int row, int column) {
+    void onPopupButtonClick(int row, int column) {
         PopupButton popup = sheetPopupButtons
                 .get(SpreadsheetUtil.relativeToAbsolute(this,
                         new CellReference(row - 1, column - 1)));
@@ -836,7 +836,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
         }
     }
 
-    public void onPopupClose(int row, int column) {
+    void onPopupClose(int row, int column) {
         PopupButton popup = sheetPopupButtons
                 .get(SpreadsheetUtil.relativeToAbsolute(this,
                         new CellReference(row - 1, column - 1)));
