@@ -17,7 +17,6 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.UUID;
 
 import org.apache.poi.ss.util.CellReference;
 
@@ -77,9 +76,7 @@ public class PopupButton extends Component {
      * Constructs a new PopupButton.
      */
     public PopupButton() {
-        setId("popupbutton-" + UUID.randomUUID().toString());
         registerRpc(rpc);
-        getElement().getStyle().set("display", "none");
     }
 
     private void registerRpc(PopupButtonServerRpc rpc) {
@@ -140,7 +137,8 @@ public class PopupButton extends Component {
         getElement().appendChild(getContent().getElement());
         getParent().ifPresent(parent -> {
             parent.getElement().callJsFunction("onPopupButtonOpen",
-                    getRow() + 1, getColumn() + 1, getId().orElse(""));
+                    getRow() + 1, getColumn() + 1,
+                    getElement().getNode().getId());
         });
         fireOpen();
     }

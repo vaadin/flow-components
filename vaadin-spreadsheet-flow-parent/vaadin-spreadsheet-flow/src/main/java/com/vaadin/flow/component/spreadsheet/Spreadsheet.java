@@ -4821,13 +4821,17 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
     private void registerPopupButton(PopupButton button) {
         attachedPopupButtons.add(button);
         registerCustomComponent(button);
-        add(button);
+        if (!getElement().equals(button.getElement().getParent())) {
+            getElement().appendVirtualChild(button.getElement());
+        }
     }
 
     private void unRegisterPopupButton(PopupButton button) {
         attachedPopupButtons.remove(button);
         unRegisterCustomComponent(button);
-        remove(button);
+        if (getElement().equals(button.getElement().getParent())) {
+            getElement().removeVirtualChild(button.getElement());
+        }
     }
 
     private void registerCustomComponent(PopupButton component) {

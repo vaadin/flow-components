@@ -516,14 +516,16 @@ public class SpreadsheetJsApi {
     }
 
     private static native Element getPopupContentContainer(
-            Element spreadsheetComponent, String contentParentId) /*-{
-        return spreadsheetComponent.querySelector('#' + contentParentId);
+            String contentParentId) /*-{
+        if (!(Vaadin && Vaadin.Flow && Vaadin.Flow.clients.ROOT)) {
+            return;
+        }
+        return Vaadin.Flow.clients.ROOT.getByNodeId(contentParentId);
     }-*/;
 
     public void onPopupButtonOpened(int row, int column,
             String contentParentId) {
-        Element container = getPopupContentContainer(
-                spreadsheetWidget.getParent().getElement(), contentParentId);
+        Element container = getPopupContentContainer(contentParentId);
 
         if (container == null) {
             return;
