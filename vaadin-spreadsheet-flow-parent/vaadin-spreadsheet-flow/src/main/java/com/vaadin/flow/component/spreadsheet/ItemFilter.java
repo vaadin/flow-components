@@ -320,7 +320,6 @@ public class ItemFilter extends Div implements SpreadsheetFilter {
         cancelValueChangeUpdate = true;
         allItems.setValue(true);
         filterCheckbox.setValue(new HashSet<>(allCellValues));
-        filterOptionsProvider.refreshAll();
         filteredRows.clear();
         cancelValueChangeUpdate = false;
     }
