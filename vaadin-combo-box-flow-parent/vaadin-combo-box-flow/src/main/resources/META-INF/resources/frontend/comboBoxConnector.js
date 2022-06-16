@@ -65,9 +65,6 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
         const clearPageCallbacks = (pages = Object.keys(pageCallbacks)) => {
           const dataProviderMixin = getDataProviderMixin();
           // Flush and empty the existing requests
-
-          const filteredItems = [...dataProviderMixin.filteredItems];
-
           pages.forEach((page) => {
             pageCallbacks[page]([], dataProviderMixin.size);
             delete pageCallbacks[page];
@@ -77,13 +74,11 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
             // encounters a placeholder)
             const pageStart = parseInt(page) * dataProviderMixin.pageSize;
             const pageEnd = pageStart + dataProviderMixin.pageSize;
-            const end = Math.min(pageEnd, filteredItems.length);
+            const end = Math.min(pageEnd, dataProviderMixin.filteredItems.length);
             for (let i = pageStart; i < end; i++) {
-              filteredItems[i] = placeHolder;
+              dataProviderMixin.filteredItems[i] = placeHolder;
             }
           });
-
-          dataProviderMixin.filteredItems = filteredItems;
         };
 
         comboBox.dataProvider = function (params, callback) {

@@ -34,10 +34,6 @@ public class SpreadsheetEventListener
         return o == null ? null : o.getBoolean(pos);
     }
 
-    private double toNumber(JsonValue v) {
-        return (v instanceof JsonNumber) ? ((JsonNumber) v).asNumber() : 0;
-    }
-
     private HashMap<Integer, Float> toMapFloat(JsonArray o, int pos) {
         HashMap<Integer, Float> m = new HashMap<>();
         if (o == null) {
@@ -45,7 +41,10 @@ public class SpreadsheetEventListener
         }
         JsonArray jso = o.getArray(pos);
         for (int i = 0; i < jso.length(); i++) {
-            m.put(i, (float) toNumber(jso.get(i)));
+            JsonValue value = jso.get(i);
+            if (value instanceof JsonNumber) {
+                m.put(i, (float) value.asNumber());
+            }
         }
         return m;
     }
@@ -57,7 +56,10 @@ public class SpreadsheetEventListener
         }
         JsonArray jso = o.getArray(pos);
         for (int i = 0; i < jso.length(); i++) {
-            m.put(i, (int) toNumber(jso.get(i)));
+            JsonValue value = jso.get(i);
+            if (value instanceof JsonNumber) {
+                m.put(i, (int) value.asNumber());
+            }
         }
         return m;
     }
