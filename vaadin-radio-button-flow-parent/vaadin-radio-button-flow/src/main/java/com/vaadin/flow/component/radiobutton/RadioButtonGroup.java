@@ -696,6 +696,7 @@ public class RadioButtonGroup<T>
             // Mark non-checked radio buttons in a readonly group as disabled.
             disabled = true;
         }
+        button.getElement().setAttribute("readonly", this.isReadOnly());
 
         button.setEnabled(!disabled);
         button.setDisabled(disabled);
