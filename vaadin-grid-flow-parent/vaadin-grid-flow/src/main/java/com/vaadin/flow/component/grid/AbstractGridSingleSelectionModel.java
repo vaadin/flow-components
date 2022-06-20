@@ -71,13 +71,9 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
         if (Objects.equals(getItemId(item), getItemId(selectedItem))) {
             return;
         }
-        T oldItem = selectedItem;
         doSelect(item, false);
 
         getGrid().doClientSideSelection(Collections.singleton(item));
-        if (oldItem != null) {
-            getGrid().getDataCommunicator().refresh(oldItem);
-        }
         if (item != null) {
             getGrid().getDataCommunicator().refresh(item);
         }
