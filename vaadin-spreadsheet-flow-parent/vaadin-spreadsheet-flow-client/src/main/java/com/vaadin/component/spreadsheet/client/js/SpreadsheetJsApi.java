@@ -517,10 +517,10 @@ public class SpreadsheetJsApi {
 
     private static native Element getPopupContentContainer(
             String contentParentId) /*-{
-        if (!(Vaadin && Vaadin.Flow && Vaadin.Flow.clients.ROOT)) {
-            return;
-        }
-        return Vaadin.Flow.clients.ROOT.getByNodeId(contentParentId);
+        return $wnd.Vaadin
+          && $wnd.Vaadin.Flow
+          && $wnd.Vaadin.Flow.clients.ROOT
+          && $wnd.Vaadin.Flow.clients.ROOT.getByNodeId(contentParentId);
     }-*/;
 
     public void onPopupButtonOpened(int row, int column,
