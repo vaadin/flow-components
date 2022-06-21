@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
+import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextAreaVariant;
 import com.vaadin.tests.ThemeVariantTestHelper;
@@ -112,5 +113,12 @@ public class TextAreaTest {
         ThemeVariantTestHelper
                 .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
                         new TextArea(), TextAreaVariant.LUMO_SMALL);
+    }
+
+    @Test
+    public void implementsHasAllowedCharPattern() {
+        Assert.assertTrue("TextArea should support char pattern",
+                HasAllowedCharPattern.class
+                        .isAssignableFrom(new TextArea().getClass()));
     }
 }

@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
+import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.tests.ThemeVariantTestHelper;
@@ -103,4 +104,10 @@ public class TextFieldTest {
                 textField.getElement().getProperty("autoselect", value));
     }
 
+    @Test
+    public void implementsHasAllowedCharPattern() {
+        Assert.assertTrue("TextField should support char pattern",
+                HasAllowedCharPattern.class
+                        .isAssignableFrom(new TextField().getClass()));
+    }
 }

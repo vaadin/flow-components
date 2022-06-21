@@ -24,6 +24,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.di.Instantiator;
@@ -260,4 +261,10 @@ public class DatePickerTest {
         germanDatePicker.setI18n(datePickerI18n);
     }
 
+    @Test
+    public void implementsHasAllowedCharPattern() {
+        Assert.assertTrue("DatePicker should support char pattern",
+                HasAllowedCharPattern.class
+                        .isAssignableFrom(new DatePicker().getClass()));
+    }
 }

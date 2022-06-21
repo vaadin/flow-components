@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
+import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.tests.ThemeVariantTestHelper;
@@ -101,5 +102,12 @@ public class PasswordFieldTest {
         ThemeVariantTestHelper
                 .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
                         new PasswordField(), TextFieldVariant.LUMO_SMALL);
+    }
+
+    @Test
+    public void implementsHasAllowedCharPattern() {
+        Assert.assertTrue("PasswordField should support char pattern",
+                HasAllowedCharPattern.class
+                        .isAssignableFrom(new PasswordField().getClass()));
     }
 }
