@@ -205,8 +205,8 @@ public class BigDecimalFieldPageIT extends AbstractComponentIT {
         clickElementWithJs("set-french-locale");
         Assert.assertEquals(
                 "BigDecimalField with French locale has unexpected pattern for "
-                        + "invalid input prevention (the _enabledCharPattern property)",
-                "[\\d-+,]", field.getPropertyString("_enabledCharPattern"));
+                        + "invalid input prevention (the allowedCharPattern property)",
+                "[\\d-+,]", field.getPropertyString("allowedCharPattern"));
     }
 
     // Always checking the count of fired events to make sure it doesn't fire
