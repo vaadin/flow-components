@@ -24,6 +24,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Tests for the {@link TextArea}.
@@ -117,7 +118,7 @@ public class TextAreaTest {
 
     @Test
     public void implementsHasAllowedCharPattern() {
-        Assert.assertTrue("TextArea should support char pattern",
+        assertTrue("TextArea should support char pattern",
                 HasAllowedCharPattern.class
                         .isAssignableFrom(new TextArea().getClass()));
     }

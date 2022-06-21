@@ -24,6 +24,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Tests for the {@link PasswordField}.
@@ -106,7 +107,7 @@ public class PasswordFieldTest {
 
     @Test
     public void implementsHasAllowedCharPattern() {
-        Assert.assertTrue("PasswordField should support char pattern",
+        assertTrue("PasswordField should support char pattern",
                 HasAllowedCharPattern.class
                         .isAssignableFrom(new PasswordField().getClass()));
     }

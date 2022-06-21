@@ -24,6 +24,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Tests for the {@link EmailField}.
@@ -74,7 +75,7 @@ public class EmailFieldTest {
 
     @Test
     public void implementsHasAllowedCharPattern() {
-        Assert.assertTrue("EmailField should support char pattern",
+        assertTrue("EmailField should support char pattern",
                 HasAllowedCharPattern.class
                         .isAssignableFrom(new EmailField().getClass()));
     }
