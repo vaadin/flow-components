@@ -26,6 +26,7 @@ import java.util.stream.Stream;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.shared.HasClearButton;
+import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
@@ -51,7 +52,7 @@ import com.vaadin.flow.shared.Registration;
 @JsModule("./vaadin-time-picker/timepickerConnector.js")
 public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         implements HasSize, HasValidation, HasEnabled, HasHelper, HasLabel,
-        HasTheme, HasClearButton {
+        HasTheme, HasClearButton, HasAllowedCharPattern {
 
     private static final SerializableFunction<String, LocalTime> PARSER = valueFromClient -> {
         return valueFromClient == null || valueFromClient.isEmpty() ? null

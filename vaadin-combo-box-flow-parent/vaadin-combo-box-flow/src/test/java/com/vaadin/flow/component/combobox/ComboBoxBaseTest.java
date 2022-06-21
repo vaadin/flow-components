@@ -17,6 +17,7 @@ package com.vaadin.flow.component.combobox;
 
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasLabel;
+import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxListDataView;
 import com.vaadin.flow.data.provider.AbstractDataProvider;
@@ -48,15 +49,21 @@ public abstract class ComboBoxBaseTest {
 
     @Test
     public void implementsFocusable() {
-        Assert.assertTrue("MultSelectComboBox should be focusable",
-                Focusable.class.isAssignableFrom(
-                        createComboBox(String.class).getClass()));
+        Assert.assertTrue("ComboBox should be focusable", Focusable.class
+                .isAssignableFrom(createComboBox(String.class).getClass()));
     }
 
     @Test
     public void implementsHasLabel() {
-        Assert.assertTrue("MultSelectComboBox should be focusable",
+        Assert.assertTrue("ComboBox should support setting a label",
                 HasLabel.class.isAssignableFrom(
+                        createComboBox(String.class).getClass()));
+    }
+
+    @Test
+    public void implementsHasAllowedCharPattern() {
+        Assert.assertTrue("ComboBox should support allowed char pattern",
+                HasAllowedCharPattern.class.isAssignableFrom(
                         createComboBox(String.class).getClass()));
     }
 

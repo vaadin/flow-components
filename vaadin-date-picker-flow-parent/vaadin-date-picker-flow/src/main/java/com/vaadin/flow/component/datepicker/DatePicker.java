@@ -26,6 +26,7 @@ import java.util.stream.Stream;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasClearButton;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
@@ -64,7 +65,7 @@ import elemental.json.JsonType;
 @NpmPackage(value = "date-fns", version = "2.28.0")
 public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         implements HasSize, HasValidation, HasHelper, HasTheme, HasLabel,
-        HasClearButton {
+        HasClearButton, HasAllowedCharPattern {
 
     private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
