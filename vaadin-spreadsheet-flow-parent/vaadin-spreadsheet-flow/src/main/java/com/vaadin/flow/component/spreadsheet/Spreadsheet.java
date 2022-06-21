@@ -31,7 +31,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
@@ -75,8 +74,6 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
-import com.vaadin.flow.component.Focusable;
-import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
@@ -3798,7 +3795,7 @@ public class Spreadsheet extends Component
         clearSheetOverlays();
         topLeftCellCommentsLoaded = false;
 
-        Optional.ofNullable(UI.getCurrent()).ifPresent(ui -> {
+        getUI().ifPresent(ui -> {
             ui.beforeClientResponse(this, e -> {
                 if (reload) {
                     this.updateReloadState();
