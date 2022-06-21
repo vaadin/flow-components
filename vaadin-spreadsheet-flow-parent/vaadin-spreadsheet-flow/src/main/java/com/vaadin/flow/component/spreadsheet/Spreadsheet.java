@@ -31,6 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
@@ -3797,13 +3798,14 @@ public class Spreadsheet extends Component
         clearSheetOverlays();
         topLeftCellCommentsLoaded = false;
 
-        if (UI.getCurrent() != null) {
-            UI.getCurrent().beforeClientResponse(this, e -> {
+        Optional.ofNullable(UI.getCurrent()).ifPresent(ui -> {
+            ui.beforeClientResponse(this, e -> {
                 if (reload) {
                     this.updateReloadState();
                 }
             });
-        }
+        });
+
         reload = true;
 
         setSheetIndex(
