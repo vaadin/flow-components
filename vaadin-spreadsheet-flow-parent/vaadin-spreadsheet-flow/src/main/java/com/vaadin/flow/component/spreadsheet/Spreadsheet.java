@@ -114,8 +114,8 @@ import elemental.json.JsonValue;
 @Tag("vaadin-spreadsheet")
 @JsModule("./vaadin-spreadsheet/vaadin-spreadsheet.js")
 @SuppressWarnings("serial")
-public class Spreadsheet extends Component implements HasComponents, HasSize,
-        HasStyle, Action.Container, Focusable {
+public class Spreadsheet extends Component
+        implements HasSize, HasStyle, Action.Container {
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(Spreadsheet.class);
@@ -204,8 +204,6 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
 
     // private Map<String, URLReference> resources = new HashMap<>();
     private Map<String, String> resources = new HashMap<>();
-
-    private boolean enabled = true;
 
     /**
      * A set of event identifiers with registered listeners.
@@ -345,11 +343,6 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
 
     public Map<String, String> getResources() {
         return resources;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return enabled;
     }
 
     public Set<String> getRegisteredEventListeners() {
@@ -5963,27 +5956,6 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
         this.invalidFormulaErrorMessage = invalidFormulaErrorMessage;
         getElement().setProperty("invalidFormulaErrorMessage",
                 invalidFormulaErrorMessage);
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.vaadin.ui.Component.Focusable#getTabIndex()
-     */
-    @Override
-    public int getTabIndex() {
-        return this.tabIndex;
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.vaadin.ui.Component.Focusable#setTabIndex(int)
-     */
-    @Override
-    public void setTabIndex(int tabIndex) {
-        this.tabIndex = tabIndex;
-        getElement().setProperty("tabIndex", tabIndex);
     }
 
     /*
