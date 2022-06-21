@@ -3797,11 +3797,13 @@ public class Spreadsheet extends Component
         clearSheetOverlays();
         topLeftCellCommentsLoaded = false;
 
-        UI.getCurrent().beforeClientResponse(this, e -> {
-            if (reload) {
-                this.updateReloadState();
-            }
-        });
+        if (UI.getCurrent() != null) {
+            UI.getCurrent().beforeClientResponse(this, e -> {
+                if (reload) {
+                    this.updateReloadState();
+                }
+            });
+        }
         reload = true;
 
         setSheetIndex(
