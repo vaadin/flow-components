@@ -21,14 +21,12 @@ import java.util.Set;
 
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
-
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.html.Div;
 
 /**
  * Represents a "table" inside a spreadsheet, that has filters (
@@ -48,6 +46,8 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 public class SpreadsheetFilterTable extends SpreadsheetTable
         implements ComponentEventListener {
     public static final String CLEAR_FILTERS_BUTTON_CLASSNAME = "clear-filters-button";
+
+    public static final String FILTER_TABLE_CONTENT_CLASSNAME = "spreadsheet-filter-table-content";
 
     protected final Map<PopupButton, HashSet<SpreadsheetFilter>> popupButtonToFiltersMap;
     protected final Map<PopupButton, Button> popupButtonToClearButtonMap;
@@ -190,12 +190,12 @@ public class SpreadsheetFilterTable extends SpreadsheetTable
     private void addComponentToPopup(PopupButton popupButton,
             Component component) {
         if (popupButton.getContent() == null) {
-            VerticalLayout content = new VerticalLayout();
-            content.setMargin(false);
+            Div content = new Div();
+            content.addClassName(FILTER_TABLE_CONTENT_CLASSNAME);
             popupButton.setContent(content);
         }
 
-        ((VerticalLayout) popupButton.getContent()).add(component);
+        ((Div) popupButton.getContent()).add(component);
     }
 
     /**
@@ -233,7 +233,7 @@ public class SpreadsheetFilterTable extends SpreadsheetTable
      * added your own SpreadsheetFilter.
      */
     public void onFiltersUpdated() {
-        Set<Integer> filteredRows = new HashSet<Integer>();
+        Set<Integer> filteredRows = new HashSet<>();
         for (Entry<PopupButton, HashSet<SpreadsheetFilter>> entry : popupButtonToFiltersMap
                 .entrySet()) {
             PopupButton popupButton = entry.getKey();

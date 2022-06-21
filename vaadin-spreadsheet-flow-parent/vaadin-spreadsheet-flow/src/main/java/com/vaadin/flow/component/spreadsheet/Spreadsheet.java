@@ -36,7 +36,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 import java.util.WeakHashMap;
-import java.util.stream.Collectors;
 
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -98,7 +97,6 @@ import com.vaadin.flow.component.spreadsheet.rpc.SpreadsheetClientRpc;
 import com.vaadin.flow.component.spreadsheet.shared.ContentMode;
 import com.vaadin.flow.component.spreadsheet.shared.ErrorLevel;
 import com.vaadin.flow.component.spreadsheet.shared.GroupingData;
-import com.vaadin.flow.component.spreadsheet.shared.PopupButtonState;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.pro.licensechecker.LicenseChecker;
@@ -822,6 +820,25 @@ public class Spreadsheet extends Component
                 Serializer.serialize(namedRanges));
     }
 
+    void onPopupButtonClick(int row, int column) {
+        PopupButton popup = sheetPopupButtons
+                .get(SpreadsheetUtil.relativeToAbsolute(this,
+                        new CellReference(row - 1, column - 1)));
+        if (popup != null) {
+            popup.openPopup();
+        }
+    }
+
+    void onPopupClose(int row, int column) {
+        PopupButton popup = sheetPopupButtons
+                .get(SpreadsheetUtil.relativeToAbsolute(this,
+                        new CellReference(row - 1, column - 1)));
+
+        if (popup != null) {
+            popup.closePopup();
+        }
+    }
+
     /*
      * CLIENT RPC
      */
@@ -1188,9 +1205,6 @@ public class Spreadsheet extends Component
     protected String initialSheetSelection = null;
 
     private Set<Component> customComponents = new HashSet<Component>();
-
-    /* Disable buttons until table support #826 */
-    private static final boolean popupButtonsEnabled = true;
 
     private Map<CellReference, PopupButton> sheetPopupButtons = new HashMap<CellReference, PopupButton>();
 
@@ -2223,6 +2237,7 @@ public class Spreadsheet extends Component
         SpreadsheetFactory.reloadSpreadsheetData(this,
                 workbook.getSheetAt(sheetIndex));
         reloadActiveSheetStyles();
+        loadPopupButtons();
     }
 
     /**
@@ -4794,22 +4809,24 @@ public class Spreadsheet extends Component
     }
 
     private void registerPopupButton(PopupButton button) {
-        if (popupButtonsEnabled) {
-            attachedPopupButtons.add(button);
-            registerCustomComponent(button);
+        attachedPopupButtons.add(button);
+        registerCustomComponent(button);
+        if (!getElement().equals(button.getElement().getParent())) {
+            getElement().appendVirtualChild(button.getElement());
         }
     }
 
     private void unRegisterPopupButton(PopupButton button) {
         attachedPopupButtons.remove(button);
         unRegisterCustomComponent(button);
+        if (getElement().equals(button.getElement().getParent())) {
+            getElement().removeVirtualChild(button.getElement());
+        }
     }
 
     private void registerCustomComponent(PopupButton component) {
-        List<PopupButtonState> popupButtonStates = attachedPopupButtons.stream()
-                .map(p -> p.getState()).collect(Collectors.toList());
-        getElement().setProperty("popupbuttons",
-                Serializer.serialize(popupButtonStates));
+        getElement().callJsFunction("addPopupButton",
+                Serializer.serialize(component.getState()));
     }
 
     private void registerCustomComponent(Component component) {
@@ -4821,7 +4838,8 @@ public class Spreadsheet extends Component
     }
 
     private void unRegisterCustomComponent(PopupButton component) {
-        getElement().removeProperty("popupbuttons");
+        getElement().callJsFunction("removePopupButton",
+                Serializer.serialize(component.getState()));
     }
 
     private void unRegisterCustomComponent(Component component) {

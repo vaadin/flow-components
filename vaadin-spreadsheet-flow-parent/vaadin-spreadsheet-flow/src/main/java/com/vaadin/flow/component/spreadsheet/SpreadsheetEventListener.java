@@ -163,6 +163,10 @@ public class SpreadsheetEventListener
                     toBool(pars, 2));
         } else if ("levelHeaderClicked".equals(type)) {
             handler.levelHeaderClicked(toBool(pars, 0), toInt(pars, 1));
+        } else if ("popupButtonClick".equals(type)) {
+            handler.onPopupButtonClick(toInt(pars, 0), toInt(pars, 1));
+        } else if ("popupClose".equals(type)) {
+            handler.onPopupClose(toInt(pars, 0), toInt(pars, 1));
         }
     }
 
