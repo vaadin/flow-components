@@ -31,16 +31,16 @@ public class MultiSelectComboBoxI18n implements Serializable {
      * The text that is announced by screen readers when the clear button is
      * clicked.
      * <p>
-     * The value is {@code null} by default, which means the default value
-     * of the web component will be used.
+     * The value is {@code null} by default, which means the default value of
+     * the web component will be used.
      */
     public String getCleared() {
         return cleared;
     }
 
     /**
-     * Sets the text that is announced by screen readers when the clear
-     * button is clicked.
+     * Sets the text that is announced by screen readers when the clear button
+     * is clicked.
      *
      * @return this instance for method chaining
      */
@@ -52,16 +52,16 @@ public class MultiSelectComboBoxI18n implements Serializable {
     /**
      * The text that is announced by screen readers when a chip is focused.
      * <p>
-     * The value is {@code null} by default, which means the default value
-     * of the web component will be used.
+     * The value is {@code null} by default, which means the default value of
+     * the web component will be used.
      */
     public String getFocused() {
         return focused;
     }
 
     /**
-     * Sets the text that is announced by screen readers when a chip is
-     * focused. The label of the chip will be prepended to this text.
+     * Sets the text that is announced by screen readers when a chip is focused.
+     * The label of the chip will be prepended to this text.
      *
      * @return this instance for method chaining
      */
@@ -71,20 +71,19 @@ public class MultiSelectComboBoxI18n implements Serializable {
     }
 
     /**
-     * The text that is announced by screen readers when an item is added to
-     * the selection.
+     * The text that is announced by screen readers when an item is added to the
+     * selection.
      * <p>
-     * The value is {@code null} by default, which means the default value
-     * of the web component will be used.
+     * The value is {@code null} by default, which means the default value of
+     * the web component will be used.
      */
     public String getSelected() {
         return selected;
     }
 
     /**
-     * Sets the text that is announced by screen readers when an item is
-     * added to the selection. The label of the item will be prepended to
-     * this text.
+     * Sets the text that is announced by screen readers when an item is added
+     * to the selection. The label of the item will be prepended to this text.
      *
      * @return this instance for method chaining
      */
@@ -94,20 +93,19 @@ public class MultiSelectComboBoxI18n implements Serializable {
     }
 
     /**
-     * The text that is announced by screen readers when an item is removed
-     * from the selection.
+     * The text that is announced by screen readers when an item is removed from
+     * the selection.
      * <p>
-     * The value is {@code null} by default, which means the default value
-     * of the web component will be used.
+     * The value is {@code null} by default, which means the default value of
+     * the web component will be used.
      */
     public String getDeselected() {
         return deselected;
     }
 
     /**
-     * Sets the text that is announced by screen readers when an item is
-     * removed from the selection. The label of the item will be prepended
-     * to this text.
+     * Sets the text that is announced by screen readers when an item is removed
+     * from the selection. The label of the item will be prepended to this text.
      *
      * @return this instance for method chaining
      */
@@ -117,11 +115,11 @@ public class MultiSelectComboBoxI18n implements Serializable {
     }
 
     /**
-     * The text that is announced by screen readers to inform about the
-     * total number of selected items.
+     * The text that is announced by screen readers to inform about the total
+     * number of selected items.
      * <p>
-     * The value is {@code null} by default, which means the default value
-     * of the web component will be used.
+     * The value is {@code null} by default, which means the default value of
+     * the web component will be used.
      */
     public String getTotal() {
         return total;
@@ -130,8 +128,8 @@ public class MultiSelectComboBoxI18n implements Serializable {
     /**
      * Sets the text that is announced by screen readers to inform about the
      * total number of selected items. The string must contain a `{count}`
-     * placeholder that will be replaced with the actual count of selected
-     * items by the component.
+     * placeholder that will be replaced with the actual count of selected items
+     * by the component.
      *
      * @return this instance for method chaining
      */
