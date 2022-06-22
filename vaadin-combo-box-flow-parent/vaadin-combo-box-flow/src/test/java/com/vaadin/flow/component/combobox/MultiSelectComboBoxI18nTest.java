@@ -1,0 +1,43 @@
+package com.vaadin.flow.component.combobox;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
+public class MultiSelectComboBoxI18nTest {
+
+    MultiSelectComboBox<String> comboBox;
+
+    @Before
+    public void setup() {
+        comboBox = new MultiSelectComboBox<>();
+    }
+
+    @Test
+    public void setI18n() {
+        MultiSelectComboBox.MultiSelectComboBoxI18n i18n = new MultiSelectComboBox.MultiSelectComboBoxI18n()
+                .setCleared("All entries removed");
+        comboBox.setI18n(i18n);
+
+        Assert.assertEquals(i18n, comboBox.getI18n());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void setI18nToNull_throws() {
+        comboBox.setI18n(null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void setTotalWithoutCountPlaceholder_throws() {
+        MultiSelectComboBox.MultiSelectComboBoxI18n i18n = new MultiSelectComboBox.MultiSelectComboBoxI18n();
+        i18n.setTotal("entries selected");
+    }
+
+    @Test()
+    public void setTotalWithCountPlaceholder_doesNotThrow() {
+        MultiSelectComboBox.MultiSelectComboBoxI18n i18n = new MultiSelectComboBox.MultiSelectComboBoxI18n();
+        i18n.setTotal("{count} entries selected");
+
+        Assert.assertEquals("{count} entries selected", i18n.getTotal());
+    }
+}

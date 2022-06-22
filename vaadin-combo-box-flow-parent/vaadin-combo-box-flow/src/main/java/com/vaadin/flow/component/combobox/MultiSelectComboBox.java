@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.combobox;
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.Tag;
@@ -27,11 +28,14 @@ import com.vaadin.flow.data.provider.IdentifierProviderChangeEvent;
 import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
+import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
 import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
+import elemental.json.JsonType;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -81,6 +85,7 @@ public class MultiSelectComboBox<TItem>
         HasThemeVariant<MultiSelectComboBoxVariant> {
 
     private final MultiSelectComboBoxSelectionModel<TItem> selectionModel;
+    private MultiSelectComboBoxI18n i18n;
 
     /**
      * Default constructor. Creates an empty combo box.
@@ -230,6 +235,15 @@ public class MultiSelectComboBox<TItem>
         setItems(items);
     }
 
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+
+        if (i18n != null) {
+            this.updateI18n();
+        }
+    }
+
     private static <T> Set<T> presentationToModel(
             MultiSelectComboBox<T> multiSelectComboBox,
             JsonArray presentation) {
@@ -365,6 +379,188 @@ public class MultiSelectComboBox<TItem>
             // Only update field value and generate change event if value has
             // actually changed
             super.setValue(selectionModel.getSelectedItems());
+        }
+    }
+
+    /**
+     * Gets the internationalization object previously set for this component.
+     * <p>
+     * Note: updating the i18n object that is returned from this method will not
+     * update the component, unless it is set again using
+     * {@link #setI18n(MultiSelectComboBoxI18n)}
+     *
+     * @return the i18n object. It will be <code>null</code>, if it has not been
+     *         set previously
+     */
+    public MultiSelectComboBoxI18n getI18n() {
+        return i18n;
+    }
+
+    /**
+     * Sets the internationalization properties for this component.
+     *
+     * @param i18n
+     *            the internationalized properties, not <code>null</code>
+     */
+    public void setI18n(MultiSelectComboBoxI18n i18n) {
+        Objects.requireNonNull(i18n,
+                "The I18N properties object should not be null");
+        this.i18n = i18n;
+        updateI18n();
+    }
+
+    /**
+     * Update I18N settings in the web component. Merges the
+     * {@link MultiSelectComboBoxI18n} settings with the current / default
+     * settings of the web component.
+     */
+    private void updateI18n() {
+        JsonObject i18nJson = (JsonObject) JsonSerializer.toJson(this.i18n);
+
+        // Remove null values so that we don't overwrite existing WC
+        // translations with empty ones
+        removeNullValuesFromJsonObject(i18nJson);
+
+        // Assign new I18N object to WC, by merging the existing
+        // WC I18N, and the values from the new I18n instance,
+        // into an empty object
+        getElement().executeJs("this.i18n = Object.assign({}, this.i18n, $0);",
+                i18nJson);
+    }
+
+    private void removeNullValuesFromJsonObject(JsonObject jsonObject) {
+        for (String key : jsonObject.keys()) {
+            if (jsonObject.get(key).getType() == JsonType.NULL) {
+                jsonObject.remove(key);
+            }
+        }
+    }
+
+    /**
+     * Class for localization of the {@link MultiSelectComboBox}
+     */
+    public static class MultiSelectComboBoxI18n implements Serializable {
+        private String cleared;
+        private String focused;
+        private String selected;
+        private String deselected;
+        private String total;
+
+        /**
+         * The text that is announced by screen readers when the clear button is
+         * clicked.
+         * <p>
+         * The value is {@code null} by default, which means the default value
+         * of the web component will be used.
+         */
+        public String getCleared() {
+            return cleared;
+        }
+
+        /**
+         * Sets the text that is announced by screen readers when the clear
+         * button is clicked.
+         *
+         * @return this instance for method chaining
+         */
+        public MultiSelectComboBoxI18n setCleared(String cleared) {
+            this.cleared = cleared;
+            return this;
+        }
+
+        /**
+         * The text that is announced by screen readers when a chip is focused.
+         * <p>
+         * The value is {@code null} by default, which means the default value
+         * of the web component will be used.
+         */
+        public String getFocused() {
+            return focused;
+        }
+
+        /**
+         * Sets the text that is announced by screen readers when a chip is
+         * focused. The label of the chip will be prepended to this text.
+         *
+         * @return this instance for method chaining
+         */
+        public MultiSelectComboBoxI18n setFocused(String focused) {
+            this.focused = focused;
+            return this;
+        }
+
+        /**
+         * The text that is announced by screen readers when an item is added to
+         * the selection.
+         * <p>
+         * The value is {@code null} by default, which means the default value
+         * of the web component will be used.
+         */
+        public String getSelected() {
+            return selected;
+        }
+
+        /**
+         * Sets the text that is announced by screen readers when an item is
+         * added to the selection. The label of the item will be prepended to
+         * this text.
+         *
+         * @return this instance for method chaining
+         */
+        public MultiSelectComboBoxI18n setSelected(String selected) {
+            this.selected = selected;
+            return this;
+        }
+
+        /**
+         * The text that is announced by screen readers when an item is removed
+         * from the selection.
+         * <p>
+         * The value is {@code null} by default, which means the default value
+         * of the web component will be used.
+         */
+        public String getDeselected() {
+            return deselected;
+        }
+
+        /**
+         * Sets the text that is announced by screen readers when an item is
+         * removed from the selection. The label of the item will be prepended
+         * to this text.
+         *
+         * @return this instance for method chaining
+         */
+        public MultiSelectComboBoxI18n setDeselected(String deselected) {
+            this.deselected = deselected;
+            return this;
+        }
+
+        /**
+         * The text that is announced by screen readers to inform about the
+         * total number of selected items.
+         * <p>
+         * The value is {@code null} by default, which means the default value
+         * of the web component will be used.
+         */
+        public String getTotal() {
+            return total;
+        }
+
+        /**
+         * Sets the text that is announced by screen readers to inform about the
+         * total number of selected items. The string must contain a `{count}`
+         * placeholder that will be replaced with the actual count of selected
+         * items by the component.
+         *
+         * @return this instance for method chaining
+         */
+        public MultiSelectComboBoxI18n setTotal(String total) {
+            if (total != null && !total.contains("{count}")) {
+                throw new IllegalArgumentException(
+                        "Text must contain a {count} placeholder");
+            }
+            this.total = total;
+            return this;
         }
     }
 }
