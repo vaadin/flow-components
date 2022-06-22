@@ -1,6 +1,7 @@
 package com.vaadin.flow.component.combobox.test;
 
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
+import com.vaadin.flow.component.combobox.MultiSelectComboBoxI18n;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.router.Route;
@@ -20,7 +21,7 @@ public class MultiSelectComboBoxI18nPage extends Div {
         toggleAttached.setId("toggle-attached");
 
         NativeButton setI18n = new NativeButton("Set I18N", e -> {
-            MultiSelectComboBox.MultiSelectComboBoxI18n i18n = new MultiSelectComboBox.MultiSelectComboBoxI18n()
+            MultiSelectComboBoxI18n i18n = new MultiSelectComboBoxI18n()
                     .setCleared("Custom cleared").setFocused("Custom focused")
                     .setSelected("Custom selected")
                     .setDeselected("Custom deselected")
@@ -30,7 +31,7 @@ public class MultiSelectComboBoxI18nPage extends Div {
         setI18n.setId("set-i18n");
 
         NativeButton setEmptyI18n = new NativeButton("Set empty I18N", e -> {
-            MultiSelectComboBox.MultiSelectComboBoxI18n i18n = new MultiSelectComboBox.MultiSelectComboBoxI18n();
+            MultiSelectComboBoxI18n i18n = new MultiSelectComboBoxI18n();
             comboBox.setI18n(i18n);
         });
         setEmptyI18n.setId("set-empty-i18n");
