@@ -269,7 +269,7 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
      * the configured pattern
      *
      * @deprecated Since 23.2, this API is deprecated in favor of
-     * {@code setAllowedCharPattern(charPattern)}
+     *             {@code setAllowedCharPattern(charPattern)}
      */
     @Deprecated
     public void setPreventInvalidInput(boolean preventInvalidInput) {

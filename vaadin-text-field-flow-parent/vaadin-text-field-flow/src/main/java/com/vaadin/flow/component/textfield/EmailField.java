@@ -319,7 +319,7 @@ public class EmailField extends GeneratedVaadinEmailField<EmailField, String>
 
     /**
      * @deprecated Since 23.2, this API is deprecated in favor of
-     * {@code setAllowedCharPattern(charPattern)}
+     *             {@code setAllowedCharPattern(charPattern)}
      */
     @Deprecated
     @Override
