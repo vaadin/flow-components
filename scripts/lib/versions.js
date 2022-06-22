@@ -112,7 +112,7 @@ async function getLatestNpmVersion(package, version, major, minor) {
     cmd = `npm view ${package} versions --json`;
     const json = await JSON.parse(await run(cmd))
     const versions = json
-       .filter(version => version.startsWith(`${major}.${minor}`))
+       .filter(version => version.startsWith(`${major}.${minor}`) && !version.includes('-dev'))
        .map(a => a.replace(/\d+$/, n => +n+900000))
        .sort()
        .map(a => a.replace(/\d+$/, n => +n-900000));
