@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
+import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.tests.ThemeVariantTestHelper;
@@ -204,5 +205,12 @@ public class NumberFieldTest extends TextFieldTest {
         final NumberField numberField = new NumberField();
         numberField.setValue(value);
         assertEquals(expected, numberField.getElement().getProperty("value"));
+    }
+
+    @Test
+    public void implementsHasAllowedCharPattern() {
+        Assert.assertTrue("NumberField should support char pattern",
+                HasAllowedCharPattern.class
+                        .isAssignableFrom(new NumberField().getClass()));
     }
 }

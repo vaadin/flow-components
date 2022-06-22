@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
+import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextAreaVariant;
 import com.vaadin.tests.ThemeVariantTestHelper;
@@ -23,6 +24,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Tests for the {@link TextArea}.
@@ -112,5 +114,12 @@ public class TextAreaTest {
         ThemeVariantTestHelper
                 .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
                         new TextArea(), TextAreaVariant.LUMO_SMALL);
+    }
+
+    @Test
+    public void implementsHasAllowedCharPattern() {
+        assertTrue("TextArea should support char pattern",
+                HasAllowedCharPattern.class
+                        .isAssignableFrom(new TextArea().getClass()));
     }
 }
