@@ -79,7 +79,7 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
             // filter based on comboBox.filter. While later we only filter clientside data.
 
             if (cache[0]) {
-              performClientSideFilter(cache[0], params.filter, callback);
+              performClientSideFilter(cache[0], callback);
               return;
             } else {
               // If client side filter is enabled then we need to first ask all data
@@ -116,7 +116,7 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
 
           if (cache[params.page]) {
             // This may happen after skipping pages by scrolling fast
-            commitPage(params.page, params.filter, callback);
+            commitPage(params.page, callback);
           } else {
             pageCallbacks[params.page] = callback;
             const activePages = Object.keys(pageCallbacks).map((page) => parseInt(page));
@@ -230,7 +230,7 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
             let page = activePages[i];
 
             if (cache[page]) {
-              commitPage(page, filter, pageCallbacks[page]);
+              commitPage(page, pageCallbacks[page]);
             }
           }
 
@@ -280,11 +280,11 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
           }
         });
 
-        const commitPage = tryCatchWrapper(function (page, filter, callback) {
+        const commitPage = tryCatchWrapper(function (page, callback) {
           let data = cache[page];
 
           if (comboBox._clientSideFilter) {
-            performClientSideFilter(data, filter, callback);
+            performClientSideFilter(data, callback);
           } else {
             // Remove the data if server-side filtering, but keep it for client-side
             // filtering
@@ -300,11 +300,11 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
         // and submitting the filtered items to specified callback.
         // The filter used is the one from combobox, not the lastFilter stored since
         // that may not reflect user's input.
-        const performClientSideFilter = tryCatchWrapper(function (page, filter, callback) {
+        const performClientSideFilter = tryCatchWrapper(function (page, callback) {
           let filteredItems = page;
 
-          if (filter) {
-            filteredItems = page.filter((item) => comboBox.$connector.filter(item, filter));
+          if (comboBox.filter) {
+            filteredItems = page.filter((item) => comboBox.$connector.filter(item, comboBox.filter));
           }
 
           callback(filteredItems, filteredItems.length);
