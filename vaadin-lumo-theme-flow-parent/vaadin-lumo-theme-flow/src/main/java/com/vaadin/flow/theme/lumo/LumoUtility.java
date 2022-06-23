@@ -15,14 +15,14 @@
  */
 package com.vaadin.flow.theme.lumo;
 
-import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 
 /**
  * Contains the definition for all the CSS utility classes provided by Lumo.
  */
-@CssImport("./lumo-utility-classes.css")
-@NpmPackage(value = "lumo-css-framework", version = "^4.0.10")
+@NpmPackage(value = "@vaadin/vaadin-lumo-styles", version = "23.2.0-alpha2")
+@JsModule("@vaadin/vaadin-lumo-styles/utility.js")
 public final class LumoUtility {
 
     private LumoUtility() {
