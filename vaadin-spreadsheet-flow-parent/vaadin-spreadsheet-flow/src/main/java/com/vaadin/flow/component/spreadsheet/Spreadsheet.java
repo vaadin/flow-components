@@ -312,7 +312,7 @@ public class Spreadsheet extends Component
         return description;
     }
 
-    public ContentMode getDescriptionContentMode() {
+    private ContentMode getDescriptionContentMode() {
         return descriptionContentMode;
     }
 
@@ -320,7 +320,7 @@ public class Spreadsheet extends Component
         return caption;
     }
 
-    public List<String> getStyles() {
+    private List<String> getStyles() {
         return styles;
     }
 
@@ -332,7 +332,7 @@ public class Spreadsheet extends Component
         return errorMessage;
     }
 
-    public ErrorLevel getErrorLevel() {
+    private ErrorLevel getErrorLevel() {
         return errorLevel;
     }
 
@@ -340,27 +340,27 @@ public class Spreadsheet extends Component
         return captionAsHtml;
     }
 
-    public Map<String, String> getResources() {
+    private Map<String, String> getResources() {
         return resources;
     }
 
-    public Set<String> getRegisteredEventListeners() {
+    private Set<String> getRegisteredEventListeners() {
         return registeredEventListeners;
     }
 
-    public int getColumnBufferSize() {
+    private int getColumnBufferSize() {
         return columnBufferSize;
     }
 
-    public int getCols() {
+    protected int getCols() {
         return cols;
     }
 
-    public List<GroupingData> getColGroupingData() {
+    private List<GroupingData> getColGroupingData() {
         return colGroupingData;
     }
 
-    public List<GroupingData> getRowGroupingData() {
+    private List<GroupingData> getRowGroupingData() {
         return rowGroupingData;
     }
 
@@ -372,167 +372,167 @@ public class Spreadsheet extends Component
         return rowGroupingMax;
     }
 
-    public boolean isColGroupingInversed() {
+    protected boolean isColGroupingInversed() {
         return colGroupingInversed;
     }
 
-    public boolean isRowGroupingInversed() {
+    protected boolean isRowGroupingInversed() {
         return rowGroupingInversed;
     }
 
-    public float getDefRowH() {
+    protected float getDefRowH() {
         return defRowH;
     }
 
-    public int getDefColW() {
+    protected int getDefColW() {
         return defColW;
     }
 
-    public float[] getRowH() {
+    protected float[] getRowH() {
         return rowH;
     }
 
-    public int[] getColW() {
+    protected int[] getColW() {
         return colW;
     }
 
-    public boolean isReload() {
+    private boolean isReload() {
         return reload;
     }
 
-    public int getSheetIndex() {
+    private int getSheetIndex() {
         return sheetIndex;
     }
 
-    public String[] getSheetNames() {
+    protected String[] getSheetNames() {
         return sheetNames;
     }
 
-    public HashMap<Integer, String> getCellStyleToCSSStyle() {
+    protected HashMap<Integer, String> getCellStyleToCSSStyle() {
         return cellStyleToCSSStyle;
     }
 
-    public HashMap<Integer, Integer> getRowIndexToStyleIndex() {
+    protected HashMap<Integer, Integer> getRowIndexToStyleIndex() {
         return rowIndexToStyleIndex;
     }
 
-    public HashMap<Integer, Integer> getColumnIndexToStyleIndex() {
+    protected HashMap<Integer, Integer> getColumnIndexToStyleIndex() {
         return columnIndexToStyleIndex;
     }
 
-    public Set<Integer> getLockedColumnIndexes() {
+    protected Set<Integer> getLockedColumnIndexes() {
         return lockedColumnIndexes;
     }
 
-    public Set<Integer> getLockedRowIndexes() {
+    protected Set<Integer> getLockedRowIndexes() {
         return lockedRowIndexes;
     }
 
-    public ArrayList<String> getShiftedCellBorderStyles() {
+    protected ArrayList<String> getShiftedCellBorderStyles() {
         return shiftedCellBorderStyles;
     }
 
-    public HashMap<Integer, String> getConditionalFormattingStyles() {
+    protected HashMap<Integer, String> getConditionalFormattingStyles() {
         return conditionalFormattingStyles;
     }
 
-    public ArrayList<Integer> getHiddenColumnIndexes() {
+    private ArrayList<Integer> getHiddenColumnIndexes() {
         return hiddenColumnIndexes;
     }
 
-    public ArrayList<Integer> getHiddenRowIndexes() {
+    private ArrayList<Integer> getHiddenRowIndexes() {
         return hiddenRowIndexes;
     }
 
-    public int[] getVerticalScrollPositions() {
+    protected int[] getVerticalScrollPositions() {
         return verticalScrollPositions;
     }
 
-    public int[] getHorizontalScrollPositions() {
+    protected int[] getHorizontalScrollPositions() {
         return horizontalScrollPositions;
     }
 
-    public boolean isSheetProtected() {
+    private boolean isSheetProtected() {
         return sheetProtected;
     }
 
-    public boolean isWorkbookProtected() {
+    private boolean isWorkbookProtected() {
         return workbookProtected;
     }
 
-    public HashMap<String, String> getCellKeysToEditorIdMap() {
+    private HashMap<String, String> getCellKeysToEditorIdMap() {
         return cellKeysToEditorIdMap;
     }
 
-    public HashMap<String, String> getComponentIDtoCellKeysMap() {
+    protected HashMap<String, String> getComponentIDtoCellKeysMap() {
         return componentIDtoCellKeysMap;
     }
 
-    public HashMap<String, String> getHyperlinksTooltips() {
+    private HashMap<String, String> getHyperlinksTooltips() {
         return hyperlinksTooltips;
     }
 
-    public HashMap<String, String> getCellComments() {
+    private HashMap<String, String> getCellComments() {
         return cellComments;
     }
 
-    public HashMap<String, String> getCellCommentAuthors() {
+    private HashMap<String, String> getCellCommentAuthors() {
         return cellCommentAuthors;
     }
 
-    public ArrayList<String> getVisibleCellComments() {
+    private ArrayList<String> getVisibleCellComments() {
         return visibleCellComments;
     }
 
-    public Set<String> getInvalidFormulaCells() {
+    private Set<String> getInvalidFormulaCells() {
         return invalidFormulaCells;
     }
 
-    public boolean isHasActions() {
+    private boolean isHasActions() {
         return hasActions;
     }
 
-    public HashMap<String, OverlayInfo> getOverlays() {
+    private HashMap<String, OverlayInfo> getOverlays() {
         return overlays;
     }
 
-    public ArrayList<MergedRegion> getMergedRegions() {
+    private ArrayList<MergedRegion> getMergedRegions() {
         return mergedRegions;
     }
 
-    public boolean isDisplayGridlines() {
+    private boolean isDisplayGridlines() {
         return displayGridlines;
     }
 
-    public boolean isDisplayRowColHeadings() {
+    private boolean isDisplayRowColHeadings() {
         return displayRowColHeadings;
     }
 
-    public int getVerticalSplitPosition() {
+    private int getVerticalSplitPosition() {
         return verticalSplitPosition;
     }
 
-    public int getHorizontalSplitPosition() {
+    private int getHorizontalSplitPosition() {
         return horizontalSplitPosition;
     }
 
-    public String getInfoLabelValue() {
+    private String getInfoLabelValue() {
         return infoLabelValue;
     }
 
-    public boolean isWorkbookChangeToggle() {
+    private boolean isWorkbookChangeToggle() {
         return workbookChangeToggle;
     }
 
-    public String getInvalidFormulaErrorMessage() {
+    private String getInvalidFormulaErrorMessage() {
         return invalidFormulaErrorMessage;
     }
 
-    public boolean isLockFormatColumns() {
+    private boolean isLockFormatColumns() {
         return lockFormatColumns;
     }
 
-    public boolean isLockFormatRows() {
+    private boolean isLockFormatRows() {
         return lockFormatRows;
     }
 
