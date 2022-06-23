@@ -288,7 +288,7 @@ public class GridContextMenu<T> extends
             final T item = grid.getDataCommunicator().getKeyMapper().get(key);
             final Grid.Column<T> column = grid.getColumns().stream()
                     .filter(col -> columnId.equals(col.getId().get()))
-                    .findFirst().get();
+                    .findFirst().orElse(null);
             return getDynamicContentHandler().test(item, column);
         }
 
