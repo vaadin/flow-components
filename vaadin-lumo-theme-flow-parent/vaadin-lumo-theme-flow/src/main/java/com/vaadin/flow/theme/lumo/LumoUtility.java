@@ -15,6 +15,9 @@
  */
 package com.vaadin.flow.theme.lumo;
 
+import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.dependency.NpmPackage;
+
 /**
  * Contains the definition for all the CSS utility classes provided by Lumo.
  */
