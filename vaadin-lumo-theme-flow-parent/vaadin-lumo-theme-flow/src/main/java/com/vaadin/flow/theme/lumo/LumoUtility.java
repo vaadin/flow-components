@@ -18,6 +18,8 @@ package com.vaadin.flow.theme.lumo;
 /**
  * Contains the definition for all the CSS utility classes provided by Lumo.
  */
+@CssImport("./lumo-utility-classes.css")
+@NpmPackage(value = "lumo-css-framework", version = "^4.0.10")
 public final class LumoUtility {
 
     private LumoUtility() {
