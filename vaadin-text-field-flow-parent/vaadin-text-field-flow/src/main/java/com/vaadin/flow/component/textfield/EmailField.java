@@ -434,7 +434,7 @@ public class EmailField extends GeneratedVaadinEmailField<EmailField, String>
      * @inheritDoc
      */
     @Override
-    @Deprecated(since = "Browser compatibility issues")
+    @Deprecated
     public void getSelectionRange(SelectionRangeCallback callback) {
         HasSelection.super.getSelectionRange(callback);
     }
@@ -446,7 +446,7 @@ public class EmailField extends GeneratedVaadinEmailField<EmailField, String>
      * @inheritDoc
      */
     @Override
-    @Deprecated(since = "Browser compatibility issues")
+    @Deprecated
     public void getCursorPosition(SerializableConsumer<Integer> callback) {
         HasSelection.super.getCursorPosition(callback);
     }

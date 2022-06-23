@@ -363,7 +363,7 @@ public class NumberField extends AbstractNumberField<NumberField, Double> {
      * @inheritDoc
      */
     @Override
-    @Deprecated(since = "Browser compatibility issues")
+    @Deprecated
     public void getSelectionRange(SelectionRangeCallback callback) {
         super.getSelectionRange(callback);
     }
@@ -375,7 +375,7 @@ public class NumberField extends AbstractNumberField<NumberField, Double> {
      * @inheritDoc
      */
     @Override
-    @Deprecated(since = "Browser compatibility issues")
+    @Deprecated
     public void getCursorPosition(SerializableConsumer<Integer> callback) {
         super.getCursorPosition(callback);
     }
