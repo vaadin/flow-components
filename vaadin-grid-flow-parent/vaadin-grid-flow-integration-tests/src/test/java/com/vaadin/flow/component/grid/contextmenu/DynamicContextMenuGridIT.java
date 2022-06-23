@@ -31,6 +31,7 @@ import org.openqa.selenium.interactions.Actions;
 public class DynamicContextMenuGridIT extends AbstractComponentIT {
 
     private static final String OVERLAY_TAG = "vaadin-context-menu-overlay";
+    private static final String ITEM_TAG = "vaadin-context-menu-item";
 
     private GridElement grid;
 
@@ -53,7 +54,27 @@ public class DynamicContextMenuGridIT extends AbstractComponentIT {
         verifyOpened();
 
         Assert.assertEquals("Person 40",
-                $(OVERLAY_TAG).first().getAttribute("innerText"));
+                $(ITEM_TAG).first().getAttribute("innerText"));
+
+        $("body").first().click();
+        verifyClosed();
+    }
+
+    @Test
+    public void shouldProvideColumnIdArgument() {
+        grid.getCell(40, 0).contextClick();
+        verifyOpened();
+
+        Assert.assertEquals("Name-Id",
+                $(ITEM_TAG).all().get(1).getAttribute("innerText"));
+
+        $("body").first().click();
+        verifyClosed();
+
+        grid.getCell(40, 1).contextClick();
+        verifyOpened();
+        Assert.assertEquals("Born-Id",
+                $(ITEM_TAG).all().get(1).getAttribute("innerText"));
 
         $("body").first().click();
         verifyClosed();
@@ -74,7 +95,7 @@ public class DynamicContextMenuGridIT extends AbstractComponentIT {
 
         verifyOpened();
         Assert.assertEquals("Person 40",
-                $(OVERLAY_TAG).first().getAttribute("innerText"));
+                $(ITEM_TAG).first().getAttribute("innerText"));
     }
 
     private void verifyOpened() {
