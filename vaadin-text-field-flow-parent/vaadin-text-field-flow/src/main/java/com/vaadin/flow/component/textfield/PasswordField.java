@@ -330,11 +330,19 @@ public class PasswordField
      * conflicts with the given {@code pattern}.
      *
      * @return the {@code preventInvalidInput} property from the webcomponent
+     *
+     * @deprecated Since 23.2, this API is deprecated.
      */
+    @Deprecated
     public boolean isPreventInvalidInput() {
         return isPreventInvalidInputBoolean();
     }
 
+    /**
+     * @deprecated Since 23.2, this API is deprecated in favor of
+     *             {@link #setAllowedCharPattern(String)}
+     */
+    @Deprecated
     @Override
     public void setPreventInvalidInput(boolean preventInvalidInput) {
         super.setPreventInvalidInput(preventInvalidInput);
