@@ -16,9 +16,11 @@
 
 package com.vaadin.flow.component.textfield;
 
+import com.vaadin.flow.component.HasSelection;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 
 /**
@@ -211,12 +213,24 @@ public class IntegerField extends AbstractNumberField<IntegerField, Integer> {
      * Note, due to browser incompatibilities, this method is not guaranteed to
      * work on all browsers.
      *
-     * @param callback
-     *            the callback to notify the selection
+     * @inheritDoc
      */
     @Override
-    @Deprecated
+    @Deprecated(since = "Browser compatibility issues")
     public void getSelectionRange(SelectionRangeCallback callback) {
         super.getSelectionRange(callback);
     }
+
+    /**
+     * Note, due to browser incompatibilities, this method is not guaranteed to
+     * work on all browsers.
+     *
+     * @inheritDoc
+     */
+    @Override
+    @Deprecated(since = "Browser compatibility issues")
+    public void getCursorPosition(SerializableConsumer<Integer> callback) {
+        super.getCursorPosition(callback);
+    }
+
 }

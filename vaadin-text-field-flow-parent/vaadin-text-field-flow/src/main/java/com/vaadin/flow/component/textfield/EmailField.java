@@ -29,6 +29,7 @@ import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.function.SerializableConsumer;
 
 /**
  * Email Field is an extension of Text Field that only accepts email addresses
@@ -430,12 +431,23 @@ public class EmailField extends GeneratedVaadinEmailField<EmailField, String>
      * Note, due to browser incompatibilities, this method is not guaranteed to
      * work on all browsers.
      *
-     * @param callback
-     *            the callback to notify the selection
+     * @inheritDoc
      */
     @Override
-    @Deprecated
+    @Deprecated(since = "Browser compatibility issues")
     public void getSelectionRange(SelectionRangeCallback callback) {
         HasSelection.super.getSelectionRange(callback);
+    }
+
+    /**
+     * Note, due to browser incompatibilities, this method is not guaranteed to
+     * work on all browsers.
+     *
+     * @inheritDoc
+     */
+    @Override
+    @Deprecated(since = "Browser compatibility issues")
+    public void getCursorPosition(SerializableConsumer<Integer> callback) {
+        HasSelection.super.getCursorPosition(callback);
     }
 }
