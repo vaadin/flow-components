@@ -391,7 +391,7 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
 
     /**
      * @deprecated Since 23.2, this API is deprecated in favor of
-     *             {@code setAllowedCharPattern(charPattern)}
+     *             {@link #setAllowedCharPattern(String)}
      */
     @Deprecated
     @Override

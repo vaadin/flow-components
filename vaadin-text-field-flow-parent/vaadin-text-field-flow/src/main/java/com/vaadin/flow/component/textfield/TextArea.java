@@ -382,7 +382,7 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
 
     /**
      * @deprecated Since 23.2, this API is deprecated in favor of
-     *             {@code setAllowedCharPattern(charPattern)}
+     *             {@link #setAllowedCharPattern(String)}
      */
     @Override
     public void setPreventInvalidInput(boolean preventInvalidInput) {
