@@ -1370,8 +1370,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
                 .getUniqueKeyProperty();
         if (uniqueKeyPropertyName != null
                 && !jsonObject.hasKey(uniqueKeyPropertyName)) {
-            jsonObject.put(uniqueKeyPropertyName,
-                    getUniqueKeyProvider().apply(item));
+            jsonObject.put(uniqueKeyPropertyName, getUniqueKey(item));
         }
     }
 
@@ -4073,5 +4072,11 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
      */
     public NestedNullBehavior getNestedNullBehavior() {
         return nestedNullBehavior;
+    }
+
+    private String getUniqueKey(T item) {
+        return Optional.ofNullable(getUniqueKeyProvider())
+                .map(provider -> provider.apply(item))
+                .orElse(getDataCommunicator().getKeyMapper().key(item));
     }
 }
