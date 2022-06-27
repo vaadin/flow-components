@@ -91,9 +91,22 @@ public class AbstractGridSingleSelectionModelTest {
         Assert.assertEquals(0, selectionModel.getSelectedItems().size());
     }
 
+    @Test
+    public void isSelected_usesDataProviderIdentify() {
+        grid.setItems(dataProviderWithIdentityProvider);
+        GridSelectionModel<TestEntity> selectionModel = grid
+                .getSelectionModel();
+        // Select item
+        selectionModel.select(new TestEntity(1, "joseph"));
+        // Item with same ID, but different hash code should be reported as
+        // selected
+        Assert.assertTrue(
+                selectionModel.isSelected(new TestEntity(1, "Joseph")));
+    }
+
     public static class TestEntity {
-        private final int id;
-        private final String name;
+        private int id;
+        private String name;
 
         public TestEntity(int id, String name) {
             this.id = id;
@@ -104,8 +117,16 @@ public class AbstractGridSingleSelectionModelTest {
             return id;
         }
 
+        public void setId(int id) {
+            this.id = id;
+        }
+
         public String getName() {
             return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
         }
 
         // equals and hashCode are intentionally implemented differently from

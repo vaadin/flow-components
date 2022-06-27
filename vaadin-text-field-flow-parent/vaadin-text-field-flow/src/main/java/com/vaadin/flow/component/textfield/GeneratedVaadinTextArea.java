@@ -674,7 +674,10 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * </p>
      *
      * @return the {@code preventInvalidInput} property from the webcomponent
+     *
+     * @deprecated Since 23.2, this API is deprecated.
      */
+    @Deprecated
     protected boolean isPreventInvalidInputBoolean() {
         return getElement().getProperty("preventInvalidInput", false);
     }
@@ -690,7 +693,10 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      *
      * @param preventInvalidInput
      *            the boolean value to set
+     *
+     * @deprecated Since 23.2, this API is deprecated.
      */
+    @Deprecated
     protected void setPreventInvalidInput(boolean preventInvalidInput) {
         getElement().setProperty("preventInvalidInput", preventInvalidInput);
     }
