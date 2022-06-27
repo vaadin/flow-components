@@ -387,6 +387,35 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
+     * Multi-sort priority (visually indicated by numbers in column headers)
+     * control how columns are added to the sort in the web component, when a
+     * column becomes sorted, or the sort direction of a column is changed.
+     * <p>
+     * Use {@link Grid#setMultiSort(boolean, MultiSortPriority)} to customize
+     * the multi-sort priority of an individual grid.
+     *
+     * @see Grid#setSelectionMode(SelectionMode)
+     * @see Grid#setMultiSort(boolean, MultiSortPriority)
+     */
+    public enum MultiSortPriority {
+        /**
+         * Whenever an unsorted column is sorted, it gets added at the end of
+         * the sort order, after all the previously sorted columns. When the
+         * sort direction of a column is changed by the user, the priority for
+         * all the sorted columns remains unchanged.
+         */
+        APPEND,
+
+        /**
+         * Whenever an unsorted column is sorted, or the sort direction of a
+         * column is changed, that column gets sort priority 1, and all the
+         * other sorted columns are updated accordingly. This is the default
+         * behavior of the component.
+         */
+        PREPEND
+    }
+
+    /**
      * Server-side component for the {@code <vaadin-grid-column>} element.
      *
      * <p>
@@ -3105,6 +3134,24 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public void setMultiSort(boolean multiSort) {
         getElement().setAttribute("multi-sort", multiSort);
+    }
+
+    /**
+     * Sets whether multiple column sorting is enabled on the client-side.
+     *
+     * @param multiSort
+     *            {@code true} to enable sorting of multiple columns on the
+     *            client-side, {@code false} to disable
+     * @param priority
+     *            the multi-sort priority to set, not {@code null}
+     *
+     * @see MultiSortPriority
+     */
+    public void setMultiSort(boolean multiSort, MultiSortPriority priority) {
+        setMultiSort(multiSort);
+
+        getElement().setAttribute("multi-sort-priority",
+                priority == MultiSortPriority.APPEND ? "append" : "prepend");
     }
 
     /**
