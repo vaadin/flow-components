@@ -36,6 +36,10 @@ import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.shared.ValidationUtils;
+import com.vaadin.flow.data.binder.HasValidator;
+import com.vaadin.flow.data.binder.ValidationResult;
+import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.StateTree;
@@ -52,7 +56,8 @@ import com.vaadin.flow.shared.Registration;
 @JsModule("./vaadin-time-picker/timepickerConnector.js")
 public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         implements HasSize, HasValidation, HasEnabled, HasHelper, HasLabel,
-        HasTheme, HasClearButton, HasAllowedCharPattern {
+        HasTheme, HasClearButton, HasAllowedCharPattern,
+        HasValidator<LocalTime> {
 
     private static final SerializableFunction<String, LocalTime> PARSER = valueFromClient -> {
         return valueFromClient == null || valueFromClient.isEmpty() ? null
@@ -262,19 +267,40 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         return isInvalidBoolean();
     }
 
+    @Override
+    public Validator<LocalTime> getDefaultValidator() {
+        return (value, context) -> checkValidity(value);
+    }
+
+    private ValidationResult checkValidity(LocalTime value) {
+        var requiredValidation = ValidationUtils.checkRequired(required, value,
+                getEmptyValue());
+        if (requiredValidation.isError()) {
+            return requiredValidation;
+        }
+
+        var greaterThanMaxValidation = ValidationUtils
+                .checkGreaterThanMax(value, max);
+        if (greaterThanMaxValidation.isError()) {
+            return greaterThanMaxValidation;
+        }
+
+        var smallThanMinValidation = ValidationUtils.checkSmallerThanMin(value,
+                min);
+        if (smallThanMinValidation.isError()) {
+            return smallThanMinValidation;
+        }
+
+        return ValidationResult.ok();
+    }
+
     /**
      * Performs a server-side validation of the given value. This is needed
      * because it is possible to circumvent the client side validation
      * constraints using browser development tools.
      */
     private boolean isInvalid(LocalTime value) {
-        final boolean isRequiredButEmpty = required
-                && Objects.equals(getEmptyValue(), value);
-        final boolean isGreaterThanMax = value != null && max != null
-                && value.isAfter(max);
-        final boolean isSmallerThenMin = value != null && min != null
-                && value.isBefore(min);
-        return isRequiredButEmpty || isGreaterThanMax || isSmallerThenMin;
+        return checkValidity(value).isError();
     }
 
     @Override
