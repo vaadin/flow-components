@@ -12,4 +12,6 @@ public final class ValidationError implements Serializable {
     public static final String MIN_LENGTH_NOT_REACHED = "VALIDATION_MIN_LENGTH_NOT_REACHED_ERROR";
 
     public static final String PATTERN_VIOLATED = "VALIDATION_PATTERN_VIOLATED_ERROR";
+
+    public static final String STEP = "VALIDATION_STEP_ERROR";
 }
