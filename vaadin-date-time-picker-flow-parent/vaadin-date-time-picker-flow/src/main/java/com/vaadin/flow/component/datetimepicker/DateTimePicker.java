@@ -29,7 +29,11 @@ import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.ValidationUtils;
 import com.vaadin.flow.component.timepicker.StepsUtil;
+import com.vaadin.flow.data.binder.HasValidator;
+import com.vaadin.flow.data.binder.ValidationResult;
+import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.function.SerializableFunction;
 
 @Tag("vaadin-date-time-picker-date-picker")
@@ -77,11 +81,14 @@ class DateTimePickerTimePicker
 @NpmPackage(value = "@vaadin/date-time-picker", version = "23.2.0-alpha2")
 @NpmPackage(value = "@vaadin/vaadin-date-time-picker", version = "23.2.0-alpha2")
 @JsModule("@vaadin/date-time-picker/src/vaadin-date-time-picker.js")
-public class DateTimePicker
-        extends AbstractSinglePropertyField<DateTimePicker, LocalDateTime>
-        implements HasStyle, HasSize, HasTheme, HasValidation,
-        Focusable<DateTimePicker>, HasHelper, HasLabel {
+public class DateTimePicker extends
+        AbstractSinglePropertyField<DateTimePicker, LocalDateTime> implements
+        HasStyle, HasSize, HasTheme, HasValidation, Focusable<DateTimePicker>,
+        HasHelper, HasLabel, HasValidator<LocalDateTime> {
 
+    public static final String VALIDATION_REQUIRED_ERROR = "VALIDATION_REQUIRED_ERROR";
+    public static final String VALIDATION_GREATER_THAN_MAX_ERROR = "VALIDATION_GREATER_THAN_MAX_ERROR";
+    public static final String VALIDATION_SMALLER_THAN_MIN_ERROR = "VALIDATION_SMALLER_THAN_MIN_ERROR";
     private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
     private final DateTimePickerDatePicker datePicker = new DateTimePickerDatePicker();
@@ -618,19 +625,38 @@ public class DateTimePicker
         return getElement().getProperty("invalid", false);
     }
 
+    @Override
+    public Validator<LocalDateTime> getDefaultValidator() {
+        return (value, context) -> checkValidity(value);
+    }
+
+    private ValidationResult checkValidity(LocalDateTime value) {
+        var requiredValidation = ValidationUtils.checkRequired(required, value,
+                getEmptyValue());
+        if (requiredValidation.isError()) {
+            return requiredValidation;
+        }
+
+        var greaterThanMax = ValidationUtils.checkGreaterThanMax(value, max);
+        if (greaterThanMax.isError()) {
+            return greaterThanMax;
+        }
+
+        var smallerThanMin = ValidationUtils.checkSmallerThanMin(value, min);
+        if (smallerThanMin.isError()) {
+            return smallerThanMin;
+        }
+
+        return ValidationResult.ok();
+    }
+
     /**
      * Gets the validity of the date time picker value.
      *
      * @return the current validity of the value.
      */
     private boolean isInvalid(LocalDateTime value) {
-        final boolean isRequiredButEmpty = required
-                && Objects.equals(getEmptyValue(), value);
-        final boolean isGreaterThanMax = value != null && max != null
-                && value.isAfter(max);
-        final boolean isSmallerThanMin = value != null && min != null
-                && value.isBefore(min);
-        return isRequiredButEmpty || isGreaterThanMax || isSmallerThanMin;
+        return checkValidity(value).isError();
     }
 
     /**
