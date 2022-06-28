@@ -372,9 +372,10 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     }
 
     private ValidationResult checkValidity(T value) {
-        final var requiredValidation = ValidationUtils.checkRequired(required, value, getEmptyValue());
+        final var requiredValidation = ValidationUtils.checkRequired(required,
+                value, getEmptyValue());
         if (requiredValidation.isError()) {
-            return  requiredValidation;
+            return requiredValidation;
         }
 
         final boolean isGreaterThanMax = value != null
