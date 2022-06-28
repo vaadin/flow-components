@@ -54,7 +54,7 @@ public class SlotUtils {
      *            the name of the slot to clear
      */
     public static void clearSlot(HasElement parent, String slot) {
-        getElementsInSlot(parent, slot).collect(Collectors.toList())
+        getElementsInSlot(parent, slot)
                 .forEach(parent.getElement()::removeChild);
     }
 
