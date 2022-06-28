@@ -1,6 +1,9 @@
 package com.vaadin.flow.component.textfield;
 
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.shared.ValidationError;
+import com.vaadin.flow.component.shared.ValidationUtils;
+import com.vaadin.flow.data.binder.ValidationResult;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -63,18 +66,37 @@ final class TextFieldValidationSupport implements Serializable {
      * @return <code>true</code> if the value is invalid.
      */
     boolean isInvalid(String value) {
-        final boolean isRequiredButEmpty = required
-                && Objects.equals(field.getEmptyValue(), value);
+        return checkValidity(value).isError();
+    }
+
+    ValidationResult checkValidity(String value) {
+        var requiredValidation = ValidationUtils.checkRequired(required, value,
+                field.getEmptyValue());
+        if (requiredValidation.isError()) {
+            return requiredValidation;
+        }
+
         final boolean isMaxLengthExceeded = value != null && maxLength != null
                 && value.length() > maxLength;
+        if (isMaxLengthExceeded) {
+            return ValidationResult.error(ValidationError.MAX_LENGTH_EXCEEDED);
+        }
+
         final boolean isMinLengthNotReached = value != null && minLength != null
                 && value.length() < minLength;
+        if (isMinLengthNotReached) {
+            return ValidationResult
+                    .error(ValidationError.MIN_LENGTH_NOT_REACHED);
+        }
+
         // Only evaluate if necessary.
         final BooleanSupplier doesValueViolatePattern = () -> value != null
                 && pattern != null && !pattern.matcher(value).matches();
-        return isRequiredButEmpty || isMaxLengthExceeded
-                || isMinLengthNotReached
-                || doesValueViolatePattern.getAsBoolean();
+        if (doesValueViolatePattern.getAsBoolean()) {
+            return ValidationResult.error(ValidationError.PATTERN_VIOLATED);
+        }
+
+        return ValidationResult.ok();
     }
 
 }
