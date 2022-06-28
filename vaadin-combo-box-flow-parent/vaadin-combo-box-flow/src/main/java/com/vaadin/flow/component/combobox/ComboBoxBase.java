@@ -35,6 +35,9 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxDataView;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxLazyDataView;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxListDataView;
+import com.vaadin.flow.component.shared.ValidationUtils;
+import com.vaadin.flow.data.binder.HasValidator;
+import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
@@ -77,7 +80,8 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
         HasHelper, HasTheme, HasLabel, HasClearButton, HasAllowedCharPattern,
         HasDataView<TItem, String, ComboBoxDataView<TItem>>,
         HasListDataView<TItem, ComboBoxListDataView<TItem>>,
-        HasLazyDataView<TItem, String, ComboBoxLazyDataView<TItem>> {
+        HasLazyDataView<TItem, String, ComboBoxLazyDataView<TItem>>,
+        HasValidator<TValue> {
 
     /**
      * Registration for custom value listeners that disallows entering custom
@@ -323,6 +327,12 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      */
     public void setInvalid(boolean invalid) {
         getElement().setProperty("invalid", invalid);
+    }
+
+    @Override
+    public Validator<TValue> getDefaultValidator() {
+        return ((value, context) -> ValidationUtils.checkRequired(isRequired(),
+                value, getEmptyValue()));
     }
 
     /**
