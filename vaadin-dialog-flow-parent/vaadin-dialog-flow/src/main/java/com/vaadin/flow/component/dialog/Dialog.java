@@ -662,6 +662,16 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         }
 
         /**
+         * Removes all components from the container.
+         */
+        public void removeAll() {
+            root.removeAllChildren();
+            dialog.getElement()
+                    .executeJs("this." + rendererFunction + " = null;");
+            setRendererCreated(false);
+        }
+
+        /**
          * Method called to create the renderer function using
          * {@link #rendererFunction} as the property name.
          */

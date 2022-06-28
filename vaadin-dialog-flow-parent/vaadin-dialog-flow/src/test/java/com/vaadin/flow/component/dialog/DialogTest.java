@@ -424,6 +424,22 @@ public class DialogTest {
         Assert.assertFalse(thirdContent.getParent().isPresent());
     }
 
+    @Test
+    public void allElementsRemovedFromHeaderOrFooter_elementsShouldNotHaveDialogAsParents() {
+        Dialog dialog = new Dialog();
+        Span content = new Span("content");
+        Span secondContent = new Span("second_content");
+        Span thirdContent = new Span("third_content");
+
+        dialog.getHeader().add(content, secondContent, thirdContent);
+
+        dialog.getHeader().removeAll();
+
+        Assert.assertFalse(content.getParent().isPresent());
+        Assert.assertFalse(secondContent.getParent().isPresent());
+        Assert.assertFalse(thirdContent.getParent().isPresent());
+    }
+
     @Test(expected = NullPointerException.class)
     public void callAddToHeaderOrFooter_withNull_shouldThrowError() {
         Dialog dialog = new Dialog();
