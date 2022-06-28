@@ -35,6 +35,9 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.ValidationUtils;
+import com.vaadin.flow.data.binder.HasValidator;
+import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.SerializableBiFunction;
@@ -55,11 +58,11 @@ import com.vaadin.flow.function.SerializableBiFunction;
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("./vaadin-big-decimal-field.js")
 public class BigDecimalField
-        extends GeneratedVaadinTextField<BigDecimalField, BigDecimal>
-        implements HasSize, HasValidation, HasValueChangeMode,
-        HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
-        HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper, HasLabel,
-        HasClearButton, HasThemeVariant<TextFieldVariant> {
+        extends GeneratedVaadinTextField<BigDecimalField, BigDecimal> implements
+        HasSize, HasValidation, HasValueChangeMode, HasPrefixAndSuffix,
+        InputNotifier, KeyNotifier, CompositionNotifier, HasAutocomplete,
+        HasAutocapitalize, HasAutocorrect, HasHelper, HasLabel, HasClearButton,
+        HasThemeVariant<TextFieldVariant>, HasValidator<BigDecimal> {
     private ValueChangeMode currentMode;
 
     private boolean isConnectorAttached;
@@ -374,6 +377,16 @@ public class BigDecimalField
         return super.getValue();
     }
 
+    private ValidationResult checkValidity(BigDecimal value) {
+        var requiredValidation = ValidationUtils.checkRequired(required, value,
+                getEmptyValue());
+        if (requiredValidation.isError()) {
+            return requiredValidation;
+        }
+
+        return ValidationResult.ok();
+    }
+
     /**
      * Performs server-side validation of the current value. This is needed
      * because it is possible to circumvent the client-side validation
@@ -381,9 +394,7 @@ public class BigDecimalField
      */
     @Override
     protected void validate() {
-        final boolean isRequiredButEmpty = required
-                && Objects.equals(getEmptyValue(), getValue());
-        setInvalid(isRequiredButEmpty);
+        setInvalid(checkValidity(getValue()).isError());
     }
 
     @Override
