@@ -86,9 +86,6 @@ public class DateTimePicker extends
         HasStyle, HasSize, HasTheme, HasValidation, Focusable<DateTimePicker>,
         HasHelper, HasLabel, HasValidator<LocalDateTime> {
 
-    public static final String VALIDATION_REQUIRED_ERROR = "VALIDATION_REQUIRED_ERROR";
-    public static final String VALIDATION_GREATER_THAN_MAX_ERROR = "VALIDATION_GREATER_THAN_MAX_ERROR";
-    public static final String VALIDATION_SMALLER_THAN_MIN_ERROR = "VALIDATION_SMALLER_THAN_MIN_ERROR";
     private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
     private final DateTimePickerDatePicker datePicker = new DateTimePickerDatePicker();
@@ -631,12 +628,6 @@ public class DateTimePicker extends
     }
 
     private ValidationResult checkValidity(LocalDateTime value) {
-        var requiredValidation = ValidationUtils.checkRequired(required, value,
-                getEmptyValue());
-        if (requiredValidation.isError()) {
-            return requiredValidation;
-        }
-
         var greaterThanMax = ValidationUtils.checkGreaterThanMax(value, max);
         if (greaterThanMax.isError()) {
             return greaterThanMax;
@@ -656,7 +647,10 @@ public class DateTimePicker extends
      * @return the current validity of the value.
      */
     private boolean isInvalid(LocalDateTime value) {
-        return checkValidity(value).isError();
+        var requiredValidation = ValidationUtils.checkRequired(required, value,
+            getEmptyValue());
+
+        return requiredValidation.isError() || checkValidity(value).isError();
     }
 
     /**
