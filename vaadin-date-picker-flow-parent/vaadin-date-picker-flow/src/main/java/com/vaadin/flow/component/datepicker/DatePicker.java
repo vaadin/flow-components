@@ -485,12 +485,6 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     }
 
     private ValidationResult checkValidity(LocalDate value) {
-        var requiredValidation = ValidationUtils.checkRequired(required, value,
-                getEmptyValue());
-        if (requiredValidation.isError()) {
-            return requiredValidation;
-        }
-
         var greaterThanMax = ValidationUtils.checkGreaterThanMax(value, max);
         if (greaterThanMax.isError()) {
             return greaterThanMax;
@@ -510,14 +504,10 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      * constraints using browser development tools.
      */
     private boolean isInvalid(LocalDate value) {
-        // final boolean isRequiredButEmpty = required
-        // && Objects.equals(getEmptyValue(), value);
-        // final boolean isGreaterThanMax = value != null && max != null
-        // && value.isAfter(max);
-        // final boolean isSmallerThenMin = value != null && min != null
-        // && value.isBefore(min);
-        // return isRequiredButEmpty || isGreaterThanMax || isSmallerThenMin;
-        return checkValidity(value).isError();
+        var requiredValidation = ValidationUtils.checkRequired(required, value,
+            getEmptyValue());
+
+        return requiredValidation.isError() || checkValidity(value).isError();
     }
 
     /**
