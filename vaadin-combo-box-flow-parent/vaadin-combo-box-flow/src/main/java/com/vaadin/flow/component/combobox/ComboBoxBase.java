@@ -37,6 +37,7 @@ import com.vaadin.flow.component.combobox.dataview.ComboBoxLazyDataView;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxListDataView;
 import com.vaadin.flow.component.shared.ValidationUtils;
 import com.vaadin.flow.data.binder.HasValidator;
+import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
@@ -327,12 +328,6 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      */
     public void setInvalid(boolean invalid) {
         getElement().setProperty("invalid", invalid);
-    }
-
-    @Override
-    public Validator<TValue> getDefaultValidator() {
-        return ((value, context) -> ValidationUtils.checkRequired(isRequired(),
-                value, getEmptyValue()));
     }
 
     /**
