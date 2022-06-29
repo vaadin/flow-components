@@ -30,7 +30,7 @@ public class ComboBoxValidationTest {
         var field = getFieldWithValidation(status -> {
             Assert.assertTrue(status.isError());
             Assert.assertEquals(BINDER_FAIL_MESSAGE,
-                status.getMessage().orElse(""));
+                    status.getMessage().orElse(""));
         });
 
         field.setValue("bar");
@@ -41,7 +41,8 @@ public class ComboBoxValidationTest {
         var field = getFieldWithValidation(status -> {
             if (status.getField().isEmpty()) {
                 Assert.assertTrue(status.isError());
-                Assert.assertEquals(REQUIRED_MESSAGE, status.getMessage().orElse(""));
+                Assert.assertEquals(REQUIRED_MESSAGE,
+                        status.getMessage().orElse(""));
             }
         }, true);
         field.setValue("foo");
@@ -70,26 +71,26 @@ public class ComboBoxValidationTest {
     }
 
     private ComboBox<String> getFieldWithValidation(
-        BindingValidationStatusHandler handler) {
+            BindingValidationStatusHandler handler) {
         return getFieldWithValidation(handler, false);
     }
 
     private ComboBox<String> getFieldWithValidation(
-        BindingValidationStatusHandler handler, boolean isRequired) {
+            BindingValidationStatusHandler handler, boolean isRequired) {
         var field = new ComboBox<String>();
         field.setItems(Arrays.asList("foo", "bar", "baz"));
         var binder = new Binder<>(Bean.class);
         var binding = binder.forField(field)
-            .withValidator(value -> value == null || Objects.equals(value, "foo"), BINDER_FAIL_MESSAGE
-            )
-            .withValidationStatusHandler(handler);
+                .withValidator(
+                        value -> value == null || Objects.equals(value, "foo"),
+                        BINDER_FAIL_MESSAGE)
+                .withValidationStatusHandler(handler);
 
         if (isRequired) {
             binding.asRequired(REQUIRED_MESSAGE);
         }
 
         binding.bind("value");
-
 
         return field;
     }

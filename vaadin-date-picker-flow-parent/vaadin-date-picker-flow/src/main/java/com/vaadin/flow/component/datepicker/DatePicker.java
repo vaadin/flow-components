@@ -505,7 +505,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      */
     private boolean isInvalid(LocalDate value) {
         var requiredValidation = ValidationUtils.checkRequired(required, value,
-            getEmptyValue());
+                getEmptyValue());
 
         return requiredValidation.isError() || checkValidity(value).isError();
     }

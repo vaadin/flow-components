@@ -295,7 +295,7 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
      */
     private boolean isInvalid(LocalTime value) {
         var requiredValidation = ValidationUtils.checkRequired(required, value,
-            getEmptyValue());
+                getEmptyValue());
 
         return requiredValidation.isError() || checkValidity(value).isError();
     }

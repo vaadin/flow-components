@@ -648,7 +648,7 @@ public class DateTimePicker extends
      */
     private boolean isInvalid(LocalDateTime value) {
         var requiredValidation = ValidationUtils.checkRequired(required, value,
-            getEmptyValue());
+                getEmptyValue());
 
         return requiredValidation.isError() || checkValidity(value).isError();
     }

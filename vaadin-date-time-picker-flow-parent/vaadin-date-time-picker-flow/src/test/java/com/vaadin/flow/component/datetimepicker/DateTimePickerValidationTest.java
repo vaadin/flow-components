@@ -30,7 +30,7 @@ public class DateTimePickerValidationTest {
         var field = getFieldWithValidation(status -> {
             Assert.assertTrue(status.isError());
             Assert.assertEquals(ValidationError.GREATER_THAN_MAX,
-                status.getMessage().orElse(""));
+                    status.getMessage().orElse(""));
         });
 
         field.setValue(LocalDateTime.now().plusDays(2));
@@ -41,7 +41,7 @@ public class DateTimePickerValidationTest {
         var field = getFieldWithValidation(status -> {
             Assert.assertTrue(status.isError());
             Assert.assertEquals(BINDER_FAIL_MESSAGE,
-                status.getMessage().orElse(""));
+                    status.getMessage().orElse(""));
         });
 
         field.setValue(LocalDateTime.now().minusYears(1));
@@ -52,7 +52,8 @@ public class DateTimePickerValidationTest {
         var field = getFieldWithValidation(status -> {
             if (status.getField().isEmpty()) {
                 Assert.assertTrue(status.isError());
-                Assert.assertEquals(REQUIRED_MESSAGE, status.getMessage().orElse(""));
+                Assert.assertEquals(REQUIRED_MESSAGE,
+                        status.getMessage().orElse(""));
             }
         }, true);
         field.setValue(LocalDateTime.now());
@@ -81,26 +82,27 @@ public class DateTimePickerValidationTest {
     }
 
     private DateTimePicker getFieldWithValidation(
-        BindingValidationStatusHandler handler) {
+            BindingValidationStatusHandler handler) {
         return getFieldWithValidation(handler, false);
     }
 
     private DateTimePicker getFieldWithValidation(
-        BindingValidationStatusHandler handler, boolean isRequired) {
+            BindingValidationStatusHandler handler, boolean isRequired) {
         var field = new DateTimePicker();
         field.setMax(LocalDateTime.now().plusDays(1));
         var binder = new Binder<>(Bean.class);
-        Binder.BindingBuilder<Bean, LocalDateTime> binding = binder.forField(field)
-            .withValidator(date -> date == null || date.getYear() >= LocalDateTime.now().getYear(), BINDER_FAIL_MESSAGE
-            )
-            .withValidationStatusHandler(handler);
+        Binder.BindingBuilder<Bean, LocalDateTime> binding = binder
+                .forField(field)
+                .withValidator(date -> date == null
+                        || date.getYear() >= LocalDateTime.now().getYear(),
+                        BINDER_FAIL_MESSAGE)
+                .withValidationStatusHandler(handler);
 
         if (isRequired) {
             binding.asRequired(REQUIRED_MESSAGE);
         }
 
         binding.bind("date");
-
 
         return field;
     }

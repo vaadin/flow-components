@@ -30,7 +30,7 @@ public class TimePickerValidationTest {
         var field = getFieldWithValidation(status -> {
             Assert.assertTrue(status.isError());
             Assert.assertEquals(ValidationError.GREATER_THAN_MAX,
-                status.getMessage().orElse(""));
+                    status.getMessage().orElse(""));
         });
 
         field.setValue(LocalTime.now().plusHours(2));
@@ -41,7 +41,7 @@ public class TimePickerValidationTest {
         var field = getFieldWithValidation(status -> {
             Assert.assertTrue(status.isError());
             Assert.assertEquals(BINDER_FAIL_MESSAGE,
-                status.getMessage().orElse(""));
+                    status.getMessage().orElse(""));
         });
 
         field.setValue(LocalTime.now().minusHours(2));
@@ -52,7 +52,8 @@ public class TimePickerValidationTest {
         var field = getFieldWithValidation(status -> {
             if (status.getField().isEmpty()) {
                 Assert.assertTrue(status.isError());
-                Assert.assertEquals(REQUIRED_MESSAGE, status.getMessage().orElse(""));
+                Assert.assertEquals(REQUIRED_MESSAGE,
+                        status.getMessage().orElse(""));
             }
         }, true);
         field.setValue(LocalTime.now());
@@ -81,26 +82,27 @@ public class TimePickerValidationTest {
     }
 
     private TimePicker getFieldWithValidation(
-        BindingValidationStatusHandler handler) {
+            BindingValidationStatusHandler handler) {
         return getFieldWithValidation(handler, false);
     }
 
     private TimePicker getFieldWithValidation(
-        BindingValidationStatusHandler handler, boolean isRequired) {
+            BindingValidationStatusHandler handler, boolean isRequired) {
         var field = new TimePicker();
         field.setMax(LocalTime.now().plusHours(1));
         var binder = new Binder<>(Bean.class);
         Binder.BindingBuilder<Bean, LocalTime> binding = binder.forField(field)
-            .withValidator(value -> value == null || value.isAfter(LocalTime.now().minusHours(1)), BINDER_FAIL_MESSAGE
-            )
-            .withValidationStatusHandler(handler);
+                .withValidator(
+                        value -> value == null
+                                || value.isAfter(LocalTime.now().minusHours(1)),
+                        BINDER_FAIL_MESSAGE)
+                .withValidationStatusHandler(handler);
 
         if (isRequired) {
             binding.asRequired(REQUIRED_MESSAGE);
         }
 
         binding.bind("time");
-
 
         return field;
     }

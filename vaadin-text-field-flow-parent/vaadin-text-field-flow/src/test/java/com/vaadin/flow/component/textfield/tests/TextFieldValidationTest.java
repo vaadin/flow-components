@@ -30,7 +30,7 @@ public class TextFieldValidationTest {
         var field = getFieldWithValidation(status -> {
             Assert.assertTrue(status.isError());
             Assert.assertEquals(ValidationError.MAX_LENGTH_EXCEEDED,
-                status.getMessage().orElse(""));
+                    status.getMessage().orElse(""));
         });
 
         field.setValue("AAAAAAAAAA");
@@ -41,7 +41,7 @@ public class TextFieldValidationTest {
         var field = getFieldWithValidation(status -> {
             Assert.assertTrue(status.isError());
             Assert.assertEquals(BINDER_FAIL_MESSAGE,
-                status.getMessage().orElse(""));
+                    status.getMessage().orElse(""));
         });
 
         field.setValue("A");
@@ -52,7 +52,8 @@ public class TextFieldValidationTest {
         var field = getFieldWithValidation(status -> {
             if (status.getField().isEmpty()) {
                 Assert.assertTrue(status.isError());
-                Assert.assertEquals(REQUIRED_MESSAGE, status.getMessage().orElse(""));
+                Assert.assertEquals(REQUIRED_MESSAGE,
+                        status.getMessage().orElse(""));
             }
         }, true);
         field.setValue("ASDF");
@@ -81,27 +82,25 @@ public class TextFieldValidationTest {
     }
 
     private TextField getFieldWithValidation(
-        BindingValidationStatusHandler handler) {
+            BindingValidationStatusHandler handler) {
         return getFieldWithValidation(handler, false);
     }
 
     private TextField getFieldWithValidation(
-        BindingValidationStatusHandler handler, boolean isRequired) {
+            BindingValidationStatusHandler handler, boolean isRequired) {
         var field = new TextField();
         field.setMaxLength(8);
         var binder = new Binder<>(Bean.class);
         var binding = binder.forField(field)
-            .withValidator(value -> Objects.equals(value, "")
-                || value.length() > 2, BINDER_FAIL_MESSAGE
-            )
-            .withValidationStatusHandler(handler);
+                .withValidator(value -> Objects.equals(value, "")
+                        || value.length() > 2, BINDER_FAIL_MESSAGE)
+                .withValidationStatusHandler(handler);
 
         if (isRequired) {
             binding.asRequired(REQUIRED_MESSAGE);
         }
 
         binding.bind("string");
-
 
         return field;
     }

@@ -30,7 +30,7 @@ public class NumberFieldValidationTest {
         var field = getFieldWithValidation(status -> {
             Assert.assertTrue(status.isError());
             Assert.assertEquals(ValidationError.GREATER_THAN_MAX,
-                status.getMessage().orElse(""));
+                    status.getMessage().orElse(""));
         });
 
         field.setValue(20d);
@@ -41,7 +41,7 @@ public class NumberFieldValidationTest {
         var field = getFieldWithValidation(status -> {
             Assert.assertTrue(status.isError());
             Assert.assertEquals(BINDER_FAIL_MESSAGE,
-                status.getMessage().orElse(""));
+                    status.getMessage().orElse(""));
         });
 
         field.setValue(1d);
@@ -52,7 +52,8 @@ public class NumberFieldValidationTest {
         var field = getFieldWithValidation(status -> {
             if (status.getField().isEmpty()) {
                 Assert.assertTrue(status.isError());
-                Assert.assertEquals(REQUIRED_MESSAGE, status.getMessage().orElse(""));
+                Assert.assertEquals(REQUIRED_MESSAGE,
+                        status.getMessage().orElse(""));
             }
         }, true);
         field.setValue(5d);
@@ -81,27 +82,25 @@ public class NumberFieldValidationTest {
     }
 
     private NumberField getFieldWithValidation(
-        BindingValidationStatusHandler handler) {
+            BindingValidationStatusHandler handler) {
         return getFieldWithValidation(handler, false);
     }
 
     private NumberField getFieldWithValidation(
-        BindingValidationStatusHandler handler, boolean isRequired) {
+            BindingValidationStatusHandler handler, boolean isRequired) {
         var field = new NumberField();
         field.setMax(10);
         var binder = new Binder<>(Bean.class);
         var binding = binder.forField(field)
-            .withValidator(value -> value == null
-                || value > 2, BINDER_FAIL_MESSAGE
-            )
-            .withValidationStatusHandler(handler);
+                .withValidator(value -> value == null || value > 2,
+                        BINDER_FAIL_MESSAGE)
+                .withValidationStatusHandler(handler);
 
         if (isRequired) {
             binding.asRequired(REQUIRED_MESSAGE);
         }
 
         binding.bind("number");
-
 
         return field;
     }
