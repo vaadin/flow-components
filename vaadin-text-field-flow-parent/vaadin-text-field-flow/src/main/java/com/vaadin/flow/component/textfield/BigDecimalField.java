@@ -38,6 +38,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.ValidationUtils;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
+import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.SerializableBiFunction;
@@ -375,6 +376,11 @@ public class BigDecimalField
     @Override
     public BigDecimal getValue() {
         return super.getValue();
+    }
+
+    @Override
+    public Validator<BigDecimal> getDefaultValidator() {
+        return ((value, context) -> checkValidity(value));
     }
 
     private ValidationResult checkValidity(BigDecimal value) {
