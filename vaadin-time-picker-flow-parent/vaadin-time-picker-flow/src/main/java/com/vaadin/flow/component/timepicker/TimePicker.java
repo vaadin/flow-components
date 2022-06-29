@@ -273,12 +273,6 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     }
 
     private ValidationResult checkValidity(LocalTime value) {
-        var requiredValidation = ValidationUtils.checkRequired(required, value,
-                getEmptyValue());
-        if (requiredValidation.isError()) {
-            return requiredValidation;
-        }
-
         var greaterThanMaxValidation = ValidationUtils
                 .checkGreaterThanMax(value, max);
         if (greaterThanMaxValidation.isError()) {
@@ -300,7 +294,10 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
      * constraints using browser development tools.
      */
     private boolean isInvalid(LocalTime value) {
-        return checkValidity(value).isError();
+        var requiredValidation = ValidationUtils.checkRequired(required, value,
+            getEmptyValue());
+
+        return requiredValidation.isError() || checkValidity(value).isError();
     }
 
     @Override
