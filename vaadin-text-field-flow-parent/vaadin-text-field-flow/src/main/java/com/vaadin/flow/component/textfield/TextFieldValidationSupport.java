@@ -66,15 +66,13 @@ final class TextFieldValidationSupport implements Serializable {
      * @return <code>true</code> if the value is invalid.
      */
     boolean isInvalid(String value) {
-        return checkValidity(value).isError();
+        var requiredValidation = ValidationUtils.checkRequired(required, value,
+            field.getEmptyValue());
+
+        return requiredValidation.isError() || checkValidity(value).isError();
     }
 
     ValidationResult checkValidity(String value) {
-        var requiredValidation = ValidationUtils.checkRequired(required, value,
-                field.getEmptyValue());
-        if (requiredValidation.isError()) {
-            return requiredValidation;
-        }
 
         final boolean isMaxLengthExceeded = value != null && maxLength != null
                 && value.length() > maxLength;
