@@ -171,7 +171,7 @@ public class GridViewSortingIT extends AbstractComponentIT {
         // enable multi sort
         clickElementWithJs(findElement(By.id("grid-multi-sort-toggle")));
 
-        // set priority
+        // set multi-sort priority to append
         clickElementWithJs(
                 findElement(By.id("grid-multi-sort-priority-toggle")));
 

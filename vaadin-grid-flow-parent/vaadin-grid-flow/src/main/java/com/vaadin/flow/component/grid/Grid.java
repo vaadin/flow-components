@@ -388,7 +388,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     /**
      * Multi-sort priority (visually indicated by numbers in column headers)
-     * control how columns are added to the sort in the web component, when a
+     * controls how columns are added to the sort order, when a
      * column becomes sorted, or the sort direction of a column is changed.
      * <p>
      * Use {@link Grid#setMultiSort(boolean, MultiSortPriority)} to customize
