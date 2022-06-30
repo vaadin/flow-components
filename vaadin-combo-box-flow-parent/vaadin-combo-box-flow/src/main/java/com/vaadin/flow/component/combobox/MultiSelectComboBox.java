@@ -333,6 +333,19 @@ public class MultiSelectComboBox<TItem>
         setValue(value);
     }
 
+    /**
+     * Sets the value of the component, which is a set of selected items. As
+     * each item can only be selected once, duplicates in the provided items
+     * will be removed. Passing no items will result in an empty selection.
+     *
+     * @param items
+     *            the new value
+     */
+    public void setValue(Collection<TItem> items) {
+        Set<TItem> value = new LinkedHashSet<>(items);
+        setValue(value);
+    }
+
     @Override
     protected void refreshValue() {
         Set<TItem> value = getValue();
