@@ -362,38 +362,6 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      * Description copied from corresponding location in WebComponent:
      * </p>
      * <p>
-     * The current required state of the select. True if required.
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
-     * </p>
-     *
-     * @return the {@code required} property from the webcomponent
-     */
-    protected boolean isRequiredBoolean() {
-        return getElement().getProperty("required", false);
-    }
-
-    /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
-     * The current required state of the select. True if required.
-     * </p>
-     *
-     * @param required
-     *            the boolean value to set
-     */
-    protected void setRequired(boolean required) {
-        getElement().setProperty("required", required);
-    }
-
-    /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
      * Set to true if the value is invalid.
      * <p>
      * This property is not synchronized automatically from the client side, so

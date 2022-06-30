@@ -611,8 +611,6 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
      */
     @Override
     public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
-        // this would be the same as setRequired(boolean) but we don't expose
-        // both
         super.setRequiredIndicatorVisible(requiredIndicatorVisible);
     }
 
@@ -624,7 +622,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
      */
     @Override
     public boolean isRequiredIndicatorVisible() {
-        return super.isRequiredBoolean();
+        return super.isRequiredIndicatorVisible();
     }
 
     /**
