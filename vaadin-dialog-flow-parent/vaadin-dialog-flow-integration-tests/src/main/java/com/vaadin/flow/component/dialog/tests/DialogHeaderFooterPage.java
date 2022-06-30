@@ -44,6 +44,11 @@ public class DialogHeaderFooterPage extends Div {
                 e -> dialog.getHeader().remove(headerContent));
         removeHeaderContent.setId("remove-header-content-button");
 
+        NativeButton removeAllHeaderContents = new NativeButton(
+                "remove all header contents",
+                e -> dialog.getHeader().removeAll());
+        removeAllHeaderContents.setId("remove-all-header-contents-button");
+
         NativeButton addSecondHeaderContent = new NativeButton(
                 "add second header content",
                 e -> dialog.getHeader().add(new Span(ANOTHER_HEADER_CONTENT)));
@@ -59,6 +64,11 @@ public class DialogHeaderFooterPage extends Div {
                 e -> dialog.getFooter().remove(footerContent));
         removeFooterContent.setId("remove-footer-content-button");
 
+        NativeButton removeAllFooterContents = new NativeButton(
+                "remove all footer contents",
+                e -> dialog.getFooter().removeAll());
+        removeAllFooterContents.setId("remove-all-footer-contents-button");
+
         NativeButton addSecondFooterContent = new NativeButton(
                 "add second footer content",
                 e -> dialog.getFooter().add(new Span(ANOTHER_FOOTER_CONTENT)));
@@ -66,7 +76,8 @@ public class DialogHeaderFooterPage extends Div {
 
         Div buttonsContainer = new Div(openDialog, attachDialog, addHeaderTitle,
                 removeHeaderTitle, addHeaderContent, removeHeaderContent,
-                addSecondHeaderContent, addFooterContent, removeFooterContent,
+                removeAllHeaderContents, addSecondHeaderContent,
+                addFooterContent, removeFooterContent, removeAllFooterContents,
                 addSecondFooterContent);
 
         NativeButton moveButtons = new NativeButton("move buttons",
