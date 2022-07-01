@@ -17,45 +17,82 @@
 package com.vaadin.flow.component.grid;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.treegrid.TreeGrid;
-import com.vaadin.flow.function.ValueProvider;
+import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider;
+import com.vaadin.flow.data.provider.hierarchy.TreeData;
+import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
 
 public class TreeGridTest {
 
-    @Test
-    public void defaultUniqueKeyProvider_usesIncrementalLongId() {
-        Item item1 = new Item("sensitive data 1");
-        Item item2 = new Item("sensitive data 2");
+    private MockUI ui;
+    private TreeGrid<Item> treeGrid;
 
-        UniqueKeyTreeGrid grid = new UniqueKeyTreeGrid();
-        String key1 = grid.getUniqueKeyProvider().apply(item1);
-        Assert.assertEquals("0", key1);
+    @Before
+    public void init() {
+        Item item1 = new Item("key 1");
+        Item item2 = new Item("key 2");
+        treeGrid = new TreeGrid<>();
+        TreeData<Item> treeData = new TreeData<>();
+        treeData.addItem(null, item1);
+        treeData.addItem(null, item2);
+        HierarchicalDataProvider<Item, ?> treeDataProvider = new TreeDataProvider<>(
+                treeData);
+        treeGrid.setDataProvider(treeDataProvider);
 
-        String key2 = grid.getUniqueKeyProvider().apply(item2);
-        Assert.assertEquals("1", key2);
-
-        key1 = grid.getUniqueKeyProvider().apply(item1);
-        Assert.assertEquals("0", key1);
+        ui = new MockUI();
+        ui.add(treeGrid);
     }
 
-    private static class UniqueKeyTreeGrid extends TreeGrid<Item> {
-        @Override
-        public ValueProvider<Item, String> getUniqueKeyProvider() {
-            return super.getUniqueKeyProvider();
-        }
+    @Test
+    public void uniqueKeyProviderNotSet_usesKeyMapper() {
+        fakeClientCommunication();
+
+        Assert.assertNotNull(
+                treeGrid.getDataCommunicator().getKeyMapper().get("1"));
+        Assert.assertNotNull(
+                treeGrid.getDataCommunicator().getKeyMapper().get("2"));
+        Assert.assertNull(
+                treeGrid.getDataCommunicator().getKeyMapper().get("3"));
+    }
+
+    @Test
+    public void uniqueKeyProviderSet_usesUniqueKeyProvider() {
+        treeGrid.setUniqueKeyProvider(Item::toString);
+        fakeClientCommunication();
+
+        Assert.assertNull(
+                treeGrid.getDataCommunicator().getKeyMapper().get("1"));
+        Assert.assertNull(
+                treeGrid.getDataCommunicator().getKeyMapper().get("2"));
+        Assert.assertNotNull(
+                treeGrid.getDataCommunicator().getKeyMapper().get("key 1"));
+        Assert.assertNotNull(
+                treeGrid.getDataCommunicator().getKeyMapper().get("key 2"));
+    }
+
+    private void fakeClientCommunication() {
+        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
+        ui.getInternals().getStateTree().collectChanges(ignore -> {
+        });
     }
 
     private static class Item {
-        private final String sensitiveData;
+        private final String key;
 
-        public Item(String sensitiveData) {
-            this.sensitiveData = sensitiveData;
+        public Item(String key) {
+            this.key = key;
         }
 
-        public String getSensitiveData() {
-            return sensitiveData;
+        public String getKey() {
+            return key;
+        }
+
+        @Override
+        public String toString() {
+            return key;
         }
     }
 
