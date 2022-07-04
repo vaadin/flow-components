@@ -378,11 +378,6 @@ public class BigDecimalField
         return super.getValue();
     }
 
-    @Override
-    public Validator<BigDecimal> getDefaultValidator() {
-        return ((value, context) -> checkValidity(value));
-    }
-
     private ValidationResult checkValidity(BigDecimal value) {
         var requiredValidation = ValidationUtils.checkRequired(required, value,
                 getEmptyValue());
