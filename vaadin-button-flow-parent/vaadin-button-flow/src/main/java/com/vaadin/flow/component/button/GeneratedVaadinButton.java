@@ -253,13 +253,15 @@ public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
         getElement().removeAllChildren();
     }
 
-    // Override is only required to keep binary compatibility with other 23.x minor versions, can be removed in a future major
+    // Override is only required to keep binary compatibility with other 23.x
+    // minor versions, can be removed in a future major
     @Override
     public void addThemeVariants(ButtonVariant... variants) {
         HasThemeVariant.super.addThemeVariants(variants);
     }
 
-    // Override is only required to keep binary compatibility with other 23.x minor versions, can be removed in a future major
+    // Override is only required to keep binary compatibility with other 23.x
+    // minor versions, can be removed in a future major
     @Override
     public void removeThemeVariants(ButtonVariant... variants) {
         HasThemeVariant.super.removeThemeVariants(variants);
