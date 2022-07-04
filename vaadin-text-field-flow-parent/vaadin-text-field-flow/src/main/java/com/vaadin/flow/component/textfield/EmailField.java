@@ -435,4 +435,16 @@ public class EmailField extends GeneratedVaadinEmailField<EmailField, String>
         super.onAttach(attachEvent);
         FieldValidationUtil.disableClientValidation(this);
     }
+
+    // Override is only required to keep binary compatibility with other 23.x minor versions, can be removed in a future major
+    @Override
+    public void addThemeVariants(TextFieldVariant... variants) {
+        HasThemeVariant.super.addThemeVariants(variants);
+    }
+
+    // Override is only required to keep binary compatibility with other 23.x minor versions, can be removed in a future major
+    @Override
+    public void removeThemeVariants(TextFieldVariant... variants) {
+        HasThemeVariant.super.removeThemeVariants(variants);
+    }
 }
