@@ -378,16 +378,6 @@ public class BigDecimalField
         return super.getValue();
     }
 
-    private ValidationResult checkValidity(BigDecimal value) {
-        var requiredValidation = ValidationUtils.checkRequired(required, value,
-                getEmptyValue());
-        if (requiredValidation.isError()) {
-            return requiredValidation;
-        }
-
-        return ValidationResult.ok();
-    }
-
     /**
      * Performs server-side validation of the current value. This is needed
      * because it is possible to circumvent the client-side validation
@@ -395,7 +385,9 @@ public class BigDecimalField
      */
     @Override
     protected void validate() {
-        setInvalid(checkValidity(getValue()).isError());
+        var requiredValidation = ValidationUtils.checkRequired(required, getValue(),
+            getEmptyValue());
+        setInvalid(requiredValidation.isError());
     }
 
     @Override
