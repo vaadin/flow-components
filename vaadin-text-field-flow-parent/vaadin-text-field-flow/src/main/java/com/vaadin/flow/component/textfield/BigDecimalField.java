@@ -385,8 +385,8 @@ public class BigDecimalField
      */
     @Override
     protected void validate() {
-        var requiredValidation = ValidationUtils.checkRequired(required, getValue(),
-            getEmptyValue());
+        var requiredValidation = ValidationUtils.checkRequired(required,
+                getValue(), getEmptyValue());
         setInvalid(requiredValidation.isError());
     }
 
