@@ -81,8 +81,7 @@ final class TextFieldValidationSupport implements Serializable {
         final boolean isMinLengthNotReached = value != null && minLength != null
                 && value.length() < minLength;
         if (isMinLengthNotReached) {
-            return ValidationResult
-                    .error("");
+            return ValidationResult.error("");
         }
 
         // Only evaluate if necessary.
