@@ -1,7 +1,6 @@
 package com.vaadin.flow.component.textfield.binder;
 
 import com.vaadin.flow.component.HasValue;
-import com.vaadin.flow.component.shared.ValidationError;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.BindingValidationStatus;
 import com.vaadin.flow.data.binder.BindingValidationStatusHandler;
@@ -40,7 +39,16 @@ public abstract class AbstractTextFieldValidationTest<T> {
 
     protected abstract SerializablePredicate<? super T> getValidator();
 
-    protected String fieldConstraintErrorMessage = ValidationError.GREATER_THAN_MAX;
+    @Captor
+    private ArgumentCaptor<BindingValidationStatus<?>> statusCaptor;
+
+    @Mock
+    private BindingValidationStatusHandler statusMock;
+
+    @Before
+    public void init() {
+        MockitoAnnotations.openMocks(this);
+    }
 
     @Test
     public void elementWithConstraints_componentValidationNotMet_elementValidationFails() {
@@ -51,8 +59,6 @@ public abstract class AbstractTextFieldValidationTest<T> {
         var status = statusCaptor.getValue();
 
         Assert.assertTrue("Validation should fail", status.isError());
-        Assert.assertEquals(fieldConstraintErrorMessage,
-                status.getMessage().orElse(""));
     }
 
     @Test
@@ -106,17 +112,6 @@ public abstract class AbstractTextFieldValidationTest<T> {
 
     private void setupFieldWithValidation() {
         setupFieldWithValidation(false);
-    }
-
-    @Captor
-    private ArgumentCaptor<BindingValidationStatus<?>> statusCaptor;
-
-    @Mock
-    private BindingValidationStatusHandler statusMock;
-
-    @Before
-    public void init() {
-        MockitoAnnotations.openMocks(this);
     }
 
     private void setupFieldWithValidation(boolean isRequired) {

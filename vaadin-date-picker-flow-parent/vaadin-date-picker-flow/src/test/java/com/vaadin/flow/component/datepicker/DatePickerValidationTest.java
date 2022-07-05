@@ -1,6 +1,5 @@
 package com.vaadin.flow.component.datepicker;
 
-import com.vaadin.flow.component.shared.ValidationError;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.BindingValidationStatusHandler;
 import org.junit.Assert;

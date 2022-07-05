@@ -29,7 +29,6 @@ import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasClearButton;
 import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.flow.component.shared.ValidationError;
 import com.vaadin.flow.component.shared.ValidationUtils;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
@@ -378,17 +377,17 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         final boolean isGreaterThanMax = value != null
                 && value.doubleValue() > max;
         if (isGreaterThanMax) {
-            return ValidationResult.error(ValidationError.GREATER_THAN_MAX);
+            return ValidationResult.error("");
         }
 
         final boolean isSmallerThanMin = value != null
                 && value.doubleValue() < min;
         if (isSmallerThanMin) {
-            return ValidationResult.error(ValidationError.SMALLER_THAN_MIN);
+            return ValidationResult.error("");
         }
 
         if (!isValidByStep(value)) {
-            return ValidationResult.error(ValidationError.STEP);
+            return ValidationResult.error("");
         }
 
         return ValidationResult.ok();

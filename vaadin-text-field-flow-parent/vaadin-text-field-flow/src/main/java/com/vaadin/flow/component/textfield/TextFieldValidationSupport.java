@@ -1,12 +1,10 @@
 package com.vaadin.flow.component.textfield;
 
 import com.vaadin.flow.component.HasValue;
-import com.vaadin.flow.component.shared.ValidationError;
 import com.vaadin.flow.component.shared.ValidationUtils;
 import com.vaadin.flow.data.binder.ValidationResult;
 
 import java.io.Serializable;
-import java.util.Objects;
 import java.util.function.BooleanSupplier;
 import java.util.regex.Pattern;
 
@@ -77,21 +75,21 @@ final class TextFieldValidationSupport implements Serializable {
         final boolean isMaxLengthExceeded = value != null && maxLength != null
                 && value.length() > maxLength;
         if (isMaxLengthExceeded) {
-            return ValidationResult.error(ValidationError.MAX_LENGTH_EXCEEDED);
+            return ValidationResult.error("");
         }
 
         final boolean isMinLengthNotReached = value != null && minLength != null
                 && value.length() < minLength;
         if (isMinLengthNotReached) {
             return ValidationResult
-                    .error(ValidationError.MIN_LENGTH_NOT_REACHED);
+                    .error("");
         }
 
         // Only evaluate if necessary.
         final BooleanSupplier doesValueViolatePattern = () -> value != null
                 && pattern != null && !pattern.matcher(value).matches();
         if (doesValueViolatePattern.getAsBoolean()) {
-            return ValidationResult.error(ValidationError.PATTERN_VIOLATED);
+            return ValidationResult.error("");
         }
 
         return ValidationResult.ok();

@@ -10,7 +10,7 @@ public class ValidationUtils {
         final boolean isRequiredButEmpty = required
                 && Objects.equals(emptyValue, value);
         if (isRequiredButEmpty) {
-            return ValidationResult.error(ValidationError.REQUIRED);
+            return ValidationResult.error("");
         }
         return ValidationResult.ok();
     }
@@ -20,7 +20,7 @@ public class ValidationUtils {
         final boolean isGreaterThanMax = value != null && maxValue != null
                 && value.compareTo(maxValue) > 0;
         if (isGreaterThanMax) {
-            return ValidationResult.error(ValidationError.GREATER_THAN_MAX);
+            return ValidationResult.error("");
         }
         return ValidationResult.ok();
     }
@@ -30,7 +30,7 @@ public class ValidationUtils {
         final boolean isSmallerThanMin = value != null && minValue != null
                 && value.compareTo(minValue) < 0;
         if (isSmallerThanMin) {
-            return ValidationResult.error(ValidationError.SMALLER_THAN_MIN);
+            return ValidationResult.error("");
         }
         return ValidationResult.ok();
     }

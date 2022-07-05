@@ -1,14 +1,11 @@
 package com.vaadin.flow.component.textfield.binder;
 
 import com.vaadin.flow.component.HasValue;
-import com.vaadin.flow.component.shared.ValidationError;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.function.SerializablePredicate;
 
 public class IntegerFieldValidationTest
         extends AbstractTextFieldValidationTest<Integer> {
-
-    protected String fieldConstraintErrorMessage = ValidationError.GREATER_THAN_MAX;
 
     private IntegerField field;
 
