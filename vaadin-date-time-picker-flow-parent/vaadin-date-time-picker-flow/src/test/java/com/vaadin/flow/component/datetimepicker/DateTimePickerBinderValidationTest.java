@@ -61,7 +61,7 @@ public class DateTimePickerBinderValidationTest {
         Mockito.verify(statusHandlerMock).statusChange(statusCaptor.capture());
         Assert.assertTrue(statusCaptor.getValue().isError());
         Assert.assertEquals(BINDER_FAIL_MESSAGE,
-            statusCaptor.getValue().getMessage().orElse(""));
+                statusCaptor.getValue().getMessage().orElse(""));
     }
 
     @Test
@@ -70,10 +70,11 @@ public class DateTimePickerBinderValidationTest {
         field.setValue(LocalDateTime.now());
         field.setValue(null);
 
-        Mockito.verify(statusHandlerMock, Mockito.times(2)).statusChange(statusCaptor.capture());
+        Mockito.verify(statusHandlerMock, Mockito.times(2))
+                .statusChange(statusCaptor.capture());
         Assert.assertTrue(statusCaptor.getValue().isError());
         Assert.assertEquals(REQUIRED_MESSAGE,
-            statusCaptor.getValue().getMessage().orElse(""));
+                statusCaptor.getValue().getMessage().orElse(""));
     }
 
     @Test
@@ -83,7 +84,8 @@ public class DateTimePickerBinderValidationTest {
         field.setValue(LocalDateTime.now());
         field.setValue(null);
 
-        Mockito.verify(statusHandlerMock, Mockito.times(2)).statusChange(statusCaptor.capture());
+        Mockito.verify(statusHandlerMock, Mockito.times(2))
+                .statusChange(statusCaptor.capture());
         Assert.assertFalse(statusCaptor.getValue().isError());
     }
 

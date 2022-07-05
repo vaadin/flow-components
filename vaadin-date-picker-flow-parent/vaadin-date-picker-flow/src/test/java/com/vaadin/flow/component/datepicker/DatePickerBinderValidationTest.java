@@ -45,9 +45,9 @@ public class DatePickerBinderValidationTest {
     @Test
     public void elementWithConstraints_componentValidationNotMet_elementValidationFails() {
         var field = getFieldWithValidation(status -> {
-//            Assert.assertTrue(status.isError());
-//            Assert.assertEquals(ValidationError.GREATER_THAN_MAX,
-//                    status.getMessage().orElse(""));
+            // Assert.assertTrue(status.isError());
+            // Assert.assertEquals(ValidationError.GREATER_THAN_MAX,
+            // status.getMessage().orElse(""));
         });
 
         field.setValue(LocalDate.now().plusDays(2));
@@ -70,7 +70,7 @@ public class DatePickerBinderValidationTest {
         Mockito.verify(statusHandlerMock).statusChange(statusCaptor.capture());
         Assert.assertTrue(statusCaptor.getValue().isError());
         Assert.assertEquals(BINDER_FAIL_MESSAGE,
-            statusCaptor.getValue().getMessage().orElse(""));
+                statusCaptor.getValue().getMessage().orElse(""));
     }
 
     @Test
@@ -85,10 +85,11 @@ public class DatePickerBinderValidationTest {
         field.setValue(LocalDate.now());
         field.setValue(null);
 
-        Mockito.verify(statusHandlerMock, Mockito.times(2)).statusChange(statusCaptor.capture());
+        Mockito.verify(statusHandlerMock, Mockito.times(2))
+                .statusChange(statusCaptor.capture());
         Assert.assertTrue(statusCaptor.getValue().isError());
         Assert.assertEquals(REQUIRED_MESSAGE,
-            statusCaptor.getValue().getMessage().orElse(""));
+                statusCaptor.getValue().getMessage().orElse(""));
     }
 
     @Test
@@ -102,7 +103,8 @@ public class DatePickerBinderValidationTest {
         field.setValue(LocalDate.now());
         field.setValue(null);
 
-        Mockito.verify(statusHandlerMock, Mockito.times(2)).statusChange(statusCaptor.capture());
+        Mockito.verify(statusHandlerMock, Mockito.times(2))
+                .statusChange(statusCaptor.capture());
         Assert.assertFalse(statusCaptor.getValue().isError());
 
     }
