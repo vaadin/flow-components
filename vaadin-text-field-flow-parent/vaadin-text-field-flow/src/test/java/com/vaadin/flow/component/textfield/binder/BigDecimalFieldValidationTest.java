@@ -3,6 +3,7 @@ package com.vaadin.flow.component.textfield.binder;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.textfield.BigDecimalField;
 import com.vaadin.flow.function.SerializablePredicate;
+import org.junit.Ignore;
 
 import java.math.BigDecimal;
 
@@ -45,7 +46,7 @@ public class BigDecimalFieldValidationTest
     }
 
     @Override
+    @Ignore("Component doesn't have validation constraints")
     public void elementWithConstraints_componentValidationNotMet_elementValidationFails() {
-        // IGNORE TEST
     }
 }
