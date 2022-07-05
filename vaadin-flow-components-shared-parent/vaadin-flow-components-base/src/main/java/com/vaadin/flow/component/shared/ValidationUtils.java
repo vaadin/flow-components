@@ -9,6 +9,9 @@ import java.util.Objects;
  */
 public class ValidationUtils {
 
+    private ValidationUtils() {
+    }
+
     /**
      * Checks the required validation constraint
      *
