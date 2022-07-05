@@ -388,8 +388,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     /**
      * Multi-sort priority (visually indicated by numbers in column headers)
-     * controls how columns are added to the sort order, when a
-     * column becomes sorted, or the sort direction of a column is changed.
+     * controls how columns are added to the sort order, when a column becomes
+     * sorted, or the sort direction of a column is changed.
      * <p>
      * Use {@link Grid#setMultiSort(boolean, MultiSortPriority)} to customize
      * the multi-sort priority of an individual grid.
@@ -3148,6 +3148,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @see MultiSortPriority
      */
     public void setMultiSort(boolean multiSort, MultiSortPriority priority) {
+        Objects.requireNonNull(priority,
+                "Multi-sort priority must not be null");
         setMultiSort(multiSort);
 
         getElement().setAttribute("multi-sort-priority",
