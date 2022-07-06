@@ -105,10 +105,10 @@ import com.vaadin.flow.dom.Element;
  * </p>
  */
 @Tag("vaadin-button")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha3")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/button", version = "23.2.0-alpha2")
-@NpmPackage(value = "@vaadin/vaadin-button", version = "23.2.0-alpha2")
+@NpmPackage(value = "@vaadin/button", version = "23.2.0-alpha3")
+@NpmPackage(value = "@vaadin/vaadin-button", version = "23.2.0-alpha3")
 @JsModule("@vaadin/button/src/vaadin-button.js")
 public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
         extends Component implements HasStyle, ClickNotifier<R>, HasText,
@@ -251,6 +251,20 @@ public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
         getElement().getChildren()
                 .forEach(child -> child.removeAttribute("slot"));
         getElement().removeAllChildren();
+    }
+
+    // Override is only required to keep binary compatibility with other 23.x
+    // minor versions, can be removed in a future major
+    @Override
+    public void addThemeVariants(ButtonVariant... variants) {
+        HasThemeVariant.super.addThemeVariants(variants);
+    }
+
+    // Override is only required to keep binary compatibility with other 23.x
+    // minor versions, can be removed in a future major
+    @Override
+    public void removeThemeVariants(ButtonVariant... variants) {
+        HasThemeVariant.super.removeThemeVariants(variants);
     }
 
     /**

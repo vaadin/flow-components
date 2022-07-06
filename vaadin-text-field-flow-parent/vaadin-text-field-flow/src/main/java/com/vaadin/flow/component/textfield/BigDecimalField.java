@@ -53,7 +53,7 @@ import com.vaadin.flow.function.SerializableBiFunction;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-big-decimal-field")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha3")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("./vaadin-big-decimal-field.js")
 public class BigDecimalField
@@ -439,5 +439,19 @@ public class BigDecimalField
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         FieldValidationUtil.disableClientValidation(this);
+    }
+
+    // Override is only required to keep binary compatibility with other 23.x
+    // minor versions, can be removed in a future major
+    @Override
+    public void addThemeVariants(TextFieldVariant... variants) {
+        HasThemeVariant.super.addThemeVariants(variants);
+    }
+
+    // Override is only required to keep binary compatibility with other 23.x
+    // minor versions, can be removed in a future major
+    @Override
+    public void removeThemeVariants(TextFieldVariant... variants) {
+        HasThemeVariant.super.removeThemeVariants(variants);
     }
 }

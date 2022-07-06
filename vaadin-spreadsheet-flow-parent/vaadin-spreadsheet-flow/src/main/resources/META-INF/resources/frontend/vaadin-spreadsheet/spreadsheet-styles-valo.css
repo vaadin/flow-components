@@ -988,6 +988,8 @@
         display: flex;
         flex-direction: column;
         gap: 4px;
+        max-height: 275px;
+        overflow-y: auto;
       }
 
       #spreadsheet-overlays .spreadsheet-filter-table-content {

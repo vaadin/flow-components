@@ -24,6 +24,7 @@ import org.mockito.Mockito;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -107,6 +108,24 @@ public class MultiSelectComboBoxTest extends ComboBoxBaseTest {
         MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
         comboBox.setItems(Arrays.asList("foo", "bar", "baz"));
         comboBox.setValue("foo", "foo", "foo");
+
+        Assert.assertEquals(Set.of("foo"), comboBox.getValue());
+    }
+
+    @Test
+    public void setValueAsCollection() {
+        MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
+        comboBox.setItems(Arrays.asList("foo", "bar", "baz"));
+        comboBox.setValue(List.of("foo", "bar"));
+
+        Assert.assertEquals(Set.of("foo", "bar"), comboBox.getValue());
+    }
+
+    @Test
+    public void setValueAsCollection_removesDuplicates() {
+        MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
+        comboBox.setItems(Arrays.asList("foo", "bar", "baz"));
+        comboBox.setValue(List.of("foo", "foo", "foo"));
 
         Assert.assertEquals(Set.of("foo"), comboBox.getValue());
     }

@@ -17,7 +17,7 @@ package com.vaadin.flow.component.textfield.tests;
 
 import com.vaadin.flow.component.textfield.BigDecimalField;
 import com.vaadin.flow.component.textfield.TextFieldVariant;
-import com.vaadin.tests.ThemeVariantTestHelper;
+import com.vaadin.flow.dom.ThemeList;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -93,15 +93,21 @@ public class BigDecimalFieldTest extends TextFieldTest {
 
     @Test
     public void addThemeVariant_themeAttributeContainsThemeVariant() {
-        ThemeVariantTestHelper.addThemeVariant_themeNamesContainsThemeVariant(
-                new BigDecimalField(), TextFieldVariant.LUMO_SMALL);
+        field.addThemeVariants(TextFieldVariant.LUMO_SMALL);
+
+        ThemeList themeNames = field.getThemeNames();
+        Assert.assertTrue(themeNames
+                .contains(TextFieldVariant.LUMO_SMALL.getVariantName()));
     }
 
     @Test
     public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
-        ThemeVariantTestHelper
-                .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
-                        new BigDecimalField(), TextFieldVariant.LUMO_SMALL);
+        field.addThemeVariants(TextFieldVariant.LUMO_SMALL);
+        field.removeThemeVariants(TextFieldVariant.LUMO_SMALL);
+
+        ThemeList themeNames = field.getThemeNames();
+        Assert.assertFalse(themeNames
+                .contains(TextFieldVariant.LUMO_SMALL.getVariantName()));
     }
 
     private void assertValueFormatting(BigDecimal bigDecimal,

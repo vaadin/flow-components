@@ -31,7 +31,6 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.StateNode;
 import com.vaadin.flow.internal.nodefeature.ElementAttributeMap;
-import com.vaadin.tests.ThemeVariantTestHelper;
 
 public class ButtonTest {
 
@@ -219,15 +218,23 @@ public class ButtonTest {
 
     @Test
     public void addThemeVariant_themeNamesContainsThemeVariant() {
-        ThemeVariantTestHelper.addThemeVariant_themeNamesContainsThemeVariant(
-                new Button(), ButtonVariant.LUMO_SMALL);
+        button = new Button();
+        button.addThemeVariants(ButtonVariant.LUMO_SMALL);
+
+        Set<String> themeNames = button.getThemeNames();
+        Assert.assertTrue(
+                themeNames.contains(ButtonVariant.LUMO_SMALL.getVariantName()));
     }
 
     @Test
     public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
-        ThemeVariantTestHelper
-                .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
-                        new Button(), ButtonVariant.LUMO_SMALL);
+        button = new Button();
+        button.addThemeVariants(ButtonVariant.LUMO_SMALL);
+        button.removeThemeVariants(ButtonVariant.LUMO_SMALL);
+
+        Set<String> themeNames = button.getThemeNames();
+        Assert.assertFalse(
+                themeNames.contains(ButtonVariant.LUMO_SMALL.getVariantName()));
     }
 
     @Test
