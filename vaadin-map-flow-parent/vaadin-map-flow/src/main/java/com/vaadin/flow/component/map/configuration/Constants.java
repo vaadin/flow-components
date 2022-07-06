@@ -39,8 +39,19 @@ public class Constants {
     public static final String OL_STYLE_FILL = "ol/style/Fill";
     public static final String OL_STYLE_STROKE = "ol/style/Stroke";
     public static final String OL_STYLE_STYLE = "ol/style/Style";
-
+    // Interaction
+	public static final String OL_DRAGROTATE = "ol/interaction/DragRotate";
+	public static final String OL_DOUBLECLICKZOOM = "ol/interaction/DoubleClickZoom";
+	public static final String OL_DRAGPAN = "ol/interaction/DragPan";
+	public static final String OL_PINCHROTATE = "ol/interaction/PinchRotate";
+	public static final String OL_PINCHZOOM = "ol/interaction/PinchZoom";
+	public static final String OL_KEYBOARDPAN = "ol/interaction/KeyboardPan";
+	public static final String OL_KEYBOARDZOOM = "ol/interaction/KeyboardZoom";
+	public static final String OL_MOUSEWHEELZOOM = "ol/interaction/MouseWheelZoom";
+	public static final String OL_DRAGZOOM = "ol/interaction/DragZoom";
+	
     public static final String OL_MAP = "ol/Map";
     public static final String OL_VIEW = "ol/View";
     public static final String OL_FEATURE = "ol/Feature";
+    
 }

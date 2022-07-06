@@ -24,6 +24,17 @@ import {
   synchronizeStroke,
   synchronizeStyle,
 } from "./styles.js";
+import {
+  synchronizeDragRotate,
+  synchronizeDoubleClickZoom,
+  synchronizeDragPan,
+  synchronizePinchRotate,
+  synchronizePinchZoom,
+  synchronizeKeyboardPan,
+  synchronizeKeyboardZoom,
+  synchronizeMouseWheelZoom,
+  synchronizeDragZoom,
+} from "./interactions.js";
 import { convertToCoordinateArray, synchronizeCollection } from "./util.js";
 
 function synchronizeMap(target, source, context) {
@@ -32,6 +43,7 @@ function synchronizeMap(target, source, context) {
   }
 
   synchronizeCollection(target.getLayers(), source.layers, context);
+  synchronizeCollection(target.getInteractions(), source.interactions, context);
   target.setView(context.lookup.get(source.view));
 
   return target;
@@ -95,6 +107,16 @@ const synchronizerLookup = {
   "ol/style/Fill": synchronizeFill,
   "ol/style/Stroke": synchronizeStroke,
   "ol/style/Style": synchronizeStyle,
+  // Interactions
+  "ol/interaction/DragRotate": synchronizeDragRotate,
+  "ol/interaction/DoubleClickZoom": synchronizeDoubleClickZoom,
+  "ol/interaction/DragPan": synchronizeDragPan,
+  "ol/interaction/PinchRotate": synchronizePinchRotate,
+  "ol/interaction/PinchZoom": synchronizePinchZoom,
+  "ol/interaction/KeyboardPan": synchronizeKeyboardPan,
+  "ol/interaction/KeyboardZoom": synchronizeKeyboardZoom,
+  "ol/interaction/MouseWheelZoom": synchronizeMouseWheelZoom,
+  "ol/interaction/DragZoom": synchronizeDragZoom,
 };
 
 /**

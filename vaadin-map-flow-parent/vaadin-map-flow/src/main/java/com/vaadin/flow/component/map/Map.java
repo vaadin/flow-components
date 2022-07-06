@@ -1,5 +1,8 @@
 package com.vaadin.flow.component.map;
 
+import java.util.List;
+import java.util.Objects;
+
 /*
  * #%L
  * Vaadin Map
@@ -23,6 +26,16 @@ import com.vaadin.flow.component.map.configuration.Configuration;
 import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.View;
 import com.vaadin.flow.component.map.configuration.feature.MarkerFeature;
+import com.vaadin.flow.component.map.configuration.interaction.DoubleClickZoom;
+import com.vaadin.flow.component.map.configuration.interaction.DragPan;
+import com.vaadin.flow.component.map.configuration.interaction.DragRotate;
+import com.vaadin.flow.component.map.configuration.interaction.DragZoom;
+import com.vaadin.flow.component.map.configuration.interaction.Interaction;
+import com.vaadin.flow.component.map.configuration.interaction.KeyboardPan;
+import com.vaadin.flow.component.map.configuration.interaction.KeyboardZoom;
+import com.vaadin.flow.component.map.configuration.interaction.MouseWheelZoom;
+import com.vaadin.flow.component.map.configuration.interaction.PinchRotate;
+import com.vaadin.flow.component.map.configuration.interaction.PinchZoom;
 import com.vaadin.flow.component.map.configuration.layer.FeatureLayer;
 import com.vaadin.flow.component.map.configuration.layer.ImageLayer;
 import com.vaadin.flow.component.map.configuration.layer.Layer;
@@ -84,6 +97,16 @@ public class Map extends MapBase {
         // layers by default. Developers can customize the z-index if they want
         // a different rendering order.
         featureLayer.setzIndex(100);
+        // Default interactions. Order is important
+        addInteraction(new DragRotate(true));
+        addInteraction(new DoubleClickZoom(true));
+        addInteraction(new DragPan(true));
+        addInteraction(new PinchRotate(true));
+        addInteraction(new PinchZoom(true));
+        addInteraction(new KeyboardPan(true));
+        addInteraction(new KeyboardZoom(true));
+        addInteraction(new MouseWheelZoom(true));
+        addInteraction(new DragZoom(true));
     }
 
     public Configuration getRawConfiguration() {
@@ -134,6 +157,18 @@ public class Map extends MapBase {
      */
     public FeatureLayer getFeatureLayer() {
         return featureLayer;
+    }
+    
+    public void addInteraction(Interaction interaction) {
+    	getConfiguration().addInteraction(interaction);
+    }
+    
+    public void removeInteraction(Interaction interaction) {
+    	getConfiguration().removeInteraction(interaction);
+    }
+    
+    public List<Interaction> getInteractions() {
+    	return getConfiguration().getInteractions();
     }
 
     /**

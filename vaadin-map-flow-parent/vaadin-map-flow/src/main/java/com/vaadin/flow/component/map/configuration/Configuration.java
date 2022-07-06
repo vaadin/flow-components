@@ -19,6 +19,7 @@ package com.vaadin.flow.component.map.configuration;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.vaadin.flow.component.map.configuration.interaction.Interaction;
 import com.vaadin.flow.component.map.configuration.layer.Layer;
 
 import java.beans.PropertyChangeListener;
@@ -34,6 +35,7 @@ import java.util.function.Consumer;
 public class Configuration extends AbstractConfigurationObject {
     private final List<Layer> layers = new ArrayList<>();
     private View view;
+	private List<Interaction> interactions = new ArrayList<>();
 
     public Configuration() {
         setView(new View());
@@ -161,5 +163,25 @@ public class Configuration extends AbstractConfigurationObject {
     public void collectChanges(
             Consumer<AbstractConfigurationObject> changeCollector) {
         super.collectChanges(changeCollector);
+    }
+
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    @JsonIdentityReference(alwaysAsId = true)
+    public List<Interaction> getInteractions() {
+        return Collections.unmodifiableList(interactions);
+    }
+    
+	public void addInteraction(Interaction interaction) {
+		Objects.requireNonNull(interaction);
+
+		interactions.add(interaction);
+        addChild(interaction);
+	}
+	
+    public void removeInteraction(Interaction interaction) {
+        Objects.requireNonNull(interaction);
+
+        interactions.remove(interaction);
+        removeChild(interaction);
     }
 }
