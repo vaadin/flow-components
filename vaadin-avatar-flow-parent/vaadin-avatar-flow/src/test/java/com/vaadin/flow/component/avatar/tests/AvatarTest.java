@@ -18,10 +18,11 @@ package com.vaadin.flow.component.avatar.tests;
 
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.avatar.AvatarVariant;
-import com.vaadin.tests.ThemeVariantTestHelper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Set;
 
 public class AvatarTest {
 
@@ -74,15 +75,21 @@ public class AvatarTest {
 
     @Test
     public void addThemeVariant_themeAttributeContainsThemeVariant() {
-        ThemeVariantTestHelper.addThemeVariant_themeNamesContainsThemeVariant(
-                new Avatar(), AvatarVariant.LUMO_LARGE);
+        avatar.addThemeVariants(AvatarVariant.LUMO_LARGE);
+
+        Set<String> themeNames = avatar.getThemeNames();
+        Assert.assertTrue(
+                themeNames.contains(AvatarVariant.LUMO_LARGE.getVariantName()));
     }
 
     @Test
-    public void addThemeVariant_removeTheme_doesNotContainThemeVariant() {
-        ThemeVariantTestHelper
-                .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
-                        new Avatar(), AvatarVariant.LUMO_LARGE);
+    public void addThemeVariant_removeThemeVariant_doesNotContainThemeVariant() {
+        avatar.addThemeVariants(AvatarVariant.LUMO_LARGE);
+        avatar.removeThemeVariants(AvatarVariant.LUMO_LARGE);
+
+        Set<String> themeNames = avatar.getThemeNames();
+        Assert.assertFalse(
+                themeNames.contains(AvatarVariant.LUMO_LARGE.getVariantName()));
     }
 
     @Test

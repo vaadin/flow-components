@@ -253,6 +253,20 @@ public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
         getElement().removeAllChildren();
     }
 
+    // Override is only required to keep binary compatibility with other 23.x
+    // minor versions, can be removed in a future major
+    @Override
+    public void addThemeVariants(ButtonVariant... variants) {
+        HasThemeVariant.super.addThemeVariants(variants);
+    }
+
+    // Override is only required to keep binary compatibility with other 23.x
+    // minor versions, can be removed in a future major
+    @Override
+    public void removeThemeVariants(ButtonVariant... variants) {
+        HasThemeVariant.super.removeThemeVariants(variants);
+    }
+
     /**
      * Sets the given string as the content of this component.
      *
