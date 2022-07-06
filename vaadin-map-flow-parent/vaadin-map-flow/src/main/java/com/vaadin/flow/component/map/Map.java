@@ -158,17 +158,17 @@ public class Map extends MapBase {
     public FeatureLayer getFeatureLayer() {
         return featureLayer;
     }
-    
+
     public void addInteraction(Interaction interaction) {
-    	getConfiguration().addInteraction(interaction);
+        getConfiguration().addInteraction(interaction);
     }
-    
+
     public void removeInteraction(Interaction interaction) {
-    	getConfiguration().removeInteraction(interaction);
+        getConfiguration().removeInteraction(interaction);
     }
-    
+
     public List<Interaction> getInteractions() {
-    	return getConfiguration().getInteractions();
+        return getConfiguration().getInteractions();
     }
 
     /**

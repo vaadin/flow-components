@@ -35,7 +35,7 @@ import java.util.function.Consumer;
 public class Configuration extends AbstractConfigurationObject {
     private final List<Layer> layers = new ArrayList<>();
     private View view;
-	private List<Interaction> interactions = new ArrayList<>();
+    private List<Interaction> interactions = new ArrayList<>();
 
     public Configuration() {
         setView(new View());
@@ -170,14 +170,14 @@ public class Configuration extends AbstractConfigurationObject {
     public List<Interaction> getInteractions() {
         return Collections.unmodifiableList(interactions);
     }
-    
-	public void addInteraction(Interaction interaction) {
-		Objects.requireNonNull(interaction);
 
-		interactions.add(interaction);
+    public void addInteraction(Interaction interaction) {
+        Objects.requireNonNull(interaction);
+
+        interactions.add(interaction);
         addChild(interaction);
-	}
-	
+    }
+
     public void removeInteraction(Interaction interaction) {
         Objects.requireNonNull(interaction);
 
