@@ -36,7 +36,7 @@ public class ValidationUtil {
      *            the current value set on the component
      * @param emptyValue
      *            the empty value for the component
-     * @return <code>Validation.ok()</code> if the validation pass,
+     * @return <code>Validation.ok()</code> if the validation passes,
      *         <code>Validation.error()</code> otherwise
      * @param <V>
      *            the type of the component value
@@ -59,7 +59,7 @@ public class ValidationUtil {
      *            the current value set on the component
      * @param maxValue
      *            the max value set on the component
-     * @return <code>Validation.ok()</code> if the validation pass,
+     * @return <code>Validation.ok()</code> if the validation passes,
      *         <code>Validation.error()</code> otherwise
      * @param <V>
      *            the type of the component value
@@ -82,7 +82,7 @@ public class ValidationUtil {
      *            the current value set on the component
      * @param minValue
      *            the min value set on the component
-     * @return <code>Validation.ok()</code> if the validation pass,
+     * @return <code>Validation.ok()</code> if the validation passes,
      *         <code>Validation.error()</code> otherwise
      * @param <V>
      *            the type of the component value
