@@ -35,7 +35,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.shared.ValidationUtils;
+import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
@@ -383,7 +383,7 @@ public class BigDecimalField
      */
     @Override
     protected void validate() {
-        var requiredValidation = ValidationUtils.checkRequired(required,
+        var requiredValidation = ValidationUtil.checkRequired(required,
                 getValue(), getEmptyValue());
         setInvalid(requiredValidation.isError());
     }

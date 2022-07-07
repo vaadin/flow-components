@@ -22,9 +22,9 @@ import java.util.Objects;
 /**
  * Util methods for component validation
  */
-public class ValidationUtils {
+public class ValidationUtil {
 
-    private ValidationUtils() {
+    private ValidationUtil() {
     }
 
     /**
@@ -38,11 +38,11 @@ public class ValidationUtils {
      *            the empty value for the component
      * @return <code>Validation.ok()</code> if the validation pass,
      *         <code>Validation.error()</code> otherwise
-     * @param <T>
+     * @param <V>
      *            the type of the component value
      */
-    public static <T> ValidationResult checkRequired(boolean required, T value,
-            T emptyValue) {
+    public static <V> ValidationResult checkRequired(boolean required, V value,
+            V emptyValue) {
         final boolean isRequiredButEmpty = required
                 && Objects.equals(emptyValue, value);
         if (isRequiredButEmpty) {
@@ -61,11 +61,11 @@ public class ValidationUtils {
      *            the max value set on the component
      * @return <code>Validation.ok()</code> if the validation pass,
      *         <code>Validation.error()</code> otherwise
-     * @param <T>
+     * @param <V>
      *            the type of the component value
      */
-    public static <T extends Comparable<T>> ValidationResult checkGreaterThanMax(
-            T value, T maxValue) {
+    public static <V extends Comparable<V>> ValidationResult checkGreaterThanMax(
+            V value, V maxValue) {
         final boolean isGreaterThanMax = value != null && maxValue != null
                 && value.compareTo(maxValue) > 0;
         if (isGreaterThanMax) {
@@ -84,11 +84,11 @@ public class ValidationUtils {
      *            the min value set on the component
      * @return <code>Validation.ok()</code> if the validation pass,
      *         <code>Validation.error()</code> otherwise
-     * @param <T>
+     * @param <V>
      *            the type of the component value
      */
-    public static <T extends Comparable<T>> ValidationResult checkSmallerThanMin(
-            T value, T minValue) {
+    public static <V extends Comparable<V>> ValidationResult checkSmallerThanMin(
+            V value, V minValue) {
         final boolean isSmallerThanMin = value != null && minValue != null
                 && value.compareTo(minValue) < 0;
         if (isSmallerThanMin) {

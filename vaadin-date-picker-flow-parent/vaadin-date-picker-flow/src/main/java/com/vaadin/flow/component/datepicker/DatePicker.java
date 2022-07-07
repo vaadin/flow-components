@@ -37,7 +37,7 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.shared.ValidationUtils;
+import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.Validator;
@@ -71,9 +71,6 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         implements HasSize, HasValidation, HasHelper, HasTheme, HasLabel,
         HasClearButton, HasAllowedCharPattern, HasValidator<LocalDate> {
 
-    public static final String VALIDATION_REQUIRED_ERROR = "VALIDATION_REQUIRED_ERROR";
-    public static final String VALIDATION_GREATER_THAN_MAX_ERROR = "VALIDATION_GREATER_THAN_MAX_ERROR";
-    public static final String VALIDATION_SMALLER_THAN_MIN_ERROR = "VALIDATION_SMALLER_MIN_THAN_ERROR";
     private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
     private DatePickerI18n i18n;
@@ -485,12 +482,12 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     }
 
     private ValidationResult checkValidity(LocalDate value) {
-        var greaterThanMax = ValidationUtils.checkGreaterThanMax(value, max);
+        var greaterThanMax = ValidationUtil.checkGreaterThanMax(value, max);
         if (greaterThanMax.isError()) {
             return greaterThanMax;
         }
 
-        var smallerThanMin = ValidationUtils.checkSmallerThanMin(value, min);
+        var smallerThanMin = ValidationUtil.checkSmallerThanMin(value, min);
         if (smallerThanMin.isError()) {
             return smallerThanMin;
         }
@@ -504,7 +501,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      * constraints using browser development tools.
      */
     private boolean isInvalid(LocalDate value) {
-        var requiredValidation = ValidationUtils.checkRequired(required, value,
+        var requiredValidation = ValidationUtil.checkRequired(required, value,
                 getEmptyValue());
 
         return requiredValidation.isError() || checkValidity(value).isError();

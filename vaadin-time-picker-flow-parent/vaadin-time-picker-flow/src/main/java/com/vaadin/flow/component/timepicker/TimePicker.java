@@ -36,7 +36,7 @@ import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.component.shared.ValidationUtils;
+import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.Validator;
@@ -273,13 +273,13 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     }
 
     private ValidationResult checkValidity(LocalTime value) {
-        var greaterThanMaxValidation = ValidationUtils
-                .checkGreaterThanMax(value, max);
+        var greaterThanMaxValidation = ValidationUtil.checkGreaterThanMax(value,
+                max);
         if (greaterThanMaxValidation.isError()) {
             return greaterThanMaxValidation;
         }
 
-        var smallThanMinValidation = ValidationUtils.checkSmallerThanMin(value,
+        var smallThanMinValidation = ValidationUtil.checkSmallerThanMin(value,
                 min);
         if (smallThanMinValidation.isError()) {
             return smallThanMinValidation;
@@ -294,7 +294,7 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
      * constraints using browser development tools.
      */
     private boolean isInvalid(LocalTime value) {
-        var requiredValidation = ValidationUtils.checkRequired(required, value,
+        var requiredValidation = ValidationUtil.checkRequired(required, value,
                 getEmptyValue());
 
         return requiredValidation.isError() || checkValidity(value).isError();

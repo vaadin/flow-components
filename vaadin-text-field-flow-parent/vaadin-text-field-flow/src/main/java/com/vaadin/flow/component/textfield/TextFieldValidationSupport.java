@@ -1,11 +1,10 @@
 package com.vaadin.flow.component.textfield;
 
 import com.vaadin.flow.component.HasValue;
-import com.vaadin.flow.component.shared.ValidationUtils;
+import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.ValidationResult;
 
 import java.io.Serializable;
-import java.util.function.BooleanSupplier;
 import java.util.regex.Pattern;
 
 /**
@@ -64,7 +63,7 @@ final class TextFieldValidationSupport implements Serializable {
      * @return <code>true</code> if the value is invalid.
      */
     boolean isInvalid(String value) {
-        var requiredValidation = ValidationUtils.checkRequired(required, value,
+        var requiredValidation = ValidationUtil.checkRequired(required, value,
                 field.getEmptyValue());
 
         return requiredValidation.isError() || checkValidity(value).isError();
@@ -84,10 +83,9 @@ final class TextFieldValidationSupport implements Serializable {
             return ValidationResult.error("");
         }
 
-        // Only evaluate if necessary.
-        final BooleanSupplier doesValueViolatePattern = () -> value != null
-                && pattern != null && !pattern.matcher(value).matches();
-        if (doesValueViolatePattern.getAsBoolean()) {
+        final boolean valueViolatePattern = value != null && pattern != null
+                && !pattern.matcher(value).matches();
+        if (valueViolatePattern) {
             return ValidationResult.error("");
         }
 

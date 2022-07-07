@@ -29,7 +29,7 @@ import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.shared.ValidationUtils;
+import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.component.timepicker.StepsUtil;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
@@ -628,12 +628,12 @@ public class DateTimePicker extends
     }
 
     private ValidationResult checkValidity(LocalDateTime value) {
-        var greaterThanMax = ValidationUtils.checkGreaterThanMax(value, max);
+        var greaterThanMax = ValidationUtil.checkGreaterThanMax(value, max);
         if (greaterThanMax.isError()) {
             return greaterThanMax;
         }
 
-        var smallerThanMin = ValidationUtils.checkSmallerThanMin(value, min);
+        var smallerThanMin = ValidationUtil.checkSmallerThanMin(value, min);
         if (smallerThanMin.isError()) {
             return smallerThanMin;
         }
@@ -647,7 +647,7 @@ public class DateTimePicker extends
      * @return the current validity of the value.
      */
     private boolean isInvalid(LocalDateTime value) {
-        var requiredValidation = ValidationUtils.checkRequired(required, value,
+        var requiredValidation = ValidationUtil.checkRequired(required, value,
                 getEmptyValue());
 
         return requiredValidation.isError() || checkValidity(value).isError();

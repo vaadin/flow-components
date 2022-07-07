@@ -29,7 +29,7 @@ import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasClearButton;
 import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.flow.component.shared.ValidationUtils;
+import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.Validator;
@@ -402,7 +402,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     protected void validate() {
         T value = getValue();
 
-        final var requiredValidation = ValidationUtils.checkRequired(required,
+        final var requiredValidation = ValidationUtil.checkRequired(required,
                 value, getEmptyValue());
 
         setInvalid(
