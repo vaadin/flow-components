@@ -109,6 +109,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
         let parentRequestDebouncer;
         let ensureSubCacheQueue = [];
         let ensureSubCacheDebouncer;
+        let pendingExpandOrCollapseRequests = {};
 
         const rootRequestDelay = 150;
         let rootRequestDebouncer;
@@ -513,6 +514,8 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           }
           let parentKey = grid.getItemId(item);
           grid.$server.updateExpandedState(parentKey, expanded);
+          // Mark item as being expanded or collapsed on the server-side
+          pendingExpandOrCollapseRequests[parentKey] = true;
 
           if (!expanded) {
             delete cache[parentKey];
@@ -532,11 +535,21 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
         // Patch grid.expandItem and grid.collapseItem to have
         // itemExpandedChanged run when either happens.
         grid.expandItem = tryCatchWrapper(function (item) {
+          // Ignore if we are already expanding or collapsing the item
+          const itemId = grid.getItemId(item);
+          if (pendingExpandOrCollapseRequests[itemId]) {
+            return;
+          }
           itemExpandedChanged(item, true);
           Grid.prototype.expandItem.call(grid, item);
         });
 
         grid.collapseItem = tryCatchWrapper(function (item) {
+          // Ignore if we are already expanding or collapsing the item
+          const itemId = grid.getItemId(item);
+          if (pendingExpandOrCollapseRequests[itemId]) {
+            return;
+          }
           itemExpandedChanged(item, false);
           Grid.prototype.collapseItem.call(grid, item);
         });
@@ -845,6 +858,11 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           let newExpandedItems = Array.from(grid.expandedItems);
           items.filter((item) => !grid._isExpanded(item)).forEach((item) => newExpandedItems.push(item));
           grid.expandedItems = newExpandedItems;
+          // Mark expand requests as resolved
+          items.forEach(item => {
+            const itemId = grid.getItemId(item);
+            delete pendingExpandOrCollapseRequests[itemId];
+          });
         });
 
         grid.$connector.collapseItems = tryCatchWrapper(function (items) {
@@ -857,6 +875,11 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           });
           grid.expandedItems = newExpandedItems;
           items.forEach((item) => grid.$connector.removeFromQueue(item));
+          // Mark collapse requests as resolved
+          items.forEach(item => {
+            const itemId = grid.getItemId(item);
+            delete pendingExpandOrCollapseRequests[itemId];
+          });
         });
 
         grid.$connector.removeFromQueue = tryCatchWrapper(function (item) {
