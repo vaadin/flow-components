@@ -10,7 +10,6 @@ import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.orderedlayout.testbench.VerticalLayoutElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.testbench.ElementQuery;
-import com.vaadin.testbench.parallel.BrowserUtil;
 
 public class TemplateSupportIT extends AbstractParallelTest {
 

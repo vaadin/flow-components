@@ -10,7 +10,6 @@ import com.vaadin.flow.component.crud.testbench.CrudElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.testbench.TestBenchElement;
-import com.vaadin.testbench.parallel.BrowserUtil;
 
 public class CustomGridIT extends AbstractParallelTest {
 

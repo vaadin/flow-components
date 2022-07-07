@@ -1,7 +1,6 @@
 package com.vaadin.flow.component.crud.tests;
 
 import org.junit.Assert;
-import org.junit.AssumptionViolatedException;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.NoSuchElementException;
@@ -11,7 +10,6 @@ import com.vaadin.flow.component.confirmdialog.testbench.ConfirmDialogElement;
 import com.vaadin.flow.component.crud.testbench.CrudElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
-import com.vaadin.testbench.parallel.BrowserUtil;
 
 public class ProtectedBackendIT extends AbstractParallelTest {
 
