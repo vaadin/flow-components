@@ -1,5 +1,12 @@
 package com.vaadin.flow.component.map;
 
+import java.beans.PropertyChangeEvent;
+import java.util.LinkedHashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 /*
  * #%L
  * Vaadin Map
@@ -30,20 +37,15 @@ import com.vaadin.flow.component.map.configuration.Extent;
 import com.vaadin.flow.component.map.configuration.Feature;
 import com.vaadin.flow.component.map.configuration.View;
 import com.vaadin.flow.component.map.configuration.layer.VectorLayer;
-import com.vaadin.flow.component.map.events.MapFeatureClickEvent;
 import com.vaadin.flow.component.map.events.MapClickEvent;
+import com.vaadin.flow.component.map.events.MapFeatureClickEvent;
+import com.vaadin.flow.component.map.events.MapFeatureDropEvent;
 import com.vaadin.flow.component.map.events.MapViewMoveEndEvent;
 import com.vaadin.flow.component.map.serialization.MapSerializer;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
-import elemental.json.JsonValue;
 
-import java.beans.PropertyChangeEvent;
-import java.util.LinkedHashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import elemental.json.JsonValue;
 
 /**
  * Base class for the map component. Contains all base functionality for the map
@@ -217,6 +219,11 @@ public abstract class MapBase extends Component implements HasSize, HasTheme {
     public Registration addFeatureClickListener(
             ComponentEventListener<MapFeatureClickEvent> listener) {
         return addListener(MapFeatureClickEvent.class, listener);
+    }
+
+    public Registration addFeatureDropListener(
+            ComponentEventListener<MapFeatureDropEvent> listener) {
+        return addListener(MapFeatureDropEvent.class, listener);
     }
 
     /**

@@ -8,6 +8,7 @@ import KeyboardPan from "ol/interaction/KeyboardPan";
 import KeyboardZoom from "ol/interaction/KeyboardZoom";
 import MouseWheelZoom from "ol/interaction/MouseWheelZoom";
 import DragZoom from "ol/interaction/DragZoom";
+import Translate from "ol/interaction/Translate";
 
 function synchronizeInteraction(target, source, _context) {
   if (!target) {
@@ -105,5 +106,46 @@ export function synchronizeDragZoom(target, source, context) {
 
   synchronizeInteraction(target, source);
 
+  return target;
+}
+
+export function synchronizeTranslate(target, source, context) {
+	
+	console.log('--> synchronizeTranslate');
+
+	if (!target) {
+
+		var feature = context.lookup.get(source.feature);
+		var map = context.lookup.get("ol/Map");
+
+		target = new Translate({
+			features: new Collection([feature]),
+			// style: null,
+			// pixelTolerance: 20
+			// TODO read values from "Options"
+		});
+
+		// Translateend event 
+		target.on('translateend', function(e) {
+			console.log('--> Translateend');
+			console.log("feature id is", feature.id);
+			console.log("event id is", e.features.item(0).id);
+			
+			const TranslateendEvent = new CustomEvent('map-marker-drop', {
+				detail: {
+					featureId: feature.id,
+					coordinate: feature.getGeometry().getCoordinates()
+				}
+			});
+
+			map.dispatchEvent(TranslateendEvent);
+			console.log('<-- Translateend');
+		}, feature);
+  }
+  
+  synchronizeInteraction(target, source);
+  
+  console.log('<-- synchronizeTranslate');
+  
   return target;
 }

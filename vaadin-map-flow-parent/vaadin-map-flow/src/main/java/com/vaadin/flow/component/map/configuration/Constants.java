@@ -49,6 +49,7 @@ public class Constants {
     public static final String OL_KEYBOARDZOOM = "ol/interaction/KeyboardZoom";
     public static final String OL_MOUSEWHEELZOOM = "ol/interaction/MouseWheelZoom";
     public static final String OL_DRAGZOOM = "ol/interaction/DragZoom";
+    public static final String OL_TRANSLATE = "ol/interaction/Translate";
 
     public static final String OL_MAP = "ol/Map";
     public static final String OL_VIEW = "ol/View";

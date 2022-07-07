@@ -34,6 +34,7 @@ import {
   synchronizeKeyboardZoom,
   synchronizeMouseWheelZoom,
   synchronizeDragZoom,
+  synchronizeTranslate,
 } from "./interactions.js";
 import { convertToCoordinateArray, synchronizeCollection } from "./util.js";
 
@@ -117,6 +118,7 @@ const synchronizerLookup = {
   "ol/interaction/KeyboardZoom": synchronizeKeyboardZoom,
   "ol/interaction/MouseWheelZoom": synchronizeMouseWheelZoom,
   "ol/interaction/DragZoom": synchronizeDragZoom,
+  "ol/interaction/Translate": synchronizeTranslate,
 };
 
 /**

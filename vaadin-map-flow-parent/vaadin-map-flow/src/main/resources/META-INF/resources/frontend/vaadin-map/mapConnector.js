@@ -20,6 +20,9 @@ import { createLookup, getLayerForFeature } from './util';
       synchronize(changedObjects) {
         // Provide synchronization function and the OL instance lookup through context object
         const context = { synchronize, lookup: this.lookup };
+        
+        // Provide an easy access to the Map to dispatch events for example 
+		context.lookup.put("ol/Map", mapElement);
 
         changedObjects.forEach((change) => {
           // The OL map instance already exists and should not be created by the
