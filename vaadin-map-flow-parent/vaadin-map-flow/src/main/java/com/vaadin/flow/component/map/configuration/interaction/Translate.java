@@ -5,7 +5,6 @@ import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import com.vaadin.flow.component.map.Map;
 import com.vaadin.flow.component.map.configuration.Constants;
 import com.vaadin.flow.component.map.configuration.Feature;
 
@@ -13,7 +12,7 @@ public class Translate extends Interaction {
 
     private Feature feature;
 
-    public Translate(Map map, Feature feature) {
+    public Translate(Feature feature) {
         super(true);
         Objects.requireNonNull(feature);
         setFeature(feature);
