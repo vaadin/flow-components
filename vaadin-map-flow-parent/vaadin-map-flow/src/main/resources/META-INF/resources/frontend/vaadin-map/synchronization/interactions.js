@@ -111,25 +111,18 @@ export function synchronizeDragZoom(target, source, context) {
 
 export function synchronizeTranslate(target, source, context) {
 	
-	console.log('--> synchronizeTranslate');
-
 	if (!target) {
 
 		var feature = context.lookup.get(source.feature);
+		// get the map from the context. The map is needed to send the event
 		var map = context.lookup.get("ol/Map");
 
 		target = new Translate({
-			features: new Collection([feature]),
-			// style: null,
-			// pixelTolerance: 20
-			// TODO read values from "Options"
+			features: new Collection([feature])
 		});
 
 		// Translateend event 
 		target.on('translateend', function(e) {
-			console.log('--> Translateend');
-			console.log("feature id is", feature.id);
-			console.log("event id is", e.features.item(0).id);
 			
 			const TranslateendEvent = new CustomEvent('map-marker-drop', {
 				detail: {
@@ -139,13 +132,10 @@ export function synchronizeTranslate(target, source, context) {
 			});
 
 			map.dispatchEvent(TranslateendEvent);
-			console.log('<-- Translateend');
 		}, feature);
   }
   
   synchronizeInteraction(target, source);
-  
-  console.log('<-- synchronizeTranslate');
   
   return target;
 }
