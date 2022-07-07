@@ -19,6 +19,8 @@ public class DatePickerBinderValidationTest {
     private static final String BINDER_FAIL_MESSAGE = "BINDER_VALIDATION_FAILED";
     private static final String REQUIRED_MESSAGE = "REQUIRED";
 
+    private DatePicker field;
+
     @Captor
     private ArgumentCaptor<BindingValidationStatus<?>> statusCaptor;
 
@@ -40,15 +42,12 @@ public class DatePickerBinderValidationTest {
     @Before
     public void init() {
         MockitoAnnotations.openMocks(this);
+        field = new DatePicker();
     }
 
     @Test
     public void elementWithConstraints_componentValidationNotMet_elementValidationFails() {
-        var field = getFieldWithValidation(status -> {
-            // Assert.assertTrue(status.isError());
-            // Assert.assertEquals(ValidationError.GREATER_THAN_MAX,
-            // status.getMessage().orElse(""));
-        });
+        attachBinderToField();
 
         field.setValue(LocalDate.now().plusDays(2));
 
@@ -59,11 +58,7 @@ public class DatePickerBinderValidationTest {
 
     @Test
     public void elementWithConstraints_binderValidationNotMet_binderValidationFails() {
-        var field = getFieldWithValidation(status -> {
-            Assert.assertTrue(status.isError());
-            Assert.assertEquals(BINDER_FAIL_MESSAGE,
-                    status.getMessage().orElse(""));
-        });
+        attachBinderToField();
 
         field.setValue(LocalDate.now().minusYears(1));
 
@@ -74,46 +69,30 @@ public class DatePickerBinderValidationTest {
     }
 
     @Test
-    public void elementRequiredFromBinder_emptyField_binderValidationFail() {
-        var field = getFieldWithValidation(status -> {
-            if (status.getField().isEmpty()) {
-                Assert.assertTrue(status.isError());
-                Assert.assertEquals(REQUIRED_MESSAGE,
-                        status.getMessage().orElse(""));
-            }
-        }, true);
-        field.setValue(LocalDate.now());
-        field.setValue(null);
+    public void setRequiredOnBinder_validate_binderValidationFails() {
+        var binder = attachBinderToField(true);
+        binder.validate();
 
-        Mockito.verify(statusHandlerMock, Mockito.times(2))
-                .statusChange(statusCaptor.capture());
+        Mockito.verify(statusHandlerMock).statusChange(statusCaptor.capture());
         Assert.assertTrue(statusCaptor.getValue().isError());
         Assert.assertEquals(REQUIRED_MESSAGE,
                 statusCaptor.getValue().getMessage().orElse(""));
     }
 
     @Test
-    public void elementRequiredFromComponent_emptyField_binderValidationOK() {
-        var field = getFieldWithValidation(status -> {
-            if (status.getField().isEmpty()) {
-                Assert.assertFalse(status.isError());
-            }
-        });
+    public void setRequiredOnComponent_validate_binderValidationPasses() {
+        var binder = attachBinderToField();
         field.setRequiredIndicatorVisible(true);
-        field.setValue(LocalDate.now());
-        field.setValue(null);
+        binder.validate();
 
-        Mockito.verify(statusHandlerMock, Mockito.times(2))
-                .statusChange(statusCaptor.capture());
+        Mockito.verify(statusHandlerMock).statusChange(statusCaptor.capture());
         Assert.assertFalse(statusCaptor.getValue().isError());
 
     }
 
     @Test
-    public void elementWithConstraints_validValue_validationOk() {
-        var field = getFieldWithValidation(status -> {
-            Assert.assertFalse(status.isError());
-        });
+    public void elementWithConstraints_validValue_validationPasses() {
+        attachBinderToField();
 
         field.setValue(LocalDate.now());
 
@@ -122,14 +101,11 @@ public class DatePickerBinderValidationTest {
 
     }
 
-    private DatePicker getFieldWithValidation(
-            BindingValidationStatusHandler handler) {
-        return getFieldWithValidation(handler, false);
+    private Binder<Bean> attachBinderToField() {
+        return attachBinderToField(false);
     }
 
-    private DatePicker getFieldWithValidation(
-            BindingValidationStatusHandler handler, boolean isRequired) {
-        var field = new DatePicker();
+    private Binder<Bean> attachBinderToField(boolean isRequired) {
         field.setMax(LocalDate.now().plusDays(1));
         var binder = new Binder<>(Bean.class);
         Binder.BindingBuilder<Bean, LocalDate> binding = binder.forField(field)
@@ -145,6 +121,6 @@ public class DatePickerBinderValidationTest {
 
         binding.bind("date");
 
-        return field;
+        return binder;
     }
 }

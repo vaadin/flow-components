@@ -36,11 +36,6 @@ public class PasswordFieldValidationTest
     }
 
     @Override
-    protected void setEmptyValue() {
-        getField().clear();
-    }
-
-    @Override
     protected SerializablePredicate<? super String> getValidator() {
         return value -> Objects.equals(value, "") || value.length() > 2;
     }

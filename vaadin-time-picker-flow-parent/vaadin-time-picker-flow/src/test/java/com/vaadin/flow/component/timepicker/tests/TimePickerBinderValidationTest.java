@@ -19,6 +19,8 @@ public class TimePickerBinderValidationTest {
     private static final String BINDER_FAIL_MESSAGE = "BINDER_VALIDATION_FAILED";
     private static final String REQUIRED_MESSAGE = "REQUIRED";
 
+    private TimePicker field;
+
     @Captor
     private ArgumentCaptor<BindingValidationStatus<?>> statusCaptor;
 
@@ -40,11 +42,12 @@ public class TimePickerBinderValidationTest {
     @Before
     public void init() {
         MockitoAnnotations.openMocks(this);
+        field = new TimePicker();
     }
 
     @Test
     public void elementWithConstraints_componentValidationNotMet_elementValidationFails() {
-        var field = getFieldWithValidation();
+        getFieldWithValidation();
 
         field.setValue(LocalTime.now().plusHours(2));
 
@@ -55,7 +58,7 @@ public class TimePickerBinderValidationTest {
 
     @Test
     public void elementWithConstraints_binderValidationNotMet_binderValidationFails() {
-        var field = getFieldWithValidation();
+        getFieldWithValidation();
         field.setValue(LocalTime.now().minusHours(2));
 
         Mockito.verify(statusHandlerMock).statusChange(statusCaptor.capture());
@@ -66,13 +69,11 @@ public class TimePickerBinderValidationTest {
     }
 
     @Test
-    public void elementRequiredFromBinder_emptyField_binderValidationFail() {
-        var field = getFieldWithValidation(true);
-        field.setValue(LocalTime.now());
-        field.setValue(null);
+    public void setRequiredOnBinder_validate_binderValidationFails() {
+        var binder = getFieldWithValidation(true);
+        binder.validate();
 
-        Mockito.verify(statusHandlerMock, Mockito.times(2))
-                .statusChange(statusCaptor.capture());
+        Mockito.verify(statusHandlerMock).statusChange(statusCaptor.capture());
 
         Assert.assertTrue(statusCaptor.getValue().isError());
         Assert.assertEquals(REQUIRED_MESSAGE,
@@ -80,20 +81,18 @@ public class TimePickerBinderValidationTest {
     }
 
     @Test
-    public void elementRequiredFromComponent_emptyField_binderValidationOK() {
-        var field = getFieldWithValidation();
+    public void setRequiredOnComponent_validate_binderValidationPasses() {
+        var binder = getFieldWithValidation();
         field.setRequiredIndicatorVisible(true);
-        field.setValue(LocalTime.now());
-        field.setValue(null);
+        binder.validate();
 
-        Mockito.verify(statusHandlerMock, Mockito.times(2))
-                .statusChange(statusCaptor.capture());
+        Mockito.verify(statusHandlerMock).statusChange(statusCaptor.capture());
         Assert.assertFalse(statusCaptor.getValue().isError());
     }
 
     @Test
-    public void elementWithConstraints_validValue_validationOk() {
-        var field = getFieldWithValidation();
+    public void elementWithConstraints_validValue_validationPasses() {
+        getFieldWithValidation();
 
         field.setValue(LocalTime.now());
 
@@ -101,12 +100,11 @@ public class TimePickerBinderValidationTest {
         Assert.assertFalse(statusCaptor.getValue().isError());
     }
 
-    private TimePicker getFieldWithValidation() {
+    private Binder<Bean> getFieldWithValidation() {
         return getFieldWithValidation(false);
     }
 
-    private TimePicker getFieldWithValidation(boolean isRequired) {
-        var field = new TimePicker();
+    private Binder<Bean> getFieldWithValidation(boolean isRequired) {
         field.setMax(LocalTime.now().plusHours(1));
         var binder = new Binder<>(Bean.class);
         Binder.BindingBuilder<Bean, LocalTime> binding = binder.forField(field)
@@ -122,6 +120,6 @@ public class TimePickerBinderValidationTest {
 
         binding.bind("time");
 
-        return field;
+        return binder;
     }
 }

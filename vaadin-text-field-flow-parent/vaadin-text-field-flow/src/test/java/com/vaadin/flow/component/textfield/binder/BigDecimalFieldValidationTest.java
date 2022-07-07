@@ -36,11 +36,6 @@ public class BigDecimalFieldValidationTest
     }
 
     @Override
-    protected void setEmptyValue() {
-        getField().setValue(getField().getEmptyValue());
-    }
-
-    @Override
     protected SerializablePredicate<? super BigDecimal> getValidator() {
         return value -> value == null || value.compareTo(BigDecimal.TEN) < 0;
     }

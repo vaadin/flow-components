@@ -35,11 +35,6 @@ public class NumberFieldValidationTest
     }
 
     @Override
-    protected void setEmptyValue() {
-        getField().setValue(getField().getEmptyValue());
-    }
-
-    @Override
     protected SerializablePredicate<? super Double> getValidator() {
         return value -> value == null || value > 2d;
     }

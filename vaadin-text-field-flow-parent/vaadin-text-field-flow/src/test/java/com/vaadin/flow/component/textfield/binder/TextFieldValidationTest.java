@@ -36,11 +36,6 @@ public class TextFieldValidationTest
     }
 
     @Override
-    protected void setEmptyValue() {
-        getField().setValue("");
-    }
-
-    @Override
     protected SerializablePredicate<? super String> getValidator() {
         return value -> Objects.equals(value, "") || value.length() > 2;
     }

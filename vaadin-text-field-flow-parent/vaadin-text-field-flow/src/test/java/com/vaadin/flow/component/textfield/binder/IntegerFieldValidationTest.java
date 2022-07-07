@@ -34,11 +34,6 @@ public class IntegerFieldValidationTest
     }
 
     @Override
-    protected void setEmptyValue() {
-        getField().setValue(getField().getEmptyValue());
-    }
-
-    @Override
     protected SerializablePredicate<? super Integer> getValidator() {
         return value -> value == null || value > 2;
     }
