@@ -30,6 +30,36 @@ public class CoordinateTest {
         });
     }
 
+    @Test
+    public void toLonLat_implicit_to_epgs_4326() {
+        TestCase.ALL.forEach(testCase -> {
+            Coordinate result = Coordinate.toLonLat(testCase.epsg_3857.getX(),
+                    testCase.epsg_3857.getY());
+            Assert.assertEquals(testCase.epsg_4326.getX(), result.getX(),
+                    0.00000001);
+            Assert.assertEquals(testCase.epsg_4326.getY(), result.getY(),
+                    0.00000001);
+
+            result = Coordinate.toLonLat(testCase.epsg_3857);
+            Assert.assertEquals(testCase.epsg_4326.getX(), result.getX(),
+                    0.00000001);
+            Assert.assertEquals(testCase.epsg_4326.getY(), result.getY(),
+                    0.00000001);
+        });
+    }
+
+    @Test
+    public void fromLonLat_to_epgs_4326() {
+        TestCase.ALL.forEach(testCase -> {
+            Coordinate result = Coordinate.fromLonLat(testCase.epsg_3857.getX(),
+                    testCase.epsg_3857.getY(), Projection.EPSG_4326);
+            Assert.assertEquals(testCase.epsg_4326.getX(), result.getX(),
+                    0.00000001);
+            Assert.assertEquals(testCase.epsg_4326.getY(), result.getY(),
+                    0.00000001);
+        });
+    }
+
     private static class TestCase {
         private static final TestCase ZERO = new TestCase(new Coordinate(0, 0),
                 new Coordinate(0, 0));

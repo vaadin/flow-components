@@ -75,6 +75,33 @@ public class Coordinate {
     }
 
     /**
+     * Creates a coordinate from {@link Projection#EPSG_3857} projection and
+     * converts it into longitude and latitude
+     *
+     * @param x
+     *            longitude value in EPSG_3857 format
+     * @param y
+     *            latitude value EPSG_3857 format
+     * @return coordinate in {@link Projection#EPSG_4326} projection
+     */
+    public static Coordinate toLonLat(double x, double y) {
+        return fromLonLat(x, y, Projection.EPSG_4326);
+    }
+
+    /**
+     * Creates a coordinate from {@link Projection#EPSG_3857} projection and
+     * converts it into longitude and latitude
+     *
+     * @param espg3857
+     *            coordinates in EPSG_3857 format
+     * @return coordinate in {@link Projection#EPSG_4326} projection
+     */
+    public static Coordinate toLonLat(Coordinate espg3857) {
+        return fromLonLat(espg3857.getX(), espg3857.getY(),
+                Projection.EPSG_4326);
+    }
+
+    /**
      * Creates a coordinate from a longitude and latitude, and converts it into
      * the specified projection.
      * <p>
@@ -95,6 +122,9 @@ public class Coordinate {
         switch (targetProjection) {
         case EPSG_3857:
             return Converters.epsg_4326_to_epsg_3857(
+                    new Coordinate(longitude, latitude));
+        case EPSG_4326:
+            return Converters.epsg_3857_to_epsg_4326(
                     new Coordinate(longitude, latitude));
         default:
             throw new IllegalArgumentException("Unsupported projection: "
@@ -123,5 +153,16 @@ public class Coordinate {
             }
             return new Coordinate(x, y);
         }
+
+        // Adapted from `ol/proj/epsg3857.js`
+        private static Coordinate epsg_3857_to_epsg_4326(
+                Coordinate coordinate) {
+            double x = 180 * coordinate.x / HALF_SIZE;
+            double y = (360 * Math.atan(Math.exp(coordinate.y / RADIUS)))
+                    / Math.PI - 90;
+
+            return new Coordinate(x, y);
+        }
+
     }
 }
