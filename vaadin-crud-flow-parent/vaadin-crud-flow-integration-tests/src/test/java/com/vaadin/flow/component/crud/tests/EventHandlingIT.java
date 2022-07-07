@@ -160,13 +160,6 @@ public class EventHandlingIT extends AbstractParallelTest {
 
         crud.getEditorSaveButton().click();
 
-        if (BrowserUtil.isIE(getDesiredCapabilities())) {
-            // TODO(oluwasayo): Investigate why editor sometimes doesn't
-            // disappear on first click in IE
-            // especially when server-side validation is involved
-            return;
-        }
-
         Assert.assertFalse(crud.isEditorOpen());
         Assert.assertEquals("Oladeji",
                 $(GridElement.class).first().getCell(0, 2).getText());

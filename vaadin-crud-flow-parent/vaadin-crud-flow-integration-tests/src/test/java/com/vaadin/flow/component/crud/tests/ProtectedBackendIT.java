@@ -54,11 +54,6 @@ public class ProtectedBackendIT extends AbstractParallelTest {
 
     @Test
     public void tryModify() {
-        if (BrowserUtil.isIE(getDesiredCapabilities())) {
-            throw new AssumptionViolatedException(
-                    "Skipped IE11, cause textfield setValue doesn't make the editor dirty");
-        }
-
         CrudElement crud = $(CrudElement.class).waitForFirst();
 
         crud.openRowForEditing(0);

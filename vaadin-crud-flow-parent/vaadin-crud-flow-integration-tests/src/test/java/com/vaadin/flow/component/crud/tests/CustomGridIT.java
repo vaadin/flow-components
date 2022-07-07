@@ -36,10 +36,6 @@ public class CustomGridIT extends AbstractParallelTest {
         lastNameField.setValue("Otto");
         crud.getEditorSaveButton().click();
 
-        if (BrowserUtil.isIE(getDesiredCapabilities())) {
-            return;
-        }
-
         Assert.assertFalse(crud.isEditorOpen());
         Assert.assertEquals("Otto",
                 $(GridElement.class).first().getCell(0, 2).getText());
@@ -58,10 +54,6 @@ public class CustomGridIT extends AbstractParallelTest {
         Assert.assertEquals("Sayo", lastNameField.getValue());
         lastNameField.setValue("Otto");
         crud.getEditorCancelButton().click();
-
-        if (BrowserUtil.isIE(getDesiredCapabilities())) {
-            return;
-        }
 
         ConfirmDialogElement confirmCancel = crud.getConfirmCancelDialog();
         Assert.assertEquals("Discard changes", confirmCancel.getHeaderText());
