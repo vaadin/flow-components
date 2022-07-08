@@ -149,5 +149,8 @@ public class MarkerFeature extends PointBasedFeature {
     public void setIcon(Icon icon) {
         Objects.requireNonNull(icon);
         getStyle().setImage(icon);
+
+        // force rerendering of the map by re-syncing the geometry (coordinates)
+        deepMarkAsDirty();
     }
 }
