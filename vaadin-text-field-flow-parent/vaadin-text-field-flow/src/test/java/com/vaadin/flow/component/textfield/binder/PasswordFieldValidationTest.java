@@ -7,32 +7,27 @@ import com.vaadin.flow.function.SerializablePredicate;
 import java.util.Objects;
 
 public class PasswordFieldValidationTest
-        extends AbstractTextFieldValidationTest<String> {
-
-    private PasswordField field;
+        extends AbstractTextFieldValidationTest<String, PasswordField> {
 
     @Override
-    protected HasValue<?, String> getField() {
-        if (field == null) {
-            field = new PasswordField();
-            field.setMaxLength(10);
-        }
-        return field;
+    protected void initField() {
+        field = new PasswordField();
+        field.setMaxLength(10);
     }
 
     @Override
     protected void setValidValue() {
-        getField().setValue("AAAA");
+        field.setValue("AAAA");
     }
 
     @Override
     protected void setComponentInvalidValue() {
-        getField().setValue("AAAAAAAAAAAAAA");
+        field.setValue("AAAAAAAAAAAAAA");
     }
 
     @Override
     protected void setBinderInvalidValue() {
-        getField().setValue("A");
+        field.setValue("A");
     }
 
     @Override

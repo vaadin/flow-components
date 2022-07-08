@@ -7,34 +7,29 @@ import com.vaadin.flow.function.SerializablePredicate;
 import java.util.Objects;
 
 public class EmailFieldValidationTest
-        extends AbstractTextFieldValidationTest<String> {
-
-    private EmailField field;
+        extends AbstractTextFieldValidationTest<String, EmailField> {
 
     @Override
-    protected HasValue<?, String> getField() {
-        if (field == null) {
-            field = new EmailField();
-            // To disable pattern validation
-            field.setPattern(null);
-            field.setMaxLength(20);
-        }
-        return field;
+    protected void initField() {
+        field = new EmailField();
+        // To disable pattern validation
+        field.setPattern(null);
+        field.setMaxLength(20);
     }
 
     @Override
     protected void setValidValue() {
-        getField().setValue("contact@example.com");
+        field.setValue("contact@example.com");
     }
 
     @Override
     protected void setComponentInvalidValue() {
-        getField().setValue("reallylongemail@example.com");
+        field.setValue("reallylongemail@example.com");
     }
 
     @Override
     protected void setBinderInvalidValue() {
-        getField().setValue("contact@another.com");
+        field.setValue("contact@another.com");
     }
 
     @Override

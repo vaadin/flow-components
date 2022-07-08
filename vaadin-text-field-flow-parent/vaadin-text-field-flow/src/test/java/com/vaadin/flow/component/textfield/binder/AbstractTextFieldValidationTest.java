@@ -1,5 +1,6 @@
 package com.vaadin.flow.component.textfield.binder;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.BindingValidationStatus;
@@ -10,7 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.*;
 
-public abstract class AbstractTextFieldValidationTest<T> {
+public abstract class AbstractTextFieldValidationTest<T, K extends Component & HasValue<?, T>> {
 
     private static final String BINDER_FAIL_MESSAGE = "BINDER_VALIDATION_FAIL";
     private static final String BINDER_REQUIRED_MESSAGE = "REQUIRED";
@@ -27,7 +28,7 @@ public abstract class AbstractTextFieldValidationTest<T> {
         }
     }
 
-    protected abstract HasValue<?, T> getField();
+    protected abstract void initField();
 
     protected abstract void setValidValue();
 
@@ -35,7 +36,7 @@ public abstract class AbstractTextFieldValidationTest<T> {
 
     protected abstract void setBinderInvalidValue();
 
-    private HasValue<?, T> field;
+    protected K field;
 
     protected abstract SerializablePredicate<? super T> getValidator();
 
@@ -48,12 +49,12 @@ public abstract class AbstractTextFieldValidationTest<T> {
     @Before
     public void init() {
         MockitoAnnotations.openMocks(this);
-        field = getField();
+        initField();
     }
 
     @Test
     public void elementWithConstraints_componentValidationNotMet_elementValidationFails() {
-        setupFieldWithValidation();
+        attachBinderToField();
         setComponentInvalidValue();
 
         Mockito.verify(statusMock).statusChange(statusCaptor.capture());
@@ -64,7 +65,7 @@ public abstract class AbstractTextFieldValidationTest<T> {
 
     @Test
     public void elementWithConstraints_binderValidationNotMet_binderValidationFails() {
-        setupFieldWithValidation();
+        attachBinderToField();
         setBinderInvalidValue();
 
         Mockito.verify(statusMock).statusChange(statusCaptor.capture());
@@ -77,7 +78,7 @@ public abstract class AbstractTextFieldValidationTest<T> {
 
     @Test
     public void setRequiredOnBinder_validate_binderValidationFails() {
-        var binder = setupFieldWithValidation(true);
+        var binder = attachBinderToField(true);
         binder.validate();
 
         Mockito.verify(statusMock).statusChange(statusCaptor.capture());
@@ -90,7 +91,7 @@ public abstract class AbstractTextFieldValidationTest<T> {
 
     @Test
     public void setRequiredOnComponent_validate_binderValidationPasses() {
-        var binder = setupFieldWithValidation();
+        var binder = attachBinderToField();
         field.setRequiredIndicatorVisible(true);
         binder.validate();
 
@@ -101,7 +102,7 @@ public abstract class AbstractTextFieldValidationTest<T> {
 
     @Test
     public void elementWithConstraints_validValue_validationPasses() {
-        setupFieldWithValidation();
+        attachBinderToField();
         setValidValue();
 
         Mockito.verify(statusMock).statusChange(statusCaptor.capture());
@@ -109,11 +110,11 @@ public abstract class AbstractTextFieldValidationTest<T> {
                 statusCaptor.getValue().isError());
     }
 
-    private Binder<Bean> setupFieldWithValidation() {
-        return setupFieldWithValidation(false);
+    private Binder<?> attachBinderToField() {
+        return attachBinderToField(false);
     }
 
-    private Binder<Bean> setupFieldWithValidation(boolean isRequired) {
+    private Binder<?> attachBinderToField(boolean isRequired) {
         var binder = new Binder<>(Bean.class);
         var binding = binder.forField(field)
                 .withValidator(getValidator(), BINDER_FAIL_MESSAGE)

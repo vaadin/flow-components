@@ -7,32 +7,27 @@ import com.vaadin.flow.function.SerializablePredicate;
 import java.util.Objects;
 
 public class TextAreaValidationTest
-        extends AbstractTextFieldValidationTest<String> {
-
-    private TextArea field;
+        extends AbstractTextFieldValidationTest<String, TextArea> {
 
     @Override
-    protected HasValue<?, String> getField() {
-        if (field == null) {
-            field = new TextArea();
-            field.setMaxLength(10);
-        }
-        return field;
+    protected void initField() {
+        field = new TextArea();
+        field.setMaxLength(10);
     }
 
     @Override
     protected void setValidValue() {
-        getField().setValue("AAAA");
+        field.setValue("AAAA");
     }
 
     @Override
     protected void setComponentInvalidValue() {
-        getField().setValue("AAAAAAAAAAAAAA");
+        field.setValue("AAAAAAAAAAAAAA");
     }
 
     @Override
     protected void setBinderInvalidValue() {
-        getField().setValue("A");
+        field.setValue("A");
     }
 
     @Override

@@ -16,8 +16,8 @@ import java.time.LocalDate;
 
 public class DatePickerBinderValidationTest {
 
-    private static final String BINDER_FAIL_MESSAGE = "BINDER_VALIDATION_FAILED";
-    private static final String REQUIRED_MESSAGE = "REQUIRED";
+    private static final String BINDER_FAIL_MESSAGE = "BINDER_FAIL_MESSAGE";
+    private static final String BINDER_REQUIRED_MESSAGE = "REQUIRED";
 
     private DatePicker field;
 
@@ -43,6 +43,7 @@ public class DatePickerBinderValidationTest {
     public void init() {
         MockitoAnnotations.openMocks(this);
         field = new DatePicker();
+        field.setMax(LocalDate.now().plusDays(1));
     }
 
     @Test
@@ -75,7 +76,7 @@ public class DatePickerBinderValidationTest {
 
         Mockito.verify(statusHandlerMock).statusChange(statusCaptor.capture());
         Assert.assertTrue(statusCaptor.getValue().isError());
-        Assert.assertEquals(REQUIRED_MESSAGE,
+        Assert.assertEquals(BINDER_REQUIRED_MESSAGE,
                 statusCaptor.getValue().getMessage().orElse(""));
     }
 
@@ -106,7 +107,6 @@ public class DatePickerBinderValidationTest {
     }
 
     private Binder<Bean> attachBinderToField(boolean isRequired) {
-        field.setMax(LocalDate.now().plusDays(1));
         var binder = new Binder<>(Bean.class);
         Binder.BindingBuilder<Bean, LocalDate> binding = binder.forField(field)
                 .withValidator(
@@ -116,7 +116,7 @@ public class DatePickerBinderValidationTest {
                 .withValidationStatusHandler(statusHandlerMock);
 
         if (isRequired) {
-            binding.asRequired(REQUIRED_MESSAGE);
+            binding.asRequired(BINDER_REQUIRED_MESSAGE);
         }
 
         binding.bind("date");

@@ -8,21 +8,16 @@ import org.junit.Ignore;
 import java.math.BigDecimal;
 
 public class BigDecimalFieldValidationTest
-        extends AbstractTextFieldValidationTest<BigDecimal> {
-
-    private BigDecimalField field;
+        extends AbstractTextFieldValidationTest<BigDecimal, BigDecimalField> {
 
     @Override
-    protected HasValue<?, BigDecimal> getField() {
-        if (field == null) {
-            field = new BigDecimalField();
-        }
-        return field;
+    protected void initField() {
+        field = new BigDecimalField();
     }
 
     @Override
     protected void setValidValue() {
-        getField().setValue(new BigDecimal("5"));
+        field.setValue(new BigDecimal("5"));
     }
 
     @Override
@@ -32,7 +27,7 @@ public class BigDecimalFieldValidationTest
 
     @Override
     protected void setBinderInvalidValue() {
-        getField().setValue(new BigDecimal("11"));
+        field.setValue(new BigDecimal("11"));
     }
 
     @Override

@@ -17,7 +17,7 @@ import java.time.LocalTime;
 
 public class TimePickerBinderValidationTest {
     private static final String BINDER_FAIL_MESSAGE = "BINDER_VALIDATION_FAILED";
-    private static final String REQUIRED_MESSAGE = "REQUIRED";
+    private static final String BINDER_REQUIRED_MESSAGE = "REQUIRED";
 
     private TimePicker field;
 
@@ -43,6 +43,7 @@ public class TimePickerBinderValidationTest {
     public void init() {
         MockitoAnnotations.openMocks(this);
         field = new TimePicker();
+        field.setMax(LocalTime.now().plusHours(1));
     }
 
     @Test
@@ -76,7 +77,7 @@ public class TimePickerBinderValidationTest {
         Mockito.verify(statusHandlerMock).statusChange(statusCaptor.capture());
 
         Assert.assertTrue(statusCaptor.getValue().isError());
-        Assert.assertEquals(REQUIRED_MESSAGE,
+        Assert.assertEquals(BINDER_REQUIRED_MESSAGE,
                 statusCaptor.getValue().getMessage().orElse(""));
     }
 
@@ -105,7 +106,6 @@ public class TimePickerBinderValidationTest {
     }
 
     private Binder<Bean> getFieldWithValidation(boolean isRequired) {
-        field.setMax(LocalTime.now().plusHours(1));
         var binder = new Binder<>(Bean.class);
         Binder.BindingBuilder<Bean, LocalTime> binding = binder.forField(field)
                 .withValidator(
@@ -115,7 +115,7 @@ public class TimePickerBinderValidationTest {
                 .withValidationStatusHandler(statusHandlerMock);
 
         if (isRequired) {
-            binding.asRequired(REQUIRED_MESSAGE);
+            binding.asRequired(BINDER_REQUIRED_MESSAGE);
         }
 
         binding.bind("time");

@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 
 public class DateTimePickerBinderValidationTest {
 
-    private static final String BINDER_FAIL_MESSAGE = "YEAR_LESS_THAN_MIN";
+    private static final String BINDER_FAIL_MESSAGE = "BINDER_FAIL_MESSAGE";
     private static final String REQUIRED_MESSAGE = "REQUIRED";
 
     private DateTimePicker field;
@@ -43,6 +43,7 @@ public class DateTimePickerBinderValidationTest {
     public void init() {
         MockitoAnnotations.openMocks(this);
         field = new DateTimePicker();
+        field.setMax(LocalDateTime.now().plusDays(1));
     }
 
     @Test
@@ -104,7 +105,6 @@ public class DateTimePickerBinderValidationTest {
     }
 
     private Binder<Bean> attachBinderToField(boolean isRequired) {
-        field.setMax(LocalDateTime.now().plusDays(1));
         var binder = new Binder<>(Bean.class);
         Binder.BindingBuilder<Bean, LocalDateTime> binding = binder
                 .forField(field)

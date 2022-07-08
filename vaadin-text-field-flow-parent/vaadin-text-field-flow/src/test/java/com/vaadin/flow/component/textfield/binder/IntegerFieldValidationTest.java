@@ -5,32 +5,27 @@ import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.function.SerializablePredicate;
 
 public class IntegerFieldValidationTest
-        extends AbstractTextFieldValidationTest<Integer> {
-
-    private IntegerField field;
+        extends AbstractTextFieldValidationTest<Integer, IntegerField> {
 
     @Override
-    protected HasValue<?, Integer> getField() {
-        if (field == null) {
-            field = new IntegerField();
-            field.setMax(10);
-        }
-        return field;
+    protected void initField() {
+        field = new IntegerField();
+        field.setMax(10);
     }
 
     @Override
     protected void setValidValue() {
-        getField().setValue(5);
+        field.setValue(5);
     }
 
     @Override
     protected void setComponentInvalidValue() {
-        getField().setValue(15);
+        field.setValue(15);
     }
 
     @Override
     protected void setBinderInvalidValue() {
-        getField().setValue(1);
+        field.setValue(1);
     }
 
     @Override
