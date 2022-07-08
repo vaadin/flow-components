@@ -13,18 +13,19 @@ import java.util.stream.Stream;
 public class RefreshEmptyLazyDataProviderPage extends Div {
     public RefreshEmptyLazyDataProviderPage() {
         ComboBox<String> comboBox = new ComboBox<>();
-        comboBox.setDataProvider(new AbstractBackEndDataProvider<String, String>() {
-            @Override
-            protected Stream<String> fetchFromBackEnd(
-                    Query<String, String> query) {
-                return Stream.of();
-            }
+        comboBox.setDataProvider(
+                new AbstractBackEndDataProvider<String, String>() {
+                    @Override
+                    protected Stream<String> fetchFromBackEnd(
+                            Query<String, String> query) {
+                        return Stream.of();
+                    }
 
-            @Override
-            protected int sizeInBackEnd(Query<String, String> query) {
-                return 0;
-            }
-        });
+                    @Override
+                    protected int sizeInBackEnd(Query<String, String> query) {
+                        return 0;
+                    }
+                });
 
         NativeButton refreshDataProvider = new NativeButton("Refresh", e -> {
             comboBox.getDataProvider().refreshAll();
