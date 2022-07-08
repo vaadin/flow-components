@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 public class DateTimePickerBinderValidationTest {
 
     private static final String BINDER_FAIL_MESSAGE = "BINDER_FAIL_MESSAGE";
-    private static final String REQUIRED_MESSAGE = "REQUIRED";
+    private static final String BINDER_REQUIRED_MESSAGE = "REQUIRED";
 
     private DateTimePicker field;
 
