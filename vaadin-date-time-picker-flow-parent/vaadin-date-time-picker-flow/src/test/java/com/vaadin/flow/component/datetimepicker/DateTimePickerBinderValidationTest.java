@@ -75,7 +75,7 @@ public class DateTimePickerBinderValidationTest {
 
         Mockito.verify(statusHandlerMock).statusChange(statusCaptor.capture());
         Assert.assertTrue(statusCaptor.getValue().isError());
-        Assert.assertEquals(REQUIRED_MESSAGE,
+        Assert.assertEquals(BINDER_REQUIRED_MESSAGE,
                 statusCaptor.getValue().getMessage().orElse(""));
     }
 
@@ -114,7 +114,7 @@ public class DateTimePickerBinderValidationTest {
                 .withValidationStatusHandler(statusHandlerMock);
 
         if (isRequired) {
-            binding.asRequired(REQUIRED_MESSAGE);
+            binding.asRequired(BINDER_REQUIRED_MESSAGE);
         }
 
         binding.bind("date");
