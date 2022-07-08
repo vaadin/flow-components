@@ -48,7 +48,7 @@ public class TimePickerBinderValidationTest {
 
     @Test
     public void elementWithConstraints_componentValidationNotMet_elementValidationFails() {
-        getFieldWithValidation();
+        attachBinderToField();
 
         field.setValue(LocalTime.now().plusHours(2));
 
@@ -59,7 +59,7 @@ public class TimePickerBinderValidationTest {
 
     @Test
     public void elementWithConstraints_binderValidationNotMet_binderValidationFails() {
-        getFieldWithValidation();
+        attachBinderToField();
         field.setValue(LocalTime.now().minusHours(2));
 
         Mockito.verify(statusHandlerMock).statusChange(statusCaptor.capture());
@@ -71,7 +71,7 @@ public class TimePickerBinderValidationTest {
 
     @Test
     public void setRequiredOnBinder_validate_binderValidationFails() {
-        var binder = getFieldWithValidation(true);
+        var binder = attachBinderToField(true);
         binder.validate();
 
         Mockito.verify(statusHandlerMock).statusChange(statusCaptor.capture());
@@ -83,7 +83,7 @@ public class TimePickerBinderValidationTest {
 
     @Test
     public void setRequiredOnComponent_validate_binderValidationPasses() {
-        var binder = getFieldWithValidation();
+        var binder = attachBinderToField();
         field.setRequiredIndicatorVisible(true);
         binder.validate();
 
@@ -93,7 +93,7 @@ public class TimePickerBinderValidationTest {
 
     @Test
     public void elementWithConstraints_validValue_validationPasses() {
-        getFieldWithValidation();
+        attachBinderToField();
 
         field.setValue(LocalTime.now());
 
@@ -101,11 +101,11 @@ public class TimePickerBinderValidationTest {
         Assert.assertFalse(statusCaptor.getValue().isError());
     }
 
-    private Binder<Bean> getFieldWithValidation() {
-        return getFieldWithValidation(false);
+    private Binder<Bean> attachBinderToField() {
+        return attachBinderToField(false);
     }
 
-    private Binder<Bean> getFieldWithValidation(boolean isRequired) {
+    private Binder<Bean> attachBinderToField(boolean isRequired) {
         var binder = new Binder<>(Bean.class);
         Binder.BindingBuilder<Bean, LocalTime> binding = binder.forField(field)
                 .withValidator(
