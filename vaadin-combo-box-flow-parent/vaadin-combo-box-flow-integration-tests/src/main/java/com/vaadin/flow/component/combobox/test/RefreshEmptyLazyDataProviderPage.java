@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 public class RefreshEmptyLazyDataProviderPage extends Div {
     public RefreshEmptyLazyDataProviderPage() {
         ComboBox<String> comboBox = new ComboBox<>();
-        comboBox.setItems(new AbstractBackEndDataProvider<>() {
+        comboBox.setDataProvider(new AbstractBackEndDataProvider<String, String>() {
             @Override
             protected Stream<String> fetchFromBackEnd(
                     Query<String, String> query) {
