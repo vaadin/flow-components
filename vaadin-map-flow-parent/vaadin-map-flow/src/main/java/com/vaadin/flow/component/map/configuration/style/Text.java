@@ -60,6 +60,11 @@ public class Text extends AbstractConfigurationObject {
         setStroke(new Stroke("#fff", 1));
     }
 
+    public Text(String text) {
+        this();
+        setText(text);
+    }
+
     @Override
     public String getType() {
         return Constants.OL_STYLE_TEXT;
