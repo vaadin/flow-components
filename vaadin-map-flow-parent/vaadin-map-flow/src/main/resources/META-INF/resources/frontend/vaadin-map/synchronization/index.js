@@ -23,6 +23,7 @@ import {
   synchronizeFill,
   synchronizeStroke,
   synchronizeStyle,
+  synchronizeText,
 } from "./styles.js";
 import { convertToCoordinateArray, synchronizeCollection } from "./util.js";
 
@@ -95,6 +96,7 @@ const synchronizerLookup = {
   "ol/style/Fill": synchronizeFill,
   "ol/style/Stroke": synchronizeStroke,
   "ol/style/Style": synchronizeStyle,
+  "ol/style/Text": synchronizeText,
 };
 
 /**

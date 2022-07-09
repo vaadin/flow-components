@@ -31,6 +31,7 @@ public class Style extends AbstractConfigurationObject {
     private ImageStyle image;
     private Fill fill;
     private Stroke stroke;
+    private Text text;
 
     @Override
     public String getType() {
@@ -71,5 +72,17 @@ public class Style extends AbstractConfigurationObject {
         removeChild(this.stroke);
         this.stroke = stroke;
         addChild(stroke);
+    }
+
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    @JsonIdentityReference(alwaysAsId = true)
+    public Text getText() {
+        return text;
+    }
+
+    public void setText(Text text) {
+        removeChild(this.text);
+        this.text = text;
+        addChild(text);
     }
 }

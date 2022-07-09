@@ -1,6 +1,7 @@
 import Fill from "ol/style/Fill";
 import Stroke from "ol/style/Stroke";
 import Style from "ol/style/Style";
+import Text from "ol/style/Text";
 import { Icon } from "ol/style";
 import {
   convertToCoordinateArray,
@@ -8,7 +9,7 @@ import {
   createOptions,
 } from "./util";
 
-export function synchronizeFill(target, source, _context) {
+export function synchronizeFill(target, source, context) {
   if (!target) {
     target = new Fill();
   }
@@ -18,7 +19,7 @@ export function synchronizeFill(target, source, _context) {
   return target;
 }
 
-export function synchronizeStroke(target, source, _context) {
+export function synchronizeStroke(target, source, context) {
   if (!target) {
     target = new Stroke();
   }
@@ -29,7 +30,31 @@ export function synchronizeStroke(target, source, _context) {
   return target;
 }
 
-function synchronizeImageStyle(target, source, _context) {
+export function synchronizeText(target, source, context) {
+  if (!target) {
+    target = new Text();
+  }
+
+  target.setFont( source.image ? context.lookup.get(source.image) : undefined );
+  target.setOffsetX( source.offsetX );
+  target.setOffsetY( source.offsetY );
+  target.setOverflow( source.overflow );
+  target.setPlacement( source.placement );
+  target.setScale( source.scale );
+  target.setRotateWithView( source.rotateWithView);
+  target.setRotation( source.rotation);
+  target.setText( source.text );
+  target.setTextAlign( source.textAlign );
+  target.setTextBaseline( source.textBaseline );
+  target.setFill( source.fill ? context.lookup.get(source.fill) : undefined );
+  target.setStroke( source.stroke ? context.lookup.get(source.stroke) : undefined );
+  target.setBackgroundFill( source.backgroundFill ? context.lookup.get(source.backgroundFill) : undefined );
+  target.setBackgroundStroke( source.backgroundStroke ? context.lookup.get(source.backgroundStroke) : undefined );
+
+  return target;
+}
+
+function synchronizeImageStyle(target, source, context) {
   if (!target) {
     throw new Error("Can not instantiate base class: ol/style/Image");
   }
@@ -94,6 +119,12 @@ export function synchronizeStyle(target, source, context) {
   target.setStroke(
     source.stroke
       ? context.lookup.get(source.stroke)
+      : undefined
+  );
+  
+  target.setText(
+	source.text
+      ? context.lookup.get(source.text)
       : undefined
   );
 
