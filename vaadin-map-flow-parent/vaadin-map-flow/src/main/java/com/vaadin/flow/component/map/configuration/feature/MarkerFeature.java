@@ -25,6 +25,7 @@ import com.vaadin.flow.component.map.configuration.geometry.Point;
 import com.vaadin.flow.component.map.configuration.source.Source;
 import com.vaadin.flow.component.map.configuration.style.Icon;
 import com.vaadin.flow.component.map.configuration.style.Style;
+import com.vaadin.flow.component.map.configuration.style.Text;
 
 import java.util.Objects;
 
@@ -115,6 +116,7 @@ public class MarkerFeature extends PointBasedFeature {
         Objects.requireNonNull(icon);
 
         Style style = new Style();
+        style.setText(new Text());
         setStyle(style);
         setIcon(icon);
     }
@@ -149,5 +151,22 @@ public class MarkerFeature extends PointBasedFeature {
     public void setIcon(Icon icon) {
         Objects.requireNonNull(icon);
         getStyle().setImage(icon);
+
+        // force rerendering of the map by re-syncing the geometry (coordinates)
+        deepMarkAsDirty();
     }
+
+    @JsonIgnore
+    public Text getLabel() {
+        return getStyle().getText();
+    }
+
+    public void setLabel(String label) {
+        Objects.requireNonNull(label);
+        getStyle().getText().setText(label);
+
+        // force rerendering of the map by re-syncing the geometry (coordinates)
+        deepMarkAsDirty();
+    }
+
 }
