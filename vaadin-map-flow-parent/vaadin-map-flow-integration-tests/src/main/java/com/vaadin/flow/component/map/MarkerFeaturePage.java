@@ -3,6 +3,7 @@ package com.vaadin.flow.component.map;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.map.configuration.Coordinate;
+import com.vaadin.flow.component.map.configuration.Feature;
 import com.vaadin.flow.component.map.configuration.feature.MarkerFeature;
 import com.vaadin.flow.component.map.configuration.style.Icon;
 import com.vaadin.flow.router.Route;
@@ -22,8 +23,9 @@ public class MarkerFeaturePage extends Div {
 
         NativeButton addCustomMarkerFeature = new NativeButton(
                 "Add custom marker feature", e -> {
-                    Coordinate coordinate = new Coordinate(1233058.1696443919,
-                            6351912.406929109);
+                    Coordinate coordinate = Coordinate
+                            .fromLonLat(-73.96746522524636, 40.749310492492796); // United
+                                                                                 // Nations
                     Icon icon = createCustomIcon();
                     MarkerFeature feature = new MarkerFeature(coordinate, icon);
                     map.getFeatureLayer().addFeature(feature);
@@ -35,8 +37,8 @@ public class MarkerFeaturePage extends Div {
                     if (map.getFeatureLayer().getFeatures().size() > 0) {
                         MarkerFeature feature = (MarkerFeature) map
                                 .getFeatureLayer().getFeatures().get(0);
-                        Coordinate coordinate = new Coordinate(
-                                1233058.1696443919, 6351912.406929109);
+                        Coordinate coordinate = Coordinate.fromLonLat(22.29985,
+                                60.45234); // Vaadin HQ
                         feature.setCoordinates(coordinate);
                     }
                 });
@@ -53,18 +55,28 @@ public class MarkerFeaturePage extends Div {
                 });
         updateMarkerIcon.setId("update-marker-icon");
 
+        NativeButton updateMarkerLabel = new NativeButton("Update marker label",
+                e -> {
+                    int number = 1;
+                    for (Feature f : map.getFeatureLayer().getFeatures()) {
+                        String label = String.format("Marker #%d", number++);
+                        System.out.println(label);
+                        ((MarkerFeature) f).setLabel(label);
+                    }
+                });
+        updateMarkerLabel.setId("update-marker-label");
+
         add(map);
         add(new Div(addDefaultMarkerFeature, addCustomMarkerFeature,
-                updateMarkerCoordinates, updateMarkerIcon));
+                updateMarkerCoordinates, updateMarkerIcon, updateMarkerLabel));
     }
 
-    private static Icon createCustomIcon() {
+    private Icon createCustomIcon() {
+
         Icon.Options options = new Icon.Options();
-        options.setSrc("assets/custom-marker.png");
-        options.setColor("blue");
+        options.setSrc("https://website.vaadin.com/hubfs/Images/favicon.ico");
+        options.setColor("green");
         options.setOpacity(0.8f);
-        options.setScale(2f);
-        options.setRotation((float) Math.PI);
         return new Icon(options);
     }
 }
