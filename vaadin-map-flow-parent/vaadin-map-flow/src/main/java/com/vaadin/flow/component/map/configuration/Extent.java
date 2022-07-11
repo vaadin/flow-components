@@ -17,9 +17,9 @@ package com.vaadin.flow.component.map.configuration;
  */
 
 /**
- * Defines an area within a map using min/max coordinates. The coordinates are
- * by default in {@code EPSG:3857} / Web Mercator Sphere projection, unless the
- * map's {@link View} uses a custom projection.
+ * Defines an area within a map using min/max coordinates. Coordinates must be
+ * specified in the map's user projection, which by default is
+ * {@code EPSG:4326}, also referred to as GPS coordinates.
  */
 public class Extent {
     private final double minX;

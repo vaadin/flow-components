@@ -20,9 +20,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vaadin.flow.component.map.Assets;
 import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.Feature;
-import com.vaadin.flow.component.map.configuration.View;
 import com.vaadin.flow.component.map.configuration.geometry.Point;
-import com.vaadin.flow.component.map.configuration.source.Source;
 import com.vaadin.flow.component.map.configuration.style.Icon;
 import com.vaadin.flow.component.map.configuration.style.Style;
 
@@ -82,9 +80,9 @@ public class MarkerFeature extends PointBasedFeature {
 
     /**
      * Creates a new marker feature located at the specified coordinates,
-     * displaying a default marker icon. The coordinates must be in the same
-     * projection as the {@link View#getProjection()} and
-     * {@link Source#getProjection()}.
+     * displaying a default marker icon. Coordinates must be specified in the
+     * map's user projection, which by default is {@code EPSG:4326}, also
+     * referred to as GPS coordinates.
      *
      * @param coordinates
      *            the coordinates that locate the feature
@@ -95,9 +93,9 @@ public class MarkerFeature extends PointBasedFeature {
 
     /**
      * Creates a new marker feature located at the specified coordinates,
-     * displaying the specified custom icon.The coordinates must be in the same
-     * projection as the {@link View#getProjection()} and
-     * {@link Source#getProjection()}.
+     * displaying the specified custom icon. Coordinates must be specified in
+     * the map's user projection, which by default is {@code EPSG:4326}, also
+     * referred to as GPS coordinates.
      * <p>
      * <b>NOTE:</b> Icon instances should be reused between features in order to
      * optimize memory-usage in the client-side component / browser. Creating a
