@@ -37,7 +37,7 @@ public class ImageWMSDemo extends Div {
         map.addLayer(imageLayer);
 
         // Move viewport to US
-        map.getView().setCenter(new Coordinate(-10997148, 4569099));
+        map.getView().setCenter(new Coordinate(-98.7890613, 37.9268619));
         map.getView().setZoom(4);
     }
 }

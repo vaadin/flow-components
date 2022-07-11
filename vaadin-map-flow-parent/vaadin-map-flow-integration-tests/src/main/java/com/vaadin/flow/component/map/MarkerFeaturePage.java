@@ -22,8 +22,7 @@ public class MarkerFeaturePage extends Div {
 
         NativeButton addCustomMarkerFeature = new NativeButton(
                 "Add custom marker feature", e -> {
-                    Coordinate coordinate = new Coordinate(1233058.1696443919,
-                            6351912.406929109);
+                    Coordinate coordinate = new Coordinate(11.07675, 49.45203);
                     Icon icon = createCustomIcon();
                     MarkerFeature feature = new MarkerFeature(coordinate, icon);
                     map.getFeatureLayer().addFeature(feature);
@@ -35,8 +34,8 @@ public class MarkerFeaturePage extends Div {
                     if (map.getFeatureLayer().getFeatures().size() > 0) {
                         MarkerFeature feature = (MarkerFeature) map
                                 .getFeatureLayer().getFeatures().get(0);
-                        Coordinate coordinate = new Coordinate(
-                                1233058.1696443919, 6351912.406929109);
+                        Coordinate coordinate = new Coordinate(11.07675,
+                                49.45203);
                         feature.setCoordinates(coordinate);
                     }
                 });

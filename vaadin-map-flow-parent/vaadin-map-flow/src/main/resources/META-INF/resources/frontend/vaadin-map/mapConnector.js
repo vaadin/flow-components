@@ -1,5 +1,10 @@
+import { setUserProjection as openLayersSetUserProjection } from 'ol/proj';
 import { synchronize } from './synchronization';
 import { createLookup, getLayerForFeature } from './util';
+
+// By default, use EPSG:4326 projection for all coordinates passed to, and return from the public API.
+// Internally coordinates will be converted to the projection used by the map's view.
+openLayersSetUserProjection('EPSG:4326');
 
 (function () {
   function init(mapElement) {

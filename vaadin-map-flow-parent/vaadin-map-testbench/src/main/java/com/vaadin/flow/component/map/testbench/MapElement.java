@@ -38,8 +38,10 @@ public class MapElement extends TestBenchElement {
                 "return arguments[0].configuration.getPixelFromCoordinate([arguments[1], arguments[2]])",
                 this, x, y);
 
-        int clickX = startLeft + pixelCoordinates.get(0).intValue();
-        int clickY = startTop + pixelCoordinates.get(1).intValue();
+        int clickX = startLeft
+                + (int) Math.round(pixelCoordinates.get(0).doubleValue());
+        int clickY = startTop
+                + (int) Math.round(pixelCoordinates.get(1).doubleValue());
         new Actions(getDriver()).moveToElement(this, clickX, clickY).click()
                 .build().perform();
     }
