@@ -2,6 +2,8 @@ package com.vaadin.flow.component.map.events;
 
 import com.vaadin.flow.component.map.configuration.Configuration;
 import com.vaadin.flow.component.map.configuration.Feature;
+import com.vaadin.flow.component.map.configuration.layer.FeatureLayer;
+import com.vaadin.flow.component.map.configuration.layer.Layer;
 import com.vaadin.flow.component.map.configuration.layer.VectorLayer;
 import com.vaadin.flow.component.map.configuration.source.VectorSource;
 
@@ -24,5 +26,21 @@ class MapEventUtil {
 
         return new FeatureEventDetails(maybeFeature.orElse(null),
                 maybeSource.orElse(null), maybeLayer.orElse(null));
+    }
+
+    static FeatureEventDetails getFeatureEventDetails(
+            Configuration configuration, String featureId) {
+        for (Layer layer : configuration.getLayers()) {
+            if (layer instanceof FeatureLayer) {
+                FeatureLayer fl = (FeatureLayer) layer;
+                Optional<Feature> feature = fl.getFeatures().stream()
+                        .filter(f -> f.getId().equals(featureId)).findFirst();
+                if (feature.isPresent()) {
+                    return new FeatureEventDetails(feature.get(),
+                            fl.getSource(), fl);
+                }
+            }
+        }
+        return null;
     }
 }

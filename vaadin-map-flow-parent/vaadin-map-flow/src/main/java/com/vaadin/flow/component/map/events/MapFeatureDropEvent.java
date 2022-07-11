@@ -23,7 +23,7 @@ public class MapFeatureDropEvent extends ComponentEvent<Map> {
 
         FeatureEventDetails featureEventDetails = MapEventUtil
                 .getFeatureEventDetails(source.getRawConfiguration(),
-                        source.getFeatureLayer().getId(), featureId);
+                        featureId);
 
         this.feature = featureEventDetails.getFeature();
         this.coordinate = new Coordinate(coordinate.getNumber(0),

@@ -35,4 +35,15 @@ public class Translate extends Interaction {
         addChild(feature);
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if ((obj == null) || (getClass() != obj.getClass()))
+            return false;
+        Translate other = (Translate) obj;
+        return getType().equals(other.getType())
+                && feature.getId().equals(other.getFeature().getId());
+    }
+
 }
