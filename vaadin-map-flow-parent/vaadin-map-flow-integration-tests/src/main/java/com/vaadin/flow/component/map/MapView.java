@@ -86,10 +86,18 @@ public class MapView extends Div {
                     updateNumMarkers(map.getFeatureLayer().getSource());
                 });
 
+        NativeButton disableInteractions = new NativeButton(
+                "Disable map interactions",
+                e -> map.getInteractions().forEach(i -> i.setActive(false)));
+
+        NativeButton enableInteractions = new NativeButton(
+                "Enable map interactions",
+                e -> map.getInteractions().forEach(i -> i.setActive(true)));
+
         add(map);
         add(new Div(toggleLayerVisible, useOpenCycleMap, useOpenStreetMap,
                 addSeaMapLayer, addRandomMarkers, showNuremberg,
-                showSaintNazaire));
+                showSaintNazaire, disableInteractions, enableInteractions));
 
         add(new Div(numMarkers));
     }
