@@ -82,7 +82,7 @@ public class ComboBoxBinderValidationTest {
 
     @Test
     public void setValidValue_binderValidationPasses() {
-        var binder = attachBinderToField();
+        attachBinderToField();
 
         field.setValue("foo");
 
