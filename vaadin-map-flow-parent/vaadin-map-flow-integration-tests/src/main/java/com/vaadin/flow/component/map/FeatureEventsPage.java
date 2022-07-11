@@ -5,6 +5,7 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.Feature;
 import com.vaadin.flow.component.map.configuration.feature.MarkerFeature;
+import com.vaadin.flow.component.map.configuration.interaction.Translate;
 import com.vaadin.flow.component.map.configuration.layer.FeatureLayer;
 import com.vaadin.flow.component.map.configuration.layer.VectorLayer;
 import com.vaadin.flow.component.map.configuration.source.VectorSource;
@@ -85,7 +86,30 @@ public class FeatureEventsPage extends Div {
         addFirstLayerFeatureClickListener
                 .setId("add-first-layer-feature-click-listener");
 
+        NativeButton enableFeatureDragging = new NativeButton(
+                "Enable dragging for second marker only", e -> {
+                    Translate translate = new Translate(secondMarkerFeature);
+                    map.addInteraction(translate);
+                });
+
+        NativeButton disableFeatureDragging = new NativeButton(
+                "Disable dragging for second marker only", e -> {
+                    Translate translate = new Translate(secondMarkerFeature);
+                    map.removeInteraction(translate);
+                });
+
+        map.addFeatureDropListener(event -> {
+            Feature feature = event.getFeature();
+            if (feature instanceof MarkerFeature) {
+                MarkerFeature marker = (MarkerFeature) feature;
+                marker.setCoordinates(event.getCoordinate());
+                eventLog.setText(String.format("Moved marker to %s%n",
+                        Coordinate.toLonLat(event.getCoordinate())));
+            }
+        });
+
         add(map, new Div(addGlobalFeatureClickListener,
-                addFirstLayerFeatureClickListener), eventLog);
+                addFirstLayerFeatureClickListener, enableFeatureDragging,
+                disableFeatureDragging), eventLog);
     }
 }
