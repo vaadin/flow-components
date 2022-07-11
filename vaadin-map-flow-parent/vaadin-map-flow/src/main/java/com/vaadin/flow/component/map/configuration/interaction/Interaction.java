@@ -23,6 +23,7 @@ public abstract class Interaction extends AbstractConfigurationObject {
 
     public void setActive(boolean active) {
         this.active = active;
+        markAsDirty();
     }
 
 }
