@@ -17,6 +17,7 @@ package com.vaadin.flow.component.map;
  */
 
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.map.configuration.Configuration;
@@ -69,6 +70,39 @@ public class Map extends MapBase {
 
     private Layer backgroundLayer;
     private final FeatureLayer featureLayer;
+
+    /**
+     * Sets the projection (or coordinate system) to use for all coordinates.
+     * That means that all coordinates passed to, or returned from the public
+     * API, must be in this projection. Internally the coordinates will be
+     * converted into the projection that is used by the map's {@link View}.
+     * <p>
+     * By default, the user projection is set to {@code EPSG:4326}, also known
+     * as latitude / longitude, or GPS coordinates.
+     * <p>
+     * This setting affects all maps in the current {@link UI}, currently it is
+     * not possible to configure this per map instance. This method may only be
+     * invoked inside of UI threads, and will throw otherwise.
+     * <p>
+     * This method should be called before creating any maps. Changing this
+     * setting does not affect existing maps, specifically the component does
+     * not convert coordinates configured in an existing map into the new
+     * projection. Instead, existing maps should be recreated after changing
+     * this setting.
+     *
+     * @param projection
+     *            the user projection to use for all public facing API
+     */
+    public static void setUserProjection(String projection) {
+        UI ui = UI.getCurrent();
+        if (ui == null || ui.getPage() == null) {
+            throw new IllegalStateException(
+                    "Setting a user projection requires a current UI, and a page.");
+        }
+        UI.getCurrent().getPage().executeJs(
+                "window.Vaadin.Flow.mapConnector.setUserProjection($0)",
+                projection);
+    }
 
     public Map() {
         super();

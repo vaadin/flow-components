@@ -329,6 +329,11 @@ public class MapElement extends TestBenchElement {
                 String expression) {
             super(executor, expression);
         }
+
+        public boolean isTileLoaded(int z, int x, int y) {
+            String tileKey = String.format("%s/%s/%s", z, x, y);
+            return getBoolean("tileCache.containsKey('%s')", tileKey);
+        }
     }
 
     public static class TileWmsSourceReference extends UrlTileSourceReference {
