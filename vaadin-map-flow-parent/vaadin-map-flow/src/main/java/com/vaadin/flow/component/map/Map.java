@@ -173,12 +173,19 @@ public class Map extends MapBase {
     }
 
     /**
-     * Sets the center of the map's viewport in format specified by projection
-     * set on the view, which defaults to {@code EPSG:3857}
+     * Sets the center of the map's viewport. Coordinates must be specified in
+     * the map's user projection, which by default is {@code EPSG:4326}, also
+     * referred to as GPS coordinates.
      * <p>
      * This is a convenience method that delegates to the map's internal
      * {@link View}. See {@link #getView()} for accessing other properties of
      * the view.
+     * <p>
+     * Note that the user projection is a different concept than the view
+     * projection set in the map's {@link View}. The view projection affects how
+     * map data is interpreted and rendered, while the user projection defines
+     * the coordinate system that all coordinates passed to, or returned from
+     * the public API must be in.
      *
      * @param center
      *            new center of the viewport

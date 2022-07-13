@@ -31,7 +31,7 @@ public class MapEventsPage extends Div {
         int numOverlappingMarkers = 3;
         for (int i = 0; i < numOverlappingMarkers; i++) {
             MarkerFeature overlappingMarker = new MarkerFeature(
-                    new Coordinate(2000000, 0));
+                    new Coordinate(20, 0));
             overlappingMarker.setId("overlapping-marker-feature-" + (i + 1));
             map.getFeatureLayer().addFeature(overlappingMarker);
         }
