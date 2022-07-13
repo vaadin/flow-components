@@ -18,8 +18,6 @@ package com.vaadin.flow.component.map.configuration.geometry;
 
 import com.vaadin.flow.component.map.configuration.Constants;
 import com.vaadin.flow.component.map.configuration.Coordinate;
-import com.vaadin.flow.component.map.configuration.View;
-import com.vaadin.flow.component.map.configuration.source.Source;
 
 import java.util.Objects;
 
@@ -36,9 +34,9 @@ public class Point extends SimpleGeometry {
     }
 
     /**
-     * Creates a new point geometry located at the specified coordinates.The
-     * coordinates must be in the same projection as the
-     * {@link View#getProjection()} and {@link Source#getProjection()}.
+     * Creates a new point geometry located at the specified coordinates.
+     * Coordinates must be specified in the map's user projection, which by
+     * default is {@code EPSG:4326}, also referred to as GPS coordinates.
      *
      * @param coordinates
      *            the coordinates that locate the point
@@ -58,9 +56,9 @@ public class Point extends SimpleGeometry {
     }
 
     /**
-     * Sets the coordinates that locate the point. The coordinates must be in
-     * the same projection as the {@link View#getProjection()} and
-     * {@link Source#getProjection()}.
+     * Sets the coordinates that locate the point. Coordinates must be specified
+     * in the map's user projection, which by default is {@code EPSG:4326}, also
+     * referred to as GPS coordinates.
      *
      * @param coordinates
      *            the new coordinates, not null
