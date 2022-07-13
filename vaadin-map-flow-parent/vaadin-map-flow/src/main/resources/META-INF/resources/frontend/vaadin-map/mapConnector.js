@@ -121,10 +121,6 @@ openLayersSetUserProjection('EPSG:4326');
         mapElement.dispatchEvent(featureClickEvent);
       }
     });
-
-    mapElement.configuration.on('rendercomplete', () => {
-      console.log('###rendercomplete');
-    });
   }
 
   window.Vaadin.Flow.mapConnector = {
