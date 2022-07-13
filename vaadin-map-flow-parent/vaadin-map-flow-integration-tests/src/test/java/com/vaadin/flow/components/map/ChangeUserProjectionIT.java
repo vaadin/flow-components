@@ -23,11 +23,14 @@ public class ChangeUserProjectionIT extends AbstractComponentIT {
 
     @Test
     public void initWithEpsg3857UserProjection_setViewportUsingEpsg3857Coordinates_correctViewport() {
-        // Verify correct viewport by checking that the Turku map tile for the configured zoom level is visible
-        // This is the map tile containing Turku for zoom level 10: https://c.tile.openstreetmap.org/10/575/294.png
-        MapElement.LayerReference layer = map.getMapReference().getLayers().getLayer("background-layer");
+        // Verify correct viewport by checking that the Turku map tile for the
+        // configured zoom level is visible
+        // This is the map tile containing Turku for zoom level 10:
+        // https://c.tile.openstreetmap.org/10/575/294.png
+        MapElement.LayerReference layer = map.getMapReference().getLayers()
+                .getLayer("background-layer");
         MapElement.XyzSourceReference source = layer.getSource().asXyzSource();
-        waitUntilMapTileLoaded(source,10, 575, 294);
+        waitUntilMapTileLoaded(source, 10, 575, 294);
     }
 
     @Test
@@ -35,10 +38,13 @@ public class ChangeUserProjectionIT extends AbstractComponentIT {
         // Simulate user changing the viewport of the map to Berlin
         MapElement.MapReference mapReference = map.getMapReference();
         MapElement.ViewReference view = mapReference.getView();
-        view.setCenter(new MapElement.Coordinate(1491592.169957, 6893740.925498));
+        view.setCenter(
+                new MapElement.Coordinate(1491592.169957, 6893740.925498));
 
-        // Double-check Berlin map tile is visible (https://a.tile.openstreetmap.org/10/550/335.png)
-        MapElement.LayerReference layer = map.getMapReference().getLayers().getLayer("background-layer");
+        // Double-check Berlin map tile is visible
+        // (https://a.tile.openstreetmap.org/10/550/335.png)
+        MapElement.LayerReference layer = map.getMapReference().getLayers()
+                .getLayer("background-layer");
         MapElement.XyzSourceReference source = layer.getSource().asXyzSource();
         waitUntilMapTileLoaded(source, 10, 550, 335);
 
@@ -51,7 +57,8 @@ public class ChangeUserProjectionIT extends AbstractComponentIT {
         Assert.assertEquals(6893740.925498, centerY, 0.001);
     }
 
-    private void waitUntilMapTileLoaded(MapElement.XyzSourceReference source, int z, int x, int y) {
+    private void waitUntilMapTileLoaded(MapElement.XyzSourceReference source,
+            int z, int x, int y) {
         waitUntil(driver -> source.isTileLoaded(z, x, y));
     }
 }

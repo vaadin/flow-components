@@ -61,6 +61,15 @@ import java.util.Objects;
  * The viewport of the map is controlled through a {@link View}, which allows
  * setting the center, zoom level and rotation. The map's view can be accessed
  * through {@link Map#getView()}.
+ * <p>
+ * The default projection, or coordinate system, for all coordinates passed to,
+ * or returned from the public API is {@code EPSG:4326}, also referred to as GPS
+ * coordinates. This is called the user projection. Internally the component
+ * converts all coordinates into the projection that is used by the map's
+ * {@link View}, which is referred to as the view projection. The user
+ * projection can be changed using {@link #setUserProjection(String)}. Out of
+ * the box, the map component has support for the {@code EPSG:4326} and
+ * {@code EPSG:3857} projections.
  */
 @Tag("vaadin-map")
 @NpmPackage(value = "@vaadin/map", version = "23.2.0-alpha3")
@@ -209,7 +218,9 @@ public class Map extends MapBase {
     /**
      * Sets the center of the map's viewport. Coordinates must be specified in
      * the map's user projection, which by default is {@code EPSG:4326}, also
-     * referred to as GPS coordinates.
+     * referred to as GPS coordinates. If the user projection has been changed
+     * using {@link Map#setUserProjection(String)}, then coordinates must be
+     * specified in that projection instead.
      * <p>
      * This is a convenience method that delegates to the map's internal
      * {@link View}. See {@link #getView()} for accessing other properties of
