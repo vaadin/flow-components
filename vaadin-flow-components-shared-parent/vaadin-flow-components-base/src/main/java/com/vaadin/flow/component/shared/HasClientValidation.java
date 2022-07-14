@@ -61,9 +61,9 @@ public interface HasClientValidation extends Serializable {
          * @param valid
          *            whether the client-side validation succeeded.
          */
-        public ClientValidatedEvent(Component source,
+        public ClientValidatedEvent(Component source, boolean fromClient,
                 @EventData("event.detail.valid") boolean valid) {
-            super(source, true);
+            super(source, fromClient);
             this.valid = valid;
         }
 
