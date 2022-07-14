@@ -69,7 +69,8 @@ import java.util.Objects;
  * {@link View}, which is referred to as the view projection. The user
  * projection can be changed using {@link #setUserProjection(String)}. Out of
  * the box, the map component has support for the {@code EPSG:4326} and
- * {@code EPSG:3857} projections.
+ * {@code EPSG:3857} projections. Custom coordinate projections can be defined
+ * using {@link #defineProjection(String, String)}.
  */
 @Tag("vaadin-map")
 @NpmPackage(value = "@vaadin/map", version = "23.2.0-alpha3")
@@ -124,6 +125,38 @@ public class Map extends MapBase {
                 projection);
     }
 
+    /**
+     * Defines a custom coordinate projection that can then be used as user
+     * projection or view projection. Defining a projection requires a name,
+     * which is then used to reference it when setting a user or view
+     * projection, as well as a projection definition in the Well Known Text
+     * (WKS) format. A handy resource for looking up WKS definitions is
+     * <a href="https://epsg.io/">epsg.io</a>, which allows to search for
+     * projections, get coordinates from a map, as well as transform coordinates
+     * between projections.
+     * <p>
+     * This definition is valid for the lifetime of the current {@link UI}. This
+     * method may only be invoked inside of UI threads, and will throw
+     * otherwise. This definition being scoped to the current UI means that it
+     * will stay active when navigating between pages using the Vaadin router,
+     * but not when doing a "hard" location change, or when reloading the page.
+     * As such it is recommended to apply this definition on every page that
+     * displays maps. Note that when using the preserve on refresh feature, a
+     * view's constructor is not called. In that case this definition can be
+     * applied in an attach listener.
+     * <p>
+     * This method should be called before creating any maps that want to make
+     * use of this projection, and before setting it as a custom user
+     * projection.
+     *
+     * @see #setUserProjection(String)
+     * @see View
+     * @param projectionName
+     *            the name of the projection that can be referenced when setting
+     *            a user or view projection
+     * @param wksDefinition
+     *            the Well Known Text (WKS) definition of the projection
+     */
     public static void defineProjection(String projectionName,
             String wksDefinition) {
         UI ui = UI.getCurrent();
