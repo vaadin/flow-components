@@ -10,8 +10,11 @@ public class DefineCustomProjectionPage extends Div {
 
     // WKS for ETRS89 / TM35FIN(E,N) -- Finland
     // Source: https://epsg.io/3067
+    //
+    //@formatter:off
     private static final String EPSG_3067_WKS = ""
-            + "PROJCS[\"ETRS89 / TM35FIN(E,N)\",\n" + "    GEOGCS[\"ETRS89\",\n"
+            + "PROJCS[\"ETRS89 / TM35FIN(E,N)\",\n"
+            + "    GEOGCS[\"ETRS89\",\n"
             + "        DATUM[\"European_Terrestrial_Reference_System_1989\",\n"
             + "            SPHEROID[\"GRS 1980\",6378137,298.257222101,\n"
             + "                AUTHORITY[\"EPSG\",\"7019\"]],\n"
@@ -33,6 +36,7 @@ public class DefineCustomProjectionPage extends Div {
             + "    AXIS[\"Easting\",EAST],\n"
             + "    AXIS[\"Northing\",NORTH],\n"
             + "    AUTHORITY[\"EPSG\",\"3067\"]]";
+    //@formatter:on
 
     public DefineCustomProjectionPage() {
         // Define custom EPSG:3067 projection
