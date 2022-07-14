@@ -91,7 +91,14 @@ public class Map extends MapBase {
      * <p>
      * This setting affects all maps in the current {@link UI}, currently it is
      * not possible to configure this per map instance. This method may only be
-     * invoked inside of UI threads, and will throw otherwise.
+     * invoked inside of UI threads, and will throw otherwise. This setting
+     * being scoped to the current UI means that it will stay active when
+     * navigating between pages using the Vaadin router, but not when doing a
+     * "hard" location change, or when reloading the page. As such it is
+     * recommended to apply this setting on every page that displays maps. Note
+     * that when using the preserve on refresh feature, a view's constructor is
+     * not called. In that case this setting can be applied in an attach
+     * listener.
      * <p>
      * This method should be called before creating any maps. Changing this
      * setting does not affect existing maps, specifically the component does
