@@ -63,4 +63,10 @@ public class Point extends SimpleGeometry {
         this.coordinates = coordinates;
         markAsDirty();
     }
+
+    @Override
+    public void translate(double deltaX, double deltaY) {
+        setCoordinates(new Coordinate(coordinates.getX() + deltaX,
+                coordinates.getY() + deltaY));
+    }
 }

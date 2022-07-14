@@ -63,6 +63,7 @@ function synchronizeFeature(target, source, context) {
 
   target.setGeometry(context.lookup.get(source.geometry));
   target.setStyle(context.lookup.get(source.style));
+  target.draggable = source.draggable;
 
   return target;
 }

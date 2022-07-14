@@ -14,4 +14,13 @@ import com.vaadin.flow.component.map.configuration.AbstractConfigurationObject;
  * Abstract base class for geometries
  */
 public abstract class SimpleGeometry extends AbstractConfigurationObject {
+    /**
+     * Translate the geometry by the specified delta
+     *
+     * @param deltaX
+     *            amount to move on x-axis
+     * @param deltaY
+     *            amount to move on y-axis
+     */
+    public abstract void translate(double deltaX, double deltaY);
 }

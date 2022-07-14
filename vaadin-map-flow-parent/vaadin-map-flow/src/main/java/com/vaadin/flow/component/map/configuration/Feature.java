@@ -11,6 +11,8 @@ package com.vaadin.flow.component.map.configuration;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.map.Map;
 import com.vaadin.flow.component.map.configuration.geometry.Point;
 import com.vaadin.flow.component.map.configuration.geometry.SimpleGeometry;
 import com.vaadin.flow.component.map.configuration.style.Style;
@@ -25,6 +27,7 @@ public abstract class Feature extends AbstractConfigurationObject {
 
     private SimpleGeometry geometry;
     private Style style;
+    private boolean draggable;
 
     @Override
     public String getType() {
@@ -78,5 +81,29 @@ public abstract class Feature extends AbstractConfigurationObject {
         removeChild(this.style);
         this.style = style;
         addChild(style);
+    }
+
+    /**
+     * Whether the feature can be dragged on the map using pointing devices or
+     * not
+     */
+    public boolean isDraggable() {
+        return draggable;
+    }
+
+    /**
+     * Sets whether the feature can be dragged on the map using pointing devices
+     * or not. Enabling this will make the feature draggable on the map,
+     * indicated by a pointer cursor when hovering over the feature. The
+     * feature's position / geometry is automatically updated after dropping the
+     * feature. Use
+     * {@link Map#addFeatureDragDropListener(ComponentEventListener)} to get
+     * notified when a feature has been moved.
+     *
+     * @param draggable
+     *            whether the feature can be dragged or not
+     */
+    public void setDraggable(boolean draggable) {
+        this.draggable = draggable;
     }
 }
