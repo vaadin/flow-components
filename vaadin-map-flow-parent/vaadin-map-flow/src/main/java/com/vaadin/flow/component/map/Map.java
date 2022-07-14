@@ -73,6 +73,7 @@ import java.util.Objects;
  */
 @Tag("vaadin-map")
 @NpmPackage(value = "@vaadin/map", version = "23.2.0-alpha3")
+@NpmPackage(value = "proj4", version = "2.8.0")
 @JsModule("@vaadin/map/src/vaadin-map.js")
 @JsModule("./vaadin-map/mapConnector.js")
 public class Map extends MapBase {
@@ -121,6 +122,18 @@ public class Map extends MapBase {
         UI.getCurrent().getPage().executeJs(
                 "window.Vaadin.Flow.mapConnector.setUserProjection($0)",
                 projection);
+    }
+
+    public static void defineProjection(String projectionName,
+            String wksDefinition) {
+        UI ui = UI.getCurrent();
+        if (ui == null || ui.getPage() == null) {
+            throw new IllegalStateException(
+                    "Defining a projection requires a current UI, and a page.");
+        }
+        UI.getCurrent().getPage().executeJs(
+                "window.Vaadin.Flow.mapConnector.defineProjection($0, $1)",
+                projectionName, wksDefinition);
     }
 
     public Map() {

@@ -1,4 +1,6 @@
 import { setUserProjection as openLayersSetUserProjection } from 'ol/proj';
+import { register as openLayersRegisterProjections } from 'ol/proj/proj4';
+import proj4 from 'proj4';
 import { synchronize } from './synchronization';
 import { createLookup, getLayerForFeature } from './util';
 
@@ -112,8 +114,24 @@ openLayersSetUserProjection('EPSG:4326');
     openLayersSetUserProjection(projection);
   }
 
+  /**
+   * Define a coordinate projection that can be used as view or user projection.
+   * Projection definitions must be provided in the WKT (well known text) format.
+   * Internally the proj4 library is used to define the projection, which is then
+   * integrated with OpenLayers.
+   * @param projection
+   * @param wksDefinition
+   */
+  function defineProjection(projection, wksDefinition) {
+    // Define projection in proj4, and then integrate it with OpenLayers
+    // There should not be any side effects from calling either multiple times
+    proj4.defs(projection, wksDefinition);
+    openLayersRegisterProjections(proj4);
+  }
+
   window.Vaadin.Flow.mapConnector = {
     init,
     setUserProjection,
+    defineProjection
   };
 })();
