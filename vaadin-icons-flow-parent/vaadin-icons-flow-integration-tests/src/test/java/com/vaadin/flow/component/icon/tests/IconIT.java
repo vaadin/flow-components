@@ -75,8 +75,8 @@ public class IconIT extends AbstractComponentIT {
     }
 
     @Test
-    public void allAvailableVaadinIcons() {
-        WebElement allIcons = findElement(By.id("all-vaadin-icons"));
+    public void allAvailableIcons() {
+        WebElement allIcons = findElement(By.id("all-icons"));
         List<WebElement> labels = allIcons.findElements(By.tagName("label"));
         List<WebElement> icons = allIcons
                 .findElements(By.tagName("vaadin-icon"));
