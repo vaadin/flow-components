@@ -13,92 +13,38 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.icon.demo;
+package com.vaadin.flow.theme.lumo;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.IconFactory;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 
-/**
- * View for {@link Icon} demo.
- *
- * @author Vaadin Ltd
- */
-@Route("vaadin-icons/icon-view")
-@JsModule("@vaadin/vaadin-lumo-styles/vaadin-iconset.js")
-public class IconView extends Div {
+@Route("vaadin-lumo-theme/lumo-icon-view")
+public class LumoIconView extends Div {
 
-    public IconView() {
-        createBasicIconsView();
-        createStyledIconView();
-        createClickableIconsView();
-        createAllVaadinIconsView();
+    public LumoIconView() {
+        createAllLumoIconsView();
     }
 
-    private void createBasicIconsView() {
-        // Creating an icon from the Vaadin icons collection
-        Icon close = new Icon(VaadinIcon.CLOSE);
-
-        // Creating an icon from the Lumo icons collection
-        Icon clock = new Icon("lumo", "clock");
-
-        close.getStyle().set("marginRight", "5px");
-        addCard("Creating a new icon", new HorizontalLayout(close, clock));
-
-        close.setId("close-icon");
-        clock.setId("clock-icon");
-    }
-
-    private void createStyledIconView() {
-        Icon logo = new Icon(VaadinIcon.VAADIN_H);
-        logo.setSize("100px");
-        logo.setColor("orange");
-
-        addCard("Styling an icon", logo);
-
-        logo.setId("logo-icon");
-    }
-
-    private void createClickableIconsView() {
-        Div message = new Div();
-        Icon logoV = new Icon(VaadinIcon.VAADIN_V);
-        logoV.getStyle().set("cursor", "pointer");
-        logoV.addClickListener(
-                event -> message.setText("The VAADIN_V icon was clicked!"));
-
-        Icon logoH = new Icon(VaadinIcon.VAADIN_H);
-        logoH.getStyle().set("cursor", "pointer");
-        logoH.addClickListener(
-                event -> message.setText("The VAADIN_H icon was clicked!"));
-
-        addCard("Clickable icons", new HorizontalLayout(logoV, logoH), message);
-
-        logoV.setId("clickable-v-icon");
-        logoH.setId("clickable-h-icon");
-        message.setId("clickable-message");
-    }
-
-    private void createAllVaadinIconsView() {
+    private void createAllLumoIconsView() {
         HorizontalLayout iconLayout = new HorizontalLayout();
         iconLayout.getStyle().set("flexWrap", "wrap");
 
         iconLayout.setDefaultVerticalComponentAlignment(Alignment.CENTER);
 
-        for (VaadinIcon icon : VaadinIcon.values()) {
+        for (LumoIcon icon : LumoIcon.values()) {
             iconLayout.add(iconWithName(icon, icon.name()));
         }
 
-        iconLayout.setId("all-vaadin-icons");
-        addCard("All available Vaadin icons", iconLayout);
+        iconLayout.setId("all-lumo-icons");
+        addCard("All available Lumo icons", iconLayout);
     }
 
     private VerticalLayout iconWithName(IconFactory iconFactory, String name) {
