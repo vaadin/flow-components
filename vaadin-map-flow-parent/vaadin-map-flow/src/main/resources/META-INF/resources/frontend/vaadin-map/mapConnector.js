@@ -47,7 +47,9 @@ openLayersSetUserProjection('EPSG:4326');
        * only results in a single render of the map.
        */
       forceRender() {
-        if (this._forceRenderTimeout) return;
+        if (this._forceRenderTimeout) {
+          return;
+        }
         this._forceRenderTimeout = setTimeout(() => {
           this._forceRenderTimeout = null;
           mapElement.configuration
