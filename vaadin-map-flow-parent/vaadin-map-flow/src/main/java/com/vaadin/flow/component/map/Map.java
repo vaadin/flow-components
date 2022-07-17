@@ -72,7 +72,7 @@ import java.util.Objects;
  * {@code EPSG:3857} projections.
  */
 @Tag("vaadin-map")
-@NpmPackage(value = "@vaadin/map", version = "23.2.0-alpha3")
+@NpmPackage(value = "@vaadin/map", version = "23.2.0-alpha4")
 @JsModule("@vaadin/map/src/vaadin-map.js")
 @JsModule("./vaadin-map/mapConnector.js")
 public class Map extends MapBase {
