@@ -4,6 +4,7 @@ import com.vaadin.flow.component.map.testbench.MapElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -26,22 +27,36 @@ public class ModifyStyleIT extends AbstractComponentIT {
 
     @Test
     public void setStyleImage_triggersRender() {
+        MapElement.LayerReference featureLayer = map.getMapReference()
+                .getLayers().getLayer("feature-layer");
+
         // Should start with initial render
         waitUntilRenderCount(1);
+        long initialRevision = featureLayer.getRevision();
 
         setStyleImage.click();
+
         // Should trigger another render
         waitUntilRenderCount(2);
+        // Feature layer revision should have increased
+        Assert.assertEquals(initialRevision + 1, featureLayer.getRevision());
     }
 
     @Test
     public void setImageScale_triggersRender() {
+        MapElement.LayerReference featureLayer = map.getMapReference()
+                .getLayers().getLayer("feature-layer");
+
         // Should start with initial render
         waitUntilRenderCount(1);
+        long initialRevision = featureLayer.getRevision();
 
         setImageScale.click();
+
         // Should trigger another render
         waitUntilRenderCount(2);
+        // Feature layer revision should have increased
+        Assert.assertEquals(initialRevision + 1, featureLayer.getRevision());
     }
 
     private void waitUntilRenderCount(int count) {

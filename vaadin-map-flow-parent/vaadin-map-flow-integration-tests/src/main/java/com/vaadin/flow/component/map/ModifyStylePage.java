@@ -12,6 +12,7 @@ import com.vaadin.flow.router.Route;
 public class ModifyStylePage extends Div {
     public ModifyStylePage() {
         Map map = new Map();
+        map.getFeatureLayer().setId("feature-layer");
 
         MarkerFeature marker = new MarkerFeature(new Coordinate(0, 0),
                 createIcon());
