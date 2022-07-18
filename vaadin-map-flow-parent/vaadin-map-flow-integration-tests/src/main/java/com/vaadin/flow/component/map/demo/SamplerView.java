@@ -39,8 +39,8 @@ public class SamplerView extends Div {
                     layer.setVisible(!layer.isVisible());
                 });
 
-        NativeButton useHumanitarianMap = new NativeButton("Use Humanitarian Map",
-                e -> {
+        NativeButton useHumanitarianMap = new NativeButton(
+                "Use Humanitarian Map", e -> {
                     OSMSource.Options options = new OSMSource.Options();
                     options.setUrl(
                             "https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png");
