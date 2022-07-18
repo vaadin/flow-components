@@ -17,6 +17,7 @@ package com.vaadin.flow.component.map.configuration;
  */
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.vaadin.flow.component.map.Map;
 import com.vaadin.flow.component.map.configuration.source.Source;
 
 import java.util.Objects;
@@ -76,7 +77,9 @@ public class View extends AbstractConfigurationObject {
     /**
      * Sets the center of the map's viewport. Coordinates must be specified in
      * the map's user projection, which by default is {@code EPSG:4326}, also
-     * referred to as GPS coordinates.
+     * referred to as GPS coordinates. If the user projection has been changed
+     * using {@link Map#setUserProjection(String)}, then coordinates must be
+     * specified in that projection instead.
      * <p>
      * Note that the user projection is a different concept than the view
      * projection set in this view. The view projection affects how map data is

@@ -16,10 +16,14 @@ package com.vaadin.flow.component.map.configuration;
  * #L%
  */
 
+import com.vaadin.flow.component.map.Map;
+
 /**
  * Defines an area within a map using min/max coordinates. Coordinates must be
  * specified in the map's user projection, which by default is
- * {@code EPSG:4326}, also referred to as GPS coordinates.
+ * {@code EPSG:4326}, also referred to as GPS coordinates. If the user
+ * projection has been changed using {@link Map#setUserProjection(String)}, then
+ * coordinates must be specified in that projection instead.
  */
 public class Extent {
     private final double minX;
