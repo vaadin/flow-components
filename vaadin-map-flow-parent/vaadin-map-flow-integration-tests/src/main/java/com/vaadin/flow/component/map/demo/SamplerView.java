@@ -39,11 +39,11 @@ public class SamplerView extends Div {
                     layer.setVisible(!layer.isVisible());
                 });
 
-        NativeButton useOpenCycleMap = new NativeButton("Use OpenCycleMap",
+        NativeButton useHumanitarianMap = new NativeButton("Use Humanitarian Map",
                 e -> {
                     OSMSource.Options options = new OSMSource.Options();
                     options.setUrl(
-                            "https://{a-c}.tile.thunderforest.com/cycle/{z}/{x}/{y}.png?apikey=187baf2db9fc454896c700ef9e87f499");
+                            "https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png");
                     OSMSource source = new OSMSource(options);
                     TileLayer layer = new TileLayer();
                     layer.setSource(source);
@@ -87,7 +87,7 @@ public class SamplerView extends Div {
                 });
 
         add(map);
-        add(new Div(toggleLayerVisible, useOpenCycleMap, useOpenStreetMap,
+        add(new Div(toggleLayerVisible, useHumanitarianMap, useOpenStreetMap,
                 addSeaMapLayer, addRandomMarkers, showNuremberg,
                 showSaintNazaire));
 
