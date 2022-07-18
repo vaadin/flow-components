@@ -46,7 +46,7 @@ public class NumberFieldPageIT extends AbstractComponentIT {
         NumberFieldElement numberField = $(NumberFieldElement.class).first();
         Assert.assertNull(numberField.getProperty("min"));
         Assert.assertNull(numberField.getProperty("max"));
-        Assert.assertEquals("", numberField.getPropertyString("step"));
+        Assert.assertEquals(null, numberField.getPropertyString("step"));
     }
 
     @Test
