@@ -26,7 +26,7 @@ openLayersSetUserProjection('EPSG:4326');
        */
       synchronize(changedObjects) {
         // Provide synchronization function and the OL instance lookup through context object
-        const context = { synchronize, lookup: this.lookup };
+        const context = { synchronize, lookup: this.lookup, mapElement, connector: mapElement.$connector };
 
         changedObjects.forEach((change) => {
           // The OL map instance already exists and should not be created by the
@@ -36,6 +36,28 @@ openLayersSetUserProjection('EPSG:4326');
           }
 
           synchronize(change, context);
+        });
+      },
+      /**
+       * Forces a render of the OpenLayers map. Some objects in OpenLayers are not observable
+       * and do not trigger change events, for example Style objects or any of their children.
+       * In these cases this method can be called from the synchronization functions of these
+       * objects.
+       * This method will trigger a debounced render of the map by firing a change event from
+       * each layer. We simply render all layers as a sync. function does not know which layer
+       * its synced object is in. Even if the change event is fired from multiple layers, this
+       * only results in a single render of the map.
+       */
+      forceRender() {
+        if (this._forceRenderTimeout) {
+          return;
+        }
+        this._forceRenderTimeout = setTimeout(() => {
+          this._forceRenderTimeout = null;
+          mapElement.configuration
+            .getLayers()
+            .getArray()
+            .forEach((layer) => layer.changed());
         });
       }
     };

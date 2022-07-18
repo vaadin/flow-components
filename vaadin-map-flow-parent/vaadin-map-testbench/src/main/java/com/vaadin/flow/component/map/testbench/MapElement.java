@@ -287,6 +287,10 @@ public class MapElement extends TestBenchElement {
         public Long getZIndex() {
             return getLong("getZIndex()");
         }
+
+        public long getRevision() {
+            return getLong("getRevision()");
+        }
     }
 
     public static class SourceReference extends ConfigurationObjectReference {
