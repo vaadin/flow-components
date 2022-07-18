@@ -8,23 +8,27 @@ import {
   createOptions,
 } from "./util";
 
-export function synchronizeFill(target, source, _context) {
+export function synchronizeFill(target, source, context) {
   if (!target) {
     target = new Fill();
   }
 
   target.setColor(source.color);
 
+  context.connector.forceRender();
+
   return target;
 }
 
-export function synchronizeStroke(target, source, _context) {
+export function synchronizeStroke(target, source, context) {
   if (!target) {
     target = new Stroke();
   }
 
   target.setColor(source.color);
   target.setWidth(source.width);
+
+  context.connector.forceRender();
 
   return target;
 }
@@ -73,6 +77,8 @@ export function synchronizeIcon(target, source, context) {
   }
   synchronizeImageStyle(target, source, context);
 
+  context.connector.forceRender();
+
   return target;
 }
 
@@ -96,6 +102,8 @@ export function synchronizeStyle(target, source, context) {
       ? context.lookup.get(source.stroke)
       : undefined
   );
+
+  context.connector.forceRender();
 
   return target;
 }
