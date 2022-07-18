@@ -38,7 +38,8 @@ public class ModifyStyleIT extends AbstractComponentIT {
 
         // Should trigger another render
         waitUntilRenderCount(2);
-        // Feature layer revision should have increased
+        // Feature layer revision should have increased, indicating that the
+        // layer has been redrawn as part of the latest rendering
         Assert.assertEquals(initialRevision + 1, featureLayer.getRevision());
     }
 
@@ -55,7 +56,8 @@ public class ModifyStyleIT extends AbstractComponentIT {
 
         // Should trigger another render
         waitUntilRenderCount(2);
-        // Feature layer revision should have increased
+        // Feature layer revision should have increased, indicating that the
+        // layer has been redrawn as part of the latest rendering
         Assert.assertEquals(initialRevision + 1, featureLayer.getRevision());
     }
 
