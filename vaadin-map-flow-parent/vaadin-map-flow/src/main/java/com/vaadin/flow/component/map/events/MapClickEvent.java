@@ -78,7 +78,9 @@ public class MapClickEvent extends ComponentEvent<MapBase> {
     /**
      * Gets the coordinate of the click on viewport. Coordinates are returned in
      * the map's user projection, which by default is {@code EPSG:4326}, also
-     * referred to as GPS coordinates.
+     * referred to as GPS coordinates. If the user projection has been changed
+     * using {@link Map#setUserProjection(String)}, then coordinates must be
+     * specified in that projection instead.
      *
      * @return coordinate of the click
      */

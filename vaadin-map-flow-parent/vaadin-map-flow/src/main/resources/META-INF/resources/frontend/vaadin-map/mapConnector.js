@@ -103,7 +103,17 @@ openLayersSetUserProjection('EPSG:4326');
     });
   }
 
+  /**
+   * Set a custom user projection for all coordinates passing through the public API.
+   * Internally coordinates will be converted to the projection used by the map's view.
+   * @param projection
+   */
+  function setUserProjection(projection) {
+    openLayersSetUserProjection(projection);
+  }
+
   window.Vaadin.Flow.mapConnector = {
-    init
+    init,
+    setUserProjection,
   };
 })();
