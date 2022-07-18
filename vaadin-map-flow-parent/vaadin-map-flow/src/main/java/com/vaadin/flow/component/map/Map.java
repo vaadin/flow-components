@@ -17,6 +17,7 @@ package com.vaadin.flow.component.map;
  */
 
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.map.configuration.Configuration;
@@ -60,6 +61,15 @@ import java.util.Objects;
  * The viewport of the map is controlled through a {@link View}, which allows
  * setting the center, zoom level and rotation. The map's view can be accessed
  * through {@link Map#getView()}.
+ * <p>
+ * The default projection, or coordinate system, for all coordinates passed to,
+ * or returned from the public API is {@code EPSG:4326}, also referred to as GPS
+ * coordinates. This is called the user projection. Internally the component
+ * converts all coordinates into the projection that is used by the map's
+ * {@link View}, which is referred to as the view projection. The user
+ * projection can be changed using {@link #setUserProjection(String)}. Out of
+ * the box, the map component has support for the {@code EPSG:4326} and
+ * {@code EPSG:3857} projections.
  */
 @Tag("vaadin-map")
 @NpmPackage(value = "@vaadin/map", version = "23.2.0-alpha3")
@@ -69,6 +79,49 @@ public class Map extends MapBase {
 
     private Layer backgroundLayer;
     private final FeatureLayer featureLayer;
+
+    /**
+     * Sets the projection (or coordinate system) to use for all coordinates.
+     * That means that all coordinates passed to, or returned from the public
+     * API, must be in this projection. Internally the coordinates will be
+     * converted into the projection that is used by the map's {@link View}.
+     * <p>
+     * By default, the user projection is set to {@code EPSG:4326}, also known
+     * as latitude / longitude, or GPS coordinates.
+     * <p>
+     * This setting affects all maps in the current {@link UI}, currently it is
+     * not possible to configure this per map instance. This method may only be
+     * invoked inside of UI threads, and will throw otherwise. This setting
+     * being scoped to the current UI means that it will stay active when
+     * navigating between pages using the Vaadin router, but not when doing a
+     * "hard" location change, or when reloading the page. As such it is
+     * recommended to apply this setting on every page that displays maps. Note
+     * that when using the preserve on refresh feature, a view's constructor is
+     * not called. In that case this setting can be applied in an attach
+     * listener.
+     * <p>
+     * This method should be called before creating any maps. Changing this
+     * setting does not affect existing maps, specifically the component does
+     * not convert coordinates configured in an existing map into the new
+     * projection. Instead, existing maps should be recreated after changing
+     * this setting.
+     *
+     * @param projection
+     *            the user projection to use for all public facing API
+     */
+    public static void setUserProjection(String projection) {
+        UI ui = UI.getCurrent();
+        if (ui == null || ui.getPage() == null) {
+            throw new IllegalStateException("UI instance is not available. "
+                    + "It means that you are calling this method "
+                    + "out of a normal workflow where it's always implicitly set. "
+                    + "That may happen if you call the method from the custom thread without "
+                    + "'UI::access' or from tests without proper initialization.");
+        }
+        UI.getCurrent().getPage().executeJs(
+                "window.Vaadin.Flow.mapConnector.setUserProjection($0)",
+                projection);
+    }
 
     public Map() {
         super();
@@ -175,7 +228,9 @@ public class Map extends MapBase {
     /**
      * Sets the center of the map's viewport. Coordinates must be specified in
      * the map's user projection, which by default is {@code EPSG:4326}, also
-     * referred to as GPS coordinates.
+     * referred to as GPS coordinates. If the user projection has been changed
+     * using {@link Map#setUserProjection(String)}, then coordinates must be
+     * specified in that projection instead.
      * <p>
      * This is a convenience method that delegates to the map's internal
      * {@link View}. See {@link #getView()} for accessing other properties of
