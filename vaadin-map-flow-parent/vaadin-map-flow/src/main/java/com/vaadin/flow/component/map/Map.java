@@ -112,8 +112,11 @@ public class Map extends MapBase {
     public static void setUserProjection(String projection) {
         UI ui = UI.getCurrent();
         if (ui == null || ui.getPage() == null) {
-            throw new IllegalStateException(
-                    "Setting a user projection requires a current UI, and a page.");
+            throw new IllegalStateException("UI instance is not available. "
+                    + "It means that you are calling this method "
+                    + "out of a normal workflow where it's always implicitly set. "
+                    + "That may happen if you call the method from the custom thread without "
+                    + "'UI::access' or from tests without proper initialization.");
         }
         UI.getCurrent().getPage().executeJs(
                 "window.Vaadin.Flow.mapConnector.setUserProjection($0)",
