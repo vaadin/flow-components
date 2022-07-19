@@ -18,6 +18,9 @@ package com.vaadin.flow.component.menubar.testbench;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.openqa.selenium.By;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
@@ -27,6 +30,8 @@ import com.vaadin.testbench.elementsbase.Element;
  */
 @Element("vaadin-menu-bar")
 public class MenuBarElement extends TestBenchElement {
+
+    public static final String OVERLAY_TAG = "vaadin-context-menu-overlay";
 
     /**
      * Gets the button elements wrapping the root level items. This does not
@@ -44,7 +49,7 @@ public class MenuBarElement extends TestBenchElement {
     /**
      * Gets the button which opens the sub menu of overflowing items, or
      * {@code null} if the overflow button is not visible.
-     *
+     * 
      * @return the button which opens the sub menu of overflowing items
      */
     public TestBenchElement getOverflowButton() {
@@ -82,8 +87,7 @@ public class MenuBarElement extends TestBenchElement {
      *            The sub menu overlay from which items are being collected.
      * @return List of TestBenchElements representing sub menu items.
      */
-    public List<TestBenchElement> getSubMenuItems(
-            TestBenchElement overlay) {
+    public List<TestBenchElement> getSubMenuItems(TestBenchElement overlay) {
         return overlay.$("vaadin-context-menu-item").all();
     }
 
