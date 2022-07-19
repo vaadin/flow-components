@@ -16,13 +16,16 @@ package com.vaadin.flow.component.map.configuration;
  * #L%
  */
 
+import com.vaadin.flow.component.map.Map;
+
 import java.util.Objects;
 
 /**
- * Represents map coordinates in a specific projection. Which projection the
- * coordinates are in is not known by the coordinate itself, and developers must
- * ensure themselves to use the same projection between coordinates, the map
- * viewport, and map sources.
+ * Represents map coordinates in a specific projection. Coordinates must be
+ * specified in the map's user projection, which by default is
+ * {@code EPSG:4326}, also referred to as GPS coordinates. If the user
+ * projection has been changed using {@link Map#setUserProjection(String)}, then
+ * coordinates must be specified in that projection instead.
  */
 public class Coordinate {
     private final double x;
@@ -33,11 +36,12 @@ public class Coordinate {
     }
 
     /**
-     * Constructs a new coordinate instance from x and y coordinates. Unless the
-     * map's view uses a custom projection, it is assumed that the coordinates
-     * are in {@code EPSG:3857} / Web Mercator Sphere projection. To create
-     * coordinates from latitude and longitude, see
-     * {@link #fromLonLat(double, double)}.
+     * Constructs a new coordinate instance from x and y coordinates.
+     * Coordinates must be specified in the map's user projection, which by
+     * default is {@code EPSG:4326}, also referred to as GPS coordinates. If the
+     * user projection has been changed using
+     * {@link Map#setUserProjection(String)}, then coordinates must be specified
+     * in that projection instead.
      *
      * @param x
      * @param y

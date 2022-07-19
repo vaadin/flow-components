@@ -29,6 +29,7 @@ import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
@@ -277,5 +278,12 @@ public class TimePickerTest {
         assertTrue(timePicker.getElement().getProperty(PROP_AUTO_OPEN_DISABLED,
                 false));
         assertFalse(timePicker.isAutoOpen());
+    }
+
+    @Test
+    public void implementsHasAllowedCharPattern() {
+        Assert.assertTrue("TimePicker should support char pattern",
+                HasAllowedCharPattern.class
+                        .isAssignableFrom(new TimePicker().getClass()));
     }
 }

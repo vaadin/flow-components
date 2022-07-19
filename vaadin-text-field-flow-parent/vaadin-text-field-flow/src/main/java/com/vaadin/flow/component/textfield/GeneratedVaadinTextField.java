@@ -166,10 +166,10 @@ import com.vaadin.flow.shared.Registration;
  * </p>
  */
 @Tag("vaadin-text-field")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha4")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/text-field", version = "23.1.0")
-@NpmPackage(value = "@vaadin/vaadin-text-field", version = "23.1.0")
+@NpmPackage(value = "@vaadin/text-field", version = "23.2.0-alpha4")
+@NpmPackage(value = "@vaadin/vaadin-text-field", version = "23.2.0-alpha4")
 @JsModule("@vaadin/text-field/src/vaadin-text-field.js")
 public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextField<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
@@ -699,7 +699,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      * </p>
      *
      * @return the {@code preventInvalidInput} property from the webcomponent
+     *
+     * @deprecated Since 23.2, this API is deprecated.
      */
+    @Deprecated
     protected boolean isPreventInvalidInputBoolean() {
         return getElement().getProperty("preventInvalidInput", false);
     }
@@ -716,7 +719,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      *
      * @param preventInvalidInput
      *            the boolean value to set
+     *
+     * @deprecated Since 23.2, this API is deprecated.
      */
+    @Deprecated
     protected void setPreventInvalidInput(boolean preventInvalidInput) {
         getElement().setProperty("preventInvalidInput", preventInvalidInput);
     }

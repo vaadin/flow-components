@@ -138,6 +138,55 @@ public class GridViewSortingIT extends AbstractComponentIT {
         Assert.assertEquals(null, sorter.getAttribute("direction"));
     }
 
+    @Test
+    public void gridWithSorting_noMultiSort_secondSortColumnIgnored() {
+        GridElement grid = $(GridElement.class).id("grid-sortable-columns");
+        scrollToElement(grid);
+
+        WebElement sortByTwoColumnsButton = findElement(
+                By.id("grid-sortable-columns-sort-by-two"));
+        WebElement resetButton = findElement(
+                By.id("grid-sortable-columns-reset-sortings"));
+
+        clickElementWithJs(sortByTwoColumnsButton);
+
+        assertSortMessageEquals(QuerySortOrder.asc("age").build(), false);
+
+        clickElementWithJs(resetButton);
+
+        // enable multi sort
+        clickElementWithJs(findElement(By.id("grid-multi-sort-toggle")));
+
+        clickElementWithJs(sortByTwoColumnsButton);
+
+        assertSortMessageEquals(
+                QuerySortOrder.asc("age").thenDesc("firstName").build(), false);
+    }
+
+    @Test
+    public void gridWithSorting_multiSortPriorityAppend() {
+        GridElement grid = $(GridElement.class).id("grid-sortable-columns");
+        scrollToElement(grid);
+
+        // enable multi sort
+        clickElementWithJs(findElement(By.id("grid-multi-sort-toggle")));
+
+        // set multi-sort priority to append
+        clickElementWithJs(
+                findElement(By.id("grid-multi-sort-priority-toggle")));
+
+        getCellContent(grid.getHeaderCell(0)).click();
+        getCellContent(grid.getHeaderCell(1)).click();
+
+        assertSortMessageEquals(
+                QuerySortOrder.asc("firstName").thenAsc("age").build(), true);
+
+        getCellContent(grid.getHeaderCell(1)).click();
+
+        assertSortMessageEquals(
+                QuerySortOrder.asc("firstName").thenDesc("age").build(), true);
+    }
+
     private void assertSortMessageEquals(List<QuerySortOrder> querySortOrders,
             boolean fromClient) {
         String sortOrdersString = querySortOrders.stream()

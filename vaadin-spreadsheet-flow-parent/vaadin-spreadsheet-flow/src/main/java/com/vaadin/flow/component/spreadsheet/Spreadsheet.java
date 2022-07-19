@@ -31,12 +31,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 import java.util.WeakHashMap;
-import java.util.stream.Collectors;
 
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -75,8 +75,6 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
-import com.vaadin.flow.component.Focusable;
-import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
@@ -98,7 +96,6 @@ import com.vaadin.flow.component.spreadsheet.rpc.SpreadsheetClientRpc;
 import com.vaadin.flow.component.spreadsheet.shared.ContentMode;
 import com.vaadin.flow.component.spreadsheet.shared.ErrorLevel;
 import com.vaadin.flow.component.spreadsheet.shared.GroupingData;
-import com.vaadin.flow.component.spreadsheet.shared.PopupButtonState;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.pro.licensechecker.LicenseChecker;
@@ -116,8 +113,8 @@ import elemental.json.JsonValue;
 @Tag("vaadin-spreadsheet")
 @JsModule("./vaadin-spreadsheet/vaadin-spreadsheet.js")
 @SuppressWarnings("serial")
-public class Spreadsheet extends Component implements HasComponents, HasSize,
-        HasStyle, Action.Container, Focusable {
+public class Spreadsheet extends Component
+        implements HasSize, HasStyle, Action.Container {
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(Spreadsheet.class);
@@ -206,8 +203,6 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
 
     // private Map<String, URLReference> resources = new HashMap<>();
     private Map<String, String> resources = new HashMap<>();
-
-    private boolean enabled = true;
 
     /**
      * A set of event identifiers with registered listeners.
@@ -347,11 +342,6 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
 
     public Map<String, String> getResources() {
         return resources;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return enabled;
     }
 
     public Set<String> getRegisteredEventListeners() {
@@ -829,6 +819,25 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
                 Serializer.serialize(namedRanges));
     }
 
+    void onPopupButtonClick(int row, int column) {
+        PopupButton popup = sheetPopupButtons
+                .get(SpreadsheetUtil.relativeToAbsolute(this,
+                        new CellReference(row - 1, column - 1)));
+        if (popup != null) {
+            popup.openPopup();
+        }
+    }
+
+    void onPopupClose(int row, int column) {
+        PopupButton popup = sheetPopupButtons
+                .get(SpreadsheetUtil.relativeToAbsolute(this,
+                        new CellReference(row - 1, column - 1)));
+
+        if (popup != null) {
+            popup.closePopup();
+        }
+    }
+
     /*
      * CLIENT RPC
      */
@@ -1195,9 +1204,6 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
     protected String initialSheetSelection = null;
 
     private Set<Component> customComponents = new HashSet<Component>();
-
-    /* Disable buttons until table support #826 */
-    private static final boolean popupButtonsEnabled = true;
 
     private Map<CellReference, PopupButton> sheetPopupButtons = new HashMap<CellReference, PopupButton>();
 
@@ -2230,6 +2236,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
         SpreadsheetFactory.reloadSpreadsheetData(this,
                 workbook.getSheetAt(sheetIndex));
         reloadActiveSheetStyles();
+        loadPopupButtons();
     }
 
     /**
@@ -3789,7 +3796,15 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
         clearSheetOverlays();
         topLeftCellCommentsLoaded = false;
 
-        setReload(true);
+        Optional.ofNullable(UI.getCurrent()).ifPresent(ui -> {
+            ui.beforeClientResponse(this, e -> {
+                if (reload) {
+                    this.updateReloadState();
+                }
+            });
+        });
+
+        reload = true;
 
         setSheetIndex(
                 getSpreadsheetSheetIndex(workbook.getActiveSheetIndex()) + 1);
@@ -3985,15 +4000,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
         return clientRpc;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.vaadin.ui.AbstractComponent#beforeClientResponse(boolean)
-     */
-    // @Override
-    public void beforeClientResponse(boolean initial) {
-        // todo: reubicar este código
-        // super.beforeClientResponse(initial);
+    private void updateReloadState() {
         if (reload) {
             setReload(reload);
             reload = false;
@@ -4804,22 +4811,24 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
     }
 
     private void registerPopupButton(PopupButton button) {
-        if (popupButtonsEnabled) {
-            attachedPopupButtons.add(button);
-            registerCustomComponent(button);
+        attachedPopupButtons.add(button);
+        registerCustomComponent(button);
+        if (!getElement().equals(button.getElement().getParent())) {
+            getElement().appendVirtualChild(button.getElement());
         }
     }
 
     private void unRegisterPopupButton(PopupButton button) {
         attachedPopupButtons.remove(button);
         unRegisterCustomComponent(button);
+        if (getElement().equals(button.getElement().getParent())) {
+            getElement().removeVirtualChild(button.getElement());
+        }
     }
 
     private void registerCustomComponent(PopupButton component) {
-        List<PopupButtonState> popupButtonStates = attachedPopupButtons.stream()
-                .map(p -> p.getState()).collect(Collectors.toList());
-        getElement().setProperty("popupbuttons",
-                Serializer.serialize(popupButtonStates));
+        getElement().callJsFunction("addPopupButton",
+                Serializer.serialize(component.getState()));
     }
 
     private void registerCustomComponent(Component component) {
@@ -4831,7 +4840,8 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
     }
 
     private void unRegisterCustomComponent(PopupButton component) {
-        getElement().removeProperty("popupbuttons");
+        getElement().callJsFunction("removePopupButton",
+                Serializer.serialize(component.getState()));
     }
 
     private void unRegisterCustomComponent(Component component) {
@@ -5948,27 +5958,6 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
         this.invalidFormulaErrorMessage = invalidFormulaErrorMessage;
         getElement().setProperty("invalidFormulaErrorMessage",
                 invalidFormulaErrorMessage);
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.vaadin.ui.Component.Focusable#getTabIndex()
-     */
-    @Override
-    public int getTabIndex() {
-        return this.tabIndex;
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.vaadin.ui.Component.Focusable#setTabIndex(int)
-     */
-    @Override
-    public void setTabIndex(int tabIndex) {
-        this.tabIndex = tabIndex;
-        getElement().setProperty("tabIndex", tabIndex);
     }
 
     /*

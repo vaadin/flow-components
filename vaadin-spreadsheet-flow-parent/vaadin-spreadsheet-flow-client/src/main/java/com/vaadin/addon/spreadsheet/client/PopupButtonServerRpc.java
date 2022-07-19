@@ -13,6 +13,7 @@ package com.vaadin.addon.spreadsheet.client;
  * #L%
  */
 
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.vaadin.shared.communication.ServerRpc;
 
 public interface PopupButtonServerRpc extends ServerRpc {
@@ -20,10 +21,10 @@ public interface PopupButtonServerRpc extends ServerRpc {
     /**
      * Called when the button has been clicked, and the pop-up has been opened.
      */
-    public void onPopupButtonClick();
+    public void onPopupButtonClick(int row, int column);
 
     /**
      * Called after the pop-up has been closed.
      */
-    public void onPopupClose();
+    public void onPopupClose(int row, int column);
 }

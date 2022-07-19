@@ -88,7 +88,7 @@ public class CustomSearchView extends VerticalLayout {
     }
 
     private Stream<Person> filter(Optional<String> filter) {
-        final String f = filter.get().toLowerCase();
+        final String f = filter.orElse("").toLowerCase();
         return data.stream()
                 .filter(p -> (p.getFirstName() != null)
                         && (p.getFirstName().toLowerCase().contains(f))

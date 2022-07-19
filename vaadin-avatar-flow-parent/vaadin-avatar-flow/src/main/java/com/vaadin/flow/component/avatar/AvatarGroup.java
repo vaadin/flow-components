@@ -63,11 +63,11 @@ import java.util.stream.Stream;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-avatar-group")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha4")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/avatar-group/src/vaadin-avatar-group.js")
-@NpmPackage(value = "@vaadin/avatar-group", version = "23.1.0")
-@NpmPackage(value = "@vaadin/vaadin-avatar", version = "23.1.0")
+@NpmPackage(value = "@vaadin/avatar-group", version = "23.2.0-alpha4")
+@NpmPackage(value = "@vaadin/vaadin-avatar", version = "23.2.0-alpha4")
 public class AvatarGroup extends Component implements HasStyle, HasSize,
         HasTheme, HasThemeVariant<AvatarGroupVariant> {
 
@@ -652,5 +652,19 @@ public class AvatarGroup extends Component implements HasStyle, HasSize,
         }
 
         return null;
+    }
+
+    // Override is only required to keep binary compatibility with other 23.x
+    // minor versions, can be removed in a future major
+    @Override
+    public void addThemeVariants(AvatarGroupVariant... variants) {
+        HasThemeVariant.super.addThemeVariants(variants);
+    }
+
+    // Override is only required to keep binary compatibility with other 23.x
+    // minor versions, can be removed in a future major
+    @Override
+    public void removeThemeVariants(AvatarGroupVariant... variants) {
+        HasThemeVariant.super.removeThemeVariants(variants);
     }
 }

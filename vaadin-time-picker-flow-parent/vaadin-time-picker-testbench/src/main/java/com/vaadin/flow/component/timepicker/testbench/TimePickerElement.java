@@ -182,8 +182,7 @@ public class TimePickerElement extends TestBenchElement
      *            the index of the item to scroll to
      */
     public void scrollToItem(int index) {
-        executeScript(
-                "arguments[0].$.dropdown._scroller.scrollIntoView(arguments[1])",
+        executeScript("arguments[0]._scroller.scrollIntoView(arguments[1])",
                 getTimePickerComboBox(), index);
     }
 

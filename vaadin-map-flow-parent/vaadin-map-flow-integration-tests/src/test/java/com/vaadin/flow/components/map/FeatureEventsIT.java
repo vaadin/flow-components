@@ -38,7 +38,7 @@ public class FeatureEventsIT extends AbstractComponentIT {
         // To prevent double-clicking, wait before we trigger the next event
         waitSeconds(1);
         // Click on second marker
-        map.clickAtCoordinates(2000000, 0);
+        map.clickAtCoordinates(20, 0);
         // Click events are delayed by around 250ms, wait for last event
         waitSeconds(1);
 
@@ -59,7 +59,7 @@ public class FeatureEventsIT extends AbstractComponentIT {
         // To prevent double-clicking, wait before we trigger the next event
         waitSeconds(1);
         // Click on second marker
-        map.clickAtCoordinates(2000000, 0);
+        map.clickAtCoordinates(20, 0);
         // Click events are delayed by around 250ms, wait for last event
         waitSeconds(1);
 
@@ -74,7 +74,7 @@ public class FeatureEventsIT extends AbstractComponentIT {
         addFirstLayerFeatureClickListener.click();
 
         // Click on overlapping markers
-        map.clickAtCoordinates(4000000, 0);
+        map.clickAtCoordinates(40, 0);
         // Click events are delayed by around 250ms, wait for event
         waitSeconds(1);
 

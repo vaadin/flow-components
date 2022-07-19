@@ -13,13 +13,13 @@
     <url>https://vaadin.com/components</url>
     <properties>
         <flow.version>23.2-SNAPSHOT</flow.version>
-        <testbench.version>8.0.2</testbench.version>
+        <testbench.version>8.1.0.alpha11</testbench.version>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8
                 </project.reporting.outputEncoding>
-        <jetty.version>9.4.46.v20220331</jetty.version>
+        <jetty.version>9.4.48.v20220622</jetty.version>
         <jetty.http.port>8080</jetty.http.port>
         <jetty.stop.port>9999</jetty.stop.port>
         <maven.surefire.plugin.version>2.22.2</maven.surefire.plugin.version>
@@ -459,7 +459,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>3.0.0</version>
+                    <version>3.1.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.sonatype.plugins</groupId>

@@ -206,10 +206,10 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha4")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/grid", version = "23.1.0")
-@NpmPackage(value = "@vaadin/vaadin-grid", version = "23.1.0")
+@NpmPackage(value = "@vaadin/grid", version = "23.2.0-alpha4")
+@NpmPackage(value = "@vaadin/vaadin-grid", version = "23.2.0-alpha4")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -387,6 +387,35 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
+     * Multi-sort priority (visually indicated by numbers in column headers)
+     * controls how columns are added to the sort order, when a column becomes
+     * sorted, or the sort direction of a column is changed.
+     * <p>
+     * Use {@link Grid#setMultiSort(boolean, MultiSortPriority)} to customize
+     * the multi-sort priority of an individual grid.
+     *
+     * @see Grid#setSelectionMode(SelectionMode)
+     * @see Grid#setMultiSort(boolean, MultiSortPriority)
+     */
+    public enum MultiSortPriority {
+        /**
+         * Whenever an unsorted column is sorted, it gets added at the end of
+         * the sort order, after all the previously sorted columns. When the
+         * sort direction of a column is changed by the user, the priority for
+         * all the sorted columns remains unchanged.
+         */
+        APPEND,
+
+        /**
+         * Whenever an unsorted column is sorted, or the sort direction of a
+         * column is changed, that column gets sort priority 1, and all the
+         * other sorted columns are updated accordingly. This is the default
+         * behavior of the component.
+         */
+        PREPEND
+    }
+
+    /**
      * Server-side component for the {@code <vaadin-grid-column>} element.
      *
      * <p>
@@ -399,7 +428,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-column")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha4")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class Column<T> extends AbstractColumn<Column<T>> {
 
@@ -3108,6 +3137,26 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
+     * Sets whether multiple column sorting is enabled on the client-side.
+     *
+     * @param multiSort
+     *            {@code true} to enable sorting of multiple columns on the
+     *            client-side, {@code false} to disable
+     * @param priority
+     *            the multi-sort priority to set, not {@code null}
+     *
+     * @see MultiSortPriority
+     */
+    public void setMultiSort(boolean multiSort, MultiSortPriority priority) {
+        Objects.requireNonNull(priority,
+                "Multi-sort priority must not be null");
+        setMultiSort(multiSort);
+
+        getElement().setAttribute("multi-sort-priority",
+                priority == MultiSortPriority.APPEND ? "append" : "prepend");
+    }
+
+    /**
      * Gets whether multiple column sorting is enabled on the client-side.
      *
      * @see #setMultiSort(boolean)
@@ -3235,6 +3284,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * For Grids with multi-sorting, the index of a given column inside the list
      * defines the sort priority. For example, the column at index 0 of the list
      * is sorted first, then on the index 1, and so on.
+     * <p>
+     * When Grid is not configured to have multi-sorting enabled, all the
+     * columns in the list except the first one are ignored.
      *
      * @param order
      *            the list of sort orders to set on the client, or
@@ -3245,6 +3297,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     public void sort(List<GridSortOrder<T>> order) {
         if (order == null) {
             order = Collections.emptyList();
+        }
+        if (!isMultiSort() && order.size() > 1) {
+            LoggerFactory.getLogger(Grid.class).warn(
+                    "Multiple sort columns provided but multi-sorting is not enabled.");
+            order = order.subList(0, 1);
         }
         setSortOrder(order, false);
     }

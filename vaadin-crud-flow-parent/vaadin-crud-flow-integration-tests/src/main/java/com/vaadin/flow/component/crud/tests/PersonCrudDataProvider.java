@@ -53,9 +53,10 @@ class PersonCrudDataProvider
 
         Stream<Person> stream = getDatabaseCopy().stream();
 
-        if (query.getFilter().isPresent()) {
-            stream = stream.filter(predicate(query.getFilter().get()))
-                    .sorted(comparator(query.getFilter().get()));
+        var filter = query.getFilter().orElse(null);
+        if (filter != null) {
+            stream = stream.filter(predicate(filter))
+                    .sorted(comparator(filter));
         }
 
         return stream.skip(offset).limit(limit);
@@ -86,7 +87,7 @@ class PersonCrudDataProvider
                         return value != null && value.toString().toLowerCase()
                                 .contains(constraint.getValue().toLowerCase());
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        e.printStackTrace(); // NOSONAR
                         return false;
                     }
                 }).reduce(Predicate::and).orElse(e -> true);

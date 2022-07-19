@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.combobox;
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.Tag;
@@ -27,10 +28,12 @@ import com.vaadin.flow.data.provider.IdentifierProviderChangeEvent;
 import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
+import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
 import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
+import elemental.json.JsonType;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -68,9 +71,9 @@ import java.util.Set;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-multi-select-combo-box")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha4")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/multi-select-combo-box", version = "23.1.0")
+@NpmPackage(value = "@vaadin/multi-select-combo-box", version = "23.2.0-alpha4")
 @JsModule("@vaadin/multi-select-combo-box/src/vaadin-multi-select-combo-box.js")
 @JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 @JsModule("./flow-component-renderer.js")
@@ -81,6 +84,7 @@ public class MultiSelectComboBox<TItem>
         HasThemeVariant<MultiSelectComboBoxVariant> {
 
     private final MultiSelectComboBoxSelectionModel<TItem> selectionModel;
+    private MultiSelectComboBoxI18n i18n;
 
     /**
      * Default constructor. Creates an empty combo box.
@@ -230,6 +234,15 @@ public class MultiSelectComboBox<TItem>
         setItems(items);
     }
 
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+
+        if (i18n != null) {
+            this.updateI18n();
+        }
+    }
+
     private static <T> Set<T> presentationToModel(
             MultiSelectComboBox<T> multiSelectComboBox,
             JsonArray presentation) {
@@ -320,6 +333,19 @@ public class MultiSelectComboBox<TItem>
         setValue(value);
     }
 
+    /**
+     * Sets the value of the component, which is a set of selected items. As
+     * each item can only be selected once, duplicates in the provided items
+     * will be removed. Passing no items will result in an empty selection.
+     *
+     * @param items
+     *            the new value
+     */
+    public void setValue(Collection<TItem> items) {
+        Set<TItem> value = new LinkedHashSet<>(items);
+        setValue(value);
+    }
+
     @Override
     protected void refreshValue() {
         Set<TItem> value = getValue();
@@ -365,6 +391,60 @@ public class MultiSelectComboBox<TItem>
             // Only update field value and generate change event if value has
             // actually changed
             super.setValue(selectionModel.getSelectedItems());
+        }
+    }
+
+    /**
+     * Gets the internationalization object previously set for this component.
+     * <p>
+     * Note: updating the i18n object that is returned from this method will not
+     * update the component, unless it is set again using
+     * {@link #setI18n(MultiSelectComboBoxI18n)}
+     *
+     * @return the i18n object. It will be <code>null</code>, if it has not been
+     *         set previously
+     */
+    public MultiSelectComboBoxI18n getI18n() {
+        return i18n;
+    }
+
+    /**
+     * Sets the internationalization properties for this component.
+     *
+     * @param i18n
+     *            the internationalized properties, not <code>null</code>
+     */
+    public void setI18n(MultiSelectComboBoxI18n i18n) {
+        Objects.requireNonNull(i18n,
+                "The I18N properties object should not be null");
+        this.i18n = i18n;
+        updateI18n();
+    }
+
+    /**
+     * Update I18N settings in the web component. Merges the
+     * {@link MultiSelectComboBoxI18n} settings with the current / default
+     * settings of the web component.
+     */
+    private void updateI18n() {
+        JsonObject i18nJson = (JsonObject) JsonSerializer.toJson(this.i18n);
+
+        // Remove null values so that we don't overwrite existing WC
+        // translations with empty ones
+        removeNullValuesFromJsonObject(i18nJson);
+
+        // Assign new I18N object to WC, by merging the existing
+        // WC I18N, and the values from the new I18n instance,
+        // into an empty object
+        getElement().executeJs("this.i18n = Object.assign({}, this.i18n, $0);",
+                i18nJson);
+    }
+
+    private void removeNullValuesFromJsonObject(JsonObject jsonObject) {
+        for (String key : jsonObject.keys()) {
+            if (jsonObject.get(key).getType() == JsonType.NULL) {
+                jsonObject.remove(key);
+            }
         }
     }
 }

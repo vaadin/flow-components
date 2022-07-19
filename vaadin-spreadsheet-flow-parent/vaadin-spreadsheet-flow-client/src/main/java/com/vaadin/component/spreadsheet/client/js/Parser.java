@@ -26,6 +26,10 @@ public class Parser {
         return parseArrayJstype(raw, PopupButtonState::new);
     }
 
+    public static PopupButtonState parsePopupButtonState(String raw) {
+        return parseJsType(raw, PopupButtonState::new);
+    }
+
     public static List<GroupingData> parseListOfGroupingData(String raw) {
         return parseArrayJstype(raw, GroupingData::new);
     }
@@ -102,6 +106,17 @@ public class Parser {
     private static <T> Set<T> parseSet(String raw,
             Function<Object, T> jsToJava) {
         return new HashSet<T>(parseArray(raw, jsToJava));
+    }
+
+    private static <T> T parseJsType(String raw, Supplier<T> constructor) {
+        if (raw == null || raw.isEmpty() || "null".equals(raw)) {
+            return null;
+        }
+
+        JsonValue jsBean = JsonUtil.parse(raw);
+        T javaBean = constructor.get();
+        copyJsToJava(jsBean, javaBean);
+        return javaBean;
     }
 
     private static <T> ArrayList<T> parseArrayJstype(String raw,
