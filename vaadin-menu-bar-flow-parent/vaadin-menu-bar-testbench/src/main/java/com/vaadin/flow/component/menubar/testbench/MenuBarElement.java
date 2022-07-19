@@ -49,7 +49,7 @@ public class MenuBarElement extends TestBenchElement {
     /**
      * Gets the button which opens the sub menu of overflowing items, or
      * {@code null} if the overflow button is not visible.
-     * 
+     *
      * @return the button which opens the sub menu of overflowing items
      */
     public TestBenchElement getOverflowButton() {
@@ -72,7 +72,7 @@ public class MenuBarElement extends TestBenchElement {
     /**
      * Get TestBenchElements representing sub menu items under the first sub
      * menu.
-     * 
+     *
      * @return List of TestBenchElements representing sub menu items.
      */
     public List<TestBenchElement> getSubMenuItems() {
@@ -82,7 +82,7 @@ public class MenuBarElement extends TestBenchElement {
     /**
      * Get TestBenchElements representing sub menu items under specific sub
      * menu.
-     * 
+     *
      * @param overlay
      *            The sub menu overlay from which items are being collected.
      * @return List of TestBenchElements representing sub menu items.
@@ -93,17 +93,18 @@ public class MenuBarElement extends TestBenchElement {
 
     /**
      * Get the sub menu overlay element.
-     * 
+     *
      * @return TestBenchElement for the first open sub menu.
      */
     public TestBenchElement getSubMenu() {
-        ExpectedConditions.presenceOfElementLocated(By.tagName(OVERLAY_TAG));
+        waitUntil(ExpectedConditions
+                .presenceOfElementLocated(By.tagName(OVERLAY_TAG)));
         return $(OVERLAY_TAG).first();
     }
 
     /**
      * Get all the open sub menu overlay elements.
-     * 
+     *
      * @return List of TestBenchElements representing currently open sub menues.
      */
     public List<TestBenchElement> getAllSubMenues() {
