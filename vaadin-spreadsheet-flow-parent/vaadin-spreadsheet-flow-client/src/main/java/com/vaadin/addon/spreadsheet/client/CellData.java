@@ -18,7 +18,7 @@ import java.io.Serializable;
 import jsinterop.annotations.JsType;
 
 @SuppressWarnings("serial")
-@JsType
+@JsType(namespace = "Vaadin.Spreadsheet")
 public class CellData implements Serializable {
 
     public int row;

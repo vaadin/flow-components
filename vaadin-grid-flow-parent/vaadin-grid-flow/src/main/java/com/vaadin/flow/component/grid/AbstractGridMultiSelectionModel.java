@@ -215,8 +215,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
 
     @Override
     public boolean isSelected(T item) {
-        return getSelectedItems().stream().anyMatch(selectedItem -> Objects
-                .equals(getItemId(selectedItem), getItemId(item)));
+        return selected.containsKey(getItemId(item));
     }
 
     @Override

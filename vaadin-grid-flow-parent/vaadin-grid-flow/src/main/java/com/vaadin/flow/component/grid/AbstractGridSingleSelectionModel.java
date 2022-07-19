@@ -60,7 +60,7 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
 
     @Override
     public void selectFromClient(T item) {
-        if (Objects.equals(getItemId(item), getItemId(selectedItem))) {
+        if (isSelected(item)) {
             return;
         }
         doSelect(item, true);
@@ -68,16 +68,12 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
 
     @Override
     public void select(T item) {
-        if (Objects.equals(getItemId(item), getItemId(selectedItem))) {
+        if (isSelected(item)) {
             return;
         }
-        T oldItem = selectedItem;
         doSelect(item, false);
 
         getGrid().doClientSideSelection(Collections.singleton(item));
-        if (oldItem != null) {
-            getGrid().getDataCommunicator().refresh(oldItem);
-        }
         if (item != null) {
             getGrid().getDataCommunicator().refresh(item);
         }
@@ -95,6 +91,11 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
         if (isSelected(item)) {
             select(null);
         }
+    }
+
+    @Override
+    public boolean isSelected(T item) {
+        return Objects.equals(getItemId(item), getItemId(selectedItem));
     }
 
     @Override

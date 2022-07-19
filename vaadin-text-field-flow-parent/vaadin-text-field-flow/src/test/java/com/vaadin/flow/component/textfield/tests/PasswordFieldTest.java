@@ -15,13 +15,17 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
-import static org.junit.Assert.assertEquals;
-
+import com.vaadin.flow.component.shared.HasAllowedCharPattern;
+import com.vaadin.flow.component.textfield.PasswordField;
+import com.vaadin.flow.component.textfield.TextFieldVariant;
+import com.vaadin.flow.dom.ThemeList;
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import com.vaadin.flow.component.textfield.PasswordField;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Tests for the {@link PasswordField}.
@@ -87,5 +91,33 @@ public class PasswordFieldTest {
         assertEquals(value, passwordField.isAutoselect());
         assertEquals(passwordField.isAutoselect(),
                 passwordField.getElement().getProperty("autoselect", value));
+    }
+
+    @Test
+    public void addThemeVariant_themeAttributeContainsThemeVariant() {
+        PasswordField field = new PasswordField();
+        field.addThemeVariants(TextFieldVariant.LUMO_SMALL);
+
+        ThemeList themeNames = field.getThemeNames();
+        Assert.assertTrue(themeNames
+                .contains(TextFieldVariant.LUMO_SMALL.getVariantName()));
+    }
+
+    @Test
+    public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
+        PasswordField field = new PasswordField();
+        field.addThemeVariants(TextFieldVariant.LUMO_SMALL);
+        field.removeThemeVariants(TextFieldVariant.LUMO_SMALL);
+
+        ThemeList themeNames = field.getThemeNames();
+        Assert.assertFalse(themeNames
+                .contains(TextFieldVariant.LUMO_SMALL.getVariantName()));
+    }
+
+    @Test
+    public void implementsHasAllowedCharPattern() {
+        assertTrue("PasswordField should support char pattern",
+                HasAllowedCharPattern.class
+                        .isAssignableFrom(new PasswordField().getClass()));
     }
 }

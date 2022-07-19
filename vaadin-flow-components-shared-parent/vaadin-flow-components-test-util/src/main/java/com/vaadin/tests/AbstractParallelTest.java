@@ -9,18 +9,13 @@ import java.util.List;
 import java.util.Optional;
 
 import org.junit.Assert;
-import org.junit.Rule;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
 import com.vaadin.testbench.Parameters;
-import com.vaadin.testbench.RetryRule;
 import com.vaadin.testbench.parallel.BrowserUtil;
 
 public abstract class AbstractParallelTest extends ParallelTest {
-
-    @Rule
-    public RetryRule maxAttempts = new RetryRule(2);
 
     public static final Dimension WINDOW_SIZE_LARGE = new Dimension(1920, 1080);
     public static final Dimension WINDOW_SIZE_MEDIUM = new Dimension(768, 1024);

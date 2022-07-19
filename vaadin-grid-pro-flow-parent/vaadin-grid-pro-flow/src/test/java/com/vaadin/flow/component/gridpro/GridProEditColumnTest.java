@@ -3,6 +3,11 @@ package com.vaadin.flow.component.gridpro;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.HasValueAndElement;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.shared.Registration;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -25,7 +30,7 @@ public class GridProEditColumnTest {
     public ExpectedException thrown = ExpectedException.none();
 
     @Before
-    public void init() {
+    public void setup() {
         itemUpdater = (item, newValue) -> {
             Assert.assertNotNull(item);
             Assert.assertNotNull(newValue);
@@ -117,5 +122,34 @@ public class GridProEditColumnTest {
                 });
         Assert.assertNotNull(column);
         Assert.assertEquals(GridPro.EditColumn.class, column.getClass());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void addEditColumn_acceptsImplementationOfHasElementAndValue() {
+        GridPro<Person> gridPro = new GridPro<>();
+        gridPro.addEditColumn(Person::getName).custom(new TestCustomEditor(),
+                (person, value) -> {
+                });
+    }
+
+    @Tag("test-custom-editor")
+    private static class TestCustomEditor extends Component implements
+            HasValueAndElement<HasValue.ValueChangeEvent<String>, String> {
+        @Override
+        public void setValue(String value) {
+
+        }
+
+        @Override
+        public String getValue() {
+            return null;
+        }
+
+        @Override
+        public Registration addValueChangeListener(
+                ValueChangeListener<? super ValueChangeEvent<String>> listener) {
+            return null;
+        }
     }
 }

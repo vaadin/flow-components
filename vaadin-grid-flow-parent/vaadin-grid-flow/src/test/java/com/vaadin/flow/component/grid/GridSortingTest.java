@@ -153,7 +153,7 @@ public class GridSortingTest {
     private TestSortListener<Person> testSortListener;
 
     @Before
-    public void init() {
+    public void setup() {
         testSortListener = new TestSortListener<>();
 
         grid = new Grid<>();
@@ -278,6 +278,19 @@ public class GridSortingTest {
     public void checkMultiSortTrue() {
         grid.setMultiSort(true);
         Assert.assertTrue(grid.isMultiSort());
+    }
+
+    @Test
+    public void setMultiSortWithPriority() {
+        grid.setMultiSort(true, Grid.MultiSortPriority.APPEND);
+
+        Assert.assertEquals("append",
+                grid.getElement().getAttribute("multi-sort-priority"));
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void setMultiSortWithPriorityNull_throws() {
+        grid.setMultiSort(true, null);
     }
 
     private void setTestSorting() {

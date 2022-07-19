@@ -23,12 +23,12 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
+import com.vaadin.flow.component.HasValueAndElement;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -50,10 +50,10 @@ import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 
 @Tag("vaadin-grid-pro")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-beta1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha4")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/grid-pro", version = "23.1.0-beta1")
-@NpmPackage(value = "@vaadin/vaadin-grid-pro", version = "23.1.0-beta1")
+@NpmPackage(value = "@vaadin/grid-pro", version = "23.2.0-alpha4")
+@NpmPackage(value = "@vaadin/vaadin-grid-pro", version = "23.2.0-alpha4")
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro.js")
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro-edit-column.js")
 @JsModule("./gridProConnector.js")
@@ -151,12 +151,12 @@ public class GridPro<E> extends Grid<E> {
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-pro-edit-column")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-beta1")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha4")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class EditColumn<T> extends Column<T> {
 
         private ItemUpdater<T, String> itemUpdater;
-        private AbstractField editorField;
+        private HasValueAndElement editorField;
         private ValueProvider<T, ?> valueProvider;
 
         /**
@@ -198,11 +198,11 @@ public class GridPro<E> extends Grid<E> {
             return itemUpdater;
         }
 
-        protected AbstractField getEditorField() {
+        protected HasValueAndElement getEditorField() {
             return editorField;
         }
 
-        protected void setEditorField(AbstractField editorField) {
+        protected void setEditorField(HasValueAndElement editorField) {
             this.editorField = editorField;
         }
 

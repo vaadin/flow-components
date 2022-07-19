@@ -45,7 +45,7 @@ public class DialogTest {
     private UI ui = new UI();
 
     @Before
-    public void setUp() {
+    public void setup() {
         UI.setCurrent(ui);
 
         VaadinSession session = Mockito.mock(VaadinSession.class);
@@ -420,6 +420,38 @@ public class DialogTest {
         Assert.assertFalse(content.getParent().isPresent());
 
         dialog.getHeader().remove(secondContent, thirdContent);
+        Assert.assertFalse(secondContent.getParent().isPresent());
+        Assert.assertFalse(thirdContent.getParent().isPresent());
+    }
+
+    @Test
+    public void allElementsRemovedFromHeader_elementsShouldNotHaveDialogAsParents() {
+        Dialog dialog = new Dialog();
+        Span content = new Span("content");
+        Span secondContent = new Span("second_content");
+        Span thirdContent = new Span("third_content");
+
+        dialog.getHeader().add(content, secondContent, thirdContent);
+
+        dialog.getHeader().removeAll();
+
+        Assert.assertFalse(content.getParent().isPresent());
+        Assert.assertFalse(secondContent.getParent().isPresent());
+        Assert.assertFalse(thirdContent.getParent().isPresent());
+    }
+
+    @Test
+    public void allElementsRemovedFromFooter_elementsShouldNotHaveDialogAsParents() {
+        Dialog dialog = new Dialog();
+        Span content = new Span("content");
+        Span secondContent = new Span("second_content");
+        Span thirdContent = new Span("third_content");
+
+        dialog.getFooter().add(content, secondContent, thirdContent);
+
+        dialog.getFooter().removeAll();
+
+        Assert.assertFalse(content.getParent().isPresent());
         Assert.assertFalse(secondContent.getParent().isPresent());
         Assert.assertFalse(thirdContent.getParent().isPresent());
     }

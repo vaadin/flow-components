@@ -18,7 +18,7 @@ import com.vaadin.shared.AbstractComponentState;
 import jsinterop.annotations.JsType;
 
 @SuppressWarnings("serial")
-@JsType
+@JsType(namespace = "Vaadin.Spreadsheet")
 public class PopupButtonState extends AbstractComponentState {
 
     /** 1-based */

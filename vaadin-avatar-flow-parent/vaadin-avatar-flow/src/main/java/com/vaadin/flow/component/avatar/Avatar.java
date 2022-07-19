@@ -23,14 +23,13 @@ import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.server.AbstractStreamResource;
 import elemental.json.JsonObject;
 
 import java.io.Serializable;
 import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Avatar is a graphical representation of an object or entity, for example a
@@ -55,12 +54,13 @@ import java.util.stream.Stream;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-avatar")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-beta1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha4")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/avatar/src/vaadin-avatar.js")
-@NpmPackage(value = "@vaadin/avatar", version = "23.1.0-beta1")
-@NpmPackage(value = "@vaadin/vaadin-avatar", version = "23.1.0-beta1")
-public class Avatar extends Component implements HasStyle, HasSize, HasTheme {
+@NpmPackage(value = "@vaadin/avatar", version = "23.2.0-alpha4")
+@NpmPackage(value = "@vaadin/vaadin-avatar", version = "23.2.0-alpha4")
+public class Avatar extends Component
+        implements HasStyle, HasSize, HasTheme, HasThemeVariant<AvatarVariant> {
 
     /**
      * The internationalization properties for {@link AvatarGroup}.
@@ -296,28 +296,17 @@ public class Avatar extends Component implements HasStyle, HasSize, HasTheme {
         getElement().setProperty("colorIndex", colorIndex);
     }
 
-    /**
-     * Adds theme variants to the avatar component.
-     *
-     * @param variants
-     *            theme variants to add
-     */
+    // Override is only required to keep binary compatibility with other 23.x
+    // minor versions, can be removed in a future major
+    @Override
     public void addThemeVariants(AvatarVariant... variants) {
-        getThemeNames()
-                .addAll(Stream.of(variants).map(AvatarVariant::getVariantName)
-                        .collect(Collectors.toList()));
+        HasThemeVariant.super.addThemeVariants(variants);
     }
 
-    /**
-     * Removes theme variants from the avatar component.
-     *
-     * @param variants
-     *            theme variants to remove
-     */
+    // Override is only required to keep binary compatibility with other 23.x
+    // minor versions, can be removed in a future major
+    @Override
     public void removeThemeVariants(AvatarVariant... variants) {
-        getThemeNames().removeAll(
-                Stream.of(variants).map(AvatarVariant::getVariantName)
-                        .collect(Collectors.toList()));
+        HasThemeVariant.super.removeThemeVariants(variants);
     }
-
 }

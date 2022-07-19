@@ -29,7 +29,7 @@ import org.junit.Test;
 public class OrientationChangeIT extends AbstractComponentIT {
 
     @Before
-    public void setUp() {
+    public void init() {
         open();
     }
 

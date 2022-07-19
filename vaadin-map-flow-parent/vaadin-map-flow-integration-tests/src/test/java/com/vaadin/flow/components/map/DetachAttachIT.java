@@ -8,8 +8,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.List;
-
 @TestPath("vaadin-map/detach-attach")
 public class DetachAttachIT extends AbstractComponentIT {
     private TestBenchElement detachMap;
@@ -60,8 +58,8 @@ public class DetachAttachIT extends AbstractComponentIT {
         MapElement.ViewReference view = mapReference.getView();
 
         Assert.assertEquals(2, mapReference.getLayers().getLength());
-        Assert.assertEquals(2482424.644689998, view.getCenter().getX(), 0.0001);
-        Assert.assertEquals(8500614.173537256, view.getCenter().getY(), 0.0001);
+        Assert.assertEquals(22.3, view.getCenter().getX(), 0.0001);
+        Assert.assertEquals(60.45, view.getCenter().getY(), 0.0001);
         Assert.assertEquals(14, view.getZoom(), 0.1);
     }
 }

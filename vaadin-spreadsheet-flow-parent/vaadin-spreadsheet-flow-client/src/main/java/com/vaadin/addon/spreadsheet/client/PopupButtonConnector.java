@@ -28,6 +28,7 @@ import com.vaadin.client.ComponentConnector;
 import com.vaadin.client.ConnectorHierarchyChangeEvent;
 import com.vaadin.client.communication.StateChangeEvent;
 import com.vaadin.client.ui.AbstractHasComponentsConnector;
+import com.vaadin.shared.communication.ServerRpc;
 
 @SuppressWarnings("serial")
 public class PopupButtonConnector extends AbstractHasComponentsConnector
@@ -46,6 +47,7 @@ public class PopupButtonConnector extends AbstractHasComponentsConnector
         }
 
     };
+    private PopupButtonServerRpc serverRpc;
 
     @Override
     public void init() {
@@ -53,6 +55,15 @@ public class PopupButtonConnector extends AbstractHasComponentsConnector
         registerRpc(PopupButtonClientRpc.class, rpc);
         getWidget().addClickHandler(this);
         getWidget().addCloseHandler(this);
+    }
+
+    public void setPopupButtonServerRpc(PopupButtonServerRpc rpc) {
+        this.serverRpc = rpc;
+    }
+
+    @Override
+    protected <T extends ServerRpc> T getRpcProxy(Class<T> rpcInterface) {
+        return (T) serverRpc;
     }
 
     @Override
@@ -122,13 +133,18 @@ public class PopupButtonConnector extends AbstractHasComponentsConnector
 
     @Override
     public void onClose(CloseEvent<PopupPanel> event) {
-        if (getWidget().isAttached()) {
-            getRpcProxy(PopupButtonServerRpc.class).onPopupClose();
+        final PopupButtonWidget widget = getWidget();
+        if (widget.isAttached()) {
+            getRpcProxy(PopupButtonServerRpc.class)
+                    .onPopupClose(widget.getRow(), widget.getCol());
         }
     }
 
     @Override
     public void onClick(ClickEvent event) {
-        getRpcProxy(PopupButtonServerRpc.class).onPopupButtonClick();
+        final PopupButtonWidget widget = getWidget();
+        getRpcProxy(PopupButtonServerRpc.class)
+                .onPopupButtonClick(widget.getRow(), widget.getCol());
     }
+
 }

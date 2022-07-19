@@ -23,6 +23,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
@@ -181,8 +182,15 @@ public class GridElement extends TestBenchElement {
      * @param rowIndex
      *            the row index
      * @return the tr element for the row
+     * @throws IndexOutOfBoundsException
+     *             if no row with given index exists
      */
-    public GridTRElement getRow(int rowIndex) {
+    public GridTRElement getRow(int rowIndex) throws IndexOutOfBoundsException {
+        int rowCount = getRowCount();
+        if (rowIndex < 0 || rowIndex >= rowCount) {
+            throw new IndexOutOfBoundsException("rowIndex: expected to be 0.."
+                    + (rowCount - 1) + " but was " + rowIndex);
+        }
         String script = "var grid = arguments[0];"
                 + "var rowIndex = arguments[1];"
                 + "var rowsInDom = grid.$.items.children;"
@@ -407,5 +415,14 @@ public class GridElement extends TestBenchElement {
         if (columnIds.isEmpty())
             return null;
         return new GridColumnElement(columnIds.get(0), this);
+    }
+
+    /**
+     * Click select all check box
+     */
+    public void clickSelectAll() {
+        CheckboxElement selectAllCheckbox = $(CheckboxElement.class)
+                .id("selectAllCheckbox");
+        selectAllCheckbox.click();
     }
 }

@@ -231,7 +231,9 @@ public class Renderer<SOURCE> implements Serializable {
      * returned map is immutable.
      *
      * @return the mapped properties, never <code>null</code>
+     * @deprecated since Vaadin 23.1
      */
+    @Deprecated
     public Map<String, ValueProvider<SOURCE, ?>> getValueProviders() {
         return valueProviders == null ? Collections.emptyMap()
                 : Collections.unmodifiableMap(valueProviders);

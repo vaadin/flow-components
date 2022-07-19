@@ -296,7 +296,7 @@ public class TreeGridElement extends GridElement {
     public boolean hasRow(int row) {
         try {
             return getRow(row) != null;
-        } catch (NullPointerException e) {
+        } catch (Exception e) {
             return false;
         }
     }
@@ -309,7 +309,7 @@ public class TreeGridElement extends GridElement {
      */
     public boolean isLoadingExpandedRows() {
         return (Boolean) executeScript(
-                "return arguments[0].$connector && (arguments[0].$connector.hasEnsureSubCacheQueue() || arguments[0].$connector.hasParentRequestQueue())",
+                "return !!arguments[0].$connector ? (arguments[0].$connector.hasEnsureSubCacheQueue() || arguments[0].$connector.hasParentRequestQueue()) : arguments[0]._cache.isLoading()",
                 this);
     }
 

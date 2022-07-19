@@ -17,7 +17,7 @@ public class CustomFieldTest {
     private Consumer<Object> consumer;
 
     @Before
-    public void setUp() {
+    public void setup() {
         consumer = Mockito.mock(Consumer.class);
         systemUnderTest = new CustomField<Object>() {
             @Override

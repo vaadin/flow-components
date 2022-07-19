@@ -22,9 +22,11 @@ public class DialogHeaderFooterIT extends AbstractComponentIT {
     private static final String ADD_HEADER_CONTENT_BUTTON = "add-header-content-button";
     private static final String ADD_SECOND_HEADER_CONTENT_BUTTON = "add-second-header-content-button";
     private static final String REMOVE_HEADER_CONTENT_BUTTON = "remove-header-content-button";
+    private static final String REMOVE_ALL_HEADER_CONTENTS_BUTTON = "remove-all-header-contents-button";
     private static final String ADD_FOOTER_CONTENT_BUTTON = "add-footer-content-button";
     private static final String ADD_SECOND_FOOTER_CONTENT_BUTTON = "add-second-footer-content-button";
     private static final String REMOVE_FOOTER_CONTENT_BUTTON = "remove-footer-content-button";
+    private static final String REMOVE_ALL_FOOTER_CONTENTS_BUTTON = "remove-all-footer-contents-button";
 
     @Before
     public void init() {
@@ -124,6 +126,19 @@ public class DialogHeaderFooterIT extends AbstractComponentIT {
     }
 
     @Test
+    public void openedDialogWithHeaderContents_removeAllContents_noContentIsRendered() {
+        clickButton(ADD_HEADER_CONTENT_BUTTON);
+        clickButton(ADD_SECOND_HEADER_CONTENT_BUTTON);
+        clickButton(OPEN_DIALOG_BUTTON);
+        verifyDialogOpened();
+        clickButton(MOVE_BUTTONS_BUTTON);
+        clickButton(REMOVE_ALL_HEADER_CONTENTS_BUTTON);
+
+        assertDialogNotContains(DialogHeaderFooterPage.HEADER_CONTENT);
+        assertDialogNotContains(DialogHeaderFooterPage.ANOTHER_HEADER_CONTENT);
+    }
+
+    @Test
     public void closedDialog_footerRendererIsSet_contentIsRendered() {
         clickButton(ADD_FOOTER_CONTENT_BUTTON);
         clickButton(OPEN_DIALOG_BUTTON);
@@ -184,6 +199,19 @@ public class DialogHeaderFooterIT extends AbstractComponentIT {
         clickButton(REMOVE_FOOTER_CONTENT_BUTTON);
 
         assertDialogNotContains(DialogHeaderFooterPage.FOOTER_CONTENT);
+    }
+
+    @Test
+    public void openedDialogWithFooterContents_removeAllContents_noContentIsRendered() {
+        clickButton(ADD_FOOTER_CONTENT_BUTTON);
+        clickButton(ADD_SECOND_FOOTER_CONTENT_BUTTON);
+        clickButton(OPEN_DIALOG_BUTTON);
+        verifyDialogOpened();
+        clickButton(MOVE_BUTTONS_BUTTON);
+        clickButton(REMOVE_ALL_FOOTER_CONTENTS_BUTTON);
+
+        assertDialogNotContains(DialogHeaderFooterPage.FOOTER_CONTENT);
+        assertDialogNotContains(DialogHeaderFooterPage.ANOTHER_FOOTER_CONTENT);
     }
 
     private void clickButton(String id) {

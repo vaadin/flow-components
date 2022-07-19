@@ -1113,16 +1113,6 @@ public class SheetWidget extends Panel {
 
         String className = target.getAttribute("class");
 
-        // click target is the inner div because IE10 and 9 are not compatible
-        // with 'pointer-events: none'
-        if ((BrowserInfo.get().isIE9() || BrowserInfo.get().isIE10())
-                && (className == null || className.isEmpty())) {
-            String parentClassName = target.getParentElement()
-                    .getAttribute("class");
-            if (parentClassName.contains("cell")) {
-                className = parentClassName;
-            }
-        }
         if (cellCommentEditMode && !className.contains("comment-overlay")) {
             cellCommentEditMode = false;
             currentlyEditedCellComment.setEditMode(false);

@@ -23,6 +23,7 @@ import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.NodeOwner;
 import com.vaadin.flow.internal.StateTree;
@@ -62,13 +63,13 @@ import java.util.stream.Stream;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-avatar-group")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-beta1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha4")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/avatar-group/src/vaadin-avatar-group.js")
-@NpmPackage(value = "@vaadin/avatar-group", version = "23.1.0-beta1")
-@NpmPackage(value = "@vaadin/vaadin-avatar", version = "23.1.0-beta1")
-public class AvatarGroup extends Component
-        implements HasStyle, HasSize, HasTheme {
+@NpmPackage(value = "@vaadin/avatar-group", version = "23.2.0-alpha4")
+@NpmPackage(value = "@vaadin/vaadin-avatar", version = "23.2.0-alpha4")
+public class AvatarGroup extends Component implements HasStyle, HasSize,
+        HasTheme, HasThemeVariant<AvatarGroupVariant> {
 
     /**
      * Item to be set as an avatar for the avatar group.
@@ -653,27 +654,17 @@ public class AvatarGroup extends Component
         return null;
     }
 
-    /**
-     * Adds theme variants to the avatar group component.
-     *
-     * @param variants
-     *            theme variants to add
-     */
+    // Override is only required to keep binary compatibility with other 23.x
+    // minor versions, can be removed in a future major
+    @Override
     public void addThemeVariants(AvatarGroupVariant... variants) {
-        getThemeNames().addAll(
-                Stream.of(variants).map(AvatarGroupVariant::getVariantName)
-                        .collect(Collectors.toList()));
+        HasThemeVariant.super.addThemeVariants(variants);
     }
 
-    /**
-     * Removes theme variants from the avatar group component.
-     *
-     * @param variants
-     *            theme variants to remove
-     */
+    // Override is only required to keep binary compatibility with other 23.x
+    // minor versions, can be removed in a future major
+    @Override
     public void removeThemeVariants(AvatarGroupVariant... variants) {
-        getThemeNames().removeAll(
-                Stream.of(variants).map(AvatarGroupVariant::getVariantName)
-                        .collect(Collectors.toList()));
+        HasThemeVariant.super.removeThemeVariants(variants);
     }
 }

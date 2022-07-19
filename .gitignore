@@ -21,6 +21,8 @@ node_modules
 .driver
 package*json
 pnpm*
+.npmrc
+.pnpmfile.cjs
 error-screenshots
 
 **/frontend/generated

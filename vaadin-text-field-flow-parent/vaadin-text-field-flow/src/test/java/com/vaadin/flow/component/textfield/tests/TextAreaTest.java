@@ -15,13 +15,17 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
-import static org.junit.Assert.assertEquals;
-
+import com.vaadin.flow.component.shared.HasAllowedCharPattern;
+import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.textfield.TextAreaVariant;
+import com.vaadin.flow.dom.ThemeList;
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import com.vaadin.flow.component.textfield.TextArea;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Tests for the {@link TextArea}.
@@ -98,5 +102,33 @@ public class TextAreaTest {
         assertEquals(value, textArea.isAutoselect());
         assertEquals(textArea.isAutoselect(),
                 textArea.getElement().getProperty("autoselect", value));
+    }
+
+    @Test
+    public void addThemeVariant_themeAttributeContainsThemeVariant() {
+        TextArea textArea = new TextArea();
+        textArea.addThemeVariants(TextAreaVariant.LUMO_SMALL);
+
+        ThemeList themeNames = textArea.getThemeNames();
+        Assert.assertTrue(themeNames
+                .contains(TextAreaVariant.LUMO_SMALL.getVariantName()));
+    }
+
+    @Test
+    public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
+        TextArea textArea = new TextArea();
+        textArea.addThemeVariants(TextAreaVariant.LUMO_SMALL);
+        textArea.removeThemeVariants(TextAreaVariant.LUMO_SMALL);
+
+        ThemeList themeNames = textArea.getThemeNames();
+        Assert.assertFalse(themeNames
+                .contains(TextAreaVariant.LUMO_SMALL.getVariantName()));
+    }
+
+    @Test
+    public void implementsHasAllowedCharPattern() {
+        assertTrue("TextArea should support char pattern",
+                HasAllowedCharPattern.class
+                        .isAssignableFrom(new TextArea().getClass()));
     }
 }

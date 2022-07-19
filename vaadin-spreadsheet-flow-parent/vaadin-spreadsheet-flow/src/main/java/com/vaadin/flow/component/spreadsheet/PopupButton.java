@@ -17,14 +17,11 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.UUID;
 
 import org.apache.poi.ss.util.CellReference;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
-import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.spreadsheet.framework.ReflectTools;
 import com.vaadin.flow.component.spreadsheet.rpc.PopupButtonClientRpc;
@@ -53,7 +50,7 @@ import com.vaadin.flow.component.spreadsheet.shared.PopupButtonState;
  */
 @SuppressWarnings("serial")
 @Tag("div")
-public class PopupButton extends Component implements HasComponents {
+public class PopupButton extends Component {
 
     private PopupButtonServerRpc rpc = new PopupButtonServerRpc() {
 
@@ -79,7 +76,6 @@ public class PopupButton extends Component implements HasComponents {
      * Constructs a new PopupButton.
      */
     public PopupButton() {
-        setId(UUID.randomUUID().toString());
         registerRpc(rpc);
     }
 
@@ -138,8 +134,13 @@ public class PopupButton extends Component implements HasComponents {
      */
     public void openPopup() {
         setPopupVisible(true);
-        // todo: when getRpcProxy is implemented
-        // getRpcProxy(PopupButtonClientRpc.class).openPopup();
+        getElement().appendChild(getContent().getElement());
+        getParent().ifPresent(parent -> {
+            parent.getElement().callJsFunction("onPopupButtonOpen",
+                    getRow() + 1, getColumn() + 1,
+                    getElement().getNode().getId());
+        });
+        fireOpen();
     }
 
     private PopupButton getRpcProxy(
@@ -153,8 +154,9 @@ public class PopupButton extends Component implements HasComponents {
      */
     public void closePopup() {
         setPopupVisible(false);
-        // todo: when getRpcProxy is implemented
-        // getRpcProxy(PopupButtonClientRpc.class).closePopup();
+        getParent().ifPresent(parent -> parent.getElement()
+                .callJsFunction("closePopup", getRow() + 1, getColumn() + 1));
+        fireClose();
     }
 
     /**

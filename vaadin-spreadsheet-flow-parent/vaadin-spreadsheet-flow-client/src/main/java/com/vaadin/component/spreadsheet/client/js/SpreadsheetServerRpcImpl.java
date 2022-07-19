@@ -3,6 +3,7 @@ package com.vaadin.component.spreadsheet.client.js;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.vaadin.addon.spreadsheet.client.PopupButtonServerRpc;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetServerRpc;
 
 import elemental.json.Json;
@@ -10,7 +11,8 @@ import elemental.json.JsonArray;
 import jsinterop.annotations.JsFunction;
 
 @SuppressWarnings("serial")
-public class SpreadsheetServerRpcImpl implements SpreadsheetServerRpc {
+public class SpreadsheetServerRpcImpl
+        implements SpreadsheetServerRpc, PopupButtonServerRpc {
 
     @FunctionalInterface
     @JsFunction
@@ -57,6 +59,8 @@ public class SpreadsheetServerRpcImpl implements SpreadsheetServerRpc {
     private JsConsumer<String> actionOnRowHeaderCallback;
     private JsConsumer<Integer> columnHeaderContextMenuOpenCallback;
     private JsConsumer<String> actionOnColumnHeaderCallback;
+    private JsConsumer<Void> popupButtonClickCallback;
+    private JsConsumer<Void> popupCloseCallback;
 
     public SpreadsheetServerRpcImpl() {
     }
@@ -226,6 +230,15 @@ public class SpreadsheetServerRpcImpl implements SpreadsheetServerRpc {
 
     public void setActionOnColumnHeaderCallback(JsConsumer<String> callback) {
         actionOnColumnHeaderCallback = callback;
+    }
+
+    public void setPopupCloseCallback(JsConsumer<Void> popupCloseCallback) {
+        this.popupCloseCallback = popupCloseCallback;
+    }
+
+    public void setPopupButtonClickCallback(
+            JsConsumer<Void> popupButtonClickCallback) {
+        this.popupButtonClickCallback = popupButtonClickCallback;
     }
 
     private native void call(JsConsumer<?> fnc, Object... args) /*-{
@@ -462,5 +475,15 @@ public class SpreadsheetServerRpcImpl implements SpreadsheetServerRpc {
     @Override
     public void actionOnColumnHeader(String actionKey) {
         call(actionOnColumnHeaderCallback, actionKey);
+    }
+
+    @Override
+    public void onPopupButtonClick(int row, int column) {
+        call(popupButtonClickCallback, row, column);
+    }
+
+    @Override
+    public void onPopupClose(int row, int column) {
+        call(popupCloseCallback, row, column);
     }
 }

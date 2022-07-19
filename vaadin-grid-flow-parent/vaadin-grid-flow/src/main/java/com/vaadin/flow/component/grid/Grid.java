@@ -206,10 +206,10 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-beta1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha4")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/grid", version = "23.1.0-beta1")
-@NpmPackage(value = "@vaadin/vaadin-grid", version = "23.1.0-beta1")
+@NpmPackage(value = "@vaadin/grid", version = "23.2.0-alpha4")
+@NpmPackage(value = "@vaadin/vaadin-grid", version = "23.2.0-alpha4")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -387,6 +387,35 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
+     * Multi-sort priority (visually indicated by numbers in column headers)
+     * controls how columns are added to the sort order, when a column becomes
+     * sorted, or the sort direction of a column is changed.
+     * <p>
+     * Use {@link Grid#setMultiSort(boolean, MultiSortPriority)} to customize
+     * the multi-sort priority of an individual grid.
+     *
+     * @see Grid#setSelectionMode(SelectionMode)
+     * @see Grid#setMultiSort(boolean, MultiSortPriority)
+     */
+    public enum MultiSortPriority {
+        /**
+         * Whenever an unsorted column is sorted, it gets added at the end of
+         * the sort order, after all the previously sorted columns. When the
+         * sort direction of a column is changed by the user, the priority for
+         * all the sorted columns remains unchanged.
+         */
+        APPEND,
+
+        /**
+         * Whenever an unsorted column is sorted, or the sort direction of a
+         * column is changed, that column gets sort priority 1, and all the
+         * other sorted columns are updated accordingly. This is the default
+         * behavior of the component.
+         */
+        PREPEND
+    }
+
+    /**
      * Server-side component for the {@code <vaadin-grid-column>} element.
      *
      * <p>
@@ -399,7 +428,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-column")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0-beta1")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha4")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class Column<T> extends AbstractColumn<Column<T>> {
 
@@ -1448,8 +1477,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 .getUniqueKeyProperty();
         if (uniqueKeyPropertyName != null
                 && !jsonObject.hasKey(uniqueKeyPropertyName)) {
-            jsonObject.put(uniqueKeyPropertyName,
-                    getUniqueKeyProvider().apply(item));
+            jsonObject.put(uniqueKeyPropertyName, getUniqueKey(item));
         }
     }
 
@@ -1805,25 +1833,16 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
-     * Adds a new text column to this {@link Grid} with a template renderer,
-     * sorting properties and default column factory. The values inside the
-     * renderer are converted to JSON values by using
-     * {@link JsonSerializer#toJson(Object)}.
+     * Adds a new column to this {@link Grid} with a renderer, sorting
+     * properties and default column factory. The values inside the renderer are
+     * converted to JSON values by using {@link JsonSerializer#toJson(Object)}.
      * <p>
      * <em>NOTE:</em> You can add component columns easily using the
      * {@link #addComponentColumn(ValueProvider)}, but using
      * {@link ComponentRenderer} is not as efficient as the built in renderers
      * or using {@link TemplateRenderer}.
      * <p>
-     * This constructor attempts to automatically configure both in-memory and
-     * backend sorting using the given sorting properties and matching those
-     * with the property names used in the given renderer.
-     * <p>
-     * <strong>Note:</strong> if a property of the renderer that is used as a
-     * sorting property does not extend Comparable, no in-memory sorting is
-     * configured for it.
      *
-     * <p>
      * Every added column sends data to the client side regardless of its
      * visibility state. Don't add a new column at all or use
      * {@link Grid#removeColumn(Column)} to avoid sending extra data.
@@ -1843,7 +1862,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @param sortingProperties
      *            the sorting properties to use for this column
      * @return the created column
+     * @deprecated since 23.2 - use
+     *             <code>addColumn(renderer).setSortProperty(sortingProperties)</code>
+     *             instead.
      */
+    @Deprecated
     public Column<T> addColumn(Renderer<T> renderer,
             String... sortingProperties) {
         BiFunction<Renderer<T>, String, Column<T>> defaultFactory = getDefaultColumnFactory();
@@ -1851,23 +1874,15 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
-     * Adds a new text column to this {@link Grid} with a template renderer,
-     * sorting properties and column factory provided. The values inside the
-     * renderer are converted to JSON values by using
+     * Adds a new column to this {@link Grid} with a renderer, sorting
+     * properties and column factory provided. The values inside the renderer
+     * are converted to JSON values by using
      * {@link JsonSerializer#toJson(Object)}.
      * <p>
      * <em>NOTE:</em> You can add component columns easily using the
      * {@link #addComponentColumn(ValueProvider)}, but using
      * {@link ComponentRenderer} is not as efficient as the built in renderers
      * or using {@link TemplateRenderer}.
-     * <p>
-     * This constructor attempts to automatically configure both in-memory and
-     * backend sorting using the given sorting properties and matching those
-     * with the property names used in the given renderer.
-     * <p>
-     * <strong>Note:</strong> if a property of the renderer that is used as a
-     * sorting property does not extend Comparable, no in-memory sorting is
-     * configured for it.
      *
      * <p>
      * Every added column sends data to the client side regardless of its
@@ -1886,38 +1901,16 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @param sortingProperties
      *            the sorting properties to use for this column
      * @return the created column
+     * @deprecated since 23.2 - use
+     *             <code>addColumn(renderer, columnFactory).setSortProperty(sortingProperties)</code>
+     *             instead.
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Deprecated
     protected <C extends Column<T>> C addColumn(Renderer<T> renderer,
             BiFunction<Renderer<T>, String, C> columnFactory,
             String... sortingProperties) {
         C column = addColumn(renderer, columnFactory);
-
-        Map<String, ValueProvider<T, ?>> valueProviders = renderer
-                .getValueProviders();
-        Set<String> valueProvidersKeySet = valueProviders.keySet();
-        List<String> matchingSortingProperties = Arrays
-                .stream(sortingProperties)
-                .filter(valueProvidersKeySet::contains)
-                .collect(Collectors.toList());
-
-        column.setSortProperty(matchingSortingProperties
-                .toArray(new String[matchingSortingProperties.size()]));
-        Comparator<T> combinedComparator = (a, b) -> 0;
-        Comparator nullsLastComparator = Comparator
-                .nullsLast(Comparator.naturalOrder());
-        for (String sortProperty : matchingSortingProperties) {
-            ValueProvider<T, ?> provider = valueProviders.get(sortProperty);
-            combinedComparator = combinedComparator.thenComparing((a, b) -> {
-                Object aa = provider.apply(a);
-                if (!(aa instanceof Comparable)) {
-                    return 0;
-                }
-                Object bb = provider.apply(b);
-                return nullsLastComparator.compare(aa, bb);
-            });
-        }
-
+        column.setSortProperty(sortingProperties);
         return column;
     }
 
@@ -2940,8 +2933,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * <p>
      * <strong>Note:</strong> If column reordering is enabled with
      * {@link #setColumnReorderingAllowed(boolean)} and the user has reordered
-     * the columns, the order of the list returned by this method might not be
-     * correct.
+     * the columns, the order of the list returned by this method might be
+     * incorrect.
      *
      * @return unmodifiable list of columns
      */
@@ -3144,6 +3137,26 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
+     * Sets whether multiple column sorting is enabled on the client-side.
+     *
+     * @param multiSort
+     *            {@code true} to enable sorting of multiple columns on the
+     *            client-side, {@code false} to disable
+     * @param priority
+     *            the multi-sort priority to set, not {@code null}
+     *
+     * @see MultiSortPriority
+     */
+    public void setMultiSort(boolean multiSort, MultiSortPriority priority) {
+        Objects.requireNonNull(priority,
+                "Multi-sort priority must not be null");
+        setMultiSort(multiSort);
+
+        getElement().setAttribute("multi-sort-priority",
+                priority == MultiSortPriority.APPEND ? "append" : "prepend");
+    }
+
+    /**
      * Gets whether multiple column sorting is enabled on the client-side.
      *
      * @see #setMultiSort(boolean)
@@ -3271,6 +3284,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * For Grids with multi-sorting, the index of a given column inside the list
      * defines the sort priority. For example, the column at index 0 of the list
      * is sorted first, then on the index 1, and so on.
+     * <p>
+     * When Grid is not configured to have multi-sorting enabled, all the
+     * columns in the list except the first one are ignored.
      *
      * @param order
      *            the list of sort orders to set on the client, or
@@ -3281,6 +3297,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     public void sort(List<GridSortOrder<T>> order) {
         if (order == null) {
             order = Collections.emptyList();
+        }
+        if (!isMultiSort() && order.size() > 1) {
+            LoggerFactory.getLogger(Grid.class).warn(
+                    "Multiple sort columns provided but multi-sorting is not enabled.");
+            order = order.subList(0, 1);
         }
         setSortOrder(order, false);
     }
@@ -3384,8 +3405,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             }
             directions.set(i, direction);
         }
-        getElement().callJsFunction("$connector.setSorterDirections",
-                directions);
+
+        if (getElement().getNode().isAttached()) {
+            getElement().callJsFunction("$connector.setSorterDirections",
+                    directions);
+        }
     }
 
     /**
@@ -4078,17 +4102,17 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     /**
      * Sets whether the user can drag the grid rows or not.
      *
-     * @param rowsRraggable
+     * @param rowsDraggable
      *            {@code true} if the rows can be dragged by the user;
      *            {@code false} if not
      */
-    public void setRowsDraggable(boolean rowsRraggable) {
+    public void setRowsDraggable(boolean rowsDraggable) {
         // We need to add DnD mobile polyfill here by invoking
         // DndUtil.addMobileDndPolyfillIfNeeded. But, since DndUtil is in a Flow
         // internal package, DragSource.create is called to invoke
         // addMobileDndPolyfillIfNeeded indirectly.
         DragSource.create(this).setDraggable(false);
-        getElement().setProperty("rowsDraggable", rowsRraggable);
+        getElement().setProperty("rowsDraggable", rowsDraggable);
     }
 
     /**
@@ -4428,5 +4452,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             }
             return result;
         };
+    }
+
+    private String getUniqueKey(T item) {
+        return Optional.ofNullable(getUniqueKeyProvider())
+                .map(provider -> provider.apply(item))
+                .orElse(getDataCommunicator().getKeyMapper().key(item));
     }
 }

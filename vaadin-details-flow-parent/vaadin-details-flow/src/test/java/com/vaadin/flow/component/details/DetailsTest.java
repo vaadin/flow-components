@@ -10,7 +10,7 @@ public class DetailsTest {
     private Details details;
 
     @Before
-    public void setUp() {
+    public void setup() {
         details = new Details();
     }
 
@@ -22,5 +22,16 @@ public class DetailsTest {
 
         details.setContent(new Span());
         Assert.assertEquals(1, details.getContent().count());
+    }
+
+    @Test
+    public void noSummaryDefined_getSummaryText_returnsEmptyString() {
+        Assert.assertEquals("", details.getSummaryText());
+    }
+
+    @Test
+    public void summaryDefined_getSummaryText_returnsStringDefined() {
+        details.setSummaryText("summary");
+        Assert.assertEquals("summary", details.getSummaryText());
     }
 }

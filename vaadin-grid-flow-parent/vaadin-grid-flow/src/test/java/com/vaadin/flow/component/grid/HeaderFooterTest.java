@@ -54,7 +54,7 @@ public class HeaderFooterTest {
     public ExpectedException thrown = ExpectedException.none();
 
     @Before
-    public void init() {
+    public void setup() {
         grid = new Grid<>();
         addColumns();
     }

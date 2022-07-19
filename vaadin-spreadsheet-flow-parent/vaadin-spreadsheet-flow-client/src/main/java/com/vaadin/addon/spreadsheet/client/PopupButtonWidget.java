@@ -74,6 +74,7 @@ public class PopupButtonWidget extends FocusWidget
     private int col;
     private int row;
     private SheetWidget owner;
+    private Widget content;
 
     public PopupButtonWidget() {
         root.setClassName(BUTTON_CLASSNAME);
@@ -197,6 +198,18 @@ public class PopupButtonWidget extends FocusWidget
         popupLayout.remove(widget);
     }
 
+    public void setPopupContent(Widget widget) {
+        this.content = widget;
+        addPopupComponent(widget);
+    }
+
+    public void clearPopupContent() {
+        if (this.content != null) {
+            removePopupComponent(this.content);
+            this.content = null;
+        }
+    }
+
     public void setPopupHeight(String popupHeight) {
         if (popupHeight != null) {
             ((PopupPanel) popup).setHeight(popupHeight);
@@ -260,6 +273,7 @@ public class PopupButtonWidget extends FocusWidget
 
     public void closePopup() {
         popup.hide();
+        clearPopupContent();
     }
 
     public void openPopup() {
