@@ -64,4 +64,46 @@ public class MenuBarElement extends TestBenchElement {
                 "return arguments[0].style.visibility !== 'hidden'", element);
     }
 
+    /**
+     * Get TestBenchElements representing sub menu items under the first sub
+     * menu.
+     * 
+     * @return List of TestBenchElements representing sub menu items.
+     */
+    public List<TestBenchElement> getSubMenuItems() {
+        return getSubMenuItems(getSubMenu());
+    }
+
+    /**
+     * Get TestBenchElements representing sub menu items under specific sub
+     * menu.
+     * 
+     * @param overlay
+     *            The sub menu overlay from which items are being collected.
+     * @return List of TestBenchElements representing sub menu items.
+     */
+    public List<TestBenchElement> getSubMenuItems(
+            TestBenchElement overlay) {
+        return overlay.$("vaadin-context-menu-item").all();
+    }
+
+    /**
+     * Get the sub menu overlay element.
+     * 
+     * @return TestBenchElement for the first open sub menu.
+     */
+    public TestBenchElement getSubMenu() {
+        ExpectedConditions.presenceOfElementLocated(By.tagName(OVERLAY_TAG));
+        return $(OVERLAY_TAG).first();
+    }
+
+    /**
+     * Get all the open sub menu overlay elements.
+     * 
+     * @return List of TestBenchElements representing currently open sub menues.
+     */
+    public List<TestBenchElement> getAllSubMenues() {
+        return $(OVERLAY_TAG).all();
+    }
+
 }
