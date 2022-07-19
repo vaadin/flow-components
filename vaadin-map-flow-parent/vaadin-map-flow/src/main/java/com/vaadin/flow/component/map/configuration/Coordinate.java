@@ -73,6 +73,19 @@ public class Coordinate {
      * @param latitude
      *            latitude value
      * @return coordinate in {@link Projection#EPSG_3857} projection
+     * @deprecated Since 23.2, the default coordinate system has been changed to
+     *             EPSG:4326, which allows passing latitude and longitude into
+     *             the constructor directly. Usages of this method should be
+     *             replaced with a call to the constructor
+     *             {@link #Coordinate(double, double)}.
+     *             <p>
+     *             Since the default coordinate system has been changed to
+     *             EPSG:4326, and the purpose of this method is to return
+     *             coordinates in EPSG:3857, this method will not return correct
+     *             results anymore. As a temporary measure, the coordinate
+     *             system can be changed back to EPSG:3857 using
+     *             {@link Map#setUserProjection(String)}. Long-term, usages of
+     *             this method should be replaced.
      */
     public static Coordinate fromLonLat(double longitude, double latitude) {
         return fromLonLat(longitude, latitude, Projection.EPSG_3857);
@@ -92,6 +105,19 @@ public class Coordinate {
      * @param targetProjection
      *            the projection of the resulting coordinate
      * @return coordinate in the specified projection
+     * @deprecated Since 23.2, the default coordinate system has been changed to
+     *             EPSG:4326, which allows passing latitude and longitude into
+     *             the constructor directly. Usages of this method should be
+     *             replaced with a call to the constructor
+     *             {@link #Coordinate(double, double)}.
+     *             <p>
+     *             Since the default coordinate system has been changed to
+     *             EPSG:4326, and the purpose of this method is to return
+     *             coordinates in EPSG:3857, this method will not return correct
+     *             results anymore. As a temporary measure, the coordinate
+     *             system can be changed back to EPSG:3857 using
+     *             {@link Map#setUserProjection(String)}. Long-term, usages of
+     *             this method should be replaced.
      */
     public static Coordinate fromLonLat(double longitude, double latitude,
             Projection targetProjection) {
