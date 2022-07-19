@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 
 import java.text.NumberFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 
@@ -14,16 +16,25 @@ public class FormattedRenderersSerializableTest {
 
     @Test
     public void numberRendererIsSerializable() throws IOException {
-        final NumberRenderer renderer = new NumberRenderer(
-                value -> value.toString(), NumberFormat.getInstance());
+        NumberRenderer<?> renderer = new NumberRenderer<>(value -> 42);
+        new ObjectOutputStream(new ByteArrayOutputStream())
+                .writeObject(renderer);
+
+        renderer = new NumberRenderer<>(value -> 42,
+                NumberFormat.getInstance());
         new ObjectOutputStream(new ByteArrayOutputStream())
                 .writeObject(renderer);
     }
 
     @Test
     public void localDateTimeRendererIsSerializable() throws IOException {
-        final LocalDateTimeRenderer renderer = new LocalDateTimeRenderer(
-                value -> value.toString(), () -> DateTimeFormatter
+        LocalDateTimeRenderer<?> renderer = new LocalDateTimeRenderer<>(
+                value -> LocalDateTime.now());
+        new ObjectOutputStream(new ByteArrayOutputStream())
+                .writeObject(renderer);
+
+        renderer = new LocalDateTimeRenderer<>(value -> LocalDateTime.now(),
+                () -> DateTimeFormatter
                         .ofLocalizedDateTime(FormatStyle.MEDIUM));
         new ObjectOutputStream(new ByteArrayOutputStream())
                 .writeObject(renderer);
@@ -31,8 +42,13 @@ public class FormattedRenderersSerializableTest {
 
     @Test
     public void localDateRendererIsSerializable() throws IOException {
-        final LocalDateRenderer renderer = new LocalDateRenderer(
-                value -> value.toString(), () -> DateTimeFormatter
+        LocalDateRenderer<?> renderer = new LocalDateRenderer<>(
+                (v) -> LocalDate.now());
+        new ObjectOutputStream(new ByteArrayOutputStream())
+                .writeObject(renderer);
+
+        renderer = new LocalDateRenderer<>((v) -> LocalDate.now(),
+                () -> DateTimeFormatter
                         .ofLocalizedDateTime(FormatStyle.MEDIUM));
         new ObjectOutputStream(new ByteArrayOutputStream())
                 .writeObject(renderer);
