@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.menubar.testbench;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -97,9 +98,9 @@ public class MenuBarElement extends TestBenchElement {
      * @return TestBenchElement for the first open sub menu.
      */
     public TestBenchElement getSubMenu() {
-        waitUntil(ExpectedConditions
-                .presenceOfElementLocated(By.tagName(OVERLAY_TAG)));
-        return $(OVERLAY_TAG).first();
+        waitForSubMenu();
+        return (TestBenchElement) getDriver()
+                .findElement(By.tagName(OVERLAY_TAG));
     }
 
     /**
@@ -108,7 +109,16 @@ public class MenuBarElement extends TestBenchElement {
      * @return List of TestBenchElements representing currently open sub menues.
      */
     public List<TestBenchElement> getAllSubMenues() {
-        return $(OVERLAY_TAG).all();
+        waitForSubMenu();
+        List<TestBenchElement> elements = new ArrayList<>();
+        getDriver().findElements(By.tagName(OVERLAY_TAG))
+                .forEach(element -> elements.add((TestBenchElement) element));
+        return elements;
+    }
+
+    private void waitForSubMenu() {
+        waitUntil(ExpectedConditions
+                .presenceOfElementLocated(By.tagName(OVERLAY_TAG)));
     }
 
 }
