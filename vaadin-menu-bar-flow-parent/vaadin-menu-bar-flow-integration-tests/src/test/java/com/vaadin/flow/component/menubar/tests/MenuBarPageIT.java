@@ -98,7 +98,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
         menuBar.$("vaadin-menu-bar-button").first().click();
         hoverOn(menuBar.getSubMenuItems().get(1));
 
-        waitUntil(driver -> menuBar.getAllSubMenues().size() == 2);
+        waitUntil(driver -> menuBar.getAllSubMenus().size() == 2);
         TestBenchElement checkableItem = menuBar
                 .getSubMenuItems(menuBar.getAllSubMenues().get(1)).get(1);
         Assert.assertTrue(checkableItem.hasAttribute("menu-item-checked"));
