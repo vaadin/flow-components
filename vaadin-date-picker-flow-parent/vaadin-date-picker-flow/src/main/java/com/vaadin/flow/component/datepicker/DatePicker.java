@@ -18,6 +18,7 @@ package com.vaadin.flow.component.datepicker;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -26,6 +27,7 @@ import java.util.stream.Stream;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasClearButton;
 import com.vaadin.flow.component.HasHelper;
@@ -37,9 +39,12 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
+import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
+import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
@@ -69,7 +74,8 @@ import elemental.json.JsonType;
 @NpmPackage(value = "date-fns", version = "2.28.0")
 public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         implements HasSize, HasValidation, HasHelper, HasTheme, HasLabel,
-        HasClearButton, HasAllowedCharPattern, HasValidator<LocalDate> {
+        HasClearButton, HasAllowedCharPattern, HasValidator<LocalDate>,
+        HasClientValidation {
 
     private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
@@ -88,6 +94,8 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     private LocalDate max;
     private LocalDate min;
     private boolean required;
+    private boolean isClientInvalid;
+    private final Collection<ValidationStatusChangeListener<LocalDate>> validationStatusChangeListeners = new ArrayList<>();
 
     private StateTree.ExecutionRegistration pendingI18nUpdate;
 
@@ -134,7 +142,25 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         // workaround for https://github.com/vaadin/flow/issues/3496
         setInvalid(false);
 
+        addClientValidatedEventListener(e -> {
+            isClientInvalid = !e.isValid();
+            validate();
+            fireValidationStatusChangeEvent();
+        });
+
         addValueChangeListener(e -> validate());
+    }
+    @Override
+    public Registration addValidationStatusChangeListener(
+            ValidationStatusChangeListener<LocalDate> listener) {
+        validationStatusChangeListeners.add(listener);
+        return () -> validationStatusChangeListeners.remove(listener);
+    }
+
+    private void fireValidationStatusChangeEvent() {
+        var event = new ValidationStatusChangeEvent<>(this, !isInvalid());
+        validationStatusChangeListeners
+                .forEach(listener -> listener.validationStatusChanged(event));
     }
 
     /**
@@ -339,7 +365,8 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         super.onAttach(attachEvent);
         initConnector();
         requestI18nUpdate();
-        FieldValidationUtil.disableClientValidation(this);
+        // FieldValidationUtil.disableClientValidation(this);
+        ClientValidationUtil.preventWebComponentFromSettingItselfToValid(this);
     }
 
     private void initConnector() {
@@ -490,6 +517,10 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         var smallerThanMin = ValidationUtil.checkSmallerThanMin(value, min);
         if (smallerThanMin.isError()) {
             return smallerThanMin;
+        }
+
+        if (isClientInvalid) {
+            return ValidationResult.error("");
         }
 
         return ValidationResult.ok();
