@@ -100,7 +100,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
 
         waitUntil(driver -> menuBar.getAllSubMenus().size() == 2);
         TestBenchElement checkableItem = menuBar
-                .getSubMenuItems(menuBar.getAllSubMenues().get(1)).get(1);
+                .getSubMenuItems(menuBar.getAllSubMenus().get(1)).get(1);
         Assert.assertTrue(checkableItem.hasAttribute("menu-item-checked"));
 
         checkableItem.click();
