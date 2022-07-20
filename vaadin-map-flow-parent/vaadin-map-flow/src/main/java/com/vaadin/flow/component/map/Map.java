@@ -170,6 +170,9 @@ public class Map extends MapBase {
         UI.getCurrent().getPage().executeJs(
                 "window.Vaadin.Flow.mapConnector.defineProjection($0, $1)",
                 projectionName, wksDefinition);
+        UI.getCurrent().getPage().executeJs(
+                "window.Vaadin.Flow.mapConnector.defineProjection($0, $1)",
+                projectionName, wksDefinition);
     }
 
     public Map() {
