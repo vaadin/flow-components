@@ -104,9 +104,7 @@ public class SamplerView extends Div {
             double x = ThreadLocalRandom.current().nextDouble(-180, // NOSONAR
                     180);
             double y = ThreadLocalRandom.current().nextDouble(-90, // NOSONAR
-                    90);
-            double test = ThreadLocalRandom.current().nextDouble(42);
-            System.out.println(test);
+                    45);
 
             MarkerFeature markerFeature = new MarkerFeature(
                     new Coordinate(x, y));
