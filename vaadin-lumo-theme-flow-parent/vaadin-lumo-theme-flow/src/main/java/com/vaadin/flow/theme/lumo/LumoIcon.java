@@ -27,6 +27,9 @@ import java.util.Locale;
  * <p>
  * These instances can be used to create {@link Icon} components by using their
  * {@link #create()} method.
+ * <p>
+ * NOTE: Using this enum will also include the Vaadin icon set in the frontend
+ * bundle.
  *
  * @author Vaadin Ltd
  */
