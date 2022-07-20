@@ -108,7 +108,7 @@ public class MenuBarElement extends TestBenchElement {
      *
      * @return List of TestBenchElements representing currently open sub menues.
      */
-    public List<TestBenchElement> getAllSubMenues() {
+    public List<TestBenchElement> getAllSubMenus() {
         waitForSubMenu();
         List<TestBenchElement> elements = new ArrayList<>();
         getDriver().findElements(By.tagName(OVERLAY_TAG))
