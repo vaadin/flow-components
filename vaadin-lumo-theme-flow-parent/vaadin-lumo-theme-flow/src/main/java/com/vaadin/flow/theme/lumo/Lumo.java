@@ -38,7 +38,7 @@ import com.vaadin.flow.theme.AbstractTheme;
 @JsModule("@vaadin/vaadin-lumo-styles/sizing.js")
 @JsModule("@vaadin/vaadin-lumo-styles/spacing.js")
 @JsModule("@vaadin/vaadin-lumo-styles/style.js")
-@JsModule("@vaadin/vaadin-lumo-styles/icons.js")
+@JsModule("@vaadin/vaadin-lumo-styles/vaadin-iconset.js")
 @JsModule("./lumo-includes.ts")
 public class Lumo implements AbstractTheme {
 
