@@ -22,7 +22,7 @@ import java.util.Locale;
 
 /**
  * Enumeration of all icons in the
- * <a href= "https://vaadin.com/docs/latest/ds/foundation/icons">Lumo Icons</a>
+ * <a href= "https://vaadin.com/docs/latest/components/icons">Lumo Icons</a>
  * collection.
  * <p>
  * These instances can be used to create {@link Icon} components by using their
