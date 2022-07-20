@@ -106,7 +106,7 @@ public class MenuBarElement extends TestBenchElement {
     /**
      * Get all the open sub menu overlay elements.
      *
-     * @return List of TestBenchElements representing currently open sub menues.
+     * @return List of TestBenchElements representing currently open sub menus.
      */
     public List<TestBenchElement> getAllSubMenus() {
         waitForSubMenu();
