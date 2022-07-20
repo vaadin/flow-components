@@ -16,6 +16,7 @@ package com.vaadin.flow.component.map.configuration.geometry;
  * #L%
  */
 
+import com.vaadin.flow.component.map.Map;
 import com.vaadin.flow.component.map.configuration.Constants;
 import com.vaadin.flow.component.map.configuration.Coordinate;
 
@@ -58,7 +59,9 @@ public class Point extends SimpleGeometry {
     /**
      * Sets the coordinates that locate the point. Coordinates must be specified
      * in the map's user projection, which by default is {@code EPSG:4326}, also
-     * referred to as GPS coordinates.
+     * referred to as GPS coordinates. If the user projection has been changed
+     * using {@link Map#setUserProjection(String)}, then coordinates must be
+     * specified in that projection instead.
      *
      * @param coordinates
      *            the new coordinates, not null
