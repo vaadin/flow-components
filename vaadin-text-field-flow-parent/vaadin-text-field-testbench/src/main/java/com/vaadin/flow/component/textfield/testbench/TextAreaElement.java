@@ -34,16 +34,19 @@ import java.util.Collections;
 public class TextAreaElement extends TestBenchElement
         implements HasStringValueProperty, HasLabel, HasPlaceholder, HasHelper {
     /**
-     * Sets the given value for the slotted {@code textarea} element and then triggers
-     * {@code input} and {@code change} DOM events.
+     * Sets the given value for the slotted {@code textarea} element and then
+     * triggers {@code input} and {@code change} DOM events.
      *
-     * @param value the value to set.
+     * @param value
+     *            the value to set.
      */
     public void setTextareaValue(String value) {
         TestBenchElement textarea = $("textarea").first();
         textarea.setProperty("value", value);
-        textarea.dispatchEvent("input", Collections.singletonMap("bubbles", true));
-        textarea.dispatchEvent("change", Collections.singletonMap("bubbles", true));
+        textarea.dispatchEvent("input",
+                Collections.singletonMap("bubbles", true));
+        textarea.dispatchEvent("change",
+                Collections.singletonMap("bubbles", true));
     }
 
     @Override

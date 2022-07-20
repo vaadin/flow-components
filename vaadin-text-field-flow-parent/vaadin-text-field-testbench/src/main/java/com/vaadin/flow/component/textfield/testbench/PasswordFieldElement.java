@@ -58,16 +58,18 @@ public class PasswordFieldElement extends TestBenchElement
     }
 
     /**
-     * Sets the given value for the slotted {@code input} element and then triggers
-     * {@code input} and {@code change} DOM events.
+     * Sets the given value for the slotted {@code input} element and then
+     * triggers {@code input} and {@code change} DOM events.
      *
-     * @param value the value to set.
+     * @param value
+     *            the value to set.
      */
     public void setInputValue(String value) {
         TestBenchElement input = $("input").first();
         input.setProperty("value", value);
         input.dispatchEvent("input", Collections.singletonMap("bubbles", true));
-        input.dispatchEvent("change", Collections.singletonMap("bubbles", true));
+        input.dispatchEvent("change",
+                Collections.singletonMap("bubbles", true));
     }
 
     @Override
