@@ -109,7 +109,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
 
         openSubSubMenu();
         checkableItem = menuBar
-                .getSubMenuItems(menuBar.getAllSubMenues().get(1)).get(1);
+                .getSubMenuItems(menuBar.getAllSubMenus().get(1)).get(1);
         Assert.assertFalse(checkableItem.hasAttribute("menu-item-checked"));
     }
 
