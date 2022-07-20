@@ -118,7 +118,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
         click("toggle-checked");
         openSubSubMenu();
         TestBenchElement checkableItem = menuBar
-                .getSubMenuItems(menuBar.getAllSubMenues().get(1)).get(1);
+                .getSubMenuItems(menuBar.getAllSubMenus().get(1)).get(1);
         Assert.assertTrue(checkableItem.hasAttribute("menu-item-checked"));
     }
 
