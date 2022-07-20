@@ -89,7 +89,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
     public void openSubSubMenu_clickCheckableItem_checkableStateChanges() {
         openSubSubMenu();
 
-        menuBar.getSubMenuItems(menuBar.getAllSubMenues().get(1)).get(1)
+        menuBar.getSubMenuItems(menuBar.getAllSubMenus().get(1)).get(1)
                 .click();
         verifyClosed();
 
