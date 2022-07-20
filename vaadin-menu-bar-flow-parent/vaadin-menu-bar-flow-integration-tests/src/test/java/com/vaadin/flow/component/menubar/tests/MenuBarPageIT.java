@@ -72,7 +72,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
         openSubSubMenu();
 
         String[] menuItemContents = getOverlayMenuItemContents(
-                menuBar.getAllSubMenues().get(1));
+                menuBar.getAllSubMenus().get(1));
         Assert.assertArrayEquals(
                 new String[] { "<p>sub sub item 1</p>", "checkable" },
                 menuItemContents);
