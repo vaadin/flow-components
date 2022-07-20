@@ -57,11 +57,17 @@ public class PasswordFieldElement extends TestBenchElement
         callFunction("_setPasswordVisible", passwordVisible);
     }
 
-    @Override
-    public void setValue(String string) {
-        HasStringValueProperty.super.setValue(string);
-        dispatchEvent("change", Collections.singletonMap("bubbles", true));
-        dispatchEvent("blur");
+    /**
+     * Sets the given value for the slotted {@code input} element and then triggers
+     * {@code input} and {@code change} DOM events.
+     *
+     * @param value the value to set.
+     */
+    public void setInputValue(String value) {
+        TestBenchElement input = $("input").first();
+        input.setProperty("value", value);
+        input.dispatchEvent("input", Collections.singletonMap("bubbles", true));
+        input.dispatchEvent("change", Collections.singletonMap("bubbles", true));
     }
 
     @Override
