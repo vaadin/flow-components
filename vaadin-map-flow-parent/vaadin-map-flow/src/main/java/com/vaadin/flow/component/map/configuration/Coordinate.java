@@ -87,6 +87,7 @@ public class Coordinate {
      *             {@link Map#setUserProjection(String)}. Long-term, usages of
      *             this method should be replaced.
      */
+    @Deprecated
     public static Coordinate fromLonLat(double longitude, double latitude) {
         return fromLonLat(longitude, latitude, Projection.EPSG_3857);
     }
@@ -119,6 +120,7 @@ public class Coordinate {
      *             {@link Map#setUserProjection(String)}. Long-term, usages of
      *             this method should be replaced.
      */
+    @Deprecated
     public static Coordinate fromLonLat(double longitude, double latitude,
             Projection targetProjection) {
         Objects.requireNonNull(targetProjection);
