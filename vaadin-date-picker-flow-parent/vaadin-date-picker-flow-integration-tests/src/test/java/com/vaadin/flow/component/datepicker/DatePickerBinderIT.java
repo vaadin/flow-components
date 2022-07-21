@@ -86,6 +86,15 @@ public class DatePickerBinderIT extends AbstractComponentIT {
         Assert.assertEquals(field.getPropertyString("label"), "invalid");
     }
 
+    @Test
+    public void dateField_internalValidationFail_fieldInvalid() {
+        DatePickerElement field = $(DatePickerElement.class).first();
+
+        field.setInputValue("invalid_value");
+        Assert.assertTrue("Field should be invalid",
+                field.getPropertyBoolean("invalid"));
+    }
+
     private void assertInvalid(DatePickerElement field) {
         Assert.assertTrue("Unexpected invalid state",
                 field.getPropertyBoolean("invalid"));
