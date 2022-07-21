@@ -1,6 +1,5 @@
 package com.vaadin.flow.component.textfield.binder;
 
-import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.function.SerializablePredicate;
 

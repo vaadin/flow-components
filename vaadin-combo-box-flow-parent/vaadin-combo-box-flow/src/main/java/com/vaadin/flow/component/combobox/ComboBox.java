@@ -311,7 +311,7 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
         JsonObject json = Json.createObject();
         json.put("key", keyMapper.key(value));
         getDataGenerator().generateData(value, json);
-        getElement().setPropertyJson("selectedItem", json);
+        getElement().setPropertyJson(PROP_SELECTED_ITEM, json);
         getElement().setProperty(PROP_VALUE, keyMapper.key(value));
         getElement().setProperty(PROP_INPUT_ELEMENT_VALUE,
                 generateLabel(value));
@@ -321,8 +321,9 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
     protected boolean isSelected(T item) {
         T value = getValue();
         DataProvider<T, ?> dataProvider = getDataProvider();
-        if (dataProvider == null || item == null || value == null)
+        if (dataProvider == null || item == null || value == null) {
             return false;
+        }
 
         return Objects.equals(dataProvider.getId(item),
                 dataProvider.getId(value));
