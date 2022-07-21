@@ -19,7 +19,6 @@ package com.vaadin.flow.component.avatar;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
@@ -60,7 +59,7 @@ import java.util.Objects;
 @NpmPackage(value = "@vaadin/avatar", version = "23.2.0-alpha5")
 @NpmPackage(value = "@vaadin/vaadin-avatar", version = "23.2.0-alpha5")
 public class Avatar extends Component
-        implements HasStyle, HasSize, HasTheme, HasThemeVariant<AvatarVariant> {
+        implements HasStyle, HasSize, HasThemeVariant<AvatarVariant> {
 
     /**
      * The internationalization properties for {@link AvatarGroup}.
