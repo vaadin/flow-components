@@ -89,8 +89,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
     public void openSubSubMenu_clickCheckableItem_checkableStateChanges() {
         openSubSubMenu();
 
-        menuBar.getSubMenuItems(menuBar.getAllSubMenus().get(1)).get(1)
-                .click();
+        menuBar.getSubMenuItems(menuBar.getAllSubMenus().get(1)).get(1).click();
         verifyClosed();
 
         assertMessage("true");
@@ -108,8 +107,8 @@ public class MenuBarPageIT extends AbstractComponentIT {
         assertMessage("false");
 
         openSubSubMenu();
-        checkableItem = menuBar
-                .getSubMenuItems(menuBar.getAllSubMenus().get(1)).get(1);
+        checkableItem = menuBat.getSubMenuItems(menuBar.getAllSubMenus().get(1))
+                .get(1);
         Assert.assertFalse(checkableItem.hasAttribute("menu-item-checked"));
     }
 
