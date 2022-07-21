@@ -58,10 +58,10 @@ import elemental.json.JsonObject;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-combo-box")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha4")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha5")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/combo-box", version = "23.2.0-alpha4")
-@NpmPackage(value = "@vaadin/vaadin-combo-box", version = "23.2.0-alpha4")
+@NpmPackage(value = "@vaadin/combo-box", version = "23.2.0-alpha5")
+@NpmPackage(value = "@vaadin/vaadin-combo-box", version = "23.2.0-alpha5")
 @JsModule("@vaadin/combo-box/src/vaadin-combo-box.js")
 @JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 @JsModule("./flow-component-renderer.js")
@@ -311,7 +311,7 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
         JsonObject json = Json.createObject();
         json.put("key", keyMapper.key(value));
         getDataGenerator().generateData(value, json);
-        getElement().setPropertyJson("selectedItem", json);
+        getElement().setPropertyJson(PROP_SELECTED_ITEM, json);
         getElement().setProperty(PROP_VALUE, keyMapper.key(value));
         getElement().setProperty(PROP_INPUT_ELEMENT_VALUE,
                 generateLabel(value));
@@ -321,8 +321,9 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
     protected boolean isSelected(T item) {
         T value = getValue();
         DataProvider<T, ?> dataProvider = getDataProvider();
-        if (dataProvider == null || item == null || value == null)
+        if (dataProvider == null || item == null || value == null) {
             return false;
+        }
 
         return Objects.equals(dataProvider.getId(item),
                 dataProvider.getId(value));
