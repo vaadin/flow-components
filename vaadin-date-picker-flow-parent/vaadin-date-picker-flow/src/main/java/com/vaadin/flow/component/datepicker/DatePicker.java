@@ -153,6 +153,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
 
         addValueChangeListener(e -> validate());
     }
+
     @Override
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<LocalDate> listener) {
@@ -368,7 +369,6 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         super.onAttach(attachEvent);
         initConnector();
         requestI18nUpdate();
-        // FieldValidationUtil.disableClientValidation(this);
         ClientValidationUtil.preventWebComponentFromSettingItselfToValid(this);
     }
 
