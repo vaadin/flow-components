@@ -17,8 +17,6 @@ package com.vaadin.flow.component.textfield.testbench;
 
 import org.openqa.selenium.By;
 
-import java.util.Collections;
-
 import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasLabel;
 import com.vaadin.testbench.HasPlaceholder;
@@ -68,10 +66,7 @@ public class PasswordFieldElement extends TestBenchElement
     @Override
     public void setValue(String string) {
         TestBenchElement input = $("input").first();
-        input.setProperty("value", string);
-        input.dispatchEvent("input", Collections.singletonMap("bubbles", true));
-        input.dispatchEvent("change",
-                Collections.singletonMap("bubbles", true));
+        TextFieldElementHelper.setValue(input, string);
     }
 
     @Override

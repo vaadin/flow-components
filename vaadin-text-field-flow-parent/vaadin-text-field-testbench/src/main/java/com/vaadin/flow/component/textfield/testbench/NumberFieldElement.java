@@ -24,8 +24,6 @@ import com.vaadin.testbench.HasStringValueProperty;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
-import java.util.Collections;
-
 /**
  * A TestBench element representing a <code>&lt;vaadin-number-field&gt;</code>
  * element.
@@ -45,10 +43,7 @@ public class NumberFieldElement extends TestBenchElement
     @Override
     public void setValue(String string) {
         TestBenchElement input = $("input").first();
-        input.setProperty("value", string);
-        input.dispatchEvent("input", Collections.singletonMap("bubbles", true));
-        input.dispatchEvent("change",
-                Collections.singletonMap("bubbles", true));
+        TextFieldElementHelper.setValue(input, string);
     }
 
     @Override
