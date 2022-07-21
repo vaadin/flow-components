@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.button;
 
-
 import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Focusable;

@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.textfield;
 
-
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
