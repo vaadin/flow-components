@@ -38,7 +38,7 @@
         <osgi.export.package>default</osgi.export.package>
         <sonar.issue.ignore.multicriteria>e1</sonar.issue.ignore.multicriteria>
         <sonar.issue.ignore.multicriteria.e1.ruleKey>java:S1176</sonar.issue.ignore.multicriteria.e1.ruleKey>
-        <sonar.issue.ignore.multicriteria.e1.resourceKey>**/*.java</sonar.issue.ignore.multicriteria.e1.resourceKey>
+        <sonar.issue.ignore.multicriteria.e1.resourceKey>**/*-integration-tests/**/*.java</sonar.issue.ignore.multicriteria.e1.resourceKey>
 
         <!-- spreadsheet -->
         <poi.version>5.2.2</poi.version>
