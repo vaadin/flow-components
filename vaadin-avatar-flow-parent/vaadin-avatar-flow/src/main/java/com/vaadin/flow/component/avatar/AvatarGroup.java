@@ -19,7 +19,6 @@ package com.vaadin.flow.component.avatar;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
@@ -69,7 +68,7 @@ import java.util.stream.Stream;
 @NpmPackage(value = "@vaadin/avatar-group", version = "23.2.0-alpha5")
 @NpmPackage(value = "@vaadin/vaadin-avatar", version = "23.2.0-alpha5")
 public class AvatarGroup extends Component implements HasStyle, HasSize,
-        HasTheme, HasThemeVariant<AvatarGroupVariant> {
+        HasThemeVariant<AvatarGroupVariant> {
 
     /**
      * Item to be set as an avatar for the avatar group.

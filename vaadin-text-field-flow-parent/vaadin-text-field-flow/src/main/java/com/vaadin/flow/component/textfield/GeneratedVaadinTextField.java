@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.textfield;
 
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.Component;
@@ -25,7 +23,6 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.NotSupported;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
