@@ -33,11 +33,22 @@ import java.util.Collections;
 @Element("vaadin-text-area")
 public class TextAreaElement extends TestBenchElement
         implements HasStringValueProperty, HasLabel, HasPlaceholder, HasHelper {
+    /**
+     * Emulates the user changing the value, which in practice means setting
+     * {@code value} of the {@code textarea} element to the given value and then
+     * triggering {@code input} and {@code change} DOM events.
+     *
+     * @param string
+     *            the value to set
+     */
     @Override
     public void setValue(String string) {
-        HasStringValueProperty.super.setValue(string);
-        dispatchEvent("change", Collections.singletonMap("bubbles", true));
-        dispatchEvent("blur");
+        TestBenchElement textarea = $("textarea").first();
+        textarea.setProperty("value", string);
+        textarea.dispatchEvent("input",
+                Collections.singletonMap("bubbles", true));
+        textarea.dispatchEvent("change",
+                Collections.singletonMap("bubbles", true));
     }
 
     @Override
