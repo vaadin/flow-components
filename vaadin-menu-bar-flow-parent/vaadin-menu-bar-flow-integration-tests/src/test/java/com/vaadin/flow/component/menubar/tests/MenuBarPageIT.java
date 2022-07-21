@@ -549,7 +549,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
     }
 
     private String[] getOverlayMenuItemContents() {
-        return getOverlayMenuItemContents(menuhttps://www.w3schools.com/csSref/pr_print_pageba.asp.getSubMenuItems());
+        return getOverlayMenuItemContents(menuBar.getSubMenuItems());
     }
 
     private String[] getOverlayMenuItemContents(TestBenchElement overlay) {
