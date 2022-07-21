@@ -31,6 +31,7 @@ public class SamplerView extends Div {
             System.out.println(
                     "Feature click: featureId=" + e.getFeature().getId()
                             + ", layerId=" + e.getLayer().getId());
+            System.out.println("Test change");
         });
 
         NativeButton toggleLayerVisible = new NativeButton("Toggle Layer",
