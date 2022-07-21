@@ -107,7 +107,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
         assertMessage("false");
 
         openSubSubMenu();
-        checkableItem = menuBat.getSubMenuItems(menuBar.getAllSubMenus().get(1))
+        checkableItem = menuBar.getSubMenuItems(menuBar.getAllSubMenus().get(1))
                 .get(1);
         Assert.assertFalse(checkableItem.hasAttribute("menu-item-checked"));
     }
@@ -541,7 +541,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
     }
 
     private void verifyNumOfOverlays(int expected) {
-        waitUntil(driver -> menuBar.getAllSubMenues().size() == expected);
+        waitUntil(driver -> menuBar.getAllSubMenus().size() == expected);
     }
 
     private void assertOverlayContents(String... expected) {
@@ -549,7 +549,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
     }
 
     private String[] getOverlayMenuItemContents() {
-        return getOverlayMenuItemContents(menuBar.getSubMenuItems());
+        return getOverlayMenuItemContents(menuhttps://www.w3schools.com/csSref/pr_print_pageba.asp.getSubMenuItems());
     }
 
     private String[] getOverlayMenuItemContents(TestBenchElement overlay) {
