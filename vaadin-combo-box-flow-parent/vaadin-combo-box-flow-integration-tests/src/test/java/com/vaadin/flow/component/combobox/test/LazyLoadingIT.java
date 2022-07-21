@@ -371,6 +371,8 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
 
         filterBox.setFilter("Person");
 
+        waitForElementNotPresent(By.tagName("vaadin-combo-box-overlay"));
+
         Assert.assertEquals(
                 "None of the items should match the filter "
                         + "and overlay is not displayed",
