@@ -57,7 +57,7 @@ public abstract class AbstractValidationBinderIT<F extends TestBenchElement & Ha
         assertServerValid(true);
         assertClientValid(true);
 
-        field.clear();
+        field.setValue("");
         assertServerValid(false);
         assertClientValid(false);
         assertErrorMessage(AbstractValidationBinderPage.REQUIRED_ERROR_MESSAGE);
