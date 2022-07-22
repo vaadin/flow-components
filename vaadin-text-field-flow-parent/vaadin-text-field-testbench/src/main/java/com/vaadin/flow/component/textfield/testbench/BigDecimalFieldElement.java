@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.textfield.testbench;
 
+import org.openqa.selenium.By;
+
 import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasLabel;
 import com.vaadin.testbench.HasPlaceholder;
@@ -44,4 +46,8 @@ public class BigDecimalFieldElement extends TestBenchElement
         TextFieldElementHelper.setValue(input, string);
     }
 
+    @Override
+    public void sendKeys(CharSequence... keysToSend) {
+        findElement(By.tagName("input")).sendKeys(keysToSend);
+    }
 }
