@@ -150,6 +150,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
 
         addValueChangeListener(e -> validate());
     }
+
     /**
      * Convenience constructor to create a date picker with a label.
      *
@@ -474,7 +475,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
 
     @Override
     public Registration addValidationStatusChangeListener(
-        ValidationStatusChangeListener<LocalDate> listener) {
+            ValidationStatusChangeListener<LocalDate> listener) {
         validationStatusChangeListeners.add(listener);
         return () -> validationStatusChangeListeners.remove(listener);
     }
@@ -482,9 +483,8 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     private void fireValidationStatusChangeEvent() {
         var event = new ValidationStatusChangeEvent<>(this, !isInvalid());
         validationStatusChangeListeners
-            .forEach(listener -> listener.validationStatusChanged(event));
+                .forEach(listener -> listener.validationStatusChanged(event));
     }
-
 
     @Override
     public Validator<LocalDate> getDefaultValidator() {
