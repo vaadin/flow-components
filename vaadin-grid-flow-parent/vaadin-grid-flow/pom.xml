@@ -101,6 +101,7 @@
             <plugin>
                 <groupId>org.apache.karaf.tooling</groupId>
                 <artifactId>karaf-maven-plugin</artifactId>
+                <version>${karaf-maven-plugin.version}</version>
                 <configuration>
                     <enableGeneration>true</enableGeneration>
                     <includeProjectArtifact>true</includeProjectArtifact>
