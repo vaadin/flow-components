@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.textfield.tests.validation;
 
+import com.vaadin.testbench.HasStringValueProperty;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
@@ -23,16 +24,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
-public abstract class AbstractValidationBasicIT<F extends TestBenchElement>
+public abstract class AbstractValidationIT<F extends TestBenchElement & HasStringValueProperty>
         extends AbstractComponentIT {
     protected F field;
-    protected TestBenchElement input;
 
     @Before
     public void init() {
         open();
         field = getField();
-        input = field.$("input").first();
     }
 
     @Test
@@ -42,19 +41,19 @@ public abstract class AbstractValidationBasicIT<F extends TestBenchElement>
     }
 
     @Test
-    public void required_triggerInputBlur_fieldIsValidated() {
-        input.sendKeys(Keys.TAB);
+    public void required_triggerInputBlur_assertValidity() {
+        field.sendKeys(Keys.TAB);
         assertServerValid(false);
         assertClientValid(false);
     }
 
     @Test
-    public void required_changeInputValue_fieldIsValidated() {
-        input.sendKeys("A", Keys.ENTER);
+    public void required_changeInputValue_assertValidity() {
+        field.setValue("Value");
         assertServerValid(true);
         assertClientValid(true);
 
-        input.sendKeys(Keys.BACK_SPACE, Keys.ENTER);
+        field.setValue("");
         assertServerValid(false);
         assertClientValid(false);
     }
@@ -64,6 +63,7 @@ public abstract class AbstractValidationBasicIT<F extends TestBenchElement>
         executeScript("arguments[0].validate()", field);
         assertClientValid(false);
 
+        TestBenchElement input = field.$("input").first();
         input.setProperty("value", "Not empty value");
         input.dispatchEvent("input");
         executeScript("arguments[0].validate()", field);
@@ -76,15 +76,15 @@ public abstract class AbstractValidationBasicIT<F extends TestBenchElement>
 
     @Test
     public void detach_attach_onlyServerCanSetFieldToValid() {
-        $("button").id("detach-field").click();
-        $("button").id("attach-field").click();
+        $("button").id(AbstractValidationPage.DETACH_FIELD_BUTTON).click();
+        $("button").id(AbstractValidationPage.ATTACH_FIELD_BUTTON).click();
 
         field = getField();
-        input = field.$("input").first();
 
         executeScript("arguments[0].validate()", field);
         assertClientValid(false);
 
+        TestBenchElement input = field.$("input").first();
         input.setProperty("value", "Not empty value");
         input.dispatchEvent("input");
         executeScript("arguments[0].validate()", field);
@@ -100,9 +100,12 @@ public abstract class AbstractValidationBasicIT<F extends TestBenchElement>
     }
 
     protected void assertServerValid(boolean expected) {
-        $("button").id("retrieve-validity-state").click();
-        Assert.assertEquals(String.valueOf(expected),
-                $("div").id("validity-state").getText());
+        $("button").id(AbstractValidationPage.SERVER_VALIDITY_STATE_BUTTON)
+                .click();
+
+        var actual = $("div").id(AbstractValidationPage.SERVER_VALIDITY_STATE)
+                .getText();
+        Assert.assertEquals(String.valueOf(expected), actual);
     }
 
     protected abstract F getField();

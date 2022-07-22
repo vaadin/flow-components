@@ -18,28 +18,29 @@ package com.vaadin.flow.component.textfield.tests.validation;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 
-@Route("vaadin-text-field/validation/constraints")
-public class TextFieldValidationConstraintsPage
-        extends AbstractValidationConstraintsPage<TextField> {
-    public TextFieldValidationConstraintsPage() {
-        super();
+@Route("vaadin-text-field/validation")
+public class TextFieldValidationPage extends AbstractValidationPage<TextField> {
+    public static final String PATTERN_INPUT = "pattern-input";
+    public static final String MIN_LENGTH_INPUT = "min-length-input";
+    public static final String MAX_LENGTH_INPUT = "max-length-input";
 
-        addInputControl("pattern", "Set pattern", event -> {
+    public TextFieldValidationPage() {
+        add(createInput(PATTERN_INPUT, "Set pattern", event -> {
             field.setPattern(event.getValue());
-        });
+        }));
 
-        addInputControl("min-length", "Set min length", event -> {
+        add(createInput(MIN_LENGTH_INPUT, "Set min length", event -> {
             int value = Integer.parseInt(event.getValue());
             field.setMinLength(value);
-        });
+        }));
 
-        addInputControl("max-length", "Set max length", event -> {
+        add(createInput(MAX_LENGTH_INPUT, "Set max length", event -> {
             int value = Integer.parseInt(event.getValue());
             field.setMaxLength(value);
-        });
+        }));
     }
 
-    protected TextField getField() {
+    protected TextField createField() {
         return new TextField();
     }
 }

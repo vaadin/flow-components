@@ -21,38 +21,41 @@ import org.openqa.selenium.Keys;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("vaadin-text-field/validation/constraints")
-public class TextFieldValidationConstraintsIT
-        extends AbstractValidationConstraintsIT<TextFieldElement> {
+@TestPath("vaadin-text-field/validation")
+public class TextFieldValidationIT
+        extends AbstractValidationIT<TextFieldElement> {
     @Test
-    public void minLength() {
-        $("input").id("min-length").sendKeys("2", Keys.ENTER);
-
-        field.setValue("A");
-        assertClientValid(false);
-        assertServerValid(false);
-
-        field.setValue("AA");
-        assertClientValid(true);
-        assertServerValid(true);
-    }
-
-    @Test
-    public void maxLength() {
-        $("input").id("max-length").sendKeys("1", Keys.ENTER);
+    public void minLength_changeInputValue_assertValidity() {
+        $("input").id(TextFieldValidationPage.MIN_LENGTH_INPUT).sendKeys("2",
+                Keys.ENTER);
 
         field.setValue("AA");
         assertClientValid(false);
         assertServerValid(false);
 
+        field.setValue("AAA");
+        assertClientValid(true);
+        assertServerValid(true);
+    }
+
+    @Test
+    public void maxLength_changeInputValue_assertValidity() {
+        $("input").id(TextFieldValidationPage.MAX_LENGTH_INPUT).sendKeys("2",
+                Keys.ENTER);
+
+        field.setValue("AA");
+        assertClientValid(false);
+        assertServerValid(false);
+
         field.setValue("A");
         assertClientValid(true);
         assertServerValid(true);
     }
 
     @Test
-    public void pattern() {
-        $("input").id("pattern").sendKeys("^\\d+$", Keys.ENTER);
+    public void pattern_changeInputValue_assertValidity() {
+        $("input").id(TextFieldValidationPage.PATTERN_INPUT).sendKeys("^\\d+$",
+                Keys.ENTER);
 
         field.setValue("Word");
         assertClientValid(false);
