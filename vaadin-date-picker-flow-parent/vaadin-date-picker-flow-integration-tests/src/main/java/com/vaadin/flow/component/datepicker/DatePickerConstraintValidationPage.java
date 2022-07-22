@@ -9,6 +9,9 @@ import com.vaadin.flow.router.Route;
 import java.time.LocalDate;
 import java.util.Locale;
 
+/**
+ * Page for testing DatePicker validation constraints
+ */
 @Route("vaadin-date-picker/constraint-validation")
 public class DatePickerConstraintValidationPage extends Div {
 
@@ -43,7 +46,7 @@ public class DatePickerConstraintValidationPage extends Div {
                 new Div(retrieveValidityState, validityState));
     }
 
-    public NativeButton addButton(String label, String id,
+    private NativeButton addButton(String label, String id,
             ComponentEventListener<ClickEvent<NativeButton>> clickListener) {
         var button = new NativeButton(label, clickListener);
         button.setId(id);
