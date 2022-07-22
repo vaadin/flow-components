@@ -43,10 +43,9 @@ public abstract class AbstractValidationBinderPage<F extends Component & HasVali
         field = createField();
 
         binder = new Binder<>(Bean.class);
-        binder.forField(field)
-                .asRequired(REQUIRED_ERROR_MESSAGE)
+        binder.forField(field).asRequired(REQUIRED_ERROR_MESSAGE)
                 .withValidator(value -> value.equals(expectedValue),
-                    UNEXPECTED_VALUE_ERROR_MESSAGE)
+                        UNEXPECTED_VALUE_ERROR_MESSAGE)
                 .bind("property");
 
         add(field);
