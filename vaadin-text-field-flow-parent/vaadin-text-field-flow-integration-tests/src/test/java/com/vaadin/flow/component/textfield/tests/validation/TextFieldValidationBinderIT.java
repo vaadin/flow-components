@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.textfield.tests.validation.binder;
+package com.vaadin.flow.component.textfield.tests.validation;
 
 import org.junit.Test;
 import org.openqa.selenium.Keys;
@@ -21,15 +21,15 @@ import org.openqa.selenium.Keys;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.flow.testutil.TestPath;
 
-import static com.vaadin.flow.component.textfield.tests.validation.binder.TextFieldValidationBinderConstraintsPage.BINDER_ERROR_MESSAGE;
-
-@TestPath("vaadin-text-field/validation/binder/constraints")
-public class TextFieldValidationBinderConstraintsIT
-        extends AbstractValidationBinderConstraintsIT<TextFieldElement> {
+@TestPath("vaadin-text-field/validation/binder")
+public class TextFieldValidationBinderIT
+        extends AbstractValidationBinderIT<TextFieldElement> {
     @Test
-    public void minLength() {
-        $("input").id("min-length").sendKeys("2", Keys.ENTER);
-        $("input").id("valid-value").sendKeys("AAA", Keys.ENTER);
+    public void minLength_changeInputValue_assertValidity() {
+        $("input").id(TextFieldValidationBinderPage.MIN_LENGTH_INPUT)
+                .sendKeys("2", Keys.ENTER);
+        $("input").id(AbstractValidationBinderPage.EXPECTED_VALUE_INPUT)
+                .sendKeys("AAA", Keys.ENTER);
 
         // Constraint validation fails:
         field.setValue("A");
@@ -40,7 +40,8 @@ public class TextFieldValidationBinderConstraintsIT
         field.setValue("AA");
         assertClientValid(false);
         assertServerValid(false);
-        assertErrorMessage(BINDER_ERROR_MESSAGE);
+        assertErrorMessage(
+                AbstractValidationBinderPage.UNEXPECTED_VALUE_ERROR_MESSAGE);
 
         // Both validations pass:
         field.setValue("AAA");
@@ -49,9 +50,11 @@ public class TextFieldValidationBinderConstraintsIT
     }
 
     @Test
-    public void maxLength() {
-        $("input").id("max-length").sendKeys("2", Keys.ENTER);
-        $("input").id("valid-value").sendKeys("A", Keys.ENTER);
+    public void maxLength_changeInputValue_assertValidity() {
+        $("input").id(TextFieldValidationBinderPage.MAX_LENGTH_INPUT)
+                .sendKeys("2", Keys.ENTER);
+        $("input").id(AbstractValidationBinderPage.EXPECTED_VALUE_INPUT)
+                .sendKeys("A", Keys.ENTER);
 
         // Constraint validation fails:
         field.setValue("AAA");
@@ -62,7 +65,8 @@ public class TextFieldValidationBinderConstraintsIT
         field.setValue("AA");
         assertClientValid(false);
         assertServerValid(false);
-        assertErrorMessage(BINDER_ERROR_MESSAGE);
+        assertErrorMessage(
+                AbstractValidationBinderPage.UNEXPECTED_VALUE_ERROR_MESSAGE);
 
         // Both validations pass:
         field.setValue("A");
@@ -71,9 +75,11 @@ public class TextFieldValidationBinderConstraintsIT
     }
 
     @Test
-    public void pattern() {
-        $("input").id("pattern").sendKeys("^\\d+$", Keys.ENTER);
-        $("input").id("valid-value").sendKeys("1234", Keys.ENTER);
+    public void pattern_changeInputValue_assertValidity() {
+        $("input").id(TextFieldValidationBinderPage.PATTERN_INPUT)
+                .sendKeys("^\\d+$", Keys.ENTER);
+        $("input").id(AbstractValidationBinderPage.EXPECTED_VALUE_INPUT)
+                .sendKeys("1234", Keys.ENTER);
 
         // Constraint validation fails:
         field.setValue("Word");
@@ -84,7 +90,8 @@ public class TextFieldValidationBinderConstraintsIT
         field.setValue("12");
         assertClientValid(false);
         assertServerValid(false);
-        assertErrorMessage(BINDER_ERROR_MESSAGE);
+        assertErrorMessage(
+                AbstractValidationBinderPage.UNEXPECTED_VALUE_ERROR_MESSAGE);
 
         // Both validations pass:
         field.setValue("1234");

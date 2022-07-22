@@ -13,44 +13,35 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.textfield.tests.validation.binder;
+package com.vaadin.flow.component.textfield.tests.validation;
 
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 
-@Route("vaadin-text-field/validation/binder/constraints")
-public class TextFieldValidationBinderConstraintsPage
-        extends AbstractValidationBinderConstraintsPage<TextField, String> {
-    public static final String BINDER_ERROR_MESSAGE = "BINDER_ERROR_MESSAGE";
+@Route("vaadin-text-field/validation/binder")
+public class TextFieldValidationBinderPage
+        extends AbstractValidationBinderPage<TextField, String> {
+    public static final String PATTERN_INPUT = "pattern-input";
+    public static final String MIN_LENGTH_INPUT = "min-length-input";
+    public static final String MAX_LENGTH_INPUT = "max-length-input";
 
-    private String validValue;
-
-    public TextFieldValidationBinderConstraintsPage() {
-        super();
-
-        binder.forField(field).withValidator(value -> value.equals(validValue),
-                BINDER_ERROR_MESSAGE).bind("property");
-
-        addInputControl("valid-value", "Set valid value for binder", event -> {
-            validValue = event.getValue();
-        });
-
-        addInputControl("pattern", "Set pattern", event -> {
+    public TextFieldValidationBinderPage() {
+        add(createInput(PATTERN_INPUT, "Set pattern", event -> {
             field.setPattern(event.getValue());
-        });
+        }));
 
-        addInputControl("min-length", "Set min length", event -> {
+        add(createInput(MIN_LENGTH_INPUT, "Set min length", event -> {
             int value = Integer.parseInt(event.getValue());
             field.setMinLength(value);
-        });
+        }));
 
-        addInputControl("max-length", "Set max length", event -> {
+        add(createInput(MAX_LENGTH_INPUT, "Set max length", event -> {
             int value = Integer.parseInt(event.getValue());
             field.setMaxLength(value);
-        });
+        }));
     }
 
-    protected TextField getField() {
+    protected TextField createField() {
         return new TextField();
     }
 }

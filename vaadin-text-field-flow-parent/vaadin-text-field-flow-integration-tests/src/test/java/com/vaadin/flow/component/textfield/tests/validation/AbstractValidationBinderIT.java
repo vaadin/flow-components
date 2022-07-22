@@ -13,28 +13,25 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.textfield.tests.validation.binder;
+package com.vaadin.flow.component.textfield.tests.validation;
 
+import com.vaadin.testbench.HasStringValueProperty;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
-
-import static com.vaadin.flow.component.textfield.tests.validation.binder.AbstractValidationBinderBasicPage.REQUIRED_ERROR_MESSAGE;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
-public abstract class AbstractValidationBinderBasicIT<F extends TestBenchElement>
+public abstract class AbstractValidationBinderIT<F extends TestBenchElement & HasStringValueProperty>
         extends AbstractComponentIT {
     protected F field;
-    protected TestBenchElement input;
 
     @Before
     public void init() {
         open();
         field = getField();
-        input = field.$("input").first();
     }
 
     @Test
@@ -44,23 +41,26 @@ public abstract class AbstractValidationBinderBasicIT<F extends TestBenchElement
     }
 
     @Test
-    public void required_triggerInputBlur_fieldIsValidated() {
-        input.sendKeys(Keys.TAB);
+    public void required_triggerInputBlur_assertValidity() {
+        field.sendKeys(Keys.TAB);
         assertServerValid(false);
         assertClientValid(false);
-        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
+        assertErrorMessage(AbstractValidationBinderPage.REQUIRED_ERROR_MESSAGE);
     }
 
     @Test
-    public void required_changeInputValue_fieldIsValidated() {
-        input.sendKeys("A", Keys.ENTER);
+    public void required_changeInputValue_assertValidity() {
+        $("input").id(AbstractValidationBinderPage.EXPECTED_VALUE_INPUT)
+                .sendKeys("Value", Keys.ENTER);
+
+        field.setValue("Value");
         assertServerValid(true);
         assertClientValid(true);
 
-        input.sendKeys(Keys.BACK_SPACE, Keys.ENTER);
+        field.clear();
         assertServerValid(false);
         assertClientValid(false);
-        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
+        assertErrorMessage(AbstractValidationBinderPage.REQUIRED_ERROR_MESSAGE);
     }
 
     protected void assertErrorMessage(String expected) {
@@ -72,9 +72,14 @@ public abstract class AbstractValidationBinderBasicIT<F extends TestBenchElement
     }
 
     protected void assertServerValid(boolean expected) {
-        $("button").id("retrieve-validity-state").click();
-        Assert.assertEquals(String.valueOf(expected),
-                $("div").id("validity-state").getText());
+        $("button")
+                .id(AbstractValidationBinderPage.SERVER_VALIDITY_STATE_BUTTON)
+                .click();
+
+        var actual = $("div")
+                .id(AbstractValidationBinderPage.SERVER_VALIDITY_STATE)
+                .getText();
+        Assert.assertEquals(String.valueOf(expected), actual);
     }
 
     protected abstract F getField();
