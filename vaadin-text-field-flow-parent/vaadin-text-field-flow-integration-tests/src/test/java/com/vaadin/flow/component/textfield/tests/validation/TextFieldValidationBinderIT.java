@@ -35,6 +35,7 @@ public class TextFieldValidationBinderIT
         field.setValue("A");
         assertClientValid(false);
         assertServerValid(false);
+        assertErrorMessage("");
 
         // Binder validation fails:
         field.setValue("AA");
@@ -60,6 +61,7 @@ public class TextFieldValidationBinderIT
         field.setValue("AAA");
         assertClientValid(false);
         assertServerValid(false);
+        assertErrorMessage("");
 
         // Binder validation fails:
         field.setValue("AA");
@@ -85,6 +87,7 @@ public class TextFieldValidationBinderIT
         field.setValue("Word");
         assertClientValid(false);
         assertServerValid(false);
+        assertErrorMessage("");
 
         // Binder validation fails:
         field.setValue("12");

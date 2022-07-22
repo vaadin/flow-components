@@ -29,9 +29,13 @@ public class TextFieldValidationIT
         $("input").id(TextFieldValidationPage.MIN_LENGTH_INPUT).sendKeys("2",
                 Keys.ENTER);
 
-        field.setValue("AA");
+        field.setValue("A");
         assertClientValid(false);
         assertServerValid(false);
+
+        field.setValue("AA");
+        assertClientValid(true);
+        assertServerValid(true);
 
         field.setValue("AAA");
         assertClientValid(true);
@@ -43,9 +47,13 @@ public class TextFieldValidationIT
         $("input").id(TextFieldValidationPage.MAX_LENGTH_INPUT).sendKeys("2",
                 Keys.ENTER);
 
-        field.setValue("AA");
+        field.setValue("AAA");
         assertClientValid(false);
         assertServerValid(false);
+
+        field.setValue("AA");
+        assertClientValid(true);
+        assertServerValid(true);
 
         field.setValue("A");
         assertClientValid(true);

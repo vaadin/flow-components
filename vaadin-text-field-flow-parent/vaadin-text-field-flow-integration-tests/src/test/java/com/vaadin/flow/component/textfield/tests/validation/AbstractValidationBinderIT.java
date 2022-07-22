@@ -38,6 +38,7 @@ public abstract class AbstractValidationBinderIT<F extends TestBenchElement & Ha
     public void required_fieldIsInitiallyValid() {
         assertClientValid(true);
         assertServerValid(true);
+        assertErrorMessage(null);
     }
 
     @Test
