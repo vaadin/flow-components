@@ -43,7 +43,8 @@ public class AbstractGridMultiSelectionModelSelectedItemsTest {
         item2 = "item2";
         item3 = "item3";
 
-        ListDataProvider<String> dataProvider = new ListDataProvider<>(List.of(item1, item2, item3)) {
+        ListDataProvider<String> dataProvider = new ListDataProvider<>(
+                List.of(item1, item2, item3)) {
             @Override
             public Object getId(String item) {
                 return System.identityHashCode(item);
@@ -60,7 +61,8 @@ public class AbstractGridMultiSelectionModelSelectedItemsTest {
         grid.setItems(dataProvider);
         grid.setSelectionMode(SelectionMode.MULTI);
 
-        selectionModel = ((AbstractGridMultiSelectionModel<String>) grid.getSelectionModel());
+        selectionModel = ((AbstractGridMultiSelectionModel<String>) grid
+                .getSelectionModel());
 
         ui = new DataCommunicatorTest.MockUI();
         ui.add(grid);
@@ -168,10 +170,14 @@ public class AbstractGridMultiSelectionModelSelectedItemsTest {
 
     private void verifySelection(String... values) {
         Assert.assertEquals(Set.of(values), selectionModel.getSelectedItems());
-        Assert.assertEquals(Stream.of(values).map(grid.getDataProvider()::getId).collect(Collectors.toSet()), selectionModel.getSelectedItemIds());
+        Assert.assertEquals(
+                Stream.of(values).map(grid.getDataProvider()::getId)
+                        .collect(Collectors.toSet()),
+                selectionModel.getSelectedItemIds());
         for (String value : values) {
             Assert.assertTrue(selectionModel.isSelected(value));
-            Assert.assertTrue(selectionModel.isSelectedItemId(grid.getDataProvider().getId(value)));
+            Assert.assertTrue(selectionModel
+                    .isSelectedItemId(grid.getDataProvider().getId(value)));
         }
     }
 }

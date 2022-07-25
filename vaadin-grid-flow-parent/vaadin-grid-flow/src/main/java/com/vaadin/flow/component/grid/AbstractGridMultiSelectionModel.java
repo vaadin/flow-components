@@ -163,10 +163,11 @@ public abstract class AbstractGridMultiSelectionModel<T>
 
     /**
      * Returns an unmodifiable view of the selected item ids.
-     *
-     * The returned Set may be a direct view of the internal data structures of this class.
-     * A defensive copy should be made by callers when iterating over this Set and modifying
-     * the selection during iteration to avoid ConcurrentModificationExceptions.
+     * <p>
+     * The returned Set may be a direct view of the internal data structures of
+     * this class. A defensive copy should be made by callers when iterating
+     * over this Set and modifying the selection during iteration to avoid
+     * ConcurrentModificationExceptions.
      */
     protected Set<Object> getSelectedItemIds() {
         return Collections.unmodifiableSet(this.selected.keySet());
@@ -187,11 +188,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
         if (item != null) {
             selected.put(itemId, item);
         }
-        doUpdateSelection(
-                selected,
-                Collections.emptyMap(),
-                false
-        );
+        doUpdateSelection(selected, Collections.emptyMap(), false);
     }
 
     @Override
@@ -204,11 +201,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
         if (item != null) {
             deselected.put(itemId, item);
         }
-        doUpdateSelection(
-                Collections.emptyMap(),
-                deselected,
-                false
-        );
+        doUpdateSelection(Collections.emptyMap(), deselected, false);
         selectionColumn.setSelectAllCheckboxState(false);
     }
 
@@ -217,20 +210,15 @@ public abstract class AbstractGridMultiSelectionModel<T>
         doUpdateSelection(
                 mapItemsById(getGrid().getDataCommunicator().getDataProvider()
                         .fetch(new Query<>()).collect(Collectors.toSet())),
-                Collections.emptyMap(),
-                false
-        );
+                Collections.emptyMap(), false);
         selectionColumn.setSelectAllCheckboxState(true);
         selectionColumn.setSelectAllCheckboxIndeterminateState(false);
     }
 
     @Override
     public void deselectAll() {
-        doUpdateSelection(
-                Collections.emptyMap(),
-                new HashMap<>(selected),
-                false
-        );
+        doUpdateSelection(Collections.emptyMap(), new HashMap<>(selected),
+                false);
         selectionColumn.setSelectAllCheckboxState(false);
         selectionColumn.setSelectAllCheckboxIndeterminateState(false);
     }
@@ -257,7 +245,9 @@ public abstract class AbstractGridMultiSelectionModel<T>
 
     /**
      * Determines if an object with the given item id is selected or not
-     * @param itemId the item id as returned by {@link DataProvider#getId(Object)}
+     *
+     * @param itemId
+     *            the item id as returned by {@link DataProvider#getId(Object)}
      * @return true if an item with the given id is selected; false otherwise
      */
     protected boolean isSelectedItemId(Object itemId) {
@@ -408,9 +398,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
         }
         doUpdateSelection(
                 mapItemsById(allItemsStream.collect(Collectors.toSet())),
-                Collections.emptyMap(),
-                true
-        );
+                Collections.emptyMap(), true);
         selectionColumn.setSelectAllCheckboxState(true);
         selectionColumn.setSelectAllCheckboxIndeterminateState(false);
     }
@@ -458,7 +446,8 @@ public abstract class AbstractGridMultiSelectionModel<T>
             // ignore event if the checkBox was meant to be hidden
             return;
         }
-        doUpdateSelection(Collections.emptyMap(), mapItemsById(getSelectedItems()), true);
+        doUpdateSelection(Collections.emptyMap(),
+                mapItemsById(getSelectedItems()), true);
         selectionColumn.setSelectAllCheckboxState(false);
         selectionColumn.setSelectAllCheckboxIndeterminateState(false);
     }
@@ -466,8 +455,8 @@ public abstract class AbstractGridMultiSelectionModel<T>
     private void doUpdateSelection(Map<Object, T> addedItems,
             Map<Object, T> removedItems, boolean userOriginated) {
         Set<Object> selectedIds = getSelectedItemIds();
-        if (selectedIds.containsAll(addedItems.keySet()) && Collections
-                .disjoint(selectedIds, removedItems.keySet())) {
+        if (selectedIds.containsAll(addedItems.keySet())
+                && Collections.disjoint(selectedIds, removedItems.keySet())) {
             return;
         }
         Set<T> oldSelection = getSelectedItems();
