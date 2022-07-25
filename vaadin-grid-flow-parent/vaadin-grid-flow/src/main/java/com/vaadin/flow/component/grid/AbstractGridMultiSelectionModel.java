@@ -168,6 +168,9 @@ public abstract class AbstractGridMultiSelectionModel<T>
      * this class. A defensive copy should be made by callers when iterating
      * over this Set and modifying the selection during iteration to avoid
      * ConcurrentModificationExceptions.
+     *
+     * @return An unmodifiable view of the selected item ids. Updates in the
+     *         selection may or may not be directly reflected in the Set.
      */
     protected Set<Object> getSelectedItemIds() {
         return Collections.unmodifiableSet(this.selected.keySet());
