@@ -68,14 +68,12 @@ public class AbstractGridMultiSelectionModelSelectedItemsTest {
 
     @Test
     public void singleSelect() {
-
         grid.select(item1);
         verifySelection(item1);
     }
 
     @Test
     public void singleSelectItemMultipleTimes() {
-
         grid.select(item1);
         grid.select(item1);
         verifySelection(item1);
@@ -83,7 +81,6 @@ public class AbstractGridMultiSelectionModelSelectedItemsTest {
 
     @Test
     public void singleSelectItemMultipleTimesAndDeselect() {
-
         grid.select(item1);
         grid.select(item1);
         grid.deselect(item1);
@@ -92,7 +89,6 @@ public class AbstractGridMultiSelectionModelSelectedItemsTest {
 
     @Test
     public void singleSelectItemAndDeselectMultipleTimes() {
-
         grid.select(item1);
         grid.select(item2);
         grid.deselect(item1);
@@ -102,7 +98,6 @@ public class AbstractGridMultiSelectionModelSelectedItemsTest {
 
     @Test
     public void singleSelectMultipleItems() {
-
         grid.select(item1);
         grid.select(item2);
         grid.select(item3);
@@ -111,7 +106,6 @@ public class AbstractGridMultiSelectionModelSelectedItemsTest {
 
     @Test
     public void singleSelectMultipleItemsAndDeselect() {
-
         grid.select(item1);
         grid.select(item2);
         grid.select(item3);
@@ -121,7 +115,6 @@ public class AbstractGridMultiSelectionModelSelectedItemsTest {
 
     @Test
     public void singleSelectMultipleItemsAndDeselectAll() {
-
         grid.select(item1);
         grid.select(item2);
         grid.select(item3);
@@ -131,14 +124,12 @@ public class AbstractGridMultiSelectionModelSelectedItemsTest {
 
     @Test
     public void multiSelect() {
-
         grid.asMultiSelect().select(item1, item2, item3);
         verifySelection(item1, item2, item3);
     }
 
     @Test
     public void multiSelectItemsMultipleTimes() {
-
         grid.asMultiSelect().select(item1, item2, item3);
         grid.asMultiSelect().select(item1, item2, item3);
         verifySelection(item1, item2, item3);
@@ -146,7 +137,6 @@ public class AbstractGridMultiSelectionModelSelectedItemsTest {
 
     @Test
     public void multiSelectItemsMultipleTimesAndDeselect() {
-
         grid.asMultiSelect().select(item1, item2, item3);
         grid.asMultiSelect().select(item1, item2, item3);
         grid.asMultiSelect().deselect(item1, item2);
@@ -155,7 +145,6 @@ public class AbstractGridMultiSelectionModelSelectedItemsTest {
 
     @Test
     public void multiSelectItemsAndDeselectMultipleTimes() {
-
         grid.asMultiSelect().select(item1, item2, item3);
         grid.asMultiSelect().deselect(item1, item2);
         grid.asMultiSelect().deselect(item1, item2);
@@ -164,7 +153,6 @@ public class AbstractGridMultiSelectionModelSelectedItemsTest {
 
     @Test
     public void multiSelectAndDeselectAll() {
-
         grid.asMultiSelect().select(item1, item2, item3);
         grid.deselectAll();
         verifySelection();
@@ -172,7 +160,6 @@ public class AbstractGridMultiSelectionModelSelectedItemsTest {
 
     @Test
     public void multiSelectAndDeselect() {
-
         MultiSelect<Grid<String>, String> multiSelect = grid.asMultiSelect();
         multiSelect.select(item1, item2, item3);
         multiSelect.deselect(item1, item3);
