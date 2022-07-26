@@ -24,6 +24,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
+import static com.vaadin.flow.component.timepicker.tests.TimePickerDetachAttachPage.SERVER_VALIDITY_STATE;
+import static com.vaadin.flow.component.timepicker.tests.TimePickerDetachAttachPage.SERVER_VALIDITY_STATE_BUTTON;
+
 /**
  * Integration tests for attaching / detaching time picker.
  */
@@ -33,6 +36,7 @@ public class TimePickerDetachAttachPageIT extends AbstractComponentIT {
     TestBenchElement toggleAttach;
     TestBenchElement setValue;
     TestBenchElement setLocale;
+    private TimePickerElement timePicker;
 
     @Before
     public void init() {
@@ -40,25 +44,13 @@ public class TimePickerDetachAttachPageIT extends AbstractComponentIT {
         toggleAttach = $("button").id("toggle-attached");
         setValue = $("button").id("set-value");
         setLocale = $("button").id("set-california-locale");
-    }
-
-    @Test
-    public void clientSideValidationIsOverriddenOnAttach() {
-        assertTimePickerIsValidOnTab();
-
-        // Detaching and attaching time picker
-        toggleAttach.click();
-        toggleAttach.click();
-
-        assertTimePickerIsValidOnTab();
+        timePicker = $(TimePickerElement.class).waitForFirst();
     }
 
     @Test
     public void formatShouldRespectLocaleAfterDetachAndReattach() {
         setValue.click();
         setLocale.click();
-        TimePickerElement timePicker = $(TimePickerElement.class)
-                .id("time-picker");
         Assert.assertEquals("2:00 a.m.", timePicker.getSelectedText());
 
         toggleAttach.click();
@@ -67,11 +59,42 @@ public class TimePickerDetachAttachPageIT extends AbstractComponentIT {
         Assert.assertEquals("2:00 a.m.", timePicker.getSelectedText());
     }
 
-    private void assertTimePickerIsValidOnTab() {
-        TimePickerElement timePicker = $(TimePickerElement.class)
-                .id("time-picker");
-        timePicker.sendKeys(Keys.TAB);
-        Assert.assertFalse("Time picker should be valid after Tab",
-                Boolean.parseBoolean(timePicker.getAttribute("invalid")));
+    @Test
+    public void onlyServerCanSetFieldToValid() {
+        executeScript("arguments[0].validate()", timePicker);
+        assertClientValid(false);
+
+        var input = timePicker.$("input").first();
+        input.setProperty("value", "11:00");
+        input.dispatchEvent("input");
+        executeScript("arguments[0].validate()", timePicker);
+        assertClientValid(false);
+
+        input.dispatchEvent("change");
+        executeScript("document.body.click()");
+        assertClientValid(true);
+        assertServerValid(true);
+    }
+
+    @Test
+    public void detach_attach_onlyServerCanSetFieldToValid() {
+        toggleAttach.click();
+        toggleAttach.click();
+
+        timePicker = $(TimePickerElement.class).waitForFirst();
+
+        onlyServerCanSetFieldToValid();
+    }
+
+    private void assertServerValid(boolean expected) {
+        $("button").id(SERVER_VALIDITY_STATE_BUTTON).click();
+
+        var actual = $("div").id(SERVER_VALIDITY_STATE).getText();
+        Assert.assertEquals(String.valueOf(expected), actual);
+    }
+
+    private void assertClientValid(boolean expected) {
+        Assert.assertEquals(expected,
+                !timePicker.getPropertyBoolean("invalid"));
     }
 }

@@ -29,6 +29,9 @@ import java.util.Locale;
 @Route("vaadin-time-picker/time-picker-detach-attach")
 public class TimePickerDetachAttachPage extends Div {
 
+    public static final String SERVER_VALIDITY_STATE_BUTTON = "retrieve-validity-state";
+    public static final String SERVER_VALIDITY_STATE = "server-validity-state";
+
     /**
      * Constructs a basic layout with a time picker.
      */
@@ -60,5 +63,14 @@ public class TimePickerDetachAttachPage extends Div {
                 });
         setCaliforniaLocale.setId("set-california-locale");
         add(setCaliforniaLocale);
+
+        Div validityState = new Div();
+        validityState.setId(SERVER_VALIDITY_STATE);
+        NativeButton retrieveInvalidState = new NativeButton(
+                "Retrieve server validity state", e -> validityState
+                        .setText(String.valueOf(!timePicker.isInvalid())));
+        retrieveInvalidState.setId(SERVER_VALIDITY_STATE_BUTTON);
+
+        add(validityState, retrieveInvalidState);
     }
 }
