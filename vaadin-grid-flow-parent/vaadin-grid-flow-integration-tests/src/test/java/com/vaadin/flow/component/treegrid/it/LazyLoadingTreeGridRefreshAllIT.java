@@ -37,11 +37,13 @@ public class LazyLoadingTreeGridRefreshAllIT extends AbstractTreeGridIT {
     public void setChildCountAndRefreshAll_resultIsNotEmpty() {
         TreeGridElement treeGrid = $(TreeGridElement.class).get(0);
 
-        // The row index should be larger than 100 in order to replicate the issue.
+        // The row index should be larger than 100 in order to replicate the
+        // issue.
         treeGrid.scrollToRow(120);
 
         // The count should be smaller than 100 in order to replicate the issue.
-        IntegerFieldElement childCount = $(IntegerFieldElement.class).id("child-count");
+        IntegerFieldElement childCount = $(IntegerFieldElement.class)
+                .id("child-count");
         childCount.setValue("5");
 
         ButtonElement refreshAll = $(ButtonElement.class).id("refresh-all");

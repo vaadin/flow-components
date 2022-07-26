@@ -35,7 +35,8 @@ public class LazyLoadingTreeGridRefreshAllPage extends Div {
 
     private IntegerField childCount = new IntegerField("Child count");
 
-    private Button refreshAll = new Button("Refresh all", e -> treeGrid.getDataProvider().refreshAll());
+    private Button refreshAll = new Button("Refresh all",
+            e -> treeGrid.getDataProvider().refreshAll());
 
     public LazyLoadingTreeGridRefreshAllPage() {
         childCount.setId("child-count");
@@ -57,10 +58,12 @@ public class LazyLoadingTreeGridRefreshAllPage extends Div {
         }
 
         @Override
-        public Stream<String> fetchChildren(HierarchicalQuery<String, Void> query) {
+        public Stream<String> fetchChildren(
+                HierarchicalQuery<String, Void> query) {
             int limit = query.getLimit();
             int offset = query.getOffset();
-            return (Stream<String>) IntStream.range(offset, offset + limit).mapToObj(index -> "Item " + index);
+            return (Stream<String>) IntStream.range(offset, offset + limit)
+                    .mapToObj(index -> "Item " + index);
         }
 
         @Override
