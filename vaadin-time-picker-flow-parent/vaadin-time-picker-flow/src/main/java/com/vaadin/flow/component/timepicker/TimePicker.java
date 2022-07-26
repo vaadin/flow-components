@@ -27,6 +27,7 @@ import com.vaadin.experimental.Feature;
 import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasClearButton;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.HasEnabled;
@@ -38,9 +39,12 @@ import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
+import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
+import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
@@ -60,7 +64,7 @@ import com.vaadin.flow.shared.Registration;
 public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         implements HasSize, HasValidation, HasEnabled, HasHelper, HasLabel,
         HasTheme, HasClearButton, HasAllowedCharPattern,
-        HasValidator<LocalTime> {
+        HasValidator<LocalTime>, HasClientValidation {
 
     private static final SerializableFunction<String, LocalTime> PARSER = valueFromClient -> {
         return valueFromClient == null || valueFromClient.isEmpty() ? null
@@ -72,6 +76,7 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     };
 
     private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
+    private boolean isClientInvalid;
 
     private Locale locale;
 
@@ -114,6 +119,11 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
 
         // workaround for https://github.com/vaadin/flow/issues/3496
         setInvalid(false);
+
+        addClientValidatedEventListener(event -> {
+            isClientInvalid = !event.isValid();
+            validate();
+        });
 
         addValueChangeListener(e -> validate());
     }
@@ -279,6 +289,15 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         return Validator.alwaysPass();
     }
 
+    @Override
+    public Registration addValidationStatusChangeListener(
+            ValidationStatusChangeListener<LocalTime> listener) {
+        return addClientValidatedEventListener(event -> {
+            listener.validationStatusChanged(
+                    new ValidationStatusChangeEvent<>(this, !isInvalid()));
+        });
+    }
+
     private ValidationResult checkValidity(LocalTime value) {
         var greaterThanMaxValidation = ValidationUtil.checkGreaterThanMax(value,
                 max);
@@ -290,6 +309,10 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
                 min);
         if (smallThanMinValidation.isError()) {
             return smallThanMinValidation;
+        }
+
+        if (isClientInvalid) {
+            return ValidationResult.error("");
         }
 
         return ValidationResult.ok();
@@ -442,7 +465,7 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         super.onAttach(attachEvent);
         initConnector();
         requestLocaleUpdate();
-        FieldValidationUtil.disableClientValidation(this);
+        ClientValidationUtil.preventWebComponentFromSettingItselfToValid(this);
     }
 
     private void initConnector() {
