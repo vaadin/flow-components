@@ -287,6 +287,10 @@ public class MapElement extends TestBenchElement {
         public Long getZIndex() {
             return getLong("getZIndex()");
         }
+
+        public long getRevision() {
+            return getLong("getRevision()");
+        }
     }
 
     public static class SourceReference extends ConfigurationObjectReference {
@@ -328,6 +332,11 @@ public class MapElement extends TestBenchElement {
         private XyzSourceReference(ExpressionExecutor executor,
                 String expression) {
             super(executor, expression);
+        }
+
+        public boolean isTileLoaded(int z, int x, int y) {
+            String tileKey = String.format("%s/%s/%s", z, x, y);
+            return getBoolean("tileCache.containsKey('%s')", tileKey);
         }
     }
 

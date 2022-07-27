@@ -17,8 +17,6 @@ package com.vaadin.flow.component.textfield.testbench;
 
 import org.openqa.selenium.By;
 
-import java.util.Collections;
-
 import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasLabel;
 import com.vaadin.testbench.HasPlaceholder;
@@ -57,11 +55,18 @@ public class PasswordFieldElement extends TestBenchElement
         callFunction("_setPasswordVisible", passwordVisible);
     }
 
+    /**
+     * Emulates the user changing the value, which in practice means setting
+     * {@code value} of the {@code input} element to the given value and then
+     * triggering {@code input} and {@code change} DOM events.
+     *
+     * @param string
+     *            the value to set
+     */
     @Override
     public void setValue(String string) {
-        HasStringValueProperty.super.setValue(string);
-        dispatchEvent("change", Collections.singletonMap("bubbles", true));
-        dispatchEvent("blur");
+        TestBenchElement input = $("input").first();
+        TextFieldElementHelper.setValue(input, string);
     }
 
     @Override
