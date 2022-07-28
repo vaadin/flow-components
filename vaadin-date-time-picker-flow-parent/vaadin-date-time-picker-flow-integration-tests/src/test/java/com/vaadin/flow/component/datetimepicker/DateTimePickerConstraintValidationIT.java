@@ -17,7 +17,7 @@ import static com.vaadin.flow.component.datetimepicker.DateTimePickerBinderValid
 import static com.vaadin.flow.component.datetimepicker.DateTimePickerBinderValidationPage.SERVER_VALIDITY_STATE;
 import static com.vaadin.flow.component.datetimepicker.DateTimePickerBinderValidationPage.SERVER_VALIDITY_STATE_BUTTON;
 
-@TestPath("vaadin-date-time-picker/validation-binder")
+@TestPath("vaadin-date-time-picker/binder-validation")
 public class DateTimePickerConstraintValidationIT extends AbstractComponentIT {
 
     private DateTimePickerElement field;
