@@ -33,8 +33,8 @@ public interface HasInputValue extends HasElement {
      * @return <code>true</code> if the input's value is populated,
      *         <code>false</code> otherwise
      */
-    @Synchronize(property = "__inputValuePopulated", value = "input-value-populated-changed")
+    @Synchronize(property = "_hasInputValue", value = "has-input-value-changed")
     default boolean isInputValuePopulated() {
-        return getElement().getProperty("__inputValuePopulated", false);
+        return getElement().getProperty("_hasInputValue", false);
     }
 }
