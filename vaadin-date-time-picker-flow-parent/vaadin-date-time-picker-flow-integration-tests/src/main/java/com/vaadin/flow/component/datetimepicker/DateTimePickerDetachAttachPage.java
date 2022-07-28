@@ -25,11 +25,15 @@ import com.vaadin.flow.router.Route;
 @Route("vaadin-date-time-picker/date-time-picker-detach-attach")
 public class DateTimePickerDetachAttachPage extends Div {
 
+    public static final String SERVER_VALIDITY_STATE = "server-validity-state";
+    public static final String SERVER_VALIDITY_STATE_BUTTON = "server-validity-state-button";
+    private final DateTimePicker dateTimePicker;
+
     /**
      * Constructs a basic layout with a date time picker.
      */
     public DateTimePickerDetachAttachPage() {
-        DateTimePicker dateTimePicker = new DateTimePicker();
+        dateTimePicker = new DateTimePicker();
         dateTimePicker.setRequiredIndicatorVisible(true);
         dateTimePicker.setId("date-time-picker");
         add(dateTimePicker);
@@ -43,5 +47,20 @@ public class DateTimePickerDetachAttachPage extends Div {
         });
         toggleAttached.setId("toggle-attached");
         add(toggleAttached);
+        addServerValidityStateControls();
+    }
+
+    private void addServerValidityStateControls() {
+        Div validityState = new Div();
+        validityState.setId(SERVER_VALIDITY_STATE);
+
+        NativeButton validityStateButton = new NativeButton(
+                "Retrieve server validity state", event -> {
+                    boolean isValid = !dateTimePicker.isInvalid();
+                    validityState.setText(String.valueOf(isValid));
+                });
+        validityStateButton.setId(SERVER_VALIDITY_STATE_BUTTON);
+
+        add(new Div(validityState, validityStateButton));
     }
 }

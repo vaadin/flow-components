@@ -20,8 +20,11 @@ import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.Keys;
+
+import static com.vaadin.flow.component.datetimepicker.DateTimePickerDetachAttachPage.SERVER_VALIDITY_STATE;
+import static com.vaadin.flow.component.datetimepicker.DateTimePickerDetachAttachPage.SERVER_VALIDITY_STATE_BUTTON;
 
 /**
  * Integration tests for attaching / detaching date time picker.
@@ -29,25 +32,58 @@ import org.openqa.selenium.Keys;
 @TestPath("vaadin-date-time-picker/date-time-picker-detach-attach")
 public class DateTimePickerDetachAttachPageIT extends AbstractComponentIT {
 
-    @Test
-    public void clientSideValidationIsOverriddenOnAttach() {
+    private DateTimePickerElement field;
+    private TestBenchElement toggleAttach;
+
+    @Before
+    public void init() {
         open();
-
-        assertDateTimePickerIsValidOnTab();
-
-        // Detaching and attaching date time picker
-        TestBenchElement toggleAttach = $("button").id("toggle-attached");
-        toggleAttach.click();
-        toggleAttach.click();
-
-        assertDateTimePickerIsValidOnTab();
+        field = $(DateTimePickerElement.class).waitForFirst();
+        toggleAttach = $("button").id("toggle-attached");
     }
 
-    private void assertDateTimePickerIsValidOnTab() {
-        DateTimePickerElement dateTimePicker = $(DateTimePickerElement.class)
+    @Test
+    public void onlyServerCanSetFieldToValid() {
+        executeScript("arguments[0].validate()", field);
+        assertClientValid(false);
+
+        var inputDate = field.$("vaadin-date-time-picker-date-picker input")
                 .first();
-        dateTimePicker.sendKeys(Keys.TAB);
-        Assert.assertFalse("Date time picker should be valid after Tab",
-                dateTimePicker.getPropertyBoolean("invalid"));
+        inputDate.setProperty("value", "01/01/2022");
+        inputDate.dispatchEvent("input");
+        var inputTime = field.$("vaadin-date-time-picker-time-picker input")
+                .first();
+        inputTime.setProperty("value", "11.00");
+        inputTime.dispatchEvent("input");
+        executeScript("arguments[0].validate()", field);
+        assertClientValid(false);
+
+        inputDate.dispatchEvent("change");
+        inputTime.dispatchEvent("change");
+        executeScript("document.body.click()");
+        executeScript("document.body.click()");
+        assertClientValid(true);
+        assertServerValid(true);
+    }
+
+    protected void assertClientValid(boolean expected) {
+        Assert.assertEquals(expected, !field.getPropertyBoolean("invalid"));
+    }
+
+    protected void assertServerValid(boolean expected) {
+        $("button").id(SERVER_VALIDITY_STATE_BUTTON).click();
+
+        var actual = $("div").id(SERVER_VALIDITY_STATE).getText();
+        Assert.assertEquals(String.valueOf(expected), actual);
+    }
+
+    @Test
+    public void detach_attach_onlyServerCanSetFieldToValid() {
+        toggleAttach.click();
+        toggleAttach.click();
+
+        field = $(DateTimePickerElement.class).waitForFirst();
+
+        onlyServerCanSetFieldToValid();
     }
 }
