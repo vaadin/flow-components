@@ -17,6 +17,7 @@
 
 package com.vaadin.flow.component.upload.tests;
 
+import com.vaadin.flow.component.html.testbench.NativeButtonElement;
 import com.vaadin.flow.component.upload.UploadI18N;
 import com.vaadin.flow.component.upload.testbench.UploadElement;
 import com.vaadin.flow.internal.JsonSerializer;
@@ -110,6 +111,28 @@ public class UploadI18nIT extends AbstractUploadIT {
 
         assertTranslationMapsHaveSameKeys(fullTranslationMap, translationMap);
         assertTranslationMapHasNoMissingTranslations(translationMap);
+    }
+
+    @Test
+    public void testDetachReattachI18nIsPreserved() {
+        open();
+
+        NativeButtonElement btnSetI18n = $(NativeButtonElement.class)
+                .id("btn-set-i18n");
+        NativeButtonElement btnToggleAttached = $(NativeButtonElement.class)
+                .id("btn-toggle-attached");
+
+        btnSetI18n.click();
+
+        btnToggleAttached.click();
+        btnToggleAttached.click();
+
+        UploadElement upload = $(UploadElement.class)
+                .id("upload-detach-reattach-i18n");
+
+        Assert.assertEquals(
+                UploadTestsI18N.RUSSIAN_FULL.getDropFiles().getOne(),
+                upload.$("*").id("dropLabel").getText());
     }
 
     private void assertTranslationMapsAreEqual(Map<String, String> expected,
