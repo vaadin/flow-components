@@ -31,13 +31,18 @@ import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.ClientValidationUtil;
+import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.component.timepicker.StepsUtil;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
+import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
+import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.shared.Registration;
 
 @Tag("vaadin-date-time-picker-date-picker")
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-rc1")
@@ -87,7 +92,7 @@ class DateTimePickerTimePicker
 public class DateTimePicker extends
         AbstractSinglePropertyField<DateTimePicker, LocalDateTime> implements
         HasStyle, HasSize, HasTheme, HasValidation, Focusable<DateTimePicker>,
-        HasHelper, HasLabel, HasValidator<LocalDateTime> {
+        HasHelper, HasLabel, HasValidator<LocalDateTime>, HasClientValidation {
 
     private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
@@ -175,6 +180,8 @@ public class DateTimePicker extends
         setInvalid(false);
 
         addValueChangeListener(e -> validate());
+
+        addClientValidatedEventListener(e -> validate());
     }
 
     /**
@@ -634,6 +641,14 @@ public class DateTimePicker extends
         return Validator.alwaysPass();
     }
 
+    @Override
+    public Registration addValidationStatusChangeListener(
+            ValidationStatusChangeListener<LocalDateTime> listener) {
+        return addClientValidatedEventListener(event -> listener
+                .validationStatusChanged(new ValidationStatusChangeEvent<>(this,
+                        event.isValid())));
+    }
+
     private ValidationResult checkValidity(LocalDateTime value) {
         var greaterThanMax = ValidationUtil.checkGreaterThanMax(value, max);
         if (greaterThanMax.isError()) {
@@ -784,8 +799,7 @@ public class DateTimePicker extends
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        FieldValidationUtil.disableClientValidation(this);
-
+        ClientValidationUtil.preventWebComponentFromSettingItselfToValid(this);
     }
 
     /**
