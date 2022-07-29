@@ -58,6 +58,9 @@ public interface HasClientValidation extends Serializable {
          *
          * @param source
          *            the source component.
+         * @param fromClient
+         *            <code>true</code> if the event originated from the client
+         *            side, <code>false</code> otherwise
          * @param valid
          *            whether the client-side validation succeeded.
          */
