@@ -22,7 +22,7 @@ import java.io.Serializable;
  */
 public interface ThemeVariant extends Serializable {
     /**
-     * The string value of the specific theme variant
+     * @return The string value of the specific theme variant
      */
     String getVariantName();
 }
