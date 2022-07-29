@@ -34,7 +34,7 @@ public interface HasInputValue extends HasElement {
      *         <code>false</code> otherwise
      */
     @Synchronize(property = "_hasInputValue", value = "has-input-value-changed")
-    default boolean isInputValuePopulated() {
+    default boolean isInputValue() {
         return getElement().getProperty("_hasInputValue", false);
     }
 }

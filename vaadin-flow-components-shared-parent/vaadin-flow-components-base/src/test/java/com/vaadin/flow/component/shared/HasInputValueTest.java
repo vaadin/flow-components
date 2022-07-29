@@ -17,7 +17,7 @@ public class HasInputValueTest {
 
     @Test
     public void initialValue() {
-        Assert.assertFalse(component.isInputValuePopulated());
+        Assert.assertFalse(component.isInputValue());
     }
 
     @Tag("test")
