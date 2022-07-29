@@ -246,6 +246,9 @@ class ComboBoxDataController<TItem>
     /**
      * Called to confirm that an update has been processed by the client-side
      * connector
+     *
+     * @param id
+     *            the update identifier
      */
     void confirmUpdate(int id) {
         dataCommunicator.confirmUpdate(id);

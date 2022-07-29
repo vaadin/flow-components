@@ -173,6 +173,8 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     /**
      * Whether the component should automatically receive focus when the page
      * loads.
+     *
+     * @return {@code true} if the component should automatically receive focus
      */
     public boolean isAutofocus() {
         return getElement().getProperty("autofocus", false);
@@ -181,6 +183,9 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     /**
      * Sets the whether the component should automatically receive focus when
      * the page loads. Defaults to {@code false}.
+     *
+     * @param autofocus
+     *            {@code true} component should automatically receive focus
      */
     public void setAutofocus(boolean autofocus) {
         getElement().setProperty("autofocus", autofocus);
@@ -243,6 +248,9 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
 
     /**
      * Sets whether the dropdown should be opened or not.
+     *
+     * @param opened
+     *            {@code true} to open the drop-down, {@code false} to close it
      */
     public void setOpened(boolean opened) {
         getElement().setProperty("opened", opened);
@@ -294,6 +302,8 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
 
     /**
      * Filtering string the user has typed into the input field.
+     *
+     * @return the filter string
      */
     @Synchronize(property = "filter", value = "filter-changed")
     protected String getFilter() {
@@ -330,6 +340,8 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     /**
      * Sets whether the component requires a value to be considered in a valid
      * state.
+     *
+     * @return {@code true} if the component requires a value to be valid
      */
     public boolean isRequired() {
         return super.isRequiredIndicatorVisible();
@@ -337,6 +349,9 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
 
     /**
      * Whether the component requires a value to be considered in a valid state.
+     *
+     * @param required
+     *            {@code true} if the component requires a value to be valid
      */
     public void setRequired(boolean required) {
         super.setRequiredIndicatorVisible(required);
@@ -362,6 +377,8 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     /**
      * The placeholder text that should be displayed in the input element, when
      * the user has not entered a value
+     *
+     * @return the placeholder text
      */
     public String getPlaceholder() {
         return getElement().getProperty("placeholder");
@@ -370,6 +387,9 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     /**
      * Sets the placeholder text that should be displayed in the input element,
      * when the user has not entered a value
+     *
+     * @param placeholder
+     *            the placeholder text
      */
     public void setPlaceholder(String placeholder) {
         getElement().setProperty("placeholder",
@@ -379,7 +399,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     /**
      * Gets whether dropdown will open automatically or not.
      *
-     * @return @{code true} if enabled, {@code false} otherwise
+     * @return {@code true} if enabled, {@code false} otherwise
      */
     public boolean isAutoOpen() {
         return !getElement().getProperty("autoOpenDisabled", false);
@@ -719,7 +739,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * used when the items are provided lazily from the backend with:
      * <ul>
      * <li>{@link #setItems(CallbackDataProvider.FetchCallback)}</li>
-     * <li>{@link #setItemsWithFilterConverter(CallbackDataProvider.FetchCallback, SerializableFunction)}</>
+     * <li>{@link #setItemsWithFilterConverter(CallbackDataProvider.FetchCallback, SerializableFunction)}</li>
      * <li>{@link #setItems(CallbackDataProvider.FetchCallback, CallbackDataProvider.CountCallback)}</li>
      * <li>{@link #setItemsWithFilterConverter(CallbackDataProvider.FetchCallback, CallbackDataProvider.CountCallback, SerializableFunction)}
      * </li>
@@ -801,6 +821,9 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * @param fetchCallback
      *            function that returns a stream of items from the backend based
      *            on the offset, limit and a object filter
+     * @param countCallback
+     *            function that return the number of items in the back end for a
+     *            query
      * @param filterConverter
      *            a function which converts a combo box's filter-string typed by
      *            the user into a callback's object filter
@@ -938,6 +961,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * Always throws an {@link UnsupportedOperationException}.
      *
      * @throws UnsupportedOperationException
+     *             when using this method with an {@link InMemoryDataProvider}
      * @see #setItems(InMemoryDataProvider, SerializableFunction)
      * @deprecated does not work so don't use
      */
@@ -1151,6 +1175,8 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
 
     /**
      * Accesses the render manager that is managing the custom renderer
+     *
+     * @return the render manager
      */
     protected ComboBoxRenderManager<TItem> getRenderManager() {
         return renderManager;
@@ -1161,6 +1187,8 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * web component
      * <p>
      * Can be null if the constructor has not run yet
+     *
+     * @return the data controller
      */
     protected ComboBoxDataController<TItem> getDataController() {
         return dataController;
@@ -1171,6 +1199,8 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * <p>
      * Can be null if the no data source has been set yet, or if the constructor
      * has not run yet
+     *
+     * @return the data communicator
      */
     protected ComboBoxDataCommunicator<TItem> getDataCommunicator() {
         return dataController != null ? dataController.getDataCommunicator()
@@ -1181,6 +1211,8 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * Accesses the data generator that is managed by the data controller
      * <p>
      * Can be null if the constructor has not run yet
+     *
+     * @return the data generator
      */
     protected CompositeDataGenerator<TItem> getDataGenerator() {
         return dataController != null ? dataController.getDataGenerator()
@@ -1192,6 +1224,8 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * <p>
      * Can be null if the no data source has been set yet, or if the constructor
      * has not run yet
+     *
+     * @return the key mapper
      */
     protected DataKeyMapper<TItem> getKeyMapper() {
         return getDataCommunicator() != null
@@ -1201,6 +1235,9 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
 
     /**
      * Called by the client-side connector, delegates to data controller
+     *
+     * @param id
+     *            the update identifier
      */
     @ClientCallable
     private void confirmUpdate(int id) {
