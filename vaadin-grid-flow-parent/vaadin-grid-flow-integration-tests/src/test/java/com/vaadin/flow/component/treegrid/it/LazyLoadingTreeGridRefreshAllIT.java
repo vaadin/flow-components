@@ -33,7 +33,7 @@ public class LazyLoadingTreeGridRefreshAllIT extends AbstractTreeGridIT {
         open();
     }
 
-    @Test // https://github.com/vaadin/vaadin-grid-flow/issues/3434
+    @Test
     public void setChildCountAndRefreshAll_resultIsNotEmpty() {
         TreeGridElement treeGrid = $(TreeGridElement.class).get(0);
 
