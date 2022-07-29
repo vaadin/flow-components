@@ -31,7 +31,7 @@ import java.util.stream.Stream;
 @Route("vaadin-grid/lazy-loading-treegrid-refreshall")
 public class LazyLoadingTreeGridRefreshAllPage extends Div {
 
-    private TreeGrid<HierarchicalTestBean> treeGrid = new TreeGrid<>();
+    private TreeGrid<String> treeGrid = new TreeGrid<>();
 
     private IntegerField childCount = new IntegerField("Child count");
 
@@ -49,8 +49,7 @@ public class LazyLoadingTreeGridRefreshAllPage extends Div {
         add(treeGrid);
     }
 
-    private class LazyLoadingProvider<String, Void>
-            extends AbstractHierarchicalDataProvider<String, Void> {
+    private class LazyLoadingProvider extends AbstractHierarchicalDataProvider<String, Void> {
 
         @Override
         public int getChildCount(HierarchicalQuery<String, Void> query) {
@@ -62,8 +61,7 @@ public class LazyLoadingTreeGridRefreshAllPage extends Div {
                 HierarchicalQuery<String, Void> query) {
             int limit = query.getLimit();
             int offset = query.getOffset();
-            return (Stream<String>) IntStream.range(offset, offset + limit)
-                    .mapToObj(index -> "Item " + index);
+            return IntStream.range(offset, offset + limit).mapToObj(index -> "Item " + index);
         }
 
         @Override
