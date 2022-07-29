@@ -19,7 +19,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.treegrid.TreeGrid;
-import com.vaadin.flow.data.bean.HierarchicalTestBean;
 import com.vaadin.flow.data.provider.hierarchy.AbstractHierarchicalDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalQuery;
 import com.vaadin.flow.function.ValueProvider;
@@ -49,7 +48,8 @@ public class LazyLoadingTreeGridRefreshAllPage extends Div {
         add(treeGrid);
     }
 
-    private class LazyLoadingProvider extends AbstractHierarchicalDataProvider<String, Void> {
+    private class LazyLoadingProvider
+            extends AbstractHierarchicalDataProvider<String, Void> {
 
         @Override
         public int getChildCount(HierarchicalQuery<String, Void> query) {
@@ -61,7 +61,8 @@ public class LazyLoadingTreeGridRefreshAllPage extends Div {
                 HierarchicalQuery<String, Void> query) {
             int limit = query.getLimit();
             int offset = query.getOffset();
-            return IntStream.range(offset, offset + limit).mapToObj(index -> "Item " + index);
+            return IntStream.range(offset, offset + limit)
+                    .mapToObj(index -> "Item " + index);
         }
 
         @Override
