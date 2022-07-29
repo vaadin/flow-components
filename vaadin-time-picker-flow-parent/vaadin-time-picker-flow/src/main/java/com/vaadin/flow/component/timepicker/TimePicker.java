@@ -657,7 +657,7 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     /**
      * Gets whether dropdown will open automatically or not.
      *
-     * @return @{code true} if enabled, {@code false} otherwise
+     * @return {@code true} if enabled, {@code false} otherwise
      */
     public boolean isAutoOpen() {
         return !getElement().getProperty(PROP_AUTO_OPEN_DISABLED, false);
