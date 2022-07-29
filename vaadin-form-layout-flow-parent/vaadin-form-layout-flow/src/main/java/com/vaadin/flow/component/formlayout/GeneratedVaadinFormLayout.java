@@ -120,7 +120,7 @@ import elemental.json.JsonObject;
  * {@code <vaadin-form-layout>} element:
  * </p>
  * <table>
- * <thead>
+ * <caption>Custom CSS properties available for styling</caption> <thead>
  * <tr>
  * <th>Custom CSS property</th>
  * <th>Description</th>
@@ -158,7 +158,7 @@ public abstract class GeneratedVaadinFormLayout<R extends GeneratedVaadinFormLay
      * {@code labelsPosition} string of {@code &quot;aside&quot;} or
      * {@code &quot;top&quot;}. At least one item is required.
      * </p>
-     * <h4>Examples</h4>
+     * Examples
      * <p>
      * {@code javascript formLayout.responsiveSteps = [ columns: 1}]; // The
      * layout is always a single column, labels aside.}
@@ -205,7 +205,7 @@ public abstract class GeneratedVaadinFormLayout<R extends GeneratedVaadinFormLay
      * {@code labelsPosition} string of {@code &quot;aside&quot;} or
      * {@code &quot;top&quot;}. At least one item is required.
      * </p>
-     * <h4>Examples</h4>
+     * Examples
      * <p>
      * {@code javascript formLayout.responsiveSteps = [ columns: 1}]; // The
      * layout is always a single column, labels aside.}
