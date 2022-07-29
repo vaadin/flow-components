@@ -114,7 +114,7 @@ import com.vaadin.flow.dom.Element;
  * The following shadow DOM parts are available for styling:
  * </p>
  * <table>
- * <thead>
+ * <caption>Shadow DOM parts available for styling</caption> <thead>
  * <tr>
  * <th>Part name</th>
  * <th>Description</th>
@@ -132,7 +132,7 @@ import com.vaadin.flow.dom.Element;
  * {@code <vaadin-form-item>} element:
  * </p>
  * <table>
- * <thead>
+ * <caption>Custom CSS properties available for styling</caption> <thead>
  * <tr>
  * <th>Custom CSS property</th>
  * <th>Description</th>
