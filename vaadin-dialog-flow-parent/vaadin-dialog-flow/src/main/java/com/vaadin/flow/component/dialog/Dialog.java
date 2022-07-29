@@ -258,6 +258,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
      * @see #close()
      *
      * @param listener
+     *            the listener to add
      * @return registration for removal of listener
      */
     public Registration addDialogCloseActionListener(
@@ -296,6 +297,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
      * every resizing.
      *
      * @param listener
+     *            the listener to add
      * @return registration for removal of listener
      */
     public Registration addResizeListener(
@@ -824,9 +826,9 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
     /**
      * Add a lister for event fired by the {@code opened-changed} events.
      *
-     * @param: listener
-     *             the listener to add;
-     * @return: a Registration for removing the event listener
+     * @param listener
+     *            the listener to add
+     * @return a Registration for removing the event listener
      */
     @Override
     public Registration addOpenedChangeListener(
