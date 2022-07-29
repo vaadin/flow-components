@@ -17,7 +17,6 @@
 
 package com.vaadin.flow.component.upload.tests;
 
-import com.vaadin.flow.component.html.testbench.NativeButtonElement;
 import com.vaadin.flow.component.upload.UploadI18N;
 import com.vaadin.flow.component.upload.testbench.UploadElement;
 import com.vaadin.flow.internal.JsonSerializer;
@@ -28,6 +27,7 @@ import elemental.json.JsonType;
 import elemental.json.JsonValue;
 import org.junit.Assert;
 import org.junit.Test;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import java.util.HashMap;
@@ -117,10 +117,8 @@ public class UploadI18nIT extends AbstractUploadIT {
     public void testDetachReattachI18nIsPreserved() {
         open();
 
-        NativeButtonElement btnSetI18n = $(NativeButtonElement.class)
-                .id("btn-set-i18n");
-        NativeButtonElement btnToggleAttached = $(NativeButtonElement.class)
-                .id("btn-toggle-attached");
+        WebElement btnSetI18n = findElement(By.id("btn-set-i18n"));
+        WebElement btnToggleAttached = findElement(By.id("btn-toggle-attached"));
 
         btnSetI18n.click();
 
