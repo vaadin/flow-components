@@ -28,6 +28,8 @@ public class DetailsElement extends TestBenchElement {
 
     /**
      * Returns summary element
+     *
+     * @return summary element
      */
     public TestBenchElement getSummary() {
         return $(TestBenchElement.class).attribute("slot", "summary").first();
@@ -35,6 +37,8 @@ public class DetailsElement extends TestBenchElement {
 
     /**
      * Returns summary element as string
+     *
+     * @return summary element as string
      */
     public String getSummaryText() {
         return getSummary().getText();
@@ -42,6 +46,8 @@ public class DetailsElement extends TestBenchElement {
 
     /**
      * Returns content element
+     *
+     * @return content element
      */
     public TestBenchElement getContent() {
         TestBenchElement contentPlaceholder = $(TestBenchElement.class)
@@ -54,6 +60,8 @@ public class DetailsElement extends TestBenchElement {
 
     /**
      * Whether the details are opened or not
+     *
+     * @return {@code true} if the details are opened, {@code false} otherwise
      */
     public boolean isOpened() {
         return getPropertyBoolean("opened");
@@ -61,6 +69,8 @@ public class DetailsElement extends TestBenchElement {
 
     /**
      * Whether the component is enabled or not
+     *
+     * @return {@code true} if the component is enabled, {@code false} otherwise
      */
     public boolean isEnabled() {
         return !getPropertyBoolean("disabled");
@@ -68,6 +78,8 @@ public class DetailsElement extends TestBenchElement {
 
     /**
      * Returns a wrapper of the summary component
+     *
+     * @return wrapper of the summary component
      */
     public TestBenchElement getSummaryWrapper() {
         return $(TestBenchElement.class).attribute("part", "summary").first();
