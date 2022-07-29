@@ -262,7 +262,8 @@ public class FormLayout extends GeneratedVaadinFormLayout<FormLayout>
 
     /**
      * Adds a component with the desired colspan. This method is a shorthand for
-     * calling {@link #add(Component)} and {@link #setColspan(Component, int)}
+     * calling {@link #add(Component...)} and
+     * {@link #setColspan(Component, int)}
      *
      * @param component
      *            the component to add
@@ -282,8 +283,7 @@ public class FormLayout extends GeneratedVaadinFormLayout<FormLayout>
      *
      * @param component
      *            the component whose colspan is retrieved
-     *
-     *
+     * @return the colspan of the given component or 1 if none is set
      */
     public int getColspan(Component component) {
         String strColspan = component.getElement().getAttribute("colspan");
