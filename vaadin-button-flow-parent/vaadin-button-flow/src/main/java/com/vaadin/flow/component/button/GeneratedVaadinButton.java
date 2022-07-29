@@ -45,7 +45,7 @@ import com.vaadin.flow.dom.Element;
  * The following shadow DOM parts are exposed for styling:
  * </p>
  * <table>
- * <thead>
+ * <caption>Shadow DOM parts exposed for styling</caption> <thead>
  * <tr>
  * <th>Part name</th>
  * <th>Description</th>
@@ -69,7 +69,7 @@ import com.vaadin.flow.dom.Element;
  * The following attributes are exposed for styling:
  * </p>
  * <table>
- * <thead>
+ * <caption>Attributes exposed for styling</caption> <thead>
  * <tr>
  * <th>Attribute</th>
  * <th>Description</th>
