@@ -118,7 +118,8 @@ public class UploadI18nIT extends AbstractUploadIT {
         open();
 
         WebElement btnSetI18n = findElement(By.id("btn-set-i18n"));
-        WebElement btnToggleAttached = findElement(By.id("btn-toggle-attached"));
+        WebElement btnToggleAttached = findElement(
+                By.id("btn-toggle-attached"));
 
         btnSetI18n.click();
 
