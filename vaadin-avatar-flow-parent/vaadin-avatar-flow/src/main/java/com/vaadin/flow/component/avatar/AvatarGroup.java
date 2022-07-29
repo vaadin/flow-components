@@ -477,6 +477,9 @@ public class AvatarGroup extends Component
     /**
      * Creates an avatar group with the provided items to be displayed as
      * avatars.
+     *
+     * @param items
+     *            the items to be displayed
      */
     public AvatarGroup(Collection<AvatarGroupItem> items) {
         setItems(items);
@@ -485,6 +488,9 @@ public class AvatarGroup extends Component
     /**
      * Creates an avatar group with the provided items to be displayed as
      * avatars.
+     *
+     * @param items
+     *            the items to be displayed
      */
     public AvatarGroup(AvatarGroupItem... items) {
         setItems(items);
