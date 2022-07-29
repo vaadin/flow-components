@@ -113,6 +113,27 @@ public class UploadI18nIT extends AbstractUploadIT {
         assertTranslationMapHasNoMissingTranslations(translationMap);
     }
 
+    @Test
+    public void testDetachReattachI18nIsPreserved() {
+        open();
+
+        WebElement btnSetI18n = findElement(By.id("btn-set-i18n"));
+        WebElement btnToggleAttached = findElement(
+                By.id("btn-toggle-attached"));
+
+        btnSetI18n.click();
+
+        btnToggleAttached.click();
+        btnToggleAttached.click();
+
+        UploadElement upload = $(UploadElement.class)
+                .id("upload-detach-reattach-i18n");
+
+        Assert.assertEquals(
+                UploadTestsI18N.RUSSIAN_FULL.getDropFiles().getOne(),
+                upload.$("*").id("dropLabel").getText());
+    }
+
     private void assertTranslationMapsAreEqual(Map<String, String> expected,
             Map<String, String> actual) {
         expected.keySet().forEach(expectedKey -> {
