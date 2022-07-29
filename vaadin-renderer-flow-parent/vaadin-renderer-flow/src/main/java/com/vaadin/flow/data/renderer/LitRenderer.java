@@ -129,7 +129,8 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
     }
 
     /**
-     * @deprecated LitRenderer doesn't support <template> elements. Don't use.
+     * @deprecated LitRenderer doesn't support {@code <template>} elements.
+     *             Don't use.
      */
     @Deprecated
     @Override
@@ -149,10 +150,10 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
     }
 
     /**
-     * Sets up rendering of model objects inside a given {@param container}
-     * element. The model objects are rendered using the Lit template literal
-     * provided when creating this LitRenderer instance, and the Vaadin-default
-     * JS renderer function name.
+     * Sets up rendering of model objects inside a given
+     * {@code Element container} element. The model objects are rendered using
+     * the Lit template literal provided when creating this LitRenderer
+     * instance, and the Vaadin-default JS renderer function name.
      *
      * @param container
      *            the DOM element that supports setting a renderer function
@@ -170,10 +171,10 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
     }
 
     /**
-     * Sets up rendering of model objects inside a given {@param container}
-     * element. The model objects are rendered using the Lit template literal
-     * provided when creating this LitRenderer instance, and a given
-     * {@param rendererName} JS renderer function.
+     * Sets up rendering of model objects inside a given
+     * {@code Element container} element. The model objects are rendered using
+     * the Lit template literal provided when creating this LitRenderer
+     * instance, and a given {@code String rendererName} JS renderer function.
      *
      * @param container
      *            the DOM element that supports setting a renderer function

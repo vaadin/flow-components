@@ -37,7 +37,6 @@ import com.vaadin.flow.shared.Registration;
  *
  * @param <T>
  *            the item type
- * @since
  */
 public class ComboBoxDataView<T> extends AbstractDataView<T> {
 

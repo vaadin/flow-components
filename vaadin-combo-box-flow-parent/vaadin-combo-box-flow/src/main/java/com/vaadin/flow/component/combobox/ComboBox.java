@@ -257,6 +257,8 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
      * Whether the component should block user input that does not match the
      * configured pattern
      *
+     * @return {@code true} if the component should block user input that does
+     *         not match the configured pattern, {@code false} otherwise
      * @deprecated Since 23.2, this API is deprecated.
      */
     @Deprecated
@@ -268,6 +270,9 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
      * Sets whether the component should block user input that does not match
      * the configured pattern
      *
+     * @param preventInvalidInput
+     *            {@code true} if the component should block user input that
+     *            does not match the configured pattern, {@code false} otherwise
      * @deprecated Since 23.2, this API is deprecated in favor of
      *             {@link #setAllowedCharPattern(String)}
      */
@@ -278,6 +283,8 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
 
     /**
      * The pattern to validate the input with
+     *
+     * @return the pattern to validate the input with
      */
     public String getPattern() {
         return getElement().getProperty("pattern");
@@ -285,6 +292,9 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
 
     /**
      * Sets the pattern with which to validate the input
+     *
+     * @param pattern
+     *            the pattern to validate the input with
      */
     public void setPattern(String pattern) {
         getElement().setProperty("pattern", pattern == null ? "" : pattern);
