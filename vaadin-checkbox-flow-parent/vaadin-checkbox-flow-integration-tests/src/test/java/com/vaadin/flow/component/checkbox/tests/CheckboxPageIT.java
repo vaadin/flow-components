@@ -16,24 +16,16 @@
 package com.vaadin.flow.component.checkbox.tests;
 
 import com.vaadin.tests.AbstractComponentIT;
+import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
 import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-/**
- * @author Vaadin Ltd
- */
 @TestPath("vaadin-checkbox/checkbox-test")
 public class CheckboxPageIT extends AbstractComponentIT {
-
-    // could use checkboxelement but that requires TB-elements dependency
-    @Element("input")
-    public static class InputElement extends TestBenchElement {
-    }
 
     @Test
     public void testInitialChecked_is_false_initialIndeterminate_is_false() {
@@ -62,13 +54,13 @@ public class CheckboxPageIT extends AbstractComponentIT {
         int id = checkedExpected ? 1 : 0;
         id += indeterminateExpected ? 2 : 0;
 
-        TestBenchElement cb = (TestBenchElement) findElement(By.id("cb-" + id));
+        CheckboxElement cb = $(CheckboxElement.class).id("cb-" + id);
         WebElement valueLabel = findElement(By.id("value-label-" + id));
         WebElement indeterminateLabel = findElement(
                 By.id("indeterminate-label-" + id));
 
         Assert.assertEquals("Wrong checked value", checkedExpected,
-                cb.getPropertyBoolean("checked"));
+                cb.isChecked());
         Assert.assertEquals("Wrong indeterminate value", indeterminateExpected,
                 cb.getPropertyBoolean("indeterminate"));
 
@@ -78,14 +70,13 @@ public class CheckboxPageIT extends AbstractComponentIT {
                 "Indeterminate: " + indeterminateExpected,
                 indeterminateLabel.getText());
 
-        // the indeterminate=true won't work properly otherwise, checked is not
-        // changed
-        cb.$(InputElement.class).first().click();
+        // click to remove indeterminate state from the native input
+        cb.click();
 
         // after clicking, checked value should have changed and indeterminate
         // is always false
         Assert.assertEquals("After click wrong checked value", !checkedExpected,
-                cb.getPropertyBoolean("checked"));
+                cb.isChecked());
         Assert.assertEquals("After click wrong indeterminate value", false,
                 cb.getPropertyBoolean("indeterminate"));
 
