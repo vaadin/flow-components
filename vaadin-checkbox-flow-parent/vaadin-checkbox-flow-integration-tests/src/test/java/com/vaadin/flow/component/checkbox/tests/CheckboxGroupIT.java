@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.checkbox.tests;
 
+import java.util.Arrays;
 import java.util.List;
 
 import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
@@ -67,7 +68,6 @@ public class CheckboxGroupIT extends AbstractComponentIT {
                         .equals(valueDiv.getText()));
         Assert.assertEquals(Arrays.asList("foo", "bar"),
                 group.getSelectedTexts());
-
 
         group.unselectByText("bar");
         waitUntil(
