@@ -51,9 +51,7 @@ public class CheckboxGroupIT extends AbstractComponentIT {
     public void valueChangeAndSelection() {
         WebElement valueDiv = layout.findElement(By.id("checkbox-group-value"));
         CheckboxGroupElement group = $(CheckboxGroupElement.class)
-                .attributeContains("id",
-                        "checkbox-group-with-value-change-listener")
-                .first();
+                .id("checkbox-group-with-value-change-listener");
 
         group.selectByText("bar");
 
@@ -81,8 +79,7 @@ public class CheckboxGroupIT extends AbstractComponentIT {
         WebElement valueDiv = layout
                 .findElement(By.id("checkbox-group-gen-value"));
         CheckboxGroupElement group = $(CheckboxGroupElement.class)
-                .attributeContains("id", "checkbox-group-with-item-generator")
-                .first();
+                .id("checkbox-group-with-item-generator");
 
         group.selectByText("John");
 
@@ -93,7 +90,7 @@ public class CheckboxGroupIT extends AbstractComponentIT {
     @Test
     public void disabledGroup() {
         CheckboxGroupElement group = $(CheckboxGroupElement.class)
-                .attributeContains("id", "checkbox-group-disabled").first();
+                .id("checkbox-group-disabled");
 
         Assert.assertEquals(Boolean.TRUE.toString(),
                 group.getAttribute("disabled"));
@@ -102,8 +99,7 @@ public class CheckboxGroupIT extends AbstractComponentIT {
     @Test
     public void disabledGroupItems() {
         CheckboxGroupElement group = $(CheckboxGroupElement.class)
-                .attributeContains("id", "checkbox-group-disabled-items")
-                .first();
+                .id("checkbox-group-disabled-items");
 
         List<CheckboxElement> checkboxes = group.getCheckboxes();
 
@@ -138,7 +134,7 @@ public class CheckboxGroupIT extends AbstractComponentIT {
     @Test
     public void readOnlyGroup() {
         CheckboxGroupElement group = $(CheckboxGroupElement.class)
-                .attributeContains("id", "checkbox-group-read-only").first();
+                .id("checkbox-group-read-only");
 
         List<CheckboxElement> checkboxes = group.getCheckboxes();
 
@@ -177,8 +173,8 @@ public class CheckboxGroupIT extends AbstractComponentIT {
     @Test
     public void assertThemeVariant() {
         CheckboxGroupElement group = $(CheckboxGroupElement.class)
-                .attributeContains("id", "checkbox-group-theme-variants")
-                .first();
+                .id("checkbox-group-theme-variants");
+
         scrollToElement(group);
         Assert.assertEquals("vertical", group.getAttribute("theme"));
 
