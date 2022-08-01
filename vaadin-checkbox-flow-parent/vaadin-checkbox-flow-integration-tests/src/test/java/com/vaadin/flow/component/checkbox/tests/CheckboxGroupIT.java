@@ -17,6 +17,8 @@ package com.vaadin.flow.component.checkbox.tests;
 
 import java.util.List;
 
+import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
+import com.vaadin.flow.component.checkbox.testbench.CheckboxGroupElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.TestBenchTestCase;
@@ -47,15 +49,17 @@ public class CheckboxGroupIT extends AbstractComponentIT {
     @Test
     public void valueChange() {
         WebElement valueDiv = layout.findElement(By.id("checkbox-group-value"));
-        WebElement group = layout.findElement(
-                By.id("checkbox-group-with-value-change-listener"));
+        CheckboxGroupElement group = $(CheckboxGroupElement.class)
+                .attributeContains("id",
+                        "checkbox-group-with-value-change-listener")
+                .first();
 
-        executeScript("arguments[0].value=['2'];", group);
+        group.changeSelectionByText("bar");
 
         waitUntil(driver -> "Checkbox group value changed from '[]' to '[bar]'"
                 .equals(valueDiv.getText()));
 
-        executeScript("arguments[0].value=['1','2'];", group);
+        group.changeSelectionByText("foo");
 
         waitUntil(
                 driver -> "Checkbox group value changed from '[bar]' to '[bar, foo]'"
@@ -66,10 +70,11 @@ public class CheckboxGroupIT extends AbstractComponentIT {
     public void itemGenerator() {
         WebElement valueDiv = layout
                 .findElement(By.id("checkbox-group-gen-value"));
-        WebElement group = layout
-                .findElement(By.id("checkbox-group-with-item-generator"));
+        CheckboxGroupElement group = $(CheckboxGroupElement.class)
+                .attributeContains("id", "checkbox-group-with-item-generator")
+                .first();
 
-        executeScript("arguments[0].value=['5'];", group);
+        group.changeSelectionByText("John");
 
         waitUntil(driver -> "Checkbox group value changed from '[]' to '[John]'"
                 .equals(valueDiv.getText()));
@@ -77,7 +82,8 @@ public class CheckboxGroupIT extends AbstractComponentIT {
 
     @Test
     public void disabledGroup() {
-        WebElement group = layout.findElement(By.id("checkbox-group-disabled"));
+        CheckboxGroupElement group = $(CheckboxGroupElement.class)
+                .attributeContains("id", "checkbox-group-disabled").first();
 
         Assert.assertEquals(Boolean.TRUE.toString(),
                 group.getAttribute("disabled"));
@@ -85,17 +91,17 @@ public class CheckboxGroupIT extends AbstractComponentIT {
 
     @Test
     public void disabledGroupItems() {
-        TestBenchElement group = $(TestBenchElement.class)
-                .id("checkbox-group-disabled-items");
+        CheckboxGroupElement group = $(CheckboxGroupElement.class)
+                .attributeContains("id", "checkbox-group-disabled-items")
+                .first();
 
-        List<TestBenchElement> checkboxes = group.$("vaadin-checkbox").all();
+        List<CheckboxElement> checkboxes = group.getCheckboxes();
 
-        Assert.assertEquals(Boolean.TRUE.toString(),
-                checkboxes.get(1).getAttribute("disabled"));
+        Assert.assertFalse(checkboxes.get(1).isChecked());
 
         scrollToElement(group);
 
-        executeScript("arguments[0].value=['1'];", group);
+        group.changeSelectionByText("foo");
 
         WebElement infoLabel = layout
                 .findElement(By.id("checkbox-group-disabled-items-info"));
@@ -103,12 +109,10 @@ public class CheckboxGroupIT extends AbstractComponentIT {
         Assert.assertEquals("'foo' should be selected", "[foo]",
                 infoLabel.getText());
 
-        executeScript("arguments[0].value=['1','2'];", group);
+        group.changeSelectionByText("bar");
 
         try {
-            waitUntil(
-                    driver -> group.findElements(By.tagName("vaadin-checkbox"))
-                            .get(1).getAttribute("disabled") != null);
+            waitUntil(driver -> !group.getCheckboxes().get(1).isChecked());
         } catch (WebDriverException wde) {
             Assert.fail("Server should have disabled the checkbox again.");
         }
@@ -118,16 +122,15 @@ public class CheckboxGroupIT extends AbstractComponentIT {
 
         Assert.assertTrue(
                 "Value 'foo' should have been re-selected on the client side",
-                Boolean.valueOf(checkboxes.get(0).getAttribute("checked")));
+                checkboxes.get(0).isChecked());
     }
 
     @Test
     public void readOnlyGroup() {
-        WebElement group = layout
-                .findElement(By.id("checkbox-group-read-only"));
+        CheckboxGroupElement group = $(CheckboxGroupElement.class)
+                .attributeContains("id", "checkbox-group-read-only").first();
 
-        List<WebElement> checkboxes = group
-                .findElements(By.tagName("vaadin-checkbox"));
+        List<CheckboxElement> checkboxes = group.getCheckboxes();
 
         Assert.assertEquals(Boolean.TRUE.toString(),
                 checkboxes.get(1).getAttribute("disabled"));
@@ -147,7 +150,7 @@ public class CheckboxGroupIT extends AbstractComponentIT {
         new Actions(getDriver()).moveToElement(switchReadOnly).click().build()
                 .perform();
 
-        executeScript("arguments[0].value=['2'];", group);
+        group.changeSelectionByText("bar");
         Assert.assertEquals("[bar]", valueInfo.getText());
 
         // make it read-only again
@@ -155,7 +158,7 @@ public class CheckboxGroupIT extends AbstractComponentIT {
                 .perform();
 
         // click to the first item
-        executeScript("arguments[0].value=['1'];", group);
+        group.changeSelectionByText("foo");
 
         // Nothing has changed
         Assert.assertEquals("[bar]", valueInfo.getText());
@@ -163,7 +166,9 @@ public class CheckboxGroupIT extends AbstractComponentIT {
 
     @Test
     public void assertThemeVariant() {
-        WebElement group = findElement(By.id("checkbox-group-theme-variants"));
+        CheckboxGroupElement group = $(CheckboxGroupElement.class)
+                .attributeContains("id", "checkbox-group-theme-variants")
+                .first();
         scrollToElement(group);
         Assert.assertEquals("vertical", group.getAttribute("theme"));
 
@@ -173,14 +178,13 @@ public class CheckboxGroupIT extends AbstractComponentIT {
 
     @Test
     public void groupHasLabelAndErrorMessage_setInvalidShowEM_setValueRemoveEM() {
-        TestBenchElement group = $(TestBenchElement.class)
+        CheckboxGroupElement group = $(CheckboxGroupElement.class)
                 .id("group-with-label-and-error-message");
 
         Assert.assertEquals("Label Attribute should present with correct text",
                 group.getAttribute("label"), "Group label");
 
-        TestBenchElement errorMessage = group.$("div")
-                .attributeContains("slot", "error-message").first();
+        TestBenchElement errorMessage = group.getErrorMessageComponent();
 
         verifyGroupValid(group, errorMessage);
 
@@ -195,11 +199,10 @@ public class CheckboxGroupIT extends AbstractComponentIT {
 
     @Test
     public void assertHelperText() {
-        TestBenchElement group = $(TestBenchElement.class)
+        CheckboxGroupElement group = $(CheckboxGroupElement.class)
                 .id("checkbox-helper-text");
 
-        TestBenchElement helperText = group.$("div")
-                .attributeContains("slot", "helper").first();
+        TestBenchElement helperText = group.getHelperComponent();
 
         Assert.assertEquals("Helper text", helperText.getText());
 
@@ -209,11 +212,10 @@ public class CheckboxGroupIT extends AbstractComponentIT {
 
     @Test
     public void assertHelperComponent() {
-        TestBenchElement group = $(TestBenchElement.class)
+        CheckboxGroupElement group = $(CheckboxGroupElement.class)
                 .id("checkbox-helper-component");
 
-        TestBenchElement helperComponent = group.$("span")
-                .attributeContains("slot", "helper").first();
+        TestBenchElement helperComponent = group.getHelperComponent();
         Assert.assertEquals("Helper text", helperComponent.getText());
 
         $("button").id("button-clear-component").click();
@@ -224,10 +226,10 @@ public class CheckboxGroupIT extends AbstractComponentIT {
 
     @Test
     public void iconRenderer() {
-        WebElement group = findElement(By.id("checkbox-group-icon-renderer"));
+        CheckboxGroupElement group = $(CheckboxGroupElement.class)
+                .id("checkbox-group-icon-renderer");
 
-        List<WebElement> checkboxes = group
-                .findElements(By.tagName("vaadin-checkbox"));
+        List<CheckboxElement> checkboxes = group.getCheckboxes();
 
         WebElement anchor = checkboxes.get(2).findElement(By.tagName("img"));
 
