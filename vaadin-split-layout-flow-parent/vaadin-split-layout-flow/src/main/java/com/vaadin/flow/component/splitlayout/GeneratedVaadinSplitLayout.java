@@ -255,6 +255,7 @@ public abstract class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitL
     }
 
     @DomEvent("iron-resize")
+    @Deprecated
     public static class IronResizeEvent<R extends GeneratedVaadinSplitLayout<R>>
             extends ComponentEvent<R> {
         public IronResizeEvent(R source, boolean fromClient) {
@@ -268,8 +269,11 @@ public abstract class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitL
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
+     *
+     * @deprecated Since 23.2, this API is deprecated.
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Deprecated
     protected Registration addIronResizeListener(
             ComponentEventListener<IronResizeEvent<R>> listener) {
         return addListener(IronResizeEvent.class,
