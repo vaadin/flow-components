@@ -39,12 +39,6 @@ public class FormLayoutIT extends AbstractComponentIT {
     }
 
     @Test
-    /*
-     * The test works locally but fails on TC. Disabling it for now.
-     *
-     * The issue is that the fields do not behave the same (responsive) way when
-     * you resize the browser window
-     */
     public void custom_responsive_layouting() {
         WebElement firstLayout = findElement(By.tagName("vaadin-form-layout"));
         List<WebElement> textFields = firstLayout
@@ -116,10 +110,6 @@ public class FormLayoutIT extends AbstractComponentIT {
                 info.getText());
 
         // reset
-        forceClick(findElement(By.id("binder-reset")));
-
-        // there's a bug preventing invalid fields from being cleared You need
-        // to reset twice. See https://github.com/vaadin/flow-demo/issues/344
         forceClick(findElement(By.id("binder-reset")));
 
         // Wait for everything to update.
