@@ -122,7 +122,7 @@ public class CheckboxGroupElement extends TestBenchElement
 
     /**
      * Gets the slotted error message component for the element.
-     * 
+     *
      * @return the slotted component or {@code null} if there is no component
      */
     public TestBenchElement getErrorMessageComponent() {
