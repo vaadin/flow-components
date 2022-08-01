@@ -47,23 +47,33 @@ public class CheckboxGroupIT extends AbstractComponentIT {
     }
 
     @Test
-    public void valueChange() {
+    public void valueChangeAndSelection() {
         WebElement valueDiv = layout.findElement(By.id("checkbox-group-value"));
         CheckboxGroupElement group = $(CheckboxGroupElement.class)
                 .attributeContains("id",
                         "checkbox-group-with-value-change-listener")
                 .first();
 
-        group.changeSelectionByText("bar");
+        group.selectByText("bar");
 
         waitUntil(driver -> "Checkbox group value changed from '[]' to '[bar]'"
                 .equals(valueDiv.getText()));
+        Assert.assertEquals(Arrays.asList("bar"), group.getSelectedTexts());
 
-        group.changeSelectionByText("foo");
+        group.selectByText("foo");
 
         waitUntil(
                 driver -> "Checkbox group value changed from '[bar]' to '[bar, foo]'"
                         .equals(valueDiv.getText()));
+        Assert.assertEquals(Arrays.asList("foo", "bar"),
+                group.getSelectedTexts());
+
+
+        group.unselectByText("bar");
+        waitUntil(
+                driver -> "Checkbox group value changed from '[bar, foo]' to '[foo]'"
+                        .equals(valueDiv.getText()));
+        Assert.assertEquals(Arrays.asList("foo"), group.getSelectedTexts());
     }
 
     @Test
@@ -74,7 +84,7 @@ public class CheckboxGroupIT extends AbstractComponentIT {
                 .attributeContains("id", "checkbox-group-with-item-generator")
                 .first();
 
-        group.changeSelectionByText("John");
+        group.selectByText("John");
 
         waitUntil(driver -> "Checkbox group value changed from '[]' to '[John]'"
                 .equals(valueDiv.getText()));
@@ -101,7 +111,7 @@ public class CheckboxGroupIT extends AbstractComponentIT {
 
         scrollToElement(group);
 
-        group.changeSelectionByText("foo");
+        group.selectByText("foo");
 
         WebElement infoLabel = layout
                 .findElement(By.id("checkbox-group-disabled-items-info"));
@@ -109,7 +119,7 @@ public class CheckboxGroupIT extends AbstractComponentIT {
         Assert.assertEquals("'foo' should be selected", "[foo]",
                 infoLabel.getText());
 
-        group.changeSelectionByText("bar");
+        group.selectByText("bar");
 
         try {
             waitUntil(driver -> !group.getCheckboxes().get(1).isChecked());
@@ -150,7 +160,7 @@ public class CheckboxGroupIT extends AbstractComponentIT {
         new Actions(getDriver()).moveToElement(switchReadOnly).click().build()
                 .perform();
 
-        group.changeSelectionByText("bar");
+        group.selectByText("bar");
         Assert.assertEquals("[bar]", valueInfo.getText());
 
         // make it read-only again
@@ -158,7 +168,7 @@ public class CheckboxGroupIT extends AbstractComponentIT {
                 .perform();
 
         // click to the first item
-        group.changeSelectionByText("foo");
+        group.selectByText("foo");
 
         // Nothing has changed
         Assert.assertEquals("[bar]", valueInfo.getText());
