@@ -50,19 +50,37 @@ public class CheckboxGroupElement extends TestBenchElement
     }
 
     /**
-     * Selects/unselects the first checkbox matching the given text.
+     * Selects the first checkbox matching the given text. If it is selected
+     * does nothing.
      *
      * @param text
      *            the text of the option to select
      */
-    public void changeSelectionByText(String text) {
+    public void selectByText(String text) {
         Optional<CheckboxElement> checkbox = getCheckboxByText(text);
         if (!checkbox.isPresent()) {
             throw new NoSuchElementException(
                     "No item with text '" + text + "' found");
         }
 
-        checkbox.get().setChecked(!checkbox.get().isChecked());
+        checkbox.get().setChecked(true);
+    }
+
+    /**
+     * Unselects the first checkbox matching the given text. If it is unslected
+     * does nothing.
+     *
+     * @param text
+     *            the text of the option to select
+     */
+    public void unselectByText(String text) {
+        Optional<CheckboxElement> checkbox = getCheckboxByText(text);
+        if (!checkbox.isPresent()) {
+            throw new NoSuchElementException(
+                    "No item with text '" + text + "' found");
+        }
+
+        checkbox.get().setChecked(false);
     }
 
     public List<String> getSelectedTexts() {
@@ -109,15 +127,6 @@ public class CheckboxGroupElement extends TestBenchElement
     private Stream<CheckboxElement> getCheckboxByChecked(boolean value) {
         return getCheckboxes().stream()
                 .filter(checkbox -> checkbox.isChecked());
-    }
-
-    /**
-     * Gets the value.
-     *
-     * @return the value
-     */
-    private String getValue() {
-        return getPropertyString("value");
     }
 
     /**
