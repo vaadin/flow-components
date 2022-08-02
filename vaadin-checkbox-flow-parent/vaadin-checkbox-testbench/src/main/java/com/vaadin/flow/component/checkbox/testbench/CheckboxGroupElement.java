@@ -67,8 +67,8 @@ public class CheckboxGroupElement extends TestBenchElement
     }
 
     /**
-     * Unselects the first checkbox matching the given text. If it is unslected
-     * does nothing.
+     * Unselects the first checkbox matching the given text. Does nothing
+     * if the item is not selected.
      *
      * @param text
      *            the text of the option to select
