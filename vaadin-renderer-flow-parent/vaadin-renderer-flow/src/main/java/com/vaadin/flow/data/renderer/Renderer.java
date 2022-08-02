@@ -44,9 +44,6 @@ import com.vaadin.flow.internal.JsonSerializer;
  * @see LitRenderer
  * @see <a href=
  *      "https://www.polymer-project.org/2.0/docs/devguide/templates">https://www.polymer-project.org/2.0/docs/devguide/templates</a>
- *
- * @param <SOURCE>
- *            the object model type
  */
 public class Renderer<SOURCE> implements Serializable {
 

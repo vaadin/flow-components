@@ -36,7 +36,6 @@ import com.vaadin.flow.shared.Registration;
  *
  * @param <T>
  *            the type of the items in ComboBox
- * @since
  */
 public class ComboBoxListDataView<T> extends AbstractListDataView<T> {
     private final DataCommunicator<T> dataCommunicator;

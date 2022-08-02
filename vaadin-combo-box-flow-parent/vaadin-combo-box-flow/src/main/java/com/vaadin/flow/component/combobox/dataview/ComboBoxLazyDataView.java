@@ -75,12 +75,10 @@ public class ComboBoxLazyDataView<T> extends AbstractLazyDataView<T> {
     }
 
     /**
-     * @inheritDoc
-     *             <p>
-     *             Calling this method will clear any previously set count
-     *             callback with the
-     *             {@link #setItemCountCallback(CallbackDataProvider.CountCallback)}
-     *             method.
+     * {@inheritDoc}
+     * <p>
+     * Calling this method will clear any previously set count callback with the
+     * {@link #setItemCountCallback(CallbackDataProvider.CountCallback)} method.
      */
     @Override
     public void setItemCountFromDataProvider() {
