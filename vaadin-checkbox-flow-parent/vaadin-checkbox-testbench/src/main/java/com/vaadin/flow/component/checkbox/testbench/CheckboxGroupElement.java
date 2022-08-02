@@ -21,7 +21,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
 import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
@@ -50,39 +49,48 @@ public class CheckboxGroupElement extends TestBenchElement
     }
 
     /**
-     * Selects the first checkbox matching the given text. If it is selected
+     * Attempts to select a checkbox by matching the label. If it is selected
      * does nothing.
      *
-     * @param text
+     * @throws NoSuchElementException
+     *             if no matching label was found.
+     * @param label
      *            the text of the option to select
      */
-    public void selectByText(String text) {
-        Optional<CheckboxElement> checkbox = getCheckboxByText(text);
+    public void selectByText(String label) {
+        Optional<CheckboxElement> checkbox = getCheckboxByText(label);
         if (!checkbox.isPresent()) {
             throw new NoSuchElementException(
-                    "No item with text '" + text + "' found");
+                    "No item with text '" + label + "' found");
         }
 
         checkbox.get().setChecked(true);
     }
 
     /**
-     * Unselects the first checkbox matching the given text. Does nothing
-     * if the item is not selected.
+     * Deselects the first checkbox matching the the label. Does nothing if the
+     * item is not selected.
      *
-     * @param text
+     * @throws NoSuchElementException
+     *             if no matching label was found.
+     * @param label
      *            the text of the option to select
      */
-    public void unselectByText(String text) {
-        Optional<CheckboxElement> checkbox = getCheckboxByText(text);
+    public void deselectByText(String label) {
+        Optional<CheckboxElement> checkbox = getCheckboxByText(label);
         if (!checkbox.isPresent()) {
             throw new NoSuchElementException(
-                    "No item with text '" + text + "' found");
+                    "No item with text '" + label + "' found");
         }
 
         checkbox.get().setChecked(false);
     }
 
+    /**
+     * Gets the labels of the currently selected items.
+     *
+     * @return the labels of the currently selected items
+     */
     public List<String> getSelectedTexts() {
         Stream<CheckboxElement> button = getSelectedCheckboxes();
         return button.map(CheckboxElement::getLabel)
@@ -117,8 +125,8 @@ public class CheckboxGroupElement extends TestBenchElement
     }
 
     /**
-     * Gets the stream of checkboxes which is part of this group and has the
-     * given value.
+     * Gets the stream of checkboxes which are part of this group and has the
+     * checked state.
      *
      * @param value
      *            the value to search for
