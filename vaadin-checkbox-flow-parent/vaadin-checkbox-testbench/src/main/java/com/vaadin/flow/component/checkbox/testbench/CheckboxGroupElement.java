@@ -92,7 +92,7 @@ public class CheckboxGroupElement extends TestBenchElement
     /**
      * Gets the selected checkboxes.
      *
-     * @return an stream with the selected checkboxs elements.
+     * @return a stream with the selected checkboxes elements.
      */
     private Stream<CheckboxElement> getSelectedCheckboxes() {
         return getCheckboxByChecked(true);
