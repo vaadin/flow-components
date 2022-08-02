@@ -67,7 +67,7 @@ public class CheckboxGroupIT extends AbstractComponentIT {
         Assert.assertEquals(Arrays.asList("foo", "bar"),
                 group.getSelectedTexts());
 
-        group.unselectByText("bar");
+        group.deselectByText("bar");
         waitUntil(
                 driver -> "Checkbox group value changed from '[bar, foo]' to '[foo]'"
                         .equals(valueDiv.getText()));
