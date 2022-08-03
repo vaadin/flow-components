@@ -114,8 +114,7 @@ public class CheckboxGroupListDataViewIT extends AbstractComponentIT {
 
         Assert.assertEquals(
                 "Wrong name for added person in second " + "CheckboxGroup",
-                "Peter",
-                otherCheckboxGroup.getCheckboxes().get(3).getLabel());
+                "Peter", otherCheckboxGroup.getCheckboxes().get(3).getLabel());
     }
 
     @Test
@@ -123,12 +122,10 @@ public class CheckboxGroupListDataViewIT extends AbstractComponentIT {
         findElement(By.id(CheckboxGroupListDataViewPage.UPDATE_ITEM)).click();
 
         Assert.assertEquals("Wrong name for updated person in first Checkbox",
-                "Jack",
-                checkboxGroup.getCheckboxes().get(0).getLabel());
+                "Jack", checkboxGroup.getCheckboxes().get(0).getLabel());
 
         Assert.assertEquals("Wrong name for updated person in second Checkbox",
-                "Jack",
-                otherCheckboxGroup.getCheckboxes().get(0).getLabel());
+                "Jack", otherCheckboxGroup.getCheckboxes().get(0).getLabel());
     }
 
     @Test
@@ -146,10 +143,12 @@ public class CheckboxGroupListDataViewIT extends AbstractComponentIT {
     public void sorting_itemsSortedOnlyInOneComponent() {
         findElement(By.id(CheckboxGroupListDataViewPage.SORT_BUTTON)).click();
 
-        Assert.assertEquals("Unexpected sort order", Arrays.asList("John","Mike","Paul"),
+        Assert.assertEquals("Unexpected sort order",
+                Arrays.asList("John", "Mike", "Paul"),
                 checkboxGroup.getOptions());
 
-        Assert.assertEquals("Unexpected sort order", Arrays.asList("John","Paul","Mike"),
+        Assert.assertEquals("Unexpected sort order",
+                Arrays.asList("John", "Paul", "Mike"),
                 otherCheckboxGroup.getOptions());
     }
 
