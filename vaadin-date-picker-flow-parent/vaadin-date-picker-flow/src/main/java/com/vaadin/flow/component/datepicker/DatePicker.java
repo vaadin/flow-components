@@ -27,6 +27,7 @@ import java.util.stream.Stream;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasClearButton;
@@ -94,7 +95,6 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     private LocalDate max;
     private LocalDate min;
     private boolean required;
-    private boolean isClientInvalid;
     private final Collection<ValidationStatusChangeListener<LocalDate>> validationStatusChangeListeners = new ArrayList<>();
 
     private StateTree.ExecutionRegistration pendingI18nUpdate;
@@ -143,7 +143,6 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         setInvalid(false);
 
         addClientValidatedEventListener(e -> {
-            isClientInvalid = !e.isValid();
             validate();
             fireValidationStatusChangeEvent();
         });
@@ -509,6 +508,12 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     }
 
     private ValidationResult checkValidity(LocalDate value) {
+        var hasNonParsableValue = value == getEmptyValue()
+                && getInputValuePopulated();
+        if (hasNonParsableValue) {
+            return ValidationResult.error("");
+        }
+
         var greaterThanMax = ValidationUtil.checkGreaterThanMax(value, max);
         if (greaterThanMax.isError()) {
             return greaterThanMax;
@@ -517,10 +522,6 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         var smallerThanMin = ValidationUtil.checkSmallerThanMin(value, min);
         if (smallerThanMin.isError()) {
             return smallerThanMin;
-        }
-
-        if (isClientInvalid) {
-            return ValidationResult.error("");
         }
 
         return ValidationResult.ok();
@@ -536,6 +537,18 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
                 getEmptyValue());
 
         return requiredValidation.isError() || checkValidity(value).isError();
+    }
+
+    /**
+     * Gets the populated state of the input's value, which is {@code false} by
+     * default.
+     *
+     * @return <code>true</code> if the input's value is populated,
+     *         <code>false</code> otherwise
+     */
+    @Synchronize(property = "_hasInputValue", value = "has-input-value-changed")
+    private boolean getInputValuePopulated() {
+        return getElement().getProperty("_hasInputValue", false);
     }
 
     /**
