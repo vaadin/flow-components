@@ -50,7 +50,7 @@ public final class LumoUtility {
 
     /**
      * Classes for distributing space around and between items along a
-     * flexbox's cross axis or a grid's block axis. Applies to flexbox and
+     * flexbox’s cross axis or a grid’s block axis. Applies to flexbox and
      * grid layouts.
      */
     public static final class AlignContent {
@@ -69,7 +69,7 @@ public final class LumoUtility {
     }
 
     /**
-     * Classes for aligning items along a flexbox's cross axis or a grid's
+     * Classes for aligning items along a flexbox’s cross axis or a grid’s
      * block axis. Applies to flexbox and grid layouts.
      */
     public static final class AlignItems {
@@ -86,7 +86,7 @@ public final class LumoUtility {
     }
 
     /**
-     * Classes for overriding individual items' align-item property. Applies to
+     * Classes for overriding individual items’ align-item property. Applies to
      * flexbox and grid items.
      */
     public static final class AlignSelf {
@@ -239,7 +239,7 @@ public final class LumoUtility {
 
     /**
      * Classes for setting the box sizing property of an element. Box sizing
-     * determines whether an element's border and padding is considered a part
+     * determines whether an element’s border and padding is considered a part
      * of its size.
      */
     public static final class BoxSizing {
@@ -987,7 +987,7 @@ public final class LumoUtility {
     }
 
     /**
-     * Classes for aligning items along a flexbox's main axis or a grid's
+     * Classes for aligning items along a flexbox’s main axis or a grid’s
      * inline axis. Applies to flexbox and grid layouts.
      */
     public static final class JustifyContent {
@@ -1433,7 +1433,7 @@ public final class LumoUtility {
     }
 
     /**
-     * Classes for setting an element's text alignment.
+     * Classes for setting an element’s text alignment.
      */
     public static final class TextAlignment {
 
@@ -1448,7 +1448,7 @@ public final class LumoUtility {
     }
 
     /**
-     * Classes for setting an element's text color.
+     * Classes for setting an element’s text color.
      */
     public static final class TextColor {
 
