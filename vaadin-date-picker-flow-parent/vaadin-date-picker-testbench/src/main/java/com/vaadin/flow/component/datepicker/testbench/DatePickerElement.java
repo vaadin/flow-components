@@ -159,6 +159,7 @@ public class DatePickerElement extends TestBenchElement
     public void setInputValue(String value) {
         this.open();
         setProperty("_inputValue", value);
+        $("input").first().dispatchEvent("change");
         this.close();
     }
 
