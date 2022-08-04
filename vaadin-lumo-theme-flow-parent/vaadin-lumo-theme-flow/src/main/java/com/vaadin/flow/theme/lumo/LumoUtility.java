@@ -49,9 +49,8 @@ public final class LumoUtility {
     }
 
     /**
-     * Classes for distributing space around and between items along a
-     * flexbox’s cross axis or a grid’s block axis. Applies to flexbox and
-     * grid layouts.
+     * Classes for distributing space around and between items along a flexbox’s
+     * cross axis or a grid’s block axis. Applies to flexbox and grid layouts.
      */
     public static final class AlignContent {
 
@@ -69,8 +68,8 @@ public final class LumoUtility {
     }
 
     /**
-     * Classes for aligning items along a flexbox’s cross axis or a grid’s
-     * block axis. Applies to flexbox and grid layouts.
+     * Classes for aligning items along a flexbox’s cross axis or a grid’s block
+     * axis. Applies to flexbox and grid layouts.
      */
     public static final class AlignItems {
 
@@ -987,8 +986,8 @@ public final class LumoUtility {
     }
 
     /**
-     * Classes for aligning items along a flexbox’s main axis or a grid’s
-     * inline axis. Applies to flexbox and grid layouts.
+     * Classes for aligning items along a flexbox’s main axis or a grid’s inline
+     * axis. Applies to flexbox and grid layouts.
      */
     public static final class JustifyContent {
 
