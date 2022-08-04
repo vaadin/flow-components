@@ -15,9 +15,15 @@
  */
 package com.vaadin.flow.theme.lumo;
 
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
+
 /**
  * Contains the definition for all the CSS utility classes provided by Lumo.
  */
+@NpmPackage(value = "@vaadin/vaadin-lumo-styles", version = "23.2.0-alpha2")
+@JsModule("@vaadin/vaadin-lumo-styles/utility.js")
+@JsModule("./lumo-utility.ts")
 public final class LumoUtility {
 
     private static String notConstant(String value) {
@@ -44,7 +50,7 @@ public final class LumoUtility {
 
     /**
      * Classes for distributing space around and between items along a
-     * flexboxâ€™s cross axis or a gridâ€™s block axis. Applies to flexbox and
+     * flexbox's cross axis or a grid's block axis. Applies to flexbox and
      * grid layouts.
      */
     public static final class AlignContent {
@@ -63,7 +69,7 @@ public final class LumoUtility {
     }
 
     /**
-     * Classes for aligning items along a flexboxâ€™s cross axis or a gridâ€™s
+     * Classes for aligning items along a flexbox's cross axis or a grid's
      * block axis. Applies to flexbox and grid layouts.
      */
     public static final class AlignItems {
@@ -233,7 +239,7 @@ public final class LumoUtility {
 
     /**
      * Classes for setting the box sizing property of an element. Box sizing
-     * determines whether an elementâ€™s border and padding is considered a part
+     * determines whether an element's border and padding is considered a part
      * of its size.
      */
     public static final class BoxSizing {
@@ -981,7 +987,7 @@ public final class LumoUtility {
     }
 
     /**
-     * Classes for aligning items along a flexboxâ€™s main axis or a gridâ€™s
+     * Classes for aligning items along a flexbox's main axis or a grid's
      * inline axis. Applies to flexbox and grid layouts.
      */
     public static final class JustifyContent {
@@ -1427,7 +1433,7 @@ public final class LumoUtility {
     }
 
     /**
-     * Classes for setting an elementâ€™s text alignment.
+     * Classes for setting an element's text alignment.
      */
     public static final class TextAlignment {
 
@@ -1442,7 +1448,7 @@ public final class LumoUtility {
     }
 
     /**
-     * Classes for setting an elementâ€™s text color.
+     * Classes for setting an element's text color.
      */
     public static final class TextColor {
 
