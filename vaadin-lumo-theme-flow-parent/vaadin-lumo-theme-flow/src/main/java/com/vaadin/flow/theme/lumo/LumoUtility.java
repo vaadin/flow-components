@@ -34,6 +34,8 @@ public final class LumoUtility {
      */
     public static final class Accessibility {
 
+        private final LumoUtility dummyBackReference = null;
+
         /**
          * Hides content visually while keeping it available to screen readers.
          */
@@ -49,6 +51,8 @@ public final class LumoUtility {
      * cross axis or a grid’s block axis. Applies to flexbox and grid layouts.
      */
     public static final class AlignContent {
+
+        private final LumoUtility dummyBackReference = null;
 
         public static final String AROUND = "content-around";
         public static final String BETWEEN = "content-between";
@@ -69,6 +73,8 @@ public final class LumoUtility {
      */
     public static final class AlignItems {
 
+        private final LumoUtility dummyBackReference = null;
+
         public static final String BASELINE = "items-baseline";
         public static final String CENTER = "items-center";
         public static final String END = "items-end";
@@ -86,6 +92,8 @@ public final class LumoUtility {
      */
     public static final class AlignSelf {
 
+        private final LumoUtility dummyBackReference = null;
+
         public static final String AUTO = "self-auto";
         public static final String BASELINE = "self-baseline";
         public static final String CENTER = "self-center";
@@ -102,6 +110,8 @@ public final class LumoUtility {
      * Classes for applying a background color.
      */
     public static final class Background {
+
+        private final LumoUtility dummyBackReference = null;
 
         public static final String BASE = "bg-base";
         public static final String TRANSPARENT = "bg-transparent";
@@ -140,6 +150,8 @@ public final class LumoUtility {
      */
     public static final class Border {
 
+        private final LumoUtility dummyBackReference = null;
+
         public static final String NONE = "border-0";
 
         public static final String ALL = "border";
@@ -157,6 +169,8 @@ public final class LumoUtility {
      * Classes for setting the border color of an element.
      */
     public static final class BorderColor {
+
+        private final LumoUtility dummyBackReference = null;
 
         public static final String CONTRAST = "border-contrast";
         public static final String CONTRAST_90 = "border-contrast-90";
@@ -192,6 +206,8 @@ public final class LumoUtility {
      */
     public static final class BorderRadius {
 
+        private final LumoUtility dummyBackReference = null;
+
         public static final String NONE = "rounded-none";
         public static final String SMALL = "rounded-s";
         public static final String MEDIUM = "rounded-m";
@@ -206,6 +222,8 @@ public final class LumoUtility {
      * Classes for applying a box shadow.
      */
     public static final class BoxShadow {
+
+        private final LumoUtility dummyBackReference = null;
 
         public static final String XSMALL = "shadow-xs";
         public static final String SMALL = "shadow-s";
@@ -225,6 +243,8 @@ public final class LumoUtility {
      */
     public static final class BoxSizing {
 
+        private final LumoUtility dummyBackReference = null;
+
         public static final String BORDER = "box-border";
         public static final String CONTENT = "box-content";
 
@@ -239,6 +259,8 @@ public final class LumoUtility {
      * laid out.
      */
     public static final class Display {
+
+        private final LumoUtility dummyBackReference = null;
 
         public static final String BLOCK = "block";
         public static final String FLEX = "flex";
@@ -266,6 +288,8 @@ public final class LumoUtility {
              */
             public static final class Small {
 
+                private final LumoUtility dummyBackReference = null;
+
                 public static final String FLEX = "sm:flex";
                 public static final String HIDDEN = "sm:hidden";
 
@@ -278,6 +302,8 @@ public final class LumoUtility {
              * be applied when the viewport has a minimum width of 768px
              */
             public static final class Medium {
+
+                private final LumoUtility dummyBackReference = null;
 
                 public static final String FLEX = "md:flex";
                 public static final String HIDDEN = "md:hidden";
@@ -292,6 +318,8 @@ public final class LumoUtility {
              */
             public static final class Large {
 
+                private final LumoUtility dummyBackReference = null;
+
                 public static final String FLEX = "lg:flex";
                 public static final String HIDDEN = "lg:hidden";
 
@@ -305,6 +333,8 @@ public final class LumoUtility {
              */
             public static final class XLarge {
 
+                private final LumoUtility dummyBackReference = null;
+
                 public static final String FLEX = "xl:flex";
                 public static final String HIDDEN = "xl:hidden";
 
@@ -317,6 +347,8 @@ public final class LumoUtility {
              * be applied when the viewport has a minimum width of 1536px
              */
             public static final class XXLarge {
+
+                private final LumoUtility dummyBackReference = null;
 
                 public static final String FLEX = "2xl:flex";
                 public static final String HIDDEN = "2xl:hidden";
@@ -332,6 +364,8 @@ public final class LumoUtility {
      * Applies to flexbox items.
      */
     public static final class Flex {
+
+        private final LumoUtility dummyBackReference = null;
 
         public static final String AUTO = "flex-auto";
         public static final String NONE = "flex-none";
@@ -352,6 +386,8 @@ public final class LumoUtility {
      */
     public static final class FlexDirection {
 
+        private final LumoUtility dummyBackReference = null;
+
         public static final String COLUMN = "flex-col";
         public static final String COLUMN_REVERSE = "flex-col-reverse";
         public static final String ROW = "flex-row";
@@ -366,6 +402,8 @@ public final class LumoUtility {
          */
         public static final class Breakpoint {
 
+            private final LumoUtility dummyBackReference = null;
+
             private Breakpoint() {
             }
 
@@ -374,6 +412,8 @@ public final class LumoUtility {
              * width of 640px.
              */
             public static final class Small {
+
+                private final LumoUtility dummyBackReference = null;
 
                 public static final String COLUMN = "sm:flex-col";
                 public static final String ROW = "sm:flex-row";
@@ -388,6 +428,8 @@ public final class LumoUtility {
              */
             public static final class Medium {
 
+                private final LumoUtility dummyBackReference = null;
+
                 public static final String COLUMN = "md:flex-col";
                 public static final String ROW = "md:flex-row";
 
@@ -400,6 +442,8 @@ public final class LumoUtility {
              * width of 1024px.
              */
             public static final class Large {
+
+               private final LumoUtility dummyBackReference = null;
 
                 public static final String COLUMN = "lg:flex-col";
                 public static final String ROW = "lg:flex-row";
@@ -414,6 +458,8 @@ public final class LumoUtility {
              */
             public static final class XLarge {
 
+                private final LumoUtility dummyBackReference = null;
+
                 public static final String COLUMN = "xl:flex-col";
                 public static final String ROW = "xl:flex-row";
 
@@ -426,6 +472,8 @@ public final class LumoUtility {
              * width of 1536px.
              */
             public static final class XXLarge {
+
+                private final LumoUtility dummyBackReference = null;
 
                 public static final String COLUMN = "2xl:flex-col";
                 public static final String ROW = "2xl:flex-row";
@@ -444,6 +492,8 @@ public final class LumoUtility {
      */
     public static final class FlexWrap {
 
+        private final LumoUtility dummyBackReference = null;
+
         public static final String NOWRAP = "flex-nowrap";
         public static final String WRAP = "flex-wrap";
         public static final String WRAP_REVERSE = "flex-wrap-reverse";
@@ -457,6 +507,8 @@ public final class LumoUtility {
      * Classes for setting the font size of an element.
      */
     public static final class FontSize {
+
+        private final LumoUtility dummyBackReference = null;
 
         public static final String XXSMALL = "text-2xs";
         public static final String XSMALL = "text-xs";
@@ -476,6 +528,8 @@ public final class LumoUtility {
          */
         public static final class Breakpoint {
 
+            private final LumoUtility dummyBackReference = null;
+
             private Breakpoint() {
             }
 
@@ -484,6 +538,8 @@ public final class LumoUtility {
              * width of 640px.
              */
             public static final class Small {
+
+                private final LumoUtility dummyBackReference = null;
 
                 public static final String XXSMALL = "sm:text-2xs";
                 public static final String XSMALL = "sm:text-xs";
@@ -504,6 +560,8 @@ public final class LumoUtility {
              */
             public static final class Medium {
 
+                private final LumoUtility dummyBackReference = null;
+
                 public static final String XXSMALL = "md:text-2xs";
                 public static final String XSMALL = "md:text-xs";
                 public static final String SMALL = "md:text-s";
@@ -522,6 +580,8 @@ public final class LumoUtility {
              * width of 1024px.
              */
             public static final class Large {
+
+                private final LumoUtility dummyBackReference = null;
 
                 public static final String XXSMALL = "lg:text-2xs";
                 public static final String XSMALL = "lg:text-xs";
@@ -542,6 +602,8 @@ public final class LumoUtility {
              */
             public static final class XLarge {
 
+                private final LumoUtility dummyBackReference = null;
+
                 public static final String XXSMALL = "xl:text-2xs";
                 public static final String XSMALL = "xl:text-xs";
                 public static final String SMALL = "xl:text-s";
@@ -560,6 +622,8 @@ public final class LumoUtility {
              * width of 1536px.
              */
             public static final class XXLarge {
+
+                private final LumoUtility dummyBackReference = null;
 
                 public static final String XXSMALL = "2xl:text-2xs";
                 public static final String XSMALL = "2xl:text-xs";
@@ -581,6 +645,8 @@ public final class LumoUtility {
      */
     public static final class FontWeight {
 
+        private final LumoUtility dummyBackReference = null;
+
         public static final String THIN = "font-thin";
         public static final String EXTRALIGHT = "font-extralight";
         public static final String LIGHT = "font-light";
@@ -601,6 +667,8 @@ public final class LumoUtility {
      */
     public static final class Gap {
 
+        private final LumoUtility dummyBackReference = null;
+
         public static final String XSMALL = "gap-xs";
         public static final String SMALL = "gap-s";
         public static final String MEDIUM = "gap-m";
@@ -615,6 +683,8 @@ public final class LumoUtility {
          * or grid layout. Applies to flexbox and grid layouts.
          */
         public static final class Column {
+
+            private final LumoUtility dummyBackReference = null;
 
             public static final String XSMALL = "gap-x-xs";
             public static final String SMALL = "gap-x-s";
@@ -632,6 +702,8 @@ public final class LumoUtility {
          */
         public static final class Row {
 
+            private final LumoUtility dummyBackReference = null;
+
             public static final String XSMALL = "gap-y-xs";
             public static final String SMALL = "gap-y-s";
             public static final String MEDIUM = "gap-y-m";
@@ -647,6 +719,8 @@ public final class LumoUtility {
      * Set of classes to define the content flow on a grid layout.
      */
     public static final class Grid {
+
+        private final LumoUtility dummyBackReference = null;
 
         /**
          * Items are placed by filling each column in turn, adding new columns
@@ -666,6 +740,8 @@ public final class LumoUtility {
          * Classes for setting the number of columns in a grid layout.
          */
         public static final class Column {
+
+            private final LumoUtility dummyBackReference = null;
 
             public static final String COLUMNS_1 = "grid-cols-1";
             public static final String COLUMNS_2 = "grid-cols-2";
@@ -703,6 +779,8 @@ public final class LumoUtility {
          */
         public static final class Row {
 
+            private final LumoUtility dummyBackReference = null;
+
             public static final String ROWS_1 = "grid-rows-1";
             public static final String ROWS_2 = "grid-rows-2";
             public static final String ROWS_3 = "grid-rows-3";
@@ -728,6 +806,8 @@ public final class LumoUtility {
          */
         public static final class Breakpoint {
 
+            private final LumoUtility dummyBackReference = null;
+
             private Breakpoint() {
             }
 
@@ -736,6 +816,8 @@ public final class LumoUtility {
              * width of 640px.
              */
             public static final class Small {
+
+                private final LumoUtility dummyBackReference = null;
 
                 public static final String COLUMNS_1 = "sm:grid-cols-1";
                 public static final String COLUMNS_2 = "sm:grid-cols-2";
@@ -760,6 +842,8 @@ public final class LumoUtility {
              */
             public static final class Medium {
 
+                private final LumoUtility dummyBackReference = null;
+
                 public static final String COLUMNS_1 = "md:grid-cols-1";
                 public static final String COLUMNS_2 = "md:grid-cols-2";
                 public static final String COLUMNS_3 = "md:grid-cols-3";
@@ -782,6 +866,8 @@ public final class LumoUtility {
              * width of 1024px.
              */
             public static final class Large {
+
+                private final LumoUtility dummyBackReference = null;
 
                 public static final String COLUMNS_1 = "lg:grid-cols-1";
                 public static final String COLUMNS_2 = "lg:grid-cols-2";
@@ -806,6 +892,8 @@ public final class LumoUtility {
              */
             public static final class XLarge {
 
+                private final LumoUtility dummyBackReference = null;
+
                 public static final String COLUMNS_1 = "xl:grid-cols-1";
                 public static final String COLUMNS_2 = "xl:grid-cols-2";
                 public static final String COLUMNS_3 = "xl:grid-cols-3";
@@ -828,6 +916,8 @@ public final class LumoUtility {
              * width of 1536px.
              */
             public static final class XXLarge {
+
+                private final LumoUtility dummyBackReference = null;
 
                 public static final String COLUMNS_1 = "2xl:grid-cols-1";
                 public static final String COLUMNS_2 = "2xl:grid-cols-2";
@@ -855,6 +945,8 @@ public final class LumoUtility {
      */
     public static final class Height {
 
+        private final LumoUtility dummyBackReference = null;
+
         public static final String AUTO = "h-auto";
         public static final String FULL = "h-full";
         public static final String NONE = "h-0";
@@ -876,6 +968,8 @@ public final class LumoUtility {
      */
     public static final class IconSize {
 
+        private final LumoUtility dummyBackReference = null;
+
         public static final String SMALL = "icon-s";
         public static final String MEDIUM = "icon-m";
         public static final String LARGE = "icon-l";
@@ -890,6 +984,8 @@ public final class LumoUtility {
      * axis. Applies to flexbox and grid layouts.
      */
     public static final class JustifyContent {
+
+        private final LumoUtility dummyBackReference = null;
 
         public static final String AROUND = "justify-around";
         public static final String BETWEEN = "justify-between";
@@ -908,6 +1004,8 @@ public final class LumoUtility {
      */
     public static final class LineHeight {
 
+        private final LumoUtility dummyBackReference = null;
+
         public static final String NONE = "leading-none";
         public static final String XSMALL = "leading-xs";
         public static final String SMALL = "leading-s";
@@ -923,6 +1021,8 @@ public final class LumoUtility {
      */
     public static final class ListStyleType {
 
+        private final LumoUtility dummyBackReference = null;
+
         public static final String NONE = "list-none";
 
         private ListStyleType() {
@@ -934,6 +1034,8 @@ public final class LumoUtility {
      * Classes for setting the margin of an element.
      */
     public static final class Margin {
+
+        private final LumoUtility dummyBackReference = null;
 
         public static final String AUTO = "m-auto";
         public static final String NONE = "m-0";
@@ -950,6 +1052,8 @@ public final class LumoUtility {
          * Classes for setting the bottom margin of an element.
          */
         public static final class Bottom {
+
+            private final LumoUtility dummyBackReference = null;
 
             public static final String AUTO = "mb-auto";
             public static final String NONE = "mb-0";
@@ -970,6 +1074,8 @@ public final class LumoUtility {
          */
         public static final class End {
 
+            private final LumoUtility dummyBackReference = null;
+
             public static final String AUTO = "me-auto";
             public static final String NONE = "me-0";
             public static final String XSMALL = "me-xs";
@@ -986,6 +1092,8 @@ public final class LumoUtility {
          * Classes for setting both the left and the right margins an element.
          */
         public static final class Horizontal {
+
+            private final LumoUtility dummyBackReference = null;
 
             public static final String AUTO = "mx-auto";
             public static final String NONE = "mx-0";
@@ -1004,6 +1112,8 @@ public final class LumoUtility {
          */
         public static final class Left {
 
+            private final LumoUtility dummyBackReference = null;
+
             public static final String AUTO = "ml-auto";
             public static final String NONE = "ml-0";
             public static final String XSMALL = "ml-xs";
@@ -1020,6 +1130,8 @@ public final class LumoUtility {
          * Classes for setting the right margin of an element.
          */
         public static final class Right {
+
+            private final LumoUtility dummyBackReference = null;
 
             public static final String AUTO = "mr-auto";
             public static final String NONE = "mr-0";
@@ -1040,6 +1152,8 @@ public final class LumoUtility {
          */
         public static final class Start {
 
+            private final LumoUtility dummyBackReference = null;
+
             public static final String AUTO = "ms-auto";
             public static final String NONE = "ms-0";
             public static final String XSMALL = "ms-xs";
@@ -1056,6 +1170,8 @@ public final class LumoUtility {
          * Classes for setting the top margin of an element.
          */
         public static final class Top {
+
+            private final LumoUtility dummyBackReference = null;
 
             public static final String AUTO = "mt-auto";
             public static final String NONE = "mt-0";
@@ -1074,6 +1190,8 @@ public final class LumoUtility {
          * element.
          */
         public static final class Vertical {
+
+            private final LumoUtility dummyBackReference = null;
 
             public static final String AUTO = "my-auto";
             public static final String NONE = "my-0";
@@ -1094,6 +1212,8 @@ public final class LumoUtility {
      */
     public static final class MaxHeight {
 
+        private final LumoUtility dummyBackReference = null;
+
         public static final String FULL = "max-h-full";
         public static final String SCREEN = "max-h-screen";
 
@@ -1106,6 +1226,8 @@ public final class LumoUtility {
      * Classes for defining the maximum width of an element.
      */
     public static final class MaxWidth {
+
+        private final LumoUtility dummyBackReference = null;
 
         public static final String FULL = "max-w-full";
         public static final String SCREEN_SMALL = "max-w-screen-sm";
@@ -1124,6 +1246,8 @@ public final class LumoUtility {
      */
     public static final class MinHeight {
 
+        private final LumoUtility dummyBackReference = null;
+
         public static final String FULL = "min-h-full";
         public static final String NONE = "min-h-0";
         public static final String SCREEN = "min-h-screen";
@@ -1138,6 +1262,8 @@ public final class LumoUtility {
      */
     public static final class MinWidth {
 
+        private final LumoUtility dummyBackReference = null;
+
         public static final String FULL = "min-w-full";
         public static final String NONE = "min-w-0";
 
@@ -1150,6 +1276,8 @@ public final class LumoUtility {
      * Classes for setting the overflow behavior of an element.
      */
     public static final class Overflow {
+
+        private final LumoUtility dummyBackReference = null;
 
         public static final String AUTO = "overflow-auto";
         public static final String HIDDEN = "overflow-hidden";
@@ -1165,6 +1293,8 @@ public final class LumoUtility {
      */
     public static final class Padding {
 
+        private final LumoUtility dummyBackReference = null;
+
         public static final String NONE = "p-0";
         public static final String XSMALL = "p-xs";
         public static final String SMALL = "p-s";
@@ -1179,6 +1309,8 @@ public final class LumoUtility {
          * Classes for setting the bottom padding of an element.
          */
         public static final class Bottom {
+
+            private final LumoUtility dummyBackReference = null;
 
             public static final String NONE = "pb-0";
             public static final String XSMALL = "pb-xs";
@@ -1198,6 +1330,8 @@ public final class LumoUtility {
          */
         public static final class End {
 
+            private final LumoUtility dummyBackReference = null;
+
             public static final String NONE = "pe-0";
             public static final String XSMALL = "pe-xs";
             public static final String SMALL = "pe-s";
@@ -1213,6 +1347,8 @@ public final class LumoUtility {
          * Classes for setting both the right and left paddings of an element.
          */
         public static final class Horizontal {
+
+            private final LumoUtility dummyBackReference = null;
 
             public static final String NONE = "px-0";
             public static final String XSMALL = "px-xs";
@@ -1230,6 +1366,8 @@ public final class LumoUtility {
          */
         public static final class Left {
 
+            private final LumoUtility dummyBackReference = null;
+
             public static final String NONE = "pl-0";
             public static final String XSMALL = "pl-xs";
             public static final String SMALL = "pl-s";
@@ -1245,6 +1383,8 @@ public final class LumoUtility {
          * Classes for setting the right padding of an element.
          */
         public static final class Right {
+
+            private final LumoUtility dummyBackReference = null;
 
             public static final String NONE = "pr-0";
             public static final String XSMALL = "pr-xs";
@@ -1264,6 +1404,8 @@ public final class LumoUtility {
          */
         public static final class Start {
 
+            private final LumoUtility dummyBackReference = null;
+
             public static final String NONE = "ps-0";
             public static final String XSMALL = "ps-xs";
             public static final String SMALL = "ps-s";
@@ -1279,6 +1421,8 @@ public final class LumoUtility {
          * Classes for defining the top padding of an element.
          */
         public static final class Top {
+
+            private final LumoUtility dummyBackReference = null;
 
             public static final String NONE = "pt-0";
             public static final String XSMALL = "pt-xs";
@@ -1296,6 +1440,8 @@ public final class LumoUtility {
          * element.
          */
         public static final class Vertical {
+
+            private final LumoUtility dummyBackReference = null;
 
             public static final String NONE = "py-0";
             public static final String XSMALL = "py-xs";
@@ -1315,6 +1461,8 @@ public final class LumoUtility {
      */
     public static final class Position {
 
+        private final LumoUtility dummyBackReference = null;
+
         public static final String ABSOLUTE = "absolute";
         public static final String FIXED = "fixed";
         public static final String RELATIVE = "relative";
@@ -1331,6 +1479,8 @@ public final class LumoUtility {
      */
     public static final class TextAlignment {
 
+        private final LumoUtility dummyBackReference = null;
+
         public static final String LEFT = "text-left";
         public static final String CENTER = "text-center";
         public static final String RIGHT = "text-right";
@@ -1345,6 +1495,8 @@ public final class LumoUtility {
      * Classes for setting an element’s text color.
      */
     public static final class TextColor {
+
+        private final LumoUtility dummyBackReference = null;
 
         public static final String HEADER = "text-header";
         public static final String BODY = "text-body";
@@ -1371,6 +1523,8 @@ public final class LumoUtility {
      */
     public static final class TextOverflow {
 
+        private final LumoUtility dummyBackReference = null;
+
         public static final String CLIP = "overflow-clip";
         public static final String ELLIPSIS = "overflow-ellipsis";
 
@@ -1383,6 +1537,8 @@ public final class LumoUtility {
      * Classes for transforming the text.
      */
     public static final class TextTransform {
+
+        private final LumoUtility dummyBackReference = null;
 
         public static final String CAPITALIZE = "capitalize";
         public static final String LOWERCASE = "lowercase";
@@ -1397,6 +1553,8 @@ public final class LumoUtility {
      * Classes for setting how the white space inside an element is handled.
      */
     public static final class Whitespace {
+
+        private final LumoUtility dummyBackReference = null;
 
         public static final String NORMAL = "whitespace-normal";
         public static final String NOWRAP = "whitespace-nowrap";
@@ -1413,6 +1571,8 @@ public final class LumoUtility {
      * Classes for setting the width of an element.
      */
     public static final class Width {
+
+        private final LumoUtility dummyBackReference = null;
 
         public static final String AUTO = "w-auto";
         public static final String FULL = "w-full";
