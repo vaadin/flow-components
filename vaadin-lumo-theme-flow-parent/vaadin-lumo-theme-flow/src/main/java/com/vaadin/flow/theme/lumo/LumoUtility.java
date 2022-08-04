@@ -443,7 +443,7 @@ public final class LumoUtility {
              */
             public static final class Large {
 
-               private final LumoUtility dummyBackReference = null;
+                private final LumoUtility dummyBackReference = null;
 
                 public static final String COLUMN = "lg:flex-col";
                 public static final String ROW = "lg:flex-row";
