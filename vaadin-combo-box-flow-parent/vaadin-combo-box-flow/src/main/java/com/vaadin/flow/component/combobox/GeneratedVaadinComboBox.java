@@ -32,6 +32,7 @@ public abstract class GeneratedVaadinComboBox implements Serializable {
      *             instead. This class will be removed in a future major
      *             version.
      * @param <TComponent>
+     *            The specific combo box component type
      */
     public static class CustomValueSetEvent<TComponent extends ComboBoxBase<TComponent, ?, ?>>
             extends
@@ -46,6 +47,7 @@ public abstract class GeneratedVaadinComboBox implements Serializable {
      * @deprecated This class is not used in any API, and will be removed in a
      *             future major version.
      * @param <TComponent>
+     *            The specific combo box component type
      */
     public static class SelectedItemChangeEvent<TComponent extends ComboBoxBase<TComponent, ?, ?>>
             extends ComponentEvent<TComponent> {
@@ -66,6 +68,7 @@ public abstract class GeneratedVaadinComboBox implements Serializable {
      * @deprecated This class is not used in any API, and will be removed in a
      *             future major version.
      * @param <TComponent>
+     *            The specific combo box component type
      */
     public static class OpenedChangeEvent<TComponent extends ComboBoxBase<TComponent, ?, ?>>
             extends ComponentEvent<TComponent> {
@@ -84,7 +87,6 @@ public abstract class GeneratedVaadinComboBox implements Serializable {
     /**
      * @deprecated This class is not used in any API, and will be removed in a
      *             future major version.
-     * @param <R>
      */
     public static class FilterChangeEvent<R extends ComboBoxBase<R, ?, ?>>
             extends ComponentEvent<R> {
@@ -103,7 +105,6 @@ public abstract class GeneratedVaadinComboBox implements Serializable {
     /**
      * @deprecated This class is not used in any API, and will be removed in a
      *             future major version.
-     * @param <R>
      */
     public static class InvalidChangeEvent<R extends ComboBoxBase<R, ?, ?>>
             extends ComponentEvent<R> {

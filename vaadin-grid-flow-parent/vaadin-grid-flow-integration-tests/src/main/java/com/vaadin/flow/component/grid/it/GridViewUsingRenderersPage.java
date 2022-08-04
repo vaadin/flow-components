@@ -51,13 +51,13 @@ public class GridViewUsingRenderersPage extends LegacyTestView {
 
         // LocalDateTimeRenderer for date and time
         grid.addColumn(new LocalDateTimeRenderer<>(Item::getPurchaseDate,
-                DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT,
+                () -> DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT,
                         FormatStyle.MEDIUM)))
                 .setHeader("Purchase date and time").setFlexGrow(2);
 
         // LocalDateRenderer for dates
         grid.addColumn(new LocalDateRenderer<>(Item::getEstimatedDeliveryDate,
-                DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)))
+                () -> DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)))
                 .setHeader("Estimated delivery date");
 
         // Icons

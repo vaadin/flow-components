@@ -19,12 +19,13 @@ package com.vaadin.flow.component.avatar.tests;
 import com.vaadin.flow.component.avatar.AvatarGroup;
 import com.vaadin.flow.component.avatar.AvatarGroup.AvatarGroupItem;
 import com.vaadin.flow.component.avatar.AvatarGroupVariant;
-import com.vaadin.tests.ThemeVariantTestHelper;
+import com.vaadin.flow.component.avatar.AvatarVariant;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.Set;
 
 public class AvatarGroupTest {
 
@@ -128,15 +129,21 @@ public class AvatarGroupTest {
 
     @Test
     public void addThemeVariant_themeAttributeContainsThemeVariant() {
-        ThemeVariantTestHelper.addThemeVariant_themeNamesContainsThemeVariant(
-                new AvatarGroup(), AvatarGroupVariant.LUMO_LARGE);
+        avatarGroup.addThemeVariants(AvatarGroupVariant.LUMO_LARGE);
+
+        Set<String> themeNames = avatarGroup.getThemeNames();
+        Assert.assertTrue(
+                themeNames.contains(AvatarVariant.LUMO_LARGE.getVariantName()));
     }
 
     @Test
-    public void addThemeVariant_removeTheme_doesNotContainThemeVariant() {
-        ThemeVariantTestHelper
-                .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
-                        new AvatarGroup(), AvatarGroupVariant.LUMO_LARGE);
+    public void addThemeVariant_removeThemeVariant_doesNotContainThemeVariant() {
+        avatarGroup.addThemeVariants(AvatarGroupVariant.LUMO_LARGE);
+        avatarGroup.removeThemeVariants(AvatarGroupVariant.LUMO_LARGE);
+
+        Set<String> themeNames = avatarGroup.getThemeNames();
+        Assert.assertFalse(
+                themeNames.contains(AvatarVariant.LUMO_LARGE.getVariantName()));
     }
 
     @Test

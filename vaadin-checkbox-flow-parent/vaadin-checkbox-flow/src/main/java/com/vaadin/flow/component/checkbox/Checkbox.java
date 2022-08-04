@@ -186,7 +186,11 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
      *
      * @param htmlContent
      *            the label html to set
+     *
+     * @deprecated Since 23.2, this API is deprecated in favor of
+     *             {@link #setLabelComponent(Component)}
      */
+    @Deprecated
     public void setLabelAsHtml(String htmlContent) {
         setLabel("");
         labelElement.getElement().setProperty("innerHTML", htmlContent);

@@ -189,7 +189,7 @@ import com.vaadin.flow.shared.Registration;
  * </p>
  */
 @Tag("vaadin-split-layout")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha5")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/split-layout/src/vaadin-split-layout.js")
 public abstract class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitLayout<R>>
@@ -255,6 +255,7 @@ public abstract class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitL
     }
 
     @DomEvent("iron-resize")
+    @Deprecated
     public static class IronResizeEvent<R extends GeneratedVaadinSplitLayout<R>>
             extends ComponentEvent<R> {
         public IronResizeEvent(R source, boolean fromClient) {
@@ -268,8 +269,11 @@ public abstract class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitL
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
+     *
+     * @deprecated Since 23.2, this API is deprecated.
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Deprecated
     protected Registration addIronResizeListener(
             ComponentEventListener<IronResizeEvent<R>> listener) {
         return addListener(IronResizeEvent.class,

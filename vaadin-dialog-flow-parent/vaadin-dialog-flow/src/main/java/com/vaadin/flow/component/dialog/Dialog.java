@@ -258,6 +258,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
      * @see #close()
      *
      * @param listener
+     *            the listener to add
      * @return registration for removal of listener
      */
     public Registration addDialogCloseActionListener(
@@ -296,6 +297,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
      * every resizing.
      *
      * @param listener
+     *            the listener to add
      * @return registration for removal of listener
      */
     public Registration addResizeListener(
@@ -589,7 +591,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
     }
 
     /**
-     * Class for adding and removing components to the header part of a dialog.
+     * Class for adding and removing components to the footer part of a dialog.
      */
     final public static class DialogFooter extends DialogHeaderFooter {
         private DialogFooter(Dialog dialog) {
@@ -662,6 +664,16 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         }
 
         /**
+         * Removes all components from the container.
+         */
+        public void removeAll() {
+            root.removeAllChildren();
+            dialog.getElement()
+                    .executeJs("this." + rendererFunction + " = null;");
+            setRendererCreated(false);
+        }
+
+        /**
          * Method called to create the renderer function using
          * {@link #rendererFunction} as the property name.
          */
@@ -723,7 +735,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         if (ui == null) {
             throw new IllegalStateException("UI instance is not available. "
                     + "It means that you are calling this method "
-                    + "out of a normal workflow where it's always implicitely set. "
+                    + "out of a normal workflow where it's always implicitly set. "
                     + "That may happen if you call the method from the custom thread without "
                     + "'UI::access' or from tests without proper initialization.");
         }
@@ -814,9 +826,9 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
     /**
      * Add a lister for event fired by the {@code opened-changed} events.
      *
-     * @param: listener
-     *             the listener to add;
-     * @return: a Registration for removing the event listener
+     * @param listener
+     *            the listener to add
+     * @return a Registration for removing the event listener
      */
     @Override
     public Registration addOpenedChangeListener(

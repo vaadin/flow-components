@@ -120,7 +120,7 @@ import elemental.json.JsonObject;
  * {@code <vaadin-form-layout>} element:
  * </p>
  * <table>
- * <thead>
+ * <caption>Custom CSS properties available for styling</caption> <thead>
  * <tr>
  * <th>Custom CSS property</th>
  * <th>Description</th>
@@ -136,10 +136,10 @@ import elemental.json.JsonObject;
  * </table>
  */
 @Tag("vaadin-form-layout")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha5")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/form-layout", version = "23.2.0-alpha2")
-@NpmPackage(value = "@vaadin/vaadin-form-layout", version = "23.2.0-alpha2")
+@NpmPackage(value = "@vaadin/form-layout", version = "23.2.0-alpha5")
+@NpmPackage(value = "@vaadin/vaadin-form-layout", version = "23.2.0-alpha5")
 @JsModule("@vaadin/form-layout/src/vaadin-form-layout.js")
 public abstract class GeneratedVaadinFormLayout<R extends GeneratedVaadinFormLayout<R>>
         extends Component implements HasStyle {
@@ -158,7 +158,7 @@ public abstract class GeneratedVaadinFormLayout<R extends GeneratedVaadinFormLay
      * {@code labelsPosition} string of {@code &quot;aside&quot;} or
      * {@code &quot;top&quot;}. At least one item is required.
      * </p>
-     * <h4>Examples</h4>
+     * Examples
      * <p>
      * {@code javascript formLayout.responsiveSteps = [ columns: 1}]; // The
      * layout is always a single column, labels aside.}
@@ -205,7 +205,7 @@ public abstract class GeneratedVaadinFormLayout<R extends GeneratedVaadinFormLay
      * {@code labelsPosition} string of {@code &quot;aside&quot;} or
      * {@code &quot;top&quot;}. At least one item is required.
      * </p>
-     * <h4>Examples</h4>
+     * Examples
      * <p>
      * {@code javascript formLayout.responsiveSteps = [ columns: 1}]; // The
      * layout is always a single column, labels aside.}

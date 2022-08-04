@@ -72,8 +72,8 @@ public class MarkerFeatureIT extends AbstractComponentIT {
 
         MapElement.Coordinate coordinates = feature.getGeometry()
                 .getCoordinates();
-        Assert.assertEquals(1233058.1696443919, coordinates.getX(), 0.001);
-        Assert.assertEquals(6351912.406929109, coordinates.getY(), 0.001);
+        Assert.assertEquals(11.07675, coordinates.getX(), 0.001);
+        Assert.assertEquals(49.45203, coordinates.getY(), 0.001);
 
         MapElement.IconReference icon = feature.getStyle().getImage();
         Assert.assertEquals(0.8f, icon.getOpacity(), 0.001);
@@ -96,8 +96,8 @@ public class MarkerFeatureIT extends AbstractComponentIT {
 
         MapElement.Coordinate coordinates = feature.getGeometry()
                 .getCoordinates();
-        Assert.assertEquals(1233058.1696443919, coordinates.getX(), 0.001);
-        Assert.assertEquals(6351912.406929109, coordinates.getY(), 0.001);
+        Assert.assertEquals(11.07675, coordinates.getX(), 0.001);
+        Assert.assertEquals(49.45203, coordinates.getY(), 0.001);
     }
 
     @Test
