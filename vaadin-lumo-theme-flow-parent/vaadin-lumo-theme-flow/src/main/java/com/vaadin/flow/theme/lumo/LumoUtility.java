@@ -26,6 +26,10 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 @JsModule("./lumo-utility.ts")
 public final class LumoUtility {
 
+    // The values in the inner classes are wrapped with this method in order to
+    // have implicit back reference to the outer class from them. This will
+    // ensure that @JsModule and @NpmPackage annotations are picked by the byte
+    // code scanner when doing a production mode build.
     private static String notConstant(String value) {
         return value;
     }
