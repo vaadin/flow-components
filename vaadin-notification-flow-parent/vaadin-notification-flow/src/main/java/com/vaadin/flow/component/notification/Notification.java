@@ -203,7 +203,7 @@ public class Notification extends GeneratedVaadinNotification<Notification>
         getElement().appendVirtualChild(container);
 
         getElement().addEventListener("opened-changed",
-                event -> AutoAdded());
+                event -> removeAutoAdded());
 
         addDetachListener(event -> {
             // If the notification gets detached, it needs to be marked
