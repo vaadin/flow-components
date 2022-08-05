@@ -219,7 +219,8 @@ public class Notification extends GeneratedVaadinNotification<Notification>
     private void removeAutoAdded() {
         if (autoAddedToTheUi && !isOpened()) {
             autoAddedToTheUi = false;
-            if (getElement().getParentNode() != null) {
+            if (getElement().getParent().getChildren()
+                    .collect(Collectors.toSet()).contains(this.getElement())) {
                 getElement().removeFromParent();
             }
         }
