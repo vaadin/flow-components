@@ -20,6 +20,11 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 
 /**
  * Contains the definition for all the CSS utility classes provided by Lumo.
+ * Importing this class somewhere will import all Lumo CSS utility classes and
+ * define them in the global namespace.
+ * <p>
+ * Note: It is possible that Lumo CSS utilitity classes are conflicting with
+ * user-defined CSS classes
  */
 @NpmPackage(value = "@vaadin/vaadin-lumo-styles", version = "23.2.0-alpha2")
 @JsModule("@vaadin/vaadin-lumo-styles/utility.js")
