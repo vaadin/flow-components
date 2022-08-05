@@ -94,7 +94,7 @@ public final class LumoUtility {
     }
 
     /**
-     * Classes for overriding individual items’ align-item property. Applies to
+     * Classes for overriding individual items' align-item property. Applies to
      * flexbox and grid items.
      */
     public static final class AlignSelf {
