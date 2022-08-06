@@ -22,6 +22,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.Stream.Builder;
 
+import org.slf4j.LoggerFactory;
+
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -60,6 +62,7 @@ public class Notification extends GeneratedVaadinNotification<Notification>
     private final Element container = ElementFactory.createDiv();
     private final Element templateElement = new Element("template");
     private boolean autoAddedToTheUi = false;
+    private boolean refreshed = false;
 
     private SerializableConsumer<UI> deferredJob = new AttachComponentTemplate();
 
@@ -219,9 +222,11 @@ public class Notification extends GeneratedVaadinNotification<Notification>
     private void removeAutoAdded() {
         if (autoAddedToTheUi && !isOpened()) {
             autoAddedToTheUi = false;
-            if (getElement().getParent().getChildren()
-                    .collect(Collectors.toSet()).contains(this.getElement())) {
+            try {
                 getElement().removeFromParent();
+            } catch (IllegalArgumentException e) {
+                LoggerFactory.getLogger(Notification.class).info(
+                        "Attempting to remove detached Notification. If this happended due PreserveOnRefresh, it is normal.");
             }
         }
     }
@@ -575,9 +580,10 @@ public class Notification extends GeneratedVaadinNotification<Notification>
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         initConnector();
-        if (!isOpened()) {
+        if (refreshed) {
             open();
         }
+        refreshed = true;
     }
 
     private void initConnector() {
