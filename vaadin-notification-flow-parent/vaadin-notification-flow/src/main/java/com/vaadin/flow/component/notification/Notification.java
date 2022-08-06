@@ -575,7 +575,9 @@ public class Notification extends GeneratedVaadinNotification<Notification>
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         initConnector();
-        open();
+        if (!isOpened()) {
+            open();
+        }
     }
 
     private void initConnector() {
