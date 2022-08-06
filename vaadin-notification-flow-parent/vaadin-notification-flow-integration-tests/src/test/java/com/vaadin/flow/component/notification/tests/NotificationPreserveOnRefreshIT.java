@@ -19,7 +19,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-import org.vaadin.addons.tatu.AbstractComponentIT;
 
 import com.vaadin.flow.component.notification.testbench.NotificationElement;
 import com.vaadin.flow.testutil.TestPath;
