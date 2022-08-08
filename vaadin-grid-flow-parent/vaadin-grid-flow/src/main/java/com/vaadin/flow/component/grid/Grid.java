@@ -50,7 +50,6 @@ import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.dnd.DragSource;
@@ -423,32 +422,15 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * this setting does not affect the default for existing Grids. Use
      * {@link Grid#setMultiSort(boolean, MultiSortPriority)} to provide a custom
      * multi-sort priority overriding the default priority for a single Grid.
-     * <p>
-     * This method may only be invoked inside of UI threads, and will throw
-     * otherwise. This setting being scoped to the current UI means that it will
-     * stay active when navigating between pages using the Vaadin router, but
-     * not when doing a "hard" location change, or when reloading the page. As
-     * such it is recommended to apply this setting on every page that displays
-     * a Grid. Note that when using the preserve on refresh feature, a view's
-     * constructor is not called. In that case this setting can be applied in an
-     * attach listener.
      *
      * @param priority
      *            the multi-sort priority to be used by all grid instances
      */
     public static void setDefaultMultiSortPriority(MultiSortPriority priority) {
-        UI ui = UI.getCurrent();
-        if (ui == null || ui.getPage() == null) {
-            throw new IllegalStateException("UI instance is not available. "
-                    + "It means that you are calling this method "
-                    + "out of a normal workflow where it's always implicitly set. "
-                    + "That may happen if you call the method from the custom thread without "
-                    + "'UI::access' or from tests without proper initialization.");
-        }
-        UI.getCurrent().getPage().executeJs(
-                "window.Vaadin.Flow.gridConnector.setDefaultMultiSortPriority($0)",
-                priority == MultiSortPriority.APPEND ? "append" : "prepend");
+        defaultMultiSortPriority = priority;
     }
+
+    private static MultiSortPriority defaultMultiSortPriority = MultiSortPriority.PREPEND;
 
     /**
      * Server-side component for the {@code <vaadin-grid-column>} element.
@@ -1504,6 +1486,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         addDragStartListener(this::onDragStart);
         addDragEndListener(this::onDragEnd);
 
+        updateMultiSortPriority(defaultMultiSortPriority);
         getElement().setAttribute("suppress-template-warning", true);
     }
 
@@ -3187,6 +3170,12 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 "Multi-sort priority must not be null");
         setMultiSort(multiSort);
 
+        if (priority != defaultMultiSortPriority) {
+            updateMultiSortPriority(priority);
+        }
+    }
+
+    private void updateMultiSortPriority(MultiSortPriority priority) {
         getElement().setAttribute("multi-sort-priority",
                 priority == MultiSortPriority.APPEND ? "append" : "prepend");
     }
