@@ -1,6 +1,7 @@
 import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
 import { timeOut, animationFrame } from '@polymer/polymer/lib/utils/async.js';
 import { Grid } from '@vaadin/grid/src/vaadin-grid.js';
+import { setDefaultMultiSortPriorityAppend } from '@vaadin/grid/src/vaadin-grid-sort-mixin.js';
 import { ItemCache } from '@vaadin/grid/src/vaadin-grid-data-provider-mixin.js';
 import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
 
@@ -8,6 +9,10 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
   const tryCatchWrapper = function (callback) {
     return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Grid');
   };
+
+  function setDefaultMultiSortPriority(priority) {
+    setDefaultMultiSortPriorityAppend(priority === 'append');
+  }
 
   let isItemCacheInitialized = false;
 
@@ -1180,6 +1185,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             }
           })
         );
-      })(grid)
+      })(grid),
+    setDefaultMultiSortPriority
   };
 })();
