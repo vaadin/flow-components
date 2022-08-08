@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import java.util.stream.Collectors;
-
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.Grid.MultiSortPriority;
