@@ -56,9 +56,9 @@ public abstract class AbstractValidationBinderIT<F extends TestBenchElement & Ha
 
     @Test
     public void required_changeInputValue_assertValidity() {
-        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("Value", Keys.ENTER);
+        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("1111", Keys.ENTER);
 
-        field.setValue("Value");
+        field.setValue("1111");
         assertServerValid(true);
         assertClientValid(true);
 

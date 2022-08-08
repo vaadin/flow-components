@@ -54,7 +54,7 @@ public abstract class AbstractValidationIT<F extends TestBenchElement & HasStrin
 
     @Test
     public void required_changeInputValue_assertValidity() {
-        field.setValue("Value");
+        field.setValue("1111");
         assertServerValid(true);
         assertClientValid(true);
 
@@ -69,7 +69,7 @@ public abstract class AbstractValidationIT<F extends TestBenchElement & HasStrin
         assertClientValid(false);
 
         TestBenchElement input = field.$("input").first();
-        input.setProperty("value", "Not empty value");
+        input.setProperty("value", "1111");
         input.dispatchEvent("input");
         executeScript("arguments[0].validate()", field);
         assertClientValid(false);
