@@ -18,7 +18,6 @@ package com.vaadin.flow.component.datepicker;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -39,6 +38,7 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
@@ -97,8 +97,6 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     private LocalDate max;
     private LocalDate min;
     private boolean required;
-    private boolean isClientInvalid;
-    private final Collection<ValidationStatusChangeListener<LocalDate>> validationStatusChangeListeners = new ArrayList<>();
 
     private StateTree.ExecutionRegistration pendingI18nUpdate;
 
@@ -145,13 +143,9 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         // workaround for https://github.com/vaadin/flow/issues/3496
         setInvalid(false);
 
-        addClientValidatedEventListener(e -> {
-            isClientInvalid = !e.isValid();
-            validate();
-            fireValidationStatusChangeEvent();
-        });
-
         addValueChangeListener(e -> validate());
+
+        addClientValidatedEventListener(e -> validate());
     }
 
     /**
@@ -477,25 +471,21 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     }
 
     @Override
-    public Registration addValidationStatusChangeListener(
-            ValidationStatusChangeListener<LocalDate> listener) {
-        validationStatusChangeListeners.add(listener);
-        return () -> validationStatusChangeListeners.remove(listener);
-    }
-
-    private void fireValidationStatusChangeEvent() {
-        var event = new ValidationStatusChangeEvent<>(this, !isInvalid());
-        validationStatusChangeListeners
-                .forEach(listener -> listener.validationStatusChanged(event));
-    }
-
-    @Override
     public Validator<LocalDate> getDefaultValidator() {
         if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
             return (value, context) -> checkValidity(value);
         }
 
         return Validator.alwaysPass();
+    }
+
+    public Registration addValidationStatusChangeListener(
+            ValidationStatusChangeListener<LocalDate> listener) {
+        return addClientValidatedEventListener(event -> {
+            listener.validationStatusChanged(
+                    new ValidationStatusChangeEvent<LocalDate>(this,
+                            !isInvalid()));
+        });
     }
 
     @Override
@@ -516,6 +506,11 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     }
 
     private ValidationResult checkValidity(LocalDate value) {
+        var hasNonParsableValue = value == getEmptyValue() && hasInputValue();
+        if (hasNonParsableValue) {
+            return ValidationResult.error("");
+        }
+
         var greaterThanMax = ValidationUtil.checkGreaterThanMax(value, max);
         if (greaterThanMax.isError()) {
             return greaterThanMax;
@@ -524,10 +519,6 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         var smallerThanMin = ValidationUtil.checkSmallerThanMin(value, min);
         if (smallerThanMin.isError()) {
             return smallerThanMin;
-        }
-
-        if (isClientInvalid) {
-            return ValidationResult.error("");
         }
 
         return ValidationResult.ok();
@@ -543,6 +534,17 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
                 getEmptyValue());
 
         return requiredValidation.isError() || checkValidity(value).isError();
+    }
+
+    /**
+     * Returns whether the input element has a value or not.
+     *
+     * @return <code>true</code> if the input element's value is populated,
+     *         <code>false</code> otherwise
+     */
+    @Synchronize(property = "_hasInputValue", value = "has-input-value-changed")
+    private boolean hasInputValue() {
+        return getElement().getProperty("_hasInputValue", false);
     }
 
     /**
