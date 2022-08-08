@@ -7,7 +7,6 @@ import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 
 import static com.vaadin.flow.component.datepicker.validation.DatePickerValidationBasicPage.DETACH_FIELD_BUTTON;

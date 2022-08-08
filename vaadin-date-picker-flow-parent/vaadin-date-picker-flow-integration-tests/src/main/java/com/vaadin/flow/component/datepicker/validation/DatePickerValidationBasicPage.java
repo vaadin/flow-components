@@ -12,9 +12,9 @@ public class DatePickerValidationBasicPage extends AbstractValidationPage {
     public static final String ATTACH_FIELD_BUTTON = "attach-field-button";
     public static final String DETACH_FIELD_BUTTON = "detach-field-button";
 
+    public static final String REQUIRED_BUTTON = "required-button";
     public static final String MIN_INPUT = "min-input";
     public static final String MAX_INPUT = "max-input";
-    public static final String REQUIRED_BUTTON = "required-button";
 
     public DatePickerValidationBasicPage() {
         field = new DatePicker();
