@@ -24,6 +24,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
+import static com.vaadin.flow.component.textfield.tests.validation.AbstractValidationPage.DETACH_FIELD_BUTTON;
+import static com.vaadin.flow.component.textfield.tests.validation.AbstractValidationPage.ATTACH_FIELD_BUTTON;
+import static com.vaadin.flow.component.textfield.tests.validation.AbstractValidationPage.SERVER_VALIDITY_STATE;
+import static com.vaadin.flow.component.textfield.tests.validation.AbstractValidationPage.SERVER_VALIDITY_STATE_BUTTON;
+
 public abstract class AbstractValidationIT<F extends TestBenchElement & HasStringValueProperty>
         extends AbstractComponentIT {
     protected F field;
@@ -76,23 +81,12 @@ public abstract class AbstractValidationIT<F extends TestBenchElement & HasStrin
 
     @Test
     public void detach_attach_onlyServerCanSetFieldToValid() {
-        $("button").id(AbstractValidationPage.DETACH_FIELD_BUTTON).click();
-        $("button").id(AbstractValidationPage.ATTACH_FIELD_BUTTON).click();
+        $("button").id(DETACH_FIELD_BUTTON).click();
+        $("button").id(ATTACH_FIELD_BUTTON).click();
 
         field = getField();
 
-        executeScript("arguments[0].validate()", field);
-        assertClientValid(false);
-
-        TestBenchElement input = field.$("input").first();
-        input.setProperty("value", "Not empty value");
-        input.dispatchEvent("input");
-        executeScript("arguments[0].validate()", field);
-        assertClientValid(false);
-
-        input.dispatchEvent("change");
-        assertServerValid(true);
-        assertClientValid(true);
+        onlyServerCanSetFieldToValid();
     }
 
     protected void assertClientValid(boolean expected) {
@@ -100,11 +94,9 @@ public abstract class AbstractValidationIT<F extends TestBenchElement & HasStrin
     }
 
     protected void assertServerValid(boolean expected) {
-        $("button").id(AbstractValidationPage.SERVER_VALIDITY_STATE_BUTTON)
-                .click();
+        $("button").id(SERVER_VALIDITY_STATE_BUTTON).click();
 
-        var actual = $("div").id(AbstractValidationPage.SERVER_VALIDITY_STATE)
-                .getText();
+        var actual = $("div").id(SERVER_VALIDITY_STATE).getText();
         Assert.assertEquals(String.valueOf(expected), actual);
     }
 

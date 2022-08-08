@@ -21,13 +21,16 @@ import org.openqa.selenium.Keys;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.flow.testutil.TestPath;
 
+import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationPage.MIN_LENGTH_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationPage.MAX_LENGTH_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationPage.PATTERN_INPUT;
+
 @TestPath("vaadin-text-field/validation")
 public class TextFieldValidationIT
         extends AbstractValidationIT<TextFieldElement> {
     @Test
     public void minLength_changeInputValue_assertValidity() {
-        $("input").id(TextFieldValidationPage.MIN_LENGTH_INPUT).sendKeys("2",
-                Keys.ENTER);
+        $("input").id(MIN_LENGTH_INPUT).sendKeys("2", Keys.ENTER);
 
         field.setValue("A");
         assertClientValid(false);
@@ -44,8 +47,7 @@ public class TextFieldValidationIT
 
     @Test
     public void maxLength_changeInputValue_assertValidity() {
-        $("input").id(TextFieldValidationPage.MAX_LENGTH_INPUT).sendKeys("2",
-                Keys.ENTER);
+        $("input").id(MAX_LENGTH_INPUT).sendKeys("2", Keys.ENTER);
 
         field.setValue("AAA");
         assertClientValid(false);
@@ -62,8 +64,7 @@ public class TextFieldValidationIT
 
     @Test
     public void pattern_changeInputValue_assertValidity() {
-        $("input").id(TextFieldValidationPage.PATTERN_INPUT).sendKeys("^\\d+$",
-                Keys.ENTER);
+        $("input").id(PATTERN_INPUT).sendKeys("^\\d+$", Keys.ENTER);
 
         field.setValue("Word");
         assertClientValid(false);

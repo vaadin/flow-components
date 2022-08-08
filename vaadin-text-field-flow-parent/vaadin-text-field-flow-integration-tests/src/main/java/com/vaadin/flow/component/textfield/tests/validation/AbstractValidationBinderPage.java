@@ -17,7 +17,6 @@ public abstract class AbstractValidationBinderPage<F extends Component & HasVali
     public static final String SERVER_VALIDITY_STATE = "server-validity-state";
     public static final String SERVER_VALIDITY_STATE_BUTTON = "server-validity-state-button";
     public static final String EXPECTED_VALUE_INPUT = "expected-value-input";
-
     public static final String REQUIRED_ERROR_MESSAGE = "The field is required";
     public static final String UNEXPECTED_VALUE_ERROR_MESSAGE = "The field doesn't match the expected value";
 
