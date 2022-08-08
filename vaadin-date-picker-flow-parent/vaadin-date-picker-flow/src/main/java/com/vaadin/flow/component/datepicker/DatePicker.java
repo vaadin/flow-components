@@ -506,10 +506,10 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     }
 
     private ValidationResult checkValidity(LocalDate value) {
-        var hasNonParsableValue = value == getEmptyValue() && hasInputValue();
-        if (hasNonParsableValue) {
-            return ValidationResult.error("");
-        }
+        // var hasNonParsableValue = value == getEmptyValue() && isInputValuePresent();
+        // if (hasNonParsableValue) {
+        //     return ValidationResult.error("");
+        // }
 
         var greaterThanMax = ValidationUtil.checkGreaterThanMax(value, max);
         if (greaterThanMax.isError()) {
@@ -543,7 +543,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      *         <code>false</code> otherwise
      */
     @Synchronize(property = "_hasInputValue", value = "has-input-value-changed")
-    private boolean hasInputValue() {
+    private boolean isInputValuePresent() {
         return getElement().getProperty("_hasInputValue", false);
     }
 
