@@ -17,6 +17,7 @@ pom.xml.bak
 types.d.ts
 tsconfig.json
 webpack.*
+vite.*
 node_modules
 .driver
 package*json
