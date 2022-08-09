@@ -20,35 +20,64 @@ import org.openqa.selenium.Keys;
 
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
 
-import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBinderPage.PATTERN_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBinderPage.MIN_LENGTH_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBinderPage.MAX_LENGTH_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBinderPage.EXPECTED_VALUE_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBinderPage.REQUIRED_ERROR_MESSAGE;
-import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBinderPage.UNEXPECTED_VALUE_ERROR_MESSAGE;
+import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBasicPage.MIN_LENGTH_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBasicPage.MAX_LENGTH_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBasicPage.PATTERN_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBasicPage.REQUIRED_BUTTON;
+import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBasicPage.DETACH_FIELD_BUTTON;
+import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBasicPage.ATTACH_FIELD_BUTTON;
 
-@TestPath("vaadin-text-field/validation/binder")
-public class TextFieldValidationBinderIT
+@TestPath("vaadin-text-field/validation/basic")
+public class TextFieldValidationIT
         extends AbstractValidationIT<TextFieldElement> {
     @Test
     public void fieldIsInitiallyValid() {
         assertClientValid(true);
         assertServerValid(true);
-        assertErrorMessage(null);
+    }
+
+    @Test
+    public void onlyServerCanSetFieldToValid() {
+        $("button").id(REQUIRED_BUTTON).click();
+
+        executeScript("arguments[0].validate()", field);
+        assertClientValid(false);
+
+        TestBenchElement input = field.$("input").first();
+        input.setProperty("value", "Value");
+        input.dispatchEvent("input");
+        executeScript("arguments[0].validate()", field);
+        assertClientValid(false);
+
+        input.dispatchEvent("change");
+        assertServerValid(true);
+        assertClientValid(true);
+    }
+
+    @Test
+    public void detach_attach_onlyServerCanSetFieldToValid() {
+        $("button").id(DETACH_FIELD_BUTTON).click();
+        $("button").id(ATTACH_FIELD_BUTTON).click();
+
+        field = getField();
+
+        onlyServerCanSetFieldToValid();
     }
 
     @Test
     public void required_triggerInputBlur_assertValidity() {
+        $("button").id(REQUIRED_BUTTON).click();
+
         field.sendKeys(Keys.TAB);
         assertServerValid(false);
         assertClientValid(false);
-        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
     @Test
     public void required_changeInputValue_assertValidity() {
-        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("Value", Keys.ENTER);
+        $("button").id(REQUIRED_BUTTON).click();
 
         field.setValue("Value");
         assertServerValid(true);
@@ -57,27 +86,20 @@ public class TextFieldValidationBinderIT
         field.setValue("");
         assertServerValid(false);
         assertClientValid(false);
-        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
     @Test
     public void minLength_changeInputValue_assertValidity() {
         $("input").id(MIN_LENGTH_INPUT).sendKeys("2", Keys.ENTER);
-        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("AAA", Keys.ENTER);
 
-        // Constraint validation fails:
         field.setValue("A");
         assertClientValid(false);
         assertServerValid(false);
-        assertErrorMessage("");
 
-        // Binder validation fails:
         field.setValue("AA");
-        assertClientValid(false);
-        assertServerValid(false);
-        assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
+        assertClientValid(true);
+        assertServerValid(true);
 
-        // Both validations pass:
         field.setValue("AAA");
         assertClientValid(true);
         assertServerValid(true);
@@ -86,21 +108,15 @@ public class TextFieldValidationBinderIT
     @Test
     public void maxLength_changeInputValue_assertValidity() {
         $("input").id(MAX_LENGTH_INPUT).sendKeys("2", Keys.ENTER);
-        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("A", Keys.ENTER);
 
-        // Constraint validation fails:
         field.setValue("AAA");
         assertClientValid(false);
         assertServerValid(false);
-        assertErrorMessage("");
 
-        // Binder validation fails:
         field.setValue("AA");
-        assertClientValid(false);
-        assertServerValid(false);
-        assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
+        assertClientValid(true);
+        assertServerValid(true);
 
-        // Both validations pass:
         field.setValue("A");
         assertClientValid(true);
         assertServerValid(true);
@@ -109,21 +125,11 @@ public class TextFieldValidationBinderIT
     @Test
     public void pattern_changeInputValue_assertValidity() {
         $("input").id(PATTERN_INPUT).sendKeys("^\\d+$", Keys.ENTER);
-        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("1234", Keys.ENTER);
 
-        // Constraint validation fails:
         field.setValue("Word");
         assertClientValid(false);
         assertServerValid(false);
-        assertErrorMessage("");
 
-        // Binder validation fails:
-        field.setValue("12");
-        assertClientValid(false);
-        assertServerValid(false);
-        assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
-
-        // Both validations pass:
         field.setValue("1234");
         assertClientValid(true);
         assertServerValid(true);

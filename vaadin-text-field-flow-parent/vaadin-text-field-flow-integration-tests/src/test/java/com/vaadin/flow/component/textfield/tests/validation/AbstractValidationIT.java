@@ -15,21 +15,16 @@
  */
 package com.vaadin.flow.component.textfield.tests.validation;
 
-import com.vaadin.testbench.HasStringValueProperty;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Test;
-import org.openqa.selenium.Keys;
 
-import static com.vaadin.flow.component.textfield.tests.validation.AbstractValidationPage.DETACH_FIELD_BUTTON;
-import static com.vaadin.flow.component.textfield.tests.validation.AbstractValidationPage.ATTACH_FIELD_BUTTON;
 import static com.vaadin.flow.component.textfield.tests.validation.AbstractValidationPage.SERVER_VALIDITY_STATE;
 import static com.vaadin.flow.component.textfield.tests.validation.AbstractValidationPage.SERVER_VALIDITY_STATE_BUTTON;
 
-public abstract class AbstractValidationIT<F extends TestBenchElement & HasStringValueProperty>
+public abstract class AbstractValidationIT<F extends TestBenchElement>
         extends AbstractComponentIT {
     protected F field;
 
@@ -39,54 +34,8 @@ public abstract class AbstractValidationIT<F extends TestBenchElement & HasStrin
         field = getField();
     }
 
-    @Test
-    public void required_fieldIsInitiallyValid() {
-        assertClientValid(true);
-        assertServerValid(true);
-    }
-
-    @Test
-    public void required_triggerInputBlur_assertValidity() {
-        field.sendKeys(Keys.TAB);
-        assertServerValid(false);
-        assertClientValid(false);
-    }
-
-    @Test
-    public void required_changeInputValue_assertValidity() {
-        field.setValue("1111");
-        assertServerValid(true);
-        assertClientValid(true);
-
-        field.setValue("");
-        assertServerValid(false);
-        assertClientValid(false);
-    }
-
-    @Test
-    public void onlyServerCanSetFieldToValid() {
-        executeScript("arguments[0].validate()", field);
-        assertClientValid(false);
-
-        TestBenchElement input = field.$("input").first();
-        input.setProperty("value", "1111");
-        input.dispatchEvent("input");
-        executeScript("arguments[0].validate()", field);
-        assertClientValid(false);
-
-        input.dispatchEvent("change");
-        assertServerValid(true);
-        assertClientValid(true);
-    }
-
-    @Test
-    public void detach_attach_onlyServerCanSetFieldToValid() {
-        $("button").id(DETACH_FIELD_BUTTON).click();
-        $("button").id(ATTACH_FIELD_BUTTON).click();
-
-        field = getField();
-
-        onlyServerCanSetFieldToValid();
+    protected void assertErrorMessage(String expected) {
+        Assert.assertEquals(expected, field.getPropertyString("errorMessage"));
     }
 
     protected void assertClientValid(boolean expected) {

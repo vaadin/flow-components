@@ -15,29 +15,53 @@
  */
 package com.vaadin.flow.component.textfield.tests.validation;
 
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 
-@Route("vaadin-text-field/validation")
-public class TextFieldValidationPage extends AbstractValidationPage<TextField> {
+@Route("vaadin-text-field/validation/basic")
+public class TextFieldValidationBasicPage extends AbstractValidationPage<TextField> {
+    public static final String REQUIRED_BUTTON = "required-button";
     public static final String PATTERN_INPUT = "pattern-input";
     public static final String MIN_LENGTH_INPUT = "min-length-input";
     public static final String MAX_LENGTH_INPUT = "max-length-input";
 
-    public TextFieldValidationPage() {
+    public static final String ATTACH_FIELD_BUTTON = "attach-field-button";
+    public static final String DETACH_FIELD_BUTTON = "detach-field-button";
+
+    public TextFieldValidationBasicPage() {
+        super();
+
+        add(createButton(REQUIRED_BUTTON, "Enable required", event -> {
+            field.setRequiredIndicatorVisible(true);
+        }));
+
         add(createInput(PATTERN_INPUT, "Set pattern", event -> {
             field.setPattern(event.getValue());
         }));
 
         add(createInput(MIN_LENGTH_INPUT, "Set min length", event -> {
-            int value = Integer.parseInt(event.getValue());
+            var value = Integer.parseInt(event.getValue());
             field.setMinLength(value);
         }));
 
         add(createInput(MAX_LENGTH_INPUT, "Set max length", event -> {
-            int value = Integer.parseInt(event.getValue());
+            var value = Integer.parseInt(event.getValue());
             field.setMaxLength(value);
         }));
+
+        addAttachDetachControls();
+
+        addServerValidityStateControls();
+    }
+
+    private void addAttachDetachControls() {
+        var attachButton = createButton(ATTACH_FIELD_BUTTON,
+                "Attach field", event -> add(field));
+        var detachButton = createButton(DETACH_FIELD_BUTTON,
+                "Detach field", event -> add(field));
+
+        add(new Div(attachButton, detachButton));
     }
 
     protected TextField createField() {

@@ -4,17 +4,14 @@ import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasValidation;
-import com.vaadin.flow.component.HasValueAndElement;
 import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.HasValue.ValueChangeListener;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Input;
 import com.vaadin.flow.component.html.NativeButton;
 
-public abstract class AbstractValidationPage<F extends Component & HasValidation & HasValueAndElement<?, ?>>
+public abstract class AbstractValidationPage<F extends Component & HasValidation>
         extends Div {
-    public static final String ATTACH_FIELD_BUTTON = "attach-field-button";
-    public static final String DETACH_FIELD_BUTTON = "detach-field-button";
     public static final String SERVER_VALIDITY_STATE = "server-validity-state";
     public static final String SERVER_VALIDITY_STATE_BUTTON = "server-validity-state-button";
 
@@ -22,23 +19,10 @@ public abstract class AbstractValidationPage<F extends Component & HasValidation
 
     public AbstractValidationPage() {
         field = createField();
-        field.setRequiredIndicatorVisible(true);
         add(field);
-
-        addAttachDetachControls();
-        addServerValidityStateControls();
     }
 
-    private void addAttachDetachControls() {
-        NativeButton attachButton = createButton(ATTACH_FIELD_BUTTON,
-                "Attach field", event -> add(field));
-        NativeButton detachButton = createButton(DETACH_FIELD_BUTTON,
-                "Detach field", event -> add(field));
-
-        add(new Div(attachButton, detachButton));
-    }
-
-    private void addServerValidityStateControls() {
+    protected void addServerValidityStateControls() {
         Div validityState = new Div();
         validityState.setId(SERVER_VALIDITY_STATE);
 
