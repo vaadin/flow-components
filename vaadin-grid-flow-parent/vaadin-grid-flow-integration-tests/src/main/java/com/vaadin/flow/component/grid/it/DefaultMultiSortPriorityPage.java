@@ -28,30 +28,30 @@ import com.vaadin.flow.router.Route;
 public class DefaultMultiSortPriorityPage extends Div {
 
     public DefaultMultiSortPriorityPage() {
-        Grid<Person> grid = new Grid<>();
-        grid.setMultiSort(true);
-        grid.setId("multi-sort-priority-grid");
-        grid.setItems(new Person("Bob", 20), new Person("Ann", 30),
-                new Person("Ann", 25));
-
-        Column<Person> nameColumn = grid.addColumn(Person::getFirstName)
-                .setHeader(new Span("Name"))
-                .setComparator(Person::getFirstName);
-
-        Column<Person> ageColumn = grid.addColumn(Person::getAge)
-                .setHeader("Age").setComparator(Person::getAge);
-
-        NativeButton addGrid = new NativeButton("Add grid", e -> {
-            add(grid);
-        });
-        addGrid.setId("btn-add-grid");
-
-        NativeButton setMultiSortPriorityAppend = new NativeButton(
-                "Set multi-sort: append", e -> {
+        NativeButton setThenAdd = new NativeButton("Set priority then add",
+                e -> {
                     Grid.setDefaultMultiSortPriority(MultiSortPriority.APPEND);
-                });
-        setMultiSortPriorityAppend.setId("btn-set-msp-append");
 
-        add(addGrid, setMultiSortPriorityAppend);
+                    Grid<Person> grid = new Grid<>();
+                    grid.setMultiSort(true);
+                    grid.setId("multi-sort-priority-grid");
+                    grid.setItems(new Person("Bob", 20), new Person("Ann", 30),
+                            new Person("Ann", 25));
+
+                    Column<Person> nameColumn = grid
+                            .addColumn(Person::getFirstName)
+                            .setHeader(new Span("Name"))
+                            .setComparator(Person::getFirstName);
+
+                    Column<Person> ageColumn = grid.addColumn(Person::getAge)
+                            .setHeader("Age").setComparator(Person::getAge);
+
+                    add(grid);
+
+                    // Restore initial state
+                    Grid.setDefaultMultiSortPriority(MultiSortPriority.PREPEND);
+                });
+        setThenAdd.setId("btn-set-add");
+        add(setThenAdd);
     }
 }

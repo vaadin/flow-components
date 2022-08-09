@@ -36,8 +36,7 @@ public class DefaultMultiSortPriorityIT extends AbstractComponentIT {
 
     @Test
     public void setDefaultMultiSortPriority_addGrid_priorityIsUsed() {
-        findElement(By.id("btn-set-msp-append")).click();
-        findElement(By.id("btn-add-grid")).click();
+        findElement(By.id("btn-set-add")).click();
 
         GridElement grid = $(GridElement.class).id("multi-sort-priority-grid");
 
@@ -56,30 +55,6 @@ public class DefaultMultiSortPriorityIT extends AbstractComponentIT {
 
         Assert.assertEquals("Bob", grid.getCell(2, 0).getText());
         Assert.assertEquals("20", grid.getCell(2, 1).getText());
-    }
-
-    @Test
-    public void addGrid_setDefaultMultiSortPriority_priorityIsIgnored() {
-        findElement(By.id("btn-add-grid")).click();
-        findElement(By.id("btn-set-msp-append")).click();
-
-        GridElement grid = $(GridElement.class).id("multi-sort-priority-grid");
-
-        // Sort by Name column
-        getCellContent(grid.getHeaderCell(0)).click();
-
-        // Sort by Age column
-        getCellContent(grid.getHeaderCell(1)).click();
-
-        // "Prepend" priority
-        Assert.assertEquals("Bob", grid.getCell(0, 0).getText());
-        Assert.assertEquals("20", grid.getCell(0, 1).getText());
-
-        Assert.assertEquals("Ann", grid.getCell(1, 0).getText());
-        Assert.assertEquals("25", grid.getCell(1, 1).getText());
-
-        Assert.assertEquals("Ann", grid.getCell(2, 0).getText());
-        Assert.assertEquals("30", grid.getCell(2, 1).getText());
     }
 
     private WebElement getCellContent(GridTHTDElement cell) {
