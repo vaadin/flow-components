@@ -30,7 +30,7 @@ import static com.vaadin.flow.component.textfield.tests.validation.TextFieldVali
 import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBasicPage.ATTACH_FIELD_BUTTON;
 
 @TestPath("vaadin-text-field/validation/basic")
-public class TextFieldValidationIT
+public class TextFieldValidationBasicIT
         extends AbstractValidationIT<TextFieldElement> {
     @Test
     public void fieldIsInitiallyValid() {

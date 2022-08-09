@@ -92,9 +92,9 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
 
         addValueChangeListener(e -> validate());
 
-        if (getFeatureFlags().isEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+        // if (getFeatureFlags().isEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
             addClientValidatedEventListener(e -> validate());
-        }
+        // }
     }
 
     /**
@@ -512,15 +512,15 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
     @Override
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<String> listener) {
-        if (getFeatureFlags().isEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+        // if (getFeatureFlags().isEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
             return addClientValidatedEventListener(event -> {
                 listener.validationStatusChanged(
                         new ValidationStatusChangeEvent<String>(this,
                                 !isInvalid()));
             });
-        }
+        // }
 
-        return null;
+        // return null;
     }
 
     /**
@@ -537,12 +537,12 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        if (getFeatureFlags().isEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+        // if (getFeatureFlags().isEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
             ClientValidationUtil
                     .preventWebComponentFromSettingItselfToValid(this);
-        } else {
-            FieldValidationUtil.disableClientValidation(this);
-        }
+        // } else {
+        //     FieldValidationUtil.disableClientValidation(this);
+        // }
     }
 
     // Override is only required to keep binary compatibility with other 23.x
