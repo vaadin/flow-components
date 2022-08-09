@@ -3169,10 +3169,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         Objects.requireNonNull(priority,
                 "Multi-sort priority must not be null");
         setMultiSort(multiSort);
-
-        if (priority != defaultMultiSortPriority) {
-            updateMultiSortPriority(priority);
-        }
+        updateMultiSortPriority(priority);
     }
 
     private void updateMultiSortPriority(MultiSortPriority priority) {
