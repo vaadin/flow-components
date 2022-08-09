@@ -1,11 +1,6 @@
 package com.vaadin.flow.component.datepicker.validation;
 
-import com.vaadin.flow.component.datepicker.testbench.DatePickerElement;
 import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.TestBenchElement;
-import com.vaadin.tests.AbstractComponentIT;
-import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
@@ -14,19 +9,9 @@ import static com.vaadin.flow.component.datepicker.validation.DatePickerValidati
 import static com.vaadin.flow.component.datepicker.validation.DatePickerValidationBinderPage.EXPECTED_VALUE_INPUT;
 import static com.vaadin.flow.component.datepicker.validation.DatePickerValidationBinderPage.REQUIRED_ERROR_MESSAGE;
 import static com.vaadin.flow.component.datepicker.validation.DatePickerValidationBinderPage.UNEXPECTED_VALUE_ERROR_MESSAGE;
-import static com.vaadin.flow.component.datepicker.validation.DatePickerValidationBinderPage.SERVER_VALIDITY_STATE;
-import static com.vaadin.flow.component.datepicker.validation.DatePickerValidationBinderPage.SERVER_VALIDITY_STATE_BUTTON;
 
 @TestPath("vaadin-date-picker/validation/binder")
-public class DatePickerValidationBinderIT extends AbstractComponentIT {
-    private DatePickerElement field;
-
-    @Before
-    public void init() {
-        open();
-        field = $(DatePickerElement.class).first();
-    }
-
+public class DatePickerValidationBinderIT extends AbstractValidationIT {
     @Test
     public void fieldIsInitiallyValid() {
         assertClientValid(true);
@@ -119,20 +104,5 @@ public class DatePickerValidationBinderIT extends AbstractComponentIT {
         assertServerValid(false);
         assertClientValid(false);
         assertErrorMessage("");
-    }
-
-    protected void assertErrorMessage(String expected) {
-        Assert.assertEquals(expected, field.getPropertyString("errorMessage"));
-    }
-
-    protected void assertClientValid(boolean expected) {
-        Assert.assertEquals(expected, !field.getPropertyBoolean("invalid"));
-    }
-
-    protected void assertServerValid(boolean expected) {
-        $("button").id(SERVER_VALIDITY_STATE_BUTTON).click();
-
-        var actual = $("div").id(SERVER_VALIDITY_STATE).getText();
-        Assert.assertEquals(String.valueOf(expected), actual);
     }
 }

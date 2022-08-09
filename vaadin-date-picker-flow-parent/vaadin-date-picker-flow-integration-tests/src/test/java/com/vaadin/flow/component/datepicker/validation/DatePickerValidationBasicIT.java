@@ -3,9 +3,6 @@ package com.vaadin.flow.component.datepicker.validation;
 import com.vaadin.flow.component.datepicker.testbench.DatePickerElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
-import com.vaadin.tests.AbstractComponentIT;
-import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
@@ -14,19 +11,9 @@ import static com.vaadin.flow.component.datepicker.validation.DatePickerValidati
 import static com.vaadin.flow.component.datepicker.validation.DatePickerValidationBasicPage.MIN_INPUT;
 import static com.vaadin.flow.component.datepicker.validation.DatePickerValidationBasicPage.MAX_INPUT;
 import static com.vaadin.flow.component.datepicker.validation.DatePickerValidationBasicPage.REQUIRED_BUTTON;
-import static com.vaadin.flow.component.datepicker.validation.DatePickerValidationBasicPage.SERVER_VALIDITY_STATE;
-import static com.vaadin.flow.component.datepicker.validation.DatePickerValidationBasicPage.SERVER_VALIDITY_STATE_BUTTON;
 
 @TestPath("vaadin-date-picker/validation/basic")
-public class DatePickerValidationBasicIT extends AbstractComponentIT {
-    private DatePickerElement field;
-
-    @Before
-    public void init() {
-        open();
-        field = $(DatePickerElement.class).first();
-    }
-
+public class DatePickerValidationBasicIT extends AbstractValidationIT {
     @Test
     public void fieldIsInitiallyValid() {
         assertClientValid(true);
@@ -130,16 +117,5 @@ public class DatePickerValidationBasicIT extends AbstractComponentIT {
         field.setInputValue("INVALID");
         assertServerValid(false);
         assertClientValid(false);
-    }
-
-    protected void assertClientValid(boolean expected) {
-        Assert.assertEquals(expected, !field.getPropertyBoolean("invalid"));
-    }
-
-    protected void assertServerValid(boolean expected) {
-        $("button").id(SERVER_VALIDITY_STATE_BUTTON).click();
-
-        var actual = $("div").id(SERVER_VALIDITY_STATE).getText();
-        Assert.assertEquals(String.valueOf(expected), actual);
     }
 }
