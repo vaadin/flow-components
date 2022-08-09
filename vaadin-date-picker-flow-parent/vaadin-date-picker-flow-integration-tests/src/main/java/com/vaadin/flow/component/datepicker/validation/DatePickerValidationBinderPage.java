@@ -54,7 +54,5 @@ public class DatePickerValidationBinderPage extends AbstractValidationPage {
             var value = LocalDate.parse(event.getValue());
             field.setMax(value);
         }));
-
-        addServerValidityStateControls();
     }
 }

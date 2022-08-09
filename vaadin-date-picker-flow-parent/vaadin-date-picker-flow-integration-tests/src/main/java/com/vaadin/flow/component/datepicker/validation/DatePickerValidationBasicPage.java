@@ -34,8 +34,6 @@ public class DatePickerValidationBasicPage extends AbstractValidationPage {
         }));
 
         addAttachDetachControls();
-
-        addServerValidityStateControls();
     }
 
     protected void addAttachDetachControls() {
