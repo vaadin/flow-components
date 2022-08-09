@@ -37,6 +37,7 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.shared.HasClientValidation;
@@ -120,12 +121,9 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         // workaround for https://github.com/vaadin/flow/issues/3496
         setInvalid(false);
 
-        addClientValidatedEventListener(event -> {
-            isClientInvalid = !event.isValid();
-            validate();
-        });
-
         addValueChangeListener(e -> validate());
+
+        addClientValidatedEventListener(event -> validate());
     }
 
     /**
@@ -294,11 +292,18 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
             ValidationStatusChangeListener<LocalTime> listener) {
         return addClientValidatedEventListener(event -> {
             listener.validationStatusChanged(
-                    new ValidationStatusChangeEvent<>(this, !isInvalid()));
+                    new ValidationStatusChangeEvent<LocalTime>(this,
+                            !isInvalid()));
         });
     }
 
     private ValidationResult checkValidity(LocalTime value) {
+        var hasNonParsableValue = value == getEmptyValue()
+                && isInputValuePresent();
+        if (hasNonParsableValue) {
+            return ValidationResult.error("");
+        }
+
         var greaterThanMaxValidation = ValidationUtil.checkGreaterThanMax(value,
                 max);
         if (greaterThanMaxValidation.isError()) {
@@ -328,6 +333,17 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
                 getEmptyValue());
 
         return requiredValidation.isError() || checkValidity(value).isError();
+    }
+
+    /**
+     * Returns whether the input element has a value or not.
+     *
+     * @return <code>true</code> if the input element's value is populated,
+     *         <code>false</code> otherwise
+     */
+    @Synchronize(property = "_hasInputValue", value = "has-input-value-changed")
+    private boolean isInputValuePresent() {
+        return getElement().getProperty("_hasInputValue", false);
     }
 
     @Override
