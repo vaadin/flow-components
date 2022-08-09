@@ -23,6 +23,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.textfield.TextField;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
@@ -102,6 +104,51 @@ public class HeaderFooterTest {
     }
 
     @Test
+    public void getHeaderText() {
+        firstColumn.setHeader("foo");
+
+        Assert.assertEquals("foo", firstColumn.getHeaderText());
+        Assert.assertEquals("foo",
+                grid.getHeaderRows().get(0).getCell(firstColumn).getText());
+    }
+
+    @Test
+    public void getHeaderComponent() {
+        TextField textField = new TextField();
+        firstColumn.setHeader(textField);
+
+        Assert.assertEquals(textField, firstColumn.getHeaderComponent());
+        Assert.assertEquals(textField, grid.getHeaderRows().get(0)
+                .getCell(firstColumn).getComponent());
+    }
+
+    @Test
+    public void setHeaderText_clearsHeaderComponent() {
+        TextField textField = new TextField();
+
+        firstColumn.setHeader(textField);
+        firstColumn.setHeader("foo");
+        Assert.assertNull(firstColumn.getHeaderComponent());
+
+        firstColumn.setHeader(textField);
+        firstColumn.setHeader((String) null);
+        Assert.assertNull(firstColumn.getHeaderComponent());
+    }
+
+    @Test
+    public void setHeaderComponent_clearsHeaderText() {
+        TextField textField = new TextField();
+
+        firstColumn.setHeader("foo");
+        firstColumn.setHeader(textField);
+        Assert.assertNull(firstColumn.getHeaderText());
+
+        firstColumn.setHeader("foo");
+        firstColumn.setHeader((Component) null);
+        Assert.assertNull(firstColumn.getHeaderText());
+    }
+
+    @Test
     public void setFooter_firstFooterRowCreated() {
         firstColumn.setFooter("foo");
         Assert.assertEquals(
@@ -109,6 +156,51 @@ public class HeaderFooterTest {
                 1, grid.getFooterRows().size());
         assertRowWrapsLayer(grid.getFooterRows().get(0),
                 getColumnLayersAndAssertCount(1).get(0));
+    }
+
+    @Test
+    public void getFooterText() {
+        firstColumn.setFooter("foo");
+
+        Assert.assertEquals("foo", firstColumn.getFooterText());
+        Assert.assertEquals("foo",
+                grid.getFooterRows().get(0).getCell(firstColumn).getText());
+    }
+
+    @Test
+    public void getFooterComponent() {
+        TextField textField = new TextField();
+        firstColumn.setFooter(textField);
+
+        Assert.assertEquals(textField, firstColumn.getFooterComponent());
+        Assert.assertEquals(textField, grid.getFooterRows().get(0)
+                .getCell(firstColumn).getComponent());
+    }
+
+    @Test
+    public void setFooterText_clearsFooterComponent() {
+        TextField textField = new TextField();
+
+        firstColumn.setFooter(textField);
+        firstColumn.setFooter("foo");
+        Assert.assertNull(firstColumn.getFooterComponent());
+
+        firstColumn.setFooter(textField);
+        firstColumn.setFooter((String) null);
+        Assert.assertNull(firstColumn.getFooterComponent());
+    }
+
+    @Test
+    public void setFooterComponent_clearsFooterText() {
+        TextField textField = new TextField();
+
+        firstColumn.setFooter("foo");
+        firstColumn.setFooter(textField);
+        Assert.assertNull(firstColumn.getFooterText());
+
+        firstColumn.setFooter("foo");
+        firstColumn.setFooter((Component) null);
+        Assert.assertNull(firstColumn.getFooterText());
     }
 
     @Test

@@ -19,7 +19,6 @@ import java.util.Collection;
 import java.util.List;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.grid.AbstractRow.AbstractCell;
 import com.vaadin.flow.component.grid.FooterRow.FooterCell;
 
 /**
@@ -44,8 +43,18 @@ public class FooterRow extends AbstractRow<FooterCell> {
         }
 
         @Override
+        public String getText() {
+            return getColumn().getFooterText();
+        }
+
+        @Override
         public void setText(String text) {
             getColumn().setFooterText(text);
+        }
+
+        @Override
+        public Component getComponent() {
+            return getColumn().getFooterComponent();
         }
 
         @Override
