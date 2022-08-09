@@ -15,6 +15,11 @@ public abstract class AbstractValidationPage extends Div {
 
     protected DatePicker field;
 
+    public AbstractValidationPage() {
+        field = new DatePicker();
+        add(field);
+    }
+
     protected void addServerValidityStateControls() {
         Div validityState = new Div();
         validityState.setId(SERVER_VALIDITY_STATE);

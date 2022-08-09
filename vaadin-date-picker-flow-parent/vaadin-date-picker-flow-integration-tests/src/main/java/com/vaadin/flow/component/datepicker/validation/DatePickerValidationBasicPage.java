@@ -17,8 +17,7 @@ public class DatePickerValidationBasicPage extends AbstractValidationPage {
     public static final String MAX_INPUT = "max-input";
 
     public DatePickerValidationBasicPage() {
-        field = new DatePicker();
-        add(field);
+        super();
 
         add(createButton(REQUIRED_BUTTON, "Enable required", event -> {
             field.setRequiredIndicatorVisible(true);

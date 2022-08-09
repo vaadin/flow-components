@@ -32,8 +32,7 @@ public class DatePickerValidationBinderPage extends AbstractValidationPage {
     private LocalDate expectedValue;
 
     public DatePickerValidationBinderPage() {
-        field = new DatePicker();
-        add(field);
+        super();
 
         binder = new Binder<>(Bean.class);
         binder.forField(field).asRequired(REQUIRED_ERROR_MESSAGE)
