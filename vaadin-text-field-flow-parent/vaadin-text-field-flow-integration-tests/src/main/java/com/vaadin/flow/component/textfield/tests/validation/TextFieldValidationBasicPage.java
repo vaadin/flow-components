@@ -20,7 +20,8 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-text-field/validation/basic")
-public class TextFieldValidationBasicPage extends AbstractValidationPage<TextField> {
+public class TextFieldValidationBasicPage
+        extends AbstractValidationPage<TextField> {
     public static final String REQUIRED_BUTTON = "required-button";
     public static final String PATTERN_INPUT = "pattern-input";
     public static final String MIN_LENGTH_INPUT = "min-length-input";
@@ -56,10 +57,10 @@ public class TextFieldValidationBasicPage extends AbstractValidationPage<TextFie
     }
 
     private void addAttachDetachControls() {
-        var attachButton = createButton(ATTACH_FIELD_BUTTON,
-                "Attach field", event -> add(field));
-        var detachButton = createButton(DETACH_FIELD_BUTTON,
-                "Detach field", event -> add(field));
+        var attachButton = createButton(ATTACH_FIELD_BUTTON, "Attach field",
+                event -> add(field));
+        var detachButton = createButton(DETACH_FIELD_BUTTON, "Detach field",
+                event -> add(field));
 
         add(new Div(attachButton, detachButton));
     }

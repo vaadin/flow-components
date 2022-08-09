@@ -92,8 +92,10 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
 
         addValueChangeListener(e -> validate());
 
-        // if (getFeatureFlags().isEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
-            addClientValidatedEventListener(e -> validate());
+        // if
+        // (getFeatureFlags().isEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION))
+        // {
+        addClientValidatedEventListener(e -> validate());
         // }
     }
 
@@ -512,12 +514,14 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
     @Override
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<String> listener) {
-        // if (getFeatureFlags().isEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
-            return addClientValidatedEventListener(event -> {
-                listener.validationStatusChanged(
-                        new ValidationStatusChangeEvent<String>(this,
-                                !isInvalid()));
-            });
+        // if
+        // (getFeatureFlags().isEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION))
+        // {
+        return addClientValidatedEventListener(event -> {
+            listener.validationStatusChanged(
+                    new ValidationStatusChangeEvent<String>(this,
+                            !isInvalid()));
+        });
         // }
 
         // return null;
@@ -537,11 +541,12 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        // if (getFeatureFlags().isEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
-            ClientValidationUtil
-                    .preventWebComponentFromSettingItselfToValid(this);
+        // if
+        // (getFeatureFlags().isEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION))
+        // {
+        ClientValidationUtil.preventWebComponentFromSettingItselfToValid(this);
         // } else {
-        //     FieldValidationUtil.disableClientValidation(this);
+        // FieldValidationUtil.disableClientValidation(this);
         // }
     }
 
