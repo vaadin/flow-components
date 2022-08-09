@@ -72,8 +72,6 @@ public class TextFieldValidationBinderPage
             var value = Integer.parseInt(event.getValue());
             field.setMaxLength(value);
         }));
-
-        addServerValidityStateControls();
     }
 
     protected TextField createField() {

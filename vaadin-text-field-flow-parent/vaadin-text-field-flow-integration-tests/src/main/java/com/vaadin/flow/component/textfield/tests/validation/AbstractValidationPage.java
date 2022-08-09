@@ -20,9 +20,11 @@ public abstract class AbstractValidationPage<F extends Component & HasValidation
     public AbstractValidationPage() {
         field = createField();
         add(field);
+
+        addServerValidityStateControls();
     }
 
-    protected void addServerValidityStateControls() {
+    private void addServerValidityStateControls() {
         Div validityState = new Div();
         validityState.setId(SERVER_VALIDITY_STATE);
 

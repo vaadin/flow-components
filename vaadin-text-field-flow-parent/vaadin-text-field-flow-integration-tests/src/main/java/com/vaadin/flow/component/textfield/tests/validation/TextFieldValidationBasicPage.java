@@ -52,8 +52,6 @@ public class TextFieldValidationBasicPage
         }));
 
         addAttachDetachControls();
-
-        addServerValidityStateControls();
     }
 
     private void addAttachDetachControls() {
