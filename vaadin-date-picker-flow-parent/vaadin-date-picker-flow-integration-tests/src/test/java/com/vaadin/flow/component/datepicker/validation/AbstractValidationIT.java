@@ -9,7 +9,7 @@ import org.junit.Before;
 import static com.vaadin.flow.component.datepicker.validation.AbstractValidationPage.SERVER_VALIDITY_STATE;
 import static com.vaadin.flow.component.datepicker.validation.AbstractValidationPage.SERVER_VALIDITY_STATE_BUTTON;
 
-public class AbstractValidationIT extends AbstractComponentIT {
+public abstract class AbstractValidationIT extends AbstractComponentIT {
     protected DatePickerElement field;
 
     @Before
