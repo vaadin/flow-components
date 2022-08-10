@@ -22,8 +22,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.AbstractRow.AbstractCell;
+import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.HeaderRow.HeaderCell;
 
 /**
@@ -53,8 +53,18 @@ public class HeaderRow extends AbstractRow<HeaderCell> {
         }
 
         @Override
+        public String getText() {
+            return getColumn().getHeaderText();
+        }
+
+        @Override
         public void setText(String text) {
             getColumn().setHeaderText(text);
+        }
+
+        @Override
+        public Component getComponent() {
+            return getColumn().getHeaderComponent();
         }
 
         @Override
