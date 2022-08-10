@@ -30,7 +30,7 @@ import com.vaadin.flow.shared.Registration;
 /**
  * Split Layout is a component with two content areas and a draggable split
  * handle between them.
- * 
+ *
  * @author Vaadin Ltd
  */
 @NpmPackage(value = "@vaadin/split-layout", version = "23.2.0-alpha6")
