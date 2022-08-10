@@ -163,8 +163,7 @@ public class DatePickerElement extends TestBenchElement
         this.open();
         var input = $("input").first();
         input.setProperty("value", value);
-        input.dispatchEvent("input",
-                Collections.singletonMap("bubbles", true));
+        input.dispatchEvent("input", Collections.singletonMap("bubbles", true));
         input.dispatchEvent("change",
                 Collections.singletonMap("bubbles", true));
         this.close();
