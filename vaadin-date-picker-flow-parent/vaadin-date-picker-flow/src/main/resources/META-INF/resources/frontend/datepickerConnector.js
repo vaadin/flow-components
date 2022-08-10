@@ -16,6 +16,10 @@ import dateFnsIsValid from 'date-fns/isValid';
       this.value = 0;
     }
 
+    parseValue(value) {
+      this.value = parseInt(value);
+    }
+
     static compare(part1, part2) {
       if (part1.index < part2.index) {
         return -1;
@@ -26,6 +30,17 @@ import dateFnsIsValid from 'date-fns/isValid';
       return 0;
     }
   }
+
+  class FlowDatePickerYearPart extends FlowDatePickerPart {
+    parseValue(yearString) {
+      let year = parseInt(yearString);
+      if (yearString.length < 3 && year > 0) {
+        year += year < 50 ? 2000 : 1900;
+      }
+      this.value = year;
+    }
+  }
+
   window.Vaadin.Flow.datepickerConnector = {
     initLazy: (datepicker) =>
       tryCatchWrapper(function (datepicker) {
@@ -39,7 +54,7 @@ import dateFnsIsValid from 'date-fns/isValid';
         /* init helper parts for reverse-engineering date-regex */
         datepicker.$connector.dayPart = new FlowDatePickerPart('22');
         datepicker.$connector.monthPart = new FlowDatePickerPart('11');
-        datepicker.$connector.yearPart = new FlowDatePickerPart('1987');
+        datepicker.$connector.yearPart = new FlowDatePickerYearPart('1987');
         datepicker.$connector.parts = [
           datepicker.$connector.dayPart,
           datepicker.$connector.monthPart,
@@ -137,7 +152,7 @@ import dateFnsIsValid from 'date-fns/isValid';
             let match = dateString.match(datepicker.$connector.regex);
             if (match && match.length == 4) {
               for (let i = 1; i < 4; i++) {
-                datepicker.$connector.parts[i - 1].value = parseInt(match[i]);
+                datepicker.$connector.parts[i - 1].parseValue(match[i]);
               }
               return {
                 day: datepicker.$connector.dayPart.value,

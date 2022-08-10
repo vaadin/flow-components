@@ -273,15 +273,19 @@ public class DatePickerIT extends AbstractComponentIT {
                 LocalDate.of(900, Month.MARCH, 6));
         setInputValueAndAssert(localePicker, "3/5/0087", "3/5/87",
                 LocalDate.of(87, Month.MARCH, 5));
-        setInputValueAndAssert(localePicker, "3/6/87",
-                LocalDate.of(87, Month.MARCH, 6));
-        setInputValueAndAssert(localePicker, "3/7/20",
-                LocalDate.of(20, Month.MARCH, 7));
+        setInputValueAndAssert(localePicker, "3/5/087", "3/5/87",
+                LocalDate.of(87, Month.MARCH, 5));
+        setInputValueAndAssert(localePicker, "3/6/87", "3/6/1987",
+                LocalDate.of(1987, Month.MARCH, 6));
         setInputValueAndAssert(localePicker, "3/8/0020", "3/8/20",
                 LocalDate.of(20, Month.MARCH, 8));
+        setInputValueAndAssert(localePicker, "3/8/020", "3/8/20",
+                LocalDate.of(20, Month.MARCH, 8));
+        setInputValueAndAssert(localePicker, "3/7/20", "3/7/2020",
+                LocalDate.of(2020, Month.MARCH, 7));
 
         $("button").id("Locale-UK").click();
-        Assert.assertEquals("08/03/20", localePicker.getInputValue());
+        Assert.assertEquals("07/03/2020", localePicker.getInputValue());
 
         setInputValueAndAssert(localePicker, "7/3/0900", "07/03/900",
                 LocalDate.of(900, Month.MARCH, 7));
@@ -290,15 +294,19 @@ public class DatePickerIT extends AbstractComponentIT {
                 LocalDate.of(900, Month.MARCH, 6));
         setInputValueAndAssert(localePicker, "5/3/0087", "05/03/87",
                 LocalDate.of(87, Month.MARCH, 5));
-        setInputValueAndAssert(localePicker, "6/3/87", "06/03/87",
-                LocalDate.of(87, Month.MARCH, 6));
-        setInputValueAndAssert(localePicker, "7/3/20", "07/03/20",
+        setInputValueAndAssert(localePicker, "5/3/087", "05/03/87",
+                LocalDate.of(87, Month.MARCH, 5));
+        setInputValueAndAssert(localePicker, "6/3/87", "06/03/1987",
+                LocalDate.of(1987, Month.MARCH, 6));
+        setInputValueAndAssert(localePicker, "7/3/0020", "07/03/20",
                 LocalDate.of(20, Month.MARCH, 7));
-        setInputValueAndAssert(localePicker, "8/3/0020", "08/03/20",
-                LocalDate.of(20, Month.MARCH, 8));
+        setInputValueAndAssert(localePicker, "7/3/020", "07/03/20",
+                LocalDate.of(20, Month.MARCH, 7));
+        setInputValueAndAssert(localePicker, "7/3/20", "07/03/2020",
+                LocalDate.of(2020, Month.MARCH, 7));
 
         $("button").id("Locale-CHINA").click();
-        Assert.assertEquals("20/3/8", localePicker.getInputValue());
+        Assert.assertEquals("2020/3/7", localePicker.getInputValue());
 
         setInputValueAndAssert(localePicker, "0900/3/7", "900/3/7",
                 LocalDate.of(900, Month.MARCH, 7));
@@ -307,14 +315,18 @@ public class DatePickerIT extends AbstractComponentIT {
                 LocalDate.of(900, Month.MARCH, 6));
         setInputValueAndAssert(localePicker, "0087/3/5", "87/3/5",
                 LocalDate.of(87, Month.MARCH, 5));
-        setInputValueAndAssert(localePicker, "87/3/6",
-                LocalDate.of(87, Month.MARCH, 6));
-        setInputValueAndAssert(localePicker, "20/3/7",
-                LocalDate.of(20, Month.MARCH, 7));
+        setInputValueAndAssert(localePicker, "087/3/5", "87/3/5",
+                LocalDate.of(87, Month.MARCH, 5));
+        setInputValueAndAssert(localePicker, "87/3/6", "1987/3/6",
+                LocalDate.of(1987, Month.MARCH, 6));
         setInputValueAndAssert(localePicker, "0020/3/8", "20/3/8",
                 LocalDate.of(20, Month.MARCH, 8));
+        setInputValueAndAssert(localePicker, "020/3/8", "20/3/8",
+                LocalDate.of(20, Month.MARCH, 8));
+        setInputValueAndAssert(localePicker, "20/3/7", "2020/3/7",
+                LocalDate.of(2020, Month.MARCH, 7));
 
         $("button").id("Locale-US").click();
-        Assert.assertEquals("3/8/20", localePicker.getInputValue());
+        Assert.assertEquals("3/7/2020", localePicker.getInputValue());
     }
 }
