@@ -22,6 +22,7 @@ import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -160,7 +161,12 @@ public class DatePickerElement extends TestBenchElement
      */
     public void setInputValue(String value) {
         this.open();
-        setProperty("_inputValue", value);
+        var input = $("input").first();
+        input.setProperty("value", value);
+        input.dispatchEvent("input",
+                Collections.singletonMap("bubbles", true));
+        input.dispatchEvent("change",
+                Collections.singletonMap("bubbles", true));
         this.close();
     }
 
@@ -171,7 +177,8 @@ public class DatePickerElement extends TestBenchElement
      * @return
      */
     public String getInputValue() {
-        return getPropertyString("_inputValue");
+        var input = $("input").first();
+        return input.getPropertyString("value");
     }
 
     /**
