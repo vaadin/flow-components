@@ -140,7 +140,7 @@ public class DateTimePickerElement extends TestBenchElement
      *               the value to set
      */
     public void setTimeInputValue(String value) {
-        var input = getTimePicker().$("input").first();
+        TestBenchElement input = getTimePicker().$("input").first();
         input.setProperty("value", "");
         input.sendKeys(value, Keys.ENTER);
     }
@@ -154,7 +154,7 @@ public class DateTimePickerElement extends TestBenchElement
      *               the value to set
      */
     public void setDateInputValue(String value) {
-        var input = getDatePicker().$("input").first();
+        TestBenchElement input = getDatePicker().$("input").first();
         input.setProperty("value", "");
         input.sendKeys(value, Keys.ENTER);
     }

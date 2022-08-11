@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.Before;
 
 import com.vaadin.flow.component.datetimepicker.testbench.DateTimePickerElement;
+import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
 import static com.vaadin.flow.component.datetimepicker.validation.AbstractValidationPage.SERVER_VALIDITY_STATE;
@@ -31,5 +32,13 @@ public class AbstractValidationIT extends AbstractComponentIT {
 
         var actual = $("div").id(SERVER_VALIDITY_STATE).getText();
         Assert.assertEquals(String.valueOf(expected), actual);
+    }
+
+    protected TestBenchElement getDateInputElement() {
+        return field.$("input").first();
+    }
+
+    protected TestBenchElement getTimeInputElement() {
+        return field.$("input").last();
     }
 }
