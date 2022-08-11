@@ -22,4 +22,5 @@ import com.vaadin.flow.testutil.TestPath;
  * Integration tests for {@link DateTimePicker} validation.
  */
 @TestPath("vaadin-date-time-picker/date-time-picker-validation")
-public class DateTimePickerValidationPageIT extends AbstractValidationTest {}
+public class DateTimePickerValidationPageIT extends AbstractValidationTest {
+}

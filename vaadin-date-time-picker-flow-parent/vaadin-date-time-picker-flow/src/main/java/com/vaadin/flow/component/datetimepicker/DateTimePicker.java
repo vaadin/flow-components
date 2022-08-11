@@ -124,7 +124,7 @@ public class DateTimePicker extends
      * Convenience constructor to create a date time picker with a label.
      *
      * @param label
-     *              the label describing the date time picker
+     *            the label describing the date time picker
      * @see #setLabel(String)
      */
     public DateTimePicker(String label) {
@@ -137,9 +137,9 @@ public class DateTimePicker extends
      * date and time in current UI locale format and a label.
      *
      * @param label
-     *                        the label describing the date time picker
+     *            the label describing the date time picker
      * @param initialDateTime
-     *                        the pre-selected date time in the picker
+     *            the pre-selected date time in the picker
      * @see #setValue(LocalDateTime)
      * @see #setLabel(String)
      */
@@ -153,7 +153,7 @@ public class DateTimePicker extends
      * date time in current UI locale format.
      *
      * @param initialDateTime
-     *                        the pre-selected date time in the picker
+     *            the pre-selected date time in the picker
      */
     public DateTimePicker(LocalDateTime initialDateTime) {
         super("value", null, String.class, PARSER, FORMATTER);
@@ -189,7 +189,7 @@ public class DateTimePicker extends
      * {@link ValueChangeListener}.
      *
      * @param listener
-     *                 the listener to receive value change events
+     *            the listener to receive value change events
      * @see #addValueChangeListener(HasValue.ValueChangeListener)
      */
     public DateTimePicker(
@@ -204,9 +204,9 @@ public class DateTimePicker extends
      *
      *
      * @param label
-     *                 the label describing the date time picker
+     *            the label describing the date time picker
      * @param listener
-     *                 the listener to receive value change events
+     *            the listener to receive value change events
      * @see #setLabel(String)
      * @see #addValueChangeListener(HasValue.ValueChangeListener)
      */
@@ -221,9 +221,9 @@ public class DateTimePicker extends
      * date time in current UI locale format and a {@link ValueChangeListener}.
      *
      * @param initialDateTime
-     *                        the pre-selected date time in the picker
+     *            the pre-selected date time in the picker
      * @param listener
-     *                        the listener to receive value change events
+     *            the listener to receive value change events
      * @see #setValue(LocalDateTime)
      * @see #addValueChangeListener(HasValue.ValueChangeListener)
      */
@@ -239,11 +239,11 @@ public class DateTimePicker extends
      * and a label.
      *
      * @param label
-     *                        the label describing the date time picker
+     *            the label describing the date time picker
      * @param initialDateTime
-     *                        the pre-selected date time in the picker
+     *            the pre-selected date time in the picker
      * @param listener
-     *                        the listener to receive value change events
+     *            the listener to receive value change events
      * @see #setLabel(String)
      * @see #setValue(LocalDateTime)
      * @see #addValueChangeListener(HasValue.ValueChangeListener)
@@ -260,9 +260,9 @@ public class DateTimePicker extends
      * date time and locale setup.
      *
      * @param initialDateTime
-     *                        the pre-selected date time in the picker
+     *            the pre-selected date time in the picker
      * @param locale
-     *                        the locale for the date time picker
+     *            the locale for the date time picker
      */
     public DateTimePicker(LocalDateTime initialDateTime, Locale locale) {
         this(initialDateTime);
@@ -280,8 +280,8 @@ public class DateTimePicker extends
      * in.
      *
      * @param value
-     *              the LocalDateTime instance representing the selected date and
-     *              time, or null
+     *            the LocalDateTime instance representing the selected date and
+     *            time, or null
      */
     @Override
     public void setValue(LocalDateTime value) {
@@ -299,7 +299,7 @@ public class DateTimePicker extends
      * internal value of the Flow TimePicker, which truncates the value as well.
      *
      * @param value
-     *              the LocalDateTime instance to sanitize, can be null
+     *            the LocalDateTime instance to sanitize, can be null
      * @return sanitized LocalDateTime instance
      */
     private LocalDateTime sanitizeValue(LocalDateTime value) {
@@ -342,7 +342,7 @@ public class DateTimePicker extends
      * Sets the label for this field.
      *
      * @param label
-     *              the String value to set
+     *            the String value to set
      */
     @Override
     public void setLabel(String label) {
@@ -363,7 +363,7 @@ public class DateTimePicker extends
      * Sets a placeholder string for the date field.
      *
      * @param placeholder
-     *                    the String value to set
+     *            the String value to set
      */
     public void setDatePlaceholder(String placeholder) {
         datePicker.setPlaceholder(placeholder);
@@ -382,7 +382,7 @@ public class DateTimePicker extends
      * Set a placeholder string for the time field.
      *
      * @param placeholder
-     *                    the String value to set
+     *            the String value to set
      */
     public void setTimePlaceholder(String placeholder) {
         timePicker.setPlaceholder(placeholder);
@@ -418,8 +418,8 @@ public class DateTimePicker extends
      * if some parts (eg. seconds) is discarded from the value.</em>
      *
      * @param step
-     *             the step to set, not {@code null} and should divide a day or
-     *             an hour evenly
+     *            the step to set, not {@code null} and should divide a day or
+     *            an hour evenly
      */
     public void setStep(Duration step) {
         Objects.requireNonNull(step, "Step cannot be null");
@@ -456,7 +456,7 @@ public class DateTimePicker extends
      * i18n.firstDayOfWeek is 1 (Monday).
      *
      * @param weekNumbersVisible
-     *                           the boolean value to set
+     *            the boolean value to set
      * @see #setDatePickerI18n(DatePickerI18n)
      * @see DatePickerI18n#setFirstDayOfWeek(int)
      */
@@ -478,7 +478,7 @@ public class DateTimePicker extends
      * be matched to the format used in that locale.
      *
      * @param locale
-     *               the locale to set to the DateTimePicker, cannot be null
+     *            the locale to set to the DateTimePicker, cannot be null
      */
     public void setLocale(Locale locale) {
         Objects.requireNonNull(locale, "Locale must not be null.");
@@ -516,7 +516,7 @@ public class DateTimePicker extends
      * Adds a theme name to this component.
      *
      * @param themeName
-     *                  the theme name to add, not <code>null</code>
+     *            the theme name to add, not <code>null</code>
      */
     @Override
     public void addThemeName(String themeName) {
@@ -528,7 +528,7 @@ public class DateTimePicker extends
      * Removes a theme name from this component.
      *
      * @param themeName
-     *                  the theme name to remove, not <code>null</code>
+     *            the theme name to remove, not <code>null</code>
      * @return <code>true</code> if the theme name was removed,
      *         <code>false</code> if the theme list didn't contain the theme
      *         name
@@ -545,8 +545,8 @@ public class DateTimePicker extends
      * previous set theme names.
      *
      * @param themeName
-     *                  a space-separated string of theme names to set, or empty
-     *                  string to remove all theme names
+     *            a space-separated string of theme names to set, or empty
+     *            string to remove all theme names
      */
     @Override
     public void setThemeName(String themeName) {
@@ -558,11 +558,10 @@ public class DateTimePicker extends
      * Sets or removes the given theme name for this component.
      *
      * @param themeName
-     *                  the theme name to set or remove, not <code>null</code>
+     *            the theme name to set or remove, not <code>null</code>
      * @param set
-     *                  <code>true</code> to set the theme name, <code>false</code>
-     *                  to
-     *                  remove it
+     *            <code>true</code> to set the theme name, <code>false</code> to
+     *            remove it
      */
     @Override
     public void setThemeName(String themeName, boolean set) {
@@ -575,7 +574,7 @@ public class DateTimePicker extends
      * be specified by using multiple parameters.
      *
      * @param themeNames
-     *                   the theme name or theme names to be added to the component
+     *            the theme name or theme names to be added to the component
      */
     @Override
     public void addThemeNames(String... themeNames) {
@@ -588,8 +587,7 @@ public class DateTimePicker extends
      * be specified by using multiple parameters.
      *
      * @param themeNames
-     *                   the theme name or theme names to be removed from the
-     *                   component
+     *            the theme name or theme names to be removed from the component
      */
     @Override
     public void removeThemeNames(String... themeNames) {
@@ -655,12 +653,14 @@ public class DateTimePicker extends
         LocalDate dateValue = value != null ? value.toLocalDate() : null;
         LocalTime timeValue = value != null ? value.toLocalTime() : null;
 
-        ValidationResult datePickerResult = datePicker.getDefaultValidator().apply(dateValue, null);
+        ValidationResult datePickerResult = datePicker.getDefaultValidator()
+                .apply(dateValue, null);
         if (datePickerResult.isError()) {
             return datePickerResult;
         }
 
-        ValidationResult timePickerResult = timePicker.getDefaultValidator().apply(timeValue, null);
+        ValidationResult timePickerResult = timePicker.getDefaultValidator()
+                .apply(timeValue, null);
         if (timePickerResult.isError()) {
             return timePickerResult;
         }
@@ -756,7 +756,7 @@ public class DateTimePicker extends
      * component.
      *
      * @param i18n
-     *             the internationalized properties, not <code>null</code>
+     *            the internationalized properties, not <code>null</code>
      */
     public void setDatePickerI18n(DatePickerI18n i18n) {
         Objects.requireNonNull(i18n,
@@ -769,8 +769,7 @@ public class DateTimePicker extends
      * Sets whether the date time picker is marked as input required.
      *
      * @param requiredIndicatorVisible
-     *                                 the value of the requiredIndicatorVisible to
-     *                                 be set
+     *            the value of the requiredIndicatorVisible to be set
      */
     @Override
     public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
@@ -783,7 +782,7 @@ public class DateTimePicker extends
      * clicked.
      *
      * @param autoOpen
-     *                 Value for the auto open property,
+     *            Value for the auto open property,
      */
     public void setAutoOpen(boolean autoOpen) {
         getElement().setProperty(PROP_AUTO_OPEN_DISABLED, !autoOpen);
@@ -812,7 +811,7 @@ public class DateTimePicker extends
      * Adds theme variants to the component.
      *
      * @param variants
-     *                 theme variants to add
+     *            theme variants to add
      */
     public void addThemeVariants(DateTimePickerVariant... variants) {
         getThemeNames().addAll(
@@ -824,7 +823,7 @@ public class DateTimePicker extends
      * Removes theme variants from the component.
      *
      * @param variants
-     *                 theme variants to remove
+     *            theme variants to remove
      */
     public void removeThemeVariants(DateTimePickerVariant... variants) {
         getThemeNames().removeAll(

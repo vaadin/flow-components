@@ -50,7 +50,7 @@ public class DateTimePickerElement extends TestBenchElement
      * Selects the given date time.
      *
      * @param dateTime
-     *                 the date time to set
+     *            the date time to set
      */
     public void setDateTime(LocalDateTime dateTime) {
         if (dateTime == null) {
@@ -78,7 +78,7 @@ public class DateTimePickerElement extends TestBenchElement
      * Selects the given date.
      *
      * @param date
-     *             the date to set
+     *            the date to set
      */
     public void setDate(LocalDate date) {
         if (date == null) {
@@ -105,7 +105,7 @@ public class DateTimePickerElement extends TestBenchElement
      * Selects the given time.
      *
      * @param time
-     *             the time to set
+     *            the time to set
      */
     public void setTime(LocalTime time) {
         if (time == null) {
@@ -137,7 +137,7 @@ public class DateTimePickerElement extends TestBenchElement
      * <code>YYYY-MM-DDThh:mm:ss</code>.
      *
      * @param value
-     *              the value to set
+     *            the value to set
      */
     private void setValue(String value) {
         setProperty(VALUE_PROPERTY, value);
@@ -162,7 +162,7 @@ public class DateTimePickerElement extends TestBenchElement
      * The value is based on ISO 8601 e.g. <code>YYYY-MM-DD</code>.
      *
      * @param value
-     *              the value to set
+     *            the value to set
      */
     private void setDateValue(String value) {
         getDatePicker().setProperty(VALUE_PROPERTY, value);
@@ -187,7 +187,7 @@ public class DateTimePickerElement extends TestBenchElement
      * The value is based on ISO 8601 e.g. <code>hh:mm:ss</code>.
      *
      * @param value
-     *              the value to set
+     *            the value to set
      */
     private void setTimeValue(String value) {
         getTimePicker().setProperty(VALUE_PROPERTY, value);

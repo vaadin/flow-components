@@ -39,10 +39,11 @@ public class DateTimePickerValidationBinderPage extends AbstractValidationPage {
                         UNEXPECTED_VALUE_ERROR_MESSAGE)
                 .bind("property");
 
-        add(createInput(EXPECTED_VALUE_INPUT, "Set expected date time", event -> {
-            var value = LocalDateTime.parse(event.getValue());
-            expectedValue = value;
-        }));
+        add(createInput(EXPECTED_VALUE_INPUT, "Set expected date time",
+                event -> {
+                    var value = LocalDateTime.parse(event.getValue());
+                    expectedValue = value;
+                }));
 
         add(createInput(MIN_INPUT, "Set min date time", event -> {
             var value = LocalDateTime.parse(event.getValue());
