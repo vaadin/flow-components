@@ -71,9 +71,9 @@ import java.util.Set;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-multi-select-combo-box")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha6")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/multi-select-combo-box", version = "23.2.0-alpha2")
+@NpmPackage(value = "@vaadin/multi-select-combo-box", version = "23.2.0-alpha6")
 @JsModule("@vaadin/multi-select-combo-box/src/vaadin-multi-select-combo-box.js")
 @JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 @JsModule("./flow-component-renderer.js")
@@ -330,6 +330,19 @@ public class MultiSelectComboBox<TItem>
     @SafeVarargs
     public final void setValue(TItem... items) {
         Set<TItem> value = new LinkedHashSet<>(List.of(items));
+        setValue(value);
+    }
+
+    /**
+     * Sets the value of the component, which is a set of selected items. As
+     * each item can only be selected once, duplicates in the provided items
+     * will be removed. Passing no items will result in an empty selection.
+     *
+     * @param items
+     *            the new value
+     */
+    public void setValue(Collection<TItem> items) {
+        Set<TItem> value = new LinkedHashSet<>(items);
         setValue(value);
     }
 

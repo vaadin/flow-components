@@ -206,10 +206,10 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha6")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/grid", version = "23.2.0-alpha2")
-@NpmPackage(value = "@vaadin/vaadin-grid", version = "23.2.0-alpha2")
+@NpmPackage(value = "@vaadin/grid", version = "23.2.0-alpha6")
+@NpmPackage(value = "@vaadin/vaadin-grid", version = "23.2.0-alpha6")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -387,6 +387,52 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
+     * Multi-sort priority (visually indicated by numbers in column headers)
+     * controls how columns are added to the sort order, when a column becomes
+     * sorted, or the sort direction of a column is changed.
+     * <p>
+     * Use {@link Grid#setMultiSort(boolean, MultiSortPriority)} to customize
+     * the multi-sort priority of an individual grid.
+     *
+     * @see Grid#setSelectionMode(SelectionMode)
+     * @see Grid#setMultiSort(boolean, MultiSortPriority)
+     */
+    public enum MultiSortPriority {
+        /**
+         * Whenever an unsorted column is sorted, it gets added at the end of
+         * the sort order, after all the previously sorted columns. When the
+         * sort direction of a column is changed by the user, the priority for
+         * all the sorted columns remains unchanged.
+         */
+        APPEND,
+
+        /**
+         * Whenever an unsorted column is sorted, or the sort direction of a
+         * column is changed, that column gets sort priority 1, and all the
+         * other sorted columns are updated accordingly. This is the default
+         * behavior of the component.
+         */
+        PREPEND
+    }
+
+    /**
+     * Sets the default multi-sort priority to use for all Grid instances.
+     * <p>
+     * This method should be called before creating any Grid instances. Changing
+     * this setting does not affect the default for existing Grids. Use
+     * {@link Grid#setMultiSort(boolean, MultiSortPriority)} to provide a custom
+     * multi-sort priority overriding the default priority for a single Grid.
+     *
+     * @param priority
+     *            the multi-sort priority to be used by all grid instances
+     */
+    public static void setDefaultMultiSortPriority(MultiSortPriority priority) {
+        defaultMultiSortPriority = priority;
+    }
+
+    private static MultiSortPriority defaultMultiSortPriority = MultiSortPriority.PREPEND;
+
+    /**
      * Server-side component for the {@code <vaadin-grid-column>} element.
      *
      * <p>
@@ -399,7 +445,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-column")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha2")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha6")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class Column<T> extends AbstractColumn<Column<T>> {
 
@@ -1440,6 +1486,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         addDragStartListener(this::onDragStart);
         addDragEndListener(this::onDragEnd);
 
+        updateMultiSortPriority(defaultMultiSortPriority);
         getElement().setAttribute("suppress-template-warning", true);
     }
 
@@ -3105,6 +3152,29 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public void setMultiSort(boolean multiSort) {
         getElement().setAttribute("multi-sort", multiSort);
+    }
+
+    /**
+     * Sets whether multiple column sorting is enabled on the client-side.
+     *
+     * @param multiSort
+     *            {@code true} to enable sorting of multiple columns on the
+     *            client-side, {@code false} to disable
+     * @param priority
+     *            the multi-sort priority to set, not {@code null}
+     *
+     * @see MultiSortPriority
+     */
+    public void setMultiSort(boolean multiSort, MultiSortPriority priority) {
+        Objects.requireNonNull(priority,
+                "Multi-sort priority must not be null");
+        setMultiSort(multiSort);
+        updateMultiSortPriority(priority);
+    }
+
+    private void updateMultiSortPriority(MultiSortPriority priority) {
+        getElement().setAttribute("multi-sort-priority",
+                priority == MultiSortPriority.APPEND ? "append" : "prepend");
     }
 
     /**

@@ -15,9 +15,6 @@
  */
 package com.vaadin.flow.component.textfield;
 
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
@@ -25,7 +22,6 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.NotSupported;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -142,10 +138,10 @@ import com.vaadin.flow.shared.Registration;
  * </p>
  */
 @Tag("vaadin-text-area")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha6")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/text-area", version = "23.2.0-alpha2")
-@NpmPackage(value = "@vaadin/vaadin-text-field", version = "23.2.0-alpha2")
+@NpmPackage(value = "@vaadin/text-area", version = "23.2.0-alpha6")
+@NpmPackage(value = "@vaadin/vaadin-text-field", version = "23.2.0-alpha6")
 @JsModule("@vaadin/text-area/src/vaadin-text-area.js")
 public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
@@ -674,7 +670,10 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * </p>
      *
      * @return the {@code preventInvalidInput} property from the webcomponent
+     *
+     * @deprecated Since 23.2, this API is deprecated.
      */
+    @Deprecated
     protected boolean isPreventInvalidInputBoolean() {
         return getElement().getProperty("preventInvalidInput", false);
     }
@@ -690,7 +689,10 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      *
      * @param preventInvalidInput
      *            the boolean value to set
+     *
+     * @deprecated Since 23.2, this API is deprecated.
      */
+    @Deprecated
     protected void setPreventInvalidInput(boolean preventInvalidInput) {
         getElement().setProperty("preventInvalidInput", preventInvalidInput);
     }

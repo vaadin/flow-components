@@ -33,8 +33,7 @@ public class MapEventsIT extends AbstractComponentIT {
         MapElement.MapReference mapReference = map.getMapReference();
         MapElement.ViewReference view = mapReference.getView();
         // Simulate user changing the view port of the map
-        view.setCenter(new MapElement.Coordinate(4849385.650796606,
-                5487570.011434158));
+        view.setCenter(new MapElement.Coordinate(43.5627725, 44.1428164));
         view.setZoom(6);
         view.setRotation(5);
 
@@ -44,8 +43,8 @@ public class MapEventsIT extends AbstractComponentIT {
         float rotation = Float.parseFloat(parts[2]);
         float zoom = Float.parseFloat(parts[3]);
 
-        Assert.assertEquals(4849385.650796606, centerX, 0.1);
-        Assert.assertEquals(5487570.011434158, centerY, 0.1);
+        Assert.assertEquals(43.5627725, centerX, 0.1);
+        Assert.assertEquals(44.1428164, centerY, 0.1);
         Assert.assertEquals(5.0, rotation, 0.01);
         Assert.assertEquals(6.0, zoom, 0.01);
     }
@@ -57,8 +56,7 @@ public class MapEventsIT extends AbstractComponentIT {
         MapElement.MapReference mapReference = map.getMapReference();
         MapElement.ViewReference view = mapReference.getView();
         // Simulate user changing the view port of the map
-        view.setCenter(new MapElement.Coordinate(4849385.650796606,
-                5487570.011434158));
+        view.setCenter(new MapElement.Coordinate(43.5627725, 44.1428164));
         view.setZoom(6);
         view.setRotation(5);
 
@@ -68,8 +66,8 @@ public class MapEventsIT extends AbstractComponentIT {
         float rotation = Float.parseFloat(parts[2]);
         float zoom = Float.parseFloat(parts[3]);
 
-        Assert.assertEquals(4849385.650796606, centerX, 0.1);
-        Assert.assertEquals(5487570.011434158, centerY, 0.1);
+        Assert.assertEquals(43.5627725, centerX, 0.1);
+        Assert.assertEquals(44.1428164, centerY, 0.1);
         Assert.assertEquals(5.0, rotation, 0.01);
         Assert.assertEquals(6.0, zoom, 0.01);
     }
@@ -78,7 +76,7 @@ public class MapEventsIT extends AbstractComponentIT {
     public void mapClick_correctCoordinatesAndPosition() {
         addClickListener.click();
 
-        map.clickAtCoordinates(-1956787.9241005122, 1956787.9241005122);
+        map.clickAtCoordinates(-17.578125, 17.308687886770045);
 
         // Click events are delayed, so wait until event data shows up
         waitUntilHasText(eventDataDiv);
@@ -95,15 +93,15 @@ public class MapEventsIT extends AbstractComponentIT {
 
         Assert.assertEquals(100, xPixel, 0.1);
         Assert.assertEquals(100, yPixel, 0.1);
-        Assert.assertEquals(-1956787.9241005122, xCoordinate, 0.00000001);
-        Assert.assertEquals(1956787.9241005122, yCoordinate, 0.00000001);
+        Assert.assertEquals(-17.578125, xCoordinate, 0.00000001);
+        Assert.assertEquals(17.308687886770045, yCoordinate, 0.00000001);
     }
 
     @Test
     public void mapClick_containsAllFeaturesAtLocation() {
         addClickListener.click();
         // Click on location with markers
-        map.clickAtCoordinates(2000000, 0);
+        map.clickAtCoordinates(20, 0);
 
         // Click events are delayed, so wait until event data shows up
         waitUntilHasText(eventDataDiv);

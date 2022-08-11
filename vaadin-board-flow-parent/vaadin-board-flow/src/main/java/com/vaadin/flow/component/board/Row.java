@@ -35,27 +35,12 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * long as sum of columns stays less than or equal to four.
  *
  * <p>
- * One row might also contain a nested row as shown in the following example:
- *
- * <pre>
- * Board board = new Board();
- * Label lbl1 = createLabel("Label 1");
- * Label lbl2 = createLabel("Label 2");
- * Label lbl3 = createLabel("Label 3");
- *
- * Label inner1 = createLabel("Inner 1");
- * Label inner3 = createLabel("Inner 3");
- * Label inner4 = createLabel("Inner 4");
- * Label inner2 = createLabel("Inner 2");
- * Row innerRow = new Row(inner1, inner2, inner3, inner4);
- * Row outerRow = board.add(lbl1, lbl2, lbl3, innerRow);
- * </pre>
  */
 @Tag("vaadin-board-row")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha6")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/board", version = "23.2.0-alpha2")
-@NpmPackage(value = "@vaadin/vaadin-board", version = "23.2.0-alpha2")
+@NpmPackage(value = "@vaadin/board", version = "23.2.0-alpha6")
+@NpmPackage(value = "@vaadin/vaadin-board", version = "23.2.0-alpha6")
 @JsModule("@vaadin/board/vaadin-board-row.js")
 public class Row extends Component
         implements HasStyle, HasSize, HasOrderedComponents {

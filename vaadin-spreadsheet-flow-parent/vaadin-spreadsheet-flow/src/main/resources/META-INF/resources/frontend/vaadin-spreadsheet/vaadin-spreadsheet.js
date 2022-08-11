@@ -181,6 +181,7 @@ export class VaadinSpreadsheet extends LitElement {
         display: block;
         height: 100%;
         min-height: 400px;
+        isolation: isolate;
       }
     `
   };

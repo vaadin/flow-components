@@ -1,8 +1,9 @@
-package com.vaadin.flow.component.map;
+package com.vaadin.flow.component.map.demo;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.map.Map;
 import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.feature.MarkerFeature;
 import com.vaadin.flow.component.map.configuration.layer.FeatureLayer;
@@ -15,15 +16,15 @@ import com.vaadin.flow.router.Route;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-@Route("vaadin-map/map-view")
-public class MapView extends Div {
+@Route("vaadin-map/demo/sampler")
+public class SamplerView extends Div {
     Span numMarkers = new Span();
 
-    public MapView() {
+    public SamplerView() {
         Map map = new Map();
 
         MarkerFeature nurembergMarker = new MarkerFeature(
-                new Coordinate(1233058.1696443919, 6351912.406929109));
+                new Coordinate(11.07675, 49.45203));
         map.getFeatureLayer().addFeature(nurembergMarker);
 
         map.addFeatureClickListener(e -> {
@@ -38,11 +39,11 @@ public class MapView extends Div {
                     layer.setVisible(!layer.isVisible());
                 });
 
-        NativeButton useOpenCycleMap = new NativeButton("Use OpenCycleMap",
-                e -> {
+        NativeButton useHumanitarianMap = new NativeButton(
+                "Use Humanitarian Map", e -> {
                     OSMSource.Options options = new OSMSource.Options();
                     options.setUrl(
-                            "https://{a-c}.tile.thunderforest.com/cycle/{z}/{x}/{y}.png?apikey=187baf2db9fc454896c700ef9e87f499");
+                            "https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png");
                     OSMSource source = new OSMSource(options);
                     TileLayer layer = new TileLayer();
                     layer.setSource(source);
@@ -68,15 +69,14 @@ public class MapView extends Div {
                 });
 
         NativeButton showNuremberg = new NativeButton("Show Nuremberg", e -> {
-            map.getView().setCenter(
-                    new Coordinate(1233058.1696443919, 6351912.406929109));
+            map.getView().setCenter(new Coordinate(11.07675, 49.45203));
             map.getView().setZoom(10);
         });
 
         NativeButton showSaintNazaire = new NativeButton("Show Saint Nazaire",
                 e -> {
-                    map.getView().setCenter(new Coordinate(-244780.24508882355,
-                            5986452.183179816));
+                    map.getView()
+                            .setCenter(new Coordinate(-2.1988983, 47.2711907));
                     map.getView().setZoom(15);
                 });
 
@@ -87,7 +87,7 @@ public class MapView extends Div {
                 });
 
         add(map);
-        add(new Div(toggleLayerVisible, useOpenCycleMap, useOpenStreetMap,
+        add(new Div(toggleLayerVisible, useHumanitarianMap, useOpenStreetMap,
                 addSeaMapLayer, addRandomMarkers, showNuremberg,
                 showSaintNazaire));
 
@@ -101,10 +101,10 @@ public class MapView extends Div {
 
     private void createRandomMarkers(FeatureLayer layer, int count) {
         for (int i = 0; i < count; i++) {
-            double x = ThreadLocalRandom.current().nextDouble(-20026376.39, // NOSONAR
-                    20026376.39);
-            double y = ThreadLocalRandom.current().nextDouble(-20048966.10, // NOSONAR
-                    20048966.10);
+            double x = ThreadLocalRandom.current().nextDouble(-180, // NOSONAR
+                    180);
+            double y = ThreadLocalRandom.current().nextDouble(-90, // NOSONAR
+                    90);
 
             MarkerFeature markerFeature = new MarkerFeature(
                     new Coordinate(x, y));

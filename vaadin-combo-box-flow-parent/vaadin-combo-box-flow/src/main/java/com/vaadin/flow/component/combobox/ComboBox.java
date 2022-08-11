@@ -58,10 +58,10 @@ import elemental.json.JsonObject;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-combo-box")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha6")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/combo-box", version = "23.2.0-alpha2")
-@NpmPackage(value = "@vaadin/vaadin-combo-box", version = "23.2.0-alpha2")
+@NpmPackage(value = "@vaadin/combo-box", version = "23.2.0-alpha6")
+@NpmPackage(value = "@vaadin/vaadin-combo-box", version = "23.2.0-alpha6")
 @JsModule("@vaadin/combo-box/src/vaadin-combo-box.js")
 @JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 @JsModule("./flow-component-renderer.js")
@@ -256,7 +256,12 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
     /**
      * Whether the component should block user input that does not match the
      * configured pattern
+     *
+     * @return {@code true} if the component should block user input that does
+     *         not match the configured pattern, {@code false} otherwise
+     * @deprecated Since 23.2, this API is deprecated.
      */
+    @Deprecated
     public boolean isPreventInvalidInput() {
         return getElement().getProperty("preventInvalidInput", false);
     }
@@ -264,13 +269,22 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
     /**
      * Sets whether the component should block user input that does not match
      * the configured pattern
+     *
+     * @param preventInvalidInput
+     *            {@code true} if the component should block user input that
+     *            does not match the configured pattern, {@code false} otherwise
+     * @deprecated Since 23.2, this API is deprecated in favor of
+     *             {@link #setAllowedCharPattern(String)}
      */
+    @Deprecated
     public void setPreventInvalidInput(boolean preventInvalidInput) {
         getElement().setProperty("preventInvalidInput", preventInvalidInput);
     }
 
     /**
      * The pattern to validate the input with
+     *
+     * @return the pattern to validate the input with
      */
     public String getPattern() {
         return getElement().getProperty("pattern");
@@ -278,6 +292,9 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
 
     /**
      * Sets the pattern with which to validate the input
+     *
+     * @param pattern
+     *            the pattern to validate the input with
      */
     public void setPattern(String pattern) {
         getElement().setProperty("pattern", pattern == null ? "" : pattern);
@@ -304,7 +321,7 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
         JsonObject json = Json.createObject();
         json.put("key", keyMapper.key(value));
         getDataGenerator().generateData(value, json);
-        getElement().setPropertyJson("selectedItem", json);
+        getElement().setPropertyJson(PROP_SELECTED_ITEM, json);
         getElement().setProperty(PROP_VALUE, keyMapper.key(value));
         getElement().setProperty(PROP_INPUT_ELEMENT_VALUE,
                 generateLabel(value));
@@ -314,8 +331,9 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
     protected boolean isSelected(T item) {
         T value = getValue();
         DataProvider<T, ?> dataProvider = getDataProvider();
-        if (dataProvider == null || item == null || value == null)
+        if (dataProvider == null || item == null || value == null) {
             return false;
+        }
 
         return Objects.equals(dataProvider.getId(item),
                 dataProvider.getId(value));
@@ -324,5 +342,19 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
     @Override
     public T getEmptyValue() {
         return null;
+    }
+
+    // Override is only required to keep binary compatibility with other 23.x
+    // minor versions, can be removed in a future major
+    @Override
+    public void addThemeVariants(ComboBoxVariant... variants) {
+        HasThemeVariant.super.addThemeVariants(variants);
+    }
+
+    // Override is only required to keep binary compatibility with other 23.x
+    // minor versions, can be removed in a future major
+    @Override
+    public void removeThemeVariants(ComboBoxVariant... variants) {
+        HasThemeVariant.super.removeThemeVariants(variants);
     }
 }

@@ -10,7 +10,6 @@ import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.orderedlayout.testbench.VerticalLayoutElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.testbench.ElementQuery;
-import com.vaadin.testbench.parallel.BrowserUtil;
 
 public class TemplateSupportIT extends AbstractParallelTest {
 
@@ -80,13 +79,6 @@ public class TemplateSupportIT extends AbstractParallelTest {
         lastNameField.setValue("Oladeji");
 
         crud.getEditorSaveButton().click();
-
-        if (BrowserUtil.isIE(getDesiredCapabilities())) {
-            // TODO(oluwasayo): Investigate why editor sometimes doesn't
-            // disappear on first click in IE
-            // especially when server-side validation is involved
-            return;
-        }
 
         Assert.assertFalse(crud.isEditorOpen());
         Assert.assertEquals("Oladeji", $("crud-app").first()

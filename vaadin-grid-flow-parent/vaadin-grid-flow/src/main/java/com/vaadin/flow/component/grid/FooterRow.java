@@ -44,8 +44,18 @@ public class FooterRow extends AbstractRow<FooterCell> {
         }
 
         @Override
+        public String getText() {
+            return getColumn().getFooterText();
+        }
+
+        @Override
         public void setText(String text) {
             getColumn().setFooterText(text);
+        }
+
+        @Override
+        public Component getComponent() {
+            return getColumn().getFooterComponent();
         }
 
         @Override

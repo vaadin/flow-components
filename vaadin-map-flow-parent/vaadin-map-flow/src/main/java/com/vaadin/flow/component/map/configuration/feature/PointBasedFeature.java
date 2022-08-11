@@ -20,12 +20,11 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.vaadin.flow.component.map.Map;
 import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.Feature;
-import com.vaadin.flow.component.map.configuration.View;
 import com.vaadin.flow.component.map.configuration.geometry.Point;
 import com.vaadin.flow.component.map.configuration.geometry.SimpleGeometry;
-import com.vaadin.flow.component.map.configuration.source.Source;
 
 import java.util.Objects;
 
@@ -47,9 +46,11 @@ public abstract class PointBasedFeature extends Feature {
     }
 
     /**
-     * The coordinates that define where the feature is located on the map. The
-     * coordinates must be in the same projection as the
-     * {@link View#getProjection()} and {@link Source#getProjection()}.
+     * The coordinates that define where the feature is located on the map.
+     * Coordinates are returned in the map's user projection, which by default
+     * is {@code EPSG:4326}, also referred to as GPS coordinates. If the user
+     * projection has been changed using {@link Map#setUserProjection(String)},
+     * then coordinates must be specified in that projection instead.
      *
      * @return the current coordinates
      */
@@ -60,8 +61,11 @@ public abstract class PointBasedFeature extends Feature {
 
     /**
      * Sets the coordinates that define where the feature is located on the map.
-     * The coordinates must be in the same projection as the
-     * {@link View#getProjection()} and {@link Source#getProjection()}.
+     * Coordinates must be specified in the map's user projection, which by
+     * default is {@code EPSG:4326}, also referred to as GPS coordinates. If the
+     * user projection has been changed using
+     * {@link Map#setUserProjection(String)}, then coordinates must be specified
+     * in that projection instead.
      *
      * @param coordinates
      *            the new coordinates

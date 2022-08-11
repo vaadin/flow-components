@@ -33,22 +33,12 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * one column each, or fewer components with multiple columns each as long as
  * sum of columns stays less than or equal to four.
  * <p>
- * Here is a simple usage example:
- *
- * <pre>
- * Board board = new Board();
- * Label lbl1 = new Label("LABEL1");
- * Label lbl2 = new Label("LABEL2");
- * Label lbl3 = new Label("LABEL3");
- * Label lbl4 = new Label("LABEL4");
- * board.addRow(lbl1, lbl2, lbl3, lbl4);
- * </pre>
  */
 @Tag("vaadin-board")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha6")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/board", version = "23.2.0-alpha2")
-@NpmPackage(value = "@vaadin/vaadin-board", version = "23.2.0-alpha2")
+@NpmPackage(value = "@vaadin/board", version = "23.2.0-alpha6")
+@NpmPackage(value = "@vaadin/vaadin-board", version = "23.2.0-alpha6")
 @JsModule("@vaadin/board/vaadin-board.js")
 public class Board extends Component
         implements HasSize, HasStyle, HasOrderedComponents {

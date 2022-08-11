@@ -114,7 +114,7 @@ import com.vaadin.flow.dom.Element;
  * The following shadow DOM parts are available for styling:
  * </p>
  * <table>
- * <thead>
+ * <caption>Shadow DOM parts available for styling</caption> <thead>
  * <tr>
  * <th>Part name</th>
  * <th>Description</th>
@@ -132,7 +132,7 @@ import com.vaadin.flow.dom.Element;
  * {@code <vaadin-form-item>} element:
  * </p>
  * <table>
- * <thead>
+ * <caption>Custom CSS properties available for styling</caption> <thead>
  * <tr>
  * <th>Custom CSS property</th>
  * <th>Description</th>
@@ -164,10 +164,10 @@ import com.vaadin.flow.dom.Element;
  * </p>
  */
 @Tag("vaadin-form-item")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha6")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/form-layout", version = "23.2.0-alpha2")
-@NpmPackage(value = "@vaadin/vaadin-form-layout", version = "23.2.0-alpha2")
+@NpmPackage(value = "@vaadin/form-layout", version = "23.2.0-alpha6")
+@NpmPackage(value = "@vaadin/vaadin-form-layout", version = "23.2.0-alpha6")
 @JsModule("@vaadin/form-layout/src/vaadin-form-item.js")
 public abstract class GeneratedVaadinFormItem<R extends GeneratedVaadinFormItem<R>>
         extends Component implements HasStyle, ClickNotifier<R> {
