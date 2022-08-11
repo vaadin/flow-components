@@ -27,7 +27,7 @@ public class DatePickerValidationBinderPage extends AbstractValidationPage {
         }
     }
 
-    protected Binder<?> binder;
+    protected Binder<Bean> binder;
 
     private LocalDate expectedValue;
 
