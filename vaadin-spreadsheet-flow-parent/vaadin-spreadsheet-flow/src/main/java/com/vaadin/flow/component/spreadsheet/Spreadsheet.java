@@ -312,16 +312,8 @@ public class Spreadsheet extends Component
         return description;
     }
 
-    private ContentMode getDescriptionContentMode() {
-        return descriptionContentMode;
-    }
-
     public String getCaption() {
         return caption;
-    }
-
-    private List<String> getStyles() {
-        return styles;
     }
 
     public String getPrimaryStyleName() {
@@ -332,24 +324,8 @@ public class Spreadsheet extends Component
         return errorMessage;
     }
 
-    private ErrorLevel getErrorLevel() {
-        return errorLevel;
-    }
-
     public boolean isCaptionAsHtml() {
         return captionAsHtml;
-    }
-
-    private Map<String, String> getResources() {
-        return resources;
-    }
-
-    private Set<String> getRegisteredEventListeners() {
-        return registeredEventListeners;
-    }
-
-    private int getColumnBufferSize() {
-        return columnBufferSize;
     }
 
     protected int getCols() {
@@ -358,10 +334,6 @@ public class Spreadsheet extends Component
 
     private List<GroupingData> getColGroupingData() {
         return colGroupingData;
-    }
-
-    private List<GroupingData> getRowGroupingData() {
-        return rowGroupingData;
     }
 
     public int getColGroupingMax() {
@@ -394,10 +366,6 @@ public class Spreadsheet extends Component
 
     protected int[] getColW() {
         return colW;
-    }
-
-    private boolean isReload() {
-        return reload;
     }
 
     private int getSheetIndex() {
@@ -456,10 +424,6 @@ public class Spreadsheet extends Component
         return sheetProtected;
     }
 
-    private boolean isWorkbookProtected() {
-        return workbookProtected;
-    }
-
     private HashMap<String, String> getCellKeysToEditorIdMap() {
         return cellKeysToEditorIdMap;
     }
@@ -488,24 +452,12 @@ public class Spreadsheet extends Component
         return invalidFormulaCells;
     }
 
-    private boolean isHasActions() {
-        return hasActions;
-    }
-
     private HashMap<String, OverlayInfo> getOverlays() {
         return overlays;
     }
 
     private ArrayList<MergedRegion> getMergedRegions() {
         return mergedRegions;
-    }
-
-    private boolean isDisplayGridlines() {
-        return displayGridlines;
-    }
-
-    private boolean isDisplayRowColHeadings() {
-        return displayRowColHeadings;
     }
 
     private int getVerticalSplitPosition() {
@@ -522,18 +474,6 @@ public class Spreadsheet extends Component
 
     private boolean isWorkbookChangeToggle() {
         return workbookChangeToggle;
-    }
-
-    private String getInvalidFormulaErrorMessage() {
-        return invalidFormulaErrorMessage;
-    }
-
-    private boolean isLockFormatColumns() {
-        return lockFormatColumns;
-    }
-
-    private boolean isLockFormatRows() {
-        return lockFormatRows;
     }
 
     public List<String> getNamedRanges() {
