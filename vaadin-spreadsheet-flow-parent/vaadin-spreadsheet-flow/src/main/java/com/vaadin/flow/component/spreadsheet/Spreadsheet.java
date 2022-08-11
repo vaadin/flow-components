@@ -476,8 +476,8 @@ public class Spreadsheet extends Component
                 Serializer.serialize(colGroupingData));
     }
 
-        this.rowGroupingData = rowGroupingData;
     protected void setRowGroupingData(List<GroupingData> rowGroupingData) {
+        this.rowGroupingData = rowGroupingData;
         getElement().setProperty("rowGroupingData",
                 Serializer.serialize(rowGroupingData));
     }
@@ -614,8 +614,8 @@ public class Spreadsheet extends Component
         getElement().setProperty("sheetProtected", sheetProtected);
     }
 
-        this.workbookProtected = workbookProtected;
     private void setWorkbookProtected(boolean workbookProtected) {
+        this.workbookProtected = workbookProtected;
         getElement().setProperty("workbookProtected", workbookProtected);
     }
 
@@ -665,8 +665,8 @@ public class Spreadsheet extends Component
                 Serializer.serialize(invalidFormulaCells));
     }
 
-        this.hasActions = hasActions;
     private void setHasActions(boolean hasActions) {
+        this.hasActions = hasActions;
         getElement().setProperty("hasActions", hasActions);
     }
 
@@ -681,13 +681,13 @@ public class Spreadsheet extends Component
                 Serializer.serialize(mergedRegions));
     }
 
-        this.displayGridlines = displayGridlines;
     private void setDisplayGridlines(boolean displayGridlines) {
+        this.displayGridlines = displayGridlines;
         getElement().setProperty("displayGridlines", displayGridlines);
     }
 
-        this.displayRowColHeadings = displayRowColHeadings;
     private void setDisplayRowColHeadings(boolean displayRowColHeadings) {
+        this.displayRowColHeadings = displayRowColHeadings;
         getElement().setProperty("displayRowColHeadings",
                 displayRowColHeadings);
     }
@@ -714,18 +714,18 @@ public class Spreadsheet extends Component
         getElement().setProperty("workbookChangeToggle", workbookChangeToggle);
     }
 
-        this.lockFormatColumns = lockFormatColumns;
     protected void setLockFormatColumns(boolean lockFormatColumns) {
+        this.lockFormatColumns = lockFormatColumns;
         getElement().setProperty("lockFormatColumns", lockFormatColumns);
     }
 
-        this.lockFormatRows = lockFormatRows;
     protected void setLockFormatRows(boolean lockFormatRows) {
+        this.lockFormatRows = lockFormatRows;
         getElement().setProperty("lockFormatRows", lockFormatRows);
     }
 
-        this.namedRanges = namedRanges;
     protected void setNamedRanges(List<String> namedRanges) {
+        this.namedRanges = namedRanges;
         getElement().setProperty("namedRanges",
                 Serializer.serialize(namedRanges));
     }
