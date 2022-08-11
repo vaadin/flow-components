@@ -54,6 +54,11 @@ class DateTimePickerDatePicker
         // Should not change invalid state
     }
 
+    // TODO: Think of a better naming.
+    ValidationResult doCheckValidity(LocalDate date) {
+        return checkValidity(date);
+    }
+
     void passThroughPresentationValue(LocalDate newPresentationValue) {
         super.setPresentationValue(newPresentationValue);
     }
@@ -67,6 +72,11 @@ class DateTimePickerTimePicker
     @Override
     protected void validate() {
         // Should not change invalid state
+    }
+
+    // TODO: Think of a better naming.
+    ValidationResult doCheckValidity(LocalTime time) {
+        return checkValidity(time);
     }
 
     void passThroughPresentationValue(LocalTime newPresentationValue) {
@@ -650,14 +660,14 @@ public class DateTimePicker extends
     }
 
     private ValidationResult checkValidity(LocalDateTime value) {
-        var greaterThanMax = ValidationUtil.checkGreaterThanMax(value, max);
-        if (greaterThanMax.isError()) {
-            return greaterThanMax;
+        ValidationResult datePickerResult = datePicker.doCheckValidity(value.toLocalDate());
+        if (datePickerResult.isError()) {
+            return datePickerResult;
         }
 
-        var smallerThanMin = ValidationUtil.checkSmallerThanMin(value, min);
-        if (smallerThanMin.isError()) {
-            return smallerThanMin;
+        ValidationResult timePickerResult = timePicker.doCheckValidity(value.toLocalTime());
+        if (timePickerResult.isError()) {
+            return timePickerResult;
         }
 
         return ValidationResult.ok();
