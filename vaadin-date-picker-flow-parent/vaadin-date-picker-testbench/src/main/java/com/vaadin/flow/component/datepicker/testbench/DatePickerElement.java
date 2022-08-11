@@ -22,11 +22,11 @@ import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 
 /**
  * A TestBench element representing a <code>&lt;vaadin-date-picker&gt;</code>
@@ -155,18 +155,18 @@ public class DatePickerElement extends TestBenchElement
     }
 
     /**
-     * Opens the overlay, sets the value to the inner input element as a string
-     * and closes the overlay. This simulates the user typing into the input and
-     * triggering an update of the value property.
+     * Emulates the user changing the value. This in practice means clearing
+     * {@code value} of the {@code input} element and then setting the new value
+     * by sending the respective characters + Enter via the Selenium
+     * {@code sendKeys} API.
+     *
+     * @param string
+     *            the value to set
      */
     public void setInputValue(String value) {
-        this.open();
         var input = $("input").first();
-        input.setProperty("value", value);
-        input.dispatchEvent("input", Collections.singletonMap("bubbles", true));
-        input.dispatchEvent("change",
-                Collections.singletonMap("bubbles", true));
-        this.close();
+        input.setProperty("value", "");
+        input.sendKeys(value, Keys.ENTER);
     }
 
     /**
