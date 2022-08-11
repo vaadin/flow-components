@@ -312,22 +312,6 @@ public class Spreadsheet extends Component
         return description;
     }
 
-    public String getCaption() {
-        return caption;
-    }
-
-    public String getPrimaryStyleName() {
-        return primaryStyleName;
-    }
-
-    public String getErrorMessage() {
-        return errorMessage;
-    }
-
-    public boolean isCaptionAsHtml() {
-        return captionAsHtml;
-    }
-
     protected int getCols() {
         return cols;
     }
@@ -360,7 +344,7 @@ public class Spreadsheet extends Component
         return defColW;
     }
 
-    protected float[] getRowH() {
+    private float[] getRowH() {
         return rowH;
     }
 
@@ -476,285 +460,272 @@ public class Spreadsheet extends Component
         return workbookChangeToggle;
     }
 
-    public List<String> getNamedRanges() {
-        return namedRanges;
-    }
-
-    public void _setRowBufferSize(int rowBufferSize) {
-        setRowBufferSize(rowBufferSize);
-    }
-
-    public void setColumnBufferSize(int columnBufferSize) {
-        this.columnBufferSize = columnBufferSize;
-        getElement().setProperty("columnBufferSize", columnBufferSize);
-    }
-
-    public void setRows(int rows) {
+    protected void setRows(int rows) {
         this.rows = rows;
         getElement().setProperty("rows", rows);
     }
 
-    public void setCols(int cols) {
+    protected void setCols(int cols) {
         this.cols = cols;
         getElement().setProperty("cols", cols);
     }
 
-    public void setColGroupingData(List<GroupingData> colGroupingData) {
+    protected void setColGroupingData(List<GroupingData> colGroupingData) {
         this.colGroupingData = colGroupingData;
         getElement().setProperty("colGroupingData",
                 Serializer.serialize(colGroupingData));
     }
 
-    public void setRowGroupingData(List<GroupingData> rowGroupingData) {
         this.rowGroupingData = rowGroupingData;
+    protected void setRowGroupingData(List<GroupingData> rowGroupingData) {
         getElement().setProperty("rowGroupingData",
                 Serializer.serialize(rowGroupingData));
     }
 
-    public void setColGroupingMax(int colGroupingMax) {
+    protected void setColGroupingMax(int colGroupingMax) {
         this.colGroupingMax = colGroupingMax;
         getElement().setProperty("colGroupingMax", colGroupingMax);
     }
 
-    public void setRowGroupingMax(int rowGroupingMax) {
+    protected void setRowGroupingMax(int rowGroupingMax) {
         this.rowGroupingMax = rowGroupingMax;
         getElement().setProperty("rowGroupingMax", rowGroupingMax);
     }
 
-    public void setColGroupingInversed(boolean colGroupingInversed) {
+    protected void setColGroupingInversed(boolean colGroupingInversed) {
         this.colGroupingInversed = colGroupingInversed;
         getElement().setProperty("colGroupingInversed", colGroupingInversed);
     }
 
-    public void setRowGroupingInversed(boolean rowGroupingInversed) {
+    protected void setRowGroupingInversed(boolean rowGroupingInversed) {
         this.rowGroupingInversed = rowGroupingInversed;
         getElement().setProperty("rowGroupingInversed", rowGroupingInversed);
     }
 
-    public void setDefRowH(float defRowH) {
+    protected void setDefRowH(float defRowH) {
         this.defRowH = defRowH;
         getElement().setProperty("defRowH", defRowH);
     }
 
-    public void setDefColW(int defColW) {
+    protected void setDefColW(int defColW) {
         this.defColW = defColW;
         getElement().setProperty("defColW", defColW);
     }
 
-    public void setRowH(float[] rowH) {
+    protected void setRowH(float[] rowH) {
         this.rowH = rowH;
         getElement().setProperty("rowH", Serializer.serialize(rowH));
     }
 
-    public void setColW(int[] colW) {
+    protected void setColW(int[] colW) {
         this.colW = colW;
         getElement().setProperty("colW", Serializer.serialize(colW));
     }
 
-    public void setReload(boolean reload) {
+    private void setReload(boolean reload) {
         if (reload)
             getElement().setProperty("reload", System.currentTimeMillis());
     }
 
-    public void setSheetIndex(int sheetIndex) {
+    private void setSheetIndex(int sheetIndex) {
         this.sheetIndex = sheetIndex;
         getElement().setProperty("sheetIndex", sheetIndex);
     }
 
-    public void setSheetNames(String[] sheetNames) {
+    private void setSheetNames(String[] sheetNames) {
         this.sheetNames = sheetNames;
         getElement().setProperty("sheetNames",
                 Serializer.serialize(sheetNames));
     }
 
-    public void setCellStyleToCSSStyle(
+    protected void setCellStyleToCSSStyle(
             HashMap<Integer, String> cellStyleToCSSStyle) {
         this.cellStyleToCSSStyle = cellStyleToCSSStyle;
         getElement().setProperty("cellStyleToCSSStyle",
                 Serializer.serialize(cellStyleToCSSStyle));
     }
 
-    public void setRowIndexToStyleIndex(
+    protected void setRowIndexToStyleIndex(
             HashMap<Integer, Integer> rowIndexToStyleIndex) {
         this.rowIndexToStyleIndex = rowIndexToStyleIndex;
         getElement().setProperty("rowIndexToStyleIndex",
                 Serializer.serialize(rowIndexToStyleIndex));
     }
 
-    public void setColumnIndexToStyleIndex(
+    protected void setColumnIndexToStyleIndex(
             HashMap<Integer, Integer> columnIndexToStyleIndex) {
         this.columnIndexToStyleIndex = columnIndexToStyleIndex;
         getElement().setProperty("columnIndexToStyleIndex",
                 Serializer.serialize(columnIndexToStyleIndex));
     }
 
-    public void setLockedColumnIndexes(Set<Integer> lockedColumnIndexes) {
+    protected void setLockedColumnIndexes(Set<Integer> lockedColumnIndexes) {
         this.lockedColumnIndexes = lockedColumnIndexes;
         getElement().setProperty("lockedColumnIndexes",
                 Serializer.serialize(lockedColumnIndexes));
     }
 
-    public void setLockedRowIndexes(Set<Integer> lockedRowIndexes) {
+    protected void setLockedRowIndexes(Set<Integer> lockedRowIndexes) {
         this.lockedRowIndexes = lockedRowIndexes;
         getElement().setProperty("lockedRowIndexes",
                 Serializer.serialize(lockedRowIndexes));
     }
 
-    public void setShiftedCellBorderStyles(
+    protected void setShiftedCellBorderStyles(
             ArrayList<String> shiftedCellBorderStyles) {
         this.shiftedCellBorderStyles = shiftedCellBorderStyles;
         getElement().setProperty("shiftedCellBorderStyles",
                 Serializer.serialize(shiftedCellBorderStyles));
     }
 
-    public void setConditionalFormattingStyles(
+    protected void setConditionalFormattingStyles(
             HashMap<Integer, String> conditionalFormattingStyles) {
         this.conditionalFormattingStyles = conditionalFormattingStyles;
         getElement().setProperty("conditionalFormattingStyles",
                 Serializer.serialize(conditionalFormattingStyles));
     }
 
-    public void setHiddenColumnIndexes(ArrayList<Integer> hiddenColumnIndexes) {
+    protected void setHiddenColumnIndexes(ArrayList<Integer> hiddenColumnIndexes) {
         this.hiddenColumnIndexes = hiddenColumnIndexes;
         getElement().setProperty("hiddenColumnIndexes",
                 Serializer.serialize(hiddenColumnIndexes));
     }
 
-    public void setHiddenRowIndexes(ArrayList<Integer> hiddenRowIndexes) {
+    protected void setHiddenRowIndexes(ArrayList<Integer> hiddenRowIndexes) {
         this.hiddenRowIndexes = hiddenRowIndexes;
         getElement().setProperty("hiddenRowIndexes",
                 Serializer.serialize(hiddenRowIndexes));
     }
 
-    public void setVerticalScrollPositions(int[] verticalScrollPositions) {
+    protected void setVerticalScrollPositions(int[] verticalScrollPositions) {
         this.verticalScrollPositions = verticalScrollPositions;
         getElement().setProperty("verticalScrollPositions",
                 Serializer.serialize(verticalScrollPositions));
     }
 
-    public void setHorizontalScrollPositions(int[] horizontalScrollPositions) {
+    protected void setHorizontalScrollPositions(int[] horizontalScrollPositions) {
         this.horizontalScrollPositions = horizontalScrollPositions;
         getElement().setProperty("horizontalScrollPositions",
                 Serializer.serialize(horizontalScrollPositions));
     }
 
-    public void setSheetProtected(boolean sheetProtected) {
+    private void setSheetProtected(boolean sheetProtected) {
         this.sheetProtected = sheetProtected;
         getElement().setProperty("sheetProtected", sheetProtected);
     }
 
-    public void setWorkbookProtected(boolean workbookProtected) {
         this.workbookProtected = workbookProtected;
+    private void setWorkbookProtected(boolean workbookProtected) {
         getElement().setProperty("workbookProtected", workbookProtected);
     }
 
-    public void setCellKeysToEditorIdMap(
+    private void setCellKeysToEditorIdMap(
             HashMap<String, String> cellKeysToEditorIdMap) {
         this.cellKeysToEditorIdMap = cellKeysToEditorIdMap;
         getElement().setProperty("cellKeysToEditorIdMap",
                 Serializer.serialize(cellKeysToEditorIdMap));
     }
 
-    public void setComponentIDtoCellKeysMap(
+    private void setComponentIDtoCellKeysMap(
             HashMap<String, String> componentIDtoCellKeysMap) {
         this.componentIDtoCellKeysMap = componentIDtoCellKeysMap;
         getElement().setProperty("componentIDtoCellKeysMap",
                 Serializer.serialize(componentIDtoCellKeysMap));
     }
 
-    public void setHyperlinksTooltips(
+    private void setHyperlinksTooltips(
             HashMap<String, String> hyperlinksTooltips) {
         this.hyperlinksTooltips = hyperlinksTooltips;
         getElement().setProperty("hyperlinksTooltips",
                 Serializer.serialize(hyperlinksTooltips));
     }
 
-    public void setCellComments(HashMap<String, String> cellComments) {
+    private void setCellComments(HashMap<String, String> cellComments) {
         this.cellComments = cellComments;
         getElement().setProperty("cellComments",
                 Serializer.serialize(cellComments));
     }
 
-    public void setCellCommentAuthors(
+    private void setCellCommentAuthors(
             HashMap<String, String> cellCommentAuthors) {
         this.cellCommentAuthors = cellCommentAuthors;
         getElement().setProperty("cellCommentAuthors",
                 Serializer.serialize(cellCommentAuthors));
     }
 
-    public void setVisibleCellComments(ArrayList<String> visibleCellComments) {
+    private void setVisibleCellComments(ArrayList<String> visibleCellComments) {
         this.visibleCellComments = visibleCellComments;
         getElement().setProperty("visibleCellComments",
                 Serializer.serialize(visibleCellComments));
     }
 
-    public void setInvalidFormulaCells(Set<String> invalidFormulaCells) {
+    private void setInvalidFormulaCells(Set<String> invalidFormulaCells) {
         this.invalidFormulaCells = invalidFormulaCells;
         getElement().setProperty("invalidFormulaCells",
                 Serializer.serialize(invalidFormulaCells));
     }
 
-    public void setHasActions(boolean hasActions) {
         this.hasActions = hasActions;
+    private void setHasActions(boolean hasActions) {
         getElement().setProperty("hasActions", hasActions);
     }
 
-    public void setOverlays(HashMap<String, OverlayInfo> overlays) {
+    private void setOverlays(HashMap<String, OverlayInfo> overlays) {
         this.overlays = overlays;
         getElement().setProperty("overlays", Serializer.serialize(overlays));
     }
 
-    public void setMergedRegions(ArrayList<MergedRegion> mergedRegions) {
+    protected void setMergedRegions(ArrayList<MergedRegion> mergedRegions) {
         this.mergedRegions = mergedRegions;
         getElement().setProperty("mergedRegions",
                 Serializer.serialize(mergedRegions));
     }
 
-    public void setDisplayGridlines(boolean displayGridlines) {
         this.displayGridlines = displayGridlines;
+    private void setDisplayGridlines(boolean displayGridlines) {
         getElement().setProperty("displayGridlines", displayGridlines);
     }
 
-    public void setDisplayRowColHeadings(boolean displayRowColHeadings) {
         this.displayRowColHeadings = displayRowColHeadings;
+    private void setDisplayRowColHeadings(boolean displayRowColHeadings) {
         getElement().setProperty("displayRowColHeadings",
                 displayRowColHeadings);
     }
 
-    public void setVerticalSplitPosition(int verticalSplitPosition) {
+    protected void setVerticalSplitPosition(int verticalSplitPosition) {
         this.verticalSplitPosition = verticalSplitPosition;
         getElement().setProperty("verticalSplitPosition",
                 verticalSplitPosition);
     }
 
-    public void setHorizontalSplitPosition(int horizontalSplitPosition) {
+    protected void setHorizontalSplitPosition(int horizontalSplitPosition) {
         this.horizontalSplitPosition = horizontalSplitPosition;
         getElement().setProperty("horizontalSplitPosition",
                 horizontalSplitPosition);
     }
 
-    public void setInfoLabelValue(String infoLabelValue) {
+    private void setInfoLabelValue(String infoLabelValue) {
         this.infoLabelValue = infoLabelValue;
         getElement().setProperty("infoLabelValue", infoLabelValue);
     }
 
-    public void setWorkbookChangeToggle(boolean workbookChangeToggle) {
+    private void setWorkbookChangeToggle(boolean workbookChangeToggle) {
         this.workbookChangeToggle = workbookChangeToggle;
         getElement().setProperty("workbookChangeToggle", workbookChangeToggle);
     }
 
-    public void setLockFormatColumns(boolean lockFormatColumns) {
         this.lockFormatColumns = lockFormatColumns;
+    protected void setLockFormatColumns(boolean lockFormatColumns) {
         getElement().setProperty("lockFormatColumns", lockFormatColumns);
     }
 
-    public void setLockFormatRows(boolean lockFormatRows) {
         this.lockFormatRows = lockFormatRows;
+    protected void setLockFormatRows(boolean lockFormatRows) {
         getElement().setProperty("lockFormatRows", lockFormatRows);
     }
 
-    public void setNamedRanges(List<String> namedRanges) {
         this.namedRanges = namedRanges;
+    protected void setNamedRanges(List<String> namedRanges) {
         getElement().setProperty("namedRanges",
                 Serializer.serialize(namedRanges));
     }
