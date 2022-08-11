@@ -9,7 +9,7 @@ import com.vaadin.tests.AbstractComponentIT;
 import static com.vaadin.flow.component.timepicker.tests.validation.AbstractValidationPage.SERVER_VALIDITY_STATE;
 import static com.vaadin.flow.component.timepicker.tests.validation.AbstractValidationPage.SERVER_VALIDITY_STATE_BUTTON;
 
-public class AbstractValidationIT extends AbstractComponentIT {
+public abstract class AbstractValidationIT extends AbstractComponentIT {
     protected TimePickerElement field;
 
     @Before
