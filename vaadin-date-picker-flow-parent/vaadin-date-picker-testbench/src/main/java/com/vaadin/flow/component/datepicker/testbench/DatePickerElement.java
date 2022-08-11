@@ -25,6 +25,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.openqa.selenium.By;
+
 /**
  * A TestBench element representing a <code>&lt;vaadin-date-picker&gt;</code>
  * element.
@@ -208,5 +210,10 @@ public class DatePickerElement extends TestBenchElement
         return this.$("vaadin-date-picker-overlay").onPage().waitForFirst()
                 .$(TestBenchElement.class).id("content")
                 .$(OverlayContentElement.class).id("overlay-content");
+    }
+
+    @Override
+    public void sendKeys(CharSequence... keysToSend) {
+        findElement(By.tagName("input")).sendKeys(keysToSend);
     }
 }
