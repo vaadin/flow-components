@@ -336,11 +336,11 @@ public class Spreadsheet extends Component
         return colGroupingData;
     }
 
-    public int getColGroupingMax() {
+    protected int getColGroupingMax() {
         return colGroupingMax;
     }
 
-    public int getRowGroupingMax() {
+    protected int getRowGroupingMax() {
         return rowGroupingMax;
     }
 
