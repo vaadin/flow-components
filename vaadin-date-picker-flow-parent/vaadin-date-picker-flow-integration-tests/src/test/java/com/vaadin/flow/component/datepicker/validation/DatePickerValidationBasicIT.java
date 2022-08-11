@@ -27,13 +27,11 @@ public class DatePickerValidationBasicIT extends AbstractValidationIT {
         executeScript("arguments[0].validate()", field);
         assertClientValid(false);
 
-        TestBenchElement input = field.$("input").first();
-        input.setProperty("value", "1/1/2022");
-        input.dispatchEvent("input");
+        field.sendKeys("1/1/2022");
         executeScript("arguments[0].validate()", field);
         assertClientValid(false);
 
-        input.dispatchEvent("change");
+        field.sendKeys(Keys.ENTER);
         assertServerValid(true);
         assertClientValid(true);
     }
