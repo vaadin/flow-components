@@ -26,7 +26,7 @@ public class TimePickerValidationBinderPage extends AbstractValidationPage {
         }
     }
 
-    protected Binder<?> binder;
+    protected Binder<Bean> binder;
 
     private LocalTime expectedValue;
 
