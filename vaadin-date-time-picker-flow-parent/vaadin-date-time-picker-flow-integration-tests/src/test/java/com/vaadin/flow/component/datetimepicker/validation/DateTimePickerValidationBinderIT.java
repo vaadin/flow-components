@@ -55,8 +55,8 @@ public class DateTimePickerValidationBinderIT extends AbstractValidationIT {
 
     @Test
     public void min_changeInputValue_assertValidity() {
-        $("input").id(MIN_INPUT).sendKeys("02-02-2000T12:00", Keys.ENTER);
-        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("03-03-2000T13:00",
+        $("input").id(MIN_INPUT).sendKeys("2000-02-02T12:00", Keys.ENTER);
+        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("2000-03-03T13:00",
                 Keys.ENTER);
 
         // Constraint validation fails:
@@ -81,8 +81,8 @@ public class DateTimePickerValidationBinderIT extends AbstractValidationIT {
 
     @Test
     public void max_changeInputValue_assertValidity() {
-        $("input").id(MAX_INPUT).sendKeys("02-02-2000T12:00", Keys.ENTER);
-        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("03-03-2000T13:00",
+        $("input").id(MAX_INPUT).sendKeys("2000-02-02T12:00", Keys.ENTER);
+        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("2000-03-03T13:00",
                 Keys.ENTER);
 
         // Constraint validation fails:
@@ -107,7 +107,7 @@ public class DateTimePickerValidationBinderIT extends AbstractValidationIT {
 
     @Test
     public void badInput_changeInputValue_assertValidity() {
-        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("01-01-2000T10:00",
+        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("2000-01-01T10:00",
                 Keys.ENTER);
 
         setDateInputValue("INVALID");
