@@ -32,7 +32,6 @@ public class TimePickerDetachAttachPageIT extends AbstractComponentIT {
     TestBenchElement toggleAttach;
     TestBenchElement setValue;
     TestBenchElement setLocale;
-    private TimePickerElement timePicker;
 
     @Before
     public void init() {
@@ -40,13 +39,14 @@ public class TimePickerDetachAttachPageIT extends AbstractComponentIT {
         toggleAttach = $("button").id("toggle-attached");
         setValue = $("button").id("set-value");
         setLocale = $("button").id("set-california-locale");
-        timePicker = $(TimePickerElement.class).waitForFirst();
     }
 
     @Test
     public void formatShouldRespectLocaleAfterDetachAndReattach() {
         setValue.click();
         setLocale.click();
+        TimePickerElement timePicker = $(TimePickerElement.class)
+                .id("time-picker");
         Assert.assertEquals("2:00 a.m.", timePicker.getSelectedText());
 
         toggleAttach.click();
