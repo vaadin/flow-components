@@ -50,6 +50,11 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
     private String rawHeaderTemplate;
     private boolean sortingIndicators;
 
+    private String headerText;
+    private Component headerComponent;
+    private String footerText;
+    private Component footerComponent;
+
     /**
      * Base constructor with the destination Grid.
      *
@@ -166,19 +171,65 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
         return rendering;
     }
 
+    /**
+     * Returns the header text of the column.
+     *
+     * @return the header text
+     */
+    public String getHeaderText() {
+        return headerText;
+    }
+
     protected void setHeaderText(String text) {
-        setHeaderRenderer(TemplateRenderer.of(HtmlUtils.escape(text)));
+        headerText = text;
+        headerComponent = null;
+        setHeaderRenderer(TemplateRenderer
+                .of(text != null ? HtmlUtils.escape(text) : ""));
+    }
+
+    /**
+     * Returns the footer text of the column.
+     *
+     * @return the footer text
+     */
+    public String getFooterText() {
+        return footerText;
     }
 
     protected void setFooterText(String text) {
-        setFooterRenderer(TemplateRenderer.of(HtmlUtils.escape(text)));
+        footerText = text;
+        footerComponent = null;
+        setFooterRenderer(TemplateRenderer
+                .of(text != null ? HtmlUtils.escape(text) : ""));
+    }
+
+    /**
+     * Returns the header component of the column.
+     *
+     * @return the header component
+     */
+    public Component getHeaderComponent() {
+        return headerComponent;
     }
 
     protected void setHeaderComponent(Component component) {
+        headerText = null;
+        headerComponent = component;
         setHeaderRenderer(new ComponentRenderer<>(() -> component));
     }
 
+    /**
+     * Returns the footer component of the column.
+     *
+     * @return the footer component
+     */
+    public Component getFooterComponent() {
+        return footerComponent;
+    }
+
     protected void setFooterComponent(Component component) {
+        footerText = null;
+        footerComponent = component;
         setFooterRenderer(new ComponentRenderer<>(() -> component));
     }
 

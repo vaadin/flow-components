@@ -30,109 +30,11 @@ import com.vaadin.flow.shared.Registration;
 /**
  * Split Layout is a component with two content areas and a draggable split
  * handle between them.
- * <h3>Horizontal and Vertical Layouts</h3>
- * <p>
- * By default, the split's orientation is horizontal, meaning that the content
- * elements are positioned side by side in a flex container with a horizontal
- * layout. You can change the split mode to vertical by using the
- * {@link #setOrientation(Orientation)} with {@link Orientation#VERTICAL}.
- * </p>
- * The {@code <vaadin-split-layout>} element itself is a flex container. It does
- * not inherit the parent height by default, but rather sets its height
- * depending on the content.
- * </p>
- * <p>
- * You can use CSS to set the fixed height for the split layout, as usual with
- * any block element. It is possible to define percentage height as well. Note
- * that you have to set the parent height in order to make percentages work
- * correctly.
- * </p>
- * <h3>Initial Splitter Position</h3>
- * <p>
- * The initial splitter position is determined from the sizes of the content
- * elements inside the split layout. Therefore, changing width on the content
- * components affects the initial splitter position for the horizontal layouts,
- * while height affects the vertical ones.
- * </p>
- * <p>
- * Note that when the total size of the content component does not fit the
- * layout, the content elements are scaled proportionally.
- * </p>
- * <p>
- * When setting initial sizes with relative units, such as percentages, it is
- * recommended to assign the size for both content elements:
- * </p>
- * <p>
- * <code>
- * SplitLayout layout = new SplitLayout();
- * <p>
- * Label first = new Label("First is 1/4");<br>
- * first.setWidth("25%");<br>
- * layout.addToPrimary(first);<br>
- * <p>
- * Label second = new Label("Second is 3/4");<br>
- * second.setWidth("75%");<br>
- * layout.addToSecondary(second);
- * </code>
- * </p>
- * <h3>Size Limits</h3>
- * <p>
- * The {@code min-width}/{@code min-height}, and {@code max-width}/
- * {@code max-height} CSS size values for the content elements are respected and
- * used to limit the splitter position when it is dragged.
- * </p>
- * <p>
- * It is preferred to set the limits only for a single content element, in order
- * to avoid size conflicts:
- * </p>
- * <p>
- * <code>
- * SplitLayout layout = new SplitLayout();<br>
- * layout.addToPrimary(new Label("First"));<br>
- * layout.addToPrimary(new Label("Second with min & max size");<br>
- * layout.setSecondaryStyle("min-width", "200px");<br>
- * layout.setSecondaryStyle("max-width", "600px");
- * </code>
- * </p>
- * <h3>Resize Notification</h3>
- * <p>
- * For notification on when the user has resized the split position, use the
- * {@link #addSplitterDragendListener(ComponentEventListener)}.
- * </p>
- * <h3>Styling</h3>
- * <p>
- * The following shadow DOM parts are available for styling:
- * </p>
- * <table>
- * <thead>
- * <tr>
- * <th>Part name</th>
- * <th>Description</th>
- * <th>Theme for Element</th>
- * </tr>
- * </thead> <tbody>
- * <tr>
- * <td>{@code splitter}</td>
- * <td>Split element</td>
- * <td>vaadin-split-layout</td>
- * </tr>
- * <tr>
- * <td>{@code handle}</td>
- * <td>The handle of the splitter</td>
- * <td>vaadin-split-layout</td>
- * </tr>
- * </tbody>
- * </table>
- * <p>
- * See
- * <a href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin
- * – how to apply styles for shadow parts</a>
- * </p>
  *
  * @author Vaadin Ltd
  */
-@NpmPackage(value = "@vaadin/split-layout", version = "23.2.0-alpha4")
-@NpmPackage(value = "@vaadin/vaadin-split-layout", version = "23.2.0-alpha4")
+@NpmPackage(value = "@vaadin/split-layout", version = "23.2.0-alpha6")
+@NpmPackage(value = "@vaadin/vaadin-split-layout", version = "23.2.0-alpha6")
 public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
         implements HasSize {
 
