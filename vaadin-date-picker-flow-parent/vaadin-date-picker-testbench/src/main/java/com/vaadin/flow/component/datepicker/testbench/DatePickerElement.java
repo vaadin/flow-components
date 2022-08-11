@@ -164,7 +164,7 @@ public class DatePickerElement extends TestBenchElement
      *            the value to set
      */
     public void setInputValue(String value) {
-        var input = $("input").first();
+        TestBenchElement input = $("input").first();
         input.setProperty("value", "");
         input.sendKeys(value, Keys.ENTER);
     }
@@ -176,7 +176,7 @@ public class DatePickerElement extends TestBenchElement
      * @return
      */
     public String getInputValue() {
-        var input = $("input").first();
+        TestBenchElement input = $("input").first();
         return input.getPropertyString("value");
     }
 
