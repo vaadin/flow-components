@@ -93,8 +93,6 @@ import com.vaadin.flow.component.spreadsheet.command.SizeChangeCommand.Type;
 import com.vaadin.flow.component.spreadsheet.framework.Action;
 import com.vaadin.flow.component.spreadsheet.framework.ReflectTools;
 import com.vaadin.flow.component.spreadsheet.rpc.SpreadsheetClientRpc;
-import com.vaadin.flow.component.spreadsheet.shared.ContentMode;
-import com.vaadin.flow.component.spreadsheet.shared.ErrorLevel;
 import com.vaadin.flow.component.spreadsheet.shared.GroupingData;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.VaadinService;
@@ -141,8 +139,6 @@ public class Spreadsheet extends Component
         }
     }
 
-    private SpreadsheetHandlerImpl spreadsheetHandler;
-
     /*
      * FLOW RELATED STUFF
      */
@@ -157,57 +153,26 @@ public class Spreadsheet extends Component
 
     // from AbstractComponentState
 
-    private String height = "100%";
-    private String width = "100%";
-
     @Override
     public void setId(String id) {
-        this.id = id;
         getElement().setProperty("id", id);
     }
 
     @Override
     public void setHeight(String height) {
-        this.height = height;
         getElement().setProperty("height", height);
     }
 
     @Override
     public void setWidth(String width) {
-        this.width = width;
         getElement().setProperty("width", width);
     }
 
     private String description = "";
-    private ContentMode descriptionContentMode = ContentMode.PREFORMATTED;
-    // Note: for the caption, there is a difference between null and an empty
-    // string!
-    private String caption = null;
-    private List<String> styles = null;
-    private String id = null;
-    private String primaryStyleName = null;
-
-    /** HTML formatted error message for the component. */
-    private String errorMessage = null;
-
-    /**
-     * Level of error.
-     *
-     * @since 8.2
-     */
-    private ErrorLevel errorLevel = null;
-
-    private boolean captionAsHtml = false;
-
     // from SaredState
 
     // private Map<String, URLReference> resources = new HashMap<>();
     private Map<String, String> resources = new HashMap<>();
-
-    /**
-     * A set of event identifiers with registered listeners.
-     */
-    private Set<String> registeredEventListeners;
 
     // spreadsheetState
 
@@ -220,7 +185,6 @@ public class Spreadsheet extends Component
     private int cols;
 
     private List<GroupingData> colGroupingData;
-    private List<GroupingData> rowGroupingData;
 
     private int colGroupingMax;
     private int rowGroupingMax;
@@ -267,8 +231,6 @@ public class Spreadsheet extends Component
 
     private boolean sheetProtected;
 
-    private boolean workbookProtected;
-
     private HashMap<String, String> cellKeysToEditorIdMap;
 
     private HashMap<String, String> componentIDtoCellKeysMap;
@@ -283,15 +245,9 @@ public class Spreadsheet extends Component
 
     private Set<String> invalidFormulaCells;
 
-    private boolean hasActions;
-
     private HashMap<String, OverlayInfo> overlays;
 
     private ArrayList<MergedRegion> mergedRegions;
-
-    private boolean displayGridlines = true;
-
-    private boolean displayRowColHeadings = true;
 
     private int verticalSplitPosition = 0;
     private int horizontalSplitPosition = 0;
@@ -299,14 +255,6 @@ public class Spreadsheet extends Component
     private String infoLabelValue;
 
     private boolean workbookChangeToggle;
-
-    private String invalidFormulaErrorMessage = "Invalid formula";
-
-    private boolean lockFormatColumns = true;
-
-    private boolean lockFormatRows = true;
-
-    private List<String> namedRanges;
 
     public String getDescription() {
         return description;
@@ -477,7 +425,6 @@ public class Spreadsheet extends Component
     }
 
     protected void setRowGroupingData(List<GroupingData> rowGroupingData) {
-        this.rowGroupingData = rowGroupingData;
         getElement().setProperty("rowGroupingData",
                 Serializer.serialize(rowGroupingData));
     }
@@ -615,7 +562,6 @@ public class Spreadsheet extends Component
     }
 
     private void setWorkbookProtected(boolean workbookProtected) {
-        this.workbookProtected = workbookProtected;
         getElement().setProperty("workbookProtected", workbookProtected);
     }
 
@@ -666,7 +612,6 @@ public class Spreadsheet extends Component
     }
 
     private void setHasActions(boolean hasActions) {
-        this.hasActions = hasActions;
         getElement().setProperty("hasActions", hasActions);
     }
 
@@ -682,12 +627,10 @@ public class Spreadsheet extends Component
     }
 
     private void setDisplayGridlines(boolean displayGridlines) {
-        this.displayGridlines = displayGridlines;
         getElement().setProperty("displayGridlines", displayGridlines);
     }
 
     private void setDisplayRowColHeadings(boolean displayRowColHeadings) {
-        this.displayRowColHeadings = displayRowColHeadings;
         getElement().setProperty("displayRowColHeadings",
                 displayRowColHeadings);
     }
@@ -715,17 +658,14 @@ public class Spreadsheet extends Component
     }
 
     protected void setLockFormatColumns(boolean lockFormatColumns) {
-        this.lockFormatColumns = lockFormatColumns;
         getElement().setProperty("lockFormatColumns", lockFormatColumns);
     }
 
     protected void setLockFormatRows(boolean lockFormatRows) {
-        this.lockFormatRows = lockFormatRows;
         getElement().setProperty("lockFormatRows", lockFormatRows);
     }
 
     protected void setNamedRanges(List<String> namedRanges) {
-        this.namedRanges = namedRanges;
         getElement().setProperty("namedRanges",
                 Serializer.serialize(namedRanges));
     }
@@ -898,7 +838,6 @@ public class Spreadsheet extends Component
             getElement().callJsFunction("editCellComment", col, row);
         }
     };
-    private Locale locale;
 
     /**
      * An interface for handling the edited cell value from user input.
@@ -1270,7 +1209,6 @@ public class Spreadsheet extends Component
 
     private void registerRpc(SpreadsheetHandlerImpl spreadsheetHandler) {
         LOGGER.info("Spreadsheet.registerRpc()");
-        this.spreadsheetHandler = spreadsheetHandler;
         addListener(SpreadsheetEvent.class,
                 new SpreadsheetEventListener(spreadsheetHandler));
     }
@@ -1732,7 +1670,6 @@ public class Spreadsheet extends Component
      * @see com.vaadin.ui.AbstractComponent#setLocale(java.util.Locale)
      */
     public void setLocale(Locale locale) {
-        this.locale = locale;
         valueManager.updateLocale(locale);
         refreshAllCellValues();
     }
@@ -5866,7 +5803,6 @@ public class Spreadsheet extends Component
 
     public void setInvalidFormulaErrorMessage(
             String invalidFormulaErrorMessage) {
-        this.invalidFormulaErrorMessage = invalidFormulaErrorMessage;
         getElement().setProperty("invalidFormulaErrorMessage",
                 invalidFormulaErrorMessage);
     }
