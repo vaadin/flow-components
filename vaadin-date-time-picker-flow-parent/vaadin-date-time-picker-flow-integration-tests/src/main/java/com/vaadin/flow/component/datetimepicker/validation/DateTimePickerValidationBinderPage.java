@@ -26,7 +26,7 @@ public class DateTimePickerValidationBinderPage extends AbstractValidationPage {
         }
     }
 
-    protected Binder<?> binder;
+    protected Binder<Bean> binder;
 
     private LocalDateTime expectedValue;
 
