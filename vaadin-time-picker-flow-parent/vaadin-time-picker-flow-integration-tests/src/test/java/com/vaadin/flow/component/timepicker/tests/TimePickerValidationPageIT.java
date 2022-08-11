@@ -23,4 +23,5 @@ import com.vaadin.flow.testutil.TestPath;
  * Integration tests for {@link TimePicker} validation.
  */
 @TestPath("vaadin-time-picker/time-picker-validation")
-public class TimePickerValidationPageIT extends AbstractValidationTest {}
+public class TimePickerValidationPageIT extends AbstractValidationTest {
+}
