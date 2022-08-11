@@ -532,7 +532,8 @@ public class Spreadsheet extends Component
                 Serializer.serialize(conditionalFormattingStyles));
     }
 
-    protected void setHiddenColumnIndexes(ArrayList<Integer> hiddenColumnIndexes) {
+    protected void setHiddenColumnIndexes(
+            ArrayList<Integer> hiddenColumnIndexes) {
         this.hiddenColumnIndexes = hiddenColumnIndexes;
         getElement().setProperty("hiddenColumnIndexes",
                 Serializer.serialize(hiddenColumnIndexes));
@@ -550,7 +551,8 @@ public class Spreadsheet extends Component
                 Serializer.serialize(verticalScrollPositions));
     }
 
-    protected void setHorizontalScrollPositions(int[] horizontalScrollPositions) {
+    protected void setHorizontalScrollPositions(
+            int[] horizontalScrollPositions) {
         this.horizontalScrollPositions = horizontalScrollPositions;
         getElement().setProperty("horizontalScrollPositions",
                 Serializer.serialize(horizontalScrollPositions));
