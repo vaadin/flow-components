@@ -20,8 +20,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 
-import org.openqa.selenium.Keys;
-
 import com.vaadin.testbench.ElementQuery;
 import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasLabel;
