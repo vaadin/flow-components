@@ -16,13 +16,11 @@ package com.vaadin.flow.component.map;
  * #L%
  */
 
-import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasTheme;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.map.configuration.AbstractConfigurationObject;
 import com.vaadin.flow.component.map.configuration.Configuration;
 import com.vaadin.flow.component.map.configuration.Coordinate;
@@ -95,7 +93,6 @@ public abstract class MapBase extends Component implements HasSize, HasTheme {
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        checkFeatureFlag();
         getElement().executeJs("window.Vaadin.Flow.mapConnector.init(this)");
         // Ensure the full configuration is synced when (re-)attaching the
         // component
@@ -217,35 +214,6 @@ public abstract class MapBase extends Component implements HasSize, HasTheme {
     public Registration addFeatureClickListener(
             ComponentEventListener<MapFeatureClickEvent> listener) {
         return addListener(MapFeatureClickEvent.class, listener);
-    }
-
-    /**
-     * Checks whether the map component feature flag is active. Succeeds if the
-     * flag is enabled, and throws otherwise.
-     *
-     * @throws ExperimentalFeatureException
-     *             when the {@link FeatureFlags#MAP_COMPONENT} feature is not
-     *             enabled
-     */
-    private void checkFeatureFlag() {
-        boolean enabled = getFeatureFlags()
-                .isEnabled(FeatureFlags.MAP_COMPONENT);
-
-        if (!enabled) {
-            throw new ExperimentalFeatureException();
-        }
-    }
-
-    /**
-     * Gets the feature flags for the current UI.
-     * <p>
-     * Extracted with protected visibility to support mocking
-     *
-     * @return the current set of feature flags
-     */
-    protected FeatureFlags getFeatureFlags() {
-        return FeatureFlags
-                .get(UI.getCurrent().getSession().getService().getContext());
     }
 
     /**
