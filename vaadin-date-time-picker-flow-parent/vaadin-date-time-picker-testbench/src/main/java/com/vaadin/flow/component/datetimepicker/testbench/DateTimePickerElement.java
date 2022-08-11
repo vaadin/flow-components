@@ -20,6 +20,8 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 
+import org.openqa.selenium.Keys;
+
 import com.vaadin.testbench.ElementQuery;
 import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasLabel;
@@ -126,34 +128,6 @@ public class DateTimePickerElement extends TestBenchElement
             return null;
         }
         return LocalTime.parse(value);
-    }
-
-    /**
-     * Emulates the user changing the value of the time picker, which in practice
-     * clears {@code value} of the {@code input} element and then sets the new value
-     * via the Selenium {@code sendKeys} API.
-     *
-     * @param string
-     *               the value to set
-     */
-    public void setTimeInputValue(String value) {
-        TestBenchElement input = getTimePicker().$("input").first();
-        input.setProperty("value", "");
-        input.sendKeys(value, Keys.ENTER);
-    }
-
-    /**
-     * Emulates the user changing the value of the tdateime picker, which in practice
-     * clears {@code value} of the {@code input} element and then sets the new value
-     * via the Selenium {@code sendKeys} API.
-     *
-     * @param string
-     *               the value to set
-     */
-    public void setDateInputValue(String value) {
-        TestBenchElement input = getDatePicker().$("input").first();
-        input.setProperty("value", "");
-        input.sendKeys(value, Keys.ENTER);
     }
 
     /**
