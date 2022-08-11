@@ -77,7 +77,6 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     };
 
     private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
-    private boolean isClientInvalid;
 
     private Locale locale;
 
@@ -314,10 +313,6 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
                 min);
         if (smallThanMinValidation.isError()) {
             return smallThanMinValidation;
-        }
-
-        if (isClientInvalid) {
-            return ValidationResult.error("");
         }
 
         return ValidationResult.ok();
