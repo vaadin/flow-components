@@ -231,4 +231,8 @@ public class TimePickerElement extends TestBenchElement
         return !getPropertyBoolean("autoOpenDisabled");
     }
 
+    @Override
+    public void sendKeys(CharSequence... keysToSend) {
+        getTimePickerInputElement().sendKeys(keysToSend);
+    }
 }
