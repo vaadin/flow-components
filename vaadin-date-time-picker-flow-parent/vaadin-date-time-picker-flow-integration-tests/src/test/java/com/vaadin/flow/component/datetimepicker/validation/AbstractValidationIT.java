@@ -2,8 +2,10 @@ package com.vaadin.flow.component.datetimepicker.validation;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.openqa.selenium.Keys;
 
 import com.vaadin.flow.component.datetimepicker.testbench.DateTimePickerElement;
+import com.vaadin.testbench.TestBench;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
@@ -40,5 +42,17 @@ public class AbstractValidationIT extends AbstractComponentIT {
 
     protected TestBenchElement getTimeInputElement() {
         return field.$("input").last();
+    }
+
+    protected void setDateInputValue(String value) {
+        TestBenchElement dateInput = getDateInputElement();
+        dateInput.setProperty("value", "");
+        dateInput.sendKeys(value, Keys.ENTER);
+    }
+
+    protected void setTimeInputValue(String value) {
+        TestBenchElement timeInput = getTimeInputElement();
+        timeInput.setProperty("value", "");
+        timeInput.sendKeys(value, Keys.ENTER);
     }
 }

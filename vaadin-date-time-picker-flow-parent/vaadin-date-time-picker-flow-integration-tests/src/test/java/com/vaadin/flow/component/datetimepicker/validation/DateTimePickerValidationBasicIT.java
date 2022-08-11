@@ -75,16 +75,16 @@ public class DateTimePickerValidationBasicIT extends AbstractValidationIT {
     public void required_changeInputValue_assertValidity() {
         $("button").id(REQUIRED_BUTTON).click();
 
-        field.setDateInputValue("1/1/2000");
-        field.setTimeInputValue("12:00");
+        setDateInputValue("1/1/2000");
+        setTimeInputValue("12:00");
         assertServerValid(true);
         assertClientValid(true);
 
-        field.setDateInputValue("");
+        setDateInputValue("");
         assertServerValid(false);
         assertClientValid(false);
 
-        field.setTimeInputValue("");
+        setTimeInputValue("");
         assertServerValid(false);
         assertClientValid(false);
     }
@@ -93,20 +93,18 @@ public class DateTimePickerValidationBasicIT extends AbstractValidationIT {
     public void min_changeInputValue_assertValidity() {
         $("input").id(MIN_INPUT).sendKeys("2000-02-02T12:00", Keys.ENTER);
 
-        LocalDateTime.of(2000, 02, 02, 12, 0).toString();
-
-        field.setDateInputValue("1/1/2000");
-        field.setTimeInputValue("11:00");
+        setDateInputValue("1/1/2000");
+        setTimeInputValue("11:00");
         assertClientValid(false);
         assertServerValid(false);
 
-        field.setDateInputValue("2/2/2000");
-        field.setTimeInputValue("12:00");
+        setDateInputValue("2/2/2000");
+        setTimeInputValue("12:00");
         assertClientValid(true);
         assertServerValid(true);
 
-        field.setDateInputValue("3/3/2000");
-        field.setTimeInputValue("13:00");
+        setDateInputValue("3/3/2000");
+        setTimeInputValue("13:00");
         assertClientValid(true);
         assertServerValid(true);
     }
@@ -115,36 +113,36 @@ public class DateTimePickerValidationBasicIT extends AbstractValidationIT {
     public void max_changeInputValue_assertValidity() {
         $("input").id(MAX_INPUT).sendKeys("2000-02-02T12:00", Keys.ENTER);
 
-        field.setDateInputValue("3/3/2000");
-        field.setTimeInputValue("13:00");
+        setDateInputValue("3/3/2000");
+        setTimeInputValue("13:00");
         assertClientValid(false);
         assertServerValid(false);
 
-        field.setDateInputValue("2/2/2000");
-        field.setTimeInputValue("12:00");
+        setDateInputValue("2/2/2000");
+        setTimeInputValue("12:00");
         assertClientValid(true);
         assertServerValid(true);
 
-        field.setDateInputValue("1/1/2000");
-        field.setTimeInputValue("11:00");
+        setDateInputValue("1/1/2000");
+        setTimeInputValue("11:00");
         assertClientValid(true);
         assertServerValid(true);
     }
 
     @Test
     public void badInput_changeInputValue_assertValidity() {
-        field.setDateInputValue("INVALID");
-        field.setTimeInputValue("INVALID");
+        setDateInputValue("INVALID");
+        setTimeInputValue("INVALID");
         assertServerValid(false);
         assertClientValid(false);
 
-        field.setDateInputValue("1/1/2000");
-        field.setTimeInputValue("10:00");
+        setDateInputValue("1/1/2000");
+        setTimeInputValue("10:00");
         assertServerValid(true);
         assertClientValid(true);
 
-        field.setDateInputValue("INVALID");
-        field.setTimeInputValue("INVALID");
+        setDateInputValue("INVALID");
+        setTimeInputValue("INVALID");
         assertServerValid(false);
         assertClientValid(false);
     }
