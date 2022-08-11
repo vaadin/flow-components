@@ -55,10 +55,10 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-confirm-dialog")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha6")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-beta1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/confirm-dialog", version = "23.2.0-alpha6")
-@NpmPackage(value = "@vaadin/vaadin-confirm-dialog", version = "23.2.0-alpha6")
+@NpmPackage(value = "@vaadin/confirm-dialog", version = "23.2.0-beta1")
+@NpmPackage(value = "@vaadin/vaadin-confirm-dialog", version = "23.2.0-beta1")
 @JsModule("@vaadin/confirm-dialog/src/vaadin-confirm-dialog.js")
 @JsModule("./confirmDialogConnector.js")
 public class ConfirmDialog extends Component
