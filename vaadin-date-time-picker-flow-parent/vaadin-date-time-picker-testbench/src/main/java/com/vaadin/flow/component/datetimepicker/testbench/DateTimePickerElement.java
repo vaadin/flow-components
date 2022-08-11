@@ -19,6 +19,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Collections;
+
+import org.openqa.selenium.Keys;
 
 import com.vaadin.testbench.ElementQuery;
 import com.vaadin.testbench.HasHelper;
@@ -48,7 +51,7 @@ public class DateTimePickerElement extends TestBenchElement
      * Selects the given date time.
      *
      * @param dateTime
-     *            the date time to set
+     *                 the date time to set
      */
     public void setDateTime(LocalDateTime dateTime) {
         if (dateTime == null) {
@@ -76,7 +79,7 @@ public class DateTimePickerElement extends TestBenchElement
      * Selects the given date.
      *
      * @param date
-     *            the date to set
+     *             the date to set
      */
     public void setDate(LocalDate date) {
         if (date == null) {
@@ -103,7 +106,7 @@ public class DateTimePickerElement extends TestBenchElement
      * Selects the given time.
      *
      * @param time
-     *            the time to set
+     *             the time to set
      */
     public void setTime(LocalTime time) {
         if (time == null) {
@@ -129,13 +132,41 @@ public class DateTimePickerElement extends TestBenchElement
     }
 
     /**
+     * Emulates the user changing the value of the time picker, which in practice
+     * clears {@code value} of the {@code input} element and then sets the new value
+     * via the Selenium {@code sendKeys} API.
+     *
+     * @param string
+     *               the value to set
+     */
+    public void setTimeInputValue(String value) {
+        var input = getTimePicker().$("input").first();
+        input.setProperty("value", "");
+        input.sendKeys(value, Keys.ENTER);
+    }
+
+    /**
+     * Emulates the user changing the value of the tdateime picker, which in practice
+     * clears {@code value} of the {@code input} element and then sets the new value
+     * via the Selenium {@code sendKeys} API.
+     *
+     * @param string
+     *               the value to set
+     */
+    public void setDateInputValue(String value) {
+        var input = getDatePicker().$("input").first();
+        input.setProperty("value", "");
+        input.sendKeys(value, Keys.ENTER);
+    }
+
+    /**
      * Sets the selected date time as a string.
      * <p>
      * The value is based on ISO 8601 (without a time zone designator) e.g.
      * <code>YYYY-MM-DDThh:mm:ss</code>.
      *
      * @param value
-     *            the value to set
+     *              the value to set
      */
     private void setValue(String value) {
         setProperty(VALUE_PROPERTY, value);
@@ -160,7 +191,7 @@ public class DateTimePickerElement extends TestBenchElement
      * The value is based on ISO 8601 e.g. <code>YYYY-MM-DD</code>.
      *
      * @param value
-     *            the value to set
+     *              the value to set
      */
     private void setDateValue(String value) {
         getDatePicker().setProperty(VALUE_PROPERTY, value);
@@ -185,7 +216,7 @@ public class DateTimePickerElement extends TestBenchElement
      * The value is based on ISO 8601 e.g. <code>hh:mm:ss</code>.
      *
      * @param value
-     *            the value to set
+     *              the value to set
      */
     private void setTimeValue(String value) {
         getTimePicker().setProperty(VALUE_PROPERTY, value);
