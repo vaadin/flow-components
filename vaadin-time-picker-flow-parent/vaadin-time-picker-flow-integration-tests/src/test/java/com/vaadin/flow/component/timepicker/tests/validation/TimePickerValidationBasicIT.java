@@ -59,11 +59,11 @@ public class TimePickerValidationBasicIT extends AbstractValidationIT {
     public void required_changeInputValue_assertValidity() {
         $("button").id(REQUIRED_BUTTON).click();
 
-        field.selectByText("12:00");
+        commitInputValue("12:00");
         assertServerValid(true);
         assertClientValid(true);
 
-        field.selectByText("");
+        commitInputValue("");
         assertServerValid(false);
         assertClientValid(false);
     }
@@ -72,15 +72,15 @@ public class TimePickerValidationBasicIT extends AbstractValidationIT {
     public void min_changeInputValue_assertValidity() {
         $("input").id(MIN_INPUT).sendKeys("11:00", Keys.ENTER);
 
-        field.selectByText("10:00");
+        commitInputValue("10:00");
         assertClientValid(false);
         assertServerValid(false);
 
-        field.selectByText("11:00");
+        commitInputValue("11:00");
         assertClientValid(true);
         assertServerValid(true);
 
-        field.selectByText("12:00");
+        commitInputValue("12:00");
         assertClientValid(true);
         assertServerValid(true);
     }
@@ -89,30 +89,30 @@ public class TimePickerValidationBasicIT extends AbstractValidationIT {
     public void max_changeInputValue_assertValidity() {
         $("input").id(MAX_INPUT).sendKeys("11:00", Keys.ENTER);
 
-        field.selectByText("12:00");
+        commitInputValue("12:00");
         assertClientValid(false);
         assertServerValid(false);
 
-        field.selectByText("11:00");
+        commitInputValue("11:00");
         assertClientValid(true);
         assertServerValid(true);
 
-        field.selectByText("10:00");
+        commitInputValue("10:00");
         assertClientValid(true);
         assertServerValid(true);
     }
 
     @Test
     public void badInput_changeInputValue_assertValidity() {
-        field.selectByText("INVALID");
+        commitInputValue("INVALID");
         assertServerValid(false);
         assertClientValid(false);
 
-        field.selectByText("10:00");
+        commitInputValue("10:00");
         assertServerValid(true);
         assertClientValid(true);
 
-        field.selectByText("INVALID");
+        commitInputValue("INVALID");
         assertServerValid(false);
         assertClientValid(false);
     }

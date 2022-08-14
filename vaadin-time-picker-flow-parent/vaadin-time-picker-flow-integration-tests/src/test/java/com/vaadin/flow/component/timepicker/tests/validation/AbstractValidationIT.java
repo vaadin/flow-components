@@ -2,6 +2,7 @@ package com.vaadin.flow.component.timepicker.tests.validation;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.openqa.selenium.Keys;
 
 import com.vaadin.flow.component.timepicker.testbench.TimePickerElement;
 import com.vaadin.tests.AbstractComponentIT;
@@ -31,5 +32,11 @@ public abstract class AbstractValidationIT extends AbstractComponentIT {
 
         var actual = $("div").id(SERVER_VALIDITY_STATE).getText();
         Assert.assertEquals(String.valueOf(expected), actual);
+    }
+
+    protected void commitInputValue(String value) {
+        field.sendKeys(Keys.META, "A"); // Select All
+        field.sendKeys(Keys.BACK_SPACE);
+        field.sendKeys(value, Keys.ENTER);
     }
 }
