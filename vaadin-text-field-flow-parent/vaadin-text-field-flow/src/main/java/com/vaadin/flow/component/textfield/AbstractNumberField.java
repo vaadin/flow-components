@@ -18,6 +18,7 @@ package com.vaadin.flow.component.textfield;
 
 import java.math.BigDecimal;
 
+import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.CompositionNotifier;
 import com.vaadin.flow.component.HasHelper;
@@ -26,6 +27,7 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.InputNotifier;
 import com.vaadin.flow.component.KeyNotifier;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasClearButton;
 import com.vaadin.flow.component.shared.HasThemeVariant;
@@ -370,7 +372,12 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
 
     @Override
     public Validator<T> getDefaultValidator() {
-        return (value, context) -> checkValidity(value);
+        if (getFeatureFlags()
+                .isEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            return (value, context) -> checkValidity(value);
+        }
+
+        return Validator.alwaysPass();
     }
 
     private ValidationResult checkValidity(T value) {
@@ -453,5 +460,17 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     @Override
     public void removeThemeVariants(TextFieldVariant... variants) {
         HasThemeVariant.super.removeThemeVariants(variants);
+    }
+
+    /**
+     * Gets the feature flags for the current UI.
+     * <p>
+     * Exposed with protected visibility to support mocking
+     *
+     * @return the current set of feature flags
+     */
+    protected FeatureFlags getFeatureFlags() {
+        return FeatureFlags
+                .get(UI.getCurrent().getSession().getService().getContext());
     }
 }

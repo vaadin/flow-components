@@ -1,5 +1,6 @@
 package com.vaadin.flow.component.textfield.binder;
 
+import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.data.binder.Binder;
@@ -46,9 +47,15 @@ public abstract class AbstractTextFieldValidationTest<T, K extends Component & H
     @Mock
     private BindingValidationStatusHandler statusMock;
 
+    @Mock
+    protected FeatureFlags featureFlagsMock;
+
     @Before
     public void init() {
         MockitoAnnotations.openMocks(this);
+        Mockito.when(featureFlagsMock
+                .isEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION))
+                .thenReturn(true);
         initField();
     }
 

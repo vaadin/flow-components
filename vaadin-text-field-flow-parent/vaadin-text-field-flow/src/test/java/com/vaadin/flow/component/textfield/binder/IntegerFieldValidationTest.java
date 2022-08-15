@@ -1,14 +1,23 @@
 package com.vaadin.flow.component.textfield.binder;
 
+import com.vaadin.experimental.FeatureFlags;
+import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.function.SerializablePredicate;
 
 public class IntegerFieldValidationTest
         extends AbstractTextFieldValidationTest<Integer, IntegerField> {
 
+    @Tag("test-integer-field")
+    private class TestIntegerField extends IntegerField {
+        protected FeatureFlags getFeatureFlags() {
+            return featureFlagsMock;
+        }
+    }
+
     @Override
     protected void initField() {
-        field = new IntegerField();
+        field = new TestIntegerField();
         field.setMax(10);
     }
 
