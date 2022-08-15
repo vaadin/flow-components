@@ -155,20 +155,16 @@ public class DatePickerElement extends TestBenchElement
     }
 
     /**
-     * Simulates the user changing the value via the input element which is in
-     * practice the following sequence of {@code sendKeys}:
+     * Simulates the user selecting a date via the input element. This
+     * effectively clears the input element with a key shortcut, then types the
+     * given date string and finally presses {@code Enter} to commit the new
+     * date.
      *
-     * <li>1. {@code Meta} + {@code A} + {@code Backspace} to clear the input
-     * element's old value.
-     * <li>2. Typing the new value.
-     * <li>3. {@code Enter} to commit the new value.
-     *
-     * @param string
-     *            the value to set
+     * @param value
+     *            the date string to enter.
      */
     public void setInputValue(String value) {
-        sendKeys(Keys.META, "A");
-        sendKeys(Keys.BACK_SPACE);
+        sendKeys(Keys.chord(Keys.SHIFT, Keys.HOME), Keys.BACK_SPACE);
         sendKeys(value, Keys.ENTER);
     }
 
