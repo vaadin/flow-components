@@ -463,8 +463,10 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
 
     @Override
     public Validator<String> getDefaultValidator() {
-        if (getFeatureFlags().isEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
-            return (value, context) -> getValidationSupport().checkValidity(value);
+        if (getFeatureFlags()
+                .isEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            return (value, context) -> getValidationSupport()
+                    .checkValidity(value);
         }
 
         return Validator.alwaysPass();

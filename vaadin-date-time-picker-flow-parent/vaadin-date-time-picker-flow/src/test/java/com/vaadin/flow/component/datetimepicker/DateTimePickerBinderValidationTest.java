@@ -54,7 +54,9 @@ public class DateTimePickerBinderValidationTest {
     @Before
     public void init() {
         MockitoAnnotations.openMocks(this);
-        Mockito.when(featureFlagsMock.isEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)).thenReturn(true);
+        Mockito.when(featureFlagsMock
+                .isEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION))
+                .thenReturn(true);
 
         field = new TestDateTimePicker();
         field.setMax(LocalDateTime.now().plusDays(1));

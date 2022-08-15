@@ -55,7 +55,9 @@ public class TimePickerBinderValidationTest {
     @Before
     public void init() {
         MockitoAnnotations.openMocks(this);
-        Mockito.when(featureFlagsMock.isEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)).thenReturn(true);
+        Mockito.when(featureFlagsMock
+                .isEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION))
+                .thenReturn(true);
 
         field = new TestTimePicker();
         field.setMax(LocalTime.now().plusHours(1));

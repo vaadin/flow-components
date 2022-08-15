@@ -625,7 +625,8 @@ public class DateTimePicker extends
 
     @Override
     public Validator<LocalDateTime> getDefaultValidator() {
-        if (getFeatureFlags().isEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+        if (getFeatureFlags()
+                .isEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
             return (value, context) -> checkValidity(value);
         }
 

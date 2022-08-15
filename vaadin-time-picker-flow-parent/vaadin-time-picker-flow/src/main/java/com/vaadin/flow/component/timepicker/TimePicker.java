@@ -270,7 +270,8 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
 
     @Override
     public Validator<LocalTime> getDefaultValidator() {
-        if (getFeatureFlags().isEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+        if (getFeatureFlags()
+                .isEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
             return (value, context) -> checkValidity(value);
         }
 
