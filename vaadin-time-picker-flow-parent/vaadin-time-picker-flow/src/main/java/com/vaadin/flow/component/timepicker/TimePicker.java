@@ -23,6 +23,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.shared.HasClearButton;
@@ -269,7 +270,11 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
 
     @Override
     public Validator<LocalTime> getDefaultValidator() {
-        return (value, context) -> checkValidity(value);
+        if (getFeatureFlags().isEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            return (value, context) -> checkValidity(value);
+        }
+
+        return Validator.alwaysPass();
     }
 
     private ValidationResult checkValidity(LocalTime value) {
@@ -686,4 +691,15 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         return time != null ? time.toString() : null;
     }
 
+    /**
+     * Gets the feature flags for the current UI.
+     * <p>
+     * Exposed with protected visibility to support mocking
+     *
+     * @return the current set of feature flags
+     */
+    protected FeatureFlags getFeatureFlags() {
+        return FeatureFlags
+                .get(UI.getCurrent().getSession().getService().getContext());
+    }
 }
