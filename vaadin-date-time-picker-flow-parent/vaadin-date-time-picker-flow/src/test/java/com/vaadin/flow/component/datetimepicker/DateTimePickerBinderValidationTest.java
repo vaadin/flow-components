@@ -1,5 +1,7 @@
 package com.vaadin.flow.component.datetimepicker;
 
+import com.vaadin.experimental.FeatureFlags;
+import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.BindingValidationStatus;
 import com.vaadin.flow.data.binder.BindingValidationStatusHandler;
@@ -27,6 +29,16 @@ public class DateTimePickerBinderValidationTest {
     @Mock
     private BindingValidationStatusHandler statusHandlerMock;
 
+    @Mock
+    private FeatureFlags featureFlagsMock;
+
+    @Tag("test-date-time-picker")
+    private class TestDateTimePicker extends DateTimePicker {
+        protected FeatureFlags getFeatureFlags() {
+            return featureFlagsMock;
+        }
+    }
+
     public static class Bean {
         private LocalDateTime date;
 
@@ -42,7 +54,9 @@ public class DateTimePickerBinderValidationTest {
     @Before
     public void init() {
         MockitoAnnotations.openMocks(this);
-        field = new DateTimePicker();
+        Mockito.when(featureFlagsMock.isEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)).thenReturn(true);
+
+        field = new TestDateTimePicker();
         field.setMax(LocalDateTime.now().plusDays(1));
     }
 
