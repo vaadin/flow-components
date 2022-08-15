@@ -204,10 +204,10 @@ public class TimePickerElement extends TestBenchElement
     }
 
     /**
-     * Simulates the user selecting a time via the input element.
-     * This effectively clears the input element with a key shortcut,
-     * then types the given time string and finally presses {@code Enter}
-     * to commit the new time.
+     * Simulates the user selecting a time via the input element. This
+     * effectively clears the input element with a key shortcut, then types the
+     * given time string and finally presses {@code Enter} to commit the new
+     * time.
      *
      * @param timeInput
      *            the time string to enter, not {@code null}
