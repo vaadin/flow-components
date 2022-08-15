@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.timepicker.testbench;
 
+import java.util.Collections;
 import java.util.Objects;
 
 import com.vaadin.testbench.HasHelper;
@@ -206,8 +207,8 @@ public class TimePickerElement extends TestBenchElement
      * Simulates the user selecting a time via the input element which is in
      * practice the following sequence of {@code sendKeys}:
      *
-     * <li>1. {@code Meta} + {@code A} + {@code Backspace} to clear the input
-     * element's old value.
+     * <li>1. {@code Meta} + {@code A} + {@code Backspace} to possibly clear
+     * the input element's old value.
      * <li>2. Typing the given time string.
      * <li>3. {@code Enter} to commit the new time.
      *
@@ -217,8 +218,7 @@ public class TimePickerElement extends TestBenchElement
     @Override
     public void selectByText(String timeInput) {
         Objects.requireNonNull(timeInput, "null input not accepted");
-        sendKeys(Keys.META, "A");
-        sendKeys(Keys.BACK_SPACE);
+        sendKeys(Keys.chord(Keys.META, "a"), Keys.BACK_SPACE);
         sendKeys(timeInput, Keys.ENTER);
     }
 
