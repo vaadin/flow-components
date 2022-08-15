@@ -59,11 +59,11 @@ public class TimePickerValidationBasicIT extends AbstractValidationIT {
     public void required_changeInputValue_assertValidity() {
         $("button").id(REQUIRED_BUTTON).click();
 
-        commitInputValue("12:00");
+        field.selectByText("12:00");
         assertServerValid(true);
         assertClientValid(true);
 
-        commitInputValue("");
+        field.selectByText("");
         assertServerValid(false);
         assertClientValid(false);
     }
@@ -72,15 +72,15 @@ public class TimePickerValidationBasicIT extends AbstractValidationIT {
     public void min_changeInputValue_assertValidity() {
         $("input").id(MIN_INPUT).sendKeys("11:00", Keys.ENTER);
 
-        commitInputValue("10:00");
+        field.selectByText("10:00");
         assertClientValid(false);
         assertServerValid(false);
 
-        commitInputValue("11:00");
+        field.selectByText("11:00");
         assertClientValid(true);
         assertServerValid(true);
 
-        commitInputValue("12:00");
+        field.selectByText("12:00");
         assertClientValid(true);
         assertServerValid(true);
     }
@@ -89,30 +89,30 @@ public class TimePickerValidationBasicIT extends AbstractValidationIT {
     public void max_changeInputValue_assertValidity() {
         $("input").id(MAX_INPUT).sendKeys("11:00", Keys.ENTER);
 
-        commitInputValue("12:00");
+        field.selectByText("12:00");
         assertClientValid(false);
         assertServerValid(false);
 
-        commitInputValue("11:00");
+        field.selectByText("11:00");
         assertClientValid(true);
         assertServerValid(true);
 
-        commitInputValue("10:00");
+        field.selectByText("10:00");
         assertClientValid(true);
         assertServerValid(true);
     }
 
     @Test
     public void badInput_changeInputValue_assertValidity() {
-        commitInputValue("INVALID");
+        field.selectByText("INVALID");
         assertServerValid(false);
         assertClientValid(false);
 
-        commitInputValue("10:00");
+        field.selectByText("10:00");
         assertServerValid(true);
         assertClientValid(true);
 
-        commitInputValue("INVALID");
+        field.selectByText("INVALID");
         assertServerValid(false);
         assertClientValid(false);
     }
