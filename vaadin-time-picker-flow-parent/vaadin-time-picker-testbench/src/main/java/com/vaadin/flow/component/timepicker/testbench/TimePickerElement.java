@@ -203,18 +203,23 @@ public class TimePickerElement extends TestBenchElement
     }
 
     /**
-     * Enter the given time input to the text field.
+     * Simulates the user selecting a time via the input element which is in
+     * practice the following sequence of {@code sendKeys}:
+     *
+     * <li>1. {@code Meta} + {@code A} + {@code Backspace} to clear the input
+     * element's old value.
+     * <li>2. Typing the given time string.
+     * <li>3. {@code Enter} to commit the new time.
      *
      * @param timeInput
-     *            the time input to enter, not {@code null}
+     *            the time string to enter, not {@code null}
      */
     @Override
     public void selectByText(String timeInput) {
         Objects.requireNonNull(timeInput, "null input not accepted");
-
-        TestBenchElement timePickerInputElement = getTimePickerInputElement();
-        executeScript("arguments[0].value = ''", timePickerInputElement);
-        timePickerInputElement.sendKeys(timeInput + Keys.RETURN);
+        sendKeys(Keys.META, "A");
+        sendKeys(Keys.BACK_SPACE);
+        sendKeys(timeInput, Keys.ENTER);
     }
 
     @Override
