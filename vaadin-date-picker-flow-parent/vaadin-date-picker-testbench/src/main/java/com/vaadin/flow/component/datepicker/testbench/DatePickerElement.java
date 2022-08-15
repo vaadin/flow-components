@@ -155,18 +155,21 @@ public class DatePickerElement extends TestBenchElement
     }
 
     /**
-     * Emulates the user changing the value. This in practice means clearing
-     * {@code value} of the {@code input} element and then setting the new value
-     * by sending the respective characters + Enter via the Selenium
-     * {@code sendKeys} API.
+     * Simulates the user changing the value via the input element which is in
+     * practice the following sequence of {@code sendKeys}:
+     *
+     * <li>1. {@code Meta} + {@code A} + {@code Backspace} to clear the input
+     * element's old value.
+     * <li>2. Typing the new value.
+     * <li>3. {@code Enter} to commit the new value.
      *
      * @param string
      *            the value to set
      */
     public void setInputValue(String value) {
-        TestBenchElement input = $("input").first();
-        input.setProperty("value", "");
-        input.sendKeys(value, Keys.ENTER);
+        sendKeys(Keys.META, "A");
+        sendKeys(Keys.BACK_SPACE);
+        sendKeys(value, Keys.ENTER);
     }
 
     /**
