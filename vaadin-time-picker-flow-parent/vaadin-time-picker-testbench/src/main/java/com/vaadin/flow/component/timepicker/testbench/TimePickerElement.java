@@ -218,7 +218,7 @@ public class TimePickerElement extends TestBenchElement
     @Override
     public void selectByText(String timeInput) {
         Objects.requireNonNull(timeInput, "null input not accepted");
-        sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.BACK_SPACE);
+        sendKeys(Keys.HOME, Keys.chord(Keys.SHIFT, Keys.END), Keys.BACK_SPACE);
         sendKeys(timeInput, Keys.ENTER);
     }
 
