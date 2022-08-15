@@ -1,5 +1,7 @@
 package com.vaadin.flow.component.textfield.binder;
 
+import com.vaadin.experimental.FeatureFlags;
+import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.function.SerializablePredicate;
 
@@ -8,9 +10,16 @@ import java.util.Objects;
 public class EmailFieldValidationTest
         extends AbstractTextFieldValidationTest<String, EmailField> {
 
+    @Tag("test-email-field")
+    private class TestEmailField extends EmailField {
+        protected FeatureFlags getFeatureFlags() {
+            return featureFlagsMock;
+        }
+    }
+
     @Override
     protected void initField() {
-        field = new EmailField();
+        field = new TestEmailField();
         // To disable pattern validation
         field.setPattern(null);
         field.setMaxLength(20);
