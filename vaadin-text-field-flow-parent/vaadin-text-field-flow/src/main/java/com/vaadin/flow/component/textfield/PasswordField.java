@@ -16,6 +16,7 @@
 
 package com.vaadin.flow.component.textfield;
 
+import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.CompositionNotifier;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
@@ -27,6 +28,7 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.InputNotifier;
 import com.vaadin.flow.component.KeyNotifier;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.Validator;
@@ -469,7 +471,11 @@ public class PasswordField
 
     @Override
     public Validator<String> getDefaultValidator() {
-        return (value, context) -> getValidationSupport().checkValidity(value);
+        if (getFeatureFlags().isEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            return (value, context) -> getValidationSupport().checkValidity(value);
+        }
+
+        return Validator.alwaysPass();
     }
 
     /**
@@ -500,5 +506,17 @@ public class PasswordField
     @Override
     public void removeThemeVariants(TextFieldVariant... variants) {
         HasThemeVariant.super.removeThemeVariants(variants);
+    }
+
+    /**
+     * Gets the feature flags for the current UI.
+     * <p>
+     * Exposed with protected visibility to support mocking
+     *
+     * @return the current set of feature flags
+     */
+    protected FeatureFlags getFeatureFlags() {
+        return FeatureFlags
+                .get(UI.getCurrent().getSession().getService().getContext());
     }
 }
