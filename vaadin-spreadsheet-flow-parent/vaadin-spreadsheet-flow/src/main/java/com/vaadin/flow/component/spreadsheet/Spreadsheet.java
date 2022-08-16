@@ -255,7 +255,7 @@ public class Spreadsheet extends Component
 
     private boolean workbookChangeToggle;
 
-    protected int getCols() {
+    int getCols() {
         return cols;
     }
 
@@ -263,27 +263,27 @@ public class Spreadsheet extends Component
         return colGroupingData;
     }
 
-    protected int getColGroupingMax() {
+    int getColGroupingMax() {
         return colGroupingMax;
     }
 
-    protected int getRowGroupingMax() {
+    int getRowGroupingMax() {
         return rowGroupingMax;
     }
 
-    protected boolean isColGroupingInversed() {
+    boolean isColGroupingInversed() {
         return colGroupingInversed;
     }
 
-    protected boolean isRowGroupingInversed() {
+    boolean isRowGroupingInversed() {
         return rowGroupingInversed;
     }
 
-    protected float getDefRowH() {
+    float getDefRowH() {
         return defRowH;
     }
 
-    protected int getDefColW() {
+    int getDefColW() {
         return defColW;
     }
 
@@ -291,7 +291,7 @@ public class Spreadsheet extends Component
         return rowH;
     }
 
-    protected int[] getColW() {
+    int[] getColW() {
         return colW;
     }
 
@@ -299,35 +299,35 @@ public class Spreadsheet extends Component
         return sheetIndex;
     }
 
-    protected String[] getSheetNames() {
+    String[] getSheetNames() {
         return sheetNames;
     }
 
-    protected HashMap<Integer, String> getCellStyleToCSSStyle() {
+    HashMap<Integer, String> getCellStyleToCSSStyle() {
         return cellStyleToCSSStyle;
     }
 
-    protected HashMap<Integer, Integer> getRowIndexToStyleIndex() {
+    HashMap<Integer, Integer> getRowIndexToStyleIndex() {
         return rowIndexToStyleIndex;
     }
 
-    protected HashMap<Integer, Integer> getColumnIndexToStyleIndex() {
+    HashMap<Integer, Integer> getColumnIndexToStyleIndex() {
         return columnIndexToStyleIndex;
     }
 
-    protected Set<Integer> getLockedColumnIndexes() {
+    Set<Integer> getLockedColumnIndexes() {
         return lockedColumnIndexes;
     }
 
-    protected Set<Integer> getLockedRowIndexes() {
+    Set<Integer> getLockedRowIndexes() {
         return lockedRowIndexes;
     }
 
-    protected ArrayList<String> getShiftedCellBorderStyles() {
+    ArrayList<String> getShiftedCellBorderStyles() {
         return shiftedCellBorderStyles;
     }
 
-    protected HashMap<Integer, String> getConditionalFormattingStyles() {
+    HashMap<Integer, String> getConditionalFormattingStyles() {
         return conditionalFormattingStyles;
     }
 
@@ -339,11 +339,11 @@ public class Spreadsheet extends Component
         return hiddenRowIndexes;
     }
 
-    protected int[] getVerticalScrollPositions() {
+    int[] getVerticalScrollPositions() {
         return verticalScrollPositions;
     }
 
-    protected int[] getHorizontalScrollPositions() {
+    int[] getHorizontalScrollPositions() {
         return horizontalScrollPositions;
     }
 
@@ -355,7 +355,7 @@ public class Spreadsheet extends Component
         return cellKeysToEditorIdMap;
     }
 
-    protected HashMap<String, String> getComponentIDtoCellKeysMap() {
+    HashMap<String, String> getComponentIDtoCellKeysMap() {
         return componentIDtoCellKeysMap;
     }
 
@@ -403,63 +403,63 @@ public class Spreadsheet extends Component
         return workbookChangeToggle;
     }
 
-    protected void setRows(int rows) {
+    void setRows(int rows) {
         this.rows = rows;
         getElement().setProperty("rows", rows);
     }
 
-    protected void setCols(int cols) {
+    void setCols(int cols) {
         this.cols = cols;
         getElement().setProperty("cols", cols);
     }
 
-    protected void setColGroupingData(List<GroupingData> colGroupingData) {
+    void setColGroupingData(List<GroupingData> colGroupingData) {
         this.colGroupingData = colGroupingData;
         getElement().setProperty("colGroupingData",
                 Serializer.serialize(colGroupingData));
     }
 
-    protected void setRowGroupingData(List<GroupingData> rowGroupingData) {
+    void setRowGroupingData(List<GroupingData> rowGroupingData) {
         getElement().setProperty("rowGroupingData",
                 Serializer.serialize(rowGroupingData));
     }
 
-    protected void setColGroupingMax(int colGroupingMax) {
+    void setColGroupingMax(int colGroupingMax) {
         this.colGroupingMax = colGroupingMax;
         getElement().setProperty("colGroupingMax", colGroupingMax);
     }
 
-    protected void setRowGroupingMax(int rowGroupingMax) {
+    void setRowGroupingMax(int rowGroupingMax) {
         this.rowGroupingMax = rowGroupingMax;
         getElement().setProperty("rowGroupingMax", rowGroupingMax);
     }
 
-    protected void setColGroupingInversed(boolean colGroupingInversed) {
+    void setColGroupingInversed(boolean colGroupingInversed) {
         this.colGroupingInversed = colGroupingInversed;
         getElement().setProperty("colGroupingInversed", colGroupingInversed);
     }
 
-    protected void setRowGroupingInversed(boolean rowGroupingInversed) {
+    void setRowGroupingInversed(boolean rowGroupingInversed) {
         this.rowGroupingInversed = rowGroupingInversed;
         getElement().setProperty("rowGroupingInversed", rowGroupingInversed);
     }
 
-    protected void setDefRowH(float defRowH) {
+    void setDefRowH(float defRowH) {
         this.defRowH = defRowH;
         getElement().setProperty("defRowH", defRowH);
     }
 
-    protected void setDefColW(int defColW) {
+    void setDefColW(int defColW) {
         this.defColW = defColW;
         getElement().setProperty("defColW", defColW);
     }
 
-    protected void setRowH(float[] rowH) {
+    void setRowH(float[] rowH) {
         this.rowH = rowH;
         getElement().setProperty("rowH", Serializer.serialize(rowH));
     }
 
-    protected void setColW(int[] colW) {
+    void setColW(int[] colW) {
         this.colW = colW;
         getElement().setProperty("colW", Serializer.serialize(colW));
     }
@@ -480,73 +480,73 @@ public class Spreadsheet extends Component
                 Serializer.serialize(sheetNames));
     }
 
-    protected void setCellStyleToCSSStyle(
+    void setCellStyleToCSSStyle(
             HashMap<Integer, String> cellStyleToCSSStyle) {
         this.cellStyleToCSSStyle = cellStyleToCSSStyle;
         getElement().setProperty("cellStyleToCSSStyle",
                 Serializer.serialize(cellStyleToCSSStyle));
     }
 
-    protected void setRowIndexToStyleIndex(
+    void setRowIndexToStyleIndex(
             HashMap<Integer, Integer> rowIndexToStyleIndex) {
         this.rowIndexToStyleIndex = rowIndexToStyleIndex;
         getElement().setProperty("rowIndexToStyleIndex",
                 Serializer.serialize(rowIndexToStyleIndex));
     }
 
-    protected void setColumnIndexToStyleIndex(
+    void setColumnIndexToStyleIndex(
             HashMap<Integer, Integer> columnIndexToStyleIndex) {
         this.columnIndexToStyleIndex = columnIndexToStyleIndex;
         getElement().setProperty("columnIndexToStyleIndex",
                 Serializer.serialize(columnIndexToStyleIndex));
     }
 
-    protected void setLockedColumnIndexes(Set<Integer> lockedColumnIndexes) {
+    void setLockedColumnIndexes(Set<Integer> lockedColumnIndexes) {
         this.lockedColumnIndexes = lockedColumnIndexes;
         getElement().setProperty("lockedColumnIndexes",
                 Serializer.serialize(lockedColumnIndexes));
     }
 
-    protected void setLockedRowIndexes(Set<Integer> lockedRowIndexes) {
+    void setLockedRowIndexes(Set<Integer> lockedRowIndexes) {
         this.lockedRowIndexes = lockedRowIndexes;
         getElement().setProperty("lockedRowIndexes",
                 Serializer.serialize(lockedRowIndexes));
     }
 
-    protected void setShiftedCellBorderStyles(
+    void setShiftedCellBorderStyles(
             ArrayList<String> shiftedCellBorderStyles) {
         this.shiftedCellBorderStyles = shiftedCellBorderStyles;
         getElement().setProperty("shiftedCellBorderStyles",
                 Serializer.serialize(shiftedCellBorderStyles));
     }
 
-    protected void setConditionalFormattingStyles(
+    void setConditionalFormattingStyles(
             HashMap<Integer, String> conditionalFormattingStyles) {
         this.conditionalFormattingStyles = conditionalFormattingStyles;
         getElement().setProperty("conditionalFormattingStyles",
                 Serializer.serialize(conditionalFormattingStyles));
     }
 
-    protected void setHiddenColumnIndexes(
+    void setHiddenColumnIndexes(
             ArrayList<Integer> hiddenColumnIndexes) {
         this.hiddenColumnIndexes = hiddenColumnIndexes;
         getElement().setProperty("hiddenColumnIndexes",
                 Serializer.serialize(hiddenColumnIndexes));
     }
 
-    protected void setHiddenRowIndexes(ArrayList<Integer> hiddenRowIndexes) {
+    void setHiddenRowIndexes(ArrayList<Integer> hiddenRowIndexes) {
         this.hiddenRowIndexes = hiddenRowIndexes;
         getElement().setProperty("hiddenRowIndexes",
                 Serializer.serialize(hiddenRowIndexes));
     }
 
-    protected void setVerticalScrollPositions(int[] verticalScrollPositions) {
+    void setVerticalScrollPositions(int[] verticalScrollPositions) {
         this.verticalScrollPositions = verticalScrollPositions;
         getElement().setProperty("verticalScrollPositions",
                 Serializer.serialize(verticalScrollPositions));
     }
 
-    protected void setHorizontalScrollPositions(
+    void setHorizontalScrollPositions(
             int[] horizontalScrollPositions) {
         this.horizontalScrollPositions = horizontalScrollPositions;
         getElement().setProperty("horizontalScrollPositions",
@@ -617,7 +617,7 @@ public class Spreadsheet extends Component
         getElement().setProperty("overlays", Serializer.serialize(overlays));
     }
 
-    protected void setMergedRegions(ArrayList<MergedRegion> mergedRegions) {
+    void setMergedRegions(ArrayList<MergedRegion> mergedRegions) {
         this.mergedRegions = mergedRegions;
         getElement().setProperty("mergedRegions",
                 Serializer.serialize(mergedRegions));
@@ -632,13 +632,13 @@ public class Spreadsheet extends Component
                 displayRowColHeadings);
     }
 
-    protected void setVerticalSplitPosition(int verticalSplitPosition) {
+    void setVerticalSplitPosition(int verticalSplitPosition) {
         this.verticalSplitPosition = verticalSplitPosition;
         getElement().setProperty("verticalSplitPosition",
                 verticalSplitPosition);
     }
 
-    protected void setHorizontalSplitPosition(int horizontalSplitPosition) {
+    void setHorizontalSplitPosition(int horizontalSplitPosition) {
         this.horizontalSplitPosition = horizontalSplitPosition;
         getElement().setProperty("horizontalSplitPosition",
                 horizontalSplitPosition);
@@ -654,15 +654,15 @@ public class Spreadsheet extends Component
         getElement().setProperty("workbookChangeToggle", workbookChangeToggle);
     }
 
-    protected void setLockFormatColumns(boolean lockFormatColumns) {
+     void setLockFormatColumns(boolean lockFormatColumns) {
         getElement().setProperty("lockFormatColumns", lockFormatColumns);
     }
 
-    protected void setLockFormatRows(boolean lockFormatRows) {
+    void setLockFormatRows(boolean lockFormatRows) {
         getElement().setProperty("lockFormatRows", lockFormatRows);
     }
 
-    protected void setNamedRanges(List<String> namedRanges) {
+    void setNamedRanges(List<String> namedRanges) {
         getElement().setProperty("namedRanges",
                 Serializer.serialize(namedRanges));
     }
