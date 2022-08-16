@@ -17,9 +17,19 @@ package com.vaadin.flow.component.fieldhighlighter;
 
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.server.Command;
+import com.vaadin.flow.shared.Registration;
 
 @NpmPackage(value = "@vaadin/form-layout", version = "23.2.0-beta1")
 @JsModule("@vaadin/field-highlighter/src/vaadin-field-highlighter.js")
 public class FieldHighlighter {
-  public void init() {}
+    protected static Registration init(Element field) {
+        Command initWithJS = () -> field.executeJs(
+                "customElements.get('vaadin-field-highlighter').init(this)");
+        if (field.getNode().isAttached()) {
+            initWithJS.execute();
+        }
+        return field.addAttachListener(e -> initWithJS.execute());
+    }
 }
