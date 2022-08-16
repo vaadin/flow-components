@@ -168,7 +168,6 @@ public class Spreadsheet extends Component
         getElement().setProperty("width", width);
     }
 
-    private String description = "";
     // from SaredState
 
     // private Map<String, URLReference> resources = new HashMap<>();
@@ -255,10 +254,6 @@ public class Spreadsheet extends Component
     private String infoLabelValue;
 
     private boolean workbookChangeToggle;
-
-    public String getDescription() {
-        return description;
-    }
 
     protected int getCols() {
         return cols;
