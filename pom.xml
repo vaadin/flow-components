@@ -86,6 +86,7 @@
         <module>vaadin-map-flow-parent</module>
         <module>vaadin-rich-text-editor-flow-parent</module>
         <module>vaadin-spreadsheet-flow-parent</module>
+        <module>vaadin-field-highlighter-flow-parent</module>
     </modules>
     <profiles>
         <profile>
