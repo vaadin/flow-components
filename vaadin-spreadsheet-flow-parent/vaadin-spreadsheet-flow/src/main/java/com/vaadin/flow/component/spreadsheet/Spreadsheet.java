@@ -480,8 +480,7 @@ public class Spreadsheet extends Component
                 Serializer.serialize(sheetNames));
     }
 
-    void setCellStyleToCSSStyle(
-            HashMap<Integer, String> cellStyleToCSSStyle) {
+    void setCellStyleToCSSStyle(HashMap<Integer, String> cellStyleToCSSStyle) {
         this.cellStyleToCSSStyle = cellStyleToCSSStyle;
         getElement().setProperty("cellStyleToCSSStyle",
                 Serializer.serialize(cellStyleToCSSStyle));
@@ -513,8 +512,7 @@ public class Spreadsheet extends Component
                 Serializer.serialize(lockedRowIndexes));
     }
 
-    void setShiftedCellBorderStyles(
-            ArrayList<String> shiftedCellBorderStyles) {
+    void setShiftedCellBorderStyles(ArrayList<String> shiftedCellBorderStyles) {
         this.shiftedCellBorderStyles = shiftedCellBorderStyles;
         getElement().setProperty("shiftedCellBorderStyles",
                 Serializer.serialize(shiftedCellBorderStyles));
@@ -527,8 +525,7 @@ public class Spreadsheet extends Component
                 Serializer.serialize(conditionalFormattingStyles));
     }
 
-    void setHiddenColumnIndexes(
-            ArrayList<Integer> hiddenColumnIndexes) {
+    void setHiddenColumnIndexes(ArrayList<Integer> hiddenColumnIndexes) {
         this.hiddenColumnIndexes = hiddenColumnIndexes;
         getElement().setProperty("hiddenColumnIndexes",
                 Serializer.serialize(hiddenColumnIndexes));
@@ -546,8 +543,7 @@ public class Spreadsheet extends Component
                 Serializer.serialize(verticalScrollPositions));
     }
 
-    void setHorizontalScrollPositions(
-            int[] horizontalScrollPositions) {
+    void setHorizontalScrollPositions(int[] horizontalScrollPositions) {
         this.horizontalScrollPositions = horizontalScrollPositions;
         getElement().setProperty("horizontalScrollPositions",
                 Serializer.serialize(horizontalScrollPositions));
@@ -654,7 +650,7 @@ public class Spreadsheet extends Component
         getElement().setProperty("workbookChangeToggle", workbookChangeToggle);
     }
 
-     void setLockFormatColumns(boolean lockFormatColumns) {
+    void setLockFormatColumns(boolean lockFormatColumns) {
         getElement().setProperty("lockFormatColumns", lockFormatColumns);
     }
 
