@@ -8,14 +8,15 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.Route;
 
 @Route(value = "vaadin-field-highlighter")
-public class fieldHighlighterView extends Div {
+public class FieldHighlighterView extends Div {
 
     static class FieldHighlighter extends FieldHighlighterInitializer {
         public void initialize(Element field) {
-            super.init(field);
+            init(field);
         }
     }
-    public fieldHighlighterView() {
+
+    public FieldHighlighterView() {
         TextField tf = new TextField("TF with field highlighter");
         Button button = new Button("call init");
         button.addClickListener(event ->
