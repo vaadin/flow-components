@@ -32,8 +32,7 @@ async function computeModules() {
     // Read modules from the parent pom.xml
     const parentJs = await xml2js.parseStringPromise(fs.readFileSync(`pom.xml`, 'utf8'));
     modules = parentJs.project.modules[0].module.filter(m => !/shared-parent/.test(m))
-      .filter(m => !/demo-helpers/.test(m))
-      .filter(m => !/field-highlighter/.test(m));
+      .filter(m => !/demo-helpers/.test(m));
   }
 }
 

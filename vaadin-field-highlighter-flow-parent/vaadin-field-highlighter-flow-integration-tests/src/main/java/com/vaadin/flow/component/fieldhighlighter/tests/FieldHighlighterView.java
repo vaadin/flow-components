@@ -19,8 +19,8 @@ public class FieldHighlighterView extends Div {
     public FieldHighlighterView() {
         TextField tf = new TextField("TF with field highlighter");
         Button button = new Button("call init");
-        button.addClickListener(event ->
-                new FieldHighlighter().initialize(tf.getElement()));
+        button.addClickListener(
+                event -> new FieldHighlighter().initialize(tf.getElement()));
 
         tf.setId("tf-with-highlighter");
         button.setId("call-init");
