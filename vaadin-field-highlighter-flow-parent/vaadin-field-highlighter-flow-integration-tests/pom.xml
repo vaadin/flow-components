@@ -16,13 +16,20 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>flow-html-components</artifactId>
+            <artifactId>vaadin-testbench-core</artifactId>
+            <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-button-testbench</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>        
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-field-highlighter-flow</artifactId>
             <version>${project.version}</version>
-        </dependency>
+        </dependency>        
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-button-flow</artifactId>
@@ -32,11 +39,15 @@
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-text-field-flow</artifactId>
             <version>${project.version}</version>
-        </dependency>
+        </dependency>    
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-client</artifactId>
+        </dependency>            
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-data</artifactId>
-        </dependency>
+        </dependency>        
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-html-components</artifactId>
@@ -49,6 +60,17 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-test-util</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-flow-components-test-util</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>        
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-lit-template</artifactId>
