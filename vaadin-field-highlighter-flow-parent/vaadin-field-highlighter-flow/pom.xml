@@ -27,8 +27,8 @@
                 <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
                     <archive>
-                        <manifestFile>&#xD;
-                            ${project.build.outputDirectory}/META-INF/MANIFEST.MF&#xD;
+                        <manifestFile>
+                            ${project.build.outputDirectory}/META-INF/MANIFEST.MF
                         </manifestFile>
                     </archive>
                 </configuration>
