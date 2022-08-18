@@ -29,6 +29,9 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.Style;
+import com.vaadin.flow.internal.StateTree;
+import com.vaadin.flow.router.NavigationTrigger;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * Server-side component for the {@code <vaadin-login-overlay>} component.
@@ -54,6 +57,8 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
     private Component title;
 
     private boolean autoAddedToTheUi;
+
+    private Registration afterProgrammaticNavigationListenerRegistration;
 
     public LoginOverlay() {
         initEnsureDetachListener();
@@ -122,10 +127,22 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
     private void ensureAttached() {
         if (getElement().getNode().getParent() == null) {
             UI ui = getCurrentUI();
-            ui.beforeClientResponse(ui, context -> {
-                ui.addToModalComponent(this);
-                autoAddedToTheUi = true;
-            });
+            StateTree.ExecutionRegistration addToUiRegistration = ui
+                    .beforeClientResponse(ui, context -> {
+                        ui.addToModalComponent(this);
+                        autoAddedToTheUi = true;
+                    });
+            if (ui.getSession() != null) {
+                afterProgrammaticNavigationListenerRegistration = ui
+                        .addAfterNavigationListener(event -> {
+                            if (event.getLocationChangeEvent()
+                                    .getTrigger() == NavigationTrigger.PROGRAMMATIC) {
+                                addToUiRegistration.remove();
+                                afterProgrammaticNavigationListenerRegistration
+                                        .remove();
+                            }
+                        });
+            }
         }
     }
 

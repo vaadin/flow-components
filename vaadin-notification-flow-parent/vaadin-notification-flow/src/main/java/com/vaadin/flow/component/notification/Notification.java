@@ -38,6 +38,8 @@ import com.vaadin.flow.dom.ElementFactory;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.HtmlUtils;
+import com.vaadin.flow.internal.StateTree;
+import com.vaadin.flow.router.NavigationTrigger;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -60,6 +62,8 @@ public class Notification extends GeneratedVaadinNotification<Notification>
     private final Element container = ElementFactory.createDiv();
     private final Element templateElement = new Element("template");
     private boolean autoAddedToTheUi = false;
+
+    private Registration afterProgrammaticNavigationListenerRegistration;
 
     private SerializableConsumer<UI> deferredJob = new AttachComponentTemplate();
 
@@ -445,14 +449,25 @@ public class Notification extends GeneratedVaadinNotification<Notification>
                     + "That may happen if you call the method from the custom thread without "
                     + "'UI::access' or from tests without proper initialization.");
         }
-
-        ui.beforeClientResponse(ui, context -> {
-            if (isOpened() && getElement().getNode().getParent() == null) {
-                ui.addToModalComponent(this);
-                autoAddedToTheUi = true;
-            }
-        });
-
+        StateTree.ExecutionRegistration addToUiRegistration = ui
+                .beforeClientResponse(ui, context -> {
+                    if (isOpened()
+                            && getElement().getNode().getParent() == null) {
+                        ui.addToModalComponent(this);
+                        autoAddedToTheUi = true;
+                    }
+                });
+        if (ui.getSession() != null) {
+            afterProgrammaticNavigationListenerRegistration = ui
+                    .addAfterNavigationListener(event -> {
+                        if (event.getLocationChangeEvent()
+                                .getTrigger() == NavigationTrigger.PROGRAMMATIC) {
+                            addToUiRegistration.remove();
+                            afterProgrammaticNavigationListenerRegistration
+                                    .remove();
+                        }
+                    });
+        }
         super.setOpened(opened);
     }
 
