@@ -10,8 +10,13 @@ public class IntegerFieldValidationTest
 
     @Tag("test-integer-field")
     private class TestIntegerField extends IntegerField {
-        protected FeatureFlags getFeatureFlags() {
-            return featureFlagsMock;
+        protected boolean isFeatureFlagEnabled(Feature feature) {
+            if (feature.getId() == FeatureFlags.ENFORCE_FIELD_VALIDATION
+                    .getId()) {
+                return true;
+            }
+
+            return super.isFeatureFlagEnabled(feature);
         }
     }
 

@@ -25,6 +25,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.experimental.Feature;
 import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
@@ -36,6 +37,7 @@ import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.server.VaadinService;
 
 @Tag("vaadin-date-time-picker-date-picker")
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-beta2")
@@ -625,8 +627,7 @@ public class DateTimePicker extends
 
     @Override
     public Validator<LocalDateTime> getDefaultValidator() {
-        if (getFeatureFlags()
-                .isEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
             return (value, context) -> checkValidity(value);
         }
 
@@ -812,14 +813,23 @@ public class DateTimePicker extends
     }
 
     /**
-     * Gets the feature flags for the current UI.
+     * Returns true if the given feature flag is enabled, false otherwise.
      * <p>
      * Exposed with protected visibility to support mocking
+     * <p>
+     * The method requires the {@code VaadinService} instance to obtain the
+     * available feature flags, otherwise, the feature is considered disabled.
      *
-     * @return the current set of feature flags
+     * @param feature
+     *            the feature flag.
+     * @return whether the feature flag is enabled.
      */
-    protected FeatureFlags getFeatureFlags() {
-        return FeatureFlags
-                .get(UI.getCurrent().getSession().getService().getContext());
+    protected boolean isFeatureFlagEnabled(Feature feature) {
+        VaadinService service = VaadinService.getCurrent();
+        if (service == null) {
+            return false;
+        }
+
+        return FeatureFlags.get(service.getContext()).isEnabled(feature);
     }
 }

@@ -1,5 +1,6 @@
 package com.vaadin.flow.component.textfield.binder;
 
+import com.vaadin.experimental.Feature;
 import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.textfield.EmailField;
@@ -12,8 +13,13 @@ public class EmailFieldValidationTest
 
     @Tag("test-email-field")
     private class TestEmailField extends EmailField {
-        protected FeatureFlags getFeatureFlags() {
-            return featureFlagsMock;
+        protected boolean isFeatureFlagEnabled(Feature feature) {
+            if (feature.getId() == FeatureFlags.ENFORCE_FIELD_VALIDATION
+                    .getId()) {
+                return true;
+            }
+
+            return super.isFeatureFlagEnabled(feature);
         }
     }
 
