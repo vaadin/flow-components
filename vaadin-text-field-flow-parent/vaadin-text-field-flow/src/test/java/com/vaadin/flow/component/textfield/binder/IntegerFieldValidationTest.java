@@ -1,5 +1,6 @@
 package com.vaadin.flow.component.textfield.binder;
 
+import com.vaadin.experimental.Feature;
 import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.textfield.IntegerField;
