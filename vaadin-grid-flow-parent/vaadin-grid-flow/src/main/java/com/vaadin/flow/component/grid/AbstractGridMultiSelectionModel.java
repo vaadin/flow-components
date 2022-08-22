@@ -227,24 +227,12 @@ public abstract class AbstractGridMultiSelectionModel<T>
     public void updateSelection(Set<T> addedItems, Set<T> removedItems) {
         Objects.requireNonNull(addedItems, "added items cannot be null");
         Objects.requireNonNull(removedItems, "removed items cannot be null");
-
         doUpdateSelection(addedItems, removedItems, false);
     }
 
     @Override
     public boolean isSelected(T item) {
         return selected.containsKey(getItemId(item));
-    }
-
-    /**
-     * Determines if an object with the given item id is selected or not
-     *
-     * @param itemId
-     *            the item id as returned by {@link DataProvider#getId(Object)}
-     * @return true if an item with the given id is selected; false otherwise
-     */
-    protected boolean isSelectedItemId(Object itemId) {
-        return selected.containsKey(itemId);
     }
 
     @Override
@@ -444,7 +432,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
     }
 
     private void doUpdateSelection(Set<T> addedItems, Set<T> removedItems,
-                                   boolean userOriginated) {
+            boolean userOriginated) {
         Map<Object, T> addedItemsMap = mapItemsById(addedItems);
         Map<Object, T> removedItemsMap = mapItemsById(removedItems);
         addedItemsMap.keySet().stream().filter(removedItemsMap::containsKey)
@@ -457,6 +445,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
 
     private void doUpdateSelection(Map<Object, T> addedItems,
             Map<Object, T> removedItems, boolean userOriginated) {
+
         if (selected.keySet().containsAll(addedItems.keySet()) && Collections
                 .disjoint(selected.keySet(), removedItems.keySet())) {
             return;
