@@ -162,6 +162,8 @@ public abstract class AbstractGridMultiSelectionModel<T>
     /**
      * Returns an unmodifiable view of the selected item ids.
      * <p>
+     * Exposed to be overridden within subclasses.
+     * <p>
      * The returned Set may be a direct view of the internal data structures of
      * this class. A defensive copy should be made by callers when iterating
      * over this Set and modifying the selection during iteration to avoid
