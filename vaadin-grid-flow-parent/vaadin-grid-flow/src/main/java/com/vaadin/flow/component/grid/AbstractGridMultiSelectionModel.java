@@ -16,7 +16,7 @@
 package com.vaadin.flow.component.grid;
 
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -105,13 +105,12 @@ public abstract class AbstractGridMultiSelectionModel<T>
 
     @Override
     public void selectFromClient(T item) {
-        Object itemId = getItemId(item);
-        if (isSelectedItemId(itemId)) {
+        if (isSelected(item)) {
             return;
         }
 
         Set<T> oldSelection = getSelectedItems();
-        selected.put(itemId, item);
+        selected.put(getItemId(item), item);
 
         fireSelectionEvent(new MultiSelectionEvent<>(getGrid(),
                 getGrid().asMultiSelect(), oldSelection, true));
@@ -132,13 +131,12 @@ public abstract class AbstractGridMultiSelectionModel<T>
 
     @Override
     public void deselectFromClient(T item) {
-        Object itemId = getItemId(item);
-        if (!isSelectedItemId(itemId)) {
+        if (!isSelected(item)) {
             return;
         }
 
         Set<T> oldSelection = getSelectedItems();
-        selected.remove(itemId);
+        selected.remove(getItemId(item));
 
         fireSelectionEvent(new MultiSelectionEvent<>(getGrid(),
                 getGrid().asMultiSelect(), oldSelection, true));
@@ -183,45 +181,42 @@ public abstract class AbstractGridMultiSelectionModel<T>
 
     @Override
     public void select(T item) {
-        Object itemId = getItemId(item);
-        if (isSelectedItemId(item)) {
+        if (isSelected(item)) {
             return;
         }
-        Map<Object, T> selected = new HashMap<>();
+        Set<T> selected = new HashSet<>();
         if (item != null) {
-            selected.put(itemId, item);
+            selected.add(item);
         }
-        doUpdateSelection(selected, Collections.emptyMap(), false);
+        doUpdateSelection(selected, Collections.emptySet(), false);
     }
 
     @Override
     public void deselect(T item) {
-        Object itemId = getItemId(item);
-        if (!isSelectedItemId(itemId)) {
+        if (!isSelected(item)) {
             return;
         }
-        Map<Object, T> deselected = new HashMap<>();
+        Set<T> deselected = new HashSet<>();
         if (item != null) {
-            deselected.put(itemId, item);
+            deselected.add(item);
         }
-        doUpdateSelection(Collections.emptyMap(), deselected, false);
+        doUpdateSelection(Collections.emptySet(), deselected, false);
         selectionColumn.setSelectAllCheckboxState(false);
     }
 
     @Override
     public void selectAll() {
-        doUpdateSelection(
-                mapItemsById(getGrid().getDataCommunicator().getDataProvider()
-                        .fetch(new Query<>()).collect(Collectors.toSet())),
-                Collections.emptyMap(), false);
+        updateSelection(
+                getGrid().getDataCommunicator().getDataProvider()
+                        .fetch(new Query<>()).collect(Collectors.toSet()),
+                Collections.emptySet());
         selectionColumn.setSelectAllCheckboxState(true);
         selectionColumn.setSelectAllCheckboxIndeterminateState(false);
     }
 
     @Override
     public void deselectAll() {
-        doUpdateSelection(Collections.emptyMap(), new HashMap<>(selected),
-                false);
+        updateSelection(Collections.emptySet(), getSelectedItems());
         selectionColumn.setSelectAllCheckboxState(false);
         selectionColumn.setSelectAllCheckboxIndeterminateState(false);
     }
@@ -231,19 +226,12 @@ public abstract class AbstractGridMultiSelectionModel<T>
         Objects.requireNonNull(addedItems, "added items cannot be null");
         Objects.requireNonNull(removedItems, "removed items cannot be null");
 
-        Map<Object, T> addedItemsMap = mapItemsById(addedItems);
-        Map<Object, T> removedItemsMap = mapItemsById(removedItems);
-        addedItemsMap.keySet().stream().filter(removedItemsMap::containsKey)
-                .collect(Collectors.toList()).forEach(key -> {
-                    addedItemsMap.remove(key);
-                    removedItemsMap.remove(key);
-                });
-        doUpdateSelection(addedItemsMap, removedItemsMap, false);
+        doUpdateSelection(addedItems, removedItems, false);
     }
 
     @Override
     public boolean isSelected(T item) {
-        return isSelectedItemId(getItemId(item));
+        return selected.containsKey(getItemId(item));
     }
 
     /**
@@ -399,9 +387,8 @@ public abstract class AbstractGridMultiSelectionModel<T>
         } else {
             allItemsStream = dataProvider.fetch(new Query<>());
         }
-        doUpdateSelection(
-                mapItemsById(allItemsStream.collect(Collectors.toSet())),
-                Collections.emptyMap(), true);
+        doUpdateSelection(allItemsStream.collect(Collectors.toSet()),
+                Collections.emptySet(), true);
         selectionColumn.setSelectAllCheckboxState(true);
         selectionColumn.setSelectAllCheckboxIndeterminateState(false);
     }
@@ -449,17 +436,27 @@ public abstract class AbstractGridMultiSelectionModel<T>
             // ignore event if the checkBox was meant to be hidden
             return;
         }
-        doUpdateSelection(Collections.emptyMap(),
-                mapItemsById(getSelectedItems()), true);
+        doUpdateSelection(Collections.emptySet(), getSelectedItems(), true);
         selectionColumn.setSelectAllCheckboxState(false);
         selectionColumn.setSelectAllCheckboxIndeterminateState(false);
     }
 
+    private void doUpdateSelection(Set<T> addedItems, Set<T> removedItems,
+                                   boolean userOriginated) {
+        Map<Object, T> addedItemsMap = mapItemsById(addedItems);
+        Map<Object, T> removedItemsMap = mapItemsById(removedItems);
+        addedItemsMap.keySet().stream().filter(removedItemsMap::containsKey)
+                .collect(Collectors.toList()).forEach(key -> {
+                    addedItemsMap.remove(key);
+                    removedItemsMap.remove(key);
+                });
+        doUpdateSelection(addedItemsMap, removedItemsMap, userOriginated);
+    }
+
     private void doUpdateSelection(Map<Object, T> addedItems,
             Map<Object, T> removedItems, boolean userOriginated) {
-        Set<Object> selectedIds = getSelectedItemIds();
-        if (selectedIds.containsAll(addedItems.keySet())
-                && Collections.disjoint(selectedIds, removedItems.keySet())) {
+        if (selected.keySet().containsAll(addedItems.keySet()) && Collections
+                .disjoint(selected.keySet(), removedItems.keySet())) {
             return;
         }
         Set<T> oldSelection = getSelectedItems();
