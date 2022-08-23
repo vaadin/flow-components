@@ -176,7 +176,6 @@ public class AbstractGridMultiSelectionModelSelectedItemsTest {
                 selectionModel.getSelectedItemIds());
         for (String value : values) {
             Assert.assertTrue(selectionModel.isSelected(value));
-            Assert.assertTrue(selectionModel.isSelected(value));
         }
     }
 }
