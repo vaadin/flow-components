@@ -1,9 +1,13 @@
 package com.vaadin.flow.component.timepicker.tests;
 
+import com.vaadin.experimental.Feature;
+import com.vaadin.experimental.FeatureFlags;
+import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.BindingValidationStatus;
 import com.vaadin.flow.data.binder.BindingValidationStatusHandler;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,6 +31,18 @@ public class TimePickerBinderValidationTest {
     @Mock
     private BindingValidationStatusHandler statusHandlerMock;
 
+    @Tag("test-time-picker")
+    private class TestTimePicker extends TimePicker {
+        protected boolean isFeatureFlagEnabled(Feature feature) {
+            if (feature.getId() == FeatureFlags.ENFORCE_FIELD_VALIDATION
+                    .getId()) {
+                return true;
+            }
+
+            return super.isFeatureFlagEnabled(feature);
+        }
+    }
+
     public static class Bean {
         private LocalTime time;
 
@@ -42,7 +58,7 @@ public class TimePickerBinderValidationTest {
     @Before
     public void init() {
         MockitoAnnotations.openMocks(this);
-        field = new TimePicker();
+        field = new TestTimePicker();
         field.setMax(LocalTime.now().plusHours(1));
     }
 
