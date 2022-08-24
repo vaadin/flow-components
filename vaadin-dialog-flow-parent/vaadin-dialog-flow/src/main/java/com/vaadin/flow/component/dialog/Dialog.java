@@ -755,6 +755,10 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
                         ui.setChildComponentModal(this, isModal());
                         autoAddedToTheUi = true;
                     }
+                    if (afterProgrammaticNavigationListenerRegistration != null) {
+                        afterProgrammaticNavigationListenerRegistration
+                                .remove();
+                    }
                 });
         if (ui.getSession() != null) {
             afterProgrammaticNavigationListenerRegistration = ui

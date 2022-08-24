@@ -456,6 +456,10 @@ public class Notification extends GeneratedVaadinNotification<Notification>
                         ui.addToModalComponent(this);
                         autoAddedToTheUi = true;
                     }
+                    if (afterProgrammaticNavigationListenerRegistration != null) {
+                        afterProgrammaticNavigationListenerRegistration
+                                .remove();
+                    }
                 });
         if (ui.getSession() != null) {
             afterProgrammaticNavigationListenerRegistration = ui

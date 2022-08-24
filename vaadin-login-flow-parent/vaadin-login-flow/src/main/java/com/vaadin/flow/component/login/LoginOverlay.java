@@ -131,6 +131,10 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
                     .beforeClientResponse(ui, context -> {
                         ui.addToModalComponent(this);
                         autoAddedToTheUi = true;
+                        if (afterProgrammaticNavigationListenerRegistration != null) {
+                            afterProgrammaticNavigationListenerRegistration
+                                    .remove();
+                        }
                     });
             if (ui.getSession() != null) {
                 afterProgrammaticNavigationListenerRegistration = ui

@@ -677,6 +677,10 @@ public class ConfirmDialog extends Component
                         updateHeight();
                         ui.setChildComponentModal(this, true);
                     }
+                    if (afterProgrammaticNavigationListenerRegistration != null) {
+                        afterProgrammaticNavigationListenerRegistration
+                                .remove();
+                    }
                 });
         if (ui.getSession() != null) {
             afterProgrammaticNavigationListenerRegistration = ui
