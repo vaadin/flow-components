@@ -16,32 +16,39 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import com.vaadin.flow.component.grid.testbench.GridColumnElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
+import java.util.List;
+
 @TestPath("vaadin-grid/recalculate-column-widths")
 public class RecalculateColumnWidthsIT extends AbstractComponentIT {
+
+    @Before
+    public void init() {
+        open();
+        waitForElementPresent(By.id("grid"));
+    }
+
     @Test
     public void columnsRecalculateAfterDataChange() {
-        open();
-
-        waitForElementPresent(By.id("grid"));
-
         GridElement grid = $(GridElement.class).id("grid");
-        TestBenchElement button = $(TestBenchElement.class)
+        TestBenchElement changeDataButton = $(TestBenchElement.class)
                 .id("change-data-button");
 
         GridTHTDElement cell = grid.getCell(1, 1);
 
         Integer scrollWidthBefore = cell.getPropertyInteger("scrollWidth");
 
-        button.click();
+        changeDataButton.click();
 
         Integer scrollWidthAfter = cell.getPropertyInteger("scrollWidth");
         Integer offsetWidthAfter = cell.getPropertyInteger("offsetWidth");
@@ -50,5 +57,28 @@ public class RecalculateColumnWidthsIT extends AbstractComponentIT {
                 scrollWidthAfter > scrollWidthBefore);
         Assert.assertTrue("Cell content should not be cut off with ellipsis",
                 offsetWidthAfter <= scrollWidthAfter);
+    }
+
+    @Test
+    public void columnsRecalculateAfterVisibilityChange() {
+        GridElement grid = $(GridElement.class).id("grid");
+        TestBenchElement setCol2InvisibleButton = $(TestBenchElement.class)
+                .id("set-column-2-invisible-button");
+        TestBenchElement setCol2VisibleButton = $(TestBenchElement.class)
+                .id("set-column-2-visible-button");
+
+        List<GridColumnElement> visibleColumnsBefore = grid.getVisibleColumns();
+        Assert.assertEquals(3, visibleColumnsBefore.size());
+
+        int column2SizeBefore = grid.getCell(0, visibleColumnsBefore.get(1))
+                .getSize().getWidth();
+
+        setCol2InvisibleButton.click();
+        setCol2VisibleButton.click();
+
+        List<GridColumnElement> visibleColumnsAfter = grid.getVisibleColumns();
+        Assert.assertEquals(3, visibleColumnsAfter.size());
+        Assert.assertEquals(column2SizeBefore, grid
+                .getCell(0, visibleColumnsAfter.get(1)).getSize().getWidth());
     }
 }

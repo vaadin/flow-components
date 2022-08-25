@@ -33,9 +33,9 @@ public class RecalculateColumnWidthsPage extends VerticalLayout {
         grid1.setAllRowsVisible(true);
         grid1.setItems(ts1, ts2);
 
-        grid1.addColumn(item -> item.a).setAutoWidth(true);
-        grid1.addColumn(item -> item.b).setAutoWidth(true);
-        grid1.addColumn(item -> item.c).setAutoWidth(true);
+        grid1.addColumn(item -> item.a).setAutoWidth(true).setKey("column1");
+        grid1.addColumn(item -> item.b).setAutoWidth(true).setKey("column2");
+        grid1.addColumn(item -> item.c).setAutoWidth(true).setKey("column3");
 
         add(grid1);
 
@@ -48,9 +48,9 @@ public class RecalculateColumnWidthsPage extends VerticalLayout {
         grid1.getElement().executeJs(
                 "$0._recalculateColumnWidthOnceLoadingFinished = false");
 
-        Button button = new Button("Add Text");
-        button.setId("change-data-button");
-        button.addClickListener(event -> {
+        Button changeDataButton = new Button("Add Text");
+        changeDataButton.setId("change-data-button");
+        changeDataButton.addClickListener(event -> {
 
             ts2.b = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr,"
                     + " sed diam nonumy eirmod tempor invidunt ut labore et dolore"
@@ -68,7 +68,21 @@ public class RecalculateColumnWidthsPage extends VerticalLayout {
             grid1.recalculateColumnWidths();
         });
 
-        add(button);
+        Button setCol2InvisibleButton = new Button("Set column 2 invisible");
+        setCol2InvisibleButton.setId("set-column-2-invisible-button");
+        setCol2InvisibleButton.addClickListener(l -> {
+            grid1.getColumnByKey("column2").setVisible(false);
+            grid1.recalculateColumnWidths();
+        });
+
+        Button setCol2VisibleButton = new Button("Set column 2 visible");
+        setCol2VisibleButton.setId("set-column-2-visible-button");
+        setCol2VisibleButton.addClickListener(l -> {
+            grid1.getColumnByKey("column2").setVisible(true);
+            grid1.recalculateColumnWidths();
+        });
+
+        add(changeDataButton, setCol2InvisibleButton, setCol2VisibleButton);
     }
 
     static class ThreeString {

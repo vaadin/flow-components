@@ -3842,9 +3842,12 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         // the client side grid in the beforeClientResponse hook, we need to
         // match this here so that the column width recalculation runs after the
         // data was updated.
-        getElement().getNode().runWhenAttached(ui -> ui.beforeClientResponse(
-                this,
-                ctx -> getElement().callJsFunction("recalculateColumnWidths")));
+        getElement().getNode().runWhenAttached(ui -> {
+            ui.getInternals().getStateTree().collectChanges(ignore -> {
+            });
+            ui.beforeClientResponse(this, ctx -> getElement()
+                    .callJsFunction("recalculateColumnWidths"));
+        });
     }
 
     /**
