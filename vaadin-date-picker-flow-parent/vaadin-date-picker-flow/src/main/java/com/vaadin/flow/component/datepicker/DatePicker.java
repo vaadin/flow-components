@@ -24,6 +24,9 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.experimental.Feature;
+import com.vaadin.experimental.FeatureFlags;
+import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
@@ -461,7 +464,11 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
 
     @Override
     public Validator<LocalDate> getDefaultValidator() {
-        return (value, context) -> checkValidity(value);
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            return (value, context) -> checkValidity(value);
+        }
+
+        return Validator.alwaysPass();
     }
 
     @Override
@@ -742,6 +749,27 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         getThemeNames().removeAll(
                 Stream.of(variants).map(DatePickerVariant::getVariantName)
                         .collect(Collectors.toList()));
+    }
+
+    /**
+     * Returns true if the given feature flag is enabled, false otherwise.
+     * <p>
+     * Exposed with protected visibility to support mocking
+     * <p>
+     * The method requires the {@code VaadinService} instance to obtain the
+     * available feature flags, otherwise, the feature is considered disabled.
+     *
+     * @param feature
+     *            the feature flag.
+     * @return whether the feature flag is enabled.
+     */
+    protected boolean isFeatureFlagEnabled(Feature feature) {
+        VaadinService service = VaadinService.getCurrent();
+        if (service == null) {
+            return false;
+        }
+
+        return FeatureFlags.get(service.getContext()).isEnabled(feature);
     }
 
     /**
