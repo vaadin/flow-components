@@ -122,7 +122,9 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
 
         addValueChangeListener(e -> validate());
 
-        addClientValidatedEventListener(event -> validate());
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            addClientValidatedEventListener(event -> validate());
+        }
     }
 
     /**
@@ -289,11 +291,15 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     @Override
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<LocalTime> listener) {
-        return addClientValidatedEventListener(event -> {
-            listener.validationStatusChanged(
-                    new ValidationStatusChangeEvent<LocalTime>(this,
-                            !isInvalid()));
-        });
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            return addClientValidatedEventListener(event -> {
+                listener.validationStatusChanged(
+                        new ValidationStatusChangeEvent<LocalTime>(this,
+                                !isInvalid()));
+            });
+        }
+
+        return null;
     }
 
     private ValidationResult checkValidity(LocalTime value) {
@@ -476,7 +482,12 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         super.onAttach(attachEvent);
         initConnector();
         requestLocaleUpdate();
-        ClientValidationUtil.preventWebComponentFromSettingItselfToValid(this);
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            ClientValidationUtil
+                    .preventWebComponentFromSettingItselfToValid(this);
+        } else {
+            FieldValidationUtil.disableClientValidation(this);
+        }
     }
 
     private void initConnector() {
