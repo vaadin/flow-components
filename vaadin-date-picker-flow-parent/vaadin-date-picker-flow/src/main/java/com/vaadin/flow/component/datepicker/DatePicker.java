@@ -145,7 +145,9 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
 
         addValueChangeListener(e -> validate());
 
-        addClientValidatedEventListener(e -> validate());
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            addClientValidatedEventListener(e -> validate());
+        }
     }
 
     /**
@@ -350,7 +352,11 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         super.onAttach(attachEvent);
         initConnector();
         requestI18nUpdate();
-        ClientValidationUtil.preventWebComponentFromSettingItselfToValid(this);
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            ClientValidationUtil.preventWebComponentFromSettingItselfToValid(this);
+        } else {
+            FieldValidationUtil.disableClientValidation(this);
+        }
     }
 
     private void initConnector() {
@@ -481,11 +487,15 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
 
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<LocalDate> listener) {
-        return addClientValidatedEventListener(event -> {
-            listener.validationStatusChanged(
-                    new ValidationStatusChangeEvent<LocalDate>(this,
-                            !isInvalid()));
-        });
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            return addClientValidatedEventListener(event -> {
+                listener.validationStatusChanged(
+                        new ValidationStatusChangeEvent<LocalDate>(this,
+                                !isInvalid()));
+            });
+        }
+
+        return null;
     }
 
     @Override
