@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.textfield;
 
+import com.vaadin.experimental.Feature;
+import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.CompositionNotifier;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
@@ -31,6 +33,7 @@ import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.server.VaadinService;
 
 /**
  * Text Field allows the user to input and edit text. Prefix and suffix
@@ -487,7 +490,12 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
 
     @Override
     public Validator<String> getDefaultValidator() {
-        return (value, context) -> getValidationSupport().checkValidity(value);
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            return (value, context) -> getValidationSupport()
+                    .checkValidity(value);
+        }
+
+        return Validator.alwaysPass();
     }
 
     /**
@@ -519,5 +527,26 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
     @Override
     public void removeThemeVariants(TextFieldVariant... variants) {
         HasThemeVariant.super.removeThemeVariants(variants);
+    }
+
+    /**
+     * Returns true if the given feature flag is enabled, false otherwise.
+     * <p>
+     * Exposed with protected visibility to support mocking
+     * <p>
+     * The method requires the {@code VaadinService} instance to obtain the
+     * available feature flags, otherwise, the feature is considered disabled.
+     *
+     * @param feature
+     *            the feature flag.
+     * @return whether the feature flag is enabled.
+     */
+    protected boolean isFeatureFlagEnabled(Feature feature) {
+        VaadinService service = VaadinService.getCurrent();
+        if (service == null) {
+            return false;
+        }
+
+        return FeatureFlags.get(service.getContext()).isEnabled(feature);
     }
 }
