@@ -17,7 +17,7 @@ public abstract class AbstractValidationPage<F extends Component & HasValidation
 
     protected F field;
 
-    public AbstractValidationPage() {
+    protected AbstractValidationPage() {
         field = createField();
         add(field);
 
