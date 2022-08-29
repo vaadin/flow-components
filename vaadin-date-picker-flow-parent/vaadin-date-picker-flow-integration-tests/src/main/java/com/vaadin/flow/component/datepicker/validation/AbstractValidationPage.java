@@ -15,7 +15,7 @@ public abstract class AbstractValidationPage extends Div {
 
     protected DatePicker field;
 
-    public AbstractValidationPage() {
+    protected AbstractValidationPage() {
         field = new DatePicker();
         add(field);
 
