@@ -15,7 +15,7 @@ public abstract class AbstractValidationPage extends Div {
 
     protected TimePicker field;
 
-    public AbstractValidationPage() {
+    protected AbstractValidationPage() {
         field = new TimePicker();
         add(field);
 
