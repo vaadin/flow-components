@@ -24,20 +24,20 @@ import org.junit.Before;
 import static com.vaadin.tests.validation.AbstractValidationPage.SERVER_VALIDITY_STATE;
 import static com.vaadin.tests.validation.AbstractValidationPage.SERVER_VALIDITY_STATE_BUTTON;
 
-public abstract class AbstractValidationIT<F extends TestBenchElement>
+public abstract class AbstractValidationIT<T extends TestBenchElement>
         extends AbstractComponentIT {
-    protected F field;
+    protected T testField;
 
     @Before
     public void init() {
         open();
-        field = getField();
+        testField = getTestField();
     }
 
-    protected abstract F getField();
+    protected abstract T getTestField();
 
     protected void assertErrorMessage(String expected) {
-        Assert.assertEquals(expected, field.getPropertyString("errorMessage"));
+        Assert.assertEquals(expected, testField.getPropertyString("errorMessage"));
     }
 
     protected void assertClientValid() {
@@ -68,6 +68,6 @@ public abstract class AbstractValidationIT<F extends TestBenchElement>
     }
 
     private boolean isClientValid() {
-        return !field.getPropertyBoolean("invalid");
+        return !testField.getPropertyBoolean("invalid");
     }
 }

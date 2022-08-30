@@ -25,16 +25,16 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Input;
 import com.vaadin.flow.component.html.NativeButton;
 
-public abstract class AbstractValidationPage<F extends Component & HasValidation>
+public abstract class AbstractValidationPage<T extends Component & HasValidation>
         extends Div {
     public static final String SERVER_VALIDITY_STATE = "server-validity-state";
     public static final String SERVER_VALIDITY_STATE_BUTTON = "server-validity-state-button";
 
-    protected F field;
+    protected T testField;
 
     protected AbstractValidationPage() {
-        field = createField();
-        add(field);
+        testField = createTestField();
+        add(testField);
 
         addServerValidityStateControls();
     }
@@ -46,7 +46,7 @@ public abstract class AbstractValidationPage<F extends Component & HasValidation
         NativeButton validityStateButton = createButton(
                 SERVER_VALIDITY_STATE_BUTTON, "Retrieve server validity state",
                 event -> {
-                    boolean isValid = !field.isInvalid();
+                    boolean isValid = !testField.isInvalid();
                     validityState.setText(String.valueOf(isValid));
                 });
 
@@ -78,5 +78,5 @@ public abstract class AbstractValidationPage<F extends Component & HasValidation
     /**
      * A field to test.
      */
-    protected abstract F createField();
+    protected abstract T createTestField();
 }
