@@ -2,12 +2,14 @@ package com.vaadin.flow.component.datepicker.validation;
 
 import java.time.LocalDate;
 
+import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.router.Route;
+import com.vaadin.tests.validation.AbstractValidationPage;
 
 @Route("vaadin-date-picker/validation/basic")
-public class DatePickerValidationBasicPage extends AbstractValidationPage {
+public class DatePickerValidationBasicPage extends AbstractValidationPage<DatePicker> {
     public static final String ATTACH_FIELD_BUTTON = "attach-field-button";
     public static final String DETACH_FIELD_BUTTON = "detach-field-button";
 
@@ -19,17 +21,17 @@ public class DatePickerValidationBasicPage extends AbstractValidationPage {
         super();
 
         add(createButton(REQUIRED_BUTTON, "Enable required", event -> {
-            field.setRequiredIndicatorVisible(true);
+            testField.setRequiredIndicatorVisible(true);
         }));
 
         add(createInput(MIN_INPUT, "Set min date", event -> {
             LocalDate value = LocalDate.parse(event.getValue());
-            field.setMin(value);
+            testField.setMin(value);
         }));
 
         add(createInput(MAX_INPUT, "Set max date", event -> {
             LocalDate value = LocalDate.parse(event.getValue());
-            field.setMax(value);
+            testField.setMax(value);
         }));
 
         addAttachDetachControls();
@@ -37,10 +39,14 @@ public class DatePickerValidationBasicPage extends AbstractValidationPage {
 
     protected void addAttachDetachControls() {
         NativeButton attachButton = createButton(ATTACH_FIELD_BUTTON,
-                "Attach field", event -> add(field));
+                "Attach field", event -> add(testField));
         NativeButton detachButton = createButton(DETACH_FIELD_BUTTON,
-                "Detach field", event -> add(field));
+                "Detach field", event -> add(testField));
 
         add(new Div(attachButton, detachButton));
+    }
+
+    protected DatePicker createTestField() {
+        return new DatePicker();
     }
 }

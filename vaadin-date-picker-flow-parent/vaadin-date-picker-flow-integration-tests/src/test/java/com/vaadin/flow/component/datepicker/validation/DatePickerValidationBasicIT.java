@@ -2,6 +2,8 @@ package com.vaadin.flow.component.datepicker.validation;
 
 import com.vaadin.flow.component.datepicker.testbench.DatePickerElement;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.validation.AbstractValidationIT;
+
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
@@ -12,27 +14,27 @@ import static com.vaadin.flow.component.datepicker.validation.DatePickerValidati
 import static com.vaadin.flow.component.datepicker.validation.DatePickerValidationBasicPage.REQUIRED_BUTTON;
 
 @TestPath("vaadin-date-picker/validation/basic")
-public class DatePickerValidationBasicIT extends AbstractValidationIT {
+public class DatePickerValidationBasicIT extends AbstractValidationIT<DatePickerElement> {
     @Test
     public void fieldIsInitiallyValid() {
-        assertClientValid(true);
-        assertServerValid(true);
+        assertClientValid();
+        assertServerValid();
     }
 
     @Test
     public void onlyServerCanSetFieldToValid() {
         $("button").id(REQUIRED_BUTTON).click();
 
-        executeScript("arguments[0].validate()", field);
-        assertClientValid(false);
+        executeScript("arguments[0].validate()", testField);
+        assertClientInvalid();
 
-        field.sendKeys("1/1/2022");
-        executeScript("arguments[0].validate()", field);
-        assertClientValid(false);
+        testField.sendKeys("1/1/2022");
+        executeScript("arguments[0].validate()", testField);
+        assertClientInvalid();
 
-        field.sendKeys(Keys.ENTER);
-        assertServerValid(true);
-        assertClientValid(true);
+        testField.sendKeys(Keys.ENTER);
+        assertServerValid();
+        assertClientValid();
     }
 
     @Test
@@ -40,7 +42,7 @@ public class DatePickerValidationBasicIT extends AbstractValidationIT {
         $("button").id(DETACH_FIELD_BUTTON).click();
         $("button").id(ATTACH_FIELD_BUTTON).click();
 
-        field = $(DatePickerElement.class).first();
+        testField = getTestField();
 
         onlyServerCanSetFieldToValid();
     }
@@ -49,70 +51,74 @@ public class DatePickerValidationBasicIT extends AbstractValidationIT {
     public void required_triggerInputBlur_assertValidity() {
         $("button").id(REQUIRED_BUTTON).click();
 
-        field.sendKeys(Keys.TAB);
-        assertServerValid(false);
-        assertClientValid(false);
+        testField.sendKeys(Keys.TAB);
+        assertServerInvalid();
+        assertClientInvalid();
     }
 
     @Test
     public void required_changeInputValue_assertValidity() {
         $("button").id(REQUIRED_BUTTON).click();
 
-        field.setInputValue("1/1/2022");
-        assertServerValid(true);
-        assertClientValid(true);
+        testField.setInputValue("1/1/2022");
+        assertServerValid();
+        assertClientValid();
 
-        field.setInputValue("");
-        assertServerValid(false);
-        assertClientValid(false);
+        testField.setInputValue("");
+        assertServerInvalid();
+        assertClientInvalid();
     }
 
     @Test
     public void min_changeInputValue_assertValidity() {
         $("input").id(MIN_INPUT).sendKeys("2022-03-01", Keys.ENTER);
 
-        field.setInputValue("2/1/2022");
-        assertClientValid(false);
-        assertServerValid(false);
+        testField.setInputValue("2/1/2022");
+        assertClientInvalid();
+        assertServerInvalid();
 
-        field.setInputValue("3/1/2022");
-        assertClientValid(true);
-        assertServerValid(true);
+        testField.setInputValue("3/1/2022");
+        assertClientValid();
+        assertServerValid();
 
-        field.setInputValue("4/1/2022");
-        assertClientValid(true);
-        assertServerValid(true);
+        testField.setInputValue("4/1/2022");
+        assertClientValid();
+        assertServerValid();
     }
 
     @Test
     public void max_changeInputValue_assertValidity() {
         $("input").id(MAX_INPUT).sendKeys("2022-03-01", Keys.ENTER);
 
-        field.setInputValue("4/1/2022");
-        assertClientValid(false);
-        assertServerValid(false);
+        testField.setInputValue("4/1/2022");
+        assertClientInvalid();
+        assertServerInvalid();
 
-        field.setInputValue("3/1/2022");
-        assertClientValid(true);
-        assertServerValid(true);
+        testField.setInputValue("3/1/2022");
+        assertClientValid();
+        assertServerValid();
 
-        field.setInputValue("2/1/2022");
-        assertClientValid(true);
-        assertServerValid(true);
+        testField.setInputValue("2/1/2022");
+        assertClientValid();
+        assertServerValid();
     }
 
     @Test
     public void badInput_changeInputValue_assertValidity() {
-        field.setInputValue("INVALID");
-        assertServerValid(false);
-        assertClientValid(false);
+        testField.setInputValue("INVALID");
+        assertServerInvalid();
+        assertClientInvalid();
 
-        field.setInputValue("1/1/2022");
-        assertServerValid(true);
-        assertClientValid(true);
+        testField.setInputValue("1/1/2022");
+        assertServerValid();
+        assertClientValid();
 
-        field.setInputValue("INVALID");
-        assertServerValid(false);
-        assertClientValid(false);
+        testField.setInputValue("INVALID");
+        assertServerInvalid();
+        assertClientInvalid();
+    }
+
+    protected DatePickerElement getTestField() {
+        return $(DatePickerElement.class).first();
     }
 }
