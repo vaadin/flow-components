@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.textfield.tests.validation;
 
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 
@@ -42,12 +43,12 @@ public class TextFieldValidationBasicPage
         }));
 
         add(createInput(MIN_LENGTH_INPUT, "Set min length", event -> {
-            var value = Integer.parseInt(event.getValue());
+            int value = Integer.parseInt(event.getValue());
             field.setMinLength(value);
         }));
 
         add(createInput(MAX_LENGTH_INPUT, "Set max length", event -> {
-            var value = Integer.parseInt(event.getValue());
+            int value = Integer.parseInt(event.getValue());
             field.setMaxLength(value);
         }));
 
@@ -55,9 +56,9 @@ public class TextFieldValidationBasicPage
     }
 
     private void addAttachDetachControls() {
-        var attachButton = createButton(ATTACH_FIELD_BUTTON, "Attach field",
+        NativeButton attachButton = createButton(ATTACH_FIELD_BUTTON, "Attach field",
                 event -> add(field));
-        var detachButton = createButton(DETACH_FIELD_BUTTON, "Detach field",
+        NativeButton detachButton = createButton(DETACH_FIELD_BUTTON, "Detach field",
                 event -> add(field));
 
         add(new Div(attachButton, detachButton));

@@ -64,12 +64,12 @@ public class TextFieldValidationBinderPage
         }));
 
         add(createInput(MIN_LENGTH_INPUT, "Set min length", event -> {
-            var value = Integer.parseInt(event.getValue());
+            int value = Integer.parseInt(event.getValue());
             field.setMinLength(value);
         }));
 
         add(createInput(MAX_LENGTH_INPUT, "Set max length", event -> {
-            var value = Integer.parseInt(event.getValue());
+            int value = Integer.parseInt(event.getValue());
             field.setMaxLength(value);
         }));
     }

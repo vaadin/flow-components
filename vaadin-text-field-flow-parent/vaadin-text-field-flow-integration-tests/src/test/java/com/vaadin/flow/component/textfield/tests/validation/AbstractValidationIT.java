@@ -45,7 +45,7 @@ public abstract class AbstractValidationIT<F extends TestBenchElement>
     protected void assertServerValid(boolean expected) {
         $("button").id(SERVER_VALIDITY_STATE_BUTTON).click();
 
-        var actual = $("div").id(SERVER_VALIDITY_STATE).getText();
+        String actual = $("div").id(SERVER_VALIDITY_STATE).getText();
         Assert.assertEquals(String.valueOf(expected), actual);
     }
 

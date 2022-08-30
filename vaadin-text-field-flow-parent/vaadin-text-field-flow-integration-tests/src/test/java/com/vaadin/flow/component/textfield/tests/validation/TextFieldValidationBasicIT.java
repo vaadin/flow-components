@@ -20,7 +20,6 @@ import org.openqa.selenium.Keys;
 
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.TestBenchElement;
 
 import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBasicPage.MIN_LENGTH_INPUT;
 import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBasicPage.MAX_LENGTH_INPUT;
