@@ -41,19 +41,23 @@ public abstract class AbstractValidationIT<F extends TestBenchElement>
     }
 
     protected void assertClientValid() {
-        Assert.assertTrue("The field should be valid on the client-side", isClientValid());
+        Assert.assertTrue("The field should be valid on the client-side",
+                isClientValid());
     }
 
     protected void assertClientInvalid() {
-        Assert.assertFalse("The field should be invalid on the client-side", isClientValid());
+        Assert.assertFalse("The field should be invalid on the client-side",
+                isClientValid());
     }
 
     protected void assertServerValid() {
-        Assert.assertTrue("The field should be valid on the server-side", isServerValid());
+        Assert.assertTrue("The field should be valid on the server-side",
+                isServerValid());
     }
 
     protected void assertServerInvalid() {
-        Assert.assertFalse("The field should be invalid on the server-side", isServerValid());
+        Assert.assertFalse("The field should be invalid on the server-side",
+                isServerValid());
     }
 
     private boolean isServerValid() {
