@@ -20,6 +20,7 @@ import org.openqa.selenium.Keys;
 
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.validation.AbstractValidationIT;
 
 import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBasicPage.MIN_LENGTH_INPUT;
 import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBasicPage.MAX_LENGTH_INPUT;
@@ -33,24 +34,24 @@ public class TextFieldValidationBasicIT
         extends AbstractValidationIT<TextFieldElement> {
     @Test
     public void fieldIsInitiallyValid() {
-        assertClientValid(true);
-        assertServerValid(true);
+        assertClientValid();
+        assertServerValid();
     }
 
     @Test
     public void onlyServerCanSetFieldToValid() {
         $("button").id(REQUIRED_BUTTON).click();
 
-        executeScript("arguments[0].validate()", field);
-        assertClientValid(false);
+        executeScript("arguments[0].validate()", testField);
+        assertClientInvalid();
 
-        field.sendKeys("Value");
-        executeScript("arguments[0].validate()", field);
-        assertClientValid(false);
+        testField.sendKeys("Value");
+        executeScript("arguments[0].validate()", testField);
+        assertClientInvalid();
 
-        field.sendKeys(Keys.ENTER);
-        assertServerValid(true);
-        assertClientValid(true);
+        testField.sendKeys(Keys.ENTER);
+        assertServerValid();
+        assertClientValid();
     }
 
     @Test
@@ -58,7 +59,7 @@ public class TextFieldValidationBasicIT
         $("button").id(DETACH_FIELD_BUTTON).click();
         $("button").id(ATTACH_FIELD_BUTTON).click();
 
-        field = getField();
+        testField = getTestField();
 
         onlyServerCanSetFieldToValid();
     }
@@ -67,72 +68,72 @@ public class TextFieldValidationBasicIT
     public void required_triggerInputBlur_assertValidity() {
         $("button").id(REQUIRED_BUTTON).click();
 
-        field.sendKeys(Keys.TAB);
-        assertServerValid(false);
-        assertClientValid(false);
+        testField.sendKeys(Keys.TAB);
+        assertServerInvalid();
+        assertClientInvalid();
     }
 
     @Test
     public void required_changeInputValue_assertValidity() {
         $("button").id(REQUIRED_BUTTON).click();
 
-        field.setValue("Value");
-        assertServerValid(true);
-        assertClientValid(true);
+        testField.setValue("Value");
+        assertServerValid();
+        assertClientValid();
 
-        field.setValue("");
-        assertServerValid(false);
-        assertClientValid(false);
+        testField.setValue("");
+        assertServerInvalid();
+        assertClientInvalid();
     }
 
     @Test
     public void minLength_changeInputValue_assertValidity() {
         $("input").id(MIN_LENGTH_INPUT).sendKeys("2", Keys.ENTER);
 
-        field.setValue("A");
-        assertClientValid(false);
-        assertServerValid(false);
+        testField.setValue("A");
+        assertClientInvalid();
+        assertServerInvalid();
 
-        field.setValue("AA");
-        assertClientValid(true);
-        assertServerValid(true);
+        testField.setValue("AA");
+        assertClientValid();
+        assertServerValid();
 
-        field.setValue("AAA");
-        assertClientValid(true);
-        assertServerValid(true);
+        testField.setValue("AAA");
+        assertClientValid();
+        assertServerValid();
     }
 
     @Test
     public void maxLength_changeInputValue_assertValidity() {
         $("input").id(MAX_LENGTH_INPUT).sendKeys("2", Keys.ENTER);
 
-        field.setValue("AAA");
-        assertClientValid(false);
-        assertServerValid(false);
+        testField.setValue("AAA");
+        assertClientInvalid();
+        assertServerInvalid();
 
-        field.setValue("AA");
-        assertClientValid(true);
-        assertServerValid(true);
+        testField.setValue("AA");
+        assertClientValid();
+        assertServerValid();
 
-        field.setValue("A");
-        assertClientValid(true);
-        assertServerValid(true);
+        testField.setValue("A");
+        assertClientValid();
+        assertServerValid();
     }
 
     @Test
     public void pattern_changeInputValue_assertValidity() {
         $("input").id(PATTERN_INPUT).sendKeys("^\\d+$", Keys.ENTER);
 
-        field.setValue("Word");
-        assertClientValid(false);
-        assertServerValid(false);
+        testField.setValue("Word");
+        assertClientInvalid();
+        assertServerInvalid();
 
-        field.setValue("1234");
-        assertClientValid(true);
-        assertServerValid(true);
+        testField.setValue("1234");
+        assertClientValid();
+        assertServerValid();
     }
 
-    protected TextFieldElement getField() {
+    protected TextFieldElement getTestField() {
         return $(TextFieldElement.class).first();
     }
 }

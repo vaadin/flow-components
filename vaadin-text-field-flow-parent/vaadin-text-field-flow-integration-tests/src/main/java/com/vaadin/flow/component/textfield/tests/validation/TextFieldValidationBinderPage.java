@@ -18,6 +18,7 @@ package com.vaadin.flow.component.textfield.tests.validation;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.router.Route;
+import com.vaadin.tests.validation.AbstractValidationPage;
 
 @Route("vaadin-text-field/validation/binder")
 public class TextFieldValidationBinderPage
@@ -50,7 +51,7 @@ public class TextFieldValidationBinderPage
         super();
 
         binder = new Binder<>(Bean.class);
-        binder.forField(field).asRequired(REQUIRED_ERROR_MESSAGE)
+        binder.forField(testField).asRequired(REQUIRED_ERROR_MESSAGE)
                 .withValidator(value -> value.equals(expectedValue),
                         UNEXPECTED_VALUE_ERROR_MESSAGE)
                 .bind("property");
@@ -60,21 +61,21 @@ public class TextFieldValidationBinderPage
         }));
 
         add(createInput(PATTERN_INPUT, "Set pattern", event -> {
-            field.setPattern(event.getValue());
+            testField.setPattern(event.getValue());
         }));
 
         add(createInput(MIN_LENGTH_INPUT, "Set min length", event -> {
             int value = Integer.parseInt(event.getValue());
-            field.setMinLength(value);
+            testField.setMinLength(value);
         }));
 
         add(createInput(MAX_LENGTH_INPUT, "Set max length", event -> {
             int value = Integer.parseInt(event.getValue());
-            field.setMaxLength(value);
+            testField.setMaxLength(value);
         }));
     }
 
-    protected TextField createField() {
+    protected TextField createTestField() {
         return new TextField();
     }
 }
