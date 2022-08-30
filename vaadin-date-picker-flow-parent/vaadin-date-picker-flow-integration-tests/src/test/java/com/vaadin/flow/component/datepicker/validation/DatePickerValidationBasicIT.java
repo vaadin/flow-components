@@ -2,7 +2,6 @@ package com.vaadin.flow.component.datepicker.validation;
 
 import com.vaadin.flow.component.datepicker.testbench.DatePickerElement;
 import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.TestBenchElement;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 

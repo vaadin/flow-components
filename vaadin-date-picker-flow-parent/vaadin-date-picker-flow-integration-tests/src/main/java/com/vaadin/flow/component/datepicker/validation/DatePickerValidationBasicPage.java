@@ -2,7 +2,6 @@ package com.vaadin.flow.component.datepicker.validation;
 
 import java.time.LocalDate;
 
-import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.router.Route;
@@ -24,12 +23,12 @@ public class DatePickerValidationBasicPage extends AbstractValidationPage {
         }));
 
         add(createInput(MIN_INPUT, "Set min date", event -> {
-            var value = LocalDate.parse(event.getValue());
+            LocalDate value = LocalDate.parse(event.getValue());
             field.setMin(value);
         }));
 
         add(createInput(MAX_INPUT, "Set max date", event -> {
-            var value = LocalDate.parse(event.getValue());
+            LocalDate value = LocalDate.parse(event.getValue());
             field.setMax(value);
         }));
 

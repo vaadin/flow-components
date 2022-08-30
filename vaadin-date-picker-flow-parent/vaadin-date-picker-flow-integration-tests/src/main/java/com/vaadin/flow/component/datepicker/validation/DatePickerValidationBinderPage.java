@@ -41,17 +41,17 @@ public class DatePickerValidationBinderPage extends AbstractValidationPage {
                 .bind("property");
 
         add(createInput(EXPECTED_VALUE_INPUT, "Set expected date", event -> {
-            var value = LocalDate.parse(event.getValue());
+            LocalDate value = LocalDate.parse(event.getValue());
             expectedValue = value;
         }));
 
         add(createInput(MIN_INPUT, "Set min date", event -> {
-            var value = LocalDate.parse(event.getValue());
+            LocalDate value = LocalDate.parse(event.getValue());
             field.setMin(value);
         }));
 
         add(createInput(MAX_INPUT, "Set max date", event -> {
-            var value = LocalDate.parse(event.getValue());
+            LocalDate value = LocalDate.parse(event.getValue());
             field.setMax(value);
         }));
     }
