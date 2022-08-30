@@ -23,12 +23,12 @@ public class TimePickerValidationBasicPage extends AbstractValidationPage {
         }));
 
         add(createInput(MIN_INPUT, "Set min time", event -> {
-            var value = LocalTime.parse(event.getValue());
+            LocalTime value = LocalTime.parse(event.getValue());
             field.setMin(value);
         }));
 
         add(createInput(MAX_INPUT, "Set max time", event -> {
-            var value = LocalTime.parse(event.getValue());
+            LocalTime value = LocalTime.parse(event.getValue());
             field.setMax(value);
         }));
 

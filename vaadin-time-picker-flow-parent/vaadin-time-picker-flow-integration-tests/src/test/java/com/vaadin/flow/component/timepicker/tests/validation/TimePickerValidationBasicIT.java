@@ -2,7 +2,6 @@ package com.vaadin.flow.component.timepicker.tests.validation;
 
 import com.vaadin.flow.component.timepicker.testbench.TimePickerElement;
 import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.TestBenchElement;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
