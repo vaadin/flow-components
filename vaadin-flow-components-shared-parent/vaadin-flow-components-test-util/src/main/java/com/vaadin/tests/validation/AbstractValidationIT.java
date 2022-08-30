@@ -37,7 +37,8 @@ public abstract class AbstractValidationIT<T extends TestBenchElement>
     protected abstract T getTestField();
 
     protected void assertErrorMessage(String expected) {
-        Assert.assertEquals(expected, testField.getPropertyString("errorMessage"));
+        Assert.assertEquals(expected,
+                testField.getPropertyString("errorMessage"));
     }
 
     protected void assertClientValid() {
