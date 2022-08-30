@@ -9,7 +9,8 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.tests.validation.AbstractValidationPage;
 
 @Route("vaadin-date-picker/validation/basic")
-public class DatePickerValidationBasicPage extends AbstractValidationPage<DatePicker> {
+public class DatePickerValidationBasicPage
+        extends AbstractValidationPage<DatePicker> {
     public static final String ATTACH_FIELD_BUTTON = "attach-field-button";
     public static final String DETACH_FIELD_BUTTON = "detach-field-button";
 

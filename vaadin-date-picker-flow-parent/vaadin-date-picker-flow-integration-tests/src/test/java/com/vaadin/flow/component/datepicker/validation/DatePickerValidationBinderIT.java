@@ -14,7 +14,8 @@ import static com.vaadin.flow.component.datepicker.validation.DatePickerValidati
 import static com.vaadin.flow.component.datepicker.validation.DatePickerValidationBinderPage.UNEXPECTED_VALUE_ERROR_MESSAGE;
 
 @TestPath("vaadin-date-picker/validation/binder")
-public class DatePickerValidationBinderIT extends AbstractValidationIT<DatePickerElement> {
+public class DatePickerValidationBinderIT
+        extends AbstractValidationIT<DatePickerElement> {
     @Test
     public void fieldIsInitiallyValid() {
         assertClientValid();

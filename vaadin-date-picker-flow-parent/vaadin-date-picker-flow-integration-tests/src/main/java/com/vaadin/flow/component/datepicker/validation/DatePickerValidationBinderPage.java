@@ -8,7 +8,8 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.tests.validation.AbstractValidationPage;
 
 @Route("vaadin-date-picker/validation/binder")
-public class DatePickerValidationBinderPage extends AbstractValidationPage<DatePicker> {
+public class DatePickerValidationBinderPage
+        extends AbstractValidationPage<DatePicker> {
     public static final String MIN_INPUT = "min-input";
     public static final String MAX_INPUT = "max-input";
     public static final String EXPECTED_VALUE_INPUT = "expected-value-input";
