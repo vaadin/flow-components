@@ -27,8 +27,8 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -110,7 +110,7 @@ public class TabSheet extends Component implements HasStyle, HasSize {
      * @return the created tab
      */
     public Tab add(String tabText, Component content) {
-        return add(new Span(tabText), content);
+        return add(new Text(tabText), content);
     }
 
     /**
