@@ -56,10 +56,10 @@ public class TextFieldValidationBasicPage
     }
 
     private void addAttachDetachControls() {
-        NativeButton attachButton = createButton(ATTACH_FIELD_BUTTON, "Attach field",
-                event -> add(field));
-        NativeButton detachButton = createButton(DETACH_FIELD_BUTTON, "Detach field",
-                event -> add(field));
+        NativeButton attachButton = createButton(ATTACH_FIELD_BUTTON,
+                "Attach field", event -> add(field));
+        NativeButton detachButton = createButton(DETACH_FIELD_BUTTON,
+                "Detach field", event -> add(field));
 
         add(new Div(attachButton, detachButton));
     }
