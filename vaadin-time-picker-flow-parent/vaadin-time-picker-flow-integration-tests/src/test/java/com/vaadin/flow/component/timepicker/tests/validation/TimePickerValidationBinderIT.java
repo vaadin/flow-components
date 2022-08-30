@@ -1,6 +1,9 @@
 package com.vaadin.flow.component.timepicker.tests.validation;
 
+import com.vaadin.flow.component.timepicker.testbench.TimePickerElement;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.validation.AbstractValidationIT;
+
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
@@ -11,19 +14,19 @@ import static com.vaadin.flow.component.timepicker.tests.validation.TimePickerVa
 import static com.vaadin.flow.component.timepicker.tests.validation.TimePickerValidationBinderPage.UNEXPECTED_VALUE_ERROR_MESSAGE;
 
 @TestPath("vaadin-time-picker/validation/binder")
-public class TimePickerValidationBinderIT extends AbstractValidationIT {
+public class TimePickerValidationBinderIT extends AbstractValidationIT<TimePickerElement> {
     @Test
     public void fieldIsInitiallyValid() {
-        assertClientValid(true);
-        assertServerValid(true);
+        assertClientValid();
+        assertServerValid();
         assertErrorMessage(null);
     }
 
     @Test
     public void required_triggerInputBlur_assertValidity() {
-        field.sendKeys(Keys.TAB);
-        assertServerValid(false);
-        assertClientValid(false);
+        testField.sendKeys(Keys.TAB);
+        assertServerInvalid();
+        assertClientInvalid();
         assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
@@ -31,13 +34,13 @@ public class TimePickerValidationBinderIT extends AbstractValidationIT {
     public void required_changeInputValue_assertValidity() {
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("10:00", Keys.ENTER);
 
-        field.selectByText("10:00");
-        assertServerValid(true);
-        assertClientValid(true);
+        testField.selectByText("10:00");
+        assertServerValid();
+        assertClientValid();
 
-        field.selectByText("");
-        assertServerValid(false);
-        assertClientValid(false);
+        testField.selectByText("");
+        assertServerInvalid();
+        assertClientInvalid();
         assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
@@ -47,21 +50,21 @@ public class TimePickerValidationBinderIT extends AbstractValidationIT {
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("12:00", Keys.ENTER);
 
         // Constraint validation fails:
-        field.selectByText("10:00");
-        assertClientValid(false);
-        assertServerValid(false);
+        testField.selectByText("10:00");
+        assertClientInvalid();
+        assertServerInvalid();
         assertErrorMessage("");
 
         // Binder validation fails:
-        field.selectByText("11:00");
-        assertClientValid(false);
-        assertServerValid(false);
+        testField.selectByText("11:00");
+        assertClientInvalid();
+        assertServerInvalid();
         assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
 
         // Both validations pass:
-        field.selectByText("12:00");
-        assertClientValid(true);
-        assertServerValid(true);
+        testField.selectByText("12:00");
+        assertClientValid();
+        assertServerValid();
     }
 
     @Test
@@ -70,39 +73,43 @@ public class TimePickerValidationBinderIT extends AbstractValidationIT {
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("10:00", Keys.ENTER);
 
         // Constraint validation fails:
-        field.selectByText("12:00");
-        assertClientValid(false);
-        assertServerValid(false);
+        testField.selectByText("12:00");
+        assertClientInvalid();
+        assertServerInvalid();
         assertErrorMessage("");
 
         // Binder validation fails:
-        field.selectByText("11:00");
-        assertClientValid(false);
-        assertServerValid(false);
+        testField.selectByText("11:00");
+        assertClientInvalid();
+        assertServerInvalid();
         assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
 
         // Both validations pass:
-        field.selectByText("10:00");
-        assertClientValid(true);
-        assertServerValid(true);
+        testField.selectByText("10:00");
+        assertClientValid();
+        assertServerValid();
     }
 
     @Test
     public void badInput_changeInputValue_assertValidity() {
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("10:00", Keys.ENTER);
 
-        field.selectByText("INVALID");
-        assertServerValid(false);
-        assertClientValid(false);
+        testField.selectByText("INVALID");
+        assertServerInvalid();
+        assertClientInvalid();
         assertErrorMessage("");
 
-        field.selectByText("10:00");
-        assertServerValid(true);
-        assertClientValid(true);
+        testField.selectByText("10:00");
+        assertServerValid();
+        assertClientValid();
 
-        field.selectByText("INVALID");
-        assertServerValid(false);
-        assertClientValid(false);
+        testField.selectByText("INVALID");
+        assertServerInvalid();
+        assertClientInvalid();
         assertErrorMessage("");
+    }
+
+    protected TimePickerElement getTestField() {
+        return $(TimePickerElement.class).first();
     }
 }
