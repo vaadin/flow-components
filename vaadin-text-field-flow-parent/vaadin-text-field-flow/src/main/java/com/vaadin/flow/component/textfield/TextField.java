@@ -30,7 +30,6 @@ import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.InputNotifier;
 import com.vaadin.flow.component.KeyNotifier;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
@@ -514,17 +513,15 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
     @Override
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<String> listener) {
-        // if
-        // (getFeatureFlags().isEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION))
-        // {
-        return addClientValidatedEventListener(event -> {
-            listener.validationStatusChanged(
-                    new ValidationStatusChangeEvent<String>(this,
-                            !isInvalid()));
-        });
-        // }
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            return addClientValidatedEventListener(event -> {
+                listener.validationStatusChanged(
+                        new ValidationStatusChangeEvent<String>(this,
+                                !isInvalid()));
+            });
+        }
 
-        // return null;
+        return null;
     }
 
     /**
@@ -541,13 +538,12 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        // if
-        // (getFeatureFlags().isEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION))
-        // {
-        ClientValidationUtil.preventWebComponentFromSettingItselfToValid(this);
-        // } else {
-        // FieldValidationUtil.disableClientValidation(this);
-        // }
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            ClientValidationUtil
+                    .preventWebComponentFromSettingItselfToValid(this);
+        } else {
+            FieldValidationUtil.disableClientValidation(this);
+        }
     }
 
     // Override is only required to keep binary compatibility with other 23.x
