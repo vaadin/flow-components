@@ -29,6 +29,7 @@ import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -40,8 +41,10 @@ import com.vaadin.flow.shared.Registration;
 @Tag("vaadin-tabsheet")
 // @JsModule("@vaadin/tabsheet/src/vaadin-tabsheet.js")
 // @NpmPackage(value = "@vaadin/vaadin-tabsheet", version = "23.3.0-alpha1")
-// Temporary module used until the package is published to npm
+// Temporary module and npm packages used until the package is published to npm
 @JsModule("./tabsheet/vaadin-tabsheet.js")
+@NpmPackage(value = "@vaadin/component-base", version = "23.2.0-beta3")
+@NpmPackage(value = "@vaadin/field-base", version = "23.2.0-beta3")
 public class TabSheet extends Component implements HasStyle, HasSize {
 
     private Tabs tabs = new Tabs();
