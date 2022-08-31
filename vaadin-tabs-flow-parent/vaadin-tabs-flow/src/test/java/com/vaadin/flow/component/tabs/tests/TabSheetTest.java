@@ -19,6 +19,7 @@ package com.vaadin.flow.component.tabs.tests;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.html.Span;
@@ -30,22 +31,26 @@ import com.vaadin.flow.component.tabs.TabSheet;
  */
 public class TabSheetTest {
 
+    private TabSheet tabSheet;
+
+    @Before
+    public void setup() {
+        tabSheet = new TabSheet();
+    }
+
     @Test
     public void tabsheet_tagName() {
-        var tabSheet = new TabSheet();
         Assert.assertEquals("vaadin-tabsheet", tabSheet.getElement().getTag());
     }
 
     @Test
     public void addTab_assignsTabId() {
-        var tabSheet = new TabSheet();
         var tab = tabSheet.add("Tab 0", new Span("Content 0"));
         Assert.assertTrue(tab.getId().isPresent());
     }
 
     @Test
     public void addTab_assignsContentTab() {
-        var tabSheet = new TabSheet();
         var content = new Span("Content 0");
         var tab = tabSheet.add("Tab 0", content);
         Assert.assertEquals(tab.getId().get(),
@@ -54,7 +59,6 @@ public class TabSheetTest {
 
     @Test
     public void addTab_contentAdded() {
-        var tabSheet = new TabSheet();
         var content = new Span("Content 0");
         tabSheet.add("Tab 0", content);
         Assert.assertTrue(content.getParent().isPresent());
@@ -62,7 +66,6 @@ public class TabSheetTest {
 
     @Test
     public void addSecondTab_contentNotAdded() {
-        var tabSheet = new TabSheet();
         tabSheet.add("Tab 0", new Span("Content 0"));
 
         var content1 = new Span("Content 1");
@@ -72,7 +75,6 @@ public class TabSheetTest {
 
     @Test
     public void changeTab_contentAdded() {
-        var tabSheet = new TabSheet();
         tabSheet.add("Tab 0", new Span("Content 0"));
 
         var content1 = new Span("Content 1");
@@ -83,7 +85,6 @@ public class TabSheetTest {
 
     @Test
     public void addSecondTab_contentDisabled() {
-        var tabSheet = new TabSheet();
         tabSheet.add("Tab 0", new Span("Content 0"));
 
         var content1 = new Span("Content 1");
@@ -93,7 +94,6 @@ public class TabSheetTest {
 
     @Test
     public void changeTab_contentEnabled() {
-        var tabSheet = new TabSheet();
         tabSheet.add("Tab 0", new Span("Content 0"));
 
         var content1 = new Span("Content 1");
@@ -104,7 +104,6 @@ public class TabSheetTest {
 
     @Test
     public void changeTab_oldContentDisabled() {
-        var tabSheet = new TabSheet();
         var content = new Span("Content 0");
         tabSheet.add("Tab 0", content);
 
@@ -115,19 +114,16 @@ public class TabSheetTest {
 
     @Test(expected = NullPointerException.class)
     public void addNullTab_throws() {
-        var tabSheet = new TabSheet();
         tabSheet.add((Tab) null, new Span("Content 0"));
     }
 
     @Test(expected = NullPointerException.class)
     public void addNullContent_throws() {
-        var tabSheet = new TabSheet();
         tabSheet.add("Tab 0", (Span) null);
     }
 
     @Test
     public void changeTab_selectedChangeEvent() {
-        var tabSheet = new TabSheet();
         var tab0 = tabSheet.add("Tab 0", new Span("Content 0"));
         var tab1 = tabSheet.add("Tab 1", new Span("Content 1"));
 
@@ -146,19 +142,16 @@ public class TabSheetTest {
 
     @Test(expected = NullPointerException.class)
     public void removeNullTab_throws() {
-        var tabSheet = new TabSheet();
         tabSheet.remove((Tab) null);
     }
 
     @Test(expected = NullPointerException.class)
     public void removeNullContent_throws() {
-        var tabSheet = new TabSheet();
         tabSheet.remove((Span) null);
     }
 
     @Test
     public void removeTab_removesContent() {
-        var tabSheet = new TabSheet();
         var content = new Span("Content 0");
         var tab = tabSheet.add("Tab 0", content);
         tabSheet.remove(tab);
@@ -167,7 +160,6 @@ public class TabSheetTest {
 
     @Test
     public void removeTab_clearsSelection() {
-        var tabSheet = new TabSheet();
         var content = new Span("Content 0");
         var tab = tabSheet.add("Tab 0", content);
         tabSheet.remove(tab);
@@ -176,7 +168,6 @@ public class TabSheetTest {
 
     @Test
     public void removeTab_selectedChangeEvent() {
-        var tabSheet = new TabSheet();
         var tab0 = tabSheet.add("Tab 0", new Span("Content 0"));
         var tab1 = tabSheet.add("Tab 1", new Span("Content 1"));
         var listenerInvoked = new AtomicBoolean(false);
@@ -194,7 +185,6 @@ public class TabSheetTest {
 
     @Test
     public void removeTab_removesTab() {
-        var tabSheet = new TabSheet();
         var tab = tabSheet.add("Tab 0", new Span("Content 0"));
         tabSheet.remove(tab);
         Assert.assertFalse(tab.getParent().isPresent());
@@ -202,7 +192,6 @@ public class TabSheetTest {
 
     @Test
     public void removeContent_removesTab() {
-        var tabSheet = new TabSheet();
         var content = new Span("Content 0");
         var tab = tabSheet.add("Tab 0", content);
         tabSheet.remove(content);
@@ -211,7 +200,6 @@ public class TabSheetTest {
 
     @Test
     public void removeNonExistentContent_doesNoteRemoveTab() {
-        var tabSheet = new TabSheet();
         var tab = tabSheet.add("Tab 0", new Span("Content 0"));
         tabSheet.remove(new Span("Content 1"));
         Assert.assertTrue(tab.getParent().isPresent());
@@ -219,7 +207,6 @@ public class TabSheetTest {
 
     @Test
     public void addTab_initialSelection() {
-        var tabSheet = new TabSheet();
         var tab = tabSheet.add("Tab 0", new Span("Content 0"));
         Assert.assertEquals(0, tabSheet.getSelectedIndex());
         Assert.assertEquals(tab, tabSheet.getSelectedTab());
@@ -227,7 +214,6 @@ public class TabSheetTest {
 
     @Test
     public void setSelectedIndex_selection() {
-        var tabSheet = new TabSheet();
         tabSheet.add("Tab 0", new Span("Content 0"));
         var tab1 = tabSheet.add("Tab 1", new Span("Content 1"));
         tabSheet.setSelectedIndex(1);
@@ -237,7 +223,6 @@ public class TabSheetTest {
 
     @Test
     public void setSelectedTab_selection() {
-        var tabSheet = new TabSheet();
         tabSheet.add("Tab 0", new Span("Content 0"));
         var tab1 = tabSheet.add("Tab 1", new Span("Content 1"));
         tabSheet.setSelectedTab(tab1);
