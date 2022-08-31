@@ -14,7 +14,8 @@ import static com.vaadin.flow.component.timepicker.tests.validation.TimePickerVa
 import static com.vaadin.flow.component.timepicker.tests.validation.TimePickerValidationBinderPage.UNEXPECTED_VALUE_ERROR_MESSAGE;
 
 @TestPath("vaadin-time-picker/validation/binder")
-public class TimePickerValidationBinderIT extends AbstractValidationIT<TimePickerElement> {
+public class TimePickerValidationBinderIT
+        extends AbstractValidationIT<TimePickerElement> {
     @Test
     public void fieldIsInitiallyValid() {
         assertClientValid();

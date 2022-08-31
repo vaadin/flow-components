@@ -9,7 +9,8 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.tests.validation.AbstractValidationPage;
 
 @Route("vaadin-time-picker/validation/basic")
-public class TimePickerValidationBasicPage extends AbstractValidationPage<TimePicker> {
+public class TimePickerValidationBasicPage
+        extends AbstractValidationPage<TimePicker> {
     public static final String ATTACH_FIELD_BUTTON = "attach-field-button";
     public static final String DETACH_FIELD_BUTTON = "detach-field-button";
 

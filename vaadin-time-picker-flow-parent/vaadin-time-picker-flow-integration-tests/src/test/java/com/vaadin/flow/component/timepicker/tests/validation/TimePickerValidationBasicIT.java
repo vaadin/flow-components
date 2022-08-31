@@ -14,7 +14,8 @@ import static com.vaadin.flow.component.timepicker.tests.validation.TimePickerVa
 import static com.vaadin.flow.component.timepicker.tests.validation.TimePickerValidationBasicPage.REQUIRED_BUTTON;
 
 @TestPath("vaadin-time-picker/validation/basic")
-public class TimePickerValidationBasicIT extends AbstractValidationIT<TimePickerElement> {
+public class TimePickerValidationBasicIT
+        extends AbstractValidationIT<TimePickerElement> {
     @Test
     public void fieldIsInitiallyValid() {
         assertClientValid();
