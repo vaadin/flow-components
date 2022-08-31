@@ -248,7 +248,8 @@ public class DatePickerViewDemoPage extends Div {
         enableParent.setId("enable-parent");
         enableParent.addClickListener(event -> parent.setEnabled(true));
 
-        addCard("DatePicker inside a disabled parent div", parent, enableParent);
+        addCard("DatePicker inside a disabled parent div", parent,
+                enableParent);
     }
 
     /**
