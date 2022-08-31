@@ -3,7 +3,9 @@ package com.vaadin.flow.component.datetimepicker.validation;
 import com.vaadin.flow.component.datetimepicker.testbench.DateTimePickerElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.validation.AbstractValidationIT;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
@@ -13,34 +15,40 @@ import static com.vaadin.flow.component.datetimepicker.validation.DateTimePicker
 import static com.vaadin.flow.component.datetimepicker.validation.DateTimePickerValidationBasicPage.MAX_INPUT;
 import static com.vaadin.flow.component.datetimepicker.validation.DateTimePickerValidationBasicPage.REQUIRED_BUTTON;
 
-import java.time.LocalDateTime;
-
 @TestPath("vaadin-date-time-picker/validation/basic")
-public class DateTimePickerValidationBasicIT extends AbstractValidationIT {
+public class DateTimePickerValidationBasicIT extends AbstractValidationIT<DateTimePickerElement> {
+    private TestBenchElement dateInput;
+    private TestBenchElement timeInput;
+
+    @Before
+    public void init() {
+        super.init();
+        dateInput = testField.$("input").first();
+        timeInput = testField.$("input").last();
+    }
+
     @Test
     public void fieldIsInitiallyValid() {
-        assertClientValid(true);
-        assertServerValid(true);
+        assertClientValid();
+        assertServerValid();
     }
 
     @Test
     public void onlyServerCanSetFieldToValid() {
         $("button").id(REQUIRED_BUTTON).click();
 
-        executeScript("arguments[0].validate()", field);
-        assertClientValid(false);
+        executeScript("arguments[0].validate()", testField);
+        assertClientInvalid();
 
-        TestBenchElement dateInput = getDateInputElement();
-        TestBenchElement timeInput = getTimeInputElement();
         dateInput.sendKeys("1/1/2000");
         timeInput.sendKeys("10:00");
-        executeScript("arguments[0].validate()", field);
-        assertClientValid(false);
+        executeScript("arguments[0].validate()", testField);
+        assertClientInvalid();
 
         dateInput.sendKeys(Keys.ENTER);
         timeInput.sendKeys(Keys.ENTER);
-        assertServerValid(true);
-        assertClientValid(true);
+        assertServerValid();
+        assertClientValid();
     }
 
     @Test
@@ -48,7 +56,9 @@ public class DateTimePickerValidationBasicIT extends AbstractValidationIT {
         $("button").id(DETACH_FIELD_BUTTON).click();
         $("button").id(ATTACH_FIELD_BUTTON).click();
 
-        field = $(DateTimePickerElement.class).first();
+        testField = getTestField();
+        dateInput = testField.$("input").first();
+        timeInput = testField.$("input").last();
 
         onlyServerCanSetFieldToValid();
     }
@@ -57,93 +67,102 @@ public class DateTimePickerValidationBasicIT extends AbstractValidationIT {
     public void required_triggerDateInputBlur_assertValidity() {
         $("button").id(REQUIRED_BUTTON).click();
 
-        getDateInputElement().sendKeys(Keys.TAB);
-        assertServerValid(false);
-        assertClientValid(false);
+        dateInput.sendKeys(Keys.TAB);
+        assertServerInvalid();
+        assertClientInvalid();
     }
 
     @Test
     public void required_triggerTimeInputBlur_assertValidity() {
         $("button").id(REQUIRED_BUTTON).click();
 
-        getTimeInputElement().sendKeys(Keys.TAB);
-        assertServerValid(false);
-        assertClientValid(false);
+        timeInput.sendKeys(Keys.TAB);
+        assertServerInvalid();
+        assertClientInvalid();
     }
 
     @Test
     public void required_changeInputValue_assertValidity() {
         $("button").id(REQUIRED_BUTTON).click();
 
-        setDateInputValue("1/1/2000");
-        setTimeInputValue("12:00");
-        assertServerValid(true);
-        assertClientValid(true);
+        setInputValue(dateInput, "1/1/2000");
+        setInputValue(timeInput, "12:00");
+        assertServerValid();
+        assertClientValid();
 
-        setDateInputValue("");
-        assertServerValid(false);
-        assertClientValid(false);
+        setInputValue(dateInput, "");
+        assertServerInvalid();
+        assertClientInvalid();
 
-        setTimeInputValue("");
-        assertServerValid(false);
-        assertClientValid(false);
+        setInputValue(timeInput, "");
+        assertServerInvalid();
+        assertClientInvalid();
     }
 
     @Test
     public void min_changeInputValue_assertValidity() {
         $("input").id(MIN_INPUT).sendKeys("2000-02-02T12:00", Keys.ENTER);
 
-        setDateInputValue("1/1/2000");
-        setTimeInputValue("11:00");
-        assertClientValid(false);
-        assertServerValid(false);
+        setInputValue(dateInput, "1/1/2000");
+        setInputValue(timeInput, "11:00");
+        assertClientInvalid();
+        assertServerInvalid();
 
-        setDateInputValue("2/2/2000");
-        setTimeInputValue("12:00");
-        assertClientValid(true);
-        assertServerValid(true);
+        setInputValue(dateInput, "2/2/2000");
+        setInputValue(timeInput, "12:00");
+        assertClientValid();
+        assertServerValid();
 
-        setDateInputValue("3/3/2000");
-        setTimeInputValue("13:00");
-        assertClientValid(true);
-        assertServerValid(true);
+        setInputValue(dateInput, "3/3/2000");
+        setInputValue(timeInput, "13:00");
+        assertClientValid();
+        assertServerValid();
     }
 
     @Test
     public void max_changeInputValue_assertValidity() {
         $("input").id(MAX_INPUT).sendKeys("2000-02-02T12:00", Keys.ENTER);
 
-        setDateInputValue("3/3/2000");
-        setTimeInputValue("13:00");
-        assertClientValid(false);
-        assertServerValid(false);
+        setInputValue(dateInput, "3/3/2000");
+        setInputValue(timeInput, "13:00");
+        assertClientInvalid();
+        assertServerInvalid();
 
-        setDateInputValue("2/2/2000");
-        setTimeInputValue("12:00");
-        assertClientValid(true);
-        assertServerValid(true);
+        setInputValue(dateInput, "2/2/2000");
+        setInputValue(timeInput, "12:00");
+        assertClientValid();
+        assertServerValid();
 
-        setDateInputValue("1/1/2000");
-        setTimeInputValue("11:00");
-        assertClientValid(true);
-        assertServerValid(true);
+        setInputValue(dateInput, "1/1/2000");
+        setInputValue(timeInput, "11:00");
+        assertClientValid();
+        assertServerValid();
     }
 
     @Test
     public void badInput_changeInputValue_assertValidity() {
-        setDateInputValue("INVALID");
-        setTimeInputValue("INVALID");
-        assertServerValid(false);
-        assertClientValid(false);
+        setInputValue(dateInput, "INVALID");
+        setInputValue(timeInput, "INVALID");
+        assertServerInvalid();
+        assertClientInvalid();
 
-        setDateInputValue("1/1/2000");
-        setTimeInputValue("10:00");
-        assertServerValid(true);
-        assertClientValid(true);
+        setInputValue(dateInput, "1/1/2000");
+        setInputValue(timeInput, "10:00");
+        assertServerValid();
+        assertClientValid();
 
-        setDateInputValue("INVALID");
-        setTimeInputValue("INVALID");
-        assertServerValid(false);
-        assertClientValid(false);
+        setInputValue(dateInput, "INVALID");
+        setInputValue(timeInput, "INVALID");
+        assertServerInvalid();
+        assertClientInvalid();
+    }
+
+    protected DateTimePickerElement getTestField() {
+        return $(DateTimePickerElement.class).first();
+    }
+
+    private void setInputValue(TestBenchElement input, String value) {
+        input.sendKeys(Keys.chord(Keys.SHIFT, Keys.HOME), Keys.BACK_SPACE);
+        input.sendKeys(value, Keys.ENTER);
     }
 }
