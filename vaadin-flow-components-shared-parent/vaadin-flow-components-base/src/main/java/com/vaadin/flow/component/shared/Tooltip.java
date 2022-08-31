@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.shared;
 
+import java.io.Serializable;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.dom.Element;
@@ -25,7 +27,7 @@ import com.vaadin.flow.function.SerializableRunnable;
  *
  * @author Vaadin Ltd
  */
-public class Tooltip {
+public class Tooltip implements Serializable {
 
     /**
      * The {@code <vaadin-tooltip>} element controlled by this tooltip instance.
