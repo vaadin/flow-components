@@ -91,11 +91,9 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
 
         addValueChangeListener(e -> validate());
 
-        // if
-        // (getFeatureFlags().isEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION))
-        // {
-        addClientValidatedEventListener(e -> validate());
-        // }
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            addClientValidatedEventListener(e -> validate());
+        }
     }
 
     /**
