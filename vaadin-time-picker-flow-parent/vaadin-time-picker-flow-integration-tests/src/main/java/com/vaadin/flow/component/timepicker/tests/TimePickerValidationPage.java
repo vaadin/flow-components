@@ -21,8 +21,8 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.testutil.ValidationTestView;
 
 /**
- * A view for integration tests verifying that the {@code HasValidation} interface
- * is implemented for {@code TimePicker}.
+ * A view for integration tests verifying that the {@code HasValidation}
+ * interface is implemented for {@code TimePicker}.
  *
  * TODO: Can be tested with unit tests.
  */
