@@ -140,7 +140,7 @@ public class TabSheet extends Component implements HasStyle, HasSize {
         Objects.requireNonNull(content,
                 "The content of the tab to be removed cannot be null");
         var tab = tabToContent.entrySet().stream()
-                .filter(entry -> entry.getValue().equals(content))
+                .filter(entry -> entry.getValue().equals(content.getElement()))
                 .map(Map.Entry::getKey).findFirst().orElse(null);
 
         if (tab != null) {
