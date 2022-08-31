@@ -30,10 +30,11 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.shared.Registration;
 
 /**
- * TabSheet consists of a set of tabs and the content area constrolled by them.
+ * TabSheet consists of a set of tabs and the content area.
  * The content area displays a component associated with the selected tab.
  *
  * @author Vaadin Ltd.
@@ -49,7 +50,7 @@ public class TabSheet extends Component implements HasStyle, HasSize {
 
     private Tabs tabs = new Tabs();
 
-    private Map<Tab, Component> tabToContent = new HashMap<>();
+    private Map<Tab, Element> tabToContent = new HashMap<>();
 
     /**
      * The default constructor.
@@ -64,13 +65,13 @@ public class TabSheet extends Component implements HasStyle, HasSize {
     }
 
     /**
-     * Adds a tab created from the given tab content and content.
+     * Adds a tab with the given content.
      *
-     * @param tabContent
-     *            the content of the tab
+     * @param tab
+     *            the tab
      * @param content
      *            the content related to the tab
-     * @return the created tab
+     * @return the added tab
      */
     public Tab add(Tab tab, Component content) {
         Objects.requireNonNull(tab, "The tab to be added cannot be null");
@@ -83,7 +84,7 @@ public class TabSheet extends Component implements HasStyle, HasSize {
         tab.setId(id);
         content.getElement().setAttribute("tab", id);
 
-        tabToContent.put(tab, content);
+        tabToContent.put(tab, content.getElement());
 
         updateContent();
 
@@ -125,7 +126,7 @@ public class TabSheet extends Component implements HasStyle, HasSize {
     public void remove(Tab tab) {
         Objects.requireNonNull(tab, "The tab to be removed cannot be null");
         var content = tabToContent.remove(tab);
-        content.getElement().removeFromParent();
+        content.removeFromParent();
         tabs.remove(tab);
     }
 
@@ -212,20 +213,20 @@ public class TabSheet extends Component implements HasStyle, HasSize {
      * are disabled so they can't be interacted with.
      */
     private void updateContent() {
-        for (Map.Entry<Tab, Component> entry : tabToContent.entrySet()) {
+        for (Map.Entry<Tab, Element> entry : tabToContent.entrySet()) {
             var tab = entry.getKey();
             var content = entry.getValue();
 
             if (tab.equals(tabs.getSelectedTab())) {
-                if (content.getElement().getParent() == null) {
-                    getElement().appendChild(content.getElement());
+                if (content.getParent() == null) {
+                    getElement().appendChild(content);
                 }
-                content.getElement().setEnabled(true);
+                content.setEnabled(true);
             } else {
                 // Can't use setEnabled(false) because it would also mark the
                 // elements as disabled in the DOM. Navigating between tabs
                 // would then briefly show the content as disabled.
-                content.getElement().getNode().setEnabled(false);
+                content.getNode().setEnabled(false);
             }
         }
     }
@@ -242,7 +243,7 @@ public class TabSheet extends Component implements HasStyle, HasSize {
          * Creates a new selected change event.
          *
          * @param source
-         *            The tabs that fired the event.
+         *            The TabSheet that fired the event.
          * @param previousTab
          *            The previous selected tab.
          * @param fromClient
@@ -278,9 +279,9 @@ public class TabSheet extends Component implements HasStyle, HasSize {
         }
 
         /**
-         * Checks if this event is initial tabs selection.
+         * Checks if this event is initial TabSheet selection.
          *
-         * @return <code>true</code> if the event is initial tabs selection,
+         * @return <code>true</code> if the event is initial TabSheet selection,
          *         <code>false</code> otherwise
          */
         public boolean isInitialSelection() {
