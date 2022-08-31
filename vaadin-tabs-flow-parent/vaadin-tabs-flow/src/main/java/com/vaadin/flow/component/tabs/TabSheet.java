@@ -34,8 +34,8 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.shared.Registration;
 
 /**
- * TabSheet consists of a set of tabs and the content area.
- * The content area displays a component associated with the selected tab.
+ * TabSheet consists of a set of tabs and the content area. The content area
+ * displays a component associated with the selected tab.
  *
  * @author Vaadin Ltd.
  */
