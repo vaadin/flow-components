@@ -97,6 +97,9 @@
                 <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
                     <archive>
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                        </manifest>
                         <manifestFile>
                             ${project.build.outputDirectory}/META-INF/MANIFEST.MF
                         </manifestFile>
