@@ -230,4 +230,18 @@ public class TabSheetTest {
         Assert.assertEquals(tab1, tabSheet.getSelectedTab());
     }
 
+    @Test
+    public void setPrefix_hasPrefix() {
+        var prefix = new Span("prefix");
+        tabSheet.setPrefixComponent(prefix);
+        Assert.assertEquals(prefix, tabSheet.getPrefixComponent());
+    }
+
+    @Test
+    public void setSuffix_hasSuffix() {
+        var suffix = new Span("suffix");
+        tabSheet.setSuffixComponent(suffix);
+        Assert.assertEquals(suffix, tabSheet.getSuffixComponent());
+    }
+
 }
