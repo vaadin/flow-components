@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.datepicker;
 
-import java.util.Locale;
-
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
@@ -74,11 +72,5 @@ public class DatePickerValidationPage extends Div {
         });
         add(button);
         add(label, value);
-
-        NativeButton localeChange = new NativeButton("Locale change button");
-        localeChange.addClickListener(
-                event -> datePicker.setLocale(new Locale("i", "i", "i")));
-        localeChange.setId("change-locale");
-        add(localeChange);
     }
 }

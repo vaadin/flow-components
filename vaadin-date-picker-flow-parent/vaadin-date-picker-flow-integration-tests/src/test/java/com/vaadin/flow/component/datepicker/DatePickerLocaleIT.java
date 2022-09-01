@@ -77,6 +77,27 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
     }
 
     @Test
+    public void datePicker_setInvalidLocale_warningIsShown() {
+        assertNoWarnings();
+
+        $("button").id("picker-set-invalid-locale").click();
+        waitUntil(driver -> getWarningEntries().size() > 0);
+
+        List<LogEntry> warnings = getWarningEntries();
+        Assert.assertEquals(1, warnings.size());
+        Assert.assertEquals("The locale is not supported, using default locale setting(en-US).", warnings.get(0).getMessage());
+    }
+
+    @Test
+    public void datePicker_setInvalidLocale_defaultUSLocaleIsUsed() {
+        DatePickerElement picker = $(DatePickerElement.class).id("picker");
+
+        picker.setDate(LocalDate.of(2018, Month.MAY, 3));
+        Assert.assertEquals("Should display the value using the default US date format",
+                "03/05/2018", picker.getInputValue());
+    }
+
+    @Test
     public void datePickerWithValue_setLocale_assertDisplayedValue() {
         DatePickerElement picker = $(DatePickerElement.class)
                 .id("picker-with-value");

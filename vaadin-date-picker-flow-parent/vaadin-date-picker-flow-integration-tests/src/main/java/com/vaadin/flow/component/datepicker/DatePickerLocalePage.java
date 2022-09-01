@@ -30,11 +30,16 @@ public class DatePickerLocalePage extends Div {
         DatePicker datePicker = new DatePicker();
         datePicker.setId("picker");
 
-        NativeButton ukLocale = new NativeButton("Locale: UK");
-        ukLocale.setId("picker-set-uk-locale");
-        ukLocale.addClickListener(e -> datePicker.setLocale(Locale.UK));
+        NativeButton setUKLocale = new NativeButton("Set UK locale");
+        setUKLocale.setId("picker-set-uk-locale");
+        setUKLocale.addClickListener(e -> datePicker.setLocale(Locale.UK));
 
-        addCard("DatePicker", datePicker, ukLocale);
+        NativeButton setInvalidLocale = new NativeButton("Set invalid locale");
+        setInvalidLocale.addClickListener(
+                event -> datePicker.setLocale(new Locale("i", "i", "i")));
+        setInvalidLocale.setId("picker-set-invalid-locale");
+
+        addCard("DatePicker", datePicker, setUKLocale, setInvalidLocale);
     }
 
     private void createDatePickerWithGermanLocale() {
@@ -47,11 +52,11 @@ public class DatePickerLocalePage extends Div {
         DatePicker datePicker = new DatePicker(may3rd);
         datePicker.setId("picker-with-value");
 
-        NativeButton ukLocale = new NativeButton("Locale: UK");
-        ukLocale.setId("picker-with-value-set-uk-locale");
-        ukLocale.addClickListener(e -> datePicker.setLocale(Locale.UK));
+        NativeButton setUKLocale = new NativeButton("Set UK locale");
+        setUKLocale.setId("picker-with-value-set-uk-locale");
+        setUKLocale.addClickListener(e -> datePicker.setLocale(Locale.UK));
 
-        addCard("DatePicker with value", datePicker, ukLocale);
+        addCard("DatePicker with value", datePicker, setUKLocale);
     }
 
     private void createDatePickerWithValueAndFrenchLocale() {
