@@ -110,21 +110,36 @@ public class DateTimePickerValidationBasicIT
         assertServerInvalid();
 
         setInputValue(dateInput, "2/2/2000");
+        setInputValue(timeInput, "11:00");
+        assertClientInvalid();
+        assertServerInvalid();
+
+        setInputValue(dateInput, "2/2/2000");
         setInputValue(timeInput, "12:00");
         assertClientValid();
         assertServerValid();
 
-        setInputValue(dateInput, "3/3/2000");
+        setInputValue(dateInput, "2/2/2000");
         setInputValue(timeInput, "13:00");
+        assertClientValid();
+        assertServerValid();
+
+        setInputValue(dateInput, "3/3/2000");
+        setInputValue(timeInput, "11:00");
         assertClientValid();
         assertServerValid();
     }
 
     @Test
-    public void max_changeInputValue_assertValidity() {
+    public void max_changeDateInputValue_assertValidity() {
         $("input").id(MAX_INPUT).sendKeys("2000-02-02T12:00", Keys.ENTER);
 
         setInputValue(dateInput, "3/3/2000");
+        setInputValue(timeInput, "13:00");
+        assertClientInvalid();
+        assertServerInvalid();
+
+        setInputValue(dateInput, "2/2/2000");
         setInputValue(timeInput, "13:00");
         assertClientInvalid();
         assertServerInvalid();
@@ -134,8 +149,13 @@ public class DateTimePickerValidationBasicIT
         assertClientValid();
         assertServerValid();
 
-        setInputValue(dateInput, "1/1/2000");
+        setInputValue(dateInput, "2/2/2000");
         setInputValue(timeInput, "11:00");
+        assertClientValid();
+        assertServerValid();
+
+        setInputValue(dateInput, "1/1/2000");
+        setInputValue(timeInput, "13:00");
         assertClientValid();
         assertServerValid();
     }

@@ -72,25 +72,33 @@ public class DateTimePickerValidationBinderIT
     @Test
     public void min_changeInputValue_assertValidity() {
         $("input").id(MIN_INPUT).sendKeys("2000-02-02T12:00", Keys.ENTER);
-        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("2000-03-03T13:00",
+        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("2000-03-03T11:00",
                 Keys.ENTER);
 
-        // Constraint validation fails:
         setInputValue(dateInput, "1/1/2000");
         setInputValue(timeInput, "11:00");
         assertClientInvalid();
         assertServerInvalid();
 
-        // Binder validation fails:
+        setInputValue(dateInput, "2/2/2000");
+        setInputValue(timeInput, "11:00");
+        assertClientInvalid();
+        assertServerInvalid();
+
         setInputValue(dateInput, "2/2/2000");
         setInputValue(timeInput, "12:00");
-        assertClientValid();
-        assertServerValid();
+        assertClientInvalid();
+        assertServerInvalid();
         assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
 
-        // Both validations pass:
-        setInputValue(dateInput, "3/3/2000");
+        setInputValue(dateInput, "2/2/2000");
         setInputValue(timeInput, "13:00");
+        assertClientInvalid();
+        assertServerInvalid();
+        assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
+
+        setInputValue(dateInput, "3/3/2000");
+        setInputValue(timeInput, "11:00");
         assertClientValid();
         assertServerValid();
     }
@@ -98,25 +106,33 @@ public class DateTimePickerValidationBinderIT
     @Test
     public void max_changeInputValue_assertValidity() {
         $("input").id(MAX_INPUT).sendKeys("2000-02-02T12:00", Keys.ENTER);
-        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("2000-03-03T13:00",
+        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("2000-01-01T13:00",
                 Keys.ENTER);
 
-        // Constraint validation fails:
         setInputValue(dateInput, "3/3/2000");
         setInputValue(timeInput, "13:00");
         assertClientInvalid();
         assertServerInvalid();
 
-        // Binder validation fails:
+        setInputValue(dateInput, "2/2/2000");
+        setInputValue(timeInput, "13:00");
+        assertClientInvalid();
+        assertServerInvalid();
+
         setInputValue(dateInput, "2/2/2000");
         setInputValue(timeInput, "12:00");
-        assertClientValid();
-        assertServerValid();
+        assertClientInvalid();
+        assertServerInvalid();
         assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
 
-        // Both validations pass:
-        setInputValue(dateInput, "1/1/2000");
+        setInputValue(dateInput, "2/2/2000");
         setInputValue(timeInput, "11:00");
+        assertClientInvalid();
+        assertServerInvalid();
+        assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
+
+        setInputValue(dateInput, "1/1/2000");
+        setInputValue(timeInput, "13:00");
         assertClientValid();
         assertServerValid();
     }
