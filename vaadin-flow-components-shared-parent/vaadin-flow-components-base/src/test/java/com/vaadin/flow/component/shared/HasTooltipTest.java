@@ -30,7 +30,7 @@ public class HasTooltipTest {
     }
 
     @Test
-    public void default_doesNotHaveTooltipText() {
+    public void default_doesNotHaveTooltip() {
         Assert.assertNull(component.getTooltip());
     }
 
@@ -41,9 +41,25 @@ public class HasTooltipTest {
     }
 
     @Test
-    public void setTooltip_hasTooltipText() {
-        component.setTooltip("foo");
-        Assert.assertEquals("foo", component.getTooltip());
+    public void setTooltip_hasTooltip() {
+        var tooltip = component.setTooltip("foo");
+        Assert.assertEquals(tooltip, component.getTooltip());
+    }
+
+    @Test
+    public void setTooltipAgain_hasTooltip() {
+        var tooltip = component.setTooltip("foo");
+        var tooltip2 = component.setTooltip("bar");
+        Assert.assertEquals(tooltip, tooltip2);
+        Assert.assertEquals(component.getTooltip().getText(), "bar");
+    }
+
+    @Test
+    public void setTooltipNull_hasTooltip() {
+        var tooltip = component.setTooltip("foo");
+        var tooltip2 = component.setTooltip(null);
+        Assert.assertEquals(tooltip, tooltip2);
+        Assert.assertEquals(component.getTooltip().getText(), null);
     }
 
     @Test
