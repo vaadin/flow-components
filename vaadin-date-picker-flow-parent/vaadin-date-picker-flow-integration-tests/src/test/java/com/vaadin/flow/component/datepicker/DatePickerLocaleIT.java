@@ -1,6 +1,7 @@
 package com.vaadin.flow.component.datepicker;
 
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
@@ -26,6 +27,11 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
 
     @Test
     public void datePickerWithValueAndLocale_assertDisplayedValue() {
+        DatePickerElement chinaLocalePicker = $(DatePickerElement.class)
+                .id("picker-with-value-and-china-locale");
+        Assert.assertEquals("Should display the value using China date format",
+                "2018/5/3", chinaLocalePicker.getInputValue());
+
         DatePickerElement frenchLocalePicker = $(DatePickerElement.class)
                 .id("picker-with-value-and-french-locale");
         Assert.assertEquals("Should display the value using French date format",
@@ -62,10 +68,10 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
     public void datePicker_setValue_setLocale_assertDisplayedValue() {
         DatePickerElement picker = $(DatePickerElement.class).id("picker");
 
-        picker.setDate(LocalDate.of(2018, 4, 23));
+        picker.setDate(LocalDate.of(2018, Month.MAY, 3));
         $("button").id("picker-set-uk-locale").click();
         Assert.assertEquals("Should display the value using UK date format",
-                "23/04/2018", picker.getInputValue());
+                "03/05/2018", picker.getInputValue());
 
         assertNoWarnings();
     }
@@ -77,7 +83,7 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
 
         $("button").id("picker-with-value-set-uk-locale").click();
         Assert.assertEquals("Should display the value using UK date format",
-                "23/04/2018", picker.getInputValue());
+                "03/05/2018", picker.getInputValue());
 
         assertNoWarnings();
     }
@@ -87,10 +93,10 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
         DatePickerElement picker = $(DatePickerElement.class)
                 .id("picker-with-german-locale");
 
-        picker.setInputValue("23.4.2018");
+        picker.setInputValue("3.5.2018");
         picker.sendKeys(Keys.TAB);
         Assert.assertEquals("Should display the value using German date format",
-                "23.4.2018", picker.getInputValue());
+                "3.5.2018", picker.getInputValue());
 
         assertNoWarnings();
     }

@@ -15,12 +15,12 @@ import com.vaadin.flow.router.Route;
 public class DatePickerLocalePage extends Div {
 
     private final LocalDate may3rd = LocalDate.of(2018, Month.MAY, 3);
-    private final LocalDate april23rd = LocalDate.of(2018, Month.APRIL, 23);
 
     public DatePickerLocalePage() {
         createDatePicker();
         createDatePickerWithGermanLocale();
         createDatePickerWithValue();
+        createDatePickerWithValueAndChinaLocale();
         createDatePickerWithValueAndFrenchLocale();
         createDatePickerWithValueAndPolishLocale();
         createDatePickerWithValueAndKoreanLocale();
@@ -44,7 +44,7 @@ public class DatePickerLocalePage extends Div {
     }
 
     private void createDatePickerWithValue() {
-        DatePicker datePicker = new DatePicker(april23rd);
+        DatePicker datePicker = new DatePicker(may3rd);
         datePicker.setId("picker-with-value");
 
         NativeButton ukLocale = new NativeButton("Locale: UK");
@@ -70,6 +70,12 @@ public class DatePickerLocalePage extends Div {
         DatePicker datePicker = new DatePicker(may3rd, new Locale("ko", "KR"));
         datePicker.setId("picker-with-value-and-korean-locale");
         addCard("DatePicker with value and Korean locale", datePicker);
+    }
+
+    private void createDatePickerWithValueAndChinaLocale() {
+        DatePicker datePicker = new DatePicker(may3rd, Locale.CHINA);
+        datePicker.setId("picker-with-value-and-china-locale");
+        addCard("DatePicker with value and China locale", datePicker);
     }
 
     private void addCard(String title, Component... components) {
