@@ -38,12 +38,20 @@ public class Tooltip implements Serializable {
      * Tooltip position in relation to the target element.
      */
     public enum TooltipPosition {
-        TOP_START("top-start"), TOP("top"), TOP_END("top-end"), BOTTOM_START(
-                "bottom-start"), BOTTOM("bottom"), BOTTOM_END(
-                        "bottom-end"), START_TOP("start-top"), START(
-                                "start"), START_BOTTOM("start-bottom"), END_TOP(
-                                        "end-top"), END("end"), END_BOTTOM(
-                                                "end-bottom");
+        //@formatter:off
+        TOP_START("top-start"),
+        TOP("top"),
+        TOP_END("top-end"),
+        BOTTOM_START("bottom-start"),
+        BOTTOM("bottom"),
+        BOTTOM_END("bottom-end"),
+        START_TOP("start-top"),
+        START("start"),
+        START_BOTTOM("start-bottom"),
+        END_TOP("end-top"),
+        END("end"),
+        END_BOTTOM("end-bottom");
+        //@formatter:off
 
         private final String position;
 
