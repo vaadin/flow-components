@@ -292,11 +292,10 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<LocalTime> listener) {
         if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
-            return addClientValidatedEventListener(event -> {
-                listener.validationStatusChanged(
-                        new ValidationStatusChangeEvent<LocalTime>(this,
-                                !isInvalid()));
-            });
+            return addClientValidatedEventListener(
+                    event -> listener.validationStatusChanged(
+                            new ValidationStatusChangeEvent<LocalTime>(this,
+                                    !isInvalid())));
         }
 
         return null;
@@ -304,7 +303,7 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
 
     private ValidationResult checkValidity(LocalTime value) {
         if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
-            var hasNonParsableValue = value == getEmptyValue()
+            boolean hasNonParsableValue = value == getEmptyValue()
                     && isInputValuePresent();
             if (hasNonParsableValue) {
                 return ValidationResult.error("");
