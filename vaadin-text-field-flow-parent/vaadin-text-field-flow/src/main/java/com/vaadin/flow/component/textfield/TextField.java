@@ -512,11 +512,10 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<String> listener) {
         if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
-            return addClientValidatedEventListener(event -> {
-                listener.validationStatusChanged(
-                        new ValidationStatusChangeEvent<String>(this,
-                                !isInvalid()));
-            });
+            return addClientValidatedEventListener(
+                    event -> listener.validationStatusChanged(
+                            new ValidationStatusChangeEvent<String>(this,
+                                    !isInvalid())));
         }
 
         return null;
