@@ -15,12 +15,9 @@
  */
 package com.vaadin.flow.component.datepicker;
 
-import java.time.LocalDate;
-import java.util.logging.Level;
 import java.util.stream.IntStream;
 
 import com.google.common.base.Strings;
-import com.vaadin.flow.component.datepicker.testbench.DatePickerElement;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -94,65 +91,6 @@ public class DatePickerValidationPageIT extends AbstractComponentIT {
         scrollIntoViewAndClick(invalidate);
         setValue("1/1/2018");
         assertValid();
-    }
-
-    @Test
-    public void invalidLocale() {
-        String logList = getLogEntries(Level.WARNING).toString();
-        Assert.assertFalse(logList.contains(
-                "The locale is not supported, using default locale setting(en-US)."));
-
-        WebElement changeLocale = findElement(By.id("change-locale"));
-        scrollIntoViewAndClick(changeLocale);
-
-        waitUntil(driver -> getLogEntries(Level.WARNING).toString().contains(
-                "The locale is not supported, using default locale setting(en-US)."));
-        WebElement picker = findElement(By.id("field"));
-        WebElement displayText = picker.findElement(By.tagName("input"));
-
-        executeScript("arguments[0].value = '2018-12-26'", picker);
-        Assert.assertEquals(
-                "DatePicker should use default locale(en-US) format, MM/DD/YYYY",
-                true,
-                executeScript("return arguments[0].value === '12/26/2018'",
-                        displayText));
-    }
-
-    @Test
-    public void testDifferentLocales() {
-        WebElement localePicker = findElement(By.id("locale-picker"));
-        WebElement displayText = localePicker.findElement(By.tagName("input"));
-        findElement(By.id("polish-locale")).click();
-
-        executeScript("arguments[0].value = '2018-03-26'", localePicker);
-        Assert.assertEquals("Polish Locale is using DD.MM.YYYY format ", true,
-                executeScript("return arguments[0].value === '26.03.2018'",
-                        displayText));
-
-        findElement(By.id("swedish-locale")).click();
-        executeScript("arguments[0].value = '2018-03-25'", localePicker);
-        Assert.assertEquals("Swedish Locale is using YYYY-MM-DD format ", true,
-                executeScript("return arguments[0].value === '2018-03-25'",
-                        displayText));
-    }
-
-    @Test
-    public void testPickerWithValueAndLocaleFromServerSide() {
-        WebElement localePicker = findElement(By.id("locale-picker-server"));
-        WebElement displayText = localePicker.findElement(By.tagName("input"));
-
-        Assert.assertEquals("Initial date is 5/23/2018", true, executeScript(
-                "return arguments[0].value === '5/23/2018'", displayText));
-
-        findElement(By.id("polish-locale-server")).click();
-        Assert.assertEquals("Polish locale date is 23.05.2018", true,
-                executeScript("return arguments[0].value === '23.05.2018'",
-                        displayText));
-
-        findElement(By.id("swedish-locale-server")).click();
-        Assert.assertEquals("Swedish locale date is 2018-05-23", true,
-                executeScript("return arguments[0].value === '2018-05-23'",
-                        displayText));
     }
 
     private void assertInvalid() {

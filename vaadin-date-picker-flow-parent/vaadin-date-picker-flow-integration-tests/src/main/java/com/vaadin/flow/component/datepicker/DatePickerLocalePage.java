@@ -4,46 +4,91 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.util.Locale;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-date-picker/date-picker-locale")
 public class DatePickerLocalePage extends Div {
 
     private final LocalDate may3rd = LocalDate.of(2018, Month.MAY, 3);
-    private final LocalDate april23rd = LocalDate.of(2018, Month.APRIL, 23);
 
     public DatePickerLocalePage() {
-        DatePicker datePicker = new DatePicker(april23rd, Locale.CHINA);
-        datePicker.setId("locale-picker-server-with-value");
+        createDatePicker();
+        createDatePickerWithGermanLocale();
+        createDatePickerWithValue();
+        createDatePickerWithValueAndChinaLocale();
+        createDatePickerWithValueAndFrenchLocale();
+        createDatePickerWithValueAndPolishLocale();
+        createDatePickerWithValueAndKoreanLocale();
+    }
 
-        NativeButton locale = new NativeButton("Locale: UK");
-        locale.setId("uk-locale");
+    private void createDatePicker() {
+        DatePicker datePicker = new DatePicker();
+        datePicker.setId("picker");
 
-        locale.addClickListener(e -> datePicker.setLocale(Locale.UK));
+        NativeButton setUKLocale = new NativeButton("Set UK locale");
+        setUKLocale.setId("picker-set-uk-locale");
+        setUKLocale.addClickListener(e -> datePicker.setLocale(Locale.UK));
 
-        DatePicker frenchLocale = new DatePicker();
-        frenchLocale.setId("french-locale-date-picker");
+        NativeButton setInvalidLocale = new NativeButton("Set invalid locale");
+        setInvalidLocale.addClickListener(
+                event -> datePicker.setLocale(new Locale("i", "i", "i")));
+        setInvalidLocale.setId("picker-set-invalid-locale");
 
-        frenchLocale.setLocale(Locale.FRANCE);
-        frenchLocale.setValue(may3rd);
+        addCard("DatePicker", datePicker, setUKLocale, setInvalidLocale);
+    }
 
-        DatePicker german = new DatePicker();
-        german.setLocale(Locale.GERMAN);
-        german.setId("german-locale-date-picker");
+    private void createDatePickerWithGermanLocale() {
+        DatePicker datePicker = new DatePicker(null, Locale.GERMAN);
+        datePicker.setId("picker-with-german-locale");
+        addCard("DatePicker with German locale", datePicker);
+    }
 
-        add(datePicker, locale, frenchLocale, german);
+    private void createDatePickerWithValue() {
+        DatePicker datePicker = new DatePicker(may3rd);
+        datePicker.setId("picker-with-value");
 
-        DatePicker polandDatePicker = new DatePicker(may3rd,
-                new Locale("pl", "PL"));
-        polandDatePicker.setId("polish-locale-date-picker");
-        add(polandDatePicker);
+        NativeButton setUKLocale = new NativeButton("Set UK locale");
+        setUKLocale.setId("picker-with-value-set-uk-locale");
+        setUKLocale.addClickListener(e -> datePicker.setLocale(Locale.UK));
 
-        DatePicker korean = new DatePicker(may3rd, new Locale("ko", "KR"));
-        korean.setId("korean-locale-date-picker");
-        add(korean);
+        addCard("DatePicker with value", datePicker, setUKLocale);
+    }
 
+    private void createDatePickerWithValueAndFrenchLocale() {
+        DatePicker datePicker = new DatePicker(may3rd, Locale.FRENCH);
+        datePicker.setId("picker-with-value-and-french-locale");
+        addCard("DatePicker with value and French locale", datePicker);
+    }
+
+    private void createDatePickerWithValueAndPolishLocale() {
+        DatePicker datePicker = new DatePicker(may3rd, new Locale("pl", "PL"));
+        datePicker.setId("picker-with-value-and-polish-locale");
+        addCard("DatePicker with value and Polish locale", datePicker);
+    }
+
+    private void createDatePickerWithValueAndKoreanLocale() {
+        DatePicker datePicker = new DatePicker(may3rd, new Locale("ko", "KR"));
+        datePicker.setId("picker-with-value-and-korean-locale");
+        addCard("DatePicker with value and Korean locale", datePicker);
+    }
+
+    private void createDatePickerWithValueAndChinaLocale() {
+        DatePicker datePicker = new DatePicker(may3rd, Locale.CHINA);
+        datePicker.setId("picker-with-value-and-china-locale");
+        addCard("DatePicker with value and China locale", datePicker);
+    }
+
+    private void addCard(String title, Component... components) {
+        VerticalLayout layout = new VerticalLayout();
+        layout.setMargin(true);
+        layout.add(new H2(title));
+        layout.add(components);
+        add(layout);
     }
 
 }
