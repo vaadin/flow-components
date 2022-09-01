@@ -22,14 +22,14 @@ import com.vaadin.flow.component.shared.ThemeVariant;
  */
 public enum TabSheetVariant implements ThemeVariant {
     //@formatter:off
-    LUMO_ICON_ON_TOP("icon-on-top"),
-    LUMO_CENTERED("centered"),
-    LUMO_SMALL("small"),
-    LUMO_MINIMAL("minimal"),
-    LUMO_HIDE_SCROLL_BUTTONS("hide-scroll-buttons"),
-    LUMO_EQUAL_WIDTH_TABS( "equal-width-tabs"),
+    LUMO_TABS_ICON_ON_TOP("icon-on-top"),
+    LUMO_TABS_CENTERED("centered"),
+    LUMO_TABS_SMALL("small"),
+    LUMO_TABS_MINIMAL("minimal"),
+    LUMO_TABS_HIDE_SCROLL_BUTTONS("hide-scroll-buttons"),
+    LUMO_TABS_EQUAL_WIDTH_TABS( "equal-width-tabs"),
     LUMO_NO_BORDER("no-border"),
-    MATERIAL_FIXED("fixed"),
+    MATERIAL_TABS_FIXED("fixed"),
     MATERIAL_NO_BORDER("no-border");
     //@formatter:on
 
