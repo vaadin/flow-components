@@ -647,9 +647,10 @@ public class DateTimePicker extends
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<LocalDateTime> listener) {
         if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
-            return addClientValidatedEventListener(event -> listener
-                    .validationStatusChanged(new ValidationStatusChangeEvent<>(this,
-                            event.isValid())));
+            return addClientValidatedEventListener(
+                    event -> listener.validationStatusChanged(
+                            new ValidationStatusChangeEvent<>(this,
+                                    event.isValid())));
         }
 
         return null;
@@ -823,7 +824,8 @@ public class DateTimePicker extends
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
-            ClientValidationUtil.preventWebComponentFromSettingItselfToValid(this);
+            ClientValidationUtil
+                    .preventWebComponentFromSettingItselfToValid(this);
         } else {
             FieldValidationUtil.disableClientValidation(this);
         }

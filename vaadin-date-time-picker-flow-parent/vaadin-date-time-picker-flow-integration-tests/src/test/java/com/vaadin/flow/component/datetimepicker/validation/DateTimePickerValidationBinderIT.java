@@ -16,7 +16,8 @@ import static com.vaadin.flow.component.datetimepicker.validation.DateTimePicker
 import static com.vaadin.flow.component.datetimepicker.validation.DateTimePickerValidationBinderPage.UNEXPECTED_VALUE_ERROR_MESSAGE;
 
 @TestPath("vaadin-date-time-picker/validation/binder")
-public class DateTimePickerValidationBinderIT extends AbstractValidationIT<DateTimePickerElement> {
+public class DateTimePickerValidationBinderIT
+        extends AbstractValidationIT<DateTimePickerElement> {
     private TestBenchElement dateInput;
     private TestBenchElement timeInput;
 

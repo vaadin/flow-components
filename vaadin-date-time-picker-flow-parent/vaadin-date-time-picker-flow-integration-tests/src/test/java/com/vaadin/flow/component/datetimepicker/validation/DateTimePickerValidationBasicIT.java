@@ -16,7 +16,8 @@ import static com.vaadin.flow.component.datetimepicker.validation.DateTimePicker
 import static com.vaadin.flow.component.datetimepicker.validation.DateTimePickerValidationBasicPage.REQUIRED_BUTTON;
 
 @TestPath("vaadin-date-time-picker/validation/basic")
-public class DateTimePickerValidationBasicIT extends AbstractValidationIT<DateTimePickerElement> {
+public class DateTimePickerValidationBasicIT
+        extends AbstractValidationIT<DateTimePickerElement> {
     private TestBenchElement dateInput;
     private TestBenchElement timeInput;
 

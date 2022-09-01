@@ -20,7 +20,10 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.testutil.ValidationTestView;
 
 /**
- * View for testing validation with {@link DateTimePicker}.
+ * A view for integration tests verifying that the {@code HasValidation}
+ * interface is implemented for {@code TimePicker}.
+ *
+ * TODO: Can be tested with unit tests.
  */
 @Route("vaadin-date-time-picker/date-time-picker-validation")
 public class DateTimePickerValidationPage extends ValidationTestView {
