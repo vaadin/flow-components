@@ -11,6 +11,7 @@
     <name>Vaadin Spreadsheet</name>
     <properties>
         <osgi.bundle.license>https://vaadin.com/license/cvdl-4.0</osgi.bundle.license>
+        <cvdlName>vaadin-spreadsheet</cvdlName>
     </properties>
     <dependencies>
         <dependency>
