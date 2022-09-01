@@ -517,10 +517,12 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     }
 
     private ValidationResult checkValidity(LocalDate value) {
-        var hasNonParsableValue = value == getEmptyValue()
-                && isInputValuePresent();
-        if (hasNonParsableValue) {
-            return ValidationResult.error("");
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            var hasNonParsableValue = value == getEmptyValue()
+                    && isInputValuePresent();
+            if (hasNonParsableValue) {
+                return ValidationResult.error("");
+            }
         }
 
         var greaterThanMax = ValidationUtil.checkGreaterThanMax(value, max);
