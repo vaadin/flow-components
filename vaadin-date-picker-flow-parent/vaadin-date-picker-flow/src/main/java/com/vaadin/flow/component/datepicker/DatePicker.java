@@ -489,11 +489,10 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<LocalDate> listener) {
         if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
-            return addClientValidatedEventListener(event -> {
-                listener.validationStatusChanged(
-                        new ValidationStatusChangeEvent<LocalDate>(this,
-                                !isInvalid()));
-            });
+            return addClientValidatedEventListener(
+                    event -> listener.validationStatusChanged(
+                            new ValidationStatusChangeEvent<LocalDate>(this,
+                                    !isInvalid())));
         }
 
         return null;
@@ -518,7 +517,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
 
     private ValidationResult checkValidity(LocalDate value) {
         if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
-            var hasNonParsableValue = value == getEmptyValue()
+            boolean hasNonParsableValue = value == getEmptyValue()
                     && isInputValuePresent();
             if (hasNonParsableValue) {
                 return ValidationResult.error("");
