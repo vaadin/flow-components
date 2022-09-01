@@ -125,7 +125,6 @@ public class TooltipTest {
     }
 
     @Tag("test")
-    private static class TestComponent extends Component
-            implements HasClearButton {
+    private static class TestComponent extends Component {
     }
 }
