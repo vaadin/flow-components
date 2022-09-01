@@ -23,7 +23,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 /**
- * Tests for setting prefix and suffix components for {@link HasPrefixAndSuffix}.
+ * Tests for setting prefix and suffix components for
+ * {@link HasPrefixAndSuffix}.
  */
 public class PrefixSuffixTest {
 

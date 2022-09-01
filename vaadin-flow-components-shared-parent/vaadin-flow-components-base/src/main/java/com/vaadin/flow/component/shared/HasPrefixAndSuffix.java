@@ -19,16 +19,16 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
 
 /**
- * Mixin interface for components that have prefix and suffix slots
- * for inserting components.
+ * Mixin interface for components that have prefix and suffix slots for
+ * inserting components.
  *
  * @author Vaadin Ltd
  */
 public interface HasPrefixAndSuffix extends HasElement {
 
     /**
-     * Adds the given component as the prefix of this component, replacing
-     * any existing prefix component.
+     * Adds the given component as the prefix of this component, replacing any
+     * existing prefix component.
      * <p>
      * This is most commonly used to add a simple icon or static text into the
      * component.
@@ -49,8 +49,8 @@ public interface HasPrefixAndSuffix extends HasElement {
     /**
      * Gets the component in the prefix slot of this component.
      *
-     * @return the prefix component of this component, or {@code null} if no prefix
-     *         component has been set
+     * @return the prefix component of this component, or {@code null} if no
+     *         prefix component has been set
      * @see #setPrefixComponent(Component)
      */
     default Component getPrefixComponent() {
@@ -80,8 +80,8 @@ public interface HasPrefixAndSuffix extends HasElement {
     /**
      * Gets the component in the suffix slot of this component.
      *
-     * @return the suffix component of this component, or {@code null} if no suffix
-     *         component has been set
+     * @return the suffix component of this component, or {@code null} if no
+     *         suffix component has been set
      * @see #setPrefixComponent(Component)
      */
     default Component getSuffixComponent() {
