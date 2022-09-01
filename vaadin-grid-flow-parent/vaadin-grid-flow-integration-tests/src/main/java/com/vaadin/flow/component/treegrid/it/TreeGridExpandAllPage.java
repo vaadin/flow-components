@@ -83,8 +83,8 @@ public class TreeGridExpandAllPage extends Div {
         addRootItems("Granddad", 3, data, parentPathMap)
                 .forEach(granddad -> addItems("Dad is very long and large", 3,
                         granddad, data, parentPathMap)
-                                .forEach(dad -> addItems("Son", 300, dad, data,
-                                        parentPathMap)));
+                        .forEach(dad -> addItems("Son", 300, dad, data,
+                                parentPathMap)));
 
         inMemoryDataProvider = new TreeDataProvider<>(data);
     }

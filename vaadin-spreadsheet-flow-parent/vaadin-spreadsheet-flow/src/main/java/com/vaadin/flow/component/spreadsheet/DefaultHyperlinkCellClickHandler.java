@@ -204,8 +204,8 @@ public class DefaultHyperlinkCellClickHandler
 
         try {
             ValueEval value = ((WorkbookEvaluatorProvider) spreadsheet
-                    .getFormulaEvaluator())._getWorkbookEvaluator().evaluate(
-                            formula,
+                    .getFormulaEvaluator())._getWorkbookEvaluator()
+                    .evaluate(formula,
                             new CellReference(cell.getSheet().getSheetName(),
                                     cell.getRowIndex(), cell.getColumnIndex(),
                                     false, false));

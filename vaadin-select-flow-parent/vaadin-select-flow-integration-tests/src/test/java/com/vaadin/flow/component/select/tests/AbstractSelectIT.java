@@ -198,7 +198,7 @@ public abstract class AbstractSelectIT extends AbstractComponentIT {
         public void userSelectionDoesntFireEvent(int itemIndexToTestWith) {
             IntSupplier numberOfValueChanges = () -> findElement(
                     By.id("value-change-container"))
-                            .findElements(By.tagName("div")).size();
+                    .findElements(By.tagName("div")).size();
             int currentValues = numberOfValueChanges.getAsInt();
 
             selectElement.selectItemByIndex(itemIndexToTestWith);
