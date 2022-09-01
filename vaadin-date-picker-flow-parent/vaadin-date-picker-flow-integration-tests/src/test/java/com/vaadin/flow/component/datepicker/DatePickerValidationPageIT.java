@@ -42,7 +42,6 @@ public class DatePickerValidationPageIT extends AbstractComponentIT {
     private WebElement field;
     private WebElement invalidate;
     private WebElement validate;
-    private WebElement open;
 
     @Before
     public void init() {
@@ -52,7 +51,6 @@ public class DatePickerValidationPageIT extends AbstractComponentIT {
         field = findElement(By.id("field"));
         invalidate = findElement(By.id("invalidate"));
         validate = findElement(By.id("validate"));
-        open = findElement(By.id("open"));
     }
 
     @Test
@@ -99,12 +97,6 @@ public class DatePickerValidationPageIT extends AbstractComponentIT {
     }
 
     @Test
-    public void openFromServer_overlayVisible() {
-        scrollIntoViewAndClick(open);
-        waitForElementVisible(By.tagName("vaadin-date-picker-overlay"));
-    }
-
-    @Test
     public void invalidLocale() {
         String logList = getLogEntries(Level.WARNING).toString();
         Assert.assertFalse(logList.contains(
@@ -124,19 +116,6 @@ public class DatePickerValidationPageIT extends AbstractComponentIT {
                 true,
                 executeScript("return arguments[0].value === '12/26/2018'",
                         displayText));
-    }
-
-    @Test
-    public void disabledDatePicker() {
-        WebElement disabledPicker = findElement(By.id("picker-inside-div"));
-        Assert.assertFalse(
-                "The date picker should be disabled, when the parent component is disabled.",
-                disabledPicker.isEnabled());
-
-        findElement(By.id("set-enabled")).click();
-        Assert.assertTrue(
-                "The date picker should be enabled after parent component is enabled.",
-                disabledPicker.isEnabled());
     }
 
     @Test

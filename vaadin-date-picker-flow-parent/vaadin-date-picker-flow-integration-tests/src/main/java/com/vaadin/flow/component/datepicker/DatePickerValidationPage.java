@@ -34,7 +34,6 @@ public class DatePickerValidationPage extends Div {
 
     public DatePickerValidationPage() {
         initView();
-        createPickerInsideDiv();
         createPickerTestLocales();
         createPickerWithValueAndLocaleFromServerSide();
         createPickerWithMaxAndMinValues();
@@ -80,31 +79,11 @@ public class DatePickerValidationPage extends Div {
         add(button);
         add(label, value);
 
-        button = new NativeButton("Open DatePicker");
-        button.setId("open");
-        button.addClickListener(event -> datePicker.open());
-        add(button);
-
         NativeButton localeChange = new NativeButton("Locale change button");
         localeChange.addClickListener(
                 event -> datePicker.setLocale(new Locale("i", "i", "i")));
         localeChange.setId("change-locale");
         add(localeChange);
-    }
-
-    private void createPickerInsideDiv() {
-        Div parent = new Div();
-        DatePicker datePicker = new DatePicker();
-        datePicker.setId("picker-inside-div");
-
-        parent.add(datePicker);
-        parent.setEnabled(false);
-
-        NativeButton button = new NativeButton("set Div Enabled");
-        button.setId("set-enabled");
-        button.addClickListener(event -> parent.setEnabled(true));
-
-        add(parent, button);
     }
 
     private void createPickerTestLocales() {
