@@ -181,7 +181,9 @@ public class DateTimePicker extends
 
         addValueChangeListener(e -> validate());
 
-        addClientValidatedEventListener(e -> validate());
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            addClientValidatedEventListener(e -> validate());
+        }
     }
 
     /**
@@ -644,25 +646,41 @@ public class DateTimePicker extends
     @Override
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<LocalDateTime> listener) {
-        return addClientValidatedEventListener(event -> listener
-                .validationStatusChanged(new ValidationStatusChangeEvent<>(this,
-                        event.isValid())));
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            return addClientValidatedEventListener(event -> listener
+                    .validationStatusChanged(new ValidationStatusChangeEvent<>(this,
+                            event.isValid())));
+        }
+
+        return null;
     }
 
     private ValidationResult checkValidity(LocalDateTime value) {
-        LocalDate dateValue = value != null ? value.toLocalDate() : null;
-        LocalTime timeValue = value != null ? value.toLocalTime() : null;
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            LocalDate dateValue = value != null ? value.toLocalDate() : null;
+            LocalTime timeValue = value != null ? value.toLocalTime() : null;
 
-        ValidationResult datePickerResult = datePicker.getDefaultValidator()
-                .apply(dateValue, null);
-        if (datePickerResult.isError()) {
-            return datePickerResult;
-        }
+            ValidationResult datePickerResult = datePicker.getDefaultValidator()
+                    .apply(dateValue, null);
+            if (datePickerResult.isError()) {
+                return datePickerResult;
+            }
 
-        ValidationResult timePickerResult = timePicker.getDefaultValidator()
-                .apply(timeValue, null);
-        if (timePickerResult.isError()) {
-            return timePickerResult;
+            ValidationResult timePickerResult = timePicker.getDefaultValidator()
+                    .apply(timeValue, null);
+            if (timePickerResult.isError()) {
+                return timePickerResult;
+            }
+        } else {
+            var greaterThanMax = ValidationUtil.checkGreaterThanMax(value, max);
+            if (greaterThanMax.isError()) {
+                return greaterThanMax;
+            }
+
+            var smallerThanMin = ValidationUtil.checkSmallerThanMin(value, min);
+            if (smallerThanMin.isError()) {
+                return smallerThanMin;
+            }
         }
 
         return ValidationResult.ok();
@@ -804,7 +822,11 @@ public class DateTimePicker extends
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        ClientValidationUtil.preventWebComponentFromSettingItselfToValid(this);
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            ClientValidationUtil.preventWebComponentFromSettingItselfToValid(this);
+        } else {
+            FieldValidationUtil.disableClientValidation(this);
+        }
     }
 
     /**
