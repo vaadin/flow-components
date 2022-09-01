@@ -21,69 +21,86 @@ import com.vaadin.flow.testutil.TestPath;
 public class DatePickerLocaleIT extends AbstractComponentIT {
 
     @Test
-    public void datePickerWithValueAndLocaleFromServerSide_assertDisplayedValue() {
+    public void datePickerWithValueAndLocale_assertDisplayedValue() {
         open();
 
-        Assert.assertEquals("03/05/2018", $(DatePickerElement.class)
-                .id("french-locale-date-picker").getInputValue());
+        DatePickerElement frenchLocalePicker = $(DatePickerElement.class)
+                .id("picker-with-value-and-french-locale");
+        Assert.assertEquals("Should display the correct value when using French locale",
+                "03/05/2018", frenchLocalePicker.getInputValue());
 
-        Assert.assertEquals("2018. 5. 3.", $(DatePickerElement.class)
-                .id("korean-locale-date-picker").getInputValue());
+        DatePickerElement koreanLocalePicker = $(DatePickerElement.class)
+                .id("picker-with-value-and-korean-locale");
+        Assert.assertEquals(
+                "Should display the correct value when using Korean locale",
+                "2018. 5. 3.", koreanLocalePicker.getInputValue());
 
-        Assert.assertEquals("3.05.2018", $(DatePickerElement.class)
-                .id("polish-locale-date-picker").getInputValue());
+        DatePickerElement polishLocalePicker = $(DatePickerElement.class)
+                .id("picker-with-value-and-polish-locale");
+        Assert.assertEquals(
+                "Should display the correct value when using Polish locale",
+                "3.05.2018", polishLocalePicker.getInputValue());
 
-        DatePickerElement localePicker = $(DatePickerElement.class)
-                .id("german-locale-date-picker");
-        localePicker.setDate(LocalDate.of(1985, 1, 10));
-        findElement(By.tagName("body")).click();
-
-        Assert.assertTrue("No new warnings should have appeared in the logs",
-                getWarningEntries().isEmpty());
-
-        Assert.assertEquals("10.1.1985", localePicker.getInputValue());
-
-        assertNoWarnings();
-
+        for (LogEntry logEntry : getWarningEntries()) {
+            Assert.assertThat(
+                    "Expected only [Deprecation] warnings in the logs",
+                    logEntry.getMessage(), CoreMatchers.containsString(
+                            "'lit-element' module entrypoint is deprecated."));
+            Assert.assertThat(logEntry.getMessage(),
+                    CoreMatchers.containsString("deprecated"));
+        }
     }
 
     @Test
-    public void datePicker_setDifferentLocales_assertDisplayedValue() {
+    public void datePicker_setDate_setLocale_assertDisplayedValue() {
         open();
 
         DatePickerElement picker = $(DatePickerElement.class).id("picker");
-
         picker.setDate(LocalDate.of(2018, 4, 23));
 
         $("button").id("picker-set-uk-locale").click();
         Assert.assertEquals("23/04/2018", picker.getInputValue());
-
-        $("button").id("picker-set-pl-locale").click();
-        Assert.assertEquals("23.04.2018", picker.getInputValue());
-
-        $("button").id("picker-set-sv-locale").click();
-        Assert.assertEquals("2018-04-23", picker.getInputValue());
-
-        assertNoWarnings();
     }
 
     @Test
-    public void datePickerWithValue_setDifferentLocales_assertDisplayedValue() {
+    public void datePickerWithValue_setLocale_assertDisplayedValue() {
         open();
 
         DatePickerElement picker = $(DatePickerElement.class)
                 .id("picker-with-value");
 
-        $("button").id("picker-set-uk-locale").click();
+        $("button").id("picker-with-value-set-uk-locale").click();
         Assert.assertEquals("23/04/2018", picker.getInputValue());
+    }
 
-        $("button").id("picker-set-pl-locale").click();
-        Assert.assertEquals("23.04.2018", picker.getInputValue());
+    @Test
+    public void datePickerWithValueAndLocale_clickInside_clickOutside_assertNoErrors() {
+        open();
 
-        $("button").id("picker-set-sv-locale").click();
-        Assert.assertEquals("2018-04-23", picker.getInputValue());
+        checkLogsForErrors();
+        WebElement picker = findElement(
+                By.id("picker-with-value-and-polish-locale"));
+        // trigger the validation on the from clientside
+        picker.click();
+        executeScript("document.body.click()");
 
-        assertNoWarnings();
+        checkLogsForErrors();
+    }
+
+    @Test
+    public void datePickerWithLocale_setDate_clickOutside_assertNoWarnings() {
+        open();
+
+        DatePickerElement picker = $(DatePickerElement.class)
+                .id("picker-with-german-locale");
+
+        picker.setDate(LocalDate.of(1985, 1, 10));
+        findElement(By.tagName("body")).click();
+
+        Assert.assertTrue("No new warnings should have appeared in the logs",
+                getWarningEntries().isEmpty());
+
+        Assert.assertEquals("10.1.1985", picker.getInputValue());
     }
 
     private void assertNoWarnings() {
@@ -103,19 +120,5 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
                 .filter(log -> log.getLevel().equals(Level.WARNING))
                 .filter(log -> !log.getMessage().contains("iron-icon"))
                 .collect(Collectors.toList());
-    }
-
-    @Test
-    public void polishLocaleTest() {
-        open();
-
-        checkLogsForErrors();
-        WebElement polishPicker = findElement(
-                By.id("polish-locale-date-picker"));
-        // trigger the validation on the from clientside
-        polishPicker.click();
-        executeScript("document.body.click()");
-
-        checkLogsForErrors();
     }
 }
