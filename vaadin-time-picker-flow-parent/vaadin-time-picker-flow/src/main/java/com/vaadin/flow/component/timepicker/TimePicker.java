@@ -303,10 +303,12 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     }
 
     private ValidationResult checkValidity(LocalTime value) {
-        var hasNonParsableValue = value == getEmptyValue()
-                && isInputValuePresent();
-        if (hasNonParsableValue) {
-            return ValidationResult.error("");
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            var hasNonParsableValue = value == getEmptyValue()
+                    && isInputValuePresent();
+            if (hasNonParsableValue) {
+                return ValidationResult.error("");
+            }
         }
 
         var greaterThanMaxValidation = ValidationUtil.checkGreaterThanMax(value,
