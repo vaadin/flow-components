@@ -18,13 +18,9 @@ package com.vaadin.flow.component.treegrid;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -216,15 +212,6 @@ public class TreeGrid<T> extends Grid<T>
         }
     }
 
-    private final AtomicLong uniqueKeyCounter = new AtomicLong(0);
-    private final Map<Object, Long> objectUniqueKeyMap = new HashMap<>();
-
-    ValueProvider<T, String> defaultUniqueKeyProvider = item -> String.valueOf(
-            objectUniqueKeyMap.computeIfAbsent(getDataProvider().getId(item),
-                    key -> uniqueKeyCounter.getAndIncrement()));
-
-    private Registration dataProviderRegistration;
-
     /**
      * Creates a new {@code TreeGrid} without support for creating columns based
      * on property names. Use an alternative constructor, such as
@@ -319,17 +306,6 @@ public class TreeGrid<T> extends Grid<T>
     }
 
     /**
-     * Gets value provider for unique key in row's generated JSON.
-     *
-     * @return ValueProvider for unique key for row
-     */
-    @Override
-    protected ValueProvider<T, String> getUniqueKeyProvider() {
-        return Optional.ofNullable(super.getUniqueKeyProvider())
-                .orElse(defaultUniqueKeyProvider);
-    }
-
-    /**
      * Adds an ExpandEvent listener to this TreeGrid.
      *
      * @param listener
@@ -373,18 +349,6 @@ public class TreeGrid<T> extends Grid<T>
     @Override
     public void setDataProvider(
             HierarchicalDataProvider<T, ?> hierarchicalDataProvider) {
-        if (dataProviderRegistration != null) {
-            dataProviderRegistration.remove();
-        }
-        dataProviderRegistration = hierarchicalDataProvider
-                .addDataProviderListener(e -> {
-                    if (!(e instanceof DataChangeEvent.DataRefreshEvent)) {
-                        // refreshAll was called
-                        getElement().executeJs(
-                                "$0.$connector && $0.$connector.reset()",
-                                getElement());
-                    }
-                });
         super.setDataProvider(hierarchicalDataProvider);
     }
 

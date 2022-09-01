@@ -1701,6 +1701,19 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
     @ClientCallable
     private void setRequestedRange(int start, int length, String filter) {
+        // If the filter is null, which indicates that the combo box was closed
+        // before, then reset the data communicator to force sending an update
+        // to the client connector. This covers an edge-case when using an empty
+        // lazy data provider and refreshing it before opening the combo box
+        // again. In that case the data provider thinks that the client should
+        // already be up-to-date from the refresh, as in both cases, refresh and
+        // empty data provider, the effective requested size is zero, which
+        // results in it not sending an update. However, the client needs to
+        // receive an update in order to clear the loading state from opening
+        // the combo box.
+        if (lastFilter == null) {
+            dataCommunicator.reset();
+        }
         dataCommunicator.setRequestedRange(start, length);
         filterSlot.accept(filter);
         updateSelectedKey();
