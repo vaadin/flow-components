@@ -107,6 +107,24 @@ public class Tooltip implements Serializable {
     }
 
     /**
+     * Creates a tooltip to the given {@link HasTooltip} component
+     * and adds the tooltip element to the component's tooltip slot.
+     *
+     * @param hasTooltip
+     *              the component to attach the tooltip to
+     * @return the tooltip handle
+     */
+    static Tooltip forHasTooltip(HasTooltip hasTooltip) {
+        // Clear any existing tooltip
+        SlotUtils.clearSlot(hasTooltip, "tooltip");
+
+        var tooltip = new Tooltip();
+        tooltip.tooltipElement.setAttribute("slot", "tooltip");
+        hasTooltip.getElement().appendChild(tooltip.tooltipElement);
+        return tooltip;
+    }
+
+    /**
      * String used as a tooltip content.
      *
      * @param text
