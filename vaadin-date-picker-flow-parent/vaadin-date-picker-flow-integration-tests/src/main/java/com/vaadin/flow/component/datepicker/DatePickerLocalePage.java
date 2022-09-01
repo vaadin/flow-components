@@ -20,7 +20,6 @@ public class DatePickerLocalePage extends Div {
     public DatePickerLocalePage() {
         createDatePicker();
         createDatePickerWithGermanLocale();
-
         createDatePickerWithValue();
         createDatePickerWithValueAndFrenchLocale();
         createDatePickerWithValueAndPolishLocale();
@@ -39,7 +38,7 @@ public class DatePickerLocalePage extends Div {
     }
 
     private void createDatePickerWithGermanLocale() {
-        DatePicker datePicker = new DatePicker(may3rd, Locale.GERMAN);
+        DatePicker datePicker = new DatePicker(null, Locale.GERMAN);
         datePicker.setId("picker-with-german-locale");
         addCard("DatePicker with German locale", datePicker);
     }
