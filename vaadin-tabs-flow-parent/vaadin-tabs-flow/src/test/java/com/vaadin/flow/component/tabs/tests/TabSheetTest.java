@@ -25,6 +25,7 @@ import org.junit.Test;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.TabSheet;
+import com.vaadin.flow.component.tabs.TabSheetVariant;
 
 /**
  * @author Vaadin Ltd.
@@ -244,4 +245,13 @@ public class TabSheetTest {
         Assert.assertEquals(suffix, tabSheet.getSuffixComponent());
     }
 
+    @Test
+    public void addThemeVariants_hasThemeVariants() {
+        tabSheet.addThemeVariants(TabSheetVariant.LUMO_CENTERED,
+                TabSheetVariant.LUMO_NO_BORDER);
+        Assert.assertTrue(tabSheet.getThemeName()
+                .contains(TabSheetVariant.LUMO_CENTERED.getVariantName()));
+        Assert.assertTrue(tabSheet.getThemeName()
+                .contains(TabSheetVariant.LUMO_NO_BORDER.getVariantName()));
+    }
 }
