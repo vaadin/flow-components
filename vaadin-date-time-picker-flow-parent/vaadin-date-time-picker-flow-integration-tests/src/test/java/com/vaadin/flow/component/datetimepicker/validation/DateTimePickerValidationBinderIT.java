@@ -53,6 +53,9 @@ public class DateTimePickerValidationBinderIT
 
     @Test
     public void required_changeInputValue_assertValidity() {
+        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("2000-01-01T12:00",
+                Keys.ENTER);
+
         setInputValue(dateInput, "1/1/2000");
         setInputValue(timeInput, "12:00");
         assertServerValid();
