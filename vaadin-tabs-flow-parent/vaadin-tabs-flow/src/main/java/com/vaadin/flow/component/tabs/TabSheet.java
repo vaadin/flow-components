@@ -31,6 +31,7 @@ import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasPrefixAndSuffix;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.shared.Registration;
 
@@ -47,8 +48,8 @@ import com.vaadin.flow.shared.Registration;
 @JsModule("./tabsheet/vaadin-tabsheet.js")
 @NpmPackage(value = "@vaadin/component-base", version = "23.2.0-beta3")
 @NpmPackage(value = "@vaadin/field-base", version = "23.2.0-beta3")
-public class TabSheet extends Component
-        implements HasStyle, HasSize, HasPrefixAndSuffix {
+public class TabSheet extends Component implements HasStyle, HasSize,
+        HasPrefixAndSuffix, HasThemeVariant<TabSheetVariant> {
 
     private Tabs tabs = new Tabs();
 
