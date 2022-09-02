@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.tabs.testbench;
 
-import java.util.Optional;
-
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 
