@@ -40,7 +40,7 @@ import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.server.VaadinService;
 
 @Tag("vaadin-date-time-picker-date-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-beta3")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 class DateTimePickerDatePicker
         extends com.vaadin.flow.component.datepicker.DatePicker {
@@ -55,7 +55,7 @@ class DateTimePickerDatePicker
 }
 
 @Tag("vaadin-date-time-picker-time-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-beta3")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 class DateTimePickerTimePicker
         extends com.vaadin.flow.component.timepicker.TimePicker {
@@ -79,10 +79,10 @@ class DateTimePickerTimePicker
  * @author Vaadin Ltd
  */
 @Tag("vaadin-date-time-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-beta3")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/date-time-picker", version = "23.2.0-beta3")
-@NpmPackage(value = "@vaadin/vaadin-date-time-picker", version = "23.2.0-beta3")
+@NpmPackage(value = "@vaadin/date-time-picker", version = "23.2.0")
+@NpmPackage(value = "@vaadin/vaadin-date-time-picker", version = "23.2.0")
 @JsModule("@vaadin/date-time-picker/src/vaadin-date-time-picker.js")
 public class DateTimePicker extends
         AbstractSinglePropertyField<DateTimePicker, LocalDateTime> implements

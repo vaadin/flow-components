@@ -13,7 +13,7 @@
     <url>https://vaadin.com/components</url>
     <properties>
         <flow.version>23.2-SNAPSHOT</flow.version>
-        <testbench.version>8.1.0.beta3</testbench.version>
+        <testbench.version>8.1.0</testbench.version>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -37,6 +37,7 @@
         <sauce.options>--tunnel-identifier ${maven.build.timestamp}</sauce.options>
         <osgi.bundle.license>http://www.apache.org/licenses/LICENSE-2.0</osgi.bundle.license>
         <osgi.export.package>default</osgi.export.package>
+        <cvdlName></cvdlName>
 
         <!-- spreadsheet -->
         <poi.version>5.2.2</poi.version>
@@ -239,6 +240,7 @@
                           Export-Package: ${exportPackage};-noimport:=true
                           Bundle-License: ${osgi.bundle.license}
 
+                          CvdlName: ${cvdlName}
                           Implementation-Title: ${project.name}
                           Vaadin-Package-Version: 1
                   includeresource.resources: -src/main/resources
