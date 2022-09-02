@@ -49,21 +49,9 @@ import com.vaadin.flow.shared.Registration;
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 class DateTimePickerDatePicker
         extends com.vaadin.flow.component.datepicker.DatePicker {
-    private final SerializableFunction<Feature, Boolean> isFeatureFlagEnabled;
-
-    public DateTimePickerDatePicker(SerializableFunction<Feature, Boolean> isFeatureFlagEnabled) {
-        super();
-        this.isFeatureFlagEnabled = isFeatureFlagEnabled;
-    }
-
     @Override
     protected void validate() {
         // Should not change invalid state
-    }
-
-    @Override
-    protected boolean isFeatureFlagEnabled(Feature feature) {
-        return isFeatureFlagEnabled.apply(feature);
     }
 
     void passThroughPresentationValue(LocalDate newPresentationValue) {
@@ -76,21 +64,9 @@ class DateTimePickerDatePicker
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 class DateTimePickerTimePicker
         extends com.vaadin.flow.component.timepicker.TimePicker {
-    private final SerializableFunction<Feature, Boolean> isFeatureFlagEnabled;
-
-    public DateTimePickerTimePicker(SerializableFunction<Feature, Boolean> isFeatureFlagEnabled) {
-        super();
-        this.isFeatureFlagEnabled = isFeatureFlagEnabled;
-    }
-
     @Override
     protected void validate() {
         // Should not change invalid state
-    }
-
-    @Override
-    protected boolean isFeatureFlagEnabled(Feature feature) {
-        return isFeatureFlagEnabled.apply(feature);
     }
 
     void passThroughPresentationValue(LocalTime newPresentationValue) {
@@ -120,12 +96,8 @@ public class DateTimePicker extends
 
     private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
-    private final SerializableFunction<Feature, Boolean> isFeatureFlagEnabled = feature -> {
-        return isFeatureFlagEnabled(feature);
-    };
-
-    private final DateTimePickerDatePicker datePicker = new DateTimePickerDatePicker(isFeatureFlagEnabled);
-    private final DateTimePickerTimePicker timePicker = new DateTimePickerTimePicker(isFeatureFlagEnabled);
+    private final DateTimePickerDatePicker datePicker = new DateTimePickerDatePicker();
+    private final DateTimePickerTimePicker timePicker = new DateTimePickerTimePicker();
     private DatePickerI18n i18n;
     private Locale locale;
 
