@@ -84,9 +84,11 @@ public class TabSheetElement extends TestBenchElement {
     }
 
     /**
-     * Gets the the content of the currently selected tab if it exists.
+     * Gets the the content related to the currently selected tab.
      *
      * @return the content of the currently selected tab.
+     * @throws NoSuchElementException
+     *             if no content is visible (no selection)
      */
     public TestBenchElement getContent() throws NoSuchElementException {
         return findElement(By.cssSelector("[tab]:not([hidden])"));
