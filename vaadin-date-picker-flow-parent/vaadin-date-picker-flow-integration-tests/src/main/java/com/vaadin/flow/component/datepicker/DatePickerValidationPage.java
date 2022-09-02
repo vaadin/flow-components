@@ -15,9 +15,6 @@
  */
 package com.vaadin.flow.component.datepicker;
 
-import java.time.LocalDate;
-import java.util.Locale;
-
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
@@ -34,9 +31,6 @@ public class DatePickerValidationPage extends Div {
 
     public DatePickerValidationPage() {
         initView();
-        createPickerTestLocales();
-        createPickerWithValueAndLocaleFromServerSide();
-        createPickerWithMaxAndMinValues();
     }
 
     private void initView() {
@@ -78,60 +72,5 @@ public class DatePickerValidationPage extends Div {
         });
         add(button);
         add(label, value);
-
-        NativeButton localeChange = new NativeButton("Locale change button");
-        localeChange.addClickListener(
-                event -> datePicker.setLocale(new Locale("i", "i", "i")));
-        localeChange.setId("change-locale");
-        add(localeChange);
-    }
-
-    private void createPickerTestLocales() {
-        DatePicker datePicker = new DatePicker();
-        datePicker.setId("locale-picker");
-        NativeButton locale1 = new NativeButton("Locale: Poland");
-        NativeButton locale2 = new NativeButton("Locale: Sweden");
-
-        locale1.setId("polish-locale");
-        locale2.setId("swedish-locale");
-        locale1.addClickListener(
-                e -> datePicker.setLocale(new Locale("pl", "PL")));
-        locale2.addClickListener(
-                e -> datePicker.setLocale(new Locale("sv", "SE")));
-
-        add(datePicker, locale1, locale2);
-    }
-
-    private void createPickerWithValueAndLocaleFromServerSide() {
-        DatePicker datePicker = new DatePicker(LocalDate.of(2018, 5, 23));
-
-        datePicker.setId("locale-picker-server");
-        NativeButton locale1 = new NativeButton("Locale: Poland");
-        NativeButton locale2 = new NativeButton("Locale: Sweden");
-
-        locale1.setId("polish-locale-server");
-        locale2.setId("swedish-locale-server");
-        locale1.addClickListener(
-                e -> datePicker.setLocale(new Locale("pl", "PL")));
-        locale2.addClickListener(
-                e -> datePicker.setLocale(new Locale("sv", "SE")));
-
-        add(datePicker, locale1, locale2);
-    }
-
-    private void createPickerWithMaxAndMinValues() {
-        final DatePicker datePicker = new DatePicker();
-        datePicker.setMin(LocalDate.of(2017, 4, 5));
-        datePicker.setMax(LocalDate.of(2018, 6, 7));
-        datePicker.setId("picker-with-valid-range");
-
-        final Div isValid = new Div();
-        isValid.setId("is-invalid");
-        final NativeButton checkIsValid = new NativeButton(
-                "Check if current value of step-number-field is invalid");
-        checkIsValid.setId("check-is-invalid");
-        checkIsValid.addClickListener(event -> isValid
-                .setText(datePicker.isInvalid() ? "invalid" : "valid"));
-        add(datePicker, checkIsValid, isValid);
     }
 }
