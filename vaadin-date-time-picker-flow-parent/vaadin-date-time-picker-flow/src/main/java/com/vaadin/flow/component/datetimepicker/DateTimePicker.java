@@ -59,7 +59,7 @@ class DateTimePickerDatePicker
     }
 
     @Synchronize(property = "_hasInputValue", value = "has-input-value-changed")
-    public boolean isInputValuePresent() {
+    boolean isInputValuePresent() {
         return getElement().getProperty("_hasInputValue", false);
     }
 }
@@ -79,7 +79,7 @@ class DateTimePickerTimePicker
     }
 
     @Synchronize(property = "_hasInputValue", value = "has-input-value-changed")
-    public boolean isInputValuePresent() {
+    boolean isInputValuePresent() {
         return getElement().getProperty("_hasInputValue", false);
     }
 }
@@ -668,10 +668,16 @@ public class DateTimePicker extends
 
     private ValidationResult checkValidity(LocalDateTime value) {
         if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
-            boolean hasNonParsableValue = value == getEmptyValue()
-                    && (datePicker.isInputValuePresent()
-                            || timePicker.isInputValuePresent());
-            if (hasNonParsableValue) {
+            boolean hasNonParsableDatePickerValue = datePicker
+                    .getValue() == datePicker.getEmptyValue()
+                    && datePicker.isInputValuePresent();
+
+            boolean hasNonParsableTimePickerValue = timePicker
+                    .getValue() == timePicker.getEmptyValue()
+                    && timePicker.isInputValuePresent();
+
+            if (hasNonParsableDatePickerValue
+                    || hasNonParsableTimePickerValue) {
                 return ValidationResult.error("");
             }
         }

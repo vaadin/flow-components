@@ -70,6 +70,45 @@ public class DateTimePickerValidationBinderIT
     }
 
     @Test
+    public void required_badInput_setDateInputValue_assertValidity() {
+        setInputValue(dateInput, "INVALID");
+        assertServerInvalid();
+        assertClientInvalid();
+        assertErrorMessage("");
+    }
+
+    @Test
+    public void required_badInput_setTimeInputValue_assertValidity() {
+        setInputValue(timeInput, "INVALID");
+        assertServerInvalid();
+        assertClientInvalid();
+        assertErrorMessage("");
+    }
+
+    @Test
+    public void badInput_changeInputValue_assertValidity() {
+        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("2000-01-01T10:00",
+                Keys.ENTER);
+
+        setInputValue(dateInput, "INVALID");
+        setInputValue(timeInput, "INVALID");
+        assertServerInvalid();
+        assertClientInvalid();
+        assertErrorMessage("");
+
+        setInputValue(dateInput, "1/1/2000");
+        setInputValue(timeInput, "10:00");
+        assertServerValid();
+        assertClientValid();
+
+        setInputValue(dateInput, "INVALID");
+        setInputValue(timeInput, "INVALID");
+        assertServerInvalid();
+        assertClientInvalid();
+        assertErrorMessage("");
+    }
+
+    @Test
     public void min_changeInputValue_assertValidity() {
         $("input").id(MIN_INPUT).sendKeys("2000-02-02T12:00", Keys.ENTER);
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("2000-03-03T11:00",
@@ -135,29 +174,6 @@ public class DateTimePickerValidationBinderIT
         setInputValue(timeInput, "13:00");
         assertClientValid();
         assertServerValid();
-    }
-
-    @Test
-    public void badInput_changeInputValue_assertValidity() {
-        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("2000-01-01T10:00",
-                Keys.ENTER);
-
-        setInputValue(dateInput, "INVALID");
-        setInputValue(timeInput, "INVALID");
-        assertServerInvalid();
-        assertClientInvalid();
-        assertErrorMessage("");
-
-        setInputValue(dateInput, "1/1/2000");
-        setInputValue(timeInput, "10:00");
-        assertServerValid();
-        assertClientValid();
-
-        setInputValue(dateInput, "INVALID");
-        setInputValue(timeInput, "INVALID");
-        assertServerInvalid();
-        assertClientInvalid();
-        assertErrorMessage("");
     }
 
     protected DateTimePickerElement getTestField() {

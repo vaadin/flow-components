@@ -101,6 +101,24 @@ public class DateTimePickerValidationBasicIT
     }
 
     @Test
+    public void badInput_changeInputValue_assertValidity() {
+        setInputValue(dateInput, "INVALID");
+        setInputValue(timeInput, "INVALID");
+        assertServerInvalid();
+        assertClientInvalid();
+
+        setInputValue(dateInput, "1/1/2000");
+        setInputValue(timeInput, "10:00");
+        assertServerValid();
+        assertClientValid();
+
+        setInputValue(dateInput, "INVALID");
+        setInputValue(timeInput, "INVALID");
+        assertServerInvalid();
+        assertClientInvalid();
+    }
+
+    @Test
     public void min_changeInputValue_assertValidity() {
         $("input").id(MIN_INPUT).sendKeys("2000-02-02T12:00", Keys.ENTER);
 
@@ -158,24 +176,6 @@ public class DateTimePickerValidationBasicIT
         setInputValue(timeInput, "13:00");
         assertClientValid();
         assertServerValid();
-    }
-
-    @Test
-    public void badInput_changeInputValue_assertValidity() {
-        setInputValue(dateInput, "INVALID");
-        setInputValue(timeInput, "INVALID");
-        assertServerInvalid();
-        assertClientInvalid();
-
-        setInputValue(dateInput, "1/1/2000");
-        setInputValue(timeInput, "10:00");
-        assertServerValid();
-        assertClientValid();
-
-        setInputValue(dateInput, "INVALID");
-        setInputValue(timeInput, "INVALID");
-        assertServerInvalid();
-        assertClientInvalid();
     }
 
     protected DateTimePickerElement getTestField() {
