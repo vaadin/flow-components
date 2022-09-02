@@ -24,7 +24,8 @@ import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
 /**
- * A TestBench element representing a <code>&lt;vaadin-tabsheet&gt;</code> element.
+ * A TestBench element representing a <code>&lt;vaadin-tabsheet&gt;</code>
+ * element.
  */
 @Element("vaadin-tabsheet")
 public class TabSheetElement extends TestBenchElement {
@@ -87,7 +88,7 @@ public class TabSheetElement extends TestBenchElement {
      *
      * @return the content of the currently selected tab.
      */
-    public TestBenchElement getContent() throws NoSuchElementException{
+    public TestBenchElement getContent() throws NoSuchElementException {
         return findElement(By.cssSelector("[tab]:not([hidden])"));
     }
 

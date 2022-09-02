@@ -27,7 +27,7 @@ import com.vaadin.flow.component.tabs.testbench.TabSheetElement;
 import com.vaadin.flow.testutil.TestPath;
 
 /**
- * Integration tests for the {@link TabsPage}.
+ * Integration tests for the {@link TabSheetPage}.
  *
  * @author Vaadin Ltd.
  */
@@ -56,19 +56,21 @@ public class TabSheetIT extends AbstractComponentIT {
     @Test
     public void setSelectedIndex_shouldHaveExpectedTextInSelectedTab() {
         tabSheet.setSelectedTabIndex(1);
-        Assert.assertEquals("Tab two", tabSheet.getSelectedTabElement().getText());
+        Assert.assertEquals("Tab two",
+                tabSheet.getSelectedTabElement().getText());
     }
 
     @Test
     public void setSelectedIndex_shouldGetTabByTextContent() {
         tabSheet.setSelectedTabIndex(1);
-        Assert.assertEquals(tabSheet.getSelectedTabElement(), tabSheet.getTabElement("Tab two"));
+        Assert.assertEquals(tabSheet.getSelectedTabElement(),
+                tabSheet.getTabElement("Tab two"));
     }
 
     @Test
     public void setSelectedIndex_shouldThrowOnGetTabByNonexistentTextContent() {
         Assert.assertThrows(NoSuchElementException.class,
-            () -> tabSheet.getTabElement("Tab foo"));
+                () -> tabSheet.getTabElement("Tab foo"));
     }
 
     @Test
@@ -91,6 +93,6 @@ public class TabSheetIT extends AbstractComponentIT {
     public void unselect_shouldThrowOnGetContent() {
         tabSheet.setSelectedTabIndex(-1);
         Assert.assertThrows(NoSuchElementException.class,
-            () -> tabSheet.getContent());
+                () -> tabSheet.getContent());
     }
 }
