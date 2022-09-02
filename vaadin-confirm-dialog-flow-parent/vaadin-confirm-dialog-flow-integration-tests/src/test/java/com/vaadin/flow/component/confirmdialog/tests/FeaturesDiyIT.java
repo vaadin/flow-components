@@ -78,7 +78,7 @@ public class FeaturesDiyIT extends AbstractParallelTest {
         actionwords.iOpenDialogDialog(sampleName);
         int confirmButtonCount = findElements(By.cssSelector(
                 "vaadin-confirm-dialog-overlay [slot='confirm-button']"))
-                        .size();
+                .size();
         Assert.assertEquals(1, confirmButtonCount);
     }
 }

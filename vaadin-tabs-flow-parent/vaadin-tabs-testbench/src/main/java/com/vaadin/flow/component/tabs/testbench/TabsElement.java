@@ -55,7 +55,7 @@ public class TabsElement extends TestBenchElement {
     public TabElement getSelectedTabElement() {
         return ((TestBenchElement) executeScript(
                 "return arguments[0].children[arguments[0].selected];", this))
-                        .wrap(TabElement.class);
+                .wrap(TabElement.class);
     }
 
     /**
