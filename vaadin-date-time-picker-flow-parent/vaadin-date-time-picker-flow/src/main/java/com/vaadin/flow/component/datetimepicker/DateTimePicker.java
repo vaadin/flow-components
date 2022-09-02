@@ -57,6 +57,11 @@ class DateTimePickerDatePicker
     void passThroughPresentationValue(LocalDate newPresentationValue) {
         super.setPresentationValue(newPresentationValue);
     }
+
+    @Synchronize(property = "_hasInputValue", value = "has-input-value-changed")
+    public boolean isInputValuePresent() {
+        return getElement().getProperty("_hasInputValue", false);
+    }
 }
 
 @Tag("vaadin-date-time-picker-time-picker")
@@ -71,6 +76,11 @@ class DateTimePickerTimePicker
 
     void passThroughPresentationValue(LocalTime newPresentationValue) {
         super.setPresentationValue(newPresentationValue);
+    }
+
+    @Synchronize(property = "_hasInputValue", value = "has-input-value-changed")
+    public boolean isInputValuePresent() {
+        return getElement().getProperty("_hasInputValue", false);
     }
 }
 
@@ -658,30 +668,22 @@ public class DateTimePicker extends
 
     private ValidationResult checkValidity(LocalDateTime value) {
         if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
-            LocalDate dateValue = value != null ? value.toLocalDate() : null;
-            LocalTime timeValue = value != null ? value.toLocalTime() : null;
+            boolean hasNonParsableValue = value == getEmptyValue()
+                    && (datePicker.isInputValuePresent()
+                            || timePicker.isInputValuePresent());
+            if (hasNonParsableValue) {
+                return ValidationResult.error("");
+            }
+        }
 
-            ValidationResult datePickerResult = datePicker.getDefaultValidator()
-                    .apply(dateValue, null);
-            if (datePickerResult.isError()) {
-                return datePickerResult;
-            }
+        var greaterThanMax = ValidationUtil.checkGreaterThanMax(value, max);
+        if (greaterThanMax.isError()) {
+            return greaterThanMax;
+        }
 
-            ValidationResult timePickerResult = timePicker.getDefaultValidator()
-                    .apply(timeValue, null);
-            if (timePickerResult.isError()) {
-                return timePickerResult;
-            }
-        } else {
-            var greaterThanMax = ValidationUtil.checkGreaterThanMax(value, max);
-            if (greaterThanMax.isError()) {
-                return greaterThanMax;
-            }
-
-            var smallerThanMin = ValidationUtil.checkSmallerThanMin(value, min);
-            if (smallerThanMin.isError()) {
-                return smallerThanMin;
-            }
+        var smallerThanMin = ValidationUtil.checkSmallerThanMin(value, min);
+        if (smallerThanMin.isError()) {
+            return smallerThanMin;
         }
 
         return ValidationResult.ok();
