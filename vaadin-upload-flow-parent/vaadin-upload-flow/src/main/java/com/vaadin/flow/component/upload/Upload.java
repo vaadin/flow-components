@@ -25,6 +25,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasSize;
@@ -594,6 +595,16 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
                         + "  addFiles: addFiles,  dropFiles: dropFiles,"
                         + "  uploading: uploading, units: units});",
                 i18nJson);
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+
+        // Element state is not persisted across attach/detach
+        if (this.i18n != null) {
+            setI18nWithJS();
+        }
     }
 
     private void deeplyRemoveNullValuesFromJsonObject(JsonObject jsonObject) {

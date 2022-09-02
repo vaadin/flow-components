@@ -141,10 +141,10 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.11")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.13")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/grid", version = "23.0.11")
-@NpmPackage(value = "@vaadin/vaadin-grid", version = "23.0.11")
+@NpmPackage(value = "@vaadin/grid", version = "23.0.13")
+@NpmPackage(value = "@vaadin/vaadin-grid", version = "23.0.13")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -334,7 +334,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-column")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.11")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.13")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class Column<T> extends AbstractColumn<Column<T>> {
 
@@ -1383,8 +1383,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 .getUniqueKeyProperty();
         if (uniqueKeyPropertyName != null
                 && !jsonObject.hasKey(uniqueKeyPropertyName)) {
-            jsonObject.put(uniqueKeyPropertyName,
-                    getUniqueKeyProvider().apply(item));
+            jsonObject.put(uniqueKeyPropertyName, getUniqueKey(item));
         }
     }
 
@@ -4363,5 +4362,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             }
             return result;
         };
+    }
+
+    private String getUniqueKey(T item) {
+        return Optional.ofNullable(getUniqueKeyProvider())
+                .map(provider -> provider.apply(item))
+                .orElse(getDataCommunicator().getKeyMapper().key(item));
     }
 }
