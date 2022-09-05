@@ -39,6 +39,8 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementConstants;
 import com.vaadin.flow.dom.Style;
+import com.vaadin.flow.internal.StateTree;
+import com.vaadin.flow.router.NavigationTrigger;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -85,6 +87,8 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
     private String maxHeight;
     private DialogHeader dialogHeader;
     private DialogFooter dialogFooter;
+
+    private Registration afterProgrammaticNavigationListenerRegistration;
 
     /**
      * Creates an empty dialog.
@@ -744,13 +748,29 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
 
     private void ensureAttached() {
         UI ui = getCurrentUI();
-        ui.beforeClientResponse(ui, context -> {
-            if (getElement().getNode().getParent() == null) {
-                ui.addToModalComponent(this);
-                ui.setChildComponentModal(this, isModal());
-                autoAddedToTheUi = true;
-            }
-        });
+        StateTree.ExecutionRegistration addToUiRegistration = ui
+                .beforeClientResponse(ui, context -> {
+                    if (getElement().getNode().getParent() == null) {
+                        ui.addToModalComponent(this);
+                        ui.setChildComponentModal(this, isModal());
+                        autoAddedToTheUi = true;
+                    }
+                    if (afterProgrammaticNavigationListenerRegistration != null) {
+                        afterProgrammaticNavigationListenerRegistration
+                                .remove();
+                    }
+                });
+        if (ui.getSession() != null) {
+            afterProgrammaticNavigationListenerRegistration = ui
+                    .addAfterNavigationListener(event -> {
+                        if (event.getLocationChangeEvent()
+                                .getTrigger() == NavigationTrigger.PROGRAMMATIC) {
+                            addToUiRegistration.remove();
+                            afterProgrammaticNavigationListenerRegistration
+                                    .remove();
+                        }
+                    });
+        }
     }
 
     private void ensureOnCloseConfigured() {

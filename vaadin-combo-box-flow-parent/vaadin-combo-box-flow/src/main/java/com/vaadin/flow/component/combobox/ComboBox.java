@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
@@ -27,6 +28,7 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableBiPredicate;
 
 import elemental.json.Json;
@@ -58,10 +60,10 @@ import elemental.json.JsonObject;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-combo-box")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-beta2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/combo-box", version = "23.2.0-beta2")
-@NpmPackage(value = "@vaadin/vaadin-combo-box", version = "23.2.0-beta2")
+@NpmPackage(value = "@vaadin/combo-box", version = "23.2.0")
+@NpmPackage(value = "@vaadin/vaadin-combo-box", version = "23.2.0")
 @JsModule("@vaadin/combo-box/src/vaadin-combo-box.js")
 @JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 @JsModule("./flow-component-renderer.js")
@@ -356,5 +358,56 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
     @Override
     public void removeThemeVariants(ComboBoxVariant... variants) {
         HasThemeVariant.super.removeThemeVariants(variants);
+    }
+
+    /**
+     * Adds the given components as children of this component at the slot
+     * 'prefix'.
+     *
+     * @param components
+     *            The components to add.
+     * @see <a href=
+     *      "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
+     *      page about slots</a>
+     * @see <a href=
+     *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
+     *      website about slots</a>
+     */
+    protected void addToPrefix(Component... components) {
+        for (Component component : components) {
+            component.getElement().setAttribute("slot", "prefix");
+            getElement().appendChild(component.getElement());
+        }
+    }
+
+    /**
+     * Removes the given child components from this component.
+     *
+     * @param components
+     *            The components to remove.
+     * @throws IllegalArgumentException
+     *             if any of the components is not a child of this component.
+     */
+    protected void remove(Component... components) {
+        for (Component component : components) {
+            if (getElement().equals(component.getElement().getParent())) {
+                component.getElement().removeAttribute("slot");
+                getElement().removeChild(component.getElement());
+            } else {
+                throw new IllegalArgumentException("The given component ("
+                        + component + ") is not a child of this component");
+            }
+        }
+    }
+
+    /**
+     * Removes all contents from this component, this includes child components,
+     * text content as well as child elements that have been added directly to
+     * this component using the {@link Element} API.
+     */
+    protected void removeAll() {
+        getElement().getChildren()
+                .forEach(child -> child.removeAttribute("slot"));
+        getElement().removeAllChildren();
     }
 }

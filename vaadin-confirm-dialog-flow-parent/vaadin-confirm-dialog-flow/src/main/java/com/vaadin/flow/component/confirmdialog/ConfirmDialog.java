@@ -31,6 +31,8 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.Style;
+import com.vaadin.flow.internal.StateTree;
+import com.vaadin.flow.router.NavigationTrigger;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -55,10 +57,10 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-confirm-dialog")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-beta2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/confirm-dialog", version = "23.2.0-beta2")
-@NpmPackage(value = "@vaadin/vaadin-confirm-dialog", version = "23.2.0-beta2")
+@NpmPackage(value = "@vaadin/confirm-dialog", version = "23.2.0")
+@NpmPackage(value = "@vaadin/vaadin-confirm-dialog", version = "23.2.0")
 @JsModule("@vaadin/confirm-dialog/src/vaadin-confirm-dialog.js")
 @JsModule("./confirmDialogConnector.js")
 public class ConfirmDialog extends Component
@@ -97,6 +99,8 @@ public class ConfirmDialog extends Component
 
     private String height;
     private String width;
+
+    private Registration afterProgrammaticNavigationListenerRegistration;
 
     /**
      * Sets the width of the component content area.
@@ -664,14 +668,30 @@ public class ConfirmDialog extends Component
 
     private void ensureAttached() {
         UI ui = getCurrentUI();
-        ui.beforeClientResponse(ui, context -> {
-            if (getElement().getNode().getParent() == null) {
-                ui.addToModalComponent(this);
-                autoAddedToTheUi = true;
-                updateWidth();
-                updateHeight();
-                ui.setChildComponentModal(this, true);
-            }
-        });
+        StateTree.ExecutionRegistration addToUiRegistration = ui
+                .beforeClientResponse(ui, context -> {
+                    if (getElement().getNode().getParent() == null) {
+                        ui.addToModalComponent(this);
+                        autoAddedToTheUi = true;
+                        updateWidth();
+                        updateHeight();
+                        ui.setChildComponentModal(this, true);
+                    }
+                    if (afterProgrammaticNavigationListenerRegistration != null) {
+                        afterProgrammaticNavigationListenerRegistration
+                                .remove();
+                    }
+                });
+        if (ui.getSession() != null) {
+            afterProgrammaticNavigationListenerRegistration = ui
+                    .addAfterNavigationListener(event -> {
+                        if (event.getLocationChangeEvent()
+                                .getTrigger() == NavigationTrigger.PROGRAMMATIC) {
+                            addToUiRegistration.remove();
+                            afterProgrammaticNavigationListenerRegistration
+                                    .remove();
+                        }
+                    });
+        }
     }
 }

@@ -22,6 +22,7 @@ import java.util.stream.IntStream;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
@@ -201,7 +202,7 @@ public class IronListIT extends AbstractComponentIT {
     }
 
     @Test
-
+    @Ignore("Flaky test")
     public void listWithComponentRendererWithBeansAndPlaceholder_scrollToBottom_placeholderIsShown() {
         WebElement list = findElement(By.id("component-renderer-with-beans"));
         List<WebElement> items = list
