@@ -31,13 +31,18 @@ import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.ClientValidationUtil;
+import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.component.timepicker.StepsUtil;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
+import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
+import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.shared.Registration;
 
 @Tag("vaadin-date-time-picker-date-picker")
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0")
@@ -51,6 +56,11 @@ class DateTimePickerDatePicker
 
     void passThroughPresentationValue(LocalDate newPresentationValue) {
         super.setPresentationValue(newPresentationValue);
+    }
+
+    @Synchronize(property = "_hasInputValue", value = "has-input-value-changed")
+    boolean isInputValuePresent() {
+        return getElement().getProperty("_hasInputValue", false);
     }
 }
 
@@ -66,6 +76,11 @@ class DateTimePickerTimePicker
 
     void passThroughPresentationValue(LocalTime newPresentationValue) {
         super.setPresentationValue(newPresentationValue);
+    }
+
+    @Synchronize(property = "_hasInputValue", value = "has-input-value-changed")
+    boolean isInputValuePresent() {
+        return getElement().getProperty("_hasInputValue", false);
     }
 }
 
@@ -87,7 +102,7 @@ class DateTimePickerTimePicker
 public class DateTimePicker extends
         AbstractSinglePropertyField<DateTimePicker, LocalDateTime> implements
         HasStyle, HasSize, HasTheme, HasValidation, Focusable<DateTimePicker>,
-        HasHelper, HasLabel, HasValidator<LocalDateTime> {
+        HasHelper, HasLabel, HasValidator<LocalDateTime>, HasClientValidation {
 
     private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
@@ -175,6 +190,10 @@ public class DateTimePicker extends
         setInvalid(false);
 
         addValueChangeListener(e -> validate());
+
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            addClientValidatedEventListener(e -> validate());
+        }
     }
 
     /**
@@ -634,7 +653,35 @@ public class DateTimePicker extends
         return Validator.alwaysPass();
     }
 
+    @Override
+    public Registration addValidationStatusChangeListener(
+            ValidationStatusChangeListener<LocalDateTime> listener) {
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            return addClientValidatedEventListener(
+                    event -> listener.validationStatusChanged(
+                            new ValidationStatusChangeEvent<>(this,
+                                    event.isValid())));
+        }
+
+        return null;
+    }
+
     private ValidationResult checkValidity(LocalDateTime value) {
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            boolean hasNonParsableDatePickerValue = datePicker
+                    .getValue() == datePicker.getEmptyValue()
+                    && datePicker.isInputValuePresent();
+
+            boolean hasNonParsableTimePickerValue = timePicker
+                    .getValue() == timePicker.getEmptyValue()
+                    && timePicker.isInputValuePresent();
+
+            if (hasNonParsableDatePickerValue
+                    || hasNonParsableTimePickerValue) {
+                return ValidationResult.error("");
+            }
+        }
+
         var greaterThanMax = ValidationUtil.checkGreaterThanMax(value, max);
         if (greaterThanMax.isError()) {
             return greaterThanMax;
@@ -784,8 +831,12 @@ public class DateTimePicker extends
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        FieldValidationUtil.disableClientValidation(this);
-
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            ClientValidationUtil
+                    .preventWebComponentFromSettingItselfToValid(this);
+        } else {
+            FieldValidationUtil.disableClientValidation(this);
+        }
     }
 
     /**
