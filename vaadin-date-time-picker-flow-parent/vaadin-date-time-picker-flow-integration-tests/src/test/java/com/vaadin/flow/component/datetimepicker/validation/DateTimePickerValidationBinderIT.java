@@ -123,11 +123,13 @@ public class DateTimePickerValidationBinderIT
         setInputValue(timeInput, "11:00");
         assertClientInvalid();
         assertServerInvalid();
+        assertErrorMessage("");
 
         setInputValue(dateInput, "2/2/2000");
         setInputValue(timeInput, "11:00");
         assertClientInvalid();
         assertServerInvalid();
+        assertErrorMessage("");
 
         setInputValue(dateInput, "2/2/2000");
         setInputValue(timeInput, "12:00");
@@ -157,11 +159,13 @@ public class DateTimePickerValidationBinderIT
         setInputValue(timeInput, "13:00");
         assertClientInvalid();
         assertServerInvalid();
+        assertErrorMessage("");
 
         setInputValue(dateInput, "2/2/2000");
         setInputValue(timeInput, "13:00");
         assertClientInvalid();
         assertServerInvalid();
+        assertErrorMessage("");
 
         setInputValue(dateInput, "2/2/2000");
         setInputValue(timeInput, "12:00");
