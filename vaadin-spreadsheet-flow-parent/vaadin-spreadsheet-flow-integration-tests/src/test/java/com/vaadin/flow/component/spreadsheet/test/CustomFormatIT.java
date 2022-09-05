@@ -12,6 +12,7 @@ public class CustomFormatIT extends AbstractSpreadsheetIT {
     @Before
     public void init() {
         getDriver().get(getBaseURL());
+        getDriver().manage().window().setSize(WINDOW_SIZE_LARGE);
 
         loadFile("custom_format.xlsx");
         setLocale(Locale.US);
