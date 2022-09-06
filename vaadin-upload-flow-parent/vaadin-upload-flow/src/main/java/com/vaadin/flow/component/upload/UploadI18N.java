@@ -506,8 +506,8 @@ public class UploadI18N implements Serializable {
          *            aria-label translation string
          * @return translation class
          */
-        public File setStart(String retry) {
-            this.retry = retry;
+        public File setStart(String start) {
+            this.start = start;
             return this;
         }
 
