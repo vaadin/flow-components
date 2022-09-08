@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.shared;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.WeakHashMap;
 
 import com.vaadin.flow.component.Component;
@@ -221,9 +222,9 @@ public class Tooltip implements Serializable {
      * @return the position
      */
     public TooltipPosition getPosition() {
-        return TooltipPosition.valueOf(tooltipElement
-                .getProperty("position", TooltipPosition.BOTTOM.name())
-                .toUpperCase());
+        var positionString = tooltipElement.getProperty("position");
+        return Arrays.stream(TooltipPosition.values())
+            .filter(p -> p.getPosition().equals(positionString)).findFirst().orElse(null);
     }
 
     /**

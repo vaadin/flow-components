@@ -95,7 +95,7 @@ public class TooltipTest {
     @Test
     public void createTooltip_defaultPosition() {
         var tooltip = Tooltip.forComponent(component);
-        Assert.assertEquals(TooltipPosition.BOTTOM, tooltip.getPosition());
+        Assert.assertEquals(null, tooltip.getPosition());
     }
 
     @Test
