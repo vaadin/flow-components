@@ -1,4 +1,8 @@
+// @ts-ignore Can not be resolved until project is run and NPM packages are installed
+// @ts-ignore can not be resolved until NPM packages are installed
 import { UserConfigFn } from 'vite';
+// @ts-ignore
+// @ts-ignore can not be resolved until Flow generates base Vite config
 import { overrideVaadinConfig } from './vite.generated';
 // import { useLocalWebComponents } from '../../shared/web-components-vite-plugin';
 
