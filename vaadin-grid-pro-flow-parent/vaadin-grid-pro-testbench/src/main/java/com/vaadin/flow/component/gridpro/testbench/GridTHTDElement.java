@@ -87,7 +87,7 @@ public class GridTHTDElement extends TestBenchElement {
     public GridProElement getGrid() {
         return ((TestBenchElement) executeScript(
                 "return arguments[0].getRootNode().host", this))
-                        .wrap(GridProElement.class);
+                .wrap(GridProElement.class);
     }
 
     @Override

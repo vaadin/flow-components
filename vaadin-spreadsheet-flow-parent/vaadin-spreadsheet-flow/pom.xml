@@ -4,13 +4,14 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-spreadsheet-flow-parent</artifactId>
-        <version>23.2-SNAPSHOT</version>
+        <version>23.3-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-spreadsheet-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Spreadsheet</name>
     <properties>
         <osgi.bundle.license>https://vaadin.com/license/cvdl-4.0</osgi.bundle.license>
+        <cvdlName>vaadin-spreadsheet</cvdlName>
     </properties>
     <dependencies>
         <dependency>
@@ -55,7 +56,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>license-checker</artifactId>
-            <version>1.7.0</version>
+            <version>1.8.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>
@@ -96,6 +97,9 @@
                 <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
                     <archive>
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                        </manifest>
                         <manifestFile>
                             ${project.build.outputDirectory}/META-INF/MANIFEST.MF
                         </manifestFile>
