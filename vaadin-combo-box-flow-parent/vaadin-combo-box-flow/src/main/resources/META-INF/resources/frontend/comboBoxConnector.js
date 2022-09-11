@@ -72,12 +72,12 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
             // Empty the comboBox's internal cache without invoking observers by filling
             // the filteredItems array with placeholders (comboBox will request for data when it
             // encounters a placeholder)
-            const pageStart = parseInt(page) * dataProviderMixin.pageSize;
-            const pageEnd = pageStart + dataProviderMixin.pageSize;
-            const end = Math.min(pageEnd, dataProviderMixin.filteredItems.length);
-            for (let i = pageStart; i < end; i++) {
-              dataProviderMixin.filteredItems[i] = placeHolder;
-            }
+            // const pageStart = parseInt(page) * dataProviderMixin.pageSize;
+            // const pageEnd = pageStart + dataProviderMixin.pageSize;
+            // const end = Math.min(pageEnd, dataProviderMixin.filteredItems.length);
+            // for (let i = pageStart; i < end; i++) {
+            //   dataProviderMixin.filteredItems[i] = placeHolder;
+            // }
           });
         };
 
