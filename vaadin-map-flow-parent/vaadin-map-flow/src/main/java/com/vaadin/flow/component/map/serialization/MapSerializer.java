@@ -31,6 +31,7 @@ import elemental.json.JsonValue;
 import elemental.json.impl.JreJsonFactory;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,7 +40,7 @@ import java.util.Map;
  * Custom JSON serializer for the map component using a Jackson
  * {@link ObjectMapper}
  */
-public class MapSerializer {
+public class MapSerializer implements Serializable {
 
     private final ObjectWriter writer;
 
