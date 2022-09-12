@@ -18,6 +18,7 @@ package com.vaadin.flow.component.map.configuration;
 
 import com.vaadin.flow.component.map.Map;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
@@ -27,7 +28,7 @@ import java.util.Objects;
  * projection has been changed using {@link Map#setUserProjection(String)}, then
  * coordinates must be specified in that projection instead.
  */
-public class Coordinate {
+public class Coordinate implements Serializable {
     private final double x;
     private final double y;
 
