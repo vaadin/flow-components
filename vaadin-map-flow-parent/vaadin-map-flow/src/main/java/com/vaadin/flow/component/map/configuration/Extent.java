@@ -18,6 +18,8 @@ package com.vaadin.flow.component.map.configuration;
 
 import com.vaadin.flow.component.map.Map;
 
+import java.io.Serializable;
+
 /**
  * Defines an area within a map using min/max coordinates. Coordinates must be
  * specified in the map's user projection, which by default is
@@ -25,7 +27,7 @@ import com.vaadin.flow.component.map.Map;
  * projection has been changed using {@link Map#setUserProjection(String)}, then
  * coordinates must be specified in that projection instead.
  */
-public class Extent {
+public class Extent implements Serializable {
     private final double minX;
     private final double minY;
     private final double maxX;
