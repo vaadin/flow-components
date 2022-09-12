@@ -18,6 +18,8 @@ package com.vaadin.flow.component.map;
 
 import com.vaadin.flow.server.StreamResource;
 
+import java.io.Serializable;
+
 /**
  * Defines the default assets that the Map component provides
  */
@@ -28,7 +30,7 @@ public class Assets {
             "/META-INF/resources/frontend/vaadin-map/assets/point.png", 128,
             128);
 
-    public static class Asset {
+    public static class Asset implements Serializable {
         private final String fileName;
         private final StreamResource resource;
 

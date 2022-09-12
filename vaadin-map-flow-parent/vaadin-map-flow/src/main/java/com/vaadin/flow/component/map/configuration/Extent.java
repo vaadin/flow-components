@@ -16,12 +16,14 @@ package com.vaadin.flow.component.map.configuration;
  * #L%
  */
 
+import java.io.Serializable;
+
 /**
  * Defines an area within a map using min/max coordinates. The coordinates are
  * by default in {@code EPSG:3857} / Web Mercator Sphere projection, unless the
  * map's {@link View} uses a custom projection.
  */
-public class Extent {
+public class Extent implements Serializable {
     private final double minX;
     private final double minY;
     private final double maxX;
