@@ -17,17 +17,6 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
 
         comboBox.$connector = {};
 
-        /**
-         * Returns the element that implements the data provider mixin.
-         * For <vaadin-combo-box> that is the element itself.
-         * <vaadin-multi-select-combo-box> wraps a regular combo box internally,
-         * which is returned in this case.
-         * @returns {Node|Element|*}
-         */
-        function getDataProviderMixin() {
-          return comboBox.localName === 'vaadin-multi-select-combo-box' ? comboBox.$.comboBox : comboBox;
-        }
-
         // holds pageIndex -> callback pairs of subsequent indexes (current active range)
         const pageCallbacks = {};
         let cache = {};
@@ -63,20 +52,19 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
         })();
 
         const clearPageCallbacks = (pages = Object.keys(pageCallbacks)) => {
-          const dataProviderMixin = getDataProviderMixin();
           // Flush and empty the existing requests
           pages.forEach((page) => {
-            pageCallbacks[page]([], dataProviderMixin.size);
+            pageCallbacks[page]([], comboBox.size);
             delete pageCallbacks[page];
 
             // Empty the comboBox's internal cache without invoking observers by filling
             // the filteredItems array with placeholders (comboBox will request for data when it
             // encounters a placeholder)
-            const pageStart = parseInt(page) * dataProviderMixin.pageSize;
-            const pageEnd = pageStart + dataProviderMixin.pageSize;
-            const end = Math.min(pageEnd, dataProviderMixin.filteredItems.length);
+            const pageStart = parseInt(page) * comboBox.pageSize;
+            const pageEnd = pageStart + comboBox.pageSize;
+            const end = Math.min(pageEnd, comboBox.filteredItems.length);
             for (let i = pageStart; i < end; i++) {
-              dataProviderMixin.filteredItems[i] = placeHolder;
+              comboBox.filteredItems[i] = placeHolder;
             }
           });
         };
@@ -91,7 +79,7 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
             // filter based on comboBox.filter. While later we only filter clientside data.
 
             if (cache[0]) {
-              performClientSideFilter(cache[0], callback);
+              performClientSideFilter(cache[0], params.filter, callback);
               return;
             } else {
               // If client side filter is enabled then we need to first ask all data
@@ -203,11 +191,9 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
         });
 
         comboBox.$connector.updateData = tryCatchWrapper(function (items) {
-          const dataProviderMixin = getDataProviderMixin();
-
           const itemsMap = new Map(items.map((item) => [item.key, item]));
 
-          dataProviderMixin.filteredItems = dataProviderMixin.filteredItems.map((item) => {
+          comboBox.filteredItems = comboBox.filteredItems.map((item) => {
             return itemsMap.get(item.key) || item;
           });
         });
@@ -227,10 +213,9 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
         });
 
         comboBox.$connector.reset = tryCatchWrapper(function () {
-          const dataProviderMixin = getDataProviderMixin();
           clearPageCallbacks();
           cache = {};
-          dataProviderMixin.clearCache();
+          comboBox.clearCache();
         });
 
         comboBox.$connector.confirm = tryCatchWrapper(function (id, filter) {
@@ -299,7 +284,7 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
           let data = cache[page];
 
           if (comboBox._clientSideFilter) {
-            performClientSideFilter(data, callback);
+            performClientSideFilter(data, comboBox.filter, callback);
           } else {
             // Remove the data if server-side filtering, but keep it for client-side
             // filtering
@@ -315,12 +300,11 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
         // and submitting the filtered items to specified callback.
         // The filter used is the one from combobox, not the lastFilter stored since
         // that may not reflect user's input.
-        const performClientSideFilter = tryCatchWrapper(function (page, callback) {
-          const dataProviderMixin = getDataProviderMixin();
+        const performClientSideFilter = tryCatchWrapper(function (page, filter, callback) {
           let filteredItems = page;
 
-          if (dataProviderMixin.filter) {
-            filteredItems = page.filter((item) => comboBox.$connector.filter(item, dataProviderMixin.filter));
+          if (filter) {
+            filteredItems = page.filter((item) => comboBox.$connector.filter(item, filter));
           }
 
           callback(filteredItems, filteredItems.length);
