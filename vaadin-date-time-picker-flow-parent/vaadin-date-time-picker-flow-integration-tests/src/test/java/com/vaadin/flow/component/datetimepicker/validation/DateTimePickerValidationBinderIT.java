@@ -38,6 +38,7 @@ public class DateTimePickerValidationBinderIT
     @Test
     public void required_triggerDateInputBlur_assertValidity() {
         dateInput.sendKeys(Keys.TAB);
+        timeInput.sendKeys(Keys.TAB);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage(REQUIRED_ERROR_MESSAGE);
@@ -76,6 +77,7 @@ public class DateTimePickerValidationBinderIT
     public void required_badInput_setDateInputValue_blur_assertValidity() {
         setInputValue(dateInput, "INVALID");
         dateInput.sendKeys(Keys.TAB);
+        timeInput.sendKeys(Keys.TAB);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage("");
@@ -84,7 +86,7 @@ public class DateTimePickerValidationBinderIT
     @Test
     public void required_badInput_setTimeInputValue_blur_assertValidity() {
         setInputValue(timeInput, "INVALID");
-        dateInput.sendKeys(Keys.TAB);
+        timeInput.sendKeys(Keys.TAB);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage("");
