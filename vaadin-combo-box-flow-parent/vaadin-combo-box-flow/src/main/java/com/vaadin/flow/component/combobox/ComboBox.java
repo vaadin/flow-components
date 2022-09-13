@@ -324,7 +324,8 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
         getDataGenerator().generateData(value, json);
         getElement().setPropertyJson(PROP_SELECTED_ITEM, json);
         getElement().setProperty(PROP_VALUE, keyMapper.key(value));
-        getElement().executeJs("this._inputElementValue = $0", generateLabel(value));
+        getElement().executeJs("this._inputElementValue = $0",
+                generateLabel(value));
     }
 
     @Override
