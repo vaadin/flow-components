@@ -71,7 +71,6 @@ import elemental.json.JsonObject;
 public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
         implements HasThemeVariant<ComboBoxVariant> {
 
-    private static final String PROP_INPUT_ELEMENT_VALUE = "_inputElementValue";
     private static final String PROP_SELECTED_ITEM = "selectedItem";
     private static final String PROP_VALUE = "value";
 
@@ -314,7 +313,7 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
         if (value == null) {
             getElement().setProperty(PROP_SELECTED_ITEM, null);
             getElement().setProperty(PROP_VALUE, "");
-            getElement().setProperty(PROP_INPUT_ELEMENT_VALUE, "");
+            getElement().executeJs("this._inputElementValue = $0", "");
             return;
         }
 
@@ -325,8 +324,7 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
         getDataGenerator().generateData(value, json);
         getElement().setPropertyJson(PROP_SELECTED_ITEM, json);
         getElement().setProperty(PROP_VALUE, keyMapper.key(value));
-        getElement().setProperty(PROP_INPUT_ELEMENT_VALUE,
-                generateLabel(value));
+        getElement().executeJs("this._inputElementValue = $0", generateLabel(value));
     }
 
     @Override
