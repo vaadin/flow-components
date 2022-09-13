@@ -38,10 +38,10 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-confirm-dialog")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.13")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.14")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/confirm-dialog", version = "23.0.13")
-@NpmPackage(value = "@vaadin/vaadin-confirm-dialog", version = "23.0.13")
+@NpmPackage(value = "@vaadin/confirm-dialog", version = "23.0.14")
+@NpmPackage(value = "@vaadin/vaadin-confirm-dialog", version = "23.0.14")
 @JsModule("@vaadin/confirm-dialog/src/vaadin-confirm-dialog.js")
 public class ConfirmDialog extends Component
         implements HasSize, HasStyle, HasOrderedComponents {

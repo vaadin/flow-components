@@ -53,7 +53,7 @@ import elemental.json.JsonObject;
  *
  */
 @Tag("vaadin-rich-text-editor")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.13")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.0.14")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 public class RichTextEditor
         extends GeneratedVaadinRichTextEditor<RichTextEditor, String>
@@ -240,13 +240,13 @@ public class RichTextEditor
             return null;
         }
 
-        // Using basic whitelist and adding img tag with data protocol enabled.
+        // Using basic safelist and adding img tag with data protocol enabled.
         return sanitize(htmlValueString);
     }
 
     String sanitize(String html) {
         return org.jsoup.Jsoup.clean(html,
-                org.jsoup.safety.Whitelist.basic()
+                org.jsoup.safety.Safelist.basic()
                         .addTags("img", "h1", "h2", "h3", "s")
                         .addAttributes("img", "align", "alt", "height", "src",
                                 "title", "width")
