@@ -32,8 +32,10 @@ public class RichTextEditorElement extends TestBenchElement {
     public List getTitles() {
         TestBenchElement toolbar = $("div").attributeContains("part", "toolbar")
                 .first();
-        List<TestBenchElement> buttonTooltips = toolbar.$("button + vaadin-tooltip").all();
-        return buttonTooltips.stream().map(tooltip -> tooltip.getProperty("text"))
+        List<TestBenchElement> buttonTooltips = toolbar
+                .$("button + vaadin-tooltip").all();
+        return buttonTooltips.stream()
+                .map(tooltip -> tooltip.getProperty("text"))
                 .collect(Collectors.toList());
     }
 
