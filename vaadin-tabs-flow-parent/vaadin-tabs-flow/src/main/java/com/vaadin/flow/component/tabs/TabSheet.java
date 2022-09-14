@@ -30,8 +30,8 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.shared.HasPrefixAndSuffix;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.shared.Registration;
 
@@ -44,8 +44,8 @@ import com.vaadin.flow.shared.Registration;
 @Tag("vaadin-tabsheet")
 @NpmPackage(value = "@vaadin/tabsheet", version = "23.3.0-alpha1")
 @JsModule("@vaadin/tabsheet/src/vaadin-tabsheet.js")
-public class TabSheet extends Component implements HasStyle, HasSize,
-        HasPrefixAndSuffix, HasThemeVariant<TabSheetVariant> {
+public class TabSheet extends Component
+        implements HasStyle, HasSize, HasThemeVariant<TabSheetVariant> {
 
     private Tabs tabs = new Tabs();
 
@@ -204,6 +204,65 @@ public class TabSheet extends Component implements HasStyle, HasSize,
                     event.isInitialSelection()));
         });
 
+    }
+
+    /**
+     * Adds the given component as the prefix of this component, replacing any
+     * existing prefix component.
+     *
+     * @param component
+     *            the component to set, can be {@code null} to remove existing
+     *            prefix component
+     */
+    public void setPrefixComponent(Component component) {
+        SlotUtils.clearSlot(this, "prefix");
+
+        if (component != null) {
+            component.getElement().setAttribute("slot", "prefix");
+            getElement().appendChild(component.getElement());
+        }
+    }
+
+    /**
+     * Gets the component in the prefix slot of this component.
+     *
+     * @return the prefix component of this component, or {@code null} if no
+     *         prefix component has been set
+     * @see #setPrefixComponent(Component)
+     */
+    public Component getPrefixComponent() {
+        return SlotUtils.getChildInSlot(this, "prefix");
+    }
+
+    /**
+     * Adds the given component as the suffix of this component, replacing any
+     * existing suffix component.
+     * <p>
+     * This is most commonly used to add a simple icon or static text into the
+     * component.
+     *
+     * @param component
+     *            the component to set, can be {@code null} to remove existing
+     *            suffix component
+     */
+    public void setSuffixComponent(Component component) {
+        SlotUtils.clearSlot(this, "suffix");
+
+        if (component != null) {
+            component.getElement().setAttribute("slot", "suffix");
+            getElement().appendChild(component.getElement());
+        }
+    }
+
+    /**
+     * Gets the component in the suffix slot of this component.
+     *
+     * @return the suffix component of this component, or {@code null} if no
+     *         suffix component has been set
+     * @see #setPrefixComponent(Component)
+     */
+    public Component getSuffixComponent() {
+        return SlotUtils.getChildInSlot(this, "suffix");
     }
 
     /**
