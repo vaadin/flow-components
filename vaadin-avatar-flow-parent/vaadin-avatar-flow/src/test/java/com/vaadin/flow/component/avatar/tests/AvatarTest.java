@@ -101,4 +101,16 @@ public class AvatarTest {
         Assert.assertEquals(i18n, avatar.getI18n());
     }
 
+    @Test
+    public void setTooltipEnabled_isTooltipEnabled() {
+        avatar.setTooltipEnabled(true);
+        Assert.assertEquals(avatar.isTooltipEnabled(), true);
+        Assert.assertTrue(
+                avatar.getElement().getProperty("withTooltip", false));
+
+        avatar.setTooltipEnabled(false);
+        Assert.assertEquals(avatar.isTooltipEnabled(), false);
+        Assert.assertFalse(
+                avatar.getElement().getProperty("withTooltip", false));
+    }
 }
