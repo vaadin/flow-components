@@ -95,7 +95,8 @@ public class ClearValueIT extends AbstractComponentIT {
     @Test
     public void allowCustomValue_setInitialValue_valueIsCorrectlyCleared() {
         checkEmptyValue(ClearValuePage.COMBO_BOX_WITH_ALLOW_CUSTOM_VALUE,
-                ClearValuePage.COMBO_BOX_CLEAR_BUTTON, true);
+                ClearValuePage.COMBO_BOX_WITH_ALLOW_CUSTOM_VALUE_CLEAR_BUTTON,
+                true);
     }
 
     @Test
@@ -104,15 +105,16 @@ public class ClearValueIT extends AbstractComponentIT {
                 "Combobox empty value is not null, add clear tests also",
                 new ComboBox<>().getEmptyValue());
         checkEmptyValue(ClearValuePage.COMBO_BOX_WITH_ALLOW_CUSTOM_VALUE,
-                ClearValuePage.COMBO_BOX_SET_NULL_VALUE_BUTTON, true);
+                ClearValuePage.COMBO_BOX_WITH_ALLOW_CUSTOM_VALUE_SET_NULL_VALUE_BUTTON,
+                true);
     }
 
     @Test
     public void allowCustomValue_enterCustomValue_clearValue_inputElementValueIsCleared() {
         ComboBoxElement comboBox = $(ComboBoxElement.class)
                 .id(ClearValuePage.COMBO_BOX_WITH_ALLOW_CUSTOM_VALUE);
-        TestBenchElement clearButton = $("button")
-                .id(ClearValuePage.COMBO_BOX_CLEAR_BUTTON);
+        TestBenchElement clearButton = $("button").id(
+                ClearValuePage.COMBO_BOX_WITH_ALLOW_CUSTOM_VALUE_CLEAR_BUTTON);
 
         // Clear initial value to set the state of the input element value
         // property to an empty value
