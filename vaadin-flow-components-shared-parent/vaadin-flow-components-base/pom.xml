@@ -29,12 +29,7 @@
       <groupId>javax.servlet</groupId>
       <artifactId>javax.servlet-api</artifactId>
       <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.vaadin</groupId>
-      <artifactId>flow-html-components</artifactId>
-      <scope>test</scope>
-    </dependency>
+  </dependency>
   </dependencies>
   <build>
     <plugins>
