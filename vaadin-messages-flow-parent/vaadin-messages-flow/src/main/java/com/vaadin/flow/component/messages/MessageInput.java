@@ -28,6 +28,7 @@ import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.shared.Registration;
 
@@ -50,7 +51,7 @@ import com.vaadin.flow.shared.Registration;
 @NpmPackage(value = "@vaadin/message-input", version = "23.3.0-alpha1")
 @NpmPackage(value = "@vaadin/vaadin-messages", version = "23.3.0-alpha1")
 public class MessageInput extends Component
-        implements HasSize, HasStyle, HasEnabled {
+        implements HasSize, HasStyle, HasEnabled, HasTooltip {
 
     private MessageInputI18n i18n;
 

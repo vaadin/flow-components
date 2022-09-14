@@ -34,6 +34,7 @@ import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupDataView;
 import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupListDataView;
 import com.vaadin.flow.data.binder.HasItemComponents;
@@ -72,7 +73,7 @@ public class RadioButtonGroup<T>
         implements HasItemComponents<T>, SingleSelect<RadioButtonGroup<T>, T>,
         HasListDataView<T, RadioButtonGroupListDataView<T>>,
         HasDataView<T, Void, RadioButtonGroupDataView<T>>, HasValidation,
-        HasHelper, HasSize, HasLabel, HasValidator<T> {
+        HasHelper, HasSize, HasLabel, HasTooltip, HasValidator<T> {
 
     private final KeyMapper<T> keyMapper = new KeyMapper<>();
 

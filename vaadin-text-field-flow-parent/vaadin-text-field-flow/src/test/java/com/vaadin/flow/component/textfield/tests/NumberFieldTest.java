@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.textfield.tests;
 
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.flow.dom.ThemeList;
@@ -176,6 +177,11 @@ public class NumberFieldTest extends TextFieldTest {
         ThemeList themeNames = field.getThemeNames();
         Assert.assertFalse(themeNames
                 .contains(TextFieldVariant.LUMO_SMALL.getVariantName()));
+    }
+
+    @Test
+    public void implementsHasTooltip() {
+        Assert.assertTrue(field instanceof HasTooltip);
     }
 
     private void assertValidValues(Double... values) {
