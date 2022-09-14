@@ -65,18 +65,10 @@ public class DateTimePickerValidationBasicIT
     }
 
     @Test
-    public void required_triggerDateInputBlur_assertValidity() {
+    public void required_triggerBlur_assertValidity() {
         $("button").id(REQUIRED_BUTTON).click();
 
         dateInput.sendKeys(Keys.TAB);
-        assertServerInvalid();
-        assertClientInvalid();
-    }
-
-    @Test
-    public void required_triggerTimeInputBlur_assertValidity() {
-        $("button").id(REQUIRED_BUTTON).click();
-
         timeInput.sendKeys(Keys.TAB);
         assertServerInvalid();
         assertClientInvalid();
