@@ -64,6 +64,32 @@ public class TabSheet extends Component
     }
 
     /**
+     * Adds a tab created from the given text and content.
+     *
+     * @param tabText
+     *            the text of the tab
+     * @param content
+     *            the content related to the tab
+     * @return the created tab
+     */
+    public Tab add(String tabText, Component content) {
+        return add(new Text(tabText), content);
+    }
+
+    /**
+     * Adds a tab created from the given tab content and content.
+     *
+     * @param tabContent
+     *            the content of the tab
+     * @param content
+     *            the content related to the tab
+     * @return the created tab
+     */
+    public Tab add(Component tabContent, Component content) {
+        return add(new Tab(tabContent), content);
+    }
+
+    /**
      * Adds a tab with the given content.
      *
      * @param tab
@@ -88,32 +114,6 @@ public class TabSheet extends Component
         updateContent();
 
         return tab;
-    }
-
-    /**
-     * Adds a tab created from the given tab content and content.
-     *
-     * @param tabContent
-     *            the content of the tab
-     * @param content
-     *            the content related to the tab
-     * @return the created tab
-     */
-    public Tab add(Component tabContent, Component content) {
-        return add(new Tab(tabContent), content);
-    }
-
-    /**
-     * Adds a tab created from the given text and content.
-     *
-     * @param tabText
-     *            the text of the tab
-     * @param content
-     *            the content related to the tab
-     * @return the created tab
-     */
-    public Tab add(String tabText, Component content) {
-        return add(new Text(tabText), content);
     }
 
     /**
