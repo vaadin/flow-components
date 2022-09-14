@@ -84,6 +84,11 @@ public class ClearValuePage extends Div {
         comboBox.setAllowCustomValue(true);
         comboBox.setValue(INITIAL_VALUE);
         comboBox.setId(COMBO_BOX_WITH_ALLOW_CUSTOM_VALUE);
+        comboBox.addCustomValueSetListener(event -> {
+            if (event.getDetail().equals("NotAcceptableCustomValue")) {
+                comboBox.clear();
+            }
+        });
 
         NativeButton setNullValueButton = new NativeButton("Set null value",
                 event -> comboBox.setValue(null));
