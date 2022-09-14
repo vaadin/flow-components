@@ -164,7 +164,8 @@ public class ClearValueIT extends AbstractComponentIT {
         clearButton.click();
         Assert.assertEquals("", comboBox.getInputElementValue());
 
-        // Enter a custom value that is cleared in the `customValueSet` listener.
+        // Enter a custom value that is cleared in the `customValueSet`
+        // listener.
         comboBox.sendKeys("NotAcceptableCustomValue", Keys.ENTER);
         Assert.assertEquals("", comboBox.getInputElementValue());
     }
