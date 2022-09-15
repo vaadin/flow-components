@@ -46,7 +46,7 @@ public class GridTooltipIT extends AbstractComponentIT {
         clickElementWithJs("toggle-grid-button");
         // Add the grid
         clickElementWithJs("toggle-grid-button");
-        
+
         var grid = $(GridElement.class).first();
         showTooltip(grid.getCell("Jack"));
         Assert.assertEquals("First name of the person is Jack",

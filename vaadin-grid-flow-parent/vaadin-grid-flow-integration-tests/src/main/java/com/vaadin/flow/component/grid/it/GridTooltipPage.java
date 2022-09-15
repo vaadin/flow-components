@@ -41,14 +41,14 @@ public class GridTooltipPage extends Div {
         setAgeTooltipButton.setId("set-age-tooltip-button");
 
         var toggleGridButton = new NativeButton("Toggle grid", event -> {
-                if (grid.getParent().isPresent()) {
-                    remove(grid);
-                } else {
-                    add(grid);
-                }
-            });
+            if (grid.getParent().isPresent()) {
+                remove(grid);
+            } else {
+                add(grid);
+            }
+        });
         toggleGridButton.setId("toggle-grid-button");
-    
+
         add(setAgeTooltipButton, toggleGridButton, grid);
     }
 

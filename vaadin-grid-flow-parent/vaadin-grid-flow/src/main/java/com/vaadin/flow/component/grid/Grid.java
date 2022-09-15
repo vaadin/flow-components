@@ -1047,9 +1047,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 // No <vaadin-tooltip> yet added to the grid, add one
                 var tooltipElement = new Element("vaadin-tooltip");
                 tooltipElement.setAttribute("slot", "tooltip");
-                
+
                 tooltipElement.addAttachListener(e -> {
-                    // Assigns a textGenerator that returns a column-specfic tooltip text from the item
+                    // Assigns a textGenerator that returns a column-specfic
+                    // tooltip text from the item
                     tooltipElement.executeJs(
                             "this.textGenerator = ({item, column}) => item.gridtooltips[column._flowId]");
                 });
