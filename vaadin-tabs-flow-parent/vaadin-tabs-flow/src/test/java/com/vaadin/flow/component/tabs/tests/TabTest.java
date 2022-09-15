@@ -18,6 +18,7 @@ package com.vaadin.flow.component.tabs.tests;
 
 import org.junit.Test;
 
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.tabs.Tab;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -52,5 +53,10 @@ public class TabTest {
         tab.setFlexGrow(1);
 
         assertThat("flexGrow is invalid", tab.getFlexGrow(), is(1.0));
+    }
+
+    @Test
+    public void implementsHasTooltip() {
+        assertTrue(tab instanceof HasTooltip);
     }
 }

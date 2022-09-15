@@ -20,6 +20,7 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasClearButton;
@@ -35,6 +36,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxDataView;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxLazyDataView;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxListDataView;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
@@ -51,7 +53,6 @@ import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.ListDataView;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.function.SerializableBiFunction;
-import com.vaadin.flow.component.combobox.events.CustomValueSetEvent;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.SerializablePredicate;
@@ -78,7 +79,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
         HasHelper, HasTheme, HasLabel, HasClearButton, HasAllowedCharPattern,
         HasDataView<TItem, String, ComboBoxDataView<TItem>>,
         HasListDataView<TItem, ComboBoxListDataView<TItem>>,
-        HasLazyDataView<TItem, String, ComboBoxLazyDataView<TItem>>,
+        HasLazyDataView<TItem, String, ComboBoxLazyDataView<TItem>>, HasTooltip,
         HasValidator<TValue> {
 
     /**
@@ -1274,5 +1275,21 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     private void initConnector() {
         getElement().executeJs(
                 "window.Vaadin.Flow.comboBoxConnector.initLazy(this)");
+    }
+
+    /**
+     * Event that is dispatched from a combo box component, if the component
+     * allows setting custom values, and the user has entered a non-empty value
+     * that does not match any of the existing items
+     *
+     * @param <TComponent>
+     *            The specific combo box component type
+     */
+    public static class CustomValueSetEvent<TComponent extends ComboBoxBase<TComponent, ?, ?>>
+            extends GeneratedVaadinComboBox.CustomValueSetEvent<TComponent> {
+        public CustomValueSetEvent(TComponent source, boolean fromClient,
+                @EventData("event.detail") String detail) {
+            super(source, fromClient, detail);
+        }
     }
 }

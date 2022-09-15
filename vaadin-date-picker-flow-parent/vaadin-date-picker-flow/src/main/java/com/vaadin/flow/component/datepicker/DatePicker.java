@@ -32,6 +32,7 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasClearButton;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
@@ -78,7 +79,7 @@ import elemental.json.JsonType;
 public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         implements HasSize, HasValidation, HasHelper, HasTheme, HasLabel,
         HasClearButton, HasAllowedCharPattern, HasValidator<LocalDate>,
-        HasClientValidation {
+        HasClientValidation, HasTooltip {
 
     private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 

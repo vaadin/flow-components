@@ -31,6 +31,7 @@ import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasClearButton;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
@@ -52,7 +53,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
         HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper, HasLabel,
         HasClearButton, HasAllowedCharPattern,
-        HasThemeVariant<TextFieldVariant>, HasValidator<T> {
+        HasThemeVariant<TextFieldVariant>, HasTooltip, HasValidator<T> {
 
     private ValueChangeMode currentMode;
 

@@ -169,24 +169,24 @@ public class Tooltip implements Serializable {
     }
 
     /**
-     * The delay in milliseconds before the tooltip is opened on hover, when not
-     * in manual mode. On focus, the tooltip is opened immediately.
+     * The delay in milliseconds before the tooltip is opened on focus, when not
+     * in manual mode.
      *
-     * @param delay
+     * @param focusDelay
      *            the delay in milliseconds
      */
-    public void setDelay(int delay) {
-        tooltipElement.setProperty("delay", delay);
+    public void setFocusDelay(int focusDelay) {
+        tooltipElement.setProperty("focusDelay", focusDelay);
     }
 
     /**
-     * The delay in milliseconds before the tooltip is opened on hover, when not
-     * in manual mode. On focus, the tooltip is opened immediately.
+     * The delay in milliseconds before the tooltip is opened on focus, when not
+     * in manual mode.
      *
      * @return the delay in milliseconds
      */
-    public int getDelay() {
-        return tooltipElement.getProperty("delay", 0);
+    public int getFocusDelay() {
+        return tooltipElement.getProperty("focusDelay", 0);
     }
 
     /**
@@ -208,6 +208,27 @@ public class Tooltip implements Serializable {
      */
     public int getHideDelay() {
         return tooltipElement.getProperty("hideDelay", 0);
+    }
+
+    /**
+     * The delay in milliseconds before the tooltip is opened on hover, when not
+     * in manual mode.
+     *
+     * @param hoverDelay
+     *            the delay in milliseconds
+     */
+    public void setHoverDelay(int hoverDelay) {
+        tooltipElement.setProperty("hoverDelay", hoverDelay);
+    }
+
+    /**
+     * The delay in milliseconds before the tooltip is opened on hover, when not
+     * in manual mode.
+     *
+     * @return the delay in milliseconds
+     */
+    public int getHoverDelay() {
+        return tooltipElement.getProperty("hoverDelay", 0);
     }
 
     /**

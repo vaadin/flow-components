@@ -19,6 +19,7 @@ package com.vaadin.flow.component.tabs;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasLabel;
+import com.vaadin.flow.component.shared.HasTooltip;
 
 /**
  * This component provides an accessible and customizable tab to be used inside
@@ -27,7 +28,7 @@ import com.vaadin.flow.component.HasLabel;
  * @author Vaadin Ltd.
  */
 public class Tab extends GeneratedVaadinTab<Tab>
-        implements HasComponents, HasLabel {
+        implements HasComponents, HasLabel, HasTooltip {
 
     private static final String FLEX_GROW_CSS_PROPERTY = "flexGrow";
 

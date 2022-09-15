@@ -22,6 +22,7 @@ import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.dom.ElementConstants;
 
 /**
@@ -39,7 +40,8 @@ import com.vaadin.flow.dom.ElementConstants;
 @NpmPackage(value = "@vaadin/icon", version = "23.3.0-alpha1")
 @NpmPackage(value = "@vaadin/vaadin-icon", version = "23.3.0-alpha1")
 @JsModule("@vaadin/icon/vaadin-icon.js")
-public class Icon extends Component implements HasStyle, ClickNotifier<Icon> {
+public class Icon extends Component
+        implements HasStyle, ClickNotifier<Icon>, HasTooltip {
 
     private static final String ICON_ATTRIBUTE_NAME = "icon";
     private static final String ICON_COLLECTION_NAME = "vaadin";

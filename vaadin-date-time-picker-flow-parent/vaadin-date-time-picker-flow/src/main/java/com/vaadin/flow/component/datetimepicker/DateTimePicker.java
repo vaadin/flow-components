@@ -33,6 +33,7 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasClientValidation;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.component.timepicker.StepsUtil;
 import com.vaadin.flow.data.binder.HasValidator;
@@ -99,10 +100,11 @@ class DateTimePickerTimePicker
 @NpmPackage(value = "@vaadin/date-time-picker", version = "23.3.0-alpha1")
 @NpmPackage(value = "@vaadin/vaadin-date-time-picker", version = "23.3.0-alpha1")
 @JsModule("@vaadin/date-time-picker/src/vaadin-date-time-picker.js")
-public class DateTimePicker extends
-        AbstractSinglePropertyField<DateTimePicker, LocalDateTime> implements
-        HasStyle, HasSize, HasTheme, HasValidation, Focusable<DateTimePicker>,
-        HasHelper, HasLabel, HasValidator<LocalDateTime>, HasClientValidation {
+public class DateTimePicker
+        extends AbstractSinglePropertyField<DateTimePicker, LocalDateTime>
+        implements HasStyle, HasSize, HasTheme, HasValidation,
+        Focusable<DateTimePicker>, HasHelper, HasLabel,
+        HasValidator<LocalDateTime>, HasClientValidation, HasTooltip {
 
     private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
