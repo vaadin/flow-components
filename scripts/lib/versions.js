@@ -111,13 +111,20 @@ async function getLatestNpmVersion(package, version, major, minor) {
   if (!cachedNpmVersions[package]) {
     cmd = `npm view ${package} versions --json`;
     const json = await JSON.parse(await run(cmd))
-    const versions = json
+	
+    try {
+      const versions = json
        .filter(version => version.startsWith(`${major}.${minor}`) && !version.includes('-dev'))
        .map(a => a.replace(/\d+$/, n => +n+900000))
        .sort()
        .map(a => a.replace(/\d+$/, n => +n-900000));
-    const next =  versions.pop();
-    console.log(`Checking next Npm version for ${package} ${version} ${next}`);
+      next =  versions.pop();	
+      console.log(`Checking next Npm version for ${package} ${version} ${next}`);
+    } catch (e){
+      // when the package has only one version available, we just use the available one
+      // mainly for new added WC has only one alpha1 release
+      next = json
+    }	
     cachedNpmVersions[package] = next;
   }
   return cachedNpmVersions[package];
