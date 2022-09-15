@@ -22,6 +22,7 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.nodefeature.ElementAttributeMap;
 import com.vaadin.flow.internal.nodefeature.NodeFeature;
@@ -40,7 +41,7 @@ import java.util.stream.Stream;
  * @author Vaadin Ltd
  */
 public class Button extends GeneratedVaadinButton<Button>
-        implements HasSize, HasEnabled {
+        implements HasSize, HasEnabled, HasTooltip {
 
     private Component iconComponent;
     private boolean iconAfterText;

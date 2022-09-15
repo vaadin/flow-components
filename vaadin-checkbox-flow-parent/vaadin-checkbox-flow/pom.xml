@@ -4,12 +4,17 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-checkbox-flow-parent</artifactId>
-        <version>23.2-SNAPSHOT</version>
+        <version>23.3-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-checkbox-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Checkbox</name>
     <dependencies>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-flow-components-base</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-data</artifactId>

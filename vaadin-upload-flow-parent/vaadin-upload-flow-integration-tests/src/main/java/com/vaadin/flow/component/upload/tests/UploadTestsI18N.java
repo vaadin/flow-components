@@ -27,8 +27,10 @@ class UploadTestsI18N {
             .setDropFiles(
                     new UploadI18N.DropFiles().setOne("Перетащите файл сюда...")
                             .setMany("Перетащите файлы сюда..."))
-            .setAddFiles(new UploadI18N.AddFiles()
-                    .setOne("Выбрать файл").setMany("Добавить файлы"))
+            .setAddFiles(new UploadI18N.AddFiles().setOne("Выбрать файл")
+                    .setMany("Добавить файлы"))
+            .setFile(new UploadI18N.File().setStart("Загрузить")
+                    .setRetry("Повторить").setRemove("Удалить"))
             .setCancel("Отменить")
             .setError(new UploadI18N.Error()
                     .setTooManyFiles("Слишком много файлов.")

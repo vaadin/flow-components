@@ -36,6 +36,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxDataView;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxLazyDataView;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxListDataView;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
@@ -78,7 +79,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
         HasHelper, HasTheme, HasLabel, HasClearButton, HasAllowedCharPattern,
         HasDataView<TItem, String, ComboBoxDataView<TItem>>,
         HasListDataView<TItem, ComboBoxListDataView<TItem>>,
-        HasLazyDataView<TItem, String, ComboBoxLazyDataView<TItem>>,
+        HasLazyDataView<TItem, String, ComboBoxLazyDataView<TItem>>, HasTooltip,
         HasValidator<TValue> {
 
     /**
