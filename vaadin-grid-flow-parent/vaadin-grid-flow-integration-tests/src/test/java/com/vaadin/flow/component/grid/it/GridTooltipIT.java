@@ -68,6 +68,7 @@ public class GridTooltipIT extends AbstractComponentIT {
     }
 
     private String getActiveTooltipText() {
+        waitForElementPresent(By.tagName("vaadin-tooltip-overlay"));
         return findElement(By.tagName("vaadin-tooltip-overlay")).getText();
     }
 
