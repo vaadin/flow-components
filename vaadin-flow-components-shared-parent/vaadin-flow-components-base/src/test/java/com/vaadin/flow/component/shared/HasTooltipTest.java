@@ -55,11 +55,11 @@ public class HasTooltipTest {
     }
 
     @Test
-    public void setTooltipNull_hasTooltip() {
+    public void setTooltipNull_hasNoTooltip() {
         var tooltip = component.setTooltip("foo");
-        var tooltip2 = component.setTooltip(null);
-        Assert.assertEquals(tooltip, tooltip2);
-        Assert.assertEquals(component.getTooltip().getText(), null);
+        component.setTooltip(null);
+        Assert.assertEquals(component.getTooltip(), null);
+        Assert.assertFalse(getTooltipElement(component).isPresent());
     }
 
     @Test

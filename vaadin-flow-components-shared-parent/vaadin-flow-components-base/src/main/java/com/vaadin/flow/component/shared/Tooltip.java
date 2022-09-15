@@ -150,6 +150,22 @@ public class Tooltip implements Serializable {
     }
 
     /**
+     * Removes the tooltip from the given {@link HasTooltip} component
+     * and clears the component's tooltip slot.
+     *
+     * @param hasTooltip
+     *            the element to get the tooltip handle for
+     */
+    static void removeForHasTooltip(HasTooltip hasTooltip) {
+        var tooltip = getForElement(hasTooltip.getElement());
+        if (tooltip != null) {
+            tooltip.tooltipElement.executeJs("this.target = null;");
+            SlotUtils.clearSlot(hasTooltip, "tooltip");
+            elementTooltips.remove(hasTooltip.getElement());
+        }
+    }
+
+    /**
      * String used as a tooltip content.
      *
      * @param text

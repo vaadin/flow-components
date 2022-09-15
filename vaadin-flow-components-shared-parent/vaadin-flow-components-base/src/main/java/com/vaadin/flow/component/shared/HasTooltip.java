@@ -34,6 +34,10 @@ public interface HasTooltip extends HasElement {
      */
     default Tooltip setTooltip(String text) {
         var tooltip = Tooltip.getForElement(getElement());
+        if (text == null && tooltip != null) {
+            Tooltip.removeForHasTooltip(this);
+            return null;
+        }
         if (tooltip == null) {
             tooltip = Tooltip.forHasTooltip(this);
         }
