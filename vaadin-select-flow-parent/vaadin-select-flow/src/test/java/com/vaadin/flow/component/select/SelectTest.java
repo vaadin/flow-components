@@ -23,6 +23,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.select.data.SelectListDataView;
 import com.vaadin.flow.component.select.generated.GeneratedVaadinSelect;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
@@ -818,6 +819,11 @@ public class SelectTest {
 
         Assert.assertEquals("Invalid label for select ", "label",
                 select.getElement().getProperty("label"));
+    }
+
+    @Test
+    public void implementsHasTooltip() {
+        Assert.assertTrue(select instanceof HasTooltip);
     }
 
     private void validateItem(int index, String textContent, String label,

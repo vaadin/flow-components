@@ -36,6 +36,7 @@ import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.shared.Registration;
@@ -64,7 +65,7 @@ import com.vaadin.flow.shared.Registration;
 @NpmPackage(value = "@vaadin/vaadin-details", version = "23.3.0-alpha1")
 @JsModule("@vaadin/details/src/vaadin-details.js")
 public class Details extends Component
-        implements HasEnabled, HasTheme, HasStyle, HasSize {
+        implements HasEnabled, HasTheme, HasStyle, HasSize, HasTooltip {
 
     private Component summary;
     private final Div contentContainer;

@@ -295,6 +295,28 @@ public class Avatar extends Component
         getElement().setProperty("colorIndex", colorIndex);
     }
 
+    /**
+     * Gets the enabled state of the avatar tooltip, which is {@code false} by
+     * default.
+     *
+     * @return <code>true</code> if the tooltip is shown on hover or focus,
+     *         <code>false</code> otherwise
+     */
+    public boolean isTooltipEnabled() {
+        return getElement().getProperty("withTooltip", false);
+    }
+
+    /**
+     * Sets the enabled of the avatar tooltip.
+     *
+     * @param tooltipEnabled
+     *            <code>true</code> to show the tooltip on hover or focus,
+     *            <code>false</code> to not show it
+     */
+    public void setTooltipEnabled(boolean tooltipEnabled) {
+        getElement().setProperty("withTooltip", tooltipEnabled);
+    }
+
     // Override is only required to keep binary compatibility with other 23.x
     // minor versions, can be removed in a future major
     @Override

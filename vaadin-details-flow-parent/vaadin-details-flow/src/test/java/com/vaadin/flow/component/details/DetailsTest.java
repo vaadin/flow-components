@@ -1,6 +1,7 @@
 package com.vaadin.flow.component.details;
 
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.shared.HasTooltip;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,5 +34,10 @@ public class DetailsTest {
     public void summaryDefined_getSummaryText_returnsStringDefined() {
         details.setSummaryText("summary");
         Assert.assertEquals("summary", details.getSummaryText());
+    }
+
+    @Test
+    public void implementsHasTooltip() {
+        Assert.assertTrue(details instanceof HasTooltip);
     }
 }

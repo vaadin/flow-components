@@ -20,6 +20,7 @@ import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxListDataView;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.data.provider.AbstractDataProvider;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataCommunicatorTest;
@@ -64,6 +65,13 @@ public abstract class ComboBoxBaseTest {
     public void implementsHasAllowedCharPattern() {
         Assert.assertTrue("ComboBox should support allowed char pattern",
                 HasAllowedCharPattern.class.isAssignableFrom(
+                        createComboBox(String.class).getClass()));
+    }
+
+    @Test
+    public void implementsHasTooltip() {
+        Assert.assertTrue("ComboBox should support setting a tooltip",
+                HasTooltip.class.isAssignableFrom(
                         createComboBox(String.class).getClass()));
     }
 
