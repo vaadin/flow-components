@@ -31,6 +31,7 @@ import com.vaadin.flow.shared.Registration;
 import com.vaadin.tests.DataProviderListenersTest;
 import elemental.json.Json;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -163,6 +164,31 @@ public abstract class ComboBoxBaseTest {
         // removes the second listener
         registration2.remove();
         Assert.assertFalse(comboBox.isAllowCustomValue());
+    }
+
+    @Test
+    @Ignore // Only test if this compiles, can be removed after removing
+            // GeneratedVaadinComboBox.CustomValueSetEvent
+    public void addCustomValueSetListenerWithNewEventType() {
+        ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
+        comboBox.addCustomValueSetListener(this::handleNewCustomValueSetEvent);
+    }
+
+    private void handleNewCustomValueSetEvent(
+            ComboBoxBase.CustomValueSetEvent<?> event) {
+    }
+
+    @Test
+    @Ignore // Only test if this compiles, can be removed after removing
+            // GeneratedVaadinComboBox.CustomValueSetEvent
+    public void addCustomValueSetListenerWithDeprecatedEventType() {
+        ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
+        comboBox.addCustomValueSetListener(
+                this::handleDeprecatedCustomValueSetEvent);
+    }
+
+    private void handleDeprecatedCustomValueSetEvent(
+            GeneratedVaadinComboBox.CustomValueSetEvent<?> event) {
     }
 
     @Test
