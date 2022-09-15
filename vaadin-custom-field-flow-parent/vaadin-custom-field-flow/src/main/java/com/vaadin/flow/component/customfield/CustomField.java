@@ -29,6 +29,7 @@ import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasTooltip;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.AbstractField;
@@ -62,7 +63,7 @@ import com.vaadin.flow.dom.Element;
 @JsModule("@vaadin/custom-field/src/vaadin-custom-field.js")
 public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
         implements HasSize, HasValidation, Focusable<CustomField>, HasHelper,
-        HasLabel, HasTheme, HasStyle {
+        HasLabel, HasTheme, HasStyle, HasTooltip {
 
     /**
      * Default constructor.

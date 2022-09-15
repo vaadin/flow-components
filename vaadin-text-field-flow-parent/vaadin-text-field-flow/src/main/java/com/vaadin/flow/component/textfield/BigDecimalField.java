@@ -28,6 +28,7 @@ import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.InputNotifier;
 import com.vaadin.flow.component.KeyNotifier;
@@ -57,11 +58,12 @@ import com.vaadin.flow.function.SerializableBiFunction;
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("./vaadin-big-decimal-field.js")
 public class BigDecimalField
-        extends GeneratedVaadinTextField<BigDecimalField, BigDecimal> implements
-        HasSize, HasValidation, HasValueChangeMode, HasPrefixAndSuffix,
-        InputNotifier, KeyNotifier, CompositionNotifier, HasAutocomplete,
-        HasAutocapitalize, HasAutocorrect, HasHelper, HasLabel, HasClearButton,
-        HasThemeVariant<TextFieldVariant>, HasValidator<BigDecimal> {
+        extends GeneratedVaadinTextField<BigDecimalField, BigDecimal>
+        implements HasSize, HasValidation, HasValueChangeMode,
+        HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
+        HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper, HasLabel,
+        HasClearButton, HasThemeVariant<TextFieldVariant>, HasTooltip,
+        HasValidator<BigDecimal> {
     private ValueChangeMode currentMode;
 
     private boolean isConnectorAttached;
