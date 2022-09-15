@@ -63,13 +63,13 @@ public class TooltipTest {
     }
 
     @Test
-    public void createTooltip_setDelay() {
+    public void createTooltip_setFocusDelay() {
         var tooltip = Tooltip.forComponent(component);
-        tooltip.setDelay(1000);
+        tooltip.setFocusDelay(1000);
         ui.add(component);
         Assert.assertEquals(1000,
-                getTooltipElement().get().getProperty("delay", 0));
-        Assert.assertEquals(1000, tooltip.getDelay());
+                getTooltipElement().get().getProperty("focusDelay", 0));
+        Assert.assertEquals(1000, tooltip.getFocusDelay());
     }
 
     @Test
@@ -80,6 +80,16 @@ public class TooltipTest {
         Assert.assertEquals(1000,
                 getTooltipElement().get().getProperty("hideDelay", 0));
         Assert.assertEquals(1000, tooltip.getHideDelay());
+    }
+
+    @Test
+    public void createTooltip_setHoverDelay() {
+        var tooltip = Tooltip.forComponent(component);
+        tooltip.setHoverDelay(1000);
+        ui.add(component);
+        Assert.assertEquals(1000,
+                getTooltipElement().get().getProperty("hoverDelay", 0));
+        Assert.assertEquals(1000, tooltip.getHoverDelay());
     }
 
     @Test
