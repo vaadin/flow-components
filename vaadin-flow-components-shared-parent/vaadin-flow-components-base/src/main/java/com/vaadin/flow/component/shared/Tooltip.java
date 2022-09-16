@@ -40,6 +40,10 @@ public class Tooltip implements Serializable {
      */
     private final Element tooltipElement = new Element("vaadin-tooltip");
 
+    private Tooltip() {
+        super();
+    }
+
     /**
      * Tooltip position in relation to the target element.
      */
