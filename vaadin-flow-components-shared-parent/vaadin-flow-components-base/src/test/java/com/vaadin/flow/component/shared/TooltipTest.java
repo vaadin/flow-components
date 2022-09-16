@@ -128,6 +128,34 @@ public class TooltipTest {
         Assert.assertEquals(true, tooltip.isOpened());
     }
 
+    @Test
+    public void createTooltip_fluentAPI() {
+        ui.add(component);
+        
+        var tooltip =  Tooltip.forComponent(component)
+            .withText("foo")
+            .withFocusDelay(200)
+            .withHideDelay(1000)
+            .withHoverDelay(500)
+            .withPosition(TooltipPosition.BOTTOM_END)
+            .withManual(true);
+
+        tooltip.setOpened(true);
+        
+        Assert.assertEquals("foo",
+                getTooltipElement().get().getProperty("text"));
+        Assert.assertEquals(200,
+                getTooltipElement().get().getProperty("focusDelay", 0));
+        Assert.assertEquals(1000,
+                getTooltipElement().get().getProperty("hideDelay", 0));
+        Assert.assertEquals(500,
+                getTooltipElement().get().getProperty("hoverDelay", 0));
+        Assert.assertEquals("bottom-end",
+                getTooltipElement().get().getProperty("position"));
+        Assert.assertEquals(true,
+                getTooltipElement().get().getProperty("manual", false));
+    }
+
     private Optional<Element> getTooltipElement() {
         return ui.getElement().getChildren()
                 .filter(child -> child.getTag().equals("vaadin-tooltip"))
