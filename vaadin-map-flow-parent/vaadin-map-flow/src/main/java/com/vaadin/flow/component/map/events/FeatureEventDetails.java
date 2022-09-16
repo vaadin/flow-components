@@ -4,10 +4,12 @@ import com.vaadin.flow.component.map.configuration.Feature;
 import com.vaadin.flow.component.map.configuration.layer.VectorLayer;
 import com.vaadin.flow.component.map.configuration.source.VectorSource;
 
+import java.io.Serializable;
+
 /**
  * Stores information about a {@link Feature} that is part of an event
  */
-public class FeatureEventDetails {
+public class FeatureEventDetails implements Serializable {
     private final Feature feature;
     private final VectorSource source;
     private final VectorLayer layer;

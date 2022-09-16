@@ -16,6 +16,7 @@ package com.vaadin.flow.component.map.configuration;
  * #L%
  */
 
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
@@ -24,7 +25,7 @@ import java.util.Objects;
  * ensure themselves to use the same projection between coordinates, the map
  * viewport, and map sources.
  */
-public class Coordinate {
+public class Coordinate implements Serializable {
     private final double x;
     private final double y;
 
