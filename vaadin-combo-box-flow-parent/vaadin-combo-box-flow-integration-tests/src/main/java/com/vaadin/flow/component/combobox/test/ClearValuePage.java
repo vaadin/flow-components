@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.combobox.test;
 
 import java.util.List;
+import java.util.Arrays;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -29,7 +30,7 @@ import com.vaadin.flow.router.Route;
 @Route("vaadin-combo-box/clear-value")
 public class ClearValuePage extends Div {
     static final String INITIAL_VALUE = "two";
-    static final List<String> ITEMS = List.of("one", "two", "three");
+    static final List<String> ITEMS = Arrays.asList("one", "two", "three");
 
     static final String COMBO_BOX = "combo-box";
     static final String COMBO_BOX_CLEAR_BUTTON = "combo-box-clear-button";
