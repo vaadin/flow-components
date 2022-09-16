@@ -260,8 +260,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
                 setItems();
             }
         });
-
-        super.addValueChangeListener(e -> updateSelectedKey());
     }
 
     /**
