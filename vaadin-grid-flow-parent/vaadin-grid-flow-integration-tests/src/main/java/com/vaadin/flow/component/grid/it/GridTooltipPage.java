@@ -28,8 +28,8 @@ public class GridTooltipPage extends Div {
         var grid = new Grid<>(Person.class);
         grid.setItems(new Person("Jack", 32), new Person("Jill", 33));
 
-        grid.getColumnByKey("firstName").setTooltipGenerator(
-                person -> "First name of the person is "
+        grid.getColumnByKey("firstName")
+                .setTooltipGenerator(person -> "First name of the person is "
                         + person.getFirstName());
 
         var setAgeTooltipButton = new NativeButton("Set tooltip to age column",
