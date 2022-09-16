@@ -1044,6 +1044,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          */
         public Column<T> setTooltipTextGenerator(
                 SerializableFunction<T, String> tooltipTextGenerator) {
+            Objects.requireNonNull(classNameGenerator,
+                    "Tooltip text generator can not be null");
+
             if (!getGrid().getElement().getChildren().anyMatch(
                     child -> "tooltip".equals(child.getAttribute("slot")))) {
                 // No <vaadin-tooltip> yet added to the grid, add one
