@@ -114,10 +114,10 @@ import elemental.json.JsonObject;
  * </p>
  */
 @Tag("vaadin-upload")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.7")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/upload", version = "23.1.7")
-@NpmPackage(value = "@vaadin/vaadin-upload", version = "23.1.7")
+@NpmPackage(value = "@vaadin/upload", version = "23.1.8")
+@NpmPackage(value = "@vaadin/vaadin-upload", version = "23.1.8")
 @JsModule("@vaadin/upload/src/vaadin-upload.js")
 public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
         extends Component implements HasStyle {
