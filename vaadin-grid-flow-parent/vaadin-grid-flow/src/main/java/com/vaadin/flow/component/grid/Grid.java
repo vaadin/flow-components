@@ -206,10 +206,11 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/grid", version = "23.2.0")
-@NpmPackage(value = "@vaadin/vaadin-grid", version = "23.2.0")
+@NpmPackage(value = "@vaadin/grid", version = "23.3.0-alpha1")
+@NpmPackage(value = "@vaadin/vaadin-grid", version = "23.3.0-alpha1")
+@NpmPackage(value = "@vaadin/tooltip", version = "23.3.0-alpha1")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -217,6 +218,7 @@ import org.slf4j.LoggerFactory;
 @JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./gridConnector.js")
+@JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
 public class Grid<T> extends Component implements HasStyle, HasSize,
         Focusable<Grid<T>>, SortNotifier<Grid<T>, GridSortOrder<T>>, HasTheme,
         HasDataGenerators<T>, HasListDataView<T, GridListDataView<T>>,
@@ -445,7 +447,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-column")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha1")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class Column<T> extends AbstractColumn<Column<T>> {
 
@@ -475,6 +477,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         private Rendering<T> rendering;
 
         private SerializableFunction<T, String> classNameGenerator = item -> null;
+        private SerializableFunction<T, String> tooltipTextGenerator = item -> null;
 
         /**
          * Constructs a new Column for use inside a Grid.
@@ -1029,6 +1032,42 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
 
         /**
+         * Sets the function that is used for generating tooltip text for cells
+         * in this column. Returning {@code null} from the generator results in
+         * no tooltip being set.
+         *
+         * @param tooltipTextGenerator
+         *            the tooltip text generator to set, not {@code null}
+         * @return this column
+         * @throws NullPointerException
+         *             if {@code classNameGenerator} is {@code null}
+         */
+        public Column<T> setTooltipTextGenerator(
+                SerializableFunction<T, String> tooltipTextGenerator) {
+            Objects.requireNonNull(classNameGenerator,
+                    "Tooltip text generator can not be null");
+
+            if (!getGrid().getElement().getChildren().anyMatch(
+                    child -> "tooltip".equals(child.getAttribute("slot")))) {
+                // No <vaadin-tooltip> yet added to the grid, add one
+                var tooltipElement = new Element("vaadin-tooltip");
+                tooltipElement.setAttribute("slot", "tooltip");
+
+                tooltipElement.addAttachListener(e -> {
+                    // Assigns a textGenerator that returns a column-specfic
+                    // tooltip text from the item
+                    tooltipElement.executeJs(
+                            "this.textGenerator = ({item, column}) => item.gridtooltips[column._flowId]");
+                });
+                getGrid().getElement().appendChild(tooltipElement);
+            }
+
+            this.tooltipTextGenerator = tooltipTextGenerator;
+            getGrid().getDataCommunicator().reset();
+            return this;
+        }
+
+        /**
          * Gets the function that is used for generating CSS class names for
          * cells in this column.
          *
@@ -1036,6 +1075,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          */
         public SerializableFunction<T, String> getClassNameGenerator() {
             return classNameGenerator;
+        }
+
+        public SerializableFunction<T, String> getTooltipTextGenerator() {
+            return tooltipTextGenerator;
         }
 
         @Override
@@ -1469,6 +1512,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         gridDataGenerator = new CompositeDataGenerator<>();
         gridDataGenerator.addDataGenerator(this::generateUniqueKeyData);
         gridDataGenerator.addDataGenerator(this::generateStyleData);
+        gridDataGenerator.addDataGenerator(this::generateTooltipTextData);
         gridDataGenerator.addDataGenerator(this::generateRowsDragAndDropAccess);
         gridDataGenerator.addDataGenerator(this::generateDragData);
 
@@ -3855,6 +3899,21 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public SerializableFunction<T, String> getClassNameGenerator() {
         return classNameGenerator;
+    }
+
+    private void generateTooltipTextData(T item, JsonObject jsonObject) {
+        JsonObject tooltips = Json.createObject();
+
+        idToColumnMap.forEach((id, column) -> {
+            String cellTooltip = column.getTooltipTextGenerator().apply(item);
+            if (cellTooltip != null) {
+                tooltips.put(id, cellTooltip);
+            }
+        });
+
+        if (tooltips.keys().length > 0) {
+            jsonObject.put("gridtooltips", tooltips);
+        }
     }
 
     private void generateStyleData(T item, JsonObject jsonObject) {

@@ -60,10 +60,10 @@ import elemental.json.JsonObject;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-combo-box")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/combo-box", version = "23.2.0")
-@NpmPackage(value = "@vaadin/vaadin-combo-box", version = "23.2.0")
+@NpmPackage(value = "@vaadin/combo-box", version = "23.3.0-alpha1")
+@NpmPackage(value = "@vaadin/vaadin-combo-box", version = "23.3.0-alpha1")
 @JsModule("@vaadin/combo-box/src/vaadin-combo-box.js")
 @JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 @JsModule("./flow-component-renderer.js")
@@ -71,7 +71,6 @@ import elemental.json.JsonObject;
 public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
         implements HasThemeVariant<ComboBoxVariant> {
 
-    private static final String PROP_INPUT_ELEMENT_VALUE = "_inputElementValue";
     private static final String PROP_SELECTED_ITEM = "selectedItem";
     private static final String PROP_VALUE = "value";
 
@@ -314,7 +313,12 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
         if (value == null) {
             getElement().setProperty(PROP_SELECTED_ITEM, null);
             getElement().setProperty(PROP_VALUE, "");
-            getElement().setProperty(PROP_INPUT_ELEMENT_VALUE, "");
+            // Force _inputElementValue update on the client-side by using
+            // `executeJs` to ensure the input's value will be cleared even
+            // if the component's value hasn't changed. The latter can be
+            // the case when calling `clear()` in a `customValueSet` listener
+            // which is triggered before any value is committed.
+            getElement().executeJs("this._inputElementValue = $0", "");
             return;
         }
 
@@ -325,7 +329,7 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
         getDataGenerator().generateData(value, json);
         getElement().setPropertyJson(PROP_SELECTED_ITEM, json);
         getElement().setProperty(PROP_VALUE, keyMapper.key(value));
-        getElement().setProperty(PROP_INPUT_ELEMENT_VALUE,
+        getElement().executeJs("this._inputElementValue = $0",
                 generateLabel(value));
     }
 

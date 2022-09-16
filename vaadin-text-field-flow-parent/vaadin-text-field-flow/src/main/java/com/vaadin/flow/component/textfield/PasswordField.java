@@ -26,6 +26,7 @@ import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.InputNotifier;
 import com.vaadin.flow.component.KeyNotifier;
@@ -49,7 +50,7 @@ public class PasswordField
         HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
         HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper, HasLabel,
         HasClearButton, HasAllowedCharPattern,
-        HasThemeVariant<TextFieldVariant>, HasValidator<String> {
+        HasThemeVariant<TextFieldVariant>, HasTooltip, HasValidator<String> {
     private ValueChangeMode currentMode;
 
     private boolean isConnectorAttached;

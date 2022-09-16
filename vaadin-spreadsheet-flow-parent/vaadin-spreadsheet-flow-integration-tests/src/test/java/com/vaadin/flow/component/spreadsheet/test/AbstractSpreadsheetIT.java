@@ -115,7 +115,7 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
     public List<String> getNamedRanges() {
         final List<WebElement> options = findElement(
                 By.className("namedrangebox"))
-                        .findElements(By.tagName("option"));
+                .findElements(By.tagName("option"));
 
         return options.stream().map(WebElement::getText)
                 .collect(Collectors.toList());

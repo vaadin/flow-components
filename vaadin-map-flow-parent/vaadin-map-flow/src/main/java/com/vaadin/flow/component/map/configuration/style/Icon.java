@@ -20,6 +20,8 @@ import com.vaadin.flow.component.map.configuration.Constants;
 import com.vaadin.flow.component.map.configuration.Feature;
 import com.vaadin.flow.server.StreamResource;
 
+import java.io.Serializable;
+
 /**
  * An icon or image that can be used to visually represent a {@link Feature}, by
  * using it as the feature's {@link Style#setImage(ImageStyle)}
@@ -221,7 +223,7 @@ public class Icon extends ImageStyle {
         }
     }
 
-    public static class Anchor {
+    public static class Anchor implements Serializable {
         private float x = 0.5f;
         private float y = 0.5f;
 
@@ -246,7 +248,7 @@ public class Icon extends ImageStyle {
         BOTTOM_LEFT, BOTTOM_RIGHT, TOP_LEFT, TOP_RIGHT,
     }
 
-    public static class ImageSize {
+    public static class ImageSize implements Serializable {
         int width;
         int height;
 

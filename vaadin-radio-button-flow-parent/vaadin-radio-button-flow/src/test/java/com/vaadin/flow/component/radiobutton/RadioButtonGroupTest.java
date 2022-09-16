@@ -32,6 +32,7 @@ import org.mockito.Mockito;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.HasValue.ValueChangeEvent;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupListDataView;
 import com.vaadin.flow.data.provider.DataCommunicatorTest;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -456,5 +457,11 @@ public class RadioButtonGroupTest {
                 .checkOldListenersRemovedOnComponentAttachAndDetach(
                         new RadioButtonGroup<>(), 1, 1, new int[] { 0, 1 },
                         new DataCommunicatorTest.MockUI());
+    }
+
+    @Test
+    public void implementsHasTooltip() {
+        RadioButtonGroup<String> group = new RadioButtonGroup<>();
+        Assert.assertTrue(group instanceof HasTooltip);
     }
 }
