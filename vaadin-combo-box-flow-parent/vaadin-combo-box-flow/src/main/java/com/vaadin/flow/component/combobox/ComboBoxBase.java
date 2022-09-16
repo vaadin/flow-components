@@ -153,17 +153,6 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
         // Disable template warnings
         getElement().setAttribute("suppress-template-warning", true);
 
-        // Synchronize input element value property state when setting a custom
-        // value. This is necessary to allow clearing the input value in
-        // `ComboBox.refreshValue`. If the input element value is not
-        // synchronized here, then setting the property to an empty value would
-        // not trigger a client update. Need to use
-        // `addInternalCustomValueSetListener` here, in order to avoid enabling
-        // custom values, which is a side effect of
-        // `ComboBoxBase.addCustomValueSetListener`.
-        addInternalCustomValueSetListener(e -> getElement()
-                .setProperty("_inputElementValue", e.getDetail()));
-
         // Notify data communicator when selection changes, which allows to
         // free up items / keys in the KeyMapper that are not used anymore in
         // the selection
