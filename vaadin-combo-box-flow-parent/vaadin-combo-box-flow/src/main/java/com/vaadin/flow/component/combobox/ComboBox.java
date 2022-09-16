@@ -93,7 +93,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         implements HasSize, HasValidation, HasFilterableDataProvider<T, String>,
         HasHelper {
 
-    private static final String PROP_INPUT_ELEMENT_VALUE = "_inputElementValue";
     private static final String PROP_SELECTED_ITEM = "selectedItem";
     private static final String PROP_VALUE = "value";
     private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
@@ -262,15 +261,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
             }
         });
 
-        // Synchronize input element value property state when setting a custom
-        // value. This is necessary to allow clearing the input value in
-        // `ComboBox.refreshValue`. If the input element value is not
-        // synchronized here, then setting the property to an empty value would
-        // not trigger a client update. Need to use `super` here, in order to
-        // avoid enabling custom values, which is a side effect of
-        // `ComboBox.addCustomValueSetListener`.
-        super.addCustomValueSetListener(e -> this.getElement()
-                .setProperty(PROP_INPUT_ELEMENT_VALUE, e.getDetail()));
+        super.addValueChangeListener(e -> updateSelectedKey());
     }
 
     /**
@@ -367,7 +358,12 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         if (value == null) {
             getElement().setProperty(PROP_SELECTED_ITEM, null);
             getElement().setProperty(PROP_VALUE, "");
-            getElement().setProperty(PROP_INPUT_ELEMENT_VALUE, "");
+            // Force _inputElementValue update on the client-side by using
+            // `executeJs` to ensure the input's value will be cleared even
+            // if the component's value hasn't changed. The latter can be
+            // the case when calling `clear()` in a `customValueSet` listener
+            // which is triggered before any value is committed.
+            getElement().executeJs("this._inputElementValue = $0", "");
             return;
         }
 
@@ -378,7 +374,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         dataGenerator.generateData(value, json);
         setSelectedItem(json);
         getElement().setProperty(PROP_VALUE, keyMapper.key(value));
-        getElement().setProperty(PROP_INPUT_ELEMENT_VALUE,
+        getElement().executeJs("this._inputElementValue = $0",
                 generateLabel(value));
     }
 

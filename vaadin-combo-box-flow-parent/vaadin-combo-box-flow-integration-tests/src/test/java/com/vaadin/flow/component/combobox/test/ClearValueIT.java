@@ -129,6 +129,25 @@ public class ClearValueIT extends AbstractComponentIT {
         Assert.assertEquals("", comboBox.getInputElementValue());
     }
 
+    @Test
+    public void allowCustomValue_enterNotAcceptableCustomValue_inputElementValueIsCleared() {
+        ComboBoxElement comboBox = $(ComboBoxElement.class)
+                .id(ClearValuePage.COMBO_BOX_WITH_ALLOW_CUSTOM_VALUE);
+
+        TestBenchElement clearButton = $("button").id(
+                ClearValuePage.COMBO_BOX_WITH_ALLOW_CUSTOM_VALUE_CLEAR_BUTTON);
+
+        // Clear initial value to set the state of the input element value
+        // property to an empty value
+        clearButton.click();
+        Assert.assertEquals("", comboBox.getInputElementValue());
+
+        // Enter a custom value that is cleared in the `customValueSet`
+        // listener.
+        comboBox.sendKeys("NotAcceptableCustomValue", Keys.ENTER);
+        Assert.assertEquals("", comboBox.getInputElementValue());
+    }
+
     private void checkEmptyValue(String comboBoxId, String buttonId,
             boolean allowCustomValue) {
         ComboBoxElement comboBox = $(ComboBoxElement.class).id(comboBoxId);
