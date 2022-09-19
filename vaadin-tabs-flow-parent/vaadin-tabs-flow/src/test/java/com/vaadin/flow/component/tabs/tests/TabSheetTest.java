@@ -83,6 +83,21 @@ public class TabSheetTest {
     }
 
     @Test
+    public void addSameTabAgain_addedAsTheLastTab() {
+        // Add a tab
+        var tab0 = tabSheet.add("Tab 0", new Span("Content 0"));
+        // Add another tab
+        tabSheet.add("Tab 1", new Span("Content 1"));
+
+        // Add the same Tab instance again
+        tabSheet.add(tab0, new Span("Content 0"));
+
+        // Check that the tab gets added as the last tab
+        Assert.assertEquals(1,
+                tab0.getElement().getParent().indexOfChild(tab0.getElement()));
+    }
+
+    @Test
     public void addSecondTab_contentNotAdded() {
         tabSheet.add("Tab 0", new Span("Content 0"));
 
