@@ -109,14 +109,15 @@ public class TabSheet extends Component
      * @param content
      *            the content related to the tab
      * @param position
-     *            the position where the tab should be added. If negative, the tab is added at the end.
+     *            the position where the tab should be added. If negative, the
+     *            tab is added at the end.
      * @return the added tab
      */
     public Tab add(Tab tab, Component content, int position) {
         Objects.requireNonNull(tab, "The tab to be added cannot be null");
         Objects.requireNonNull(content,
                 "The content to be added cannot be null");
-        
+
         if (position < 0) {
             tabs.add(tab);
         } else {
@@ -168,14 +169,13 @@ public class TabSheet extends Component
 
     /**
      * Removes the tab at the given position.
-     * 
+     *
      * @param position
-     *      the position of the tab to be removed
+     *            the position of the tab to be removed
      */
     public void remove(int position) {
         remove(getTabAt(position));
     }
-
 
     /**
      * Gets the zero-based index of the currently selected tab.
@@ -222,8 +222,8 @@ public class TabSheet extends Component
      * Returns the tab at the given position.
      *
      * @param index
-     *            the position of the tab, must be greater than or equals
-     *            to 0 and less than the number of tabs
+     *            the position of the tab, must be greater than or equals to 0
+     *            and less than the number of tabs
      * @return The tab at the given index
      * @throws IllegalArgumentException
      *             if the index is less than 0 or greater than or equals to the
