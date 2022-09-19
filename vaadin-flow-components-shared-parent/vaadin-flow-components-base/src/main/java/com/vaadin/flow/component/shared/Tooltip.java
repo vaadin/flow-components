@@ -77,7 +77,7 @@ public class Tooltip implements Serializable {
      *            the element to attach the tooltip to
      * @return the tooltip handle
      */
-    public static Tooltip forElement(Element element) {
+    private static Tooltip forElement(Element element) {
         // Create a new Tooltip handle instance
         var tooltip = new Tooltip();
 
