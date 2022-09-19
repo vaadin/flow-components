@@ -280,10 +280,10 @@ public class TabSheetTest {
     @Test
     public void addThemeVariants_hasThemeVariants() {
         tabSheet.addThemeVariants(TabSheetVariant.LUMO_TABS_CENTERED,
-                TabSheetVariant.LUMO_NO_BORDER);
+                TabSheetVariant.LUMO_BORDERED);
         Assert.assertTrue(tabSheet.getThemeName()
                 .contains(TabSheetVariant.LUMO_TABS_CENTERED.getVariantName()));
         Assert.assertTrue(tabSheet.getThemeName()
-                .contains(TabSheetVariant.LUMO_NO_BORDER.getVariantName()));
+                .contains(TabSheetVariant.LUMO_BORDERED.getVariantName()));
     }
 }
