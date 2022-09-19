@@ -216,6 +216,8 @@ public class MenuBar extends Component
      *
      * @param component
      *            the component to add inside new item
+     * @param tooltipText
+     *            the tooltip text for the new item
      * @return the added {@link MenuItem} component
      */
     public MenuItem addItem(Component component, String tooltipText) {
@@ -239,6 +241,8 @@ public class MenuBar extends Component
      *
      * @param text
      *            the text content for the new item
+     * @param tooltipText
+     *            the tooltip text for the new item
      * @param clickListener
      *            the handler for clicking the new item, can be {@code null} to
      *            not add listener
@@ -266,6 +270,8 @@ public class MenuBar extends Component
      *
      * @param component
      *            the component to add inside the added menu item
+     * @param tooltipText
+     *            the tooltip text for the new item
      * @param clickListener
      *            the handler for clicking the new item, can be {@code null} to
      *            not add listener
