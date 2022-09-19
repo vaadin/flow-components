@@ -131,17 +131,13 @@ public class TooltipTest {
     @Test
     public void createTooltip_fluentAPI() {
         ui.add(component);
-        
-        var tooltip =  Tooltip.forComponent(component)
-            .withText("foo")
-            .withFocusDelay(200)
-            .withHideDelay(1000)
-            .withHoverDelay(500)
-            .withPosition(TooltipPosition.BOTTOM_END)
-            .withManual(true);
+
+        var tooltip = Tooltip.forComponent(component).withText("foo")
+                .withFocusDelay(200).withHideDelay(1000).withHoverDelay(500)
+                .withPosition(TooltipPosition.BOTTOM_END).withManual(true);
 
         tooltip.setOpened(true);
-        
+
         Assert.assertEquals("foo",
                 getTooltipElement().get().getProperty("text"));
         Assert.assertEquals(200,
