@@ -38,6 +38,7 @@ import com.vaadin.flow.component.contextmenu.MenuManager;
 import com.vaadin.flow.component.contextmenu.SubMenu;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.JsonSerializer;
 
@@ -174,6 +175,107 @@ public class MenuBar extends Component
     public MenuItem addItem(Component component,
             ComponentEventListener<ClickEvent<MenuItem>> clickListener) {
         return menuManager.addItem(component, clickListener);
+    }
+
+    /**
+     * Creates a new {@link MenuItem} component with the provided text content
+     * and the tooltip text and adds it to the root level of this menu bar.
+     * <p>
+     * The added {@link MenuItem} component is placed inside a button in the
+     * menu bar. If this button overflows the menu bar horizontally, the
+     * {@link MenuItem} is moved out of the button, into a context menu openable
+     * via an overflow button at the end of the button row.
+     * <p>
+     * To add content to the sub menu opened by clicking the root level item,
+     * use {@link MenuItem#getSubMenu()}.
+     *
+     * @param text
+     *            the text content for the new item
+     * @param tooltipText
+     *            the tooltip text for the new item
+     * @return the added {@link MenuItem} component
+     */
+    public MenuItem addItem(String text, String tooltipText) {
+        var item = addItem(text);
+        setTooltip(item, tooltipText);
+        return item;
+    }
+
+    /**
+     * Creates a new {@link MenuItem} component with the provided tooltip text
+     * and adds it to the root level of this menu bar. The provided component is
+     * added into the created {@link MenuItem}.
+     * <p>
+     * The added {@link MenuItem} component is placed inside a button in the
+     * menu bar. If this button overflows the menu bar horizontally, the
+     * {@link MenuItem} is moved out of the button, into a context menu openable
+     * via an overflow button at the end of the button row.
+     * <p>
+     * To add content to the sub menu opened by clicking the root level item,
+     * use {@link MenuItem#getSubMenu()}.
+     *
+     * @param component
+     *            the component to add inside new item
+     * @return the added {@link MenuItem} component
+     */
+    public MenuItem addItem(Component component, String tooltipText) {
+        var item = addItem(component);
+        setTooltip(item, tooltipText);
+        return item;
+    }
+
+    /**
+     * Creates a new {@link MenuItem} component with the provided text content
+     * and the tooltip text and click listener and adds it to the root level of
+     * this menu bar.
+     * <p>
+     * The added {@link MenuItem} component is placed inside a button in the
+     * menu bar. If this button overflows the menu bar horizontally, the
+     * {@link MenuItem} is moved out of the button, into a context menu openable
+     * via an overflow button at the end of the button row.
+     * <p>
+     * To add content to the sub menu opened by clicking the root level item,
+     * use {@link MenuItem#getSubMenu()}.
+     *
+     * @param text
+     *            the text content for the new item
+     * @param clickListener
+     *            the handler for clicking the new item, can be {@code null} to
+     *            not add listener
+     * @return the added {@link MenuItem} component
+     */
+    public MenuItem addItem(String text, String tooltipText,
+            ComponentEventListener<ClickEvent<MenuItem>> clickListener) {
+        var item = addItem(text, clickListener);
+        setTooltip(item, tooltipText);
+        return item;
+    }
+
+    /**
+     * Creates a new {@link MenuItem} component with the provided click listener
+     * and the tooltip text and adds it to the root level of this menu bar. The
+     * provided component is added into the created {@link MenuItem}.
+     * <p>
+     * The added {@link MenuItem} component is placed inside a button in the
+     * menu bar. If this button overflows the menu bar horizontally, the
+     * {@link MenuItem} is moved out of the button, into a context menu openable
+     * via an overflow button at the end of the button row.
+     * <p>
+     * To add content to the sub menu opened by clicking the root level item,
+     * use {@link MenuItem#getSubMenu()}.
+     *
+     * @param component
+     *            the component to add inside the added menu item
+     * @param clickListener
+     *            the handler for clicking the new item, can be {@code null} to
+     *            not add listener
+     * @return the added {@link MenuItem} component
+     */
+    public MenuItem addItem(Component component, String tooltipText,
+            ComponentEventListener<ClickEvent<MenuItem>> clickListener) {
+        var item = addItem(component, clickListener);
+        setTooltip(item, tooltipText);
+        return item;
     }
 
     /**
@@ -392,5 +494,29 @@ public class MenuBar extends Component
             this.moreOptions = moreOptions;
             return this;
         }
+    }
+
+    /**
+     * Sets the tooltip property for the given menu item. A vaadin-tooltip
+     * element with a custom generator is created and added inside the menu bar
+     * in case it doesn't exist.
+     */
+    private void setTooltip(MenuItem item, String tooltipText) {
+        if (!getElement().getChildren().anyMatch(
+                child -> "tooltip".equals(child.getAttribute("slot")))) {
+            // No <vaadin-tooltip> yet added, add one
+            var tooltipElement = new Element("vaadin-tooltip");
+            tooltipElement.setAttribute("slot", "tooltip");
+
+            tooltipElement.addAttachListener(e -> {
+                // Assigns a generator that reads the tooltip property of the
+                // item component
+                tooltipElement.executeJs(
+                        "this.textGenerator = ({item}) => { return (item && item.component) ? item.component.tooltip : ''; }");
+            });
+            getElement().appendChild(tooltipElement);
+        }
+
+        item.getElement().setProperty("tooltip", tooltipText);
     }
 }
