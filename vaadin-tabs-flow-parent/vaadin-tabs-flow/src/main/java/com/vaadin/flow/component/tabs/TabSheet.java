@@ -27,7 +27,6 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
@@ -73,7 +72,7 @@ public class TabSheet extends Component
      * @return the created tab
      */
     public Tab add(String tabText, Component content) {
-        return add(new Text(tabText), content);
+        return add(new Tab(tabText), content);
     }
 
     /**
@@ -99,10 +98,30 @@ public class TabSheet extends Component
      * @return the added tab
      */
     public Tab add(Tab tab, Component content) {
+        return add(tab, content, -1);
+    }
+
+    /**
+     * Adds a tab with the given content to the given position.
+     *
+     * @param tab
+     *            the tab
+     * @param content
+     *            the content related to the tab
+     * @param position
+     *            the position where the tab should be added. If negative, the tab is added at the end.
+     * @return the added tab
+     */
+    public Tab add(Tab tab, Component content, int position) {
         Objects.requireNonNull(tab, "The tab to be added cannot be null");
         Objects.requireNonNull(content,
                 "The content to be added cannot be null");
-        tabs.add(tab);
+        
+        if (position < 0) {
+            tabs.add(tab);
+        } else {
+            tabs.addComponentAtIndex(position, tab);
+        }
 
         // On the client, content is associated with a tab by id
         var id = "tabsheet-tab-" + UUID.randomUUID().toString();
@@ -148,6 +167,17 @@ public class TabSheet extends Component
     }
 
     /**
+     * Removes the tab at the given position.
+     * 
+     * @param position
+     *      the position of the tab to be removed
+     */
+    public void remove(int position) {
+        remove(getTabAt(position));
+    }
+
+
+    /**
      * Gets the zero-based index of the currently selected tab.
      *
      * @return the zero-based index of the selected tab, or -1 if none of the
@@ -186,6 +216,32 @@ public class TabSheet extends Component
      */
     public void setSelectedTab(Tab selectedTab) {
         tabs.setSelectedTab(selectedTab);
+    }
+
+    /**
+     * Returns the tab at the given position.
+     *
+     * @param index
+     *            the position of the tab, must be greater than or equals
+     *            to 0 and less than the number of tabs
+     * @return The tab at the given index
+     * @throws IllegalArgumentException
+     *             if the index is less than 0 or greater than or equals to the
+     *             number of tabs
+     */
+    public Tab getTabAt(int position) {
+        return (Tab) tabs.getComponentAt(position);
+    }
+
+    /**
+     * Returns the index of the given tab.
+     *
+     * @param tab
+     *            the tab to look up, can not be <code>null</code>
+     * @return the index of the tab or -1 if the tab is not added
+     */
+    public int indexOf(Tab tab) {
+        return tabs.indexOf(tab);
     }
 
     /**
