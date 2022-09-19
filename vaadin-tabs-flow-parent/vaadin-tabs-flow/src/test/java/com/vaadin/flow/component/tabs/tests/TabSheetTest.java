@@ -69,6 +69,38 @@ public class TabSheetTest {
     }
 
     @Test
+    public void addSameTabAgainWithNewContent_oldContentRemoved() {
+        // Add a tab with content
+        var content0 = new Span("Content 0");
+        var tab0 = tabSheet.add("Tab 0", content0);
+
+        // Assert that the content is attached to the parent (the tab is
+        // selected)
+        Assert.assertEquals(tabSheet, content0.getParent().get());
+
+        // Add the same Tab instance again but with a new content component
+        tabSheet.add(tab0, new Span("Content 0"));
+
+        // Check that the old content is no longer attached to the parent
+        Assert.assertFalse(content0.getParent().isPresent());
+    }
+
+    @Test
+    public void addSameTabAgain_addedAsTheLastTab() {
+        // Add a tab
+        var tab0 = tabSheet.add("Tab 0", new Span("Content 0"));
+        // Add another tab
+        tabSheet.add("Tab 1", new Span("Content 1"));
+
+        // Add the same Tab instance again
+        tabSheet.add(tab0, new Span("Content 0"));
+
+        // Check that the tab gets added as the last tab
+        Assert.assertEquals(1,
+                tab0.getElement().getParent().indexOfChild(tab0.getElement()));
+    }
+
+    @Test
     public void addSecondTab_contentNotAdded() {
         tabSheet.add("Tab 0", new Span("Content 0"));
 
@@ -251,11 +283,11 @@ public class TabSheetTest {
     @Test
     public void addThemeVariants_hasThemeVariants() {
         tabSheet.addThemeVariants(TabSheetVariant.LUMO_TABS_CENTERED,
-                TabSheetVariant.LUMO_NO_BORDER);
+                TabSheetVariant.LUMO_BORDERED);
         Assert.assertTrue(tabSheet.getThemeName()
                 .contains(TabSheetVariant.LUMO_TABS_CENTERED.getVariantName()));
         Assert.assertTrue(tabSheet.getThemeName()
-                .contains(TabSheetVariant.LUMO_NO_BORDER.getVariantName()));
+                .contains(TabSheetVariant.LUMO_BORDERED.getVariantName()));
     }
 
     @Test

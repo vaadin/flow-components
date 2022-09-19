@@ -124,6 +124,11 @@ public class TabSheet extends Component
             tabs.addComponentAtIndex(position, tab);
         }
 
+        // Make sure possible old content related to the same tab gets removed
+        if (tabToContent.containsKey(tab)) {
+            tabToContent.get(tab).removeFromParent();
+        }
+
         // On the client, content is associated with a tab by id
         var id = "tabsheet-tab-" + UUID.randomUUID().toString();
         tab.setId(id);
