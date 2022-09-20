@@ -1,5 +1,6 @@
 package com.vaadin.flow.component.gridpro.tests;
 
+import java.time.Year;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -112,7 +113,7 @@ public class MainView extends VerticalLayout {
         beanGrid.setItems(createItems());
 
         beanGrid.addEditColumn("age").text(
-                (item, newValue) -> item.setAge(Integer.valueOf(newValue)));
+                (item, newValue) -> item.setAge(Integer.parseInt(newValue)));
 
         TextField textField = new TextField();
         beanGrid.addEditColumn("name").custom(textField,
@@ -125,6 +126,12 @@ public class MainView extends VerticalLayout {
         beanGrid.addEditColumn("department").select((item, newValue) -> {
             item.setDepartment(fromStringRepresentation((newValue)));
         }, listOptions).setHeader("Department").setWidth("300px");
+
+        TextField employmentYearField = new TextField();
+        beanGrid.addEditColumn(Person::getEmploymentYear).custom(
+                employmentYearField, item -> item.getEmploymentYear() + "",
+                (item, newValue) -> item
+                        .setEmploymentYear(Integer.parseInt(newValue)));
 
         add(beanGrid);
     }
@@ -148,6 +155,8 @@ public class MainView extends VerticalLayout {
         } else {
             person.setDepartment(Department.getRandomDepartment());
         }
+
+        person.setEmploymentYear(2020 - index);
 
         return person;
     }
