@@ -73,11 +73,13 @@ public class EditColumnConfigurator<T> implements Serializable {
         return getColumn();
     }
 
-    private <V> Column<T> configureColumn(ItemUpdater<T, String> itemUpdater,
+    private <V> Column<T> configureColumn(ValueProvider<T, V> valueProvider,
+            ItemUpdater<T, String> itemUpdater,
             EditorType type, HasValueAndElement<?, V> editorField) {
         column.setEditorType(type);
         column.setItemUpdater(itemUpdater);
         column.setEditorField(editorField);
+        column.setValueProvider(valueProvider);
 
         return getColumn();
     }
@@ -107,6 +109,14 @@ public class EditColumnConfigurator<T> implements Serializable {
 
     public <V> Column<T> custom(HasValueAndElement<?, V> component,
             ItemUpdater<T, V> itemUpdater) {
+        @SuppressWarnings("unchecked")
+        ValueProvider<T, V> valueProvider = (ValueProvider<T, V>) column
+                .getValueProvider();
+        return custom(component, valueProvider, itemUpdater);
+    }
+
+    public <V> Column<T> custom(HasValueAndElement<?, V> component,
+            ValueProvider<T, V> valueProvider, ItemUpdater<T, V> itemUpdater) {
         column.getElement().appendVirtualChild(component.getElement());
         if (attachRegistration != null) {
             attachRegistration.remove();
@@ -118,7 +128,8 @@ public class EditColumnConfigurator<T> implements Serializable {
         column.getElement().getNode()
                 .runWhenAttached(ui -> ui.beforeClientResponse(column,
                         context -> setEditModeRenderer(component)));
-        return configureColumn((item, ignore) -> itemUpdater.accept(item,
+        return configureColumn(valueProvider,
+                (item, ignore) -> itemUpdater.accept(item,
                 component.getValue()), EditorType.CUSTOM, component);
     }
 
