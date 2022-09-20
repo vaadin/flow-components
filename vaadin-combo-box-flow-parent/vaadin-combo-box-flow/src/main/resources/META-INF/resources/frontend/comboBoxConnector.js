@@ -21,6 +21,7 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
         const pageCallbacks = {};
         let cache = {};
         let lastFilter = '';
+        let pageInDebouncer;
         const placeHolder = new window.Vaadin.ComboBoxPlaceholder();
         const MAX_RANGE_COUNT = Math.max(comboBox.pageSize * 2, 500); // Max item count in active range
 
@@ -70,6 +71,13 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
         };
 
         comboBox.dataProvider = function (params, callback) {
+          const filterUnchanged = params.filter === lastFilter;
+          if (filterUnchanged && this._debouncer) {
+            if (pageInDebouncer !== params.page) {
+              pageCallbacks[params.page] = callback;
+            }
+            return;
+          }
           if (params.pageSize != comboBox.pageSize) {
             throw 'Invalid pageSize';
           }
@@ -92,11 +100,11 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
             }
           }
 
-          const filterChanged = params.filter !== lastFilter;
-          if (filterChanged) {
+          if (!filterUnchanged) {
             cache = {};
             lastFilter = params.filter;
             this._debouncer = Debouncer.debounce(this._debouncer, timeOut.after(500), () => {
+              pageInDebouncer = params.page;
               if (serverFacade.getLastFilterSentToServer() === params.filter) {
                 // Fixes the case when the filter changes
                 // to something else and back to the original value
@@ -107,6 +115,7 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
               if (params.filter !== lastFilter) {
                 throw new Error("Expected params.filter to be '" + lastFilter + "' but was '" + params.filter + "'");
               }
+              this._debouncer = undefined;
               // Call the method again after debounce.
               clearPageCallbacks();
               comboBox.dataProvider(params, callback);
@@ -138,13 +147,7 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
               const startIndex = params.pageSize * rangeMin;
               const endIndex = params.pageSize * (rangeMax + 1);
 
-              if (!this._debouncer || !this._debouncer.isActive()) {
-                serverFacade.requestData(startIndex, endIndex, params);
-              } else {
-                this._debouncer = Debouncer.debounce(this._debouncer, timeOut.after(200), () =>
-                  serverFacade.requestData(startIndex, endIndex, params)
-                );
-              }
+              serverFacade.requestData(startIndex, endIndex, params);
             }
           }
         };

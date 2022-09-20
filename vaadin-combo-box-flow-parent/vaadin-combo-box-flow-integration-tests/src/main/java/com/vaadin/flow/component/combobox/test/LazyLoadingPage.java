@@ -68,6 +68,8 @@ public class LazyLoadingPage extends Div {
         addSeparator();
         createComboBoxWithDisabledLazyLoading();
         addSeparator();
+        createComboBoxWithSmallPageSizeAndLazyLoading();
+        addSeparator();
     }
 
     private void createListDataProviderWithStringsAutoOpenDisabled() {
@@ -278,7 +280,7 @@ public class LazyLoadingPage extends Div {
     }
 
     private void createComboBoxWithDisabledLazyLoading() {
-        addTitle("ComboBox with disabled lazy loading");
+        addTitle("");
         ComboBox<Integer> comboBox = new ComboBox<>(100);
         comboBox.setId("disabled-lazy-loading");
         // Having a number of items less than or equal than the page size will
@@ -293,6 +295,17 @@ public class LazyLoadingPage extends Div {
         enableLazyLoading.setId("enable-lazy-loading");
 
         add(comboBox, enableLazyLoading);
+    }
+
+    private void createComboBoxWithSmallPageSizeAndLazyLoading() {
+        addTitle("Callback data provider with small page size 2");
+        ComboBox<String> comboBox = new ComboBox<>(2);
+        comboBox.setId("lazy-small-page-size");
+
+        comboBox.setItems(query -> IntStream.range(0, 500)
+                    .mapToObj(String::valueOf).skip(query.getOffset()).limit(query.getLimit()));
+
+        add(comboBox);
     }
 
     public static List<String> generateStrings(int count) {
