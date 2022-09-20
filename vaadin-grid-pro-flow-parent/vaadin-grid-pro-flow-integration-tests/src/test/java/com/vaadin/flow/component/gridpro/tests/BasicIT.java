@@ -140,7 +140,7 @@ public class BasicIT extends AbstractParallelTest {
         Assert.assertEquals(
                 "Person{id=1, age=23, name='Person 1', "
                         + "isSubscriber=false, email='person1@vaadin.com', "
-                        + "department=sales, city='City 1'}",
+                        + "department=sales, city='City 1', employmentYear=2019}",
                 getPanelText("events" + "-panel"));
     }
 
@@ -195,6 +195,16 @@ public class BasicIT extends AbstractParallelTest {
         Assert.assertTrue(optionsList.contains("Services"));
         Assert.assertTrue(optionsList.contains("Marketing"));
         Assert.assertTrue(optionsList.contains("Sales"));
+    }
+
+    @Test
+    public void customTextFieldIsGettingConvertedValue() {
+        GridTHTDElement cell = beanGrid.getCell(0, 3);
+        assertCellEnterEditModeOnDoubleClick(0, 3, "vaadin-text-field",
+                beanGrid, true);
+        TestBenchElement textField = cell.$("vaadin-text-field").first();
+
+        Assert.assertEquals("2019", textField.getProperty("value"));
     }
 
     @Test
