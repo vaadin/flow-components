@@ -302,8 +302,9 @@ public class LazyLoadingPage extends Div {
         ComboBox<String> comboBox = new ComboBox<>(2);
         comboBox.setId("lazy-small-page-size");
 
-        comboBox.setItems(query -> IntStream.range(0, 500)
-                    .mapToObj(String::valueOf).skip(query.getOffset()).limit(query.getLimit()));
+        comboBox.setItems(
+                query -> IntStream.range(0, 500).mapToObj(String::valueOf)
+                        .skip(query.getOffset()).limit(query.getLimit()));
 
         add(comboBox);
     }

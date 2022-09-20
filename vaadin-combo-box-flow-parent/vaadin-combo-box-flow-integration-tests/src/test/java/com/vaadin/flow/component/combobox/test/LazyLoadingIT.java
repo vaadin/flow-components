@@ -585,10 +585,12 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
 
         lazyWithSmallCustomPageSize.selectByText(item);
         lazyWithSmallCustomPageSize.setFilter(item);
-        Assert.assertEquals(item, getSelectedItemLabel(lazyWithSmallCustomPageSize));
+        Assert.assertEquals(item,
+                getSelectedItemLabel(lazyWithSmallCustomPageSize));
 
         lazyWithSmallCustomPageSize.closePopup();
-        Assert.assertEquals(item, getSelectedItemLabel(lazyWithSmallCustomPageSize));
+        Assert.assertEquals(item,
+                getSelectedItemLabel(lazyWithSmallCustomPageSize));
 
         lazyWithSmallCustomPageSize.click();
         assertLoadingStateResolved(lazyWithSmallCustomPageSize);
