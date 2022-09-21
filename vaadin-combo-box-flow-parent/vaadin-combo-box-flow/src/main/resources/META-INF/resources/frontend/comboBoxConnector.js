@@ -107,6 +107,8 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
               if (params.filter !== lastFilter) {
                 throw new Error("Expected params.filter to be '" + lastFilter + "' but was '" + params.filter + "'");
               }
+              // Remove the debouncer before clearing page callbacks.
+              // This makes sure that they are executed.
               this._filterDebouncer = undefined;
               // Call the method again after debounce.
               clearPageCallbacks();
@@ -115,6 +117,8 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
             return;
           }
 
+          // Postpone the execution of new callbacks if there is an active debouncer.
+          // They will be executed when the page callbacks are cleared within the debouncer.
           if (this._filterDebouncer) {
             pageCallbacks[params.page] = callback;
             return;

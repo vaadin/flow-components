@@ -580,6 +580,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
     }
 
     @Test
+    // https://github.com/vaadin/flow-components/issues/3595
     public void customPageSize_filter_selectItem_loadingStateResolved() {
         String item = "2";
 
