@@ -169,6 +169,17 @@ public class Tooltip implements Serializable {
     }
 
     /**
+     * String used as a tooltip content.
+     *
+     * @param text
+     *            the text to set
+     */
+    public Tooltip withText(String text) {
+        setText(text);
+        return this;
+    }
+
+    /**
      * The delay in milliseconds before the tooltip is opened on focus, when not
      * in manual mode.
      *
@@ -187,6 +198,18 @@ public class Tooltip implements Serializable {
      */
     public int getFocusDelay() {
         return tooltipElement.getProperty("focusDelay", 0);
+    }
+
+    /**
+     * The delay in milliseconds before the tooltip is opened on focus, when not
+     * in manual mode.
+     *
+     * @param focusDelay
+     *            the delay in milliseconds
+     */
+    public Tooltip withFocusDelay(int focusDelay) {
+        setFocusDelay(focusDelay);
+        return this;
     }
 
     /**
@@ -211,6 +234,18 @@ public class Tooltip implements Serializable {
     }
 
     /**
+     * The delay in milliseconds before the tooltip is closed on losing hover,
+     * when not in manual mode. On blur, the tooltip is closed immediately.
+     *
+     * @param hideDelay
+     *            the delay in milliseconds
+     */
+    public Tooltip withHideDelay(int hideDelay) {
+        setHideDelay(hideDelay);
+        return this;
+    }
+
+    /**
      * The delay in milliseconds before the tooltip is opened on hover, when not
      * in manual mode.
      *
@@ -229,6 +264,18 @@ public class Tooltip implements Serializable {
      */
     public int getHoverDelay() {
         return tooltipElement.getProperty("hoverDelay", 0);
+    }
+
+    /**
+     * The delay in milliseconds before the tooltip is opened on hover, when not
+     * in manual mode.
+     *
+     * @param hoverDelay
+     *            the delay in milliseconds
+     */
+    public Tooltip withHoverDelay(int hoverDelay) {
+        setHoverDelay(hoverDelay);
+        return this;
     }
 
     /**
@@ -253,6 +300,17 @@ public class Tooltip implements Serializable {
     }
 
     /**
+     * Position of the tooltip with respect to its target.
+     *
+     * @param position
+     *            the position to set
+     */
+    public Tooltip withPosition(TooltipPosition position) {
+        setPosition(position);
+        return this;
+    }
+
+    /**
      * When true, the tooltip is controlled programmatically instead of reacting
      * to focus and mouse events.
      *
@@ -271,6 +329,18 @@ public class Tooltip implements Serializable {
      */
     public boolean isManual() {
         return tooltipElement.getProperty("manual", false);
+    }
+
+    /**
+     * When true, the tooltip is controlled programmatically instead of reacting
+     * to focus and mouse events.
+     *
+     * @param manual
+     *            true to enable manual mode
+     */
+    public Tooltip withManual(boolean manual) {
+        setManual(manual);
+        return this;
     }
 
     /**

@@ -28,13 +28,13 @@ public class GridTooltipPage extends Div {
         var grid = new Grid<>(Person.class);
         grid.setItems(new Person("Jack", 32), new Person("Jill", 33));
 
-        grid.getColumnByKey("firstName").setTooltipTextGenerator(
-                person -> "First name of the person is "
+        grid.getColumnByKey("firstName")
+                .setTooltipGenerator(person -> "First name of the person is "
                         + person.getFirstName());
 
         var setAgeTooltipButton = new NativeButton("Set tooltip to age column",
                 event -> {
-                    grid.getColumnByKey("age").setTooltipTextGenerator(
+                    grid.getColumnByKey("age").setTooltipGenerator(
                             person -> "Age of the person is "
                                     + person.getAge());
                 });
