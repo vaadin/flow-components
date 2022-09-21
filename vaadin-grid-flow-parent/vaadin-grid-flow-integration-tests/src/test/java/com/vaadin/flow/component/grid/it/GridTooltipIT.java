@@ -33,6 +33,11 @@ public class GridTooltipIT extends AbstractComponentIT {
     }
 
     @Test
+    public void tooltipGenerator_shouldNotProduceErrors() {
+        checkLogsForErrors(msg -> !msg.contains("Cannot read properties of undefined"));
+    }
+
+    @Test
     public void hoverOverTooltipColumnCell_showTooltip() {
         var grid = $(GridElement.class).first();
         showTooltip(grid.getCell("Jack"));
