@@ -64,7 +64,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         disabledLazyLoadingBox = $(ComboBoxElement.class)
                 .id("disabled-lazy-loading");
         lazyWithSmallCustomPageSize = $(ComboBoxElement.class)
-                .id("lazy-small-page-size");
+                .id("lazy-small-custom-page-size");
     }
 
     @Test
