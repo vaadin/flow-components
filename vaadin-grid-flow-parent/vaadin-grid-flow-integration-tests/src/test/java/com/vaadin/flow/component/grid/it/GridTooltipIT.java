@@ -34,7 +34,8 @@ public class GridTooltipIT extends AbstractComponentIT {
 
     @Test
     public void tooltipGenerator_shouldNotProduceErrors() {
-        checkLogsForErrors(msg -> !msg.contains("Cannot read properties of undefined"));
+        checkLogsForErrors(
+                msg -> !msg.contains("Cannot read properties of undefined"));
     }
 
     @Test
