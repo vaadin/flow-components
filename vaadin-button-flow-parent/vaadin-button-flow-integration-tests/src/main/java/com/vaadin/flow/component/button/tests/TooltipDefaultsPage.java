@@ -32,7 +32,7 @@ public class TooltipDefaultsPage extends Div {
 
         Button button = new Button("Set tooltip default hide delay to 1000");
         // Use component-specific delay to override the default
-        button.setTooltip("Tooltip").setHoverDelay(100);
+        button.setTooltipText("Tooltip").setHoverDelay(100);
 
         // Dynamically change the default hide delay
         button.addClickListener(
