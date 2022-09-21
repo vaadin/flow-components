@@ -53,7 +53,6 @@ import elemental.json.JsonType;
 @Tag("vaadin-menu-bar")
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@JsModule("./contextMenuConnector.js")
 @JsModule("./menubarConnector.js")
 @JsModule("@vaadin/menu-bar/src/vaadin-menu-bar.js")
 @NpmPackage(value = "@vaadin/menu-bar", version = "23.3.0-alpha1")
