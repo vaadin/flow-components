@@ -280,7 +280,7 @@ public class LazyLoadingPage extends Div {
     }
 
     private void createComboBoxWithDisabledLazyLoading() {
-        addTitle("");
+        addTitle("ComboBox with disabled lazy loading");
         ComboBox<Integer> comboBox = new ComboBox<>(100);
         comboBox.setId("disabled-lazy-loading");
         // Having a number of items less than or equal than the page size will
@@ -300,7 +300,7 @@ public class LazyLoadingPage extends Div {
     private void createComboBoxWithSmallPageSizeAndLazyLoading() {
         addTitle("Callback data provider with small page size 2");
         ComboBox<String> comboBox = new ComboBox<>(2);
-        comboBox.setId("lazy-small-page-size");
+        comboBox.setId("lazy-small-custom-page-size");
 
         comboBox.setItems(
                 query -> IntStream.range(0, 500).mapToObj(String::valueOf)
