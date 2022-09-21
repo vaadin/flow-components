@@ -1057,7 +1057,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                     // Assigns a generator that returns a column-specfic
                     // tooltip text from the item
                     tooltipElement.executeJs(
-                            "this.textGenerator = ({item, column}) => item.gridtooltips[column._flowId]");
+                            "this.textGenerator = ({item, column}) => { return (item && item.gridtooltips && column) ? item.gridtooltips[column._flowId] : ''; }");
                 });
                 getGrid().getElement().appendChild(tooltipElement);
             }
