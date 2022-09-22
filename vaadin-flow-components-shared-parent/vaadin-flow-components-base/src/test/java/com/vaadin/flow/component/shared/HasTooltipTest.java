@@ -30,56 +30,64 @@ public class HasTooltipTest {
     }
 
     @Test
-    public void default_doesNotHaveTooltip() {
-        Assert.assertNull(component.getTooltip());
-    }
-
-    @Test
-    public void setTooltip_hasTooltipElement() {
-        component.setTooltip("foo");
+    public void getTooltip_hasTooltipElement() {
+        var tooltip = component.getTooltip();
+        Assert.assertNotNull(tooltip);
         Assert.assertTrue(getTooltipElement(component).isPresent());
     }
 
     @Test
-    public void setTooltip_hasTooltip() {
-        var tooltip = component.setTooltip("foo");
+    public void getTooltip_hasNoText() {
+        var tooltip = component.getTooltip();
+        Assert.assertNull(tooltip.getText());
+    }
+
+    @Test
+    public void setTooltipText_hasTooltipElement() {
+        component.setTooltipText("foo");
+        Assert.assertTrue(getTooltipElement(component).isPresent());
+    }
+
+    @Test
+    public void setTooltipText_hasTooltip() {
+        var tooltip = component.setTooltipText("foo");
         Assert.assertEquals(tooltip, component.getTooltip());
     }
 
     @Test
-    public void setTooltipAgain_hasTooltip() {
-        var tooltip = component.setTooltip("foo");
-        var tooltip2 = component.setTooltip("bar");
+    public void setTooltipTextAgain_hasTooltip() {
+        var tooltip = component.setTooltipText("foo");
+        var tooltip2 = component.setTooltipText("bar");
         Assert.assertEquals(tooltip, tooltip2);
         Assert.assertEquals(component.getTooltip().getText(), "bar");
     }
 
     @Test
-    public void setTooltipNull_hasTooltip() {
-        var tooltip = component.setTooltip("foo");
-        var tooltip2 = component.setTooltip(null);
+    public void setTooltipTextNull_hasTooltip() {
+        var tooltip = component.setTooltipText("foo");
+        var tooltip2 = component.setTooltipText(null);
         Assert.assertEquals(tooltip, tooltip2);
         Assert.assertEquals(component.getTooltip().getText(), null);
     }
 
     @Test
-    public void setTooltip_tooltipHasText() {
-        component.setTooltip("foo");
+    public void setTooltipText_tooltipHasText() {
+        component.setTooltipText("foo");
         Assert.assertEquals("foo",
                 getTooltipElement(component).get().getProperty("text"));
     }
 
     @Test
-    public void setTooltip_tooltipHasSlot() {
-        component.setTooltip("foo");
+    public void setTooltipText_tooltipHasSlot() {
+        component.setTooltipText("foo");
         Assert.assertEquals("tooltip",
                 getTooltipElement(component).get().getAttribute("slot"));
     }
 
     @Test
-    public void setTooltipAgain_hasOneTooltipElement() {
-        component.setTooltip("foo");
-        component.setTooltip("bar");
+    public void setTooltipTextAgain_hasOneTooltipElement() {
+        component.setTooltipText("foo");
+        component.setTooltipText("bar");
         Assert.assertEquals(1, getTooltipElements(component).count());
     }
 
