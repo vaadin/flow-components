@@ -38,11 +38,10 @@ import com.vaadin.flow.function.SerializableFunction;
  * @author Vaadin Ltd.
  */
 public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T extends Number>
-        extends GeneratedVaadinNumberField<C, T>
-        implements HasSize, HasValidation, HasValueChangeMode,
-        HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
-        HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper,
-        HasLabel {
+        extends GeneratedVaadinNumberField<C, T> implements HasSize,
+        HasValidation, HasValueChangeMode, HasPrefixAndSuffix, InputNotifier,
+        KeyNotifier, CompositionNotifier, HasAutocomplete, HasAutocapitalize,
+        HasAutocorrect, HasHelper, HasLabel {
 
     private ValueChangeMode currentMode;
 
