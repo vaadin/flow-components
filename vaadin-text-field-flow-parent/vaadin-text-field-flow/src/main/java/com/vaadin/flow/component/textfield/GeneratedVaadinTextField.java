@@ -15,6 +15,9 @@
  */
 package com.vaadin.flow.component.textfield;
 
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
@@ -24,7 +27,6 @@ import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.NotSupported;
-import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -33,9 +35,6 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.shared.Registration;
-
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * <p>
@@ -496,21 +495,6 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      */
     protected String getLabelString() {
         return getElement().getProperty("label");
-    }
-
-    /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
-     * String used for the label element.
-     * </p>
-     *
-     * @param label
-     *            the String value to set
-     */
-    protected void setLabel(String label) {
-        getElement().setProperty("label", label == null ? "" : label);
     }
 
     /**

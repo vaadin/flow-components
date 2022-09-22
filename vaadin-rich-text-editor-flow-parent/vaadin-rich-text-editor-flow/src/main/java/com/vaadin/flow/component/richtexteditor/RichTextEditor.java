@@ -16,8 +16,13 @@ package com.vaadin.flow.component.richtexteditor;
  * If not, see <http://vaadin.com/license/cval-3>.
  * #L%
  */
+
+import java.io.Serializable;
+import java.util.Objects;
+
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.CompositionNotifier;
+import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.InputNotifier;
@@ -31,10 +36,8 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
-import elemental.json.JsonObject;
 
-import java.io.Serializable;
-import java.util.Objects;
+import elemental.json.JsonObject;
 
 /**
  * Server-side component for the {@code <vaadin-rich-text-editor>} component.
@@ -56,7 +59,7 @@ import java.util.Objects;
 public class RichTextEditor
         extends GeneratedVaadinRichTextEditor<RichTextEditor, String>
         implements HasSize, HasValueChangeMode, InputNotifier, KeyNotifier,
-        CompositionNotifier {
+        CompositionNotifier, HasLabel {
 
     private ValueChangeMode currentMode;
     private RichTextEditorI18n i18n;

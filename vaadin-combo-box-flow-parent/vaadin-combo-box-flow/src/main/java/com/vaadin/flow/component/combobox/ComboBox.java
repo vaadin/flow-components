@@ -26,8 +26,9 @@ import java.util.stream.Stream;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.HasHelper;
+import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.ItemLabelGenerator;
@@ -91,7 +92,7 @@ import elemental.json.JsonValue;
 @JsModule("./comboBoxConnector-es6.js")
 public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         implements HasSize, HasValidation, HasFilterableDataProvider<T, String>,
-        HasHelper {
+        HasHelper, HasLabel {
 
     private static final String PROP_SELECTED_ITEM = "selectedItem";
     private static final String PROP_VALUE = "value";
@@ -643,7 +644,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      * size callback.
      * <p>
      * This method is a shorthand for making a {@link CallbackDataProvider} that
-     * handles a partial {@link com.vaadin.data.provider.Query Query} object.
+     * handles a partial {@link com.vaadin.flow.data.provider.Query Query}
+     * object.
      * <p>
      * Changing the combo box's data provider resets its current value to
      * {@code null}.
@@ -952,6 +954,12 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         return isRequiredBoolean();
     }
 
+    /**
+     * Sets the label for the combobox.
+     *
+     * @param label
+     *            value for the {@code label} property in the combobox
+     */
     @Override
     public void setLabel(String label) {
         super.setLabel(label);
@@ -962,6 +970,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      *
      * @return the {@code label} property of the combobox
      */
+    @Override
     public String getLabel() {
         return getLabelString();
     }

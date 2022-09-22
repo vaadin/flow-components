@@ -22,20 +22,21 @@ package com.vaadin.flow.component.customfield;
 
 import java.util.Objects;
 
-import com.vaadin.flow.component.HasHelper;
-import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.component.dependency.NpmPackage;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.HasHelper;
+import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.Element;
 
 /**
@@ -55,7 +56,8 @@ import com.vaadin.flow.dom.Element;
 @JsModule("@vaadin/vaadin-custom-field/src/vaadin-custom-field.js")
 @HtmlImport("frontend://bower_components/vaadin-custom-field/src/vaadin-custom-field.html")
 public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
-        implements HasSize, HasValidation, Focusable<CustomField>, HasHelper {
+        implements HasSize, HasValidation, Focusable<CustomField>, HasHelper,
+        HasLabel {
 
     /**
      * Default constructor.
@@ -210,6 +212,7 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
      *
      * @return the {@code label} property from the webcomponent
      */
+    @Override
     public String getLabel() {
         return getElement().getProperty("label", null);
     }
@@ -220,6 +223,7 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
      * @param label
      *            value for the {@code label} property in the webcomponent
      */
+    @Override
     public void setLabel(String label) {
         getElement().setProperty("label", label);
     }

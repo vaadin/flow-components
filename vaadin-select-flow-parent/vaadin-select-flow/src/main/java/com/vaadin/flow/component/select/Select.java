@@ -15,10 +15,17 @@
  */
 package com.vaadin.flow.component.select;
 
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Stream;
+
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasHelper;
+import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.ItemLabelGenerator;
@@ -41,14 +48,6 @@ import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
 
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Stream;
-
 /**
  * A customizable drop-down select component similar to a native browser select.
  * <p>
@@ -66,7 +65,7 @@ import java.util.stream.Stream;
 @JavaScript("frontend://selectConnector.js")
 public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         implements HasDataProvider<T>, HasItemsAndComponents<T>, HasSize,
-        HasValidation, SingleSelect<Select<T>, T>, HasHelper {
+        HasValidation, SingleSelect<Select<T>, T>, HasHelper, HasLabel {
 
     public static final String LABEL_ATTRIBUTE = "label";
 
@@ -393,6 +392,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
      *
      * @return the label string, or {@code null} if not set
      */
+    @Override
     public String getLabel() {
         return super.getLabelString();
     }

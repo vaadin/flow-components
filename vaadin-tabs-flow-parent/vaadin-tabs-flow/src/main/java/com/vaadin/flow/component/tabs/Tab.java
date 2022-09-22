@@ -18,14 +18,15 @@ package com.vaadin.flow.component.tabs;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
-import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.HasLabel;
 
 /**
  * Server-side component for the {@code vaadin-tab} element.
  *
  * @author Vaadin Ltd.
  */
-public class Tab extends GeneratedVaadinTab<Tab> implements HasComponents {
+public class Tab extends GeneratedVaadinTab<Tab>
+        implements HasComponents, HasLabel {
 
     private static final String FLEX_GROW_CSS_PROPERTY = "flexGrow";
 
@@ -60,6 +61,7 @@ public class Tab extends GeneratedVaadinTab<Tab> implements HasComponents {
      *
      * @return the label
      */
+    @Override
     public final String getLabel() {
         return getElement().getText();
     }
@@ -70,6 +72,7 @@ public class Tab extends GeneratedVaadinTab<Tab> implements HasComponents {
      * @param label
      *            the label to display
      */
+    @Override
     public final void setLabel(String label) {
         getElement().setText(label);
     }

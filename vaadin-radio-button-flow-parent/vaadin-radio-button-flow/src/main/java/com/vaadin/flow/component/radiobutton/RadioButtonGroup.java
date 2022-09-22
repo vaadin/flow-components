@@ -22,8 +22,9 @@ import java.util.stream.Stream;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.HasHelper;
+import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.data.binder.HasDataProvider;
@@ -56,7 +57,7 @@ import com.vaadin.flow.shared.Registration;
 public class RadioButtonGroup<T>
         extends GeneratedVaadinRadioGroup<RadioButtonGroup<T>, T> implements
         HasItemsAndComponents<T>, SingleSelect<RadioButtonGroup<T>, T>,
-        HasDataProvider<T>, HasValidation, HasHelper {
+        HasDataProvider<T>, HasValidation, HasHelper, HasLabel {
 
     private final KeyMapper<T> keyMapper = new KeyMapper<>();
 
@@ -278,6 +279,12 @@ public class RadioButtonGroup<T>
         return super.getErrorMessageString();
     }
 
+    /**
+     * Sets the label for the field.
+     *
+     * @param label
+     *            value for the {@code label} property in the webcomponent
+     */
     @Override
     public void setLabel(String label) {
         super.setLabel(label);
@@ -288,6 +295,7 @@ public class RadioButtonGroup<T>
      *
      * @return the {@code label} property from the webcomponent
      */
+    @Override
     public String getLabel() {
         return super.getLabelString();
     }

@@ -19,6 +19,7 @@ package com.vaadin.flow.component.textfield;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.CompositionNotifier;
 import com.vaadin.flow.component.HasHelper;
+import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.InputNotifier;
@@ -35,7 +36,8 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 public class EmailField extends GeneratedVaadinEmailField<EmailField, String>
         implements HasSize, HasValidation, HasValueChangeMode,
         HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
-        HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper {
+        HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper,
+        HasLabel {
     private static final String EMAIL_PATTERN = "^" + "([a-zA-Z0-9_\\.\\-+])+" // local
             + "@" + "[a-zA-Z0-9-.]+" // domain
             + "\\." + "[a-zA-Z0-9-]{2,}" // tld
@@ -204,16 +206,12 @@ public class EmailField extends GeneratedVaadinEmailField<EmailField, String>
         super.setInvalid(invalid);
     }
 
-    @Override
-    public void setLabel(String label) {
-        super.setLabel(label);
-    }
-
     /**
      * String used for the label element.
      *
      * @return the {@code label} property from the webcomponent
      */
+    @Override
     public String getLabel() {
         return getLabelString();
     }

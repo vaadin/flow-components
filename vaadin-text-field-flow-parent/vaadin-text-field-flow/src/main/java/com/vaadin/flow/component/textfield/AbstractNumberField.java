@@ -22,6 +22,7 @@ import java.util.Objects;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.CompositionNotifier;
 import com.vaadin.flow.component.HasHelper;
+import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.InputNotifier;
@@ -40,7 +41,8 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         extends GeneratedVaadinNumberField<C, T>
         implements HasSize, HasValidation, HasValueChangeMode,
         HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
-        HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper {
+        HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper,
+        HasLabel {
 
     private ValueChangeMode currentMode;
 
@@ -142,16 +144,12 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         super.setErrorMessage(errorMessage);
     }
 
-    @Override
-    public void setLabel(String label) {
-        super.setLabel(label);
-    }
-
     /**
      * String used for the label element.
      *
      * @return the {@code label} property from the webcomponent
      */
+    @Override
     public String getLabel() {
         return getLabelString();
     }
