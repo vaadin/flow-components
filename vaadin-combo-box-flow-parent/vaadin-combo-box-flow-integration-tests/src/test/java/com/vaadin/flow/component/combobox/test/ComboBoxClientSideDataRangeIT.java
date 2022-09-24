@@ -43,15 +43,15 @@ public class ComboBoxClientSideDataRangeIT extends AbstractComboBoxIT {
     public void defaultPageSize_scrollToEnd_onlyLastPageLoaded() {
         scrollToItem(comboBox, ITEMS_COUNT - 1);
         assertLoadingStateResolved(comboBox);
-        assertLoadedItemsCount(
-                String.format("Should have only %s items loaded after scrolling to the end",
-                        50),
-                50, comboBox);
+        assertLoadedItemsCount(String.format(
+                "Should have only %s items loaded after scrolling to the end",
+                50), 50, comboBox);
     }
 
     @Test
     public void defaultPageSize_scrollToEnd_scrollUpAndDown_morePagesLoaded_overflowingPagesDiscarded() {
-        scrollToEnd_scrollUpAndDown_morePagesLoaded_overflowingPagesDiscarded(50, 500);
+        scrollToEnd_scrollUpAndDown_morePagesLoaded_overflowingPagesDiscarded(
+                50, 500);
     }
 
     @Test
@@ -65,7 +65,8 @@ public class ComboBoxClientSideDataRangeIT extends AbstractComboBoxIT {
     public void setSmallPageSize_scrollToEnd_scrollUpAndDown_morePagesLoaded_overflowingPagesDiscarded() {
         $("input").id("set-page-size").sendKeys("10", Keys.ENTER);
 
-        scrollToEnd_scrollUpAndDown_morePagesLoaded_overflowingPagesDiscarded(10, 100);
+        scrollToEnd_scrollUpAndDown_morePagesLoaded_overflowingPagesDiscarded(
+                10, 100);
     }
 
     @Test
@@ -79,10 +80,12 @@ public class ComboBoxClientSideDataRangeIT extends AbstractComboBoxIT {
     public void setGreatPageSize_scrollToEnd_scrollUpAndDown_morePagesLoaded_overflowingPagesDiscarded() {
         $("input").id("set-page-size").sendKeys("100", Keys.ENTER);
 
-        scrollToEnd_scrollUpAndDown_morePagesLoaded_overflowingPagesDiscarded(100, 500);
+        scrollToEnd_scrollUpAndDown_morePagesLoaded_overflowingPagesDiscarded(
+                100, 500);
     }
 
-    private void scrollUpAndDown_morePagesLoaded_overflowingPagesDiscarded(int pageSize, int maxLoadedItemsCount) {
+    private void scrollUpAndDown_morePagesLoaded_overflowingPagesDiscarded(
+            int pageSize, int maxLoadedItemsCount) {
         comboBox.openPopup();
 
         // Scroll to the end page by page.
@@ -91,10 +94,9 @@ public class ComboBoxClientSideDataRangeIT extends AbstractComboBoxIT {
             assertLoadingStateResolved(comboBox);
 
             if (i >= maxLoadedItemsCount) {
-                assertLoadedItemsCount(
-                        String.format("Should have only %s items loaded after scrolling to the index %s",
-                                maxLoadedItemsCount, i),
-                        maxLoadedItemsCount, comboBox);
+                assertLoadedItemsCount(String.format(
+                        "Should have only %s items loaded after scrolling to the index %s",
+                        maxLoadedItemsCount, i), maxLoadedItemsCount, comboBox);
             }
         }
 
@@ -102,15 +104,14 @@ public class ComboBoxClientSideDataRangeIT extends AbstractComboBoxIT {
         for (int i = ITEMS_COUNT - 1; i >= 0; i -= pageSize) {
             scrollToItem(comboBox, i);
             assertLoadingStateResolved(comboBox);
-            assertLoadedItemsCount(
-                    String.format("Should have only %s items loaded after scrolling back to the index %s",
-                            maxLoadedItemsCount, i),
-                    maxLoadedItemsCount, comboBox);
+            assertLoadedItemsCount(String.format(
+                    "Should have only %s items loaded after scrolling back to the index %s",
+                    maxLoadedItemsCount, i), maxLoadedItemsCount, comboBox);
         }
     }
 
-    private void scrollToEnd_scrollUpAndDown_morePagesLoaded_overflowingPagesDiscarded(int pageSize,
-            int maxLoadedItemsCount) {
+    private void scrollToEnd_scrollUpAndDown_morePagesLoaded_overflowingPagesDiscarded(
+            int pageSize, int maxLoadedItemsCount) {
         comboBox.openPopup();
 
         // Scroll to the end.
@@ -123,10 +124,9 @@ public class ComboBoxClientSideDataRangeIT extends AbstractComboBoxIT {
             assertLoadingStateResolved(comboBox);
 
             if ((ITEMS_COUNT - 1) - i >= maxLoadedItemsCount) {
-                assertLoadedItemsCount(
-                        String.format("Should have only %s items loaded after scrolling to the index %s",
-                                maxLoadedItemsCount, i),
-                        maxLoadedItemsCount, comboBox);
+                assertLoadedItemsCount(String.format(
+                        "Should have only %s items loaded after scrolling to the index %s",
+                        maxLoadedItemsCount, i), maxLoadedItemsCount, comboBox);
             }
         }
 
@@ -134,10 +134,9 @@ public class ComboBoxClientSideDataRangeIT extends AbstractComboBoxIT {
         for (int i = 0; i < ITEMS_COUNT; i += pageSize) {
             scrollToItem(comboBox, i);
             assertLoadingStateResolved(comboBox);
-            assertLoadedItemsCount(
-                    String.format("Should have only %s items loaded after scrolling back to the index %s",
-                            maxLoadedItemsCount, i),
-                    maxLoadedItemsCount, comboBox);
+            assertLoadedItemsCount(String.format(
+                    "Should have only %s items loaded after scrolling back to the index %s",
+                    maxLoadedItemsCount, i), maxLoadedItemsCount, comboBox);
         }
     }
 }
