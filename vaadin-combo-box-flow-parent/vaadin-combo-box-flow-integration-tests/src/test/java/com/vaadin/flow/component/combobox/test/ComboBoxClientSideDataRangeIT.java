@@ -22,11 +22,11 @@ import org.openqa.selenium.Keys;
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.testutil.TestPath;
 
+import static com.vaadin.flow.component.combobox.test.ComboBoxClientSideDataRangePage.ITEMS_COUNT;
+
 @TestPath("vaadin-combo-box/client-side-data-range")
 public class ComboBoxClientSideDataRangeIT extends AbstractComboBoxIT {
     private ComboBoxElement comboBox;
-
-    private static final int MAX_LOADED_PAGES_COUNT = 10;
 
     @Before
     public void init() {
@@ -35,126 +35,109 @@ public class ComboBoxClientSideDataRangeIT extends AbstractComboBoxIT {
     }
 
     @Test
-    public void defaultPageSize_scrollBackAndForth_morePagesLoaded_overflowingPagesDiscarded() {
-        scrollBackAndForth_morePagesLoaded_overflowingPagesDiscarded(1000, 50);
+    public void defaultPageSize_scrollUpAndDown_morePagesLoaded_overflowingPagesDiscarded() {
+        scrollUpAndDown_morePagesLoaded_overflowingPagesDiscarded(50, 500);
     }
 
     @Test
-    public void setSmallPageSize_scrollBackAndForth_morePagesLoaded_overflowingPagesDiscarded() {
+    public void defaultPageSize_scrollToEnd_onlyLastPageLoaded() {
+        scrollToItem(comboBox, ITEMS_COUNT - 1);
+        assertLoadingStateResolved(comboBox);
+        assertLoadedItemsCount(
+                String.format("Should have only %s items loaded after scrolling to the end",
+                        50),
+                50, comboBox);
+    }
+
+    @Test
+    public void defaultPageSize_scrollToEnd_scrollUpAndDown_morePagesLoaded_overflowingPagesDiscarded() {
+        scrollToEnd_scrollUpAndDown_morePagesLoaded_overflowingPagesDiscarded(50, 500);
+    }
+
+    @Test
+    public void setSmallPageSize_scrollUpAndDown_morePagesLoaded_overflowingPagesDiscarded() {
         $("input").id("set-page-size").sendKeys("10", Keys.ENTER);
 
-        scrollBackAndForth_morePagesLoaded_overflowingPagesDiscarded(1000, 10);
+        scrollUpAndDown_morePagesLoaded_overflowingPagesDiscarded(10, 100);
     }
 
     @Test
-    public void setGreatPageSize_scrollBackAndForth_morePagesLoaded_overflowingPagesDiscarded() {
-        $("input").id("set-page-size").sendKeys("100", Keys.ENTER);
-
-        scrollBackAndForth_morePagesLoaded_overflowingPagesDiscarded(1000, 100);
-    }
-
-    @Test
-    public void defaultPageSize_scrollToEnd_scrollBackAndForth_morePagesLoaded_overflowingPagesDiscarded() {
-        scrollToEnd_scrollBackAndForth_morePagesLoaded_overflowingPagesDiscarded(1000, 50);
-    }
-
-    @Test
-    public void setSmallPageSize_scrollToEnd_scrollBackAndForth_morePagesLoaded_overflowingPagesDiscarded() {
+    public void setSmallPageSize_scrollToEnd_scrollUpAndDown_morePagesLoaded_overflowingPagesDiscarded() {
         $("input").id("set-page-size").sendKeys("10", Keys.ENTER);
 
-        scrollToEnd_scrollBackAndForth_morePagesLoaded_overflowingPagesDiscarded(1000, 10);
+        scrollToEnd_scrollUpAndDown_morePagesLoaded_overflowingPagesDiscarded(10, 100);
     }
 
     @Test
-    public void setGreatPageSize_scrollToEnd_scrollBackAndForth_morePagesLoaded_overflowingPagesDiscarded() {
+    public void setGreatPageSize_scrollUpAndDown_morePagesLoaded_overflowingPagesDiscarded() {
         $("input").id("set-page-size").sendKeys("100", Keys.ENTER);
 
-        scrollToEnd_scrollBackAndForth_morePagesLoaded_overflowingPagesDiscarded(1000, 100);
+        scrollUpAndDown_morePagesLoaded_overflowingPagesDiscarded(100, 500);
     }
 
-    private void scrollBackAndForth_morePagesLoaded_overflowingPagesDiscarded(int itemsCount, int pageSize) {
-        int pagesCount = itemsCount / pageSize;
-        int maxLoadedItemsCount = MAX_LOADED_PAGES_COUNT * pageSize;
+    @Test
+    public void setGreatPageSize_scrollToEnd_scrollUpAndDown_morePagesLoaded_overflowingPagesDiscarded() {
+        $("input").id("set-page-size").sendKeys("100", Keys.ENTER);
 
+        scrollToEnd_scrollUpAndDown_morePagesLoaded_overflowingPagesDiscarded(100, 500);
+    }
+
+    private void scrollUpAndDown_morePagesLoaded_overflowingPagesDiscarded(int pageSize, int maxLoadedItemsCount) {
         comboBox.openPopup();
 
-        // Scroll from the first page to the last page.
-        for (int page = 0; page < pagesCount; page++) {
-            int index = page * pageSize;
-            scrollToItem(comboBox, index);
-            waitUntilTextInContent("Item " + index);
+        // Scroll to the end page by page.
+        for (int i = 0; i < ITEMS_COUNT; i += pageSize) {
+            scrollToItem(comboBox, i);
+            assertLoadingStateResolved(comboBox);
 
-            if (page < MAX_LOADED_PAGES_COUNT) {
-                int loadedItemsCount = (page + 1) * pageSize;
+            if (i >= maxLoadedItemsCount) {
                 assertLoadedItemsCount(
-                        String.format("Should have %s items loaded after scrolling to the page %s", loadedItemsCount, page),
-                        loadedItemsCount,
-                        comboBox);
-            } else {
-                assertLoadedItemsCount(
-                    String.format("Should have %s items loaded after scrolling to the page %s", maxLoadedItemsCount,
-                            page),
-                    maxLoadedItemsCount,
-                    comboBox);
+                        String.format("Should have only %s items loaded after scrolling to the index %s",
+                                maxLoadedItemsCount, i),
+                        maxLoadedItemsCount, comboBox);
             }
         }
 
-        // Scroll from the last page to the first page.
-        for (int page = pagesCount; page >= 0; page--) {
-            int index = page * pageSize;
-            scrollToItem(comboBox, index);
-            waitUntilTextInContent("Item " + index);
+        // Scroll to the beginning page by page.
+        for (int i = ITEMS_COUNT - 1; i >= 0; i -= pageSize) {
+            scrollToItem(comboBox, i);
+            assertLoadingStateResolved(comboBox);
             assertLoadedItemsCount(
-                    String.format("Should have %s items loaded after scrolling back to the page %s", maxLoadedItemsCount,
-                            page),
-                    maxLoadedItemsCount,
-                    comboBox);
+                    String.format("Should have only %s items loaded after scrolling back to the index %s",
+                            maxLoadedItemsCount, i),
+                    maxLoadedItemsCount, comboBox);
         }
     }
 
-    private void scrollToEnd_scrollBackAndForth_morePagesLoaded_overflowingPagesDiscarded(int itemsCount, int pageSize) {
-        int pagesCount = itemsCount / pageSize;
-        int maxLoadedItemsCount = MAX_LOADED_PAGES_COUNT * pageSize;
-
+    private void scrollToEnd_scrollUpAndDown_morePagesLoaded_overflowingPagesDiscarded(int pageSize,
+            int maxLoadedItemsCount) {
         comboBox.openPopup();
 
-        // Scroll to end
-        int lastIndex = itemsCount - 1;
-        scrollToItem(comboBox, lastIndex);
-        waitUntilTextInContent("Item " + lastIndex);
-        assertLoadedItemsCount(String.format("Should have %s items loaded after scrolling to the end", pageSize), pageSize, comboBox);
+        // Scroll to the end.
+        scrollToItem(comboBox, ITEMS_COUNT - 1);
+        assertLoadingStateResolved(comboBox);
 
-        // Scroll from the last page to the first page.
-        for (int page = pagesCount - 1; page >= 0; page--) {
-            int index = page * pageSize;
-            scrollToItem(comboBox, index);
-            waitUntilTextInContent("Item " + index);
+        // Scroll to the beginning page by page.
+        for (int i = ITEMS_COUNT - 1; i >= 0; i -= pageSize) {
+            scrollToItem(comboBox, i);
+            assertLoadingStateResolved(comboBox);
 
-            if (pagesCount - page < MAX_LOADED_PAGES_COUNT) {
-                int loadedItemsCount = (pagesCount - page) * pageSize;
+            if ((ITEMS_COUNT - 1) - i >= maxLoadedItemsCount) {
                 assertLoadedItemsCount(
-                        String.format("Should have %s items loaded after scrolling to the page %s", loadedItemsCount, page),
-                        loadedItemsCount,
-                        comboBox);
-            } else {
-                assertLoadedItemsCount(
-                    String.format("Should have %s items loaded after scrolling to the page %s", maxLoadedItemsCount,
-                            page),
-                    maxLoadedItemsCount,
-                    comboBox);
+                        String.format("Should have only %s items loaded after scrolling to the index %s",
+                                maxLoadedItemsCount, i),
+                        maxLoadedItemsCount, comboBox);
             }
         }
 
-        // Scroll from the first page to the last page.
-        for (int page = 0; page <= pagesCount; page++) {
-            int index = page * pageSize;
-            scrollToItem(comboBox, index);
-            waitUntilTextInContent("Item " + index);
+        // Scroll to the end page by page.
+        for (int i = 0; i < ITEMS_COUNT; i += pageSize) {
+            scrollToItem(comboBox, i);
+            assertLoadingStateResolved(comboBox);
             assertLoadedItemsCount(
-                    String.format("Should have %s items loaded after scrolling to the page %s", maxLoadedItemsCount,
-                            page),
-                    maxLoadedItemsCount,
-                    comboBox);
+                    String.format("Should have only %s items loaded after scrolling back to the index %s",
+                            maxLoadedItemsCount, i),
+                    maxLoadedItemsCount, comboBox);
         }
     }
 }

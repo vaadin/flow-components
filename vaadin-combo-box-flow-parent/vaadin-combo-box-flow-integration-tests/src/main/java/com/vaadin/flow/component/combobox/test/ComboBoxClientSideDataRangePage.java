@@ -35,14 +35,14 @@ public class ComboBoxClientSideDataRangePage extends Div {
         }
         comboBox.setItems(items);
 
-        Input pageSizeInput = new Input();
-        pageSizeInput.setId("page-size-input");
-        pageSizeInput.setPlaceholder("Set page size");
-        pageSizeInput.addValueChangeListener(event -> {
+        Input setPageSizeInput = new Input();
+        setPageSizeInput.setId("set-page-size");
+        setPageSizeInput.setPlaceholder("Set page size");
+        setPageSizeInput.addValueChangeListener(event -> {
             Integer pageSize = Integer.parseInt(event.getValue());
             comboBox.setPageSize(pageSize);
         });
 
-        add(comboBox, pageSizeInput);
+        add(comboBox, setPageSizeInput);
     }
 }

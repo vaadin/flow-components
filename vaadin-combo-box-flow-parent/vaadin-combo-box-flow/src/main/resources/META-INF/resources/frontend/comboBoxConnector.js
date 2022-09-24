@@ -22,7 +22,6 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
         let cache = {};
         let lastFilter = '';
         const placeHolder = new window.Vaadin.ComboBoxPlaceholder();
-        const MAX_RANGE_COUNT = Math.min(comboBox.pageSize * 10, 500); // Max item count in active range
 
         const serverFacade = (() => {
           // Private variables
@@ -119,11 +118,12 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
             commitPage(params.page, callback);
           } else {
             pageCallbacks[params.page] = callback;
+            const maxLoadedItemsCount = Math.min(params.pageSize * 10, 500); // Max item count in active range
             const activePages = Object.keys(pageCallbacks).map((page) => parseInt(page));
             const rangeMin = Math.min(...activePages);
             const rangeMax = Math.max(...activePages);
 
-            if (activePages.length * params.pageSize > MAX_RANGE_COUNT) {
+            if (activePages.length * params.pageSize > maxLoadedItemsCount) {
               if (params.page === rangeMin) {
                 clearPageCallbacks([String(rangeMax)]);
               } else {
