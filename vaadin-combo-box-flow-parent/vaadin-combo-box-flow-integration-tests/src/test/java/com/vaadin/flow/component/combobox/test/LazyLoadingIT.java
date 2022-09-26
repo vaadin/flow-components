@@ -38,6 +38,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
     private ComboBoxElement emptyCallbackBox;
     private ComboBoxElement lazyCustomPageSize;
     private ComboBoxElement disabledLazyLoadingBox;
+    private ComboBoxElement lazyWithSmallCustomPageSize;
 
     private WebElement lazySizeRequestCountSpan;
 
@@ -62,6 +63,8 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
                 By.id("callback-dataprovider-size-request-count"));
         disabledLazyLoadingBox = $(ComboBoxElement.class)
                 .id("disabled-lazy-loading");
+        lazyWithSmallCustomPageSize = $(ComboBoxElement.class)
+                .id("lazy-small-custom-page-size");
     }
 
     @Test
@@ -562,7 +565,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         disabledLazyLoadingBox.openPopup();
         assertLoadedItemsCount("Initially all 100 items should be loaded", 100,
                 disabledLazyLoadingBox);
-        lazyCustomPageSize.closePopup();
+        disabledLazyLoadingBox.closePopup();
 
         clickButton("enable-lazy-loading");
         disabledLazyLoadingBox.openPopup();
@@ -574,6 +577,24 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         assertLoadedItemsCount("Scrolling down should load further pages", 100,
                 disabledLazyLoadingBox);
         assertRendered("99");
+    }
+
+    @Test
+    // https://github.com/vaadin/flow-components/issues/3595
+    public void smallCustomPageSize_filter_selectItem_loadingStateResolved() {
+        String item = "2";
+
+        lazyWithSmallCustomPageSize.selectByText(item);
+        lazyWithSmallCustomPageSize.setFilter(item);
+        Assert.assertEquals(item,
+                getSelectedItemLabel(lazyWithSmallCustomPageSize));
+
+        lazyWithSmallCustomPageSize.closePopup();
+        Assert.assertEquals(item,
+                getSelectedItemLabel(lazyWithSmallCustomPageSize));
+
+        lazyWithSmallCustomPageSize.click();
+        assertLoadingStateResolved(lazyWithSmallCustomPageSize);
     }
 
     private void assertMessage(String expectedMessage) {
