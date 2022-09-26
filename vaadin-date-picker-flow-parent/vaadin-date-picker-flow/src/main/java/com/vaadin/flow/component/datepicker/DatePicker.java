@@ -75,7 +75,7 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd
  */
 @JsModule("./datepickerConnector.js")
-@NpmPackage(value = "date-fns", version = "2.29.1")
+@NpmPackage(value = "date-fns", version = "2.29.3")
 public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         implements HasSize, HasValidation, HasHelper, HasTheme, HasLabel,
         HasClearButton, HasAllowedCharPattern, HasValidator<LocalDate>,
