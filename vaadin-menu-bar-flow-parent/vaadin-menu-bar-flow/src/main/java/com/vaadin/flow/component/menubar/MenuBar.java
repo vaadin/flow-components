@@ -520,7 +520,7 @@ public class MenuBar extends Component
                 // Assigns a generator that reads the tooltip property of the
                 // item component
                 tooltipElement.executeJs(
-                        "this.textGenerator = ({item}) => { return (item && item.component) ? item.component.tooltip : ''; }");
+                        "this.generator = ({item}) => { return (item && item.component) ? item.component.tooltip : ''; }");
             });
             getElement().appendChild(tooltipElement);
         }
