@@ -51,8 +51,7 @@ public class MapClickEvent extends ComponentEvent<MapBase> {
             @EventData("event.detail.originalEvent.button") int button) {
         super(source, fromClient);
 
-        this.coordinate = new Coordinate(coordinate.getNumber(0),
-                coordinate.getNumber(1));
+        this.coordinate = MapEventUtil.getCoordinate(coordinate);
 
         List<FeatureEventDetails> features = new ArrayList<>();
         for (int i = 0; i < featureIds.length(); i++) {
