@@ -45,29 +45,29 @@ public class GridTooltipTest {
     }
 
     @Test
-    public void setTooltipTextGenerator_hasTooltipElement() {
-        grid.addColumn(item -> item).setTooltipTextGenerator(item -> item);
+    public void setTooltipGenerator_hasTooltipElement() {
+        grid.addColumn(item -> item).setTooltipGenerator(item -> item);
         Assert.assertTrue(getTooltipElement(grid).isPresent());
     }
 
     @Test
-    public void setTooltipTextGenerator_hasFluidAPI() {
+    public void setTooltipGenerator_hasFluidAPI() {
         var column = grid.addColumn(item -> item)
-                .setTooltipTextGenerator(item -> item).setAutoWidth(true);
+                .setTooltipGenerator(item -> item).setAutoWidth(true);
         Assert.assertTrue(column.isAutoWidth());
     }
 
     @Test
     public void setTooltip_tooltipHasSlot() {
-        grid.addColumn(item -> item).setTooltipTextGenerator(item -> item);
+        grid.addColumn(item -> item).setTooltipGenerator(item -> item);
         Assert.assertEquals("tooltip",
                 getTooltipElement(grid).get().getAttribute("slot"));
     }
 
     @Test
-    public void setAnotherTooltipTextGenerator_hasOneTooltipElement() {
-        grid.addColumn(item -> item).setTooltipTextGenerator(item -> item);
-        grid.addColumn(item -> item).setTooltipTextGenerator(item -> item);
+    public void setAnotherTooltipGenerator_hasOneTooltipElement() {
+        grid.addColumn(item -> item).setTooltipGenerator(item -> item);
+        grid.addColumn(item -> item).setTooltipGenerator(item -> item);
         Assert.assertEquals(1, getTooltipElements(grid).count());
     }
 

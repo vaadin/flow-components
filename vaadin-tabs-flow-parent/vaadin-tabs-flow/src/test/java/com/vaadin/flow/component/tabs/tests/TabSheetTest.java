@@ -26,6 +26,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.TabSheet;
 import com.vaadin.flow.component.tabs.TabSheetVariant;
+import com.vaadin.flow.component.tabs.Tabs;
 
 /**
  * @author Vaadin Ltd.
@@ -33,10 +34,12 @@ import com.vaadin.flow.component.tabs.TabSheetVariant;
 public class TabSheetTest {
 
     private TabSheet tabSheet;
+    private Tabs tabs;
 
     @Before
     public void setup() {
         tabSheet = new TabSheet();
+        tabs = (Tabs) tabSheet.getChildren().findFirst().get();
     }
 
     @Test
@@ -63,6 +66,38 @@ public class TabSheetTest {
         var content = new Span("Content 0");
         tabSheet.add("Tab 0", content);
         Assert.assertTrue(content.getParent().isPresent());
+    }
+
+    @Test
+    public void addSameTabAgainWithNewContent_oldContentRemoved() {
+        // Add a tab with content
+        var content0 = new Span("Content 0");
+        var tab0 = tabSheet.add("Tab 0", content0);
+
+        // Assert that the content is attached to the parent (the tab is
+        // selected)
+        Assert.assertEquals(tabSheet, content0.getParent().get());
+
+        // Add the same Tab instance again but with a new content component
+        tabSheet.add(tab0, new Span("Content 0"));
+
+        // Check that the old content is no longer attached to the parent
+        Assert.assertFalse(content0.getParent().isPresent());
+    }
+
+    @Test
+    public void addSameTabAgain_addedAsTheLastTab() {
+        // Add a tab
+        var tab0 = tabSheet.add("Tab 0", new Span("Content 0"));
+        // Add another tab
+        tabSheet.add("Tab 1", new Span("Content 1"));
+
+        // Add the same Tab instance again
+        tabSheet.add(tab0, new Span("Content 0"));
+
+        // Check that the tab gets added as the last tab
+        Assert.assertEquals(1,
+                tab0.getElement().getParent().indexOfChild(tab0.getElement()));
     }
 
     @Test
@@ -248,10 +283,105 @@ public class TabSheetTest {
     @Test
     public void addThemeVariants_hasThemeVariants() {
         tabSheet.addThemeVariants(TabSheetVariant.LUMO_TABS_CENTERED,
-                TabSheetVariant.LUMO_NO_BORDER);
+                TabSheetVariant.LUMO_BORDERED);
         Assert.assertTrue(tabSheet.getThemeName()
                 .contains(TabSheetVariant.LUMO_TABS_CENTERED.getVariantName()));
         Assert.assertTrue(tabSheet.getThemeName()
-                .contains(TabSheetVariant.LUMO_NO_BORDER.getVariantName()));
+                .contains(TabSheetVariant.LUMO_BORDERED.getVariantName()));
+    }
+
+    @Test
+    public void addTab_addedAsLastTab() {
+        tabSheet.add("Tab 0", new Span("Content 0"));
+        var tab1 = tabSheet.add("Tab 1", new Span("Content 1"));
+        Assert.assertEquals(1, tabs.indexOf(tab1));
+    }
+
+    @Test
+    public void addTabToNegativeIndex_addedAsLastTab() {
+        tabSheet.add("Tab 0", new Span("Content 0"));
+        var tab1 = tabSheet.add(new Tab("Tab 1"), new Span("Content 1"), -1);
+        Assert.assertEquals(1, tabs.indexOf(tab1));
+    }
+
+    @Test
+    public void addTabToEndIndex_addedAsLastTab() {
+        tabSheet.add("Tab 0", new Span("Content 0"));
+        var tab1 = tabSheet.add(new Tab("Tab 1"), new Span("Content 1"), 1);
+        Assert.assertEquals(1, tabs.indexOf(tab1));
+    }
+
+    @Test
+    public void addTabToStartIndex_addedAsFirstTab() {
+        tabSheet.add("Tab 0", new Span("Content 0"));
+        var tab1 = tabSheet.add(new Tab("Tab 1"), new Span("Content 1"), 0);
+        Assert.assertEquals(0, tabs.indexOf(tab1));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void addTabToOverflowingIndex_throws() {
+        tabSheet.add("Tab 0", new Span("Content 0"));
+        tabSheet.add(new Tab("Tab 1"), new Span("Content 1"), 2);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void removeNegativeIndex_throws() {
+        tabSheet.add("Tab 0", new Span("Content 0"));
+        tabSheet.remove(-1);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void removeOverflowingIndex_throws() {
+        tabSheet.add("Tab 0", new Span("Content 0"));
+        tabSheet.remove(1);
+    }
+
+    @Test
+    public void removeFirstIndex_onlySecondTabRemains() {
+        var tab0 = tabSheet.add("Tab 0", new Span("Content 0"));
+        var tab1 = tabSheet.add("Tab 1", new Span("Content 1"));
+        tabSheet.remove(0);
+        Assert.assertEquals(tabs, tab1.getParent().get());
+        Assert.assertFalse(tab0.getParent().isPresent());
+    }
+
+    @Test
+    public void getTabAt_returnsTab() {
+        var tab0 = tabSheet.add("Tab 0", new Span("Content 0"));
+        var tab1 = tabSheet.add("Tab 1", new Span("Content 1"));
+        Assert.assertEquals(tab0, tabSheet.getTabAt(0));
+        Assert.assertEquals(tab1, tabSheet.getTabAt(1));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void getTabAtNegativeIndex_throws() {
+        tabSheet.add("Tab 0", new Span("Content 0"));
+        tabSheet.getTabAt(-1);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void getTabAtOverflowingIndex_throws() {
+        tabSheet.add("Tab 0", new Span("Content 0"));
+        tabSheet.getTabAt(1);
+    }
+
+    @Test
+    public void indexOfTab_returnsIndex() {
+        var tab0 = tabSheet.add("Tab 0", new Span("Content 0"));
+        var tab1 = tabSheet.add("Tab 1", new Span("Content 1"));
+        Assert.assertEquals(0, tabSheet.indexOf(tab0));
+        Assert.assertEquals(1, tabSheet.indexOf(tab1));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void indexOfNull_throws() {
+        tabSheet.add("Tab 0", new Span("Content 0"));
+        tabSheet.indexOf(null);
+    }
+
+    @Test
+    public void indexOfNonAttachedTab_returnsMinusOne() {
+        tabSheet.add("Tab 0", new Span("Content 0"));
+        Assert.assertEquals(-1, tabSheet.indexOf(new Tab()));
     }
 }
