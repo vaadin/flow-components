@@ -16,10 +16,6 @@ package com.vaadin.flow.component.richtexteditor;
  * If not, see <http://vaadin.com/license/cval-3>.
  * #L%
  */
-
-import java.io.Serializable;
-import java.util.Objects;
-
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.CompositionNotifier;
 import com.vaadin.flow.component.HasSize;
@@ -35,8 +31,10 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
-
 import elemental.json.JsonObject;
+
+import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * Server-side component for the {@code <vaadin-rich-text-editor>} component.
