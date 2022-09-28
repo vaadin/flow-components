@@ -209,8 +209,10 @@ public abstract class AbstractGridMultiSelectionModel<T>
     @Override
     public void selectAll() {
         updateSelection(
-                getGrid().getDataCommunicator().getDataProvider()
-                        .fetch(new Query<>()).collect(Collectors.toSet()),
+                (Set<T>) getGrid().getDataCommunicator().getDataProvider()
+                        .fetch(getGrid().getDataCommunicator().buildQuery(0,
+                                Integer.MAX_VALUE))
+                        .collect(Collectors.toSet()),
                 Collections.emptySet());
         selectionColumn.setSelectAllCheckboxState(true);
         selectionColumn.setSelectAllCheckboxIndeterminateState(false);
@@ -375,7 +377,8 @@ public abstract class AbstractGridMultiSelectionModel<T>
             allItemsStream = fetchAllHierarchical(
                     (HierarchicalDataProvider<T, ?>) dataProvider);
         } else {
-            allItemsStream = dataProvider.fetch(new Query<>());
+            allItemsStream = dataProvider.fetch(getGrid().getDataCommunicator()
+                    .buildQuery(0, Integer.MAX_VALUE));
         }
         doUpdateSelection(allItemsStream.collect(Collectors.toSet()),
                 Collections.emptySet(), true);
