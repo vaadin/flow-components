@@ -408,12 +408,13 @@ public class AbstractGridMultiSelectionModelTest {
     public void setFilterUsingDataView_clientSelectAll_selectionEventContainsFilteredValues() {
         grid.setSelectionMode(SelectionMode.MULTI);
         List<String> items = List.of("foo", "bar");
-        ListDataProvider<String> dataProvider = DataProvider
-                .ofCollection(items);
-        ListDataView<String, ?> dataView = grid.setItems(dataProvider);
+        ListDataView<String, ?> dataView = grid.setItems(items);
         dataView.setFilter(items.get(0)::equals);
 
         grid.addSelectionListener(e -> {
+            if (e.getAllSelectedItems().isEmpty()) {
+                return;
+            }
             Assert.assertEquals("Filter was not applied to data size", 1,
                     e.getAllSelectedItems().size());
             Assert.assertTrue("Expected item is missing from filtered data",
@@ -423,8 +424,12 @@ public class AbstractGridMultiSelectionModelTest {
                     dataView.contains(items.get(1)));
         });
 
-        ((AbstractGridMultiSelectionModel<String>) grid.getSelectionModel())
-                .clientSelectAll();
+        AbstractGridMultiSelectionModel<String> selectionModel = ((AbstractGridMultiSelectionModel<String>) grid
+                .getSelectionModel());
+
+        selectionModel.clientSelectAll();
+        selectionModel.deselectAll();
+        selectionModel.selectAll();
     }
 
     private void verifySelectAllCheckboxVisibilityInMultiSelectMode(
