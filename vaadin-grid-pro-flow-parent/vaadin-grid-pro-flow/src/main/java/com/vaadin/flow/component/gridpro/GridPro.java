@@ -19,6 +19,7 @@ package com.vaadin.flow.component.gridpro;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -48,6 +49,7 @@ import com.vaadin.flow.shared.Registration;
 
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
+import org.slf4j.LoggerFactory;
 
 @Tag("vaadin-grid-pro")
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha2")
@@ -118,11 +120,21 @@ public class GridPro<E> extends Grid<E> {
             EditColumn<E> column = (EditColumn<E>) this.idToColumnMap
                     .get(e.getPath());
 
+            Object idBeforeUpdate = getItemId(e.getItem());
             if (column.getEditorType().equals("custom")) {
                 column.getItemUpdater().accept(e.getItem(), null);
             } else {
                 column.getItemUpdater().accept(e.getItem(),
                         e.getSourceItem().get(e.getPath()).asString());
+            }
+            Object idAfterUpdate = getItemId(e.getItem());
+
+            if (!Objects.equals(idBeforeUpdate, idAfterUpdate)) {
+                LoggerFactory.getLogger(GridPro.class).warn(
+                        "An item updater modified the data provider ID of the edited item, which is not allowed. "
+                                + "This can happen with classes that implement hashCode using fields that can be edited. "
+                                + "Either change the hashCode implementation so that it does not rely on editable fields, or "
+                                + "override DataProvider.getId() to generate a stable ID that does not change when editing fields.");
             }
 
             getDataProvider().refreshItem(e.getItem());
@@ -137,6 +149,29 @@ public class GridPro<E> extends Grid<E> {
                         .setValue(column.getValueProvider().apply(e.getItem()));
             }
         });
+    }
+
+    /**
+     * Returns the unique data provider ID of an item, or the item's hash code
+     * when using the default data provider identity implementation.
+     *
+     * @param item
+     *            the item
+     * @return the data provider ID of the item
+     */
+    private Object getItemId(E item) {
+        if (item == null) {
+            return null;
+        }
+        Object itemId = getDataProvider().getId(item);
+        // The default data provider identity implementation returns the item
+        // itself. As this method is used to detect changes to the item that
+        // affect the ID, which is not possible when comparing the item with
+        // itself, return the hash code instead
+        if (Objects.equals(item, itemId)) {
+            itemId = item.hashCode();
+        }
+        return itemId;
     }
 
     /**
