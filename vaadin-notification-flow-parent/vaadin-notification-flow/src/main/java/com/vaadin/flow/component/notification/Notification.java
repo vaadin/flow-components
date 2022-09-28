@@ -208,13 +208,6 @@ public class Notification extends GeneratedVaadinNotification<Notification>
 
         getElement().addEventListener("opened-changed",
                 event -> removeAutoAdded());
-
-        addDetachListener(event -> {
-            // If the notification gets detached, it needs to be marked
-            // as closed so it won't auto-open when reattached.
-            setOpened(false);
-            removeAutoAdded();
-        });
     }
 
     /**
@@ -591,6 +584,24 @@ public class Notification extends GeneratedVaadinNotification<Notification>
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         initConnector();
+    }
+
+    @Override
+    protected void onDetach(DetachEvent detachEvent) {
+        super.onDetach(detachEvent);
+        // When reloading a page using preserve on refresh, the notification
+        // should keep its opened state. To prevent it from auto-closing, delay
+        // the auto-closing logic to before client response, which is not called
+        // when reloading the page. This also prevents an exception when trying
+        // to remove an auto-added notification from its parent.
+        detachEvent.getUI().beforeClientResponse(this, executionContext -> {
+            // Close the notification, and remove it from its parent if it was
+            // auto-added. This ensures that the notification doesn't re-open
+            // itself when its parent, for example a dialog, gets attached
+            // again.
+            setOpened(false);
+            removeAutoAdded();
+        });
     }
 
     private void initConnector() {
