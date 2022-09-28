@@ -412,17 +412,19 @@ public class AbstractGridMultiSelectionModelTest {
         dataView.setFilter(items.get(0)::equals);
 
         grid.addSelectionListener(e -> {
-            Assert.assertEquals("Filter was not applied to data size", 1,
+            Assert.assertEquals("Selected item count does not match data view item count", dataView.getItems().count(),
                     e.getAllSelectedItems().size());
-            Assert.assertTrue("Expected item is missing from filtered data",
-                    dataView.contains(items.get(0)));
-            Assert.assertFalse(
-                    "Item that should be filtered out is available in the data",
-                    dataView.contains(items.get(1)));
+            Assert.assertTrue("Selected items do not contain filtered item",
+                    e.getAllSelectedItems().contains(items.get(0)));
         });
 
         ((AbstractGridMultiSelectionModel<String>) grid.getSelectionModel())
                 .clientSelectAll();
+
+        Assert.assertEquals("Selected item count does not match data view item count", dataView.getItems().count(),
+                grid.getSelectedItems().size());
+        Assert.assertTrue("Selected items do not contain filtered item",
+                grid.getSelectedItems().contains(items.get(0)));
     }
 
     @Test
@@ -433,17 +435,19 @@ public class AbstractGridMultiSelectionModelTest {
         dataView.setFilter(items.get(0)::equals);
 
         grid.addSelectionListener(e -> {
-            Assert.assertEquals("Filter was not applied to data size", 1,
+            Assert.assertEquals("Selected item count does not match data view item count", dataView.getItems().count(),
                     e.getAllSelectedItems().size());
-            Assert.assertTrue("Expected item is missing from filtered data",
-                    dataView.contains(items.get(0)));
-            Assert.assertFalse(
-                    "Item that should be filtered out is available in the data",
-                    dataView.contains(items.get(1)));
+            Assert.assertTrue("Selected items do not contain filtered item",
+                    e.getAllSelectedItems().contains(items.get(0)));
         });
 
         ((AbstractGridMultiSelectionModel<String>) grid.getSelectionModel())
                 .selectAll();
+
+        Assert.assertEquals("Selected item count does not match data view item count", dataView.getItems().count(),
+                grid.getSelectedItems().size());
+        Assert.assertTrue("Selected items do not contain filtered item",
+                grid.getSelectedItems().contains(items.get(0)));
     }
 
     private void verifySelectAllCheckboxVisibilityInMultiSelectMode(
