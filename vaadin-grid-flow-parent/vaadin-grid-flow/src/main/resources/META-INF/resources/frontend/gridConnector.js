@@ -455,7 +455,14 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
                   }
                 });
 
-                directions.reverse().forEach(({ column, direction }) => {
+                // Apply directions in correct order, depending on configured multi-sort priority.
+                // For the default "prepend" mode, directions need to be applied in reverse, in
+                // order for the sort indicators to match the order on the server. For "append"
+                // just keep the order passed from the server.
+                if (grid.multiSortPriority !== 'append') {
+                  directions = directions.reverse()
+                }
+                directions.forEach(({ column, direction }) => {
                   sorters.forEach((sorter) => {
                     if (sorter.getAttribute('path') === column && sorter.direction !== direction) {
                       sorter.direction = direction;
