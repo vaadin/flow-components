@@ -18,15 +18,16 @@ package com.vaadin.flow.component.datepicker;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasHelper;
+import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
@@ -56,7 +57,7 @@ import elemental.json.JsonType;
 @JavaScript("frontend://date-picker-datefns.js")
 @JavaScript("frontend://datepickerConnector.js")
 public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
-        implements HasSize, HasValidation, HasHelper {
+        implements HasSize, HasValidation, HasHelper, HasLabel {
 
     private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
@@ -482,6 +483,12 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         return super.isClearButtonVisibleBoolean();
     }
 
+    /**
+     * Sets the label for the datepicker.
+     *
+     * @param label
+     *            value for the {@code label} property in the datepicker
+     */
     @Override
     public void setLabel(String label) {
         super.setLabel(label);
@@ -492,6 +499,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      *
      * @return the {@code label} property of the datePicker
      */
+    @Override
     public String getLabel() {
         return getLabelString();
     }

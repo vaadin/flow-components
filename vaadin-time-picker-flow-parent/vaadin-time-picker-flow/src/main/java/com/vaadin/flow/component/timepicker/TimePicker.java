@@ -27,6 +27,7 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasHelper;
+import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
@@ -47,7 +48,7 @@ import com.vaadin.flow.shared.Registration;
 @JavaScript("frontend://timepickerConnector.js")
 @JsModule("./timepickerConnector.js")
 public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
-        implements HasSize, HasValidation, HasEnabled, HasHelper {
+        implements HasSize, HasValidation, HasEnabled, HasHelper, HasLabel {
 
     private static final SerializableFunction<String, LocalTime> PARSER = valueFromClient -> {
         return valueFromClient == null || valueFromClient.isEmpty() ? null
@@ -130,6 +131,12 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         addValueChangeListener(listener);
     }
 
+    /**
+     * Sets the label for the time picker.
+     *
+     * @param label
+     *            value for the {@code label} property in the time picker
+     */
     @Override
     public void setLabel(String label) {
         super.setLabel(label);
@@ -163,6 +170,7 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
      *
      * @return the {@code label} property of the time picker
      */
+    @Override
     public String getLabel() {
         return getLabelString();
     }

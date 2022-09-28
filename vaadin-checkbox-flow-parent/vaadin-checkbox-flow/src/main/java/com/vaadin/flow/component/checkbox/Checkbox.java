@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.checkbox;
 
 import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
 
 /**
@@ -30,7 +31,7 @@ import com.vaadin.flow.component.HasSize;
  * @author Vaadin Ltd
  */
 public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
-        implements HasSize {
+        implements HasSize, HasLabel {
 
     /**
      * Default constructor.
@@ -106,6 +107,7 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
      *
      * @return the current label text
      */
+    @Override
     public String getLabel() {
         return getElement().getText();
     }
@@ -116,6 +118,7 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
      * @param label
      *            the label text to set
      */
+    @Override
     public void setLabel(String label) {
         getElement().setText(label);
     }

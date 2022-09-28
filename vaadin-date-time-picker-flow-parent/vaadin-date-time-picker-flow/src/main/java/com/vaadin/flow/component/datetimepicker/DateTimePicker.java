@@ -23,7 +23,18 @@ import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 import java.util.Objects;
 
-import com.vaadin.flow.component.*;
+import com.vaadin.flow.component.AbstractSinglePropertyField;
+import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.HasHelper;
+import com.vaadin.flow.component.HasLabel;
+import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.HasTheme;
+import com.vaadin.flow.component.HasValidation;
+import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -69,7 +80,7 @@ class DateTimePickerTimePicker
 public class DateTimePicker
         extends AbstractSinglePropertyField<DateTimePicker, LocalDateTime>
         implements HasStyle, HasSize, HasTheme, HasValidation,
-        Focusable<DateTimePicker>, HasHelper {
+        Focusable<DateTimePicker>, HasHelper, HasLabel {
 
     private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
@@ -309,6 +320,7 @@ public class DateTimePicker
      * @param label
      *            the String value to set
      */
+    @Override
     public void setLabel(String label) {
         getElement().setProperty("label", label == null ? "" : label);
     }
@@ -318,6 +330,7 @@ public class DateTimePicker
      *
      * @return the {@code label} property of the date time picker
      */
+    @Override
     public String getLabel() {
         return getElement().getProperty("label");
     }
