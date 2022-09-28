@@ -408,7 +408,8 @@ public class AbstractGridMultiSelectionModelTest {
     public void setFilterUsingDataView_clientSelectAll_selectionEventContainsFilteredValues() {
         grid.setSelectionMode(SelectionMode.MULTI);
         List<String> items = List.of("foo", "bar");
-        ListDataProvider<String> dataProvider = DataProvider.ofCollection(items);
+        ListDataProvider<String> dataProvider = DataProvider
+                .ofCollection(items);
         ListDataView<String, ?> dataView = grid.setItems(dataProvider);
         dataView.setFilter(items.get(0)::equals);
 
@@ -425,7 +426,6 @@ public class AbstractGridMultiSelectionModelTest {
         ((AbstractGridMultiSelectionModel<String>) grid.getSelectionModel())
                 .clientSelectAll();
     }
-
 
     private void verifySelectAllCheckboxVisibilityInMultiSelectMode(
             boolean inMemory, boolean unknownItemCount,

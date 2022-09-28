@@ -375,7 +375,8 @@ public abstract class AbstractGridMultiSelectionModel<T>
             allItemsStream = fetchAllHierarchical(
                     (HierarchicalDataProvider<T, ?>) dataProvider);
         } else {
-            allItemsStream = dataProvider.fetch(getGrid().getDataCommunicator().buildQuery(0, Integer.MAX_VALUE));
+            allItemsStream = dataProvider.fetch(getGrid().getDataCommunicator()
+                    .buildQuery(0, Integer.MAX_VALUE));
         }
         doUpdateSelection(allItemsStream.collect(Collectors.toSet()),
                 Collections.emptySet(), true);
