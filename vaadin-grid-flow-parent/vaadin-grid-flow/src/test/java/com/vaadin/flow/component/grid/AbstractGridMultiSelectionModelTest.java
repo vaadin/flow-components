@@ -16,10 +16,13 @@
 package com.vaadin.flow.component.grid;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.grid.dataview.GridListDataView;
+import com.vaadin.flow.data.provider.*;
 import com.vaadin.flow.dom.Element;
 import org.junit.Assert;
 import org.junit.Before;
@@ -27,9 +30,6 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
-import com.vaadin.flow.data.provider.DataCommunicatorTest;
-import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.data.provider.Query;
 
 public class AbstractGridMultiSelectionModelTest {
 
@@ -403,6 +403,29 @@ public class AbstractGridMultiSelectionModelTest {
         Assert.assertFalse(
                 (boolean) columnElement.getPropertyRaw("indeterminate"));
     }
+
+    @Test
+    public void setFilterUsingDataView_clientSelectAll_selectionEventContainsFilteredValues() {
+        grid.setSelectionMode(SelectionMode.MULTI);
+        List<String> items = List.of("foo", "bar");
+        ListDataProvider<String> dataProvider = DataProvider.ofCollection(items);
+        ListDataView<String, ?> dataView = grid.setItems(dataProvider);
+        dataView.setFilter(items.get(0)::equals);
+
+        grid.addSelectionListener(e -> {
+            Assert.assertEquals("Filter was not applied to data size", 1,
+                    e.getAllSelectedItems().size());
+            Assert.assertTrue("Expected item is missing from filtered data",
+                    dataView.contains(items.get(0)));
+            Assert.assertFalse(
+                    "Item that should be filtered out is available in the data",
+                    dataView.contains(items.get(1)));
+        });
+
+        ((AbstractGridMultiSelectionModel<String>) grid.getSelectionModel())
+                .clientSelectAll();
+    }
+
 
     private void verifySelectAllCheckboxVisibilityInMultiSelectMode(
             boolean inMemory, boolean unknownItemCount,
