@@ -46,10 +46,14 @@ import javax.annotation.concurrent.NotThreadSafe;
 @NotThreadSafe
 public class NotificationTest {
 
-    private final UI ui = new UI();
+    private UI ui;
 
     @Before
     public void setup() {
+        VaadinSession session = Mockito.mock(VaadinSession.class);
+        ui = new UI();
+        ui.getInternals().setSession(session);
+
         UI.setCurrent(ui);
     }
 
@@ -237,7 +241,7 @@ public class NotificationTest {
     }
 
     @Test
-    public void createNotificationh_closeOnParentDetach() {
+    public void createNotification_closeOnParentDetach() {
         // Create a Notification manually and add it to a parent container
         Notification notification = new Notification();
         notification.open();
@@ -250,6 +254,8 @@ public class NotificationTest {
 
         // Remove the parent container from the UI
         ui.remove(parent);
+        // Auto-close happens in before client response
+        flushBeforeClientResponse();
 
         // The notification should have been closed on detach, even if it was
         // the parent that was removed
@@ -259,7 +265,7 @@ public class NotificationTest {
     }
 
     @Test
-    public void showNotification_closeAndDetachOnParentDetach() {
+    public void showNotificationInModal_closeAndDetachOnParentDetach() {
         // Create a modal parent container and add it to the UI
         Div parent = new Div();
         ui.add(parent);
@@ -279,6 +285,8 @@ public class NotificationTest {
 
         // Remove the modal parent container from the UI
         ui.remove(parent);
+        // Auto-close happens in before client response
+        flushBeforeClientResponse();
 
         // The notification should have been closed on detach, even if it was
         // the parent that was removed
@@ -305,6 +313,8 @@ public class NotificationTest {
 
         // Remove the modal parent container from the UI
         ui.remove(parent);
+        // Auto-removal happens in before client response
+        flushBeforeClientResponse();
 
         // Even though the notification was created using Notification.show(),
         // it got was manually added to the parent container so it should not
@@ -314,8 +324,6 @@ public class NotificationTest {
 
     private void flushBeforeClientResponse() {
         UIInternals internals = ui.getInternals();
-        VaadinSession session = Mockito.mock(VaadinSession.class);
-        internals.setSession(session);
         internals.getStateTree().runExecutionsBeforeClientResponse();
     }
 }
