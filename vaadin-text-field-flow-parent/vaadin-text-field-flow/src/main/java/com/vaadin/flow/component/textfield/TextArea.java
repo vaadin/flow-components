@@ -219,6 +219,17 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
     }
 
     /**
+     * Sets the label for this component.
+     *
+     * @param label
+     *            value for the {@code label} property in the webcomponent
+     */
+    @Override
+    public void setLabel(String label) {
+        super.setLabel(label);
+    }
+
+    /**
      * String used for the label element.
      *
      * @return the {@code label} property from the webcomponent

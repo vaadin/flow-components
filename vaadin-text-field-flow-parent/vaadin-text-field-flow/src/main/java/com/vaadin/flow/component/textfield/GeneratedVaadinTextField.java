@@ -502,6 +502,21 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      * Description copied from corresponding location in WebComponent:
      * </p>
      * <p>
+     * String used for the label element.
+     * </p>
+     *
+     * @param label
+     *            the String value to set
+     */
+    protected void setLabel(String label) {
+        getElement().setProperty("label", label == null ? "" : label);
+    }
+
+    /**
+     * <p>
+     * Description copied from corresponding location in WebComponent:
+     * </p>
+     * <p>
      * Maximum number of characters (in Unicode code points) that the user can
      * enter.
      * <p>

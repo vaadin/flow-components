@@ -144,6 +144,17 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     }
 
     /**
+     * Sets the label for this component.
+     *
+     * @param label
+     *            value for the {@code label} property in the webcomponent
+     */
+    @Override
+    public void setLabel(String label) {
+        super.setLabel(label);
+    }
+
+    /**
      * String used for the label element.
      *
      * @return the {@code label} property from the webcomponent
