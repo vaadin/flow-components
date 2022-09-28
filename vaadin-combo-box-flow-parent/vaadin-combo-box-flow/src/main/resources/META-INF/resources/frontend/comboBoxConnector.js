@@ -133,20 +133,6 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
             const rangeMin = Math.min(...activePages);
             const rangeMax = Math.max(...activePages);
 
-            if (rangeMax - rangeMin + 1 !== activePages.length) {
-              // The range doens't form a sequence anymore because of a jumping page request.
-              // Force the server to resend the range in case
-              // there are several synchronous scroll jumps back and forth,
-              // by the end of which combo-box ends up at the same position
-              // as before but the cache has been already cleared, e.g:
-              // scroll from the page 0 to 100 and then immediatelly back to 0.
-              serverFacade.needsDataCommunicatorReset();
-              // Clear the cache so combo-box will request
-              // the currently visible pages.
-              clearPageCallbacks();
-              return;
-            }
-
             if (activePages.length * params.pageSize > maxRangeCount) {
               // The range reached the max size.
               if (params.page === rangeMin) {
@@ -159,13 +145,23 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
                 clearPageCallbacks([String(rangeMin)]);
               }
               comboBox.dataProvider(params, callback);
-              return;
+            } else if (rangeMax - rangeMin + 1 !== activePages.length) {
+              // The range doens't form a sequence anymore because of a jumping page request.
+              // Force the server to resend the range in case
+              // there are several synchronous scroll jumps back and forth,
+              // by the end of which combo-box ends up at the same position
+              // as before but the cache has been already cleared, e.g:
+              // scroll from the page 0 to 100 and then immediatelly back to 0.
+              serverFacade.needsDataCommunicatorReset();
+              // Clear the cache so combo-box will request
+              // the currently visible pages.
+              clearPageCallbacks();
+            } else {
+              // The requested page was sequential, extend the requested range
+              const startIndex = params.pageSize * rangeMin;
+              const endIndex = params.pageSize * (rangeMax + 1);
+              serverFacade.requestData(startIndex, endIndex, params);
             }
-
-            // The requested page was sequential, extend the requested range
-            const startIndex = params.pageSize * rangeMin;
-            const endIndex = params.pageSize * (rangeMax + 1);
-            serverFacade.requestData(startIndex, endIndex, params);
           }
         };
 
