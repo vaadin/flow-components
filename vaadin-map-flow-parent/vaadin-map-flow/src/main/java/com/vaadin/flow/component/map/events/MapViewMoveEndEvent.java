@@ -44,9 +44,8 @@ public class MapViewMoveEndEvent extends ComponentEvent<MapBase> {
         super(source, fromClient);
         this.rotation = (float) rotation;
         this.zoom = (float) zoom;
-        this.center = new Coordinate(center.getNumber(0), center.getNumber(1));
-        this.extent = new Extent(extent.getNumber(0), extent.getNumber(1),
-                extent.getNumber(2), extent.getNumber(3));
+        this.center = MapEventUtil.getCoordinate(center);
+        this.extent = MapEventUtil.getExtent(extent);
     }
 
     /**
