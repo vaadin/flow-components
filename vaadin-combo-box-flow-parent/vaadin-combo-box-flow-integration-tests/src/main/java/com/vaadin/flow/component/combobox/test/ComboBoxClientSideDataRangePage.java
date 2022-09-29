@@ -39,7 +39,7 @@ public class ComboBoxClientSideDataRangePage extends Div {
         setPageSizeInput.setId("set-page-size");
         setPageSizeInput.setPlaceholder("Set page size");
         setPageSizeInput.addValueChangeListener(event -> {
-            Integer pageSize = Integer.parseInt(event.getValue());
+            int pageSize = Integer.parseInt(event.getValue());
             comboBox.setPageSize(pageSize);
         });
 
