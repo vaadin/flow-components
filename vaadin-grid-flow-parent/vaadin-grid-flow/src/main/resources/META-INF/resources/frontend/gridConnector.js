@@ -345,12 +345,6 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           let firstPage = Math.max(0, firstNeededPage);
           let lastPage =
             parentKey !== root ? lastNeededPage : Math.min(lastNeededPage, Math.floor(grid.size / grid.pageSize));
-          let pageCount = lastPage - firstPage + 1;
-          let requestedItemCount = pageCount * grid.pageSize;
-          if ((!parentKey || parentKey === root) && (pageCount > 10 || requestedItemCount > 500)) {
-            throw 'Attempted to fetch more items from server than allowed in one go. ' +
-            'Maximum allowed page count is 10, maximum allowed item count is 500.';
-          }
           let lastRequestedRange = lastRequestedRanges[parentKey];
           if (!lastRequestedRange) {
             lastRequestedRange = [-1, -1];
@@ -358,7 +352,8 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           if (lastRequestedRange[0] != firstPage || lastRequestedRange[1] != lastPage) {
             lastRequestedRange = [firstPage, lastPage];
             lastRequestedRanges[parentKey] = lastRequestedRange;
-            fetch(firstPage * grid.pageSize, requestedItemCount);
+            let count = lastPage - firstPage + 1;
+            fetch(firstPage * grid.pageSize, count * grid.pageSize);
           }
         });
 
