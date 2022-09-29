@@ -25,7 +25,7 @@ import com.vaadin.flow.router.Route;
 
 @Route("vaadin-combo-box/client-side-data-range")
 public class ComboBoxClientSideDataRangePage extends Div {
-    public static final int ITEMS_COUNT = 1000;
+    public static final int ITEMS_COUNT = 900;
 
     public ComboBoxClientSideDataRangePage() {
         ComboBox<String> comboBox = new ComboBox<>();
