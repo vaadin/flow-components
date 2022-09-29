@@ -24,6 +24,10 @@
 
     <!-- optimizations -->
     <gwt.loglevel>WARN</gwt.loglevel>
+    <!-- Source level must be one of [auto, 1.8, 1.9, 1.10, 1.11].
+         17 is not an option for sourcelevel in gwt-maven-plugin
+         use `auto` for this case -->
+    <gwt.sourcelevel>auto</gwt.sourcelevel>
     <gwt.disableCastChecking>true</gwt.disableCastChecking>
     <gwt.enableAssertions>false</gwt.enableAssertions>
     <gwt.closure>true</gwt.closure>
@@ -132,6 +136,7 @@
           <draftCompile>${gwt.draft.compile}</draftCompile>
 
           <logLevel>${gwt.loglevel}</logLevel>
+          <sourceLevel>${gwt.sourcelevel}</sourceLevel>
           <gwtVersion>${gwt.version}</gwtVersion>
           <compileReport>${gwt.report}</compileReport>
           <compileMetrics>${gwt.report}</compileMetrics>
