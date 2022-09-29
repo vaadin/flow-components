@@ -137,8 +137,8 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
         executeScript("arguments[0]._scroller.scrollIntoView(arguments[1])",
                 comboBox, index);
         // Wait for the scroller to request missing pages.
-        getCommandExecutor().getDriver().executeAsyncScript(
-                "requestAnimationFrame(arguments[0])");
+        getCommandExecutor().getDriver()
+                .executeAsyncScript("requestAnimationFrame(arguments[0])");
     }
 
     protected void waitUntilTextInContent(String text) {
