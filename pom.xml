@@ -270,24 +270,13 @@
                         <httpConnector>
                             <port>${jetty.http.port}</port>
                         </httpConnector>
-                        <scanIntervalSeconds>-1</scanIntervalSeconds>
                         <stopPort>${jetty.stop.port}</stopPort>
                         <stopWait>5</stopWait>
                         <stopKey>foo</stopKey>
                         <systemProperties>
-                            <force>true</force>
-                            <systemProperty>
-                                <name>project.basedir</name>
-                                <value>${project.basedir}</value>
-                            </systemProperty>
-                            <systemProperty>
-                                <name>vaadin.productionMode</name>
-                                <value>false</value>
-                            </systemProperty>
-                            <systemProperty>
-                                <name>vaadin.reuseDevServer</name>
-                                <value>true</value>
-                            </systemProperty>
+                            <project.basedir>${project.basedir}</project.basedir>
+                            <vaadin.productionMode>false</vaadin.productionMode>
+                            <vaadin.reuseDevServer>true</vaadin.reuseDevServer>
                         </systemProperties>
                     </configuration>
                 </plugin>
