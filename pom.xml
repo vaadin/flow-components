@@ -621,4 +621,12 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+    <dependencies>
+        <!--testing use -->
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>license-checker</artifactId>
+            <version>1.9.0</version>
+        </dependency>
+    </dependencies>
 </project>
