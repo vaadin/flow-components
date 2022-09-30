@@ -152,7 +152,7 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
               // by the end of which combo-box ends up at the same position
               // as before but the cache has been already cleared, e.g:
               // scroll from the page 0 to 100 and then immediatelly back to 0.
-              serverFacade.needsDataCommunicatorReset();
+              // serverFacade.needsDataCommunicatorReset();
               // Clear the cache so combo-box will request
               // the currently visible pages.
               clearPageCallbacks();
