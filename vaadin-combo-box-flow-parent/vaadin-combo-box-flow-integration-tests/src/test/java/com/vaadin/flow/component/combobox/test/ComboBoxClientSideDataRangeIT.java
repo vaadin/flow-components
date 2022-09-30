@@ -35,6 +35,18 @@ public class ComboBoxClientSideDataRangeIT extends AbstractComboBoxIT {
     }
 
     @Test
+    public void defaultPageSize_scrollToEnd_scrollToBeginning_firstPageLoaded() {
+        comboBox.openPopup();
+        assertLoadingStateResolved(comboBox);
+        getCommandExecutor().getDriver()
+                .executeAsyncScript("arguments[0]._scrollIntoView(999);" +
+                        "arguments[0]._scrollIntoView(0);" +
+                        "requestAnimationFrame(arguments[1])", comboBox);
+        waitUntilTextInContent("Item 0");
+        assertLoadingStateResolved(comboBox);
+    }
+
+    @Test
     public void defaultPageSize_scrollUpAndDown_morePagesLoaded_overflowingPagesDiscarded() {
         scrollUpAndDown_morePagesLoaded_overflowingPagesDiscarded(50, 500);
     }
