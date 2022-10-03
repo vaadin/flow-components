@@ -22,6 +22,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.TabSheet;
@@ -158,6 +159,11 @@ public class TabSheetTest {
         tabSheet.add("Tab 0", (Span) null);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void addTextContent_throws() {
+        tabSheet.add("Tab 0", new Text("Tab 0 content"));
+    }
+
     @Test
     public void changeTab_selectedChangeEvent() {
         var tab0 = tabSheet.add("Tab 0", new Span("Content 0"));
@@ -184,6 +190,11 @@ public class TabSheetTest {
     @Test(expected = NullPointerException.class)
     public void removeNullContent_throws() {
         tabSheet.remove((Span) null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void removeTextContent_throws() {
+        tabSheet.remove(new Text("Tab 0 content"));
     }
 
     @Test
@@ -273,11 +284,21 @@ public class TabSheetTest {
         Assert.assertEquals(prefix, tabSheet.getPrefixComponent());
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void setTextAsPrefix_throws() {
+        tabSheet.setPrefixComponent(new Text("Prefix"));
+    }
+
     @Test
     public void setSuffix_hasSuffix() {
         var suffix = new Span("suffix");
         tabSheet.setSuffixComponent(suffix);
         Assert.assertEquals(suffix, tabSheet.getSuffixComponent());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void setTextAsSuffix_throws() {
+        tabSheet.setSuffixComponent(new Text("Suffix"));
     }
 
     @Test
