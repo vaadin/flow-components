@@ -257,7 +257,7 @@ public class TabSheet extends Component
      *            the tab to look up, can not be <code>null</code>
      * @return the index of the tab or -1 if the tab is not added
      */
-    public int indexOf(Tab tab) {
+    public int getIndexOf(Tab tab) {
         return tabs.indexOf(tab);
     }
 

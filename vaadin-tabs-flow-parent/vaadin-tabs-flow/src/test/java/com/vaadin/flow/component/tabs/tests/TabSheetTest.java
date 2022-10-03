@@ -390,19 +390,19 @@ public class TabSheetTest {
     public void indexOfTab_returnsIndex() {
         var tab0 = tabSheet.add("Tab 0", new Span("Content 0"));
         var tab1 = tabSheet.add("Tab 1", new Span("Content 1"));
-        Assert.assertEquals(0, tabSheet.indexOf(tab0));
-        Assert.assertEquals(1, tabSheet.indexOf(tab1));
+        Assert.assertEquals(0, tabSheet.getIndexOf(tab0));
+        Assert.assertEquals(1, tabSheet.getIndexOf(tab1));
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void indexOfNull_throws() {
+    public void getIndexOfNull_throws() {
         tabSheet.add("Tab 0", new Span("Content 0"));
-        tabSheet.indexOf(null);
+        tabSheet.getIndexOf(null);
     }
 
     @Test
-    public void indexOfNonAttachedTab_returnsMinusOne() {
+    public void getIndexOfNonAttachedTab_returnsMinusOne() {
         tabSheet.add("Tab 0", new Span("Content 0"));
-        Assert.assertEquals(-1, tabSheet.indexOf(new Tab()));
+        Assert.assertEquals(-1, tabSheet.getIndexOf(new Tab()));
     }
 }

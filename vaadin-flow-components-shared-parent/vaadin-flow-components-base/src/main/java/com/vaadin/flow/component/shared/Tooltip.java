@@ -184,7 +184,7 @@ public class Tooltip implements Serializable {
     }
 
     /**
-     * The delay in milliseconds before the tooltip is opened on focus, when not
+     * The delay in milliseconds before the tooltip is opened on keyboard focus, when not
      * in manual mode.
      *
      * @param focusDelay
@@ -195,7 +195,7 @@ public class Tooltip implements Serializable {
     }
 
     /**
-     * The delay in milliseconds before the tooltip is opened on focus, when not
+     * The delay in milliseconds before the tooltip is opened on keyboard focus, when not
      * in manual mode.
      *
      * @return the delay in milliseconds
@@ -205,7 +205,7 @@ public class Tooltip implements Serializable {
     }
 
     /**
-     * The delay in milliseconds before the tooltip is opened on focus, when not
+     * The delay in milliseconds before the tooltip is opened on keyboard focus, when not
      * in manual mode.
      *
      * @param focusDelay
