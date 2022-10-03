@@ -27,6 +27,7 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
@@ -118,6 +119,11 @@ public class TabSheet extends Component
         Objects.requireNonNull(content,
                 "The content to be added cannot be null");
 
+        if (content instanceof Text) {
+            throw new IllegalArgumentException(
+                    "Text as content is not supported. Consider wrapping the Text inside a Div.");
+        }
+
         if (position < 0) {
             tabs.add(tab);
         } else {
@@ -163,6 +169,12 @@ public class TabSheet extends Component
     public void remove(Component content) {
         Objects.requireNonNull(content,
                 "The content of the tab to be removed cannot be null");
+
+        if (content instanceof Text) {
+            throw new IllegalArgumentException(
+                    "Text as content is not supported.");
+        }
+
         var tab = tabToContent.entrySet().stream()
                 .filter(entry -> entry.getValue().equals(content.getElement()))
                 .map(Map.Entry::getKey).findFirst().orElse(null);
@@ -279,6 +291,11 @@ public class TabSheet extends Component
         SlotUtils.clearSlot(this, "prefix");
 
         if (component != null) {
+            if (component instanceof Text) {
+                throw new IllegalArgumentException(
+                        "Text as a prefix is not supported. Consider wrapping the Text inside a Div.");
+            }
+
             component.getElement().setAttribute("slot", "prefix");
             getElement().appendChild(component.getElement());
         }
@@ -310,6 +327,11 @@ public class TabSheet extends Component
         SlotUtils.clearSlot(this, "suffix");
 
         if (component != null) {
+            if (component instanceof Text) {
+                throw new IllegalArgumentException(
+                        "Text as a suffix is not supported. Consider wrapping the Text inside a Div.");
+            }
+
             component.getElement().setAttribute("slot", "suffix");
             getElement().appendChild(component.getElement());
         }
