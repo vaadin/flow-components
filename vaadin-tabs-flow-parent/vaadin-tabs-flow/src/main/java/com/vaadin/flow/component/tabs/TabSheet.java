@@ -171,9 +171,10 @@ public class TabSheet extends Component
                 "The content of the tab to be removed cannot be null");
 
         if (content instanceof Text) {
-            throw new IllegalArgumentException("Text as content is not supported.");
+            throw new IllegalArgumentException(
+                    "Text as content is not supported.");
         }
-                
+
         var tab = tabToContent.entrySet().stream()
                 .filter(entry -> entry.getValue().equals(content.getElement()))
                 .map(Map.Entry::getKey).findFirst().orElse(null);
@@ -291,7 +292,8 @@ public class TabSheet extends Component
 
         if (component != null) {
             if (component instanceof Text) {
-                throw new IllegalArgumentException("Text as a prefix is not supported. Consider wrapping the Text inside a Div.");
+                throw new IllegalArgumentException(
+                        "Text as a prefix is not supported. Consider wrapping the Text inside a Div.");
             }
 
             component.getElement().setAttribute("slot", "prefix");
@@ -326,7 +328,8 @@ public class TabSheet extends Component
 
         if (component != null) {
             if (component instanceof Text) {
-                throw new IllegalArgumentException("Text as a suffix is not supported. Consider wrapping the Text inside a Div.");
+                throw new IllegalArgumentException(
+                        "Text as a suffix is not supported. Consider wrapping the Text inside a Div.");
             }
 
             component.getElement().setAttribute("slot", "suffix");
