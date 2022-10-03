@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>vaadin-flow-components</artifactId>
-    <version>23.3-SNAPSHOT</version>
+    <version>24.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Vaadin Flow Components Root Project</name>
     <parent>
@@ -12,14 +12,14 @@
     </parent>
     <url>https://vaadin.com/components</url>
     <properties>
-        <flow.version>23.3-SNAPSHOT</flow.version>
+        <flow.version>24.0-SNAPSHOT</flow.version>
         <testbench.version>8.1.1</testbench.version>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8
                 </project.reporting.outputEncoding>
-        <jetty.version>9.4.49.v20220914</jetty.version>
+        <jetty.version>11.0.8</jetty.version>
         <jetty.http.port>8080</jetty.http.port>
         <jetty.stop.port>9999</jetty.stop.port>
         <karaf-maven-plugin.version>4.4.0</karaf-maven-plugin.version>
@@ -38,6 +38,7 @@
         <osgi.bundle.license>http://www.apache.org/licenses/LICENSE-2.0</osgi.bundle.license>
         <osgi.export.package>default</osgi.export.package>
         <cvdlName></cvdlName>
+        <jakarta.servlet.api.version>5.0.0</jakarta.servlet.api.version>
 
         <!-- spreadsheet -->
         <poi.version>5.2.3</poi.version>
@@ -150,6 +151,10 @@
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
+        </repository>
+        <repository>
+            <id>apache snapshots</id>
+            <url>https://repository.apache.org/content/repositories/snapshots</url>
         </repository>
     </repositories>
     <pluginRepositories>
@@ -266,7 +271,6 @@
                         <httpConnector>
                             <port>${jetty.http.port}</port>
                         </httpConnector>
-                        <scanIntervalSeconds>-1</scanIntervalSeconds>
                         <stopPort>${jetty.stop.port}</stopPort>
                         <stopWait>5</stopWait>
                         <stopKey>foo</stopKey>
@@ -291,7 +295,7 @@
                             <id>start-jetty</id>
                             <phase>pre-integration-test</phase>
                             <goals>
-                                <goal>deploy-war</goal>
+                                <goal>start-war</goal>
                             </goals>
                         </execution>
                         <execution>
@@ -550,6 +554,12 @@
                 <version>1.7.36</version>
             </dependency>
             <dependency>
+                <groupId>jakarta.servlet</groupId>
+                <artifactId>jakarta.servlet-api</artifactId>
+                <version>${jakarta.servlet.api.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
                 <groupId>org.osgi</groupId>
                 <artifactId>osgi.cmpn</artifactId>
                 <version>7.0.0</version>
@@ -618,4 +628,12 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+    <dependencies>
+        <!--testing use -->
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>license-checker</artifactId>
+            <version>1.9.0</version>
+        </dependency>
+    </dependencies>
 </project>
