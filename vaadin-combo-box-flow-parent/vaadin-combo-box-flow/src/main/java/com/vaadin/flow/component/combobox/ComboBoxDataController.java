@@ -479,9 +479,10 @@ class ComboBoxDataController<TItem>
         setDataProvider(listDataProvider, filterText -> {
             Optional<SerializablePredicate<TItem>> componentInMemoryFilter = DataViewUtils
                     .getComponentFilter(comboBox);
+            SerializablePredicate<TItem> componentInMemoryFilterOrAlwaysPass = componentInMemoryFilter
+                    .orElse(ignore -> true);
             return item -> itemFilter.test(item, filterText)
-                    && componentInMemoryFilter.orElse(ignore -> true)
-                            .test(item);
+                    && componentInMemoryFilterOrAlwaysPass.test(item);
         });
     }
 
