@@ -330,6 +330,7 @@
                         <argLine>-Xmx2048m</argLine>
                         <reuseForks>false</reuseForks>
                         <trimStackTrace>false</trimStackTrace>
+                        <redirectTestOutputToFile>true</redirectTestOutputToFile>
                         <systemPropertyVariables>
                             <webdriver.chrome.driver>${webdriver.chrome.driver}</webdriver.chrome.driver>
                             <com.vaadin.tests.SharedBrowser.reuseBrowser>${com.vaadin.tests.SharedBrowser.reuseBrowser}</com.vaadin.tests.SharedBrowser.reuseBrowser>
