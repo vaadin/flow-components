@@ -18,24 +18,38 @@ package com.vaadin.flow.component.datepicker;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.experimental.Feature;
+import com.vaadin.experimental.FeatureFlags;
+import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.shared.ClientValidationUtil;
+import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasClearButton;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasClientValidation;
+import com.vaadin.flow.component.shared.ValidationUtil;
+import com.vaadin.flow.data.binder.HasValidator;
+import com.vaadin.flow.data.binder.ValidationResult;
+import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
+import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
+import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.JsonSerializer;
@@ -61,10 +75,11 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd
  */
 @JsModule("./datepickerConnector.js")
-@NpmPackage(value = "date-fns", version = "2.28.0")
+@NpmPackage(value = "date-fns", version = "2.29.3")
 public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         implements HasSize, HasValidation, HasHelper, HasTheme, HasLabel,
-        HasClearButton {
+        HasClearButton, HasAllowedCharPattern, HasValidator<LocalDate>,
+        HasClientValidation, HasTooltip {
 
     private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
@@ -130,6 +145,10 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         setInvalid(false);
 
         addValueChangeListener(e -> validate());
+
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            addClientValidatedEventListener(e -> validate());
+        }
     }
 
     /**
@@ -334,7 +353,12 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         super.onAttach(attachEvent);
         initConnector();
         requestI18nUpdate();
-        FieldValidationUtil.disableClientValidation(this);
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            ClientValidationUtil
+                    .preventWebComponentFromSettingItselfToValid(this);
+        } else {
+            FieldValidationUtil.disableClientValidation(this);
+        }
     }
 
     private void initConnector() {
@@ -455,6 +479,27 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     }
 
     @Override
+    public Validator<LocalDate> getDefaultValidator() {
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            return (value, context) -> checkValidity(value);
+        }
+
+        return Validator.alwaysPass();
+    }
+
+    public Registration addValidationStatusChangeListener(
+            ValidationStatusChangeListener<LocalDate> listener) {
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            return addClientValidatedEventListener(
+                    event -> listener.validationStatusChanged(
+                            new ValidationStatusChangeEvent<LocalDate>(this,
+                                    !isInvalid())));
+        }
+
+        return null;
+    }
+
+    @Override
     public void setInvalid(boolean invalid) {
         super.setInvalid(invalid);
     }
@@ -471,19 +516,49 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         return isInvalidBoolean();
     }
 
+    private ValidationResult checkValidity(LocalDate value) {
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            boolean hasNonParsableValue = value == getEmptyValue()
+                    && isInputValuePresent();
+            if (hasNonParsableValue) {
+                return ValidationResult.error("");
+            }
+        }
+
+        var greaterThanMax = ValidationUtil.checkGreaterThanMax(value, max);
+        if (greaterThanMax.isError()) {
+            return greaterThanMax;
+        }
+
+        var smallerThanMin = ValidationUtil.checkSmallerThanMin(value, min);
+        if (smallerThanMin.isError()) {
+            return smallerThanMin;
+        }
+
+        return ValidationResult.ok();
+    }
+
     /**
      * Performs a server-side validation of the given value. This is needed
      * because it is possible to circumvent the client side validation
      * constraints using browser development tools.
      */
     private boolean isInvalid(LocalDate value) {
-        final boolean isRequiredButEmpty = required
-                && Objects.equals(getEmptyValue(), value);
-        final boolean isGreaterThanMax = value != null && max != null
-                && value.isAfter(max);
-        final boolean isSmallerThenMin = value != null && min != null
-                && value.isBefore(min);
-        return isRequiredButEmpty || isGreaterThanMax || isSmallerThenMin;
+        var requiredValidation = ValidationUtil.checkRequired(required, value,
+                getEmptyValue());
+
+        return requiredValidation.isError() || checkValidity(value).isError();
+    }
+
+    /**
+     * Returns whether the input element has a value or not.
+     *
+     * @return <code>true</code> if the input element's value is populated,
+     *         <code>false</code> otherwise
+     */
+    @Synchronize(property = "_hasInputValue", value = "has-input-value-changed")
+    private boolean isInputValuePresent() {
+        return getElement().getProperty("_hasInputValue", false);
     }
 
     /**
@@ -721,6 +796,27 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         getThemeNames().removeAll(
                 Stream.of(variants).map(DatePickerVariant::getVariantName)
                         .collect(Collectors.toList()));
+    }
+
+    /**
+     * Returns true if the given feature flag is enabled, false otherwise.
+     * <p>
+     * Exposed with protected visibility to support mocking
+     * <p>
+     * The method requires the {@code VaadinService} instance to obtain the
+     * available feature flags, otherwise, the feature is considered disabled.
+     *
+     * @param feature
+     *            the feature flag.
+     * @return whether the feature flag is enabled.
+     */
+    protected boolean isFeatureFlagEnabled(Feature feature) {
+        VaadinService service = VaadinService.getCurrent();
+        if (service == null) {
+            return false;
+        }
+
+        return FeatureFlags.get(service.getContext()).isEnabled(feature);
     }
 
     /**

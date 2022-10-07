@@ -39,6 +39,8 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementConstants;
 import com.vaadin.flow.dom.Style;
+import com.vaadin.flow.internal.StateTree;
+import com.vaadin.flow.router.NavigationTrigger;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -85,6 +87,8 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
     private String maxHeight;
     private DialogHeader dialogHeader;
     private DialogFooter dialogFooter;
+
+    private Registration afterProgrammaticNavigationListenerRegistration;
 
     /**
      * Creates an empty dialog.
@@ -258,6 +262,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
      * @see #close()
      *
      * @param listener
+     *            the listener to add
      * @return registration for removal of listener
      */
     public Registration addDialogCloseActionListener(
@@ -296,6 +301,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
      * every resizing.
      *
      * @param listener
+     *            the listener to add
      * @return registration for removal of listener
      */
     public Registration addResizeListener(
@@ -589,7 +595,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
     }
 
     /**
-     * Class for adding and removing components to the header part of a dialog.
+     * Class for adding and removing components to the footer part of a dialog.
      */
     final public static class DialogFooter extends DialogHeaderFooter {
         private DialogFooter(Dialog dialog) {
@@ -662,6 +668,16 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         }
 
         /**
+         * Removes all components from the container.
+         */
+        public void removeAll() {
+            root.removeAllChildren();
+            dialog.getElement()
+                    .executeJs("this." + rendererFunction + " = null;");
+            setRendererCreated(false);
+        }
+
+        /**
          * Method called to create the renderer function using
          * {@link #rendererFunction} as the property name.
          */
@@ -723,7 +739,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         if (ui == null) {
             throw new IllegalStateException("UI instance is not available. "
                     + "It means that you are calling this method "
-                    + "out of a normal workflow where it's always implicitely set. "
+                    + "out of a normal workflow where it's always implicitly set. "
                     + "That may happen if you call the method from the custom thread without "
                     + "'UI::access' or from tests without proper initialization.");
         }
@@ -732,13 +748,29 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
 
     private void ensureAttached() {
         UI ui = getCurrentUI();
-        ui.beforeClientResponse(ui, context -> {
-            if (getElement().getNode().getParent() == null) {
-                ui.addToModalComponent(this);
-                ui.setChildComponentModal(this, isModal());
-                autoAddedToTheUi = true;
-            }
-        });
+        StateTree.ExecutionRegistration addToUiRegistration = ui
+                .beforeClientResponse(ui, context -> {
+                    if (getElement().getNode().getParent() == null) {
+                        ui.addToModalComponent(this);
+                        ui.setChildComponentModal(this, isModal());
+                        autoAddedToTheUi = true;
+                    }
+                    if (afterProgrammaticNavigationListenerRegistration != null) {
+                        afterProgrammaticNavigationListenerRegistration
+                                .remove();
+                    }
+                });
+        if (ui.getSession() != null) {
+            afterProgrammaticNavigationListenerRegistration = ui
+                    .addAfterNavigationListener(event -> {
+                        if (event.getLocationChangeEvent()
+                                .getTrigger() == NavigationTrigger.PROGRAMMATIC) {
+                            addToUiRegistration.remove();
+                            afterProgrammaticNavigationListenerRegistration
+                                    .remove();
+                        }
+                    });
+        }
     }
 
     private void ensureOnCloseConfigured() {
@@ -814,9 +846,9 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
     /**
      * Add a lister for event fired by the {@code opened-changed} events.
      *
-     * @param: listener
-     *             the listener to add;
-     * @return: a Registration for removing the event listener
+     * @param listener
+     *            the listener to add
+     * @return a Registration for removing the event listener
      */
     @Override
     public Registration addOpenedChangeListener(

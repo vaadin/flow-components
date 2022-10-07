@@ -50,28 +50,15 @@ import java.util.stream.Collectors;
  * "https://en.wikipedia.org/wiki/Create,_read,_update_and_delete">CRUD</a>
  * operations on a data backend (e.g entities from a database).
  *
- * <pre>
- * <u>Basic usage</u>
- *
- * {@code
- *   Crud<Person> crud = new Crud<>(Person.class, personEditor);
- *   crud.setDataProvider(personDataProvider);
- *
- *   // Handle save and delete events.
- *   crud.addSaveListener(e -> save(e.getItem()));
- *   crud.addDeleteListener(e -> delete(e.getItem()));
- * }
- * </pre>
- *
  * @param <E>
  *            the bean type
  * @author Vaadin Ltd
  */
 @Tag("vaadin-crud")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/crud", version = "23.1.0")
-@NpmPackage(value = "@vaadin/vaadin-crud", version = "23.1.0")
+@NpmPackage(value = "@vaadin/crud", version = "23.3.0-alpha2")
+@NpmPackage(value = "@vaadin/vaadin-crud", version = "23.3.0-alpha2")
 @JsModule("@vaadin/crud/src/vaadin-crud.js")
 @JsModule("@vaadin/crud/src/vaadin-crud-edit-column.js")
 public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
@@ -146,34 +133,6 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
      * information. The editor and bean type must be initialized before a Crud
      * is put into full use therefore this constructor only exists for partial
      * initialization in order to support template binding.
-     *
-     * <pre>
-     * Example:
-     * <code>
-     *    &#064;Id
-     *    Crud&lt;Person&gt; crud;
-     *
-     *    &#064;Id
-     *    private TextField firstName;
-     *
-     *    &#064;Id
-     *    private TextField lastName;
-     *
-     *    &#064;Override
-     *    protected void onAttach(AttachEvent attachEvent) {
-     *        super.onAttach(attachEvent);
-     *
-     *        Binder&lt;Person&gt; binder = new Binder&lt;&gt;(Person.class);
-     *        binder.bind(firstName, Person::getFirstName, Person::setFirstName);
-     *        binder.bind(lastName, Person::getLastName, Person::setLastName);
-     *
-     *        crud.setEditor(new BinderCrudEditor&lt;&gt;(binder));
-     *        crud.setBeanType(Person.class);
-     *
-     *        crud.setDataProvider(new PersonCrudDataProvider());
-     *    }
-     * </code>
-     * </pre>
      *
      * @see #setEditor(CrudEditor)
      * @see #setBeanType(Class)

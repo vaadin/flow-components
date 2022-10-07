@@ -212,8 +212,6 @@ public class TreeGrid<T> extends Grid<T>
         }
     }
 
-    private Registration dataProviderRegistration;
-
     /**
      * Creates a new {@code TreeGrid} without support for creating columns based
      * on property names. Use an alternative constructor, such as
@@ -351,18 +349,6 @@ public class TreeGrid<T> extends Grid<T>
     @Override
     public void setDataProvider(
             HierarchicalDataProvider<T, ?> hierarchicalDataProvider) {
-        if (dataProviderRegistration != null) {
-            dataProviderRegistration.remove();
-        }
-        dataProviderRegistration = hierarchicalDataProvider
-                .addDataProviderListener(e -> {
-                    if (!(e instanceof DataChangeEvent.DataRefreshEvent)) {
-                        // refreshAll was called
-                        getElement().executeJs(
-                                "$0.$connector && $0.$connector.reset()",
-                                getElement());
-                    }
-                });
         super.setDataProvider(hierarchicalDataProvider);
     }
 
@@ -722,7 +708,7 @@ public class TreeGrid<T> extends Grid<T>
     private Column<T> addHierarchyColumn(PropertyDefinition<T, ?> property) {
         Column<T> column = addHierarchyColumn(
                 item -> String.valueOf(property.getGetter().apply(item)))
-                        .setHeader(property.getCaption());
+                .setHeader(property.getCaption());
         try {
             return column.setKey(property.getName());
         } catch (IllegalArgumentException exception) {

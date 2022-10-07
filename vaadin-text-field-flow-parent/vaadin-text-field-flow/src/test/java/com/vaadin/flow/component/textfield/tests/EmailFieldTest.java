@@ -15,14 +15,18 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
+import com.vaadin.flow.component.shared.HasAllowedCharPattern;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextFieldVariant;
-import com.vaadin.tests.ThemeVariantTestHelper;
+import com.vaadin.flow.dom.ThemeList;
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Tests for the {@link EmailField}.
@@ -60,14 +64,35 @@ public class EmailFieldTest {
 
     @Test
     public void addThemeVariant_themeAttributeContainsThemeVariant() {
-        ThemeVariantTestHelper.addThemeVariant_themeNamesContainsThemeVariant(
-                new EmailField(), TextFieldVariant.LUMO_SMALL);
+        EmailField field = new EmailField();
+        field.addThemeVariants(TextFieldVariant.LUMO_SMALL);
+
+        ThemeList themeNames = field.getThemeNames();
+        Assert.assertTrue(themeNames
+                .contains(TextFieldVariant.LUMO_SMALL.getVariantName()));
     }
 
     @Test
     public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
-        ThemeVariantTestHelper
-                .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
-                        new EmailField(), TextFieldVariant.LUMO_SMALL);
+        EmailField field = new EmailField();
+        field.addThemeVariants(TextFieldVariant.LUMO_SMALL);
+        field.removeThemeVariants(TextFieldVariant.LUMO_SMALL);
+
+        ThemeList themeNames = field.getThemeNames();
+        Assert.assertFalse(themeNames
+                .contains(TextFieldVariant.LUMO_SMALL.getVariantName()));
+    }
+
+    @Test
+    public void implementsHasAllowedCharPattern() {
+        assertTrue("EmailField should support char pattern",
+                HasAllowedCharPattern.class
+                        .isAssignableFrom(new EmailField().getClass()));
+    }
+
+    @Test
+    public void implementsHasTooltip() {
+        EmailField field = new EmailField();
+        Assert.assertTrue(field instanceof HasTooltip);
     }
 }

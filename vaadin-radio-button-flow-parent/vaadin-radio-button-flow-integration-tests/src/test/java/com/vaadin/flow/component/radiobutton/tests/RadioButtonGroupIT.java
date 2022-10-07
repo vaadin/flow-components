@@ -351,7 +351,7 @@ public class RadioButtonGroupIT extends AbstractComponentIT {
 
         RadioButtonGroupElement groupWithHelperComponent = $(
                 RadioButtonGroupElement.class)
-                        .id("group-with-helper-component");
+                .id("group-with-helper-component");
         WebElement helperComponent = groupWithHelperComponent
                 .getHelperComponent();
         Assert.assertEquals("helperComponent", helperComponent.getText());
@@ -370,7 +370,7 @@ public class RadioButtonGroupIT extends AbstractComponentIT {
 
         RadioButtonGroupElement groupWithHelperComponent = $(
                 RadioButtonGroupElement.class)
-                        .id("group-with-helper-component");
+                .id("group-with-helper-component");
         WebElement helperComponent = groupWithHelperComponent
                 .getHelperComponent();
         Assert.assertEquals("helper-component",

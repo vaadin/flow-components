@@ -38,6 +38,8 @@ import com.vaadin.flow.dom.ElementFactory;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.HtmlUtils;
+import com.vaadin.flow.internal.StateTree;
+import com.vaadin.flow.router.NavigationTrigger;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -60,6 +62,8 @@ public class Notification extends GeneratedVaadinNotification<Notification>
     private final Element container = ElementFactory.createDiv();
     private final Element templateElement = new Element("template");
     private boolean autoAddedToTheUi = false;
+
+    private Registration afterProgrammaticNavigationListenerRegistration;
 
     private SerializableConsumer<UI> deferredJob = new AttachComponentTemplate();
 
@@ -204,13 +208,6 @@ public class Notification extends GeneratedVaadinNotification<Notification>
 
         getElement().addEventListener("opened-changed",
                 event -> removeAutoAdded());
-
-        addDetachListener(event -> {
-            // If the notification gets detached, it needs to be marked
-            // as closed so it won't auto-open when reattached.
-            setOpened(false);
-            removeAutoAdded();
-        });
     }
 
     /**
@@ -445,14 +442,29 @@ public class Notification extends GeneratedVaadinNotification<Notification>
                     + "That may happen if you call the method from the custom thread without "
                     + "'UI::access' or from tests without proper initialization.");
         }
-
-        ui.beforeClientResponse(ui, context -> {
-            if (isOpened() && getElement().getNode().getParent() == null) {
-                ui.addToModalComponent(this);
-                autoAddedToTheUi = true;
-            }
-        });
-
+        StateTree.ExecutionRegistration addToUiRegistration = ui
+                .beforeClientResponse(ui, context -> {
+                    if (isOpened()
+                            && getElement().getNode().getParent() == null) {
+                        ui.addToModalComponent(this);
+                        autoAddedToTheUi = true;
+                    }
+                    if (afterProgrammaticNavigationListenerRegistration != null) {
+                        afterProgrammaticNavigationListenerRegistration
+                                .remove();
+                    }
+                });
+        if (ui.getSession() != null) {
+            afterProgrammaticNavigationListenerRegistration = ui
+                    .addAfterNavigationListener(event -> {
+                        if (event.getLocationChangeEvent()
+                                .getTrigger() == NavigationTrigger.PROGRAMMATIC) {
+                            addToUiRegistration.remove();
+                            afterProgrammaticNavigationListenerRegistration
+                                    .remove();
+                        }
+                    });
+        }
         super.setOpened(opened);
     }
 
@@ -572,6 +584,24 @@ public class Notification extends GeneratedVaadinNotification<Notification>
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         initConnector();
+    }
+
+    @Override
+    protected void onDetach(DetachEvent detachEvent) {
+        super.onDetach(detachEvent);
+        // When reloading a page using preserve on refresh, the notification
+        // should keep its opened state. To prevent it from auto-closing, delay
+        // the auto-closing logic to before client response, which is not called
+        // when reloading the page. This also prevents an exception when trying
+        // to remove an auto-added notification from its parent.
+        detachEvent.getUI().beforeClientResponse(this, executionContext -> {
+            // Close the notification, and remove it from its parent if it was
+            // auto-added. This ensures that the notification doesn't re-open
+            // itself when its parent, for example a dialog, gets attached
+            // again.
+            setOpened(false);
+            removeAutoAdded();
+        });
     }
 
     private void initConnector() {

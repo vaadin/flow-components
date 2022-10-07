@@ -20,6 +20,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.dom.PropertyChangeListener;
 
 /**
@@ -35,7 +36,7 @@ import com.vaadin.flow.dom.PropertyChangeListener;
  * @author Vaadin Ltd
  */
 public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
-        implements HasSize, HasLabel {
+        implements HasSize, HasLabel, HasTooltip {
 
     private final Label labelElement;
 
@@ -186,7 +187,11 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
      *
      * @param htmlContent
      *            the label html to set
+     *
+     * @deprecated Since 23.2, this API is deprecated in favor of
+     *             {@link #setLabelComponent(Component)}
      */
+    @Deprecated
     public void setLabelAsHtml(String htmlContent) {
         setLabel("");
         labelElement.getElement().setProperty("innerHTML", htmlContent);

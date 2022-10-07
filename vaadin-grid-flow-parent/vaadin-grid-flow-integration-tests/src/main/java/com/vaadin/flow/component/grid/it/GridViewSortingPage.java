@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridSortOrder;
+import com.vaadin.flow.component.grid.Grid.MultiSortPriority;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
@@ -43,8 +44,10 @@ public class GridViewSortingPage extends LegacyTestView {
         grid.setItems(getItems());
         grid.setSelectionMode(SelectionMode.NONE);
 
-        grid.addColumn(Person::getFirstName, "firstName").setHeader("Name");
-        grid.addColumn(Person::getAge, "age").setHeader("Age");
+        Grid.Column<Person> nameColumn = grid
+                .addColumn(Person::getFirstName, "firstName").setHeader("Name");
+        Grid.Column<Person> ageColumn = grid.addColumn(Person::getAge, "age")
+                .setHeader("Age");
 
         Comparator<Person> addressComparator = Comparator
                 .comparing((Person person) -> person.getAddress().getNumber())
@@ -65,6 +68,13 @@ public class GridViewSortingPage extends LegacyTestView {
         Checkbox multiSort = new Checkbox("Multiple column sorting enabled");
         multiSort.addValueChangeListener(
                 event -> grid.setMultiSort(event.getValue()));
+
+        Checkbox multiSortPriority = new Checkbox(
+                "Multi-sort priority: append");
+        multiSortPriority.addValueChangeListener(event -> grid.setMultiSort(
+                grid.isMultiSort(), event.getValue() ? MultiSortPriority.APPEND
+                        : MultiSortPriority.PREPEND));
+
         grid.addSortListener(event -> {
             String currentSortOrder = grid.getDataCommunicator()
                     .getBackEndSorting().stream()
@@ -102,14 +112,22 @@ public class GridViewSortingPage extends LegacyTestView {
                     grid.sort(null);
                 });
 
+        NativeButton sortByTwoColumns = new NativeButton("Sort by 2 columns",
+                event -> {
+                    grid.sort(GridSortOrder.asc(ageColumn).thenDesc(nameColumn)
+                            .build());
+                });
+
         grid.setId("grid-sortable-columns");
         multiSort.setId("grid-multi-sort-toggle");
+        multiSortPriority.setId("grid-multi-sort-priority-toggle");
         invertAllSortings.setId("grid-sortable-columns-invert-sortings");
         resetAllSortings.setId("grid-sortable-columns-reset-sortings");
         toggleFirstColumnAndReset.setId("grid-sortable-columns-toggle-first");
+        sortByTwoColumns.setId("grid-sortable-columns-sort-by-two");
         messageDiv.setId("grid-sortable-columns-message");
         addCard("Sorting", "Grid with sortable columns", grid, multiSort,
-                invertAllSortings, resetAllSortings, toggleFirstColumnAndReset,
-                messageDiv);
+                multiSortPriority, invertAllSortings, resetAllSortings,
+                toggleFirstColumnAndReset, sortByTwoColumns, messageDiv);
     }
 }

@@ -984,6 +984,19 @@
       #spreadsheet-overlays .v-spreadsheet-popupbutton-overlay .v-panel.spreadsheet-item-filter-layout .v-panel-deco {
         background-color: transparent;
         border: none; }
+      #spreadsheet-overlays .spreadsheet-item-filter-layout {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        max-height: 275px;
+        overflow-y: auto;
+      }
+
+      #spreadsheet-overlays .spreadsheet-filter-table-content {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
   #spreadsheet-overlays .v-spreadsheet-popupbutton-overlay-header {
     background: white;
     height: 18px;
@@ -996,7 +1009,18 @@
       top: 0px;
       width: 18px;
       height: 18px;
-      line-height: 18px; }
+      line-height: 18px;
+      cursor: pointer;
+      box-sizing: border-box;
+      font-size: 21px;
+      color: #999999;
+      padding-right: 4px;
+      border-radius: 0 4px 0 4px;
+      text-align: center; }
+    #spreadsheet-overlays .v-spreadsheet-popupbutton-overlay-header .v-window-closebox:hover {
+      color: #197de1; }
+    #spreadsheet-overlays .v-spreadsheet-popupbutton-overlay-header .v-window-closebox:before {
+      content: "\00d7";}
     #spreadsheet-overlays .v-spreadsheet-popupbutton-overlay-header .header-caption {
       margin: 0 18px;
       height: 18px;
@@ -1020,3 +1044,6 @@
         box-shadow: none; }
       vaadin-spreadsheet .sheet-image > .v-csslayout .v-button-minimize-button .v-button-caption {
         display: none; }
+      vaadin-spreadsheet .clear-filters-button {
+        width: 100%;
+      }

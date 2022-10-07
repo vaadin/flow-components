@@ -18,15 +18,17 @@ package com.vaadin.flow.component.combobox;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableBiPredicate;
 
 import elemental.json.Json;
@@ -58,17 +60,17 @@ import elemental.json.JsonObject;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-combo-box")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/combo-box", version = "23.1.0")
-@NpmPackage(value = "@vaadin/vaadin-combo-box", version = "23.1.0")
+@NpmPackage(value = "@vaadin/combo-box", version = "23.3.0-alpha2")
+@NpmPackage(value = "@vaadin/vaadin-combo-box", version = "23.3.0-alpha2")
 @JsModule("@vaadin/combo-box/src/vaadin-combo-box.js")
 @JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./comboBoxConnector.js")
-public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T> {
+public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
+        implements HasThemeVariant<ComboBoxVariant> {
 
-    private static final String PROP_INPUT_ELEMENT_VALUE = "_inputElementValue";
     private static final String PROP_SELECTED_ITEM = "selectedItem";
     private static final String PROP_VALUE = "value";
 
@@ -255,7 +257,12 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T> {
     /**
      * Whether the component should block user input that does not match the
      * configured pattern
+     *
+     * @return {@code true} if the component should block user input that does
+     *         not match the configured pattern, {@code false} otherwise
+     * @deprecated Since 23.2, this API is deprecated.
      */
+    @Deprecated
     public boolean isPreventInvalidInput() {
         return getElement().getProperty("preventInvalidInput", false);
     }
@@ -263,13 +270,22 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T> {
     /**
      * Sets whether the component should block user input that does not match
      * the configured pattern
+     *
+     * @param preventInvalidInput
+     *            {@code true} if the component should block user input that
+     *            does not match the configured pattern, {@code false} otherwise
+     * @deprecated Since 23.2, this API is deprecated in favor of
+     *             {@link #setAllowedCharPattern(String)}
      */
+    @Deprecated
     public void setPreventInvalidInput(boolean preventInvalidInput) {
         getElement().setProperty("preventInvalidInput", preventInvalidInput);
     }
 
     /**
      * The pattern to validate the input with
+     *
+     * @return the pattern to validate the input with
      */
     public String getPattern() {
         return getElement().getProperty("pattern");
@@ -277,6 +293,9 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T> {
 
     /**
      * Sets the pattern with which to validate the input
+     *
+     * @param pattern
+     *            the pattern to validate the input with
      */
     public void setPattern(String pattern) {
         getElement().setProperty("pattern", pattern == null ? "" : pattern);
@@ -294,7 +313,12 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T> {
         if (value == null) {
             getElement().setProperty(PROP_SELECTED_ITEM, null);
             getElement().setProperty(PROP_VALUE, "");
-            getElement().setProperty(PROP_INPUT_ELEMENT_VALUE, "");
+            // Force _inputElementValue update on the client-side by using
+            // `executeJs` to ensure the input's value will be cleared even
+            // if the component's value hasn't changed. The latter can be
+            // the case when calling `clear()` in a `customValueSet` listener
+            // which is triggered before any value is committed.
+            getElement().executeJs("this._inputElementValue = $0", "");
             return;
         }
 
@@ -303,9 +327,9 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T> {
         JsonObject json = Json.createObject();
         json.put("key", keyMapper.key(value));
         getDataGenerator().generateData(value, json);
-        getElement().setPropertyJson("selectedItem", json);
+        getElement().setPropertyJson(PROP_SELECTED_ITEM, json);
         getElement().setProperty(PROP_VALUE, keyMapper.key(value));
-        getElement().setProperty(PROP_INPUT_ELEMENT_VALUE,
+        getElement().executeJs("this._inputElementValue = $0",
                 generateLabel(value));
     }
 
@@ -313,8 +337,9 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T> {
     protected boolean isSelected(T item) {
         T value = getValue();
         DataProvider<T, ?> dataProvider = getDataProvider();
-        if (dataProvider == null || item == null || value == null)
+        if (dataProvider == null || item == null || value == null) {
             return false;
+        }
 
         return Objects.equals(dataProvider.getId(item),
                 dataProvider.getId(value));
@@ -325,27 +350,68 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T> {
         return null;
     }
 
-    /**
-     * Adds theme variants to the component.
-     *
-     * @param variants
-     *            theme variants to add
-     */
+    // Override is only required to keep binary compatibility with other 23.x
+    // minor versions, can be removed in a future major
+    @Override
     public void addThemeVariants(ComboBoxVariant... variants) {
-        getThemeNames()
-                .addAll(Stream.of(variants).map(ComboBoxVariant::getVariantName)
-                        .collect(Collectors.toList()));
+        HasThemeVariant.super.addThemeVariants(variants);
+    }
+
+    // Override is only required to keep binary compatibility with other 23.x
+    // minor versions, can be removed in a future major
+    @Override
+    public void removeThemeVariants(ComboBoxVariant... variants) {
+        HasThemeVariant.super.removeThemeVariants(variants);
     }
 
     /**
-     * Removes theme variants from the component.
+     * Adds the given components as children of this component at the slot
+     * 'prefix'.
      *
-     * @param variants
-     *            theme variants to remove
+     * @param components
+     *            The components to add.
+     * @see <a href=
+     *      "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
+     *      page about slots</a>
+     * @see <a href=
+     *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
+     *      website about slots</a>
      */
-    public void removeThemeVariants(ComboBoxVariant... variants) {
-        getThemeNames().removeAll(
-                Stream.of(variants).map(ComboBoxVariant::getVariantName)
-                        .collect(Collectors.toList()));
+    protected void addToPrefix(Component... components) {
+        for (Component component : components) {
+            component.getElement().setAttribute("slot", "prefix");
+            getElement().appendChild(component.getElement());
+        }
+    }
+
+    /**
+     * Removes the given child components from this component.
+     *
+     * @param components
+     *            The components to remove.
+     * @throws IllegalArgumentException
+     *             if any of the components is not a child of this component.
+     */
+    protected void remove(Component... components) {
+        for (Component component : components) {
+            if (getElement().equals(component.getElement().getParent())) {
+                component.getElement().removeAttribute("slot");
+                getElement().removeChild(component.getElement());
+            } else {
+                throw new IllegalArgumentException("The given component ("
+                        + component + ") is not a child of this component");
+            }
+        }
+    }
+
+    /**
+     * Removes all contents from this component, this includes child components,
+     * text content as well as child elements that have been added directly to
+     * this component using the {@link Element} API.
+     */
+    protected void removeAll() {
+        getElement().getChildren()
+                .forEach(child -> child.removeAttribute("slot"));
+        getElement().removeAllChildren();
     }
 }

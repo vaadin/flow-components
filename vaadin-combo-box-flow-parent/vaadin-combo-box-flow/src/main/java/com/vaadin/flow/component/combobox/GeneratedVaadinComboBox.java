@@ -16,6 +16,8 @@
 package com.vaadin.flow.component.combobox;
 
 import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.DomEvent;
+import com.vaadin.flow.component.EventData;
 import elemental.json.JsonObject;
 
 import java.io.Serializable;
@@ -24,21 +26,35 @@ import java.io.Serializable;
  * @deprecated This class is not used in any API, and will be removed in a
  *             future major version.
  */
+@Deprecated
 public abstract class GeneratedVaadinComboBox implements Serializable {
 
     /**
+     * Event that is dispatched from a combo box component, if the component
+     * allows setting custom values, and the user has entered a non-empty value
+     * that does not match any of the existing items
+     *
      * @deprecated Use
-     *             {@link com.vaadin.flow.component.combobox.events.CustomValueSetEvent}
+     *             {@link com.vaadin.flow.component.combobox.ComboBoxBase.CustomValueSetEvent}
      *             instead. This class will be removed in a future major
      *             version.
      * @param <TComponent>
+     *            The specific combo box component type
      */
+    @DomEvent("custom-value-set")
+    @Deprecated
     public static class CustomValueSetEvent<TComponent extends ComboBoxBase<TComponent, ?, ?>>
-            extends
-            com.vaadin.flow.component.combobox.events.CustomValueSetEvent<TComponent> {
+            extends ComponentEvent<TComponent> {
+        private final String detail;
+
         public CustomValueSetEvent(TComponent source, boolean fromClient,
-                String detail) {
-            super(source, fromClient, detail);
+                @EventData("event.detail") String detail) {
+            super(source, fromClient);
+            this.detail = detail;
+        }
+
+        public String getDetail() {
+            return detail;
         }
     }
 
@@ -46,6 +62,7 @@ public abstract class GeneratedVaadinComboBox implements Serializable {
      * @deprecated This class is not used in any API, and will be removed in a
      *             future major version.
      * @param <TComponent>
+     *            The specific combo box component type
      */
     public static class SelectedItemChangeEvent<TComponent extends ComboBoxBase<TComponent, ?, ?>>
             extends ComponentEvent<TComponent> {
@@ -66,6 +83,7 @@ public abstract class GeneratedVaadinComboBox implements Serializable {
      * @deprecated This class is not used in any API, and will be removed in a
      *             future major version.
      * @param <TComponent>
+     *            The specific combo box component type
      */
     public static class OpenedChangeEvent<TComponent extends ComboBoxBase<TComponent, ?, ?>>
             extends ComponentEvent<TComponent> {
@@ -84,7 +102,6 @@ public abstract class GeneratedVaadinComboBox implements Serializable {
     /**
      * @deprecated This class is not used in any API, and will be removed in a
      *             future major version.
-     * @param <R>
      */
     public static class FilterChangeEvent<R extends ComboBoxBase<R, ?, ?>>
             extends ComponentEvent<R> {
@@ -103,7 +120,6 @@ public abstract class GeneratedVaadinComboBox implements Serializable {
     /**
      * @deprecated This class is not used in any API, and will be removed in a
      *             future major version.
-     * @param <R>
      */
     public static class InvalidChangeEvent<R extends ComboBoxBase<R, ?, ?>>
             extends ComponentEvent<R> {

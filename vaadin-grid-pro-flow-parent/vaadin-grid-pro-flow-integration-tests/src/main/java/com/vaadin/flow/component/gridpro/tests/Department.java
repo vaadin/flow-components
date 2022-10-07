@@ -12,7 +12,7 @@ public enum Department {
     }
 
     public static Department getRandomDepartment() {
-        Random random = new Random();
+        Random random = new Random(); // NOSONAR
         return Department.values()[random.nextInt(values().length)];
     }
 

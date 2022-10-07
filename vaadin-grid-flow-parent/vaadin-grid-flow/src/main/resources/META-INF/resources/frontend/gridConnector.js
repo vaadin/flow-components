@@ -455,7 +455,14 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
                   }
                 });
 
-                directions.reverse().forEach(({ column, direction }) => {
+                // Apply directions in correct order, depending on configured multi-sort priority.
+                // For the default "prepend" mode, directions need to be applied in reverse, in
+                // order for the sort indicators to match the order on the server. For "append"
+                // just keep the order passed from the server.
+                if (grid.multiSortPriority !== 'append') {
+                  directions = directions.reverse()
+                }
+                directions.forEach(({ column, direction }) => {
                   sorters.forEach((sorter) => {
                     if (sorter.getAttribute('path') === column && sorter.direction !== direction) {
                       sorter.direction = direction;
@@ -1034,20 +1041,11 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             );
         };
 
-        const contextMenuListener = function (e) {
-          // For `contextmenu` events, we need to access the source event,
-          // when using open on click we just use the click event itself
-          const sourceEvent = e.detail.sourceEvent || e;
-          const eventContext = grid.getEventContext(sourceEvent);
-          const key = eventContext.item && eventContext.item.key;
-          const colId = eventContext.column && eventContext.column.id;
-          grid.$server.updateContextMenuTargetItem(key, colId);
-        };
-
         grid.addEventListener(
           'vaadin-context-menu-before-open',
           tryCatchWrapper(function (e) {
-            contextMenuListener(grid.$contextMenuTargetConnector.openEvent);
+            const { key, columnId } = e.detail;
+            grid.$server.updateContextMenuTargetItem(key, columnId);
           })
         );
 
@@ -1056,9 +1054,9 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           // when using open on click we just use the click event itself
           const sourceEvent = event.detail.sourceEvent || event;
           const eventContext = grid.getEventContext(sourceEvent);
-          return {
-            key: (eventContext.item && eventContext.item.key) || ''
-          };
+          const key = (eventContext.item && eventContext.item.key) || '';
+          const columnId = (eventContext.column && eventContext.column.id) || '';
+          return { key, columnId };
         });
 
         grid.addEventListener(

@@ -31,12 +31,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 import java.util.WeakHashMap;
-import java.util.stream.Collectors;
 
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -75,8 +75,6 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
-import com.vaadin.flow.component.Focusable;
-import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
@@ -95,10 +93,7 @@ import com.vaadin.flow.component.spreadsheet.command.SizeChangeCommand.Type;
 import com.vaadin.flow.component.spreadsheet.framework.Action;
 import com.vaadin.flow.component.spreadsheet.framework.ReflectTools;
 import com.vaadin.flow.component.spreadsheet.rpc.SpreadsheetClientRpc;
-import com.vaadin.flow.component.spreadsheet.shared.ContentMode;
-import com.vaadin.flow.component.spreadsheet.shared.ErrorLevel;
 import com.vaadin.flow.component.spreadsheet.shared.GroupingData;
-import com.vaadin.flow.component.spreadsheet.shared.PopupButtonState;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.pro.licensechecker.LicenseChecker;
@@ -116,8 +111,8 @@ import elemental.json.JsonValue;
 @Tag("vaadin-spreadsheet")
 @JsModule("./vaadin-spreadsheet/vaadin-spreadsheet.js")
 @SuppressWarnings("serial")
-public class Spreadsheet extends Component implements HasComponents, HasSize,
-        HasStyle, Action.Container, Focusable {
+public class Spreadsheet extends Component
+        implements HasSize, HasStyle, Action.Container {
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(Spreadsheet.class);
@@ -144,8 +139,6 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
         }
     }
 
-    private SpreadsheetHandlerImpl spreadsheetHandler;
-
     /*
      * FLOW RELATED STUFF
      */
@@ -160,59 +153,25 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
 
     // from AbstractComponentState
 
-    private String height = "100%";
-    private String width = "100%";
-
     @Override
     public void setId(String id) {
-        this.id = id;
         getElement().setProperty("id", id);
     }
 
     @Override
     public void setHeight(String height) {
-        this.height = height;
         getElement().setProperty("height", height);
     }
 
     @Override
     public void setWidth(String width) {
-        this.width = width;
         getElement().setProperty("width", width);
     }
-
-    private String description = "";
-    private ContentMode descriptionContentMode = ContentMode.PREFORMATTED;
-    // Note: for the caption, there is a difference between null and an empty
-    // string!
-    private String caption = null;
-    private List<String> styles = null;
-    private String id = null;
-    private String primaryStyleName = null;
-
-    /** HTML formatted error message for the component. */
-    private String errorMessage = null;
-
-    /**
-     * Level of error.
-     *
-     * @since 8.2
-     */
-    private ErrorLevel errorLevel = null;
-
-    private boolean captionAsHtml = false;
 
     // from SaredState
 
     // private Map<String, URLReference> resources = new HashMap<>();
     private Map<String, String> resources = new HashMap<>();
-
-    private boolean enabled = true;
-
-    /**
-     * A set of event identifiers with registered listeners.
-     */
-    private Set<String> registeredEventListeners;
 
     // spreadsheetState
 
@@ -225,7 +184,6 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
     private int cols;
 
     private List<GroupingData> colGroupingData;
-    private List<GroupingData> rowGroupingData;
 
     private int colGroupingMax;
     private int rowGroupingMax;
@@ -272,8 +230,6 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
 
     private boolean sheetProtected;
 
-    private boolean workbookProtected;
-
     private HashMap<String, String> cellKeysToEditorIdMap;
 
     private HashMap<String, String> componentIDtoCellKeysMap;
@@ -288,15 +244,9 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
 
     private Set<String> invalidFormulaCells;
 
-    private boolean hasActions;
-
     private HashMap<String, OverlayInfo> overlays;
 
     private ArrayList<MergedRegion> mergedRegions;
-
-    private boolean displayGridlines = true;
-
-    private boolean displayRowColHeadings = true;
 
     private int verticalSplitPosition = 0;
     private int horizontalSplitPosition = 0;
@@ -305,528 +255,431 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
 
     private boolean workbookChangeToggle;
 
-    private String invalidFormulaErrorMessage = "Invalid formula";
-
-    private boolean lockFormatColumns = true;
-
-    private boolean lockFormatRows = true;
-
-    private List<String> namedRanges;
-
-    public String getDescription() {
-        return description;
-    }
-
-    public ContentMode getDescriptionContentMode() {
-        return descriptionContentMode;
-    }
-
-    public String getCaption() {
-        return caption;
-    }
-
-    public List<String> getStyles() {
-        return styles;
-    }
-
-    public String getPrimaryStyleName() {
-        return primaryStyleName;
-    }
-
-    public String getErrorMessage() {
-        return errorMessage;
-    }
-
-    public ErrorLevel getErrorLevel() {
-        return errorLevel;
-    }
-
-    public boolean isCaptionAsHtml() {
-        return captionAsHtml;
-    }
-
-    public Map<String, String> getResources() {
-        return resources;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public Set<String> getRegisteredEventListeners() {
-        return registeredEventListeners;
-    }
-
-    public int getColumnBufferSize() {
-        return columnBufferSize;
-    }
-
-    public int getCols() {
+    int getCols() {
         return cols;
     }
 
-    public List<GroupingData> getColGroupingData() {
+    private List<GroupingData> getColGroupingData() {
         return colGroupingData;
     }
 
-    public List<GroupingData> getRowGroupingData() {
-        return rowGroupingData;
-    }
-
-    public int getColGroupingMax() {
+    int getColGroupingMax() {
         return colGroupingMax;
     }
 
-    public int getRowGroupingMax() {
+    int getRowGroupingMax() {
         return rowGroupingMax;
     }
 
-    public boolean isColGroupingInversed() {
+    boolean isColGroupingInversed() {
         return colGroupingInversed;
     }
 
-    public boolean isRowGroupingInversed() {
+    boolean isRowGroupingInversed() {
         return rowGroupingInversed;
     }
 
-    public float getDefRowH() {
+    float getDefRowH() {
         return defRowH;
     }
 
-    public int getDefColW() {
+    int getDefColW() {
         return defColW;
     }
 
-    public float[] getRowH() {
+    private float[] getRowH() {
         return rowH;
     }
 
-    public int[] getColW() {
+    int[] getColW() {
         return colW;
     }
 
-    public boolean isReload() {
-        return reload;
-    }
-
-    public int getSheetIndex() {
+    private int getSheetIndex() {
         return sheetIndex;
     }
 
-    public String[] getSheetNames() {
+    String[] getSheetNames() {
         return sheetNames;
     }
 
-    public HashMap<Integer, String> getCellStyleToCSSStyle() {
+    HashMap<Integer, String> getCellStyleToCSSStyle() {
         return cellStyleToCSSStyle;
     }
 
-    public HashMap<Integer, Integer> getRowIndexToStyleIndex() {
+    HashMap<Integer, Integer> getRowIndexToStyleIndex() {
         return rowIndexToStyleIndex;
     }
 
-    public HashMap<Integer, Integer> getColumnIndexToStyleIndex() {
+    HashMap<Integer, Integer> getColumnIndexToStyleIndex() {
         return columnIndexToStyleIndex;
     }
 
-    public Set<Integer> getLockedColumnIndexes() {
+    Set<Integer> getLockedColumnIndexes() {
         return lockedColumnIndexes;
     }
 
-    public Set<Integer> getLockedRowIndexes() {
+    Set<Integer> getLockedRowIndexes() {
         return lockedRowIndexes;
     }
 
-    public ArrayList<String> getShiftedCellBorderStyles() {
+    ArrayList<String> getShiftedCellBorderStyles() {
         return shiftedCellBorderStyles;
     }
 
-    public HashMap<Integer, String> getConditionalFormattingStyles() {
+    HashMap<Integer, String> getConditionalFormattingStyles() {
         return conditionalFormattingStyles;
     }
 
-    public ArrayList<Integer> getHiddenColumnIndexes() {
+    private ArrayList<Integer> getHiddenColumnIndexes() {
         return hiddenColumnIndexes;
     }
 
-    public ArrayList<Integer> getHiddenRowIndexes() {
+    private ArrayList<Integer> getHiddenRowIndexes() {
         return hiddenRowIndexes;
     }
 
-    public int[] getVerticalScrollPositions() {
+    int[] getVerticalScrollPositions() {
         return verticalScrollPositions;
     }
 
-    public int[] getHorizontalScrollPositions() {
+    int[] getHorizontalScrollPositions() {
         return horizontalScrollPositions;
     }
 
-    public boolean isSheetProtected() {
+    private boolean isSheetProtected() {
         return sheetProtected;
     }
 
-    public boolean isWorkbookProtected() {
-        return workbookProtected;
-    }
-
-    public HashMap<String, String> getCellKeysToEditorIdMap() {
+    private HashMap<String, String> getCellKeysToEditorIdMap() {
         return cellKeysToEditorIdMap;
     }
 
-    public HashMap<String, String> getComponentIDtoCellKeysMap() {
+    HashMap<String, String> getComponentIDtoCellKeysMap() {
         return componentIDtoCellKeysMap;
     }
 
-    public HashMap<String, String> getHyperlinksTooltips() {
+    private HashMap<String, String> getHyperlinksTooltips() {
         return hyperlinksTooltips;
     }
 
-    public HashMap<String, String> getCellComments() {
+    private HashMap<String, String> getCellComments() {
         return cellComments;
     }
 
-    public HashMap<String, String> getCellCommentAuthors() {
+    private HashMap<String, String> getCellCommentAuthors() {
         return cellCommentAuthors;
     }
 
-    public ArrayList<String> getVisibleCellComments() {
+    private ArrayList<String> getVisibleCellComments() {
         return visibleCellComments;
     }
 
-    public Set<String> getInvalidFormulaCells() {
+    private Set<String> getInvalidFormulaCells() {
         return invalidFormulaCells;
     }
 
-    public boolean isHasActions() {
-        return hasActions;
-    }
-
-    public HashMap<String, OverlayInfo> getOverlays() {
+    private HashMap<String, OverlayInfo> getOverlays() {
         return overlays;
     }
 
-    public ArrayList<MergedRegion> getMergedRegions() {
+    private ArrayList<MergedRegion> getMergedRegions() {
         return mergedRegions;
     }
 
-    public boolean isDisplayGridlines() {
-        return displayGridlines;
-    }
-
-    public boolean isDisplayRowColHeadings() {
-        return displayRowColHeadings;
-    }
-
-    public int getVerticalSplitPosition() {
+    private int getVerticalSplitPosition() {
         return verticalSplitPosition;
     }
 
-    public int getHorizontalSplitPosition() {
+    private int getHorizontalSplitPosition() {
         return horizontalSplitPosition;
     }
 
-    public String getInfoLabelValue() {
+    private String getInfoLabelValue() {
         return infoLabelValue;
     }
 
-    public boolean isWorkbookChangeToggle() {
+    private boolean isWorkbookChangeToggle() {
         return workbookChangeToggle;
     }
 
-    public String getInvalidFormulaErrorMessage() {
-        return invalidFormulaErrorMessage;
-    }
-
-    public boolean isLockFormatColumns() {
-        return lockFormatColumns;
-    }
-
-    public boolean isLockFormatRows() {
-        return lockFormatRows;
-    }
-
-    public List<String> getNamedRanges() {
-        return namedRanges;
-    }
-
-    public void _setRowBufferSize(int rowBufferSize) {
-        setRowBufferSize(rowBufferSize);
-    }
-
-    public void setColumnBufferSize(int columnBufferSize) {
-        this.columnBufferSize = columnBufferSize;
-        getElement().setProperty("columnBufferSize", columnBufferSize);
-    }
-
-    public void setRows(int rows) {
+    void setRows(int rows) {
         this.rows = rows;
         getElement().setProperty("rows", rows);
     }
 
-    public void setCols(int cols) {
+    void setCols(int cols) {
         this.cols = cols;
         getElement().setProperty("cols", cols);
     }
 
-    public void setColGroupingData(List<GroupingData> colGroupingData) {
+    void setColGroupingData(List<GroupingData> colGroupingData) {
         this.colGroupingData = colGroupingData;
         getElement().setProperty("colGroupingData",
                 Serializer.serialize(colGroupingData));
     }
 
-    public void setRowGroupingData(List<GroupingData> rowGroupingData) {
-        this.rowGroupingData = rowGroupingData;
+    void setRowGroupingData(List<GroupingData> rowGroupingData) {
         getElement().setProperty("rowGroupingData",
                 Serializer.serialize(rowGroupingData));
     }
 
-    public void setColGroupingMax(int colGroupingMax) {
+    void setColGroupingMax(int colGroupingMax) {
         this.colGroupingMax = colGroupingMax;
         getElement().setProperty("colGroupingMax", colGroupingMax);
     }
 
-    public void setRowGroupingMax(int rowGroupingMax) {
+    void setRowGroupingMax(int rowGroupingMax) {
         this.rowGroupingMax = rowGroupingMax;
         getElement().setProperty("rowGroupingMax", rowGroupingMax);
     }
 
-    public void setColGroupingInversed(boolean colGroupingInversed) {
+    void setColGroupingInversed(boolean colGroupingInversed) {
         this.colGroupingInversed = colGroupingInversed;
         getElement().setProperty("colGroupingInversed", colGroupingInversed);
     }
 
-    public void setRowGroupingInversed(boolean rowGroupingInversed) {
+    void setRowGroupingInversed(boolean rowGroupingInversed) {
         this.rowGroupingInversed = rowGroupingInversed;
         getElement().setProperty("rowGroupingInversed", rowGroupingInversed);
     }
 
-    public void setDefRowH(float defRowH) {
+    void setDefRowH(float defRowH) {
         this.defRowH = defRowH;
         getElement().setProperty("defRowH", defRowH);
     }
 
-    public void setDefColW(int defColW) {
+    void setDefColW(int defColW) {
         this.defColW = defColW;
         getElement().setProperty("defColW", defColW);
     }
 
-    public void setRowH(float[] rowH) {
+    void setRowH(float[] rowH) {
         this.rowH = rowH;
         getElement().setProperty("rowH", Serializer.serialize(rowH));
     }
 
-    public void setColW(int[] colW) {
+    void setColW(int[] colW) {
         this.colW = colW;
         getElement().setProperty("colW", Serializer.serialize(colW));
     }
 
-    public void setReload(boolean reload) {
+    private void setReload(boolean reload) {
         if (reload)
             getElement().setProperty("reload", System.currentTimeMillis());
     }
 
-    public void setSheetIndex(int sheetIndex) {
+    private void setSheetIndex(int sheetIndex) {
         this.sheetIndex = sheetIndex;
         getElement().setProperty("sheetIndex", sheetIndex);
     }
 
-    public void setSheetNames(String[] sheetNames) {
+    private void setSheetNames(String[] sheetNames) {
         this.sheetNames = sheetNames;
         getElement().setProperty("sheetNames",
                 Serializer.serialize(sheetNames));
     }
 
-    public void setCellStyleToCSSStyle(
-            HashMap<Integer, String> cellStyleToCSSStyle) {
+    void setCellStyleToCSSStyle(HashMap<Integer, String> cellStyleToCSSStyle) {
         this.cellStyleToCSSStyle = cellStyleToCSSStyle;
         getElement().setProperty("cellStyleToCSSStyle",
                 Serializer.serialize(cellStyleToCSSStyle));
     }
 
-    public void setRowIndexToStyleIndex(
+    void setRowIndexToStyleIndex(
             HashMap<Integer, Integer> rowIndexToStyleIndex) {
         this.rowIndexToStyleIndex = rowIndexToStyleIndex;
         getElement().setProperty("rowIndexToStyleIndex",
                 Serializer.serialize(rowIndexToStyleIndex));
     }
 
-    public void setColumnIndexToStyleIndex(
+    void setColumnIndexToStyleIndex(
             HashMap<Integer, Integer> columnIndexToStyleIndex) {
         this.columnIndexToStyleIndex = columnIndexToStyleIndex;
         getElement().setProperty("columnIndexToStyleIndex",
                 Serializer.serialize(columnIndexToStyleIndex));
     }
 
-    public void setLockedColumnIndexes(Set<Integer> lockedColumnIndexes) {
+    void setLockedColumnIndexes(Set<Integer> lockedColumnIndexes) {
         this.lockedColumnIndexes = lockedColumnIndexes;
         getElement().setProperty("lockedColumnIndexes",
                 Serializer.serialize(lockedColumnIndexes));
     }
 
-    public void setLockedRowIndexes(Set<Integer> lockedRowIndexes) {
+    void setLockedRowIndexes(Set<Integer> lockedRowIndexes) {
         this.lockedRowIndexes = lockedRowIndexes;
         getElement().setProperty("lockedRowIndexes",
                 Serializer.serialize(lockedRowIndexes));
     }
 
-    public void setShiftedCellBorderStyles(
-            ArrayList<String> shiftedCellBorderStyles) {
+    void setShiftedCellBorderStyles(ArrayList<String> shiftedCellBorderStyles) {
         this.shiftedCellBorderStyles = shiftedCellBorderStyles;
         getElement().setProperty("shiftedCellBorderStyles",
                 Serializer.serialize(shiftedCellBorderStyles));
     }
 
-    public void setConditionalFormattingStyles(
+    void setConditionalFormattingStyles(
             HashMap<Integer, String> conditionalFormattingStyles) {
         this.conditionalFormattingStyles = conditionalFormattingStyles;
         getElement().setProperty("conditionalFormattingStyles",
                 Serializer.serialize(conditionalFormattingStyles));
     }
 
-    public void setHiddenColumnIndexes(ArrayList<Integer> hiddenColumnIndexes) {
+    void setHiddenColumnIndexes(ArrayList<Integer> hiddenColumnIndexes) {
         this.hiddenColumnIndexes = hiddenColumnIndexes;
         getElement().setProperty("hiddenColumnIndexes",
                 Serializer.serialize(hiddenColumnIndexes));
     }
 
-    public void setHiddenRowIndexes(ArrayList<Integer> hiddenRowIndexes) {
+    void setHiddenRowIndexes(ArrayList<Integer> hiddenRowIndexes) {
         this.hiddenRowIndexes = hiddenRowIndexes;
         getElement().setProperty("hiddenRowIndexes",
                 Serializer.serialize(hiddenRowIndexes));
     }
 
-    public void setVerticalScrollPositions(int[] verticalScrollPositions) {
+    void setVerticalScrollPositions(int[] verticalScrollPositions) {
         this.verticalScrollPositions = verticalScrollPositions;
         getElement().setProperty("verticalScrollPositions",
                 Serializer.serialize(verticalScrollPositions));
     }
 
-    public void setHorizontalScrollPositions(int[] horizontalScrollPositions) {
+    void setHorizontalScrollPositions(int[] horizontalScrollPositions) {
         this.horizontalScrollPositions = horizontalScrollPositions;
         getElement().setProperty("horizontalScrollPositions",
                 Serializer.serialize(horizontalScrollPositions));
     }
 
-    public void setSheetProtected(boolean sheetProtected) {
+    private void setSheetProtected(boolean sheetProtected) {
         this.sheetProtected = sheetProtected;
         getElement().setProperty("sheetProtected", sheetProtected);
     }
 
-    public void setWorkbookProtected(boolean workbookProtected) {
-        this.workbookProtected = workbookProtected;
+    private void setWorkbookProtected(boolean workbookProtected) {
         getElement().setProperty("workbookProtected", workbookProtected);
     }
 
-    public void setCellKeysToEditorIdMap(
+    private void setCellKeysToEditorIdMap(
             HashMap<String, String> cellKeysToEditorIdMap) {
         this.cellKeysToEditorIdMap = cellKeysToEditorIdMap;
         getElement().setProperty("cellKeysToEditorIdMap",
                 Serializer.serialize(cellKeysToEditorIdMap));
     }
 
-    public void setComponentIDtoCellKeysMap(
+    private void setComponentIDtoCellKeysMap(
             HashMap<String, String> componentIDtoCellKeysMap) {
         this.componentIDtoCellKeysMap = componentIDtoCellKeysMap;
         getElement().setProperty("componentIDtoCellKeysMap",
                 Serializer.serialize(componentIDtoCellKeysMap));
     }
 
-    public void setHyperlinksTooltips(
+    private void setHyperlinksTooltips(
             HashMap<String, String> hyperlinksTooltips) {
         this.hyperlinksTooltips = hyperlinksTooltips;
         getElement().setProperty("hyperlinksTooltips",
                 Serializer.serialize(hyperlinksTooltips));
     }
 
-    public void setCellComments(HashMap<String, String> cellComments) {
+    private void setCellComments(HashMap<String, String> cellComments) {
         this.cellComments = cellComments;
         getElement().setProperty("cellComments",
                 Serializer.serialize(cellComments));
     }
 
-    public void setCellCommentAuthors(
+    private void setCellCommentAuthors(
             HashMap<String, String> cellCommentAuthors) {
         this.cellCommentAuthors = cellCommentAuthors;
         getElement().setProperty("cellCommentAuthors",
                 Serializer.serialize(cellCommentAuthors));
     }
 
-    public void setVisibleCellComments(ArrayList<String> visibleCellComments) {
+    private void setVisibleCellComments(ArrayList<String> visibleCellComments) {
         this.visibleCellComments = visibleCellComments;
         getElement().setProperty("visibleCellComments",
                 Serializer.serialize(visibleCellComments));
     }
 
-    public void setInvalidFormulaCells(Set<String> invalidFormulaCells) {
+    private void setInvalidFormulaCells(Set<String> invalidFormulaCells) {
         this.invalidFormulaCells = invalidFormulaCells;
         getElement().setProperty("invalidFormulaCells",
                 Serializer.serialize(invalidFormulaCells));
     }
 
-    public void setHasActions(boolean hasActions) {
-        this.hasActions = hasActions;
+    private void setHasActions(boolean hasActions) {
         getElement().setProperty("hasActions", hasActions);
     }
 
-    public void setOverlays(HashMap<String, OverlayInfo> overlays) {
+    private void setOverlays(HashMap<String, OverlayInfo> overlays) {
         this.overlays = overlays;
         getElement().setProperty("overlays", Serializer.serialize(overlays));
     }
 
-    public void setMergedRegions(ArrayList<MergedRegion> mergedRegions) {
+    void setMergedRegions(ArrayList<MergedRegion> mergedRegions) {
         this.mergedRegions = mergedRegions;
         getElement().setProperty("mergedRegions",
                 Serializer.serialize(mergedRegions));
     }
 
-    public void setDisplayGridlines(boolean displayGridlines) {
-        this.displayGridlines = displayGridlines;
+    private void setDisplayGridlines(boolean displayGridlines) {
         getElement().setProperty("displayGridlines", displayGridlines);
     }
 
-    public void setDisplayRowColHeadings(boolean displayRowColHeadings) {
-        this.displayRowColHeadings = displayRowColHeadings;
+    private void setDisplayRowColHeadings(boolean displayRowColHeadings) {
         getElement().setProperty("displayRowColHeadings",
                 displayRowColHeadings);
     }
 
-    public void setVerticalSplitPosition(int verticalSplitPosition) {
+    void setVerticalSplitPosition(int verticalSplitPosition) {
         this.verticalSplitPosition = verticalSplitPosition;
         getElement().setProperty("verticalSplitPosition",
                 verticalSplitPosition);
     }
 
-    public void setHorizontalSplitPosition(int horizontalSplitPosition) {
+    void setHorizontalSplitPosition(int horizontalSplitPosition) {
         this.horizontalSplitPosition = horizontalSplitPosition;
         getElement().setProperty("horizontalSplitPosition",
                 horizontalSplitPosition);
     }
 
-    public void setInfoLabelValue(String infoLabelValue) {
+    private void setInfoLabelValue(String infoLabelValue) {
         this.infoLabelValue = infoLabelValue;
         getElement().setProperty("infoLabelValue", infoLabelValue);
     }
 
-    public void setWorkbookChangeToggle(boolean workbookChangeToggle) {
+    private void setWorkbookChangeToggle(boolean workbookChangeToggle) {
         this.workbookChangeToggle = workbookChangeToggle;
         getElement().setProperty("workbookChangeToggle", workbookChangeToggle);
     }
 
-    public void setLockFormatColumns(boolean lockFormatColumns) {
-        this.lockFormatColumns = lockFormatColumns;
+    void setLockFormatColumns(boolean lockFormatColumns) {
         getElement().setProperty("lockFormatColumns", lockFormatColumns);
     }
 
-    public void setLockFormatRows(boolean lockFormatRows) {
-        this.lockFormatRows = lockFormatRows;
+    void setLockFormatRows(boolean lockFormatRows) {
         getElement().setProperty("lockFormatRows", lockFormatRows);
     }
 
-    public void setNamedRanges(List<String> namedRanges) {
-        this.namedRanges = namedRanges;
+    void setNamedRanges(List<String> namedRanges) {
         getElement().setProperty("namedRanges",
                 Serializer.serialize(namedRanges));
+    }
+
+    void onPopupButtonClick(int row, int column) {
+        PopupButton popup = sheetPopupButtons
+                .get(SpreadsheetUtil.relativeToAbsolute(this,
+                        new CellReference(row - 1, column - 1)));
+        if (popup != null) {
+            popup.openPopup();
+        }
+    }
+
+    void onPopupClose(int row, int column) {
+        PopupButton popup = sheetPopupButtons
+                .get(SpreadsheetUtil.relativeToAbsolute(this,
+                        new CellReference(row - 1, column - 1)));
+
+        if (popup != null) {
+            popup.closePopup();
+        }
     }
 
     /*
@@ -978,7 +831,6 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
             getElement().callJsFunction("editCellComment", col, row);
         }
     };
-    private Locale locale;
 
     /**
      * An interface for handling the edited cell value from user input.
@@ -1196,9 +1048,6 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
 
     private Set<Component> customComponents = new HashSet<Component>();
 
-    /* Disable buttons until table support #826 */
-    private static final boolean popupButtonsEnabled = true;
-
     private Map<CellReference, PopupButton> sheetPopupButtons = new HashMap<CellReference, PopupButton>();
 
     private HashSet<PopupButton> attachedPopupButtons = new HashSet<PopupButton>();
@@ -1353,7 +1202,6 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
 
     private void registerRpc(SpreadsheetHandlerImpl spreadsheetHandler) {
         LOGGER.info("Spreadsheet.registerRpc()");
-        this.spreadsheetHandler = spreadsheetHandler;
         addListener(SpreadsheetEvent.class,
                 new SpreadsheetEventListener(spreadsheetHandler));
     }
@@ -1815,7 +1663,6 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
      * @see com.vaadin.ui.AbstractComponent#setLocale(java.util.Locale)
      */
     public void setLocale(Locale locale) {
-        this.locale = locale;
         valueManager.updateLocale(locale);
         refreshAllCellValues();
     }
@@ -2230,6 +2077,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
         SpreadsheetFactory.reloadSpreadsheetData(this,
                 workbook.getSheetAt(sheetIndex));
         reloadActiveSheetStyles();
+        loadPopupButtons();
     }
 
     /**
@@ -3789,7 +3637,15 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
         clearSheetOverlays();
         topLeftCellCommentsLoaded = false;
 
-        setReload(true);
+        Optional.ofNullable(UI.getCurrent()).ifPresent(ui -> {
+            ui.beforeClientResponse(this, e -> {
+                if (reload) {
+                    this.updateReloadState();
+                }
+            });
+        });
+
+        reload = true;
 
         setSheetIndex(
                 getSpreadsheetSheetIndex(workbook.getActiveSheetIndex()) + 1);
@@ -3985,15 +3841,7 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
         return clientRpc;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.vaadin.ui.AbstractComponent#beforeClientResponse(boolean)
-     */
-    // @Override
-    public void beforeClientResponse(boolean initial) {
-        // todo: reubicar este código
-        // super.beforeClientResponse(initial);
+    private void updateReloadState() {
         if (reload) {
             setReload(reload);
             reload = false;
@@ -4804,22 +4652,24 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
     }
 
     private void registerPopupButton(PopupButton button) {
-        if (popupButtonsEnabled) {
-            attachedPopupButtons.add(button);
-            registerCustomComponent(button);
+        attachedPopupButtons.add(button);
+        registerCustomComponent(button);
+        if (!getElement().equals(button.getElement().getParent())) {
+            getElement().appendVirtualChild(button.getElement());
         }
     }
 
     private void unRegisterPopupButton(PopupButton button) {
         attachedPopupButtons.remove(button);
         unRegisterCustomComponent(button);
+        if (getElement().equals(button.getElement().getParent())) {
+            getElement().removeVirtualChild(button.getElement());
+        }
     }
 
     private void registerCustomComponent(PopupButton component) {
-        List<PopupButtonState> popupButtonStates = attachedPopupButtons.stream()
-                .map(p -> p.getState()).collect(Collectors.toList());
-        getElement().setProperty("popupbuttons",
-                Serializer.serialize(popupButtonStates));
+        getElement().callJsFunction("addPopupButton",
+                Serializer.serialize(component.getState()));
     }
 
     private void registerCustomComponent(Component component) {
@@ -4831,7 +4681,8 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
     }
 
     private void unRegisterCustomComponent(PopupButton component) {
-        getElement().removeProperty("popupbuttons");
+        getElement().callJsFunction("removePopupButton",
+                Serializer.serialize(component.getState()));
     }
 
     private void unRegisterCustomComponent(Component component) {
@@ -5945,30 +5796,8 @@ public class Spreadsheet extends Component implements HasComponents, HasSize,
 
     public void setInvalidFormulaErrorMessage(
             String invalidFormulaErrorMessage) {
-        this.invalidFormulaErrorMessage = invalidFormulaErrorMessage;
         getElement().setProperty("invalidFormulaErrorMessage",
                 invalidFormulaErrorMessage);
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.vaadin.ui.Component.Focusable#getTabIndex()
-     */
-    @Override
-    public int getTabIndex() {
-        return this.tabIndex;
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.vaadin.ui.Component.Focusable#setTabIndex(int)
-     */
-    @Override
-    public void setTabIndex(int tabIndex) {
-        this.tabIndex = tabIndex;
-        getElement().setProperty("tabIndex", tabIndex);
     }
 
     /*

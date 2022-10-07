@@ -17,21 +17,29 @@
 package com.vaadin.flow.component.textfield;
 
 import java.math.BigDecimal;
-import java.util.Objects;
 
+import com.vaadin.experimental.Feature;
+import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.CompositionNotifier;
-import com.vaadin.flow.component.shared.HasClearButton;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.InputNotifier;
 import com.vaadin.flow.component.KeyNotifier;
+import com.vaadin.flow.component.shared.HasAllowedCharPattern;
+import com.vaadin.flow.component.shared.HasClearButton;
+import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.ValidationUtil;
+import com.vaadin.flow.data.binder.HasValidator;
+import com.vaadin.flow.data.binder.ValidationResult;
+import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.server.VaadinService;
 
 /**
  * Abstract base class for components based on {@code vaadin-number-field}
@@ -44,7 +52,8 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         implements HasSize, HasValidation, HasValueChangeMode,
         HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
         HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper, HasLabel,
-        HasClearButton, HasThemeVariant<TextFieldVariant> {
+        HasClearButton, HasAllowedCharPattern,
+        HasThemeVariant<TextFieldVariant>, HasTooltip, HasValidator<T> {
 
     private ValueChangeMode currentMode;
 
@@ -363,6 +372,35 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         return isInvalidBoolean();
     }
 
+    @Override
+    public Validator<T> getDefaultValidator() {
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            return (value, context) -> checkValidity(value);
+        }
+
+        return Validator.alwaysPass();
+    }
+
+    private ValidationResult checkValidity(T value) {
+        final boolean isGreaterThanMax = value != null
+                && value.doubleValue() > max;
+        if (isGreaterThanMax) {
+            return ValidationResult.error("");
+        }
+
+        final boolean isSmallerThanMin = value != null
+                && value.doubleValue() < min;
+        if (isSmallerThanMin) {
+            return ValidationResult.error("");
+        }
+
+        if (!isValidByStep(value)) {
+            return ValidationResult.error("");
+        }
+
+        return ValidationResult.ok();
+    }
+
     /**
      * Performs server-side validation of the current value. This is needed
      * because it is possible to circumvent the client-side validation
@@ -372,15 +410,11 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     protected void validate() {
         T value = getValue();
 
-        final boolean isRequiredButEmpty = required
-                && Objects.equals(getEmptyValue(), value);
-        final boolean isGreaterThanMax = value != null
-                && value.doubleValue() > max;
-        final boolean isSmallerThanMin = value != null
-                && value.doubleValue() < min;
+        final var requiredValidation = ValidationUtil.checkRequired(required,
+                value, getEmptyValue());
 
-        setInvalid(isRequiredButEmpty || isGreaterThanMax || isSmallerThanMin
-                || !isValidByStep(value));
+        setInvalid(
+                requiredValidation.isError() || checkValidity(value).isError());
     }
 
     private boolean isValidByStep(T value) {
@@ -413,5 +447,40 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         FieldValidationUtil.disableClientValidation(this);
+    }
+
+    // Override is only required to keep binary compatibility with other 23.x
+    // minor versions, can be removed in a future major
+    @Override
+    public void addThemeVariants(TextFieldVariant... variants) {
+        HasThemeVariant.super.addThemeVariants(variants);
+    }
+
+    // Override is only required to keep binary compatibility with other 23.x
+    // minor versions, can be removed in a future major
+    @Override
+    public void removeThemeVariants(TextFieldVariant... variants) {
+        HasThemeVariant.super.removeThemeVariants(variants);
+    }
+
+    /**
+     * Returns true if the given feature flag is enabled, false otherwise.
+     * <p>
+     * Exposed with protected visibility to support mocking
+     * <p>
+     * The method requires the {@code VaadinService} instance to obtain the
+     * available feature flags, otherwise, the feature is considered disabled.
+     *
+     * @param feature
+     *            the feature flag.
+     * @return whether the feature flag is enabled.
+     */
+    protected boolean isFeatureFlagEnabled(Feature feature) {
+        VaadinService service = VaadinService.getCurrent();
+        if (service == null) {
+            return false;
+        }
+
+        return FeatureFlags.get(service.getContext()).isEnabled(feature);
     }
 }

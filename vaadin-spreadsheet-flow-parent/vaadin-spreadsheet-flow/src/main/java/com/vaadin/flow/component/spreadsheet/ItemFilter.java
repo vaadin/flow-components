@@ -23,17 +23,16 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.vaadin.flow.component.checkbox.CheckboxGroupVariant;
 import org.apache.poi.ss.util.CellRangeAddress;
 
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.spreadsheet.PopupButton.PopupCloseEvent;
 import com.vaadin.flow.component.spreadsheet.PopupButton.PopupCloseListener;
 import com.vaadin.flow.component.spreadsheet.PopupButton.PopupOpenEvent;
 import com.vaadin.flow.component.spreadsheet.PopupButton.PopupOpenListener;
-import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 
 /**
@@ -51,12 +50,11 @@ public class ItemFilter extends Div implements SpreadsheetFilter {
     private CellRangeAddress filterRange;
     private Checkbox allItems;
     private CheckboxGroup<String> filterCheckbox;
-    private DataProvider<String, ?> filterOptionsProvider;
+    private ListDataProvider<String> filterOptionsProvider;
     private List<String> filterOptions = new ArrayList<>();
     private ArrayList<String> allCellValues;
     private Collection<String> latestFilteredValues;
     private PopupButton popupButton;
-    private VerticalLayout layout;
     private boolean firstUpdate = true;
     private boolean cancelValueChangeUpdate;
     private SpreadsheetFilterTable filterTable;
@@ -103,12 +101,9 @@ public class ItemFilter extends Div implements SpreadsheetFilter {
      * Creates the base layout for the filter components.
      */
     protected void initLayouts() {
-        layout = new VerticalLayout();
-        layout.setMargin(false);
-        layout.add(allItems);
-        layout.add(filterCheckbox);
+        add(allItems);
+        add(filterCheckbox);
 
-        add(layout);
         setClassName(ITEM_FILTER_LAYOUT_CLASSNAME);
     }
 
@@ -183,7 +178,8 @@ public class ItemFilter extends Div implements SpreadsheetFilter {
     protected void initOptions() {
         filterOptionsProvider = new ListDataProvider<>(filterOptions);
         filterCheckbox = new CheckboxGroup<>();
-        filterCheckbox.setDataProvider(filterOptionsProvider);
+        filterCheckbox.setItems(filterOptionsProvider);
+        filterCheckbox.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
         filterCheckbox.addValueChangeListener(event -> {
             if (firstUpdate) {
                 firstUpdate = false;
@@ -246,9 +242,11 @@ public class ItemFilter extends Div implements SpreadsheetFilter {
 
         Set<String> visibleValues = getVisibleValues();
         cancelValueChangeUpdate = true;
-        filterCheckbox.setValue(visibleValues);
         allItems.setValue(visibleValues.containsAll(allCellValues));
         cancelValueChangeUpdate = false;
+        filterOptionsProvider = new ListDataProvider<>(filterOptions);
+        filterCheckbox.setItems(filterOptionsProvider);
+        filterCheckbox.setValue(visibleValues);
     }
 
     /**
@@ -297,7 +295,7 @@ public class ItemFilter extends Div implements SpreadsheetFilter {
             String cellValue = spreadsheet.getCellValue(
                     spreadsheet.getCell(r, filterRange.getFirstColumn()));
             if (!visibleValues.contains(cellValue)) {
-                filteredRows.add(new Integer(r));
+                filteredRows.add(r);
             }
         }
         latestFilteredValues = new ArrayList<>(visibleValues);
@@ -315,7 +313,6 @@ public class ItemFilter extends Div implements SpreadsheetFilter {
         cancelValueChangeUpdate = true;
         allItems.setValue(true);
         filterCheckbox.setValue(new HashSet<>(allCellValues));
-        filterOptionsProvider.refreshAll();
         filteredRows.clear();
         cancelValueChangeUpdate = false;
     }

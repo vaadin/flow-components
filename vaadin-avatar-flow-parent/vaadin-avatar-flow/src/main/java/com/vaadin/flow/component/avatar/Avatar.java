@@ -19,7 +19,6 @@ package com.vaadin.flow.component.avatar;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
@@ -54,13 +53,13 @@ import java.util.Objects;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-avatar")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/avatar/src/vaadin-avatar.js")
-@NpmPackage(value = "@vaadin/avatar", version = "23.1.0")
-@NpmPackage(value = "@vaadin/vaadin-avatar", version = "23.1.0")
+@NpmPackage(value = "@vaadin/avatar", version = "23.3.0-alpha2")
+@NpmPackage(value = "@vaadin/vaadin-avatar", version = "23.3.0-alpha2")
 public class Avatar extends Component
-        implements HasStyle, HasSize, HasTheme, HasThemeVariant<AvatarVariant> {
+        implements HasStyle, HasSize, HasThemeVariant<AvatarVariant> {
 
     /**
      * The internationalization properties for {@link AvatarGroup}.
@@ -294,5 +293,41 @@ public class Avatar extends Component
      */
     public void setColorIndex(Integer colorIndex) {
         getElement().setProperty("colorIndex", colorIndex);
+    }
+
+    /**
+     * Gets the enabled state of the avatar tooltip, which is {@code false} by
+     * default.
+     *
+     * @return <code>true</code> if the tooltip is shown on hover or focus,
+     *         <code>false</code> otherwise
+     */
+    public boolean isTooltipEnabled() {
+        return getElement().getProperty("withTooltip", false);
+    }
+
+    /**
+     * Sets the enabled of the avatar tooltip.
+     *
+     * @param tooltipEnabled
+     *            <code>true</code> to show the tooltip on hover or focus,
+     *            <code>false</code> to not show it
+     */
+    public void setTooltipEnabled(boolean tooltipEnabled) {
+        getElement().setProperty("withTooltip", tooltipEnabled);
+    }
+
+    // Override is only required to keep binary compatibility with other 23.x
+    // minor versions, can be removed in a future major
+    @Override
+    public void addThemeVariants(AvatarVariant... variants) {
+        HasThemeVariant.super.addThemeVariants(variants);
+    }
+
+    // Override is only required to keep binary compatibility with other 23.x
+    // minor versions, can be removed in a future major
+    @Override
+    public void removeThemeVariants(AvatarVariant... variants) {
+        HasThemeVariant.super.removeThemeVariants(variants);
     }
 }

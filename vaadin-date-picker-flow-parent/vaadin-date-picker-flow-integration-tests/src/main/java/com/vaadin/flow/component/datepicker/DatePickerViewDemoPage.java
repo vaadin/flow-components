@@ -44,6 +44,7 @@ public class DatePickerViewDemoPage extends Div {
         createWithClearButton();
         createStartAndEndDatePickers();
         createLocaleChangeDatePicker();
+        createDatePickerInsideDisabledParent();
         addCard("Additional code used in the demo",
                 new Label("These methods are used in the demo."));
     }
@@ -57,7 +58,12 @@ public class DatePickerViewDemoPage extends Div {
                 event -> updateMessage(message, datePicker));
 
         datePicker.setId("simple-picker");
-        addCard("Simple date picker", datePicker, message);
+
+        NativeButton open = new NativeButton("Open");
+        open.setId("open-simple-picker");
+        open.addClickListener(event -> datePicker.open());
+
+        addCard("Simple date picker", datePicker, open, message);
     }
 
     private void createMinAndMaxDatePicker() {
@@ -228,6 +234,22 @@ public class DatePickerViewDemoPage extends Div {
         datePicker.setId("locale-change-picker");
         addCard("Date picker with customize locales", datePicker, locale1,
                 locale2, locale3, message);
+    }
+
+    private void createDatePickerInsideDisabledParent() {
+        Div parent = new Div();
+        DatePicker datePicker = new DatePicker();
+        datePicker.setId("picker-inside-disabled-parent");
+
+        parent.add(datePicker);
+        parent.setEnabled(false);
+
+        NativeButton enableParent = new NativeButton("Enable parent");
+        enableParent.setId("enable-parent");
+        enableParent.addClickListener(event -> parent.setEnabled(true));
+
+        addCard("DatePicker inside a disabled parent div", parent,
+                enableParent);
     }
 
     /**

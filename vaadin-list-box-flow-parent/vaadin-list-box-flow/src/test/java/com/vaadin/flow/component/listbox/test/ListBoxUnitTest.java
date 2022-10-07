@@ -12,6 +12,7 @@ import org.junit.rules.ExpectedException;
 
 import com.vaadin.flow.component.listbox.ListBox;
 import com.vaadin.flow.component.listbox.dataview.ListBoxListDataView;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.data.provider.DataCommunicatorTest;
 import com.vaadin.tests.DataProviderListenersTest;
 
@@ -171,6 +172,11 @@ public class ListBoxUnitTest {
                 .checkOldListenersRemovedOnComponentAttachAndDetach(
                         new ListBox<>(), 1, 1, new int[] { 0, 1 },
                         new DataCommunicatorTest.MockUI());
+    }
+
+    @Test
+    public void implementsHasTooltip() {
+        Assert.assertTrue(listBox instanceof HasTooltip);
     }
 
     private void assertDisabledItem(int index, boolean disabled) {

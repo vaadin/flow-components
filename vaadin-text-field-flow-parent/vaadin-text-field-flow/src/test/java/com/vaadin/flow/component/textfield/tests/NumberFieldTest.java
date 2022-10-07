@@ -15,9 +15,11 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
+import com.vaadin.flow.component.shared.HasAllowedCharPattern;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextFieldVariant;
-import com.vaadin.tests.ThemeVariantTestHelper;
+import com.vaadin.flow.dom.ThemeList;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -160,15 +162,26 @@ public class NumberFieldTest extends TextFieldTest {
 
     @Test
     public void addThemeVariant_themeAttributeContainsThemeVariant() {
-        ThemeVariantTestHelper.addThemeVariant_themeNamesContainsThemeVariant(
-                new NumberField(), TextFieldVariant.LUMO_SMALL);
+        field.addThemeVariants(TextFieldVariant.LUMO_SMALL);
+
+        ThemeList themeNames = field.getThemeNames();
+        Assert.assertTrue(themeNames
+                .contains(TextFieldVariant.LUMO_SMALL.getVariantName()));
     }
 
     @Test
     public void addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant() {
-        ThemeVariantTestHelper
-                .addThemeVariant_removeThemeVariant_themeNamesDoesNotContainThemeVariant(
-                        new NumberField(), TextFieldVariant.LUMO_SMALL);
+        field.addThemeVariants(TextFieldVariant.LUMO_SMALL);
+        field.removeThemeVariants(TextFieldVariant.LUMO_SMALL);
+
+        ThemeList themeNames = field.getThemeNames();
+        Assert.assertFalse(themeNames
+                .contains(TextFieldVariant.LUMO_SMALL.getVariantName()));
+    }
+
+    @Test
+    public void implementsHasTooltip() {
+        Assert.assertTrue(field instanceof HasTooltip);
     }
 
     private void assertValidValues(Double... values) {
@@ -204,5 +217,12 @@ public class NumberFieldTest extends TextFieldTest {
         final NumberField numberField = new NumberField();
         numberField.setValue(value);
         assertEquals(expected, numberField.getElement().getProperty("value"));
+    }
+
+    @Test
+    public void implementsHasAllowedCharPattern() {
+        Assert.assertTrue("NumberField should support char pattern",
+                HasAllowedCharPattern.class
+                        .isAssignableFrom(new NumberField().getClass()));
     }
 }

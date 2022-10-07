@@ -34,9 +34,11 @@ import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupDataView;
 import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupListDataView;
 import com.vaadin.flow.data.binder.HasItemComponents;
+import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderWrapper;
@@ -64,14 +66,14 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author Vaadin Ltd.
  */
-@NpmPackage(value = "@vaadin/radio-group", version = "23.1.0")
-@NpmPackage(value = "@vaadin/vaadin-radio-button", version = "23.1.0")
+@NpmPackage(value = "@vaadin/radio-group", version = "23.3.0-alpha2")
+@NpmPackage(value = "@vaadin/vaadin-radio-button", version = "23.3.0-alpha2")
 public class RadioButtonGroup<T>
         extends GeneratedVaadinRadioGroup<RadioButtonGroup<T>, T>
         implements HasItemComponents<T>, SingleSelect<RadioButtonGroup<T>, T>,
         HasListDataView<T, RadioButtonGroupListDataView<T>>,
         HasDataView<T, Void, RadioButtonGroupDataView<T>>, HasValidation,
-        HasHelper, HasSize, HasLabel {
+        HasHelper, HasSize, HasLabel, HasTooltip, HasValidator<T> {
 
     private final KeyMapper<T> keyMapper = new KeyMapper<>();
 

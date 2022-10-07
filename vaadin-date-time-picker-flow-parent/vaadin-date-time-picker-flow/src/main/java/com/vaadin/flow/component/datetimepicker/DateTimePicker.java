@@ -25,15 +25,28 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.experimental.Feature;
+import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.ClientValidationUtil;
+import com.vaadin.flow.component.shared.HasClientValidation;
+import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.component.timepicker.StepsUtil;
+import com.vaadin.flow.data.binder.HasValidator;
+import com.vaadin.flow.data.binder.ValidationResult;
+import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
+import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
+import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.shared.Registration;
 
 @Tag("vaadin-date-time-picker-date-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 class DateTimePickerDatePicker
         extends com.vaadin.flow.component.datepicker.DatePicker {
@@ -45,10 +58,15 @@ class DateTimePickerDatePicker
     void passThroughPresentationValue(LocalDate newPresentationValue) {
         super.setPresentationValue(newPresentationValue);
     }
+
+    @Synchronize(property = "_hasInputValue", value = "has-input-value-changed")
+    boolean isInputValuePresent() {
+        return getElement().getProperty("_hasInputValue", false);
+    }
 }
 
 @Tag("vaadin-date-time-picker-time-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 class DateTimePickerTimePicker
         extends com.vaadin.flow.component.timepicker.TimePicker {
@@ -59,6 +77,11 @@ class DateTimePickerTimePicker
 
     void passThroughPresentationValue(LocalTime newPresentationValue) {
         super.setPresentationValue(newPresentationValue);
+    }
+
+    @Synchronize(property = "_hasInputValue", value = "has-input-value-changed")
+    boolean isInputValuePresent() {
+        return getElement().getProperty("_hasInputValue", false);
     }
 }
 
@@ -72,15 +95,16 @@ class DateTimePickerTimePicker
  * @author Vaadin Ltd
  */
 @Tag("vaadin-date-time-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/date-time-picker", version = "23.1.0")
-@NpmPackage(value = "@vaadin/vaadin-date-time-picker", version = "23.1.0")
+@NpmPackage(value = "@vaadin/date-time-picker", version = "23.3.0-alpha2")
+@NpmPackage(value = "@vaadin/vaadin-date-time-picker", version = "23.3.0-alpha2")
 @JsModule("@vaadin/date-time-picker/src/vaadin-date-time-picker.js")
 public class DateTimePicker
         extends AbstractSinglePropertyField<DateTimePicker, LocalDateTime>
         implements HasStyle, HasSize, HasTheme, HasValidation,
-        Focusable<DateTimePicker>, HasHelper, HasLabel {
+        Focusable<DateTimePicker>, HasHelper, HasLabel,
+        HasValidator<LocalDateTime>, HasClientValidation, HasTooltip {
 
     private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
@@ -168,6 +192,10 @@ public class DateTimePicker
         setInvalid(false);
 
         addValueChangeListener(e -> validate());
+
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            addClientValidatedEventListener(e -> validate());
+        }
     }
 
     /**
@@ -618,19 +646,67 @@ public class DateTimePicker
         return getElement().getProperty("invalid", false);
     }
 
+    @Override
+    public Validator<LocalDateTime> getDefaultValidator() {
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            return (value, context) -> checkValidity(value);
+        }
+
+        return Validator.alwaysPass();
+    }
+
+    @Override
+    public Registration addValidationStatusChangeListener(
+            ValidationStatusChangeListener<LocalDateTime> listener) {
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            return addClientValidatedEventListener(
+                    event -> listener.validationStatusChanged(
+                            new ValidationStatusChangeEvent<>(this,
+                                    event.isValid())));
+        }
+
+        return null;
+    }
+
+    private ValidationResult checkValidity(LocalDateTime value) {
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            boolean hasNonParsableDatePickerValue = datePicker
+                    .getValue() == datePicker.getEmptyValue()
+                    && datePicker.isInputValuePresent();
+
+            boolean hasNonParsableTimePickerValue = timePicker
+                    .getValue() == timePicker.getEmptyValue()
+                    && timePicker.isInputValuePresent();
+
+            if (hasNonParsableDatePickerValue
+                    || hasNonParsableTimePickerValue) {
+                return ValidationResult.error("");
+            }
+        }
+
+        var greaterThanMax = ValidationUtil.checkGreaterThanMax(value, max);
+        if (greaterThanMax.isError()) {
+            return greaterThanMax;
+        }
+
+        var smallerThanMin = ValidationUtil.checkSmallerThanMin(value, min);
+        if (smallerThanMin.isError()) {
+            return smallerThanMin;
+        }
+
+        return ValidationResult.ok();
+    }
+
     /**
      * Gets the validity of the date time picker value.
      *
      * @return the current validity of the value.
      */
     private boolean isInvalid(LocalDateTime value) {
-        final boolean isRequiredButEmpty = required
-                && Objects.equals(getEmptyValue(), value);
-        final boolean isGreaterThanMax = value != null && max != null
-                && value.isAfter(max);
-        final boolean isSmallerThanMin = value != null && min != null
-                && value.isBefore(min);
-        return isRequiredButEmpty || isGreaterThanMax || isSmallerThanMin;
+        var requiredValidation = ValidationUtil.checkRequired(required, value,
+                getEmptyValue());
+
+        return requiredValidation.isError() || checkValidity(value).isError();
     }
 
     /**
@@ -757,8 +833,12 @@ public class DateTimePicker
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        FieldValidationUtil.disableClientValidation(this);
-
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            ClientValidationUtil
+                    .preventWebComponentFromSettingItselfToValid(this);
+        } else {
+            FieldValidationUtil.disableClientValidation(this);
+        }
     }
 
     /**
@@ -783,5 +863,26 @@ public class DateTimePicker
         getThemeNames().removeAll(
                 Stream.of(variants).map(DateTimePickerVariant::getVariantName)
                         .collect(Collectors.toList()));
+    }
+
+    /**
+     * Returns true if the given feature flag is enabled, false otherwise.
+     * <p>
+     * Exposed with protected visibility to support mocking
+     * <p>
+     * The method requires the {@code VaadinService} instance to obtain the
+     * available feature flags, otherwise, the feature is considered disabled.
+     *
+     * @param feature
+     *            the feature flag.
+     * @return whether the feature flag is enabled.
+     */
+    protected boolean isFeatureFlagEnabled(Feature feature) {
+        VaadinService service = VaadinService.getCurrent();
+        if (service == null) {
+            return false;
+        }
+
+        return FeatureFlags.get(service.getContext()).isEnabled(feature);
     }
 }

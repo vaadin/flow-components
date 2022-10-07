@@ -206,10 +206,11 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/grid", version = "23.1.0")
-@NpmPackage(value = "@vaadin/vaadin-grid", version = "23.1.0")
+@NpmPackage(value = "@vaadin/grid", version = "23.3.0-alpha2")
+@NpmPackage(value = "@vaadin/vaadin-grid", version = "23.3.0-alpha2")
+@NpmPackage(value = "@vaadin/tooltip", version = "23.3.0-alpha2")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -217,6 +218,7 @@ import org.slf4j.LoggerFactory;
 @JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./gridConnector.js")
+@JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
 public class Grid<T> extends Component implements HasStyle, HasSize,
         Focusable<Grid<T>>, SortNotifier<Grid<T>, GridSortOrder<T>>, HasTheme,
         HasDataGenerators<T>, HasListDataView<T, GridListDataView<T>>,
@@ -387,6 +389,52 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
+     * Multi-sort priority (visually indicated by numbers in column headers)
+     * controls how columns are added to the sort order, when a column becomes
+     * sorted, or the sort direction of a column is changed.
+     * <p>
+     * Use {@link Grid#setMultiSort(boolean, MultiSortPriority)} to customize
+     * the multi-sort priority of an individual grid.
+     *
+     * @see Grid#setSelectionMode(SelectionMode)
+     * @see Grid#setMultiSort(boolean, MultiSortPriority)
+     */
+    public enum MultiSortPriority {
+        /**
+         * Whenever an unsorted column is sorted, it gets added at the end of
+         * the sort order, after all the previously sorted columns. When the
+         * sort direction of a column is changed by the user, the priority for
+         * all the sorted columns remains unchanged.
+         */
+        APPEND,
+
+        /**
+         * Whenever an unsorted column is sorted, or the sort direction of a
+         * column is changed, that column gets sort priority 1, and all the
+         * other sorted columns are updated accordingly. This is the default
+         * behavior of the component.
+         */
+        PREPEND
+    }
+
+    /**
+     * Sets the default multi-sort priority to use for all Grid instances.
+     * <p>
+     * This method should be called before creating any Grid instances. Changing
+     * this setting does not affect the default for existing Grids. Use
+     * {@link Grid#setMultiSort(boolean, MultiSortPriority)} to provide a custom
+     * multi-sort priority overriding the default priority for a single Grid.
+     *
+     * @param priority
+     *            the multi-sort priority to be used by all grid instances
+     */
+    public static void setDefaultMultiSortPriority(MultiSortPriority priority) {
+        defaultMultiSortPriority = priority;
+    }
+
+    private static MultiSortPriority defaultMultiSortPriority = MultiSortPriority.PREPEND;
+
+    /**
      * Server-side component for the {@code <vaadin-grid-column>} element.
      *
      * <p>
@@ -399,7 +447,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-column")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha2")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class Column<T> extends AbstractColumn<Column<T>> {
 
@@ -429,6 +477,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         private Rendering<T> rendering;
 
         private SerializableFunction<T, String> classNameGenerator = item -> null;
+        private SerializableFunction<T, String> tooltipGenerator = item -> null;
 
         /**
          * Constructs a new Column for use inside a Grid.
@@ -983,6 +1032,42 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
 
         /**
+         * Sets the function that is used for generating tooltip text for cells
+         * in this column. Returning {@code null} from the generator results in
+         * no tooltip being set.
+         *
+         * @param tooltipGenerator
+         *            the tooltip generator to set, not {@code null}
+         * @return this column
+         * @throws NullPointerException
+         *             if {@code classNameGenerator} is {@code null}
+         */
+        public Column<T> setTooltipGenerator(
+                SerializableFunction<T, String> tooltipGenerator) {
+            Objects.requireNonNull(classNameGenerator,
+                    "Tooltip generator can not be null");
+
+            if (!getGrid().getElement().getChildren().anyMatch(
+                    child -> "tooltip".equals(child.getAttribute("slot")))) {
+                // No <vaadin-tooltip> yet added to the grid, add one
+                var tooltipElement = new Element("vaadin-tooltip");
+                tooltipElement.setAttribute("slot", "tooltip");
+
+                tooltipElement.addAttachListener(e -> {
+                    // Assigns a generator that returns a column-specfic
+                    // tooltip text from the item
+                    tooltipElement.executeJs(
+                            "this.generator = ({item, column}) => { return (item && item.gridtooltips && column) ? item.gridtooltips[column._flowId] : ''; }");
+                });
+                getGrid().getElement().appendChild(tooltipElement);
+            }
+
+            this.tooltipGenerator = tooltipGenerator;
+            getGrid().getDataCommunicator().reset();
+            return this;
+        }
+
+        /**
          * Gets the function that is used for generating CSS class names for
          * cells in this column.
          *
@@ -990,6 +1075,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          */
         public SerializableFunction<T, String> getClassNameGenerator() {
             return classNameGenerator;
+        }
+
+        public SerializableFunction<T, String> getTooltipGenerator() {
+            return tooltipGenerator;
         }
 
         @Override
@@ -1423,6 +1512,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         gridDataGenerator = new CompositeDataGenerator<>();
         gridDataGenerator.addDataGenerator(this::generateUniqueKeyData);
         gridDataGenerator.addDataGenerator(this::generateStyleData);
+        gridDataGenerator.addDataGenerator(this::generateTooltipTextData);
         gridDataGenerator.addDataGenerator(this::generateRowsDragAndDropAccess);
         gridDataGenerator.addDataGenerator(this::generateDragData);
 
@@ -1440,6 +1530,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         addDragStartListener(this::onDragStart);
         addDragEndListener(this::onDragEnd);
 
+        updateMultiSortPriority(defaultMultiSortPriority);
         getElement().setAttribute("suppress-template-warning", true);
     }
 
@@ -3108,6 +3199,29 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
+     * Sets whether multiple column sorting is enabled on the client-side.
+     *
+     * @param multiSort
+     *            {@code true} to enable sorting of multiple columns on the
+     *            client-side, {@code false} to disable
+     * @param priority
+     *            the multi-sort priority to set, not {@code null}
+     *
+     * @see MultiSortPriority
+     */
+    public void setMultiSort(boolean multiSort, MultiSortPriority priority) {
+        Objects.requireNonNull(priority,
+                "Multi-sort priority must not be null");
+        setMultiSort(multiSort);
+        updateMultiSortPriority(priority);
+    }
+
+    private void updateMultiSortPriority(MultiSortPriority priority) {
+        getElement().setAttribute("multi-sort-priority",
+                priority == MultiSortPriority.APPEND ? "append" : "prepend");
+    }
+
+    /**
      * Gets whether multiple column sorting is enabled on the client-side.
      *
      * @see #setMultiSort(boolean)
@@ -3235,6 +3349,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * For Grids with multi-sorting, the index of a given column inside the list
      * defines the sort priority. For example, the column at index 0 of the list
      * is sorted first, then on the index 1, and so on.
+     * <p>
+     * When Grid is not configured to have multi-sorting enabled, all the
+     * columns in the list except the first one are ignored.
      *
      * @param order
      *            the list of sort orders to set on the client, or
@@ -3245,6 +3362,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     public void sort(List<GridSortOrder<T>> order) {
         if (order == null) {
             order = Collections.emptyList();
+        }
+        if (!isMultiSort() && order.size() > 1) {
+            LoggerFactory.getLogger(Grid.class).warn(
+                    "Multiple sort columns provided but multi-sorting is not enabled.");
+            order = order.subList(0, 1);
         }
         setSortOrder(order, false);
     }
@@ -3777,6 +3899,21 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public SerializableFunction<T, String> getClassNameGenerator() {
         return classNameGenerator;
+    }
+
+    private void generateTooltipTextData(T item, JsonObject jsonObject) {
+        JsonObject tooltips = Json.createObject();
+
+        idToColumnMap.forEach((id, column) -> {
+            String cellTooltip = column.getTooltipGenerator().apply(item);
+            if (cellTooltip != null) {
+                tooltips.put(id, cellTooltip);
+            }
+        });
+
+        if (tooltips.keys().length > 0) {
+            jsonObject.put("gridtooltips", tooltips);
+        }
     }
 
     private void generateStyleData(T item, JsonObject jsonObject) {

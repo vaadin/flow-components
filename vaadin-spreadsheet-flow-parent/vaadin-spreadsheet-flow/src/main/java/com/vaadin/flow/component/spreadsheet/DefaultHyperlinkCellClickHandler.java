@@ -14,6 +14,7 @@ package com.vaadin.flow.component.spreadsheet;
  */
 
 import org.apache.poi.common.usermodel.HyperlinkType;
+import org.apache.poi.ss.formula.LazyRefEval;
 import org.apache.poi.ss.formula.WorkbookEvaluatorProvider;
 import org.apache.poi.ss.formula.eval.StringEval;
 import org.apache.poi.ss.formula.eval.ValueEval;
@@ -142,7 +143,7 @@ public class DefaultHyperlinkCellClickHandler
                 int sheetPOIIndex = getSheetIndex(cell, sheetName);
                 spreadsheet.setActiveSheetWithPOIIndex(sheetPOIIndex);
             }
-            spreadsheet.initialSheetSelection = address;
+            spreadsheet.initialSheetSelection = addressInSheet;
             spreadsheet.getCellSelectionManager()
                     .onSheetAddressChanged(addressInSheet, true);
         } else {
@@ -203,11 +204,18 @@ public class DefaultHyperlinkCellClickHandler
 
         try {
             ValueEval value = ((WorkbookEvaluatorProvider) spreadsheet
-                    .getFormulaEvaluator())._getWorkbookEvaluator().evaluate(
-                            formula,
+                    .getFormulaEvaluator())._getWorkbookEvaluator()
+                    .evaluate(formula,
                             new CellReference(cell.getSheet().getSheetName(),
                                     cell.getRowIndex(), cell.getColumnIndex(),
                                     false, false));
+
+            if (value instanceof LazyRefEval) {
+                var refEvalValue = (LazyRefEval) value;
+                value = refEvalValue
+                        .getInnerValueEval(refEvalValue.getFirstSheetIndex());
+            }
+
             if (value instanceof StringEval) {
                 return ((StringEval) value).getStringValue();
             }

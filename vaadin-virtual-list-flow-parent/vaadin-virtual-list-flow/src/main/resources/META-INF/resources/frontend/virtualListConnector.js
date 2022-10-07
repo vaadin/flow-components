@@ -97,12 +97,20 @@ window.Vaadin.Flow.virtualListConnector = {
     };
 
     list.$connector.updateData = function (items) {
-      const mapByKey = items.reduce((map, item) => {
+      const updatedItemsMap = items.reduce((map, item) => {
         map[item.key] = item;
         return map;
       }, {});
 
-      list.items = list.items.map((item) => mapByKey[item.key] || item);
+      list.items = list.items.map((item) => {
+        // Items can be undefined if they are outside the viewport
+        if (!item) {
+          return item;
+        }
+        // Replace existing item with updated item,
+        // return existing item as fallback if it was not updated
+        return updatedItemsMap[item.key] || item;
+      });
     };
 
     list.$connector.updateSize = function (newSize) {

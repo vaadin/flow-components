@@ -181,6 +181,7 @@ export class VaadinSpreadsheet extends LitElement {
         display: block;
         height: 100%;
         min-height: 400px;
+        isolation: isolate;
       }
     `
   };
@@ -341,8 +342,6 @@ export class VaadinSpreadsheet extends LitElement {
         this.api.setClass(newVal);
       } else if ('resources' == name) {
         this.api.setResources(this, newVal);
-      } else if ('popupbuttons' == name) {
-        this.api.setPopups(newVal);
       } else if ('api' == name) {
       } else {
         console.error('<vaadin-spreadsheet> unsupported property received from server: property=' + name);
@@ -402,6 +401,22 @@ export class VaadinSpreadsheet extends LitElement {
 
   editCellComment(col, row) { // int col, int row
     this.api.editCellComment(col, row);
+  }
+
+  onPopupButtonOpen(row, column, contentId) {
+    this.api.onPopupButtonOpened(row, column, contentId);
+  }
+
+  closePopup(row, column) {
+    this.api.closePopup(row, column);
+  }
+
+  addPopupButton(rawState) {
+    this.api.addPopupButton(rawState);
+  }
+
+  removePopupButton(rawState) {
+    this.api.removePopupButton(rawState);
   }
 
   /* SERVER RPC METHOD CALLBACKS */
@@ -560,6 +575,14 @@ export class VaadinSpreadsheet extends LitElement {
 
     this.api.setActionOnColumnHeaderCallback(e => {
       this.dispatchEvent(this.createEvent('actionOnColumnHeader', e));
+    });
+
+    this.api.setPopupButtonClickCallback(e => {
+      this.dispatchEvent(this.createEvent('popupButtonClick', e));
+    });
+
+    this.api.setPopupCloseCallback(e => {
+      this.dispatchEvent(this.createEvent('popupClose', e));
     });
 
     this.dispatchEvent(this.createEvent('onConnectorInit'), []);

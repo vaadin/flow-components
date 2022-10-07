@@ -29,6 +29,7 @@ import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasTooltip;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.AbstractField;
@@ -39,7 +40,6 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
-import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.dom.Element;
 
@@ -56,14 +56,14 @@ import com.vaadin.flow.dom.Element;
  *            field value type
  */
 @Tag("vaadin-custom-field")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/custom-field", version = "23.1.0")
-@NpmPackage(value = "@vaadin/vaadin-custom-field", version = "23.1.0")
+@NpmPackage(value = "@vaadin/custom-field", version = "23.3.0-alpha2")
+@NpmPackage(value = "@vaadin/vaadin-custom-field", version = "23.3.0-alpha2")
 @JsModule("@vaadin/custom-field/src/vaadin-custom-field.js")
 public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
         implements HasSize, HasValidation, Focusable<CustomField>, HasHelper,
-        HasLabel, HasTheme, HasStyle {
+        HasLabel, HasTheme, HasStyle, HasTooltip {
 
     /**
      * Default constructor.

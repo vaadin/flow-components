@@ -48,8 +48,8 @@ public class BasicIT extends AbstractComponentIT {
         final AccordionPanelElement secondPanel = $(AccordionElement.class)
                 .first().$(AccordionPanelElement.class).all().get(1);
 
-        Assert.assertEquals(secondPanel,
-                $(AccordionElement.class).first().getOpenedPanel());
+        Assert.assertEquals(secondPanel, $(AccordionElement.class).first()
+                .getOpenedPanel().orElse(null));
 
         Assert.assertEquals("Green opened", getLastEvent(ACCORDION_EVENTS));
         Assert.assertEquals("Panel Green opened", getLastEvent(PANEL_EVENTS));

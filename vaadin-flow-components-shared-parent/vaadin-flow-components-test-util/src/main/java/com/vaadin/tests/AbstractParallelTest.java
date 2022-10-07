@@ -9,12 +9,10 @@ import java.util.List;
 import java.util.Optional;
 
 import org.junit.Assert;
-import org.junit.Rule;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
 import com.vaadin.testbench.Parameters;
-import com.vaadin.testbench.RetryRule;
 import com.vaadin.testbench.parallel.BrowserUtil;
 
 public abstract class AbstractParallelTest extends ParallelTest {

@@ -19,7 +19,6 @@ import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
@@ -59,7 +58,6 @@ public class SortingIT extends AbstractComponentIT {
     }
 
     @Test
-    @Ignore("Fix reverted for https://github.com/vaadin/vaadin-flow-components/issues/427")
     public void setInitialSortOrderGridHidden_showGrid_dataPresentAndSorted() {
         findElement(By.id("sort-hidden-by-age")).click();
         findElement(By.id("show-hidden-grid")).click();

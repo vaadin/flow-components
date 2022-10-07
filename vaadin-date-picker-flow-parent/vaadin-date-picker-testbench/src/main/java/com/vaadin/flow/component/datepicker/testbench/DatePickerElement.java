@@ -25,6 +25,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
+
 /**
  * A TestBench element representing a <code>&lt;vaadin-date-picker&gt;</code>
  * element.
@@ -152,14 +155,17 @@ public class DatePickerElement extends TestBenchElement
     }
 
     /**
-     * Opens the overlay, sets the value to the inner input element as a string
-     * and closes the overlay. This simulates the user typing into the input and
-     * triggering an update of the value property.
+     * Simulates the user selecting a date via the input element. This
+     * effectively clears the input element with a key shortcut, then types the
+     * given date string and finally presses {@code Enter} to commit the new
+     * date.
+     *
+     * @param value
+     *            the date string to enter.
      */
     public void setInputValue(String value) {
-        this.open();
-        setProperty("_inputValue", value);
-        this.close();
+        sendKeys(Keys.chord(Keys.SHIFT, Keys.HOME), Keys.BACK_SPACE);
+        sendKeys(value, Keys.ENTER);
     }
 
     /**
@@ -169,7 +175,8 @@ public class DatePickerElement extends TestBenchElement
      * @return
      */
     public String getInputValue() {
-        return getPropertyString("_inputValue");
+        TestBenchElement input = $("input").first();
+        return input.getPropertyString("value");
     }
 
     /**
@@ -208,5 +215,10 @@ public class DatePickerElement extends TestBenchElement
         return this.$("vaadin-date-picker-overlay").onPage().waitForFirst()
                 .$(TestBenchElement.class).id("content")
                 .$(OverlayContentElement.class).id("overlay-content");
+    }
+
+    @Override
+    public void sendKeys(CharSequence... keysToSend) {
+        findElement(By.tagName("input")).sendKeys(keysToSend);
     }
 }

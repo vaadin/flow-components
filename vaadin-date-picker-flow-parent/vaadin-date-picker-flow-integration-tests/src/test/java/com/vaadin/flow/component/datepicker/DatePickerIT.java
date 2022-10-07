@@ -49,6 +49,12 @@ public class DatePickerIT extends AbstractComponentIT {
     }
 
     @Test
+    public void openSimpleDatePickerFromServer_overlayVisible() {
+        scrollIntoViewAndClick(findElement(By.id("open-simple-picker")));
+        waitForElementVisible(By.tagName("vaadin-date-picker-overlay"));
+    }
+
+    @Test
     public void selectDateOnSimpleDatePicker() {
         WebElement picker = layout.findElement(By.id("simple-picker"));
         WebElement message = layout.findElement(By.id("simple-picker-message"));
@@ -316,5 +322,22 @@ public class DatePickerIT extends AbstractComponentIT {
 
         $("button").id("Locale-US").click();
         Assert.assertEquals("3/8/20", localePicker.getInputValue());
+    }
+
+    @Test
+    public void datePickerInsideDisabledParent_pickerIsDisabled() {
+        WebElement picker = findElement(By.id("picker-inside-disabled-parent"));
+        Assert.assertFalse(
+                "The date picker should be disabled, when the parent component is disabled.",
+                picker.isEnabled());
+    }
+
+    @Test
+    public void datePickerInsideDisabledParent_enableParent_pickerIsEnabled() {
+        WebElement picker = findElement(By.id("picker-inside-disabled-parent"));
+        findElement(By.id("enable-parent")).click();
+        Assert.assertTrue(
+                "The date picker should be enabled after parent component is enabled.",
+                picker.isEnabled());
     }
 }

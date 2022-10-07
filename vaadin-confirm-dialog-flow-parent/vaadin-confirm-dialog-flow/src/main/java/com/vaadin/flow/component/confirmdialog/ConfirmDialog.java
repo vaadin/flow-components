@@ -1,20 +1,19 @@
-package com.vaadin.flow.component.confirmdialog;
-
 /*
- * #%L
- * Vaadin Confirm Dialog for Vaadin 10
- * %%
  * Copyright 2000-2022 Vaadin Ltd.
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
  *
- * See the file license.html distributed with this software for more
- * information about licensing.
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
+package com.vaadin.flow.component.confirmdialog;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
@@ -32,6 +31,8 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.Style;
+import com.vaadin.flow.internal.StateTree;
+import com.vaadin.flow.router.NavigationTrigger;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -56,10 +57,10 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-confirm-dialog")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/confirm-dialog", version = "23.1.0")
-@NpmPackage(value = "@vaadin/vaadin-confirm-dialog", version = "23.1.0")
+@NpmPackage(value = "@vaadin/confirm-dialog", version = "23.3.0-alpha2")
+@NpmPackage(value = "@vaadin/vaadin-confirm-dialog", version = "23.3.0-alpha2")
 @JsModule("@vaadin/confirm-dialog/src/vaadin-confirm-dialog.js")
 @JsModule("./confirmDialogConnector.js")
 public class ConfirmDialog extends Component
@@ -98,6 +99,8 @@ public class ConfirmDialog extends Component
 
     private String height;
     private String width;
+
+    private Registration afterProgrammaticNavigationListenerRegistration;
 
     /**
      * Sets the width of the component content area.
@@ -665,14 +668,30 @@ public class ConfirmDialog extends Component
 
     private void ensureAttached() {
         UI ui = getCurrentUI();
-        ui.beforeClientResponse(ui, context -> {
-            if (getElement().getNode().getParent() == null) {
-                ui.addToModalComponent(this);
-                autoAddedToTheUi = true;
-                updateWidth();
-                updateHeight();
-                ui.setChildComponentModal(this, true);
-            }
-        });
+        StateTree.ExecutionRegistration addToUiRegistration = ui
+                .beforeClientResponse(ui, context -> {
+                    if (getElement().getNode().getParent() == null) {
+                        ui.addToModalComponent(this);
+                        autoAddedToTheUi = true;
+                        updateWidth();
+                        updateHeight();
+                        ui.setChildComponentModal(this, true);
+                    }
+                    if (afterProgrammaticNavigationListenerRegistration != null) {
+                        afterProgrammaticNavigationListenerRegistration
+                                .remove();
+                    }
+                });
+        if (ui.getSession() != null) {
+            afterProgrammaticNavigationListenerRegistration = ui
+                    .addAfterNavigationListener(event -> {
+                        if (event.getLocationChangeEvent()
+                                .getTrigger() == NavigationTrigger.PROGRAMMATIC) {
+                            addToUiRegistration.remove();
+                            afterProgrammaticNavigationListenerRegistration
+                                    .remove();
+                        }
+                    });
+        }
     }
 }

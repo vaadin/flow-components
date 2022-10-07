@@ -15,19 +15,31 @@
  */
 package com.vaadin.flow.component.textfield;
 
+import com.vaadin.experimental.Feature;
+import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.CompositionNotifier;
+import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasClearButton;
+import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.ClientValidationUtil;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.InputNotifier;
 import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.HasValidator;
+import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
+import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
+import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * Text Field allows the user to input and edit text. Prefix and suffix
@@ -39,7 +51,9 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
         implements HasSize, HasValidation, HasValueChangeMode,
         HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
         HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper, HasLabel,
-        HasClearButton, HasThemeVariant<TextFieldVariant> {
+        HasClearButton, HasAllowedCharPattern,
+        HasThemeVariant<TextFieldVariant>, HasTooltip, HasValidator<String>,
+        HasClientValidation {
     private ValueChangeMode currentMode;
 
     private boolean isConnectorAttached;
@@ -77,6 +91,10 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
         setValueChangeMode(ValueChangeMode.ON_CHANGE);
 
         addValueChangeListener(e -> validate());
+
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            addClientValidatedEventListener(e -> validate());
+        }
     }
 
     /**
@@ -379,11 +397,19 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
      * conflicts with the given {@code pattern}.
      *
      * @return the {@code preventInvalidInput} property from the webcomponent
+     *
+     * @deprecated Since 23.2, this API is deprecated.
      */
+    @Deprecated
     public boolean isPreventInvalidInput() {
         return isPreventInvalidInputBoolean();
     }
 
+    /**
+     * @deprecated Since 23.2, this API is deprecated in favor of
+     *             {@link #setAllowedCharPattern(String)}
+     */
+    @Deprecated
     @Override
     public void setPreventInvalidInput(boolean preventInvalidInput) {
         super.setPreventInvalidInput(preventInvalidInput);
@@ -473,6 +499,29 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
         getValidationSupport().setRequired(requiredIndicatorVisible);
     }
 
+    @Override
+    public Validator<String> getDefaultValidator() {
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            return (value, context) -> getValidationSupport()
+                    .checkValidity(value);
+        }
+
+        return Validator.alwaysPass();
+    }
+
+    @Override
+    public Registration addValidationStatusChangeListener(
+            ValidationStatusChangeListener<String> listener) {
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            return addClientValidatedEventListener(
+                    event -> listener.validationStatusChanged(
+                            new ValidationStatusChangeEvent<String>(this,
+                                    !isInvalid())));
+        }
+
+        return null;
+    }
+
     /**
      * Performs server-side validation of the current value and the validation
      * constraints of the field, such as {@link #setPattern(String)}. This is
@@ -487,6 +536,46 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        FieldValidationUtil.disableClientValidation(this);
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            ClientValidationUtil
+                    .preventWebComponentFromSettingItselfToValid(this);
+        } else {
+            FieldValidationUtil.disableClientValidation(this);
+        }
+    }
+
+    // Override is only required to keep binary compatibility with other 23.x
+    // minor versions, can be removed in a future major
+    @Override
+    public void addThemeVariants(TextFieldVariant... variants) {
+        HasThemeVariant.super.addThemeVariants(variants);
+    }
+
+    // Override is only required to keep binary compatibility with other 23.x
+    // minor versions, can be removed in a future major
+    @Override
+    public void removeThemeVariants(TextFieldVariant... variants) {
+        HasThemeVariant.super.removeThemeVariants(variants);
+    }
+
+    /**
+     * Returns true if the given feature flag is enabled, false otherwise.
+     * <p>
+     * Exposed with protected visibility to support mocking
+     * <p>
+     * The method requires the {@code VaadinService} instance to obtain the
+     * available feature flags, otherwise, the feature is considered disabled.
+     *
+     * @param feature
+     *            the feature flag.
+     * @return whether the feature flag is enabled.
+     */
+    protected boolean isFeatureFlagEnabled(Feature feature) {
+        VaadinService service = VaadinService.getCurrent();
+        if (service == null) {
+            return false;
+        }
+
+        return FeatureFlags.get(service.getContext()).isEnabled(feature);
     }
 }

@@ -15,15 +15,11 @@
  */
 package com.vaadin.flow.component.button;
 
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasText;
-import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
@@ -49,7 +45,7 @@ import com.vaadin.flow.dom.Element;
  * The following shadow DOM parts are exposed for styling:
  * </p>
  * <table>
- * <thead>
+ * <caption>Shadow DOM parts exposed for styling</caption> <thead>
  * <tr>
  * <th>Part name</th>
  * <th>Description</th>
@@ -73,7 +69,7 @@ import com.vaadin.flow.dom.Element;
  * The following attributes are exposed for styling:
  * </p>
  * <table>
- * <thead>
+ * <caption>Attributes exposed for styling</caption> <thead>
  * <tr>
  * <th>Attribute</th>
  * <th>Description</th>
@@ -105,14 +101,14 @@ import com.vaadin.flow.dom.Element;
  * </p>
  */
 @Tag("vaadin-button")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.0")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/button", version = "23.1.0")
-@NpmPackage(value = "@vaadin/vaadin-button", version = "23.1.0")
+@NpmPackage(value = "@vaadin/button", version = "23.3.0-alpha2")
+@NpmPackage(value = "@vaadin/vaadin-button", version = "23.3.0-alpha2")
 @JsModule("@vaadin/button/src/vaadin-button.js")
 public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
         extends Component implements HasStyle, ClickNotifier<R>, HasText,
-        Focusable<R>, HasTheme, HasThemeVariant<ButtonVariant> {
+        Focusable<R>, HasThemeVariant<ButtonVariant> {
 
     /**
      * <p>
@@ -251,6 +247,20 @@ public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
         getElement().getChildren()
                 .forEach(child -> child.removeAttribute("slot"));
         getElement().removeAllChildren();
+    }
+
+    // Override is only required to keep binary compatibility with other 23.x
+    // minor versions, can be removed in a future major
+    @Override
+    public void addThemeVariants(ButtonVariant... variants) {
+        HasThemeVariant.super.addThemeVariants(variants);
+    }
+
+    // Override is only required to keep binary compatibility with other 23.x
+    // minor versions, can be removed in a future major
+    @Override
+    public void removeThemeVariants(ButtonVariant... variants) {
+        HasThemeVariant.super.removeThemeVariants(variants);
     }
 
     /**
