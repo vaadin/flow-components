@@ -11,9 +11,9 @@ import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-spreadsheet/freeze-pane-locale")
-public class SpreadsheetFreezePaneLocalePage extends Div {
+public class FreezePaneLocalePage extends Div {
 
-    public SpreadsheetFreezePaneLocalePage() {
+    public FreezePaneLocalePage() {
         super();
         setSizeFull();
 
