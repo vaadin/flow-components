@@ -12,11 +12,13 @@ public class NewSpreadsheetEditIT extends AbstractComponentIT {
     @Test
     public void spreadsheetLoaded_cellEdited_valueIsCorrectlySet() {
         open();
-        SpreadsheetElement spreadsheetElement = $(SpreadsheetElement.class).first();
+        SpreadsheetElement spreadsheetElement = $(SpreadsheetElement.class)
+                .first();
         Assert.assertTrue(spreadsheetElement.isDisplayed());
         String inputValue = "input";
         String cellAddress = "B2";
         spreadsheetElement.getCellAt(cellAddress).setValue(inputValue);
-        Assert.assertEquals(inputValue, spreadsheetElement.getCellAt(cellAddress).getText());
+        Assert.assertEquals(inputValue,
+                spreadsheetElement.getCellAt(cellAddress).getText());
     }
 }
