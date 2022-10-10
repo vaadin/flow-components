@@ -24,11 +24,24 @@ public class SpreadsheetTabSheetPage extends Div {
         final SpreadsheetTable table = new SpreadsheetTable(sheet, range);
         sheet.registerTable(table);
 
+        var sheetWrapper = new Div(sheet);
+        sheetWrapper.setHeight("400px");
+
         TabSheet tabsheet = new TabSheet();
         tabsheet.setSizeFull();
         tabsheet.add("First tab", new Span("First"));
-        tabsheet.add("Spreadsheet", sheet);
+        var sheetTab = tabsheet.add("Spreadsheet", sheetWrapper);
         tabsheet.add("Third tab", new Span("Third"));
+
+        // Since V23 TabSheet doesn't detach tab content on tab change, we need
+        // to do it manually to make this test case work.
+        tabsheet.addSelectedChangeListener(event -> {
+            if (event.getSelectedTab() == sheetTab) {
+                sheetWrapper.add(sheet);
+            } else {
+                sheetWrapper.removeAll();
+            }
+        });
 
         add(tabsheet);
 
