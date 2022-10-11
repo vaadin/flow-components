@@ -55,21 +55,21 @@ public class TooltipDefaultsIT extends AbstractComponentIT {
     }
 
     private int getActiveFocusDelay(ButtonElement button) {
-        return getTooltipFunctionValue(button, "__getFocusDelay");
+        return getTooltipControllerPropertyValue(button, "focusDelay");
     }
 
     private int getActiveHoverDelay(ButtonElement button) {
-        return getTooltipFunctionValue(button, "__getHoverDelay");
+        return getTooltipControllerPropertyValue(button, "hoverDelay");
     }
 
     private int getActiveHideDelay(ButtonElement button) {
-        return getTooltipFunctionValue(button, "__getHideDelay");
+        return getTooltipControllerPropertyValue(button, "hideDelay");
     }
 
-    private int getTooltipFunctionValue(ButtonElement button,
+    private int getTooltipControllerPropertyValue(ButtonElement button,
             String functionName) {
         var tooltipElement = button.$("vaadin-tooltip").first();
-        var value = executeScript("return arguments[0][arguments[1]]();",
+        var value = executeScript("return arguments[0]._stateController[arguments[1]];",
                 tooltipElement, functionName);
         return ((Number) value).intValue();
     }
