@@ -212,6 +212,7 @@ public class TabSheet extends Component
      */
     public void setSelectedIndex(int selectedIndex) {
         tabs.setSelectedIndex(selectedIndex);
+        getElement().setProperty("selected", tabs.getSelectedIndex());
     }
 
     /**
@@ -233,6 +234,7 @@ public class TabSheet extends Component
      */
     public void setSelectedTab(Tab selectedTab) {
         tabs.setSelectedTab(selectedTab);
+        getElement().setProperty("selected", tabs.getSelectedIndex());
     }
 
     /**
