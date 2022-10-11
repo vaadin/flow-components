@@ -69,7 +69,8 @@ public class TooltipDefaultsIT extends AbstractComponentIT {
     private int getTooltipControllerPropertyValue(ButtonElement button,
             String functionName) {
         var tooltipElement = button.$("vaadin-tooltip").first();
-        var value = executeScript("return arguments[0]._stateController[arguments[1]];",
+        var value = executeScript(
+                "return arguments[0]._stateController[arguments[1]];",
                 tooltipElement, functionName);
         return ((Number) value).intValue();
     }
