@@ -9,7 +9,6 @@ import java.util.Locale;
 import com.vaadin.flow.component.spreadsheet.FormulaFormatter;
 import org.junit.Test;
 
-
 public class FormulaFormatterTest {
 
     @Test
@@ -18,17 +17,18 @@ public class FormulaFormatterTest {
         FormulaFormatter manager = new FormulaFormatter();
 
         assertEquals("SUM(C4,E4)",
-            manager.unFormatFormulaValue("SUM(C4;E4)", locale));
-        assertEquals("1.1 + 2", manager.unFormatFormulaValue("1,1 + 2", locale));
+                manager.unFormatFormulaValue("SUM(C4;E4)", locale));
+        assertEquals("1.1 + 2",
+                manager.unFormatFormulaValue("1,1 + 2", locale));
         assertEquals("IF(B2=3.2,1,0)",
-            manager.unFormatFormulaValue("IF(B2=3,2;1;0)", locale));
+                manager.unFormatFormulaValue("IF(B2=3,2;1;0)", locale));
         assertEquals("1 + 2", manager.unFormatFormulaValue("1 + 2", locale));
         assertEquals("1000 + 2000",
-            manager.unFormatFormulaValue("1000 + 2000", locale));
+                manager.unFormatFormulaValue("1000 + 2000", locale));
         assertEquals("HYPERLINK(\"http://www,vaadin,com\",  \"ups\")",
-            manager.unFormatFormulaValue(
-                "HYPERLINK(\"http://www,vaadin,com\";  \"ups\")",
-                locale));
+                manager.unFormatFormulaValue(
+                        "HYPERLINK(\"http://www,vaadin,com\";  \"ups\")",
+                        locale));
     }
 
     @Test
@@ -37,17 +37,18 @@ public class FormulaFormatterTest {
         FormulaFormatter manager = new FormulaFormatter();
 
         assertEquals("SUM(C4,E4)",
-            manager.unFormatFormulaValue("SUM(C4;E4)", locale));
-        assertEquals("1.1 + 2", manager.unFormatFormulaValue("1,1 + 2", locale));
+                manager.unFormatFormulaValue("SUM(C4;E4)", locale));
+        assertEquals("1.1 + 2",
+                manager.unFormatFormulaValue("1,1 + 2", locale));
         assertEquals("IF(B2=3.2,1,0)",
-            manager.unFormatFormulaValue("IF(B2=3,2;1;0)", locale));
+                manager.unFormatFormulaValue("IF(B2=3,2;1;0)", locale));
         assertEquals("1 + 2", manager.unFormatFormulaValue("1 + 2", locale));
         assertEquals("1000.2 + 2000.1",
-            manager.unFormatFormulaValue("1000,20 + 2000,10", locale));
+                manager.unFormatFormulaValue("1000,20 + 2000,10", locale));
         assertEquals("HYPERLINK(\"http://www,vaadin,com\",  \"ups\")",
-            manager.unFormatFormulaValue(
-                "HYPERLINK(\"http://www,vaadin,com\";  \"ups\")",
-                locale));
+                manager.unFormatFormulaValue(
+                        "HYPERLINK(\"http://www,vaadin,com\";  \"ups\")",
+                        locale));
     }
 
     @Test
@@ -56,7 +57,7 @@ public class FormulaFormatterTest {
         FormulaFormatter manager = new FormulaFormatter();
 
         assertEquals("1000.20 + 2000.10",
-            manager.unFormatFormulaValue("1000.20 + 2000.10", locale));
+                manager.unFormatFormulaValue("1000.20 + 2000.10", locale));
     }
 
     @Test
@@ -65,17 +66,18 @@ public class FormulaFormatterTest {
         FormulaFormatter manager = new FormulaFormatter();
 
         assertEquals("SUM(C4;E4)",
-            manager.reFormatFormulaValue("SUM(C4,E4)", locale));
-        assertEquals("1,1 + 2", manager.reFormatFormulaValue("1.1 + 2", locale));
+                manager.reFormatFormulaValue("SUM(C4,E4)", locale));
+        assertEquals("1,1 + 2",
+                manager.reFormatFormulaValue("1.1 + 2", locale));
         assertEquals("IF(B2=3,2;1;0)",
-            manager.reFormatFormulaValue("IF(B2=3.2,1,0)", locale));
+                manager.reFormatFormulaValue("IF(B2=3.2,1,0)", locale));
         assertEquals("1 + 2", manager.reFormatFormulaValue("1 + 2", locale));
         assertEquals("1000 + 2000",
-            manager.reFormatFormulaValue("1000 + 2000", locale));
+                manager.reFormatFormulaValue("1000 + 2000", locale));
         assertEquals("HYPERLINK(\"https://www,vaadin,com\";  \"ups\")",
-            manager.reFormatFormulaValue(
-                "HYPERLINK(\"https://www,vaadin,com\",  \"ups\")",
-                locale));
+                manager.reFormatFormulaValue(
+                        "HYPERLINK(\"https://www,vaadin,com\",  \"ups\")",
+                        locale));
     }
 
     @Test
@@ -84,17 +86,18 @@ public class FormulaFormatterTest {
         FormulaFormatter manager = new FormulaFormatter();
 
         assertEquals("SUM(C4;E4)",
-            manager.reFormatFormulaValue("SUM(C4,E4)", locale));
-        assertEquals("1,1 + 2", manager.reFormatFormulaValue("1.1 + 2", locale));
+                manager.reFormatFormulaValue("SUM(C4,E4)", locale));
+        assertEquals("1,1 + 2",
+                manager.reFormatFormulaValue("1.1 + 2", locale));
         assertEquals("IF(B2=3,2;1;0)",
-            manager.reFormatFormulaValue("IF(B2=3.2,1,0)", locale));
+                manager.reFormatFormulaValue("IF(B2=3.2,1,0)", locale));
         assertEquals("1 + 2", manager.reFormatFormulaValue("1 + 2", locale));
         assertEquals("1000,2 + 2000,1",
-            manager.reFormatFormulaValue("1000.20 + 2000.10", locale));
+                manager.reFormatFormulaValue("1000.20 + 2000.10", locale));
         assertEquals("HYPERLINK(\"https://www,vaadin,com\",  \"ups\")",
-            manager.unFormatFormulaValue(
-                "HYPERLINK(\"https://www,vaadin,com\";  \"ups\")",
-                locale));
+                manager.unFormatFormulaValue(
+                        "HYPERLINK(\"https://www,vaadin,com\";  \"ups\")",
+                        locale));
     }
 
     @Test
@@ -103,7 +106,7 @@ public class FormulaFormatterTest {
         FormulaFormatter manager = new FormulaFormatter();
 
         assertEquals("1000.20 + 2000.10",
-            manager.reFormatFormulaValue("1000.20 + 2000.10", locale));
+                manager.reFormatFormulaValue("1000.20 + 2000.10", locale));
     }
 
     @Test
@@ -111,15 +114,16 @@ public class FormulaFormatterTest {
         final FormulaFormatter formulaFormatter = new FormulaFormatter();
         Locale locale = new Locale("fi", "FI");
 
-        assertTrue(formulaFormatter.isValidFormulaFormat("=SUM(C4;E4)", locale));
+        assertTrue(
+                formulaFormatter.isValidFormulaFormat("=SUM(C4;E4)", locale));
         assertTrue(formulaFormatter.isValidFormulaFormat("=1,1 + 2", locale));
         assertTrue(formulaFormatter.isValidFormulaFormat("=IF(B2=3,2;1;0)",
-            locale));
+                locale));
         assertTrue(formulaFormatter.isValidFormulaFormat("=1 + 2", locale));
         assertTrue(formulaFormatter.isValidFormulaFormat("=1000,20 + 2000,10",
-            locale));
+                locale));
         assertTrue(formulaFormatter.isValidFormulaFormat(
-            "=HYPERLINK(\"https://www.vaadin,com\";  \"ups\")", locale));
+                "=HYPERLINK(\"https://www.vaadin,com\";  \"ups\")", locale));
     }
 
     @Test
@@ -127,15 +131,16 @@ public class FormulaFormatterTest {
         final FormulaFormatter formulaFormatter = new FormulaFormatter();
         Locale locale = new Locale("it", "IT");
 
-        assertTrue(formulaFormatter.isValidFormulaFormat("=SUM(C4;E4)", locale));
+        assertTrue(
+                formulaFormatter.isValidFormulaFormat("=SUM(C4;E4)", locale));
         assertTrue(formulaFormatter.isValidFormulaFormat("=1,1 + 2", locale));
         assertTrue(formulaFormatter.isValidFormulaFormat("=IF(B2=3,2;1;0)",
-            locale));
+                locale));
         assertTrue(formulaFormatter.isValidFormulaFormat("=1 + 2", locale));
         assertTrue(formulaFormatter.isValidFormulaFormat("=1000,20 + 2000,10",
-            locale));
+                locale));
         assertTrue(formulaFormatter.isValidFormulaFormat(
-            "=HYPERLINK(\"https://www.vaadin,com\";  \"ups\")", locale));
+                "=HYPERLINK(\"https://www.vaadin,com\";  \"ups\")", locale));
     }
 
     @Test

@@ -12,7 +12,6 @@ import org.apache.poi.ss.usermodel.ClientAnchor;
 import org.junit.Ignore;
 import org.junit.Test;
 
-
 /**
  * Tests for conditional formatting
  *
@@ -24,7 +23,7 @@ public class ConditionalFormatterTest {
      */
     @Test
     public void createConditionalFormatterRules_sheetWithStringFormatRuleForNumericCell_rulesCreatedWithoutExceptions()
-        throws URISyntaxException, IOException {
+            throws URISyntaxException, IOException {
         createConditionalFormatterRulesForSheet("conditional_formatting.xlsx");
     }
 
@@ -41,30 +40,30 @@ public class ConditionalFormatterTest {
     @Ignore("The file throws NPE when loaded. The same does not happen on the V8 version.")
     @Test
     public void matchesFormula_rulesWithoutFormula_formulasEvaluatedWithoutExceptions()
-        throws URISyntaxException, IOException {
+            throws URISyntaxException, IOException {
         // ensure sheet with rules without formulas is active
         createConditionalFormatterRulesForSheet(
-            "ConditionalFormatterSamples.xlsx", 3);
+                "ConditionalFormatterSamples.xlsx", 3);
     }
 
     @Test
     public void createConditionalFormatterRules_ruleWithNullBackgroundColor_rulesCreatedWithoutExceptions()
-        throws URISyntaxException, IOException {
+            throws URISyntaxException, IOException {
         createConditionalFormatterRulesForSheet(
-            "conditionalformater_nobackground.xlsx");
+                "conditionalformater_nobackground.xlsx");
     }
 
     private void createConditionalFormatterRulesForSheet(String fileName)
-        throws URISyntaxException, IOException {
+            throws URISyntaxException, IOException {
         createConditionalFormatterRulesForSheet(fileName, null);
     }
 
     private void createConditionalFormatterRulesForSheet(String fileName,
-        Integer sheetIndex) throws URISyntaxException, IOException {
+            Integer sheetIndex) throws URISyntaxException, IOException {
         ClassLoader classLoader = ConditionalFormatterTest.class
-            .getClassLoader();
+                .getClassLoader();
         URL resource = classLoader
-            .getResource("test_sheets" + File.separator + fileName);
+                .getResource("test_sheets" + File.separator + fileName);
         assert resource != null;
         File file = new File(resource.toURI());
 
