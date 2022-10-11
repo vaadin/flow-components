@@ -10,7 +10,6 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.spreadsheet.CellValueFormatter;
 
-
 public class CellValueShorteningTest {
 
     private CellValueFormatter cellValueFormatter;
@@ -18,8 +17,8 @@ public class CellValueShorteningTest {
     @Before
     public void setUp() throws Exception {
         cellValueFormatter = new CellValueFormatter();
-        cellValueFormatter.setLocaleDecimalSymbols(DecimalFormatSymbols
-                .getInstance(Locale.US));
+        cellValueFormatter.setLocaleDecimalSymbols(
+                DecimalFormatSymbols.getInstance(Locale.US));
     }
 
     @Test
@@ -102,13 +101,15 @@ public class CellValueShorteningTest {
         assertCorrectRounding("##", "1234567.89", 2);
     }
 
-    private void assertCorrectRounding(String expected, String input, int width) {
+    private void assertCorrectRounding(String expected, String input,
+            int width) {
         String result = cellValueFormatter
                 .getScientificNotationStringForNumericCell(
                         Double.parseDouble(input), input, 1, width);
 
-        assertEquals(String.format(
-                "Rounding of %s to %s was wrong, expected %s", input, result,
-                expected), expected, result);
+        assertEquals(
+                String.format("Rounding of %s to %s was wrong, expected %s",
+                        input, result, expected),
+                expected, result);
     }
 }

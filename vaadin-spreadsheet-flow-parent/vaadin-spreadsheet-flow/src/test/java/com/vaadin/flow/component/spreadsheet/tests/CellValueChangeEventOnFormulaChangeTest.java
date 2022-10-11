@@ -15,7 +15,6 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 
-
 /**
  * Unit test for fix for issue #550.
  */
@@ -53,8 +52,8 @@ public class CellValueChangeEventOnFormulaChangeTest {
         spreadsheet.getCellValueManager().onCellValueChange(3, 1, "=A1+2*B1");
 
         assertEquals("There should be 1 changed cell", 1, changedCells.size());
-        assertEquals("The changed cell should be C1", new CellReference("Sheet0!C1"),
-                changedCells.get(0));
+        assertEquals("The changed cell should be C1",
+                new CellReference("Sheet0!C1"), changedCells.get(0));
     }
 
 }

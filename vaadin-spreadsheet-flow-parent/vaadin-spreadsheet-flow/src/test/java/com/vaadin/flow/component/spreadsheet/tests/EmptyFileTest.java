@@ -60,8 +60,7 @@ public class EmptyFileTest {
         File file = null;
 
         try {
-            file = new File(EmptyFileTest.class
-                    .getClassLoader()
+            file = new File(EmptyFileTest.class.getClassLoader()
                     .getResource(
                             "test_sheets" + File.separator + testSheetFileName)
                     .toURI());
