@@ -277,6 +277,8 @@ public class TabSheetTest {
         tabSheet.setSelectedTab(tab1);
         Assert.assertEquals(1, tabSheet.getSelectedIndex());
         Assert.assertEquals(tab1, tabSheet.getSelectedTab());
+        Assert.assertEquals(1,
+                tabSheet.getElement().getProperty("selected", 0));
     }
 
     @Test

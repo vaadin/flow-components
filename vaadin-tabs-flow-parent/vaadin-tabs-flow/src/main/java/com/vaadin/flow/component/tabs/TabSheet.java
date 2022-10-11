@@ -211,8 +211,8 @@ public class TabSheet extends Component
      *            the zero-based index of the selected tab, -1 to unselect all
      */
     public void setSelectedIndex(int selectedIndex) {
-        getElement().setProperty("selected", selectedIndex);
         tabs.setSelectedIndex(selectedIndex);
+        getElement().setProperty("selected", tabs.getSelectedIndex());
     }
 
     /**
@@ -234,6 +234,7 @@ public class TabSheet extends Component
      */
     public void setSelectedTab(Tab selectedTab) {
         tabs.setSelectedTab(selectedTab);
+        getElement().setProperty("selected", tabs.getSelectedIndex());
     }
 
     /**
