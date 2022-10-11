@@ -2526,7 +2526,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     @Override
-    public GridDataView<T> setItems(DataProvider<T, Void> dataProvider) {
+    public GridDataView<T> setItems(DataProvider<T, ?> dataProvider) {
         setDataProvider(dataProvider);
         return getGenericDataView();
     }
