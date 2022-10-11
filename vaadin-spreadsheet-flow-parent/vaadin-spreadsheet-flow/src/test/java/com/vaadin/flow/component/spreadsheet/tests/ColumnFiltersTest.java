@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.spreadsheet;
+package com.vaadin.flow.component.spreadsheet.tests;
 
 import java.io.File;
 import java.net.URISyntaxException;
@@ -12,6 +12,9 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.vaadin.flow.component.spreadsheet.Spreadsheet;
+import com.vaadin.flow.component.spreadsheet.SpreadsheetTable;
 
 public class ColumnFiltersTest {
 

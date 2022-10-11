@@ -16,10 +16,13 @@
 package com.vaadin.flow.component.grid;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.grid.dataview.GridListDataView;
+import com.vaadin.flow.data.provider.*;
 import com.vaadin.flow.dom.Element;
 import org.junit.Assert;
 import org.junit.Before;
@@ -27,9 +30,6 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
-import com.vaadin.flow.data.provider.DataCommunicatorTest;
-import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.data.provider.Query;
 
 public class AbstractGridMultiSelectionModelTest {
 
@@ -402,6 +402,58 @@ public class AbstractGridMultiSelectionModelTest {
         Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
         Assert.assertFalse(
                 (boolean) columnElement.getPropertyRaw("indeterminate"));
+    }
+
+    @Test
+    public void setFilterUsingDataView_clientSelectAll_selectionEventContainsFilteredValues() {
+        grid.setSelectionMode(SelectionMode.MULTI);
+        List<String> items = List.of("foo", "bar");
+        ListDataView<String, ?> dataView = grid.setItems(items);
+        dataView.setFilter(items.get(0)::equals);
+
+        grid.addSelectionListener(e -> {
+            Assert.assertEquals(
+                    "Selected item count does not match data view item count",
+                    dataView.getItems().count(),
+                    e.getAllSelectedItems().size());
+            Assert.assertTrue("Selected items do not contain filtered item",
+                    e.getAllSelectedItems().contains(items.get(0)));
+        });
+
+        ((AbstractGridMultiSelectionModel<String>) grid.getSelectionModel())
+                .clientSelectAll();
+
+        Assert.assertEquals(
+                "Selected item count does not match data view item count",
+                dataView.getItems().count(), grid.getSelectedItems().size());
+        Assert.assertTrue("Selected items do not contain filtered item",
+                grid.getSelectedItems().contains(items.get(0)));
+    }
+
+    @Test
+    public void setFilterUsingDataView_serverSelectAll_selectionEventContainsFilteredValues() {
+        grid.setSelectionMode(SelectionMode.MULTI);
+        List<String> items = List.of("foo", "bar");
+        ListDataView<String, ?> dataView = grid.setItems(items);
+        dataView.setFilter(items.get(0)::equals);
+
+        grid.addSelectionListener(e -> {
+            Assert.assertEquals(
+                    "Selected item count does not match data view item count",
+                    dataView.getItems().count(),
+                    e.getAllSelectedItems().size());
+            Assert.assertTrue("Selected items do not contain filtered item",
+                    e.getAllSelectedItems().contains(items.get(0)));
+        });
+
+        ((AbstractGridMultiSelectionModel<String>) grid.getSelectionModel())
+                .selectAll();
+
+        Assert.assertEquals(
+                "Selected item count does not match data view item count",
+                dataView.getItems().count(), grid.getSelectedItems().size());
+        Assert.assertTrue("Selected items do not contain filtered item",
+                grid.getSelectedItems().contains(items.get(0)));
     }
 
     private void verifySelectAllCheckboxVisibilityInMultiSelectMode(

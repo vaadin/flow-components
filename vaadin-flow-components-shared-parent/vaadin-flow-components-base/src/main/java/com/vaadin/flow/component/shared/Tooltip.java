@@ -31,7 +31,7 @@ import com.vaadin.flow.function.SerializableRunnable;
  *
  * @author Vaadin Ltd
  */
-@NpmPackage(value = "@vaadin/tooltip", version = "23.3.0-alpha1")
+@NpmPackage(value = "@vaadin/tooltip", version = "23.3.0-alpha3")
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
 public class Tooltip implements Serializable {
 
@@ -39,6 +39,10 @@ public class Tooltip implements Serializable {
      * The {@code <vaadin-tooltip>} element controlled by this tooltip instance.
      */
     private final Element tooltipElement = new Element("vaadin-tooltip");
+
+    private Tooltip() {
+        super();
+    }
 
     /**
      * Tooltip position in relation to the target element.
@@ -180,7 +184,7 @@ public class Tooltip implements Serializable {
     }
 
     /**
-     * The delay in milliseconds before the tooltip is opened on focus, when not
+     * The delay in milliseconds before the tooltip is opened on keyboard focus, when not
      * in manual mode.
      *
      * @param focusDelay
@@ -191,7 +195,7 @@ public class Tooltip implements Serializable {
     }
 
     /**
-     * The delay in milliseconds before the tooltip is opened on focus, when not
+     * The delay in milliseconds before the tooltip is opened on keyboard focus, when not
      * in manual mode.
      *
      * @return the delay in milliseconds
@@ -201,7 +205,7 @@ public class Tooltip implements Serializable {
     }
 
     /**
-     * The delay in milliseconds before the tooltip is opened on focus, when not
+     * The delay in milliseconds before the tooltip is opened on keyboard focus, when not
      * in manual mode.
      *
      * @param focusDelay
