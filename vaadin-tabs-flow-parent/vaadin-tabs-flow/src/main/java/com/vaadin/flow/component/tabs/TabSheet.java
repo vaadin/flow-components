@@ -60,7 +60,10 @@ public class TabSheet extends Component
         tabs.getElement().setAttribute("slot", "tabs");
         getElement().appendChild(tabs.getElement());
 
-        addSelectedChangeListener(e -> updateContent());
+        addSelectedChangeListener(e -> {
+            getElement().setProperty("selected", tabs.getSelectedIndex());
+            updateContent();
+        });
     }
 
     /**
@@ -212,7 +215,6 @@ public class TabSheet extends Component
      */
     public void setSelectedIndex(int selectedIndex) {
         tabs.setSelectedIndex(selectedIndex);
-        getElement().setProperty("selected", tabs.getSelectedIndex());
     }
 
     /**
@@ -234,7 +236,6 @@ public class TabSheet extends Component
      */
     public void setSelectedTab(Tab selectedTab) {
         tabs.setSelectedTab(selectedTab);
-        getElement().setProperty("selected", tabs.getSelectedIndex());
     }
 
     /**
