@@ -60,7 +60,10 @@ public class TabSheet extends Component
         tabs.getElement().setAttribute("slot", "tabs");
         getElement().appendChild(tabs.getElement());
 
-        addSelectedChangeListener(e -> updateContent());
+        addSelectedChangeListener(e -> {
+            getElement().setProperty("selected", tabs.getSelectedIndex());
+            updateContent();
+        });
     }
 
     /**
