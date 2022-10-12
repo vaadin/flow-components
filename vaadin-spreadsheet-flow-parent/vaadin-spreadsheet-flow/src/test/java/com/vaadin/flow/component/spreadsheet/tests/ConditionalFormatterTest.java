@@ -18,9 +18,6 @@ import org.junit.Test;
  */
 public class ConditionalFormatterTest {
 
-    /**
-     * Ticket #17595
-     */
     @Test
     public void createConditionalFormatterRules_sheetWithStringFormatRuleForNumericCell_rulesCreatedWithoutExceptions()
             throws URISyntaxException, IOException {
@@ -35,7 +32,6 @@ public class ConditionalFormatterTest {
      * {@link ClientAnchor#hashCode()} which wasn't designed and does {@code
      *         assert false : "hashCode not designed";
      * }. Assertions can be disabled with -DenableAssertions=false in maven.
-     * HashCode issue reported in SHEET-120
      */
     @Ignore("The file throws NPE when loaded. The same does not happen on the V8 version.")
     @Test
