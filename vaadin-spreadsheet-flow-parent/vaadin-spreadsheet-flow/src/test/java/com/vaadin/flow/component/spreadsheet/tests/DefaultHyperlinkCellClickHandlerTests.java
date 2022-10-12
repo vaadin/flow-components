@@ -32,8 +32,9 @@ public class DefaultHyperlinkCellClickHandlerTests {
         TestHyperlinkCellClickHandler handler = new TestHyperlinkCellClickHandler(
                 ss);
 
-        // this tests the condition from #537, formula first argument is a cell
-        // ref whose value is the link target
+        // this tests the condition from
+        // https://github.com/vaadin/spreadsheet/pull/537,
+        // formula first argument is a cell ref whose value is the link target
         assertEquals("#A3",
                 handler.getFirstArgumentFromFormula(ss.getCell(0, 1)));
         assertEquals("https://www.google.com",
