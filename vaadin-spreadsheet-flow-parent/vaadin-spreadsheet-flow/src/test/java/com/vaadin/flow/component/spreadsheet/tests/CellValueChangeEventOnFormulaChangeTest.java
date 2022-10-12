@@ -16,7 +16,7 @@ import org.junit.Test;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 
 /**
- * Unit test for fix for issue #550.
+ * Unit test for fix for issue https://github.com/vaadin/spreadsheet/issues/550.
  */
 public class CellValueChangeEventOnFormulaChangeTest {
 
