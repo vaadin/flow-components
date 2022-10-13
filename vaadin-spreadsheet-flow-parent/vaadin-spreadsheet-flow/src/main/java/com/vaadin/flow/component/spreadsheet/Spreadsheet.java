@@ -139,20 +139,6 @@ public class Spreadsheet extends Component
         }
     }
 
-    /*
-     * FLOW RELATED STUFF
-     */
-
-    /*
-     * SHARED STATE PROPERTIES
-     */
-
-    // from TabIndexState
-
-    public int tabIndex = 0;
-
-    // from AbstractComponentState
-
     @Override
     public void setId(String id) {
         getElement().setProperty("id", id);
