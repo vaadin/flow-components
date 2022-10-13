@@ -38,7 +38,7 @@
         <osgi.bundle.license>http://www.apache.org/licenses/LICENSE-2.0</osgi.bundle.license>
         <osgi.export.package>default</osgi.export.package>
         <cvdlName></cvdlName>
-        <jakarta.servlet.api.version>5.0.0</jakarta.servlet.api.version>
+        <jakarta.servlet.api.version>6.0.0</jakarta.servlet.api.version>
 
         <!-- spreadsheet -->
         <poi.version>5.2.3</poi.version>
