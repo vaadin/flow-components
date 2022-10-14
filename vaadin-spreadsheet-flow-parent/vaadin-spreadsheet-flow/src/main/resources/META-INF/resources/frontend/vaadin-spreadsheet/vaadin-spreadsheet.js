@@ -196,7 +196,13 @@ export class VaadinSpreadsheet extends LitElement {
     super.connectedCallback()
     this.observer && this.observer.observe(this);
     // Restore styles in the case widget is reattached, it happens e.g in client router
-    this.styles && this.styles.forEach(e => document.head.appendChild(e));
+    this.styles && this.styles.forEach(e => {
+      document.head.appendChild(e);
+      const rulesToBeAdded = e.__removedRules;
+      for (let i = 0; i < rulesToBeAdded.length; i++) {
+        e.sheet.insertRule(rulesToBeAdded.item(i).cssText);
+      }
+    });
   }
 
   disconnectedCallback() {
@@ -204,7 +210,10 @@ export class VaadinSpreadsheet extends LitElement {
     this.observer && this.observer.unobserve(this);
     // Remove styles added to the head by the Widget
     this.styles = document.head.querySelectorAll(`style[id^="spreadsheet-${this.id}"]`);
-    this.styles.forEach(e => document.head.removeChild(e));
+    this.styles.forEach(e => {
+      e.__removedRules = e.sheet.cssRules;
+      document.head.removeChild(e);
+    });
   }
 
   updated(_changedProperties) {

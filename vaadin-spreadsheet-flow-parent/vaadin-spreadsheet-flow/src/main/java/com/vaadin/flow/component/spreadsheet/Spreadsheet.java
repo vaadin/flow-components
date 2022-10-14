@@ -139,20 +139,6 @@ public class Spreadsheet extends Component
         }
     }
 
-    /*
-     * FLOW RELATED STUFF
-     */
-
-    /*
-     * SHARED STATE PROPERTIES
-     */
-
-    // from TabIndexState
-
-    public int tabIndex = 0;
-
-    // from AbstractComponentState
-
     @Override
     public void setId(String id) {
         getElement().setProperty("id", id);
@@ -1937,6 +1923,8 @@ public class Spreadsheet extends Component
         workbook.removeSheetAt(poiSheetIndex);
 
         // POI doesn't seem to shift the active sheet index ...
+        // TODO: This no longer seems to be the case. Remove the following
+        // logic?
         int oldIndex = getSheetIndex() - 1;
         if (removedVisibleIndex <= oldIndex) { // removed before current
             if (oldIndex == (getNumberOfVisibleSheets())) {
@@ -1965,9 +1953,9 @@ public class Spreadsheet extends Component
      *             index is invalid.
      */
     public void deleteSheet(int sheetIndex) throws IllegalArgumentException {
-        if (getNumberOfVisibleSheets() < 2) {
+        if (sheetIndex < 0 || sheetIndex >= getNumberOfVisibleSheets()) {
             throw new IllegalArgumentException(
-                    "A workbook must contain at least one visible worksheet");
+                    "Invalid index for visible sheet given.");
         }
         deleteSheetWithPOIIndex(getVisibleSheetPOIIndex(sheetIndex));
     }
