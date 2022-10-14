@@ -36,7 +36,7 @@ class TestHelper {
      * @param fileName
      *            the name of the file. The file must be in the test_sheets
      *            folder.
-     * @return the test sheet file
+     * @return the created Spreadsheet component
      */
     static Spreadsheet createSpreadsheet(String fileName) {
         File testSheetFile = getTestSheetFile(fileName);
@@ -47,13 +47,22 @@ class TestHelper {
         }
     }
 
-    static File getTestSheetFile(String name) {
+    /**
+     * Gets the File object for the given file name.
+     *
+     * @param fileName
+     *            the name of the file. The file must be in the test_sheets
+     *            folder.
+     * @return the File object
+     */
+    static File getTestSheetFile(String fileName) {
         try {
             return new File(TestHelper.class.getClassLoader()
-                    .getResource("test_sheets" + File.separator + name)
+                    .getResource("test_sheets" + File.separator + fileName)
                     .toURI());
         } catch (URISyntaxException e) {
-            throw new RuntimeException("Can't find test sheet file " + name);
+            throw new RuntimeException(
+                    "Can't find test sheet file " + fileName);
         }
     }
 
