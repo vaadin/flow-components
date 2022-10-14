@@ -14,244 +14,270 @@ public class GroupingTest {
     @Before
     public void init() {
         spreadsheet = TestHelper.createSpreadsheet("Groupingtest.xlsx");
-        TestHelper.fireClientEvent(spreadsheet, "onSheetScroll",
-                "[1, 1, 1, 1]");
     }
 
     @Test
     public void expandRow_alreadyExpanded_shouldNotThrow() {
-        expandRow(1);
+        setActiveSheet(SHEET9);
+
+        expandRow(SHEET9_ROW_GROUP);
     }
 
     @Test
     public void collapseRow_rowHidden() {
-        collapseRow(1);
-        Assert.assertTrue(spreadsheet.isRowHidden(3));
+        setActiveSheet(SHEET9);
+
+        collapseRow(SHEET9_ROW_GROUP);
+        Assert.assertTrue(spreadsheet.isRowHidden(SHEET9_ROW));
     }
 
     @Test
     public void collapseRow_expandRow_rowVisible() {
-        collapseRow(1);
-        expandRow(1);
-        Assert.assertFalse(spreadsheet.isRowHidden(3));
+        setActiveSheet(SHEET9);
+
+        collapseRow(SHEET9_ROW_GROUP);
+        expandRow(SHEET9_ROW_GROUP);
+        Assert.assertFalse(spreadsheet.isRowHidden(SHEET9_ROW));
     }
 
     @Test
     public void collapseRow_collapseParentRow_expandRow_rowHidden() {
-        spreadsheet.setActiveSheetIndex(3);
+        setActiveSheet(SHEET4);
         // Collapse child row
-        collapseRow(1);
-        Assert.assertTrue(spreadsheet.isRowHidden(2));
+        collapseRow(SHEET4_ROW_GROUP);
+        Assert.assertTrue(spreadsheet.isRowHidden(SHEET4_ROW));
 
         // Collapse parent row
-        collapseRow(0);
+        collapseRow(SHEET4_PARENT_ROW_GROUP);
 
         // Expand child row
-        expandRow(1);
-        Assert.assertTrue(spreadsheet.isRowHidden(2));
+        expandRow(SHEET4_ROW_GROUP);
+        Assert.assertTrue(spreadsheet.isRowHidden(SHEET4_ROW));
     }
 
     @Test
     public void collapseRow_collapseParentRow_expandParentRow_rowHidden() {
-        spreadsheet.setActiveSheetIndex(3);
+        setActiveSheet(SHEET4);
         // Collapse child row
-        collapseRow(1);
-        Assert.assertTrue(spreadsheet.isRowHidden(2));
+        collapseRow(SHEET4_ROW_GROUP);
+        Assert.assertTrue(spreadsheet.isRowHidden(SHEET4_ROW));
 
         // Collapse parent row
-        collapseRow(0);
+        collapseRow(SHEET4_PARENT_ROW_GROUP);
 
         // Expand parent row
-        expandRow(0);
-        Assert.assertTrue(spreadsheet.isRowHidden(2));
+        expandRow(SHEET4_PARENT_ROW_GROUP);
+        Assert.assertTrue(spreadsheet.isRowHidden(SHEET4_ROW));
     }
 
     @Test
     public void collapseParentRow_expandParentRow_rowVisible() {
-        spreadsheet.setActiveSheetIndex(3);
+        setActiveSheet(SHEET4);
         // Collapse parent row
-        collapseRow(0);
-        Assert.assertTrue(spreadsheet.isRowHidden(2));
+        collapseRow(SHEET4_PARENT_ROW_GROUP);
+        Assert.assertTrue(spreadsheet.isRowHidden(SHEET4_ROW));
 
         // Expand Parent row
-        expandRow(0);
-        Assert.assertFalse(spreadsheet.isRowHidden(2));
+        expandRow(SHEET4_PARENT_ROW_GROUP);
+        Assert.assertFalse(spreadsheet.isRowHidden(SHEET4_ROW));
     }
 
     @Test
     public void inverted_collapseRow_rowHidden() {
-        spreadsheet.setActiveSheetIndex(6);
-        collapseRow(3);
-        Assert.assertTrue(spreadsheet.isRowHidden(3));
+        setActiveSheet(SHEET7);
+
+        collapseRow(SHEET7_ROW_GROUP);
+        Assert.assertTrue(spreadsheet.isRowHidden(SHEET7_ROW));
     }
 
     @Test
     public void inverted_collapseRow_expandRow_rowVisible() {
-        spreadsheet.setActiveSheetIndex(6);
-        collapseRow(3);
-        expandRow(3);
-        Assert.assertFalse(spreadsheet.isRowHidden(3));
+        setActiveSheet(SHEET7);
+
+        collapseRow(SHEET7_ROW_GROUP);
+        expandRow(SHEET7_ROW_GROUP);
+        Assert.assertFalse(spreadsheet.isRowHidden(SHEET7_ROW));
     }
 
     @Test
     public void inverted_collapseRow_collapseParentRow_expandRow_rowHidden() {
-        spreadsheet.setActiveSheetIndex(6);
+        setActiveSheet(SHEET7);
+
         // Collapse child row
-        collapseRow(3);
-        Assert.assertTrue(spreadsheet.isRowHidden(3));
+        collapseRow(SHEET7_ROW_GROUP);
+        Assert.assertTrue(spreadsheet.isRowHidden(SHEET7_ROW));
 
         // Collapse parent row
-        collapseRow(2);
+        collapseRow(SHEET7_PARENT_ROW_GROUP);
 
         // Expand child row
-        expandRow(3);
-        Assert.assertTrue(spreadsheet.isRowHidden(3));
+        expandRow(SHEET7_ROW_GROUP);
+        Assert.assertTrue(spreadsheet.isRowHidden(SHEET7_ROW));
     }
 
     @Test
     public void inverted_collapseRow_collapseParentRow_expandParentRow_rowHidden() {
-        spreadsheet.setActiveSheetIndex(6);
+        setActiveSheet(SHEET7);
+
         // Collapse child row
-        collapseRow(3);
-        Assert.assertTrue(spreadsheet.isRowHidden(3));
+        collapseRow(SHEET7_ROW_GROUP);
+        Assert.assertTrue(spreadsheet.isRowHidden(SHEET7_ROW));
 
         // Collapse parent row
-        collapseRow(2);
+        collapseRow(SHEET7_PARENT_ROW_GROUP);
 
         // Expand parent row
-        expandRow(2);
-        Assert.assertTrue(spreadsheet.isRowHidden(3));
+        expandRow(SHEET7_PARENT_ROW_GROUP);
+        Assert.assertTrue(spreadsheet.isRowHidden(SHEET7_ROW));
     }
 
     @Test
     public void inverted_collapseParentRow_expandParentRow_rowVisible() {
-        spreadsheet.setActiveSheetIndex(6);
+        setActiveSheet(SHEET7);
+
         // Collapse parent row
-        collapseRow(2);
-        Assert.assertTrue(spreadsheet.isRowHidden(3));
+        collapseRow(SHEET7_PARENT_ROW_GROUP);
+        Assert.assertTrue(spreadsheet.isRowHidden(SHEET7_ROW_GROUP));
 
         // Expand parent row
-        expandRow(2);
-        Assert.assertFalse(spreadsheet.isRowHidden(3));
+        expandRow(SHEET7_PARENT_ROW_GROUP);
+        Assert.assertFalse(spreadsheet.isRowHidden(SHEET7_ROW_GROUP));
     }
 
     @Test
     public void expandColumn_alreadyExpanded_shouldNotThrow() {
-        expandColumn(1);
+        setActiveSheet(SHEET9);
+
+        expandColumn(SHEET9_COLUMN_GROUP);
     }
 
     @Test
     public void collapseColumn_columnHidden() {
-        collapseColumn(1);
-        Assert.assertTrue(spreadsheet.isColumnHidden(3));
+        setActiveSheet(SHEET9);
+
+        collapseColumn(SHEET9_COLUMN_GROUP);
+        Assert.assertTrue(spreadsheet.isColumnHidden(SHEET9_COLUMN));
     }
 
     @Test
     public void collapseColumn_expandColumn_columnVisible() {
-        collapseColumn(1);
-        expandColumn(1);
-        Assert.assertFalse(spreadsheet.isColumnHidden(3));
+        setActiveSheet(SHEET9);
+
+        collapseColumn(SHEET9_COLUMN_GROUP);
+        expandColumn(SHEET9_COLUMN_GROUP);
+        Assert.assertFalse(spreadsheet.isColumnHidden(SHEET9_COLUMN));
     }
 
     @Test
     public void collapseColumn_collapseParentColumn_expandColumn_columnHidden() {
-        spreadsheet.setActiveSheetIndex(5);
+        setActiveSheet(SHEET6);
         // Collapse child column
-        collapseColumn(0);
-        Assert.assertTrue(spreadsheet.isColumnHidden(1));
+        collapseColumn(SHEET6_COLUMN_GROUP);
+        Assert.assertTrue(spreadsheet.isColumnHidden(SHEET6_COLUMN));
 
         // Collapse parent column
-        collapseColumn(2);
+        collapseColumn(SHEET6_COLUMN_PARENT_GROUP);
 
         // Expand child column
-        expandColumn(0);
-        Assert.assertTrue(spreadsheet.isColumnHidden(1));
+        expandColumn(SHEET6_COLUMN_GROUP);
+        Assert.assertTrue(spreadsheet.isColumnHidden(SHEET6_COLUMN));
     }
 
     @Test
     public void collapseColumn_collapseParentColumn_expandParentColumn_columnHidden() {
-        spreadsheet.setActiveSheetIndex(5);
+        setActiveSheet(SHEET6);
         // Collapse child column
-        collapseColumn(0);
-        Assert.assertTrue(spreadsheet.isColumnHidden(1));
+        collapseColumn(SHEET6_COLUMN_GROUP);
+        Assert.assertTrue(spreadsheet.isColumnHidden(SHEET6_COLUMN));
 
         // Collapse parent column
-        collapseColumn(2);
+        collapseColumn(SHEET6_COLUMN_PARENT_GROUP);
 
         // Expand parent column
-        expandColumn(2);
-        Assert.assertTrue(spreadsheet.isColumnHidden(1));
+        expandColumn(SHEET6_COLUMN_PARENT_GROUP);
+        Assert.assertTrue(spreadsheet.isColumnHidden(SHEET6_COLUMN));
     }
 
     @Ignore("bug in GroupingUtil, collapsing and expanding parent column should not result with collapsed child columns")
     @Test
     public void collapseParentColumn_expandParentColumn_columnVisible() {
-        spreadsheet.setActiveSheetIndex(5);
+        setActiveSheet(SHEET6);
         // Collapse parent column
-        collapseColumn(2);
-        Assert.assertTrue(spreadsheet.isColumnHidden(1));
+        collapseColumn(SHEET6_COLUMN_PARENT_GROUP);
+        Assert.assertTrue(spreadsheet.isColumnHidden(SHEET6_COLUMN));
 
         // Expand Parent column
-        expandColumn(2);
-        Assert.assertFalse(spreadsheet.isColumnHidden(1));
+        expandColumn(SHEET6_COLUMN_PARENT_GROUP);
+        Assert.assertFalse(spreadsheet.isColumnHidden(SHEET6_COLUMN));
     }
 
     @Test
     public void inverted_collapseColumn_columnHidden() {
-        spreadsheet.setActiveSheetIndex(6);
-        collapseColumn(2);
-        Assert.assertTrue(spreadsheet.isColumnHidden(3));
+        setActiveSheet(SHEET7);
+
+        collapseColumn(SHEET7_COLUMN_GROUP);
+        Assert.assertTrue(spreadsheet.isColumnHidden(SHEET7_COLUMN));
     }
 
     @Test
     public void inverted_collapseColumn_expandColumn_columnVisible() {
-        spreadsheet.setActiveSheetIndex(6);
-        collapseColumn(2);
-        expandColumn(2);
-        Assert.assertFalse(spreadsheet.isColumnHidden(3));
+        setActiveSheet(SHEET7);
+
+        collapseColumn(SHEET7_COLUMN_GROUP);
+        expandColumn(SHEET7_COLUMN_GROUP);
+        Assert.assertFalse(spreadsheet.isColumnHidden(SHEET7_COLUMN));
     }
 
     @Test
     public void inverted_collapseColumn_collapseParentColumn_expandColumn_columnHidden() {
-        spreadsheet.setActiveSheetIndex(6);
+        setActiveSheet(SHEET7);
+
         // Collapse child column
-        collapseColumn(2);
-        Assert.assertTrue(spreadsheet.isColumnHidden(3));
+        collapseColumn(SHEET7_COLUMN_GROUP);
+        Assert.assertTrue(spreadsheet.isColumnHidden(SHEET7_COLUMN));
 
         // Collapse parent column
-        collapseColumn(1);
+        collapseColumn(SHEET7_PARENT_COLUMN_GROUP);
 
         // Expand child column
-        expandColumn(2);
-        Assert.assertTrue(spreadsheet.isColumnHidden(3));
+        expandColumn(SHEET7_COLUMN_GROUP);
+        Assert.assertTrue(spreadsheet.isColumnHidden(SHEET7_COLUMN));
     }
 
     @Test
     public void inverted_collapseColumn_collapseParentColumn_expandParentColumn_columnHidden() {
-        spreadsheet.setActiveSheetIndex(6);
+        setActiveSheet(SHEET7);
+
         // Collapse child column
-        collapseColumn(2);
-        Assert.assertTrue(spreadsheet.isColumnHidden(3));
+        collapseColumn(SHEET7_COLUMN_GROUP);
+        Assert.assertTrue(spreadsheet.isColumnHidden(SHEET7_COLUMN));
 
         // Collapse parent column
-        collapseColumn(1);
+        collapseColumn(SHEET7_PARENT_COLUMN_GROUP);
 
         // Expand parent column
-        expandColumn(1);
-        Assert.assertTrue(spreadsheet.isColumnHidden(3));
+        expandColumn(SHEET7_PARENT_COLUMN_GROUP);
+        Assert.assertTrue(spreadsheet.isColumnHidden(SHEET7_COLUMN));
     }
 
     @Test
     @Ignore("bug in GroupingUtil, collapsing and expanding parent column should not result with collapsed child columns")
     public void inverted_collapseParentColumn_expandParentColumn_columnVisible() {
-        spreadsheet.setActiveSheetIndex(6);
+        setActiveSheet(SHEET7);
+
         // Collapse parent column
-        collapseColumn(1);
-        Assert.assertTrue(spreadsheet.isColumnHidden(3));
+        collapseColumn(SHEET7_PARENT_COLUMN_GROUP);
+        Assert.assertTrue(spreadsheet.isColumnHidden(SHEET7_COLUMN));
 
         // Expand parent column
-        expandColumn(1);
-        Assert.assertFalse(spreadsheet.isColumnHidden(3));
+        expandColumn(SHEET7_PARENT_COLUMN_GROUP);
+        Assert.assertFalse(spreadsheet.isColumnHidden(SHEET7_COLUMN));
+    }
+
+    private void setActiveSheet(int sheetIndex) {
+        spreadsheet.setActiveSheetIndex(sheetIndex);
+        TestHelper.fireClientEvent(spreadsheet, "onSheetScroll",
+                "[1, 1, 1, 1]");
     }
 
     private void expandRow(int row) {
@@ -273,5 +299,29 @@ public class GroupingTest {
         TestHelper.fireClientEvent(spreadsheet, "groupingCollapsed",
                 "[true, " + column + ", true]");
     }
+
+    private final int SHEET4 = 3;
+    private final int SHEET4_ROW_GROUP = 1;
+    private final int SHEET4_ROW = 2;
+    private final int SHEET4_PARENT_ROW_GROUP = 0;
+
+    private final int SHEET6 = 5;
+    private final int SHEET6_COLUMN_GROUP = 0;
+    private final int SHEET6_COLUMN = 1;
+    private final int SHEET6_COLUMN_PARENT_GROUP = 2;
+
+    private final int SHEET7 = 6;
+    private final int SHEET7_ROW_GROUP = 3;
+    private final int SHEET7_ROW = 3;
+    private final int SHEET7_PARENT_ROW_GROUP = 2;
+    private final int SHEET7_COLUMN_GROUP = 2;
+    private final int SHEET7_COLUMN = 3;
+    private final int SHEET7_PARENT_COLUMN_GROUP = 1;
+
+    private final int SHEET9 = 8;
+    private final int SHEET9_ROW_GROUP = 1;
+    private final int SHEET9_ROW = 3;
+    private final int SHEET9_COLUMN_GROUP = 1;
+    private final int SHEET9_COLUMN = 3;
 
 }
