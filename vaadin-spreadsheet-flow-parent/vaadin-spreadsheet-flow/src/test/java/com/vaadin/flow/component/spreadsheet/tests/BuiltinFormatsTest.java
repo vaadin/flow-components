@@ -74,19 +74,23 @@ public class BuiltinFormatsTest {
         Assert.assertEquals("($12,345)", spreadsheet.getCellValue(cell));
 
         cell.setCellValue(12345);
-        cellStyle.setDataFormat(dataFormat.getFormat("$#,##0.00_);($#,##0.00)"));
+        cellStyle
+                .setDataFormat(dataFormat.getFormat("$#,##0.00_);($#,##0.00)"));
         Assert.assertEquals("$12,345.00", spreadsheet.getCellValue(cell));
 
         cell.setCellValue(-12345);
-        cellStyle.setDataFormat(dataFormat.getFormat("$#,##0.00_);($#,##0.00)"));
+        cellStyle
+                .setDataFormat(dataFormat.getFormat("$#,##0.00_);($#,##0.00)"));
         Assert.assertEquals("($12,345.00)", spreadsheet.getCellValue(cell));
 
         cell.setCellValue(12345);
-        cellStyle.setDataFormat(dataFormat.getFormat("$#,##0.00_);[Red]($#,##0.00)"));
+        cellStyle.setDataFormat(
+                dataFormat.getFormat("$#,##0.00_);[Red]($#,##0.00)"));
         Assert.assertEquals("$12,345.00", spreadsheet.getCellValue(cell));
 
         cell.setCellValue(-12345);
-        cellStyle.setDataFormat(dataFormat.getFormat("$#,##0.00_);[Red]($#,##0.00)"));
+        cellStyle.setDataFormat(
+                dataFormat.getFormat("$#,##0.00_);[Red]($#,##0.00)"));
         Assert.assertEquals("($12,345.00)", spreadsheet.getCellValue(cell));
 
         cell.setCellValue(.7525);
