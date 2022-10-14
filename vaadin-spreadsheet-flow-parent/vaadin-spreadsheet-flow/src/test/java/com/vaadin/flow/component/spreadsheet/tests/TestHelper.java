@@ -1,5 +1,9 @@
 package com.vaadin.flow.component.spreadsheet.tests;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet.SpreadsheetEvent;
@@ -23,6 +27,34 @@ class TestHelper {
             String jsonDataArray) {
         ComponentUtil.fireEvent(spreadsheet, new SpreadsheetEvent(spreadsheet,
                 true, eventName, JsonUtil.parse(jsonDataArray)));
+    }
+
+    /**
+     * Ceates a Spreadsheet component with the given Excel file as the data
+     * source.
+     *
+     * @param fileName
+     *            the name of the file. The file must be in the test_sheets
+     *            folder.
+     * @return the test sheet file
+     */
+    static Spreadsheet createSpreadsheet(String fileName) {
+        File testSheetFile = getTestSheetFile(fileName);
+        try {
+            return new Spreadsheet(testSheetFile);
+        } catch (IOException e) {
+            throw new RuntimeException("Could not create Spreadsheet", e);
+        }
+    }
+
+    static File getTestSheetFile(String name) {
+        try {
+            return new File(TestHelper.class.getClassLoader()
+                    .getResource("test_sheets" + File.separator + name)
+                    .toURI());
+        } catch (URISyntaxException e) {
+            throw new RuntimeException("Can't find test sheet file " + name);
+        }
     }
 
 }
