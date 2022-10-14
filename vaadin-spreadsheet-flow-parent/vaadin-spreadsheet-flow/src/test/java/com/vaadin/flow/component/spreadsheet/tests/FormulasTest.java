@@ -69,10 +69,8 @@ public class FormulasTest {
     public void setInvalidFormula_invalidFormulaCellsSet() throws Exception {
         // onSheetScroll must be invoked once, otherwise cell comments are not
         // loaded
-        var method = Spreadsheet.class.getDeclaredMethod("onSheetScroll",
-                int.class, int.class, int.class, int.class);
-        method.setAccessible(true);
-        method.invoke(spreadsheet, 1, 1, 1, 1);
+        TestHelper.fireClientEvent(spreadsheet, "onSheetScroll",
+                "[1, 1, 1, 1]");
 
         // Create a formula cell with an invalid formula
         var A1 = spreadsheet.createFormulaCell(0, 0, "Sheet2!A1");

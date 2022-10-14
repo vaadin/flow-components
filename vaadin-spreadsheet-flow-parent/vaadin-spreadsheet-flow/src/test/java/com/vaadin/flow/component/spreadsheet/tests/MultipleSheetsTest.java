@@ -139,15 +139,7 @@ public class MultipleSheetsTest {
             Assert.assertEquals("bar", event.getNewSheet().getSheetName());
         });
 
-        // TODO: setActiveSheetIndex doesn't currently dispatch an event so need
-        // to use reflection
-        // spreadsheet.setActiveSheetIndex(1);
-
-        var onSheetSelected = Spreadsheet.class.getDeclaredMethod(
-                "onSheetSelected", int.class, int.class, int.class);
-        onSheetSelected.setAccessible(true);
-        onSheetSelected.invoke(spreadsheet, 1, 0, 0);
-
+        TestHelper.fireClientEvent(spreadsheet, "sheetSelected", "[1, 0, 0]");
         Assert.assertTrue(listenerInvoked.get());
     }
 
