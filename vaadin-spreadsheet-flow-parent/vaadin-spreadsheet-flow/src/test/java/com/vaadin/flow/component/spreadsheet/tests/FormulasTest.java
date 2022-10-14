@@ -14,7 +14,7 @@ public class FormulasTest {
     private Spreadsheet spreadsheet;
 
     @Before
-    public void init() throws Exception {
+    public void init() {
         spreadsheet = new Spreadsheet();
         var ui = new UI();
         UI.setCurrent(ui);
@@ -66,7 +66,7 @@ public class FormulasTest {
     }
 
     @Test
-    public void setInvalidFormula_invalidFormulaCellsSet() throws Exception {
+    public void setInvalidFormula_invalidFormulaCellsSet() {
         // onSheetScroll must be invoked once, otherwise cell comments are not
         // loaded
         TestHelper.fireClientEvent(spreadsheet, "onSheetScroll",
@@ -81,8 +81,7 @@ public class FormulasTest {
     }
 
     @Test
-    public void setInvalidFormulaErrorMessage_invalidFormulaErrorMessageSet()
-            throws Exception {
+    public void setInvalidFormulaErrorMessage_invalidFormulaErrorMessageSet() {
         spreadsheet.setInvalidFormulaErrorMessage("foo");
         Assert.assertEquals("foo", spreadsheet.getElement()
                 .getProperty("invalidFormulaErrorMessage"));

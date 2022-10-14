@@ -1,7 +1,5 @@
 package com.vaadin.flow.component.spreadsheet.tests;
 
-import java.io.File;
-import java.net.URISyntaxException;
 import java.util.Iterator;
 
 import org.apache.poi.ss.usermodel.Row;
@@ -25,7 +23,7 @@ public class ColumnFiltersTest {
     private Spreadsheet spreadsheet;
 
     @Before
-    public void init() throws Exception {
+    public void init() {
         workbook = new XSSFWorkbook();
         XSSFSheet sheet = workbook.createSheet();
 
@@ -87,19 +85,14 @@ public class ColumnFiltersTest {
     }
 
     @Test
-    public void loadFile_filteredColumnsLoadedAsActive() throws Exception {
-        Spreadsheet spr = new Spreadsheet(
-                getTestSheetFile("autofilter_with_active_column.xlsx"));
+    public void loadFile_filteredColumnsLoadedAsActive() {
+        Spreadsheet spr = TestHelper
+                .createSpreadsheet("autofilter_with_active_column.xlsx");
 
         final SpreadsheetTable table = spr.getTables().iterator().next();
 
         Assert.assertTrue(table.getPopupButton(1).isActive());
         Assert.assertFalse(table.getPopupButton(2).isActive());
-    }
-
-    private File getTestSheetFile(String name) throws URISyntaxException {
-        return new File(getClass().getClassLoader()
-                .getResource("test_sheets" + File.separator + name).toURI());
     }
 
 }
