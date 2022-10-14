@@ -22,7 +22,7 @@ public class FilterTableTest {
     private SpreadsheetFilterTable table;
 
     @Before
-    public void init() throws Exception {
+    public void init() {
         spreadsheet = new Spreadsheet();
 
         int maxColumns = 5;
