@@ -13,7 +13,7 @@ import java.util.Locale;
 
 public class CustomDataFormatterTest {
     Spreadsheet spreadsheet;
-        Cell cell;
+    Cell cell;
 
     @Before
     public void init() {
@@ -27,7 +27,8 @@ public class CustomDataFormatterTest {
         var cellStyle = spreadsheet.getWorkbook().createCellStyle();
         var dataFormat = spreadsheet.getWorkbook().createDataFormat();
         cell.setCellStyle(cellStyle);
-        cellStyle.setDataFormat(dataFormat.getFormat("_(* #,##0_);_(* (#,##0);_(* \\\"-\\\"_);_(@_)"));
+        cellStyle.setDataFormat(dataFormat
+                .getFormat("_(* #,##0_);_(* (#,##0);_(* \\\"-\\\"_);_(@_)"));
     }
 
     @Test
