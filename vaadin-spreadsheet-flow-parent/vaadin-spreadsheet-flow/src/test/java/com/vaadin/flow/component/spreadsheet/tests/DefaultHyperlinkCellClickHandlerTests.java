@@ -2,12 +2,7 @@ package com.vaadin.flow.component.spreadsheet.tests;
 
 import static org.junit.Assert.*;
 
-import java.io.File;
-import java.net.URL;
-
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.junit.Test;
 
 import com.vaadin.flow.component.spreadsheet.DefaultHyperlinkCellClickHandler;
@@ -19,14 +14,8 @@ import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 public class DefaultHyperlinkCellClickHandlerTests {
 
     @Test
-    public void hyperlinkParser_validStrings_correctParsed() throws Exception {
-        URL testSheetResource = this.getClass().getClassLoader()
-                .getResource("test_sheets/hyper_links.xlsx");
-        File testSheetFile = new File(testSheetResource.toURI());
-
-        Workbook workbook = WorkbookFactory.create(testSheetFile);
-
-        final Spreadsheet ss = new Spreadsheet(workbook);
+    public void hyperlinkParser_validStrings_correctParsed() {
+        final Spreadsheet ss = TestHelper.createSpreadsheet("hyper_links.xlsx");
         ss.setActiveSheetIndex(0);
 
         TestHyperlinkCellClickHandler handler = new TestHyperlinkCellClickHandler(
