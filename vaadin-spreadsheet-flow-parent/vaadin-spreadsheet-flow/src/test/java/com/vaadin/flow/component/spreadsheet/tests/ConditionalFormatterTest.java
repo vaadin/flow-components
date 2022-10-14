@@ -33,7 +33,6 @@ public class ConditionalFormatterTest {
      *         assert false : "hashCode not designed";
      * }. Assertions can be disabled with -DenableAssertions=false in maven.
      */
-    @Ignore("The file throws NPE when loaded. The same does not happen on the V8 version.")
     @Test
     public void matchesFormula_rulesWithoutFormula_formulasEvaluatedWithoutExceptions()
             throws URISyntaxException, IOException {
