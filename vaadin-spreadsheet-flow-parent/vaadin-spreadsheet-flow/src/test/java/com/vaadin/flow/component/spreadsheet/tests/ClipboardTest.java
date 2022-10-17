@@ -66,7 +66,7 @@ public class ClipboardTest {
     @Test
     public void paste_multiRow_multiColumn_cellHasValue() {
         spreadsheet.setSelection("A1:A2");
-        paste("['A1\\tB1\\r\\nA2\\tB2']");
+        paste("['A1\\tB1\\nA2\\tB2']");
         Assert.assertEquals("A1", getCellValue("A1"));
         Assert.assertEquals("A2", getCellValue("A2"));
         Assert.assertEquals("B1", getCellValue("B1"));
@@ -139,9 +139,9 @@ public class ClipboardTest {
     public void paste_multiRow_multiColumn_undefinedCell() {
         spreadsheet.setSelection("A1:A2");
         // Paste a 2x2 matrix
-        paste("['A1\\tB1\\r\\nA2\\tB2']");
+        paste("['A1\\tB1\\nA2\\tB2']");
         // Paste the same matrix but with one cell undefined
-        paste("['A1\\tB1\\r\\nA2']");
+        paste("['A1\\tB1\\nA2']");
         Assert.assertEquals("A1", getCellValue("A1"));
         Assert.assertEquals("A2", getCellValue("A2"));
         Assert.assertEquals("B1", getCellValue("B1"));
