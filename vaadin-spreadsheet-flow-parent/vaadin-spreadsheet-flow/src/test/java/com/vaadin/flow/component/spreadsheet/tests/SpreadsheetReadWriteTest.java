@@ -6,17 +6,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.Test;
-
-import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 
 /*
  * Tests are performed with pure POI and Spreadsheet to find differences and bugs
@@ -25,10 +20,8 @@ public class SpreadsheetReadWriteTest {
 
     @Test
     public void openAndSaveFileWithPOI_emptyXLSXFile_openAndSaveWorks()
-            throws URISyntaxException, IOException, InvalidFormatException {
-        URL testSheetResource = this.getClass().getClassLoader()
-                .getResource("test_sheets/empty.xlsx");
-        File testSheetFIle = new File(testSheetResource.toURI());
+            throws IOException {
+        File testSheetFIle = TestHelper.getTestSheetFile("empty.xlsx");
 
         FileInputStream fis = new FileInputStream(testSheetFIle);
         XSSFWorkbook workbook = (XSSFWorkbook) WorkbookFactory.create(fis);
@@ -44,11 +37,8 @@ public class SpreadsheetReadWriteTest {
 
     @Test
     public void openAndSaveFile_emptyXLSXFile_openAndSaveWorks()
-            throws URISyntaxException, IOException {
-        URL testSheetResource = this.getClass().getClassLoader()
-                .getResource("test_sheets/empty.xlsx");
-        File testSheetFIle = new File(testSheetResource.toURI());
-        Spreadsheet sheet = new Spreadsheet(testSheetFIle);
+            throws IOException {
+        var sheet = TestHelper.createSpreadsheet("empty.xlsx");
 
         File tempFile = File.createTempFile("resultEmptyFile", "xlsx");
         FileOutputStream tempOutputStream = new FileOutputStream(tempFile);
@@ -61,11 +51,8 @@ public class SpreadsheetReadWriteTest {
 
     @Test
     public void openAndSaveFile_emptyXLSXFile_FileDoesNotContainAdditionalDrawing()
-            throws URISyntaxException, IOException {
-        URL testSheetResource = this.getClass().getClassLoader()
-                .getResource("test_sheets/empty.xlsx");
-        File testSheetFIle = new File(testSheetResource.toURI());
-        Spreadsheet sheet = new Spreadsheet(testSheetFIle);
+            throws IOException {
+        var sheet = TestHelper.createSpreadsheet("empty.xlsx");
 
         File tempFile = File.createTempFile("resultEmptyFile", "xlsx");
         FileOutputStream tempOutputStream = new FileOutputStream(tempFile);
@@ -89,10 +76,8 @@ public class SpreadsheetReadWriteTest {
 
     @Test
     public void openAndSaveFileWithPOI_emptyXLSXFile_FileDoesNotContainAdditionalDrawing()
-            throws URISyntaxException, IOException, InvalidFormatException {
-        URL testSheetResource = this.getClass().getClassLoader()
-                .getResource("test_sheets/empty.xlsx");
-        File testSheetFIle = new File(testSheetResource.toURI());
+            throws IOException {
+        File testSheetFIle = TestHelper.getTestSheetFile("empty.xlsx");
 
         FileInputStream fis = new FileInputStream(testSheetFIle);
         XSSFWorkbook workbook = (XSSFWorkbook) WorkbookFactory.create(fis);
