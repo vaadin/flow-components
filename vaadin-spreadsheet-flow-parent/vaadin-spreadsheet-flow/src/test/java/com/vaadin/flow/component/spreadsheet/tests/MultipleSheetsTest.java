@@ -15,7 +15,7 @@ public class MultipleSheetsTest {
     private Spreadsheet spreadsheet;
 
     @Before
-    public void init() throws Exception {
+    public void init() {
         var workbook = new XSSFWorkbook();
         workbook.createSheet("foo");
         workbook.createSheet("bar");
@@ -129,7 +129,7 @@ public class MultipleSheetsTest {
     }
 
     @Test
-    public void addSheetChangeListener_invokesOnSheetChange() throws Exception {
+    public void addSheetChangeListener_invokesOnSheetChange() {
         var listenerInvoked = new AtomicBoolean(false);
         spreadsheet.addSheetChangeListener(event -> {
             listenerInvoked.set(true);

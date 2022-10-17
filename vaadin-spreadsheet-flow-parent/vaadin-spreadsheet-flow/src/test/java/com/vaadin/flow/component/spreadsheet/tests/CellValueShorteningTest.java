@@ -15,7 +15,7 @@ public class CellValueShorteningTest {
     private CellValueFormatter cellValueFormatter;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         cellValueFormatter = new CellValueFormatter();
         cellValueFormatter.setLocaleDecimalSymbols(
                 DecimalFormatSymbols.getInstance(Locale.US));
