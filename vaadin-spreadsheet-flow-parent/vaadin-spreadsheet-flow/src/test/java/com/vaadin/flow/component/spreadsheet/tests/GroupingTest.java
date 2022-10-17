@@ -137,11 +137,11 @@ public class GroupingTest {
 
         // Collapse parent row group
         collapseRow(SHEET7_PARENT_ROW_GROUP);
-        Assert.assertTrue(spreadsheet.isRowHidden(SHEET7_ROW_GROUP));
+        Assert.assertTrue(spreadsheet.isRowHidden(SHEET7_ROW));
 
         // Expand parent row group
         expandRow(SHEET7_PARENT_ROW_GROUP);
-        Assert.assertFalse(spreadsheet.isRowHidden(SHEET7_ROW_GROUP));
+        Assert.assertFalse(spreadsheet.isRowHidden(SHEET7_ROW));
     }
 
     @Test
