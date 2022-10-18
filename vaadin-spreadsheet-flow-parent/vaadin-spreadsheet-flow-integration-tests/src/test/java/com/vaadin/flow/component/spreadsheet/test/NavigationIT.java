@@ -235,7 +235,6 @@ public class NavigationIT extends AbstractSpreadsheetIT {
     }
 
     @Test
-    @Ignore("Keys.RETURN loses active position indication")
     public void testNavigationInSelectionWithEnterAndTab() throws Exception {
         setAddressFieldValue("A1:C2");
         // Assert that everything is selected
@@ -243,11 +242,9 @@ public class NavigationIT extends AbstractSpreadsheetIT {
 
         // Press enter/return 2 times to end up in cell B1
         assertActiveCellInsideSelection("A1");
-        new Actions(getDriver()).sendKeys(Keys.ENTER, Keys.ENTER).build()
-                .perform();
+        new Actions(getDriver()).sendKeys(Keys.ENTER).build().perform();
         assertActiveCellInsideSelection("A2");
-        new Actions(getDriver()).sendKeys(Keys.ENTER, Keys.ENTER).build()
-                .perform();
+        new Actions(getDriver()).sendKeys(Keys.ENTER).build().perform();
         assertActiveCellInsideSelection("B1");
 
         // Continue from B1 by pressing TAB twice, getting to A2 and shift tab
