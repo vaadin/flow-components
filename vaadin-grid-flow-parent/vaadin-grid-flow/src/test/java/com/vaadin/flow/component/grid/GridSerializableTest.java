@@ -32,7 +32,8 @@ public class GridSerializableTest extends ClassesSerializableTest {
     }
 
     @Test
-    public void gridWithoutColumnsIsSerializable() throws IOException, ClassNotFoundException {
+    public void gridWithoutColumnsIsSerializable()
+            throws IOException, ClassNotFoundException {
         var grid = new Grid<String>();
         var layout = new Div(grid);
         grid.setItems("item");
