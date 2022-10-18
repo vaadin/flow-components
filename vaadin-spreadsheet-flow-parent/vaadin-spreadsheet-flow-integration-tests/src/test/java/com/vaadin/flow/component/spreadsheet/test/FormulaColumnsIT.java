@@ -98,7 +98,6 @@ public class FormulaColumnsIT extends AbstractSpreadsheetIT {
     }
 
     @Test
-    @Ignore("Formulas with quotes are not working")
     public void testFloatOperations() {
         for (int i = 0; i < floatColumn.length; i++) {
             getSpreadsheet().getCellAt(i + 1, 1).setValue(floatColumn[i]);
