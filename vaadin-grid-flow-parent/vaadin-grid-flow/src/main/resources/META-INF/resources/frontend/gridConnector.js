@@ -668,9 +668,9 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             }
             cache[pkey][page] = slice;
 
-            grid.$connector.doSelection(slice.filter((item) => item.selected && !isSelectedOnGrid(item)));
+            grid.$connector.doSelection(slice.filter((item) => item.selected));
             grid.$connector.doDeselection(
-              slice.filter((item) => !item.selected && (selectedKeys[item.key] || isSelectedOnGrid(item)))
+              slice.filter((item) => !item.selected && selectedKeys[item.key])
             );
 
             const updatedItems = updateGridCache(page, pkey);
@@ -802,17 +802,6 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           }
           grid._cache.updateSize();
         });
-
-        const isSelectedOnGrid = function (item) {
-          const selectedItems = grid.selectedItems;
-          for (let i = 0; i < selectedItems; i++) {
-            let selectedItem = selectedItems[i];
-            if (selectedItem.key === item.key) {
-              return true;
-            }
-          }
-          return false;
-        };
 
         grid.$connector.reset = tryCatchWrapper(function () {
           grid.size = 0;
