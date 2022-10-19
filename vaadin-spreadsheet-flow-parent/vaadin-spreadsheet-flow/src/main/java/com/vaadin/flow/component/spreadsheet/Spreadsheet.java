@@ -96,6 +96,7 @@ import com.vaadin.flow.component.spreadsheet.rpc.SpreadsheetClientRpc;
 import com.vaadin.flow.component.spreadsheet.shared.GroupingData;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.shared.Registration;
 import com.vaadin.pro.licensechecker.LicenseChecker;
 
 import elemental.json.JsonValue;
@@ -2622,34 +2623,6 @@ public class Spreadsheet extends Component
         }
         getActiveSheet().setDefaultRowHeightInPoints(heightPT);
         setDefRowH(heightPT);
-    }
-
-    /**
-     * This method is called when rowIndex auto-fit has been initiated from the
-     * browser by double-clicking the border of the target rowIndex header.
-     *
-     * @param rowIndex
-     *            Index of the target rowIndex, 0-based
-     */
-    protected void onRowHeaderDoubleClick(int rowIndex) {
-        fireRowHeaderDoubleClick(rowIndex);
-    }
-
-    private void fireRowHeaderDoubleClick(int rowIndex) {
-        fireEvent(new RowHeaderDoubleClickEvent(this, rowIndex));
-    }
-
-    /**
-     * adds a {@link RowHeaderDoubleClickListener} to the Spreadsheet
-     *
-     * @param listener
-     *            The listener to add
-     **/
-    public void addRowHeaderDoubleClickListener(
-            RowHeaderDoubleClickListener listener) {
-        addListener(RowHeaderDoubleClickEvent.class,
-                listener::onRowHeaderDoubleClick); // ,
-                                                   // RowHeaderDoubleClickListener.ON_ROW_ON_ROW_HEADER_DOUBLE_CLICK);
     }
 
     /**
@@ -5234,10 +5207,12 @@ public class Spreadsheet extends Component
      *
      * @param listener
      *            Listener to add.
+     * @return a {@link Registration} for removing the event listener
      */
-    public void addSelectionChangeListener(SelectionChangeListener listener) {
-        addListener(SelectionChangeEvent.class, listener::onSelectionChange); // ,
-                                                                              // SelectionChangeListener.SELECTION_CHANGE_METHOD);
+    public Registration addSelectionChangeListener(
+            SelectionChangeListener listener) {
+        return addListener(SelectionChangeEvent.class,
+                listener::onSelectionChange);
     }
 
     /**
@@ -5245,10 +5220,12 @@ public class Spreadsheet extends Component
      *
      * @param listener
      *            Listener to add.
+     * @return a {@link Registration} for removing the event listener
      */
-    public void addCellValueChangeListener(CellValueChangeListener listener) {
-        addListener(CellValueChangeEvent.class, listener::onCellValueChange); // ,
-                                                                              // CellValueChangeListener.CELL_VALUE_CHANGE_METHOD);
+    public Registration addCellValueChangeListener(
+            CellValueChangeListener listener) {
+        return addListener(CellValueChangeEvent.class,
+                listener::onCellValueChange);
     }
 
     /**
@@ -5256,38 +5233,12 @@ public class Spreadsheet extends Component
      *
      * @param listener
      *            Listener to add.
+     * @return a {@link Registration} for removing the event listener
      */
-    public void addFormulaValueChangeListener(
+    public Registration addFormulaValueChangeListener(
             FormulaValueChangeListener listener) {
-        addListener(FormulaValueChangeEvent.class,
-                listener::onFormulaValueChange); // ,
-                                                 // FormulaValueChangeListener.FORMULA_VALUE_CHANGE_METHOD);
-    }
-
-    /**
-     * Removes the given SelectionChangeListener from this Spreadsheet.
-     *
-     * @param listener
-     *            Listener to remove.
-     */
-    public void removeSelectionChangeListener(
-            SelectionChangeListener listener) {
-        // todo: el método removeListener no existe en Component
-        // removeListener(SelectionChangeEvent.class, listener,
-        // SelectionChangeListener.SELECTION_CHANGE_METHOD);
-    }
-
-    /**
-     * Removes the given CellValueChangeListener from this Spreadsheet.
-     *
-     * @param listener
-     *            Listener to remove.
-     */
-    public void removeCellValueChangeListener(
-            CellValueChangeListener listener) {
-        // todo: el método removeListener no existe en Component
-        // removeListener(CellValueChangeEvent.class, listener,
-        // CellValueChangeListener.CELL_VALUE_CHANGE_METHOD);
+        return addListener(FormulaValueChangeEvent.class,
+                listener::onFormulaValueChange);
     }
 
     /**
@@ -5327,22 +5278,11 @@ public class Spreadsheet extends Component
      *
      * @param listener
      *            The listener to add.
+     * @return a {@link Registration} for removing the event listener
      */
-    public void addProtectedEditListener(ProtectedEditListener listener) {
-        addListener(ProtectedEditEvent.class, listener::writeAttempted); // ,
-                                                                         // ProtectedEditListener.SELECTION_CHANGE_METHOD);
-    }
-
-    /**
-     * Removes the given ProtectedEditListener.
-     *
-     * @param listener
-     *            The listener to remove.
-     */
-    public void removeProtectedEditListener(ProtectedEditListener listener) {
-        // todo: el método removeListener no existe en Component
-        // removeListener(ProtectedEditEvent.class, listener,
-        // ProtectedEditListener.SELECTION_CHANGE_METHOD);
+    public Registration addProtectedEditListener(
+            ProtectedEditListener listener) {
+        return addListener(ProtectedEditEvent.class, listener::writeAttempted);
     }
 
     /**
@@ -5498,22 +5438,10 @@ public class Spreadsheet extends Component
      *
      * @param listener
      *            Listener to add
+     * @return a {@link Registration} for removing the event listener
      */
-    public void addSheetChangeListener(SheetChangeListener listener) {
-        addListener(SheetChangeEvent.class, listener::onSheetChange); // ,
-                                                                      // SheetChangeListener.SHEET_CHANGE_METHOD);
-    }
-
-    /**
-     * Removes the given SheetChangeListener from this Spreadsheet.
-     *
-     * @param listener
-     *            Listener to remove
-     */
-    public void removeSheetChangeListener(SheetChangeListener listener) {
-        // todo: el método removeListener no existe en Component
-        // removeListener(SheetChangeEvent.class, listener,
-        // SheetChangeListener.SHEET_CHANGE_METHOD);
+    public Registration addSheetChangeListener(SheetChangeListener listener) {
+        return addListener(SheetChangeEvent.class, listener::onSheetChange);
     }
 
     private void fireSheetChangeEvent(Sheet previousSheet, Sheet newSheet) {
@@ -6046,6 +5974,34 @@ public class Spreadsheet extends Component
          *            The RowHeaderDoubleClilckEvent that happened
          **/
         void onRowHeaderDoubleClick(RowHeaderDoubleClickEvent event);
+    }
+
+    /**
+     * This method is called when rowIndex auto-fit has been initiated from the
+     * browser by double-clicking the border of the target rowIndex header.
+     *
+     * @param rowIndex
+     *            Index of the target rowIndex, 0-based
+     */
+    protected void onRowHeaderDoubleClick(int rowIndex) {
+        fireRowHeaderDoubleClick(rowIndex);
+    }
+
+    private void fireRowHeaderDoubleClick(int rowIndex) {
+        fireEvent(new RowHeaderDoubleClickEvent(this, rowIndex));
+    }
+
+    /**
+     * adds a {@link RowHeaderDoubleClickListener} to the Spreadsheet
+     *
+     * @param listener
+     *            The listener to add
+     * @return a {@link Registration} for removing the event listener
+     **/
+    public Registration addRowHeaderDoubleClickListener(
+            RowHeaderDoubleClickListener listener) {
+        return addListener(RowHeaderDoubleClickEvent.class,
+                listener::onRowHeaderDoubleClick);
     }
 
     @Override
