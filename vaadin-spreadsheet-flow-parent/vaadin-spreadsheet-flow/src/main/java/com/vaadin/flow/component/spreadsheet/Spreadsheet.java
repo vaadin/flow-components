@@ -2626,34 +2626,6 @@ public class Spreadsheet extends Component
     }
 
     /**
-     * This method is called when rowIndex auto-fit has been initiated from the
-     * browser by double-clicking the border of the target rowIndex header.
-     *
-     * @param rowIndex
-     *            Index of the target rowIndex, 0-based
-     */
-    protected void onRowHeaderDoubleClick(int rowIndex) {
-        fireRowHeaderDoubleClick(rowIndex);
-    }
-
-    private void fireRowHeaderDoubleClick(int rowIndex) {
-        fireEvent(new RowHeaderDoubleClickEvent(this, rowIndex));
-    }
-
-    /**
-     * adds a {@link RowHeaderDoubleClickListener} to the Spreadsheet
-     *
-     * @param listener
-     *            The listener to add
-     * @return a {@link Registration} for removing the event listener
-     **/
-    public Registration addRowHeaderDoubleClickListener(
-            RowHeaderDoubleClickListener listener) {
-        return addListener(RowHeaderDoubleClickEvent.class,
-                listener::onRowHeaderDoubleClick);
-    }
-
-    /**
      * This method is called when column auto-fit has been initiated from the
      * browser by double-clicking the border of the target column header.
      *
@@ -6002,6 +5974,34 @@ public class Spreadsheet extends Component
          *            The RowHeaderDoubleClilckEvent that happened
          **/
         void onRowHeaderDoubleClick(RowHeaderDoubleClickEvent event);
+    }
+
+    /**
+     * This method is called when rowIndex auto-fit has been initiated from the
+     * browser by double-clicking the border of the target rowIndex header.
+     *
+     * @param rowIndex
+     *            Index of the target rowIndex, 0-based
+     */
+    protected void onRowHeaderDoubleClick(int rowIndex) {
+        fireRowHeaderDoubleClick(rowIndex);
+    }
+
+    private void fireRowHeaderDoubleClick(int rowIndex) {
+        fireEvent(new RowHeaderDoubleClickEvent(this, rowIndex));
+    }
+
+    /**
+     * adds a {@link RowHeaderDoubleClickListener} to the Spreadsheet
+     *
+     * @param listener
+     *            The listener to add
+     * @return a {@link Registration} for removing the event listener
+     **/
+    public Registration addRowHeaderDoubleClickListener(
+            RowHeaderDoubleClickListener listener) {
+        return addListener(RowHeaderDoubleClickEvent.class,
+                listener::onRowHeaderDoubleClick);
     }
 
     @Override
