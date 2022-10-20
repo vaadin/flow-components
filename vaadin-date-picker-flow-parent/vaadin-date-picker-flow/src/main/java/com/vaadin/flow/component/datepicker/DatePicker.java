@@ -17,6 +17,7 @@ package com.vaadin.flow.component.datepicker;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -833,6 +834,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         private String clear;
         private String today;
         private String cancel;
+        private String referenceDate;
 
         /**
          * Gets the name of the months.
@@ -1139,6 +1141,28 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
          */
         public DatePickerI18n setCancel(String cancel) {
             this.cancel = cancel;
+            return this;
+        }
+
+        /**
+         * Gets the {@code referenceDate} in ISO date format.
+         *
+         * @return the referenceDate in ISO date format
+         */
+        public String getReferenceDate() {
+            return referenceDate;
+        }
+
+        /**
+         * Sets the {@code referenceDate}.
+         *
+         * @param referenceDate
+         *            the date used to base relative dates on
+         * @return this instance for method chaining
+         */
+        public DatePickerI18n setReferenceDate(LocalDate referenceDate) {
+            this.referenceDate = referenceDate
+                    .format(DateTimeFormatter.ISO_DATE);
             return this;
         }
     }

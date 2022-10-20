@@ -116,6 +116,95 @@ public class DatePickerFormatIT extends AbstractComponentIT {
     }
 
     @Test
+    public void testLocaleWithTwoDigitsYearBasedParsingShouldUseReferenceDate() {
+        String id = DatePickerFormatPage.REFERENCE_DATE_AND_LOCALE_WITH_TWO_DIGITS_YEAR_DATE_PICKER;
+        TestBenchElement output = $("span").id(
+                DatePickerFormatPage.REFERENCE_DATE_AND_LOCALE_WITH_TWO_DIGITS_YEAR_OUTPUT);
+
+        submitValue(id, "02/27/2031");
+        Assert.assertEquals("2031-02-27", output.getText());
+
+        submitValue(id, "02/27/31");
+        Assert.assertEquals("1931-02-27", output.getText());
+
+        submitValue(id, "02/27/29");
+        Assert.assertEquals("2029-02-27", output.getText());
+
+        submitValue(id, "02/27/0030");
+        Assert.assertEquals("0030-02-27", output.getText());
+    }
+
+    @Test
+    public void testLocaleWithFourDigitsYearBasedParsingShouldUseReferenceDate() {
+        String id = DatePickerFormatPage.REFERENCE_DATE_AND_LOCALE_WITH_FOUR_DIGITS_YEAR_DATE_PICKER;
+        TestBenchElement output = $("span").id(
+                DatePickerFormatPage.REFERENCE_DATE_AND_LOCALE_WITH_FOUR_DIGITS_YEAR_OUTPUT);
+
+        submitValue(id, "27/02/2031");
+        Assert.assertEquals("2031-02-27", output.getText());
+
+        submitValue(id, "27/02/31");
+        Assert.assertEquals("1931-02-27", output.getText());
+
+        submitValue(id, "27/02/29");
+        Assert.assertEquals("2029-02-27", output.getText());
+
+        submitValue(id, "27/02/0030");
+        Assert.assertEquals("0030-02-27", output.getText());
+    }
+
+    @Test
+    public void testTwoDigitsYearFormatBasedParsingShouldUseReferenceDate() {
+        String id = DatePickerFormatPage.REFERENCE_DATE_AND_FORMAT_WITH_TWO_DIGITS_YEAR_DATE_PICKER;
+        TestBenchElement output = $("span").id(
+                DatePickerFormatPage.REFERENCE_DATE_AND_FORMAT_WITH_TWO_DIGITS_YEAR_OUTPUT);
+
+        submitValue(id, "31-02-27");
+        Assert.assertEquals("1931-02-27", output.getText());
+
+        submitValue(id, "29-02-27");
+        Assert.assertEquals("2029-02-27", output.getText());
+    }
+
+    @Test
+    public void testFourDigitsYearFormatBasedParsingShouldUseReferenceDate() {
+        String id = DatePickerFormatPage.REFERENCE_DATE_AND_FORMAT_WITH_FOUR_DIGITS_YEAR_DATE_PICKER;
+        TestBenchElement output = $("span").id(
+                DatePickerFormatPage.REFERENCE_DATE_AND_FORMAT_WITH_FOUR_DIGITS_YEAR_OUTPUT);
+
+        submitValue(id, "2031-02-27");
+        Assert.assertEquals("2031-02-27", output.getText());
+
+        submitValue(id, "31-02-27");
+        Assert.assertEquals("1931-02-27", output.getText());
+
+        submitValue(id, "29-02-27");
+        Assert.assertEquals("2029-02-27", output.getText());
+
+        submitValue(id, "0030-02-27");
+        Assert.assertEquals("0030-02-27", output.getText());
+    }
+
+    @Test
+    public void testMultipleFormatParsingShouldUseReferenceDate() {
+        String id = DatePickerFormatPage.REFERENCE_DATE_AND_MULTIPLE_FORMATS_YEAR_DATE_PICKER;
+        TestBenchElement output = $("span").id(
+                DatePickerFormatPage.REFERENCE_DATE_AND_MULTIPLE_FORMATS_YEAR_OUTPUT);
+
+        submitValue(id, "2031-02-27");
+        Assert.assertEquals("2031-02-27", output.getText());
+
+        submitValue(id, "31-02-27");
+        Assert.assertEquals("1931-02-27", output.getText());
+
+        submitValue(id, "29-02-27");
+        Assert.assertEquals("2029-02-27", output.getText());
+
+        submitValue(id, "0030-02-27");
+        Assert.assertEquals("0030-02-27", output.getText());
+    }
+
+    @Test
     public void testRemovingDateFormatShouldParseWithLocaleFormat() {
         $("button").id(DatePickerFormatPage.REMOVE_DATE_FORMAT_BUTTON).click();
 

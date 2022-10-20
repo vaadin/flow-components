@@ -1,6 +1,7 @@
 import dateFnsFormat from 'date-fns/format';
 import dateFnsParse from 'date-fns/parse';
 import dateFnsIsValid from 'date-fns/isValid';
+import { DatePicker } from '@vaadin/date-picker';
 
 (function () {
   const tryCatchWrapper = function (callback) {
@@ -74,7 +75,7 @@ import dateFnsIsValid from 'date-fns/isValid';
           return inputValue;
         });
 
-        const createLocaleBasedFormatterAndParser = tryCatchWrapper(function (locale) {
+        const createLocaleBasedFormatterAndParser = tryCatchWrapper(function (locale, referenceDate) {
           try {
             // Check whether the locale is supported or not
             new Date().toLocaleDateString(locale);
@@ -115,6 +116,39 @@ import dateFnsIsValid from 'date-fns/isValid';
             .replace(datepicker.$connector.monthPart.initial, '(\\d{1,2})')
             .replace(datepicker.$connector.yearPart.initial, '(\\d{1,4})');
 
+          const numberOfLeadingZeroesAddedToSingleDigitYear = (cleanString(new Date(2,11,11)
+            .toLocaleDateString(locale)).match(/0/g) || []).length;
+          const shouldAddLeadingZeroesToYear = testDate.toLocaleDateString(locale)
+            .includes(String(testDate.getFullYear())) && numberOfLeadingZeroesAddedToSingleDigitYear != 3;
+
+          function _addLeadingZeroesToYearOfDate(dateString, date) {
+            const dateFullYear = date.getFullYear();
+            if (dateFullYear >= 1000 || dateFullYear < 0) {
+              return dateString;
+            }
+            const monthString = (date.getMonth() + 1).toString();
+            const dayString = date.getDate().toString();
+            let unusedDigit;
+            for (let i = 1; i < 10; i++) {
+              if (!monthString.includes(i) && !dayString.includes(i)) {
+                unusedDigit = i.toString();
+                break;
+              }
+            }
+            const numberOfYearDigits = dateFullYear.toString().length;
+            const dummyDateYearToUse = unusedDigit.repeat(numberOfYearDigits);
+            const countOfZeroesAlreadyAdded = Math.max(numberOfLeadingZeroesAddedToSingleDigitYear + 1
+              - numberOfYearDigits, 0);
+            const dummyDateStringToSearchFor = '0'.repeat(countOfZeroesAlreadyAdded) + dummyDateYearToUse;
+            const dummyDateToUse = new Date();
+            dummyDateToUse.setFullYear(Number(dummyDateYearToUse), date.getMonth(), date.getDate());
+            const indexOfDate = cleanString(dummyDateToUse.toLocaleDateString(locale))
+              .indexOf(dummyDateStringToSearchFor);
+            const realDateStringToReplace = '0'.repeat(4 - numberOfYearDigits) + dateFullYear;
+            return dateString.substring(0, indexOfDate) + realDateStringToReplace + dateString.substring(indexOfDate
+              + dummyDateStringToSearchFor.length, dateString.length);
+          }
+
           function formatDate(date) {
             let rawDate = datepicker._parseDate(`${date.year}-${date.month + 1}-${date.day}`);
 
@@ -124,29 +158,47 @@ import dateFnsIsValid from 'date-fns/isValid';
             // See https://github.com/vaadin/vaadin-date-picker-flow/issues/126#issuecomment-508169514
             rawDate.setHours(12);
 
-            return cleanString(rawDate.toLocaleDateString(locale));
+            let cleanDateString = cleanString(rawDate.toLocaleDateString(locale));
+            if (shouldAddLeadingZeroesToYear) {
+              cleanDateString = _addLeadingZeroesToYearOfDate(cleanDateString, rawDate);
+            }
+            return cleanDateString;
           }
 
           function parseDate(dateString) {
             dateString = cleanString(dateString);
 
             if (dateString.length == 0) {
+              this._lastParsedShortYear = undefined;
               return;
             }
 
-            let match = dateString.match(datepicker.$connector.regex);
-            if (match && match.length == 4) {
-              for (let i = 1; i < 4; i++) {
-                datepicker.$connector.parts[i - 1].value = parseInt(match[i]);
-              }
-              return {
-                day: datepicker.$connector.dayPart.value,
-                month: datepicker.$connector.monthPart.value - 1,
-                year: datepicker.$connector.yearPart.value
-              };
-            } else {
+            const match = dateString.match(datepicker.$connector.regex);
+            if (!match || match.length != 4) {
+              this._lastParsedShortYear = undefined;
               return false;
             }
+
+            for (let i = 1; i < 4; i++) {
+              datepicker.$connector.parts[i - 1].value = parseInt(match[i]);
+            }
+
+            let yearValue = datepicker.$connector.yearPart.value;
+            const yearMatch = match[datepicker.$connector.parts.indexOf(datepicker.$connector.yearPart) + 1];
+            // If the provided year has less than 3 digits, the value is calculated using a reference date.
+            // The last parsed short year check handles the case when a date with an actual year value is provided
+            // with zero padding, but then got reformatted without the zeroes and parsed again.
+            if (yearMatch.length < 3 && yearValue >= 0 && yearValue !== this._lastParsedShortYear) {
+              yearValue = DatePicker.calculateDateBasedOnReferenceDate(referenceDate, yearValue,
+                  datepicker.$connector.monthPart.value - 1, datepicker.$connector.dayPart.value);
+            }
+            this._lastParsedShortYear = yearValue % 100;
+            datepicker.$connector.yearPart.value = yearValue;
+            return {
+              day: datepicker.$connector.dayPart.value,
+              month: datepicker.$connector.monthPart.value - 1,
+              year: datepicker.$connector.yearPart.value
+            };
           }
 
           return {
@@ -155,9 +207,42 @@ import dateFnsIsValid from 'date-fns/isValid';
           };
         });
 
-        const createCustomFormatBasedFormatterAndParser = tryCatchWrapper(function (formats) {
+        const createCustomFormatBasedFormatterAndParser = tryCatchWrapper(function (formats, referenceDate) {
           if (!formats || formats.length === 0) {
             throw new Error('Array of custom date formats is null or empty');
+          }
+
+          function _getShorterFormat(format) {
+            if (format.includes('yyyyy')) {
+              return format.replace('yyyyy', 'yy');
+            }
+            if (format.includes('yyyy')) {
+              return format.replace('yyyy', 'yy');
+            }
+            if (format.includes('YYYYY')) {
+              return format.replace('YYYYY', 'YY');
+            }
+            if (format.includes('YYYY')) {
+              return format.replace('YYYY', 'YY');
+            }
+            if (format.includes('RRRRR')) {
+              return format.replace('RRRRR', 'RR');
+            }
+            if (format.includes('RRRR')) {
+              return format.replace('RRRR', 'RR');
+            }
+            if (format.includes('uuuuu')) {
+              return format.replace('uuuuu', 'uu');
+            }
+            if (format.includes('uuuu')) {
+              return format.replace('uuuu', 'uu');
+            }
+            return undefined;
+          }
+
+          function _isShortFormat(format) {
+            return !format.includes('yyy') && !format.includes('YYY')
+              && !format.includes('RRR') && !format.includes('uuu');
           }
 
           function formatDate(dateParts) {
@@ -169,16 +254,41 @@ import dateFnsIsValid from 'date-fns/isValid';
 
           function parseDate(dateString) {
             for (let format of formats) {
-              const date = dateFnsParse(dateString, format, new Date());
+              // We first try to match the date with the shorter version.
+              const shorterFormat = _getShorterFormat(format);
+              if (shorterFormat) {
+                const shorterFormatDate = dateFnsParse(dateString, shorterFormat, referenceDate);
+                if (dateFnsIsValid(shorterFormatDate)) {
+                  let yearValue = shorterFormatDate.getFullYear();
+                  // The last parsed year check handles the case when a date with an actual year value is provided
+                  // with zero padding, but then got reformatted without the zeroes and parsed again.
+                  if (this._lastParsedYear && yearValue == this._lastParsedYear % 100) {
+                    yearValue = this._lastParsedYear;
+                  }
+                  return {
+                    day: shorterFormatDate.getDate(),
+                    month: shorterFormatDate.getMonth(),
+                    year: yearValue
+                  };
+                }
+              }
+              const date = dateFnsParse(dateString, format, referenceDate);
 
               if (dateFnsIsValid(date)) {
+                let yearValue = date.getFullYear();
+                if (this._lastParsedYear && yearValue % 100 == this._lastParsedYear % 100 && _isShortFormat(format)) {
+                  yearValue = this._lastParsedYear;
+                } else {
+                  this._lastParsedYear = yearValue;
+                }
                 return {
                   day: date.getDate(),
                   month: date.getMonth(),
-                  year: date.getFullYear()
+                  year: yearValue
                 };
               }
             }
+            this._lastParsedYear = undefined;
             return false;
           }
 
@@ -193,10 +303,11 @@ import dateFnsIsValid from 'date-fns/isValid';
           // or based on the locale set in the date picker
           // Custom formats take priority over locale
           const hasDateFormats = i18n && i18n.dateFormats && i18n.dateFormats.length > 0;
+          const referenceDate = i18n && i18n.referenceDate ? new Date(i18n.referenceDate) : new Date();
           const formatterAndParser = hasDateFormats
-            ? createCustomFormatBasedFormatterAndParser(i18n.dateFormats)
+            ? createCustomFormatBasedFormatterAndParser(i18n.dateFormats, referenceDate)
             : locale
-            ? createLocaleBasedFormatterAndParser(locale)
+            ? createLocaleBasedFormatterAndParser(locale, referenceDate)
             : null;
 
           // Merge current web component I18N settings with new I18N settings and the formatting and parsing functions
