@@ -1,7 +1,7 @@
 import dateFnsFormat from 'date-fns/format';
 import dateFnsParse from 'date-fns/parse';
 import dateFnsIsValid from 'date-fns/isValid';
-import { DatePicker } from '@vaadin/date-picker';
+import { calculateYearBasedOnReferenceDate } from '@vaadin/date-picker/src/vaadin-date-picker-helper';
 
 (function () {
   const tryCatchWrapper = function (callback) {
@@ -189,7 +189,7 @@ import { DatePicker } from '@vaadin/date-picker';
             // The last parsed short year check handles the case when a date with an actual year value is provided
             // with zero padding, but then got reformatted without the zeroes and parsed again.
             if (yearMatch.length < 3 && yearValue >= 0 && yearValue !== this._lastParsedShortYear) {
-              yearValue = DatePicker.calculateDateBasedOnReferenceDate(referenceDate, yearValue,
+              yearValue = calculateYearBasedOnReferenceDate(referenceDate, yearValue,
                   datepicker.$connector.monthPart.value - 1, datepicker.$connector.dayPart.value);
             }
             this._lastParsedShortYear = yearValue % 100;
