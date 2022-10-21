@@ -373,15 +373,13 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
             HashMap<String, Widget> customWidgetMap = new HashMap<String, Widget>();
             if (cellKeysToComponentIdMap != null
                     && !cellKeysToComponentIdMap.isEmpty()) {
-                List<ComponentConnector> childComponents = getChildComponents();
-                for (ComponentConnector cc : childComponents) {
-                    String connectorId = cc.getConnectorId();
-                    if (cellKeysToComponentIdMap.containsKey(connectorId)) {
-                        customWidgetMap.put(
-                                cellKeysToComponentIdMap.get(connectorId),
-                                cc.getWidget());
-                    }
-                }
+                cellKeysToComponentIdMap.forEach((nodeId, key) -> {
+                    // Should be passed from the server based on
+                    // ui.getInternals().getAppId()
+                    String appid = "ROOT";
+                    customWidgetMap.put(key,
+                            new FlowComponentRenderer(appid, nodeId));
+                });
             }
             widget.showCellCustomComponents(customWidgetMap);
         }
