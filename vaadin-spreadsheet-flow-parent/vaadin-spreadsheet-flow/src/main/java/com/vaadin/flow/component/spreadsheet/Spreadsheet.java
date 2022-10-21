@@ -93,6 +93,7 @@ import com.vaadin.flow.component.spreadsheet.framework.Action;
 import com.vaadin.flow.component.spreadsheet.framework.ReflectTools;
 import com.vaadin.flow.component.spreadsheet.rpc.SpreadsheetClientRpc;
 import com.vaadin.flow.component.spreadsheet.shared.GroupingData;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.shared.Registration;
@@ -4536,10 +4537,8 @@ public class Spreadsheet extends Component
                         if (!customComponents.contains(customComponent)) {
                             registerCustomComponent(customComponent);
                         }
-                        _componentIDtoCellKeysMap.put(
-                                // todo: revisar
-                                customComponent.getId().orElse(""),
-                                // customComponent.getConnectorId(),
+                        _componentIDtoCellKeysMap.put(Integer.toString(
+                                customComponent.getElement().getNode().getId()),
                                 key);
                         newCustomComponents.add(customComponent);
                         rowsWithComponents.add(r);
@@ -4658,7 +4657,8 @@ public class Spreadsheet extends Component
     }
 
     private void registerCustomComponent(Component component) {
-        if (!equals(component.getParent())) {
+        if (!getElement().equals(component.getElement().getParent())) {
+            getElement().appendVirtualChild(component.getElement());
             // todo: se puede eliminar esto? en v8, setparent provoca que se
             // añada el componente en la jerarquía
             // component.setParent(this);
@@ -4671,6 +4671,11 @@ public class Spreadsheet extends Component
     }
 
     private void unRegisterCustomComponent(Component component) {
+        Element element = component.getElement();
+        if (element.isVirtualChild()
+                && getElement().equals(element.getParent())) {
+            getElement().removeVirtualChild(element);
+        }
         // todo: se puede eliminar esto?
         // component.setParent(null);
     }
