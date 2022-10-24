@@ -137,11 +137,11 @@ public class GroupingTest {
 
         // Collapse parent row group
         collapseRow(SHEET7_PARENT_ROW_GROUP);
-        Assert.assertTrue(spreadsheet.isRowHidden(SHEET7_ROW_GROUP));
+        Assert.assertTrue(spreadsheet.isRowHidden(SHEET7_ROW));
 
         // Expand parent row group
         expandRow(SHEET7_PARENT_ROW_GROUP);
-        Assert.assertFalse(spreadsheet.isRowHidden(SHEET7_ROW_GROUP));
+        Assert.assertFalse(spreadsheet.isRowHidden(SHEET7_ROW));
     }
 
     @Test
@@ -274,6 +274,56 @@ public class GroupingTest {
         Assert.assertFalse(spreadsheet.isColumnHidden(SHEET7_COLUMN));
     }
 
+    @Test
+    public void clickRowLevelHeader_shouldNotHidePrecedingGroups() {
+        setActiveSheet(SHEET6);
+
+        clickRowLevelHeader(4);
+        Assert.assertFalse(spreadsheet.isRowHidden(6));
+    }
+
+    @Test
+    public void clickRowLevelHeader_shouldHideFollowingGroups() {
+        setActiveSheet(SHEET6);
+
+        clickRowLevelHeader(4);
+        Assert.assertTrue(spreadsheet.isRowHidden(4));
+    }
+
+    @Test
+    public void clickRowLevelHeader_clickLastLevelHeader_shouldUnhideGroups() {
+        setActiveSheet(SHEET6);
+
+        clickRowLevelHeader(4);
+        clickRowLevelHeader(8);
+        Assert.assertFalse(spreadsheet.isRowHidden(4));
+    }
+
+    @Test
+    public void clickColumnLevelHeader_shouldNotHidePrecedingGroups() {
+        setActiveSheet(SHEET6);
+
+        clickColumnLevelHeader(4);
+        Assert.assertFalse(spreadsheet.isColumnHidden(6));
+    }
+
+    @Test
+    public void clickColumnLevelHeader_shouldHideFollowingGroups() {
+        setActiveSheet(SHEET6);
+
+        clickColumnLevelHeader(4);
+        Assert.assertTrue(spreadsheet.isColumnHidden(4));
+    }
+
+    @Test
+    public void clickColumnLevelHeader_clickLastLevelHeader_shouldUnhideGroups() {
+        setActiveSheet(SHEET6);
+
+        clickColumnLevelHeader(4);
+        clickColumnLevelHeader(8);
+        Assert.assertFalse(spreadsheet.isColumnHidden(4));
+    }
+
     private void setActiveSheet(int sheetIndex) {
         spreadsheet.setActiveSheetIndex(sheetIndex);
         TestHelper.fireClientEvent(spreadsheet, "onSheetScroll",
@@ -298,6 +348,16 @@ public class GroupingTest {
     private void collapseColumn(int column) {
         TestHelper.fireClientEvent(spreadsheet, "groupingCollapsed",
                 "[true, " + column + ", true]");
+    }
+
+    private void clickRowLevelHeader(int level) {
+        TestHelper.fireClientEvent(spreadsheet, "levelHeaderClicked",
+                "[false, " + level + "]");
+    }
+
+    private void clickColumnLevelHeader(int level) {
+        TestHelper.fireClientEvent(spreadsheet, "levelHeaderClicked",
+                "[true, " + level + "]");
     }
 
     private final int SHEET4 = 3;
