@@ -213,36 +213,17 @@ import { calculateYearBasedOnReferenceDate } from '@vaadin/date-picker/src/vaadi
           }
 
           function _getShorterFormat(format) {
-            if (format.includes('yyyyy')) {
-              return format.replace('yyyyy', 'yy');
-            }
-            if (format.includes('yyyy')) {
+            if (format.includes('yyyy') && !format.includes('yyyyy')) {
               return format.replace('yyyy', 'yy');
             }
-            if (format.includes('YYYYY')) {
-              return format.replace('YYYYY', 'YY');
-            }
-            if (format.includes('YYYY')) {
+            if (format.includes('YYYY') && !format.includes('YYYYY')) {
               return format.replace('YYYY', 'YY');
-            }
-            if (format.includes('RRRRR')) {
-              return format.replace('RRRRR', 'RR');
-            }
-            if (format.includes('RRRR')) {
-              return format.replace('RRRR', 'RR');
-            }
-            if (format.includes('uuuuu')) {
-              return format.replace('uuuuu', 'uu');
-            }
-            if (format.includes('uuuu')) {
-              return format.replace('uuuu', 'uu');
             }
             return undefined;
           }
 
           function _isShortFormat(format) {
-            return !format.includes('yyy') && !format.includes('YYY')
-              && !format.includes('RRR') && !format.includes('uuu');
+            return !format.includes('yyy') && !format.includes('YYY');
           }
 
           function formatDate(dateParts) {
