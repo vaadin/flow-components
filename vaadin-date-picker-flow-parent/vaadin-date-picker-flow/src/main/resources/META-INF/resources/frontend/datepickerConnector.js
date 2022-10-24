@@ -1,7 +1,7 @@
 import dateFnsFormat from 'date-fns/format';
 import dateFnsParse from 'date-fns/parse';
 import dateFnsIsValid from 'date-fns/isValid';
-import { calculateYearBasedOnReferenceDate } from '@vaadin/date-picker/src/vaadin-date-picker-helper';
+import { extractDateParts, getAdjustedYear } from '@vaadin/date-picker/src/vaadin-date-picker-helper';
 
 (function () {
   const tryCatchWrapper = function (callback) {
@@ -75,7 +75,7 @@ import { calculateYearBasedOnReferenceDate } from '@vaadin/date-picker/src/vaadi
           return inputValue;
         });
 
-        const createLocaleBasedFormatterAndParser = tryCatchWrapper(function (locale, referenceDate) {
+        const createLocaleBasedFormatterAndParser = tryCatchWrapper(function (locale) {
           try {
             // Check whether the locale is supported or not
             new Date().toLocaleDateString(locale);
@@ -189,8 +189,9 @@ import { calculateYearBasedOnReferenceDate } from '@vaadin/date-picker/src/vaadi
             // The last parsed short year check handles the case when a date with an actual year value is provided
             // with zero padding, but then got reformatted without the zeroes and parsed again.
             if (yearMatch.length < 3 && yearValue >= 0 && yearValue !== this._lastParsedShortYear) {
-              yearValue = calculateYearBasedOnReferenceDate(referenceDate, yearValue,
-                  datepicker.$connector.monthPart.value - 1, datepicker.$connector.dayPart.value);
+              const referenceDate = _getReferenceDate();
+              yearValue = getAdjustedYear(referenceDate, yearValue, datepicker.$connector.monthPart.value - 1,
+                datepicker.$connector.dayPart.value);
             }
             this._lastParsedShortYear = yearValue % 100;
             datepicker.$connector.yearPart.value = yearValue;
@@ -207,7 +208,7 @@ import { calculateYearBasedOnReferenceDate } from '@vaadin/date-picker/src/vaadi
           };
         });
 
-        const createCustomFormatBasedFormatterAndParser = tryCatchWrapper(function (formats, referenceDate) {
+        const createCustomFormatBasedFormatterAndParser = tryCatchWrapper(function (formats) {
           if (!formats || formats.length === 0) {
             throw new Error('Array of custom date formats is null or empty');
           }
@@ -240,6 +241,7 @@ import { calculateYearBasedOnReferenceDate } from '@vaadin/date-picker/src/vaadi
           }
 
           function parseDate(dateString) {
+            const referenceDate = _getReferenceDate();
             for (let format of formats) {
               // We first try to match the date with the shorter version.
               const shorterFormat = _getShorterFormat(format);
@@ -285,16 +287,23 @@ import { calculateYearBasedOnReferenceDate } from '@vaadin/date-picker/src/vaadi
           };
         });
 
+        function _getReferenceDate() {
+          return datepicker.i18n.referenceDate ? new Date(datepicker.i18n.referenceDate.year,
+              datepicker.i18n.referenceDate.month - 1, datepicker.i18n.referenceDate.day) : new Date();
+        }
+
         datepicker.$connector.updateI18n = tryCatchWrapper(function (locale, i18n) {
           // Create formatting and parsing functions, either based on custom formats set in i18n object,
           // or based on the locale set in the date picker
           // Custom formats take priority over locale
           const hasDateFormats = i18n && i18n.dateFormats && i18n.dateFormats.length > 0;
-          const referenceDate = i18n && i18n.referenceDate ? new Date(i18n.referenceDate) : new Date();
+          if (i18n && i18n.referenceDate) {
+            i18n.referenceDate = extractDateParts(new Date(i18n.referenceDate));
+          }
           const formatterAndParser = hasDateFormats
-            ? createCustomFormatBasedFormatterAndParser(i18n.dateFormats, referenceDate)
+            ? createCustomFormatBasedFormatterAndParser(i18n.dateFormats)
             : locale
-            ? createLocaleBasedFormatterAndParser(locale, referenceDate)
+            ? createLocaleBasedFormatterAndParser(locale)
             : null;
 
           // Merge current web component I18N settings with new I18N settings and the formatting and parsing functions
