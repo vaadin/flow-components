@@ -5306,6 +5306,7 @@ public class SheetWidget extends Panel {
 
         jsniUtil.replaceSelector(editedCellFreezeColumnStyle,
                 ".notusedselector", 0);
+        input.setFocus(false);
         input.setValue("");
         input.setWidth("0");
         input.setHeight("");
