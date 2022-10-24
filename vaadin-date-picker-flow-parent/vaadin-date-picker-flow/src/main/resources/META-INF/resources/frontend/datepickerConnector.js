@@ -223,7 +223,13 @@ import { calculateYearBasedOnReferenceDate } from '@vaadin/date-picker/src/vaadi
           }
 
           function _isShortFormat(format) {
-            return !format.includes('yyy') && !format.includes('YYY');
+            if (format.includes('y')) {
+              return !format.includes('yyy');
+            }
+            if (format.includes('Y')) {
+              return !format.includes('YYY');
+            }
+            return false;
           }
 
           function formatDate(dateParts) {
