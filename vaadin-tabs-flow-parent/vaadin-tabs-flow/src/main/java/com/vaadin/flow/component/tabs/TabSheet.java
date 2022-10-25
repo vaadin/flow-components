@@ -42,7 +42,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-tabsheet")
-@NpmPackage(value = "@vaadin/tabsheet", version = "23.3.0-alpha2")
+@NpmPackage(value = "@vaadin/tabsheet", version = "23.3.0-alpha3")
 @JsModule("@vaadin/tabsheet/src/vaadin-tabsheet.js")
 public class TabSheet extends Component
         implements HasStyle, HasSize, HasThemeVariant<TabSheetVariant> {
@@ -60,7 +60,10 @@ public class TabSheet extends Component
         tabs.getElement().setAttribute("slot", "tabs");
         getElement().appendChild(tabs.getElement());
 
-        addSelectedChangeListener(e -> updateContent());
+        addSelectedChangeListener(e -> {
+            getElement().setProperty("selected", tabs.getSelectedIndex());
+            updateContent();
+        });
     }
 
     /**
