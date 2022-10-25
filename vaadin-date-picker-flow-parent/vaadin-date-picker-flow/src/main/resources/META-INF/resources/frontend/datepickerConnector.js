@@ -213,7 +213,7 @@ import { extractDateParts, getAdjustedYear } from '@vaadin/date-picker/src/vaadi
             throw new Error('Array of custom date formats is null or empty');
           }
 
-          function _getShorterFormat(format) {
+          function _shortenFourDigitYearFormat(format) {
             if (format.includes('yyyy') && !format.includes('yyyyy')) {
               return format.replace('yyyy', 'yy');
             }
@@ -244,7 +244,7 @@ import { extractDateParts, getAdjustedYear } from '@vaadin/date-picker/src/vaadi
             const referenceDate = _getReferenceDate();
             for (let format of formats) {
               // We first try to match the date with the shorter version.
-              const shorterFormat = _getShorterFormat(format);
+              const shorterFormat = _shortenFourDigitYearFormat(format);
               if (shorterFormat) {
                 const shorterFormatDate = dateFnsParse(dateString, shorterFormat, referenceDate);
                 if (dateFnsIsValid(shorterFormatDate)) {
