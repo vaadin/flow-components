@@ -189,8 +189,7 @@ import { extractDateParts, getAdjustedYear } from '@vaadin/date-picker/src/vaadi
             // The last parsed short year check handles the case when a date with an actual year value is provided
             // with zero padding, but then got reformatted without the zeroes and parsed again.
             if (yearMatch.length < 3 && yearValue >= 0 && yearValue !== this._lastParsedShortYear) {
-              const referenceDate = _getReferenceDate();
-              yearValue = getAdjustedYear(referenceDate, yearValue, datepicker.$connector.monthPart.value - 1,
+              yearValue = getAdjustedYear(_getReferenceDate(), yearValue, datepicker.$connector.monthPart.value - 1,
                 datepicker.$connector.dayPart.value);
             }
             this._lastParsedShortYear = yearValue % 100;
