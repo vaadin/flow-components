@@ -22,7 +22,7 @@
         <jetty.version>11.0.8</jetty.version>
         <jetty.http.port>8080</jetty.http.port>
         <jetty.stop.port>9999</jetty.stop.port>
-        <karaf-maven-plugin.version>4.4.0</karaf-maven-plugin.version>
+        <karaf-maven-plugin.version>4.4.2</karaf-maven-plugin.version>
         <maven.surefire.plugin.version>2.22.2</maven.surefire.plugin.version>
         <maven.failsafe.plugin.version>2.22.2</maven.failsafe.plugin.version>
         <maven.resources.plugin.version>3.3.0</maven.resources.plugin.version>
@@ -586,7 +586,7 @@
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
-                <version>4.8.0</version>
+                <version>4.8.1</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
