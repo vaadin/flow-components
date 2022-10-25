@@ -117,9 +117,9 @@ public class DatePickerFormatIT extends AbstractComponentIT {
 
     @Test
     public void testLocaleWithTwoDigitsYearBasedParsingShouldUseReferenceDate() {
-        String id = DatePickerFormatPage.REFERENCE_DATE_AND_LOCALE_WITH_TWO_DIGITS_YEAR_DATE_PICKER;
+        String id = DatePickerFormatPage.CUSTOM_REFERENCE_DATE_AND_LOCALE_WITH_TWO_DIGITS_YEAR_DATE_PICKER;
         TestBenchElement output = $("span").id(
-                DatePickerFormatPage.REFERENCE_DATE_AND_LOCALE_WITH_TWO_DIGITS_YEAR_OUTPUT);
+                DatePickerFormatPage.CUSTOM_REFERENCE_DATE_AND_LOCALE_WITH_TWO_DIGITS_YEAR_OUTPUT);
 
         submitValue(id, "02/27/2031");
         Assert.assertEquals("2031-02-27", output.getText());
@@ -136,9 +136,9 @@ public class DatePickerFormatIT extends AbstractComponentIT {
 
     @Test
     public void testLocaleWithFourDigitsYearBasedParsingShouldUseReferenceDate() {
-        String id = DatePickerFormatPage.REFERENCE_DATE_AND_LOCALE_WITH_FOUR_DIGITS_YEAR_DATE_PICKER;
+        String id = DatePickerFormatPage.CUSTOM_REFERENCE_DATE_AND_LOCALE_WITH_FOUR_DIGITS_YEAR_DATE_PICKER;
         TestBenchElement output = $("span").id(
-                DatePickerFormatPage.REFERENCE_DATE_AND_LOCALE_WITH_FOUR_DIGITS_YEAR_OUTPUT);
+                DatePickerFormatPage.CUSTOM_REFERENCE_DATE_AND_LOCALE_WITH_FOUR_DIGITS_YEAR_OUTPUT);
 
         submitValue(id, "27/02/2031");
         Assert.assertEquals("2031-02-27", output.getText());
@@ -155,9 +155,9 @@ public class DatePickerFormatIT extends AbstractComponentIT {
 
     @Test
     public void testTwoDigitsYearFormatBasedParsingShouldUseReferenceDate() {
-        String id = DatePickerFormatPage.REFERENCE_DATE_AND_FORMAT_WITH_TWO_DIGITS_YEAR_DATE_PICKER;
+        String id = DatePickerFormatPage.CUSTOM_REFERENCE_DATE_AND_FORMAT_WITH_TWO_DIGITS_YEAR_DATE_PICKER;
         TestBenchElement output = $("span").id(
-                DatePickerFormatPage.REFERENCE_DATE_AND_FORMAT_WITH_TWO_DIGITS_YEAR_OUTPUT);
+                DatePickerFormatPage.CUSTOM_REFERENCE_DATE_AND_FORMAT_WITH_TWO_DIGITS_YEAR_OUTPUT);
 
         submitValue(id, "31-02-27");
         Assert.assertEquals("1931-02-27", output.getText());
@@ -168,9 +168,9 @@ public class DatePickerFormatIT extends AbstractComponentIT {
 
     @Test
     public void testFourDigitsYearFormatBasedParsingShouldUseReferenceDate() {
-        String id = DatePickerFormatPage.REFERENCE_DATE_AND_FORMAT_WITH_FOUR_DIGITS_YEAR_DATE_PICKER;
+        String id = DatePickerFormatPage.CUSTOM_REFERENCE_DATE_AND_FORMAT_WITH_FOUR_DIGITS_YEAR_DATE_PICKER;
         TestBenchElement output = $("span").id(
-                DatePickerFormatPage.REFERENCE_DATE_AND_FORMAT_WITH_FOUR_DIGITS_YEAR_OUTPUT);
+                DatePickerFormatPage.CUSTOM_REFERENCE_DATE_AND_FORMAT_WITH_FOUR_DIGITS_YEAR_OUTPUT);
 
         submitValue(id, "2031-02-27");
         Assert.assertEquals("2031-02-27", output.getText());
@@ -187,9 +187,9 @@ public class DatePickerFormatIT extends AbstractComponentIT {
 
     @Test
     public void testMultipleFormatParsingShouldUseReferenceDate() {
-        String id = DatePickerFormatPage.REFERENCE_DATE_AND_MULTIPLE_FORMATS_YEAR_DATE_PICKER;
+        String id = DatePickerFormatPage.CUSTOM_REFERENCE_DATE_AND_MULTIPLE_FORMATS_YEAR_DATE_PICKER;
         TestBenchElement output = $("span").id(
-                DatePickerFormatPage.REFERENCE_DATE_AND_MULTIPLE_FORMATS_YEAR_OUTPUT);
+                DatePickerFormatPage.CUSTOM_REFERENCE_DATE_AND_MULTIPLE_FORMATS_YEAR_OUTPUT);
 
         submitValue(id, "2031-02-27");
         Assert.assertEquals("2031-02-27", output.getText());

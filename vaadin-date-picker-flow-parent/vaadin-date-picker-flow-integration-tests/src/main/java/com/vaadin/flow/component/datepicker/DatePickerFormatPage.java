@@ -46,16 +46,16 @@ public class DatePickerFormatPage extends VerticalLayout {
     public static final String SET_DATE_FORMAT_AFTER_LOCALE_OUTPUT = "SET_DATE_FORMAT_AFTER_LOCALE_OUTPUT";
     public static final String SERVER_SIDE_VALUE_CHANGE_DATE_PICKER = "SERVER_SIDE_VALUE_CHANGE_DATE_PICKER";
     public static final String SERVER_SIDE_VALUE_CHANGE_BUTTON = "SERVER_SIDE_VALUE_CHANGE_BUTTON";
-    public static final String REFERENCE_DATE_AND_LOCALE_WITH_TWO_DIGITS_YEAR_DATE_PICKER = "REFERENCE_DATE_AND_LOCALE_WITH_TWO_DIGITS_YEAR_DATE_PICKER";
-    public static final String REFERENCE_DATE_AND_LOCALE_WITH_TWO_DIGITS_YEAR_OUTPUT = "REFERENCE_DATE_AND_LOCALE_WITH_TWO_DIGITS_YEAR_OUTPUT";
-    public static final String REFERENCE_DATE_AND_LOCALE_WITH_FOUR_DIGITS_YEAR_DATE_PICKER = "REFERENCE_DATE_AND_LOCALE_WITH_FOUR_DIGITS_YEAR_DATE_PICKER";
-    public static final String REFERENCE_DATE_AND_LOCALE_WITH_FOUR_DIGITS_YEAR_OUTPUT = "REFERENCE_DATE_AND_LOCALE_WITH_FOUR_DIGITS_YEAR_OUTPUT";
-    public static final String REFERENCE_DATE_AND_FORMAT_WITH_TWO_DIGITS_YEAR_DATE_PICKER = "REFERENCE_DATE_AND_FORMAT_WITH_TWO_DIGITS_YEAR_DATE_PICKER";
-    public static final String REFERENCE_DATE_AND_FORMAT_WITH_TWO_DIGITS_YEAR_OUTPUT = "REFERENCE_DATE_AND_FORMAT_WITH_TWO_DIGITS_YEAR_OUTPUT";
-    public static final String REFERENCE_DATE_AND_FORMAT_WITH_FOUR_DIGITS_YEAR_DATE_PICKER = "REFERENCE_DATE_AND_FORMAT_WITH_FOUR_DIGITS_YEAR_DATE_PICKER";
-    public static final String REFERENCE_DATE_AND_FORMAT_WITH_FOUR_DIGITS_YEAR_OUTPUT = "REFERENCE_DATE_AND_FORMAT_WITH_FOUR_DIGITS_YEAR_OUTPUT";
-    public static final String REFERENCE_DATE_AND_MULTIPLE_FORMATS_YEAR_DATE_PICKER = "REFERENCE_DATE_AND_MULTIPLE_FORMATS_YEAR_DATE_PICKER";
-    public static final String REFERENCE_DATE_AND_MULTIPLE_FORMATS_YEAR_OUTPUT = "REFERENCE_DATE_AND_MULTIPLE_FORMATS_YEAR_OUTPUT";
+    public static final String CUSTOM_REFERENCE_DATE_AND_LOCALE_WITH_TWO_DIGITS_YEAR_DATE_PICKER = "CUSTOM_REFERENCE_DATE_AND_LOCALE_WITH_TWO_DIGITS_YEAR_DATE_PICKER";
+    public static final String CUSTOM_REFERENCE_DATE_AND_LOCALE_WITH_TWO_DIGITS_YEAR_OUTPUT = "CUSTOM_REFERENCE_DATE_AND_LOCALE_WITH_TWO_DIGITS_YEAR_OUTPUT";
+    public static final String CUSTOM_REFERENCE_DATE_AND_LOCALE_WITH_FOUR_DIGITS_YEAR_DATE_PICKER = "CUSTOM_REFERENCE_DATE_AND_LOCALE_WITH_FOUR_DIGITS_YEAR_DATE_PICKER";
+    public static final String CUSTOM_REFERENCE_DATE_AND_LOCALE_WITH_FOUR_DIGITS_YEAR_OUTPUT = "CUSTOM_REFERENCE_DATE_AND_LOCALE_WITH_FOUR_DIGITS_YEAR_OUTPUT";
+    public static final String CUSTOM_REFERENCE_DATE_AND_FORMAT_WITH_TWO_DIGITS_YEAR_DATE_PICKER = "CUSTOM_REFERENCE_DATE_AND_FORMAT_WITH_TWO_DIGITS_YEAR_DATE_PICKER";
+    public static final String CUSTOM_REFERENCE_DATE_AND_FORMAT_WITH_TWO_DIGITS_YEAR_OUTPUT = "CUSTOM_REFERENCE_DATE_AND_FORMAT_WITH_TWO_DIGITS_YEAR_OUTPUT";
+    public static final String CUSTOM_REFERENCE_DATE_AND_FORMAT_WITH_FOUR_DIGITS_YEAR_DATE_PICKER = "CUSTOM_REFERENCE_DATE_AND_FORMAT_WITH_FOUR_DIGITS_YEAR_DATE_PICKER";
+    public static final String CUSTOM_REFERENCE_DATE_AND_FORMAT_WITH_FOUR_DIGITS_YEAR_OUTPUT = "CUSTOM_REFERENCE_DATE_AND_FORMAT_WITH_FOUR_DIGITS_YEAR_OUTPUT";
+    public static final String CUSTOM_REFERENCE_DATE_AND_MULTIPLE_FORMATS_YEAR_DATE_PICKER = "CUSTOM_REFERENCE_DATE_AND_MULTIPLE_FORMATS_YEAR_DATE_PICKER";
+    public static final String CUSTOM_REFERENCE_DATE_AND_MULTIPLE_FORMATS_YEAR_OUTPUT = "CUSTOM_REFERENCE_DATE_AND_MULTIPLE_FORMATS_YEAR_OUTPUT";
 
     public static final LocalDate may13 = LocalDate.of(2018, Month.MAY, 13);
 
@@ -67,11 +67,11 @@ public class DatePickerFormatPage extends VerticalLayout {
         setupSetLocaleAfterFormat();
         setupSetFormatAfterLocale();
         setupServerSideValueChange();
-        setupReferenceDateAndLocaleWithTwoDigitsYear();
-        setupReferenceDateAndLocaleWithFourDigitsYear();
-        setupReferenceDateAndFormatWithTwoDigitsYear();
-        setupReferenceDateAndFormatWithFourDigitsYear();
-        setupReferenceDateAndMultipleFormatsYear();
+        setupCustomReferenceDateAndLocaleWithTwoDigitsYear();
+        setupCustomReferenceDateAndLocaleWithFourDigitsYear();
+        setupCustomReferenceDateAndFormatWithTwoDigitsYear();
+        setupCustomReferenceDateAndFormatWithFourDigitsYear();
+        setupCustomReferenceDateAndMultipleFormatsYear();
     }
 
     public void setupPrimaryFormat() {
@@ -180,7 +180,7 @@ public class DatePickerFormatPage extends VerticalLayout {
         add(datePicker, btn);
     }
 
-    private void setupReferenceDateAndLocaleWithTwoDigitsYear() {
+    private void setupCustomReferenceDateAndLocaleWithTwoDigitsYear() {
         DatePicker datePicker = new DatePicker(may13);
         datePicker.setLocale(Locale.US);
 
@@ -190,12 +190,13 @@ public class DatePickerFormatPage extends VerticalLayout {
 
         Span output = createOutputSpan(datePicker);
         datePicker.setId(
-                REFERENCE_DATE_AND_LOCALE_WITH_TWO_DIGITS_YEAR_DATE_PICKER);
-        output.setId(REFERENCE_DATE_AND_LOCALE_WITH_TWO_DIGITS_YEAR_OUTPUT);
+                CUSTOM_REFERENCE_DATE_AND_LOCALE_WITH_TWO_DIGITS_YEAR_DATE_PICKER);
+        output.setId(
+                CUSTOM_REFERENCE_DATE_AND_LOCALE_WITH_TWO_DIGITS_YEAR_OUTPUT);
         add(datePicker, output);
     }
 
-    private void setupReferenceDateAndLocaleWithFourDigitsYear() {
+    private void setupCustomReferenceDateAndLocaleWithFourDigitsYear() {
         DatePicker datePicker = new DatePicker(may13);
         datePicker.setLocale(Locale.FRANCE);
 
@@ -205,12 +206,13 @@ public class DatePickerFormatPage extends VerticalLayout {
 
         Span output = createOutputSpan(datePicker);
         datePicker.setId(
-                REFERENCE_DATE_AND_LOCALE_WITH_FOUR_DIGITS_YEAR_DATE_PICKER);
-        output.setId(REFERENCE_DATE_AND_LOCALE_WITH_FOUR_DIGITS_YEAR_OUTPUT);
+                CUSTOM_REFERENCE_DATE_AND_LOCALE_WITH_FOUR_DIGITS_YEAR_DATE_PICKER);
+        output.setId(
+                CUSTOM_REFERENCE_DATE_AND_LOCALE_WITH_FOUR_DIGITS_YEAR_OUTPUT);
         add(datePicker, output);
     }
 
-    private void setupReferenceDateAndFormatWithTwoDigitsYear() {
+    private void setupCustomReferenceDateAndFormatWithTwoDigitsYear() {
         DatePicker datePicker = new DatePicker(may13);
 
         DatePickerI18n i18n = new DatePickerI18n();
@@ -220,12 +222,13 @@ public class DatePickerFormatPage extends VerticalLayout {
 
         Span output = createOutputSpan(datePicker);
         datePicker.setId(
-                REFERENCE_DATE_AND_FORMAT_WITH_TWO_DIGITS_YEAR_DATE_PICKER);
-        output.setId(REFERENCE_DATE_AND_FORMAT_WITH_TWO_DIGITS_YEAR_OUTPUT);
+                CUSTOM_REFERENCE_DATE_AND_FORMAT_WITH_TWO_DIGITS_YEAR_DATE_PICKER);
+        output.setId(
+                CUSTOM_REFERENCE_DATE_AND_FORMAT_WITH_TWO_DIGITS_YEAR_OUTPUT);
         add(datePicker, output);
     }
 
-    private void setupReferenceDateAndFormatWithFourDigitsYear() {
+    private void setupCustomReferenceDateAndFormatWithFourDigitsYear() {
         DatePicker datePicker = new DatePicker(may13);
 
         DatePickerI18n i18n = new DatePickerI18n();
@@ -235,12 +238,13 @@ public class DatePickerFormatPage extends VerticalLayout {
 
         Span output = createOutputSpan(datePicker);
         datePicker.setId(
-                REFERENCE_DATE_AND_FORMAT_WITH_FOUR_DIGITS_YEAR_DATE_PICKER);
-        output.setId(REFERENCE_DATE_AND_FORMAT_WITH_FOUR_DIGITS_YEAR_OUTPUT);
+                CUSTOM_REFERENCE_DATE_AND_FORMAT_WITH_FOUR_DIGITS_YEAR_DATE_PICKER);
+        output.setId(
+                CUSTOM_REFERENCE_DATE_AND_FORMAT_WITH_FOUR_DIGITS_YEAR_OUTPUT);
         add(datePicker, output);
     }
 
-    private void setupReferenceDateAndMultipleFormatsYear() {
+    private void setupCustomReferenceDateAndMultipleFormatsYear() {
         DatePicker datePicker = new DatePicker(may13);
 
         DatePickerI18n i18n = new DatePickerI18n();
@@ -249,8 +253,9 @@ public class DatePickerFormatPage extends VerticalLayout {
         datePicker.setI18n(i18n);
 
         Span output = createOutputSpan(datePicker);
-        datePicker.setId(REFERENCE_DATE_AND_MULTIPLE_FORMATS_YEAR_DATE_PICKER);
-        output.setId(REFERENCE_DATE_AND_MULTIPLE_FORMATS_YEAR_OUTPUT);
+        datePicker.setId(
+                CUSTOM_REFERENCE_DATE_AND_MULTIPLE_FORMATS_YEAR_DATE_PICKER);
+        output.setId(CUSTOM_REFERENCE_DATE_AND_MULTIPLE_FORMATS_YEAR_OUTPUT);
         add(datePicker, output);
     }
 
