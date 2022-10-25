@@ -200,7 +200,9 @@ export class VaadinSpreadsheet extends LitElement {
       document.head.appendChild(e);
       const rulesToBeAdded = e.__removedRules;
       for (let i = 0; i < rulesToBeAdded.length; i++) {
-        e.sheet.insertRule(rulesToBeAdded.item(i).cssText);
+        // To guarantee that the rules are added on the same order
+        // they were added by spreadsheet, we pass current index
+        e.sheet.insertRule(rulesToBeAdded.item(i).cssText, i);
       }
     });
   }
