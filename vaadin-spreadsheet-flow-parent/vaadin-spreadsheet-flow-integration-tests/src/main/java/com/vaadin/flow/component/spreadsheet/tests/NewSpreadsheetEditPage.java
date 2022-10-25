@@ -6,16 +6,15 @@ import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-spreadsheet/new-spreadsheet-edit-page")
-public class NewSpreadsheetEditPage extends Div {
+final public class NewSpreadsheetEditPage extends Div {
 
     private Spreadsheet spreadsheet;
 
     public NewSpreadsheetEditPage() {
         setSizeFull();
 
-        var freezePaneButton = new Button("Freeze pane", e -> {
-            spreadsheet.createFreezePane(6, 6);
-        });
+        var freezePaneButton = new Button("Freeze pane",
+                e -> spreadsheet.createFreezePane(6, 6));
         freezePaneButton.setId("freeze-pane-button");
 
         spreadsheet = new Spreadsheet();
