@@ -80,7 +80,6 @@ import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.spreadsheet.SheetOverlayWrapper.OverlayChangeListener;
 import com.vaadin.flow.component.spreadsheet.action.SpreadsheetDefaultActionHandler;
 import com.vaadin.flow.component.spreadsheet.client.CellData;
@@ -3502,11 +3501,6 @@ public class Spreadsheet extends Component
                     Serializer.serialize(new ArrayList<>(resources.keySet())));
             getElement().setAttribute("resource-" + key, resource);
         }
-    }
-
-    protected void setResource(String key, Icon icon) {
-        // todo: ver que hacemos con esto
-        // super.setResource(key, resource);
     }
 
     void clearSheetServerSide() {
