@@ -304,6 +304,9 @@ public class GridSortingTest {
 
     private void callSortersChanged(JsonArray json) {
         try {
+            Field field = Grid.class.getDeclaredField("sorterIndicatorUpdateRequested");
+            field.setAccessible(true);
+            field.setBoolean(grid, false);
             Method method = Grid.class.getDeclaredMethod("sortersChanged",
                     JsonArray.class);
             method.setAccessible(true);
