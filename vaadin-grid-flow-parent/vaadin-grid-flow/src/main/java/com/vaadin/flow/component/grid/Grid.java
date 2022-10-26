@@ -1365,6 +1365,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     private Registration dataProviderChangeRegistration;
 
+    private boolean sorterIndicatorUpdateRequested;
+
     /**
      * Creates a new instance, with page size of 50.
      */
@@ -3315,6 +3317,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     @ClientCallable
     private void sortersChanged(JsonArray sorters) {
+        if (sorterIndicatorUpdateRequested == true) {
+            sorterIndicatorUpdateRequested = false;
+            return;
+        }
         GridSortOrderBuilder<T> sortOrderBuilder = new GridSortOrderBuilder<>();
         for (int i = 0; i < sorters.length(); ++i) {
             JsonObject sorter = sorters.getObject(i);
@@ -3446,6 +3452,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     private void updateClientSideSorterIndicators(
             List<GridSortOrder<T>> order) {
+    	sorterIndicatorUpdateRequested = true;
         JsonArray directions = Json.createArray();
 
         for (int i = 0; i < order.size(); i++) {
