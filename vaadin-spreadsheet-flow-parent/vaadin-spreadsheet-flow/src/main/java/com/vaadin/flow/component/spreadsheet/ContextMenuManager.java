@@ -227,7 +227,6 @@ public class ContextMenuManager implements Serializable {
             if (actions2 != null) {
                 for (Action action : actions2) {
                     String key = actionMapper.key(action);
-                    spreadsheet.setResource(key, action.getIcon());
                     SpreadsheetActionDetails spreadsheetActionDetails = new SpreadsheetActionDetails();
                     spreadsheetActionDetails.caption = action.getCaption();
                     spreadsheetActionDetails.key = key;
@@ -254,7 +253,6 @@ public class ContextMenuManager implements Serializable {
         for (Handler handler : actionHandlers) {
             for (Action action : handler.getActions(column, spreadsheet)) {
                 String key = actionMapper.key(action);
-                spreadsheet.setResource(key, action.getIcon());
                 SpreadsheetActionDetails spreadsheetActionDetails = new SpreadsheetActionDetails();
                 spreadsheetActionDetails.caption = action.getCaption();
                 spreadsheetActionDetails.key = key;
@@ -280,7 +278,6 @@ public class ContextMenuManager implements Serializable {
         for (Handler handler : actionHandlers) {
             for (Action action : handler.getActions(row, spreadsheet)) {
                 String key = actionMapper.key(action);
-                spreadsheet.setResource(key, action.getIcon());
                 SpreadsheetActionDetails spreadsheetActionDetails = new SpreadsheetActionDetails();
                 spreadsheetActionDetails.caption = action.getCaption();
                 spreadsheetActionDetails.key = key;
