@@ -3417,6 +3417,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
 
         if (!userOriginated) {
+    	    sorterIndicatorUpdateRequested = true;        
             updateClientSideSorterIndicators(order);
         }
 
@@ -3452,7 +3453,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     private void updateClientSideSorterIndicators(
             List<GridSortOrder<T>> order) {
-    	sorterIndicatorUpdateRequested = true;
         JsonArray directions = Json.createArray();
 
         for (int i = 0; i < order.size(); i++) {
