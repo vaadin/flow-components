@@ -115,6 +115,7 @@ public class SpreadsheetPage extends VerticalLayout implements Receiver {
         spreadsheetContainer = new Div();
         spreadsheetContainer.addClassName("spreadsheetContainer");
         spreadsheetContainer.setSizeFull();
+        spreadsheetContainer.setMinHeight("400px");
 
         layout.addClassName("layout");
         layout.setSizeFull();
