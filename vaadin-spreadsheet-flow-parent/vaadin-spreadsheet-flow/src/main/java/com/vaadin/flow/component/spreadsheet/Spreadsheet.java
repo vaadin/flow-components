@@ -144,16 +144,6 @@ public class Spreadsheet extends Component
         getElement().setProperty("id", id);
     }
 
-    @Override
-    public void setHeight(String height) {
-        getElement().setProperty("height", height);
-    }
-
-    @Override
-    public void setWidth(String width) {
-        getElement().setProperty("width", width);
-    }
-
     // from SaredState
 
     // private Map<String, URLReference> resources = new HashMap<>();

@@ -12,7 +12,7 @@
  * http://polymer.github.io/PATENTS.txt
  */
 
-import {LitElement, html, css, unsafeCSS} from 'lit-element';
+import {LitElement, html, css} from 'lit-element';
 import { Spreadsheet } from './spreadsheet-export.js';
 import css_valo from './spreadsheet-styles-valo.css';
 
@@ -30,10 +30,6 @@ export class VaadinSpreadsheet extends LitElement {
 
       /* SHARED STATE */
       dirty: {type: Number},
-
-      width: {type: String},
-
-      height: {type: String},
 
       id: {type: String},
 
@@ -180,8 +176,13 @@ export class VaadinSpreadsheet extends LitElement {
       :host {
         display: block;
         height: 100%;
-        min-height: 400px;
+        flex: 1 1 auto;
         isolation: isolate;
+      }
+
+      ::slotted(.v-spreadsheet) {
+        box-sizing: border-box;
+        min-height: 100px;
       }
     `
   };
@@ -232,6 +233,8 @@ export class VaadinSpreadsheet extends LitElement {
       }
 
       this.api = new Spreadsheet(this);
+      this.api.setHeight("100%");
+      this.api.setWidth("100%");
       this.createCallbacks();
 
       this.observer = new ResizeObserver(e => this.api.resize());
@@ -343,10 +346,6 @@ export class VaadinSpreadsheet extends LitElement {
         this.api.setLockFormatRows(newVal);
       } else if ('namedRanges' == name) {
         this.api.setNamedRanges(newVal);
-      } else if ('width' == name) {
-        this.api.setWidth(newVal);
-      } else if ('height' == name) {
-        this.api.setHeight(newVal);
       } else if ('id' == name) {
         this.api.setId(newVal);
       } else if ('class' == name) {
