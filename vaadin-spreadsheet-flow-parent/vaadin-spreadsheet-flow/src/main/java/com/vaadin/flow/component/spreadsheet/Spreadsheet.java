@@ -5451,19 +5451,6 @@ public class Spreadsheet extends Component
                 getSpreadsheetSheetIndex(newSheetPOIIndex), newSheetPOIIndex));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.vaadin.ui.HasComponents#iterator()
-     */
-    // @Override
-    // todo: comprobar si esto es necesario
-    public Iterator<Component> iterator() {
-        return new IteratorChain<Component>(Arrays.asList(
-                customComponents.iterator(), attachedPopupButtons.iterator(),
-                overlayComponents.iterator()));
-    }
-
     /**
      * This is called when the client-side connector has been initialized.
      */
