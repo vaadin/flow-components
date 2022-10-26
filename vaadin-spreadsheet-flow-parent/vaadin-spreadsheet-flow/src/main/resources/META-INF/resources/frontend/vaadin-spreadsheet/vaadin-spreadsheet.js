@@ -12,7 +12,7 @@
  * http://polymer.github.io/PATENTS.txt
  */
 
-import {LitElement, html, css} from 'lit-element';
+import {LitElement, html, css} from 'lit';
 import { Spreadsheet } from './spreadsheet-export.js';
 import css_valo from './spreadsheet-styles-valo.css';
 
