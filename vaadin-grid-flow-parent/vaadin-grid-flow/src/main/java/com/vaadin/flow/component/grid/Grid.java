@@ -3317,7 +3317,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     @ClientCallable
     private void sortersChanged(JsonArray sorters) {
-        if (sorterIndicatorUpdateRequested == true) {
+        if (sorterIndicatorUpdateRequested) {
             sorterIndicatorUpdateRequested = false;
             return;
         }
@@ -3368,7 +3368,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     public void sort(List<GridSortOrder<T>> order) {
         if (!isAttached()) {
             sorterIndicatorUpdateRequested = true;
-        }    
+        }
         if (order == null) {
             order = Collections.emptyList();
         }
