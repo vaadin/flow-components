@@ -311,7 +311,7 @@ public class GridSortingTest {
                     JsonArray.class);
             method.setAccessible(true);
             method.invoke(grid, json);
-        } catch (NoSuchMethodException | SecurityException
+        } catch (NoSucFieldException | NoSuchMethodException | SecurityException
                 | IllegalAccessException | IllegalArgumentException
                 | InvocationTargetException e) {
             Assert.fail("Could not call Grid.sortersChanged");
