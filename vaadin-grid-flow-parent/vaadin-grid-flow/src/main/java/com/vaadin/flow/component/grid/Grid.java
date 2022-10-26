@@ -209,7 +209,6 @@ import org.slf4j.LoggerFactory;
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha3")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/grid", version = "23.3.0-alpha3")
-@NpmPackage(value = "@vaadin/vaadin-grid", version = "23.3.0-alpha3")
 @NpmPackage(value = "@vaadin/tooltip", version = "23.3.0-alpha3")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")

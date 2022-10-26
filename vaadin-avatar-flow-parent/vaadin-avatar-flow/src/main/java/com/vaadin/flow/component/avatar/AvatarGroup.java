@@ -66,7 +66,6 @@ import java.util.stream.Stream;
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/avatar-group/src/vaadin-avatar-group.js")
 @NpmPackage(value = "@vaadin/avatar-group", version = "23.3.0-alpha3")
-@NpmPackage(value = "@vaadin/vaadin-avatar", version = "23.3.0-alpha3")
 public class AvatarGroup extends Component
         implements HasStyle, HasSize, HasThemeVariant<AvatarGroupVariant> {
 
