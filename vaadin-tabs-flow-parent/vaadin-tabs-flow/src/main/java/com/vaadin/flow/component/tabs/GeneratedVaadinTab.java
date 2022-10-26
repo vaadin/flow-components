@@ -94,7 +94,6 @@ Tab 1
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/tabs/src/vaadin-tab.js")
 @NpmPackage(value = "@vaadin/tabs", version = "23.3.0-alpha3")
-@NpmPackage(value = "@vaadin/vaadin-tabs", version = "23.3.0-alpha3")
 public abstract class GeneratedVaadinTab<R extends GeneratedVaadinTab<R>>
         extends Component implements HasStyle, HasTheme {
 

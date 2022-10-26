@@ -72,7 +72,6 @@ import elemental.json.JsonValue;
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 @NpmPackage(value = "@vaadin/virtual-list", version = "23.3.0-alpha3")
-@NpmPackage(value = "@vaadin/vaadin-virtual-list", version = "23.3.0-alpha3")
 @JsModule("@vaadin/virtual-list/vaadin-virtual-list.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./virtualListConnector.js")
