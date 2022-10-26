@@ -205,11 +205,12 @@ public class Action implements Serializable {
 
     /**
      * Sets the icon.
+     * TODO: Marked private since the feature is not yet implemented.
      *
      * @param icon
      *            the icon to set.
      */
-    public void setIcon(Icon icon) {
+    private void setIcon(Icon icon) {
         this.icon = icon;
     }
 
