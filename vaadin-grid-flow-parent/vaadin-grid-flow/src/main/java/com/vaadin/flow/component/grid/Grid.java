@@ -3366,6 +3366,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @see #getSortOrder()
      */
     public void sort(List<GridSortOrder<T>> order) {
+        if (!isAttached()) {
+            sorterIndicatorUpdateRequested = true;
+        }    
         if (order == null) {
             order = Collections.emptyList();
         }
@@ -3417,7 +3420,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
 
         if (!userOriginated) {
-    	    sorterIndicatorUpdateRequested = true;        
             updateClientSideSorterIndicators(order);
         }
 
