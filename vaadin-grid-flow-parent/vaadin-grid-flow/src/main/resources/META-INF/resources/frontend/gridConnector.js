@@ -455,7 +455,14 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
                   }
                 });
 
-                directions.reverse().forEach(({ column, direction }) => {
+                // Apply directions in correct order, depending on configured multi-sort priority.
+                // For the default "prepend" mode, directions need to be applied in reverse, in
+                // order for the sort indicators to match the order on the server. For "append"
+                // just keep the order passed from the server.
+                if (grid.multiSortPriority !== 'append') {
+                  directions = directions.reverse()
+                }
+                directions.forEach(({ column, direction }) => {
                   sorters.forEach((sorter) => {
                     if (sorter.getAttribute('path') === column && sorter.direction !== direction) {
                       sorter.direction = direction;
@@ -668,9 +675,9 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             }
             cache[pkey][page] = slice;
 
-            grid.$connector.doSelection(slice.filter((item) => item.selected && !isSelectedOnGrid(item)));
+            grid.$connector.doSelection(slice.filter((item) => item.selected));
             grid.$connector.doDeselection(
-              slice.filter((item) => !item.selected && (selectedKeys[item.key] || isSelectedOnGrid(item)))
+              slice.filter((item) => !item.selected && selectedKeys[item.key])
             );
 
             const updatedItems = updateGridCache(page, pkey);
@@ -802,17 +809,6 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           }
           grid._cache.updateSize();
         });
-
-        const isSelectedOnGrid = function (item) {
-          const selectedItems = grid.selectedItems;
-          for (let i = 0; i < selectedItems; i++) {
-            let selectedItem = selectedItems[i];
-            if (selectedItem.key === item.key) {
-              return true;
-            }
-          }
-          return false;
-        };
 
         grid.$connector.reset = tryCatchWrapper(function () {
           grid.size = 0;

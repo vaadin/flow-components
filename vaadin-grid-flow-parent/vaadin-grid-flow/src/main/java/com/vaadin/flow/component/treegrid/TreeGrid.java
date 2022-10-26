@@ -335,6 +335,21 @@ public class TreeGrid<T> extends Grid<T>
                 (ComponentEventListener) listener);
     }
 
+    /**
+     * Tree grid only supports hierarchical data providers. Use
+     * {@link #setDataProvider(HierarchicalDataProvider)} instead.
+     * <p>
+     * This method is inherited from Grid and has been marked as deprecated to
+     * indicate that it is not supported. This method will throw an
+     * {@link UnsupportedOperationException}.
+     *
+     * @param dataProvider
+     *            the data provider
+     * @deprecated use {@link #setDataProvider(HierarchicalDataProvider)},
+     *             {@link #setItems(Collection, ValueProvider)},
+     *             {@link #setItems(Stream, ValueProvider)} or
+     *             {@link #setTreeData(TreeData)} instead.
+     */
     @Override
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         if (dataProvider instanceof HierarchicalDataProvider) {
@@ -354,8 +369,10 @@ public class TreeGrid<T> extends Grid<T>
 
     /**
      * Tree grid does not support data views. Use
-     * {@link #setDataProvider(HierarchicalDataProvider)} instead. This method
-     * is inherited from Grid and it will throw an
+     * {@link #setDataProvider(HierarchicalDataProvider)} instead.
+     * <p>
+     * This method is inherited from Grid and has been marked as deprecated to
+     * indicate that it is not supported. This method will throw an
      * {@link UnsupportedOperationException}.
      *
      * @param dataProvider
@@ -378,7 +395,9 @@ public class TreeGrid<T> extends Grid<T>
 
     /**
      * Tree grid supports only hierarchical data so use another method instead.
-     * This method is inherited from Grid and it will throw an
+     * <p>
+     * This method is inherited from Grid and has been marked as deprecated to
+     * indicate that it is not supported. This method will throw an
      * {@link UnsupportedOperationException}.
      *
      * @param fetchCallback
@@ -401,7 +420,10 @@ public class TreeGrid<T> extends Grid<T>
 
     /**
      * Tree grid supports only hierarchical data providers so use another method
-     * instead. This method is inherited from Grid and it will throw an
+     * instead.
+     * <p>
+     * This method is inherited from Grid and has been marked as deprecated to
+     * indicate that it is not supported. This method will throw an
      * {@link UnsupportedOperationException}.
      *
      * @param dataProvider
@@ -423,7 +445,9 @@ public class TreeGrid<T> extends Grid<T>
 
     /**
      * Tree grid supports only hierarchical data so use another method instead.
-     * This method is inherited from Grid and it will throw an
+     * <p>
+     * This method is inherited from Grid and has been marked as deprecated to
+     * indicate that it is not supported. This method will throw an
      * {@link UnsupportedOperationException}.
      *
      * @param items
@@ -445,7 +469,9 @@ public class TreeGrid<T> extends Grid<T>
 
     /**
      * Tree grid supports only hierarchical data, so use another method instead.
-     * This method is inherited from Grid and it will throw an
+     * <p>
+     * This method is inherited from Grid and has been marked as deprecated to
+     * indicate that it is not supported. This method will throw an
      * {@link UnsupportedOperationException}.
      *
      * @param items
@@ -466,7 +492,10 @@ public class TreeGrid<T> extends Grid<T>
     }
 
     /**
-     * Tree grid does not support list data view, this will throw an
+     * Tree grid does not support list data view.
+     * <p>
+     * This method is inherited from Grid and has been marked as deprecated to
+     * indicate that it is not supported. This method will throw an
      * {@link UnsupportedOperationException}.
      *
      * @return exception is thrown
@@ -480,7 +509,10 @@ public class TreeGrid<T> extends Grid<T>
     }
 
     /**
-     * Tree grid does not support list data view, this will throw an
+     * Tree grid does not support list data view.
+     * <p>
+     * This method is inherited from Grid and has been marked as deprecated to
+     * indicate that it is not supported. This method will throw an
      * {@link UnsupportedOperationException}.
      *
      * @return exception is thrown
@@ -494,7 +526,10 @@ public class TreeGrid<T> extends Grid<T>
     }
 
     /**
-     * Tree grid does not support list data view, this will throw an
+     * Tree grid does not support list data view.
+     * <p>
+     * This method is inherited from Grid and has been marked as deprecated to
+     * indicate that it is not supported. This method will throw an
      * {@link UnsupportedOperationException}.
      *
      * @return exception is thrown

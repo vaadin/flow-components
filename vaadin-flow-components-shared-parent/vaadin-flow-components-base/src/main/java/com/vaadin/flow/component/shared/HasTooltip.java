@@ -32,7 +32,7 @@ public interface HasTooltip extends HasElement {
      *
      * @return the tooltip handle
      */
-    default Tooltip setTooltip(String text) {
+    default Tooltip setTooltipText(String text) {
         var tooltip = Tooltip.getForElement(getElement());
         if (tooltip == null) {
             tooltip = Tooltip.forHasTooltip(this);
@@ -42,12 +42,16 @@ public interface HasTooltip extends HasElement {
     }
 
     /**
-     * Gets the tooltip handle of the component or null if no tooltip is set.
+     * Gets the tooltip handle of the component.
      *
      * @return the tooltip handle
      */
     default Tooltip getTooltip() {
-        return Tooltip.getForElement(getElement());
+        var tooltip = Tooltip.getForElement(getElement());
+        if (tooltip == null) {
+            tooltip = setTooltipText(null);
+        }
+        return tooltip;
     }
 
 }
