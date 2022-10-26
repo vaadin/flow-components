@@ -243,16 +243,6 @@ public class PopupButton extends Component {
         return child;
     }
 
-    // @Override
-    // todo: comprobar si esto es necesario
-    public Iterator<Component> iterator() {
-        if (child != null && popupVisible) {
-            return Collections.singleton(child).iterator();
-        } else {
-            return Collections.<Component> emptyList().iterator();
-        }
-    }
-
     /**
      * Mark the button with "active" - style. See PopupButtonWidget for the CSS
      * class name.
