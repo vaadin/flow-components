@@ -41,6 +41,7 @@ public class GridTooltipIT extends AbstractComponentIT {
     @Test
     public void hoverOverTooltipColumnCell_showTooltip() {
         var grid = $(GridElement.class).first();
+        flushScrolling(grid);
         showTooltip(grid.getCell("Jack"));
         Assert.assertEquals("First name of the person is Jack",
                 getActiveTooltipText());
@@ -54,15 +55,17 @@ public class GridTooltipIT extends AbstractComponentIT {
         clickElementWithJs("toggle-grid-button");
 
         var grid = $(GridElement.class).first();
+        flushScrolling(grid);
         showTooltip(grid.getCell("Jack"));
         Assert.assertEquals("First name of the person is Jack",
                 getActiveTooltipText());
     }
 
     @Test
-    public void dynamicalyAddGenerator_hoverOverTooltipColumnCell_showTooltip() {
+    public void dynamicallyAddGenerator_hoverOverTooltipColumnCell_showTooltip() {
         var grid = $(GridElement.class).first();
         clickElementWithJs("set-age-tooltip-button");
+        flushScrolling(grid);
         showTooltip(grid.getCell("33"));
         Assert.assertEquals("Age of the person is 33", getActiveTooltipText());
     }
@@ -77,4 +80,16 @@ public class GridTooltipIT extends AbstractComponentIT {
         return findElement(By.tagName("vaadin-tooltip-overlay")).getText();
     }
 
+    /**
+     * Forces the grid to remove the `scrolling` attribute on the grid scroller,
+     * which would otherwise prevent a tooltip to open on mouseenter
+     *
+     * @param grid
+     *            the grid to flush
+     */
+    private void flushScrolling(GridElement grid) {
+        getCommandExecutor().executeScript(
+                "const grid = arguments[0]; if (grid._debounceScrolling) { grid._debounceScrolling.flush() }",
+                grid);
+    }
 }
