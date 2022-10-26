@@ -57,7 +57,6 @@ import java.util.Objects;
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/avatar/src/vaadin-avatar.js")
 @NpmPackage(value = "@vaadin/avatar", version = "23.3.0-alpha3")
-@NpmPackage(value = "@vaadin/vaadin-avatar", version = "23.3.0-alpha3")
 public class Avatar extends Component
         implements HasStyle, HasSize, HasThemeVariant<AvatarVariant> {
 

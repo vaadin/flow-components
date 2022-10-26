@@ -63,7 +63,6 @@ import elemental.json.JsonObject;
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha3")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/combo-box", version = "23.3.0-alpha3")
-@NpmPackage(value = "@vaadin/vaadin-combo-box", version = "23.3.0-alpha3")
 @JsModule("@vaadin/combo-box/src/vaadin-combo-box.js")
 @JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 @JsModule("./flow-component-renderer.js")
