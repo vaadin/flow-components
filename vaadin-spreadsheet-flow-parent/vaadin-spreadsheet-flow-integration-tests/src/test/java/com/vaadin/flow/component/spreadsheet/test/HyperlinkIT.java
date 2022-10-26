@@ -101,6 +101,8 @@ public class HyperlinkIT extends AbstractSpreadsheetIT {
         loadFile("hyper_links.xlsx");
         // ensure hyperlink switches to correct cell
         getSpreadsheet().scroll(29 * CELL_HEIGHT);
+        waitUntil(e -> findElement(By.cssSelector(".col2.row30")).isDisplayed());
+
         testInternal("B30", "B10");
         // ensure correct sheet
         testInternal("A3", "A3");
