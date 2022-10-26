@@ -33,15 +33,13 @@ public class SizingPage extends Div {
 
         var spreadsheetList = new UnorderedList();
 
-        var spreadsheetHeight200 = getButton("200px", "spreadsheetHeight200",
-                e -> spreadsheet.setHeight("200px"));
-        var spreadsheetHeight600 = getButton("600px", "spreadsheetHeight600",
-                e -> spreadsheet.setHeight("600px"));
-        var spreadsheetHeightDefault = getButton("Default (100%)",
-                "spreadsheetHeightDefault", e -> spreadsheet.setHeight(null));
-        spreadsheetList
-                .add(new ListItem(new Span("Height: "), spreadsheetHeight200,
-                        spreadsheetHeight600, spreadsheetHeightDefault));
+        spreadsheetList.add(new ListItem(new Span("Height: "),
+                getButton("200px", "spreadsheetHeight200",
+                        e -> spreadsheet.setHeight("200px")),
+                getButton("600px", "spreadsheetHeight600",
+                        e -> spreadsheet.setHeight("600px")),
+                getButton("Default (100%)", "spreadsheetHeightDefault",
+                        e -> spreadsheet.setHeight(null))));
 
         add(spreadsheetList);
 
@@ -49,23 +47,19 @@ public class SizingPage extends Div {
 
         var layoutList = new UnorderedList();
 
-        var layoutHeight200 = getButton("200px", "layoutHeight200",
-                e -> layout.setHeight("200px"));
-        var layoutHeight600 = getButton("600px", "layoutHeight600",
-                e -> layout.setHeight("600px"));
-        var layoutHeightDefault = getButton("Default (auto)",
-                "layoutHeightDefault", e -> layout.setHeight(null));
-        layoutList.add(new ListItem(new Span("Height: "), layoutHeight200,
-                layoutHeight600, layoutHeightDefault));
+        layoutList.add(new ListItem(new Span("Height: "),
+                getButton("200px", "layoutHeight200",
+                        e -> layout.setHeight("200px")),
+                getButton("600px", "layoutHeight600",
+                        e -> layout.setHeight("600px")),
+                getButton("Default (auto)", "layoutHeightDefault",
+                        e -> layout.setHeight(null))));
 
-        var layoutDisplayFlex = getButton("flex", "layoutDisplayFlex",
-                e -> layout.getStyle().set("display", "flex"));
-        var layoutDisplayDefault = getButton("Default (block)",
-                "layoutDisplayDefault",
-                e -> layout.getStyle().remove("display"));
-
-        layoutList.add(new ListItem(new Span("Display: "), layoutDisplayFlex,
-                layoutDisplayDefault));
+        layoutList.add(new ListItem(new Span("Display: "),
+                getButton("flex", "layoutDisplayFlex",
+                        e -> layout.getStyle().set("display", "flex")),
+                getButton("Default (block)", "layoutDisplayDefault",
+                        e -> layout.getStyle().remove("display"))));
 
         add(layoutList);
 
