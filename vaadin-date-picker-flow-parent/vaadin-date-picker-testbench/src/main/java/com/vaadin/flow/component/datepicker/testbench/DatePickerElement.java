@@ -36,6 +36,7 @@ import org.openqa.selenium.Keys;
 public class DatePickerElement extends TestBenchElement
         implements HasLabel, HasHelper {
 
+    @Element("vaadin-date-picker-overlay-content")
     public static class OverlayContentElement extends TestBenchElement {
         /**
          * Gets all visible month calendars that are currently rendered by the
