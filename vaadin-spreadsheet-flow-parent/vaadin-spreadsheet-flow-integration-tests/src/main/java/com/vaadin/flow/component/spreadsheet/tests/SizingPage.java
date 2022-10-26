@@ -1,5 +1,7 @@
 package com.vaadin.flow.component.spreadsheet.tests;
 
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.ListItem;
@@ -28,20 +30,15 @@ public class SizingPage extends Div {
         layout.getStyle().set("overflow", "auto");
 
         add(new H2("Spreadsheet"));
+
         var spreadsheetList = new UnorderedList();
 
-        var spreadsheetHeight200 = new NativeButton("200px",
+        var spreadsheetHeight200 = getButton("200px", "spreadsheetHeight200",
                 e -> spreadsheet.setHeight("200px"));
-        spreadsheetHeight200.setId("spreadsheetHeight200");
-
-        var spreadsheetHeight600 = new NativeButton("600px",
+        var spreadsheetHeight600 = getButton("600px", "spreadsheetHeight600",
                 e -> spreadsheet.setHeight("600px"));
-        spreadsheetHeight600.setId("spreadsheetHeight600");
-
-        var spreadsheetHeightDefault = new NativeButton("default (100%)",
-                e -> spreadsheet.getStyle().remove("height"));
-        spreadsheetHeightDefault.setId("spreadsheetHeightDefault");
-
+        var spreadsheetHeightDefault = getButton("Default (100%)",
+                "spreadsheetHeightDefault", e -> spreadsheet.setHeight(null));
         spreadsheetList
                 .add(new ListItem(new Span("Height: "), spreadsheetHeight200,
                         spreadsheetHeight600, spreadsheetHeightDefault));
@@ -49,35 +46,23 @@ public class SizingPage extends Div {
         add(spreadsheetList);
 
         add(new H2("Layout"));
+
         var layoutList = new UnorderedList();
 
-        var layoutHeight200 = new NativeButton("200px",
+        var layoutHeight200 = getButton("200px", "layoutHeight200",
                 e -> layout.setHeight("200px"));
-        layoutHeight200.setId("layoutHeight200");
-        add(layoutHeight200);
-
-        var layoutHeight600 = new NativeButton("600px",
+        var layoutHeight600 = getButton("600px", "layoutHeight600",
                 e -> layout.setHeight("600px"));
-        layoutHeight600.setId("layoutHeight600");
-        add(layoutHeight600);
-
-        var layoutHeightDefault = new NativeButton("default (auto)",
-                e -> layout.getStyle().remove("height"));
-        layoutHeightDefault.setId("layoutHeightDefault");
-        add(layoutHeightDefault);
-
+        var layoutHeightDefault = getButton("Default (auto)",
+                "layoutHeightDefault", e -> layout.setHeight(null));
         layoutList.add(new ListItem(new Span("Height: "), layoutHeight200,
                 layoutHeight600, layoutHeightDefault));
 
-        var layoutDisplayFlex = new NativeButton("flex",
+        var layoutDisplayFlex = getButton("flex", "layoutDisplayFlex",
                 e -> layout.getStyle().set("display", "flex"));
-        layoutDisplayFlex.setId("layoutDisplayFlex");
-        add(layoutDisplayFlex);
-
-        var layoutDisplayDefault = new NativeButton("default (block)",
+        var layoutDisplayDefault = getButton("Default (block)",
+                "layoutDisplayDefault",
                 e -> layout.getStyle().remove("display"));
-        layoutDisplayDefault.setId("layoutDisplayDefault");
-        add(layoutDisplayDefault);
 
         layoutList.add(new ListItem(new Span("Display: "), layoutDisplayFlex,
                 layoutDisplayDefault));
@@ -85,6 +70,13 @@ public class SizingPage extends Div {
         add(layoutList);
 
         add(layout);
+    }
+
+    private NativeButton getButton(String title, String id,
+            ComponentEventListener<ClickEvent<NativeButton>> clickListener) {
+        var button = new NativeButton(title, clickListener);
+        button.setId(id);
+        return button;
     }
 
 }
