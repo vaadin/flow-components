@@ -272,11 +272,14 @@ public class BeanGridSortingTest {
             JsonArray array = Json.createArray();
             array.set(0, json);
 
+            Field field = Grid.class.getDeclaredField("sorterIndicatorUpdateRequested");
+            field.setAccessible(true);
+            field.setBoolean(grid, false);            
             Method method = Grid.class.getDeclaredMethod("sortersChanged",
                     JsonArray.class);
             method.setAccessible(true);
             method.invoke(grid, array);
-        } catch (NoSuchMethodException | SecurityException
+        } catch (NoSuchFieldException | NoSuchMethodException | SecurityException
                 | IllegalAccessException | IllegalArgumentException
                 | InvocationTargetException e) {
             Assert.fail("Could not call Grid.sortersChanged: " + e);
