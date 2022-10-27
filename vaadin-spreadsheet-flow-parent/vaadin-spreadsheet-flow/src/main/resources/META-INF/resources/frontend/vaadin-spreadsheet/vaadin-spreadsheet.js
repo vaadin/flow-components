@@ -1,17 +1,15 @@
-/**
- * @license
- * Copyright (c) 2019 The Polymer Project Authors. All rights reserved.
- * This code may only be used under the BSD style license found at
- * http://polymer.github.io/LICENSE.txt
- * The complete set of authors may be found at
- * http://polymer.github.io/AUTHORS.txt
- * The complete set of contributors may be found at
- * http://polymer.github.io/CONTRIBUTORS.txt
- * Code distributed by Google as part of the polymer project is also
- * subject to an additional IP rights grant found at
- * http://polymer.github.io/PATENTS.txt
+/*
+ * #%L
+ * Vaadin Spreadsheet
+ * %%
+ * Copyright (C) 2019 - 2022 Vaadin Ltd
+ * %%
+ * This program is available under Commercial Vaadin Developer License
+ * 4.0 (CVDLv4).
+ *
+ * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
+ * #L%
  */
-
 import {LitElement, html, css} from 'lit';
 import { Spreadsheet } from './spreadsheet-export.js';
 import css_valo from './spreadsheet-styles-valo.css';
