@@ -12,9 +12,13 @@
  * http://polymer.github.io/PATENTS.txt
  */
 
-import {LitElement, html, css} from 'lit-element';
+import {LitElement, html, css} from 'lit';
 import { Spreadsheet } from './spreadsheet-export.js';
 import css_valo from './spreadsheet-styles-valo.css';
+
+const spreadsheetResizeObserver = new ResizeObserver((entries) => {
+  entries.forEach((entry) => entry.target.api.resize());
+});
 
 /**
  * An example element.
@@ -167,10 +171,6 @@ export class VaadinSpreadsheet extends LitElement {
     };
   }
 
-  constructor() {
-    super();
-  }
-
   static get styles() {
     return css`
       :host {
@@ -195,7 +195,7 @@ export class VaadinSpreadsheet extends LitElement {
 
   connectedCallback() {
     super.connectedCallback()
-    this.observer && this.observer.observe(this);
+    spreadsheetResizeObserver.observe(this);
     // Restore styles in the case widget is reattached, it happens e.g in client router
     this.styles && this.styles.forEach(e => {
       document.head.appendChild(e);
@@ -210,7 +210,7 @@ export class VaadinSpreadsheet extends LitElement {
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    this.observer && this.observer.unobserve(this);
+    spreadsheetResizeObserver.unobserve(this);
     // Remove styles added to the head by the Widget
     this.styles = document.head.querySelectorAll(`style[id^="spreadsheet-${this.id}"]`);
     this.styles.forEach(e => {
@@ -237,7 +237,6 @@ export class VaadinSpreadsheet extends LitElement {
       this.api.setWidth("100%");
       this.createCallbacks();
 
-      this.observer = new ResizeObserver(e => this.api.resize());
       initial = true;
     }
     let propNames = [];
