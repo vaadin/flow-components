@@ -1,14 +1,7 @@
-/*
- * #%L
- * Vaadin Spreadsheet
- * %%
- * Copyright (C) 2019 - 2022 Vaadin Ltd
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
- *
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
+/**
+ * @license
+ * Copyright (c) 2019 - 2022 Vaadin Ltd.
+ * This program is available under Commercial Vaadin Developer License 4.0, available at https://vaadin.com/license/cvdl-4.0.
  */
 import {LitElement, html, css} from 'lit';
 import { Spreadsheet } from './spreadsheet-export.js';
