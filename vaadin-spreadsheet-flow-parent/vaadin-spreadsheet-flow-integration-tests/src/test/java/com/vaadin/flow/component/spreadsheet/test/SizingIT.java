@@ -88,6 +88,22 @@ public class SizingIT extends AbstractComponentIT {
         Assert.assertEquals(layoutWidth, spreadsheet.getSize().getWidth());
     }
 
+    @Test
+    public void toggleSpreadsheetAttached_noMissingRows() {
+        // Detach spreadsheet
+        findElement(By.id("spreadsheetAttachedToggle")).click();
+        // Re-attach spreadsheet
+        findElement(By.id("spreadsheetAttachedToggle")).click();
+        // Get reference to the new spreadsheet
+        var spreadsheet = $(SpreadsheetElement.class).first();
+
+        // Increase the spreadsheet height
+        findElement(By.id("spreadsheetHeight600")).click();
+
+        // New rows should have been added on resize
+        waitUntil(e -> spreadsheet.getCellAt("A20") != null);
+    }
+
     private void assertSpreadsheetHeight(int height) {
         var internal = spreadsheet.findElement(By.className("v-spreadsheet"));
         Assert.assertEquals(height, internal.getSize().getHeight());
