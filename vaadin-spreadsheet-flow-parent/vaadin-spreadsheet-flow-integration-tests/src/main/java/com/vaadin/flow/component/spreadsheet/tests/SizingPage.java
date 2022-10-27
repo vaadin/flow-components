@@ -41,6 +41,15 @@ public class SizingPage extends Div {
                 getButton("Default (100%)", "spreadsheetHeightDefault",
                         e -> spreadsheet.setHeight(null))));
 
+        spreadsheetList.add(new ListItem(new Span("Attached: "),
+                getButton("Toggle", "spreadsheetAttachedToggle", e -> {
+                    if (spreadsheet.getParent().isPresent()) {
+                        layout.remove(spreadsheet);
+                    } else {
+                        layout.add(spreadsheet);
+                    }
+                })));
+
         add(spreadsheetList);
 
         add(new H2("Layout"));
