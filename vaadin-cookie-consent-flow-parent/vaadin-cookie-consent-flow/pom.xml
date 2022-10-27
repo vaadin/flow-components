@@ -26,7 +26,7 @@
         <dependency>
             <groupId>com.vaadin.webjar</groupId>
             <artifactId>vaadin-cookie-consent</artifactId>
-            <version>1.2.0</version>
+            <version>1.2.1</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.webjars.bowergithub.osano</groupId>
