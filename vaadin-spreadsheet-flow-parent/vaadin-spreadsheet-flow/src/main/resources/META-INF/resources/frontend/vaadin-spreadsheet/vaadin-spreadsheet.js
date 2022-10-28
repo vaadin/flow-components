@@ -179,9 +179,7 @@ export class VaadinSpreadsheet extends LitElement {
   };
 
   render() {
-    return html`
-      <slot></slot>
-    `;
+    return html``;
   }
 
   connectedCallback() {
@@ -189,7 +187,7 @@ export class VaadinSpreadsheet extends LitElement {
     spreadsheetResizeObserver.observe(this);
     // Restore styles in the case widget is reattached, it happens e.g in client router
     this.styles && this.styles.forEach(e => {
-      document.head.appendChild(e);
+      this.renderRoot.appendChild(e)
       const rulesToBeAdded = e.__removedRules;
       for (let i = 0; i < rulesToBeAdded.length; i++) {
         // To guarantee that the rules are added on the same order
@@ -206,7 +204,7 @@ export class VaadinSpreadsheet extends LitElement {
     this.styles = document.head.querySelectorAll(`style[id^="spreadsheet-${this.id}"]`);
     this.styles.forEach(e => {
       e.__removedRules = e.sheet.cssRules;
-      document.head.removeChild(e);
+      this.renderRoot.removeChild(e);
     });
   }
 
@@ -223,7 +221,7 @@ export class VaadinSpreadsheet extends LitElement {
         document.body.appendChild(overlays);        
       }
 
-      this.api = new Spreadsheet(this);
+      this.api = new Spreadsheet(this.renderRoot);
       this.api.setHeight("100%");
       this.api.setWidth("100%");
       this.createCallbacks();
@@ -599,7 +597,7 @@ export class VaadinSpreadsheet extends LitElement {
     if (!elm) {
       elm = document.createElement('style');
       elm.id = id;
-      document.head.append(elm);
+      this.renderRoot.append(elm);
     }
     elm.textContent = style;
   }

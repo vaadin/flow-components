@@ -54,6 +54,7 @@ public class SpreadsheetJsApi {
 
     private void init(Element element) {
         spreadsheetConnector = new SpreadsheetConnector();
+        spreadsheetConnector.setHost(element);
         spreadsheetConnector.doInit("1", new ApplicationConnection());
         spreadsheetWidget = spreadsheetConnector.getWidget();
         RootPanel.getForElement(element).add(spreadsheetWidget);

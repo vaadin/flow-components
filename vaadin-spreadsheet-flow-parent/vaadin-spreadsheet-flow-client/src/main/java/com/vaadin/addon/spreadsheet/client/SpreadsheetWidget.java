@@ -25,6 +25,7 @@ import java.util.Set;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.TouchEvent;
@@ -1997,6 +1998,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             commsTrigger.sendUpdates();
         }
     };
+    private Element host;
 
     void startDelayedSendingTimer() {
         delayedSending.schedule(DELAYED_SERVER_REQUEST_DELAY);
@@ -2034,7 +2036,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     }
 
     public void setId(String connectorId) {
-        sheetWidget.postInit(connectorId);
+        sheetWidget.postInit(connectorId, this.host);
     }
 
     @Override
@@ -2076,5 +2078,9 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
 
     public void setNamedRanges(List<String> namedRanges) {
         formulaBarWidget.setNamedRanges(namedRanges);
+    }
+
+    public void setHost(Element element) {
+        this.host = element;
     }
 }

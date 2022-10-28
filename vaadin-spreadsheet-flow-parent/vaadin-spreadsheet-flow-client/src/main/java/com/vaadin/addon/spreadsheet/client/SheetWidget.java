@@ -927,31 +927,30 @@ public class SheetWidget extends Panel {
         fontWidthDummyElement.setInnerText("5555555555");
     }
 
-    void postInit(String connectorId) {
+    void postInit(String connectorId, Node styleHost) {
         sheetId = "spreadsheet-" + connectorId;
         spreadsheet.addClassName(sheetId);
 
         // Dynamic position & size styles for this spreadsheet
         cellSizeAndPositionStyle.setType("text/css");
         cellSizeAndPositionStyle.setId(sheetId + "-dynamicStyle");
-        Document.get().getBody().getParentElement().getFirstChild()
-                .appendChild(cellSizeAndPositionStyle);
+        styleHost.appendChild(cellSizeAndPositionStyle);
 
         // Workbook styles
         sheetStyle.setType("text/css");
         sheetStyle.setId(sheetId + "-sheetStyle");
-        cellSizeAndPositionStyle.getParentElement().appendChild(sheetStyle);
+        cellSizeAndPositionStyle.getParentNode().appendChild(sheetStyle);
 
         // Custom cell size styles (because of borders)
         shiftedBorderCellStyle.setType("text/css");
         shiftedBorderCellStyle.setId(sheetId + "-customCellSizeStyle");
-        cellSizeAndPositionStyle.getParentElement()
+        cellSizeAndPositionStyle.getParentNode()
                 .appendChild(shiftedBorderCellStyle);
 
         // style for "hiding" the edited cell
         editedCellFreezeColumnStyle.setType("text/css");
         editedCellFreezeColumnStyle.setId(sheetId + "-editedCellStyle");
-        cellSizeAndPositionStyle.getParentElement()
+        cellSizeAndPositionStyle.getParentNode()
                 .appendChild(editedCellFreezeColumnStyle);
         jsniUtil.insertRule(editedCellFreezeColumnStyle,
                 ".notusedselector" + EDITING_CELL_STYLE);
@@ -961,12 +960,11 @@ public class SheetWidget extends Panel {
         // style for hiding the cell inside merged regions
         mergedRegionStyle.setType("text/css");
         mergedRegionStyle.setId(sheetId + "-mergedRegionStyle");
-        cellSizeAndPositionStyle.getParentElement()
-                .appendChild(mergedRegionStyle);
+        cellSizeAndPositionStyle.getParentNode().appendChild(mergedRegionStyle);
 
         resizeStyle.setType("text/css");
         resizeStyle.setId(sheetId + "-resizeStyle");
-        cellSizeAndPositionStyle.getParentElement().appendChild(resizeStyle);
+        cellSizeAndPositionStyle.getParentNode().appendChild(resizeStyle);
     }
 
     /**
@@ -3779,7 +3777,7 @@ public class SheetWidget extends Panel {
                 hyperlinkStyle = Document.get().createStyleElement();
                 hyperlinkStyle.setType("text/css");
                 hyperlinkStyle.setId(sheetId + "-hyperlinkstyle");
-                cellSizeAndPositionStyle.getParentElement()
+                cellSizeAndPositionStyle.getParentNode()
                         .appendChild(hyperlinkStyle);
                 sb.append(HYPERLINK_CELL_STYLE);
                 jsniUtil.insertRule(hyperlinkStyle, sb.toString());
