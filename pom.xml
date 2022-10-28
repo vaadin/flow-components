@@ -133,6 +133,12 @@
                 </pluginManagement>
             </build>
         </profile>
+        <profile>
+            <id>all-components</id>
+            <modules>
+                <module>vaadin-flow-components-all</module>
+            </modules>
+        </profile>
     </profiles>
     <repositories>
         <repository>
