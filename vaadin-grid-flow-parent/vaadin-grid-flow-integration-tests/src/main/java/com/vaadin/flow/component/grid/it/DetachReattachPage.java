@@ -50,6 +50,7 @@ public class DetachReattachPage extends Div {
                 });
         resetSortingButton.setId("reset-sorting-button");
 
-        add(btnAttach, btnDetach, btnDisallowDeselect, resetSortingButton, grid);
+        add(btnAttach, btnDetach, btnDisallowDeselect, resetSortingButton,
+                grid);
     }
 }
