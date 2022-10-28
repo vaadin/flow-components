@@ -171,7 +171,7 @@ export class VaadinSpreadsheet extends LitElement {
         isolation: isolate;
       }
 
-      ::slotted(.v-spreadsheet) {
+      .v-spreadsheet {
         box-sizing: border-box;
         min-height: 100px;
       }
