@@ -3322,8 +3322,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             }
             directions.set(i, direction);
         }
-        getElement().callJsFunction("$connector.setSorterDirections",
-                directions);
+
+        if (getElement().getNode().isAttached()) {
+            getElement().callJsFunction("$connector.setSorterDirections",
+                    directions);
+        }
     }
 
     /**
