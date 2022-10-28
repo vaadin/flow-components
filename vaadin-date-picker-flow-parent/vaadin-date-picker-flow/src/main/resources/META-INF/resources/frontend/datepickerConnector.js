@@ -1,6 +1,7 @@
 import dateFnsFormat from 'date-fns/format';
 import dateFnsParse from 'date-fns/parse';
 import dateFnsIsValid from 'date-fns/isValid';
+import { parseDate as _parseDate } from '@vaadin/date-picker/src/vaadin-date-picker-helper.js';
 
 (function () {
   const tryCatchWrapper = function (callback) {
@@ -116,7 +117,7 @@ import dateFnsIsValid from 'date-fns/isValid';
             .replace(datepicker.$connector.yearPart.initial, '(\\d{1,4})');
 
           function formatDate(date) {
-            let rawDate = datepicker._parseDate(`${date.year}-${date.month + 1}-${date.day}`);
+            let rawDate = _parseDate(`${date.year}-${date.month + 1}-${date.day}`);
 
             // Workaround for Safari DST offset issue when using Date.toLocaleDateString().
             // This is needed to keep the correct date in formatted result even if Safari
@@ -162,7 +163,7 @@ import dateFnsIsValid from 'date-fns/isValid';
 
           function formatDate(dateParts) {
             const format = formats[0];
-            const date = datepicker._parseDate(`${dateParts.year}-${dateParts.month + 1}-${dateParts.day}`);
+            const date = _parseDate(`${dateParts.year}-${dateParts.month + 1}-${dateParts.day}`);
 
             return dateFnsFormat(date, format);
           }
