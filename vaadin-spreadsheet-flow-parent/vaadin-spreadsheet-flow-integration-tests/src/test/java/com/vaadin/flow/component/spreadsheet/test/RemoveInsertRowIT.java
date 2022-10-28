@@ -1,5 +1,6 @@
 package com.vaadin.flow.component.spreadsheet.test;
 
+import com.vaadin.flow.component.html.testbench.DivElement;
 import com.vaadin.flow.component.spreadsheet.testbench.SpreadsheetElement;
 import com.vaadin.flow.component.spreadsheet.tests.fixtures.TestFixtures;
 
@@ -146,7 +147,6 @@ public class RemoveInsertRowIT extends AbstractSpreadsheetIT {
         Assert.assertFalse(spreadsheet.getCellAt("A1").hasPopupButton());
     }
 
-    @Ignore("Ignore until https://github.com/vaadin/flow-components/issues/3223 is fixed")
     @Test
     public void removeRow_theSecondRowCellHasPopupButton_thereIsNoPopupButtons() {
         final SpreadsheetElement spreadsheet = getSpreadsheet();
@@ -156,8 +156,8 @@ public class RemoveInsertRowIT extends AbstractSpreadsheetIT {
 
         deleteRow(spreadsheet, 2);
 
-        Assert.assertTrue(spreadsheet.findElements(By.className("popupbutton"))
-                .isEmpty());
+        Assert.assertTrue(spreadsheet.$(DivElement.class).first()
+                .findElements(By.className("popupbutton")).isEmpty());
     }
 
     @Ignore("Ignore until https://github.com/vaadin/flow-components/issues/3223 is fixed")

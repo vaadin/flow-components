@@ -40,7 +40,7 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
         return spreadsheet.$(DivElement.class).first();
     }
 
-    private TestBenchElement findShadowRootElement(By by) {
+    protected TestBenchElement findShadowRootElement(By by) {
         return getSpreadsheetInShaodwRoot().findElement(by);
     }
 

@@ -23,10 +23,10 @@ public class MultipleSheetIT extends AbstractSpreadsheetIT {
     public void testMultipleSheet() {
         var spreadsheet = getSpreadsheet();
 
-        findElement(By.xpath("//div[contains(@class,'col4 row4')]")).click();
+        findShadowRootElement(By.cssSelector("div.col4.row4")).click();
 
-        var cell = (TestBenchElement) findElement(
-                By.xpath("//div[contains(@class, 'col6 row6')]"));
+        var cell = (TestBenchElement) findShadowRootElement(
+                By.cssSelector("div.col6.row6"));
         cell.click(8, 8, Keys.CONTROL);
 
         spreadsheet.getCellAt("B2").setValue("sheet0 value");
@@ -73,23 +73,21 @@ public class MultipleSheetIT extends AbstractSpreadsheetIT {
     @Test
     public void testMultipleSheetByAPI() {
         loadTestFixture(TestFixtures.CreateSheet);
-        var spreadsheet = getSpreadsheet();
-        spreadsheet.findElement(By.xpath("//*[text()='newSheet1']"));
-        spreadsheet.findElement(By.xpath("//*[text()='newSheet2']"));
+
+        findShadowRootElement(By.cssSelector("[title='newSheet1']"));
+        findShadowRootElement(By.cssSelector("[title='newSheet2']"));
     }
 
     @Test(expected = NoSuchElementException.class)
     public void multiplySheets_removeSheetBySpreadsheetAPI_sheetIsRemoved() {
         loadTestFixture(TestFixtures.CreateSheet);
-        var spreadsheet = getSpreadsheet();
-        spreadsheet.findElement(By.xpath("//*[text()='dontSee']"));
+        findShadowRootElement(By.cssSelector("[title='dontSee']"));
     }
 
     @Test(expected = NoSuchElementException.class)
     public void multiplySheets_removeSheetByPOI_sheetIsRemoved() {
         loadTestFixture(TestFixtures.CreateSheet);
-        var spreadsheet = getSpreadsheet();
-        spreadsheet.findElement(By.xpath("//*[text()='dontSee2']"));
+        findShadowRootElement(By.cssSelector("[title='dontSee2']"));
     }
 
 }
