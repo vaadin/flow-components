@@ -558,12 +558,10 @@
                 <groupId>org.osgi</groupId>
                 <artifactId>osgi.cmpn</artifactId>
                 <version>7.0.0</version>
-                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>org.osgi</groupId>
                 <artifactId>org.osgi.core</artifactId>
-                <scope>provided</scope>
                 <version>6.0.0</version>
             </dependency>
             <dependency>
@@ -575,13 +573,16 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>flow-test-generic</artifactId>
                 <version>${flow.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
                 <artifactId>flow-test-util</artifactId>
                 <version>${flow.version}</version>
-                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>4.13.2</version>
             </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>
@@ -593,13 +594,11 @@
                 <groupId>org.hamcrest</groupId>
                 <artifactId>hamcrest-all</artifactId>
                 <version>1.3</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-testbench-core</artifactId>
                 <version>${testbench.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.apache.poi</groupId>
@@ -623,12 +622,4 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-    <dependencies>
-        <!--testing use -->
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>license-checker</artifactId>
-            <version>1.10.1</version>
-        </dependency>
-    </dependencies>
 </project>
