@@ -2,6 +2,7 @@ package com.vaadin.flow.component.spreadsheet.test;
 
 import com.google.common.base.Predicate;
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
+import com.vaadin.flow.component.html.testbench.DivElement;
 import com.vaadin.flow.component.spreadsheet.testbench.AddressUtil;
 import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
 import com.vaadin.flow.component.spreadsheet.testbench.SpreadsheetElement;
@@ -33,6 +34,15 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
     private Keys metaKey = Keys.CONTROL;
     private SpreadsheetElement spreadsheet;
     private static final String BACKGROUND_COLOR = "background-color";
+
+    private TestBenchElement getSpreadsheetInShaodwRoot() {
+        var spreadsheet = $(SpreadsheetElement.class).first();
+        return spreadsheet.$(DivElement.class).first();
+    }
+
+    private TestBenchElement findShadowRootElement(By by) {
+        return getSpreadsheetInShaodwRoot().findElement(by);
+    }
 
     public void selectCell(String address) {
         selectElement(getSpreadsheet().getCellAt(address), false, false);
@@ -98,7 +108,7 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
     }
 
     public void addSheet() {
-        findElement(By.className("add-new-tab")).click();
+        findShadowRootElement(By.className("add-new-tab")).click();
     }
 
     public void selectSheetAt(int sheetIndex) {
@@ -106,14 +116,14 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
     }
 
     public String getSelectedSheetName() {
-        WebElement selectedSheetTab = findElement(
+        WebElement selectedSheetTab = findShadowRootElement(
                 By.cssSelector(".sheet-tabsheet-tab.selected-tab"));
 
         return selectedSheetTab.getText();
     }
 
     public List<String> getNamedRanges() {
-        final List<WebElement> options = findElement(
+        final List<WebElement> options = findShadowRootElement(
                 By.className("namedrangebox"))
                 .findElements(By.tagName("option"));
 
@@ -122,7 +132,7 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
     }
 
     public void selectNamedRange(String name) {
-        TestBenchElement select = ((TestBenchElement) findElement(
+        TestBenchElement select = ((TestBenchElement) findShadowRootElement(
                 By.className("namedrangebox")));
         select.setProperty("value", name);
         select.dispatchEvent("change");
@@ -181,7 +191,8 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
         for (Keys modifier : modifiers) {
             actions.keyDown(modifier);
         }
-        actions.click(driver.findElement(By.cssSelector(".ch.col" + column)));
+        actions.click(
+                findShadowRootElement(By.cssSelector(".ch.col" + column)));
         for (Keys modifier : modifiers) {
             actions.keyUp(modifier);
         }
@@ -191,11 +202,11 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
     public void clickOnRowHeader(int row, Keys... modifiers) {
         Actions actions = new Actions(driver);
         actions.moveToElement(
-                driver.findElement(By.cssSelector(".rh.row" + row)), 1, 1);
+                findShadowRootElement(By.cssSelector(".rh.row" + row)), 1, 1);
         for (Keys modifier : modifiers) {
             actions.keyDown(modifier);
         }
-        actions.click(driver.findElement(By.cssSelector(".rh.row" + row)));
+        actions.click(findShadowRootElement(By.cssSelector(".rh.row" + row)));
         for (Keys modifier : modifiers) {
             actions.keyUp(modifier);
         }
@@ -205,7 +216,7 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
     public void setSpreadsheet(SpreadsheetElement spreadsheet) {
         this.spreadsheet = spreadsheet;
         // Force sheet initial focus
-        spreadsheet.findElement(By.className("sheet-tabsheet")).click();
+        findShadowRootElement(By.className("sheet-tabsheet")).click();
     }
 
     public void setCellValue(String address, String value) {
@@ -217,7 +228,7 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
     }
 
     public WebElement getCellElement(String cell) {
-        return findElement(By.xpath(cellToXPath(cell)));
+        return findShadowRootElement(By.xpath(cellToXPath(cell)));
     }
 
     public String getCellValue(int col, int row) {
@@ -335,11 +346,11 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
     }
 
     private WebElement getAddressField() {
-        return findElement(By.cssSelector("input.addressfield"));
+        return findShadowRootElement(By.cssSelector("input.addressfield"));
     }
 
     private WebElement getFormulaField() {
-        return getDriver().findElement(By.className("functionfield"));
+        return findShadowRootElement(By.className("functionfield"));
     }
 
     public String getFormulaFieldValue() {
@@ -349,7 +360,7 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
     public String getSelectionFormula() {
         final var sprElement = getSpreadsheet();
 
-        WebElement selection = findElement(
+        WebElement selection = findShadowRootElement(
                 org.openqa.selenium.By.className("sheet-selection"));
         final String[] classes = selection.getAttribute("class").split(" ");
 
@@ -473,7 +484,7 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
     }
 
     public String getMergedCellContent(String topLeftCell) {
-        return driver.findElement(mergedCell(topLeftCell)).getText();
+        return findShadowRootElement(mergedCell(topLeftCell)).getText();
     }
 
     public By mergedCell(String topLeftCell) {
@@ -483,8 +494,8 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
     }
 
     public void navigateToCell(String cell) {
-        getDriver().findElement(By.xpath("//*[@class='addressfield']")).clear();
-        getDriver().findElement(By.xpath("//*[@class='addressfield']"))
+        findShadowRootElement(By.xpath("//*[@class='addressfield']")).clear();
+        findShadowRootElement(By.xpath("//*[@class='addressfield']"))
                 .sendKeys(cell);
         new Actions(getDriver()).sendKeys(Keys.RETURN).perform();
     }
