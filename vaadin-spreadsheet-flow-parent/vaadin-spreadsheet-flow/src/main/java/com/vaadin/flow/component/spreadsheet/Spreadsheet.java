@@ -52,12 +52,15 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.SheetVisibility;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.ClientAnchor.AnchorType;
 import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellRangeUtil;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.ss.util.PaneInformation;
 import org.apache.poi.ss.util.WorkbookUtil;
+import org.apache.poi.util.Units;
+import org.apache.poi.xssf.usermodel.XSSFClientAnchor;
 import org.apache.poi.xssf.usermodel.XSSFHyperlink;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -4173,10 +4176,23 @@ public class Spreadsheet extends Component
      * Decides if overlay is visible in the current view.
      */
     private boolean isOverlayVisible(SheetOverlayWrapper overlay) {
-        int col1 = overlay.getAnchor().getCol1();
-        int col2 = overlay.getAnchor().getCol2();
-        int row1 = overlay.getAnchor().getRow1();
-        int row2 = overlay.getAnchor().getRow2();
+        var anchor = overlay.getAnchor();
+
+        // Need special handling for XSSFClientAnchor anchors of type
+        // DONT_MOVE_AND_RESIZE.
+        // See https://github.com/vaadin/flow-components/issues/3261
+        if (AnchorType.DONT_MOVE_AND_RESIZE.equals(anchor.getAnchorType())
+                && anchor instanceof XSSFClientAnchor) {
+            // Since there's no way to know if an arbitrary x/y coordinate is
+            // inside the current viewport, always return true for these
+            // anchors.
+            return true;
+        }
+
+        int col1 = anchor.getCol1();
+        int col2 = anchor.getCol2();
+        int row1 = anchor.getRow1();
+        int row2 = anchor.getRow2();
 
         // type=2, doesn't size with cells
         final boolean isType2 = (col2 == 0 && row2 == 0);
@@ -4242,12 +4258,33 @@ public class Spreadsheet extends Component
 
         Sheet sheet = getActiveSheet();
 
-        int col = overlayWrapper.getAnchor().getCol1();
+        var anchor = overlayWrapper.getAnchor();
+
+        // Need special handling for XSSFClientAnchor anchors of type
+        // DONT_MOVE_AND_RESIZE.
+        // See https://github.com/vaadin/flow-components/issues/3261
+        if (AnchorType.DONT_MOVE_AND_RESIZE.equals(anchor.getAnchorType())
+                && anchor instanceof XSSFClientAnchor) {
+            info.col = 1;
+            info.row = 1;
+
+            var xssfAnchor = (XSSFClientAnchor) anchor;
+            info.dx = (Long) xssfAnchor.getPosition().getX()
+                    / Units.EMU_PER_PIXEL;
+            info.dy = (Long) xssfAnchor.getPosition().getY()
+                    / Units.EMU_PER_POINT;
+            info.width = xssfAnchor.getSize().getCx() / Units.EMU_PER_PIXEL;
+            info.height = xssfAnchor.getSize().getCy() / Units.EMU_PER_POINT;
+
+            return info;
+        }
+
+        int col = anchor.getCol1();
         while (isColumnHidden(col)) {
             col++;
         }
 
-        int row = overlayWrapper.getAnchor().getRow1();
+        int row = anchor.getRow1();
         while (isRowHidden(row)) {
             row++;
         }
@@ -4261,11 +4298,11 @@ public class Spreadsheet extends Component
         // FIXME: height and width can be -1, it is never handled anywhere
 
         // if original start row/column is hidden, use 0 dy/dx
-        if (col == overlayWrapper.getAnchor().getCol1()) {
+        if (col == anchor.getCol1()) {
             info.dx = overlayWrapper.getDx1(sheet);
         }
 
-        if (row == overlayWrapper.getAnchor().getRow1()) {
+        if (row == anchor.getRow1()) {
             info.dy = overlayWrapper.getDy1(sheet);
         }
 
