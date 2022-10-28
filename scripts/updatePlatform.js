@@ -113,7 +113,7 @@ async function main() {
     process.exit(1);
   }
   const annotations = await getAnnotations();
-  const branch = await currentBranch();
+  const branch = process.env['baseBranch'] || await currentBranch();
   process.chdir(platformDir);
   console.log(`Using ${branch} platform branch`);
   await run(`git checkout ${branch}`);

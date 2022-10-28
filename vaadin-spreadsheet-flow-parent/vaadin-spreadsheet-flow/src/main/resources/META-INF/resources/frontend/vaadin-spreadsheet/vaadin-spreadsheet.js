@@ -1,20 +1,15 @@
 /**
  * @license
- * Copyright (c) 2019 The Polymer Project Authors. All rights reserved.
- * This code may only be used under the BSD style license found at
- * http://polymer.github.io/LICENSE.txt
- * The complete set of authors may be found at
- * http://polymer.github.io/AUTHORS.txt
- * The complete set of contributors may be found at
- * http://polymer.github.io/CONTRIBUTORS.txt
- * Code distributed by Google as part of the polymer project is also
- * subject to an additional IP rights grant found at
- * http://polymer.github.io/PATENTS.txt
+ * Copyright (c) 2019 - 2022 Vaadin Ltd.
+ * This program is available under Commercial Vaadin Developer License 4.0, available at https://vaadin.com/license/cvdl-4.0.
  */
-
-import {LitElement, html, css, unsafeCSS} from 'lit-element';
+import {LitElement, html, css} from 'lit';
 import { Spreadsheet } from './spreadsheet-export.js';
 import css_valo from './spreadsheet-styles-valo.css';
+
+const spreadsheetResizeObserver = new ResizeObserver((entries) => {
+  entries.forEach((entry) => entry.target.api.resize());
+});
 
 /**
  * An example element.
@@ -30,10 +25,6 @@ export class VaadinSpreadsheet extends LitElement {
 
       /* SHARED STATE */
       dirty: {type: Number},
-
-      width: {type: String},
-
-      height: {type: String},
 
       id: {type: String},
 
@@ -171,17 +162,18 @@ export class VaadinSpreadsheet extends LitElement {
     };
   }
 
-  constructor() {
-    super();
-  }
-
   static get styles() {
     return css`
       :host {
         display: block;
         height: 100%;
-        min-height: 400px;
+        flex: 1 1 auto;
         isolation: isolate;
+      }
+
+      ::slotted(.v-spreadsheet) {
+        box-sizing: border-box;
+        min-height: 100px;
       }
     `
   };
@@ -194,20 +186,22 @@ export class VaadinSpreadsheet extends LitElement {
 
   connectedCallback() {
     super.connectedCallback()
-    this.observer && this.observer.observe(this);
+    spreadsheetResizeObserver.observe(this);
     // Restore styles in the case widget is reattached, it happens e.g in client router
     this.styles && this.styles.forEach(e => {
       document.head.appendChild(e);
       const rulesToBeAdded = e.__removedRules;
       for (let i = 0; i < rulesToBeAdded.length; i++) {
-        e.sheet.insertRule(rulesToBeAdded.item(i).cssText);
+        // To guarantee that the rules are added on the same order
+        // they were added by spreadsheet, we pass current index
+        e.sheet.insertRule(rulesToBeAdded.item(i).cssText, i);
       }
     });
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    this.observer && this.observer.unobserve(this);
+    spreadsheetResizeObserver.unobserve(this);
     // Remove styles added to the head by the Widget
     this.styles = document.head.querySelectorAll(`style[id^="spreadsheet-${this.id}"]`);
     this.styles.forEach(e => {
@@ -230,9 +224,10 @@ export class VaadinSpreadsheet extends LitElement {
       }
 
       this.api = new Spreadsheet(this);
+      this.api.setHeight("100%");
+      this.api.setWidth("100%");
       this.createCallbacks();
 
-      this.observer = new ResizeObserver(e => this.api.resize());
       initial = true;
     }
     let propNames = [];
@@ -341,10 +336,6 @@ export class VaadinSpreadsheet extends LitElement {
         this.api.setLockFormatRows(newVal);
       } else if ('namedRanges' == name) {
         this.api.setNamedRanges(newVal);
-      } else if ('width' == name) {
-        this.api.setWidth(newVal);
-      } else if ('height' == name) {
-        this.api.setHeight(newVal);
       } else if ('id' == name) {
         this.api.setId(newVal);
       } else if ('class' == name) {

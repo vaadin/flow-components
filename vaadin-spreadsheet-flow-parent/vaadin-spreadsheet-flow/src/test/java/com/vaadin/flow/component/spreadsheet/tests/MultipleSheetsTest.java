@@ -15,7 +15,7 @@ public class MultipleSheetsTest {
     private Spreadsheet spreadsheet;
 
     @Before
-    public void init() throws Exception {
+    public void init() {
         var workbook = new XSSFWorkbook();
         workbook.createSheet("foo");
         workbook.createSheet("bar");
@@ -129,7 +129,7 @@ public class MultipleSheetsTest {
     }
 
     @Test
-    public void addSheetChangeListener_invokesOnSheetChange() throws Exception {
+    public void addSheetChangeListener_invokesOnSheetChange() {
         var listenerInvoked = new AtomicBoolean(false);
         spreadsheet.addSheetChangeListener(event -> {
             listenerInvoked.set(true);
@@ -139,15 +139,7 @@ public class MultipleSheetsTest {
             Assert.assertEquals("bar", event.getNewSheet().getSheetName());
         });
 
-        // TODO: setActiveSheetIndex doesn't currently dispatch an event so need
-        // to use reflection
-        // spreadsheet.setActiveSheetIndex(1);
-
-        var onSheetSelected = Spreadsheet.class.getDeclaredMethod(
-                "onSheetSelected", int.class, int.class, int.class);
-        onSheetSelected.setAccessible(true);
-        onSheetSelected.invoke(spreadsheet, 1, 0, 0);
-
+        TestHelper.fireClientEvent(spreadsheet, "sheetSelected", "[1, 0, 0]");
         Assert.assertTrue(listenerInvoked.get());
     }
 
