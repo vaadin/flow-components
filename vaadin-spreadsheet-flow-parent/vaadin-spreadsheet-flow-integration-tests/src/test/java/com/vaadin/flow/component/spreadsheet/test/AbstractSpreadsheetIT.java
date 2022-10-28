@@ -232,7 +232,7 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
     }
 
     public WebElement getCellElement(String cell) {
-        return findShadowRootElement(By.xpath(cellToXPath(cell)));
+        return findShadowRootElement(By.cssSelector(cellToCSS(cell)));
     }
 
     public String getCellValue(int col, int row) {
@@ -468,16 +468,9 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
         return coordinates;
     }
 
-    public String cellToXPath(String cell) {
+    public String cellToCSS(String cell) {
         int[] coordinates = numericCoordinates(cell);
-
-        // TODO - This will not work with multiple spreadsheets, add reference
-        // to sheet's XPath
-        return "//*["
-                + "contains(concat(' ', normalize-space(@class), ' '), ' col"
-                + coordinates[0] + " ')"
-                + "and contains(concat(' ', normalize-space(@class), ' '), ' row"
-                + coordinates[1] + " ')" + "]";
+        return ".col" + coordinates[0] + ".row" + coordinates[1];
     }
 
     public void dragFromCellToCell(String from, String to) {

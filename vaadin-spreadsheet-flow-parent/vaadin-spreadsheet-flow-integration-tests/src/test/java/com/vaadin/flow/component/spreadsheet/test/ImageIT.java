@@ -33,7 +33,7 @@ public class ImageIT extends AbstractSpreadsheetIT {
     public void pictureType2_width() {
         spreadsheet.scroll(680);
         waitUntil(e -> findElement(
-                By.xpath(cellToXPath("G42") + "/img")) != null);
+                By.cssSelector(cellToCSS("G42") + "/img")) != null);
 
         assertInRange(250, imageWidth("C38"), 280);
         assertInRange(240, imageWidth("G42"), 260);
@@ -46,8 +46,9 @@ public class ImageIT extends AbstractSpreadsheetIT {
         spreadsheet.scroll(1300);
 
         // Get all type3 pictures (absolute position)
-        var type3 = findElements(By.xpath(cellToXPath("A1") + "/img")).stream()
-                .map(image -> image.getRect()).collect(Collectors.toList());
+        var type3 = findElements(By.cssSelector(cellToCSS("A1") + "/img"))
+                .stream().map(image -> image.getRect())
+                .collect(Collectors.toList());
         Assert.assertEquals(3, type3.size());
 
         // Sort the pictures by their position starting from the left
@@ -75,7 +76,7 @@ public class ImageIT extends AbstractSpreadsheetIT {
     }
 
     private double imageWidth(String cell) {
-        return findElement(By.xpath(cellToXPath(cell) + "/img"))
+        return findElement(By.cssSelector(cellToCSS(cell) + "/img"))
                 .getSize().width;
     }
 }

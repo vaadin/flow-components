@@ -7,7 +7,6 @@ import static org.junit.Assert.assertNotNull;
 
 import java.util.List;
 
-import com.vaadin.flow.component.html.testbench.DivElement;
 import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
 import org.junit.Before;
 import org.junit.Test;
