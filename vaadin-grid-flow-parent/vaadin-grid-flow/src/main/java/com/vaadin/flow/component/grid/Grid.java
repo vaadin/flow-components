@@ -3142,8 +3142,11 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
             }
             directions.set(i, direction);
         }
-        getElement().callJsFunction("$connector.setSorterDirections",
-                directions);
+
+        if (getElement().getNode().isAttached()) {
+            getElement().callJsFunction("$connector.setSorterDirections",
+                    directions);
+        }
     }
 
     private void sort(boolean userOriginated) {
