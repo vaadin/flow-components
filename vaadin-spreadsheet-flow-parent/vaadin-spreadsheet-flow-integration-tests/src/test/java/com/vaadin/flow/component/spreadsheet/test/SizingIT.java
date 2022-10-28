@@ -21,6 +21,7 @@ public class SizingIT extends AbstractComponentIT {
         open();
         spreadsheet = $(SpreadsheetElement.class).first();
         layout = findElement(By.id("layout"));
+        waitUntil(e -> spreadsheet.$(DivElement.class).exists());
     }
 
     @Test

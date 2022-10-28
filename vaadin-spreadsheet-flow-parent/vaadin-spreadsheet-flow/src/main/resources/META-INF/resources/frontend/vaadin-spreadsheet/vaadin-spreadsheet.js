@@ -201,7 +201,7 @@ export class VaadinSpreadsheet extends LitElement {
     super.disconnectedCallback();
     spreadsheetResizeObserver.unobserve(this);
     // Remove styles added to the head by the Widget
-    this.styles = document.head.querySelectorAll(`style[id^="spreadsheet-${this.id}"]`);
+    this.styles = this.renderRoot.querySelectorAll(`style[id^="spreadsheet-${this.id}"]`);
     this.styles.forEach(e => {
       e.__removedRules = e.sheet.cssRules;
       this.renderRoot.removeChild(e);

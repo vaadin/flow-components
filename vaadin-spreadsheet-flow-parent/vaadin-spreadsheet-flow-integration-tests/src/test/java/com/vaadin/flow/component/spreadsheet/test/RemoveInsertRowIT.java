@@ -37,9 +37,8 @@ public class RemoveInsertRowIT extends AbstractSpreadsheetIT {
 
         deleteRow(spreadsheet, 2);
 
-        Assert.assertTrue(spreadsheet
-                .findElements(By.className("cell-invalidformula-triangle"))
-                .isEmpty());
+        Assert.assertTrue(findShadowRootElements(
+                By.className("cell-invalidformula-triangle")).isEmpty());
     }
 
     @Test
@@ -115,8 +114,8 @@ public class RemoveInsertRowIT extends AbstractSpreadsheetIT {
 
         deleteFirstRow(spreadsheet);
 
-        Assert.assertTrue(spreadsheet
-                .findElements(By.cssSelector(".merged-cell")).isEmpty());
+        Assert.assertTrue(findShadowRootElements(By.cssSelector(".merged-cell"))
+                .isEmpty());
     }
 
     @Test
@@ -129,9 +128,9 @@ public class RemoveInsertRowIT extends AbstractSpreadsheetIT {
 
         insertNewFirstRow(spreadsheet);
 
-        Assert.assertTrue(spreadsheet
-                .findElement(By.cssSelector(".col1.row2.merged-cell"))
-                .isDisplayed());
+        Assert.assertTrue(
+                findShadowRootElement(By.cssSelector(".col1.row2.merged-cell"))
+                        .isDisplayed());
     }
 
     @Ignore("Ignore until https://github.com/vaadin/flow-components/issues/3223 is fixed")
@@ -156,8 +155,8 @@ public class RemoveInsertRowIT extends AbstractSpreadsheetIT {
 
         deleteRow(spreadsheet, 2);
 
-        Assert.assertTrue(spreadsheet.$(DivElement.class).first()
-                .findElements(By.className("popupbutton")).isEmpty());
+        Assert.assertTrue(
+                findShadowRootElements(By.className("popupbutton")).isEmpty());
     }
 
     @Ignore("Ignore until https://github.com/vaadin/flow-components/issues/3223 is fixed")

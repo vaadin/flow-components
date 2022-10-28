@@ -44,6 +44,10 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
         return getSpreadsheetInShaodwRoot().findElement(by);
     }
 
+    protected List<WebElement> findShadowRootElements(By by) {
+        return getSpreadsheetInShaodwRoot().findElements(by);
+    }
+
     public void selectCell(String address) {
         selectElement(getSpreadsheet().getCellAt(address), false, false);
     }

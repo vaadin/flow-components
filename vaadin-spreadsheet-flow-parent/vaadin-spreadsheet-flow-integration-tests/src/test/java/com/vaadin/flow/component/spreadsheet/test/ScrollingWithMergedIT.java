@@ -58,7 +58,7 @@ public class ScrollingWithMergedIT extends AbstractSpreadsheetIT {
         ensureMergedRegionNotVisibleWhenScrolledLeft(spreadsheetElement);
 
         // scroll all the way to right
-        int scrollLeft = spreadsheetElement.findElement(By.className("floater"))
+        int scrollLeft = findShadowRootElement(By.className("floater"))
                 .getSize().width + 100;
         spreadsheetElement.scrollLeft(scrollLeft);
         Thread.sleep(1000);

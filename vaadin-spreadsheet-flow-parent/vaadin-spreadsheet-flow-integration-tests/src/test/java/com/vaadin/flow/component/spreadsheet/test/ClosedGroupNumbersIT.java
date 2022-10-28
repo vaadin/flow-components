@@ -27,8 +27,8 @@ public class ClosedGroupNumbersIT extends AbstractSpreadsheetIT {
         loadFile("closed-group-with-numbers.xlsx");
         SpreadsheetElement spreadsheet = $(SpreadsheetElement.class).first();
 
-        WebElement rowGrouping = spreadsheet
-                .findElement(By.cssSelector(".col-group-pane .grouping.plus"));
+        WebElement rowGrouping = findShadowRootElement(
+                By.cssSelector(".col-group-pane .grouping.plus"));
         rowGrouping.click();
 
         waitUntil(ExpectedConditions.presenceOfElementLocated(

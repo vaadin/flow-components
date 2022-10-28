@@ -1,6 +1,5 @@
 package com.vaadin.flow.component.spreadsheet.testbench;
 
-import java.time.Duration;
 import java.util.List;
 
 import com.vaadin.testbench.elementsbase.Element;
@@ -10,8 +9,6 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.vaadin.testbench.TestBenchElement;
 
