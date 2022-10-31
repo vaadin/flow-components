@@ -353,6 +353,7 @@ public class SheetWidget extends Panel {
     private boolean displayRowColHeadings;
 
     private Event mouseOverOrOutEvent;
+    private Element mouseOverOrOutEventTarget;
 
     private HashMap<MergedRegion, Cell> overflownMergedCells;
 
@@ -424,6 +425,14 @@ public class SheetWidget extends Panel {
                 }
             });
 
+    static native Element getEventTarget(NativeEvent event)
+    /*-{
+       if (!event.target || event.target.localName === 'vaadin-spreadsheet') {
+           return event.composedPath()[0];
+       }
+       return event.target;
+    }-*/;
+
     private VLazyExecutor onMouseOverOrOutHandler = new VLazyExecutor(100,
             new ScheduledCommand() {
 
@@ -432,8 +441,8 @@ public class SheetWidget extends Panel {
                     if (isEditingCell()) {
                         return;
                     }
-                    Element target = mouseOverOrOutEvent.getEventTarget()
-                            .cast();
+
+                    Element target = mouseOverOrOutEventTarget;
                     boolean targetParentIsPaneElement = target
                             .getParentElement().getAttribute("class")
                             .contains("sheet");
@@ -1021,6 +1030,7 @@ public class SheetWidget extends Panel {
      */
     protected void onSheetMouseOverOrOut(Event event) {
         mouseOverOrOutEvent = event;
+        mouseOverOrOutEventTarget = getEventTarget(event);
         onMouseOverOrOutHandler.trigger();
     }
 
@@ -1035,7 +1045,7 @@ public class SheetWidget extends Panel {
 
     protected boolean isEventInCustomEditorCell(Event event) {
         if (customEditorWidget != null) {
-            final Element target = event.getEventTarget().cast();
+            final Element target = getEventTarget(event);
             final Element customWidgetElement = customEditorWidget.getElement();
             return (customWidgetElement.isOrHasChild(target)
                     || customWidgetElement.getParentElement() != null
@@ -1107,7 +1117,7 @@ public class SheetWidget extends Panel {
      *            The original event (that can be onClick or onTouchStart)
      */
     protected void onSheetMouseDown(Event event) {
-        Element target = event.getEventTarget().cast();
+        Element target = getEventTarget(event);
 
         String className = target.getAttribute("class");
 
@@ -1244,7 +1254,7 @@ public class SheetWidget extends Panel {
             JsArray<Touch> touches = event.getTouches();
             target = touches.get(touches.length() - 1).getTarget().cast();
         } else {
-            target = event.getEventTarget().cast();
+            target = getEventTarget(event);
         }
 
         // Update scroll deltas
@@ -1387,7 +1397,7 @@ public class SheetWidget extends Panel {
                     tempCol, selectedCellRow, tempRow);
         } else {
             actionHandler.onCellClick(tempCol, tempRow,
-                    ((Element) event.getEventTarget().cast()).getInnerText(),
+                    ((Element) getEventTarget(event)).getInnerText(),
                     event.getShiftKey(),
                     event.getMetaKey() || event.getCtrlKey(), true);
         }
@@ -1506,7 +1516,7 @@ public class SheetWidget extends Panel {
                     public void onPreviewNativeEvent(NativePreviewEvent event) {
                         int eventTypeInt = event.getTypeInt();
                         final NativeEvent nativeEvent = event.getNativeEvent();
-                        Element target = nativeEvent.getEventTarget().cast();
+                        Element target = getEventTarget(nativeEvent);
                         String className = "";
                         if (Element.is(target)) {
                             // In Firefox when dragging outside of the browser
@@ -1516,7 +1526,7 @@ public class SheetWidget extends Panel {
                         }
 
                         if (getElement().isOrHasChild(
-                                (Node) nativeEvent.getEventTarget().cast())) {
+                                (Node) getEventTarget(nativeEvent))) {
                             if (Event.ONTOUCHSTART == eventTypeInt
                                     || Event.ONMOUSEDOWN == eventTypeInt
                                     || Event.ONMOUSEUP == eventTypeInt
@@ -1759,8 +1769,7 @@ public class SheetWidget extends Panel {
             @Override
             public void onContextMenu(ContextMenuEvent event) {
                 if (actionHandler.hasCustomContextMenu()) {
-                    Element target = event.getNativeEvent().getEventTarget()
-                            .cast();
+                    Element target = getEventTarget(event.getNativeEvent());
                     String className = target.getAttribute("class");
                     int i = jsniUtil.isHeader(className);
                     if (i == 1 || i == 2) {
