@@ -256,7 +256,7 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
 
     public WebElement getInlineEditor(String cell) {
         openInlineEditor(cell);
-        return getCellElement(cell).findElement(By.cssSelector("input"));
+        return findShadowRootElement(By.cssSelector("input"));
     }
 
     public SpreadsheetElement getSpreadsheet() {
