@@ -6,6 +6,7 @@ import com.vaadin.testbench.TestBenchElement;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 
 /**
  * This class represents one cell within the currently active sheet of a
@@ -37,8 +38,10 @@ public class SheetCellElement extends TestBenchElement {
             WebElement cellValueInput = parent.getCellValueInput();
             executeScript("arguments[0].value=''",
                     ((TestBenchElement) cellValueInput).getWrappedElement());
-            cellValueInput.sendKeys(newValue);
-            cellValueInput.sendKeys(Keys.TAB);
+            new Actions(getDriver()).moveToElement(cellValueInput)
+                    .sendKeys(newValue).build().perform();
+            new Actions(getDriver()).moveToElement(cellValueInput)
+                    .sendKeys(Keys.TAB).build().perform();
             getCommandExecutor().waitForVaadin();
         }
     }

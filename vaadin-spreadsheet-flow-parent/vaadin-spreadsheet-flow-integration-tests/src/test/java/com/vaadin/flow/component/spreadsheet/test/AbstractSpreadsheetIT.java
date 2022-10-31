@@ -565,25 +565,6 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
                 .collect(Collectors.toList());
     }
 
-    public void putCellContent(String cell, CharSequence value) {
-        openInlineEditor(cell);
-        getCommandExecutor().waitForVaadin();
-        clearInput();
-        getCommandExecutor().waitForVaadin();
-        insertAndTab(value);
-    }
-
-    private void clearInput() {
-        WebElement inlineInput = driver.findElement(By.id("cellinput"));
-        inlineInput.clear();
-    }
-
-    private void insertAndTab(CharSequence k) {
-        action(k);
-        action(Keys.TAB);
-        getCommandExecutor().waitForVaadin();
-    }
-
     @Override
     protected String getBaseURL() {
         return super.getBaseURL() + "/vaadin-spreadsheet";
