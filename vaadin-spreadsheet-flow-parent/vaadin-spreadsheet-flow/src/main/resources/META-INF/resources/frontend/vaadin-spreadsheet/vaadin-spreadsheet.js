@@ -5,11 +5,16 @@
  */
 import {LitElement, html, css} from 'lit';
 import { Spreadsheet } from './spreadsheet-export.js';
-import css_valo from './spreadsheet-styles-valo.css';
+import { spreadsheetStyles, spreadsheetOverlayStyles } from './vaadin-spreadsheet-styles.js';
 
 const spreadsheetResizeObserver = new ResizeObserver((entries) => {
   entries.forEach((entry) => entry.target.api.resize());
 });
+
+// Append spreadsheet overlay styles to the document head
+const $tpl = document.createElement('template');
+$tpl.innerHTML = `<style>${spreadsheetOverlayStyles.toString()}</style>`;
+document.head.appendChild($tpl.content);
 
 /**
  * An example element.
@@ -18,6 +23,8 @@ const spreadsheetResizeObserver = new ResizeObserver((entries) => {
  * @csspart button - The button
  */
 export class VaadinSpreadsheet extends LitElement {
+
+  static styles = spreadsheetStyles;
 
   static get properties() {
     return {
@@ -162,22 +169,6 @@ export class VaadinSpreadsheet extends LitElement {
     };
   }
 
-  static get styles() {
-    return css`
-      :host {
-        display: block;
-        height: 100%;
-        flex: 1 1 auto;
-        isolation: isolate;
-      }
-
-      .v-spreadsheet {
-        box-sizing: border-box;
-        min-height: 100px;
-      }
-    `
-  };
-
   render() {
     return html``;
   }
@@ -212,7 +203,6 @@ export class VaadinSpreadsheet extends LitElement {
     super.updated(_changedProperties);
     let initial = false;
     if (!this.api) {
-      this.injectStyle('css_valo', css_valo);
 
       let overlays = document.getElementById('spreadsheet-overlays');
       if (!overlays) {
@@ -590,16 +580,6 @@ export class VaadinSpreadsheet extends LitElement {
     return new CustomEvent('spreadsheet-event', {
       detail: {type, data}
     });
-  }
-
-  injectStyle(id, style) {
-    let elm = document.getElementById(id);
-    if (!elm) {
-      elm = document.createElement('style');
-      elm.id = id;
-      this.renderRoot.append(elm);
-    }
-    elm.textContent = style;
   }
 }
 

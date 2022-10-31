@@ -62,7 +62,8 @@ public class PopupButtonHeader extends Widget {
 
     @Override
     public void onBrowserEvent(Event event) {
-        if (SheetWidget.getEventTarget(event).equals((JavaScriptObject) close)) {
+        if (SheetWidget.getEventTarget(event)
+                .equals((JavaScriptObject) close)) {
             popup.hide();
             sheetWidget.focusSheet();
         } else {
