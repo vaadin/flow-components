@@ -11,7 +11,11 @@ const spreadsheetResizeObserver = new ResizeObserver((entries) => {
   entries.forEach((entry) => entry.target.api.resize());
 });
 
-let overlayStylesAdded = false;
+const overlayStyles = (() => {
+  const $tpl = document.createElement('template');
+  $tpl.innerHTML = `<style>${spreadsheetOverlayStyles.toString()}</style>`;
+  return $tpl.content;
+})();
 
 /**
  * An example element.
@@ -168,12 +172,10 @@ export class VaadinSpreadsheet extends LitElement {
 
   constructor() {
     super();
-    if (!overlayStylesAdded) {
+
+    if (!overlayStyles.parentElement) {
       // Append spreadsheet overlay styles to the document head
-      const $tpl = document.createElement('template');
-      $tpl.innerHTML = `<style>${spreadsheetOverlayStyles.toString()}</style>`;
-      document.head.appendChild($tpl.content);
-      overlayStylesAdded = true;
+      document.head.appendChild(overlayStyles);
     }
   }
 
@@ -184,27 +186,11 @@ export class VaadinSpreadsheet extends LitElement {
   connectedCallback() {
     super.connectedCallback()
     spreadsheetResizeObserver.observe(this);
-    // Restore styles in the case widget is reattached, it happens e.g in client router
-    this.styles && this.styles.forEach(e => {
-      this.renderRoot.appendChild(e)
-      const rulesToBeAdded = e.__removedRules;
-      for (let i = 0; i < rulesToBeAdded.length; i++) {
-        // To guarantee that the rules are added on the same order
-        // they were added by spreadsheet, we pass current index
-        e.sheet.insertRule(rulesToBeAdded.item(i).cssText, i);
-      }
-    });
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
     spreadsheetResizeObserver.unobserve(this);
-    // Remove styles added to the head by the Widget
-    this.styles = this.renderRoot.querySelectorAll(`style[id^="spreadsheet-${this.id}"]`);
-    this.styles.forEach(e => {
-      e.__removedRules = e.sheet.cssRules;
-      this.renderRoot.removeChild(e);
-    });
   }
 
   updated(_changedProperties) {
