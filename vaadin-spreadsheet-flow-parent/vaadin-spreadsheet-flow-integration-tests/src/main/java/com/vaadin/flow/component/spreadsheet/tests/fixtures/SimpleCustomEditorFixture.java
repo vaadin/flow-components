@@ -15,7 +15,7 @@ public class SimpleCustomEditorFixture implements SpreadsheetFixture {
     @Override
     public void loadFixture(final Spreadsheet spreadsheet) {
 
-        spreadsheet.setSpreadsheetComponentFactory(new ComponentFactory());
+//        spreadsheet.setSpreadsheetComponentFactory(new ComponentFactory());
 
         List<Cell> cellsToRefresh = new ArrayList<Cell>();
         cellsToRefresh.add(spreadsheet.createCell(0, 0, 1));

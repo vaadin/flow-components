@@ -8,7 +8,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
-import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
@@ -153,30 +152,33 @@ public class SpreadsheetPage extends VerticalLayout implements Receiver {
         download.setEnabled(false);
 
         gridlines = createCBNewLines();
-        Button customComponentTest = new Button(
-                "Create Custom Editor Test sheet", event -> {
-                    if (spreadsheet == null) {
-                        spreadsheet = new Spreadsheet(
-                                ((SpreadsheetEditorComponentFactoryTest) spreadsheetFieldFactory)
-                                        .getTestWorkbook());
-                        updateLocale();
-                        spreadsheet.setSpreadsheetComponentFactory(
-                                spreadsheetFieldFactory);
-                        spreadsheetContainer.add(spreadsheet);
-                        spreadsheet.setSizeFull();
 
-                        // layout.setExpandRatio(spreadsheet, 1.0F);
-                    } else {
-                        spreadsheet.setWorkbook(
-                                ((SpreadsheetEditorComponentFactoryTest) spreadsheetFieldFactory)
-                                        .getTestWorkbook());
-                        spreadsheet.setSpreadsheetComponentFactory(
-                                spreadsheetFieldFactory);
-                    }
-                    gridlines.setValue(spreadsheet.isGridlinesVisible());
-                    rowColHeadings
-                            .setValue(spreadsheet.isRowColHeadingsVisible());
-                });
+//      TODO re-enable when custom component is done
+
+//        Button customComponentTest = new Button(
+//                "Create Custom Editor Test sheet", event -> {
+//                    if (spreadsheet == null) {
+//                        spreadsheet = new Spreadsheet(
+//                                ((SpreadsheetEditorComponentFactoryTest) spreadsheetFieldFactory)
+//                                        .getTestWorkbook());
+//                        updateLocale();
+//                        spreadsheet.setSpreadsheetComponentFactory(
+//                                spreadsheetFieldFactory);
+//                        spreadsheetContainer.add(spreadsheet);
+//                        spreadsheet.setSizeFull();
+
+//                        // layout.setExpandRatio(spreadsheet, 1.0F);
+//                    } else {
+//                        spreadsheet.setWorkbook(
+//                                ((SpreadsheetEditorComponentFactoryTest) spreadsheetFieldFactory)
+//                                        .getTestWorkbook());
+//                        spreadsheet.setSpreadsheetComponentFactory(
+//                                spreadsheetFieldFactory);
+//                    }
+//                    gridlines.setValue(spreadsheet.isGridlinesVisible());
+//                    rowColHeadings
+//                            .setValue(spreadsheet.isRowColHeadingsVisible());
+//                });
 
         upload.addSucceededListener(event -> {
             loadFile(uploadedFile);
@@ -292,7 +294,7 @@ public class SpreadsheetPage extends VerticalLayout implements Receiver {
         VerticalLayout createAndFreeze = new VerticalLayout();
         createAndFreeze.setSpacing(true);
         createAndFreeze.setMargin(false);
-        createAndFreeze.add(newSpreadsheetButton, customComponentTest,
+        createAndFreeze.add(newSpreadsheetButton,
                 freezePanesButton);
 
         HorizontalLayout updateLayout = new HorizontalLayout();
@@ -390,7 +392,7 @@ public class SpreadsheetPage extends VerticalLayout implements Receiver {
             } else {
                 spreadsheet.reset();
             }
-            spreadsheet.setSpreadsheetComponentFactory(null);
+//            spreadsheet.setSpreadsheetComponentFactory(null);
             save.setEnabled(true);
             previousFile = null;
             openTestSheetSelect.setValue(null);
@@ -489,7 +491,7 @@ public class SpreadsheetPage extends VerticalLayout implements Receiver {
                 }
             }
             updateLocale();
-            spreadsheet.setSpreadsheetComponentFactory(null);
+//            spreadsheet.setSpreadsheetComponentFactory(null);
             previousFile = file;
             save.setEnabled(true);
             download.setEnabled(false);

@@ -59,8 +59,8 @@ public class CustomComponentFixture implements SpreadsheetFixture {
         spreadsheet.createCell(0, 7, "Slider");
         spreadsheet.createCell(0, 8, "ComboBox");
 
-        spreadsheet
-                .setSpreadsheetComponentFactory(new ComponentEditorFactory());
+//        spreadsheet
+//                .setSpreadsheetComponentFactory(new ComponentEditorFactory());
 
         spreadsheet.refreshAllCellValues();
     }
