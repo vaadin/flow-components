@@ -201,7 +201,7 @@ public class SpreadsheetElement extends TestBenchElement {
     public void selectSheetAt(int sheetIndex) {
         WebElement tabContainer = findShadowRootElement(
                 By.className("sheet-tabsheet-container"));
-        List<WebElement> tabs = tabContainer.findElements(By.xpath(".//*"));
+        List<WebElement> tabs = tabContainer.findElements(By.cssSelector("*"));
         WebElement target = tabs.get(sheetIndex);
         scrollSheetVisible(target);
         target.click();
@@ -217,7 +217,7 @@ public class SpreadsheetElement extends TestBenchElement {
     public void selectSheet(String sheetName) {
         WebElement tabContainer = findShadowRootElement(
                 By.className("sheet-tabsheet-container"));
-        List<WebElement> tabs = tabContainer.findElements(By.xpath(".//*"));
+        List<WebElement> tabs = tabContainer.findElements(By.cssSelector("*"));
         for (WebElement tab : tabs) {
             if (tab.getText().equals(sheetName)) {
                 scrollSheetVisible(tab);

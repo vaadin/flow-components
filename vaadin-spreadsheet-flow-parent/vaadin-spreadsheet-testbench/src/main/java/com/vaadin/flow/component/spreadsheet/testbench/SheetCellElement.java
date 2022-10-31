@@ -69,7 +69,7 @@ public class SheetCellElement extends TestBenchElement {
      *         cell has e.g. a custom editor component.
      */
     public boolean isNormalCell() {
-        List<WebElement> children = findElements(By.xpath(".//*"));
+        List<WebElement> children = findElements(By.cssSelector("*"));
         // might have an inner div for example when content is overflowing, cell
         // has a comment
         // or cell contains an invalid formula

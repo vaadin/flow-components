@@ -256,7 +256,7 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
 
     public WebElement getInlineEditor(String cell) {
         openInlineEditor(cell);
-        return getCellElement(cell).findElement(By.xpath("../input"));
+        return getCellElement(cell).findElement(By.cssSelector("input"));
     }
 
     public SpreadsheetElement getSpreadsheet() {
@@ -486,14 +486,13 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
 
     public By mergedCell(String topLeftCell) {
         int[] coordinates = numericCoordinates(topLeftCell);
-        return By.xpath("//div[contains(@class,'col" + coordinates[0] + " row"
-                + coordinates[1] + "') and contains(@class, 'merged-cell')]");
+        return By.cssSelector("div.col" + coordinates[0] + ".row"
+                + coordinates[1] + ".merged-cell");
     }
 
     public void navigateToCell(String cell) {
-        findShadowRootElement(By.xpath("//*[@class='addressfield']")).clear();
-        findShadowRootElement(By.xpath("//*[@class='addressfield']"))
-                .sendKeys(cell);
+        findShadowRootElement(By.cssSelector(".addressfield")).clear();
+        findShadowRootElement(By.cssSelector(".addressfield")).sendKeys(cell);
         new Actions(getDriver()).sendKeys(Keys.RETURN).perform();
     }
 
