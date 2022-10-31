@@ -1448,7 +1448,7 @@ public class Spreadsheet extends Component
      * @see #setChartsEnabled(boolean)
      * @return
      */
-    public boolean isChartsEnabled() {
+    boolean isChartsEnabled() {
         return chartsEnabled;
     }
 
@@ -1458,7 +1458,7 @@ public class Spreadsheet extends Component
      *
      * @param chartsEnabled
      */
-    public void setChartsEnabled(boolean chartsEnabled) {
+    void setChartsEnabled(boolean chartsEnabled) {
         this.chartsEnabled = chartsEnabled;
         clearSheetOverlays();
         loadOrUpdateOverlays();
@@ -4679,7 +4679,7 @@ public class Spreadsheet extends Component
      * @param customComponentFactory
      *            The new component factory to use.
      */
-    public void setSpreadsheetComponentFactory(
+    void setSpreadsheetComponentFactory(
             SpreadsheetComponentFactory customComponentFactory) {
         this.customComponentFactory = customComponentFactory;
         if (firstRow != -1) {
@@ -4701,7 +4701,7 @@ public class Spreadsheet extends Component
      *
      * @return The currently used component factory.
      */
-    public SpreadsheetComponentFactory getSpreadsheetComponentFactory() {
+    SpreadsheetComponentFactory getSpreadsheetComponentFactory() {
         return customComponentFactory;
     }
 
@@ -5723,17 +5723,6 @@ public class Spreadsheet extends Component
         getElement().setProperty("invalidFormulaErrorMessage",
                 invalidFormulaErrorMessage);
     }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.vaadin.ui.AbstractComponent#focus()
-     */
-    // todo: no hace falta llamar al padre?
-    /*
-     * @Override public void focus() { super.focus(); }
-     *
-     */
 
     /**
      * Controls if a column group is collapsed or not.
