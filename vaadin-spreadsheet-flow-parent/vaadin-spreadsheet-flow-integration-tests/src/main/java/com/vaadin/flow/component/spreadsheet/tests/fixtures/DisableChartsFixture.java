@@ -10,6 +10,7 @@ public class DisableChartsFixture implements SpreadsheetFixture {
 
     @Override
     public void loadFixture(Spreadsheet spreadsheet) {
-        spreadsheet.setChartsEnabled(false);
+        // TODO Re-enable when Charts implementation is done
+        // spreadsheet.setChartsEnabled(false);
     }
 }
