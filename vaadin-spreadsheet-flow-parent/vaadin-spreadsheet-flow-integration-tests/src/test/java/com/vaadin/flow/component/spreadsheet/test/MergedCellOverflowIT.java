@@ -33,7 +33,8 @@ public class MergedCellOverflowIT extends AbstractSpreadsheetIT {
         Assert.assertEquals(b2.getValue(), cellText);
 
         String cellSelector = String.format(".col%d.row%d.cell", 2, 2);
-        List<WebElement> elements = findElements(By.cssSelector(cellSelector));
+        List<WebElement> elements = findShadowRootElements(
+                By.cssSelector(cellSelector));
         TestBenchElement underlyingCell = null;
         for (WebElement element : elements) {
             if (b2.getWrappedElement().equals(element)) {

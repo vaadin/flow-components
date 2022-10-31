@@ -26,8 +26,9 @@ public class ScrollingWithMergedIT extends AbstractSpreadsheetIT {
         final SpreadsheetElement spreadsheetElement = getSpreadsheet();
         Assert.assertNotNull(spreadsheetElement.getCellAt("A1"));
 
-        spreadsheetElement.scroll(spreadsheetElement
-                .findElement(By.className("floater")).getSize().height + 100);
+        spreadsheetElement.scroll(
+                findShadowRootElement(By.className("floater")).getSize().height
+                        + 100);
         Thread.sleep(1000);
 
         try {

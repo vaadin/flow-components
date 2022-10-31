@@ -189,8 +189,8 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
 
     public void clickOnColumnHeader(int column, Keys... modifiers) {
         Actions actions = new Actions(driver);
-        WebElement header = driver
-                .findElement(By.cssSelector(".ch.col" + column));
+        WebElement header = findShadowRootElement(
+                By.cssSelector(".ch.col" + column));
         actions.moveToElement(header, 1, 1);
         for (Keys modifier : modifiers) {
             actions.keyDown(modifier);
@@ -517,8 +517,8 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
     }
 
     public List<WebElement> getGroupings() {
-        return getSpreadsheet()
-                .findElements(By.cssSelector(".col-group-pane .grouping.plus"));
+        return findShadowRootElements(
+                By.cssSelector(".col-group-pane .grouping.plus"));
     }
 
     protected double getSize(String size) {

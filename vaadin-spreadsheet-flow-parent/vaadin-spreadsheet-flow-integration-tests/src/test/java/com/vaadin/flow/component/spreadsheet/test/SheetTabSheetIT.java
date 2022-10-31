@@ -79,7 +79,9 @@ public class SheetTabSheetIT extends AbstractSpreadsheetIT {
      * @return Focused element or null
      */
     protected WebElement getFocusedElement() {
-        Object focusedElement = executeScript("return document.activeElement");
+        Object focusedElement = executeScript(
+                "return arguments[0].shadowRoot.activeElement",
+                getSpreadsheet().getWrappedElement());
         if (null != focusedElement) {
             return (WebElement) focusedElement;
         } else {

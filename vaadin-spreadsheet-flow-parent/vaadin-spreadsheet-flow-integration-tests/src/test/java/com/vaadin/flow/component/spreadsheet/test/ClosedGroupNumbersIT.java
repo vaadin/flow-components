@@ -31,8 +31,8 @@ public class ClosedGroupNumbersIT extends AbstractSpreadsheetIT {
                 By.cssSelector(".col-group-pane .grouping.plus"));
         rowGrouping.click();
 
-        waitUntil(ExpectedConditions.presenceOfElementLocated(
-                By.cssSelector(".col-group-pane .grouping.minus")));
+        waitUntil(e -> findShadowRootElement(
+                By.cssSelector(".col-group-pane .grouping.minus")) != null);
 
         SheetCellElement c2 = spreadsheet.getCellAt("C2");
         Assert.assertEquals("100", c2.getValue());
