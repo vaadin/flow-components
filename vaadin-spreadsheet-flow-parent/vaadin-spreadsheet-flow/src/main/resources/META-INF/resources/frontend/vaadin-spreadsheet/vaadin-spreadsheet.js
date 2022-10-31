@@ -3,7 +3,7 @@
  * Copyright (c) 2019 - 2022 Vaadin Ltd.
  * This program is available under Commercial Vaadin Developer License 4.0, available at https://vaadin.com/license/cvdl-4.0.
  */
-import {LitElement, html, css} from 'lit';
+import {LitElement, html } from 'lit';
 import { Spreadsheet } from './spreadsheet-export.js';
 import { spreadsheetStyles, spreadsheetOverlayStyles } from './vaadin-spreadsheet-styles.js';
 
@@ -11,10 +11,7 @@ const spreadsheetResizeObserver = new ResizeObserver((entries) => {
   entries.forEach((entry) => entry.target.api.resize());
 });
 
-// Append spreadsheet overlay styles to the document head
-const $tpl = document.createElement('template');
-$tpl.innerHTML = `<style>${spreadsheetOverlayStyles.toString()}</style>`;
-document.head.appendChild($tpl.content);
+let overlayStylesAdded = false;
 
 /**
  * An example element.
@@ -167,6 +164,17 @@ export class VaadinSpreadsheet extends LitElement {
       //public void setNamedRanges(List<String> namedRanges) {
       namedRanges: {type: String},
     };
+  }
+
+  constructor() {
+    super();
+    if (!overlayStylesAdded) {
+      // Append spreadsheet overlay styles to the document head
+      const $tpl = document.createElement('template');
+      $tpl.innerHTML = `<style>${spreadsheetOverlayStyles.toString()}</style>`;
+      document.head.appendChild($tpl.content);
+      overlayStylesAdded = true;
+    }
   }
 
   render() {

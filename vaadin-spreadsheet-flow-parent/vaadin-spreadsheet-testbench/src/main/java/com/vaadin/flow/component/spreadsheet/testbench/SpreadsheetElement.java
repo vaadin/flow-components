@@ -21,18 +21,18 @@ import com.vaadin.testbench.TestBenchElement;
 @Element("vaadin-spreadsheet")
 public class SpreadsheetElement extends TestBenchElement {
 
-    private TestBenchElement getSpreadsheetInShaodwRoot() {
+    private TestBenchElement getSpreadsheetInShadowRoot() {
         return this.$(TestBenchElement.class).all().stream()
                 .filter(el -> el.hasClassName("v-spreadsheet")).findFirst()
                 .get();
     }
 
     private TestBenchElement findShadowRootElement(By by) {
-        return getSpreadsheetInShaodwRoot().findElement(by);
+        return getSpreadsheetInShadowRoot().findElement(by);
     }
 
     private List<WebElement> findShadowRootElements(By by) {
-        return getSpreadsheetInShaodwRoot().findElements(by);
+        return getSpreadsheetInShadowRoot().findElements(by);
     }
 
     /**

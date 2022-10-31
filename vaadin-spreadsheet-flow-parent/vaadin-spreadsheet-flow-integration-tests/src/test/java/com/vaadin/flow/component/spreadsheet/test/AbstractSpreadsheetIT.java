@@ -35,17 +35,17 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
     private SpreadsheetElement spreadsheet;
     private static final String BACKGROUND_COLOR = "background-color";
 
-    private TestBenchElement getSpreadsheetInShaodwRoot() {
+    private TestBenchElement getSpreadsheetInShadowRoot() {
         var spreadsheet = $(SpreadsheetElement.class).first();
         return spreadsheet.$(DivElement.class).first();
     }
 
     protected TestBenchElement findShadowRootElement(By by) {
-        return getSpreadsheetInShaodwRoot().findElement(by);
+        return getSpreadsheetInShadowRoot().findElement(by);
     }
 
     protected List<WebElement> findShadowRootElements(By by) {
-        return getSpreadsheetInShaodwRoot().findElements(by);
+        return getSpreadsheetInShadowRoot().findElements(by);
     }
 
     public void selectCell(String address) {

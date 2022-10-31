@@ -46,8 +46,7 @@ public class SheetTabSheetIT extends AbstractSpreadsheetIT {
         spreadsheet.selectSheetAt(1);
         selectRegion("C3", "G14");
         spreadsheet.selectSheetAt(0);
-        getCommandExecutor().waitForVaadin();
-        Assert.assertTrue(spreadsheet.getCellAt("C8").isCellSelected());
+        waitUntil(e -> spreadsheet.getCellAt("C8").isCellSelected());
         spreadsheet.selectSheetAt(1);
         getCommandExecutor().waitForVaadin();
         String[] cols = { "C", "D", "E", "F", "G" };
