@@ -123,8 +123,8 @@ interface SpreadsheetComponentFactory extends Serializable {
      *         <code>null</code> if the default editor (input field) should be
      *         used.
      */
-    Component getCustomEditorForCell(Cell cell, int rowIndex,
-            int columnIndex, Spreadsheet spreadsheet, Sheet sheet);
+    Component getCustomEditorForCell(Cell cell, int rowIndex, int columnIndex,
+            Spreadsheet spreadsheet, Sheet sheet);
 
     /**
      * This method is called when a cell with a custom editor is displayed (the
@@ -149,7 +149,6 @@ interface SpreadsheetComponentFactory extends Serializable {
      * @param customEditor
      *            The component that is displayed inside the cell
      */
-    void onCustomEditorDisplayed(Cell cell, int rowIndex,
-            int columnIndex, Spreadsheet spreadsheet, Sheet sheet,
-            Component customEditor);
+    void onCustomEditorDisplayed(Cell cell, int rowIndex, int columnIndex,
+            Spreadsheet spreadsheet, Sheet sheet, Component customEditor);
 }
