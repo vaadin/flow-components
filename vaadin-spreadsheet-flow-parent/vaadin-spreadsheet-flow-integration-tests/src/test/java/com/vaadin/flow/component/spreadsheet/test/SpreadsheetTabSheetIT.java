@@ -1,5 +1,6 @@
 package com.vaadin.flow.component.spreadsheet.test;
 
+import com.vaadin.flow.component.spreadsheet.testbench.SpreadsheetElement;
 import com.vaadin.flow.component.tabs.testbench.TabSheetElement;
 
 import org.junit.Assert;
@@ -35,7 +36,12 @@ public class SpreadsheetTabSheetIT extends AbstractSpreadsheetIT {
     }
 
     public void checkPopupButtons(int expected) {
-        int actual = findElements(By.className("popupbutton")).size();
+        var spreadsheet = $(SpreadsheetElement.class);
+        int actual = 0;
+        if (spreadsheet.exists()) {
+            actual = findElementsInShadowRoot(By.className("popupbutton"))
+                    .size();
+        }
         Assert.assertTrue(expected + " PopupButtons were expected, but "
                 + actual + " were found.", actual == expected);
     }

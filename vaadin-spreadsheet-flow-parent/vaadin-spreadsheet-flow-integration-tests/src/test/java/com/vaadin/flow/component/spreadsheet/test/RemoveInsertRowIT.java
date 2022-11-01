@@ -1,5 +1,6 @@
 package com.vaadin.flow.component.spreadsheet.test;
 
+import com.vaadin.flow.component.html.testbench.DivElement;
 import com.vaadin.flow.component.spreadsheet.testbench.SpreadsheetElement;
 import com.vaadin.flow.component.spreadsheet.tests.fixtures.TestFixtures;
 
@@ -36,9 +37,8 @@ public class RemoveInsertRowIT extends AbstractSpreadsheetIT {
 
         deleteRow(spreadsheet, 2);
 
-        Assert.assertTrue(spreadsheet
-                .findElements(By.className("cell-invalidformula-triangle"))
-                .isEmpty());
+        Assert.assertTrue(findElementsInShadowRoot(
+                By.className("cell-invalidformula-triangle")).isEmpty());
     }
 
     @Test
@@ -114,8 +114,9 @@ public class RemoveInsertRowIT extends AbstractSpreadsheetIT {
 
         deleteFirstRow(spreadsheet);
 
-        Assert.assertTrue(spreadsheet
-                .findElements(By.cssSelector(".merged-cell")).isEmpty());
+        Assert.assertTrue(
+                findElementsInShadowRoot(By.cssSelector(".merged-cell"))
+                        .isEmpty());
     }
 
     @Test
@@ -128,9 +129,8 @@ public class RemoveInsertRowIT extends AbstractSpreadsheetIT {
 
         insertNewFirstRow(spreadsheet);
 
-        Assert.assertTrue(spreadsheet
-                .findElement(By.cssSelector(".col1.row2.merged-cell"))
-                .isDisplayed());
+        Assert.assertTrue(findElementInShadowRoot(
+                By.cssSelector(".col1.row2.merged-cell")).isDisplayed());
     }
 
     @Ignore("Ignore until https://github.com/vaadin/flow-components/issues/3223 is fixed")
@@ -146,7 +146,6 @@ public class RemoveInsertRowIT extends AbstractSpreadsheetIT {
         Assert.assertFalse(spreadsheet.getCellAt("A1").hasPopupButton());
     }
 
-    @Ignore("Ignore until https://github.com/vaadin/flow-components/issues/3223 is fixed")
     @Test
     public void removeRow_theSecondRowCellHasPopupButton_thereIsNoPopupButtons() {
         final SpreadsheetElement spreadsheet = getSpreadsheet();
@@ -156,7 +155,7 @@ public class RemoveInsertRowIT extends AbstractSpreadsheetIT {
 
         deleteRow(spreadsheet, 2);
 
-        Assert.assertTrue(spreadsheet.findElements(By.className("popupbutton"))
+        Assert.assertTrue(findElementsInShadowRoot(By.className("popupbutton"))
                 .isEmpty());
     }
 

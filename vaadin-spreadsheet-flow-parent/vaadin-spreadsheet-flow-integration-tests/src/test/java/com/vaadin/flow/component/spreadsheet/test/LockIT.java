@@ -40,7 +40,7 @@ public class LockIT extends AbstractSpreadsheetIT {
 
         // Assert that an unlocked cell can be edited
         Assert.assertEquals("unlocked", spreadsheet.getCellAt("C3").getValue());
-        putCellContent("C3", "value");
+        setCellValue("C3", "value");
         Assert.assertEquals("value", spreadsheet.getCellAt("C3").getValue());
     }
 
