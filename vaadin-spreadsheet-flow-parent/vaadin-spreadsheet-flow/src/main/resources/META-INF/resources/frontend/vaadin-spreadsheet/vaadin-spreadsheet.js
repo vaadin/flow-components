@@ -3,7 +3,7 @@
  * Copyright (c) 2019 - 2022 Vaadin Ltd.
  * This program is available under Commercial Vaadin Developer License 4.0, available at https://vaadin.com/license/cvdl-4.0.
  */
-import {LitElement, html } from 'lit';
+import { LitElement, html } from 'lit';
 import { Spreadsheet } from './spreadsheet-export.js';
 import { spreadsheetStyles, spreadsheetOverlayStyles } from './vaadin-spreadsheet-styles.js';
 
@@ -17,12 +17,6 @@ const overlayStyles = (() => {
   return $tpl.content;
 })();
 
-/**
- * An example element.
- *
- * @slot - This element has a slot
- * @csspart button - The button
- */
 export class VaadinSpreadsheet extends LitElement {
 
   static styles = spreadsheetStyles;
