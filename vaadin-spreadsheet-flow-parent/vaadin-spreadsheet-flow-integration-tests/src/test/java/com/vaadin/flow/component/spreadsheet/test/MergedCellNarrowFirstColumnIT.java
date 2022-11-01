@@ -34,7 +34,7 @@ public class MergedCellNarrowFirstColumnIT extends AbstractSpreadsheetIT {
         assertThat(a2.getValue(), equalTo(cellText));
 
         String cellSelector = String.format(".col%d.row%d.cell", 1, 2);
-        List<WebElement> elements = findShadowRootElements(
+        List<WebElement> elements = findElementsInShadowRoot(
                 By.cssSelector(cellSelector));
         TestBenchElement underlyingCell = null;
         for (WebElement element : elements) {

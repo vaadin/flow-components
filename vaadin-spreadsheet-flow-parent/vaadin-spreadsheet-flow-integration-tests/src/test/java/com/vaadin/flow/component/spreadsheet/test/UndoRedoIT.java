@@ -217,7 +217,7 @@ public class UndoRedoIT extends AbstractSpreadsheetIT {
         waitUntil(new ExpectedCondition<Object>() {
             @Override
             public Object apply(WebDriver webDriver) {
-                return findShadowRootElement(
+                return findElementInShadowRoot(
                         By.cssSelector(".col1.row2.merged-cell")).isDisplayed();
             }
         });

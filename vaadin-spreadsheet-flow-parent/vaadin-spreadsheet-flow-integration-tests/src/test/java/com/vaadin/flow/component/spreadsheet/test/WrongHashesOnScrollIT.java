@@ -42,7 +42,7 @@ public class WrongHashesOnScrollIT extends AbstractSpreadsheetIT {
 
         Thread.sleep(500);
 
-        final List<WebElement> elements = findShadowRootElements(
+        final List<WebElement> elements = findElementsInShadowRoot(
                 By.cssSelector(".cell"));
 
         for (WebElement cell : elements) {

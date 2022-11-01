@@ -29,7 +29,7 @@ public class CellShiftValuesUndoRedoIT extends AbstractSpreadsheetIT {
 
         selectCell("A1");
 
-        WebElement selectionCorner = findShadowRootElement(
+        WebElement selectionCorner = findElementInShadowRoot(
                 By.className("sheet-selection"))
                 .findElement(By.className("s-corner"));
         // drag corner element of the selected cell to the target cell

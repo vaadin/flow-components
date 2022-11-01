@@ -32,7 +32,7 @@ public class ImageIT extends AbstractSpreadsheetIT {
     @Test
     public void pictureType2_width() {
         spreadsheet.scroll(680);
-        waitUntil(e -> findShadowRootElement(
+        waitUntil(e -> findElementInShadowRoot(
                 By.cssSelector(cellToCSS("G42") + " img")) != null);
 
         assertInRange(250, imageWidth("C38"), 280);
@@ -46,7 +46,7 @@ public class ImageIT extends AbstractSpreadsheetIT {
         spreadsheet.scroll(1300);
 
         // Get all type3 pictures (absolute position)
-        var type3 = findShadowRootElements(
+        var type3 = findElementsInShadowRoot(
                 By.cssSelector(cellToCSS("A1") + " img")).stream()
                 .map(image -> image.getRect()).collect(Collectors.toList());
         Assert.assertEquals(3, type3.size());
@@ -76,7 +76,7 @@ public class ImageIT extends AbstractSpreadsheetIT {
     }
 
     private double imageWidth(String cell) {
-        return findShadowRootElement(By.cssSelector(cellToCSS(cell) + " img"))
+        return findElementInShadowRoot(By.cssSelector(cellToCSS(cell) + " img"))
                 .getSize().width;
     }
 }

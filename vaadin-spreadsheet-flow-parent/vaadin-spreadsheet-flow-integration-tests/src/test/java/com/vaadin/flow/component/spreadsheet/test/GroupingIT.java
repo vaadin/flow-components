@@ -25,9 +25,9 @@ public class GroupingIT extends AbstractSpreadsheetIT {
             throws Exception {
         loadFile("grouping_without_headers.xlsx");
 
-        WebElement colGrouping = findShadowRootElement(
+        WebElement colGrouping = findElementInShadowRoot(
                 By.cssSelector(".col-group-pane .grouping.minus"));
-        WebElement rowGrouping = findShadowRootElement(
+        WebElement rowGrouping = findElementInShadowRoot(
                 By.cssSelector(".row-group-pane .grouping.minus"));
         Assert.assertTrue(colGrouping.getSize().getWidth() > 270);
         Assert.assertTrue(colGrouping.getSize().getWidth() <= 280);
@@ -96,31 +96,31 @@ public class GroupingIT extends AbstractSpreadsheetIT {
     }
 
     private void collapseColumn(SpreadsheetElement spreadsheetElement) {
-        WebElement colGrouping = findShadowRootElement(
+        WebElement colGrouping = findElementInShadowRoot(
                 By.cssSelector(".col-group-pane .grouping.minus"));
         colGrouping.click();
     }
 
     private void expandColumn(SpreadsheetElement spreadsheetElement) {
-        WebElement colGrouping = findShadowRootElement(
+        WebElement colGrouping = findElementInShadowRoot(
                 By.cssSelector(".col-group-pane .grouping.plus"));
         colGrouping.click();
     }
 
     private void collapseRow(SpreadsheetElement spreadsheetElement) {
-        WebElement colGrouping = findShadowRootElement(
+        WebElement colGrouping = findElementInShadowRoot(
                 By.cssSelector(".row-group-pane .grouping.minus"));
         colGrouping.click();
     }
 
     private void expandRow(SpreadsheetElement spreadsheetElement) {
-        WebElement colGrouping = findShadowRootElement(
+        WebElement colGrouping = findElementInShadowRoot(
                 By.cssSelector(".row-group-pane .grouping.plus"));
         colGrouping.click();
     }
 
     private WebElement getOverlay(SpreadsheetElement spreadsheetElement) {
-        List<WebElement> overlayDivs = findShadowRootElements(
+        List<WebElement> overlayDivs = findElementsInShadowRoot(
                 (By.cssSelector(IMAGE_CSS_SELECTOR)));
         Assert.assertFalse("Can not find image overlay", overlayDivs.isEmpty());
         return overlayDivs.get(0);

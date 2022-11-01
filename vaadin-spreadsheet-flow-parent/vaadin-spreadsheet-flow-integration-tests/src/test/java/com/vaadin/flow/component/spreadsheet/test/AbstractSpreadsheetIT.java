@@ -40,11 +40,11 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
         return spreadsheet.$(DivElement.class).first();
     }
 
-    protected TestBenchElement findShadowRootElement(By by) {
+    protected TestBenchElement findElementInShadowRoot(By by) {
         return getSpreadsheetInShadowRoot().findElement(by);
     }
 
-    protected List<WebElement> findShadowRootElements(By by) {
+    protected List<WebElement> findElementsInShadowRoot(By by) {
         return getSpreadsheetInShadowRoot().findElements(by);
     }
 
@@ -112,7 +112,7 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
     }
 
     public void addSheet() {
-        findShadowRootElement(By.className("add-new-tab")).click();
+        findElementInShadowRoot(By.className("add-new-tab")).click();
     }
 
     public void selectSheetAt(int sheetIndex) {
@@ -120,14 +120,14 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
     }
 
     public String getSelectedSheetName() {
-        WebElement selectedSheetTab = findShadowRootElement(
+        WebElement selectedSheetTab = findElementInShadowRoot(
                 By.cssSelector(".sheet-tabsheet-tab.selected-tab"));
 
         return selectedSheetTab.getText();
     }
 
     public List<String> getNamedRanges() {
-        final List<WebElement> options = findShadowRootElement(
+        final List<WebElement> options = findElementInShadowRoot(
                 By.className("namedrangebox"))
                 .findElements(By.tagName("option"));
 
@@ -136,7 +136,7 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
     }
 
     public void selectNamedRange(String name) {
-        TestBenchElement select = ((TestBenchElement) findShadowRootElement(
+        TestBenchElement select = ((TestBenchElement) findElementInShadowRoot(
                 By.className("namedrangebox")));
         select.setProperty("value", name);
         select.dispatchEvent("change");
@@ -189,14 +189,14 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
 
     public void clickOnColumnHeader(int column, Keys... modifiers) {
         Actions actions = new Actions(driver);
-        WebElement header = findShadowRootElement(
+        WebElement header = findElementInShadowRoot(
                 By.cssSelector(".ch.col" + column));
         actions.moveToElement(header, 1, 1);
         for (Keys modifier : modifiers) {
             actions.keyDown(modifier);
         }
         actions.click(
-                findShadowRootElement(By.cssSelector(".ch.col" + column)));
+                findElementInShadowRoot(By.cssSelector(".ch.col" + column)));
         for (Keys modifier : modifiers) {
             actions.keyUp(modifier);
         }
@@ -206,11 +206,11 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
     public void clickOnRowHeader(int row, Keys... modifiers) {
         Actions actions = new Actions(driver);
         actions.moveToElement(
-                findShadowRootElement(By.cssSelector(".rh.row" + row)), 1, 1);
+                findElementInShadowRoot(By.cssSelector(".rh.row" + row)), 1, 1);
         for (Keys modifier : modifiers) {
             actions.keyDown(modifier);
         }
-        actions.click(findShadowRootElement(By.cssSelector(".rh.row" + row)));
+        actions.click(findElementInShadowRoot(By.cssSelector(".rh.row" + row)));
         for (Keys modifier : modifiers) {
             actions.keyUp(modifier);
         }
@@ -220,7 +220,7 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
     public void setSpreadsheet(SpreadsheetElement spreadsheet) {
         this.spreadsheet = spreadsheet;
         // Force sheet initial focus
-        findShadowRootElement(By.className("sheet-tabsheet")).click();
+        findElementInShadowRoot(By.className("sheet-tabsheet")).click();
     }
 
     public void setCellValue(String address, String value) {
@@ -232,7 +232,7 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
     }
 
     public WebElement getCellElement(String cell) {
-        return findShadowRootElement(By.cssSelector(cellToCSS(cell)));
+        return findElementInShadowRoot(By.cssSelector(cellToCSS(cell)));
     }
 
     public String getCellValue(int col, int row) {
@@ -256,7 +256,7 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
 
     public WebElement getInlineEditor(String cell) {
         openInlineEditor(cell);
-        return findShadowRootElement(By.cssSelector("input"));
+        return findElementInShadowRoot(By.cssSelector("input"));
     }
 
     public SpreadsheetElement getSpreadsheet() {
@@ -350,11 +350,11 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
     }
 
     private WebElement getAddressField() {
-        return findShadowRootElement(By.cssSelector("input.addressfield"));
+        return findElementInShadowRoot(By.cssSelector("input.addressfield"));
     }
 
     private WebElement getFormulaField() {
-        return findShadowRootElement(By.className("functionfield"));
+        return findElementInShadowRoot(By.className("functionfield"));
     }
 
     public String getFormulaFieldValue() {
@@ -364,7 +364,7 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
     public String getSelectionFormula() {
         final var sprElement = getSpreadsheet();
 
-        WebElement selection = findShadowRootElement(
+        WebElement selection = findElementInShadowRoot(
                 org.openqa.selenium.By.className("sheet-selection"));
         final String[] classes = selection.getAttribute("class").split(" ");
 
@@ -481,7 +481,7 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
     }
 
     public String getMergedCellContent(String topLeftCell) {
-        return findShadowRootElement(mergedCell(topLeftCell)).getText();
+        return findElementInShadowRoot(mergedCell(topLeftCell)).getText();
     }
 
     public By mergedCell(String topLeftCell) {
@@ -491,8 +491,8 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
     }
 
     public void navigateToCell(String cell) {
-        findShadowRootElement(By.cssSelector(".addressfield")).clear();
-        findShadowRootElement(By.cssSelector(".addressfield")).sendKeys(cell);
+        findElementInShadowRoot(By.cssSelector(".addressfield")).clear();
+        findElementInShadowRoot(By.cssSelector(".addressfield")).sendKeys(cell);
         new Actions(getDriver()).sendKeys(Keys.RETURN).perform();
     }
 
@@ -517,7 +517,7 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
     }
 
     public List<WebElement> getGroupings() {
-        return findShadowRootElements(
+        return findElementsInShadowRoot(
                 By.cssSelector(".col-group-pane .grouping.plus"));
     }
 

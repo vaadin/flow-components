@@ -106,7 +106,7 @@ public class CommentIT extends AbstractSpreadsheetIT {
 
     public void moveMouseOverCell(String cellAddress) {
         SheetCellElement cell = getSpreadsheet().getCellAt(cellAddress);
-        WebElement cornerElement = findShadowRootElement(
+        WebElement cornerElement = findElementInShadowRoot(
                 By.cssSelector(".corner"));
 
         new Actions(driver).moveToElement(cornerElement)

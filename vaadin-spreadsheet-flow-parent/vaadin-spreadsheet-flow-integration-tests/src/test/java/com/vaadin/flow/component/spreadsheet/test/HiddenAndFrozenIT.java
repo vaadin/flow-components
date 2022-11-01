@@ -47,7 +47,7 @@ public class HiddenAndFrozenIT extends AbstractSpreadsheetIT {
     private void assertFreezePanePositionedCorrectly(String filename,
             int frozenRows, int frozenColumns, String regularCell) {
         loadFile(filename);
-        WebElement topLeft = findShadowRootElement(
+        WebElement topLeft = findElementInShadowRoot(
                 By.className("top-left-pane"));
 
         assertVisibleChildCount(topLeft, "rh", frozenRows);

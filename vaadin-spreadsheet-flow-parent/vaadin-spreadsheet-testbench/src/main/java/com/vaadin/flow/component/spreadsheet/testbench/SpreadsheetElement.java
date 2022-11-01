@@ -27,11 +27,11 @@ public class SpreadsheetElement extends TestBenchElement {
                 .get();
     }
 
-    private TestBenchElement findShadowRootElement(By by) {
+    private TestBenchElement findElementInShadowRoot(By by) {
         return getSpreadsheetInShadowRoot().findElement(by);
     }
 
-    private List<WebElement> findShadowRootElements(By by) {
+    private List<WebElement> findElementsInShadowRoot(By by) {
         return getSpreadsheetInShadowRoot().findElements(by);
     }
 
@@ -51,10 +51,10 @@ public class SpreadsheetElement extends TestBenchElement {
     public SheetCellElement getCellAt(int row, int column) {
         String cellSelector = String.format(".col%d.row%d.cell", column, row);
         // If there are multiple cells return the merged cell
-        if (findShadowRootElements(By.cssSelector(cellSelector)).size() > 1) {
+        if (findElementsInShadowRoot(By.cssSelector(cellSelector)).size() > 1) {
             cellSelector += ".merged-cell";
         }
-        TestBenchElement cell = (TestBenchElement) findShadowRootElement(
+        TestBenchElement cell = (TestBenchElement) findElementInShadowRoot(
                 By.cssSelector(cellSelector));
         SheetCellElement cellElement = cell.wrap(SheetCellElement.class);
         cellElement.setParent(this);
@@ -85,7 +85,7 @@ public class SpreadsheetElement extends TestBenchElement {
      * @return Header of the row at the given index
      */
     public SheetHeaderElement getRowHeader(int rowIndex) {
-        TestBenchElement cell = (TestBenchElement) findShadowRootElement(
+        TestBenchElement cell = (TestBenchElement) findElementInShadowRoot(
                 By.cssSelector(String.format(".rh.row%d", rowIndex)));
         return cell.wrap(SheetHeaderElement.class);
     }
@@ -98,7 +98,7 @@ public class SpreadsheetElement extends TestBenchElement {
      * @return Header of the column at the given index
      */
     public SheetHeaderElement getColumnHeader(int columnIndex) {
-        TestBenchElement cell = (TestBenchElement) findShadowRootElement(
+        TestBenchElement cell = (TestBenchElement) findElementInShadowRoot(
                 By.cssSelector(String.format(".ch.col%d", columnIndex)));
         return cell.wrap(SheetHeaderElement.class);
     }
@@ -110,7 +110,7 @@ public class SpreadsheetElement extends TestBenchElement {
      * @return Address field element
      */
     public TestBenchElement getAddressField() {
-        return (TestBenchElement) findShadowRootElement(
+        return (TestBenchElement) findElementInShadowRoot(
                 By.className("addressfield"));
     }
 
@@ -121,7 +121,7 @@ public class SpreadsheetElement extends TestBenchElement {
      * @return Formula field element
      */
     public TestBenchElement getFormulaField() {
-        return (TestBenchElement) findShadowRootElement(
+        return (TestBenchElement) findElementInShadowRoot(
                 By.className("functionfield"));
     }
 
@@ -132,7 +132,7 @@ public class SpreadsheetElement extends TestBenchElement {
      * @return Info label element
      */
     public TestBenchElement getInfoLabel() {
-        return (TestBenchElement) findShadowRootElement(
+        return (TestBenchElement) findElementInShadowRoot(
                 By.className("sheet-tabsheet-infolabel"));
     }
 
@@ -162,7 +162,7 @@ public class SpreadsheetElement extends TestBenchElement {
      * Has no effect if there are not enough sheets to require scrolling.
      */
     public void scrollSheetsToStart() {
-        findShadowRootElement(By.className("scroll-tabs-beginning")).click();
+        findElementInShadowRoot(By.className("scroll-tabs-beginning")).click();
     }
 
     /**
@@ -171,7 +171,7 @@ public class SpreadsheetElement extends TestBenchElement {
      * Has no effect if there are not enough sheets to require scrolling.
      */
     public void scrollSheetsToEnd() {
-        findShadowRootElement(By.className("scroll-tabs-end")).click();
+        findElementInShadowRoot(By.className("scroll-tabs-end")).click();
     }
 
     /**
@@ -184,7 +184,7 @@ public class SpreadsheetElement extends TestBenchElement {
      *            negative numbers scroll to the left.
      */
     public void scrollSheets(int amount) {
-        WebElement target = findShadowRootElement(By.className(
+        WebElement target = findElementInShadowRoot(By.className(
                 amount > 0 ? "scroll-tabs-right" : "scroll-tabs-left"));
         for (int i = 0; i < amount; i++) {
             target.click();
@@ -199,7 +199,7 @@ public class SpreadsheetElement extends TestBenchElement {
      *            Index of sheet to select, 0-based
      */
     public void selectSheetAt(int sheetIndex) {
-        WebElement tabContainer = findShadowRootElement(
+        WebElement tabContainer = findElementInShadowRoot(
                 By.className("sheet-tabsheet-container"));
         List<WebElement> tabs = tabContainer.findElements(By.cssSelector("*"));
         WebElement target = tabs.get(sheetIndex);
@@ -215,7 +215,7 @@ public class SpreadsheetElement extends TestBenchElement {
      *            Name of sheet to select
      */
     public void selectSheet(String sheetName) {
-        WebElement tabContainer = findShadowRootElement(
+        WebElement tabContainer = findElementInShadowRoot(
                 By.className("sheet-tabsheet-container"));
         List<WebElement> tabs = tabContainer.findElements(By.cssSelector("*"));
         for (WebElement tab : tabs) {
@@ -231,7 +231,7 @@ public class SpreadsheetElement extends TestBenchElement {
      * Adds a new sheet.
      */
     public void addSheet() {
-        findShadowRootElement(By.className("add-new-tab")).click();
+        findElementInShadowRoot(By.className("add-new-tab")).click();
     }
 
     /**
@@ -290,12 +290,12 @@ public class SpreadsheetElement extends TestBenchElement {
     private void findSelectionOutline() {
         // sometimes the spreadsheet takes so long to load that the selection
         // widget elements are not found
-        waitUntil(e -> findShadowRootElement(By.className("s-top")) != null);
-        sTop = findShadowRootElement(By.className("s-top"));
-        sBottom = findShadowRootElement(By.className("s-bottom"));
+        waitUntil(e -> findElementInShadowRoot(By.className("s-top")) != null);
+        sTop = findElementInShadowRoot(By.className("s-top"));
+        sBottom = findElementInShadowRoot(By.className("s-bottom"));
         // Just to make sure the left element is present
-        findShadowRootElement(By.className("s-left"));
-        sRight = findShadowRootElement(By.className("s-right"));
+        findElementInShadowRoot(By.className("s-left"));
+        sRight = findElementInShadowRoot(By.className("s-right"));
     }
 
     private boolean isNonCoherentlySelected(WebElement element) {
@@ -334,7 +334,7 @@ public class SpreadsheetElement extends TestBenchElement {
     }
 
     public WebElement getCellValueInput() {
-        return findShadowRootElement(By.id("cellinput"));
+        return findElementInShadowRoot(By.id("cellinput"));
     }
 
     /**
@@ -348,7 +348,7 @@ public class SpreadsheetElement extends TestBenchElement {
 
     private TestBenchElement getBottomRightPane() {
         return wrapElement(
-                findShadowRootElement(By.className("bottom-right-pane")),
+                findElementInShadowRoot(By.className("bottom-right-pane")),
                 getCommandExecutor());
     }
 }

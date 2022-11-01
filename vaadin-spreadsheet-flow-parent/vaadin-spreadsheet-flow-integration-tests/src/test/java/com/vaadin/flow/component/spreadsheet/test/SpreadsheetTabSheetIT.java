@@ -39,7 +39,8 @@ public class SpreadsheetTabSheetIT extends AbstractSpreadsheetIT {
         var spreadsheet = $(SpreadsheetElement.class);
         int actual = 0;
         if (spreadsheet.exists()) {
-            actual = findShadowRootElements(By.className("popupbutton")).size();
+            actual = findElementsInShadowRoot(By.className("popupbutton"))
+                    .size();
         }
         Assert.assertTrue(expected + " PopupButtons were expected, but "
                 + actual + " were found.", actual == expected);

@@ -27,11 +27,11 @@ public class ClosedGroupNumbersIT extends AbstractSpreadsheetIT {
         loadFile("closed-group-with-numbers.xlsx");
         SpreadsheetElement spreadsheet = $(SpreadsheetElement.class).first();
 
-        WebElement rowGrouping = findShadowRootElement(
+        WebElement rowGrouping = findElementInShadowRoot(
                 By.cssSelector(".col-group-pane .grouping.plus"));
         rowGrouping.click();
 
-        waitUntil(e -> findShadowRootElement(
+        waitUntil(e -> findElementInShadowRoot(
                 By.cssSelector(".col-group-pane .grouping.minus")) != null);
 
         SheetCellElement c2 = spreadsheet.getCellAt("C2");

@@ -52,7 +52,7 @@ public class SheetEventListener implements EventListener {
 
     @Override
     public void onBrowserEvent(Event event) {
-        if (((Element) SheetWidget.getEventTarget(event)).getAttribute("class")
+        if ((SheetWidget.getEventTarget(event)).getAttribute("class")
                 .contains(PopupButtonWidget.BUTTON_CLASSNAME)) {
             widget.setFocused(true);
             return;

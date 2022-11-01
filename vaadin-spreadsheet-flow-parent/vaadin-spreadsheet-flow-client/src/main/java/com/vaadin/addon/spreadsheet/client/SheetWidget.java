@@ -948,19 +948,17 @@ public class SheetWidget extends Panel {
         // Workbook styles
         sheetStyle.setType("text/css");
         sheetStyle.setId(sheetId + "-sheetStyle");
-        cellSizeAndPositionStyle.getParentNode().appendChild(sheetStyle);
+        styleHost.appendChild(sheetStyle);
 
         // Custom cell size styles (because of borders)
         shiftedBorderCellStyle.setType("text/css");
         shiftedBorderCellStyle.setId(sheetId + "-customCellSizeStyle");
-        cellSizeAndPositionStyle.getParentNode()
-                .appendChild(shiftedBorderCellStyle);
+        styleHost.appendChild(shiftedBorderCellStyle);
 
         // style for "hiding" the edited cell
         editedCellFreezeColumnStyle.setType("text/css");
         editedCellFreezeColumnStyle.setId(sheetId + "-editedCellStyle");
-        cellSizeAndPositionStyle.getParentNode()
-                .appendChild(editedCellFreezeColumnStyle);
+        styleHost.appendChild(editedCellFreezeColumnStyle);
         jsniUtil.insertRule(editedCellFreezeColumnStyle,
                 ".notusedselector" + EDITING_CELL_STYLE);
         jsniUtil.insertRule(editedCellFreezeColumnStyle,
@@ -969,11 +967,11 @@ public class SheetWidget extends Panel {
         // style for hiding the cell inside merged regions
         mergedRegionStyle.setType("text/css");
         mergedRegionStyle.setId(sheetId + "-mergedRegionStyle");
-        cellSizeAndPositionStyle.getParentNode().appendChild(mergedRegionStyle);
+        styleHost.appendChild(mergedRegionStyle);
 
         resizeStyle.setType("text/css");
         resizeStyle.setId(sheetId + "-resizeStyle");
-        cellSizeAndPositionStyle.getParentNode().appendChild(resizeStyle);
+        styleHost.appendChild(resizeStyle);
     }
 
     /**
@@ -1525,8 +1523,8 @@ public class SheetWidget extends Panel {
                             className = target.getAttribute("class");
                         }
 
-                        if (getElement().isOrHasChild(
-                                (Node) getEventTarget(nativeEvent))) {
+                        if (getElement()
+                                .isOrHasChild(getEventTarget(nativeEvent))) {
                             if (Event.ONTOUCHSTART == eventTypeInt
                                     || Event.ONMOUSEDOWN == eventTypeInt
                                     || Event.ONMOUSEUP == eventTypeInt
