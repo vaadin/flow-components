@@ -1,6 +1,8 @@
 package com.vaadin.flow.component.spreadsheet.testbench;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import com.vaadin.testbench.elementsbase.Element;
 import org.openqa.selenium.By;
@@ -28,11 +30,13 @@ public class SpreadsheetElement extends TestBenchElement {
     }
 
     private TestBenchElement findElementInShadowRoot(By by) {
-        return getSpreadsheetInShadowRoot().findElement(by);
+        return Optional.of(getSpreadsheetInShadowRoot())
+                .map(el -> el.findElement(by)).orElse(null);
     }
 
     private List<WebElement> findElementsInShadowRoot(By by) {
-        return getSpreadsheetInShadowRoot().findElements(by);
+        return Optional.of(getSpreadsheetInShadowRoot())
+                .map(el -> el.findElements(by)).orElse(Collections.emptyList());
     }
 
     /**
