@@ -23,20 +23,19 @@ import com.vaadin.testbench.TestBenchElement;
 @Element("vaadin-spreadsheet")
 public class SpreadsheetElement extends TestBenchElement {
 
-    private TestBenchElement getSpreadsheetInShadowRoot() {
+    private Optional<TestBenchElement> getSpreadsheetInShadowRoot() {
         return this.$(TestBenchElement.class).all().stream()
-                .filter(el -> el.hasClassName("v-spreadsheet")).findFirst()
-                .get();
+                .filter(el -> el.hasClassName("v-spreadsheet")).findFirst();
     }
 
     private TestBenchElement findElementInShadowRoot(By by) {
-        return Optional.of(getSpreadsheetInShadowRoot())
-                .map(el -> el.findElement(by)).orElse(null);
+        return getSpreadsheetInShadowRoot().map(el -> el.findElement(by))
+                .orElse(null);
     }
 
     private List<WebElement> findElementsInShadowRoot(By by) {
-        return Optional.of(getSpreadsheetInShadowRoot())
-                .map(el -> el.findElements(by)).orElse(Collections.emptyList());
+        return getSpreadsheetInShadowRoot().map(el -> el.findElements(by))
+                .orElse(Collections.emptyList());
     }
 
     /**
