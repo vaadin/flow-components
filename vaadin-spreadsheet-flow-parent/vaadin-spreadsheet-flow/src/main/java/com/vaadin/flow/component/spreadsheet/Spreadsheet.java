@@ -104,10 +104,10 @@ import com.vaadin.pro.licensechecker.LicenseChecker;
 import elemental.json.JsonValue;
 
 /**
- * Vaadin Spreadsheet is a Vaadin Add-On Component which allows displaying and
- * interacting with the contents of an Excel file. The Spreadsheet can be used
- * in any Vaadin application for enabling users to view and manipulate Excel
- * files in their web browsers.
+ * Vaadin Spreadsheet is a component which allows displaying and interacting
+ * with the contents of an Excel file. The Spreadsheet can be used in any Vaadin
+ * application for enabling users to view and manipulate Excel files in their
+ * web browsers.
  *
  * @author Vaadin Ltd.
  */
