@@ -132,7 +132,7 @@ public class SheetTabSheet extends Widget {
 
             @Override
             public void onBrowserEvent(Event event) {
-                final Element target = event.getEventTarget().cast();
+                final Element target = SheetWidget.getEventTarget(event);
                 final int type = event.getTypeInt();
                 if (target.equals(input)) {
                     return;

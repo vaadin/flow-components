@@ -3,6 +3,7 @@ package com.vaadin.flow.component.spreadsheet.test;
 import com.vaadin.flow.component.spreadsheet.testbench.SpreadsheetElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
+import com.vaadin.flow.component.html.testbench.DivElement;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,6 +21,7 @@ public class SizingIT extends AbstractComponentIT {
         open();
         spreadsheet = $(SpreadsheetElement.class).first();
         layout = findElement(By.id("layout"));
+        waitUntil(e -> spreadsheet.$(DivElement.class).exists());
     }
 
     @Test
@@ -83,7 +85,7 @@ public class SizingIT extends AbstractComponentIT {
         findElement(By.id("layoutDisplayFlex")).click();
 
         var layoutWidth = layout.getSize().getWidth();
-        var internal = spreadsheet.findElement(By.className("v-spreadsheet"));
+        var internal = spreadsheet.$(DivElement.class).first();
         Assert.assertEquals(layoutWidth, internal.getSize().getWidth());
         Assert.assertEquals(layoutWidth, spreadsheet.getSize().getWidth());
     }
@@ -105,7 +107,7 @@ public class SizingIT extends AbstractComponentIT {
     }
 
     private void assertSpreadsheetHeight(int height) {
-        var internal = spreadsheet.findElement(By.className("v-spreadsheet"));
+        var internal = spreadsheet.$(DivElement.class).first();
         Assert.assertEquals(height, internal.getSize().getHeight());
         Assert.assertEquals(height, spreadsheet.getSize().getHeight());
     }

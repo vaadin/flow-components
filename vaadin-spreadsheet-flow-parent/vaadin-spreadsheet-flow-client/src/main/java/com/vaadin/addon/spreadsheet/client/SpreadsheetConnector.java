@@ -25,6 +25,7 @@ import java.util.logging.Logger;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
@@ -550,5 +551,9 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
 
     public interface CommsTrigger {
         void sendUpdates();
+    }
+
+    public void setHost(Element element) {
+        getWidget().setHost(element);
     }
 }

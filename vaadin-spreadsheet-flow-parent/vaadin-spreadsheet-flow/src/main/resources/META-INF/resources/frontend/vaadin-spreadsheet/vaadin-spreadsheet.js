@@ -3,21 +3,23 @@
  * Copyright (c) 2019 - 2022 Vaadin Ltd.
  * This program is available under Commercial Vaadin Developer License 4.0, available at https://vaadin.com/license/cvdl-4.0.
  */
-import {LitElement, html, css} from 'lit';
+import { LitElement, html } from 'lit';
 import { Spreadsheet } from './spreadsheet-export.js';
-import css_valo from './spreadsheet-styles-valo.css';
+import { spreadsheetStyles, spreadsheetOverlayStyles } from './vaadin-spreadsheet-styles.js';
 
 const spreadsheetResizeObserver = new ResizeObserver((entries) => {
   entries.forEach((entry) => entry.target.api.resize());
 });
 
-/**
- * An example element.
- *
- * @slot - This element has a slot
- * @csspart button - The button
- */
+const overlayStyles = (() => {
+  const $tpl = document.createElement('template');
+  $tpl.innerHTML = `<style>${spreadsheetOverlayStyles.toString()}</style>`;
+  return $tpl.content;
+})();
+
 export class VaadinSpreadsheet extends LitElement {
+
+  static styles = spreadsheetStyles;
 
   static get properties() {
     return {
@@ -162,59 +164,33 @@ export class VaadinSpreadsheet extends LitElement {
     };
   }
 
-  static get styles() {
-    return css`
-      :host {
-        display: block;
-        height: 100%;
-        flex: 1 1 auto;
-        isolation: isolate;
-      }
+  constructor() {
+    super();
 
-      ::slotted(.v-spreadsheet) {
-        box-sizing: border-box;
-        min-height: 100px;
-      }
-    `
-  };
+    if (!overlayStyles.parentElement) {
+      // Append spreadsheet overlay styles to the document head
+      document.head.appendChild(overlayStyles);
+    }
+  }
 
   render() {
-    return html`
-      <slot></slot>
-    `;
+    return html``;
   }
 
   connectedCallback() {
     super.connectedCallback()
     spreadsheetResizeObserver.observe(this);
-    // Restore styles in the case widget is reattached, it happens e.g in client router
-    this.styles && this.styles.forEach(e => {
-      document.head.appendChild(e);
-      const rulesToBeAdded = e.__removedRules;
-      for (let i = 0; i < rulesToBeAdded.length; i++) {
-        // To guarantee that the rules are added on the same order
-        // they were added by spreadsheet, we pass current index
-        e.sheet.insertRule(rulesToBeAdded.item(i).cssText, i);
-      }
-    });
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
     spreadsheetResizeObserver.unobserve(this);
-    // Remove styles added to the head by the Widget
-    this.styles = document.head.querySelectorAll(`style[id^="spreadsheet-${this.id}"]`);
-    this.styles.forEach(e => {
-      e.__removedRules = e.sheet.cssRules;
-      document.head.removeChild(e);
-    });
   }
 
   updated(_changedProperties) {
     super.updated(_changedProperties);
     let initial = false;
     if (!this.api) {
-      this.injectStyle('css_valo', css_valo);
 
       let overlays = document.getElementById('spreadsheet-overlays');
       if (!overlays) {
@@ -223,7 +199,7 @@ export class VaadinSpreadsheet extends LitElement {
         document.body.appendChild(overlays);        
       }
 
-      this.api = new Spreadsheet(this);
+      this.api = new Spreadsheet(this.renderRoot);
       this.api.setHeight("100%");
       this.api.setWidth("100%");
       this.createCallbacks();
@@ -592,16 +568,6 @@ export class VaadinSpreadsheet extends LitElement {
     return new CustomEvent('spreadsheet-event', {
       detail: {type, data}
     });
-  }
-
-  injectStyle(id, style) {
-    let elm = document.getElementById(id);
-    if (!elm) {
-      elm = document.createElement('style');
-      elm.id = id;
-      document.head.append(elm);
-    }
-    elm.textContent = style;
   }
 }
 
