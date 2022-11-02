@@ -1,14 +1,14 @@
-import { render, html } from 'lit';
+/* eslint-disable no-restricted-syntax */
+/* eslint-disable max-params */
+import { html, render } from 'lit';
 
 type RenderRoot = HTMLElement & { __litRenderer?: Renderer; _$litPart$?: any };
 
 type ItemModel = { item: any; index: number };
 
-type Renderer = (
-  root: RenderRoot,
-  rendererOwner: HTMLElement,
-  model: ItemModel
-) => void;
+type Renderer = ((root: RenderRoot, rendererOwner: HTMLElement, model: ItemModel) => void) & { __rendererId?: string };
+
+type Component = HTMLElement & { [key: string]: Renderer | undefined };
 
 const _window = window as any;
 _window.Vaadin = _window.Vaadin || {};
@@ -27,12 +27,12 @@ _window.Vaadin = _window.Vaadin || {};
  * Needed to avoid property name collisions between renderers.
  */
 _window.Vaadin.setLitRenderer = (
-  component: HTMLElement,
+  component: Component,
   rendererName: string,
   templateExpression: string,
   returnChannel: (name: string, itemKey: string, args: any[]) => void,
   clientCallables: string[],
-  propertyNamespace: string
+  propertyNamespace: string,
 ) => {
   // Dynamically created function that renders the templateExpression
   // inside the given root element using Lit
@@ -75,7 +75,7 @@ _window.Vaadin.setLitRenderer = (
     // item: { key: "2", lr_3_lastName: "Tyler"}
     // ->
     // mappedItem: { lastName: "Tyler" }
-    const mappedItem = {};
+    const mappedItem: { [key: string]: any } = {};
     for (const key in item) {
       if (key.startsWith(propertyNamespace)) {
         mappedItem[key.replace(propertyNamespace, '')] = item[key];
@@ -85,7 +85,7 @@ _window.Vaadin.setLitRenderer = (
     renderFunction(root, { index, item: mappedItem }, item.key);
   };
 
-  (renderer as any).__rendererId = propertyNamespace;
+  renderer.__rendererId = propertyNamespace;
   component[rendererName] = renderer;
 };
 
@@ -97,11 +97,7 @@ _window.Vaadin.setLitRenderer = (
  * @param rendererName The name of the renderer function
  * @param rendererId The rendererId of the function to be removed
  */
-_window.Vaadin.unsetLitRenderer = (
-  component: HTMLElement,
-  rendererName: string,
-  rendererId: string
-) => {
+_window.Vaadin.unsetLitRenderer = (component: Component, rendererName: string, rendererId: string) => {
   // The check for __rendererId property is necessary since the renderer function
   // may get overridden by another renderer, for example, by one coming from
   // vaadin-template-renderer. We don't want LitRenderer registration cleanup to
