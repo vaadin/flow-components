@@ -427,7 +427,7 @@ public class SheetWidget extends Panel {
 
     static native Element getEventTarget(NativeEvent event)
     /*-{
-       if (!event.target || event.target.localName === 'vaadin-spreadsheet') {
+       if (!event.target || event.target.shadowRoot) {
            return event.composedPath()[0];
        }
        return event.target;
