@@ -26,41 +26,38 @@ import dateFnsIsValid from 'date-fns/isValid';
           })
         );
 
-        const cleanString = tryCatchWrapper(function (string) {
-          // Clear any non ascii characters from the date string,
-          // mainly the LEFT-TO-RIGHT MARK.
-          // This is a problem for many Microsoft browsers where `toLocaleDateString`
-          // adds the LEFT-TO-RIGHT MARK see https://en.wikipedia.org/wiki/Left-to-right_mark
-          return string.replace(/[^\x00-\x7F]/g, '');
-        });
-
-        const createLocaleBasedDateFormat = tryCatchWrapper(function(locale) {
+        const createLocaleBasedDateFormat = function (locale) {
           try {
             // Check whether the locale is supported or not
             new Date().toLocaleDateString(locale);
           } catch (e) {
-            locale = 'en-US';
             console.warn('The locale is not supported, using default locale setting(en-US).');
+            return 'M/d/y';
           }
 
           // format test date and convert to date-fns pattern
           const testDate = new Date(Date.UTC(1234, 4, 6));
-          let pattern = cleanString(testDate.toLocaleDateString(locale, { timeZone: 'UTC' }));
+          let pattern = testDate.toLocaleDateString(locale, { timeZone: 'UTC' });
+          pattern = pattern
+            // escape date-fns pattern letters by enclosing them in single quotes
+            .replace(/([a-zA-Z]+)/g, "'$1'")
+            // insert date placeholder
+            .replace('06', 'dd')
+            .replace('6', 'd')
+            // insert month placeholder
+            .replace('05', 'MM')
+            .replace('5', 'M')
+            // insert year placeholder
+            .replace('1234', 'y');
 
-          if (/06/.test(pattern)) {
-            pattern = pattern.replace('06', 'dd')
-          } else {
-            pattern = pattern.replace('6', 'd')
+          const isValidPattern = pattern.includes('d') && pattern.includes('M') && pattern.includes('y');
+          if (!isValidPattern) {
+            console.warn('The locale is not supported, using default locale setting(en-US).');
+            return 'M/d/y';
           }
-          if (/05/.test(pattern)) {
-            pattern = pattern.replace('05', 'MM')
-          } else {
-            pattern = pattern.replace('5', 'M')
-          }
-          pattern = pattern.replace('1234', 'y')
 
           return pattern;
-        });
+        };
 
         const createFormatterAndParser = tryCatchWrapper(function (formats) {
           if (!formats || formats.length === 0) {
