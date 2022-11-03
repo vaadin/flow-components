@@ -524,8 +524,8 @@ public class SpreadsheetJsApi {
           && $wnd.Vaadin.Flow.clients[appId].getByNodeId(contentParentId);
     }-*/;
 
-    public void onPopupButtonOpened(int row, int column,
-            String contentParentId, String appId) {
+    public void onPopupButtonOpened(int row, int column, String contentParentId,
+            String appId) {
         Element container = getPopupContentContainer(contentParentId, appId);
 
         if (container == null) {
