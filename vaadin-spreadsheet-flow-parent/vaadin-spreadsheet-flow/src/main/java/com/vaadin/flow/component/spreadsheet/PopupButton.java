@@ -18,6 +18,7 @@ import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Iterator;
 
+import com.vaadin.flow.component.UI;
 import org.apache.poi.ss.util.CellReference;
 
 import com.vaadin.flow.component.Component;
@@ -138,7 +139,8 @@ public class PopupButton extends Component {
         getParent().ifPresent(parent -> {
             parent.getElement().callJsFunction("onPopupButtonOpen",
                     getRow() + 1, getColumn() + 1,
-                    getElement().getNode().getId());
+                    getElement().getNode().getId(),
+                    UI.getCurrent().getInternals().getAppId());
         });
         fireOpen();
     }
