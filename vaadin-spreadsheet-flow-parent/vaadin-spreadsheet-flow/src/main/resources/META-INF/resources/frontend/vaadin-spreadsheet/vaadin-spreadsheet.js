@@ -350,8 +350,8 @@ export class VaadinSpreadsheet extends LitElement {
     this.api.editCellComment(col, row);
   }
 
-  onPopupButtonOpen(row, column, contentId) {
-    this.api.onPopupButtonOpened(row, column, contentId);
+  onPopupButtonOpen(row, column, contentId, appId) {
+    this.api.onPopupButtonOpened(row, column, contentId, appId);
   }
 
   closePopup(row, column) {
