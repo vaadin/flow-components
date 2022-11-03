@@ -63,7 +63,6 @@
         <module>vaadin-form-layout-flow-parent</module>
         <module>vaadin-grid-flow-parent</module>
         <module>vaadin-icons-flow-parent</module>
-        <module>vaadin-iron-list-flow-parent</module>
         <module>vaadin-virtual-list-flow-parent</module>
         <module>vaadin-list-box-flow-parent</module>
         <module>vaadin-login-flow-parent</module>

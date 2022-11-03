@@ -128,7 +128,7 @@ async function main() {
       prev[pkg]['org'] = json[k][pkg];
       prev[pkg].package = pkg;
       prev[pkg].branch = branch;
-      prev[pkg].module = pkg === 'iron-list' ? 'vaadin-' + pkg : pkg;
+      prev[pkg].module = pkg;
     });
     return prev;
   }, {});
