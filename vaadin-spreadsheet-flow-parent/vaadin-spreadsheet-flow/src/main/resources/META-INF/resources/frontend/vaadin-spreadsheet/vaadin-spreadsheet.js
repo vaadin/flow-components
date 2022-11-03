@@ -11,6 +11,8 @@ import { LitElement, html } from 'lit';
 import { Spreadsheet } from './spreadsheet-export.js';
 import { spreadsheetStyles, spreadsheetOverlayStyles } from './vaadin-spreadsheet-styles.js';
 
+let ExportedSpreadsheet = Spreadsheet;
+
 const spreadsheetResizeObserver = new ResizeObserver((entries) => {
   entries.forEach((entry) => entry.target.api.resize());
 });
