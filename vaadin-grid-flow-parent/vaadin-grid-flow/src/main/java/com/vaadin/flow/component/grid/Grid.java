@@ -3211,6 +3211,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     /**
      * Sets whether multiple column sorting is enabled on the client-side.
+     * <p>
+     * <strong>Note:</strong> The {@code onShiftClickOnly} parameter takes
+     * precedence over {@code multiSort}. This means if {@code onShiftClickOnly}
+     * is enabled, {@code multiSort} is effectively ignored.
      *
      * @param multiSort
      *            {@code true} to enable sorting of multiple columns on the
@@ -3220,13 +3224,16 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            {@code false} for normal multi-sort behavior
      */
     public void setMultiSort(boolean multiSort, boolean onShiftClickOnly) {
-        getElement().setAttribute("multi-sort-on-shift-click",
-                multiSort && onShiftClickOnly);
+        getElement().setProperty("multiSortOnShiftClick", onShiftClickOnly);
         setMultiSort(multiSort);
     }
 
     /**
      * Sets whether multiple column sorting is enabled on the client-side.
+     * <p>
+     * <strong>Note:</strong> The {@code onShiftClickOnly} parameter takes
+     * precedence over {@code multiSort}. This means if {@code onShiftClickOnly}
+     * is enabled, {@code multiSort} is effectively ignored.
      *
      * @param multiSort
      *            {@code true} to enable sorting of multiple columns on the
@@ -3277,12 +3284,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *         {@code false} otherwise
      */
     public boolean isMultiSortShiftClickOnly() {
-        String onShiftClickOnly = getElement()
-                .getAttribute("multi-sort-on-shift-click");
-        if (onShiftClickOnly != null && onShiftClickOnly.length() == 0) {
-            onShiftClickOnly = "true";
-        }
-        return isMultiSort() && Boolean.parseBoolean(onShiftClickOnly);
+        return getElement().getProperty("multiSortOnShiftClick", false);
     }
 
     @ClientCallable
