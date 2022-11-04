@@ -1028,15 +1028,12 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             );
         };
 
-        const renderOnce = (renderer) => {
-          let rendered = false;
-
+        const singleTimeRenderer = (renderer) => {
           return (root) => {
-            if (rendered) {
-              return;
+            if (renderer) {
+              renderer(root);
+              renderer = null;
             }
-            rendered = true;
-            renderer(root);
           };
         };
 
@@ -1048,7 +1045,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             return;
           }
 
-          column.headerRenderer = renderOnce((root, _) => {
+          column.headerRenderer = singleTimeRenderer((root) => {
             // Clear previous contents
             root.innerHTML = '';
             // Render sorter
@@ -1082,7 +1079,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             return;
           }
 
-          column.footerRenderer = renderOnce((root, _) => {
+          column.footerRenderer = singleTimeRenderer((root) => {
             // Clear previous contents
             root.innerHTML = '';
             // Add content
