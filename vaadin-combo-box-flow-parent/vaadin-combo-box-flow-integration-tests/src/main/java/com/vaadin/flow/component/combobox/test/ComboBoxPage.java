@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.combobox.test;
 
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.Component;
