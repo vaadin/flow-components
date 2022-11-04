@@ -297,38 +297,6 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * Description copied from corresponding location in WebComponent:
      * </p>
      * <p>
-     * Set to true to prevent the user from entering invalid input.
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
-     * </p>
-     *
-     * @return the {@code preventInvalidInput} property from the webcomponent
-     */
-    protected boolean isPreventInvalidInputBoolean() {
-        return getElement().getProperty("preventInvalidInput", false);
-    }
-
-    /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
-     * Set to true to prevent the user from entering invalid input.
-     * </p>
-     *
-     * @param preventInvalidInput
-     *            the boolean value to set
-     */
-    protected void setPreventInvalidInput(boolean preventInvalidInput) {
-        getElement().setProperty("preventInvalidInput", preventInvalidInput);
-    }
-
-    /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
      * A pattern to validate the {@code input} with.
      * <p>
      * This property is not synchronized automatically from the client side, so

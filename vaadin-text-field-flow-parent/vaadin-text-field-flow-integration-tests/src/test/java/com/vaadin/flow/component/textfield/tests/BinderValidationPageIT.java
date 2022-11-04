@@ -118,8 +118,7 @@ public class BinderValidationPageIT extends AbstractComponentIT {
                     "arguments[0].checkedValidity = arguments[0].checkValidity()",
                     field);
 
-            // Ensure checkValidity still works (used by
-            // preventinvalidinput)
+            // Ensure checkValidity still works
             Assert.assertTrue("Unexpected checkedValidity state",
                     field.getPropertyBoolean("checkedValidity"));
         });

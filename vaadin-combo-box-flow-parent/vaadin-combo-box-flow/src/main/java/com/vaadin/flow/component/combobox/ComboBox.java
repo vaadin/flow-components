@@ -254,34 +254,6 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
     }
 
     /**
-     * Whether the component should block user input that does not match the
-     * configured pattern
-     *
-     * @return {@code true} if the component should block user input that does
-     *         not match the configured pattern, {@code false} otherwise
-     * @deprecated Since 23.2, this API is deprecated.
-     */
-    @Deprecated
-    public boolean isPreventInvalidInput() {
-        return getElement().getProperty("preventInvalidInput", false);
-    }
-
-    /**
-     * Sets whether the component should block user input that does not match
-     * the configured pattern
-     *
-     * @param preventInvalidInput
-     *            {@code true} if the component should block user input that
-     *            does not match the configured pattern, {@code false} otherwise
-     * @deprecated Since 23.2, this API is deprecated in favor of
-     *             {@link #setAllowedCharPattern(String)}
-     */
-    @Deprecated
-    public void setPreventInvalidInput(boolean preventInvalidInput) {
-        getElement().setProperty("preventInvalidInput", preventInvalidInput);
-    }
-
-    /**
      * The pattern to validate the input with
      *
      * @return the pattern to validate the input with
