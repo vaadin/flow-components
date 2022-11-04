@@ -15,16 +15,12 @@
  */
 package com.vaadin.flow.component.grid;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.grid.Grid.Column;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
-import com.vaadin.flow.data.renderer.Renderer;
-import com.vaadin.flow.data.renderer.Rendering;
-import com.vaadin.flow.data.renderer.TemplateRenderer;
-import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.HtmlUtils;
 
 /**
@@ -39,15 +35,9 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
         implements ColumnBase<T> {
 
     protected final Grid<?> grid;
-    protected Element headerTemplate;
-    protected Element footerTemplate;
-    private Renderer<?> headerRenderer;
-    private Renderer<?> footerRenderer;
-
     private boolean headerRenderingScheduled;
     private boolean footerRenderingScheduled;
 
-    private String rawHeaderTemplate;
     private boolean sortingIndicators;
 
     private String headerText;
@@ -96,11 +86,6 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
         super.setVisible(visible);
     }
 
-    protected void setHeaderRenderer(Renderer<?> renderer) {
-        headerRenderer = renderer;
-        scheduleHeaderRendering();
-    }
-
     private void scheduleHeaderRendering() {
         if (headerRenderingScheduled) {
             return;
@@ -116,25 +101,18 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
                 }));
     }
 
-    private Rendering<?> renderHeader() {
-        if (headerTemplate != null) {
-            headerTemplate.removeFromParent();
-            headerTemplate = null;
-        }
-        if (headerRenderer == null) {
-            return null;
-        }
-        Rendering<?> rendering = headerRenderer.render(getElement(), null);
-        headerTemplate = rendering.getTemplateElement();
-        headerTemplate.setAttribute("class", "header");
+    private void renderHeader() {
+        Serializable headerContent = headerComponent != null
+                ? headerComponent.getElement()
+                : headerText;
+        boolean showSorter = hasSortingIndicators();
+        String sorterPath = showSorter
+                ? HtmlUtils.escape(getBottomLevelColumn().getInternalId())
+                : null;
 
-        setBaseHeaderTemplate(headerTemplate.getProperty("innerHTML"));
-        if (hasSortingIndicators()) {
-            headerTemplate.setProperty("innerHTML",
-                    addGridSorter(rawHeaderTemplate));
-        }
-
-        return rendering;
+        grid.getElement().executeJs(
+                "this.$connector.setHeaderRenderer($0, { content: $1, showSorter: $2, sorterPath: $3 })",
+                this.getElement(), headerContent, showSorter, sorterPath);
     }
 
     private void scheduleFooterRendering() {
@@ -152,23 +130,14 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
                 }));
     }
 
-    protected void setFooterRenderer(Renderer<?> renderer) {
-        footerRenderer = renderer;
-        scheduleFooterRendering();
-    }
+    private void renderFooter() {
+        Serializable footerContent = footerComponent != null
+                ? footerComponent.getElement()
+                : footerText;
 
-    private Rendering<?> renderFooter() {
-        if (footerTemplate != null) {
-            footerTemplate.removeFromParent();
-            footerTemplate = null;
-        }
-        if (footerRenderer == null) {
-            return null;
-        }
-        Rendering<?> rendering = footerRenderer.render(getElement(), null);
-        footerTemplate = rendering.getTemplateElement();
-        footerTemplate.setAttribute("class", "footer");
-        return rendering;
+        grid.getElement().executeJs(
+                "this.$connector.setFooterRenderer($0, { content: $1 })",
+                this.getElement(), footerContent);
     }
 
     /**
@@ -181,10 +150,7 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
     }
 
     protected void setHeaderText(String text) {
-        headerText = text;
-        headerComponent = null;
-        setHeaderRenderer(TemplateRenderer
-                .of(text != null ? HtmlUtils.escape(text) : ""));
+        setHeaderContent(text, null);
     }
 
     /**
@@ -197,10 +163,7 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
     }
 
     protected void setFooterText(String text) {
-        footerText = text;
-        footerComponent = null;
-        setFooterRenderer(TemplateRenderer
-                .of(text != null ? HtmlUtils.escape(text) : ""));
+        setFooterContent(text, null);
     }
 
     /**
@@ -213,9 +176,7 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
     }
 
     protected void setHeaderComponent(Component component) {
-        headerText = null;
-        headerComponent = component;
-        setHeaderRenderer(new ComponentRenderer<>(() -> component));
+        setHeaderContent(null, component);
     }
 
     /**
@@ -228,17 +189,51 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
     }
 
     protected void setFooterComponent(Component component) {
-        footerText = null;
+        setFooterContent(null, component);
+    }
+
+    void setHeaderContent(String text, Component component) {
+        if (headerComponent != null) {
+            getElement().removeVirtualChild(headerComponent.getElement());
+        }
+
+        headerText = text;
+        headerComponent = component;
+
+        if (headerComponent != null) {
+            getElement().appendVirtualChild(headerComponent.getElement());
+        }
+
+        scheduleHeaderRendering();
+    }
+
+    void setFooterContent(String text, Component component) {
+        if (footerComponent != null) {
+            getElement().removeVirtualChild(footerComponent.getElement());
+        }
+
+        footerText = text;
         footerComponent = component;
-        setFooterRenderer(new ComponentRenderer<>(() -> component));
+
+        if (footerComponent != null) {
+            getElement().appendVirtualChild(footerComponent.getElement());
+        }
+
+        scheduleFooterRendering();
     }
 
-    protected Renderer<?> getHeaderRenderer() {
-        return headerRenderer;
+    protected void moveHeaderContent(AbstractColumn<?> otherColumn) {
+        String text = headerText;
+        Component component = headerComponent;
+        setHeaderContent(null, null);
+        otherColumn.setHeaderContent(text, component);
     }
 
-    protected Renderer<?> getFooterRenderer() {
-        return footerRenderer;
+    protected void moveFooterContent(AbstractColumn<?> otherColumn) {
+        String text = footerText;
+        Component component = footerComponent;
+        setFooterContent(null, null);
+        otherColumn.setFooterContent(text, component);
     }
 
     /**
@@ -275,30 +270,6 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
 
     protected boolean hasSortingIndicators() {
         return sortingIndicators;
-    }
-
-    /*
-     * The original header template is needed for when sorting is enabled or
-     * disabled in a column.
-     */
-    protected void setBaseHeaderTemplate(String headerTemplate) {
-        rawHeaderTemplate = headerTemplate;
-    }
-
-    /*
-     * Adds the sorting webcomponent markup to an existing template.
-     */
-    protected String addGridSorter(String templateInnerHtml) {
-        String escapedColumnId = HtmlUtils
-                .escape(getBottomLevelColumn().getInternalId());
-
-        String textContent = org.jsoup.Jsoup.parse(templateInnerHtml).text();
-        String sortBy = textContent.isBlank() ? ""
-                : "aria-label='Sort by " + textContent + "'";
-
-        return String.format(
-                "<vaadin-grid-sorter path='%s' %s>%s</vaadin-grid-sorter>",
-                escapedColumnId, sortBy, templateInnerHtml);
     }
 
     /**
