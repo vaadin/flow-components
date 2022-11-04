@@ -53,6 +53,7 @@ public class ComboBoxPage extends Div {
         createWithUpdateProvider();
         createWithValueChangeListener();
         createWithUpdatableValue();
+        createWithUpdateOnValueChange();
         createWithPresetValue();
         createWithButtonRenderer();
         setLabelGeneratorAfterValue();
@@ -167,6 +168,22 @@ public class ComboBoxPage extends Div {
         message.setId("updatable-combo-message");
         button.setId("updatable-combo-button");
         add(combo, message, button);
+    }
+
+    private void createWithUpdateOnValueChange() {
+        ComboBox<String> combo = new ComboBox<>();
+        combo.setItems("1", "2", "3");
+        combo.setValue("1");
+        AtomicInteger i = new AtomicInteger(1);
+        
+        NativeButton button = new NativeButton("Set next");
+        button.addClickListener(e -> {
+            combo.setValue(""+i.addAndGet(1));
+        });
+        button.setId("set-next-button");
+
+        combo.setId("update-on-change-combo");
+        add(combo, button);
     }
 
     private void setLabelGeneratorAfterValue() {
