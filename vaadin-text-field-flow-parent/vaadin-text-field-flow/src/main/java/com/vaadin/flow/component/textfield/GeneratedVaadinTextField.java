@@ -685,48 +685,6 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      * Description copied from corresponding location in WebComponent:
      * </p>
      * <p>
-     * When set to true, user is prevented from typing a value that conflicts
-     * with the given {@code pattern}, {@code maxlength} or {@code minlength}
-     * properties.
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
-     * </p>
-     *
-     * @return the {@code preventInvalidInput} property from the webcomponent
-     *
-     * @deprecated Since 23.2, this API is deprecated.
-     */
-    @Deprecated
-    protected boolean isPreventInvalidInputBoolean() {
-        return getElement().getProperty("preventInvalidInput", false);
-    }
-
-    /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
-     * When set to true, user is prevented from typing a value that conflicts
-     * with the given {@code pattern}, {@code maxlength} or {@code minlength}
-     * properties.
-     * </p>
-     *
-     * @param preventInvalidInput
-     *            the boolean value to set
-     *
-     * @deprecated Since 23.2, this API is deprecated.
-     */
-    @Deprecated
-    protected void setPreventInvalidInput(boolean preventInvalidInput) {
-        getElement().setProperty("preventInvalidInput", preventInvalidInput);
-    }
-
-    /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
      * Identifies a list of pre-defined options to suggest to the user. The
      * value must be the id of a <datalist> element in the same document.
      * <p>

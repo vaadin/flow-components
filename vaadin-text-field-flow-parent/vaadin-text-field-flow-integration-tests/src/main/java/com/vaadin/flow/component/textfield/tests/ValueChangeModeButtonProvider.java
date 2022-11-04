@@ -41,7 +41,7 @@ public class ValueChangeModeButtonProvider {
         field.setTitle("ValueChangeTimeout");
         field.setPattern("[0-9]*");
         field.setMaxLength(4);
-        field.setPreventInvalidInput(true);
+        field.setAllowedCharPattern("[0-9]*");
         field.addThemeVariants(LUMO_ALIGN_RIGHT, LUMO_SMALL);
         field.setValue(elementWithChangeMode.getValueChangeTimeout() + "");
         field.addValueChangeListener(this::onTimeoutChange);
