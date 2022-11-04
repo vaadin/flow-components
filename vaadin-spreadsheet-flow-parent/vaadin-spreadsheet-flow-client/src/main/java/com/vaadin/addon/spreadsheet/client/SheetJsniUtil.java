@@ -114,6 +114,9 @@ public class SheetJsniUtil {
     public native int replaceSelector(StyleElement stylesheet, String selector,
             int ruleindex)
     /*-{
+        if (!stylesheet.sheet.cssRules[ruleindex]) {
+            return -1;
+        }
         var oldSelector = stylesheet.sheet.cssRules[ruleindex].selectorText;
         var cssText = stylesheet.sheet.cssRules[ruleindex].cssText.replace(oldSelector, selector);
         stylesheet.sheet.deleteRule(ruleindex);

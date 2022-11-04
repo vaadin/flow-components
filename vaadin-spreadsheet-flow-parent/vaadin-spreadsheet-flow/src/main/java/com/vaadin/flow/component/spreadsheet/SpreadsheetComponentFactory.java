@@ -50,7 +50,7 @@ import com.vaadin.flow.component.Component;
  *
  * @author Vaadin Ltd.
  */
-public interface SpreadsheetComponentFactory extends Serializable {
+interface SpreadsheetComponentFactory extends Serializable {
 
     /**
      * Should return a unique component that is displayed inside the cell
@@ -84,7 +84,7 @@ public interface SpreadsheetComponentFactory extends Serializable {
      *         becomes visible or <code>null</code> if no component should be
      *         displayed when the cell is not selected.
      */
-    public Component getCustomComponentForCell(Cell cell, int rowIndex,
+    Component getCustomComponentForCell(Cell cell, int rowIndex,
             int columnIndex, Spreadsheet spreadsheet, Sheet sheet);
 
     /**
@@ -123,8 +123,8 @@ public interface SpreadsheetComponentFactory extends Serializable {
      *         <code>null</code> if the default editor (input field) should be
      *         used.
      */
-    public Component getCustomEditorForCell(Cell cell, int rowIndex,
-            int columnIndex, Spreadsheet spreadsheet, Sheet sheet);
+    Component getCustomEditorForCell(Cell cell, int rowIndex, int columnIndex,
+            Spreadsheet spreadsheet, Sheet sheet);
 
     /**
      * This method is called when a cell with a custom editor is displayed (the
@@ -149,7 +149,6 @@ public interface SpreadsheetComponentFactory extends Serializable {
      * @param customEditor
      *            The component that is displayed inside the cell
      */
-    public void onCustomEditorDisplayed(Cell cell, int rowIndex,
-            int columnIndex, Spreadsheet spreadsheet, Sheet sheet,
-            Component customEditor);
+    void onCustomEditorDisplayed(Cell cell, int rowIndex, int columnIndex,
+            Spreadsheet spreadsheet, Sheet sheet, Component customEditor);
 }

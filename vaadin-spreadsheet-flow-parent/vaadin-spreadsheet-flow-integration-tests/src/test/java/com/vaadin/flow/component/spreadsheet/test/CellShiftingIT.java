@@ -46,8 +46,8 @@ public class CellShiftingIT extends AbstractSpreadsheetIT {
         Assert.assertEquals(value, cellA2.getValue());
         // open input
         cellA2.doubleClick();
-        WebElement shiftSelection = getSpreadsheet()
-                .findElement(By.className("paintmode"));
+        WebElement shiftSelection = findElementInShadowRoot(
+                By.className("paintmode"));
         // verify shifting indicator is not visible (SHEET-62)
         assertFalse(shiftSelection.isDisplayed());
     }
@@ -58,8 +58,8 @@ public class CellShiftingIT extends AbstractSpreadsheetIT {
         SheetCellElement lastCell = getSpreadsheet().getCellAt(lastAddress);
         firstCell.setValue(value);
         selectCell(firstAddress);
-        WebElement shiftHandle = getSpreadsheet()
-                .findElement(By.className("s-corner"));
+        WebElement shiftHandle = findElementInShadowRoot(
+                By.className("s-corner"));
         new Actions(driver).dragAndDrop(shiftHandle, lastCell).perform();
         waitUntilCellHasValue(lastCell, value);
     }

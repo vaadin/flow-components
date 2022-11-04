@@ -49,7 +49,7 @@ function computeRoute(wcname, clname, prefix, route, suffix) {
   if (!route) {
     rootRoutes[wcname] = rootRoutes[wcname] || '';
   }
-  route = new RegExp(wcname).test(route) || /^\/?iron-list$/.test(route)? route
+  route = new RegExp(wcname).test(route) ? route
     : `${wcname}/${route ? route : rootRoutes[wcname]}`;
   return `${prefix}${route}${suffix}`;
 }
