@@ -193,47 +193,41 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
     }
 
     void setHeaderContent(String text, Component component) {
-        if (headerComponent != null) {
-            getElement().removeVirtualChild(headerComponent.getElement());
-        }
-
         headerText = text;
-        headerComponent = component;
-
-        if (headerComponent != null) {
-            getElement().appendVirtualChild(headerComponent.getElement());
-        }
-
+        headerComponent = replaceChildComponent(headerComponent, component);
         scheduleHeaderRendering();
     }
 
     void setFooterContent(String text, Component component) {
-        if (footerComponent != null) {
-            getElement().removeVirtualChild(footerComponent.getElement());
-        }
-
         footerText = text;
-        footerComponent = component;
-
-        if (footerComponent != null) {
-            getElement().appendVirtualChild(footerComponent.getElement());
-        }
-
+        footerComponent = replaceChildComponent(footerComponent, component);
         scheduleFooterRendering();
     }
 
+    private Component replaceChildComponent(Component oldComponent,
+            Component newComponent) {
+        if (oldComponent != null
+                && oldComponent.getElement().getParent() == this.getElement()) {
+            getElement().removeVirtualChild(oldComponent.getElement());
+        }
+        if (newComponent != null) {
+            if (newComponent.getElement().getParent() != null) {
+                newComponent.getElement().getParent()
+                        .removeVirtualChild(newComponent.getElement());
+            }
+            getElement().appendVirtualChild(newComponent.getElement());
+        }
+        return newComponent;
+    }
+
     protected void moveHeaderContent(AbstractColumn<?> otherColumn) {
-        String text = headerText;
-        Component component = headerComponent;
+        otherColumn.setHeaderContent(headerText, headerComponent);
         setHeaderContent(null, null);
-        otherColumn.setHeaderContent(text, component);
     }
 
     protected void moveFooterContent(AbstractColumn<?> otherColumn) {
-        String text = footerText;
-        Component component = footerComponent;
+        otherColumn.setFooterContent(footerText, footerComponent);
         setFooterContent(null, null);
-        otherColumn.setFooterContent(text, component);
     }
 
     /**
@@ -301,5 +295,4 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
                         .collect(Collectors.toList()));
         return columnChildren;
     }
-
 }

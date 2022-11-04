@@ -1028,6 +1028,18 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             );
         };
 
+        const renderOnce = (renderer) => {
+          let rendered = false;
+
+          return (root) => {
+            if (rendered) {
+              return;
+            }
+            rendered = true;
+            renderer(root);
+          };
+        };
+
         grid.$connector.setHeaderRenderer = tryCatchWrapper(function (column, options) {
           const { content, showSorter, sorterPath } = options;
 
@@ -1036,7 +1048,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             return;
           }
 
-          column.headerRenderer = (root, _) => {
+          column.headerRenderer = renderOnce((root, _) => {
             // Clear previous contents
             root.innerHTML = '';
             // Render sorter
@@ -1059,7 +1071,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             } else {
               contentRoot.textContent = content;
             }
-          };
+          });
         });
 
         grid.$connector.setFooterRenderer = tryCatchWrapper(function (column, options) {
@@ -1070,7 +1082,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             return;
           }
 
-          column.footerRenderer = (root, _) => {
+          column.footerRenderer = renderOnce((root, _) => {
             // Clear previous contents
             root.innerHTML = '';
             // Add content
@@ -1079,7 +1091,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             } else {
               root.textContent = content;
             }
-          };
+          });
         });
 
         grid.addEventListener(

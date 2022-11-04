@@ -79,7 +79,8 @@ public class SortingIT extends AbstractComponentIT {
     public void setInitialSortOrder_sorterAriaLabels() {
         findElement(By.id("sort-by-age")).click();
         List<TestBenchElement> sorters = grid.$("vaadin-grid-sorter").all();
-        Assert.assertEquals("Sort by Name", sorters.get(0).getAttribute("aria-label"));
+        Assert.assertEquals("Sort by Name",
+                sorters.get(0).getAttribute("aria-label"));
         Assert.assertEquals("Sort by Age",
                 sorters.get(1).getAttribute("aria-label"));
     }
