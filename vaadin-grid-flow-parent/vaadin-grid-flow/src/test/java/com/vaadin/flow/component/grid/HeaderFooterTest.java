@@ -929,7 +929,8 @@ public class HeaderFooterTest {
         return layers;
     }
 
-    private void assertIsVirtualChild(Component child, Component expectedParent) {
+    private void assertIsVirtualChild(Component child,
+            Component expectedParent) {
         Assert.assertTrue(child.getParent().isPresent());
         Assert.assertSame(child.getParent().get(), expectedParent);
         Assert.assertTrue(child.getElement().isVirtualChild());
