@@ -1,7 +1,7 @@
 import dateFnsFormat from 'date-fns/format';
 import dateFnsParse from 'date-fns/parse';
 import dateFnsIsValid from 'date-fns/isValid';
-import { extractDateParts, getAdjustedYear } from '@vaadin/date-picker/src/vaadin-date-picker-helper';
+import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/src/vaadin-date-picker-helper';
 
 (function () {
   const tryCatchWrapper = function (callback) {
@@ -33,7 +33,7 @@ import { extractDateParts, getAdjustedYear } from '@vaadin/date-picker/src/vaadi
             new Date().toLocaleDateString(locale);
           } catch (e) {
             console.warn('The locale is not supported, using default locale setting(en-US).');
-            return 'M/d/y';
+            return 'M/d/yyyy';
           }
 
           // format test date and convert to date-fns pattern
@@ -49,11 +49,12 @@ import { extractDateParts, getAdjustedYear } from '@vaadin/date-picker/src/vaadi
             .replace('05', 'MM')
             .replace('5', 'M')
             // insert year placeholder
-            .replace('1234', 'y');
+            .replace('1234', 'yyyy')
+            .replace('34', 'yy');
           const isValidPattern = pattern.includes('d') && pattern.includes('M') && pattern.includes('y');
           if (!isValidPattern) {
             console.warn('The locale is not supported, using default locale setting(en-US).');
-            return 'M/d/y';
+            return 'M/d/yyyy';
           }
 
           return pattern;
@@ -86,7 +87,7 @@ import { extractDateParts, getAdjustedYear } from '@vaadin/date-picker/src/vaadi
 
           function formatDate(dateParts) {
             const format = formats[0];
-            const date = datepicker._parseDate(`${dateParts.year}-${dateParts.month + 1}-${dateParts.day}`);
+            const date = _parseDate(`${dateParts.year}-${dateParts.month + 1}-${dateParts.day}`);
 
             return dateFnsFormat(date, format);
           }
