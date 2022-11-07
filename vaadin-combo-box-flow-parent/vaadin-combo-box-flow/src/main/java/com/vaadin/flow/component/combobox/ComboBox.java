@@ -60,10 +60,9 @@ import elemental.json.JsonObject;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-combo-box")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha3")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/combo-box", version = "23.3.0-alpha3")
-@NpmPackage(value = "@vaadin/vaadin-combo-box", version = "23.3.0-alpha3")
+@NpmPackage(value = "@vaadin/combo-box", version = "24.0.0-alpha1")
 @JsModule("@vaadin/combo-box/src/vaadin-combo-box.js")
 @JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 @JsModule("./flow-component-renderer.js")
@@ -252,34 +251,6 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
             return null;
         }
         return keyMapper.key(model);
-    }
-
-    /**
-     * Whether the component should block user input that does not match the
-     * configured pattern
-     *
-     * @return {@code true} if the component should block user input that does
-     *         not match the configured pattern, {@code false} otherwise
-     * @deprecated Since 23.2, this API is deprecated.
-     */
-    @Deprecated
-    public boolean isPreventInvalidInput() {
-        return getElement().getProperty("preventInvalidInput", false);
-    }
-
-    /**
-     * Sets whether the component should block user input that does not match
-     * the configured pattern
-     *
-     * @param preventInvalidInput
-     *            {@code true} if the component should block user input that
-     *            does not match the configured pattern, {@code false} otherwise
-     * @deprecated Since 23.2, this API is deprecated in favor of
-     *             {@link #setAllowedCharPattern(String)}
-     */
-    @Deprecated
-    public void setPreventInvalidInput(boolean preventInvalidInput) {
-        getElement().setProperty("preventInvalidInput", preventInvalidInput);
     }
 
     /**

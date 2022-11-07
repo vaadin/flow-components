@@ -46,8 +46,7 @@ public class SheetTabSheetIT extends AbstractSpreadsheetIT {
         spreadsheet.selectSheetAt(1);
         selectRegion("C3", "G14");
         spreadsheet.selectSheetAt(0);
-        getCommandExecutor().waitForVaadin();
-        Assert.assertTrue(spreadsheet.getCellAt("C8").isCellSelected());
+        waitUntil(e -> spreadsheet.getCellAt("C8").isCellSelected());
         spreadsheet.selectSheetAt(1);
         getCommandExecutor().waitForVaadin();
         String[] cols = { "C", "D", "E", "F", "G" };
@@ -79,7 +78,9 @@ public class SheetTabSheetIT extends AbstractSpreadsheetIT {
      * @return Focused element or null
      */
     protected WebElement getFocusedElement() {
-        Object focusedElement = executeScript("return document.activeElement");
+        Object focusedElement = executeScript(
+                "return arguments[0].shadowRoot.activeElement",
+                getSpreadsheet().getWrappedElement());
         if (null != focusedElement) {
             return (WebElement) focusedElement;
         } else {

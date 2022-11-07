@@ -54,7 +54,7 @@ public class MenuBarElement extends TestBenchElement {
      * @return the button which opens the sub menu of overflowing items
      */
     public TestBenchElement getOverflowButton() {
-        TestBenchElement overflowButton = $("[part~=overflow-button]").first();
+        TestBenchElement overflowButton = $("[slot='overflow']").first();
         if (overflowButton == null || overflowButton.hasAttribute("hidden")) {
             return null;
         }
@@ -62,7 +62,7 @@ public class MenuBarElement extends TestBenchElement {
     }
 
     private boolean isOverflowButton(TestBenchElement element) {
-        return element.getAttribute("part").contains("overflow-button");
+        return element.getAttribute("slot").contains("overflow");
     }
 
     private boolean isVisible(TestBenchElement element) {

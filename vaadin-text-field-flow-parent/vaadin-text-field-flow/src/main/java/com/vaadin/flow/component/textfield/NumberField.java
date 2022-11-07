@@ -262,38 +262,6 @@ public class NumberField extends AbstractNumberField<NumberField, Double> {
     }
 
     /**
-     * When set to <code>true</code>, user is prevented from typing a value that
-     * conflicts with the given {@code pattern}.
-     *
-     * @return the {@code preventInvalidInput} property from the webcomponent
-     *
-     * @deprecated Not supported by NumberField (as it's built on
-     *             {@code <input type="number">} in HTML). You can set numeric
-     *             value constraints with {@link #setMin(double)},
-     *             {@link #setMax(double)} and {@link #setStep(double)}. For
-     *             setting a custom value pattern and preventing invalid input,
-     *             use the TextField component instead.
-     */
-    @Deprecated
-    public boolean isPreventInvalidInput() {
-        return isPreventInvalidInputBoolean();
-    }
-
-    /**
-     * @deprecated Not supported by NumberField (as it's built on
-     *             {@code <input type="number">} in HTML). You can set numeric
-     *             value constraints with {@link #setMin(double)},
-     *             {@link #setMax(double)} and {@link #setStep(double)}. For
-     *             setting a custom value pattern and preventing invalid input,
-     *             use the TextField component instead.
-     */
-    @Override
-    @Deprecated
-    public void setPreventInvalidInput(boolean preventInvalidInput) {
-        super.setPreventInvalidInput(preventInvalidInput);
-    }
-
-    /**
      * @deprecated Not supported by NumberField (as it's built on
      *             {@code <input type="number">} in HTML). You can set numeric
      *             value constraints with {@link #setMin(double)},
