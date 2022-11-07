@@ -104,7 +104,7 @@ public class HeaderFooterTest {
     }
 
     @Test
-    public void getHeaderText() {
+    public void setHeaderText() {
         firstColumn.setHeader("foo");
 
         Assert.assertEquals("foo", firstColumn.getHeaderText());
@@ -113,13 +113,16 @@ public class HeaderFooterTest {
     }
 
     @Test
-    public void getHeaderComponent() {
+    public void setHeaderComponent() {
         TextField textField = new TextField();
         firstColumn.setHeader(textField);
 
+        // Getter should return component
         Assert.assertEquals(textField, firstColumn.getHeaderComponent());
         Assert.assertEquals(textField, grid.getHeaderRows().get(0)
                 .getCell(firstColumn).getComponent());
+        // Should be added as virtual child
+        assertIsVirtualChild(textField, firstColumn);
     }
 
     @Test
@@ -133,6 +136,8 @@ public class HeaderFooterTest {
         firstColumn.setHeader(textField);
         firstColumn.setHeader((String) null);
         Assert.assertNull(firstColumn.getHeaderComponent());
+        // Component should be removed
+        assertIsNotVirtualChild(textField);
     }
 
     @Test
@@ -149,6 +154,53 @@ public class HeaderFooterTest {
     }
 
     @Test
+    public void replaceHeaderComponent_replacesVirtualChild() {
+        TextField firstField = new TextField();
+        firstColumn.setHeader(firstField);
+
+        TextField secondField = new TextField();
+        firstColumn.setHeader(secondField);
+
+        assertIsNotVirtualChild(firstField);
+        assertIsVirtualChild(secondField, firstColumn);
+    }
+
+    @Test
+    public void moveHeaderContent() {
+        // Move text
+        firstColumn.setHeader("Header");
+        firstColumn.moveHeaderContent(secondColumn);
+
+        Assert.assertNull(firstColumn.getHeaderText());
+        Assert.assertEquals("Header", secondColumn.getHeaderText());
+
+        // Move component
+        TextField firstField = new TextField();
+        firstColumn.setHeader(firstField);
+        firstColumn.moveHeaderContent(secondColumn);
+
+        Assert.assertNull(firstColumn.getHeaderComponent());
+        Assert.assertNull(secondColumn.getHeaderText());
+        Assert.assertEquals(firstField, secondColumn.getHeaderComponent());
+        assertIsVirtualChild(firstField, secondColumn);
+
+        // Replace component
+        TextField secondField = new TextField();
+        firstColumn.setHeader(secondField);
+        firstColumn.moveHeaderContent(secondColumn);
+
+        assertIsNotVirtualChild(firstField);
+        assertIsVirtualChild(secondField, secondColumn);
+
+        // Overwrite component with text
+        firstColumn.setHeader("Header");
+        firstColumn.moveHeaderContent(secondColumn);
+
+        Assert.assertNull(secondColumn.getHeaderComponent());
+        assertIsNotVirtualChild(secondField);
+    }
+
+    @Test
     public void setFooter_firstFooterRowCreated() {
         firstColumn.setFooter("foo");
         Assert.assertEquals(
@@ -159,7 +211,7 @@ public class HeaderFooterTest {
     }
 
     @Test
-    public void getFooterText() {
+    public void setFooterText() {
         firstColumn.setFooter("foo");
 
         Assert.assertEquals("foo", firstColumn.getFooterText());
@@ -168,13 +220,16 @@ public class HeaderFooterTest {
     }
 
     @Test
-    public void getFooterComponent() {
+    public void setFooterComponent() {
         TextField textField = new TextField();
         firstColumn.setFooter(textField);
 
+        // Getter should return component
         Assert.assertEquals(textField, firstColumn.getFooterComponent());
         Assert.assertEquals(textField, grid.getFooterRows().get(0)
                 .getCell(firstColumn).getComponent());
+        // Should be added as virtual child
+        assertIsVirtualChild(textField, firstColumn);
     }
 
     @Test
@@ -188,6 +243,7 @@ public class HeaderFooterTest {
         firstColumn.setFooter(textField);
         firstColumn.setFooter((String) null);
         Assert.assertNull(firstColumn.getFooterComponent());
+        assertIsNotVirtualChild(textField);
     }
 
     @Test
@@ -201,6 +257,53 @@ public class HeaderFooterTest {
         firstColumn.setFooter("foo");
         firstColumn.setFooter((Component) null);
         Assert.assertNull(firstColumn.getFooterText());
+    }
+
+    @Test
+    public void replaceFooterComponent_replacesVirtualChild() {
+        TextField firstField = new TextField();
+        firstColumn.setFooter(firstField);
+
+        TextField secondField = new TextField();
+        firstColumn.setFooter(secondField);
+
+        assertIsNotVirtualChild(firstField);
+        assertIsVirtualChild(secondField, firstColumn);
+    }
+
+    @Test
+    public void moveFooterContent() {
+        // Move text
+        firstColumn.setFooter("Footer");
+        firstColumn.moveFooterContent(secondColumn);
+
+        Assert.assertNull(firstColumn.getFooterText());
+        Assert.assertEquals("Footer", secondColumn.getFooterText());
+
+        // Move component
+        TextField firstField = new TextField();
+        firstColumn.setFooter(firstField);
+        firstColumn.moveFooterContent(secondColumn);
+
+        Assert.assertNull(firstColumn.getFooterComponent());
+        Assert.assertNull(secondColumn.getFooterText());
+        Assert.assertEquals(firstField, secondColumn.getFooterComponent());
+        assertIsVirtualChild(firstField, secondColumn);
+
+        // Replace component
+        TextField secondField = new TextField();
+        firstColumn.setFooter(secondField);
+        firstColumn.moveFooterContent(secondColumn);
+
+        assertIsNotVirtualChild(firstField);
+        assertIsVirtualChild(secondField, secondColumn);
+
+        // Overwrite component with text
+        firstColumn.setFooter("Header");
+        firstColumn.moveFooterContent(secondColumn);
+
+        Assert.assertNull(secondColumn.getFooterComponent());
+        assertIsNotVirtualChild(secondField);
     }
 
     @Test
@@ -866,5 +969,16 @@ public class HeaderFooterTest {
         return element.getChildren().filter(isTemplate)
                 .filter(template -> template.getClassList().contains(className))
                 .findFirst();
+    }
+
+    private void assertIsVirtualChild(Component child, Component expectedParent) {
+        Assert.assertTrue(child.getParent().isPresent());
+        Assert.assertSame(child.getParent().get(), expectedParent);
+        Assert.assertTrue(child.getElement().isVirtualChild());
+    }
+
+    private void assertIsNotVirtualChild(Component component) {
+        Assert.assertFalse(component.getParent().isPresent());
+        Assert.assertFalse(component.getElement().isVirtualChild());
     }
 }

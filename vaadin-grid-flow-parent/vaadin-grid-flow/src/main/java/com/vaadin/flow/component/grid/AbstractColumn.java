@@ -207,7 +207,7 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
     private Component replaceChildComponent(Component oldComponent,
             Component newComponent) {
         if (oldComponent != null
-                && oldComponent.getElement().getParent() == this.getElement()) {
+                && oldComponent.getParent().isPresent() && oldComponent.getParent().get() == this) {
             getElement().removeVirtualChild(oldComponent.getElement());
         }
         if (newComponent != null) {
