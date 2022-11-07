@@ -18,7 +18,6 @@ package com.vaadin.flow.component.grid;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -43,8 +42,6 @@ public class HeaderFooterTest {
     private static final Predicate<Element> isColumn = element -> "vaadin-grid-column"
             .equals(element.getTag());
     private static final Predicate<Element> isColumnGroup = element -> "vaadin-grid-column-group"
-            .equals(element.getTag());
-    private static final Predicate<Element> isTemplate = element -> "template"
             .equals(element.getTag());
 
     Grid<String> grid;
@@ -80,17 +77,6 @@ public class HeaderFooterTest {
         List<List<Element>> layers = getColumnLayers();
         Assert.assertTrue("Grid should not have column groups initially",
                 layers.size() == 1);
-    }
-
-    @Test
-    public void initGrid_noHeaderFooterTemplates() {
-        List<List<Element>> layers = getColumnLayersAndAssertCount(1);
-        Assert.assertTrue(
-                "Grid columns should not have header or "
-                        + "footer templates initially",
-                layers.get(0).stream().noneMatch(
-                        element -> getHeaderTemplate(element).isPresent()
-                                || getFooterTemplate(element).isPresent()));
     }
 
     @Test
@@ -907,8 +893,6 @@ public class HeaderFooterTest {
         List<Element> children = grid.getElement().getChildren()
                 .collect(Collectors.toList());
         while (children.stream().anyMatch(isColumnGroup)) {
-            children = children.stream().filter(isTemplate.negate())
-                    .collect(Collectors.toList());
             if (!children.stream().allMatch(isColumnGroup)) {
                 throw new IllegalStateException(
                         "All column-children on the same hierarchy level "
@@ -924,8 +908,6 @@ public class HeaderFooterTest {
                     .collect(Collectors.toList());
         }
         if (children.stream().anyMatch(isColumn)) {
-            children = children.stream().filter(isTemplate.negate())
-                    .collect(Collectors.toList());
             if (!children.stream().allMatch(isColumn)) {
                 throw new IllegalStateException(
                         "All column-children on the same hierarchy level "
@@ -945,30 +927,6 @@ public class HeaderFooterTest {
         // from inner-most to out-most
         Collections.reverse(layers);
         return layers;
-    }
-
-    private boolean isHeaderRow(List<Element> layer) {
-        return layer.stream()
-                .allMatch(element -> getHeaderTemplate(element).isPresent());
-    }
-
-    private boolean isFooterRow(List<Element> layer) {
-        return layer.stream()
-                .allMatch(element -> getFooterTemplate(element).isPresent());
-    }
-
-    private Optional<Element> getHeaderTemplate(Element element) {
-        return getTemplate(element, "header");
-    }
-
-    private Optional<Element> getFooterTemplate(Element element) {
-        return getTemplate(element, "footer");
-    }
-
-    private Optional<Element> getTemplate(Element element, String className) {
-        return element.getChildren().filter(isTemplate)
-                .filter(template -> template.getClassList().contains(className))
-                .findFirst();
     }
 
     private void assertIsVirtualChild(Component child, Component expectedParent) {
