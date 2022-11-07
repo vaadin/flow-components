@@ -116,19 +116,6 @@ public class RichTextEditor
     }
 
     /**
-     * Constructs a {@code RichTextEditor} with the initial value
-     *
-     * @param initialValue
-     *            the initial value in Delta format, not {@code null}
-     *
-     * @see #setValue(Object)
-     */
-    public RichTextEditor(String initialValue) {
-        this();
-        setValue(initialValue);
-    }
-
-    /**
      * Constructs an empty {@code RichTextEditor} with a value change listener.
      *
      * @param listener
