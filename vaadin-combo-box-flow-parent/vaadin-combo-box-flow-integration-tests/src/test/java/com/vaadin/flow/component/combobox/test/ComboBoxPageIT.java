@@ -177,6 +177,26 @@ public class ComboBoxPageIT extends AbstractComboBoxIT {
     }
 
     @Test
+    public void selectValueFromClient_open_selectValueFromServer_onlyOneItemMarkedAsSelected() {
+        // Select item 1 on client, this also opens / renders the overlay
+        ComboBoxElement combo = $(ComboBoxElement.class).id("updatable-combo");
+        combo.selectByText("Item 1");
+        // Select item 2 from server
+        WebElement button = findElement(By.id("updatable-combo-button"));
+        button.click();
+
+        // Get overlay items and verify only item 2 is selected
+        combo.openPopup();
+        TestBenchElement overlay = $("vaadin-combo-box-overlay").first();
+        List<TestBenchElement> items = overlay.$("div").id("content")
+                .$("vaadin-combo-box-item").all();
+
+        items.forEach(
+                item -> Assert.assertEquals("Item 2".equals(item.getText()),
+                        item.hasAttribute("selected")));
+    }
+
+    @Test
     public void setValue_setLabelGenerator_selectedItemLabelUpdated() {
         ComboBoxElement combo = $(ComboBoxElement.class)
                 .id("label-generator-after-value");
