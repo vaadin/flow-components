@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.contextmenu;
 
-import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -143,7 +142,7 @@ import elemental.json.JsonObject;
 @JsModule("@vaadin/context-menu/src/vaadin-context-menu.js")
 @JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 public abstract class GeneratedVaadinContextMenu<R extends GeneratedVaadinContextMenu<R>>
-        extends Component implements HasStyle, ClickNotifier<R> {
+        extends Component implements HasStyle {
 
     /**
      * <p>
