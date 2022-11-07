@@ -122,7 +122,10 @@ public class RichTextEditor
      *            the initial value in Delta format, not {@code null}
      *
      * @see #setValue(Object)
+     *
+     * @deprecated Since 23.3, this API is deprecated.
      */
+    @Deprecated
     public RichTextEditor(String initialValue) {
         this();
         setValue(initialValue);
