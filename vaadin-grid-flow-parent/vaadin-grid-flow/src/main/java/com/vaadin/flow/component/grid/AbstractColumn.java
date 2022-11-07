@@ -192,18 +192,52 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
         setFooterContent(null, component);
     }
 
+    /**
+     * Sets the content of the column header to either a text or a component,
+     * and triggers a re-render of the header. If both are null, then the
+     * content of the header is cleared.
+     *
+     * @param text
+     *            the new text content, can be null
+     * @param component
+     *            the new component content, can be null
+     */
     void setHeaderContent(String text, Component component) {
         headerText = text;
         headerComponent = replaceChildComponent(headerComponent, component);
         scheduleHeaderRendering();
     }
 
+    /**
+     * Sets the content of the column footer to either a text or a component,
+     * and triggers a re-render of the footer. If both are null, then the
+     * content of the footer is cleared.
+     *
+     * @param text
+     *            the new text content, can be null
+     * @param component
+     *            the new component content, can be null
+     */
     void setFooterContent(String text, Component component) {
         footerText = text;
         footerComponent = replaceChildComponent(footerComponent, component);
         scheduleFooterRendering();
     }
 
+    /**
+     * Removes the old component as a virtual child, adds the new component as a
+     * virtual child. Both components can be null, in which case the operation
+     * does nothing. Additionally, the old component will only be removed if it
+     * is still a child of this component, and the new component will be removed
+     * from its current parent before adding it to this component.
+     *
+     * @param oldComponent
+     *            the component to remove as a virtual child, can be null
+     * @param newComponent
+     *            the component to add as a virtual child, can be null
+     * @return the newly added component, or null if there was no component to
+     *         add
+     */
     private Component replaceChildComponent(Component oldComponent,
             Component newComponent) {
         if (oldComponent != null && oldComponent.getParent().isPresent()
@@ -220,11 +254,25 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
         return newComponent;
     }
 
+    /**
+     * Moves the current header content, either a text or a component, to a
+     * different column or column group. Also clears the content of this column.
+     *
+     * @param otherColumn
+     *            the column or group to move the content to
+     */
     protected void moveHeaderContent(AbstractColumn<?> otherColumn) {
         otherColumn.setHeaderContent(headerText, headerComponent);
         setHeaderContent(null, null);
     }
 
+    /**
+     * Moves the current footer content, either a text or a component, to a
+     * different column or column group. Also clears the content of this column.
+     *
+     * @param otherColumn
+     *            the column or group to move the content to
+     */
     protected void moveFooterContent(AbstractColumn<?> otherColumn) {
         otherColumn.setFooterContent(footerText, footerComponent);
         setFooterContent(null, null);
