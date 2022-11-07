@@ -355,7 +355,7 @@ public abstract class GeneratedVaadinContextMenu<R extends GeneratedVaadinContex
      *
      * @deprecated since 23.3
      */
-    @Deprecated
+    @Deprecated(forRemoval=true)
     @Override
     public Registration addClickListener(
             ComponentEventListener<ClickEvent<R>> listener) {
@@ -370,7 +370,7 @@ public abstract class GeneratedVaadinContextMenu<R extends GeneratedVaadinContex
      *
      * @deprecated since 23.3
      */
-    @Deprecated
+    @Deprecated(forRemoval=true)
     @Override
     public ShortcutRegistration addClickShortcut(Key key,
             KeyModifier... keyModifiers) {
