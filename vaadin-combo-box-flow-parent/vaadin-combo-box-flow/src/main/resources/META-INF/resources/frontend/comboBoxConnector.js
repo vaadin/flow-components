@@ -167,7 +167,7 @@
             comboBox.$connector.clear = tryCatchWrapper((start, length) => {
                 const firstPageToClear = Math.floor(start / comboBox.pageSize);
                 const numberOfPagesToClear = Math.ceil(length / comboBox.pageSize);
-                
+
                 for (let i = firstPageToClear; i < firstPageToClear + numberOfPagesToClear; i++) {
                     delete cache[i];
                 }
@@ -259,34 +259,6 @@
                 // Let server know we're done
                 comboBox.$server.confirmUpdate(id);
             });
-
-            const patchIsItemSelected = tryCatchWrapper(() => {
-                // IE11 doesn't support {once: true} with event listeners. Need to
-                // remove the listener manually on the first invocation
-                comboBox.removeEventListener('opened-changed', patchIsItemSelected)
-
-                // Patch once the instance is ready and vaadin-combo-box has
-                // been finalized (i.e. opened-changed is emitted)
-
-                const _isItemSelected = comboBox.$.overlay._isItemSelected;
-                // Override comboBox's _isItemSelected logic to handle remapped items
-                comboBox.$.overlay._isItemSelected = (item, selectedItem, itemIdPath) => {
-                    let selected = _isItemSelected.call(comboBox, item, selectedItem, itemIdPath);
-
-                    if (comboBox._selectedKey) {
-                        if (comboBox.filteredItems.indexOf(selectedItem) > -1) {
-                            delete comboBox._selectedKey;
-                        } else {
-                            selected = selected || item.key === comboBox._selectedKey;
-                        }
-                    }
-
-                    return selected;
-                }
-            });
-
-            comboBox.addEventListener('opened-changed', patchIsItemSelected);
-
 
             comboBox.$connector.enableClientValidation = tryCatchWrapper(function( enable ){
                 let input = null;
