@@ -15,8 +15,6 @@ package com.vaadin.flow.component.spreadsheet;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.Iterator;
 
 import com.vaadin.flow.component.UI;
 import org.apache.poi.ss.util.CellReference;
@@ -25,9 +23,9 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.spreadsheet.framework.ReflectTools;
-import com.vaadin.flow.component.spreadsheet.rpc.PopupButtonClientRpc;
 import com.vaadin.flow.component.spreadsheet.rpc.PopupButtonServerRpc;
 import com.vaadin.flow.component.spreadsheet.shared.PopupButtonState;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * A button component that when clicked opens a pop-up next to spreadsheet cell
@@ -145,12 +143,6 @@ public class PopupButton extends Component {
         fireOpen();
     }
 
-    private PopupButton getRpcProxy(
-            Class<PopupButtonClientRpc> popupButtonClientRpcClass) {
-        // todo: completar
-        return null;
-    }
-
     /**
      * Closes the pop-up if it is open.
      */
@@ -265,46 +257,21 @@ public class PopupButton extends Component {
      *
      * @param listener
      *            The listener to add
+     * @return a {@link Registration} for removing the event listener
      */
-    public void addPopupOpenListener(PopupOpenListener listener) {
-        addListener(PopupOpenEvent.class, listener::onPopupOpen); // ,
-                                                                  // PopupOpenListener.POPUP_OPEN_METHOD);
-    }
-
-    /**
-     * Removes the given {@link PopupOpenListener} from this pop-up button.
-     *
-     * @param listener
-     *            The listener to remove
-     */
-    public void removePopupOpenListener(PopupOpenListener listener) {
-        removeListener(PopupOpenEvent.class, listener,
-                PopupOpenListener.POPUP_OPEN_METHOD);
-    }
-
-    private void removeListener(Class<? extends ComponentEvent> eventClass,
-            Serializable listener, Method method) {
-        // todo: implementar si hace falta
+    public Registration addPopupOpenListener(PopupOpenListener listener) {
+        return addListener(PopupOpenEvent.class, listener::onPopupOpen);
     }
 
     /**
      * Adds a {@link PopupCloseListener} to this pop-up button.
      *
      * @param listener
+     *            The listener to add
+     * @return a {@link Registration} for removing the event listener
      */
-    public void addPopupCloseListener(PopupCloseListener listener) {
-        addListener(PopupCloseEvent.class, listener::onPopupClose); // ,
-                                                                    // PopupCloseListener.POPUP_CLOSE_METHOD);
-    }
-
-    /**
-     * Removes the given {@link PopupCloseListener} from this pop-up button.
-     *
-     * @param listener
-     */
-    public void removePopupCloseListener(PopupCloseListener listener) {
-        removeListener(PopupCloseEvent.class, listener,
-                PopupCloseListener.POPUP_CLOSE_METHOD);
+    public Registration addPopupCloseListener(PopupCloseListener listener) {
+        return addListener(PopupCloseEvent.class, listener::onPopupClose);
     }
 
     /*
