@@ -267,7 +267,7 @@ public class PopupButton extends Component {
      * Adds a {@link PopupCloseListener} to this pop-up button.
      *
      * @param listener
-     *          The listener to add
+     *            The listener to add
      * @return a {@link Registration} for removing the event listener
      */
     public Registration addPopupCloseListener(PopupCloseListener listener) {
