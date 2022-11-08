@@ -1008,10 +1008,6 @@ public class Spreadsheet extends Component
 
     private Workbook workbook;
 
-    /** true if the component sheet should be reloaded on client side. */
-    // todo: already defined in shared state. Check!
-    // private boolean reload;
-
     /** are tables for currently active sheet loaded */
     private boolean tablesLoaded;
 
