@@ -2411,16 +2411,12 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         ColumnLayer newBottomLayer = new ColumnLayer(this, columns);
 
         IntStream.range(0, groups.size()).forEach(i -> {
-            // Move templates from columns to column-groups
+            // Move content from columns to column-groups
             if (forFooterRow) {
-                groups.get(i)
-                        .setFooterRenderer(columns.get(i).getFooterRenderer());
-                columns.get(i).setFooterRenderer(null);
+                columns.get(i).moveFooterContent(groups.get(i));
             }
             if (forHeaderRow) {
-                groups.get(i)
-                        .setHeaderRenderer(columns.get(i).getHeaderRenderer());
-                columns.get(i).setHeaderRenderer(null);
+                columns.get(i).moveHeaderContent(groups.get(i));
             }
         });
 
