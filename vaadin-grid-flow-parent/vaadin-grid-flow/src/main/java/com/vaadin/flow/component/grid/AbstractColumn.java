@@ -96,6 +96,15 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
         super.setVisible(visible);
     }
 
+    /**
+     * Only intended for internal use.
+     *
+     * @param renderer
+     *            the new footer renderer
+     * @deprecated since 23.3, internal usage of renderers for grid headers and
+     *             footers will be removed in 24
+     */
+    @Deprecated
     protected void setHeaderRenderer(Renderer<?> renderer) {
         headerRenderer = renderer;
         scheduleHeaderRendering();
@@ -152,6 +161,15 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
                 }));
     }
 
+    /**
+     * Only intended for internal use.
+     *
+     * @param renderer
+     *            the new footer renderer
+     * @deprecated since 23.3, internal usage of renderers for grid headers and
+     *             footers will be removed in 24
+     */
+    @Deprecated
     protected void setFooterRenderer(Renderer<?> renderer) {
         footerRenderer = renderer;
         scheduleFooterRendering();
@@ -233,10 +251,26 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
         setFooterRenderer(new ComponentRenderer<>(() -> component));
     }
 
+    /**
+     * Only intended for internal use.
+     *
+     * @return the header renderer
+     * @deprecated since 23.3, internal usage of renderers for grid headers and
+     *             footers will be removed in 24
+     */
+    @Deprecated
     protected Renderer<?> getHeaderRenderer() {
         return headerRenderer;
     }
 
+    /**
+     * Only intended for internal use.
+     *
+     * @return the footer renderer
+     * @deprecated since 23.3, internal usage of renderers for grid headers and
+     *             footers will be removed in 24
+     */
+    @Deprecated
     protected Renderer<?> getFooterRenderer() {
         return footerRenderer;
     }
