@@ -460,7 +460,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
                 // order for the sort indicators to match the order on the server. For "append"
                 // just keep the order passed from the server.
                 if (grid.multiSortPriority !== 'append') {
-                  directions = directions.reverse()
+                  directions = directions.reverse();
                 }
                 directions.forEach(({ column, direction }) => {
                   sorters.forEach((sorter) => {
@@ -676,9 +676,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             cache[pkey][page] = slice;
 
             grid.$connector.doSelection(slice.filter((item) => item.selected));
-            grid.$connector.doDeselection(
-              slice.filter((item) => !item.selected && selectedKeys[item.key])
-            );
+            grid.$connector.doDeselection(slice.filter((item) => !item.selected && selectedKeys[item.key]));
 
             const updatedItems = updateGridCache(page, pkey);
             if (updatedItems) {
@@ -1029,6 +1027,69 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
               }))
             );
         };
+
+        const singleTimeRenderer = (renderer) => {
+          return (root) => {
+            if (renderer) {
+              renderer(root);
+              renderer = null;
+            }
+          };
+        };
+
+        grid.$connector.setHeaderRenderer = tryCatchWrapper(function (column, options) {
+          const { content, showSorter, sorterPath } = options;
+
+          if (content === null) {
+            column.headerRenderer = null;
+            return;
+          }
+
+          column.headerRenderer = singleTimeRenderer((root) => {
+            // Clear previous contents
+            root.innerHTML = '';
+            // Render sorter
+            let contentRoot = root;
+            if (showSorter) {
+              const sorter = document.createElement('vaadin-grid-sorter');
+              sorter.setAttribute('path', sorterPath);
+              const ariaLabel = content instanceof Node ? content.textContent : content;
+              if (ariaLabel) {
+                sorter.setAttribute('aria-label', `Sort by ${ariaLabel}`);
+              }
+              root.appendChild(sorter);
+
+              // Use sorter as content root
+              contentRoot = sorter;
+            }
+            // Add content
+            if (content instanceof Node) {
+              contentRoot.appendChild(content);
+            } else {
+              contentRoot.textContent = content;
+            }
+          });
+        });
+
+        grid.$connector.setFooterRenderer = tryCatchWrapper(function (column, options) {
+          const { content } = options;
+
+          if (content === null) {
+            column.footerRenderer = null;
+            return;
+          }
+
+          column.footerRenderer = singleTimeRenderer((root) => {
+            // Clear previous contents
+            root.innerHTML = '';
+            // Add content
+            if (content instanceof Node) {
+              root.appendChild(content);
+            } else {
+              root.textContent = content;
+            }
+          });
+        });
 
         grid.addEventListener(
           'vaadin-context-menu-before-open',
