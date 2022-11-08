@@ -65,7 +65,7 @@ import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/s
             throw new Error('Array of custom date formats is null or empty');
           }
 
-          function _shortenFourDigitYearFormat(format) {
+          function getShortYearFormat(format) {
             if (format.includes('yyyy') && !format.includes('yyyyy')) {
               return format.replace('yyyy', 'yy');
             }
@@ -75,7 +75,7 @@ import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/s
             return undefined;
           }
 
-          function _isShortFormat(format) {
+          function isShortYearFormat(format) {
             if (format.includes('y')) {
               return !format.includes('yyy');
             }
@@ -96,19 +96,21 @@ import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/s
             const referenceDate = _getReferenceDate();
             for (let format of formats) {
               // We first try to match the date with the shorter version.
-              const shorterFormat = _shortenFourDigitYearFormat(format);
-              if (shorterFormat) {
-                const shorterFormatDate = dateFnsParse(dateString, shorterFormat, referenceDate);
-                if (dateFnsIsValid(shorterFormatDate)) {
-                  let yearValue = shorterFormatDate.getFullYear();
-                  // The last parsed year check handles the case when a date with an actual year value is provided
-                  // with zero padding, but then got reformatted without the zeroes and parsed again.
-                  if (this._lastParsedYear && yearValue == this._lastParsedYear % 100) {
+              const shortYearFormat = getShortYearFormat(format);
+              if (shortYearFormat) {
+                const shortYearFormatDate = dateFnsParse(dateString, shortYearFormat, referenceDate);
+                if (dateFnsIsValid(shortYearFormatDate)) {
+                  let yearValue = shortYearFormatDate.getFullYear();
+                  // The last parsed year check handles the case where a four-digit year is parsed, then formatted
+                  // as a two-digit year, and then parsed again. In this case we want to keep the century of the
+                  // originally parsed year, instead of using the century of the reference date.
+                  if (this._lastParsedYear && yearValue
+                    === this._lastParsedYear % 100) {
                     yearValue = this._lastParsedYear;
                   }
                   return {
-                    day: shorterFormatDate.getDate(),
-                    month: shorterFormatDate.getMonth(),
+                    day: shortYearFormatDate.getDate(),
+                    month: shortYearFormatDate.getMonth(),
                     year: yearValue
                   };
                 }
@@ -117,7 +119,8 @@ import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/s
 
               if (dateFnsIsValid(date)) {
                 let yearValue = date.getFullYear();
-                if (this._lastParsedYear && yearValue % 100 == this._lastParsedYear % 100 && _isShortFormat(format)) {
+                if (this._lastParsedYear && yearValue % 100
+                  === this._lastParsedYear % 100 && isShortYearFormat(format)) {
                   yearValue = this._lastParsedYear;
                 } else {
                   this._lastParsedYear = yearValue;
