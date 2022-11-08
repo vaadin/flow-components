@@ -104,6 +104,7 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
      * @deprecated since 23.3, internal usage of renderers for grid headers and
      *             footers will be removed in 24
      */
+    @Deprecated
     protected void setHeaderRenderer(Renderer<?> renderer) {
         headerRenderer = renderer;
         scheduleHeaderRendering();
@@ -168,6 +169,7 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
      * @deprecated since 23.3, internal usage of renderers for grid headers and
      *             footers will be removed in 24
      */
+    @Deprecated
     protected void setFooterRenderer(Renderer<?> renderer) {
         footerRenderer = renderer;
         scheduleFooterRendering();
@@ -268,6 +270,7 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
      * @deprecated since 23.3, internal usage of renderers for grid headers and
      *             footers will be removed in 24
      */
+    @Deprecated
     protected Renderer<?> getFooterRenderer() {
         return footerRenderer;
     }
