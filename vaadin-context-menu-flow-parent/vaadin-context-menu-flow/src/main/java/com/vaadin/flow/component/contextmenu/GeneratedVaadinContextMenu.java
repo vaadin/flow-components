@@ -355,7 +355,7 @@ public abstract class GeneratedVaadinContextMenu<R extends GeneratedVaadinContex
      *
      * @deprecated since 23.3
      */
-    @Deprecated()
+    @Deprecated
     @Override
     public Registration addClickListener(
             ComponentEventListener<ClickEvent<R>> listener) {
