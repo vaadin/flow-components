@@ -45,7 +45,7 @@ public abstract class BasicIT extends AbstractParallelTest {
             PasswordFieldElement password, ButtonElement submit) {
         Assert.assertEquals("Username", username.getLabel());
         Assert.assertEquals("Password", password.getLabel());
-        Assert.assertEquals("Log in", submit.getText());
+        Assert.assertEquals("Log in", submit.getText().trim());
     }
 
     protected void checkSuccessfulLogin(TextFieldElement usernameField,

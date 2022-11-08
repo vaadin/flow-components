@@ -97,9 +97,8 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
      *
      * @return the value of action property
      */
-    @Synchronize(property = PROP_ACTION, value = "action-changed")
     public String getAction() {
-        return getElement().getProperty(PROP_ACTION);
+        return getElement().getProperty(PROP_ACTION, "");
     }
 
     /**
