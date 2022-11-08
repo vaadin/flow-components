@@ -323,12 +323,27 @@ public class FlexLayout extends Component
     }
 
     /**
+     * Gets the flex direction property of the layout.
+     *
+     * @return the flex direction property, or {@link FlexDirection#ROW} if none
+     *         was set
+     */
+    public FlexDirection getFlexDirection() {
+        return FlexDirection.toFlexDirection(
+                getElement().getStyle()
+                        .get(FlexConstants.FLEX_DIRECTION_CSS_PROPERTY),
+                FlexDirection.ROW);
+    }
+
+    /**
      * Gets the flex direction property of a given element container.
      *
      * @param elementContainer
      *            the element container to read the flex direction property from
      * @return the flex direction property, or {@link FlexDirection#ROW} if none
      *         was set
+     * @deprecated since 23.3 - use {@link #getFlexDirection()} to get the flex
+     *             direction property of the layout directly
      */
     public FlexDirection getFlexDirection(HasElement elementContainer) {
         return FlexDirection.toFlexDirection(
