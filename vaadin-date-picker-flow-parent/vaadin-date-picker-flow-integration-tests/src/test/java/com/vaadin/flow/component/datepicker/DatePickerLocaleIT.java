@@ -12,6 +12,7 @@ import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.logging.LogEntries;
 import org.openqa.selenium.logging.LogEntry;
@@ -23,16 +24,15 @@ import com.vaadin.flow.testutil.TestPath;
 @TestPath("vaadin-date-picker/date-picker-locale")
 public class DatePickerLocaleIT extends AbstractComponentIT {
 
-    private DatePickerElement picker;
-
     @Before
     public void init() {
         open();
-        picker = $(DatePickerElement.class).id("picker");
     }
 
     @Test
     public void datePickerWithValue_setLocale_assertDisplayedValue() {
+        DatePickerElement picker = $(DatePickerElement.class)
+                .id(DatePickerLocalePage.CUSTOMIZABLE_LOCALE_DATE_PICKER);
         picker.setDate(LocalDate.of(2018, Month.MAY, 3));
 
         applyLocale(Locale.CHINA);
@@ -61,6 +61,8 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
 
     @Test
     public void datePickerWithLocale_enterValue_assertParsedValue() {
+        DatePickerElement picker = $(DatePickerElement.class)
+                .id(DatePickerLocalePage.CUSTOMIZABLE_LOCALE_DATE_PICKER);
         LocalDate mayThird = LocalDate.of(2018, Month.MAY, 3);
 
         applyLocale(Locale.CHINA);
@@ -103,6 +105,8 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
 
     @Test
     public void datePickerWithValueAndLocale_blur_assertDisplayedValue() {
+        DatePickerElement picker = $(DatePickerElement.class)
+                .id(DatePickerLocalePage.CUSTOMIZABLE_LOCALE_DATE_PICKER);
         picker.setDate(LocalDate.of(2018, Month.MAY, 3));
         applyLocale(new Locale("pl", "PL"));
 
@@ -118,6 +122,8 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
 
     @Test
     public void datePicker_setValue_setLocale_assertDisplayedValue() {
+        DatePickerElement picker = $(DatePickerElement.class)
+                .id(DatePickerLocalePage.CUSTOMIZABLE_LOCALE_DATE_PICKER);
         picker.setDate(LocalDate.of(2018, Month.MAY, 3));
 
         applyLocale(Locale.UK);
@@ -139,6 +145,8 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
 
     @Test
     public void datePicker_setInvalidLocale_defaultUSLocaleIsUsed() {
+        DatePickerElement picker = $(DatePickerElement.class)
+                .id(DatePickerLocalePage.CUSTOMIZABLE_LOCALE_DATE_PICKER);
         applyLocale(new Locale("i", "i", "i"));
         picker.setDate(LocalDate.of(2018, Month.MAY, 3));
 
@@ -159,6 +167,8 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
 
     @Test
     public void datePicker_setUnsupportedLocale_defaultUSLocaleIsUsed() {
+        DatePickerElement picker = $(DatePickerElement.class)
+                .id(DatePickerLocalePage.CUSTOMIZABLE_LOCALE_DATE_PICKER);
         picker.setDate(LocalDate.of(2018, Month.MAY, 3));
 
         List<Locale> unsupportedLocales = List.of(new Locale("ar", "SA"),
@@ -176,6 +186,8 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
 
     @Test
     public void datePickerWithLocale_setInputValue_blur_assertDisplayedValue() {
+        DatePickerElement picker = $(DatePickerElement.class)
+                .id(DatePickerLocalePage.CUSTOMIZABLE_LOCALE_DATE_PICKER);
         applyLocale(Locale.GERMAN);
 
         picker.setInputValue("3.5.2018");
@@ -186,13 +198,34 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
         assertNoWarnings();
     }
 
+    @Test
+    public void testLocaleBasedParsingShouldUseReferenceDate() {
+        String id = DatePickerLocalePage.CUSTOM_REFERENCE_DATE_AND_LOCALE_DATE_PICKER;
+        TestBenchElement output = $("span").id(
+                DatePickerLocalePage.CUSTOM_REFERENCE_DATE_AND_LOCALE_OUTPUT);
+
+        submitValue(id, "02/27/2031");
+        Assert.assertEquals("2031-02-27", output.getText());
+
+        submitValue(id, "02/27/31");
+        Assert.assertEquals("1931-02-27", output.getText());
+
+        submitValue(id, "02/27/29");
+        Assert.assertEquals("2029-02-27", output.getText());
+
+        submitValue(id, "02/27/0030");
+        Assert.assertEquals("0030-02-27", output.getText());
+    }
+
     private void applyLocale(Locale locale) {
-        TestBenchElement localeInput = $("input").id("locale-input");
+        TestBenchElement localeInput = $("input")
+                .id(DatePickerLocalePage.CUSTOMIZABLE_LOCALE_INPUT);
         localeInput.setProperty("value", locale.toString());
         localeInput.dispatchEvent("change",
                 Collections.singletonMap("bubbles", true));
 
-        TestBenchElement applyLocale = $("button").id("apply-locale");
+        TestBenchElement applyLocale = $("button")
+                .id(DatePickerLocalePage.CUSTOMIZABLE_LOCALE_BUTTON);
         applyLocale.click();
     }
 
@@ -212,5 +245,17 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
                     "Received a warning in browser log console, message: %s",
                     logEntry));
         }
+    }
+
+    private void submitValue(String id, String value) {
+        TestBenchElement input = $(DatePickerElement.class).id(id)
+                .findElement(By.tagName("input"));
+
+        while (!input.getAttribute("value").isEmpty()) {
+            input.sendKeys(Keys.BACK_SPACE);
+        }
+        input.sendKeys(value);
+        input.sendKeys(Keys.ENTER);
+        getCommandExecutor().waitForVaadin();
     }
 }

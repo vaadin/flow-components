@@ -25,11 +25,10 @@ import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 
 import java.time.LocalDate;
 import java.time.Month;
-import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
-@Route("vaadin-date-picker/date-picker-format")
-public class DatePickerFormatPage extends VerticalLayout {
+@Route("vaadin-date-picker/date-picker-custom-format")
+public class DatePickerCustomFormatPage extends VerticalLayout {
     public static final String PRIMARY_FORMAT_DATE_PICKER = "PRIMARY_FORMAT_DATE_PICKER";
     public static final String PRIMARY_FORMAT_OUTPUT = "PRIMARY_FORMAT_OUTPUT";
     public static final String MULTIPLE_FORMAT_DATE_PICKER = "MULTIPLE_FORMAT_DATE_PICKER";
@@ -46,10 +45,6 @@ public class DatePickerFormatPage extends VerticalLayout {
     public static final String SET_DATE_FORMAT_AFTER_LOCALE_OUTPUT = "SET_DATE_FORMAT_AFTER_LOCALE_OUTPUT";
     public static final String SERVER_SIDE_VALUE_CHANGE_DATE_PICKER = "SERVER_SIDE_VALUE_CHANGE_DATE_PICKER";
     public static final String SERVER_SIDE_VALUE_CHANGE_BUTTON = "SERVER_SIDE_VALUE_CHANGE_BUTTON";
-    public static final String CUSTOM_REFERENCE_DATE_AND_LOCALE_WITH_TWO_DIGITS_YEAR_DATE_PICKER = "CUSTOM_REFERENCE_DATE_AND_LOCALE_WITH_TWO_DIGITS_YEAR_DATE_PICKER";
-    public static final String CUSTOM_REFERENCE_DATE_AND_LOCALE_WITH_TWO_DIGITS_YEAR_OUTPUT = "CUSTOM_REFERENCE_DATE_AND_LOCALE_WITH_TWO_DIGITS_YEAR_OUTPUT";
-    public static final String CUSTOM_REFERENCE_DATE_AND_LOCALE_WITH_FOUR_DIGITS_YEAR_DATE_PICKER = "CUSTOM_REFERENCE_DATE_AND_LOCALE_WITH_FOUR_DIGITS_YEAR_DATE_PICKER";
-    public static final String CUSTOM_REFERENCE_DATE_AND_LOCALE_WITH_FOUR_DIGITS_YEAR_OUTPUT = "CUSTOM_REFERENCE_DATE_AND_LOCALE_WITH_FOUR_DIGITS_YEAR_OUTPUT";
     public static final String CUSTOM_REFERENCE_DATE_AND_FORMAT_WITH_TWO_DIGITS_YEAR_DATE_PICKER = "CUSTOM_REFERENCE_DATE_AND_FORMAT_WITH_TWO_DIGITS_YEAR_DATE_PICKER";
     public static final String CUSTOM_REFERENCE_DATE_AND_FORMAT_WITH_TWO_DIGITS_YEAR_OUTPUT = "CUSTOM_REFERENCE_DATE_AND_FORMAT_WITH_TWO_DIGITS_YEAR_OUTPUT";
     public static final String CUSTOM_REFERENCE_DATE_AND_FORMAT_WITH_FOUR_DIGITS_YEAR_DATE_PICKER = "CUSTOM_REFERENCE_DATE_AND_FORMAT_WITH_FOUR_DIGITS_YEAR_DATE_PICKER";
@@ -59,7 +54,7 @@ public class DatePickerFormatPage extends VerticalLayout {
 
     public static final LocalDate may13 = LocalDate.of(2018, Month.MAY, 13);
 
-    public DatePickerFormatPage() {
+    public DatePickerCustomFormatPage() {
         setupPrimaryFormat();
         setupMultipleFormats();
         setupChangeBetweenFormats();
@@ -67,8 +62,6 @@ public class DatePickerFormatPage extends VerticalLayout {
         setupSetLocaleAfterFormat();
         setupSetFormatAfterLocale();
         setupServerSideValueChange();
-        setupCustomReferenceDateAndLocaleWithTwoDigitsYear();
-        setupCustomReferenceDateAndLocaleWithFourDigitsYear();
         setupCustomReferenceDateAndFormatWithTwoDigitsYear();
         setupCustomReferenceDateAndFormatWithFourDigitsYear();
         setupCustomReferenceDateAndMultipleFormatsYear();
@@ -80,7 +73,7 @@ public class DatePickerFormatPage extends VerticalLayout {
         i18n.setDateFormat("yyyy-MM-dd");
         datePicker.setI18n(i18n);
 
-        Span output = createOutputSpan(datePicker);
+        Span output = DatePickerITHelper.createOutputSpan(datePicker);
         datePicker.setId(PRIMARY_FORMAT_DATE_PICKER);
         output.setId(PRIMARY_FORMAT_OUTPUT);
         add(datePicker, output);
@@ -92,7 +85,7 @@ public class DatePickerFormatPage extends VerticalLayout {
         i18n.setDateFormats("yyyy-MM-dd", "dd.MM.yyyy", "MM/dd/yyyy");
         datePicker.setI18n(i18n);
 
-        Span output = createOutputSpan(datePicker);
+        Span output = DatePickerITHelper.createOutputSpan(datePicker);
         datePicker.setId(MULTIPLE_FORMAT_DATE_PICKER);
         output.setId(MULTIPLE_FORMAT_OUTPUT);
         add(datePicker, output);
@@ -109,7 +102,7 @@ public class DatePickerFormatPage extends VerticalLayout {
             datePicker.setI18n(new DatePickerI18n().setDateFormat("M/d/yy"));
         });
 
-        Span output = createOutputSpan(datePicker);
+        Span output = DatePickerITHelper.createOutputSpan(datePicker);
         btn.setId(CHANGE_BETWEEN_FORMATS_BUTTON);
         datePicker.setId(CHANGE_BETWEEN_FORMATS_DATE_PICKER);
         output.setId(CHANGE_BETWEEN_FORMATS_OUTPUT);
@@ -130,7 +123,7 @@ public class DatePickerFormatPage extends VerticalLayout {
                             .setI18n(new DatePickerI18n().setDateFormat(null));
                 });
 
-        Span output = createOutputSpan(datePicker);
+        Span output = DatePickerITHelper.createOutputSpan(datePicker);
         btn.setId(REMOVE_DATE_FORMAT_BUTTON);
         datePicker.setId(REMOVE_DATE_FORMAT_DATE_PICKER);
         output.setId(REMOVE_DATE_FORMAT_OUTPUT);
@@ -145,7 +138,7 @@ public class DatePickerFormatPage extends VerticalLayout {
 
         datePicker.setLocale(Locale.GERMANY); // should have no effect
 
-        Span output = createOutputSpan(datePicker);
+        Span output = DatePickerITHelper.createOutputSpan(datePicker);
         datePicker.setId(SET_LOCALE_AFTER_FORMAT_DATE_PICKER);
         output.setId(SET_LOCALE_AFTER_FORMAT_OUTPUT);
         add(datePicker, output);
@@ -159,7 +152,7 @@ public class DatePickerFormatPage extends VerticalLayout {
         i18n.setDateFormat("yyyy/MM/dd");
         datePicker.setI18n(i18n);
 
-        Span output = createOutputSpan(datePicker);
+        Span output = DatePickerITHelper.createOutputSpan(datePicker);
         datePicker.setId(SET_DATE_FORMAT_AFTER_LOCALE_DATE_PICKER);
         output.setId(SET_DATE_FORMAT_AFTER_LOCALE_OUTPUT);
         add(datePicker, output);
@@ -180,38 +173,6 @@ public class DatePickerFormatPage extends VerticalLayout {
         add(datePicker, btn);
     }
 
-    private void setupCustomReferenceDateAndLocaleWithTwoDigitsYear() {
-        DatePicker datePicker = new DatePicker(may13);
-        datePicker.setLocale(Locale.US);
-
-        DatePickerI18n i18n = new DatePickerI18n();
-        i18n.setReferenceDate(LocalDate.of(1980, 2, 2));
-        datePicker.setI18n(i18n);
-
-        Span output = createOutputSpan(datePicker);
-        datePicker.setId(
-                CUSTOM_REFERENCE_DATE_AND_LOCALE_WITH_TWO_DIGITS_YEAR_DATE_PICKER);
-        output.setId(
-                CUSTOM_REFERENCE_DATE_AND_LOCALE_WITH_TWO_DIGITS_YEAR_OUTPUT);
-        add(datePicker, output);
-    }
-
-    private void setupCustomReferenceDateAndLocaleWithFourDigitsYear() {
-        DatePicker datePicker = new DatePicker(may13);
-        datePicker.setLocale(Locale.FRANCE);
-
-        DatePickerI18n i18n = new DatePickerI18n();
-        i18n.setReferenceDate(LocalDate.of(1980, 2, 2));
-        datePicker.setI18n(i18n);
-
-        Span output = createOutputSpan(datePicker);
-        datePicker.setId(
-                CUSTOM_REFERENCE_DATE_AND_LOCALE_WITH_FOUR_DIGITS_YEAR_DATE_PICKER);
-        output.setId(
-                CUSTOM_REFERENCE_DATE_AND_LOCALE_WITH_FOUR_DIGITS_YEAR_OUTPUT);
-        add(datePicker, output);
-    }
-
     private void setupCustomReferenceDateAndFormatWithTwoDigitsYear() {
         DatePicker datePicker = new DatePicker(may13);
 
@@ -220,7 +181,7 @@ public class DatePickerFormatPage extends VerticalLayout {
         i18n.setReferenceDate(LocalDate.of(1980, 2, 2));
         datePicker.setI18n(i18n);
 
-        Span output = createOutputSpan(datePicker);
+        Span output = DatePickerITHelper.createOutputSpan(datePicker);
         datePicker.setId(
                 CUSTOM_REFERENCE_DATE_AND_FORMAT_WITH_TWO_DIGITS_YEAR_DATE_PICKER);
         output.setId(
@@ -236,7 +197,7 @@ public class DatePickerFormatPage extends VerticalLayout {
         i18n.setReferenceDate(LocalDate.of(1980, 2, 2));
         datePicker.setI18n(i18n);
 
-        Span output = createOutputSpan(datePicker);
+        Span output = DatePickerITHelper.createOutputSpan(datePicker);
         datePicker.setId(
                 CUSTOM_REFERENCE_DATE_AND_FORMAT_WITH_FOUR_DIGITS_YEAR_DATE_PICKER);
         output.setId(
@@ -252,23 +213,10 @@ public class DatePickerFormatPage extends VerticalLayout {
         i18n.setReferenceDate(LocalDate.of(1980, 2, 2));
         datePicker.setI18n(i18n);
 
-        Span output = createOutputSpan(datePicker);
+        Span output = DatePickerITHelper.createOutputSpan(datePicker);
         datePicker.setId(
                 CUSTOM_REFERENCE_DATE_AND_MULTIPLE_FORMATS_YEAR_DATE_PICKER);
         output.setId(CUSTOM_REFERENCE_DATE_AND_MULTIPLE_FORMATS_YEAR_OUTPUT);
         add(datePicker, output);
-    }
-
-    private static Span createOutputSpan(DatePicker datePicker) {
-        Span output = new Span();
-        datePicker.addValueChangeListener(event -> {
-            LocalDate newValue = datePicker.getValue();
-            if (newValue != null) {
-                output.setText(newValue.format(DateTimeFormatter.ISO_DATE));
-            } else {
-                output.setText("");
-            }
-        });
-        return output;
     }
 }
