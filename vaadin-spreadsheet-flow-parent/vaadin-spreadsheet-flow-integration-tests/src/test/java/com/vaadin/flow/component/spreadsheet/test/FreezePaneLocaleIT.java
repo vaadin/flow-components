@@ -21,6 +21,9 @@ public class FreezePaneLocaleIT extends AbstractSpreadsheetIT {
         getDriver().get(getBaseURL() + "/freeze-pane-locale");
         setSpreadsheet($(SpreadsheetElement.class).first());
 
+        Assert.assertNotEquals("1px",
+                getCellStyle("B5", "border-bottom-width"));
+
         getCellAt(1, 1).contextClick();
         clickItem("Hide sheet");
 
