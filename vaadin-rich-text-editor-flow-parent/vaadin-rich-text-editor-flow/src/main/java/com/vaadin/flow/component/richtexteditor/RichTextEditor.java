@@ -123,7 +123,7 @@ public class RichTextEditor
      *
      * @see #setValue(Object)
      *
-     * @deprecated Since 23.3, this API is deprecated.
+     * @deprecated Since 23.3, this API is deprecated. Use {@link #setValue(String)} instead.
      */
     @Deprecated
     public RichTextEditor(String initialValue) {
