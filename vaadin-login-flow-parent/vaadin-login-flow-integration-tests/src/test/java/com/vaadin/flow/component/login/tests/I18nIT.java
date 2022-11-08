@@ -25,7 +25,7 @@ public class I18nIT extends AbstractParallelTest {
         Assert.assertEquals("Acesse a sua conta", login.getFormTitle());
         Assert.assertEquals("Usuário", login.getUsernameField().getLabel());
         Assert.assertEquals("Senha", login.getPasswordField().getLabel());
-        Assert.assertEquals("Entrar", login.getSubmitButton().getText());
+        Assert.assertEquals("Entrar", login.getSubmitButton().getText().trim());
         Assert.assertEquals("Esqueci minha senha",
                 login.getForgotPasswordButton().getText());
         Assert.assertEquals(
