@@ -49,8 +49,7 @@ import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/s
             .replace('05', 'MM')
             .replace('5', 'M')
             // insert year placeholder
-            .replace('1234', 'yyyy')
-            .replace('34', 'yy');
+            .replace('1234', 'yyyy');
           const isValidPattern = pattern.includes('d') && pattern.includes('M') && pattern.includes('y');
           if (!isValidPattern) {
             console.warn('The locale is not supported, using default locale setting(en-US).');
