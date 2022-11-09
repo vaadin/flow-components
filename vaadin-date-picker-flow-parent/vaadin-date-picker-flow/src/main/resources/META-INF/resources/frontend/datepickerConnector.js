@@ -103,9 +103,9 @@ import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/s
                   // The last parsed year check handles the case where a four-digit year is parsed, then formatted
                   // as a two-digit year, and then parsed again. In this case we want to keep the century of the
                   // originally parsed year, instead of using the century of the reference date.
-                  if (this._lastParsedYear && yearValue
-                    === this._lastParsedYear % 100) {
-                    yearValue = this._lastParsedYear;
+                  if (datepicker.$connector._lastParsedYear && yearValue
+                    === datepicker.$connector._lastParsedYear % 100) {
+                    yearValue = datepicker.$connector._lastParsedYear;
                   }
                   return {
                     day: shortYearFormatDate.getDate(),
@@ -118,11 +118,11 @@ import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/s
 
               if (dateFnsIsValid(date)) {
                 let yearValue = date.getFullYear();
-                if (this._lastParsedYear && yearValue % 100
-                  === this._lastParsedYear % 100 && isShortYearFormat(format)) {
-                  yearValue = this._lastParsedYear;
+                if (datepicker.$connector._lastParsedYear && yearValue % 100
+                  === datepicker.$connector._lastParsedYear % 100 && isShortYearFormat(format)) {
+                  yearValue = datepicker.$connector._lastParsedYear;
                 } else {
-                  this._lastParsedYear = yearValue;
+                  datepicker.$connector._lastParsedYear = yearValue;
                 }
                 return {
                   day: date.getDate(),
@@ -131,7 +131,7 @@ import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/s
                 };
               }
             }
-            this._lastParsedYear = undefined;
+            datepicker.$connector._lastParsedYear = undefined;
             return false;
           }
 
