@@ -3252,7 +3252,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     private void updateMultiSortOnShiftClick(boolean multiSortOnShiftClick) {
-        getElement().setProperty("multiSortOnShiftClick", multiSortOnShiftClick);
+        getElement().setProperty("multiSortOnShiftClick",
+                multiSortOnShiftClick);
     }
 
     private void updateMultiSortPriority(MultiSortPriority priority) {
@@ -3276,19 +3277,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             multiSort = "true";
         }
         return Boolean.parseBoolean(multiSort);
-    }
-
-    /**
-     * Gets whether multiple column sorting with shift-click is enabled.
-     *
-     * @see #setMultiSort(boolean, boolean)
-     *
-     * @return {@code true} if multi-sort with shift-click is enabled,
-     *         {@code false} otherwise
-     */
-    public boolean isMultiSortOnShiftClick() {
-        return this.isMultiSort()
-                && getElement().getProperty("multiSortOnShiftClick", false);
     }
 
     @ClientCallable

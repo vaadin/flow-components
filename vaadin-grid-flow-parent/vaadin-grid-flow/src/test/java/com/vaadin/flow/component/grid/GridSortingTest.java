@@ -299,7 +299,6 @@ public class GridSortingTest {
 
         Assert.assertTrue(
                 grid.getElement().getProperty("multiSortOnShiftClick", false));
-        Assert.assertTrue(grid.isMultiSortOnShiftClick());
     }
 
     @Test
@@ -308,7 +307,6 @@ public class GridSortingTest {
 
         Assert.assertFalse(
                 grid.getElement().getProperty("multiSortOnShiftClick", false));
-        Assert.assertFalse(grid.isMultiSortOnShiftClick());
     }
 
     @Test
@@ -318,7 +316,6 @@ public class GridSortingTest {
 
         Assert.assertFalse(
                 grid.getElement().getProperty("multiSortOnShiftClick", false));
-        Assert.assertFalse(grid.isMultiSortOnShiftClick());
     }
 
     @Test
@@ -329,7 +326,6 @@ public class GridSortingTest {
                 grid.getElement().getAttribute("multi-sort-priority"));
         Assert.assertTrue(
                 grid.getElement().getProperty("multiSortOnShiftClick", false));
-        Assert.assertTrue(grid.isMultiSortOnShiftClick());
     }
 
     @Test(expected = NullPointerException.class)
