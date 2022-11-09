@@ -1702,6 +1702,8 @@ public class Spreadsheet extends Component
                 reloadActiveSheetData();
                 SpreadsheetFactory.reloadSpreadsheetData(this,
                         getActiveSheet());
+
+                getSpreadsheetStyleFactory().reloadActiveSheetCellStyles();
             }
         }
     }

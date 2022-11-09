@@ -16,4 +16,18 @@ public class FreezePaneLocaleIT extends AbstractSpreadsheetIT {
                 $(SpreadsheetElement.class).exists());
     }
 
+    @Test
+    public void hideFirstSheet_borderStylesUpdated() {
+        getDriver().get(getBaseURL() + "/freeze-pane-locale");
+        setSpreadsheet($(SpreadsheetElement.class).first());
+
+        Assert.assertNotEquals("1px",
+                getCellStyle("B5", "border-bottom-width"));
+
+        getCellAt(1, 1).contextClick();
+        clickItem("Hide sheet");
+
+        Assert.assertEquals("1px", getCellStyle("B5", "border-bottom-width"));
+    }
+
 }
