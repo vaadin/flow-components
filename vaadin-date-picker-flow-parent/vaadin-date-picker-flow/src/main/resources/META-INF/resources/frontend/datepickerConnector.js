@@ -147,8 +147,8 @@ import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/s
         });
 
         function _getReferenceDate() {
-          return datepicker.i18n.referenceDate ? new Date(datepicker.i18n.referenceDate.year,
-              datepicker.i18n.referenceDate.month - 1, datepicker.i18n.referenceDate.day) : new Date();
+          const { referenceDate } = datepicker.i18n;
+          return referenceDate ? new Date(referenceDate.year, referenceDate.month - 1, referenceDate.day) : new Date();
         }
 
         datepicker.$connector.updateI18n = tryCatchWrapper(function (locale, i18n) {
