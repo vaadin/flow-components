@@ -118,8 +118,11 @@ import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/s
 
               if (dateFnsIsValid(date)) {
                 let yearValue = date.getFullYear();
-                if (datepicker.$connector._lastParsedYear && yearValue % 100
-                  === datepicker.$connector._lastParsedYear % 100 && isShortYearFormat(format)) {
+                if (
+                  datepicker.$connector._lastParsedYear &&
+                  yearValue % 100 === datepicker.$connector._lastParsedYear % 100 &&
+                  isShortYearFormat(format)
+                ) {
                   yearValue = datepicker.$connector._lastParsedYear;
                 } else {
                   datepicker.$connector._lastParsedYear = yearValue;
