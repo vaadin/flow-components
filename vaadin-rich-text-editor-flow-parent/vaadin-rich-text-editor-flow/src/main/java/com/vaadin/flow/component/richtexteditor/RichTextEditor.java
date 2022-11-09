@@ -123,8 +123,8 @@ public class RichTextEditor
      *
      * @see #setValue(Object)
      *
-     * @deprecated Since 23.3, this API is deprecated in order to maintain API consistency.
-     * Use {@link #setValue(String)} instead.
+     * @deprecated Since 23.3, this API is deprecated in order to maintain API
+     *             consistency. Use {@link #setValue(String)} instead.
      */
     @Deprecated
     public RichTextEditor(String initialValue) {
@@ -158,8 +158,8 @@ public class RichTextEditor
      * @see #setValue(Object)
      * @see #addValueChangeListener(com.vaadin.flow.component.HasValue.ValueChangeListener)
      *
-     * @deprecated Since 23.3, this API is deprecated in order to maintain API consistency.
-     * Use {@link #setValue(String)} instead.
+     * @deprecated Since 23.3, this API is deprecated in order to maintain API
+     *             consistency. Use {@link #setValue(String)} instead.
      */
     @Deprecated
     public RichTextEditor(String initialValue,
