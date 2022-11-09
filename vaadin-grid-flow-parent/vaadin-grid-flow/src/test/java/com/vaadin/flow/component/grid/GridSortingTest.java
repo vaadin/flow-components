@@ -293,6 +293,46 @@ public class GridSortingTest {
         grid.setMultiSort(true, null);
     }
 
+    @Test
+    public void setMultiSortShiftClickOnly() {
+        grid.setMultiSort(true, true);
+
+        Assert.assertTrue(
+                grid.getElement().getProperty("multiSortOnShiftClick", false));
+    }
+
+    @Test
+    public void setMultiSortShiftClickOnly_onlyWhenMultiSortTrue() {
+        grid.setMultiSort(false, true);
+
+        Assert.assertFalse(
+                grid.getElement().getProperty("multiSortOnShiftClick", false));
+    }
+
+    @Test
+    public void setMultiSortShiftClickOnlyFalse_whenUsingMethodWithoutOnShiftClickOnly() {
+        grid.setMultiSort(true, true);
+        grid.setMultiSort(false);
+
+        Assert.assertFalse(
+                grid.getElement().getProperty("multiSortOnShiftClick", false));
+    }
+
+    @Test
+    public void setMultiSortShiftClickOnlyWithPriority() {
+        grid.setMultiSort(true, Grid.MultiSortPriority.APPEND, true);
+
+        Assert.assertEquals("append",
+                grid.getElement().getAttribute("multi-sort-priority"));
+        Assert.assertTrue(
+                grid.getElement().getProperty("multiSortOnShiftClick", false));
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void setMultiSortShiftClickOnlyWithPriorityNull_throws() {
+        grid.setMultiSort(true, null, true);
+    }
+
     private void setTestSorting() {
         JsonArray sortersArray = Json.createArray();
         sortersArray.set(0, createSortObject(getColumnId(nameColumn), "asc"));

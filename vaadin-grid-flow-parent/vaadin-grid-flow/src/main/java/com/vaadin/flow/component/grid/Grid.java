@@ -3191,6 +3191,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public void setMultiSort(boolean multiSort) {
         getElement().setAttribute("multi-sort", multiSort);
+        if (!multiSort) {
+            updateMultiSortOnShiftClick(false);
+        }
     }
 
     /**
@@ -3205,13 +3208,57 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @see MultiSortPriority
      */
     public void setMultiSort(boolean multiSort, MultiSortPriority priority) {
-        Objects.requireNonNull(priority,
-                "Multi-sort priority must not be null");
         setMultiSort(multiSort);
         updateMultiSortPriority(priority);
     }
 
+    /**
+     * Sets whether multiple column sorting is enabled on the client-side.
+     *
+     * @param multiSort
+     *            {@code true} to enable sorting of multiple columns on the
+     *            client-side, {@code false} to disable
+     * @param onShiftClickOnly
+     *            {@code true} to enable multi-sort by shift-clicking (when
+     *            {@code multiSort = true}), {@code false} for normal multi-sort
+     *            behavior
+     */
+    public void setMultiSort(boolean multiSort, boolean onShiftClickOnly) {
+        setMultiSort(multiSort);
+        if (multiSort) {
+            updateMultiSortOnShiftClick(onShiftClickOnly);
+        }
+    }
+
+    /**
+     * Sets whether multiple column sorting is enabled on the client-side.
+     *
+     * @param multiSort
+     *            {@code true} to enable sorting of multiple columns on the
+     *            client-side, {@code false} to disable
+     * @param priority
+     *            the multi-sort priority to set, not {@code null}
+     * @param onShiftClickOnly
+     *            {@code true} to enable multi-sort by shift-clicking (when
+     *            {@code multiSort = true}), {@code false} for normal multi-sort
+     *            behavior
+     *
+     * @see MultiSortPriority
+     */
+    public void setMultiSort(boolean multiSort, MultiSortPriority priority,
+            boolean onShiftClickOnly) {
+        setMultiSort(multiSort, onShiftClickOnly);
+        updateMultiSortPriority(priority);
+    }
+
+    private void updateMultiSortOnShiftClick(boolean multiSortOnShiftClick) {
+        getElement().setProperty("multiSortOnShiftClick",
+                multiSortOnShiftClick);
+    }
+
     private void updateMultiSortPriority(MultiSortPriority priority) {
+        Objects.requireNonNull(priority,
+                "Multi-sort priority must not be null");
         getElement().setAttribute("multi-sort-priority",
                 priority == MultiSortPriority.APPEND ? "append" : "prepend");
     }
