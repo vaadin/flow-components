@@ -44,8 +44,7 @@ public class LoginFormElement extends TestBenchElement implements Login {
 
     @Override
     public ButtonElement getSubmitButton() {
-        return $(ButtonElement.class).attribute("part", "vaadin-login-submit")
-                .first();
+        return $(ButtonElement.class).first();
     }
 
     private TestBenchElement getFormWrapper() {
