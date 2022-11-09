@@ -98,8 +98,6 @@ public class FormulaFormatIT extends AbstractSpreadsheetIT {
     public void formulaFormatting_invalidFormula_cellHasInvalidFormulaIndicator()
             throws InterruptedException {
         createNewSpreadsheet();
-        reduceFontSizeAtCellA1(); // Otherwise, #VALUE! would overflow in
-                                  // PhantomJS
         final SheetCellElement a1 = $(SpreadsheetElement.class).first()
                 .getCellAt("A1");
 
@@ -124,7 +122,6 @@ public class FormulaFormatIT extends AbstractSpreadsheetIT {
         waitUntil(webDriver -> "#VALUE!".equals(a1.getValue()));
     }
 
-    // TODO:
     @Test
     public void formulaFormatting_removeCommentFromCellWithInvalidFormula_cellValueIsStillInvalidFormula()
             throws InterruptedException {
@@ -148,8 +145,6 @@ public class FormulaFormatIT extends AbstractSpreadsheetIT {
     public void formulaFormatting_addFreezePaneWhileACellHasAnInvalidFormula_cellStillHasInvalidFormulaIndicator()
             throws InterruptedException {
         createNewSpreadsheet();
-        reduceFontSizeAtCellA1(); // Otherwise, #VALUE! would overflow in
-                                  // PhantomJS
         SheetCellElement a1 = $(SpreadsheetElement.class).first()
                 .getCellAt("A1");
         a1.setValue("=a");
@@ -159,14 +154,6 @@ public class FormulaFormatIT extends AbstractSpreadsheetIT {
         final SheetCellElement a1_reloaded = $(SpreadsheetElement.class).first()
                 .getCellAt("A1");
         waitUntil(webDriver -> a1_reloaded.hasInvalidFormulaIndicator());
-    }
-
-    private void reduceFontSizeAtCellA1() {
-        String script = "var css = '.v-spreadsheet .col1.row1.cell { font-size: 8pt }'; "
-                + "var style = document.createElement('style'); "
-                + "style.appendChild(document.createTextNode(css)); "
-                + "document.head.appendChild(style);";
-        executeScript(script);
     }
 
     private void waitForContexMenu() {
