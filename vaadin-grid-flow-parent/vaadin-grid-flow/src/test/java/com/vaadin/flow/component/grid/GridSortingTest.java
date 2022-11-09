@@ -297,8 +297,8 @@ public class GridSortingTest {
     public void setMultiSortShiftClickOnly() {
         grid.setMultiSort(true, true);
 
-        Assert.assertEquals("true",
-                grid.getElement().getProperty("multiSortOnShiftClick"));
+        Assert.assertTrue(
+                grid.getElement().getProperty("multiSortOnShiftClick", false));
         Assert.assertTrue(grid.isMultiSortShiftClickOnly());
     }
 
@@ -306,8 +306,18 @@ public class GridSortingTest {
     public void setMultiSortShiftClickOnly_onlyWhenMultiSortTrue() {
         grid.setMultiSort(false, true);
 
-        Assert.assertEquals("false",
-                grid.getElement().getProperty("multiSortOnShiftClick"));
+        Assert.assertFalse(
+                grid.getElement().getProperty("multiSortOnShiftClick", false));
+        Assert.assertFalse(grid.isMultiSortShiftClickOnly());
+    }
+
+    @Test
+    public void setMultiSortShiftClickOnlyFalse_whenUsingMethodWithoutOnShiftClickOnly() {
+        grid.setMultiSort(true, true);
+        grid.setMultiSort(false);
+
+        Assert.assertFalse(
+                grid.getElement().getProperty("multiSortOnShiftClick", false));
         Assert.assertFalse(grid.isMultiSortShiftClickOnly());
     }
 
@@ -317,8 +327,8 @@ public class GridSortingTest {
 
         Assert.assertEquals("append",
                 grid.getElement().getAttribute("multi-sort-priority"));
-        Assert.assertEquals("true",
-                grid.getElement().getProperty("multiSortOnShiftClick"));
+        Assert.assertTrue(
+                grid.getElement().getProperty("multiSortOnShiftClick", false));
         Assert.assertTrue(grid.isMultiSortShiftClickOnly());
     }
 
