@@ -3192,7 +3192,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     public void setMultiSort(boolean multiSort) {
         getElement().setAttribute("multi-sort", multiSort);
         if (!multiSort) {
-            updateMultiSortShiftClickOnly(false);
+            updateMultiSortOnShiftClick(false);
         }
     }
 
@@ -3226,7 +3226,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     public void setMultiSort(boolean multiSort, boolean onShiftClickOnly) {
         setMultiSort(multiSort);
         if (multiSort) {
-            updateMultiSortShiftClickOnly(onShiftClickOnly);
+            updateMultiSortOnShiftClick(onShiftClickOnly);
         }
     }
 
@@ -3251,8 +3251,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         updateMultiSortPriority(priority);
     }
 
-    private void updateMultiSortShiftClickOnly(Boolean onShiftClickOnly) {
-        getElement().setProperty("multiSortOnShiftClick", onShiftClickOnly);
+    private void updateMultiSortOnShiftClick(boolean multiSortOnShiftClick) {
+        getElement().setProperty("multiSortOnShiftClick", multiSortOnShiftClick);
     }
 
     private void updateMultiSortPriority(MultiSortPriority priority) {
@@ -3286,7 +3286,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @return {@code true} if multi-sort with shift-click is enabled,
      *         {@code false} otherwise
      */
-    public boolean isMultiSortShiftClickOnly() {
+    public boolean isMultiSortOnShiftClick() {
         return this.isMultiSort()
                 && getElement().getProperty("multiSortOnShiftClick", false);
     }
