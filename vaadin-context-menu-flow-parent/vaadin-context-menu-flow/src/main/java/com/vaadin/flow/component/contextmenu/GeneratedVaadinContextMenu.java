@@ -15,11 +15,15 @@
  */
 package com.vaadin.flow.component.contextmenu;
 
+import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.KeyModifier;
+import com.vaadin.flow.component.ShortcutRegistration;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -351,5 +355,35 @@ public abstract class GeneratedVaadinContextMenu<R extends GeneratedVaadinContex
                         event -> listener.onComponentEvent(
                                 new OpenedChangeEvent<R>((R) this,
                                         event.isUserOriginated())));
+    }
+
+    /**
+     * Has no effect for ContextMenu because the element for ContextMenu is not
+     * clickable. Therefore, this method should not be used.
+     *
+     * @see #addClickListener(ComponentEventListener)
+     *
+     * @deprecated since 23.3
+     */
+    @Deprecated
+    @Override
+    public Registration addClickListener(
+            ComponentEventListener<ClickEvent<R>> listener) {
+        return ClickNotifier.super.addClickListener(listener);
+    }
+
+    /**
+     * Has no effect for ContextMenu because the element for ContextMenu is not
+     * clickable. Therefore, this method should not be used.
+     *
+     * @see #addClickShortcut(Key, KeyModifier...)
+     *
+     * @deprecated since 23.3
+     */
+    @Deprecated
+    @Override
+    public ShortcutRegistration addClickShortcut(Key key,
+            KeyModifier... keyModifiers) {
+        return ClickNotifier.super.addClickShortcut(key, keyModifiers);
     }
 }
