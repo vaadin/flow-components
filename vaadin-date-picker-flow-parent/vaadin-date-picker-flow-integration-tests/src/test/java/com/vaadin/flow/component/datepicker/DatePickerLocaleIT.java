@@ -204,16 +204,16 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
         TestBenchElement output = $("span").id(
                 DatePickerLocalePage.CUSTOM_REFERENCE_DATE_AND_LOCALE_OUTPUT);
 
-        submitValue(id, "02/27/2031");
+        submitValue(id, "27/02/2031");
         Assert.assertEquals("2031-02-27", output.getText());
 
-        submitValue(id, "02/27/31");
+        submitValue(id, "27/02/31");
         Assert.assertEquals("1931-02-27", output.getText());
 
-        submitValue(id, "02/27/29");
+        submitValue(id, "27/02/29");
         Assert.assertEquals("2029-02-27", output.getText());
 
-        submitValue(id, "02/27/0030");
+        submitValue(id, "27/02/0030");
         Assert.assertEquals("0030-02-27", output.getText());
     }
 
