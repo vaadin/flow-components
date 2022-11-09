@@ -3211,29 +3211,23 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     /**
      * Sets whether multiple column sorting is enabled on the client-side.
-     * <p>
-     * <strong>Note:</strong> The {@code onShiftClickOnly} parameter takes
-     * precedence over {@code multiSort}. This means if {@code onShiftClickOnly}
-     * is enabled, {@code multiSort} is effectively ignored.
      *
      * @param multiSort
      *            {@code true} to enable sorting of multiple columns on the
      *            client-side, {@code false} to disable
      * @param onShiftClickOnly
-     *            {@code true} to enable multi-sort by shift-clicking,
-     *            {@code false} for normal multi-sort behavior
+     *            {@code true} to enable multi-sort by shift-clicking (when
+     *            {@code multiSort = true}), {@code false} for normal multi-sort
+     *            behavior
      */
     public void setMultiSort(boolean multiSort, boolean onShiftClickOnly) {
-        getElement().setProperty("multiSortOnShiftClick", onShiftClickOnly);
+        getElement().setProperty("multiSortOnShiftClick",
+                multiSort && onShiftClickOnly);
         setMultiSort(multiSort);
     }
 
     /**
      * Sets whether multiple column sorting is enabled on the client-side.
-     * <p>
-     * <strong>Note:</strong> The {@code onShiftClickOnly} parameter takes
-     * precedence over {@code multiSort}. This means if {@code onShiftClickOnly}
-     * is enabled, {@code multiSort} is effectively ignored.
      *
      * @param multiSort
      *            {@code true} to enable sorting of multiple columns on the
@@ -3241,8 +3235,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @param priority
      *            the multi-sort priority to set, not {@code null}
      * @param onShiftClickOnly
-     *            {@code true} to enable multi-sort by shift-clicking,
-     *            {@code false} for normal multi-sort behavior
+     *            {@code true} to enable multi-sort by shift-clicking (when
+     *            {@code multiSort = true}), {@code false} for normal multi-sort
+     *            behavior
      *
      * @see MultiSortPriority
      */
@@ -3284,7 +3279,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *         {@code false} otherwise
      */
     public boolean isMultiSortShiftClickOnly() {
-        return getElement().getProperty("multiSortOnShiftClick", false);
+        return this.isMultiSort()
+                && getElement().getProperty("multiSortOnShiftClick", false);
     }
 
     @ClientCallable

@@ -303,6 +303,15 @@ public class GridSortingTest {
     }
 
     @Test
+    public void setMultiSortShiftClickOnly_onlyWhenMultiSortTrue() {
+        grid.setMultiSort(false, true);
+
+        Assert.assertEquals("false",
+                grid.getElement().getProperty("multiSortOnShiftClick"));
+        Assert.assertFalse(grid.isMultiSortShiftClickOnly());
+    }
+
+    @Test
     public void setMultiSortShiftClickOnlyWithPriority() {
         grid.setMultiSort(true, Grid.MultiSortPriority.APPEND, true);
 
