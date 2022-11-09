@@ -122,7 +122,11 @@ public class RichTextEditor
      *            the initial value in Delta format, not {@code null}
      *
      * @see #setValue(Object)
+     *
+     * @deprecated Since 23.3, this API is deprecated in order to maintain API
+     *             consistency. Use {@link #setValue(String)} instead.
      */
+    @Deprecated
     public RichTextEditor(String initialValue) {
         this();
         setValue(initialValue);
@@ -153,7 +157,11 @@ public class RichTextEditor
      *
      * @see #setValue(Object)
      * @see #addValueChangeListener(com.vaadin.flow.component.HasValue.ValueChangeListener)
+     *
+     * @deprecated Since 23.3, this API is deprecated in order to maintain API
+     *             consistency. Use {@link #setValue(String)} instead.
      */
+    @Deprecated
     public RichTextEditor(String initialValue,
             ValueChangeListener<? super ComponentValueChangeEvent<RichTextEditor, String>> listener) {
         this();
