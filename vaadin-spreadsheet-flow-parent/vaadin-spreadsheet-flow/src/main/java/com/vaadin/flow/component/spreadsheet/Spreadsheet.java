@@ -1819,7 +1819,6 @@ public class Spreadsheet extends Component
         if (!workbook.isSheetVeryHidden(sheetIndex)
                 && !workbook.isSheetHidden(sheetIndex)) {
             int ourIndex = getSpreadsheetSheetIndex(sheetIndex);
-            // todo: comprobar si esto es así
             String[] _sheetNames = Arrays.copyOf(getSheetNames(),
                     getSheetNames().length);
             _sheetNames[ourIndex] = sheetName;
