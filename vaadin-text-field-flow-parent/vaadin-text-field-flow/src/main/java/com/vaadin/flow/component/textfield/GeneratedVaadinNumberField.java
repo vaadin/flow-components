@@ -48,38 +48,6 @@ public abstract class GeneratedVaadinNumberField<R extends GeneratedVaadinNumber
      * Description copied from corresponding location in WebComponent:
      * </p>
      * <p>
-     * Set to true to display value increase/decrease controls.
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
-     * </p>
-     *
-     * @return the {@code hasControls} property from the webcomponent
-     */
-    protected boolean hasControlsBoolean() {
-        return getElement().getProperty("hasControls", false);
-    }
-
-    /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
-     * Set to true to display value increase/decrease controls.
-     * </p>
-     *
-     * @param hasControls
-     *            the boolean value to set
-     */
-    protected void setHasControls(boolean hasControls) {
-        getElement().setProperty("hasControls", hasControls);
-    }
-
-    /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
      * The minimum value of the field.
      * <p>
      * This property is not synchronized automatically from the client side, so

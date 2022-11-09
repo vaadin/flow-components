@@ -57,8 +57,6 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
 
     private ValueChangeMode currentMode;
 
-    private boolean isConnectorAttached;
-
     private int valueChangeTimeout = DEFAULT_CHANGE_TIMEOUT;
 
     private boolean required;
@@ -208,30 +206,28 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     }
 
     /**
-     * Sets the visibility of the control buttons for increasing/decreasing the
-     * value accordingly to the default or specified step.
+     * Sets the visibility of the buttons for increasing/decreasing the value
+     * accordingly to the default or specified step.
      *
      * @see #setStep(double)
      *
-     * @param hasControls
+     * @param stepButtonsVisible
      *            {@code true} if control buttons should be visible;
      *            {@code false} if those should be hidden
      */
-    @Override
-    public void setHasControls(boolean hasControls) {
-        super.setHasControls(hasControls);
+    public void setStepButtonsVisible(boolean stepButtonsVisible) {
+        getElement().setProperty("hasControls", stepButtonsVisible);
     }
 
     /**
-     * Gets whether the control buttons for increasing/decreasing the value are
-     * visible.
+     * Gets whether the buttons for increasing/decreasing the value are visible.
      *
      * @see #setStep(double)
      *
      * @return {@code true} if buttons are visible, {@code false} otherwise
      */
-    public boolean hasControls() {
-        return super.hasControlsBoolean();
+    public boolean isStepButtonsVisible() {
+        return getElement().getProperty("hasControls", false);
     }
 
     /**
