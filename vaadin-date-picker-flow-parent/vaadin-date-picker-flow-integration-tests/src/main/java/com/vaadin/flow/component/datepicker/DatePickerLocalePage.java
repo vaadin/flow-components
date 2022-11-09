@@ -4,6 +4,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Input;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 
 import java.time.LocalDate;
@@ -11,7 +12,7 @@ import java.time.Month;
 import java.util.Locale;
 
 @Route("vaadin-date-picker/date-picker-locale")
-public class DatePickerLocalePage extends Div {
+public class DatePickerLocalePage extends VerticalLayout {
 
     public static final String CUSTOMIZABLE_LOCALE_DATE_PICKER = "CUSTOMIZABLE_LOCALE_DATE_PICKER";
     public static final String CUSTOMIZABLE_LOCALE_BUTTON = "CUSTOMIZABLE_LOCALE_BUTTON";
@@ -52,7 +53,7 @@ public class DatePickerLocalePage extends Div {
         });
         applyLocale.setId(CUSTOMIZABLE_LOCALE_BUTTON);
 
-        add(datePicker, localeInput, applyLocale);
+        add(datePicker, new Div(localeInput, applyLocale));
     }
 
     private void setupCustomReferenceDateAndLocale() {
