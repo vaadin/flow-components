@@ -121,9 +121,8 @@ public class DatePickerIT extends AbstractComponentIT {
         waitForElementPresent(By.tagName(DATEPICKER_OVERLAY));
 
         TestBenchElement overlay = $(DATEPICKER_OVERLAY).first();
-        TestBenchElement content = overlay.$("*").id("content");
-        TestBenchElement overlayContent = content.$("*").id("overlay-content");
-        WebElement todayButton = overlayContent.$("*").id("todayButton");
+        WebElement todayButton = overlay.$("*")
+                .attribute("slot", "today-button").first();
 
         waitUntil(driver -> "tänään".equals(todayButton.getText()));
     }

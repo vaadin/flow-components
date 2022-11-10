@@ -138,10 +138,9 @@ import com.vaadin.flow.shared.Registration;
  * </p>
  */
 @Tag("vaadin-text-area")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha3")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/text-area", version = "23.3.0-alpha3")
-@NpmPackage(value = "@vaadin/vaadin-text-field", version = "23.3.0-alpha3")
+@NpmPackage(value = "@vaadin/text-area", version = "24.0.0-alpha2")
 @JsModule("@vaadin/text-area/src/vaadin-text-area.js")
 public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
@@ -655,46 +654,6 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      */
     protected void setInvalid(boolean invalid) {
         getElement().setProperty("invalid", invalid);
-    }
-
-    /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
-     * When set to true, user is prevented from typing a value that conflicts
-     * with the given {@code maxlength} or {@code minlength} properties.
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
-     * </p>
-     *
-     * @return the {@code preventInvalidInput} property from the webcomponent
-     *
-     * @deprecated Since 23.2, this API is deprecated.
-     */
-    @Deprecated
-    protected boolean isPreventInvalidInputBoolean() {
-        return getElement().getProperty("preventInvalidInput", false);
-    }
-
-    /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
-     * When set to true, user is prevented from typing a value that conflicts
-     * with the given {@code maxlength} or {@code minlength} properties.
-     * </p>
-     *
-     * @param preventInvalidInput
-     *            the boolean value to set
-     *
-     * @deprecated Since 23.2, this API is deprecated.
-     */
-    @Deprecated
-    protected void setPreventInvalidInput(boolean preventInvalidInput) {
-        getElement().setProperty("preventInvalidInput", preventInvalidInput);
     }
 
     /**

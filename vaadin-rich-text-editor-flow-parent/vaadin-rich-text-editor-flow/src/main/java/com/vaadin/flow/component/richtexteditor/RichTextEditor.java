@@ -54,7 +54,7 @@ import elemental.json.JsonObject;
  *
  */
 @Tag("vaadin-rich-text-editor")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha3")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 public class RichTextEditor
         extends GeneratedVaadinRichTextEditor<RichTextEditor, String>
@@ -116,19 +116,6 @@ public class RichTextEditor
     }
 
     /**
-     * Constructs a {@code RichTextEditor} with the initial value
-     *
-     * @param initialValue
-     *            the initial value in Delta format, not {@code null}
-     *
-     * @see #setValue(Object)
-     */
-    public RichTextEditor(String initialValue) {
-        this();
-        setValue(initialValue);
-    }
-
-    /**
      * Constructs an empty {@code RichTextEditor} with a value change listener.
      *
      * @param listener
@@ -139,25 +126,6 @@ public class RichTextEditor
     public RichTextEditor(
             ValueChangeListener<? super ComponentValueChangeEvent<RichTextEditor, String>> listener) {
         this();
-        addValueChangeListener(listener);
-    }
-
-    /**
-     * Constructs an empty {@code RichTextEditor} with a value change listener
-     * and an initial value.
-     *
-     * @param initialValue
-     *            the initial value
-     * @param listener
-     *            the value change listener
-     *
-     * @see #setValue(Object)
-     * @see #addValueChangeListener(com.vaadin.flow.component.HasValue.ValueChangeListener)
-     */
-    public RichTextEditor(String initialValue,
-            ValueChangeListener<? super ComponentValueChangeEvent<RichTextEditor, String>> listener) {
-        this();
-        setValue(initialValue);
         addValueChangeListener(listener);
     }
 

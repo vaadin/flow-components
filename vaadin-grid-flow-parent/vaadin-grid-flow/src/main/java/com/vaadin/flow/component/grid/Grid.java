@@ -206,11 +206,10 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha3")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/grid", version = "23.3.0-alpha3")
-@NpmPackage(value = "@vaadin/vaadin-grid", version = "23.3.0-alpha3")
-@NpmPackage(value = "@vaadin/tooltip", version = "23.3.0-alpha3")
+@NpmPackage(value = "@vaadin/grid", version = "24.0.0-alpha2")
+@NpmPackage(value = "@vaadin/tooltip", version = "24.0.0-alpha2")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -447,7 +446,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-column")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha3")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha2")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class Column<T> extends AbstractColumn<Column<T>> {
 
@@ -2412,16 +2411,12 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         ColumnLayer newBottomLayer = new ColumnLayer(this, columns);
 
         IntStream.range(0, groups.size()).forEach(i -> {
-            // Move templates from columns to column-groups
+            // Move content from columns to column-groups
             if (forFooterRow) {
-                groups.get(i)
-                        .setFooterRenderer(columns.get(i).getFooterRenderer());
-                columns.get(i).setFooterRenderer(null);
+                columns.get(i).moveFooterContent(groups.get(i));
             }
             if (forHeaderRow) {
-                groups.get(i)
-                        .setHeaderRenderer(columns.get(i).getHeaderRenderer());
-                columns.get(i).setHeaderRenderer(null);
+                columns.get(i).moveHeaderContent(groups.get(i));
             }
         });
 
@@ -3196,6 +3191,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public void setMultiSort(boolean multiSort) {
         getElement().setAttribute("multi-sort", multiSort);
+        if (!multiSort) {
+            updateMultiSortOnShiftClick(false);
+        }
     }
 
     /**
@@ -3210,13 +3208,57 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @see MultiSortPriority
      */
     public void setMultiSort(boolean multiSort, MultiSortPriority priority) {
-        Objects.requireNonNull(priority,
-                "Multi-sort priority must not be null");
         setMultiSort(multiSort);
         updateMultiSortPriority(priority);
     }
 
+    /**
+     * Sets whether multiple column sorting is enabled on the client-side.
+     *
+     * @param multiSort
+     *            {@code true} to enable sorting of multiple columns on the
+     *            client-side, {@code false} to disable
+     * @param onShiftClickOnly
+     *            {@code true} to enable multi-sort by shift-clicking (when
+     *            {@code multiSort = true}), {@code false} for normal multi-sort
+     *            behavior
+     */
+    public void setMultiSort(boolean multiSort, boolean onShiftClickOnly) {
+        setMultiSort(multiSort);
+        if (multiSort) {
+            updateMultiSortOnShiftClick(onShiftClickOnly);
+        }
+    }
+
+    /**
+     * Sets whether multiple column sorting is enabled on the client-side.
+     *
+     * @param multiSort
+     *            {@code true} to enable sorting of multiple columns on the
+     *            client-side, {@code false} to disable
+     * @param priority
+     *            the multi-sort priority to set, not {@code null}
+     * @param onShiftClickOnly
+     *            {@code true} to enable multi-sort by shift-clicking (when
+     *            {@code multiSort = true}), {@code false} for normal multi-sort
+     *            behavior
+     *
+     * @see MultiSortPriority
+     */
+    public void setMultiSort(boolean multiSort, MultiSortPriority priority,
+            boolean onShiftClickOnly) {
+        setMultiSort(multiSort, onShiftClickOnly);
+        updateMultiSortPriority(priority);
+    }
+
+    private void updateMultiSortOnShiftClick(boolean multiSortOnShiftClick) {
+        getElement().setProperty("multiSortOnShiftClick",
+                multiSortOnShiftClick);
+    }
+
     private void updateMultiSortPriority(MultiSortPriority priority) {
+        Objects.requireNonNull(priority,
+                "Multi-sort priority must not be null");
         getElement().setAttribute("multi-sort-priority",
                 priority == MultiSortPriority.APPEND ? "append" : "prepend");
     }

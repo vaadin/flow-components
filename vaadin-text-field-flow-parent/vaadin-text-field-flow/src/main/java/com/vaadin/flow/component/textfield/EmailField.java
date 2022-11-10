@@ -310,29 +310,6 @@ public class EmailField extends GeneratedVaadinEmailField<EmailField, String>
         return (int) getMinlengthDouble();
     }
 
-    /**
-     * When set to <code>true</code>, user is prevented from typing a value that
-     * conflicts with the given {@code pattern}.
-     *
-     * @return the {@code preventInvalidInput} property from the webcomponent
-     *
-     * @deprecated Since 23.2, this API is deprecated.
-     */
-    @Deprecated
-    public boolean isPreventInvalidInput() {
-        return isPreventInvalidInputBoolean();
-    }
-
-    /**
-     * @deprecated Since 23.2, this API is deprecated in favor of
-     *             {@link #setAllowedCharPattern(String)}
-     */
-    @Deprecated
-    @Override
-    public void setPreventInvalidInput(boolean preventInvalidInput) {
-        super.setPreventInvalidInput(preventInvalidInput);
-    }
-
     @Override
     public void setPattern(String pattern) {
         super.setPattern(pattern);

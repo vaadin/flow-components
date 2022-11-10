@@ -13,6 +13,8 @@ package com.vaadin.flow.component.spreadsheet.client;
  * #L%
  */
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.io.Serializable;
 
 @SuppressWarnings("serial")
@@ -20,6 +22,7 @@ public class CellData implements Serializable {
 
     public int row;
     public int col;
+    @JsonInclude
     public String value;
     public String formulaValue;
     public String originalValue;

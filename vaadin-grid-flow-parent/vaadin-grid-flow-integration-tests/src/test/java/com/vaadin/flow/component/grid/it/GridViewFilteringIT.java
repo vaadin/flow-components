@@ -42,8 +42,7 @@ public class GridViewFilteringIT extends AbstractComponentIT {
 
         IntStream.range(0, 4).forEach(i -> {
             GridTHTDElement headerCell = grid.getHeaderCell(i);
-            assertRendereredHeaderCell(headerCell, "<vaadin-text-field", true,
-                    false);
+            assertRendereredHeaderCell(headerCell, "<vaadin-text-field", false);
         });
 
         grid.findElement(By.tagName("vaadin-text-field")).sendKeys("6");
@@ -66,16 +65,13 @@ public class GridViewFilteringIT extends AbstractComponentIT {
     }
 
     private void assertRendereredHeaderCell(GridTHTDElement headerCell,
-            String text, boolean componentRenderer, boolean withSorter) {
+            String text, boolean withSorter) {
 
         String html = headerCell.getInnerHTML();
         if (withSorter) {
             Assert.assertTrue(html.contains("<vaadin-grid-sorter"));
         } else {
             Assert.assertFalse(html.contains("<vaadin-grid-sorter"));
-        }
-        if (componentRenderer) {
-            Assert.assertTrue(html.contains("<flow-component-renderer"));
         }
         Assert.assertTrue(html.contains(text));
     }

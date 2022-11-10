@@ -20,7 +20,7 @@ getLatest() {
 }
 
 getPlatformVersion() {
-  [ "$1" = vaadin-iron-list ] && name="iron-list" || name=$1
+  name=$1
 
   echo "$versions" | jq -r ".core, .vaadin | .[\"$name\"]| .javaVersion" | grep -v null
 }
@@ -73,7 +73,7 @@ mvn -B -q versions:set -DnewVersion=$version || exit 1
 setPomVersion flow $flow || exit 1
 
 ## Compute modules to build and deploy
-### collect the component modules from the root pom, remove the shared parent from the list, as it will be added separately (line 109) 
+### collect the component modules from the root pom, remove the shared parent from the list, as it will be added separately (line 109)
 modules=`grep '<module>' pom.xml | grep parent | grep -v shared-parent | cut -d '>' -f2 | cut -d '<' -f1 | perl -pe 's,-flow-parent,,g'`
 
 if [ "$versionBase" = 14.4 -o "$versionBase" = 17.0 ]

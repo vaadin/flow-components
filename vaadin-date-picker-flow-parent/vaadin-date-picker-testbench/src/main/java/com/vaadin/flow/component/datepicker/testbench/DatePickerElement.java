@@ -36,6 +36,7 @@ import org.openqa.selenium.Keys;
 public class DatePickerElement extends TestBenchElement
         implements HasLabel, HasHelper {
 
+    @Element("vaadin-date-picker-overlay-content")
     public static class OverlayContentElement extends TestBenchElement {
         /**
          * Gets all visible month calendars that are currently rendered by the
@@ -55,7 +56,7 @@ public class DatePickerElement extends TestBenchElement
          * @return
          */
         public ButtonElement getTodayButton() {
-            return this.$(ButtonElement.class).attribute("part", "today-button")
+            return this.$(ButtonElement.class).attribute("slot", "today-button")
                     .first();
         }
 
@@ -66,7 +67,7 @@ public class DatePickerElement extends TestBenchElement
          */
         public ButtonElement getCancelButton() {
             return this.$(ButtonElement.class)
-                    .attribute("part", "cancel-button").first();
+                    .attribute("slot", "cancel-button").first();
         }
     }
 
@@ -213,8 +214,7 @@ public class DatePickerElement extends TestBenchElement
      */
     public OverlayContentElement getOverlayContent() {
         return this.$("vaadin-date-picker-overlay").onPage().waitForFirst()
-                .$(TestBenchElement.class).id("content")
-                .$(OverlayContentElement.class).id("overlay-content");
+                .$(OverlayContentElement.class).first();
     }
 
     @Override

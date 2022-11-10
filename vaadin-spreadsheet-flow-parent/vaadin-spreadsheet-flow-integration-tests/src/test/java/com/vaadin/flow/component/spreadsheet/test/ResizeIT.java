@@ -58,14 +58,14 @@ public class ResizeIT extends AbstractSpreadsheetIT {
 
     @Test
     public void testColumnAutoResize() {
-        putCellContent("B2", "text");
+        setCellValue("B2", "text");
 
         $(SpreadsheetElement.class).first().getColumnHeader(2).getResizeHandle()
                 .doubleClick();
         getCommandExecutor().waitForVaadin();
         assertInRange(25, getSize(getCellStyle("B2", "width")), 35);
 
-        putCellContent("D2", "very long text inserted in D2.");
+        setCellValue("D2", "very long text inserted in D2.");
 
         $(SpreadsheetElement.class).first().getColumnHeader(4).getResizeHandle()
                 .doubleClick();
