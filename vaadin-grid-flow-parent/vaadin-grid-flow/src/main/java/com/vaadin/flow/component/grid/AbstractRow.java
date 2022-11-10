@@ -413,8 +413,8 @@ abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
                 ColumnGroup group = ColumnGroupHelpers.wrapInColumnGroup(grid,
                         col);
                 AbstractColumn<?> oldGroup = leftColumns.next();
-                group.setHeaderRenderer(oldGroup.getHeaderRenderer());
-                group.setFooterRenderer(oldGroup.getFooterRenderer());
+                oldGroup.moveHeaderContent(group);
+                oldGroup.moveFooterContent(group);
                 newColumns.add(group);
 
                 CELL next = leftCells.next();

@@ -47,7 +47,6 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
     private boolean headerRenderingScheduled;
     private boolean footerRenderingScheduled;
 
-    private String rawHeaderTemplate;
     private boolean sortingIndicators;
 
     private String headerText;
@@ -137,10 +136,9 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
         headerTemplate = rendering.getTemplateElement();
         headerTemplate.setAttribute("class", "header");
 
-        setBaseHeaderTemplate(headerTemplate.getProperty("innerHTML"));
         if (hasSortingIndicators()) {
             headerTemplate.setProperty("innerHTML",
-                    addGridSorter(rawHeaderTemplate));
+                    addGridSorter(headerTemplate.getProperty("innerHTML")));
         }
 
         return rendering;
@@ -275,6 +273,22 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
         return footerRenderer;
     }
 
+    protected void moveHeaderContent(AbstractColumn<?> otherColumn) {
+        if (headerComponent != null) {
+            otherColumn.setHeaderComponent(headerComponent);
+        } else {
+            otherColumn.setHeaderText(headerText);
+        }
+    }
+
+    protected void moveFooterContent(AbstractColumn<?> otherColumn) {
+        if (footerComponent != null) {
+            otherColumn.setFooterComponent(footerComponent);
+        } else {
+            otherColumn.setFooterText(footerText);
+        }
+    }
+
     /**
      * Updates this component to either have sorting indicators according to the
      * sortable state of the underlying column, or removes the sorting
@@ -312,22 +326,19 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
     }
 
     /*
-     * The original header template is needed for when sorting is enabled or
-     * disabled in a column.
-     */
-    protected void setBaseHeaderTemplate(String headerTemplate) {
-        rawHeaderTemplate = headerTemplate;
-    }
-
-    /*
      * Adds the sorting webcomponent markup to an existing template.
      */
     protected String addGridSorter(String templateInnerHtml) {
         String escapedColumnId = HtmlUtils
                 .escape(getBottomLevelColumn().getInternalId());
 
-        String textContent = org.jsoup.Jsoup.parse(templateInnerHtml).text();
-        String sortBy = textContent.isBlank() ? ""
+        String textContent = headerComponent != null
+                ? headerComponent.getElement().getTextRecursively()
+                : headerText;
+        if (textContent != null) {
+            textContent = HtmlUtils.escape(textContent);
+        }
+        String sortBy = textContent == null || textContent.isBlank() ? ""
                 : "aria-label='Sort by " + textContent + "'";
 
         return String.format(

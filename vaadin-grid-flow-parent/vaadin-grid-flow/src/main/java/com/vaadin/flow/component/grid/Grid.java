@@ -2414,13 +2414,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         IntStream.range(0, groups.size()).forEach(i -> {
             // Move templates from columns to column-groups
             if (forFooterRow) {
-                groups.get(i)
-                        .setFooterRenderer(columns.get(i).getFooterRenderer());
+                columns.get(i).moveFooterContent(groups.get(i));
                 columns.get(i).setFooterRenderer(null);
             }
             if (forHeaderRow) {
-                groups.get(i)
-                        .setHeaderRenderer(columns.get(i).getHeaderRenderer());
+                columns.get(i).moveHeaderContent(groups.get(i));
                 columns.get(i).setHeaderRenderer(null);
             }
         });
