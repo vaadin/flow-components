@@ -445,7 +445,8 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
             return null;
         }
         JsonObject i18nObject = (JsonObject) JsonSerializer.toJson(i18n);
-        // LocalDate objects have to be explicitly added to the serialized i18n object
+        // LocalDate objects have to be explicitly added to the serialized i18n
+        // object
         // in order to be formatted correctly
         if (i18n.getReferenceDate() != null) {
             i18nObject.put("referenceDate",
