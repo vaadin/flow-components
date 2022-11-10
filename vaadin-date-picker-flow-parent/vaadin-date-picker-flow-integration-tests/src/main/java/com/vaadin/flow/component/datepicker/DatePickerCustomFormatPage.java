@@ -17,6 +17,8 @@
 
 package com.vaadin.flow.component.datepicker;
 
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Input;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -45,12 +47,8 @@ public class DatePickerCustomFormatPage extends VerticalLayout {
     public static final String SET_DATE_FORMAT_AFTER_LOCALE_OUTPUT = "SET_DATE_FORMAT_AFTER_LOCALE_OUTPUT";
     public static final String SERVER_SIDE_VALUE_CHANGE_DATE_PICKER = "SERVER_SIDE_VALUE_CHANGE_DATE_PICKER";
     public static final String SERVER_SIDE_VALUE_CHANGE_BUTTON = "SERVER_SIDE_VALUE_CHANGE_BUTTON";
-    public static final String CUSTOM_REFERENCE_DATE_AND_FORMAT_WITH_TWO_DIGITS_YEAR_DATE_PICKER = "CUSTOM_REFERENCE_DATE_AND_FORMAT_WITH_TWO_DIGITS_YEAR_DATE_PICKER";
-    public static final String CUSTOM_REFERENCE_DATE_AND_FORMAT_WITH_TWO_DIGITS_YEAR_OUTPUT = "CUSTOM_REFERENCE_DATE_AND_FORMAT_WITH_TWO_DIGITS_YEAR_OUTPUT";
-    public static final String CUSTOM_REFERENCE_DATE_AND_FORMAT_WITH_FOUR_DIGITS_YEAR_DATE_PICKER = "CUSTOM_REFERENCE_DATE_AND_FORMAT_WITH_FOUR_DIGITS_YEAR_DATE_PICKER";
-    public static final String CUSTOM_REFERENCE_DATE_AND_FORMAT_WITH_FOUR_DIGITS_YEAR_OUTPUT = "CUSTOM_REFERENCE_DATE_AND_FORMAT_WITH_FOUR_DIGITS_YEAR_OUTPUT";
-    public static final String CUSTOM_REFERENCE_DATE_AND_MULTIPLE_FORMATS_YEAR_DATE_PICKER = "CUSTOM_REFERENCE_DATE_AND_MULTIPLE_FORMATS_YEAR_DATE_PICKER";
-    public static final String CUSTOM_REFERENCE_DATE_AND_MULTIPLE_FORMATS_YEAR_OUTPUT = "CUSTOM_REFERENCE_DATE_AND_MULTIPLE_FORMATS_YEAR_OUTPUT";
+    public static final String CUSTOM_REFERENCE_DATE_AND_FORMAT_OPTIONS_DATE_PICKER = "CUSTOM_REFERENCE_DATE_AND_FORMAT_OPTIONS_DATE_PICKER";
+    public static final String CUSTOM_REFERENCE_DATE_AND_FORMAT_OPTIONS_OUTPUT = "CUSTOM_REFERENCE_DATE_AND_FORMAT_OPTIONS_OUTPUT";
 
     public static final LocalDate may13 = LocalDate.of(2018, Month.MAY, 13);
 
@@ -62,9 +60,7 @@ public class DatePickerCustomFormatPage extends VerticalLayout {
         setupSetLocaleAfterFormat();
         setupSetFormatAfterLocale();
         setupServerSideValueChange();
-        setupCustomReferenceDateAndFormatWithTwoDigitsYear();
-        setupCustomReferenceDateAndFormatWithFourDigitsYear();
-        setupCustomReferenceDateAndMultipleFormatsYear();
+        setupCustomReferenceDateAndFormatOptions();
     }
 
     public void setupPrimaryFormat() {
@@ -173,50 +169,39 @@ public class DatePickerCustomFormatPage extends VerticalLayout {
         add(datePicker, btn);
     }
 
-    private void setupCustomReferenceDateAndFormatWithTwoDigitsYear() {
+    private void setupCustomReferenceDateAndFormatOptions() {
         DatePicker datePicker = new DatePicker(may13);
 
         DatePickerI18n i18n = new DatePickerI18n();
-        i18n.setDateFormat("yy-MM-dd");
         i18n.setReferenceDate(LocalDate.of(1980, 2, 2));
         datePicker.setI18n(i18n);
 
-        Span output = DatePickerITHelper.createOutputSpan(datePicker);
-        datePicker.setId(
-                CUSTOM_REFERENCE_DATE_AND_FORMAT_WITH_TWO_DIGITS_YEAR_DATE_PICKER);
-        output.setId(
-                CUSTOM_REFERENCE_DATE_AND_FORMAT_WITH_TWO_DIGITS_YEAR_OUTPUT);
-        add(datePicker, output);
-    }
+        NativeButton setShortFormat = new NativeButton("Set short format",
+                clickEvent -> {
+                    datePicker.setI18n(
+                            datePicker.getI18n().setDateFormat("yy-MM-dd"));
+                });
+        setShortFormat.setId("set-short-format");
 
-    private void setupCustomReferenceDateAndFormatWithFourDigitsYear() {
-        DatePicker datePicker = new DatePicker(may13);
+        NativeButton setLongFormat = new NativeButton("Set long format",
+                clickEvent -> {
+                    datePicker.setI18n(
+                            datePicker.getI18n().setDateFormat("yyyy-MM-dd"));
+                });
+        setLongFormat.setId("set-long-format");
 
-        DatePickerI18n i18n = new DatePickerI18n();
-        i18n.setDateFormat("yyyy-MM-dd");
-        i18n.setReferenceDate(LocalDate.of(1980, 2, 2));
-        datePicker.setI18n(i18n);
-
-        Span output = DatePickerITHelper.createOutputSpan(datePicker);
-        datePicker.setId(
-                CUSTOM_REFERENCE_DATE_AND_FORMAT_WITH_FOUR_DIGITS_YEAR_DATE_PICKER);
-        output.setId(
-                CUSTOM_REFERENCE_DATE_AND_FORMAT_WITH_FOUR_DIGITS_YEAR_OUTPUT);
-        add(datePicker, output);
-    }
-
-    private void setupCustomReferenceDateAndMultipleFormatsYear() {
-        DatePicker datePicker = new DatePicker(may13);
-
-        DatePickerI18n i18n = new DatePickerI18n();
-        i18n.setDateFormats("yy-MM-dd", "yyyy-MM-dd");
-        i18n.setReferenceDate(LocalDate.of(1980, 2, 2));
-        datePicker.setI18n(i18n);
+        NativeButton setMultipleFormats = new NativeButton(
+                "Set multiple formats", clickEvent -> {
+                    datePicker.setI18n(datePicker.getI18n()
+                            .setDateFormats("yy-MM-dd", "yyyy-MM-dd"));
+                });
+        setMultipleFormats.setId("set-multiple-formats");
 
         Span output = DatePickerITHelper.createOutputSpan(datePicker);
-        datePicker.setId(
-                CUSTOM_REFERENCE_DATE_AND_MULTIPLE_FORMATS_YEAR_DATE_PICKER);
-        output.setId(CUSTOM_REFERENCE_DATE_AND_MULTIPLE_FORMATS_YEAR_OUTPUT);
-        add(datePicker, output);
+        datePicker.setId(CUSTOM_REFERENCE_DATE_AND_FORMAT_OPTIONS_DATE_PICKER);
+        output.setId(CUSTOM_REFERENCE_DATE_AND_FORMAT_OPTIONS_OUTPUT);
+        add(datePicker,
+                new Div(setShortFormat, setLongFormat, setMultipleFormats),
+                output);
     }
 }

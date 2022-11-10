@@ -119,9 +119,11 @@ public class DatePickerCustomFormatIT extends AbstractComponentIT {
 
     @Test
     public void testTwoDigitsYearFormatBasedParsingShouldUseReferenceDate() {
-        String id = DatePickerCustomFormatPage.CUSTOM_REFERENCE_DATE_AND_FORMAT_WITH_TWO_DIGITS_YEAR_DATE_PICKER;
+        String id = DatePickerCustomFormatPage.CUSTOM_REFERENCE_DATE_AND_FORMAT_OPTIONS_DATE_PICKER;
         TestBenchElement output = $("span").id(
-                DatePickerCustomFormatPage.CUSTOM_REFERENCE_DATE_AND_FORMAT_WITH_TWO_DIGITS_YEAR_OUTPUT);
+                DatePickerCustomFormatPage.CUSTOM_REFERENCE_DATE_AND_FORMAT_OPTIONS_OUTPUT);
+
+        $("button").id("set-short-format").click();
 
         submitValue(id, "31-02-27");
         Assert.assertEquals("1931-02-27", output.getText());
@@ -132,9 +134,11 @@ public class DatePickerCustomFormatIT extends AbstractComponentIT {
 
     @Test
     public void testFourDigitsYearFormatBasedParsingShouldUseReferenceDate() {
-        String id = DatePickerCustomFormatPage.CUSTOM_REFERENCE_DATE_AND_FORMAT_WITH_FOUR_DIGITS_YEAR_DATE_PICKER;
+        String id = DatePickerCustomFormatPage.CUSTOM_REFERENCE_DATE_AND_FORMAT_OPTIONS_DATE_PICKER;
         TestBenchElement output = $("span").id(
-                DatePickerCustomFormatPage.CUSTOM_REFERENCE_DATE_AND_FORMAT_WITH_FOUR_DIGITS_YEAR_OUTPUT);
+                DatePickerCustomFormatPage.CUSTOM_REFERENCE_DATE_AND_FORMAT_OPTIONS_OUTPUT);
+
+        $("button").id("set-long-format").click();
 
         submitValue(id, "2031-02-27");
         Assert.assertEquals("2031-02-27", output.getText());
@@ -151,9 +155,11 @@ public class DatePickerCustomFormatIT extends AbstractComponentIT {
 
     @Test
     public void testMultipleFormatParsingShouldUseReferenceDate() {
-        String id = DatePickerCustomFormatPage.CUSTOM_REFERENCE_DATE_AND_MULTIPLE_FORMATS_YEAR_DATE_PICKER;
+        String id = DatePickerCustomFormatPage.CUSTOM_REFERENCE_DATE_AND_FORMAT_OPTIONS_DATE_PICKER;
         TestBenchElement output = $("span").id(
-                DatePickerCustomFormatPage.CUSTOM_REFERENCE_DATE_AND_MULTIPLE_FORMATS_YEAR_OUTPUT);
+                DatePickerCustomFormatPage.CUSTOM_REFERENCE_DATE_AND_FORMAT_OPTIONS_OUTPUT);
+
+        $("button").id("set-multiple-formats").click();
 
         submitValue(id, "2031-02-27");
         Assert.assertEquals("2031-02-27", output.getText());
