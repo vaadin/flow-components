@@ -188,29 +188,51 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
     }
 
     @Test
-    public void testLocaleBasedParsingShouldUseDefaultReferenceDateIfNotSpecified() {
+    public void datePickerWithLocale_setInputValue_blur_defaultReferenceDateIsUsed() {
         LocalDate now = LocalDate.now();
         int currentYear = now.getYear();
 
         int testYear1 = (currentYear + 51) % 100;
         int adjustedYear1 = getAdjustedYear(currentYear, testYear1);
-        assertInputOutputPair("02/27/" + testYear1, adjustedYear1 + "-02-27");
+
+        picker.setInputValue("02/27/" + testYear1);
+        picker.sendKeys(Keys.TAB);
+        Assert.assertEquals("2/27/" + adjustedYear1, picker.getInputValue());
 
         int testYear2 = (currentYear + 49) % 100;
         int adjustedYear2 = getAdjustedYear(currentYear, testYear2);
-        assertInputOutputPair("02/27/" + testYear2, adjustedYear2 + "-02-27");
+        picker.setInputValue("02/27/" + testYear2);
+        picker.sendKeys(Keys.TAB);
+        Assert.assertEquals("2/27/" + adjustedYear2, picker.getInputValue());
 
-        assertInputOutputPair("02/27/2031", "2031-02-27");
-        assertInputOutputPair("02/27/0030", "0030-02-27");
+        picker.setInputValue("02/27/2031");
+        picker.sendKeys(Keys.TAB);
+        Assert.assertEquals("2/27/2031", picker.getInputValue());
+
+        picker.setInputValue("02/27/0030");
+        picker.sendKeys(Keys.TAB);
+        Assert.assertEquals("2/27/0030", picker.getInputValue());
     }
 
     @Test
-    public void testLocaleBasedParsingShouldUseCustomReferenceDate() {
+    public void datePickerWithLocale_setCustomReferenceDate_setInputValue_blur_customReferenceDateIsUsed() {
         $("button").id("apply-custom-reference-date").click();
-        assertInputOutputPair("02/27/2031", "2031-02-27");
-        assertInputOutputPair("02/27/31", "1931-02-27");
-        assertInputOutputPair("02/27/29", "2029-02-27");
-        assertInputOutputPair("02/27/0030", "0030-02-27");
+
+        picker.setInputValue("02/27/31");
+        picker.sendKeys(Keys.TAB);
+        Assert.assertEquals("2/27/1931", picker.getInputValue());
+
+        picker.setInputValue("02/27/29");
+        picker.sendKeys(Keys.TAB);
+        Assert.assertEquals("2/27/2029", picker.getInputValue());
+
+        picker.setInputValue("02/27/2031");
+        picker.sendKeys(Keys.TAB);
+        Assert.assertEquals("2/27/2031", picker.getInputValue());
+
+        picker.setInputValue("02/27/0030");
+        picker.sendKeys(Keys.TAB);
+        Assert.assertEquals("2/27/0030", picker.getInputValue());
     }
 
     private void applyLocale(Locale locale) {
@@ -238,21 +260,6 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
                     "Received a warning in browser log console, message: %s",
                     logEntry));
         }
-    }
-
-    private void submitValue(String value) {
-        TestBenchElement input = picker.findElement(By.tagName("input"));
-        while (!input.getAttribute("value").isEmpty()) {
-            input.sendKeys(Keys.BACK_SPACE);
-        }
-        input.sendKeys(value);
-        input.sendKeys(Keys.ENTER);
-        getCommandExecutor().waitForVaadin();
-    }
-
-    private void assertInputOutputPair(String input, String expectedOutput) {
-        submitValue(input);
-        Assert.assertEquals(expectedOutput, $("span").id("output").getText());
     }
 
     private int getAdjustedYear(int currentYear, int testYear) {

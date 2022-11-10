@@ -18,7 +18,6 @@
 package com.vaadin.flow.component.datepicker;
 
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Input;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -27,6 +26,7 @@ import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 
 import java.time.LocalDate;
 import java.time.Month;
+import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 @Route("vaadin-date-picker/date-picker-custom-format")
@@ -69,7 +69,7 @@ public class DatePickerCustomFormatPage extends VerticalLayout {
         i18n.setDateFormat("yyyy-MM-dd");
         datePicker.setI18n(i18n);
 
-        Span output = DatePickerITHelper.createOutputSpan(datePicker);
+        Span output = createOutputSpan(datePicker);
         datePicker.setId(PRIMARY_FORMAT_DATE_PICKER);
         output.setId(PRIMARY_FORMAT_OUTPUT);
         add(datePicker, output);
@@ -81,7 +81,7 @@ public class DatePickerCustomFormatPage extends VerticalLayout {
         i18n.setDateFormats("yyyy-MM-dd", "dd.MM.yyyy", "MM/dd/yyyy");
         datePicker.setI18n(i18n);
 
-        Span output = DatePickerITHelper.createOutputSpan(datePicker);
+        Span output = createOutputSpan(datePicker);
         datePicker.setId(MULTIPLE_FORMAT_DATE_PICKER);
         output.setId(MULTIPLE_FORMAT_OUTPUT);
         add(datePicker, output);
@@ -98,7 +98,7 @@ public class DatePickerCustomFormatPage extends VerticalLayout {
             datePicker.setI18n(new DatePickerI18n().setDateFormat("M/d/yy"));
         });
 
-        Span output = DatePickerITHelper.createOutputSpan(datePicker);
+        Span output = createOutputSpan(datePicker);
         btn.setId(CHANGE_BETWEEN_FORMATS_BUTTON);
         datePicker.setId(CHANGE_BETWEEN_FORMATS_DATE_PICKER);
         output.setId(CHANGE_BETWEEN_FORMATS_OUTPUT);
@@ -119,7 +119,7 @@ public class DatePickerCustomFormatPage extends VerticalLayout {
                             .setI18n(new DatePickerI18n().setDateFormat(null));
                 });
 
-        Span output = DatePickerITHelper.createOutputSpan(datePicker);
+        Span output = createOutputSpan(datePicker);
         btn.setId(REMOVE_DATE_FORMAT_BUTTON);
         datePicker.setId(REMOVE_DATE_FORMAT_DATE_PICKER);
         output.setId(REMOVE_DATE_FORMAT_OUTPUT);
@@ -134,7 +134,7 @@ public class DatePickerCustomFormatPage extends VerticalLayout {
 
         datePicker.setLocale(Locale.GERMANY); // should have no effect
 
-        Span output = DatePickerITHelper.createOutputSpan(datePicker);
+        Span output = createOutputSpan(datePicker);
         datePicker.setId(SET_LOCALE_AFTER_FORMAT_DATE_PICKER);
         output.setId(SET_LOCALE_AFTER_FORMAT_OUTPUT);
         add(datePicker, output);
@@ -148,7 +148,7 @@ public class DatePickerCustomFormatPage extends VerticalLayout {
         i18n.setDateFormat("yyyy/MM/dd");
         datePicker.setI18n(i18n);
 
-        Span output = DatePickerITHelper.createOutputSpan(datePicker);
+        Span output = createOutputSpan(datePicker);
         datePicker.setId(SET_DATE_FORMAT_AFTER_LOCALE_DATE_PICKER);
         output.setId(SET_DATE_FORMAT_AFTER_LOCALE_OUTPUT);
         add(datePicker, output);
@@ -197,11 +197,24 @@ public class DatePickerCustomFormatPage extends VerticalLayout {
                 });
         setMultipleFormats.setId("set-multiple-formats");
 
-        Span output = DatePickerITHelper.createOutputSpan(datePicker);
+        Span output = createOutputSpan(datePicker);
         datePicker.setId(CUSTOM_REFERENCE_DATE_AND_FORMAT_OPTIONS_DATE_PICKER);
         output.setId(CUSTOM_REFERENCE_DATE_AND_FORMAT_OPTIONS_OUTPUT);
         add(datePicker,
                 new Div(setShortFormat, setLongFormat, setMultipleFormats),
                 output);
+    }
+
+    private static Span createOutputSpan(DatePicker datePicker) {
+        Span output = new Span();
+        datePicker.addValueChangeListener(event -> {
+            LocalDate newValue = datePicker.getValue();
+            if (newValue != null) {
+                output.setText(newValue.format(DateTimeFormatter.ISO_DATE));
+            } else {
+                output.setText("");
+            }
+        });
+        return output;
     }
 }

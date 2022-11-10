@@ -3,7 +3,6 @@ package com.vaadin.flow.component.datepicker;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Input;
 import com.vaadin.flow.component.html.NativeButton;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.router.Route;
 
 import java.time.LocalDate;
@@ -46,10 +45,6 @@ public class DatePickerLocalePage extends Div {
                 });
         applyCustomReferenceDate.setId("apply-custom-reference-date");
 
-        Span output = DatePickerITHelper.createOutputSpan(datePicker);
-        output.setId("output");
-
-        add(datePicker, localeInput, applyLocale, applyCustomReferenceDate,
-                output);
+        add(datePicker, localeInput, applyLocale, applyCustomReferenceDate);
     }
 }
