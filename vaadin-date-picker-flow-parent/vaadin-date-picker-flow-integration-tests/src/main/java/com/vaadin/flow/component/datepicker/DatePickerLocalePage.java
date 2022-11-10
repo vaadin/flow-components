@@ -4,36 +4,21 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Input;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 
 import java.time.LocalDate;
-import java.time.Month;
 import java.util.Locale;
 
 @Route("vaadin-date-picker/date-picker-locale")
-public class DatePickerLocalePage extends VerticalLayout {
-
-    public static final String CUSTOMIZABLE_LOCALE_DATE_PICKER = "CUSTOMIZABLE_LOCALE_DATE_PICKER";
-    public static final String CUSTOMIZABLE_LOCALE_BUTTON = "CUSTOMIZABLE_LOCALE_BUTTON";
-    public static final String CUSTOMIZABLE_LOCALE_INPUT = "CUSTOMIZABLE_LOCALE_INPUT";
-    public static final String CUSTOM_REFERENCE_DATE_AND_LOCALE_DATE_PICKER = "CUSTOM_REFERENCE_DATE_AND_LOCALE_DATE_PICKER";
-    public static final String CUSTOM_REFERENCE_DATE_AND_LOCALE_OUTPUT = "CUSTOM_REFERENCE_DATE_AND_LOCALE_OUTPUT";
-
-    public static final LocalDate may13 = LocalDate.of(2018, Month.MAY, 13);
-
+public class DatePickerLocalePage extends Div {
     public DatePickerLocalePage() {
-        setupCustomizableLocale();
-        setupCustomReferenceDateAndLocale();
-    }
-
-    private void setupCustomizableLocale() {
         DatePicker datePicker = new DatePicker();
-        datePicker.setId(CUSTOMIZABLE_LOCALE_DATE_PICKER);
+        datePicker.setId("picker");
 
         Input localeInput = new Input();
-        localeInput.setId(CUSTOMIZABLE_LOCALE_INPUT);
+        localeInput.setId("locale-input");
         localeInput.setPlaceholder("Enter locale string");
+
         NativeButton applyLocale = new NativeButton("Apply locale", e -> {
             String localeString = localeInput.getValue();
             String[] localeParts = localeString.split("_");
@@ -51,22 +36,20 @@ public class DatePickerLocalePage extends VerticalLayout {
 
             datePicker.setLocale(locale);
         });
-        applyLocale.setId(CUSTOMIZABLE_LOCALE_BUTTON);
+        applyLocale.setId("apply-locale");
 
-        add(datePicker, new Div(localeInput, applyLocale));
-    }
-
-    private void setupCustomReferenceDateAndLocale() {
-        DatePicker datePicker = new DatePicker(may13);
-        datePicker.setLocale(Locale.FRANCE);
-
-        DatePicker.DatePickerI18n i18n = new DatePicker.DatePickerI18n();
-        i18n.setReferenceDate(LocalDate.of(1980, 2, 2));
-        datePicker.setI18n(i18n);
+        NativeButton applyCustomReferenceDate = new NativeButton(
+                "Apply custom reference date", e -> {
+                    DatePicker.DatePickerI18n i18n = new DatePicker.DatePickerI18n();
+                    i18n.setReferenceDate(LocalDate.of(1980, 2, 2));
+                    datePicker.setI18n(i18n);
+                });
+        applyCustomReferenceDate.setId("apply-custom-reference-date");
 
         Span output = DatePickerITHelper.createOutputSpan(datePicker);
-        datePicker.setId(CUSTOM_REFERENCE_DATE_AND_LOCALE_DATE_PICKER);
-        output.setId(CUSTOM_REFERENCE_DATE_AND_LOCALE_OUTPUT);
-        add(datePicker, output);
+        output.setId("output");
+
+        add(datePicker, localeInput, applyLocale, applyCustomReferenceDate,
+                output);
     }
 }

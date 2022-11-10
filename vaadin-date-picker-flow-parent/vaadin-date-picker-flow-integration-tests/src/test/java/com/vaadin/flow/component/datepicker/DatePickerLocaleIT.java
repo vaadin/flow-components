@@ -24,15 +24,16 @@ import com.vaadin.flow.testutil.TestPath;
 @TestPath("vaadin-date-picker/date-picker-locale")
 public class DatePickerLocaleIT extends AbstractComponentIT {
 
+    private DatePickerElement picker;
+
     @Before
     public void init() {
         open();
+        picker = $(DatePickerElement.class).id("picker");
     }
 
     @Test
     public void datePickerWithValue_setLocale_assertDisplayedValue() {
-        DatePickerElement picker = $(DatePickerElement.class)
-                .id(DatePickerLocalePage.CUSTOMIZABLE_LOCALE_DATE_PICKER);
         picker.setDate(LocalDate.of(2018, Month.MAY, 3));
 
         applyLocale(Locale.CHINA);
@@ -61,8 +62,6 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
 
     @Test
     public void datePickerWithLocale_enterValue_assertParsedValue() {
-        DatePickerElement picker = $(DatePickerElement.class)
-                .id(DatePickerLocalePage.CUSTOMIZABLE_LOCALE_DATE_PICKER);
         LocalDate mayThird = LocalDate.of(2018, Month.MAY, 3);
 
         applyLocale(Locale.CHINA);
@@ -105,8 +104,6 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
 
     @Test
     public void datePickerWithValueAndLocale_blur_assertDisplayedValue() {
-        DatePickerElement picker = $(DatePickerElement.class)
-                .id(DatePickerLocalePage.CUSTOMIZABLE_LOCALE_DATE_PICKER);
         picker.setDate(LocalDate.of(2018, Month.MAY, 3));
         applyLocale(new Locale("pl", "PL"));
 
@@ -122,8 +119,6 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
 
     @Test
     public void datePicker_setValue_setLocale_assertDisplayedValue() {
-        DatePickerElement picker = $(DatePickerElement.class)
-                .id(DatePickerLocalePage.CUSTOMIZABLE_LOCALE_DATE_PICKER);
         picker.setDate(LocalDate.of(2018, Month.MAY, 3));
 
         applyLocale(Locale.UK);
@@ -145,8 +140,6 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
 
     @Test
     public void datePicker_setInvalidLocale_defaultUSLocaleIsUsed() {
-        DatePickerElement picker = $(DatePickerElement.class)
-                .id(DatePickerLocalePage.CUSTOMIZABLE_LOCALE_DATE_PICKER);
         applyLocale(new Locale("i", "i", "i"));
         picker.setDate(LocalDate.of(2018, Month.MAY, 3));
 
@@ -167,8 +160,6 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
 
     @Test
     public void datePicker_setUnsupportedLocale_defaultUSLocaleIsUsed() {
-        DatePickerElement picker = $(DatePickerElement.class)
-                .id(DatePickerLocalePage.CUSTOMIZABLE_LOCALE_DATE_PICKER);
         picker.setDate(LocalDate.of(2018, Month.MAY, 3));
 
         List<Locale> unsupportedLocales = List.of(new Locale("ar", "SA"),
@@ -186,8 +177,6 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
 
     @Test
     public void datePickerWithLocale_setInputValue_blur_assertDisplayedValue() {
-        DatePickerElement picker = $(DatePickerElement.class)
-                .id(DatePickerLocalePage.CUSTOMIZABLE_LOCALE_DATE_PICKER);
         applyLocale(Locale.GERMAN);
 
         picker.setInputValue("3.5.2018");
@@ -199,33 +188,38 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
     }
 
     @Test
-    public void testLocaleBasedParsingShouldUseReferenceDate() {
-        String id = DatePickerLocalePage.CUSTOM_REFERENCE_DATE_AND_LOCALE_DATE_PICKER;
-        TestBenchElement output = $("span").id(
-                DatePickerLocalePage.CUSTOM_REFERENCE_DATE_AND_LOCALE_OUTPUT);
+    public void testLocaleBasedParsingShouldUseDefaultReferenceDateIfNotSpecified() {
+        LocalDate now = LocalDate.now();
+        int currentYear = now.getYear();
 
-        submitValue(id, "27/02/2031");
-        Assert.assertEquals("2031-02-27", output.getText());
+        int testYear1 = (currentYear + 51) % 100;
+        int adjustedYear1 = getAdjustedYear(currentYear, testYear1);
+        assertInputOutputPair("02/27/" + testYear1, adjustedYear1 + "-02-27");
 
-        submitValue(id, "27/02/31");
-        Assert.assertEquals("1931-02-27", output.getText());
+        int testYear2 = (currentYear + 49) % 100;
+        int adjustedYear2 = getAdjustedYear(currentYear, testYear2);
+        assertInputOutputPair("02/27/" + testYear2, adjustedYear2 + "-02-27");
 
-        submitValue(id, "27/02/29");
-        Assert.assertEquals("2029-02-27", output.getText());
+        assertInputOutputPair("02/27/2031", "2031-02-27");
+        assertInputOutputPair("02/27/0030", "0030-02-27");
+    }
 
-        submitValue(id, "27/02/0030");
-        Assert.assertEquals("0030-02-27", output.getText());
+    @Test
+    public void testLocaleBasedParsingShouldUseCustomReferenceDate() {
+        $("button").id("apply-custom-reference-date").click();
+        assertInputOutputPair("02/27/2031", "2031-02-27");
+        assertInputOutputPair("02/27/31", "1931-02-27");
+        assertInputOutputPair("02/27/29", "2029-02-27");
+        assertInputOutputPair("02/27/0030", "0030-02-27");
     }
 
     private void applyLocale(Locale locale) {
-        TestBenchElement localeInput = $("input")
-                .id(DatePickerLocalePage.CUSTOMIZABLE_LOCALE_INPUT);
+        TestBenchElement localeInput = $("input").id("locale-input");
         localeInput.setProperty("value", locale.toString());
         localeInput.dispatchEvent("change",
                 Collections.singletonMap("bubbles", true));
 
-        TestBenchElement applyLocale = $("button")
-                .id(DatePickerLocalePage.CUSTOMIZABLE_LOCALE_BUTTON);
+        TestBenchElement applyLocale = $("button").id("apply-locale");
         applyLocale.click();
     }
 
@@ -246,15 +240,29 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
         }
     }
 
-    private void submitValue(String id, String value) {
-        TestBenchElement input = $(DatePickerElement.class).id(id)
-                .findElement(By.tagName("input"));
-
+    private void submitValue(String value) {
+        TestBenchElement input = picker.findElement(By.tagName("input"));
         while (!input.getAttribute("value").isEmpty()) {
             input.sendKeys(Keys.BACK_SPACE);
         }
         input.sendKeys(value);
         input.sendKeys(Keys.ENTER);
         getCommandExecutor().waitForVaadin();
+    }
+
+    private void assertInputOutputPair(String input, String expectedOutput) {
+        submitValue(input);
+        Assert.assertEquals(expectedOutput, $("span").id("output").getText());
+    }
+
+    private int getAdjustedYear(int currentYear, int testYear) {
+        int adjustedYear = testYear + (currentYear / 100) * 100;
+        if (currentYear < adjustedYear - 50) {
+            return adjustedYear - 100;
+        }
+        if (currentYear > adjustedYear + 50) {
+            return adjustedYear + 100;
+        }
+        return adjustedYear;
     }
 }
