@@ -31,6 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -232,6 +233,8 @@ public class Spreadsheet extends Component
     private String infoLabelValue;
 
     private boolean workbookChangeToggle;
+
+    private Locale locale;
 
     int getCols() {
         return cols;
@@ -1631,14 +1634,32 @@ public class Spreadsheet extends Component
         return new CellRangeAddress(r1 - 1, r2 - 1, c1 - 1, c2 - 1);
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Set the Locale for the Spreadsheet. The locale is used for formatting
+     * cell values.
      *
-     * @see com.vaadin.ui.AbstractComponent#setLocale(java.util.Locale)
+     * @param locale
+     *            the locale set to the spreadsheet, cannot be null
      */
     public void setLocale(Locale locale) {
+        Objects.requireNonNull(locale, "Locale must not be null.");
+        this.locale = locale;
         valueManager.updateLocale(locale);
         refreshAllCellValues();
+    }
+
+    /**
+     * Gets the Locale for this spreadsheet
+     *
+     * @return the locale used for spreadsheet
+     */
+    @Override
+    public Locale getLocale() {
+        if (locale != null) {
+            return locale;
+        } else {
+            return super.getLocale();
+        }
     }
 
     @Override
@@ -5985,10 +6006,5 @@ public class Spreadsheet extends Component
             RowHeaderDoubleClickListener listener) {
         return addListener(RowHeaderDoubleClickEvent.class,
                 listener::onRowHeaderDoubleClick);
-    }
-
-    @Override
-    public Locale getLocale() {
-        return super.getLocale();
     }
 }
