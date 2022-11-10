@@ -216,7 +216,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
      *            {@code false} if those should be hidden
      */
     public void setStepButtonsVisible(boolean stepButtonsVisible) {
-        getElement().setProperty("hasControls", stepButtonsVisible);
+        getElement().setProperty("stepButtonsVisible", stepButtonsVisible);
     }
 
     /**
@@ -227,7 +227,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
      * @return {@code true} if buttons are visible, {@code false} otherwise
      */
     public boolean isStepButtonsVisible() {
-        return getElement().getProperty("hasControls", false);
+        return getElement().getProperty("stepButtonsVisible", false);
     }
 
     /**
