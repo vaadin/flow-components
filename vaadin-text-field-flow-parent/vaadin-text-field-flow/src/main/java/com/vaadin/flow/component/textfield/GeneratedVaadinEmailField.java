@@ -23,27 +23,9 @@ import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableFunction;
 
 /**
- * <p>
- * Description copied from corresponding location in WebComponent:
- * </p>
- * <p>
- * {@code <vaadin-email-field>} is a Web Component for email field control in
- * forms.
- * </p>
- * <p>
- * &lt;vaadin-email-field label=&quot;Email&quot;&gt;
- * &lt;/vaadin-email-field&gt;
- * </p>
- * <h3>Styling</h3>
- * <p>
- * See vaadin-text-field.html for the styling documentation
- * </p>
- * <p>
- * See
- * <a href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin
- * – how to apply styles for shadow parts</a>
- * </p>
+ * @deprecated since v23.3, will be removed in v24.
  */
+@Deprecated
 @Tag("vaadin-email-field")
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha5")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
@@ -69,7 +51,10 @@ public abstract class GeneratedVaadinEmailField<R extends GeneratedVaadinEmailFi
      *            a function that converts a model value to a string value
      * @param <P>
      *            the property type
+     *
+     * @deprecated since v23.3, will be removed in v24
      */
+    @Deprecated
     public <P> GeneratedVaadinEmailField(T initialValue, T defaultValue,
             Class<P> elementPropertyType,
             SerializableFunction<P, T> presentationToModel,
@@ -88,7 +73,10 @@ public abstract class GeneratedVaadinEmailField<R extends GeneratedVaadinEmailFi
      *            the default value to use if the value isn't defined
      * @param acceptNullValues
      *            whether <code>null</code> is accepted as a model value
+     *
+     * @deprecated since v23.3, will be removed in v24
      */
+    @Deprecated
     public GeneratedVaadinEmailField(T initialValue, T defaultValue,
             boolean acceptNullValues) {
         super(initialValue, defaultValue, acceptNullValues);
@@ -113,7 +101,10 @@ public abstract class GeneratedVaadinEmailField<R extends GeneratedVaadinEmailFi
      *            initial value is used only if element has no {@code "value"}
      *            property value, otherwise element {@code "value"} property is
      *            ignored and the initial value is set
+     *
+     * @deprecated since v23.3, will be removed in v24
      */
+    @Deprecated
     public GeneratedVaadinEmailField(T initialValue, T defaultValue,
             boolean acceptNullValues, boolean isInitialValueOptional) {
         super(initialValue, defaultValue, acceptNullValues,
@@ -138,7 +129,10 @@ public abstract class GeneratedVaadinEmailField<R extends GeneratedVaadinEmailFi
      *            returns a property value
      * @param <P>
      *            the property type
+     *
+     * @deprecated since v23.3, will be removed in v24
      */
+    @Deprecated
     public <P> GeneratedVaadinEmailField(T initialValue, T defaultValue,
             Class<P> elementPropertyType,
             SerializableBiFunction<R, P, T> presentationToModel,
@@ -149,7 +143,10 @@ public abstract class GeneratedVaadinEmailField<R extends GeneratedVaadinEmailFi
 
     /**
      * Default constructor.
+     *
+     * @deprecated since v23.3, will be removed in v24
      */
+    @Deprecated
     public GeneratedVaadinEmailField() {
         this(null, null, null, (SerializableFunction) null,
                 (SerializableFunction) null);
