@@ -194,45 +194,26 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
 
         int testYear1 = (currentYear + 51) % 100;
         int adjustedYear1 = getAdjustedYear(currentYear, testYear1);
-
-        picker.setInputValue("02/27/" + testYear1);
-        picker.sendKeys(Keys.TAB);
-        Assert.assertEquals("2/27/" + adjustedYear1, picker.getInputValue());
+        testParseReformatCycle(Integer.toString(testYear1),
+                Integer.toString(adjustedYear1));
 
         int testYear2 = (currentYear + 49) % 100;
         int adjustedYear2 = getAdjustedYear(currentYear, testYear2);
-        picker.setInputValue("02/27/" + testYear2);
-        picker.sendKeys(Keys.TAB);
-        Assert.assertEquals("2/27/" + adjustedYear2, picker.getInputValue());
+        testParseReformatCycle(Integer.toString(testYear2),
+                Integer.toString(adjustedYear2));
 
-        picker.setInputValue("02/27/2031");
-        picker.sendKeys(Keys.TAB);
-        Assert.assertEquals("2/27/2031", picker.getInputValue());
-
-        picker.setInputValue("02/27/0030");
-        picker.sendKeys(Keys.TAB);
-        Assert.assertEquals("2/27/0030", picker.getInputValue());
+        testParseReformatCycle("2031", "2031");
+        testParseReformatCycle("0030", "0030");
     }
 
     @Test
     public void datePickerWithLocale_setCustomReferenceDate_setInputValue_blur_customReferenceDateIsUsed() {
         $("button").id("apply-custom-reference-date").click();
 
-        picker.setInputValue("02/27/31");
-        picker.sendKeys(Keys.TAB);
-        Assert.assertEquals("2/27/1931", picker.getInputValue());
-
-        picker.setInputValue("02/27/29");
-        picker.sendKeys(Keys.TAB);
-        Assert.assertEquals("2/27/2029", picker.getInputValue());
-
-        picker.setInputValue("02/27/2031");
-        picker.sendKeys(Keys.TAB);
-        Assert.assertEquals("2/27/2031", picker.getInputValue());
-
-        picker.setInputValue("02/27/0030");
-        picker.sendKeys(Keys.TAB);
-        Assert.assertEquals("2/27/0030", picker.getInputValue());
+        testParseReformatCycle("31", "1931");
+        testParseReformatCycle("29", "2029");
+        testParseReformatCycle("2031", "2031");
+        testParseReformatCycle("0030", "0030");
     }
 
     private void applyLocale(Locale locale) {
@@ -271,5 +252,17 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
             return adjustedYear + 100;
         }
         return adjustedYear;
+    }
+
+    private void testParseReformatCycle(String testYear, String expectedYear) {
+        int dayOfTheMonth = 27;
+        int month = 11;
+        String dateStringWithoutYear = month + "/" + dayOfTheMonth + "/";
+        picker.setInputValue(dateStringWithoutYear + testYear);
+        picker.sendKeys(Keys.TAB);
+        Assert.assertEquals(dateStringWithoutYear + expectedYear,
+                picker.getInputValue());
+        Assert.assertEquals(LocalDate.of(Integer.valueOf(expectedYear), month,
+                dayOfTheMonth), picker.getDate());
     }
 }
