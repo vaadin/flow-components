@@ -55,20 +55,17 @@ public class PopupButton extends Component {
 
         @Override
         public void onPopupClose() {
-            setPopupVisible(false);
             fireClose();
         }
 
         @Override
         public void onPopupButtonClick() {
-            setPopupVisible(true);
             fireOpen();
         }
     };
 
     private Component child;
 
-    private boolean popupVisible = false;
     private PopupButtonState state = new PopupButtonState();
 
     /**
@@ -132,7 +129,6 @@ public class PopupButton extends Component {
      * of the Spreadsheet.
      */
     public void openPopup() {
-        setPopupVisible(true);
         getElement().appendChild(getContent().getElement());
         getParent().ifPresent(parent -> {
             parent.getElement().callJsFunction("onPopupButtonOpen",
@@ -147,7 +143,6 @@ public class PopupButton extends Component {
      * Closes the pop-up if it is open.
      */
     public void closePopup() {
-        setPopupVisible(false);
         getParent().ifPresent(parent -> parent.getElement()
                 .callJsFunction("closePopup", getRow() + 1, getColumn() + 1));
         fireClose();
@@ -366,9 +361,4 @@ public class PopupButton extends Component {
          */
         public void onPopupClose(PopupCloseEvent event);
     }
-
-    private void setPopupVisible(boolean visible) {
-        popupVisible = visible;
-    }
-
 }

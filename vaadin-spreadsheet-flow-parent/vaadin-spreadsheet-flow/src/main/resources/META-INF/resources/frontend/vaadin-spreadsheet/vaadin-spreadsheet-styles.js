@@ -756,18 +756,23 @@ export const spreadsheetStyles = css`
     height: 11px;
     width: 11px;
     border: solid 1px lightgrey;
-    text-align: center;
     background: white;
     border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   .v-spreadsheet .sheet div div.popupbutton:after {
     content: '▼';
     color: grey;
-    font-size: 11px;
+    font-size: 9px;
     vertical-align: top;
   }
   .v-spreadsheet .sheet div div.popupbutton.v-disabled {
     opacity: 0.5;
+  }
+  .popupbutton.active {
+    box-shadow: rgb(0 171 238) 0 2px 0 0 inset;
   }
   .v-spreadsheet .sheet-selection.touch.fill .fill-touch-square {
     position: relative;
