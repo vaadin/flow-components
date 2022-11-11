@@ -20,6 +20,10 @@ import com.vaadin.experimental.Feature;
 import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.CompositionNotifier;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasClearButton;
 import com.vaadin.flow.component.HasHelper;
@@ -44,13 +48,18 @@ import com.vaadin.flow.server.VaadinService;
  *
  * @author Vaadin Ltd.
  */
-public class PasswordField
-        extends GeneratedVaadinPasswordField<PasswordField, String>
+@Tag("vaadin-password-field")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha2")
+@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@NpmPackage(value = "@vaadin/password-field", version = "24.0.0-alpha2")
+@JsModule("@vaadin/password-field/src/vaadin-password-field.js")
+public class PasswordField extends TextFieldBase<PasswordField, String>
         implements HasSize, HasValidation, HasValueChangeMode,
         HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
         HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper, HasLabel,
         HasClearButton, HasAllowedCharPattern,
-        HasThemeVariant<TextFieldVariant>, HasTooltip, HasValidator<String> {
+        HasThemeVariant<TextFieldVariant>, HasTooltip, HasValidator<String>,
+        HasStyle {
     private ValueChangeMode currentMode;
 
     private boolean isConnectorAttached;
@@ -371,7 +380,7 @@ public class PasswordField
      *         otherwise
      */
     public boolean isRevealButtonVisible() {
-        return !isRevealButtonHiddenBoolean();
+        return !getElement().getProperty("revealButtonHidden", false);
     }
 
     /**
@@ -383,7 +392,7 @@ public class PasswordField
      *            <code>false</code> otherwise
      */
     public void setRevealButtonVisible(boolean revealButtonVisible) {
-        setRevealButtonHidden(!revealButtonVisible);
+        getElement().setProperty("revealButtonHidden", !revealButtonVisible);
     }
 
     /**

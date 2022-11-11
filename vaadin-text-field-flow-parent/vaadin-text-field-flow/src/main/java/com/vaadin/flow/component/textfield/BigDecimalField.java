@@ -57,8 +57,7 @@ import com.vaadin.flow.function.SerializableBiFunction;
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("./vaadin-big-decimal-field.js")
-public class BigDecimalField
-        extends GeneratedVaadinTextField<BigDecimalField, BigDecimal>
+public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
         implements HasSize, HasValidation, HasValueChangeMode,
         HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
         HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper, HasLabel,

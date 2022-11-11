@@ -27,28 +27,28 @@ final class TextFieldValidationSupport implements Serializable {
     }
 
     /**
-     * @see GeneratedVaadinTextField#setRequired
+     * @see TextFieldBase#setRequired
      */
     void setRequired(boolean required) {
         this.required = required;
     }
 
     /**
-     * @see GeneratedVaadinTextField#setMinlength(double)
+     * @see TextFieldBase#setMinlength(double)
      */
     void setMinLength(Integer minLength) {
         this.minLength = minLength;
     }
 
     /**
-     * @see GeneratedVaadinTextField#setMaxlength(double)
+     * @see TextFieldBase#setMaxlength(double)
      */
     void setMaxLength(Integer maxLength) {
         this.maxLength = maxLength;
     }
 
     /**
-     * @see GeneratedVaadinTextField#setPattern(String)
+     * @see TextFieldBase#setPattern(String)
      */
     void setPattern(String pattern) {
         this.pattern = pattern == null || pattern.isEmpty() ? null

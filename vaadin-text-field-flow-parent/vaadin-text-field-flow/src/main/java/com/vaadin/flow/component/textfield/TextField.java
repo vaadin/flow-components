@@ -19,6 +19,9 @@ import com.vaadin.experimental.Feature;
 import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.CompositionNotifier;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasClearButton;
 import com.vaadin.flow.component.shared.HasClientValidation;
@@ -47,13 +50,17 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author Vaadin Ltd
  */
-public class TextField extends GeneratedVaadinTextField<TextField, String>
-        implements HasSize, HasValidation, HasValueChangeMode,
-        HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
-        HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper, HasLabel,
-        HasClearButton, HasAllowedCharPattern,
-        HasThemeVariant<TextFieldVariant>, HasTooltip, HasValidator<String>,
-        HasClientValidation {
+@Tag("vaadin-text-field")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha2")
+@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@NpmPackage(value = "@vaadin/text-field", version = "24.0.0-alpha2")
+@JsModule("@vaadin/text-field/src/vaadin-text-field.js")
+public class TextField extends TextFieldBase<TextField, String> implements
+        HasSize, HasValidation, HasValueChangeMode, HasPrefixAndSuffix,
+        InputNotifier, KeyNotifier, CompositionNotifier, HasAutocomplete,
+        HasAutocapitalize, HasAutocorrect, HasHelper, HasLabel, HasClearButton,
+        HasAllowedCharPattern, HasThemeVariant<TextFieldVariant>, HasTooltip,
+        HasValidator<String>, HasClientValidation {
     private ValueChangeMode currentMode;
 
     private boolean isConnectorAttached;

@@ -20,6 +20,10 @@ import com.vaadin.experimental.Feature;
 import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.CompositionNotifier;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasClearButton;
 import com.vaadin.flow.component.HasHelper;
@@ -49,12 +53,17 @@ import com.vaadin.flow.server.VaadinService;
  *
  * @author Vaadin Ltd.
  */
-public class EmailField extends GeneratedVaadinEmailField<EmailField, String>
-        implements HasSize, HasValidation, HasValueChangeMode,
-        HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
-        HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper, HasLabel,
-        HasClearButton, HasAllowedCharPattern,
-        HasThemeVariant<TextFieldVariant>, HasTooltip, HasValidator<String> {
+@Tag("vaadin-email-field")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha2")
+@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@NpmPackage(value = "@vaadin/email-field", version = "24.0.0-alpha2")
+@JsModule("@vaadin/email-field/src/vaadin-email-field.js")
+public class EmailField extends TextFieldBase<EmailField, String> implements
+        HasSize, HasValidation, HasValueChangeMode, HasPrefixAndSuffix,
+        InputNotifier, KeyNotifier, CompositionNotifier, HasAutocomplete,
+        HasAutocapitalize, HasAutocorrect, HasHelper, HasLabel, HasClearButton,
+        HasAllowedCharPattern, HasThemeVariant<TextFieldVariant>, HasTooltip,
+        HasValidator<String>, HasStyle {
     private static final String EMAIL_PATTERN = "^" + "([a-zA-Z0-9_\\.\\-+])+" // local
             + "@" + "[a-zA-Z0-9-.]+" // domain
             + "\\." + "[a-zA-Z0-9-]{2,}" // tld

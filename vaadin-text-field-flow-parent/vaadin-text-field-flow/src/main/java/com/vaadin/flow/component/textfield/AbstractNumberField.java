@@ -25,9 +25,13 @@ import com.vaadin.flow.component.CompositionNotifier;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.InputNotifier;
 import com.vaadin.flow.component.KeyNotifier;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasClearButton;
 import com.vaadin.flow.component.shared.HasThemeVariant;
@@ -47,13 +51,18 @@ import com.vaadin.flow.server.VaadinService;
  *
  * @author Vaadin Ltd.
  */
+@Tag("vaadin-number-field")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha2")
+@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@NpmPackage(value = "@vaadin/number-field", version = "24.0.0-alpha2")
+@JsModule("@vaadin/number-field/src/vaadin-number-field.js")
 public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T extends Number>
-        extends GeneratedVaadinNumberField<C, T>
-        implements HasSize, HasValidation, HasValueChangeMode,
-        HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
-        HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper, HasLabel,
-        HasClearButton, HasAllowedCharPattern,
-        HasThemeVariant<TextFieldVariant>, HasTooltip, HasValidator<T> {
+        extends TextFieldBase<C, T> implements HasSize, HasValidation,
+        HasValueChangeMode, HasPrefixAndSuffix, InputNotifier, KeyNotifier,
+        CompositionNotifier, HasAutocomplete, HasAutocapitalize, HasAutocorrect,
+        HasHelper, HasLabel, HasClearButton, HasAllowedCharPattern,
+        HasThemeVariant<TextFieldVariant>, HasTooltip, HasValidator<T>,
+        HasStyle {
 
     private ValueChangeMode currentMode;
 
@@ -217,9 +226,8 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
      *            {@code true} if control buttons should be visible;
      *            {@code false} if those should be hidden
      */
-    @Override
     public void setHasControls(boolean hasControls) {
-        super.setHasControls(hasControls);
+        getElement().setProperty("hasControls", hasControls);
     }
 
     /**
@@ -231,7 +239,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
      * @return {@code true} if buttons are visible, {@code false} otherwise
      */
     public boolean hasControls() {
-        return super.hasControlsBoolean();
+        return getElement().getProperty("hasControls", false);
     }
 
     /**
@@ -327,37 +335,31 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         return super.getValue();
     }
 
-    @Override
     protected void setMin(double min) {
-        super.setMin(min);
+        getElement().setProperty("min", min);
         this.min = min;
         minSetByUser = true;
     }
 
-    @Override
     protected double getMinDouble() {
         return min;
     }
 
-    @Override
     protected void setMax(double max) {
-        super.setMax(max);
+        getElement().setProperty("max", max);
         this.max = max;
     }
 
-    @Override
     protected double getMaxDouble() {
         return max;
     }
 
-    @Override
     protected void setStep(double step) {
-        super.setStep(step);
+        getElement().setProperty("step", step);
         this.step = step;
         stepSetByUser = true;
     }
 
-    @Override
     protected double getStepDouble() {
         return step;
     }
