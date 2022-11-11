@@ -63,8 +63,6 @@ public class TextField extends TextFieldBase<TextField, String> implements
         HasValidator<String>, HasClientValidation {
     private ValueChangeMode currentMode;
 
-    private boolean isConnectorAttached;
-
     private int valueChangeTimeout = DEFAULT_CHANGE_TIMEOUT;
 
     private TextFieldValidationSupport validationSupport;

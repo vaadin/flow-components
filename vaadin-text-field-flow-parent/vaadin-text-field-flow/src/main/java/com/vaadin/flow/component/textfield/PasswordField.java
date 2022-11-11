@@ -62,8 +62,6 @@ public class PasswordField extends TextFieldBase<PasswordField, String>
         HasStyle {
     private ValueChangeMode currentMode;
 
-    private boolean isConnectorAttached;
-
     private int valueChangeTimeout = DEFAULT_CHANGE_TIMEOUT;
 
     private TextFieldValidationSupport validationSupport;

@@ -52,8 +52,6 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
         HasTooltip, HasValidator<String> {
     private ValueChangeMode currentMode;
 
-    private boolean isConnectorAttached;
-
     private int valueChangeTimeout = DEFAULT_CHANGE_TIMEOUT;
 
     private TextFieldValidationSupport validationSupport;

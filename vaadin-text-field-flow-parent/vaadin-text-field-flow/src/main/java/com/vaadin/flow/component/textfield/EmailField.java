@@ -71,8 +71,6 @@ public class EmailField extends TextFieldBase<EmailField, String> implements
 
     private ValueChangeMode currentMode;
 
-    private boolean isConnectorAttached;
-
     private int valueChangeTimeout = DEFAULT_CHANGE_TIMEOUT;
 
     private TextFieldValidationSupport validationSupport;

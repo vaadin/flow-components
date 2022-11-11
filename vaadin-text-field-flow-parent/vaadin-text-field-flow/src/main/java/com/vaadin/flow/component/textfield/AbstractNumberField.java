@@ -66,8 +66,6 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
 
     private ValueChangeMode currentMode;
 
-    private boolean isConnectorAttached;
-
     private int valueChangeTimeout = DEFAULT_CHANGE_TIMEOUT;
 
     private boolean required;

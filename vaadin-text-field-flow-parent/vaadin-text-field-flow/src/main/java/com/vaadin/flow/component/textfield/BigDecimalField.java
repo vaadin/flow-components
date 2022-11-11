@@ -65,8 +65,6 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
         HasValidator<BigDecimal> {
     private ValueChangeMode currentMode;
 
-    private boolean isConnectorAttached;
-
     private int valueChangeTimeout = DEFAULT_CHANGE_TIMEOUT;
 
     private boolean required;
