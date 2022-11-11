@@ -32,7 +32,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.data.renderer.TemplateRenderer;
+import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
@@ -734,7 +734,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
      * @see #removeEditColumn(Grid)
      * @see #hasEditColumn(Grid)
      */
-    public static void addEditColumn(Grid grid) {
+    public static void addEditColumn(Grid<?> grid) {
         addEditColumn(grid, CrudI18n.createDefault());
     }
 
@@ -750,8 +750,8 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
      *            the i18n object for localizing the accessibility of the edit
      *            column
      */
-    public static void addEditColumn(Grid grid, CrudI18n crudI18n) {
-        grid.addColumn(TemplateRenderer.of(createEditColumnTemplate(crudI18n)))
+    public static void addEditColumn(Grid<?> grid, CrudI18n crudI18n) {
+        grid.addColumn(LitRenderer.of(createEditColumnTemplate(crudI18n)))
                 .setKey(EDIT_COLUMN_KEY).setWidth("4em").setFlexGrow(0);
     }
 
@@ -768,7 +768,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
      * @see #addEditColumn(Grid)
      * @see #hasEditColumn(Grid)
      */
-    public static void removeEditColumn(Grid grid) {
+    public static void removeEditColumn(Grid<?> grid) {
         grid.removeColumnByKey(EDIT_COLUMN_KEY);
     }
 
@@ -781,7 +781,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
      * @return true if an edit column is present or false if otherwise
      * @see Crud#addEditColumn(Grid)
      */
-    public static boolean hasEditColumn(Grid grid) {
+    public static boolean hasEditColumn(Grid<?> grid) {
         return grid.getColumnByKey(EDIT_COLUMN_KEY) != null;
     }
 
