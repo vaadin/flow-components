@@ -1165,6 +1165,13 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         /**
          * Sets the {@code referenceDate}.
          *
+         * The reference date is used to determine the century when parsing
+         * two-digit years. The century that makes the date closest to the
+         * reference date is applied. The default value is the current date.
+         *
+         * Example: for a reference date of 1970-10-30; years {10, 40, 80}
+         * become {2010, 1940, 1980}.
+         *
          * @param referenceDate
          *            the date used to base relative dates on
          * @return this instance for method chaining
