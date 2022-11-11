@@ -1169,7 +1169,6 @@ public class Spreadsheet extends Component
         sheetOverlays = new HashSet<SheetOverlayWrapper>();
         tables = new HashSet<SpreadsheetTable>();
         registerRpc(new SpreadsheetHandlerImpl(this));
-        setSizeFull(); // Default to full size
         defaultActionHandler = new SpreadsheetDefaultActionHandler();
         hyperlinkCellClickHandler = new DefaultHyperlinkCellClickHandler(this);
         addActionHandler(defaultActionHandler);
