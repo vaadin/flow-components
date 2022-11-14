@@ -32,111 +32,9 @@ import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.shared.Registration;
 
 /**
- * <p>
- * Description copied from corresponding location in WebComponent:
- * </p>
- * <p>
- * {@code <vaadin-text-area>} is a Web Component for text area control in forms.
- * </p>
- * <p>
- * &lt;vaadin-text-area label=&quot;Add description&quot;&gt;
- * &lt;/vaadin-text-area&gt;
- * </p>
- * <h3>Prefixes and suffixes</h3>
- * <p>
- * These are child elements of a {@code <vaadin-text-area>} that are displayed
- * inline with the input, before or after. In order for an element to be
- * considered as a prefix, it must have the slot attribute set to {@code prefix}
- * (and similarly for {@code suffix}).
- * </p>
- * <p>
- * &lt;vaadin-text-area label=&quot;Add description&quot;&gt; &lt;div
- * slot=&quot;prefix&quot;&gt;Details:&lt;/div&gt; &lt;div
- * slot=&quot;suffix&quot;&gt;The end!&lt;/div&gt; &lt;/vaadin-text-area&gt;
- * </p>
- * <h3>Styling</h3>
- * <p>
- * The following shadow DOM parts are available for styling:
- * </p>
- * <table>
- * <thead>
- * <tr>
- * <th>Part name</th>
- * <th>Description</th>
- * </tr>
- * </thead> <tbody>
- * <tr>
- * <td>{@code label}</td>
- * <td>The label element</td>
- * </tr>
- * <tr>
- * <td>{@code input-field}</td>
- * <td>The element that wraps prefix, value and suffix</td>
- * </tr>
- * <tr>
- * <td>{@code value}</td>
- * <td>The text value element inside the {@code input-field} element</td>
- * </tr>
- * <tr>
- * <td>{@code error-message}</td>
- * <td>The error message element</td>
- * </tr>
- * </tbody>
- * </table>
- * <p>
- * The following state attributes are available for styling:
- * </p>
- * <table>
- * <thead>
- * <tr>
- * <th>Attribute</th>
- * <th>Description</th>
- * <th>Part name</th>
- * </tr>
- * </thead> <tbody>
- * <tr>
- * <td>{@code disabled}</td>
- * <td>Set to a disabled text field</td>
- * <td>:host</td>
- * </tr>
- * <tr>
- * <td>{@code has-value}</td>
- * <td>Set when the element has a value</td>
- * <td>:host</td>
- * </tr>
- * <tr>
- * <td>{@code has-label}</td>
- * <td>Set when the element has a label</td>
- * <td>:host</td>
- * </tr>
- * <tr>
- * <td>{@code invalid}</td>
- * <td>Set when the element is invalid</td>
- * <td>:host</td>
- * </tr>
- * <tr>
- * <td>{@code focused}</td>
- * <td>Set when the element is focused</td>
- * <td>:host</td>
- * </tr>
- * <tr>
- * <td>{@code focus-ring}</td>
- * <td>Set when the element is keyboard focused</td>
- * <td>:host</td>
- * </tr>
- * <tr>
- * <td>{@code readonly}</td>
- * <td>Set to a readonly text field</td>
- * <td>:host</td>
- * </tr>
- * </tbody>
- * </table>
- * <p>
- * See
- * <a href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin
- * – how to apply styles for shadow parts</a>
- * </p>
+ * @deprecated since v23.3, will be removed in v24.
  */
+@Deprecated
 @Tag("vaadin-text-area")
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha5")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
@@ -159,7 +57,10 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * </p>
      *
      * @return the {@code autofocus} property from the webcomponent
+     *
+     * @deprecated since v23.3, will be removed in v24.
      */
+    @Deprecated
     protected boolean isAutofocusBoolean() {
         return getElement().getProperty("autofocus", false);
     }
@@ -191,7 +92,10 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * </p>
      *
      * @return the {@code disabled} property from the webcomponent
+     *
+     * @deprecated since v23.3, will be removed in v24.
      */
+    @Deprecated
     protected boolean isDisabledBoolean() {
         return getElement().getProperty("disabled", false);
     }
@@ -206,7 +110,10 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      *
      * @param disabled
      *            the boolean value to set
+     *
+     * @deprecated since v23.3, will be removed in v24.
      */
+    @Deprecated
     protected void setDisabled(boolean disabled) {
         getElement().setProperty("disabled", disabled);
     }
@@ -226,7 +133,10 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * </p>
      *
      * @return the {@code autocomplete} property from the webcomponent
+     *
+     * @deprecated since v23.3, will be removed in v24.
      */
+    @Deprecated
     protected String getAutocompleteString() {
         return getElement().getProperty("autocomplete");
     }
@@ -244,7 +154,10 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      *
      * @param autocomplete
      *            the String value to set
+     *
+     * @deprecated since v23.3, will be removed in v24.
      */
+    @Deprecated
     protected void setAutocomplete(String autocomplete) {
         getElement().setProperty("autocomplete",
                 autocomplete == null ? "" : autocomplete);
@@ -265,7 +178,10 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * </p>
      *
      * @return the {@code autocorrect} property from the webcomponent
+     *
+     * @deprecated since v23.3, will be removed in v24.
      */
+    @Deprecated
     protected String getAutocorrectString() {
         return getElement().getProperty("autocorrect");
     }
@@ -283,7 +199,10 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      *
      * @param autocorrect
      *            the String value to set
+     *
+     * @deprecated since v23.3, will be removed in v24.
      */
+    @Deprecated
     protected void setAutocorrect(String autocorrect) {
         getElement().setProperty("autocorrect",
                 autocorrect == null ? "" : autocorrect);
@@ -305,7 +224,10 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * </p>
      *
      * @return the {@code autocapitalize} property from the webcomponent
+     *
+     * @deprecated since v23.3, will be removed in v24.
      */
+    @Deprecated
     protected String getAutocapitalizeString() {
         return getElement().getProperty("autocapitalize");
     }
@@ -324,7 +246,10 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      *
      * @param autocapitalize
      *            the String value to set
+     *
+     * @deprecated since v23.3, will be removed in v24.
      */
+    @Deprecated
     protected void setAutocapitalize(String autocapitalize) {
         getElement().setProperty("autocapitalize",
                 autocapitalize == null ? "" : autocapitalize);
@@ -343,7 +268,10 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * </p>
      *
      * @return the {@code autoselect} property from the webcomponent
+     *
+     * @deprecated since v23.3, will be removed in v24.
      */
+    @Deprecated
     protected boolean isAutoselectBoolean() {
         return getElement().getProperty("autoselect", false);
     }
@@ -376,7 +304,10 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * </p>
      *
      * @return the {@code errorMessage} property from the webcomponent
+     *
+     * @deprecated since v23.3, will be removed in v24.
      */
+    @Deprecated
     protected String getErrorMessageString() {
         return getElement().getProperty("errorMessage");
     }
@@ -409,7 +340,10 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * </p>
      *
      * @return the {@code label} property from the webcomponent
+     *
+     * @deprecated since v23.3, will be removed in v24.
      */
+    @Deprecated
     protected String getLabelString() {
         return getElement().getProperty("label");
     }
@@ -442,7 +376,10 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * </p>
      *
      * @return the {@code maxlength} property from the webcomponent
+     *
+     * @deprecated since v23.3, will be removed in v24.
      */
+    @Deprecated
     protected double getMaxlengthDouble() {
         return getElement().getProperty("maxlength", 0.0);
     }
@@ -458,7 +395,10 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      *
      * @param maxlength
      *            the double value to set
+     *
+     * @deprecated since v23.3, will be removed in v24.
      */
+    @Deprecated
     protected void setMaxlength(double maxlength) {
         getElement().setProperty("maxlength", maxlength);
     }
@@ -476,7 +416,10 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * </p>
      *
      * @return the {@code minlength} property from the webcomponent
+     *
+     * @deprecated since v23.3, will be removed in v24.
      */
+    @Deprecated
     protected double getMinlengthDouble() {
         return getElement().getProperty("minlength", 0.0);
     }
@@ -492,7 +435,10 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      *
      * @param minlength
      *            the double value to set
+     *
+     * @deprecated since v23.3, will be removed in v24.
      */
+    @Deprecated
     protected void setMinlength(double minlength) {
         getElement().setProperty("minlength", minlength);
     }
@@ -509,7 +455,10 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * </p>
      *
      * @return the {@code name} property from the webcomponent
+     *
+     * @deprecated since v23.3, will be removed in v24.
      */
+    @Deprecated
     protected String getNameString() {
         return getElement().getProperty("name");
     }
@@ -524,7 +473,10 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      *
      * @param name
      *            the String value to set
+     *
+     * @deprecated since v23.3, will be removed in v24.
      */
+    @Deprecated
     protected void setName(String name) {
         getElement().setProperty("name", name == null ? "" : name);
     }
@@ -541,7 +493,10 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * </p>
      *
      * @return the {@code placeholder} property from the webcomponent
+     *
+     * @deprecated since v23.3, will be removed in v24.
      */
+    @Deprecated
     protected String getPlaceholderString() {
         return getElement().getProperty("placeholder");
     }
@@ -575,7 +530,10 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * </p>
      *
      * @return the {@code readonly} property from the webcomponent
+     *
+     * @deprecated since v23.3, will be removed in v24.
      */
+    @Deprecated
     protected boolean isReadonlyBoolean() {
         return getElement().getProperty("readonly", false);
     }
@@ -591,7 +549,10 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      *
      * @param readonly
      *            the boolean value to set
+     *
+     * @deprecated since v23.3, will be removed in v24.
      */
+    @Deprecated
     protected void setReadonly(boolean readonly) {
         getElement().setProperty("readonly", readonly);
     }
@@ -608,7 +569,10 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * </p>
      *
      * @return the {@code required} property from the webcomponent
+     *
+     * @deprecated since v23.3, will be removed in v24.
      */
+    @Deprecated
     protected boolean isRequiredBoolean() {
         return getElement().getProperty("required", false);
     }
@@ -637,7 +601,10 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * </p>
      *
      * @return the {@code invalid} property from the webcomponent
+     *
+     * @deprecated since v23.3, will be removed in v24.
      */
+    @Deprecated
     protected boolean isInvalidBoolean() {
         return getElement().getProperty("invalid", false);
     }
@@ -709,7 +676,9 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * This function is not supported by Flow because it returns a
      * <code>boolean</code>. Functions with return types different than void are
      * not supported at this moment.
+     * @deprecated since v23.3, will be removed in v24.
      */
+    @Deprecated
     @NotSupported
     protected void checkValidity() {
     }
@@ -731,6 +700,10 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
     protected void validate() {
     }
 
+    /**
+     * @deprecated since v23.3, will be removed in v24.
+     */
+    @Deprecated
     @DomEvent("change")
     public static class ChangeEvent<R extends GeneratedVaadinTextArea<R, ?>>
             extends ComponentEvent<R> {
@@ -745,7 +718,10 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
+     *
+     * @deprecated since v23.3, will be removed in v24.
      */
+    @Deprecated
     @SuppressWarnings({ "rawtypes", "unchecked" })
     protected Registration addChangeListener(
             ComponentEventListener<ChangeEvent<R>> listener) {
@@ -753,11 +729,15 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
                 (ComponentEventListener) listener);
     }
 
-    public static class InvalidChangeEvent<R extends GeneratedVaadinTextArea<R, ?>>
-            extends ComponentEvent<R> {
+    /**
+     * @deprecated since v23.3, will be removed in v24.
+     */
+    @Deprecated
+    public static class InvalidChangeEvent<TComponent extends GeneratedVaadinTextArea<TComponent, ?>>
+            extends ComponentEvent<TComponent> {
         private final boolean invalid;
 
-        public InvalidChangeEvent(R source, boolean fromClient) {
+        public InvalidChangeEvent(TComponent source, boolean fromClient) {
             super(source, fromClient);
             this.invalid = source.isInvalidBoolean();
         }
@@ -774,7 +754,10 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
+     *
+     * @deprecated since v23.3, will be removed in v24.
      */
+    @Deprecated
     protected Registration addInvalidChangeListener(
             ComponentEventListener<InvalidChangeEvent<R>> listener) {
         return getElement()
@@ -796,7 +779,10 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * @see <a href=
      *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
+     *
+     * @deprecated since v23.3, will be removed in v24.
      */
+    @Deprecated
     protected void addToPrefix(Component... components) {
         for (Component component : components) {
             component.getElement().setAttribute("slot", "prefix");
@@ -816,7 +802,10 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * @see <a href=
      *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
+     *
+     * @deprecated since v23.3, will be removed in v24.
      */
+    @Deprecated
     protected void addToTextarea(Component... components) {
         for (Component component : components) {
             component.getElement().setAttribute("slot", "textarea");
@@ -836,7 +825,10 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * @see <a href=
      *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
+     *
+     * @deprecated since v23.3, will be removed in v24.
      */
+    @Deprecated
     protected void addToSuffix(Component... components) {
         for (Component component : components) {
             component.getElement().setAttribute("slot", "suffix");
@@ -851,7 +843,10 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      *            The components to remove.
      * @throws IllegalArgumentException
      *             if any of the components is not a child of this component.
+     *
+     * @deprecated since v23.3, will be removed in v24.
      */
+    @Deprecated
     protected void remove(Component... components) {
         for (Component component : components) {
             if (getElement().equals(component.getElement().getParent())) {
@@ -868,7 +863,10 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * Removes all contents from this component, this includes child components,
      * text content as well as child elements that have been added directly to
      * this component using the {@link Element} API.
+     *
+     * @deprecated since v23.3, will be removed in v24.
      */
+    @Deprecated
     protected void removeAll() {
         getElement().getChildren()
                 .forEach(child -> child.removeAttribute("slot"));
@@ -891,7 +889,10 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      *            a function that converts a model value to a string value
      * @param <P>
      *            the property type
+     *
+     * @deprecated since v23.3, will be removed in v24.
      */
+    @Deprecated
     public <P> GeneratedVaadinTextArea(T initialValue, T defaultValue,
             Class<P> elementPropertyType,
             SerializableFunction<P, T> presentationToModel,
@@ -914,7 +915,10 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      *            the default value to use if the value isn't defined
      * @param acceptNullValues
      *            whether <code>null</code> is accepted as a model value
+     *
+     * @deprecated since v23.3, will be removed in v24.
      */
+    @Deprecated
     public GeneratedVaadinTextArea(T initialValue, T defaultValue,
             boolean acceptNullValues) {
         this(initialValue, defaultValue, acceptNullValues, false);
@@ -935,7 +939,10 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      *            initial value is used only if element has no {@code "value"}
      *            property value, otherwise element {@code "value"} property is
      *            ignored and the initial value is set
+     *
+     * @deprecated since v23.3, will be removed in v24.
      */
+    @Deprecated
     public GeneratedVaadinTextArea(T initialValue, T defaultValue,
             boolean acceptNullValues, boolean isInitialValueOptional) {
         super("value", defaultValue, acceptNullValues);
@@ -963,7 +970,10 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      *            returns a property value
      * @param <P>
      *            the property type
+     *
+     * @deprecated since v23.3, will be removed in v24.
      */
+    @Deprecated
     public <P> GeneratedVaadinTextArea(T initialValue, T defaultValue,
             Class<P> elementPropertyType,
             SerializableBiFunction<R, P, T> presentationToModel,
@@ -977,7 +987,10 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
 
     /**
      * Default constructor.
+     *
+     * @deprecated since v23.3, will be removed in v24.
      */
+    @Deprecated
     public GeneratedVaadinTextArea() {
         this(null, null, null, (SerializableFunction) null,
                 (SerializableFunction) null);
