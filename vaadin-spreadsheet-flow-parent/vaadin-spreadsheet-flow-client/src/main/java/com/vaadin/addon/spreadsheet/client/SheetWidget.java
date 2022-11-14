@@ -1144,7 +1144,8 @@ public class SheetWidget extends Panel {
                 stoppedSelectingCellsWithDrag(event);
             }
         } else if (className.contains("cell")) {
-            if (className.equals("cell-comment-triangle")) {
+            if (className.equals("cell-comment-triangle")
+                    || className.equals("cell-invalidformula-triangle")) {
                 jsniUtil.parseColRow(
                         target.getParentElement().getAttribute("class"));
             } else {
