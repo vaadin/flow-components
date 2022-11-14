@@ -33,7 +33,8 @@ import com.vaadin.flow.shared.Registration;
 import elemental.json.JsonObject;
 
 /**
- * @deprecated since v23.3, will be removed in v24.
+ * @deprecated since v23.3. Will be removed in v24 along with all generated
+ *             classes.
  */
 @Deprecated
 @Tag("vaadin-context-menu")
@@ -60,7 +61,8 @@ public abstract class GeneratedVaadinContextMenu<R extends GeneratedVaadinContex
      *
      * @return the {@code selector} property from the webcomponent
      *
-     * @deprecated since v23.3, will be removed in v24.
+     * @deprecated since v23.3. Will be removed in v24 along with all generated
+     *             classes.
      */
     @Deprecated
     protected String getSelectorString() {
@@ -79,7 +81,8 @@ public abstract class GeneratedVaadinContextMenu<R extends GeneratedVaadinContex
      * @param selector
      *            the String value to set
      *
-     * @deprecated since v23.3, will be removed in v24.
+     * @deprecated since v23.3. Will be removed in v24 along with all generated
+     *             classes.
      */
     @Deprecated
     protected void setSelector(String selector) {
@@ -99,7 +102,8 @@ public abstract class GeneratedVaadinContextMenu<R extends GeneratedVaadinContex
      *
      * @return the {@code opened} property from the webcomponent
      *
-     * @deprecated since v23.3, will be removed in v24.
+     * @deprecated since v23.3. Will be removed in v24 along with all generated
+     *             classes.
      */
     @Deprecated
     @Synchronize(property = "opened", value = "opened-changed")
@@ -120,7 +124,8 @@ public abstract class GeneratedVaadinContextMenu<R extends GeneratedVaadinContex
      *
      * @return the {@code openOn} property from the webcomponent
      *
-     * @deprecated since v23.3, will be removed in v24.
+     * @deprecated since v23.3. Will be removed in v24 along with all generated
+     *             classes.
      */
     @Deprecated
     protected String getOpenOnString() {
@@ -138,7 +143,8 @@ public abstract class GeneratedVaadinContextMenu<R extends GeneratedVaadinContex
      * @param openOn
      *            the String value to set
      *
-     * @deprecated since v23.3, will be removed in v24.
+     * @deprecated since v23.3. Will be removed in v24 along with all generated
+     *             classes.
      */
     @Deprecated
     protected void setOpenOn(String openOn) {
@@ -160,7 +166,8 @@ public abstract class GeneratedVaadinContextMenu<R extends GeneratedVaadinContex
      *
      * @return the {@code listenOn} property from the webcomponent
      *
-     * @deprecated since v23.3, will be removed in v24.
+     * @deprecated since v23.3. Will be removed in v24 along with all generated
+     *             classes.
      */
     @Deprecated
     protected JsonObject getListenOnJsonObject() {
@@ -180,7 +187,8 @@ public abstract class GeneratedVaadinContextMenu<R extends GeneratedVaadinContex
      * @param listenOn
      *            the JsonObject value to set
      *
-     * @deprecated since v23.3, will be removed in v24.
+     * @deprecated since v23.3. Will be removed in v24 along with all generated
+     *             classes.
      */
     @Deprecated
     protected void setListenOn(JsonObject listenOn) {
@@ -200,7 +208,8 @@ public abstract class GeneratedVaadinContextMenu<R extends GeneratedVaadinContex
      *
      * @return the {@code closeOn} property from the webcomponent
      *
-     * @deprecated since v23.3, will be removed in v24.
+     * @deprecated since v23.3. Will be removed in v24 along with all generated
+     *             classes.
      */
     @Deprecated
     protected String getCloseOnString() {
@@ -218,7 +227,8 @@ public abstract class GeneratedVaadinContextMenu<R extends GeneratedVaadinContex
      * @param closeOn
      *            the String value to set
      *
-     * @deprecated since v23.3, will be removed in v24.
+     * @deprecated since v23.3. Will be removed in v24 along with all generated
+     *             classes.
      */
     @Deprecated
     protected void setCloseOn(String closeOn) {
@@ -232,7 +242,11 @@ public abstract class GeneratedVaadinContextMenu<R extends GeneratedVaadinContex
      * <p>
      * Closes the overlay.
      * </p>
+     *
+     * @deprecated since v23.3. Will be removed in v24 along with all generated
+     *             classes.
      */
+    @Deprecated
     protected void close() {
         getElement().callFunction("close");
     }
@@ -245,7 +259,8 @@ public abstract class GeneratedVaadinContextMenu<R extends GeneratedVaadinContex
      * Opens the overlay.
      * </p>
      *
-     * @deprecated since v23.3, will be removed in v24.
+     * @deprecated since v23.3. Will be removed in v24 along with all generated
+     *             classes.
      */
     @Deprecated
     protected void open() {
@@ -253,7 +268,8 @@ public abstract class GeneratedVaadinContextMenu<R extends GeneratedVaadinContex
     }
 
     /**
-     * @deprecated since v23.3, will be removed in v24.
+     * @deprecated since v23.3. Will be removed in v24 along with all generated
+     *             classes.
      */
     @Deprecated
     public static class OpenedChangeEvent<R extends GeneratedVaadinContextMenu<R>>
@@ -277,7 +293,11 @@ public abstract class GeneratedVaadinContextMenu<R extends GeneratedVaadinContex
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
+     *
+     * @deprecated since v23.3. Will be removed in v24 along with all generated
+     *             classes.
      */
+    @Deprecated
     protected Registration addOpenedChangeListener(
             ComponentEventListener<OpenedChangeEvent<R>> listener) {
         return getElement()
