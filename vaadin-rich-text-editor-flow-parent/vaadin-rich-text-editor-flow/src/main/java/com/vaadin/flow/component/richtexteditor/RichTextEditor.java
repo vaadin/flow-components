@@ -41,14 +41,19 @@ import elemental.json.JsonObject;
  * format and style your text using boldface, italics, headings, lists, images,
  * links etc.
  * <p>
- * The value of the rich text editor is in
- * <a href="https://github.com/quilljs/delta">Delta</a> format. The
+ * The value of the rich text editor is in the
+ * <a href="https://github.com/quilljs/delta">Quill Delta</a> format. The
  * {@link #setValue(String) setValue} and {@link #getValue() getValue} methods
- * deal with the default Delta format, but it is also possible to get and set
- * the value as an HTML string using
- * <code>rte.{@link #asHtml()}.{@link AsHtml#getValue() getValue()}</code>,
- * <code>rte.{@link #asHtml()}.{@link AsHtml#setValue(String) setValue()}</code>
- * and {@link #getHtmlValue()}.
+ * use the delta format by default.
+ * <p>
+ * Note that the default use of the delta format has been deprecated in 23.3,
+ * and from 24 onwards, the component will use the HTML format as default. To
+ * keep using the delta format, use {@link #asDelta()},
+ * {@link AsDelta#getValue()} and {@link AsDelta#setValue(String)}.
+ *
+ * <p>
+ * To get and set the value in HTML format, use {@link #asHtml},
+ * {@link AsHtml#getValue()} and {@link AsHtml#setValue(String)}.
  *
  * @author Vaadin Ltd
  *
@@ -65,6 +70,7 @@ public class RichTextEditor
     private ValueChangeMode currentMode;
     private RichTextEditorI18n i18n;
     private AsHtml asHtml;
+    private AsDelta asDelta;
     private HtmlSetRequest htmlSetRequest;
 
     /**
@@ -200,8 +206,11 @@ public class RichTextEditor
      * @see AsHtml#setValue(String)
      * @param value
      *            the new value in Delta format, not {@code null}
+     * @deprecated since 23.3, from 24 onwards the value will be in HTML format.
+     *             Use {@link #asDelta()} instead.
      */
     @Override
+    @Deprecated
     public void setValue(String value) {
         super.setValue(value);
     }
@@ -223,8 +232,11 @@ public class RichTextEditor
      * @see #asHtml()
      * @see AsHtml#getValue()
      * @return the current value.
+     * @deprecated since 23.3, from 24 onwards the value will be in HTML format.
+     *             Use {@link #asDelta()} instead.
      */
     @Override
+    @Deprecated
     public String getValue() {
         return super.getValue();
     }
@@ -777,8 +789,8 @@ public class RichTextEditor
     }
 
     /**
-     * Gets an instance of {@code HasValue} for binding the html value of the
-     * editor with {@code Binder}.
+     * Gets an instance of {@code HasValue} for the editor in the HTML format.
+     * Can be used for binding the value with {@link Binder}.
      *
      * @return an instance of {@code HasValue}
      */
@@ -787,6 +799,42 @@ public class RichTextEditor
             asHtml = new AsHtml();
         }
         return asHtml;
+    }
+
+    /**
+     * Gets an instance of {@code HasValue} for the editor in the
+     * <a href="https://github.com/quilljs/delta">Quill Delta</a> format. Can be
+     * used for binding the value with {@link Binder}.
+     *
+     * @return an instance of {@code HasValue}
+     */
+    public HasValue<ValueChangeEvent<String>, String> asDelta() {
+        if (asDelta == null) {
+            asDelta = new AsDelta();
+        }
+        return asDelta;
+    }
+
+    /**
+     * Adds theme variants to the component.
+     *
+     * @param variants
+     *            theme variants to add
+     */
+    @Override
+    public void addThemeVariants(RichTextEditorVariant... variants) {
+        super.addThemeVariants(variants);
+    }
+
+    /**
+     * Removes theme variants from the component.
+     *
+     * @param variants
+     *            theme variants to remove
+     */
+    @Override
+    public void removeThemeVariants(RichTextEditorVariant... variants) {
+        super.removeThemeVariants(variants);
     }
 
     /**
@@ -988,25 +1036,74 @@ public class RichTextEditor
         }
     }
 
-    /**
-     * Adds theme variants to the component.
-     *
-     * @param variants
-     *            theme variants to add
-     */
-    @Override
-    public void addThemeVariants(RichTextEditorVariant... variants) {
-        super.addThemeVariants(variants);
-    }
+    private class AsDelta
+            implements HasValue<ValueChangeEvent<String>, String> {
+        /**
+         * Sets the value of this editor in the
+         * <a href="https://github.com/quilljs/delta">Quill Delta</a> format. If
+         * the new value is not equal to {@code getValue()}, fires a value
+         * change event. Throws {@code NullPointerException}, if the value is
+         * null.
+         * <p>
+         * Note: {@link Binder} will take care of the {@code null} conversion
+         * when integrates with the editor, as long as no new converter is
+         * defined.
+         *
+         * @param value
+         *            the new value in Delta format, not {@code null}
+         */
+        @Override
+        public void setValue(String value) {
+            RichTextEditor.this.setValue(value);
+        }
 
-    /**
-     * Removes theme variants from the component.
-     *
-     * @param variants
-     *            theme variants to remove
-     */
-    @Override
-    public void removeThemeVariants(RichTextEditorVariant... variants) {
-        super.removeThemeVariants(variants);
+        /**
+         * Returns the current value of this editor in the
+         * <a href="https://github.com/quilljs/delta">Quill Delta</a> format. By
+         * default, the empty editor will return an empty string.
+         *
+         * @return the current value.
+         */
+        @Override
+        public String getValue() {
+            return RichTextEditor.this.getValue();
+        }
+
+        @Override
+        public Registration addValueChangeListener(
+                ValueChangeListener<? super ValueChangeEvent<String>> valueChangeListener) {
+            return RichTextEditor.this
+                    .addValueChangeListener(valueChangeListener);
+        }
+
+        @Override
+        public void setReadOnly(boolean b) {
+            RichTextEditor.this.setReadonly(b);
+        }
+
+        @Override
+        public boolean isReadOnly() {
+            return RichTextEditor.this.isReadOnly();
+        }
+
+        @Override
+        public void setRequiredIndicatorVisible(boolean b) {
+            RichTextEditor.this.setRequiredIndicatorVisible(b);
+        }
+
+        @Override
+        public boolean isRequiredIndicatorVisible() {
+            return RichTextEditor.this.isRequiredIndicatorVisible();
+        }
+
+        @Override
+        public String getEmptyValue() {
+            return RichTextEditor.this.getEmptyValue();
+        }
+
+        @Override
+        public void clear() {
+            RichTextEditor.this.clear();
+        }
     }
 }
