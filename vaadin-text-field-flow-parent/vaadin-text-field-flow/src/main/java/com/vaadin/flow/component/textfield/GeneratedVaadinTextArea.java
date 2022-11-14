@@ -676,6 +676,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * This function is not supported by Flow because it returns a
      * <code>boolean</code>. Functions with return types different than void are
      * not supported at this moment.
+     *
      * @deprecated since v23.3, will be removed in v24.
      */
     @Deprecated
