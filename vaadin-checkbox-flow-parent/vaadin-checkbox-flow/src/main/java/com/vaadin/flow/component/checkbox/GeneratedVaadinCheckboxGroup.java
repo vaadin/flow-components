@@ -32,7 +32,8 @@ import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.shared.Registration;
 
 /**
- * @deprecated since v23.3, will be removed in v24.
+ * @deprecated since v23.3. Will be removed in v24 along with all generated
+ *             classes.
  */
 @Deprecated
 @Tag("vaadin-checkbox-group")
@@ -50,7 +51,11 @@ public abstract class GeneratedVaadinCheckboxGroup<R extends GeneratedVaadinChec
      *
      * @param variants
      *            theme variants to add
+     *
+     * @deprecated since v23.3. Will be removed in v24 along with all generated
+     *             classes.
      */
+    @Deprecated
     public void addThemeVariants(CheckboxGroupVariant... variants) {
         getThemeNames().addAll(
                 Stream.of(variants).map(CheckboxGroupVariant::getVariantName)
@@ -62,7 +67,11 @@ public abstract class GeneratedVaadinCheckboxGroup<R extends GeneratedVaadinChec
      *
      * @param variants
      *            theme variants to remove
+     *
+     * @deprecated since v23.3. Will be removed in v24 along with all generated
+     *             classes.
      */
+    @Deprecated
     public void removeThemeVariants(CheckboxGroupVariant... variants) {
         getThemeNames().removeAll(
                 Stream.of(variants).map(CheckboxGroupVariant::getVariantName)
@@ -83,7 +92,8 @@ public abstract class GeneratedVaadinCheckboxGroup<R extends GeneratedVaadinChec
      *
      * @return the {@code disabled} property from the webcomponent
      *
-     * @deprecated since v23.3, will be removed in v24.
+     * @deprecated since v23.3. Will be removed in v24 along with all generated
+     *             classes.
      */
     @Deprecated
     protected boolean isDisabledBoolean() {
@@ -102,7 +112,8 @@ public abstract class GeneratedVaadinCheckboxGroup<R extends GeneratedVaadinChec
      * @param disabled
      *            the boolean value to set
      *
-     * @deprecated since v23.3, will be removed in v24.
+     * @deprecated since v23.3. Will be removed in v24 along with all generated
+     *             classes.
      */
     @Deprecated
     protected void setDisabled(boolean disabled) {
@@ -122,7 +133,8 @@ public abstract class GeneratedVaadinCheckboxGroup<R extends GeneratedVaadinChec
      *
      * @return the {@code label} property from the webcomponent
      *
-     * @deprecated since v23.3, will be removed in v24.
+     * @deprecated since v23.3. Will be removed in v24 along with all generated
+     *             classes.
      */
     @Deprecated
     protected String getLabelString() {
@@ -139,7 +151,11 @@ public abstract class GeneratedVaadinCheckboxGroup<R extends GeneratedVaadinChec
      *
      * @param label
      *            the String value to set
+     *
+     * @deprecated since v23.3. Will be removed in v24 along with all generated
+     *             classes.
      */
+    @Deprecated
     protected void setLabel(String label) {
         getElement().setProperty("label", label == null ? "" : label);
     }
@@ -157,7 +173,8 @@ public abstract class GeneratedVaadinCheckboxGroup<R extends GeneratedVaadinChec
      *
      * @return the {@code errorMessage} property from the webcomponent
      *
-     * @deprecated since v23.3, will be removed in v24.
+     * @deprecated since v23.3. Will be removed in v24 along with all generated
+     *             classes.
      */
     @Deprecated
     protected String getErrorMessageString() {
@@ -174,7 +191,11 @@ public abstract class GeneratedVaadinCheckboxGroup<R extends GeneratedVaadinChec
      *
      * @param errorMessage
      *            the String value to set
+     *
+     * @deprecated since v23.3. Will be removed in v24 along with all generated
+     *             classes.
      */
+    @Deprecated
     protected void setErrorMessage(String errorMessage) {
         getElement().setProperty("errorMessage",
                 errorMessage == null ? "" : errorMessage);
@@ -193,7 +214,8 @@ public abstract class GeneratedVaadinCheckboxGroup<R extends GeneratedVaadinChec
      *
      * @return the {@code required} property from the webcomponent
      *
-     * @deprecated since v23.3, will be removed in v24.
+     * @deprecated since v23.3. Will be removed in v24 along with all generated
+     *             classes.
      */
     @Deprecated
     protected boolean isRequiredBoolean() {
@@ -210,7 +232,11 @@ public abstract class GeneratedVaadinCheckboxGroup<R extends GeneratedVaadinChec
      *
      * @param required
      *            the boolean value to set
+     *
+     * @deprecated since v23.3. Will be removed in v24 along with all generated
+     *             classes.
      */
+    @Deprecated
     protected void setRequired(boolean required) {
         getElement().setProperty("required", required);
     }
@@ -224,7 +250,8 @@ public abstract class GeneratedVaadinCheckboxGroup<R extends GeneratedVaadinChec
      *
      * @return the {@code invalid} property from the webcomponent
      *
-     * @deprecated since v23.3, will be removed in v24.
+     * @deprecated since v23.3. Will be removed in v24 along with all generated
+     *             classes.
      */
     @Deprecated
     protected boolean isInvalidBoolean() {
@@ -241,7 +268,11 @@ public abstract class GeneratedVaadinCheckboxGroup<R extends GeneratedVaadinChec
      *
      * @param invalid
      *            the boolean value to set
+     *
+     * @deprecated since v23.3. Will be removed in v24 along with all generated
+     *             classes.
      */
+    @Deprecated
     protected void setInvalid(boolean invalid) {
         getElement().setProperty("invalid", invalid);
     }
@@ -259,7 +290,8 @@ public abstract class GeneratedVaadinCheckboxGroup<R extends GeneratedVaadinChec
      * <code>boolean</code>. Functions with return types different than void are
      * not supported at this moment.
      *
-     * @deprecated since v23.3, will be removed in v24.
+     * @deprecated since v23.3. Will be removed in v24 along with all generated
+     *             classes.
      */
     @Deprecated
     @NotSupported
@@ -267,7 +299,8 @@ public abstract class GeneratedVaadinCheckboxGroup<R extends GeneratedVaadinChec
     }
 
     /**
-     * @deprecated since v23.3, will be removed in v24.
+     * @deprecated since v23.3. Will be removed in v24 along with all generated
+     *             classes.
      */
     @Deprecated
     public static class InvalidChangeEvent<R extends GeneratedVaadinCheckboxGroup<R, ?>>
@@ -292,7 +325,8 @@ public abstract class GeneratedVaadinCheckboxGroup<R extends GeneratedVaadinChec
      *            the listener
      * @return a {@link Registration} for removing the event listener
      *
-     * @deprecated since v23.3, will be removed in v24.
+     * @deprecated since v23.3. Will be removed in v24 along with all generated
+     *             classes.
      */
     @Deprecated
     protected Registration addInvalidChangeListener(
@@ -321,7 +355,8 @@ public abstract class GeneratedVaadinCheckboxGroup<R extends GeneratedVaadinChec
      * @param <P>
      *            the property type
      *
-     * @deprecated since v23.3, will be removed in v24.
+     * @deprecated since v23.3. Will be removed in v24 along with all generated
+     *             classes.
      */
     @Deprecated
     public <P> GeneratedVaadinCheckboxGroup(T initialValue, T defaultValue,
@@ -346,7 +381,8 @@ public abstract class GeneratedVaadinCheckboxGroup<R extends GeneratedVaadinChec
      * @param acceptNullValues
      *            whether <code>null</code> is accepted as a model value
      *
-     * @deprecated since v23.3, will be removed in v24.
+     * @deprecated since v23.3. Will be removed in v24 along with all generated
+     *             classes.
      */
     @Deprecated
     public GeneratedVaadinCheckboxGroup(T initialValue, T defaultValue,
@@ -385,7 +421,8 @@ public abstract class GeneratedVaadinCheckboxGroup<R extends GeneratedVaadinChec
      * @param <P>
      *            the property type
      *
-     * @deprecated since v23.3, will be removed in v24.
+     * @deprecated since v23.3. Will be removed in v24 along with all generated
+     *             classes.
      */
     @Deprecated
     public <P> GeneratedVaadinCheckboxGroup(T initialValue, T defaultValue,
@@ -424,7 +461,8 @@ public abstract class GeneratedVaadinCheckboxGroup<R extends GeneratedVaadinChec
      * @param <P>
      *            the property type
      *
-     * @deprecated since v23.3, will be removed in v24.
+     * @deprecated since v23.3. Will be removed in v24 along with all generated
+     *             classes.
      */
     @Deprecated
     public <P> GeneratedVaadinCheckboxGroup(T initialValue, T defaultValue,
@@ -438,7 +476,8 @@ public abstract class GeneratedVaadinCheckboxGroup<R extends GeneratedVaadinChec
     /**
      * Default constructor.
      *
-     * @deprecated since v23.3, will be removed in v24.
+     * @deprecated since v23.3. Will be removed in v24 along with all generated
+     *             classes.
      */
     @Deprecated
     public GeneratedVaadinCheckboxGroup() {
