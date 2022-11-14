@@ -608,6 +608,28 @@ public class CheckboxGroup<T>
         refreshCheckboxItems();
     }
 
+    /**
+     * Adds theme variants to the component.
+     *
+     * @param variants
+     *            theme variants to add
+     */
+    @Override
+    public void addThemeVariants(CheckboxGroupVariant... variants) {
+        super.addThemeVariants(variants);
+    }
+
+    /**
+     * Removes theme variants from the component.
+     *
+     * @param variants
+     *            theme variants to remove
+     */
+    @Override
+    public void removeThemeVariants(CheckboxGroupVariant... variants) {
+        super.removeThemeVariants(variants);
+    }
+
     @SuppressWarnings("unchecked")
     private void reset() {
         keyMapper.removeAll();

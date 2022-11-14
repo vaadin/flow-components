@@ -32,90 +32,9 @@ import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.shared.Registration;
 
 /**
- * <p>
- * Description copied from corresponding location in WebComponent:
- * </p>
- * <p>
- * {@code <vaadin-checkbox-group>} is a Polymer element for grouping
- * vaadin-checkboxes.
- * </p>
- * <p>
- * &lt;vaadin-checkbox-group label=&quot;Preferred language of
- * contact:&quot;&gt; &lt;vaadin-checkbox
- * value=&quot;en&quot;&gt;English&lt;/vaadin-checkbox&gt; &lt;vaadin-checkbox
- * value=&quot;fr&quot;&gt;Français&lt;/vaadin-checkbox&gt; &lt;vaadin-checkbox
- * value=&quot;de&quot;&gt;Deutsch&lt;/vaadin-checkbox&gt;
- * &lt;/vaadin-checkbox-group&gt;
- * </p>
- * <h3>Styling</h3>
- * <p>
- * The following shadow DOM parts are available for styling:
- * </p>
- * <table>
- * <thead>
- * <tr>
- * <th>Part name</th>
- * <th>Description</th>
- * </tr>
- * </thead> <tbody>
- * <tr>
- * <td>{@code label}</td>
- * <td>The label element</td>
- * </tr>
- * <tr>
- * <td>{@code group-field}</td>
- * <td>The element that wraps checkboxes</td>
- * </tr>
- * <tr>
- * <td>{@code error-message}</td>
- * <td>The error message element</td>
- * </tr>
- * </tbody>
- * </table>
- * <p>
- * The following state attributes are available for styling:
- * </p>
- * <table>
- * <thead>
- * <tr>
- * <th>Attribute</th>
- * <th>Description</th>
- * <th>Part name</th>
- * </tr>
- * </thead> <tbody>
- * <tr>
- * <td>{@code disabled}</td>
- * <td>Set when the checkbox group and its children are disabled.</td>
- * <td>:host</td>
- * </tr>
- * <tr>
- * <td>{@code has-label}</td>
- * <td>Set when the element has a label</td>
- * <td>:host</td>
- * </tr>
- * <tr>
- * <td>{@code has-value}</td>
- * <td>Set when the element has a value</td>
- * <td>:host</td>
- * </tr>
- * <tr>
- * <td>{@code required}</td>
- * <td>Set when the element is required</td>
- * <td>:host</td>
- * </tr>
- * <tr>
- * <td>{@code invalid}</td>
- * <td>Set when the element is invalid</td>
- * <td>:host</td>
- * </tr>
- * </tbody>
- * </table>
- * <p>
- * See
- * <a href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin
- * – how to apply styles for shadow parts</a>
- * </p>
+ * @deprecated since v23.3, will be removed in v24.
  */
+@Deprecated
 @Tag("vaadin-checkbox-group")
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha6")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
@@ -163,7 +82,10 @@ public abstract class GeneratedVaadinCheckboxGroup<R extends GeneratedVaadinChec
      * </p>
      *
      * @return the {@code disabled} property from the webcomponent
+     *
+     * @deprecated since v23.3, will be removed in v24.
      */
+    @Deprecated
     protected boolean isDisabledBoolean() {
         return getElement().getProperty("disabled", false);
     }
@@ -179,7 +101,10 @@ public abstract class GeneratedVaadinCheckboxGroup<R extends GeneratedVaadinChec
      *
      * @param disabled
      *            the boolean value to set
+     *
+     * @deprecated since v23.3, will be removed in v24.
      */
+    @Deprecated
     protected void setDisabled(boolean disabled) {
         getElement().setProperty("disabled", disabled);
     }
@@ -196,7 +121,10 @@ public abstract class GeneratedVaadinCheckboxGroup<R extends GeneratedVaadinChec
      * </p>
      *
      * @return the {@code label} property from the webcomponent
+     *
+     * @deprecated since v23.3, will be removed in v24.
      */
+    @Deprecated
     protected String getLabelString() {
         return getElement().getProperty("label");
     }
@@ -228,7 +156,10 @@ public abstract class GeneratedVaadinCheckboxGroup<R extends GeneratedVaadinChec
      * </p>
      *
      * @return the {@code errorMessage} property from the webcomponent
+     *
+     * @deprecated since v23.3, will be removed in v24.
      */
+    @Deprecated
     protected String getErrorMessageString() {
         return getElement().getProperty("errorMessage");
     }
@@ -261,7 +192,10 @@ public abstract class GeneratedVaadinCheckboxGroup<R extends GeneratedVaadinChec
      * </p>
      *
      * @return the {@code required} property from the webcomponent
+     *
+     * @deprecated since v23.3, will be removed in v24.
      */
+    @Deprecated
     protected boolean isRequiredBoolean() {
         return getElement().getProperty("required", false);
     }
@@ -289,7 +223,10 @@ public abstract class GeneratedVaadinCheckboxGroup<R extends GeneratedVaadinChec
      * This property is set to true when the control value is invalid.
      *
      * @return the {@code invalid} property from the webcomponent
+     *
+     * @deprecated since v23.3, will be removed in v24.
      */
+    @Deprecated
     protected boolean isInvalidBoolean() {
         return getElement().getProperty("invalid", false);
     }
@@ -321,11 +258,18 @@ public abstract class GeneratedVaadinCheckboxGroup<R extends GeneratedVaadinChec
      * This function is not supported by Flow because it returns a
      * <code>boolean</code>. Functions with return types different than void are
      * not supported at this moment.
+     *
+     * @deprecated since v23.3, will be removed in v24.
      */
+    @Deprecated
     @NotSupported
     protected void validate() {
     }
 
+    /**
+     * @deprecated since v23.3, will be removed in v24.
+     */
+    @Deprecated
     public static class InvalidChangeEvent<R extends GeneratedVaadinCheckboxGroup<R, ?>>
             extends ComponentEvent<R> {
         private final boolean invalid;
@@ -347,7 +291,10 @@ public abstract class GeneratedVaadinCheckboxGroup<R extends GeneratedVaadinChec
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
+     *
+     * @deprecated since v23.3, will be removed in v24.
      */
+    @Deprecated
     protected Registration addInvalidChangeListener(
             ComponentEventListener<InvalidChangeEvent<R>> listener) {
         return getElement()
@@ -373,7 +320,10 @@ public abstract class GeneratedVaadinCheckboxGroup<R extends GeneratedVaadinChec
      *            a function that converts a model value to a string value
      * @param <P>
      *            the property type
+     *
+     * @deprecated since v23.3, will be removed in v24.
      */
+    @Deprecated
     public <P> GeneratedVaadinCheckboxGroup(T initialValue, T defaultValue,
             Class<P> elementPropertyType,
             SerializableFunction<P, T> presentationToModel,
@@ -395,7 +345,10 @@ public abstract class GeneratedVaadinCheckboxGroup<R extends GeneratedVaadinChec
      *            the default value to use if the value isn't defined
      * @param acceptNullValues
      *            whether <code>null</code> is accepted as a model value
+     *
+     * @deprecated since v23.3, will be removed in v24.
      */
+    @Deprecated
     public GeneratedVaadinCheckboxGroup(T initialValue, T defaultValue,
             boolean acceptNullValues) {
         super("value", defaultValue, acceptNullValues);
@@ -431,7 +384,10 @@ public abstract class GeneratedVaadinCheckboxGroup<R extends GeneratedVaadinChec
      *            ignored and the initial value is set
      * @param <P>
      *            the property type
+     *
+     * @deprecated since v23.3, will be removed in v24.
      */
+    @Deprecated
     public <P> GeneratedVaadinCheckboxGroup(T initialValue, T defaultValue,
             Class<P> elementPropertyType,
             SerializableBiFunction<R, P, T> presentationToModel,
@@ -467,7 +423,10 @@ public abstract class GeneratedVaadinCheckboxGroup<R extends GeneratedVaadinChec
      *            returns a property value
      * @param <P>
      *            the property type
+     *
+     * @deprecated since v23.3, will be removed in v24.
      */
+    @Deprecated
     public <P> GeneratedVaadinCheckboxGroup(T initialValue, T defaultValue,
             Class<P> elementPropertyType,
             SerializableBiFunction<R, P, T> presentationToModel,
@@ -478,7 +437,10 @@ public abstract class GeneratedVaadinCheckboxGroup<R extends GeneratedVaadinChec
 
     /**
      * Default constructor.
+     *
+     * @deprecated since v23.3, will be removed in v24.
      */
+    @Deprecated
     public GeneratedVaadinCheckboxGroup() {
         this(null, null, null, (SerializableFunction) null,
                 (SerializableFunction) null);
