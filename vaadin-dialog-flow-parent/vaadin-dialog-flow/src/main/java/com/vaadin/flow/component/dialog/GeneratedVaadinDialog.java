@@ -142,7 +142,8 @@ public abstract class GeneratedVaadinDialog<R extends GeneratedVaadinDialog<R>>
     }
 
     /**
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, deprecated classes will be removed in v24. Use
+     *             {@link Dialog.OpenedChangeEvent} instead.
      */
     @Deprecated
     public static class OpenedChangeEvent<R extends GeneratedVaadinDialog<R>>
