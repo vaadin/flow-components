@@ -84,7 +84,7 @@ public class GridTest {
     }
 
     @Test
-    public void setAllRowsVisibleProperty_isAllRowsVisibleWork() {
+    public void setAllRowsVisibleProperty_isAllRowsVisibleWorks() {
         final Grid<String> grid = new Grid<>();
         grid.getElement().setProperty("allRowsVisible", true);
 
