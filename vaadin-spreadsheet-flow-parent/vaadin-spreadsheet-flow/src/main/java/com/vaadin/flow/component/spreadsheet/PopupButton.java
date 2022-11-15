@@ -55,20 +55,17 @@ public class PopupButton extends Component {
 
         @Override
         public void onPopupClose() {
-            setPopupVisible(false);
             fireClose();
         }
 
         @Override
         public void onPopupButtonClick() {
-            setPopupVisible(true);
             fireOpen();
         }
     };
 
     private Component child;
 
-    private boolean popupVisible = false;
     private PopupButtonState state = new PopupButtonState();
 
     /**
@@ -99,8 +96,8 @@ public class PopupButton extends Component {
      * @return Target cell reference
      */
     public CellReference getCellReference() {
-        return new CellReference(getState(false).sheet, getState(false).row - 1,
-                getState(false).col - 1, false, false);
+        return new CellReference(getState().sheet, getState().row - 1,
+                getState().col - 1, false, false);
     }
 
     void setCellReference(CellReference cellReference) {
@@ -115,7 +112,7 @@ public class PopupButton extends Component {
      * @return Column index, 0-based
      */
     public int getColumn() {
-        return getState(false).col - 1;
+        return getState().col - 1;
     }
 
     /**
@@ -124,7 +121,7 @@ public class PopupButton extends Component {
      * @return Row index, 0-based
      */
     public int getRow() {
-        return getState(false).row - 1;
+        return getState().row - 1;
     }
 
     /**
@@ -132,7 +129,6 @@ public class PopupButton extends Component {
      * of the Spreadsheet.
      */
     public void openPopup() {
-        setPopupVisible(true);
         getElement().appendChild(getContent().getElement());
         getParent().ifPresent(parent -> {
             parent.getElement().callJsFunction("onPopupButtonOpen",
@@ -147,7 +143,6 @@ public class PopupButton extends Component {
      * Closes the pop-up if it is open.
      */
     public void closePopup() {
-        setPopupVisible(false);
         getParent().ifPresent(parent -> parent.getElement()
                 .callJsFunction("closePopup", getRow() + 1, getColumn() + 1));
         fireClose();
@@ -216,12 +211,6 @@ public class PopupButton extends Component {
         return state;
     }
 
-    protected PopupButtonState getState(boolean markAsDirty) {
-        // todo: ver que hacemos con esto
-        // state.markAsDirty(markAsDirty);
-        return state;
-    }
-
     /**
      * Set the contents of the popup.
      *
@@ -273,15 +262,6 @@ public class PopupButton extends Component {
     public Registration addPopupCloseListener(PopupCloseListener listener) {
         return addListener(PopupCloseEvent.class, listener::onPopupClose);
     }
-
-    /*
-     * todo: es necesario?
-     *
-     * @Override public void detach() { // this order needs to be maintained so
-     * that // 1) iterator returns empty // 2) child -> parent is cleared
-     * properly popupVisible = false; child.setParent(null); super.detach(); }
-     *
-     */
 
     private void fireOpen() {
         fireEvent(new PopupOpenEvent(this));
@@ -381,23 +361,4 @@ public class PopupButton extends Component {
          */
         public void onPopupClose(PopupCloseEvent event);
     }
-
-    private void setPopupVisible(boolean visible) {
-        popupVisible = visible;
-
-        /*
-         * todo: se pueden mover componentes en flow? if (child != null) { if
-         * (visible) { if (child.getParent() != null &&
-         * !equals(child.getParent())) { // If the component already has a
-         * parent, try to remove it
-         * AbstractSingleComponentContainer.removeFromParent(child); }
-         * child.setParent(this);
-         *
-         * } else { if (equals(child.getParent())) { child.setParent(null); } }
-         * }
-         *
-         * markAsDirty();
-         */
-    }
-
 }

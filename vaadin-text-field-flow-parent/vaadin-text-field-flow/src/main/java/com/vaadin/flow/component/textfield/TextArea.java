@@ -323,7 +323,7 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
      *            the maximum length
      */
     public void setMaxLength(int maxLength) {
-        super.setMaxlength(maxLength);
+        getElement().setProperty("maxlength", maxLength);
         getValidationSupport().setMaxLength(maxLength);
     }
 
@@ -334,7 +334,7 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
      * @return the {@code maxlength} property from the webcomponent
      */
     public int getMaxLength() {
-        return (int) getMaxlengthDouble();
+        return (int) getElement().getProperty("maxlength", 0.0);
     }
 
     /**
@@ -345,7 +345,7 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
      *            the minimum length
      */
     public void setMinLength(int minLength) {
-        super.setMinlength(minLength);
+        getElement().setProperty("minlength", minLength);
         getValidationSupport().setMinLength(minLength);
     }
 
@@ -356,7 +356,7 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
      * @return the {@code minlength} property from the webcomponent
      */
     public int getMinLength() {
-        return (int) getMinlengthDouble();
+        return (int) getElement().getProperty("minlength", 0.0);
     }
 
     /**
@@ -390,7 +390,7 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
      *      https://html.spec.whatwg.org/multipage/input.html#attr-input-pattern</>
      */
     public void setPattern(String pattern) {
-        getElement().setProperty("pattern", pattern);
+        getElement().setProperty("pattern", pattern == null ? "" : pattern);
         getValidationSupport().setPattern(pattern);
     }
 

@@ -65,4 +65,23 @@ public class FreezePaneIT extends AbstractSpreadsheetIT {
         Assert.assertEquals("0px",
                 firstRowHeader.getWrappedElement().getCssValue("top"));
     }
+
+    @Test
+    public void largeSheet_addFreezePane_verticalAndHorizontal_firstHeaderIsPlacedCorrectly()
+            throws Exception {
+        loadFile("100_000_rows.xlsx");
+
+        addFreezePane();
+
+        SheetHeaderElement firstColumnHeader = getSpreadsheet()
+                .getColumnHeader(1);
+        SheetHeaderElement firstRowHeader = getSpreadsheet().getRowHeader(1);
+        Assert.assertEquals("A", firstColumnHeader.getText());
+        Assert.assertEquals("0px",
+                firstColumnHeader.getWrappedElement().getCssValue("left"));
+        Assert.assertEquals("1", firstRowHeader.getText());
+        Assert.assertEquals("0px",
+                firstRowHeader.getWrappedElement().getCssValue("top"));
+    }
+
 }
