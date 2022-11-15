@@ -983,12 +983,11 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      */
     @Deprecated
     protected Registration addInvalidChangeListener(
-            ComponentEventListener<InvalidChangeEvent<R>> listener) {
-        return getElement()
-                .addPropertyChangeListener("invalid",
-                        event -> listener.onComponentEvent(
-                                new InvalidChangeEvent<R>((R) this,
-                                        event.isUserOriginated())));
+            ComponentEventListener<DatePicker.InvalidChangeEvent> listener) {
+        return getElement().addPropertyChangeListener("invalid",
+                event -> listener.onComponentEvent(
+                        new DatePicker.InvalidChangeEvent((DatePicker) this,
+                                event.isUserOriginated())));
     }
 
     /**
@@ -1023,12 +1022,11 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      */
     @Deprecated
     protected Registration addOpenedChangeListener(
-            ComponentEventListener<OpenedChangeEvent<R>> listener) {
-        return getElement()
-                .addPropertyChangeListener("opened",
-                        event -> listener.onComponentEvent(
-                                new OpenedChangeEvent<R>((R) this,
-                                        event.isUserOriginated())));
+            ComponentEventListener<DatePicker.OpenedChangeEvent> listener) {
+        return getElement().addPropertyChangeListener("opened",
+                event -> listener.onComponentEvent(
+                        new DatePicker.OpenedChangeEvent((DatePicker) this,
+                                event.isUserOriginated())));
     }
 
     /**
