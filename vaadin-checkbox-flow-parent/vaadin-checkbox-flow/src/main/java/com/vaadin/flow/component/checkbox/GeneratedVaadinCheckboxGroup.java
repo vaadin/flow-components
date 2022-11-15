@@ -135,7 +135,8 @@ public abstract class GeneratedVaadinCheckboxGroup<R extends GeneratedVaadinChec
      * @param variants
      *            theme variants to add
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, deprecated classes will be removed in v24. Use
+     *             {@link CheckboxGroup#addThemeVariants} instead.
      */
     @Deprecated
     public void addThemeVariants(CheckboxGroupVariant... variants) {
@@ -150,7 +151,8 @@ public abstract class GeneratedVaadinCheckboxGroup<R extends GeneratedVaadinChec
      * @param variants
      *            theme variants to remove
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, deprecated classes will be removed in v24. Use
+     *             {@link CheckboxGroup#removeThemeVariants} instead.
      */
     @Deprecated
     public void removeThemeVariants(CheckboxGroupVariant... variants) {
