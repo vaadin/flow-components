@@ -74,6 +74,7 @@ import elemental.json.JsonArray;
  *
  * @author Vaadin Ltd
  */
+@SuppressWarnings("deprecation")
 public class CheckboxGroup<T>
         extends GeneratedVaadinCheckboxGroup<CheckboxGroup<T>, Set<T>>
         implements HasItemComponents<T>, HasSize, HasValidation,
