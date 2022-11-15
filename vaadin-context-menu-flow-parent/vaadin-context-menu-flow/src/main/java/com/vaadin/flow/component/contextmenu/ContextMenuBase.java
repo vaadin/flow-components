@@ -45,7 +45,7 @@ import elemental.json.JsonObject;
  *
  * @author Vaadin Ltd.
  */
-@SuppressWarnings("serial")
+@SuppressWarnings({"serial", "deprecation"})
 @JsModule("./flow-component-renderer.js")
 @JsModule("./contextMenuConnector.js")
 @JsModule("./contextMenuTargetConnector.js")

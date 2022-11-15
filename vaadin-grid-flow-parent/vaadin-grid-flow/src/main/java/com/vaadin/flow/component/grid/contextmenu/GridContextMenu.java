@@ -36,7 +36,7 @@ import elemental.json.JsonObject;
  *
  * @author Vaadin Ltd.
  */
-@SuppressWarnings("serial")
+@SuppressWarnings({"serial", "deprecation"})
 public class GridContextMenu<T> extends
         ContextMenuBase<GridContextMenu<T>, GridMenuItem<T>, GridSubMenu<T>>
         implements HasGridMenuItems<T> {
