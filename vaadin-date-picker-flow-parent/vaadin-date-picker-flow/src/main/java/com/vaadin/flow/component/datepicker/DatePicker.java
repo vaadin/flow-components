@@ -74,6 +74,7 @@ import elemental.json.JsonType;
  *
  * @author Vaadin Ltd
  */
+@SuppressWarnings("deprecation")
 @JsModule("./datepickerConnector.js")
 @NpmPackage(value = "date-fns", version = "2.29.3")
 public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
@@ -764,13 +765,13 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
 
     @Override
     public Registration addOpenedChangeListener(
-            ComponentEventListener<OpenedChangeEvent<DatePicker>> listener) {
+            ComponentEventListener<OpenedChangeEvent> listener) {
         return super.addOpenedChangeListener(listener);
     }
 
     @Override
     public Registration addInvalidChangeListener(
-            ComponentEventListener<InvalidChangeEvent<DatePicker>> listener) {
+            ComponentEventListener<InvalidChangeEvent> listener) {
         return super.addInvalidChangeListener(listener);
     }
 
@@ -1142,6 +1143,20 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         public DatePickerI18n setCancel(String cancel) {
             this.cancel = cancel;
             return this;
+        }
+    }
+
+    public static class InvalidChangeEvent
+            extends GeneratedVaadinDatePicker.InvalidChangeEvent<DatePicker> {
+        public InvalidChangeEvent(DatePicker source, boolean fromClient) {
+            super(source, fromClient);
+        }
+    }
+
+    public static class OpenedChangeEvent
+            extends GeneratedVaadinDatePicker.OpenedChangeEvent<DatePicker> {
+        public OpenedChangeEvent(DatePicker source, boolean fromClient) {
+            super(source, fromClient);
         }
     }
 }
