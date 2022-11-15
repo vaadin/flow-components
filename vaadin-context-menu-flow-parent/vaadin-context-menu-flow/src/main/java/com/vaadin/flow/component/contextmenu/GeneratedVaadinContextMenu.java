@@ -33,8 +33,114 @@ import com.vaadin.flow.shared.Registration;
 import elemental.json.JsonObject;
 
 /**
- * @deprecated since v23.3. Will be removed in v24 along with all generated
- *             classes.
+ * <p>
+ * Description copied from corresponding location in WebComponent:
+ * </p>
+ * <p>
+ * &lt;vaadin-context-menu&gt; &lt;template&gt; &lt;vaadin-list-box&gt;
+ * &lt;vaadin-item&gt;First menu item&lt;/vaadin-item&gt;
+ * &lt;vaadin-item&gt;Second menu item&lt;/vaadin-item&gt;
+ * &lt;/vaadin-list-box&gt; &lt;/template&gt; &lt;/vaadin-context-menu&gt;
+ * </p>
+ * <h3>“vaadin-contextmenu” Gesture Event</h3>
+ * <p>
+ * {@code vaadin-contextmenu} is a gesture event (a custom event fired by
+ * Polymer), which is dispatched after either {@code contextmenu} and long touch
+ * events. This enables support for both mouse and touch environments in a
+ * uniform way.
+ * </p>
+ * <p>
+ * {@code <vaadin-context-menu>} opens the menu overlay on the
+ * {@code vaadin-contextmenu} event by default.
+ * </p>
+ * <h3>Menu Listener</h3>
+ * <p>
+ * By default, the {@code <vaadin-context-menu>} element listens for the menu
+ * opening event on itself. In order to have a context menu on your content,
+ * wrap your content with the {@code <vaadin-context-menu>} element, and add a
+ * template element with a menu. Example:
+ * </p>
+ * <p>
+ * &lt;vaadin-context-menu&gt; &lt;template&gt; &lt;vaadin-list-box&gt;
+ * &lt;vaadin-item&gt;First menu item&lt;/vaadin-item&gt;
+ * &lt;vaadin-item&gt;Second menu item&lt;/vaadin-item&gt;
+ * &lt;/vaadin-list-box&gt; &lt;/template&gt;
+ * </p>
+ * <p>
+ * &lt;p&gt;This paragraph has the context menu provided in the above
+ * template.&lt;/p&gt; &lt;p&gt;Another paragraph with the context
+ * menu.&lt;/p&gt; &lt;/vaadin-context-menu&gt;
+ * </p>
+ * <p>
+ * In case if you do not want to wrap the page content, you can listen for
+ * events on an element outside the {@code <vaadin-context-menu>} by setting the
+ * {@code listenOn} property:
+ * </p>
+ * <p>
+ * &lt;vaadin-context-menu id=&quot;customListener&quot;&gt; &lt;template&gt;
+ * &lt;vaadin-list-box&gt; ... &lt;/vaadin-list-box&gt; &lt;/template&gt;
+ * &lt;/vaadin-context-menu&gt;
+ * </p>
+ * <p>
+ * &lt;div id=&quot;menuListener&quot;&gt;The element that listens for the
+ * context menu.&lt;/div&gt;
+ * </p>
+ * <p>
+ * &amp;lt;script&amp;gt; const contextMenu =
+ * document.querySelector('vaadin-context-menu#customListener');
+ * contextMenu.listenOn = document.querySelector('#menuListener');
+ * &amp;lt;/script&amp;gt;
+ * </p>
+ * <h3>Filtering Menu Targets</h3>
+ * <p>
+ * By default, the listener element and all its descendants open the context
+ * menu. You can filter the menu targets to a smaller set of elements inside the
+ * listener element by setting the {@code selector} property.
+ * </p>
+ * <p>
+ * In the following example, only the elements matching {@code .has-menu} will
+ * open the context menu:
+ * </p>
+ * <p>
+ * &lt;vaadin-context-menu selector=&quot;.has-menu&quot;&gt; &lt;template&gt;
+ * &lt;vaadin-list-box&gt; ... &lt;/vaadin-list-box&gt; &lt;/template&gt;
+ * </p>
+ * <p>
+ * &lt;p class=&quot;has-menu&quot;&gt;This paragraph opens the context
+ * menu&lt;/p&gt; &lt;p&gt;This paragraph does not open the context
+ * menu&lt;/p&gt; &lt;/vaadin-context-menu&gt;
+ * </p>
+ * <h3>Menu Context</h3>
+ * <p>
+ * You can bind to the following properties in the menu template:
+ * </p>
+ * <ul>
+ * <li>{@code target} is the menu opening event target, which is the element
+ * that the user has called the context menu for</li>
+ * <li>{@code detail} is the menu opening event detail</li>
+ * </ul>
+ * <p>
+ * In the following example, the menu item text is composed with the contents of
+ * the element that opened the menu:
+ * </p>
+ * <p>
+ * &lt;vaadin-context-menu selector=&quot;li&quot;&gt; &lt;template&gt;
+ * &lt;vaadin-list-box&gt; &lt;vaadin-item&gt;The menu target:
+ * [[target.textContent]]&lt;/vaadin-item&gt; &lt;/vaadin-list-box&gt;
+ * &lt;/template&gt;
+ * </p>
+ * <p>
+ * &lt;ul&gt; &lt;li&gt;Foo&lt;/li&gt; &lt;li&gt;Bar&lt;/li&gt;
+ * &lt;li&gt;Baz&lt;/li&gt; &lt;/ul&gt; &lt;/vaadin-context-menu&gt;
+ * </p>
+ * <h3>Styling</h3>
+ * <p>
+ * See
+ * <a href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin
+ * – how to apply styles for shadow parts</a>
+ * </p>
+ *
+ * @deprecated since v23.3, deprecated classes will be removed in v24.
  */
 @Deprecated
 @Tag("vaadin-context-menu")
@@ -61,8 +167,7 @@ public abstract class GeneratedVaadinContextMenu<R extends ContextMenuBase<R, ?,
      *
      * @return the {@code selector} property from the webcomponent
      *
-     * @deprecated since v23.3. Will be removed in v24 along with all generated
-     *             classes.
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
     @Deprecated
     protected String getSelectorString() {
@@ -81,8 +186,7 @@ public abstract class GeneratedVaadinContextMenu<R extends ContextMenuBase<R, ?,
      * @param selector
      *            the String value to set
      *
-     * @deprecated since v23.3. Will be removed in v24 along with all generated
-     *             classes.
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
     @Deprecated
     protected void setSelector(String selector) {
@@ -102,8 +206,7 @@ public abstract class GeneratedVaadinContextMenu<R extends ContextMenuBase<R, ?,
      *
      * @return the {@code opened} property from the webcomponent
      *
-     * @deprecated since v23.3. Will be removed in v24 along with all generated
-     *             classes.
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
     @Deprecated
     @Synchronize(property = "opened", value = "opened-changed")
@@ -124,8 +227,7 @@ public abstract class GeneratedVaadinContextMenu<R extends ContextMenuBase<R, ?,
      *
      * @return the {@code openOn} property from the webcomponent
      *
-     * @deprecated since v23.3. Will be removed in v24 along with all generated
-     *             classes.
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
     @Deprecated
     protected String getOpenOnString() {
@@ -143,8 +245,7 @@ public abstract class GeneratedVaadinContextMenu<R extends ContextMenuBase<R, ?,
      * @param openOn
      *            the String value to set
      *
-     * @deprecated since v23.3. Will be removed in v24 along with all generated
-     *             classes.
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
     @Deprecated
     protected void setOpenOn(String openOn) {
@@ -166,8 +267,7 @@ public abstract class GeneratedVaadinContextMenu<R extends ContextMenuBase<R, ?,
      *
      * @return the {@code listenOn} property from the webcomponent
      *
-     * @deprecated since v23.3. Will be removed in v24 along with all generated
-     *             classes.
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
     @Deprecated
     protected JsonObject getListenOnJsonObject() {
@@ -187,8 +287,7 @@ public abstract class GeneratedVaadinContextMenu<R extends ContextMenuBase<R, ?,
      * @param listenOn
      *            the JsonObject value to set
      *
-     * @deprecated since v23.3. Will be removed in v24 along with all generated
-     *             classes.
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
     @Deprecated
     protected void setListenOn(JsonObject listenOn) {
@@ -208,8 +307,7 @@ public abstract class GeneratedVaadinContextMenu<R extends ContextMenuBase<R, ?,
      *
      * @return the {@code closeOn} property from the webcomponent
      *
-     * @deprecated since v23.3. Will be removed in v24 along with all generated
-     *             classes.
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
     @Deprecated
     protected String getCloseOnString() {
@@ -227,8 +325,7 @@ public abstract class GeneratedVaadinContextMenu<R extends ContextMenuBase<R, ?,
      * @param closeOn
      *            the String value to set
      *
-     * @deprecated since v23.3. Will be removed in v24 along with all generated
-     *             classes.
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
     @Deprecated
     protected void setCloseOn(String closeOn) {
@@ -243,8 +340,7 @@ public abstract class GeneratedVaadinContextMenu<R extends ContextMenuBase<R, ?,
      * Closes the overlay.
      * </p>
      *
-     * @deprecated since v23.3. Will be removed in v24 along with all generated
-     *             classes.
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
     @Deprecated
     protected void close() {
@@ -259,8 +355,7 @@ public abstract class GeneratedVaadinContextMenu<R extends ContextMenuBase<R, ?,
      * Opens the overlay.
      * </p>
      *
-     * @deprecated since v23.3. Will be removed in v24 along with all generated
-     *             classes.
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
     @Deprecated
     protected void open() {
@@ -268,9 +363,8 @@ public abstract class GeneratedVaadinContextMenu<R extends ContextMenuBase<R, ?,
     }
 
     /**
-     * @deprecated since v23.3. Will be removed in v24 along with all generated
-     *             classes. Use {@link ContextMenuBase.OpenedChangeEvent}
-     *             instead.
+     * @deprecated since v23.3, deprecated classes will be removed in v24. Use
+     *             {@link ContextMenuBase.OpenedChangeEvent} instead.
      */
     @Deprecated
     public static class OpenedChangeEvent<C extends ContextMenuBase<C, ?, ?>>
@@ -295,8 +389,8 @@ public abstract class GeneratedVaadinContextMenu<R extends ContextMenuBase<R, ?,
      *            the listener
      * @return a {@link Registration} for removing the event listener
      *
-     * @deprecated since v23.3. Will be removed in v24 along with all generated
-     *             classes.
+     * @deprecated since v23.3, deprecated classes will be removed in v24. Use
+     *             {@link ContextMenuBase#addOpenedChangeListener} instead.
      */
     @Deprecated
     protected Registration addOpenedChangeListener(
@@ -313,7 +407,7 @@ public abstract class GeneratedVaadinContextMenu<R extends ContextMenuBase<R, ?,
      *
      * @see #addClickListener(ComponentEventListener)
      *
-     * @deprecated since 23.3
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
     @Deprecated
     @Override
@@ -328,7 +422,7 @@ public abstract class GeneratedVaadinContextMenu<R extends ContextMenuBase<R, ?,
      *
      * @see #addClickShortcut(Key, KeyModifier...)
      *
-     * @deprecated since 23.3
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
     @Deprecated
     @Override
