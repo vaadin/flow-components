@@ -22,14 +22,10 @@ import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.data.bean.Person;
 import com.vaadin.flow.router.Route;
 
-@Route("vaadin-grid-it-demo/height-by-rows")
-public class GridViewHeightByRowsPage extends LegacyTestView {
+@Route("vaadin-grid-it-demo/all-rows-visible")
+public class GridViewAllRowsVisiblePage extends LegacyTestView {
 
-    public GridViewHeightByRowsPage() {
-        createHeightByRows();
-    }
-
-    private void createHeightByRows() {
+    public GridViewAllRowsVisiblePage() {
         Grid<Person> grid = new Grid<>();
 
         // When using allRowsVisible, all items are fetched and
@@ -44,7 +40,7 @@ public class GridViewHeightByRowsPage extends LegacyTestView {
 
         grid.setSelectionMode(SelectionMode.NONE);
 
-        grid.setId("grid-height-by-rows");
-        addCard("Height by Rows", "Using height by rows", grid);
+        grid.setId("grid-all-rows-visible");
+        add(grid);
     }
 }
