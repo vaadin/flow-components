@@ -3571,42 +3571,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * are fetched from the {@link DataProvider}, and the Grid shows no vertical
      * scroll bar.
      * <p>
-     * Note: <code>setHeightByRows</code> disables the grid's virtual scrolling
-     * so that all the rows are rendered in the DOM at once. If the grid has a
-     * large number of items, using the feature is discouraged to avoid
-     * performance issues.
-     *
-     * @deprecated since 14.7 - use {@link #setAllRowsVisible(boolean)}
-     * @see #setAllRowsVisible(boolean)
-     *
-     * @param heightByRows
-     *            <code>true</code> to make Grid compute its height by the
-     *            number of rows, <code>false</code> for the default behavior
-     */
-    @Deprecated
-    public void setHeightByRows(boolean heightByRows) {
-        setAllRowsVisible(heightByRows);
-    }
-
-    /**
-     * Gets whether grid's height is defined by the number of its rows.
-     *
-     * @deprecated since 14.7 - use {@link #isAllRowsVisible()}
-     * @see #isAllRowsVisible()
-     *
-     * @return <code>true</code> if Grid computes its height by the number of
-     *         rows, <code>false</code> otherwise
-     */
-    @Deprecated
-    public boolean isHeightByRows() {
-        return isAllRowsVisible();
-    }
-
-    /**
-     * If <code>true</code>, the grid's height is defined by its rows. All items
-     * are fetched from the {@link DataProvider}, and the Grid shows no vertical
-     * scroll bar.
-     * <p>
      * Note: <code>setAllRowsVisible</code> disables the grid's virtual
      * scrolling so that all the rows are rendered in the DOM at once. If the
      * grid has a large number of items, using the feature is discouraged to
