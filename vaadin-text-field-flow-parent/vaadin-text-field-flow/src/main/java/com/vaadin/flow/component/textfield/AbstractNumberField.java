@@ -47,6 +47,7 @@ import com.vaadin.flow.server.VaadinService;
  *
  * @author Vaadin Ltd.
  */
+@SuppressWarnings("deprecation")
 public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T extends Number>
         extends GeneratedVaadinNumberField<C, T>
         implements HasSize, HasValidation, HasValueChangeMode,

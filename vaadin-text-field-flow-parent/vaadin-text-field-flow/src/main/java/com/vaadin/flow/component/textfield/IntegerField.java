@@ -26,6 +26,7 @@ import com.vaadin.flow.function.SerializableFunction;
  *
  * @author Vaadin Ltd.
  */
+@SuppressWarnings("deprecation")
 @Tag("vaadin-integer-field")
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha5")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")

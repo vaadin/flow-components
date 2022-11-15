@@ -23,7 +23,28 @@ import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableFunction;
 
 /**
- * @deprecated since v23.3, will be removed in v24.
+ * <p>
+ * Description copied from corresponding location in WebComponent:
+ * </p>
+ * <p>
+ * {@code <vaadin-email-field>} is a Web Component for email field control in
+ * forms.
+ * </p>
+ * <p>
+ * &lt;vaadin-email-field label=&quot;Email&quot;&gt;
+ * &lt;/vaadin-email-field&gt;
+ * </p>
+ * <h3>Styling</h3>
+ * <p>
+ * See vaadin-text-field.html for the styling documentation
+ * </p>
+ * <p>
+ * See
+ * <a href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin
+ * – how to apply styles for shadow parts</a>
+ * </p>
+ *
+ * @deprecated since v23.3, deprecated classes will be removed in v24.
  */
 @Deprecated
 @Tag("vaadin-email-field")
@@ -52,7 +73,7 @@ public abstract class GeneratedVaadinEmailField<R extends GeneratedVaadinEmailFi
      * @param <P>
      *            the property type
      *
-     * @deprecated since v23.3, will be removed in v24
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
     @Deprecated
     public <P> GeneratedVaadinEmailField(T initialValue, T defaultValue,
@@ -74,7 +95,7 @@ public abstract class GeneratedVaadinEmailField<R extends GeneratedVaadinEmailFi
      * @param acceptNullValues
      *            whether <code>null</code> is accepted as a model value
      *
-     * @deprecated since v23.3, will be removed in v24
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
     @Deprecated
     public GeneratedVaadinEmailField(T initialValue, T defaultValue,
@@ -102,7 +123,7 @@ public abstract class GeneratedVaadinEmailField<R extends GeneratedVaadinEmailFi
      *            property value, otherwise element {@code "value"} property is
      *            ignored and the initial value is set
      *
-     * @deprecated since v23.3, will be removed in v24
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
     @Deprecated
     public GeneratedVaadinEmailField(T initialValue, T defaultValue,
@@ -130,7 +151,7 @@ public abstract class GeneratedVaadinEmailField<R extends GeneratedVaadinEmailFi
      * @param <P>
      *            the property type
      *
-     * @deprecated since v23.3, will be removed in v24
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
     @Deprecated
     public <P> GeneratedVaadinEmailField(T initialValue, T defaultValue,
@@ -144,7 +165,7 @@ public abstract class GeneratedVaadinEmailField<R extends GeneratedVaadinEmailFi
     /**
      * Default constructor.
      *
-     * @deprecated since v23.3, will be removed in v24
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
     @Deprecated
     public GeneratedVaadinEmailField() {
