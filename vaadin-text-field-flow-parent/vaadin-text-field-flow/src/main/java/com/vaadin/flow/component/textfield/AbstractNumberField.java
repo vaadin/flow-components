@@ -58,8 +58,6 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
 
     private ValueChangeMode currentMode;
 
-    private boolean isConnectorAttached;
-
     private int valueChangeTimeout = DEFAULT_CHANGE_TIMEOUT;
 
     private boolean required;
@@ -217,8 +215,11 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
      * @param hasControls
      *            {@code true} if control buttons should be visible;
      *            {@code false} if those should be hidden
+     * @deprecated since 23.3. Use {@link #setStepButtonsVisible(boolean)}
+     *             instead.
      */
     @Override
+    @Deprecated
     public void setHasControls(boolean hasControls) {
         super.setHasControls(hasControls);
     }
@@ -230,9 +231,36 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
      * @see #setStep(double)
      *
      * @return {@code true} if buttons are visible, {@code false} otherwise
+     * @deprecated since 23.3. Use {@link #isStepButtonsVisible()} instead.
      */
+    @Deprecated
     public boolean hasControls() {
         return super.hasControlsBoolean();
+    }
+
+    /**
+     * Sets the visibility of the buttons for increasing/decreasing the value
+     * accordingly to the default or specified step.
+     *
+     * @see #setStep(double)
+     *
+     * @param stepButtonsVisible
+     *            {@code true} if control buttons should be visible;
+     *            {@code false} if those should be hidden
+     */
+    public void setStepButtonsVisible(boolean stepButtonsVisible) {
+        getElement().setProperty("stepButtonsVisible", stepButtonsVisible);
+    }
+
+    /**
+     * Gets whether the buttons for increasing/decreasing the value are visible.
+     *
+     * @see #setStep(double)
+     *
+     * @return {@code true} if buttons are visible, {@code false} otherwise
+     */
+    public boolean isStepButtonsVisible() {
+        return getElement().getProperty("stepButtonsVisible", false);
     }
 
     /**

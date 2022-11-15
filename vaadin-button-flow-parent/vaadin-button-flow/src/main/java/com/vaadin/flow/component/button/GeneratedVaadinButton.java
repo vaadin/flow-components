@@ -99,12 +99,15 @@ import com.vaadin.flow.dom.Element;
  * <a href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin
  * – how to apply styles for shadow parts</a>
  * </p>
+ *
+ * @deprecated since v23.3, deprecated classes will be removed in v24.
  */
+@Deprecated
 @Tag("vaadin-button")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha5")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha6")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/button", version = "23.3.0-alpha5")
-@NpmPackage(value = "@vaadin/vaadin-button", version = "23.3.0-alpha5")
+@NpmPackage(value = "@vaadin/button", version = "23.3.0-alpha6")
+@NpmPackage(value = "@vaadin/vaadin-button", version = "23.3.0-alpha6")
 @JsModule("@vaadin/button/src/vaadin-button.js")
 public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
         extends Component implements HasStyle, ClickNotifier<R>, HasText,
@@ -122,7 +125,10 @@ public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
      * </p>
      *
      * @return the {@code autofocus} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected boolean isAutofocusBoolean() {
         return getElement().getProperty("autofocus", false);
     }
@@ -137,7 +143,10 @@ public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
      *
      * @param autofocus
      *            the boolean value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setAutofocus(boolean autofocus) {
         getElement().setProperty("autofocus", autofocus);
     }
@@ -154,7 +163,10 @@ public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
      * </p>
      *
      * @return the {@code disabled} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected boolean isDisabledBoolean() {
         return getElement().getProperty("disabled", false);
     }
@@ -190,7 +202,10 @@ public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
      * @see <a href=
      *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void addToPrefix(Component... components) {
         for (Component component : components) {
             component.getElement().setAttribute("slot", "prefix");
@@ -210,7 +225,10 @@ public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
      * @see <a href=
      *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void addToSuffix(Component... components) {
         for (Component component : components) {
             component.getElement().setAttribute("slot", "suffix");
@@ -225,7 +243,10 @@ public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
      *            The components to remove.
      * @throws IllegalArgumentException
      *             if any of the components is not a child of this component.
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void remove(Component... components) {
         for (Component component : components) {
             if (getElement().equals(component.getElement().getParent())) {
@@ -242,7 +263,10 @@ public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
      * Removes all contents from this component, this includes child components,
      * text content as well as child elements that have been added directly to
      * this component using the {@link Element} API.
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void removeAll() {
         getElement().getChildren()
                 .forEach(child -> child.removeAttribute("slot"));
@@ -250,14 +274,14 @@ public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
     }
 
     // Override is only required to keep binary compatibility with other 23.x
-    // minor versions, can be removed in a future major
+    // minor versions, will be removed with the method in v24
     @Override
     public void addThemeVariants(ButtonVariant... variants) {
         HasThemeVariant.super.addThemeVariants(variants);
     }
 
     // Override is only required to keep binary compatibility with other 23.x
-    // minor versions, can be removed in a future major
+    // minor versions, will be removed with the method in v24
     @Override
     public void removeThemeVariants(ButtonVariant... variants) {
         HasThemeVariant.super.removeThemeVariants(variants);
@@ -269,14 +293,20 @@ public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
      * @param text
      *            the text content to set
      * @see HasText#setText(String)
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     public GeneratedVaadinButton(String text) {
         setText(text);
     }
 
     /**
      * Default constructor.
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     public GeneratedVaadinButton() {
     }
 }

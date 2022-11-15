@@ -69,7 +69,7 @@ public class IntegerFieldPage extends Div {
         integerFieldStep.setStep(3);
         integerFieldStep.setMin(4);
         integerFieldStep.setMax(10);
-        integerFieldStep.setHasControls(true);
+        integerFieldStep.setStepButtonsVisible(true);
         integerFieldStep.addValueChangeListener(this::logValueChangeEvent);
 
         add(integerFieldStep);

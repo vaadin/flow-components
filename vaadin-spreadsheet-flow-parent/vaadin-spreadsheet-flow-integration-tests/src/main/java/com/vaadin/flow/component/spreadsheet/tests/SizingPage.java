@@ -70,6 +70,15 @@ public class SizingPage extends Div {
                 getButton("Default (block)", "layoutDisplayDefault",
                         e -> layout.getStyle().remove("display"))));
 
+        layoutList.add(new ListItem(new Span("Flex: "), getButton(
+                "Column / align-start", "layoutFlexColumnStart", e -> {
+                    layout.getStyle().set("flex-direction", "column");
+                    layout.getStyle().set("align-items", "start");
+                }), getButton("Default", "layoutFlexColumnStartDefault", e -> {
+                    layout.getStyle().remove("flex-direction");
+                    layout.getStyle().remove("align-items");
+                })));
+
         add(layoutList);
 
         add(layout);

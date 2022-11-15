@@ -112,12 +112,15 @@ import elemental.json.JsonObject;
  * <a href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin
  * – how to apply styles for shadow parts</a>
  * </p>
+ *
+ * @deprecated since v23.3, generated classes will be removed in v24.
  */
+@Deprecated
 @Tag("vaadin-upload")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha5")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha6")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/upload", version = "23.3.0-alpha5")
-@NpmPackage(value = "@vaadin/vaadin-upload", version = "23.3.0-alpha5")
+@NpmPackage(value = "@vaadin/upload", version = "23.3.0-alpha6")
+@NpmPackage(value = "@vaadin/vaadin-upload", version = "23.3.0-alpha6")
 @JsModule("@vaadin/upload/src/vaadin-upload.js")
 public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
         extends Component implements HasStyle {
@@ -138,7 +141,9 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      * </p>
      *
      * @return the {@code nodrop} property from the webcomponent
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected boolean isNodropBoolean() {
         return getElement().getProperty("nodrop", false);
     }
@@ -157,7 +162,9 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      *
      * @param nodrop
      *            the boolean value to set
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected void setNodrop(boolean nodrop) {
         getElement().setProperty("nodrop", nodrop);
     }
@@ -175,7 +182,9 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      * </p>
      *
      * @return the {@code target} property from the webcomponent
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected String getTargetString() {
         return getElement().getProperty("target");
     }
@@ -191,7 +200,9 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      *
      * @param target
      *            the String value to set
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected void setTarget(String target) {
         getElement().setProperty("target", target == null ? "" : target);
     }
@@ -208,7 +219,9 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      * </p>
      *
      * @return the {@code method} property from the webcomponent
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected String getMethodString() {
         return getElement().getProperty("method");
     }
@@ -223,7 +236,9 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      *
      * @param method
      *            the String value to set
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected void setMethod(String method) {
         getElement().setProperty("method", method == null ? "" : method);
     }
@@ -242,7 +257,9 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      * </p>
      *
      * @return the {@code headers} property from the webcomponent
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected JsonObject getHeadersJsonObject() {
         return (JsonObject) getElement().getPropertyRaw("headers");
     }
@@ -259,7 +276,9 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      *
      * @param headers
      *            the JsonObject value to set
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected void setHeaders(JsonObject headers) {
         getElement().setPropertyJson("headers", headers);
     }
@@ -279,7 +298,9 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      * </pre>
      *
      * @return the {@code timeout} property from the webcomponent
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected double getTimeoutDouble() {
         return getElement().getProperty("timeout", 0.0);
     }
@@ -295,7 +316,9 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      *
      * @param timeout
      *            the double value to set
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected void setTimeout(double timeout) {
         getElement().setProperty("timeout", timeout);
     }
@@ -338,8 +361,10 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      * </ul>
      *
      * @return the {@code files} property from the webcomponent
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Synchronize(property = "files", value = "files-changed")
+    @Deprecated
     protected JsonArray getFilesJsonArray() {
         return (JsonArray) getElement().getPropertyRaw("files");
     }
@@ -380,7 +405,9 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      *
      * @param files
      *            the JsonArray value to set
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected void setFiles(JsonArray files) {
         getElement().setPropertyJson("files", files);
     }
@@ -398,7 +425,9 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      * </p>
      *
      * @return the {@code maxFiles} property from the webcomponent
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected double getMaxFilesDouble() {
         return getElement().getProperty("maxFiles", 0.0);
     }
@@ -414,7 +443,9 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      *
      * @param maxFiles
      *            the double value to set
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected void setMaxFiles(double maxFiles) {
         getElement().setProperty("maxFiles", maxFiles);
     }
@@ -431,8 +462,10 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      * </p>
      *
      * @return the {@code maxFilesReached} property from the webcomponent
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Synchronize(property = "maxFilesReached", value = "max-files-reached-changed")
+    @Deprecated
     protected boolean isMaxFilesReachedBoolean() {
         return getElement().getProperty("maxFilesReached", false);
     }
@@ -454,7 +487,9 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      * </p>
      *
      * @return the {@code accept} property from the webcomponent
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected String getAcceptString() {
         return getElement().getProperty("accept");
     }
@@ -474,7 +509,9 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      *
      * @param accept
      *            the String value to set
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected void setAccept(String accept) {
         getElement().setProperty("accept", accept == null ? "" : accept);
     }
@@ -494,7 +531,9 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      * </p>
      *
      * @return the {@code maxFileSize} property from the webcomponent
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected double getMaxFileSizeDouble() {
         return getElement().getProperty("maxFileSize", 0.0);
     }
@@ -512,7 +551,9 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      *
      * @param maxFileSize
      *            the double value to set
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected void setMaxFileSize(double maxFileSize) {
         getElement().setProperty("maxFileSize", maxFileSize);
     }
@@ -529,7 +570,9 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      * </p>
      *
      * @return the {@code formDataName} property from the webcomponent
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected String getFormDataNameString() {
         return getElement().getProperty("formDataName");
     }
@@ -544,7 +587,9 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      *
      * @param formDataName
      *            the String value to set
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected void setFormDataName(String formDataName) {
         getElement().setProperty("formDataName",
                 formDataName == null ? "" : formDataName);
@@ -564,7 +609,9 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      * </p>
      *
      * @return the {@code noAuto} property from the webcomponent
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected boolean isNoAutoBoolean() {
         return getElement().getProperty("noAuto", false);
     }
@@ -581,7 +628,9 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      *
      * @param noAuto
      *            the boolean value to set
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected void setNoAuto(boolean noAuto) {
         getElement().setProperty("noAuto", noAuto);
     }
@@ -598,7 +647,9 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      * </p>
      *
      * @return the {@code withCredentials} property from the webcomponent
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected boolean isWithCredentialsBoolean() {
         return getElement().getProperty("withCredentials", false);
     }
@@ -613,7 +664,9 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      *
      * @param withCredentials
      *            the boolean value to set
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected void setWithCredentials(boolean withCredentials) {
         getElement().setProperty("withCredentials", withCredentials);
     }
@@ -631,7 +684,9 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      * </p>
      *
      * @return the {@code capture} property from the webcomponent
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected String getCaptureString() {
         return getElement().getProperty("capture");
     }
@@ -647,7 +702,9 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      *
      * @param capture
      *            the String value to set
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected void setCapture(String capture) {
         getElement().setProperty("capture", capture == null ? "" : capture);
     }
@@ -712,7 +769,9 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      * </pre>
      *
      * @return the {@code i18n} property from the webcomponent
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected JsonObject getI18nJsonObject() {
         return (JsonObject) getElement().getPropertyRaw("i18n");
     }
@@ -778,7 +837,9 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      *
      * @param i18n
      *            the JsonObject value to set
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected void setI18n(JsonObject i18n) {
         getElement().setPropertyJson("i18n", i18n);
     }
@@ -793,12 +854,18 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      *
      * @param files
      *            Missing documentation!
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected void uploadFiles(JsonObject files) {
         getElement().callJsFunction("uploadFiles", files);
     }
 
+    /**
+     * @deprecated since v23.3, generated classes will be removed in v24.
+     */
     @DomEvent("file-reject")
+    @Deprecated
     public static class FileRejectEvent<R extends GeneratedVaadinUpload<R>>
             extends ComponentEvent<R> {
         private final JsonObject detail;
@@ -834,15 +901,21 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Deprecated
     protected Registration addFileRejectListener(
             ComponentEventListener<FileRejectEvent<R>> listener) {
         return addListener(FileRejectEvent.class,
                 (ComponentEventListener) listener);
     }
 
+    /**
+     * @deprecated since v23.3, generated classes will be removed in v24.
+     */
     @DomEvent("upload-abort")
+    @Deprecated
     public static class UploadAbortEvent<R extends GeneratedVaadinUpload<R>>
             extends ComponentEvent<R> {
         private final JsonObject detail;
@@ -879,15 +952,21 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Deprecated
     protected Registration addUploadAbortListener(
             ComponentEventListener<UploadAbortEvent<R>> listener) {
         return addListener(UploadAbortEvent.class,
                 (ComponentEventListener) listener);
     }
 
+    /**
+     * @deprecated since v23.3, generated classes will be removed in v24.
+     */
     @DomEvent("upload-before")
+    @Deprecated
     public static class UploadBeforeEvent<R extends GeneratedVaadinUpload<R>>
             extends ComponentEvent<R> {
         private final JsonObject detail;
@@ -931,15 +1010,21 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Deprecated
     protected Registration addUploadBeforeListener(
             ComponentEventListener<UploadBeforeEvent<R>> listener) {
         return addListener(UploadBeforeEvent.class,
                 (ComponentEventListener) listener);
     }
 
+    /**
+     * @deprecated since v23.3, generated classes will be removed in v24.
+     */
     @DomEvent("upload-error")
+    @Deprecated
     public static class UploadErrorEvent<R extends GeneratedVaadinUpload<R>>
             extends ComponentEvent<R> {
         private final JsonObject detail;
@@ -976,15 +1061,21 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Deprecated
     protected Registration addUploadErrorListener(
             ComponentEventListener<UploadErrorEvent<R>> listener) {
         return addListener(UploadErrorEvent.class,
                 (ComponentEventListener) listener);
     }
 
+    /**
+     * @deprecated since v23.3, generated classes will be removed in v24.
+     */
     @DomEvent("upload-progress")
+    @Deprecated
     public static class UploadProgressEvent<R extends GeneratedVaadinUpload<R>>
             extends ComponentEvent<R> {
         private final JsonObject detail;
@@ -1021,15 +1112,21 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Deprecated
     protected Registration addUploadProgressListener(
             ComponentEventListener<UploadProgressEvent<R>> listener) {
         return addListener(UploadProgressEvent.class,
                 (ComponentEventListener) listener);
     }
 
+    /**
+     * @deprecated since v23.3, generated classes will be removed in v24.
+     */
     @DomEvent("upload-request")
+    @Deprecated
     public static class UploadRequestEvent<R extends GeneratedVaadinUpload<R>>
             extends ComponentEvent<R> {
         private final JsonObject detail;
@@ -1073,15 +1170,21 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Deprecated
     protected Registration addUploadRequestListener(
             ComponentEventListener<UploadRequestEvent<R>> listener) {
         return addListener(UploadRequestEvent.class,
                 (ComponentEventListener) listener);
     }
 
+    /**
+     * @deprecated since v23.3, generated classes will be removed in v24.
+     */
     @DomEvent("upload-response")
+    @Deprecated
     public static class UploadResponseEvent<R extends GeneratedVaadinUpload<R>>
             extends ComponentEvent<R> {
         private final JsonObject detail;
@@ -1118,15 +1221,21 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Deprecated
     protected Registration addUploadResponseListener(
             ComponentEventListener<UploadResponseEvent<R>> listener) {
         return addListener(UploadResponseEvent.class,
                 (ComponentEventListener) listener);
     }
 
+    /**
+     * @deprecated since v23.3, generated classes will be removed in v24.
+     */
     @DomEvent("upload-retry")
+    @Deprecated
     public static class UploadRetryEvent<R extends GeneratedVaadinUpload<R>>
             extends ComponentEvent<R> {
         private final JsonObject detail;
@@ -1163,15 +1272,21 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Deprecated
     protected Registration addUploadRetryListener(
             ComponentEventListener<UploadRetryEvent<R>> listener) {
         return addListener(UploadRetryEvent.class,
                 (ComponentEventListener) listener);
     }
 
+    /**
+     * @deprecated since v23.3, generated classes will be removed in v24.
+     */
     @DomEvent("upload-start")
+    @Deprecated
     public static class UploadStartEvent<R extends GeneratedVaadinUpload<R>>
             extends ComponentEvent<R> {
         private final JsonObject detail;
@@ -1208,15 +1323,21 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Deprecated
     protected Registration addUploadStartListener(
             ComponentEventListener<UploadStartEvent<R>> listener) {
         return addListener(UploadStartEvent.class,
                 (ComponentEventListener) listener);
     }
 
+    /**
+     * @deprecated since v23.3, generated classes will be removed in v24.
+     */
     @DomEvent("upload-success")
+    @Deprecated
     public static class UploadSuccessEvent<R extends GeneratedVaadinUpload<R>>
             extends ComponentEvent<R> {
         private final JsonObject detail;
@@ -1253,14 +1374,20 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Deprecated
     protected Registration addUploadSuccessListener(
             ComponentEventListener<UploadSuccessEvent<R>> listener) {
         return addListener(UploadSuccessEvent.class,
                 (ComponentEventListener) listener);
     }
 
+    /**
+     * @deprecated since v23.3, generated classes will be removed in v24.
+     */
+    @Deprecated
     public static class FilesChangeEvent<R extends GeneratedVaadinUpload<R>>
             extends ComponentEvent<R> {
         private final JsonArray files;
@@ -1282,7 +1409,9 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected Registration addFilesChangeListener(
             ComponentEventListener<FilesChangeEvent<R>> listener) {
         return getElement()
@@ -1292,6 +1421,10 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
                                         event.isUserOriginated())));
     }
 
+    /**
+     * @deprecated since v23.3, generated classes will be removed in v24.
+     */
+    @Deprecated
     public static class MaxFilesReachedChangeEvent<R extends GeneratedVaadinUpload<R>>
             extends ComponentEvent<R> {
         private final boolean maxFilesReached;
@@ -1313,7 +1446,9 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected Registration addMaxFilesReachedChangeListener(
             ComponentEventListener<MaxFilesReachedChangeEvent<R>> listener) {
         return getElement().addPropertyChangeListener("maxFilesReached",
@@ -1334,7 +1469,9 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      * @see <a href=
      *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected void addToAddButton(Component... components) {
         for (Component component : components) {
             component.getElement().setAttribute("slot", "add-button");
@@ -1354,7 +1491,9 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      * @see <a href=
      *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected void addToDropLabelIcon(Component... components) {
         for (Component component : components) {
             component.getElement().setAttribute("slot", "drop-label-icon");
@@ -1374,7 +1513,9 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      * @see <a href=
      *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected void addToDropLabel(Component... components) {
         for (Component component : components) {
             component.getElement().setAttribute("slot", "drop-label");
@@ -1394,7 +1535,9 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      * @see <a href=
      *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected void addToFileList(Component... components) {
         for (Component component : components) {
             component.getElement().setAttribute("slot", "file-list");
@@ -1409,7 +1552,9 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      *            The components to remove.
      * @throws IllegalArgumentException
      *             if any of the components is not a child of this component.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected void remove(Component... components) {
         for (Component component : components) {
             if (getElement().equals(component.getElement().getParent())) {
@@ -1426,7 +1571,10 @@ public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
      * Removes all contents from this component, this includes child components,
      * text content as well as child elements that have been added directly to
      * this component using the {@link Element} API.
+     *
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected void removeAll() {
         getElement().getChildren()
                 .forEach(child -> child.removeAttribute("slot"));
