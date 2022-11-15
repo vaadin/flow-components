@@ -91,6 +91,17 @@ public class SizingIT extends AbstractComponentIT {
     }
 
     @Test
+    public void layoutFlexColumnStart_spreadsheetFullWidth() {
+        findElement(By.id("layoutDisplayFlex")).click();
+        findElement(By.id("layoutFlexColumnStart")).click();
+
+        var layoutWidth = layout.getSize().getWidth();
+        var internal = spreadsheet.$(DivElement.class).first();
+        Assert.assertEquals(layoutWidth, internal.getSize().getWidth());
+        Assert.assertEquals(layoutWidth, spreadsheet.getSize().getWidth());
+    }
+
+    @Test
     public void toggleSpreadsheetAttached_noMissingRows() {
         // Detach spreadsheet
         findElement(By.id("spreadsheetAttachedToggle")).click();
