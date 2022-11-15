@@ -76,7 +76,7 @@ public class NumberFieldPage extends Div {
         numberFieldStep.setStep(0.5);
         numberFieldStep.setMin(0);
         numberFieldStep.setMax(10);
-        numberFieldStep.setHasControls(true);
+        numberFieldStep.setStepButtonsVisible(true);
         Div stepValueMessage = new Div();
         stepValueMessage.setId("step-message");
         numberFieldStep.addValueChangeListener(
@@ -112,7 +112,7 @@ public class NumberFieldPage extends Div {
         stepperField.setValue(1d);
         stepperField.setMin(0);
         stepperField.setMax(10);
-        stepperField.setHasControls(true);
+        stepperField.setStepButtonsVisible(true);
 
         euroField.setSuffixComponent(new Span("€"));
 
