@@ -1323,6 +1323,10 @@ public class CellValueManager implements Serializable {
                         }
                         cell.setCellValue((String) null);
                         getFormulaEvaluator().notifyUpdateCell(cell);
+
+                        spreadsheet.removeInvalidFormulaMark(
+                                cell.getColumnIndex() + 1,
+                                cell.getRowIndex() + 1);
                     }
                 }
             }
@@ -1376,6 +1380,9 @@ public class CellValueManager implements Serializable {
                 }
                 cell.setCellValue((String) null);
                 getFormulaEvaluator().notifyUpdateCell(cell);
+
+                spreadsheet.removeInvalidFormulaMark(cell.getColumnIndex() + 1,
+                        cell.getRowIndex() + 1);
             }
         }
     }
