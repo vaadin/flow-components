@@ -1030,6 +1030,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
          *
          * @return the translated word for week
          */
+        @Deprecated
         public String getWeek() {
             return week;
         }
@@ -1041,6 +1042,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
          *            the translated word for week
          * @return this instance for method chaining
          */
+        @Deprecated
         public DatePickerI18n setWeek(String week) {
             this.week = week;
             return this;

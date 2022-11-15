@@ -677,6 +677,12 @@ public class CellValueManager implements Serializable {
                         spreadsheet.markInvalidFormula(col, row);
                     }
                 } else {
+                    if (oldCellType == CellType.FORMULA) {
+                        // The old cell type was formula.
+                        // Set the cell blank to clear the old formula first.
+                        cell.setBlank();
+                    }
+
                     spreadsheet.removeInvalidFormulaMark(col, row);
                     Double percentage = SpreadsheetUtil.parsePercentage(value,
                             spreadsheetLocale);
@@ -1323,6 +1329,10 @@ public class CellValueManager implements Serializable {
                         }
                         cell.setCellValue((String) null);
                         getFormulaEvaluator().notifyUpdateCell(cell);
+
+                        spreadsheet.removeInvalidFormulaMark(
+                                cell.getColumnIndex() + 1,
+                                cell.getRowIndex() + 1);
                     }
                 }
             }
@@ -1376,6 +1386,9 @@ public class CellValueManager implements Serializable {
                 }
                 cell.setCellValue((String) null);
                 getFormulaEvaluator().notifyUpdateCell(cell);
+
+                spreadsheet.removeInvalidFormulaMark(cell.getColumnIndex() + 1,
+                        cell.getRowIndex() + 1);
             }
         }
     }

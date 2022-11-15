@@ -18,6 +18,11 @@ public class FormulasTest {
         spreadsheet = new Spreadsheet();
         var ui = new UI();
         UI.setCurrent(ui);
+
+        // onSheetScroll must be invoked once, otherwise cell comments are not
+        // loaded
+        TestHelper.fireClientEvent(spreadsheet, "onSheetScroll",
+                "[1, 1, 1, 1]");
     }
 
     @Test
@@ -67,16 +72,39 @@ public class FormulasTest {
 
     @Test
     public void setInvalidFormula_invalidFormulaCellsSet() {
-        // onSheetScroll must be invoked once, otherwise cell comments are not
-        // loaded
-        TestHelper.fireClientEvent(spreadsheet, "onSheetScroll",
-                "[1, 1, 1, 1]");
-
         // Create a formula cell with an invalid formula
         var A1 = spreadsheet.createFormulaCell(0, 0, "Sheet2!A1");
         spreadsheet.refreshCells(A1);
 
         Assert.assertEquals("[\"col1 row1\"]",
+                spreadsheet.getElement().getProperty("invalidFormulaCells"));
+    }
+
+    @Test
+    public void setInvalidFormula_deleteSelectedCell_invalidFormulaCellsCleared() {
+        // Create a formula cell with an invalid formula
+        var A1 = spreadsheet.createFormulaCell(0, 0, "Sheet2!A1");
+        spreadsheet.refreshCells(A1);
+
+        // Delete the selected cell
+        spreadsheet.setSelection("A1");
+        spreadsheet.getCellValueManager().onDeleteSelectedCells();
+
+        Assert.assertEquals("[]",
+                spreadsheet.getElement().getProperty("invalidFormulaCells"));
+    }
+
+    @Test
+    public void setInvalidFormula_deleteSelectedCells_invalidFormulaCellsCleared() {
+        // Create a formula cell with an invalid formula
+        var A1 = spreadsheet.createFormulaCell(0, 0, "Sheet2!A1");
+        spreadsheet.refreshCells(A1);
+
+        // Delete the selected cell range
+        spreadsheet.setSelection("A1:A2");
+        spreadsheet.getCellValueManager().onDeleteSelectedCells();
+
+        Assert.assertEquals("[]",
                 spreadsheet.getElement().getProperty("invalidFormulaCells"));
     }
 
@@ -87,4 +115,23 @@ public class FormulasTest {
                 .getProperty("invalidFormulaErrorMessage"));
     }
 
+    @Test
+    public void createFormulaCell_updateCellValue() {
+        spreadsheet.setSelection("A1");
+        var A1 = spreadsheet.createFormulaCell(0, 0, "1+1");
+        Assert.assertEquals("2", spreadsheet.getCellValue(A1));
+
+        spreadsheet.getCellValueManager().onCellValueChange(1, 1, "foo");
+        Assert.assertEquals("foo", spreadsheet.getCellValue(A1));
+    }
+
+    @Test
+    public void createFormulaCellWithCircularReference_updateCellValue() {
+        spreadsheet.setSelection("A1");
+        var A1 = spreadsheet.createFormulaCell(0, 0, "A1");
+        Assert.assertEquals("~CIRCULAR~REF~", spreadsheet.getCellValue(A1));
+
+        spreadsheet.getCellValueManager().onCellValueChange(1, 1, "foo");
+        Assert.assertEquals("foo", spreadsheet.getCellValue(A1));
+    }
 }

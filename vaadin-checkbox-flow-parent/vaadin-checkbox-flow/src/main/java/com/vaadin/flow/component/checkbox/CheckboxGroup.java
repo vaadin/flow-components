@@ -74,6 +74,7 @@ import elemental.json.JsonArray;
  *
  * @author Vaadin Ltd
  */
+@SuppressWarnings("deprecation")
 public class CheckboxGroup<T>
         extends GeneratedVaadinCheckboxGroup<CheckboxGroup<T>, Set<T>>
         implements HasItemComponents<T>, HasSize, HasValidation,
@@ -606,6 +607,28 @@ public class CheckboxGroup<T>
             ComponentRenderer<? extends Component, T> renderer) {
         this.itemRenderer = Objects.requireNonNull(renderer);
         refreshCheckboxItems();
+    }
+
+    /**
+     * Adds theme variants to the component.
+     *
+     * @param variants
+     *            theme variants to add
+     */
+    @Override
+    public void addThemeVariants(CheckboxGroupVariant... variants) {
+        super.addThemeVariants(variants);
+    }
+
+    /**
+     * Removes theme variants from the component.
+     *
+     * @param variants
+     *            theme variants to remove
+     */
+    @Override
+    public void removeThemeVariants(CheckboxGroupVariant... variants) {
+        super.removeThemeVariants(variants);
     }
 
     @SuppressWarnings("unchecked")
