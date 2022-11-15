@@ -98,7 +98,10 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * </tr>
  * </tbody>
  * </table>
+ *
+ * @deprecated since v23.3, deprecated classes will be removed in v24.
  */
+@Deprecated
 @Tag("vaadin-progress-bar")
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha6")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
@@ -111,7 +114,11 @@ public abstract class GeneratedVaadinProgressBar<R extends GeneratedVaadinProgre
      *
      * @param variants
      *            theme variants to add
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24. Use
+     *             {@link ProgressBar#addThemeVariants} instead.
      */
+    @Deprecated
     public void addThemeVariants(ProgressBarVariant... variants) {
         getThemeNames().addAll(
                 Stream.of(variants).map(ProgressBarVariant::getVariantName)
@@ -123,7 +130,11 @@ public abstract class GeneratedVaadinProgressBar<R extends GeneratedVaadinProgre
      *
      * @param variants
      *            theme variants to remove
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24. Use
+     *             {@link ProgressBar#removeThemeVariants} instead.
      */
+    @Deprecated
     public void removeThemeVariants(ProgressBarVariant... variants) {
         getThemeNames().removeAll(
                 Stream.of(variants).map(ProgressBarVariant::getVariantName)
@@ -142,7 +153,10 @@ public abstract class GeneratedVaadinProgressBar<R extends GeneratedVaadinProgre
      * </p>
      *
      * @return the {@code value} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected double getValueDouble() {
         return getElement().getProperty("value", 0.0);
     }
@@ -157,7 +171,10 @@ public abstract class GeneratedVaadinProgressBar<R extends GeneratedVaadinProgre
      *
      * @param value
      *            the double value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setValue(double value) {
         getElement().setProperty("value", value);
     }
@@ -174,7 +191,10 @@ public abstract class GeneratedVaadinProgressBar<R extends GeneratedVaadinProgre
      * </p>
      *
      * @return the {@code min} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected double getMinDouble() {
         return getElement().getProperty("min", 0.0);
     }
@@ -189,7 +209,10 @@ public abstract class GeneratedVaadinProgressBar<R extends GeneratedVaadinProgre
      *
      * @param min
      *            the double value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setMin(double min) {
         getElement().setProperty("min", min);
     }
@@ -206,7 +229,10 @@ public abstract class GeneratedVaadinProgressBar<R extends GeneratedVaadinProgre
      * </p>
      *
      * @return the {@code max} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected double getMaxDouble() {
         return getElement().getProperty("max", 0.0);
     }
@@ -221,7 +247,10 @@ public abstract class GeneratedVaadinProgressBar<R extends GeneratedVaadinProgre
      *
      * @param max
      *            the double value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setMax(double max) {
         getElement().setProperty("max", max);
     }
@@ -239,7 +268,10 @@ public abstract class GeneratedVaadinProgressBar<R extends GeneratedVaadinProgre
      * </p>
      *
      * @return the {@code indeterminate} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected boolean isIndeterminateBoolean() {
         return getElement().getProperty("indeterminate", false);
     }
@@ -255,7 +287,10 @@ public abstract class GeneratedVaadinProgressBar<R extends GeneratedVaadinProgre
      *
      * @param indeterminate
      *            the boolean value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setIndeterminate(boolean indeterminate) {
         getElement().setProperty("indeterminate", indeterminate);
     }
