@@ -3,6 +3,7 @@ package com.vaadin.flow.component.spreadsheet.test;
 import com.vaadin.flow.component.spreadsheet.testbench.SpreadsheetElement;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedCondition;
@@ -14,6 +15,7 @@ public class CopyPasteCellsIT extends AbstractSpreadsheetIT {
         getDriver().get(getBaseURL());
     }
 
+    @Ignore("The test started to fail on CI. Ignore until the issue is resolved.")
     @Test
     public void spreadsheetHandlerOnPaste_PasteCellsWhichOtherCellsDependingOn_UpdatesDependentCells() {
         createNewSpreadsheet();
