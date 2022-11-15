@@ -31,9 +31,95 @@ import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.shared.Registration;
 
 /**
- * @deprecated since v23.3, will be removed in v24.
+ * <p>
+ * Description copied from corresponding location in WebComponent:
+ * </p>
+ * <p>
+ * {@code <vaadin-checkbox>} is a Web Component for customized checkboxes.
+ * </p>
+ * <p>
+ * &lt;vaadin-checkbox&gt; Make my profile visible &lt;/vaadin-checkbox&gt;
+ * </p>
+ * <h3>Styling</h3>
+ * <p>
+ * The following shadow DOM parts are available for styling:
+ * </p>
+ * <table>
+ * <thead>
+ * <tr>
+ * <th>Part name</th>
+ * <th>Description</th>
+ * </tr>
+ * </thead> <tbody>
+ * <tr>
+ * <td>{@code checkbox}</td>
+ * <td>The checkbox element</td>
+ * </tr>
+ * <tr>
+ * <td>{@code label}</td>
+ * <td>The label content element</td>
+ * </tr>
+ * </tbody>
+ * </table>
+ * <p>
+ * The following state attributes are available for styling:
+ * </p>
+ * <table>
+ * <thead>
+ * <tr>
+ * <th>Attribute</th>
+ * <th>Description</th>
+ * <th>Part name</th>
+ * </tr>
+ * </thead> <tbody>
+ * <tr>
+ * <td>{@code active}</td>
+ * <td>Set when the checkbox is pressed down, either with mouse, touch or the
+ * keyboard.</td>
+ * <td>{@code :host}</td>
+ * </tr>
+ * <tr>
+ * <td>{@code disabled}</td>
+ * <td>Set when the checkbox is disabled.</td>
+ * <td>{@code :host}</td>
+ * </tr>
+ * <tr>
+ * <td>{@code focus-ring}</td>
+ * <td>Set when the checkbox is focused using the keyboard.</td>
+ * <td>{@code :host}</td>
+ * </tr>
+ * <tr>
+ * <td>{@code focused}</td>
+ * <td>Set when the checkbox is focused.</td>
+ * <td>{@code :host}</td>
+ * </tr>
+ * <tr>
+ * <td>{@code indeterminate}</td>
+ * <td>Set when the checkbox is in indeterminate mode.</td>
+ * <td>{@code :host}</td>
+ * </tr>
+ * <tr>
+ * <td>{@code checked}</td>
+ * <td>Set when the checkbox is checked.</td>
+ * <td>{@code :host}</td>
+ * </tr>
+ * <tr>
+ * <td>{@code empty}</td>
+ * <td>Set when there is no label provided.</td>
+ * <td>{@code label}</td>
+ * </tr>
+ * </tbody>
+ * </table>
+ * <p>
+ * See
+ * <a href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin
+ * – how to apply styles for shadow parts</a>
+ * </p>
+ *
+ * @deprecated since v23.3, deprecated classes will be removed in v24.
  */
 @Deprecated
+@SuppressWarnings("deprecation")
 @Tag("vaadin-checkbox")
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha6")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
@@ -57,7 +143,7 @@ public abstract class GeneratedVaadinCheckbox<R extends GeneratedVaadinCheckbox<
      *
      * @return the {@code autofocus} property from the webcomponent
      *
-     * @deprecated since v23.3, will be removed in v24.
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
     @Deprecated
     protected boolean isAutofocusBoolean() {
@@ -92,7 +178,7 @@ public abstract class GeneratedVaadinCheckbox<R extends GeneratedVaadinCheckbox<
      *
      * @return the {@code disabled} property from the webcomponent
      *
-     * @deprecated since v23.3, will be removed in v24.
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
     @Deprecated
     protected boolean isDisabledBoolean() {
@@ -110,7 +196,7 @@ public abstract class GeneratedVaadinCheckbox<R extends GeneratedVaadinCheckbox<
      * @param disabled
      *            the boolean value to set
      *
-     * @deprecated since v23.3, will be removed in v24.
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
     @Deprecated
     protected void setDisabled(boolean disabled) {
@@ -123,7 +209,7 @@ public abstract class GeneratedVaadinCheckbox<R extends GeneratedVaadinCheckbox<
      *
      * @return the {@code name} property from the webcomponent
      *
-     * @deprecated since v23.3, will be removed in v24.
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
     @Deprecated
     protected String getNameString() {
@@ -134,7 +220,7 @@ public abstract class GeneratedVaadinCheckbox<R extends GeneratedVaadinCheckbox<
      * @param name
      *            the String value to set
      *
-     * @deprecated since v23.3, will be removed in v24.
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
     @Deprecated
     protected void setName(String name) {
@@ -157,7 +243,7 @@ public abstract class GeneratedVaadinCheckbox<R extends GeneratedVaadinCheckbox<
      *
      * @return the {@code indeterminate} property from the webcomponent
      *
-     * @deprecated since v23.3, will be removed in v24.
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
     @Deprecated
     @Synchronize(property = "indeterminate", value = "indeterminate-changed")
@@ -184,7 +270,7 @@ public abstract class GeneratedVaadinCheckbox<R extends GeneratedVaadinCheckbox<
     }
 
     /**
-     * @deprecated since v23.3, will be removed in v24.
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
     @Deprecated
     @DomEvent("change")
@@ -202,7 +288,7 @@ public abstract class GeneratedVaadinCheckbox<R extends GeneratedVaadinCheckbox<
      *            the listener
      * @return a {@link Registration} for removing the event listener
      *
-     * @deprecated since v23.3, will be removed in v24.
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
     @Deprecated
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -213,7 +299,7 @@ public abstract class GeneratedVaadinCheckbox<R extends GeneratedVaadinCheckbox<
     }
 
     /**
-     * @deprecated since v23.3, will be removed in v24.
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
     @Deprecated
     public static class CheckedChangeEvent<R extends GeneratedVaadinCheckbox<R, ?>>
@@ -231,7 +317,7 @@ public abstract class GeneratedVaadinCheckbox<R extends GeneratedVaadinCheckbox<
      *            the listener
      * @return a {@link Registration} for removing the event listener
      *
-     * @deprecated since v23.3, will be removed in v24.
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
     @Deprecated
     protected Registration addCheckedChangeListener(
@@ -244,7 +330,7 @@ public abstract class GeneratedVaadinCheckbox<R extends GeneratedVaadinCheckbox<
     }
 
     /**
-     * @deprecated since v23.3, will be removed in v24.
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
     @Deprecated
     public static class IndeterminateChangeEvent<R extends GeneratedVaadinCheckbox<R, ?>>
@@ -269,7 +355,7 @@ public abstract class GeneratedVaadinCheckbox<R extends GeneratedVaadinCheckbox<
      *            the listener
      * @return a {@link Registration} for removing the event listener
      *
-     * @deprecated since v23.3, will be removed in v24.
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
     @Deprecated
     protected Registration addIndeterminateChangeListener(
@@ -297,7 +383,7 @@ public abstract class GeneratedVaadinCheckbox<R extends GeneratedVaadinCheckbox<
      * @param <P>
      *            the property type
      *
-     * @deprecated since v23.3, will be removed in v24.
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
     @Deprecated
     public <P> GeneratedVaadinCheckbox(T initialValue, T defaultValue,
@@ -332,7 +418,7 @@ public abstract class GeneratedVaadinCheckbox<R extends GeneratedVaadinCheckbox<
      *            property value, otherwise element {@code "checked"} property
      *            is ignored and the initial value is set
      *
-     * @deprecated since v23.3, will be removed in v24.
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
     @Deprecated
     public GeneratedVaadinCheckbox(T initialValue, T defaultValue,
@@ -360,7 +446,7 @@ public abstract class GeneratedVaadinCheckbox<R extends GeneratedVaadinCheckbox<
      * @param acceptNullValues
      *            whether <code>null</code> is accepted as a model value
      *
-     * @deprecated since v23.3, will be removed in v24.
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
     @Deprecated
     public GeneratedVaadinCheckbox(T initialValue, T defaultValue,
@@ -387,7 +473,7 @@ public abstract class GeneratedVaadinCheckbox<R extends GeneratedVaadinCheckbox<
      * @param <P>
      *            the property type
      *
-     * @deprecated since v23.3, will be removed in v24.
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
     @Deprecated
     public <P> GeneratedVaadinCheckbox(T initialValue, T defaultValue,
@@ -404,7 +490,7 @@ public abstract class GeneratedVaadinCheckbox<R extends GeneratedVaadinCheckbox<
     /**
      * Default constructor.
      *
-     * @deprecated since v23.3, will be removed in v24.
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
     @Deprecated
     public GeneratedVaadinCheckbox() {
