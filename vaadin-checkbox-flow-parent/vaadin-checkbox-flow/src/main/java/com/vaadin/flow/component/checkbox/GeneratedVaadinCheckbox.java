@@ -119,7 +119,6 @@ import com.vaadin.flow.shared.Registration;
  * @deprecated since v23.3, deprecated classes will be removed in v24.
  */
 @Deprecated
-@SuppressWarnings("deprecation")
 @Tag("vaadin-checkbox")
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha6")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
