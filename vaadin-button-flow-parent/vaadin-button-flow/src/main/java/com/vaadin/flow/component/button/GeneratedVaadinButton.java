@@ -103,7 +103,6 @@ import com.vaadin.flow.dom.Element;
  * @deprecated since v23.3, deprecated classes will be removed in v24.
  */
 @Deprecated
-@SuppressWarnings("deprecation")
 @Tag("vaadin-button")
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha6")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
