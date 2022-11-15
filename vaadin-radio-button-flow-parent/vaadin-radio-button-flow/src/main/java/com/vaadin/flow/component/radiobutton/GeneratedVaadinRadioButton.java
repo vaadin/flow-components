@@ -97,7 +97,10 @@ import com.vaadin.flow.shared.Registration;
  * <a href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin
  * – how to apply styles for shadow parts</a>
  * </p>
+ *
+ * @deprecated since v23.3, deprecated classes will be removed in v24.
  */
+@Deprecated
 @Tag("vaadin-radio-button")
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha6")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
@@ -117,7 +120,10 @@ public abstract class GeneratedVaadinRadioButton<R extends GeneratedVaadinRadioB
      * </p>
      *
      * @return the {@code autofocus} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected boolean isAutofocusBoolean() {
         return getElement().getProperty("autofocus", false);
     }
@@ -132,7 +138,10 @@ public abstract class GeneratedVaadinRadioButton<R extends GeneratedVaadinRadioB
      *
      * @param autofocus
      *            the boolean value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setAutofocus(boolean autofocus) {
         getElement().setProperty("autofocus", autofocus);
     }
@@ -149,7 +158,10 @@ public abstract class GeneratedVaadinRadioButton<R extends GeneratedVaadinRadioB
      * </p>
      *
      * @return the {@code disabled} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected boolean isDisabledBoolean() {
         return getElement().getProperty("disabled", false);
     }
@@ -164,7 +176,10 @@ public abstract class GeneratedVaadinRadioButton<R extends GeneratedVaadinRadioB
      *
      * @param disabled
      *            the boolean value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setDisabled(boolean disabled) {
         getElement().setProperty("disabled", disabled);
     }
@@ -174,7 +189,10 @@ public abstract class GeneratedVaadinRadioButton<R extends GeneratedVaadinRadioB
      * the returned value may not be the same as in client side.
      *
      * @return the {@code name} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected String getNameString() {
         return getElement().getProperty("name");
     }
@@ -182,7 +200,10 @@ public abstract class GeneratedVaadinRadioButton<R extends GeneratedVaadinRadioB
     /**
      * @param name
      *            the String value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setName(String name) {
         getElement().setProperty("name", name == null ? "" : name);
     }
@@ -199,7 +220,10 @@ public abstract class GeneratedVaadinRadioButton<R extends GeneratedVaadinRadioB
      * </p>
      *
      * @return the {@code checked} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     @Synchronize(property = "checked", value = "checked-changed")
     protected boolean isCheckedBoolean() {
         return getElement().getProperty("checked", false);
@@ -215,7 +239,10 @@ public abstract class GeneratedVaadinRadioButton<R extends GeneratedVaadinRadioB
      *
      * @param checked
      *            the boolean value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setChecked(boolean checked) {
         getElement().setProperty("checked", checked);
     }
@@ -232,7 +259,10 @@ public abstract class GeneratedVaadinRadioButton<R extends GeneratedVaadinRadioB
      * </p>
      *
      * @return the {@code value} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected String getValueString() {
         return getElement().getProperty("value");
     }
@@ -247,11 +277,18 @@ public abstract class GeneratedVaadinRadioButton<R extends GeneratedVaadinRadioB
      *
      * @param value
      *            the String value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setValue(String value) {
         getElement().setProperty("value", value == null ? "" : value);
     }
 
+    /**
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     */
+    @Deprecated
     public static class CheckedChangeEvent<R extends GeneratedVaadinRadioButton<R>>
             extends ComponentEvent<R> {
         private final boolean checked;
@@ -273,7 +310,10 @@ public abstract class GeneratedVaadinRadioButton<R extends GeneratedVaadinRadioB
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected Registration addCheckedChangeListener(
             ComponentEventListener<CheckedChangeEvent<R>> listener) {
         return getElement()
