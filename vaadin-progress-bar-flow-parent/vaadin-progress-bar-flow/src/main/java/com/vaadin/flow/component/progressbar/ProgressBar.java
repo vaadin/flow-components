@@ -27,6 +27,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  *
  * @author Vaadin Ltd.
  */
+@SuppressWarnings("deprecation")
 @NpmPackage(value = "@vaadin/progress-bar", version = "23.3.0-alpha6")
 @NpmPackage(value = "@vaadin/vaadin-progress-bar", version = "23.3.0-alpha6")
 public class ProgressBar extends GeneratedVaadinProgressBar<ProgressBar>
@@ -166,5 +167,27 @@ public class ProgressBar extends GeneratedVaadinProgressBar<ProgressBar>
      */
     public boolean isIndeterminate() {
         return isIndeterminateBoolean();
+    }
+
+    /**
+     * Adds theme variants to the component.
+     *
+     * @param variants
+     *            theme variants to add
+     */
+    @Override
+    public void addThemeVariants(ProgressBarVariant... variants) {
+        super.addThemeVariants(variants);
+    }
+
+    /**
+     * Removes theme variants from the component.
+     *
+     * @param variants
+     *            theme variants to remove
+     */
+    @Override
+    public void removeThemeVariants(ProgressBarVariant... variants) {
+        super.removeThemeVariants(variants);
     }
 }
