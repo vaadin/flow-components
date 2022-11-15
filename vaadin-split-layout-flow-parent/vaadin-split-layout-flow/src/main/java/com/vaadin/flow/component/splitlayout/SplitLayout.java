@@ -19,7 +19,9 @@ import java.util.Locale;
 import java.util.Objects;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.NpmPackage;
@@ -33,6 +35,7 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author Vaadin Ltd
  */
+@SuppressWarnings("deprecation")
 @NpmPackage(value = "@vaadin/split-layout", version = "23.3.0-alpha6")
 @NpmPackage(value = "@vaadin/vaadin-split-layout", version = "23.3.0-alpha6")
 public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
@@ -304,7 +307,7 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
      */
     @Override
     public Registration addSplitterDragendListener(
-            ComponentEventListener<SplitterDragendEvent<SplitLayout>> listener) {
+            ComponentEventListener<SplitterDragendEvent> listener) {
         return super.addSplitterDragendListener(listener);
     }
 
@@ -318,6 +321,35 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
             getElement().executeJs(
                     "var element = this.children[$0]; if (element) { element.style[$1]=$2; }",
                     primary ? 0 : 1, styleName, value);
+        }
+    }
+
+    /**
+     * Adds theme variants to the component.
+     *
+     * @param variants
+     *            theme variants to add
+     */
+    @Override
+    public void addThemeVariants(SplitLayoutVariant... variants) {
+        super.addThemeVariants(variants);
+    }
+
+    /**
+     * Removes theme variants from the component.
+     *
+     * @param variants
+     *            theme variants to remove
+     */
+    @Override
+    public void removeThemeVariants(SplitLayoutVariant... variants) {
+        super.removeThemeVariants(variants);
+    }
+
+    public static class SplitterDragendEvent extends
+            GeneratedVaadinSplitLayout.SplitterDragendEvent<SplitLayout> {
+        public SplitterDragendEvent(SplitLayout source, boolean fromClient) {
+            super(source, fromClient);
         }
     }
 }
