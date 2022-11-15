@@ -46,7 +46,6 @@ import com.vaadin.flow.function.SerializableRunnable;
  *
  * @author Vaadin Ltd.
  */
-@SuppressWarnings({"serial", "deprecation"})
 public class ContextMenu extends ContextMenuBase<ContextMenu, MenuItem, SubMenu>
         implements HasMenuItems {
 

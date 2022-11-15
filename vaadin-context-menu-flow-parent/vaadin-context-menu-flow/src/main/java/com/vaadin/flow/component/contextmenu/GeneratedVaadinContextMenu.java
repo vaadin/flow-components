@@ -44,7 +44,7 @@ import elemental.json.JsonObject;
 @NpmPackage(value = "@vaadin/vaadin-context-menu", version = "23.3.0-alpha6")
 @JsModule("@vaadin/context-menu/src/vaadin-context-menu.js")
 @JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
-public abstract class GeneratedVaadinContextMenu<R extends GeneratedVaadinContextMenu<R>>
+public abstract class GeneratedVaadinContextMenu<R extends ContextMenuBase<R, ?, ?>>
         extends Component implements HasStyle, ClickNotifier<R> {
 
     /**
@@ -269,14 +269,15 @@ public abstract class GeneratedVaadinContextMenu<R extends GeneratedVaadinContex
 
     /**
      * @deprecated since v23.3. Will be removed in v24 along with all generated
-     *             classes.
+     *             classes. Use {@link ContextMenuBase.OpenedChangeEvent}
+     *             instead.
      */
     @Deprecated
-    public static class OpenedChangeEvent<R extends GeneratedVaadinContextMenu<R>>
-            extends ComponentEvent<R> {
+    public static class OpenedChangeEvent<C extends ContextMenuBase<C, ?, ?>>
+            extends ComponentEvent<C> {
         private final boolean opened;
 
-        public OpenedChangeEvent(R source, boolean fromClient) {
+        public OpenedChangeEvent(C source, boolean fromClient) {
             super(source, fromClient);
             this.opened = source.isOpenedBoolean();
         }
@@ -299,12 +300,11 @@ public abstract class GeneratedVaadinContextMenu<R extends GeneratedVaadinContex
      */
     @Deprecated
     protected Registration addOpenedChangeListener(
-            ComponentEventListener<OpenedChangeEvent<R>> listener) {
-        return getElement()
-                .addPropertyChangeListener("opened",
-                        event -> listener.onComponentEvent(
-                                new OpenedChangeEvent<R>((R) this,
-                                        event.isUserOriginated())));
+            ComponentEventListener<ContextMenuBase.OpenedChangeEvent<R>> listener) {
+        return getElement().addPropertyChangeListener("opened",
+                event -> listener.onComponentEvent(
+                        new ContextMenuBase.OpenedChangeEvent<>((R) this,
+                                event.isUserOriginated())));
     }
 
     /**
