@@ -139,7 +139,10 @@ import elemental.json.JsonObject;
  * <a href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin
  * – how to apply styles for shadow parts</a>
  * </p>
+ *
+ * @deprecated since v23.3, generated classes will be removed in v24.
  */
+@Deprecated
 @Tag("vaadin-upload-file")
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha6")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
@@ -152,7 +155,9 @@ public abstract class GeneratedVaadinUploadFile<R extends GeneratedVaadinUploadF
      * the returned value may not be the same as in client side.
      *
      * @return the {@code file} property from the webcomponent
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected JsonObject getFileJsonObject() {
         return (JsonObject) getElement().getPropertyRaw("file");
     }
@@ -160,12 +165,18 @@ public abstract class GeneratedVaadinUploadFile<R extends GeneratedVaadinUploadF
     /**
      * @param file
      *            the JsonObject value to set
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected void setFile(JsonObject file) {
         getElement().setPropertyJson("file", file);
     }
 
+    /**
+     * @deprecated since v23.3, generated classes will be removed in v24.
+     */
     @DomEvent("file-abort")
+    @Deprecated
     public static class FileAbortEvent<R extends GeneratedVaadinUploadFile<R>>
             extends ComponentEvent<R> {
         private final JsonObject detail;
@@ -194,15 +205,21 @@ public abstract class GeneratedVaadinUploadFile<R extends GeneratedVaadinUploadF
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Deprecated
     protected Registration addFileAbortListener(
             ComponentEventListener<FileAbortEvent<R>> listener) {
         return addListener(FileAbortEvent.class,
                 (ComponentEventListener) listener);
     }
 
+    /**
+     * @deprecated since v23.3, generated classes will be removed in v24.
+     */
     @DomEvent("file-remove")
+    @Deprecated
     public static class FileRemoveEvent<R extends GeneratedVaadinUploadFile<R>>
             extends ComponentEvent<R> {
         private final JsonObject detail;
@@ -231,15 +248,21 @@ public abstract class GeneratedVaadinUploadFile<R extends GeneratedVaadinUploadF
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Deprecated
     protected Registration addFileRemoveListener(
             ComponentEventListener<FileRemoveEvent<R>> listener) {
         return addListener(FileRemoveEvent.class,
                 (ComponentEventListener) listener);
     }
 
+    /**
+     * @deprecated since v23.3, generated classes will be removed in v24.
+     */
     @DomEvent("file-retry")
+    @Deprecated
     public static class FileRetryEvent<R extends GeneratedVaadinUploadFile<R>>
             extends ComponentEvent<R> {
         private final JsonObject detail;
@@ -268,15 +291,21 @@ public abstract class GeneratedVaadinUploadFile<R extends GeneratedVaadinUploadF
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Deprecated
     protected Registration addFileRetryListener(
             ComponentEventListener<FileRetryEvent<R>> listener) {
         return addListener(FileRetryEvent.class,
                 (ComponentEventListener) listener);
     }
 
+    /**
+     * @deprecated since v23.3, generated classes will be removed in v24.
+     */
     @DomEvent("file-start")
+    @Deprecated
     public static class FileStartEvent<R extends GeneratedVaadinUploadFile<R>>
             extends ComponentEvent<R> {
         private final JsonObject detail;
@@ -305,8 +334,10 @@ public abstract class GeneratedVaadinUploadFile<R extends GeneratedVaadinUploadF
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Deprecated
     protected Registration addFileStartListener(
             ComponentEventListener<FileStartEvent<R>> listener) {
         return addListener(FileStartEvent.class,
