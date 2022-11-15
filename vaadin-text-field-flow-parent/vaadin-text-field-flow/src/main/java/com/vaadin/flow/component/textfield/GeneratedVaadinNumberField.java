@@ -56,7 +56,10 @@ public abstract class GeneratedVaadinNumberField<R extends GeneratedVaadinNumber
      * </p>
      *
      * @return the {@code hasControls} property from the webcomponent
+     * @deprecated since 23.3. Use
+     *             {@link AbstractNumberField#isStepButtonsVisible()} instead.
      */
+    @Deprecated
     protected boolean hasControlsBoolean() {
         return getElement().getProperty("hasControls", false);
     }
@@ -71,7 +74,11 @@ public abstract class GeneratedVaadinNumberField<R extends GeneratedVaadinNumber
      *
      * @param hasControls
      *            the boolean value to set
+     * @deprecated since 23.3. Use
+     *             {@link AbstractNumberField#setStepButtonsVisible(boolean)}
+     *             instead.
      */
+    @Deprecated
     protected void setHasControls(boolean hasControls) {
         getElement().setProperty("hasControls", hasControls);
     }
