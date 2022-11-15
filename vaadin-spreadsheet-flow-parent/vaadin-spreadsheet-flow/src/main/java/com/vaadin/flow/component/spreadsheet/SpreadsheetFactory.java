@@ -1029,6 +1029,10 @@ public class SpreadsheetFactory implements Serializable {
         // only freeze panes supported
         if (paneInformation != null && paneInformation.isFreezePane()) {
 
+            // With a large sheet, getTopRow could become negative.
+            var topRow = Math.max(0, sheet.getTopRow());
+            var leftCol = Math.max(0, sheet.getLeftCol());
+
             /*
              * In POI, HorizontalSplit means rows and VerticalSplit means
              * columns.
@@ -1036,22 +1040,20 @@ public class SpreadsheetFactory implements Serializable {
              * In Spreadsheet the meaning is the opposite.
              */
             spreadsheet.setHorizontalSplitPosition(
-                    paneInformation.getVerticalSplitPosition()
-                            + sheet.getLeftCol());
+                    paneInformation.getVerticalSplitPosition() + leftCol);
 
             spreadsheet.setVerticalSplitPosition(
-                    paneInformation.getHorizontalSplitPosition()
-                            + sheet.getTopRow());
+                    paneInformation.getHorizontalSplitPosition() + topRow);
 
             /*
              * If the view was scrolled down / right when panes were frozen, the
              * invisible frozen rows/columns are effectively hidden in Excel. We
              * mimic this behavior here.
              */
-            for (int col = 0; col < sheet.getLeftCol(); col++) {
+            for (int col = 0; col < leftCol; col++) {
                 spreadsheet.setColumnHidden(col, true);
             }
-            for (int row = 0; row < sheet.getTopRow(); row++) {
+            for (int row = 0; row < topRow; row++) {
                 spreadsheet.setRowHidden(row, true);
             }
         } else {
