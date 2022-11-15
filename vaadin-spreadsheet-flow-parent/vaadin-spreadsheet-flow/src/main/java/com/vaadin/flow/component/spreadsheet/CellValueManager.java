@@ -510,6 +510,9 @@ public class CellValueManager implements Serializable {
      *            Cell to mark for updates
      */
     protected void cellUpdated(Cell cell) {
+        // Remove existing invalid formula markers
+        spreadsheet.removeInvalidFormulaMark(cell.getColumnIndex() + 1,
+                cell.getRowIndex() + 1);
         getFormulaEvaluator().notifyUpdateCell(cell);
         markCellForUpdate(cell);
     }
@@ -1189,10 +1192,6 @@ public class CellValueManager implements Serializable {
                 int columnIndex = cell.getColumnIndex();
                 final String key = SpreadsheetUtil.toKey(columnIndex + 1,
                         rowIndex + 1);
-
-                // Remove existing invalid formula markers
-                spreadsheet.removeInvalidFormulaMark(cell.getColumnIndex() + 1,
-                        cell.getRowIndex() + 1);
 
                 // Mark for update if there are formatting rules.
                 if (spreadsheet.getConditionalFormatter()
