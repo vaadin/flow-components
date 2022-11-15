@@ -232,7 +232,7 @@ public class RichTextEditorTest {
 
     @Test
     public void asDelta_setValue_getValue() {
-        String deltaValue = "\"[{\"insert\":\"Foo\"}]\"";
+        String deltaValue = "[{\"insert\":\"Foo\"}]";
         RichTextEditor rte = new RichTextEditor();
         HasValue<ValueChangeEvent<String>, String> asDelta = rte.asDelta();
         asDelta.setValue(deltaValue);
@@ -265,7 +265,7 @@ public class RichTextEditorTest {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test
     public void asDelta_addChangeListener() {
-        String deltaValue = "\"[{\"insert\":\"Foo\"}]\"";
+        String deltaValue = "[{\"insert\":\"Foo\"}]";
         RichTextEditor rte = new RichTextEditor();
         HasValue<ValueChangeEvent<String>, String> asDelta = rte.asDelta();
 
