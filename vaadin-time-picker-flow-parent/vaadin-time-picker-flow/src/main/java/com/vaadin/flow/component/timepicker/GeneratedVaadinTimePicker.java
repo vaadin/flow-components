@@ -122,12 +122,15 @@ import elemental.json.JsonObject;
  * Note: the {@code theme} attribute value set on {@code <vaadin-time-picker>}
  * is propagated to the internal themable components listed above.
  * </p>
+ *
+ * @deprecated since v23.3, generated classes will be removed in v24.
  */
+@Deprecated
 @Tag("vaadin-time-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha5")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha6")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/time-picker", version = "23.3.0-alpha5")
-@NpmPackage(value = "@vaadin/vaadin-time-picker", version = "23.3.0-alpha5")
+@NpmPackage(value = "@vaadin/time-picker", version = "23.3.0-alpha6")
+@NpmPackage(value = "@vaadin/vaadin-time-picker", version = "23.3.0-alpha6")
 @JsModule("@vaadin/time-picker/src/vaadin-time-picker.js")
 public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePicker<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
@@ -145,7 +148,9 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * </p>
      *
      * @return the {@code autofocus} property from the webcomponent
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected boolean isAutofocusBoolean() {
         return getElement().getProperty("autofocus", false);
     }
@@ -160,7 +165,9 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      *
      * @param autofocus
      *            the boolean value to set
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected void setAutofocus(boolean autofocus) {
         getElement().setProperty("autofocus", autofocus);
     }
@@ -177,7 +184,9 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * </p>
      *
      * @return the {@code disabled} property from the webcomponent
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected boolean isDisabledBoolean() {
         return getElement().getProperty("disabled", false);
     }
@@ -192,7 +201,9 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      *
      * @param disabled
      *            the boolean value to set
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected void setDisabled(boolean disabled) {
         getElement().setProperty("disabled", disabled);
     }
@@ -209,7 +220,9 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * </p>
      *
      * @return the {@code name} property from the webcomponent
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected String getNameString() {
         return getElement().getProperty("name");
     }
@@ -224,7 +237,9 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      *
      * @param name
      *            the String value to set
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected void setName(String name) {
         getElement().setProperty("name", name == null ? "" : name);
     }
@@ -241,7 +256,9 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * </p>
      *
      * @return the {@code label} property from the webcomponent
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected String getLabelString() {
         return getElement().getProperty("label");
     }
@@ -256,7 +273,9 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      *
      * @param label
      *            the String value to set
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected void setLabel(String label) {
         getElement().setProperty("label", label == null ? "" : label);
     }
@@ -273,7 +292,9 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * </p>
      *
      * @return the {@code required} property from the webcomponent
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected boolean isRequiredBoolean() {
         return getElement().getProperty("required", false);
     }
@@ -288,7 +309,9 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      *
      * @param required
      *            the boolean value to set
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected void setRequired(boolean required) {
         getElement().setProperty("required", required);
     }
@@ -305,7 +328,9 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * </p>
      *
      * @return the {@code preventInvalidInput} property from the webcomponent
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected boolean isPreventInvalidInputBoolean() {
         return getElement().getProperty("preventInvalidInput", false);
     }
@@ -320,7 +345,9 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      *
      * @param preventInvalidInput
      *            the boolean value to set
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected void setPreventInvalidInput(boolean preventInvalidInput) {
         getElement().setProperty("preventInvalidInput", preventInvalidInput);
     }
@@ -337,7 +364,9 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * </p>
      *
      * @return the {@code pattern} property from the webcomponent
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected String getPatternString() {
         return getElement().getProperty("pattern");
     }
@@ -352,7 +381,9 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      *
      * @param pattern
      *            the String value to set
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected void setPattern(String pattern) {
         getElement().setProperty("pattern", pattern == null ? "" : pattern);
     }
@@ -369,7 +400,9 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * </p>
      *
      * @return the {@code errorMessage} property from the webcomponent
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected String getErrorMessageString() {
         return getElement().getProperty("errorMessage");
     }
@@ -384,7 +417,9 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      *
      * @param errorMessage
      *            the String value to set
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected void setErrorMessage(String errorMessage) {
         getElement().setProperty("errorMessage",
                 errorMessage == null ? "" : errorMessage);
@@ -402,7 +437,9 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * </p>
      *
      * @return the {@code placeholder} property from the webcomponent
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected String getPlaceholderString() {
         return getElement().getProperty("placeholder");
     }
@@ -417,7 +454,9 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      *
      * @param placeholder
      *            the String value to set
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected void setPlaceholder(String placeholder) {
         getElement().setProperty("placeholder",
                 placeholder == null ? "" : placeholder);
@@ -435,7 +474,9 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * </p>
      *
      * @return the {@code readonly} property from the webcomponent
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected boolean isReadonlyBoolean() {
         return getElement().getProperty("readonly", false);
     }
@@ -450,7 +491,9 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      *
      * @param readonly
      *            the boolean value to set
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected void setReadonly(boolean readonly) {
         getElement().setProperty("readonly", readonly);
     }
@@ -467,7 +510,9 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * </p>
      *
      * @return the {@code invalid} property from the webcomponent
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected boolean isInvalidBoolean() {
         return getElement().getProperty("invalid", false);
     }
@@ -482,7 +527,9 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      *
      * @param invalid
      *            the boolean value to set
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected void setInvalid(boolean invalid) {
         getElement().setProperty("invalid", invalid);
     }
@@ -507,7 +554,9 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * </ul>
      *
      * @return the {@code min} property from the webcomponent
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected String getMinString() {
         return getElement().getProperty("min");
     }
@@ -530,7 +579,9 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      *
      * @param min
      *            the String value to set
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected void setMin(String min) {
         getElement().setProperty("min", min == null ? "" : min);
     }
@@ -555,7 +606,9 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * </ul>
      *
      * @return the {@code max} property from the webcomponent
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected String getMaxString() {
         return getElement().getProperty("max");
     }
@@ -578,7 +631,9 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      *
      * @param max
      *            the String value to set
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected void setMax(String max) {
         getElement().setProperty("max", max == null ? "" : max);
     }
@@ -611,7 +666,9 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * </p>
      *
      * @return the {@code step} property from the webcomponent
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected double getStepDouble() {
         return getElement().getProperty("step", 0.0);
     }
@@ -642,7 +699,9 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      *
      * @param step
      *            the double value to set
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected void setStep(double step) {
         getElement().setProperty("step", step);
     }
@@ -688,7 +747,9 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * </pre>
      *
      * @return the {@code i18n} property from the webcomponent
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected JsonObject getI18nJsonObject() {
         return (JsonObject) getElement().getPropertyRaw("i18n");
     }
@@ -734,7 +795,9 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      *
      * @param i18n
      *            the JsonObject value to set
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected void setI18n(JsonObject i18n) {
         getElement().setPropertyJson("i18n", i18n);
     }
@@ -751,8 +814,11 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * This function is not supported by Flow because it returns a
      * <code>boolean</code>. Functions with return types different than void are
      * not supported at this moment.
+     *
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @NotSupported
+    @Deprecated
     protected void validate() {
     }
 
@@ -767,11 +833,19 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * <p>
      * You can override the {@code checkValidity} method for custom validations.
      * </p>
+     *
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected void checkValidity() {
         getElement().callJsFunction("checkValidity");
     }
 
+    /**
+     * @deprecated since v23.3, generated classes will be removed in v24. Use
+     *             {@link TimePicker.InvalidChangeEvent} instead.
+     */
+    @Deprecated
     public static class InvalidChangeEvent<R extends GeneratedVaadinTimePicker<R, ?>>
             extends ComponentEvent<R> {
         private final boolean invalid;
@@ -793,14 +867,15 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     protected Registration addInvalidChangeListener(
-            ComponentEventListener<InvalidChangeEvent<R>> listener) {
-        return getElement()
-                .addPropertyChangeListener("invalid",
-                        event -> listener.onComponentEvent(
-                                new InvalidChangeEvent<R>((R) this,
-                                        event.isUserOriginated())));
+            ComponentEventListener<TimePicker.InvalidChangeEvent> listener) {
+        return getElement().addPropertyChangeListener("invalid",
+                event -> listener.onComponentEvent(
+                        new TimePicker.InvalidChangeEvent((TimePicker) this,
+                                event.isUserOriginated())));
     }
 
     /**
@@ -828,7 +903,9 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      *            ignored and the initial value is set
      * @param <P>
      *            the property type
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     public <P> GeneratedVaadinTimePicker(T initialValue, T defaultValue,
             Class<P> elementPropertyType,
             SerializableFunction<P, T> presentationToModel,
@@ -863,7 +940,9 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      *            a function that converts a model value to a string value
      * @param <P>
      *            the property type
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     public <P> GeneratedVaadinTimePicker(T initialValue, T defaultValue,
             Class<P> elementPropertyType,
             SerializableFunction<P, T> presentationToModel,
@@ -882,7 +961,9 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      *            the default value to use if the value isn't defined
      * @param acceptNullValues
      *            whether <code>null</code> is accepted as a model value
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     public GeneratedVaadinTimePicker(T initialValue, T defaultValue,
             boolean acceptNullValues) {
         super("value", defaultValue, acceptNullValues);
@@ -907,7 +988,9 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      *            returns a property value
      * @param <P>
      *            the property type
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     public <P> GeneratedVaadinTimePicker(T initialValue, T defaultValue,
             Class<P> elementPropertyType,
             SerializableBiFunction<R, P, T> presentationToModel,
@@ -919,7 +1002,10 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
 
     /**
      * Default constructor.
+     *
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
+    @Deprecated
     public GeneratedVaadinTimePicker() {
         this(null, null, null, (SerializableFunction) null,
                 (SerializableFunction) null, false);

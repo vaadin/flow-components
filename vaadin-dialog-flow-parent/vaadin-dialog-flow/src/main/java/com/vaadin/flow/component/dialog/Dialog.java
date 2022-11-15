@@ -71,6 +71,7 @@ import com.vaadin.flow.shared.Registration;
  */
 @JsModule("./dialogConnector.js")
 @JsModule("./flow-component-renderer.js")
+@SuppressWarnings("deprecation")
 public class Dialog extends GeneratedVaadinDialog<Dialog>
         implements HasComponents, HasSize, HasTheme, HasStyle {
 
@@ -852,7 +853,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
      */
     @Override
     public Registration addOpenedChangeListener(
-            ComponentEventListener<OpenedChangeEvent<Dialog>> listener) {
+            ComponentEventListener<OpenedChangeEvent> listener) {
         return super.addOpenedChangeListener(listener);
     }
 
@@ -964,4 +965,10 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
                 "Dialog does not support adding styles to overlay");
     }
 
+    public static class OpenedChangeEvent
+            extends GeneratedVaadinDialog.OpenedChangeEvent<Dialog> {
+        public OpenedChangeEvent(Dialog source, boolean fromClient) {
+            super(source, fromClient);
+        }
+    }
 }

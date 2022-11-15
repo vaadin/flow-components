@@ -36,10 +36,10 @@ import com.vaadin.flow.function.SerializableFunction;
  * </p>
  */
 @Tag("vaadin-number-field")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha5")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha6")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/number-field", version = "23.3.0-alpha5")
-@NpmPackage(value = "@vaadin/vaadin-text-field", version = "23.3.0-alpha5")
+@NpmPackage(value = "@vaadin/number-field", version = "23.3.0-alpha6")
+@NpmPackage(value = "@vaadin/vaadin-text-field", version = "23.3.0-alpha6")
 @JsModule("@vaadin/number-field/src/vaadin-number-field.js")
 public abstract class GeneratedVaadinNumberField<R extends GeneratedVaadinNumberField<R, T>, T>
         extends GeneratedVaadinTextField<R, T> implements HasStyle {
@@ -56,7 +56,10 @@ public abstract class GeneratedVaadinNumberField<R extends GeneratedVaadinNumber
      * </p>
      *
      * @return the {@code hasControls} property from the webcomponent
+     * @deprecated since 23.3. Use
+     *             {@link AbstractNumberField#isStepButtonsVisible()} instead.
      */
+    @Deprecated
     protected boolean hasControlsBoolean() {
         return getElement().getProperty("hasControls", false);
     }
@@ -71,7 +74,11 @@ public abstract class GeneratedVaadinNumberField<R extends GeneratedVaadinNumber
      *
      * @param hasControls
      *            the boolean value to set
+     * @deprecated since 23.3. Use
+     *             {@link AbstractNumberField#setStepButtonsVisible(boolean)}
+     *             instead.
      */
+    @Deprecated
     protected void setHasControls(boolean hasControls) {
         getElement().setProperty("hasControls", hasControls);
     }
