@@ -261,38 +261,6 @@ public class NumberField extends AbstractNumberField<NumberField, Double> {
         return (int) getMinlengthDouble();
     }
 
-    /**
-     * @deprecated Not supported by NumberField (as it's built on
-     *             {@code <input type="number">} in HTML). You can set numeric
-     *             value constraints with {@link #setMin(double)},
-     *             {@link #setMax(double)} and {@link #setStep(double)}. For
-     *             setting a custom value pattern, use the TextField component
-     *             instead.
-     */
-    @Override
-    @Deprecated
-    public void setPattern(String pattern) {
-        super.setPattern(pattern);
-    }
-
-    /**
-     * A regular expression that the value is checked against. The pattern must
-     * match the entire value, not just some subset.
-     *
-     * @return the {@code pattern} property from the webcomponent
-     *
-     * @deprecated Not supported by NumberField (as it's built on
-     *             {@code <input type="number">} in HTML). You can set numeric
-     *             value constraints with {@link #setMin(double)},
-     *             {@link #setMax(double)} and {@link #setStep(double)}. For
-     *             setting a custom value pattern, use the TextField component
-     *             instead.
-     */
-    @Deprecated
-    public String getPattern() {
-        return getPatternString();
-    }
-
     private static class Formatter
             implements SerializableFunction<Double, String> {
 

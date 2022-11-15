@@ -390,7 +390,7 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
      *      https://html.spec.whatwg.org/multipage/input.html#attr-input-pattern</>
      */
     public void setPattern(String pattern) {
-        getElement().setProperty("pattern", pattern);
+        getElement().setProperty("pattern", pattern == null ? "" : pattern);
         getValidationSupport().setPattern(pattern);
     }
 

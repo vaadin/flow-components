@@ -407,9 +407,8 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
      *      "https://html.spec.whatwg.org/multipage/input.html#attr-input-pattern">
      *      https://html.spec.whatwg.org/multipage/input.html#attr-input-pattern</>
      */
-    @Override
     public void setPattern(String pattern) {
-        super.setPattern(pattern);
+        getElement().setProperty("pattern", pattern == null ? "" : pattern);
         getValidationSupport().setPattern(pattern);
     }
 
@@ -420,7 +419,7 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
      * @return the {@code pattern} property from the webcomponent
      */
     public String getPattern() {
-        return getPatternString();
+        return getElement().getProperty("pattern");
     }
 
     /**

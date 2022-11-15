@@ -719,40 +719,6 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      * Description copied from corresponding location in WebComponent:
      * </p>
      * <p>
-     * A regular expression that the value is checked against. The pattern must
-     * match the entire value, not just some subset.
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
-     * </p>
-     *
-     * @return the {@code pattern} property from the webcomponent
-     */
-    protected String getPatternString() {
-        return getElement().getProperty("pattern");
-    }
-
-    /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
-     * A regular expression that the value is checked against. The pattern must
-     * match the entire value, not just some subset.
-     * </p>
-     *
-     * @param pattern
-     *            the String value to set
-     */
-    protected void setPattern(String pattern) {
-        getElement().setProperty("pattern", pattern == null ? "" : pattern);
-    }
-
-    /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
      * Message to show to the user when validation fails.
      * <p>
      * This property is not synchronized automatically from the client side, so
