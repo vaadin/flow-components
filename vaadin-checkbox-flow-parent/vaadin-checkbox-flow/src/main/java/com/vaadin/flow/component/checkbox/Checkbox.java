@@ -35,6 +35,7 @@ import com.vaadin.flow.dom.PropertyChangeListener;
  *
  * @author Vaadin Ltd
  */
+@SuppressWarnings("deprecation")
 public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
         implements HasSize, HasLabel, HasTooltip {
 

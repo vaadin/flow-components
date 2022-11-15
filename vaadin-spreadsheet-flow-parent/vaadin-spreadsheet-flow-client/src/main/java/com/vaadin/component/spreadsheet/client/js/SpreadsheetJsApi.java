@@ -494,6 +494,7 @@ public class SpreadsheetJsApi {
         } else {
             widget = popupButtonWidgets.get(key);
         }
+        widget.markActive(state.active);
         spreadsheetWidget.addPopupButton(widget);
     }
 
