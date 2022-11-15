@@ -3,8 +3,11 @@ package com.vaadin.flow.component.spreadsheet.test;
 import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.By;
 
 import static org.junit.Assert.assertEquals;
+
+import org.junit.Assert;
 
 public class FormulaIT extends AbstractSpreadsheetIT {
 
@@ -153,5 +156,21 @@ public class FormulaIT extends AbstractSpreadsheetIT {
         assertEquals("19.98", getCellContent("B4"));
         assertEquals("4.44", getCellContent("B5"));
         assertEquals("2.59", getCellContent("B6"));
+    }
+
+    @Test
+    public void invalidFormulaIndicatorMouseDown_cellSelected() {
+        createNewSpreadsheet();
+
+        setCellValue("A1", "=a");
+        selectCell("B1");
+
+        var invalidFormulaIndicator = getCellElement("A1")
+                .findElement(By.className("cell-invalidformula-triangle"));
+        executeScript(
+                "arguments[0].dispatchEvent(new Event('mousedown', {bubbles:true}))",
+                invalidFormulaIndicator);
+
+        Assert.assertTrue(isCellSelected("A1"));
     }
 }

@@ -162,9 +162,9 @@ import com.vaadin.flow.shared.Registration;
  * </p>
  */
 @Tag("vaadin-text-field")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha4")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/text-field", version = "24.0.0-alpha2")
+@NpmPackage(value = "@vaadin/text-field", version = "24.0.0-alpha4")
 @JsModule("@vaadin/text-field/src/vaadin-text-field.js")
 public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextField<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
@@ -457,74 +457,6 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      * Description copied from corresponding location in WebComponent:
      * </p>
      * <p>
-     * Maximum number of characters (in Unicode code points) that the user can
-     * enter.
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
-     * </p>
-     *
-     * @return the {@code maxlength} property from the webcomponent
-     */
-    protected double getMaxlengthDouble() {
-        return getElement().getProperty("maxlength", 0.0);
-    }
-
-    /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
-     * Maximum number of characters (in Unicode code points) that the user can
-     * enter.
-     * </p>
-     *
-     * @param maxlength
-     *            the double value to set
-     */
-    protected void setMaxlength(double maxlength) {
-        getElement().setProperty("maxlength", maxlength);
-    }
-
-    /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
-     * Minimum number of characters (in Unicode code points) that the user can
-     * enter.
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
-     * </p>
-     *
-     * @return the {@code minlength} property from the webcomponent
-     */
-    protected double getMinlengthDouble() {
-        return getElement().getProperty("minlength", 0.0);
-    }
-
-    /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
-     * Minimum number of characters (in Unicode code points) that the user can
-     * enter.
-     * </p>
-     *
-     * @param minlength
-     *            the double value to set
-     */
-    protected void setMinlength(double minlength) {
-        getElement().setProperty("minlength", minlength);
-    }
-
-    /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
      * The name of the control, which is submitted with the form data.
      * <p>
      * This property is not synchronized automatically from the client side, so
@@ -712,40 +644,6 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      */
     protected void setList(String list) {
         getElement().setProperty("list", list == null ? "" : list);
-    }
-
-    /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
-     * A regular expression that the value is checked against. The pattern must
-     * match the entire value, not just some subset.
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
-     * </p>
-     *
-     * @return the {@code pattern} property from the webcomponent
-     */
-    protected String getPatternString() {
-        return getElement().getProperty("pattern");
-    }
-
-    /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
-     * A regular expression that the value is checked against. The pattern must
-     * match the entire value, not just some subset.
-     * </p>
-     *
-     * @param pattern
-     *            the String value to set
-     */
-    protected void setPattern(String pattern) {
-        getElement().setProperty("pattern", pattern == null ? "" : pattern);
     }
 
     /**
