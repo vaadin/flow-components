@@ -112,7 +112,10 @@ import com.vaadin.flow.shared.Registration;
  * <a href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin
  * – how to apply styles for shadow parts</a>
  * </p>
+ *
+ * @deprecated since v23.3, deprecated classes will be removed in v24.
  */
+@Deprecated
 @Tag("vaadin-radio-group")
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha6")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
@@ -126,7 +129,11 @@ public abstract class GeneratedVaadinRadioGroup<R extends GeneratedVaadinRadioGr
      *
      * @param variants
      *            theme variants to add
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24. Use
+     *             {@link RadioButtonGroup#addThemeVariants} instead.
      */
+    @Deprecated
     public void addThemeVariants(RadioGroupVariant... variants) {
         getThemeNames().addAll(
                 Stream.of(variants).map(RadioGroupVariant::getVariantName)
@@ -138,7 +145,11 @@ public abstract class GeneratedVaadinRadioGroup<R extends GeneratedVaadinRadioGr
      *
      * @param variants
      *            theme variants to remove
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24. Use
+     *             {@link RadioButtonGroup#removeThemeVariants} instead.
      */
+    @Deprecated
     public void removeThemeVariants(RadioGroupVariant... variants) {
         getThemeNames().removeAll(
                 Stream.of(variants).map(RadioGroupVariant::getVariantName)
@@ -158,7 +169,10 @@ public abstract class GeneratedVaadinRadioGroup<R extends GeneratedVaadinRadioGr
      * </p>
      *
      * @return the {@code disabled} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected boolean isDisabledBoolean() {
         return getElement().getProperty("disabled", false);
     }
@@ -174,7 +188,10 @@ public abstract class GeneratedVaadinRadioGroup<R extends GeneratedVaadinRadioGr
      *
      * @param disabled
      *            the boolean value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setDisabled(boolean disabled) {
         getElement().setProperty("disabled", disabled);
     }
@@ -192,7 +209,10 @@ public abstract class GeneratedVaadinRadioGroup<R extends GeneratedVaadinRadioGr
      * </p>
      *
      * @return the {@code readonly} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected boolean isReadonlyBoolean() {
         return getElement().getProperty("readonly", false);
     }
@@ -208,7 +228,10 @@ public abstract class GeneratedVaadinRadioGroup<R extends GeneratedVaadinRadioGr
      *
      * @param readonly
      *            the boolean value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setReadonly(boolean readonly) {
         getElement().setProperty("readonly", readonly);
     }
@@ -221,7 +244,10 @@ public abstract class GeneratedVaadinRadioGroup<R extends GeneratedVaadinRadioGr
      * This property is set to true when the value is invalid.
      *
      * @return the {@code invalid} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected boolean isInvalidBoolean() {
         return getElement().getProperty("invalid", false);
     }
@@ -236,7 +262,10 @@ public abstract class GeneratedVaadinRadioGroup<R extends GeneratedVaadinRadioGr
      *
      * @param invalid
      *            the boolean value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setInvalid(boolean invalid) {
         getElement().setProperty("invalid", invalid);
     }
@@ -253,7 +282,10 @@ public abstract class GeneratedVaadinRadioGroup<R extends GeneratedVaadinRadioGr
      * </p>
      *
      * @return the {@code required} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected boolean isRequiredBoolean() {
         return getElement().getProperty("required", false);
     }
@@ -268,7 +300,10 @@ public abstract class GeneratedVaadinRadioGroup<R extends GeneratedVaadinRadioGr
      *
      * @param required
      *            the boolean value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setRequired(boolean required) {
         getElement().setProperty("required", required);
     }
@@ -285,7 +320,10 @@ public abstract class GeneratedVaadinRadioGroup<R extends GeneratedVaadinRadioGr
      * </p>
      *
      * @return the {@code errorMessage} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected String getErrorMessageString() {
         return getElement().getProperty("errorMessage");
     }
@@ -300,7 +338,10 @@ public abstract class GeneratedVaadinRadioGroup<R extends GeneratedVaadinRadioGr
      *
      * @param errorMessage
      *            the String value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setErrorMessage(String errorMessage) {
         getElement().setProperty("errorMessage",
                 errorMessage == null ? "" : errorMessage);
@@ -318,7 +359,10 @@ public abstract class GeneratedVaadinRadioGroup<R extends GeneratedVaadinRadioGr
      * </p>
      *
      * @return the {@code label} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected String getLabelString() {
         return getElement().getProperty("label");
     }
@@ -333,7 +377,10 @@ public abstract class GeneratedVaadinRadioGroup<R extends GeneratedVaadinRadioGr
      *
      * @param label
      *            the String value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setLabel(String label) {
         getElement().setProperty("label", label == null ? "" : label);
     }
@@ -350,7 +397,10 @@ public abstract class GeneratedVaadinRadioGroup<R extends GeneratedVaadinRadioGr
      * This function is not supported by Flow because it returns a
      * <code>boolean</code>. Functions with return types different than void are
      * not supported at this moment.
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     @NotSupported
     protected void validate() {
     }
@@ -367,11 +417,18 @@ public abstract class GeneratedVaadinRadioGroup<R extends GeneratedVaadinRadioGr
      * This function is not supported by Flow because it returns a
      * <code>boolean</code>. Functions with return types different than void are
      * not supported at this moment.
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     @NotSupported
     protected void checkValidity() {
     }
 
+    /**
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     */
+    @Deprecated
     public static class InvalidChangeEvent<R extends GeneratedVaadinRadioGroup<R, ?>>
             extends ComponentEvent<R> {
         private final boolean invalid;
@@ -393,7 +450,10 @@ public abstract class GeneratedVaadinRadioGroup<R extends GeneratedVaadinRadioGr
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected Registration addInvalidChangeListener(
             ComponentEventListener<InvalidChangeEvent<R>> listener) {
         return getElement()
@@ -419,7 +479,10 @@ public abstract class GeneratedVaadinRadioGroup<R extends GeneratedVaadinRadioGr
      *            a function that converts a model value to a string value
      * @param <P>
      *            the property type
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     public <P> GeneratedVaadinRadioGroup(T initialValue, T defaultValue,
             Class<P> elementPropertyType,
             SerializableFunction<P, T> presentationToModel,
@@ -441,7 +504,10 @@ public abstract class GeneratedVaadinRadioGroup<R extends GeneratedVaadinRadioGr
      *            the default value to use if the value isn't defined
      * @param acceptNullValues
      *            whether <code>null</code> is accepted as a model value
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     public GeneratedVaadinRadioGroup(T initialValue, T defaultValue,
             boolean acceptNullValues) {
         super("value", defaultValue, acceptNullValues);
@@ -477,7 +543,10 @@ public abstract class GeneratedVaadinRadioGroup<R extends GeneratedVaadinRadioGr
      *            ignored and the initial value is set
      * @param <P>
      *            the property type
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     public <P> GeneratedVaadinRadioGroup(T initialValue, T defaultValue,
             Class<P> elementPropertyType,
             SerializableBiFunction<R, P, T> presentationToModel,
@@ -509,7 +578,10 @@ public abstract class GeneratedVaadinRadioGroup<R extends GeneratedVaadinRadioGr
      *            returns a property value
      * @param <P>
      *            the property type
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     public <P> GeneratedVaadinRadioGroup(T initialValue, T defaultValue,
             Class<P> elementPropertyType,
             SerializableBiFunction<R, P, T> presentationToModel,
@@ -520,7 +592,10 @@ public abstract class GeneratedVaadinRadioGroup<R extends GeneratedVaadinRadioGr
 
     /**
      * Default constructor.
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     public GeneratedVaadinRadioGroup() {
         this(null, null, null, (SerializableFunction) null,
                 (SerializableFunction) null);

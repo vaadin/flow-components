@@ -162,7 +162,10 @@ import com.vaadin.flow.dom.Element;
  * <a href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin
  * – how to apply styles for shadow parts</a>
  * </p>
+ *
+ * @deprecated since v23.3, deprecated classes will be removed in v24.
  */
+@Deprecated
 @Tag("vaadin-form-item")
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha6")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
@@ -184,7 +187,10 @@ public abstract class GeneratedVaadinFormItem<R extends GeneratedVaadinFormItem<
      * @see <a href=
      *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void addToLabel(Component... components) {
         for (Component component : components) {
             component.getElement().setAttribute("slot", "label");
@@ -199,7 +205,10 @@ public abstract class GeneratedVaadinFormItem<R extends GeneratedVaadinFormItem<
      *            The components to remove.
      * @throws IllegalArgumentException
      *             if any of the components is not a child of this component.
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void remove(Component... components) {
         for (Component component : components) {
             if (getElement().equals(component.getElement().getParent())) {
@@ -216,7 +225,10 @@ public abstract class GeneratedVaadinFormItem<R extends GeneratedVaadinFormItem<
      * Removes all contents from this component, this includes child components,
      * text content as well as child elements that have been added directly to
      * this component using the {@link Element} API.
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void removeAll() {
         getElement().getChildren()
                 .forEach(child -> child.removeAttribute("slot"));

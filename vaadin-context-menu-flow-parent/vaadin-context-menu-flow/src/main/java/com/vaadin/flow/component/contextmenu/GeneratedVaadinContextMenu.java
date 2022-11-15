@@ -139,7 +139,10 @@ import elemental.json.JsonObject;
  * <a href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin
  * – how to apply styles for shadow parts</a>
  * </p>
+ *
+ * @deprecated since v23.3, deprecated classes will be removed in v24.
  */
+@Deprecated
 @Tag("vaadin-context-menu")
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha6")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
@@ -147,7 +150,7 @@ import elemental.json.JsonObject;
 @NpmPackage(value = "@vaadin/vaadin-context-menu", version = "23.3.0-alpha6")
 @JsModule("@vaadin/context-menu/src/vaadin-context-menu.js")
 @JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
-public abstract class GeneratedVaadinContextMenu<R extends GeneratedVaadinContextMenu<R>>
+public abstract class GeneratedVaadinContextMenu<R extends ContextMenuBase<R, ?, ?>>
         extends Component implements HasStyle, ClickNotifier<R> {
 
     /**
@@ -163,7 +166,10 @@ public abstract class GeneratedVaadinContextMenu<R extends GeneratedVaadinContex
      * </p>
      *
      * @return the {@code selector} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected String getSelectorString() {
         return getElement().getProperty("selector");
     }
@@ -179,7 +185,10 @@ public abstract class GeneratedVaadinContextMenu<R extends GeneratedVaadinContex
      *
      * @param selector
      *            the String value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setSelector(String selector) {
         getElement().setProperty("selector", selector == null ? "" : selector);
     }
@@ -196,7 +205,10 @@ public abstract class GeneratedVaadinContextMenu<R extends GeneratedVaadinContex
      * </p>
      *
      * @return the {@code opened} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     @Synchronize(property = "opened", value = "opened-changed")
     protected boolean isOpenedBoolean() {
         return getElement().getProperty("opened", false);
@@ -214,7 +226,10 @@ public abstract class GeneratedVaadinContextMenu<R extends GeneratedVaadinContex
      * </p>
      *
      * @return the {@code openOn} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected String getOpenOnString() {
         return getElement().getProperty("openOn");
     }
@@ -229,7 +244,10 @@ public abstract class GeneratedVaadinContextMenu<R extends GeneratedVaadinContex
      *
      * @param openOn
      *            the String value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setOpenOn(String openOn) {
         getElement().setProperty("openOn", openOn == null ? "" : openOn);
     }
@@ -248,7 +266,10 @@ public abstract class GeneratedVaadinContextMenu<R extends GeneratedVaadinContex
      * </p>
      *
      * @return the {@code listenOn} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected JsonObject getListenOnJsonObject() {
         return (JsonObject) getElement().getPropertyRaw("listenOn");
     }
@@ -265,7 +286,10 @@ public abstract class GeneratedVaadinContextMenu<R extends GeneratedVaadinContex
      *
      * @param listenOn
      *            the JsonObject value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setListenOn(JsonObject listenOn) {
         getElement().setPropertyJson("listenOn", listenOn);
     }
@@ -282,7 +306,10 @@ public abstract class GeneratedVaadinContextMenu<R extends GeneratedVaadinContex
      * </p>
      *
      * @return the {@code closeOn} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected String getCloseOnString() {
         return getElement().getProperty("closeOn");
     }
@@ -297,7 +324,10 @@ public abstract class GeneratedVaadinContextMenu<R extends GeneratedVaadinContex
      *
      * @param closeOn
      *            the String value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setCloseOn(String closeOn) {
         getElement().setProperty("closeOn", closeOn == null ? "" : closeOn);
     }
@@ -309,7 +339,10 @@ public abstract class GeneratedVaadinContextMenu<R extends GeneratedVaadinContex
      * <p>
      * Closes the overlay.
      * </p>
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void close() {
         getElement().callFunction("close");
     }
@@ -321,16 +354,24 @@ public abstract class GeneratedVaadinContextMenu<R extends GeneratedVaadinContex
      * <p>
      * Opens the overlay.
      * </p>
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void open() {
         getElement().callFunction("open");
     }
 
-    public static class OpenedChangeEvent<R extends GeneratedVaadinContextMenu<R>>
-            extends ComponentEvent<R> {
+    /**
+     * @deprecated since v23.3, deprecated classes will be removed in v24. Use
+     *             {@link ContextMenuBase.OpenedChangeEvent} instead.
+     */
+    @Deprecated
+    public static class OpenedChangeEvent<C extends ContextMenuBase<C, ?, ?>>
+            extends ComponentEvent<C> {
         private final boolean opened;
 
-        public OpenedChangeEvent(R source, boolean fromClient) {
+        public OpenedChangeEvent(C source, boolean fromClient) {
             super(source, fromClient);
             this.opened = source.isOpenedBoolean();
         }
@@ -347,14 +388,17 @@ public abstract class GeneratedVaadinContextMenu<R extends GeneratedVaadinContex
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24. Use
+     *             {@link ContextMenuBase#addOpenedChangeListener} instead.
      */
+    @Deprecated
     protected Registration addOpenedChangeListener(
-            ComponentEventListener<OpenedChangeEvent<R>> listener) {
-        return getElement()
-                .addPropertyChangeListener("opened",
-                        event -> listener.onComponentEvent(
-                                new OpenedChangeEvent<R>((R) this,
-                                        event.isUserOriginated())));
+            ComponentEventListener<ContextMenuBase.OpenedChangeEvent<R>> listener) {
+        return getElement().addPropertyChangeListener("opened",
+                event -> listener.onComponentEvent(
+                        new ContextMenuBase.OpenedChangeEvent<>((R) this,
+                                event.isUserOriginated())));
     }
 
     /**
@@ -363,7 +407,7 @@ public abstract class GeneratedVaadinContextMenu<R extends GeneratedVaadinContex
      *
      * @see #addClickListener(ComponentEventListener)
      *
-     * @deprecated since 23.3
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
     @Deprecated
     @Override
@@ -378,7 +422,7 @@ public abstract class GeneratedVaadinContextMenu<R extends GeneratedVaadinContex
      *
      * @see #addClickShortcut(Key, KeyModifier...)
      *
-     * @deprecated since 23.3
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
     @Deprecated
     @Override
