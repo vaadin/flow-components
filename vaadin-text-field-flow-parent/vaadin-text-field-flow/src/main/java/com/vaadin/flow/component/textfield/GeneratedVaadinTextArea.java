@@ -138,9 +138,9 @@ import com.vaadin.flow.shared.Registration;
  * </p>
  */
 @Tag("vaadin-text-area")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha4")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/text-area", version = "24.0.0-alpha2")
+@NpmPackage(value = "@vaadin/text-area", version = "24.0.0-alpha4")
 @JsModule("@vaadin/text-area/src/vaadin-text-area.js")
 public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
@@ -426,74 +426,6 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      */
     protected void setLabel(String label) {
         getElement().setProperty("label", label == null ? "" : label);
-    }
-
-    /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
-     * Maximum number of characters (in Unicode code points) that the user can
-     * enter.
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
-     * </p>
-     *
-     * @return the {@code maxlength} property from the webcomponent
-     */
-    protected double getMaxlengthDouble() {
-        return getElement().getProperty("maxlength", 0.0);
-    }
-
-    /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
-     * Maximum number of characters (in Unicode code points) that the user can
-     * enter.
-     * </p>
-     *
-     * @param maxlength
-     *            the double value to set
-     */
-    protected void setMaxlength(double maxlength) {
-        getElement().setProperty("maxlength", maxlength);
-    }
-
-    /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
-     * Minimum number of characters (in Unicode code points) that the user can
-     * enter.
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
-     * </p>
-     *
-     * @return the {@code minlength} property from the webcomponent
-     */
-    protected double getMinlengthDouble() {
-        return getElement().getProperty("minlength", 0.0);
-    }
-
-    /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
-     * Minimum number of characters (in Unicode code points) that the user can
-     * enter.
-     * </p>
-     *
-     * @param minlength
-     *            the double value to set
-     */
-    protected void setMinlength(double minlength) {
-        getElement().setProperty("minlength", minlength);
     }
 
     /**

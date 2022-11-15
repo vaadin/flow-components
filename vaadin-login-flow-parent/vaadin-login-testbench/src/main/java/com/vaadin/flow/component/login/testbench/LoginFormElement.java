@@ -53,8 +53,8 @@ public class LoginFormElement extends TestBenchElement implements Login {
 
     @Override
     public ButtonElement getForgotPasswordButton() {
-        return getFormWrapper().$(ButtonElement.class)
-                .id("forgotPasswordButton");
+        return $(ButtonElement.class).attribute("slot", "forgot-password")
+                .first();
     }
 
     @Override
