@@ -40,6 +40,7 @@ import java.util.stream.Stream;
  *
  * @author Vaadin Ltd
  */
+@SuppressWarnings("deprecation")
 public class Button extends GeneratedVaadinButton<Button>
         implements HasSize, HasEnabled, HasTooltip {
 

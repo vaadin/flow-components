@@ -180,7 +180,7 @@ public class IntegerField extends AbstractNumberField<IntegerField, Integer> {
     /**
      * Sets the allowed number intervals of the field. This specifies how much
      * the value will be increased/decreased when clicking on the
-     * {@link #setHasControls(boolean) control buttons}. It is also used to
+     * {@link #setStepButtonsVisible(boolean) step buttons}. It is also used to
      * invalidate the field, if the value doesn't align with the specified step
      * and {@link #setMin(int) min} (if specified by user).
      *
