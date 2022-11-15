@@ -677,6 +677,12 @@ public class CellValueManager implements Serializable {
                         spreadsheet.markInvalidFormula(col, row);
                     }
                 } else {
+                    if (oldCellType == CellType.FORMULA) {
+                        // The old cell type was formula.
+                        // Set the cell blank to clear the old formula first.
+                        cell.setBlank();
+                    }
+
                     spreadsheet.removeInvalidFormulaMark(col, row);
                     Double percentage = SpreadsheetUtil.parsePercentage(value,
                             spreadsheetLocale);

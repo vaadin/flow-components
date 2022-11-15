@@ -53,6 +53,7 @@ import elemental.json.JsonType;
  *
  * @author Vaadin Ltd.
  */
+@SuppressWarnings("deprecation")
 public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
 
     private StreamVariable streamVariable;
