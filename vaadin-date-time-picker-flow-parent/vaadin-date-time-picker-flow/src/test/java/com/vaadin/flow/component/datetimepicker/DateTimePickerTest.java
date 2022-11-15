@@ -159,7 +159,6 @@ public class DateTimePickerTest {
         DateTimePicker picker = new DateTimePicker();
 
         DatePicker.DatePickerI18n i18n = new DatePicker.DatePickerI18n()
-                .setWeek("viikko").setCalendar("kalenteri").setClear("tyhjennä")
                 .setToday("tänään").setCancel("peruuta").setFirstDayOfWeek(1)
                 .setMonthNames(Arrays.asList("tammikuu", "helmikuu",
                         "maaliskuu", "huhtikuu", "toukokuu", "kesäkuu",
