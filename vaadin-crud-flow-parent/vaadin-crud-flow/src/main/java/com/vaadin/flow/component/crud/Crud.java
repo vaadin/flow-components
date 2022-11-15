@@ -55,9 +55,9 @@ import java.util.stream.Collectors;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-crud")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha4")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/crud", version = "24.0.0-alpha2")
+@NpmPackage(value = "@vaadin/crud", version = "24.0.0-alpha4")
 @JsModule("@vaadin/crud/src/vaadin-crud.js")
 @JsModule("@vaadin/crud/src/vaadin-crud-edit-column.js")
 public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
@@ -87,6 +87,8 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
     final private Button cancelButton;
 
     final private Button deleteButton;
+
+    private Component newButton;
 
     /**
      * Instantiates a new Crud using a custom grid.
@@ -139,6 +141,11 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
     public Crud() {
         setI18n(CrudI18n.createDefault(), false);
         registerHandlers();
+
+        newButton = new Button();
+        newButton.getElement().setAttribute("slot", "new-button");
+        newButton.getElement().setAttribute("theme", "primary");
+        getElement().appendChild(newButton.getElement());
 
         saveButton = new SaveButton();
         saveButton.getElement().setAttribute("slot", "save-button");
@@ -506,8 +513,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
     }
 
     /**
-     * Sets the content of the toolbar. Any content with the attribute
-     * `new-button` triggers a new item creation.
+     * Sets the content of the toolbar.
      *
      * @param components
      *            the content to be set
@@ -566,6 +572,33 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
      */
     public boolean getToolbarVisible() {
         return toolbarVisible;
+    }
+
+    /**
+     * Gets the Crud new item button
+     *
+     * @return the new item button
+     */
+    public Component getNewButton() {
+        return newButton;
+    }
+
+    /**
+     * Sets the Crud new item button
+     *
+     * @param button
+     */
+    public void setNewButton(Component button) {
+        getElement().getChildren().filter(
+                child -> "new-button".equals(child.getAttribute("slot")))
+                .findAny().ifPresent(getElement()::removeChild);
+
+        newButton = button;
+
+        if (button != null) {
+            button.getElement().setAttribute("slot", "new-button");
+            getElement().appendChild(button.getElement());
+        }
     }
 
     /**
