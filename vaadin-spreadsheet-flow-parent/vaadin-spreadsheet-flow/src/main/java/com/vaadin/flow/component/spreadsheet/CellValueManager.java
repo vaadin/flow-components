@@ -1190,6 +1190,10 @@ public class CellValueManager implements Serializable {
                 final String key = SpreadsheetUtil.toKey(columnIndex + 1,
                         rowIndex + 1);
 
+                // Remove existing invalid formula markers
+                spreadsheet.removeInvalidFormulaMark(cell.getColumnIndex() + 1,
+                        cell.getRowIndex() + 1);
+
                 // Mark for update if there are formatting rules.
                 if (spreadsheet.getConditionalFormatter()
                         .getCellFormattingIndex(cell) != null) {

@@ -109,6 +109,34 @@ public class FormulasTest {
     }
 
     @Test
+    public void setInvalidFormula_overwriteFormula_invalidFormulaCellsCleared() {
+        // Create a formula cell with an invalid formula
+        var A1 = spreadsheet.createFormulaCell(0, 0, "Sheet2!A1");
+        spreadsheet.refreshCells(A1);
+
+        // Overwrite the formula with a valid one
+        A1.setCellFormula("1+1");
+        spreadsheet.refreshCells(A1);
+
+        Assert.assertEquals("[]",
+                spreadsheet.getElement().getProperty("invalidFormulaCells"));
+    }
+
+    @Test
+    public void setValidFormula_overwriteWithInvalidFormula_invalidFormulaCellsSet() {
+        // Create a formula cell with a valid formula
+        var A1 = spreadsheet.createFormulaCell(0, 0, "1+1");
+        spreadsheet.refreshCells(A1);
+
+        // Overwrite the formula with an invalid one
+        A1.setCellFormula("Sheet2!A1");
+        spreadsheet.refreshCells(A1);
+
+        Assert.assertEquals("[\"col1 row1\"]",
+                spreadsheet.getElement().getProperty("invalidFormulaCells"));
+    }
+
+    @Test
     public void setInvalidFormulaErrorMessage_invalidFormulaErrorMessageSet() {
         spreadsheet.setInvalidFormulaErrorMessage("foo");
         Assert.assertEquals("foo", spreadsheet.getElement()
