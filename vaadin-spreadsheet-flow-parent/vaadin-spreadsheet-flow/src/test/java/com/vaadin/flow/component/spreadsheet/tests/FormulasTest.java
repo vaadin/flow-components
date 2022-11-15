@@ -115,4 +115,23 @@ public class FormulasTest {
                 .getProperty("invalidFormulaErrorMessage"));
     }
 
+    @Test
+    public void createFormulaCell_updateCellValue() {
+        spreadsheet.setSelection("A1");
+        var A1 = spreadsheet.createFormulaCell(0, 0, "1+1");
+        Assert.assertEquals("2", spreadsheet.getCellValue(A1));
+
+        spreadsheet.getCellValueManager().onCellValueChange(1, 1, "foo");
+        Assert.assertEquals("foo", spreadsheet.getCellValue(A1));
+    }
+
+    @Test
+    public void createFormulaCellWithCircularReference_updateCellValue() {
+        spreadsheet.setSelection("A1");
+        var A1 = spreadsheet.createFormulaCell(0, 0, "A1");
+        Assert.assertEquals("~CIRCULAR~REF~", spreadsheet.getCellValue(A1));
+
+        spreadsheet.getCellValueManager().onCellValueChange(1, 1, "foo");
+        Assert.assertEquals("foo", spreadsheet.getCellValue(A1));
+    }
 }

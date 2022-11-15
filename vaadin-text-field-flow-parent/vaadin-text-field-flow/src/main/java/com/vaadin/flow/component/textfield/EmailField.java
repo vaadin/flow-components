@@ -274,7 +274,7 @@ public class EmailField extends GeneratedVaadinEmailField<EmailField, String>
      *            the maximum length
      */
     public void setMaxLength(int maxLength) {
-        super.setMaxlength(maxLength);
+        getElement().setProperty("maxlength", maxLength);
         getValidationSupport().setMaxLength(maxLength);
     }
 
@@ -285,7 +285,7 @@ public class EmailField extends GeneratedVaadinEmailField<EmailField, String>
      * @return the {@code maxlength} property from the webcomponent
      */
     public int getMaxLength() {
-        return (int) getMaxlengthDouble();
+        return (int) getElement().getProperty("maxlength", 0.0);
     }
 
     /**
@@ -296,7 +296,7 @@ public class EmailField extends GeneratedVaadinEmailField<EmailField, String>
      *            the minimum length
      */
     public void setMinLength(int minLength) {
-        super.setMinlength(minLength);
+        getElement().setProperty("minlength", minLength);
         getValidationSupport().setMinLength(minLength);
     }
 
@@ -307,7 +307,7 @@ public class EmailField extends GeneratedVaadinEmailField<EmailField, String>
      * @return the {@code minlength} property from the webcomponent
      */
     public int getMinLength() {
-        return (int) getMinlengthDouble();
+        return (int) getElement().getProperty("minlength", 0.0);
     }
 
     /**
