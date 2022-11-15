@@ -44,6 +44,7 @@ import com.vaadin.flow.server.VaadinService;
  *
  * @author Vaadin Ltd.
  */
+@SuppressWarnings("deprecation")
 public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
         implements HasSize, HasValidation, HasValueChangeMode,
         HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
