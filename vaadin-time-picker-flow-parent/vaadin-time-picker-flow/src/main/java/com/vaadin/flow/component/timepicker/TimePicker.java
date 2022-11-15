@@ -62,6 +62,7 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author Vaadin Ltd
  */
+@SuppressWarnings("deprecation")
 @JsModule("./vaadin-time-picker/timepickerConnector.js")
 public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         implements HasSize, HasValidation, HasEnabled, HasHelper, HasLabel,
@@ -441,7 +442,7 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
 
     @Override
     public Registration addInvalidChangeListener(
-            ComponentEventListener<InvalidChangeEvent<TimePicker>> listener) {
+            ComponentEventListener<TimePicker.InvalidChangeEvent> listener) {
         return super.addInvalidChangeListener(listener);
     }
 
@@ -759,5 +760,12 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         }
 
         return FeatureFlags.get(service.getContext()).isEnabled(feature);
+    }
+
+    public static class InvalidChangeEvent
+            extends GeneratedVaadinTimePicker.InvalidChangeEvent<TimePicker> {
+        public InvalidChangeEvent(TimePicker source, boolean fromClient) {
+            super(source, fromClient);
+        }
     }
 }
