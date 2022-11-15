@@ -35,6 +35,223 @@ import com.vaadin.flow.shared.Registration;
 import elemental.json.JsonObject;
 
 /**
+ * <p>
+ * Description copied from corresponding location in WebComponent:
+ * </p>
+ * <p>
+ * {@code <vaadin-date-picker>} is a date selection field which includes a
+ * scrollable month calendar view. &lt;vaadin-date-picker
+ * label=&quot;Birthday&quot;&gt;&lt;/vaadin-date-picker&gt;
+ * {@code datePicker.value = '2016-03-02';} When the selected {@code value} is
+ * changed, a {@code value-changed} event is triggered.
+ * </p>
+ * <h3>Styling</h3>
+ * <p>
+ * The following shadow DOM parts are available for styling:
+ * </p>
+ * <table>
+ * <thead>
+ * <tr>
+ * <th>Part name</th>
+ * <th>Description</th>
+ * <th>Theme for Element</th>
+ * </tr>
+ * </thead> <tbody>
+ * <tr>
+ * <td>{@code text-field}</td>
+ * <td>Input element</td>
+ * <td>vaadin-date-picker</td>
+ * </tr>
+ * <tr>
+ * <td>{@code clear-button}</td>
+ * <td>Clear button</td>
+ * <td>vaadin-date-picker</td>
+ * </tr>
+ * <tr>
+ * <td>{@code toggle-button}</td>
+ * <td>Toggle button</td>
+ * <td>vaadin-date-picker</td>
+ * </tr>
+ * <tr>
+ * <td>{@code overlay-content}</td>
+ * <td>The overlay element</td>
+ * <td>vaadin-date-picker</td>
+ * </tr>
+ * <tr>
+ * <td>{@code overlay-header}</td>
+ * <td>Fullscreen mode header</td>
+ * <td>vaadin-date-picker-overlay-content</td>
+ * </tr>
+ * <tr>
+ * <td>{@code label}</td>
+ * <td>Fullscreen mode value/label</td>
+ * <td>vaadin-date-picker-overlay-content</td>
+ * </tr>
+ * <tr>
+ * <td>{@code clear-button}</td>
+ * <td>Fullscreen mode clear button</td>
+ * <td>vaadin-date-picker-overlay-content</td>
+ * </tr>
+ * <tr>
+ * <td>{@code toggle-button}</td>
+ * <td>Fullscreen mode toggle button</td>
+ * <td>vaadin-date-picker-overlay-content</td>
+ * </tr>
+ * <tr>
+ * <td>{@code years-toggle-button}</td>
+ * <td>Fullscreen mode years scroller toggle</td>
+ * <td>vaadin-date-picker-overlay-content</td>
+ * </tr>
+ * <tr>
+ * <td>{@code months}</td>
+ * <td>Months scroller</td>
+ * <td>vaadin-date-picker-overlay-content</td>
+ * </tr>
+ * <tr>
+ * <td>{@code years}</td>
+ * <td>Years scroller</td>
+ * <td>vaadin-date-picker-overlay-content</td>
+ * </tr>
+ * <tr>
+ * <td>{@code toolbar}</td>
+ * <td>Footer bar with buttons</td>
+ * <td>vaadin-date-picker-overlay-content</td>
+ * </tr>
+ * <tr>
+ * <td>{@code today-button}</td>
+ * <td>Today button</td>
+ * <td>vaadin-date-picker-overlay-content</td>
+ * </tr>
+ * <tr>
+ * <td>{@code cancel-button}</td>
+ * <td>Cancel button</td>
+ * <td>vaadin-date-picker-overlay-content</td>
+ * </tr>
+ * <tr>
+ * <td>{@code month}</td>
+ * <td>Month calendar</td>
+ * <td>vaadin-date-picker-overlay-content</td>
+ * </tr>
+ * <tr>
+ * <td>{@code year-number}</td>
+ * <td>Year number</td>
+ * <td>vaadin-date-picker-overlay-content</td>
+ * </tr>
+ * <tr>
+ * <td>{@code year-separator}</td>
+ * <td>Year separator</td>
+ * <td>vaadin-date-picker-overlay-content</td>
+ * </tr>
+ * <tr>
+ * <td>{@code month-header}</td>
+ * <td>Month title</td>
+ * <td>vaadin-month-calendar</td>
+ * </tr>
+ * <tr>
+ * <td>{@code weekdays}</td>
+ * <td>Weekday container</td>
+ * <td>vaadin-month-calendar</td>
+ * </tr>
+ * <tr>
+ * <td>{@code weekday}</td>
+ * <td>Weekday element</td>
+ * <td>vaadin-month-calendar</td>
+ * </tr>
+ * <tr>
+ * <td>{@code week-numbers}</td>
+ * <td>Week numbers container</td>
+ * <td>vaadin-month-calendar</td>
+ * </tr>
+ * <tr>
+ * <td>{@code week-number}</td>
+ * <td>Week number element</td>
+ * <td>vaadin-month-calendar</td>
+ * </tr>
+ * <tr>
+ * <td>{@code date}</td>
+ * <td>Date element</td>
+ * <td>vaadin-month-calendar</td>
+ * </tr>
+ * </tbody>
+ * </table>
+ * <p>
+ * See
+ * <a href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin
+ * – how to apply styles for shadow parts</a>
+ * </p>
+ * <p>
+ * The following state attributes are available for styling:
+ * </p>
+ * <table>
+ * <thead>
+ * <tr>
+ * <th>Attribute</th>
+ * <th>Description</th>
+ * <th>Part name</th>
+ * </tr>
+ * </thead> <tbody>
+ * <tr>
+ * <td>{@code invalid}</td>
+ * <td>Set when the element is invalid</td>
+ * <td>:host</td>
+ * </tr>
+ * <tr>
+ * <td>{@code opened}</td>
+ * <td>Set when the date selector overlay is opened</td>
+ * <td>:host</td>
+ * </tr>
+ * <tr>
+ * <td>{@code readonly}</td>
+ * <td>Set when the element is readonly</td>
+ * <td>:host</td>
+ * </tr>
+ * <tr>
+ * <td>{@code disabled}</td>
+ * <td>Set when the element is disabled</td>
+ * <td>:host</td>
+ * </tr>
+ * <tr>
+ * <td>{@code today}</td>
+ * <td>Set on the date corresponding to the current day</td>
+ * <td>date</td>
+ * </tr>
+ * <tr>
+ * <td>{@code focused}</td>
+ * <td>Set on the focused date</td>
+ * <td>date</td>
+ * </tr>
+ * <tr>
+ * <td>{@code disabled}</td>
+ * <td>Set on the date out of the allowed range</td>
+ * <td>date</td>
+ * </tr>
+ * <tr>
+ * <td>{@code selected}</td>
+ * <td>Set on the selected date</td>
+ * <td>date</td>
+ * </tr>
+ * </tbody>
+ * </table>
+ * <p>
+ * If you want to replace the default input field with a custom implementation,
+ * you should use the <a href="#vaadin-date-picker-light">
+ * {@code <vaadin-date-picker-light>}</a> element.
+ * </p>
+ * <p>
+ * In addition to {@code <vaadin-date-picker>} itself, the following internal
+ * components are themable:
+ * </p>
+ * <ul>
+ * <li>{@code <vaadin-date-picker-text-field>}</li>
+ * <li>{@code <vaadin-date-picker-overlay>}</li>
+ * <li>{@code <vaadin-date-picker-overlay-content>}</li>
+ * <li>{@code <vaadin-month-calendar>}</li>
+ * </ul>
+ * <p>
+ * Note: the {@code theme} attribute value set on {@code <vaadin-date-picker>}
+ * is propagated to the internal themable components listed above.
+ * </p>
+ *
  * @deprecated since v23.3, deprecated classes will be removed in v24.
  */
 @Deprecated
