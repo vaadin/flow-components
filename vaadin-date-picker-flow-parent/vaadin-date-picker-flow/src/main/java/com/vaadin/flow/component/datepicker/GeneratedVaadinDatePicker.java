@@ -251,7 +251,10 @@ import elemental.json.JsonObject;
  * Note: the {@code theme} attribute value set on {@code <vaadin-date-picker>}
  * is propagated to the internal themable components listed above.
  * </p>
+ *
+ * @deprecated since v23.3, deprecated classes will be removed in v24.
  */
+@Deprecated
 @Tag("vaadin-date-picker")
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha6")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
@@ -274,7 +277,10 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      * </p>
      *
      * @return the {@code autofocus} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected boolean isAutofocusBoolean() {
         return getElement().getProperty("autofocus", false);
     }
@@ -289,7 +295,10 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *
      * @param autofocus
      *            the boolean value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setAutofocus(boolean autofocus) {
         getElement().setProperty("autofocus", autofocus);
     }
@@ -306,7 +315,10 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      * </p>
      *
      * @return the {@code disabled} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected boolean isDisabledBoolean() {
         return getElement().getProperty("disabled", false);
     }
@@ -321,7 +333,10 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *
      * @param disabled
      *            the boolean value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setDisabled(boolean disabled) {
         getElement().setProperty("disabled", disabled);
     }
@@ -338,7 +353,10 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      * </p>
      *
      * @return the {@code required} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected boolean isRequiredBoolean() {
         return getElement().getProperty("required", false);
     }
@@ -353,7 +371,10 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *
      * @param required
      *            the boolean value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setRequired(boolean required) {
         getElement().setProperty("required", required);
     }
@@ -370,7 +391,10 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      * </p>
      *
      * @return the {@code name} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected String getNameString() {
         return getElement().getProperty("name");
     }
@@ -385,7 +409,10 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *
      * @param name
      *            the String value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setName(String name) {
         getElement().setProperty("name", name == null ? "" : name);
     }
@@ -405,7 +432,10 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      * </p>
      *
      * @return the {@code initialPosition} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected String getInitialPositionString() {
         return getElement().getProperty("initialPosition");
     }
@@ -423,7 +453,10 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *
      * @param initialPosition
      *            the String value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setInitialPosition(String initialPosition) {
         getElement().setProperty("initialPosition",
                 initialPosition == null ? "" : initialPosition);
@@ -441,7 +474,10 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      * </p>
      *
      * @return the {@code label} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected String getLabelString() {
         return getElement().getProperty("label");
     }
@@ -456,7 +492,10 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *
      * @param label
      *            the String value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setLabel(String label) {
         getElement().setProperty("label", label == null ? "" : label);
     }
@@ -473,7 +512,10 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      * </p>
      *
      * @return the {@code opened} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     @Synchronize(property = "opened", value = "opened-changed")
     protected boolean isOpenedBoolean() {
         return getElement().getProperty("opened", false);
@@ -489,7 +531,10 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *
      * @param opened
      *            the boolean value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setOpened(boolean opened) {
         getElement().setProperty("opened", opened);
     }
@@ -508,7 +553,10 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      * </p>
      *
      * @return the {@code showWeekNumbers} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected boolean isShowWeekNumbersBoolean() {
         return getElement().getProperty("showWeekNumbers", false);
     }
@@ -525,7 +573,10 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *
      * @param showWeekNumbers
      *            the boolean value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setShowWeekNumbers(boolean showWeekNumbers) {
         getElement().setProperty("showWeekNumbers", showWeekNumbers);
     }
@@ -611,7 +662,10 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      * </pre>
      *
      * @return the {@code i18n} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected JsonObject getI18nJsonObject() {
         return (JsonObject) getElement().getPropertyRaw("i18n");
     }
@@ -698,7 +752,10 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *
      * @param i18n
      *            the JsonObject value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setI18n(JsonObject i18n) {
         getElement().setPropertyJson("i18n", i18n);
     }
@@ -724,7 +781,10 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      * </ul>
      *
      * @return the {@code min} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected String getMinAsStringString() {
         return getElement().getProperty("min");
     }
@@ -748,7 +808,10 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *
      * @param minAsString
      *            the String value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setMinAsString(String minAsString) {
         getElement().setProperty("min", minAsString == null ? "" : minAsString);
     }
@@ -773,7 +836,10 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      * </ul>
      *
      * @return the {@code max} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected String getMaxAsStringString() {
         return getElement().getProperty("max");
     }
@@ -796,7 +862,10 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *
      * @param maxAsString
      *            the String value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setMaxAsString(String maxAsString) {
         getElement().setProperty("max", maxAsString == null ? "" : maxAsString);
     }
@@ -813,7 +882,10 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      * </p>
      *
      * @return the {@code errorMessage} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected String getErrorMessageString() {
         return getElement().getProperty("errorMessage");
     }
@@ -828,7 +900,10 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *
      * @param errorMessage
      *            the String value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setErrorMessage(String errorMessage) {
         getElement().setProperty("errorMessage",
                 errorMessage == null ? "" : errorMessage);
@@ -847,7 +922,10 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      * </p>
      *
      * @return the {@code placeholder} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected String getPlaceholderString() {
         return getElement().getProperty("placeholder");
     }
@@ -863,7 +941,10 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *
      * @param placeholder
      *            the String value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setPlaceholder(String placeholder) {
         getElement().setProperty("placeholder",
                 placeholder == null ? "" : placeholder);
@@ -881,7 +962,10 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      * </p>
      *
      * @return the {@code readonly} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected boolean isReadonlyBoolean() {
         return getElement().getProperty("readonly", false);
     }
@@ -896,7 +980,10 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *
      * @param readonly
      *            the boolean value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setReadonly(boolean readonly) {
         getElement().setProperty("readonly", readonly);
     }
@@ -910,7 +997,10 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      * </p>
      *
      * @return the {@code invalid} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected boolean isInvalidBoolean() {
         return getElement().getProperty("invalid", false);
     }
@@ -925,7 +1015,10 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *
      * @param invalid
      *            the boolean value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setInvalid(boolean invalid) {
         getElement().setProperty("invalid", invalid);
     }
@@ -937,7 +1030,10 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      * <p>
      * Opens the dropdown.
      * </p>
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void open() {
         getElement().callJsFunction("open");
     }
@@ -949,7 +1045,10 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      * <p>
      * Closes the dropdown.
      * </p>
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void close() {
         getElement().callJsFunction("close");
     }
@@ -969,7 +1068,10 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *
      * @param value
      *            Value to validate. Optional, defaults to user's input value.
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     @NotSupported
     protected void validate(String value) {
     }
@@ -992,11 +1094,18 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *
      * @param value
      *            Value to validate. Optional, defaults to the selected date.
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     @NotSupported
     protected void checkValidity(String value) {
     }
 
+    /**
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     */
+    @Deprecated
     @DomEvent("change")
     public static class ChangeEvent<R extends GeneratedVaadinDatePicker<R, ?>>
             extends ComponentEvent<R> {
@@ -1011,7 +1120,10 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     @SuppressWarnings({ "rawtypes", "unchecked" })
     protected Registration addChangeListener(
             ComponentEventListener<ChangeEvent<R>> listener) {
@@ -1019,6 +1131,11 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
                 (ComponentEventListener) listener);
     }
 
+    /**
+     * @deprecated since v23.3, deprecated classes will be removed in v24. Use
+     *             {@link DatePicker.InvalidChangeEvent} instead.
+     */
+    @Deprecated
     public static class InvalidChangeEvent<R extends GeneratedVaadinDatePicker<R, ?>>
             extends ComponentEvent<R> {
         private final boolean invalid;
@@ -1040,16 +1157,23 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected Registration addInvalidChangeListener(
-            ComponentEventListener<InvalidChangeEvent<R>> listener) {
-        return getElement()
-                .addPropertyChangeListener("invalid",
-                        event -> listener.onComponentEvent(
-                                new InvalidChangeEvent<R>((R) this,
-                                        event.isUserOriginated())));
+            ComponentEventListener<DatePicker.InvalidChangeEvent> listener) {
+        return getElement().addPropertyChangeListener("invalid",
+                event -> listener.onComponentEvent(
+                        new DatePicker.InvalidChangeEvent((DatePicker) this,
+                                event.isUserOriginated())));
     }
 
+    /**
+     * @deprecated since v23.3, deprecated classes will be removed in v24. Use
+     *             {@link DatePicker.OpenedChangeEvent} instead.
+     */
+    @Deprecated
     public static class OpenedChangeEvent<R extends GeneratedVaadinDatePicker<R, ?>>
             extends ComponentEvent<R> {
         private final boolean opened;
@@ -1071,14 +1195,16 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected Registration addOpenedChangeListener(
-            ComponentEventListener<OpenedChangeEvent<R>> listener) {
-        return getElement()
-                .addPropertyChangeListener("opened",
-                        event -> listener.onComponentEvent(
-                                new OpenedChangeEvent<R>((R) this,
-                                        event.isUserOriginated())));
+            ComponentEventListener<DatePicker.OpenedChangeEvent> listener) {
+        return getElement().addPropertyChangeListener("opened",
+                event -> listener.onComponentEvent(
+                        new DatePicker.OpenedChangeEvent((DatePicker) this,
+                                event.isUserOriginated())));
     }
 
     /**
@@ -1093,7 +1219,10 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      * @see <a href=
      *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void addToPrefix(Component... components) {
         for (Component component : components) {
             component.getElement().setAttribute("slot", "prefix");
@@ -1108,7 +1237,10 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *            The components to remove.
      * @throws IllegalArgumentException
      *             if any of the components is not a child of this component.
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void remove(Component... components) {
         for (Component component : components) {
             if (getElement().equals(component.getElement().getParent())) {
@@ -1125,7 +1257,10 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      * Removes all contents from this component, this includes child components,
      * text content as well as child elements that have been added directly to
      * this component using the {@link Element} API.
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void removeAll() {
         getElement().getChildren()
                 .forEach(child -> child.removeAttribute("slot"));
@@ -1153,7 +1288,10 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *            ignored and the initial value is set
      * @param <P>
      *            the property type
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     public <P> GeneratedVaadinDatePicker(T initialValue, T defaultValue,
             Class<P> elementPropertyType,
             SerializableFunction<P, T> presentationToModel,
@@ -1182,7 +1320,10 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *            the default value to use if the value isn't defined
      * @param acceptNullValues
      *            whether <code>null</code> is accepted as a model value
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     public GeneratedVaadinDatePicker(T initialValue, T defaultValue,
             boolean acceptNullValues) {
         super("value", defaultValue, acceptNullValues);
@@ -1207,7 +1348,10 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *            returns a property value
      * @param <P>
      *            the property type
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     public <P> GeneratedVaadinDatePicker(T initialValue, T defaultValue,
             Class<P> elementPropertyType,
             SerializableBiFunction<R, P, T> presentationToModel,
@@ -1219,7 +1363,10 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
 
     /**
      * Default constructor.
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     public GeneratedVaadinDatePicker() {
         this(null, null, null, (SerializableFunction) null,
                 (SerializableFunction) null, false);
