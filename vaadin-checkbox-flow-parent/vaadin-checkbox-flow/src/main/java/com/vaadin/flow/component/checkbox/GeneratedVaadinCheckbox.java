@@ -159,7 +159,9 @@ public abstract class GeneratedVaadinCheckbox<R extends GeneratedVaadinCheckbox<
      *
      * @param autofocus
      *            the boolean value to set
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setAutofocus(boolean autofocus) {
         getElement().setProperty("autofocus", autofocus);
     }
@@ -263,7 +265,9 @@ public abstract class GeneratedVaadinCheckbox<R extends GeneratedVaadinCheckbox<
      *
      * @param indeterminate
      *            the boolean value to set
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setIndeterminate(boolean indeterminate) {
         getElement().setProperty("indeterminate", indeterminate);
     }
