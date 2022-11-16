@@ -53,6 +53,7 @@ import elemental.json.JsonObject;
  * @author Vaadin Ltd
  *
  */
+@SuppressWarnings("deprecation")
 @Tag("vaadin-rich-text-editor")
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha6")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
@@ -987,4 +988,25 @@ public class RichTextEditor
         }
     }
 
+    /**
+     * Adds theme variants to the component.
+     *
+     * @param variants
+     *            theme variants to add
+     */
+    @Override
+    public void addThemeVariants(RichTextEditorVariant... variants) {
+        super.addThemeVariants(variants);
+    }
+
+    /**
+     * Removes theme variants from the component.
+     *
+     * @param variants
+     *            theme variants to remove
+     */
+    @Override
+    public void removeThemeVariants(RichTextEditorVariant... variants) {
+        super.removeThemeVariants(variants);
+    }
 }
