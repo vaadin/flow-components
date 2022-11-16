@@ -54,6 +54,7 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author Vaadin Ltd.
  */
+@SuppressWarnings("deprecation")
 public class Tabs extends GeneratedVaadinTabs<Tabs>
         implements HasOrderedComponents, HasSize {
 
@@ -510,4 +511,25 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
         }
     }
 
+    /**
+     * Adds theme variants to the component.
+     *
+     * @param variants
+     *            theme variants to add
+     */
+    @Override
+    public void addThemeVariants(TabsVariant... variants) {
+        super.addThemeVariants(variants);
+    }
+
+    /**
+     * Removes theme variants from the component.
+     *
+     * @param variants
+     *            theme variants to remove
+     */
+    @Override
+    public void removeThemeVariants(TabsVariant... variants) {
+        super.removeThemeVariants(variants);
+    }
 }

@@ -73,6 +73,7 @@ import java.util.stream.Stream;
  *            the type of the items for the select
  * @author Vaadin Ltd.
  */
+@SuppressWarnings("deprecation")
 @JsModule("./selectConnector.js")
 public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         implements HasItemComponents<T>, HasSize, HasValidation,
