@@ -248,8 +248,8 @@ public class GridMultiSelectionModelTest {
         assertEquals(asSet(PERSON_C, PERSON_B), oldSelectionCapture.get());
 
         selectionModel.selectItems(PERSON_A);
-         assertEquals(asSet(PERSON_A), currentSelectionCapture.get());
-         assertEquals(Collections.emptySet(), oldSelectionCapture.get());
+        assertEquals(asSet(PERSON_A), currentSelectionCapture.get());
+        assertEquals(Collections.emptySet(), oldSelectionCapture.get());
 
         selectionModel.updateSelection(
                 new LinkedHashSet<>(asSet(PERSON_C, PERSON_B)),
