@@ -44,6 +44,7 @@ import com.vaadin.flow.server.VaadinService;
  *
  * @author Vaadin Ltd.
  */
+@SuppressWarnings("deprecation")
 public class PasswordField
         extends GeneratedVaadinPasswordField<PasswordField, String>
         implements HasSize, HasValidation, HasValueChangeMode,

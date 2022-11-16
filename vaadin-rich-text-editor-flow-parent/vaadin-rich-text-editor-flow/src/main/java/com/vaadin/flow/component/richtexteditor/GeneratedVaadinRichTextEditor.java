@@ -185,7 +185,10 @@ import elemental.json.JsonArray;
  * <a href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin
  * – how to apply styles for shadow parts</a>
  * </p>
+ *
+ * @deprecated since v23.3, deprecated classes will be removed in v24.
  */
+@Deprecated
 @Tag("vaadin-rich-text-editor")
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha6")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
@@ -201,7 +204,11 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
      *
      * @param variants
      *            theme variants to add
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24. Use
+     *             {@link RichTextEditor#addThemeVariants} instead.
      */
+    @Deprecated
     public void addThemeVariants(RichTextEditorVariant... variants) {
         getThemeNames().addAll(
                 Stream.of(variants).map(RichTextEditorVariant::getVariantName)
@@ -213,7 +220,11 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
      *
      * @param variants
      *            theme variants to remove
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24. Use
+     *             {@link RichTextEditor#removeThemeVariants} instead.
      */
+    @Deprecated
     public void removeThemeVariants(RichTextEditorVariant... variants) {
         getThemeNames().removeAll(
                 Stream.of(variants).map(RichTextEditorVariant::getVariantName)
@@ -232,7 +243,10 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
      * </p>
      *
      * @return the {@code htmlValue} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     @Synchronize(property = "htmlValue", value = "html-value-changed")
     protected String getHtmlValueString() {
         return getElement().getProperty("htmlValue");
@@ -250,7 +264,10 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
      * </p>
      *
      * @return the {@code disabled} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected boolean isDisabledBoolean() {
         return getElement().getProperty("disabled", false);
     }
@@ -265,7 +282,10 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
      *
      * @param disabled
      *            the boolean value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setDisabled(boolean disabled) {
         getElement().setProperty("disabled", disabled);
     }
@@ -282,7 +302,10 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
      * </p>
      *
      * @return the {@code readonly} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected boolean isReadonlyBoolean() {
         return getElement().getProperty("readonly", false);
     }
@@ -297,7 +320,10 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
      *
      * @param readonly
      *            the boolean value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setReadonly(boolean readonly) {
         getElement().setProperty("readonly", readonly);
     }
@@ -315,7 +341,10 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
      * </p>
      *
      * @return the {@code i18n} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected JsonArray getI18nJsonArray() {
         return (JsonArray) getElement().getPropertyRaw("i18n");
     }
@@ -331,11 +360,18 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
      *
      * @param i18n
      *            the JsonArray value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setI18n(JsonArray i18n) {
         getElement().setPropertyJson("i18n", i18n);
     }
 
+    /**
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     */
+    @Deprecated
     @DomEvent("change")
     public static class ChangeEvent<R extends GeneratedVaadinRichTextEditor<R, ?>>
             extends ComponentEvent<R> {
@@ -350,7 +386,10 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     @SuppressWarnings({ "rawtypes", "unchecked" })
     protected Registration addChangeListener(
             ComponentEventListener<ChangeEvent<R>> listener) {
@@ -374,7 +413,10 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
      *            a function that converts a model value to a string value
      * @param <P>
      *            the property type
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     public <P> GeneratedVaadinRichTextEditor(T initialValue, T defaultValue,
             Class<P> elementPropertyType,
             SerializableFunction<P, T> presentationToModel,
@@ -401,7 +443,10 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
      *            initial value is used only if element has no {@code "value"}
      *            property value, otherwise element {@code "value"} property is
      *            ignored and the initial value is set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     public GeneratedVaadinRichTextEditor(T initialValue, T defaultValue,
             boolean acceptNullValues, boolean isInitialValueOptional) {
         super("value", defaultValue, acceptNullValues);
@@ -429,7 +474,10 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
      *            returns a property value
      * @param <P>
      *            the property type
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     public <P> GeneratedVaadinRichTextEditor(T initialValue, T defaultValue,
             Class<P> elementPropertyType,
             SerializableBiFunction<R, P, T> presentationToModel,
@@ -443,7 +491,10 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
 
     /**
      * Default constructor.
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     public GeneratedVaadinRichTextEditor() {
         this(null, null, null, (SerializableFunction) null,
                 (SerializableFunction) null);
