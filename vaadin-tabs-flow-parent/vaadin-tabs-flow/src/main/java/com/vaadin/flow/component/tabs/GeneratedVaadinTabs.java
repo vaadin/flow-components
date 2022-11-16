@@ -96,7 +96,10 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * <a href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin
  * – how to apply styles for shadow parts</a>
  * </p>
+ *
+ * @deprecated since v23.3, deprecated classes will be removed in v24.
  */
+@Deprecated
 @Tag("vaadin-tabs")
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha6")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
@@ -111,7 +114,10 @@ public abstract class GeneratedVaadinTabs<R extends GeneratedVaadinTabs<R>>
      *
      * @param variants
      *            theme variants to add
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     public void addThemeVariants(TabsVariant... variants) {
         getThemeNames().addAll(Stream.of(variants)
                 .map(TabsVariant::getVariantName).collect(Collectors.toList()));
@@ -122,12 +128,18 @@ public abstract class GeneratedVaadinTabs<R extends GeneratedVaadinTabs<R>>
      *
      * @param variants
      *            theme variants to remove
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     public void removeThemeVariants(TabsVariant... variants) {
         getThemeNames().removeAll(Stream.of(variants)
                 .map(TabsVariant::getVariantName).collect(Collectors.toList()));
     }
 
+    /**
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     */
     protected void focus() {
         getElement().callJsFunction("focus");
     }
