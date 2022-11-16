@@ -187,7 +187,10 @@ import com.vaadin.flow.shared.Registration;
  * <a href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin
  * – how to apply styles for shadow parts</a>
  * </p>
+ *
+ * @deprecated since v23.3, deprecated classes will be removed in v24.
  */
+@Deprecated
 @Tag("vaadin-split-layout")
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha6")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
@@ -200,7 +203,11 @@ public abstract class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitL
      *
      * @param variants
      *            theme variants to add
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24. Use
+     *             {@link SplitLayout#addThemeVariants} instead.
      */
+    @Deprecated
     public void addThemeVariants(SplitLayoutVariant... variants) {
         getThemeNames().addAll(
                 Stream.of(variants).map(SplitLayoutVariant::getVariantName)
@@ -212,7 +219,11 @@ public abstract class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitL
      *
      * @param variants
      *            theme variants to remove
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24. Use
+     *             {@link SplitLayout#removeThemeVariants} instead.
      */
+    @Deprecated
     public void removeThemeVariants(SplitLayoutVariant... variants) {
         getThemeNames().removeAll(
                 Stream.of(variants).map(SplitLayoutVariant::getVariantName)
@@ -232,7 +243,10 @@ public abstract class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitL
      * </p>
      *
      * @return the {@code orientation} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected String getOrientationString() {
         return getElement().getProperty("orientation");
     }
@@ -248,12 +262,18 @@ public abstract class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitL
      *
      * @param orientation
      *            the String value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setOrientation(String orientation) {
         getElement().setProperty("orientation",
                 orientation == null ? "" : orientation);
     }
 
+    /**
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     */
     @DomEvent("iron-resize")
     @Deprecated
     public static class IronResizeEvent<R extends GeneratedVaadinSplitLayout<R>>
@@ -270,7 +290,8 @@ public abstract class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitL
      *            the listener
      * @return a {@link Registration} for removing the event listener
      *
-     * @deprecated Since 23.2, this API is deprecated.
+     * @deprecated Since 23.2, this API is deprecated, deprecated classes will
+     *             be removed in v24.
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Deprecated
@@ -280,6 +301,11 @@ public abstract class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitL
                 (ComponentEventListener) listener);
     }
 
+    /**
+     * @deprecated since v23.3, deprecated classes will be removed in v24. Use
+     *             {@link SplitLayout.SplitterDragendEvent} instead.
+     */
+    @Deprecated
     @DomEvent("splitter-dragend")
     public static class SplitterDragendEvent<R extends GeneratedVaadinSplitLayout<R>>
             extends ComponentEvent<R> {
@@ -295,12 +321,14 @@ public abstract class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitL
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     @SuppressWarnings({ "rawtypes", "unchecked" })
     protected Registration addSplitterDragendListener(
-            ComponentEventListener<SplitterDragendEvent<R>> listener) {
-        return addListener(SplitterDragendEvent.class,
-                (ComponentEventListener) listener);
+            ComponentEventListener<SplitLayout.SplitterDragendEvent> listener) {
+        return addListener(SplitLayout.SplitterDragendEvent.class, listener);
     }
 
     /**
@@ -315,7 +343,10 @@ public abstract class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitL
      * @see <a href=
      *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void addToPrimary(Component... components) {
         for (Component component : components) {
             component.getElement().setAttribute("slot", "primary");
@@ -335,7 +366,10 @@ public abstract class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitL
      * @see <a href=
      *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void addToSecondary(Component... components) {
         for (Component component : components) {
             component.getElement().setAttribute("slot", "secondary");
@@ -350,7 +384,10 @@ public abstract class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitL
      *            The components to remove.
      * @throws IllegalArgumentException
      *             if any of the components is not a child of this component.
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void remove(Component... components) {
         for (Component component : components) {
             if (getElement().equals(component.getElement().getParent())) {
@@ -367,7 +404,10 @@ public abstract class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitL
      * Removes all contents from this component, this includes child components,
      * text content as well as child elements that have been added directly to
      * this component using the {@link Element} API.
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void removeAll() {
         getElement().getChildren()
                 .forEach(child -> child.removeAttribute("slot"));
