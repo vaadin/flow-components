@@ -138,6 +138,16 @@ public class FilterTableTest {
         table.registerFilter(new PopupButton(), getItemFilter());
     }
 
+    @Test
+    public void filteredTable_unhideRowAndOpenPopup_rowIsUnhidden() {
+        getFilterCheckboxGroup().deselect("4");
+
+        spreadsheet.setRowHidden(3, false);
+        getPopupButton().openPopup();
+
+        Assert.assertFalse(spreadsheet.isRowHidden(3));
+    }
+
     private CheckboxGroup<String> getFilterCheckboxGroup() {
         return (CheckboxGroup<String>) getItemFilter().getChildren()
                 .filter(component -> component instanceof CheckboxGroup)
