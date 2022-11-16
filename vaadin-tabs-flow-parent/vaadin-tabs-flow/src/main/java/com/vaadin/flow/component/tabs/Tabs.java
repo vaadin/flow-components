@@ -54,6 +54,7 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author Vaadin Ltd.
  */
+@SuppressWarnings("deprecation")
 public class Tabs extends GeneratedVaadinTabs<Tabs>
         implements HasOrderedComponents, HasSize {
 

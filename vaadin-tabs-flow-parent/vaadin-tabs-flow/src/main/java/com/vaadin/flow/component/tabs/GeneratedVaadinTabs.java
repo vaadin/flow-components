@@ -140,6 +140,7 @@ public abstract class GeneratedVaadinTabs<R extends GeneratedVaadinTabs<R>>
     /**
      * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void focus() {
         getElement().callJsFunction("focus");
     }
