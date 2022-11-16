@@ -126,6 +126,14 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
                 ComboBox::modelToPresentation);
         setPageSize(pageSize);
         setItems(new DataCommunicator.EmptyDataProvider<>());
+
+        // Sync server-side `selectedItem` property from client, so that the
+        // client's property value can be restored when re-attaching
+        addValueChangeListener(event -> {
+            if (event.isFromClient()) {
+                refreshValue();
+            }
+        });
     }
 
     /**
