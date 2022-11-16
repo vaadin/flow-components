@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.spreadsheet.ItemFilter;
 import com.vaadin.flow.component.spreadsheet.PopupButton;
@@ -138,10 +139,35 @@ public class FilterTableTest {
         table.registerFilter(new PopupButton(), getItemFilter());
     }
 
+    @Test
+    public void uncheckSelectAll_allRowsHidden() {
+        getSelectAllCheckbox().setValue(false);
+        Assert.assertTrue(spreadsheet.isRowHidden(2));
+        Assert.assertTrue(spreadsheet.isRowHidden(3));
+        Assert.assertTrue(spreadsheet.isRowHidden(4));
+        Assert.assertTrue(spreadsheet.isRowHidden(5));
+    }
+
+    @Test
+    public void reCheckSelectAll_allRowsVisible() {
+        getSelectAllCheckbox().setValue(false);
+        getSelectAllCheckbox().setValue(true);
+        Assert.assertFalse(spreadsheet.isRowHidden(2));
+        Assert.assertFalse(spreadsheet.isRowHidden(3));
+        Assert.assertFalse(spreadsheet.isRowHidden(4));
+        Assert.assertFalse(spreadsheet.isRowHidden(5));
+    }
+
     private CheckboxGroup<String> getFilterCheckboxGroup() {
         return (CheckboxGroup<String>) getItemFilter().getChildren()
                 .filter(component -> component instanceof CheckboxGroup)
                 .findFirst().get();
+    }
+
+    private Checkbox getSelectAllCheckbox() {
+        return (Checkbox) getItemFilter().getChildren()
+                .filter(component -> component instanceof Checkbox).findFirst()
+                .get();
     }
 
     private ItemFilter getItemFilter() {

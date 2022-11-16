@@ -163,10 +163,10 @@ public class ItemFilter extends Div implements SpreadsheetFilter {
                 cancelValueChangeUpdate = true;
                 if (value) {
                     filterCheckbox.setValue(new HashSet<>(allCellValues));
-                    updateFilteredItems(allCellValues);
                 } else {
                     filterCheckbox.setValue(Collections.emptySet());
                 }
+                updateFilteredItems(filterCheckbox.getValue());
                 cancelValueChangeUpdate = false;
             }
         });
