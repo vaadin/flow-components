@@ -88,7 +88,10 @@ Tab 1
  * <a href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin
  * – how to apply styles for shadow parts</a>
  * </p>
+ *
+ * @deprecated since v23.3, deprecated classes will be removed in v24.
  */
+@Deprecated
 @Tag("vaadin-tab")
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha6")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
@@ -103,7 +106,10 @@ public abstract class GeneratedVaadinTab<R extends GeneratedVaadinTab<R>>
      *
      * @param variants
      *            theme variants to add
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     public void addThemeVariants(TabVariant... variants) {
         getThemeNames().addAll(Stream.of(variants)
                 .map(TabVariant::getVariantName).collect(Collectors.toList()));
@@ -114,7 +120,10 @@ public abstract class GeneratedVaadinTab<R extends GeneratedVaadinTab<R>>
      *
      * @param variants
      *            theme variants to remove
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     public void removeThemeVariants(TabVariant... variants) {
         getThemeNames().removeAll(Stream.of(variants)
                 .map(TabVariant::getVariantName).collect(Collectors.toList()));
@@ -133,7 +142,10 @@ public abstract class GeneratedVaadinTab<R extends GeneratedVaadinTab<R>>
      * </p>
      *
      * @return the {@code value} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected String getValueString() {
         return getElement().getProperty("value");
     }
@@ -149,7 +161,10 @@ public abstract class GeneratedVaadinTab<R extends GeneratedVaadinTab<R>>
      *
      * @param value
      *            the String value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setValue(String value) {
         getElement().setProperty("value", value == null ? "" : value);
     }
@@ -166,7 +181,10 @@ public abstract class GeneratedVaadinTab<R extends GeneratedVaadinTab<R>>
      * </p>
      *
      * @return the {@code disabled} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected boolean isDisabledBoolean() {
         return getElement().getProperty("disabled", false);
     }
@@ -181,7 +199,10 @@ public abstract class GeneratedVaadinTab<R extends GeneratedVaadinTab<R>>
      *
      * @param disabled
      *            the boolean value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setDisabled(boolean disabled) {
         getElement().setProperty("disabled", disabled);
     }
@@ -198,7 +219,10 @@ public abstract class GeneratedVaadinTab<R extends GeneratedVaadinTab<R>>
      * </p>
      *
      * @return the {@code selected} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected boolean isSelectedBoolean() {
         return getElement().getProperty("selected", false);
     }
@@ -213,7 +237,10 @@ public abstract class GeneratedVaadinTab<R extends GeneratedVaadinTab<R>>
      *
      * @param selected
      *            the boolean value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setSelected(boolean selected) {
         getElement().setProperty("selected", selected);
     }

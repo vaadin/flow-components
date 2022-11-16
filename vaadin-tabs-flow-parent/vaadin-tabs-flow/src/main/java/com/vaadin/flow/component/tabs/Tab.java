@@ -27,6 +27,7 @@ import com.vaadin.flow.component.shared.HasTooltip;
  *
  * @author Vaadin Ltd.
  */
+@SuppressWarnings("deprecation")
 public class Tab extends GeneratedVaadinTab<Tab>
         implements HasComponents, HasLabel, HasTooltip {
 
@@ -155,5 +156,27 @@ public class Tab extends GeneratedVaadinTab<Tab>
     @Override
     public String toString() {
         return "Tab{" + getLabel() + "}";
+    }
+
+    /**
+     * Adds theme variants to the component.
+     *
+     * @param variants
+     *            theme variants to add
+     */
+    @Override
+    public void addThemeVariants(TabVariant... variants) {
+        super.addThemeVariants(variants);
+    }
+
+    /**
+     * Removes theme variants from the component.
+     *
+     * @param variants
+     *            theme variants to remove
+     */
+    @Override
+    public void removeThemeVariants(TabVariant... variants) {
+        super.removeThemeVariants(variants);
     }
 }
