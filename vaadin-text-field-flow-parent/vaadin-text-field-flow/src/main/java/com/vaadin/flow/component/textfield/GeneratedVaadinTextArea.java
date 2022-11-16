@@ -863,11 +863,11 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
     @Deprecated
-    public static class InvalidChangeEvent<TComponent extends GeneratedVaadinTextArea<TComponent, ?>>
-            extends ComponentEvent<TComponent> {
+    public static class InvalidChangeEvent<R extends GeneratedVaadinTextArea<R, ?>>
+            extends ComponentEvent<R> {
         private final boolean invalid;
 
-        public InvalidChangeEvent(TComponent source, boolean fromClient) {
+        public InvalidChangeEvent(R source, boolean fromClient) {
             super(source, fromClient);
             this.invalid = source.isInvalidBoolean();
         }
