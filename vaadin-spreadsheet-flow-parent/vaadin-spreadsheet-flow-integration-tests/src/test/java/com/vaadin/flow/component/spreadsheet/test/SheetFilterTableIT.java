@@ -50,6 +50,22 @@ public class SheetFilterTableIT extends AbstractSpreadsheetIT {
         assertSelectAll(cell);
     }
 
+    @Test
+    public void filteredTable_unhideRowAndOpenPopup_rowIsUnhidden() {
+        loadTestFixture(TestFixtures.SpreadsheetTable);
+        final var cell = getSpreadsheet().getCellAt("B2");
+
+        cell.popupButtonClick();
+        clickItem("4");
+        contextClickOnRowHeader(3);
+        clickItem("Unhide row 4");
+        cell.popupButtonClick();
+
+        var displayValue = getSpreadsheet().getRowHeader(4)
+                .getCssValue("display");
+        Assert.assertNotEquals(displayValue, "none");
+    }
+
     private void assertSelectAll(SheetCellElement cell) {
         cell.popupButtonClick();
         Assert.assertTrue(hasOption("(Select All)"));
