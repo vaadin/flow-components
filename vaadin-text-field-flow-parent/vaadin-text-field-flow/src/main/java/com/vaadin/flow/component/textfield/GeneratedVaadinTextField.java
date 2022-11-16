@@ -160,7 +160,10 @@ import com.vaadin.flow.shared.Registration;
  * <a href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin
  * – how to apply styles for shadow parts</a>
  * </p>
+ *
+ * @deprecated since v23.3, deprecated classes will be removed in v24.
  */
+@Deprecated
 @Tag("vaadin-text-field")
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha6")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
@@ -183,7 +186,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      * </p>
      *
      * @return the {@code autofocus} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected boolean isAutofocusBoolean() {
         return getElement().getProperty("autofocus", false);
     }
@@ -198,7 +204,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      *
      * @param autofocus
      *            the boolean value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setAutofocus(boolean autofocus) {
         getElement().setProperty("autofocus", autofocus);
     }
@@ -215,7 +224,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      * </p>
      *
      * @return the {@code disabled} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected boolean isDisabledBoolean() {
         return getElement().getProperty("disabled", false);
     }
@@ -230,7 +242,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      *
      * @param disabled
      *            the boolean value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setDisabled(boolean disabled) {
         getElement().setProperty("disabled", disabled);
     }
@@ -250,7 +265,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      * </p>
      *
      * @return the {@code autocomplete} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected String getAutocompleteString() {
         return getElement().getProperty("autocomplete");
     }
@@ -268,7 +286,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      *
      * @param autocomplete
      *            the String value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setAutocomplete(String autocomplete) {
         getElement().setProperty("autocomplete",
                 autocomplete == null ? "" : autocomplete);
@@ -289,7 +310,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      * </p>
      *
      * @return the {@code autocorrect} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected String getAutocorrectString() {
         return getElement().getProperty("autocorrect");
     }
@@ -307,7 +331,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      *
      * @param autocorrect
      *            the String value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setAutocorrect(String autocorrect) {
         getElement().setProperty("autocorrect",
                 autocorrect == null ? "" : autocorrect);
@@ -329,7 +356,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      * </p>
      *
      * @return the {@code autocapitalize} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected String getAutocapitalizeString() {
         return getElement().getProperty("autocapitalize");
     }
@@ -348,7 +378,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      *
      * @param autocapitalize
      *            the String value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setAutocapitalize(String autocapitalize) {
         getElement().setProperty("autocapitalize",
                 autocapitalize == null ? "" : autocapitalize);
@@ -367,7 +400,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      * </p>
      *
      * @return the {@code autoselect} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected boolean isAutoselectBoolean() {
         return getElement().getProperty("autoselect", false);
     }
@@ -383,7 +419,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      *
      * @param autoselect
      *            the boolean value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setAutoselect(boolean autoselect) {
         getElement().setProperty("autoselect", autoselect);
     }
@@ -400,7 +439,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      * </p>
      *
      * @return the {@code errorMessage} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected String getErrorMessageString() {
         return getElement().getProperty("errorMessage");
     }
@@ -415,7 +457,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      *
      * @param errorMessage
      *            the String value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setErrorMessage(String errorMessage) {
         getElement().setProperty("errorMessage",
                 errorMessage == null ? "" : errorMessage);
@@ -433,7 +478,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      * </p>
      *
      * @return the {@code label} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected String getLabelString() {
         return getElement().getProperty("label");
     }
@@ -448,7 +496,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      *
      * @param label
      *            the String value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setLabel(String label) {
         getElement().setProperty("label", label == null ? "" : label);
     }
@@ -466,7 +517,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      * </p>
      *
      * @return the {@code maxlength} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected double getMaxlengthDouble() {
         return getElement().getProperty("maxlength", 0.0);
     }
@@ -482,7 +536,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      *
      * @param maxlength
      *            the double value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setMaxlength(double maxlength) {
         getElement().setProperty("maxlength", maxlength);
     }
@@ -500,7 +557,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      * </p>
      *
      * @return the {@code minlength} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected double getMinlengthDouble() {
         return getElement().getProperty("minlength", 0.0);
     }
@@ -516,7 +576,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      *
      * @param minlength
      *            the double value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setMinlength(double minlength) {
         getElement().setProperty("minlength", minlength);
     }
@@ -533,7 +596,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      * </p>
      *
      * @return the {@code name} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected String getNameString() {
         return getElement().getProperty("name");
     }
@@ -548,7 +614,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      *
      * @param name
      *            the String value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setName(String name) {
         getElement().setProperty("name", name == null ? "" : name);
     }
@@ -565,7 +634,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      * </p>
      *
      * @return the {@code placeholder} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected String getPlaceholderString() {
         return getElement().getProperty("placeholder");
     }
@@ -580,7 +652,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      *
      * @param placeholder
      *            the String value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setPlaceholder(String placeholder) {
         getElement().setProperty("placeholder",
                 placeholder == null ? "" : placeholder);
@@ -599,7 +674,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      * </p>
      *
      * @return the {@code readonly} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected boolean isReadonlyBoolean() {
         return getElement().getProperty("readonly", false);
     }
@@ -615,7 +693,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      *
      * @param readonly
      *            the boolean value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setReadonly(boolean readonly) {
         getElement().setProperty("readonly", readonly);
     }
@@ -632,7 +713,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      * </p>
      *
      * @return the {@code required} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected boolean isRequiredBoolean() {
         return getElement().getProperty("required", false);
     }
@@ -647,7 +731,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      *
      * @param required
      *            the boolean value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setRequired(boolean required) {
         getElement().setProperty("required", required);
     }
@@ -661,7 +748,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      * </p>
      *
      * @return the {@code invalid} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected boolean isInvalidBoolean() {
         return getElement().getProperty("invalid", false);
     }
@@ -676,7 +766,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      *
      * @param invalid
      *            the boolean value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setInvalid(boolean invalid) {
         getElement().setProperty("invalid", invalid);
     }
@@ -736,7 +829,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      * </p>
      *
      * @return the {@code list} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected String getListString() {
         return getElement().getProperty("list");
     }
@@ -752,7 +848,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      *
      * @param list
      *            the String value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setList(String list) {
         getElement().setProperty("list", list == null ? "" : list);
     }
@@ -770,7 +869,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      * </p>
      *
      * @return the {@code pattern} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected String getPatternString() {
         return getElement().getProperty("pattern");
     }
@@ -786,7 +888,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      *
      * @param pattern
      *            the String value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setPattern(String pattern) {
         getElement().setProperty("pattern", pattern == null ? "" : pattern);
     }
@@ -803,7 +908,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      * </p>
      *
      * @return the {@code title} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected String getTitleString() {
         return getElement().getProperty("title");
     }
@@ -819,7 +927,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      *
      * @param title
      *            the String value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setTitle(String title) {
         getElement().setProperty("title", title == null ? "" : title);
     }
@@ -836,7 +947,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      * This function is not supported by Flow because it returns a
      * <code>boolean</code>. Functions with return types different than void are
      * not supported at this moment.
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     @NotSupported
     protected void checkValidity() {
     }
@@ -853,11 +967,18 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      * This function is not supported by Flow because it returns a
      * <code>boolean</code>. Functions with return types different than void are
      * not supported at this moment.
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     @NotSupported
     protected void validate() {
     }
 
+    /**
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     */
+    @Deprecated
     @DomEvent("change")
     public static class ChangeEvent<R extends GeneratedVaadinTextField<R, ?>>
             extends ComponentEvent<R> {
@@ -872,7 +993,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     @SuppressWarnings({ "rawtypes", "unchecked" })
     protected Registration addChangeListener(
             ComponentEventListener<ChangeEvent<R>> listener) {
@@ -880,6 +1004,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
                 (ComponentEventListener) listener);
     }
 
+    /**
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     */
+    @Deprecated
     public static class InvalidChangeEvent<R extends GeneratedVaadinTextField<R, ?>>
             extends ComponentEvent<R> {
         private final boolean invalid;
@@ -901,7 +1029,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected Registration addInvalidChangeListener(
             ComponentEventListener<InvalidChangeEvent<R>> listener) {
         return getElement()
@@ -923,7 +1054,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      * @see <a href=
      *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void addToPrefix(Component... components) {
         for (Component component : components) {
             component.getElement().setAttribute("slot", "prefix");
@@ -943,7 +1077,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      * @see <a href=
      *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void addToInput(Component... components) {
         for (Component component : components) {
             component.getElement().setAttribute("slot", "input");
@@ -963,7 +1100,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      * @see <a href=
      *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void addToSuffix(Component... components) {
         for (Component component : components) {
             component.getElement().setAttribute("slot", "suffix");
@@ -978,7 +1118,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      *            The components to remove.
      * @throws IllegalArgumentException
      *             if any of the components is not a child of this component.
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void remove(Component... components) {
         for (Component component : components) {
             if (getElement().equals(component.getElement().getParent())) {
@@ -995,7 +1138,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      * Removes all contents from this component, this includes child components,
      * text content as well as child elements that have been added directly to
      * this component using the {@link Element} API.
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void removeAll() {
         getElement().getChildren()
                 .forEach(child -> child.removeAttribute("slot"));
@@ -1018,7 +1164,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      *            a function that converts a model value to a string value
      * @param <P>
      *            the property type
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     public <P> GeneratedVaadinTextField(T initialValue, T defaultValue,
             Class<P> elementPropertyType,
             SerializableFunction<P, T> presentationToModel,
@@ -1053,7 +1202,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      *            ignored and the initial value is set
      * @param <P>
      *            the property type
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     public <P> GeneratedVaadinTextField(T initialValue, T defaultValue,
             Class<P> elementPropertyType,
             SerializableFunction<P, T> presentationToModel,
@@ -1077,7 +1229,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      *            the default value to use if the value isn't defined
      * @param acceptNullValues
      *            whether <code>null</code> is accepted as a model value
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     public GeneratedVaadinTextField(T initialValue, T defaultValue,
             boolean acceptNullValues) {
         this(initialValue, defaultValue, acceptNullValues, false);
@@ -1102,7 +1257,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      *            initial value is used only if element has no {@code "value"}
      *            property value, otherwise element {@code "value"} property is
      *            ignored and the initial value is set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     public GeneratedVaadinTextField(T initialValue, T defaultValue,
             boolean acceptNullValues, boolean isInitialValueOptional) {
         super("value", defaultValue, acceptNullValues);
@@ -1130,7 +1288,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      *            returns a property value
      * @param <P>
      *            the property type
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     public <P> GeneratedVaadinTextField(T initialValue, T defaultValue,
             Class<P> elementPropertyType,
             SerializableBiFunction<R, P, T> presentationToModel,
@@ -1167,7 +1328,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
      *            ignored and the initial value is set
      * @param <P>
      *            the property type
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     public <P> GeneratedVaadinTextField(T initialValue, T defaultValue,
             Class<P> elementPropertyType,
             SerializableBiFunction<R, P, T> presentationToModel,
@@ -1183,7 +1347,10 @@ public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextFiel
 
     /**
      * Default constructor.
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     public GeneratedVaadinTextField() {
         this(null, null, null, (SerializableFunction) null,
                 (SerializableFunction) null);
