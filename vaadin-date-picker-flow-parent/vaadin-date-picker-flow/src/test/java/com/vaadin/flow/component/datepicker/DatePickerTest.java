@@ -245,9 +245,6 @@ public class DatePickerTest {
         germanDatePicker.setValue(LocalDate.now());
 
         DatePickerI18n datePickerI18n = new DatePickerI18n();
-        datePickerI18n.setWeek("Woche");
-        datePickerI18n.setCalendar("Kalender");
-        datePickerI18n.setClear("Löschen");
         datePickerI18n.setToday("Heute");
         datePickerI18n.setCancel("Abbrechen");
         datePickerI18n.setWeekdays(Arrays.asList("Sonntag", "Montag",

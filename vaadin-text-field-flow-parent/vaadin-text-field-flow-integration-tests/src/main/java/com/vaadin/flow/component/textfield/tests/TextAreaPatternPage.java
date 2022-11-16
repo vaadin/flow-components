@@ -44,15 +44,15 @@ public class TextAreaPatternPage extends Div {
                 e -> textArea.setPattern(null));
         clearPattern.setId("clear-pattern");
 
-        NativeButton enablePreventInvalidInput = new NativeButton(
-                "Enable prevent invalid input",
-                e -> textArea.setPreventInvalidInput(true));
-        enablePreventInvalidInput.setId("enable-prevent-invalid-input");
+        NativeButton enableAllowedCharPattern = new NativeButton(
+                "Enable allowed char pattern",
+                e -> textArea.setAllowedCharPattern("[0-9]*"));
+        enableAllowedCharPattern.setId("enable-allowed-char-pattern");
 
         add(textArea);
         add(currentValue);
         add(new Div(setNumberPattern, setInvalidPattern, clearPattern,
-                enablePreventInvalidInput));
+                enableAllowedCharPattern));
     }
 
 }

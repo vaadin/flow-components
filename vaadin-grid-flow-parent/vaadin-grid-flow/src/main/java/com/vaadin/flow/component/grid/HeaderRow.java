@@ -47,7 +47,8 @@ public class HeaderRow extends AbstractRow<HeaderCell> {
          */
         HeaderCell(AbstractColumn<?> column) {
             super(column);
-            if (column.getHeaderRenderer() == null) {
+            if (column.getHeaderText() == null
+                    && column.getHeaderComponent() == null) {
                 column.setHeaderText("");
             }
         }
