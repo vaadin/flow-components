@@ -49,7 +49,8 @@ import elemental.json.JsonObject;
 /**
  * Abstract implementation of a GridMultiSelectionModel.
  *
- * @param <T> the grid type
+ * @param <T>
+ *            the grid type
  * @author Vaadin Ltd.
  */
 public abstract class AbstractGridMultiSelectionModel<T>
@@ -62,8 +63,9 @@ public abstract class AbstractGridMultiSelectionModel<T>
     /**
      * Constructor for passing a reference of the grid to this implementation.
      *
-     * @param grid reference to the grid for which this selection model is
-     *             created
+     * @param grid
+     *            reference to the grid for which this selection model is
+     *            created
      */
     public AbstractGridMultiSelectionModel(Grid<T> grid) {
         super(grid);
