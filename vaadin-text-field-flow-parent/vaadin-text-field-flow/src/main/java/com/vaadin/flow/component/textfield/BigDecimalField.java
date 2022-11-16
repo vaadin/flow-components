@@ -53,6 +53,7 @@ import com.vaadin.flow.function.SerializableBiFunction;
  *
  * @author Vaadin Ltd.
  */
+@SuppressWarnings("deprecation")
 @Tag("vaadin-big-decimal-field")
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha6")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
