@@ -39,15 +39,13 @@ public class SheetFilterTableIT extends AbstractSpreadsheetIT {
 
     @Test
     public void sheetWithFilterTable_rowIsRemoved_filterOptionsAvailable() {
-        selectRegion("A1", "A5");
-        final var cell = getCellAt(1, 1);
-        cell.contextClick();
-        clickItem("Create Table on A1:A5");
+        loadTestFixture(TestFixtures.SpreadsheetTable);
+        final var cell = getSpreadsheet().getCellAt("B2");
 
         assertSelectAll(cell);
 
-        contextClickOnRowHeader(3);
-        clickItem("Delete row 3");
+        contextClickOnRowHeader(4);
+        clickItem("Delete row 4");
 
         assertSelectAll(cell);
     }
