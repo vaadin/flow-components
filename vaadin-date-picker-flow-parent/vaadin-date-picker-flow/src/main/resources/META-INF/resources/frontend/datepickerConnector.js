@@ -1,7 +1,7 @@
 import dateFnsFormat from 'date-fns/format';
 import dateFnsParse from 'date-fns/parse';
 import dateFnsIsValid from 'date-fns/isValid';
-import { parseDate as _parseDate } from '@vaadin/date-picker/src/vaadin-date-picker-helper.js';
+import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/src/vaadin-date-picker-helper.js';
 
 (function () {
   const tryCatchWrapper = function (callback) {
@@ -33,7 +33,7 @@ import { parseDate as _parseDate } from '@vaadin/date-picker/src/vaadin-date-pic
             new Date().toLocaleDateString(locale);
           } catch (e) {
             console.warn('The locale is not supported, using default locale setting(en-US).');
-            return 'M/d/y';
+            return 'M/d/yyyy';
           }
 
           // format test date and convert to date-fns pattern
@@ -49,12 +49,11 @@ import { parseDate as _parseDate } from '@vaadin/date-picker/src/vaadin-date-pic
             .replace('05', 'MM')
             .replace('5', 'M')
             // insert year placeholder
-            .replace('1234', 'y');
-
+            .replace('1234', 'yyyy');
           const isValidPattern = pattern.includes('d') && pattern.includes('M') && pattern.includes('y');
           if (!isValidPattern) {
             console.warn('The locale is not supported, using default locale setting(en-US).');
-            return 'M/d/y';
+            return 'M/d/yyyy';
           }
 
           return pattern;
@@ -65,6 +64,26 @@ import { parseDate as _parseDate } from '@vaadin/date-picker/src/vaadin-date-pic
             throw new Error('Array of custom date formats is null or empty');
           }
 
+          function getShortYearFormat(format) {
+            if (format.includes('yyyy') && !format.includes('yyyyy')) {
+              return format.replace('yyyy', 'yy');
+            }
+            if (format.includes('YYYY') && !format.includes('YYYYY')) {
+              return format.replace('YYYY', 'YY');
+            }
+            return undefined;
+          }
+
+          function isShortYearFormat(format) {
+            if (format.includes('y')) {
+              return !format.includes('yyy');
+            }
+            if (format.includes('Y')) {
+              return !format.includes('YYY');
+            }
+            return false;
+          }
+
           function formatDate(dateParts) {
             const format = formats[0];
             const date = _parseDate(`${dateParts.year}-${dateParts.month + 1}-${dateParts.day}`);
@@ -73,17 +92,51 @@ import { parseDate as _parseDate } from '@vaadin/date-picker/src/vaadin-date-pic
           }
 
           function parseDate(dateString) {
+            const referenceDate = _getReferenceDate();
             for (let format of formats) {
-              const date = dateFnsParse(dateString, format, new Date());
+              // We first try to match the date with the shorter version.
+              const shortYearFormat = getShortYearFormat(format);
+              if (shortYearFormat) {
+                const shortYearFormatDate = dateFnsParse(dateString, shortYearFormat, referenceDate);
+                if (dateFnsIsValid(shortYearFormatDate)) {
+                  let yearValue = shortYearFormatDate.getFullYear();
+                  // The last parsed year check handles the case where a four-digit year is parsed, then formatted
+                  // as a two-digit year, and then parsed again. In this case we want to keep the century of the
+                  // originally parsed year, instead of using the century of the reference date.
+                  if (
+                    datepicker.$connector._lastParsedYear &&
+                    yearValue === datepicker.$connector._lastParsedYear % 100
+                  ) {
+                    yearValue = datepicker.$connector._lastParsedYear;
+                  }
+                  return {
+                    day: shortYearFormatDate.getDate(),
+                    month: shortYearFormatDate.getMonth(),
+                    year: yearValue
+                  };
+                }
+              }
+              const date = dateFnsParse(dateString, format, referenceDate);
 
               if (dateFnsIsValid(date)) {
+                let yearValue = date.getFullYear();
+                if (
+                  datepicker.$connector._lastParsedYear &&
+                  yearValue % 100 === datepicker.$connector._lastParsedYear % 100 &&
+                  isShortYearFormat(format)
+                ) {
+                  yearValue = datepicker.$connector._lastParsedYear;
+                } else {
+                  datepicker.$connector._lastParsedYear = yearValue;
+                }
                 return {
                   day: date.getDate(),
                   month: date.getMonth(),
-                  year: date.getFullYear()
+                  year: yearValue
                 };
               }
             }
+            datepicker.$connector._lastParsedYear = undefined;
             return false;
           }
 
@@ -93,9 +146,17 @@ import { parseDate as _parseDate } from '@vaadin/date-picker/src/vaadin-date-pic
           };
         });
 
+        function _getReferenceDate() {
+          const { referenceDate } = datepicker.i18n;
+          return referenceDate ? new Date(referenceDate.year, referenceDate.month - 1, referenceDate.day) : new Date();
+        }
+
         datepicker.$connector.updateI18n = tryCatchWrapper(function (locale, i18n) {
           // Either use custom formats specified in I18N, or create format from locale
           const hasCustomFormats = i18n && i18n.dateFormats && i18n.dateFormats.length > 0;
+          if (i18n && i18n.referenceDate) {
+            i18n.referenceDate = extractDateParts(new Date(i18n.referenceDate));
+          }
           const usedFormats = hasCustomFormats ? i18n.dateFormats : [createLocaleBasedDateFormat(locale)];
           const formatterAndParser = createFormatterAndParser(usedFormats);
 
