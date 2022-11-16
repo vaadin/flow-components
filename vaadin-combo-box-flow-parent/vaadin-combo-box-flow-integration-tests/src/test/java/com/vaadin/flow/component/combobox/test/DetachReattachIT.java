@@ -73,6 +73,16 @@ public class DetachReattachIT extends AbstractComboBoxIT {
         assertValueChanges("foo", "bar");
     }
 
+    @Test
+    public void setValueFromClient_detach_reattach_hasSelectedItem() {
+        combo.selectByText("foo");
+        clickButton("detach");
+        clickButton("attach");
+
+        combo = $(ComboBoxElement.class).first();
+        Assert.assertEquals("foo", combo.getInputElementValue());
+    }
+
     private void assertValueChanges(String... expected) {
         String[] valueChanges = $("div").id("value-changes").$("p").all()
                 .stream().map(TestBenchElement::getText).toArray(String[]::new);
