@@ -30,6 +30,7 @@ import com.vaadin.flow.function.SerializableFunction;
  *
  * @author Vaadin Ltd.
  */
+@SuppressWarnings("deprecation")
 public class NumberField extends AbstractNumberField<NumberField, Double> {
 
     /**
