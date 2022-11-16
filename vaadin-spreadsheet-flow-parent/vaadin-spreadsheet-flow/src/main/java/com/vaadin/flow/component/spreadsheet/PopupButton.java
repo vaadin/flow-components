@@ -97,7 +97,7 @@ public class PopupButton extends Component {
      */
     public CellReference getCellReference() {
         return new CellReference(getState().sheet, getState().row - 1,
-                getState().col - 1, false, false);
+                getState().col - 1, true, true);
     }
 
     void setCellReference(CellReference cellReference) {
