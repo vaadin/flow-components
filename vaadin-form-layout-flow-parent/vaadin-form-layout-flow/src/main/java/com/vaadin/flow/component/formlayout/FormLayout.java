@@ -64,6 +64,7 @@ import elemental.json.JsonValue;
  *
  * @author Vaadin Ltd
  */
+@SuppressWarnings("deprecation")
 public class FormLayout extends GeneratedVaadinFormLayout<FormLayout>
         implements HasSize, HasComponents, ClickNotifier<FormLayout> {
 
