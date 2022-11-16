@@ -294,6 +294,10 @@ public class SpreadsheetFactory implements Serializable {
             }
         }
         final File file = new File(fileName);
+        if (file.exists()) {
+            // If the file exists beforehand, it needs to be deleted first
+            file.delete();
+        }
         FileOutputStream fos = null;
         try {
             fos = new FileOutputStream(file);
