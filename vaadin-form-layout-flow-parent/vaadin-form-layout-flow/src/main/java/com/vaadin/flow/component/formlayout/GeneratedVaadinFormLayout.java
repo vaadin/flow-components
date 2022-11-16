@@ -134,7 +134,10 @@ import elemental.json.JsonObject;
  * </tr>
  * </tbody>
  * </table>
+ *
+ * @deprecated since v23.3, deprecated classes will be removed in v24.
  */
+@Deprecated
 @Tag("vaadin-form-layout")
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha6")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
@@ -186,7 +189,10 @@ public abstract class GeneratedVaadinFormLayout<R extends GeneratedVaadinFormLay
      * </p>
      *
      * @return the {@code responsiveSteps} property from the webcomponent
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected JsonObject getResponsiveStepsJsonObject() {
         return (JsonObject) getElement().getPropertyRaw("responsiveSteps");
     }
@@ -231,7 +237,10 @@ public abstract class GeneratedVaadinFormLayout<R extends GeneratedVaadinFormLay
      *
      * @param responsiveSteps
      *            the JsonObject value to set
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void setResponsiveSteps(JsonObject responsiveSteps) {
         getElement().setPropertyJson("responsiveSteps", responsiveSteps);
     }
@@ -246,7 +255,10 @@ public abstract class GeneratedVaadinFormLayout<R extends GeneratedVaadinFormLay
      *
      * @param _Args
      *            Missing documentation!
+     *
+     * @deprecated since v23.3, deprecated classes will be removed in v24.
      */
+    @Deprecated
     protected void updateStyles(JsonObject _Args) {
         getElement().callJsFunction("updateStyles", _Args);
     }

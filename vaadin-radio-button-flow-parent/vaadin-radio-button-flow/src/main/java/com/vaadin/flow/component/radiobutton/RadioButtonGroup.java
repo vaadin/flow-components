@@ -66,6 +66,7 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author Vaadin Ltd.
  */
+@SuppressWarnings("deprecation")
 @NpmPackage(value = "@vaadin/radio-group", version = "23.3.0-alpha6")
 @NpmPackage(value = "@vaadin/vaadin-radio-button", version = "23.3.0-alpha6")
 public class RadioButtonGroup<T>
@@ -728,4 +729,25 @@ public class RadioButtonGroup<T>
         keyMapper.setIdentifierGetter(identifierProvider);
     }
 
+    /**
+     * Adds theme variants to the component.
+     *
+     * @param variants
+     *            theme variants to add
+     */
+    @Override
+    public void addThemeVariants(RadioGroupVariant... variants) {
+        super.addThemeVariants(variants);
+    }
+
+    /**
+     * Removes theme variants from the component.
+     *
+     * @param variants
+     *            theme variants to remove
+     */
+    @Override
+    public void removeThemeVariants(RadioGroupVariant... variants) {
+        super.removeThemeVariants(variants);
+    }
 }

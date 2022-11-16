@@ -45,7 +45,7 @@ import elemental.json.JsonObject;
  *
  * @author Vaadin Ltd.
  */
-@SuppressWarnings("serial")
+@SuppressWarnings("deprecation")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./contextMenuConnector.js")
 @JsModule("./contextMenuTargetConnector.js")
@@ -439,5 +439,12 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
         getElement().executeJs(
                 "window.Vaadin.Flow.contextMenuConnector.initLazy(this, $0)",
                 appId);
+    }
+
+    public static class OpenedChangeEvent<C extends ContextMenuBase<C, ?, ?>>
+            extends GeneratedVaadinContextMenu.OpenedChangeEvent<C> {
+        public OpenedChangeEvent(C source, boolean fromClient) {
+            super(source, fromClient);
+        }
     }
 }
