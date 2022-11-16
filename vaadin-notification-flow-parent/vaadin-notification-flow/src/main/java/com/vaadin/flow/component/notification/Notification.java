@@ -48,6 +48,7 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author Vaadin Ltd
  */
+@SuppressWarnings("deprecation")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./notificationConnector.js")
 public class Notification extends GeneratedVaadinNotification<Notification>
@@ -487,7 +488,7 @@ public class Notification extends GeneratedVaadinNotification<Notification>
 
     @Override
     public Registration addOpenedChangeListener(
-            ComponentEventListener<OpenedChangeEvent<Notification>> listener) {
+            ComponentEventListener<OpenedChangeEvent> listener) {
         return super.addOpenedChangeListener(listener);
     }
 
@@ -617,5 +618,12 @@ public class Notification extends GeneratedVaadinNotification<Notification>
     public Style getStyle() {
         throw new UnsupportedOperationException(
                 "Notification does not support adding styles to card element");
+    }
+
+    public static class OpenedChangeEvent extends
+            GeneratedVaadinNotification.OpenedChangeEvent<Notification> {
+        public OpenedChangeEvent(Notification source, boolean fromClient) {
+            super(source, fromClient);
+        }
     }
 }
