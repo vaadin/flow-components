@@ -384,7 +384,9 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
      * @see <a href=
      *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
+     * @deprecated since v23.3
      */
+    @Deprecated
     protected void addToPrefix(Component... components) {
         for (Component component : components) {
             component.getElement().setAttribute("slot", "prefix");
@@ -399,7 +401,9 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
      *            The components to remove.
      * @throws IllegalArgumentException
      *             if any of the components is not a child of this component.
+     * @deprecated since v23.3
      */
+    @Deprecated
     protected void remove(Component... components) {
         for (Component component : components) {
             if (getElement().equals(component.getElement().getParent())) {
@@ -416,7 +420,10 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
      * Removes all contents from this component, this includes child components,
      * text content as well as child elements that have been added directly to
      * this component using the {@link Element} API.
+     *
+     * @deprecated since v23.3
      */
+    @Deprecated
     protected void removeAll() {
         getElement().getChildren()
                 .forEach(child -> child.removeAttribute("slot"));
