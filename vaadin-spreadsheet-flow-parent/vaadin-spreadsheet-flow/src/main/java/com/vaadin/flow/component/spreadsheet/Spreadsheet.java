@@ -2904,7 +2904,8 @@ public class Spreadsheet extends Component
                 } else if (numberOfRowsAboveWasChanged(row, last, first)) {
                     int newRow = cell.getRow() + n;
                     int col = cell.getCol();
-                    CellReference newCell = new CellReference(newRow, col);
+                    CellReference newCell = new CellReference(newRow, col, true,
+                            true);
                     pbutton.setCellReference(newCell);
                     updated.put(newCell, pbutton);
                 } else {
