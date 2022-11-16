@@ -23,8 +23,8 @@ import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
-@TestPath("vaadin-grid-it-demo/height-by-rows")
-public class GridViewHeightByRowsIT extends AbstractComponentIT {
+@TestPath("vaadin-grid-it-demo/all-rows-visible")
+public class GridViewAllRowsVisibleIT extends AbstractComponentIT {
 
     @Before
     public void init() {
@@ -32,12 +32,12 @@ public class GridViewHeightByRowsIT extends AbstractComponentIT {
     }
 
     @Test
-    public void heightByRows_allRowsAreFetched() {
-        GridElement grid = $(GridElement.class).id("grid-height-by-rows");
+    public void allRowsVisible_allRowsAreFetched() {
+        GridElement grid = $(GridElement.class).id("grid-all-rows-visible");
         scrollToElement(grid);
         waitUntil(driver -> grid.getRowCount() == 50);
 
-        Assert.assertEquals("Grid should have heightByRows set to true", "true",
-                grid.getAttribute("allRowsVisible"));
+        Assert.assertEquals("Grid should have allRowsVisible set to true",
+                "true", grid.getAttribute("allRowsVisible"));
     }
 }
