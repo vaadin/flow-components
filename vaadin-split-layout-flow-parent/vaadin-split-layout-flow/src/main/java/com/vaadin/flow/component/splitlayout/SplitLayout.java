@@ -19,9 +19,7 @@ import java.util.Locale;
 import java.util.Objects;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.NpmPackage;
