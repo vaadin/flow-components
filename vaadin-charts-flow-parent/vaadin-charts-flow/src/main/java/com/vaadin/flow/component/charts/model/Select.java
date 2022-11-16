@@ -19,7 +19,6 @@ import com.vaadin.flow.component.charts.model.style.Color;
  * The appearance of the point marker when selected. In order to allow a point
  * to be selected, set the <code>series.allowPointSelect</code> option to true.
  */
-@SuppressWarnings("deprecation")
 public class Select extends AbstractConfigurationObject {
 
     private Boolean enabled;
