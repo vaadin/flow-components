@@ -70,8 +70,8 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
                     .sendKeys("v").keyUp(Keys.CONTROL).keyUp(Keys.COMMAND)
                     .build().perform();
         } else {
-            new Actions(getDriver()).sendKeys(Keys.chord(Keys.CONTROL, "v"))
-                    .build().perform();
+            new Actions(getDriver()).keyDown(Keys.CONTROL).sendKeys("v")
+                    .keyUp(Keys.CONTROL).build().perform();
             getCommandExecutor().waitForVaadin();
         }
     }
@@ -82,8 +82,8 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
                     .sendKeys("c").keyUp(Keys.CONTROL).keyUp(Keys.COMMAND)
                     .build().perform();
         } else {
-            new Actions(getDriver()).sendKeys(Keys.chord(Keys.CONTROL, "c"))
-                    .build().perform();
+            new Actions(getDriver()).keyDown(Keys.CONTROL).sendKeys("c")
+                    .keyUp(Keys.CONTROL).build().perform();
         }
     }
 
@@ -106,6 +106,7 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
     public void selectRegion(String from, String to) {
         new Actions(getDriver()).clickAndHold(getSpreadsheet().getCellAt(from))
                 .release(getSpreadsheet().getCellAt(to)).perform();
+        getCommandExecutor().waitForVaadin();
     }
 
     private void selectElement(WebElement element, boolean ctrl,

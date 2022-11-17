@@ -354,8 +354,8 @@ public class UndoRedoIT extends AbstractSpreadsheetIT {
                     .sendKeys("z").keyUp(Keys.CONTROL).keyUp(Keys.COMMAND)
                     .build().perform();
         } else {
-            new Actions(getDriver()).sendKeys(Keys.chord(Keys.CONTROL, "z"))
-                    .build().perform();
+            new Actions(getDriver()).keyDown(Keys.CONTROL).sendKeys("z")
+                    .keyUp(Keys.CONTROL).build().perform();
         }
     }
 
@@ -365,8 +365,8 @@ public class UndoRedoIT extends AbstractSpreadsheetIT {
                     .sendKeys("y").keyUp(Keys.CONTROL).keyUp(Keys.COMMAND)
                     .build().perform();
         } else {
-            new Actions(getDriver()).sendKeys(Keys.chord(Keys.CONTROL, "y"))
-                    .build().perform();
+            new Actions(getDriver()).keyDown(Keys.CONTROL).sendKeys("y")
+                    .keyUp(Keys.CONTROL).build().perform();
         }
     }
 
