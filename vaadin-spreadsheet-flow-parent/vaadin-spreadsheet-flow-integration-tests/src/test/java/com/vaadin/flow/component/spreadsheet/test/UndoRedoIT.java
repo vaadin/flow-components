@@ -351,22 +351,22 @@ public class UndoRedoIT extends AbstractSpreadsheetIT {
     private void undo() {
         if (isMac()) {
             new Actions(getDriver()).keyDown(Keys.CONTROL).keyDown(Keys.COMMAND)
-                    .sendKeys("z").keyUp(Keys.CONTROL).keyUp(Keys.COMMAND).build()
-                    .perform();
+                    .sendKeys("z").keyUp(Keys.CONTROL).keyUp(Keys.COMMAND)
+                    .build().perform();
         } else {
-            new Actions(getDriver())
-                    .sendKeys(Keys.chord(Keys.CONTROL, "z")).build().perform();
+            new Actions(getDriver()).sendKeys(Keys.chord(Keys.CONTROL, "z"))
+                    .build().perform();
         }
     }
 
     private void redo() {
         if (isMac()) {
             new Actions(getDriver()).keyDown(Keys.CONTROL).keyDown(Keys.COMMAND)
-                    .sendKeys("y").keyUp(Keys.CONTROL).keyUp(Keys.COMMAND).build()
-                    .perform();
+                    .sendKeys("y").keyUp(Keys.CONTROL).keyUp(Keys.COMMAND)
+                    .build().perform();
         } else {
-            new Actions(getDriver())
-                    .sendKeys(Keys.chord(Keys.CONTROL, "z")).build().perform();
+            new Actions(getDriver()).sendKeys(Keys.chord(Keys.CONTROL, "z"))
+                    .build().perform();
         }
     }
 

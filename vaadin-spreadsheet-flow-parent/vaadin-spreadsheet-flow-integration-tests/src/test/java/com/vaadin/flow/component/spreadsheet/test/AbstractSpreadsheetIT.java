@@ -67,11 +67,11 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
     protected void paste() {
         if (isMac()) {
             new Actions(getDriver()).keyDown(Keys.CONTROL).keyDown(Keys.COMMAND)
-                    .sendKeys("v").keyUp(Keys.CONTROL).keyUp(Keys.COMMAND).build()
-                    .perform();
+                    .sendKeys("v").keyUp(Keys.CONTROL).keyUp(Keys.COMMAND)
+                    .build().perform();
         } else {
-            new Actions(getDriver())
-                    .sendKeys(Keys.chord(Keys.CONTROL, "v")).build().perform();
+            new Actions(getDriver()).sendKeys(Keys.chord(Keys.CONTROL, "v"))
+                    .build().perform();
             getCommandExecutor().waitForVaadin();
         }
     }
@@ -79,15 +79,15 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
     protected void copy() {
         if (isMac()) {
             new Actions(getDriver()).keyDown(Keys.CONTROL).keyDown(Keys.COMMAND)
-                    .sendKeys("c").keyUp(Keys.CONTROL).keyUp(Keys.COMMAND).build()
-                    .perform();
+                    .sendKeys("c").keyUp(Keys.CONTROL).keyUp(Keys.COMMAND)
+                    .build().perform();
         } else {
-            new Actions(getDriver())
-                    .sendKeys(Keys.chord(Keys.CONTROL, "c")).build().perform();
+            new Actions(getDriver()).sendKeys(Keys.chord(Keys.CONTROL, "c"))
+                    .build().perform();
         }
     }
 
-    protected boolean isMac(){
+    protected boolean isMac() {
         return System.getProperty("os.name").toLowerCase().contains("mac");
     }
 
