@@ -124,6 +124,7 @@ public class LitRendererIT extends AbstractComponentIT {
                 // Discard lit-element warning lines
                 .filter(m -> !m.getMessage().contains(
                         "The main 'lit-element' module entrypoint is deprecated."))
+                .filter(m -> !m.getMessage().contains("Lit is in dev mode"))
                 // Return first warning message in console
                 .findFirst().get().getMessage();
         return message.split("\"")[1];
