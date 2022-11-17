@@ -140,7 +140,7 @@ import elemental.json.JsonObject;
  * – how to apply styles for shadow parts</a>
  * </p>
  *
- * @deprecated since v23.3, deprecated classes will be removed in v24.
+ * @deprecated since v23.3, generated classes will be removed in v24.
  */
 @Deprecated
 @Tag("vaadin-context-menu")
@@ -167,7 +167,7 @@ public abstract class GeneratedVaadinContextMenu<R extends ContextMenuBase<R, ?,
      *
      * @return the {@code selector} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected String getSelectorString() {
@@ -186,7 +186,7 @@ public abstract class GeneratedVaadinContextMenu<R extends ContextMenuBase<R, ?,
      * @param selector
      *            the String value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setSelector(String selector) {
@@ -206,7 +206,7 @@ public abstract class GeneratedVaadinContextMenu<R extends ContextMenuBase<R, ?,
      *
      * @return the {@code opened} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     @Synchronize(property = "opened", value = "opened-changed")
@@ -227,7 +227,7 @@ public abstract class GeneratedVaadinContextMenu<R extends ContextMenuBase<R, ?,
      *
      * @return the {@code openOn} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected String getOpenOnString() {
@@ -245,7 +245,7 @@ public abstract class GeneratedVaadinContextMenu<R extends ContextMenuBase<R, ?,
      * @param openOn
      *            the String value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setOpenOn(String openOn) {
@@ -267,7 +267,7 @@ public abstract class GeneratedVaadinContextMenu<R extends ContextMenuBase<R, ?,
      *
      * @return the {@code listenOn} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected JsonObject getListenOnJsonObject() {
@@ -287,7 +287,7 @@ public abstract class GeneratedVaadinContextMenu<R extends ContextMenuBase<R, ?,
      * @param listenOn
      *            the JsonObject value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setListenOn(JsonObject listenOn) {
@@ -307,7 +307,7 @@ public abstract class GeneratedVaadinContextMenu<R extends ContextMenuBase<R, ?,
      *
      * @return the {@code closeOn} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected String getCloseOnString() {
@@ -325,7 +325,7 @@ public abstract class GeneratedVaadinContextMenu<R extends ContextMenuBase<R, ?,
      * @param closeOn
      *            the String value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setCloseOn(String closeOn) {
@@ -340,7 +340,7 @@ public abstract class GeneratedVaadinContextMenu<R extends ContextMenuBase<R, ?,
      * Closes the overlay.
      * </p>
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void close() {
@@ -355,7 +355,7 @@ public abstract class GeneratedVaadinContextMenu<R extends ContextMenuBase<R, ?,
      * Opens the overlay.
      * </p>
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void open() {
@@ -363,7 +363,7 @@ public abstract class GeneratedVaadinContextMenu<R extends ContextMenuBase<R, ?,
     }
 
     /**
-     * @deprecated since v23.3, deprecated classes will be removed in v24. Use
+     * @deprecated since v23.3, generated classes will be removed in v24. Use
      *             {@link ContextMenuBase.OpenedChangeEvent} instead.
      */
     @Deprecated
@@ -389,7 +389,7 @@ public abstract class GeneratedVaadinContextMenu<R extends ContextMenuBase<R, ?,
      *            the listener
      * @return a {@link Registration} for removing the event listener
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24. Use
+     * @deprecated since v23.3, generated classes will be removed in v24. Use
      *             {@link ContextMenuBase#addOpenedChangeListener} instead.
      */
     @Deprecated
@@ -407,7 +407,7 @@ public abstract class GeneratedVaadinContextMenu<R extends ContextMenuBase<R, ?,
      *
      * @see #addClickListener(ComponentEventListener)
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     @Override
@@ -422,7 +422,7 @@ public abstract class GeneratedVaadinContextMenu<R extends ContextMenuBase<R, ?,
      *
      * @see #addClickShortcut(Key, KeyModifier...)
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     @Override

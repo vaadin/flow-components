@@ -100,7 +100,7 @@ import com.vaadin.flow.dom.Element;
  * – how to apply styles for shadow parts</a>
  * </p>
  *
- * @deprecated since v23.3, deprecated classes will be removed in v24.
+ * @deprecated since v23.3, generated classes will be removed in v24.
  */
 @Deprecated
 @Tag("vaadin-button")
@@ -126,7 +126,7 @@ public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
      *
      * @return the {@code autofocus} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected boolean isAutofocusBoolean() {
@@ -144,7 +144,7 @@ public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
      * @param autofocus
      *            the boolean value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setAutofocus(boolean autofocus) {
@@ -164,7 +164,7 @@ public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
      *
      * @return the {@code disabled} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected boolean isDisabledBoolean() {
@@ -203,7 +203,7 @@ public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
      *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void addToPrefix(Component... components) {
@@ -226,7 +226,7 @@ public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
      *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void addToSuffix(Component... components) {
@@ -244,7 +244,7 @@ public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
      * @throws IllegalArgumentException
      *             if any of the components is not a child of this component.
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void remove(Component... components) {
@@ -264,7 +264,7 @@ public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
      * text content as well as child elements that have been added directly to
      * this component using the {@link Element} API.
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void removeAll() {
@@ -294,7 +294,7 @@ public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
      *            the text content to set
      * @see HasText#setText(String)
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     public GeneratedVaadinButton(String text) {
@@ -304,7 +304,7 @@ public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
     /**
      * Default constructor.
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     public GeneratedVaadinButton() {

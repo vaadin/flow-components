@@ -35,7 +35,7 @@ import com.vaadin.flow.function.SerializableFunction;
  * &lt;/vaadin-number-field&gt;
  * </p>
  *
- * @deprecated since v23.3, deprecated classes will be removed in v24.
+ * @deprecated since v23.3, generated classes will be removed in v24.
  */
 @Deprecated
 @Tag("vaadin-number-field")
@@ -101,7 +101,7 @@ public abstract class GeneratedVaadinNumberField<R extends GeneratedVaadinNumber
      *
      * @return the {@code min} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected double getMinDouble() {
@@ -119,7 +119,7 @@ public abstract class GeneratedVaadinNumberField<R extends GeneratedVaadinNumber
      * @param min
      *            the double value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setMin(double min) {
@@ -139,7 +139,7 @@ public abstract class GeneratedVaadinNumberField<R extends GeneratedVaadinNumber
      *
      * @return the {@code max} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected double getMaxDouble() {
@@ -157,7 +157,7 @@ public abstract class GeneratedVaadinNumberField<R extends GeneratedVaadinNumber
      * @param max
      *            the double value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setMax(double max) {
@@ -177,7 +177,7 @@ public abstract class GeneratedVaadinNumberField<R extends GeneratedVaadinNumber
      *
      * @return the {@code step} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected double getStepDouble() {
@@ -195,7 +195,7 @@ public abstract class GeneratedVaadinNumberField<R extends GeneratedVaadinNumber
      * @param step
      *            the double value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setStep(double step) {
@@ -203,7 +203,7 @@ public abstract class GeneratedVaadinNumberField<R extends GeneratedVaadinNumber
     }
 
     /**
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     @Override
@@ -237,7 +237,7 @@ public abstract class GeneratedVaadinNumberField<R extends GeneratedVaadinNumber
      * @param <P>
      *            the property type
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     public <P> GeneratedVaadinNumberField(T initialValue, T defaultValue,
@@ -267,7 +267,7 @@ public abstract class GeneratedVaadinNumberField<R extends GeneratedVaadinNumber
      * @param <P>
      *            the property type
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     public <P> GeneratedVaadinNumberField(T initialValue, T defaultValue,
@@ -289,7 +289,7 @@ public abstract class GeneratedVaadinNumberField<R extends GeneratedVaadinNumber
      * @param acceptNullValues
      *            whether <code>null</code> is accepted as a model value
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     public GeneratedVaadinNumberField(T initialValue, T defaultValue,
@@ -316,7 +316,7 @@ public abstract class GeneratedVaadinNumberField<R extends GeneratedVaadinNumber
      * @param <P>
      *            the property type
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     public <P> GeneratedVaadinNumberField(T initialValue, T defaultValue,
@@ -330,7 +330,7 @@ public abstract class GeneratedVaadinNumberField<R extends GeneratedVaadinNumber
     /**
      * Default constructor.
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     public GeneratedVaadinNumberField() {

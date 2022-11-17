@@ -163,7 +163,7 @@ import com.vaadin.flow.dom.Element;
  * – how to apply styles for shadow parts</a>
  * </p>
  *
- * @deprecated since v23.3, deprecated classes will be removed in v24.
+ * @deprecated since v23.3, generated classes will be removed in v24.
  */
 @Deprecated
 @Tag("vaadin-form-item")
@@ -188,7 +188,7 @@ public abstract class GeneratedVaadinFormItem<R extends GeneratedVaadinFormItem<
      *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void addToLabel(Component... components) {
@@ -206,7 +206,7 @@ public abstract class GeneratedVaadinFormItem<R extends GeneratedVaadinFormItem<
      * @throws IllegalArgumentException
      *             if any of the components is not a child of this component.
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void remove(Component... components) {
@@ -226,7 +226,7 @@ public abstract class GeneratedVaadinFormItem<R extends GeneratedVaadinFormItem<
      * text content as well as child elements that have been added directly to
      * this component using the {@link Element} API.
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void removeAll() {

@@ -98,7 +98,7 @@ import com.vaadin.flow.shared.Registration;
  * – how to apply styles for shadow parts</a>
  * </p>
  *
- * @deprecated since v23.3, deprecated classes will be removed in v24.
+ * @deprecated since v23.3, generated classes will be removed in v24.
  */
 @Deprecated
 @Tag("vaadin-radio-button")
@@ -121,7 +121,7 @@ public abstract class GeneratedVaadinRadioButton<R extends GeneratedVaadinRadioB
      *
      * @return the {@code autofocus} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected boolean isAutofocusBoolean() {
@@ -139,7 +139,7 @@ public abstract class GeneratedVaadinRadioButton<R extends GeneratedVaadinRadioB
      * @param autofocus
      *            the boolean value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setAutofocus(boolean autofocus) {
@@ -159,7 +159,7 @@ public abstract class GeneratedVaadinRadioButton<R extends GeneratedVaadinRadioB
      *
      * @return the {@code disabled} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected boolean isDisabledBoolean() {
@@ -177,7 +177,7 @@ public abstract class GeneratedVaadinRadioButton<R extends GeneratedVaadinRadioB
      * @param disabled
      *            the boolean value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setDisabled(boolean disabled) {
@@ -190,7 +190,7 @@ public abstract class GeneratedVaadinRadioButton<R extends GeneratedVaadinRadioB
      *
      * @return the {@code name} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected String getNameString() {
@@ -201,7 +201,7 @@ public abstract class GeneratedVaadinRadioButton<R extends GeneratedVaadinRadioB
      * @param name
      *            the String value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setName(String name) {
@@ -221,7 +221,7 @@ public abstract class GeneratedVaadinRadioButton<R extends GeneratedVaadinRadioB
      *
      * @return the {@code checked} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     @Synchronize(property = "checked", value = "checked-changed")
@@ -240,7 +240,7 @@ public abstract class GeneratedVaadinRadioButton<R extends GeneratedVaadinRadioB
      * @param checked
      *            the boolean value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setChecked(boolean checked) {
@@ -260,7 +260,7 @@ public abstract class GeneratedVaadinRadioButton<R extends GeneratedVaadinRadioB
      *
      * @return the {@code value} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected String getValueString() {
@@ -278,7 +278,7 @@ public abstract class GeneratedVaadinRadioButton<R extends GeneratedVaadinRadioB
      * @param value
      *            the String value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setValue(String value) {
@@ -286,7 +286,7 @@ public abstract class GeneratedVaadinRadioButton<R extends GeneratedVaadinRadioB
     }
 
     /**
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     public static class CheckedChangeEvent<R extends GeneratedVaadinRadioButton<R>>
@@ -311,7 +311,7 @@ public abstract class GeneratedVaadinRadioButton<R extends GeneratedVaadinRadioB
      *            the listener
      * @return a {@link Registration} for removing the event listener
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected Registration addCheckedChangeListener(

@@ -252,7 +252,7 @@ import elemental.json.JsonObject;
  * is propagated to the internal themable components listed above.
  * </p>
  *
- * @deprecated since v23.3, deprecated classes will be removed in v24.
+ * @deprecated since v23.3, generated classes will be removed in v24.
  */
 @Deprecated
 @Tag("vaadin-date-picker")
@@ -278,7 +278,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *
      * @return the {@code autofocus} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected boolean isAutofocusBoolean() {
@@ -296,7 +296,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      * @param autofocus
      *            the boolean value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setAutofocus(boolean autofocus) {
@@ -316,7 +316,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *
      * @return the {@code disabled} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected boolean isDisabledBoolean() {
@@ -334,7 +334,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      * @param disabled
      *            the boolean value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setDisabled(boolean disabled) {
@@ -354,7 +354,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *
      * @return the {@code required} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected boolean isRequiredBoolean() {
@@ -372,7 +372,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      * @param required
      *            the boolean value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setRequired(boolean required) {
@@ -392,7 +392,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *
      * @return the {@code name} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected String getNameString() {
@@ -410,7 +410,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      * @param name
      *            the String value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setName(String name) {
@@ -433,7 +433,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *
      * @return the {@code initialPosition} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected String getInitialPositionString() {
@@ -454,7 +454,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      * @param initialPosition
      *            the String value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setInitialPosition(String initialPosition) {
@@ -475,7 +475,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *
      * @return the {@code label} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected String getLabelString() {
@@ -493,7 +493,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      * @param label
      *            the String value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setLabel(String label) {
@@ -513,7 +513,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *
      * @return the {@code opened} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     @Synchronize(property = "opened", value = "opened-changed")
@@ -532,7 +532,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      * @param opened
      *            the boolean value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setOpened(boolean opened) {
@@ -554,7 +554,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *
      * @return the {@code showWeekNumbers} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected boolean isShowWeekNumbersBoolean() {
@@ -574,7 +574,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      * @param showWeekNumbers
      *            the boolean value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setShowWeekNumbers(boolean showWeekNumbers) {
@@ -663,7 +663,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *
      * @return the {@code i18n} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected JsonObject getI18nJsonObject() {
@@ -753,7 +753,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      * @param i18n
      *            the JsonObject value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setI18n(JsonObject i18n) {
@@ -782,7 +782,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *
      * @return the {@code min} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected String getMinAsStringString() {
@@ -809,7 +809,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      * @param minAsString
      *            the String value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setMinAsString(String minAsString) {
@@ -837,7 +837,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *
      * @return the {@code max} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected String getMaxAsStringString() {
@@ -863,7 +863,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      * @param maxAsString
      *            the String value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setMaxAsString(String maxAsString) {
@@ -883,7 +883,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *
      * @return the {@code errorMessage} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected String getErrorMessageString() {
@@ -901,7 +901,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      * @param errorMessage
      *            the String value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setErrorMessage(String errorMessage) {
@@ -923,7 +923,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *
      * @return the {@code placeholder} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected String getPlaceholderString() {
@@ -942,7 +942,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      * @param placeholder
      *            the String value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setPlaceholder(String placeholder) {
@@ -963,7 +963,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *
      * @return the {@code readonly} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected boolean isReadonlyBoolean() {
@@ -981,7 +981,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      * @param readonly
      *            the boolean value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setReadonly(boolean readonly) {
@@ -998,7 +998,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *
      * @return the {@code invalid} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected boolean isInvalidBoolean() {
@@ -1016,7 +1016,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      * @param invalid
      *            the boolean value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setInvalid(boolean invalid) {
@@ -1031,7 +1031,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      * Opens the dropdown.
      * </p>
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void open() {
@@ -1046,7 +1046,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      * Closes the dropdown.
      * </p>
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void close() {
@@ -1069,7 +1069,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      * @param value
      *            Value to validate. Optional, defaults to user's input value.
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     @NotSupported
@@ -1095,7 +1095,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      * @param value
      *            Value to validate. Optional, defaults to the selected date.
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     @NotSupported
@@ -1103,7 +1103,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
     }
 
     /**
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     @DomEvent("change")
@@ -1121,7 +1121,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *            the listener
      * @return a {@link Registration} for removing the event listener
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -1132,7 +1132,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
     }
 
     /**
-     * @deprecated since v23.3, deprecated classes will be removed in v24. Use
+     * @deprecated since v23.3, generated classes will be removed in v24. Use
      *             {@link DatePicker.InvalidChangeEvent} instead.
      */
     @Deprecated
@@ -1158,7 +1158,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *            the listener
      * @return a {@link Registration} for removing the event listener
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected Registration addInvalidChangeListener(
@@ -1170,7 +1170,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
     }
 
     /**
-     * @deprecated since v23.3, deprecated classes will be removed in v24. Use
+     * @deprecated since v23.3, generated classes will be removed in v24. Use
      *             {@link DatePicker.OpenedChangeEvent} instead.
      */
     @Deprecated
@@ -1196,7 +1196,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *            the listener
      * @return a {@link Registration} for removing the event listener
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected Registration addOpenedChangeListener(
@@ -1220,7 +1220,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void addToPrefix(Component... components) {
@@ -1238,7 +1238,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      * @throws IllegalArgumentException
      *             if any of the components is not a child of this component.
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void remove(Component... components) {
@@ -1258,7 +1258,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      * text content as well as child elements that have been added directly to
      * this component using the {@link Element} API.
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void removeAll() {
@@ -1289,7 +1289,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      * @param <P>
      *            the property type
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     public <P> GeneratedVaadinDatePicker(T initialValue, T defaultValue,
@@ -1321,7 +1321,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      * @param acceptNullValues
      *            whether <code>null</code> is accepted as a model value
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     public GeneratedVaadinDatePicker(T initialValue, T defaultValue,
@@ -1349,7 +1349,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      * @param <P>
      *            the property type
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     public <P> GeneratedVaadinDatePicker(T initialValue, T defaultValue,
@@ -1364,7 +1364,7 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
     /**
      * Default constructor.
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     public GeneratedVaadinDatePicker() {

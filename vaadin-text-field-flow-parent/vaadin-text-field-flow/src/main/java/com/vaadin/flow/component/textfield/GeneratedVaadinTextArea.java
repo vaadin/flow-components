@@ -137,7 +137,7 @@ import com.vaadin.flow.shared.Registration;
  * – how to apply styles for shadow parts</a>
  * </p>
  *
- * @deprecated since v23.3, deprecated classes will be removed in v24.
+ * @deprecated since v23.3, generated classes will be removed in v24.
  */
 @Deprecated
 @Tag("vaadin-text-area")
@@ -163,7 +163,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      *
      * @return the {@code autofocus} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected boolean isAutofocusBoolean() {
@@ -181,7 +181,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * @param autofocus
      *            the boolean value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setAutofocus(boolean autofocus) {
@@ -201,7 +201,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      *
      * @return the {@code disabled} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected boolean isDisabledBoolean() {
@@ -219,7 +219,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * @param disabled
      *            the boolean value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setDisabled(boolean disabled) {
@@ -242,7 +242,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      *
      * @return the {@code autocomplete} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected String getAutocompleteString() {
@@ -263,7 +263,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * @param autocomplete
      *            the String value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setAutocomplete(String autocomplete) {
@@ -287,7 +287,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      *
      * @return the {@code autocorrect} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected String getAutocorrectString() {
@@ -308,7 +308,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * @param autocorrect
      *            the String value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setAutocorrect(String autocorrect) {
@@ -333,7 +333,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      *
      * @return the {@code autocapitalize} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected String getAutocapitalizeString() {
@@ -355,7 +355,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * @param autocapitalize
      *            the String value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setAutocapitalize(String autocapitalize) {
@@ -377,7 +377,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      *
      * @return the {@code autoselect} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected boolean isAutoselectBoolean() {
@@ -396,7 +396,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * @param autoselect
      *            the boolean value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setAutoselect(boolean autoselect) {
@@ -416,7 +416,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      *
      * @return the {@code errorMessage} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected String getErrorMessageString() {
@@ -434,7 +434,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * @param errorMessage
      *            the String value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setErrorMessage(String errorMessage) {
@@ -455,7 +455,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      *
      * @return the {@code label} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected String getLabelString() {
@@ -473,7 +473,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * @param label
      *            the String value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setLabel(String label) {
@@ -494,7 +494,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      *
      * @return the {@code maxlength} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected double getMaxlengthDouble() {
@@ -513,7 +513,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * @param maxlength
      *            the double value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setMaxlength(double maxlength) {
@@ -534,7 +534,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      *
      * @return the {@code minlength} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected double getMinlengthDouble() {
@@ -553,7 +553,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * @param minlength
      *            the double value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setMinlength(double minlength) {
@@ -573,7 +573,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      *
      * @return the {@code name} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected String getNameString() {
@@ -591,7 +591,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * @param name
      *            the String value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setName(String name) {
@@ -611,7 +611,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      *
      * @return the {@code placeholder} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected String getPlaceholderString() {
@@ -629,7 +629,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * @param placeholder
      *            the String value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setPlaceholder(String placeholder) {
@@ -651,7 +651,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      *
      * @return the {@code readonly} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected boolean isReadonlyBoolean() {
@@ -670,7 +670,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * @param readonly
      *            the boolean value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setReadonly(boolean readonly) {
@@ -690,7 +690,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      *
      * @return the {@code required} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected boolean isRequiredBoolean() {
@@ -708,7 +708,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * @param required
      *            the boolean value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setRequired(boolean required) {
@@ -725,7 +725,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      *
      * @return the {@code invalid} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected boolean isInvalidBoolean() {
@@ -743,7 +743,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * @param invalid
      *            the boolean value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setInvalid(boolean invalid) {
@@ -803,7 +803,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * <code>boolean</code>. Functions with return types different than void are
      * not supported at this moment.
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     @NotSupported
@@ -823,7 +823,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * <code>boolean</code>. Functions with return types different than void are
      * not supported at this moment.
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     @NotSupported
@@ -831,7 +831,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
     }
 
     /**
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     @DomEvent("change")
@@ -849,7 +849,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      *            the listener
      * @return a {@link Registration} for removing the event listener
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -860,7 +860,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
     }
 
     /**
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     public static class InvalidChangeEvent<R extends GeneratedVaadinTextArea<R, ?>>
@@ -885,7 +885,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      *            the listener
      * @return a {@link Registration} for removing the event listener
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected Registration addInvalidChangeListener(
@@ -910,7 +910,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void addToPrefix(Component... components) {
@@ -933,7 +933,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void addToTextarea(Component... components) {
@@ -956,7 +956,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void addToSuffix(Component... components) {
@@ -974,7 +974,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * @throws IllegalArgumentException
      *             if any of the components is not a child of this component.
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void remove(Component... components) {
@@ -994,7 +994,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * text content as well as child elements that have been added directly to
      * this component using the {@link Element} API.
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void removeAll() {
@@ -1020,7 +1020,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * @param <P>
      *            the property type
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     public <P> GeneratedVaadinTextArea(T initialValue, T defaultValue,
@@ -1046,7 +1046,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * @param acceptNullValues
      *            whether <code>null</code> is accepted as a model value
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     public GeneratedVaadinTextArea(T initialValue, T defaultValue,
@@ -1070,7 +1070,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      *            property value, otherwise element {@code "value"} property is
      *            ignored and the initial value is set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     public GeneratedVaadinTextArea(T initialValue, T defaultValue,
@@ -1101,7 +1101,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
      * @param <P>
      *            the property type
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     public <P> GeneratedVaadinTextArea(T initialValue, T defaultValue,
@@ -1118,7 +1118,7 @@ public abstract class GeneratedVaadinTextArea<R extends GeneratedVaadinTextArea<
     /**
      * Default constructor.
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     public GeneratedVaadinTextArea() {
