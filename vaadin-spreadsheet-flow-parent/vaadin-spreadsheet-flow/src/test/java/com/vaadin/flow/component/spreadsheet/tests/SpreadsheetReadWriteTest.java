@@ -50,6 +50,19 @@ public class SpreadsheetReadWriteTest {
     }
 
     @Test
+    public void writeFileMultipleTimes() throws IOException {
+        var sheet = TestHelper.createSpreadsheet("empty.xlsx");
+
+        // Write the file
+        sheet.write("resultEmptyFile.xlsx");
+        // Write the same file again
+        var tempFile = sheet.write("resultEmptyFile.xlsx");
+
+        tempFile.delete();
+        // no exceptions, everything ok
+    }
+
+    @Test
     public void openAndSaveFile_emptyXLSXFile_FileDoesNotContainAdditionalDrawing()
             throws IOException {
         var sheet = TestHelper.createSpreadsheet("empty.xlsx");

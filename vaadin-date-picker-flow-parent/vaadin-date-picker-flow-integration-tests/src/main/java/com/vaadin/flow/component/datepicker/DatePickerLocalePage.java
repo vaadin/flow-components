@@ -5,6 +5,7 @@ import com.vaadin.flow.component.html.Input;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.router.Route;
 
+import java.time.LocalDate;
 import java.util.Locale;
 
 @Route("vaadin-date-picker/date-picker-locale")
@@ -16,6 +17,7 @@ public class DatePickerLocalePage extends Div {
         Input localeInput = new Input();
         localeInput.setId("locale-input");
         localeInput.setPlaceholder("Enter locale string");
+
         NativeButton applyLocale = new NativeButton("Apply locale", e -> {
             String localeString = localeInput.getValue();
             String[] localeParts = localeString.split("_");
@@ -35,6 +37,14 @@ public class DatePickerLocalePage extends Div {
         });
         applyLocale.setId("apply-locale");
 
-        add(datePicker, localeInput, applyLocale);
+        NativeButton applyCustomReferenceDate = new NativeButton(
+                "Apply custom reference date", e -> {
+                    DatePicker.DatePickerI18n i18n = new DatePicker.DatePickerI18n();
+                    i18n.setReferenceDate(LocalDate.of(1980, 2, 2));
+                    datePicker.setI18n(i18n);
+                });
+        applyCustomReferenceDate.setId("apply-custom-reference-date");
+
+        add(datePicker, localeInput, applyLocale, applyCustomReferenceDate);
     }
 }

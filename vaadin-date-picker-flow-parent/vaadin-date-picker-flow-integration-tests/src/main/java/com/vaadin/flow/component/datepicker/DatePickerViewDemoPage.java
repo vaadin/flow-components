@@ -227,6 +227,9 @@ public class DatePickerViewDemoPage extends Div {
 
         datePicker.addValueChangeListener(
                 event -> updateMessage(message, datePicker));
+        DatePicker.DatePickerI18n i18n = new DatePicker.DatePickerI18n();
+        i18n.setReferenceDate(LocalDate.of(1980, 2, 2));
+        datePicker.setI18n(i18n);
         locale1.setId("Locale-US");
         locale2.setId("Locale-UK");
         locale3.setId("Locale-CHINA");
