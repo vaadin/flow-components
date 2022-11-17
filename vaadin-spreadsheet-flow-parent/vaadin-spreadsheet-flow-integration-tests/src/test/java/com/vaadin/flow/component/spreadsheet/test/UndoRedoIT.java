@@ -25,7 +25,7 @@ public class UndoRedoIT extends AbstractSpreadsheetIT {
         createNewSpreadsheet();
     }
 
-    @Ignore("The test started to fail on CI. Ignore until the issue is resolved.")
+
     @Test
     public void undo_cellValueIsSetAndUndone_cellHasNoValue() {
         final SpreadsheetElement spreadsheet = getSpreadsheet();
@@ -36,7 +36,7 @@ public class UndoRedoIT extends AbstractSpreadsheetIT {
         Assert.assertEquals("", spreadsheet.getCellAt("A1").getValue());
     }
 
-    @Ignore("The test started to fail on CI. Ignore until the issue is resolved.")
+
     @Test
     public void redo_cellValueIsSetAndUndoneAndRedone_cellHasValue() {
         final SpreadsheetElement spreadsheet = getSpreadsheet();
@@ -48,7 +48,7 @@ public class UndoRedoIT extends AbstractSpreadsheetIT {
         Assert.assertEquals("a", spreadsheet.getCellAt("A1").getValue());
     }
 
-    @Ignore("The test started to fail on CI. Ignore until the issue is resolved.")
+
     @Test
     public void undo_cellValuesHasDeletedAndUndone_cellsHaveValue() {
         final SpreadsheetElement spreadsheet = getSpreadsheet();
@@ -64,7 +64,7 @@ public class UndoRedoIT extends AbstractSpreadsheetIT {
         Assert.assertEquals("A1=a, A2=b", selectionValue);
     }
 
-    @Ignore("The test started to fail on CI. Ignore until the issue is resolved.")
+
     @Test
     public void undo_cellValuesHasDeletedAndUndoneAndRedone_cellsHasNoValue() {
         final SpreadsheetElement spreadsheet = getSpreadsheet();
@@ -81,7 +81,7 @@ public class UndoRedoIT extends AbstractSpreadsheetIT {
         Assert.assertEquals("A1=, A2=", selectionValue);
     }
 
-    @Ignore("The test started to fail on CI. Ignore until the issue is resolved.")
+
     @Test
     public void undo_cellValuesHasDeletedAndUndoneRedoneAndUndone_cellsHaveValues() {
         final SpreadsheetElement spreadsheet = getSpreadsheet();
@@ -99,7 +99,7 @@ public class UndoRedoIT extends AbstractSpreadsheetIT {
         Assert.assertEquals("A1=a, A2=b", selectionValue);
     }
 
-    @Ignore("The test started to fail on CI. Ignore until the issue is resolved.")
+
     @Test
     public void undo_addRowAndUndone_addedRowIsRemoved() {
         final SpreadsheetElement spreadsheet = getSpreadsheet();
@@ -112,7 +112,7 @@ public class UndoRedoIT extends AbstractSpreadsheetIT {
         Assert.assertEquals("a", spreadsheet.getCellAt("A1").getValue());
     }
 
-    @Ignore("The test started to fail on CI. Ignore until the issue is resolved.")
+
     @Test
     public void redo_addRowAndUndoneAndRedo_rowIsAdded() {
         final SpreadsheetElement spreadsheet = getSpreadsheet();
@@ -127,7 +127,7 @@ public class UndoRedoIT extends AbstractSpreadsheetIT {
         Assert.assertEquals("a", spreadsheet.getCellAt("A2").getValue());
     }
 
-    @Ignore("The test started to fail on CI. Ignore until the issue is resolved.")
+
     @Test
     public void undo_removeRowAndUndone_removedRowIsAdded() {
         final SpreadsheetElement spreadsheet = getSpreadsheet();
@@ -140,7 +140,7 @@ public class UndoRedoIT extends AbstractSpreadsheetIT {
         Assert.assertEquals("a", spreadsheet.getCellAt("A1").getValue());
     }
 
-    @Ignore("The test started to fail on CI. Ignore until the issue is resolved.")
+
     @Test
     public void redo_removeRowAndUndoneAndRedo_rowIsRemoved() {
         final SpreadsheetElement spreadsheet = getSpreadsheet();
@@ -154,7 +154,7 @@ public class UndoRedoIT extends AbstractSpreadsheetIT {
         Assert.assertEquals("", spreadsheet.getCellAt("A1").getValue());
     }
 
-    @Ignore("The test started to fail on CI. Ignore until the issue is resolved.")
+
     @Test
     public void undo_removeRowWithCommentAndUndo_cellStillHasComment() {
         loadFile("cell_comments.xlsx"); // A1 has a comment
@@ -168,7 +168,7 @@ public class UndoRedoIT extends AbstractSpreadsheetIT {
                 webDriver -> spreadsheet.getCellAt("A1").hasCommentIndicator());
     }
 
-    @Ignore("The test started to fail on CI. Ignore until the issue is resolved.")
+
     @Test
     public void undo_userAddsCommentAndRemovesTheRowAndUndo_cellStillHasComment() {
         final SpreadsheetElement spreadsheet = getSpreadsheet();
@@ -183,7 +183,7 @@ public class UndoRedoIT extends AbstractSpreadsheetIT {
                 webDriver -> spreadsheet.getCellAt("A1").hasCommentIndicator());
     }
 
-    @Ignore("The test started to fail on CI. Ignore until the issue is resolved.")
+
     @Test
     public void undo_removeRowsWithStyledCellsAndUndo_cellsHaveStyles() {
         loadFile("spreadsheet_styles.xlsx"); // differently styled cells on rows
@@ -202,7 +202,7 @@ public class UndoRedoIT extends AbstractSpreadsheetIT {
         assertCorrectCss(spreadsheet);
     }
 
-    @Ignore("The test started to fail on CI. Ignore until the issue is resolved.")
+
     @Test
     public void undo_addRowWithDateAndUndone_dateIsVisible() {
 
@@ -216,7 +216,7 @@ public class UndoRedoIT extends AbstractSpreadsheetIT {
                 spreadsheet.getCellAt("A1").getValue());
     }
 
-    @Ignore("The test started to fail on CI. Ignore until the issue is resolved.")
+
     @Test
     public void undo_theSecondRowWithMergedCellIsRemovedAndUndo_cellIsMerged() {
         final SpreadsheetElement spreadsheet = getSpreadsheet();
@@ -272,7 +272,7 @@ public class UndoRedoIT extends AbstractSpreadsheetIT {
         });
     }
 
-    @Ignore("The test started to fail on CI. Ignore until the issue is resolved.")
+
     @Test
     public void undo_pasteRegionThenUndo_cellsHaveInitialValues() {
         final SpreadsheetElement spreadsheet = setupSpreadSheetForRegionCopyPasteTest();
@@ -300,7 +300,7 @@ public class UndoRedoIT extends AbstractSpreadsheetIT {
         Assert.assertEquals("D1=3, E1=4", selectionValue);
     }
 
-    @Ignore("The test started to fail on CI. Ignore until the issue is resolved.")
+
     @Test
     public void undo_pasteRegionThenUndoAndRedo_cellsHavePastedValues() {
         final SpreadsheetElement spreadsheet = setupSpreadSheetForRegionCopyPasteTest();
@@ -364,18 +364,14 @@ public class UndoRedoIT extends AbstractSpreadsheetIT {
         new Actions(getDriver()).sendKeys(Keys.DELETE).build().perform();
     }
 
-    private void undo() {
-        // TODO: cleanup modifier keys solution (for macOS)
-        new Actions(getDriver()).keyDown(Keys.CONTROL).keyDown(Keys.COMMAND)
-                .sendKeys("z").keyUp(Keys.CONTROL).keyUp(Keys.COMMAND).build()
-                .perform();
+    private void redo() {
+        new Actions(getDriver())
+                .sendKeys(Keys.chord(Keys.CONTROL, "y")).build().perform();
     }
 
-    private void redo() {
-        // TODO: cleanup modifier keys solution (for macOS)
-        new Actions(getDriver()).keyDown(Keys.CONTROL).keyDown(Keys.COMMAND)
-                .sendKeys("y").keyUp(Keys.CONTROL).keyUp(Keys.COMMAND).build()
-                .perform();
+    private void undo() {
+        new Actions(getDriver())
+                .sendKeys(Keys.chord(Keys.CONTROL, "z")).build().perform();
     }
 
     private void assertCorrectCss(SpreadsheetElement c) {
