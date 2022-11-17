@@ -48,7 +48,7 @@ import com.vaadin.flow.shared.Registration;
  * – how to apply styles for shadow parts</a>
  * </p>
  *
- * @deprecated since v23.3, deprecated classes will be removed in v24.
+ * @deprecated since v23.3, generated classes will be removed in v24.
  */
 @Deprecated
 @Tag("vaadin-dialog")
@@ -73,7 +73,7 @@ public abstract class GeneratedVaadinDialog<R extends GeneratedVaadinDialog<R>>
      * </p>
      *
      * @return the {@code opened} property from the webcomponent
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     @Synchronize(property = "opened", value = "opened-changed")
@@ -91,7 +91,7 @@ public abstract class GeneratedVaadinDialog<R extends GeneratedVaadinDialog<R>>
      *
      * @param opened
      *            the boolean value to set
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setOpened(boolean opened) {
@@ -113,7 +113,7 @@ public abstract class GeneratedVaadinDialog<R extends GeneratedVaadinDialog<R>>
      * </p>
      *
      * @return the {@code ariaLabel} property from the webcomponent
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected String getAriaLabelString() {
@@ -133,7 +133,7 @@ public abstract class GeneratedVaadinDialog<R extends GeneratedVaadinDialog<R>>
      *
      * @param ariaLabel
      *            the String value to set
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setAriaLabel(String ariaLabel) {
@@ -142,7 +142,7 @@ public abstract class GeneratedVaadinDialog<R extends GeneratedVaadinDialog<R>>
     }
 
     /**
-     * @deprecated since v23.3, deprecated classes will be removed in v24. Use
+     * @deprecated since v23.3, generated classes will be removed in v24. Use
      *             {@link Dialog.OpenedChangeEvent} instead.
      */
     @Deprecated
@@ -167,7 +167,7 @@ public abstract class GeneratedVaadinDialog<R extends GeneratedVaadinDialog<R>>
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected Registration addOpenedChangeListener(

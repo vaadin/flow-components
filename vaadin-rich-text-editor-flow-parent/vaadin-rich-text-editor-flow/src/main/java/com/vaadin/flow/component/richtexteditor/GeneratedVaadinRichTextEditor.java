@@ -186,7 +186,7 @@ import elemental.json.JsonArray;
  * – how to apply styles for shadow parts</a>
  * </p>
  *
- * @deprecated since v23.3, deprecated classes will be removed in v24.
+ * @deprecated since v23.3, generated classes will be removed in v24.
  */
 @Deprecated
 @Tag("vaadin-rich-text-editor")
@@ -205,7 +205,7 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
      * @param variants
      *            theme variants to add
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24. Use
+     * @deprecated since v23.3, generated classes will be removed in v24. Use
      *             {@link RichTextEditor#addThemeVariants} instead.
      */
     @Deprecated
@@ -221,7 +221,7 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
      * @param variants
      *            theme variants to remove
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24. Use
+     * @deprecated since v23.3, generated classes will be removed in v24. Use
      *             {@link RichTextEditor#removeThemeVariants} instead.
      */
     @Deprecated
@@ -244,7 +244,7 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
      *
      * @return the {@code htmlValue} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     @Synchronize(property = "htmlValue", value = "html-value-changed")
@@ -265,7 +265,7 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
      *
      * @return the {@code disabled} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected boolean isDisabledBoolean() {
@@ -283,7 +283,7 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
      * @param disabled
      *            the boolean value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setDisabled(boolean disabled) {
@@ -303,7 +303,7 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
      *
      * @return the {@code readonly} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected boolean isReadonlyBoolean() {
@@ -321,7 +321,7 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
      * @param readonly
      *            the boolean value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setReadonly(boolean readonly) {
@@ -342,7 +342,7 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
      *
      * @return the {@code i18n} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected JsonArray getI18nJsonArray() {
@@ -361,7 +361,7 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
      * @param i18n
      *            the JsonArray value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setI18n(JsonArray i18n) {
@@ -369,7 +369,7 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
     }
 
     /**
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     @DomEvent("change")
@@ -387,7 +387,7 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
      *            the listener
      * @return a {@link Registration} for removing the event listener
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -414,7 +414,7 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
      * @param <P>
      *            the property type
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     public <P> GeneratedVaadinRichTextEditor(T initialValue, T defaultValue,
@@ -444,7 +444,7 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
      *            property value, otherwise element {@code "value"} property is
      *            ignored and the initial value is set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     public GeneratedVaadinRichTextEditor(T initialValue, T defaultValue,
@@ -475,7 +475,7 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
      * @param <P>
      *            the property type
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     public <P> GeneratedVaadinRichTextEditor(T initialValue, T defaultValue,
@@ -492,7 +492,7 @@ public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRic
     /**
      * Default constructor.
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     public GeneratedVaadinRichTextEditor() {

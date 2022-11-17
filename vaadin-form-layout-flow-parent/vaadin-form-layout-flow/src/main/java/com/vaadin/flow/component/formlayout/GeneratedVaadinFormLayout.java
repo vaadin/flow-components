@@ -135,7 +135,7 @@ import elemental.json.JsonObject;
  * </tbody>
  * </table>
  *
- * @deprecated since v23.3, deprecated classes will be removed in v24.
+ * @deprecated since v23.3, generated classes will be removed in v24.
  */
 @Deprecated
 @Tag("vaadin-form-layout")
@@ -190,7 +190,7 @@ public abstract class GeneratedVaadinFormLayout<R extends GeneratedVaadinFormLay
      *
      * @return the {@code responsiveSteps} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected JsonObject getResponsiveStepsJsonObject() {
@@ -238,7 +238,7 @@ public abstract class GeneratedVaadinFormLayout<R extends GeneratedVaadinFormLay
      * @param responsiveSteps
      *            the JsonObject value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setResponsiveSteps(JsonObject responsiveSteps) {
@@ -256,7 +256,7 @@ public abstract class GeneratedVaadinFormLayout<R extends GeneratedVaadinFormLay
      * @param _Args
      *            Missing documentation!
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void updateStyles(JsonObject _Args) {

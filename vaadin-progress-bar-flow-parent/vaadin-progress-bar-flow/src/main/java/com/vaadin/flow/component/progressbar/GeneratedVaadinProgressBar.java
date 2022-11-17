@@ -99,7 +99,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * </tbody>
  * </table>
  *
- * @deprecated since v23.3, deprecated classes will be removed in v24.
+ * @deprecated since v23.3, generated classes will be removed in v24.
  */
 @Deprecated
 @Tag("vaadin-progress-bar")
@@ -115,7 +115,7 @@ public abstract class GeneratedVaadinProgressBar<R extends GeneratedVaadinProgre
      * @param variants
      *            theme variants to add
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24. Use
+     * @deprecated since v23.3, generated classes will be removed in v24. Use
      *             {@link ProgressBar#addThemeVariants} instead.
      */
     @Deprecated
@@ -131,7 +131,7 @@ public abstract class GeneratedVaadinProgressBar<R extends GeneratedVaadinProgre
      * @param variants
      *            theme variants to remove
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24. Use
+     * @deprecated since v23.3, generated classes will be removed in v24. Use
      *             {@link ProgressBar#removeThemeVariants} instead.
      */
     @Deprecated
@@ -154,7 +154,7 @@ public abstract class GeneratedVaadinProgressBar<R extends GeneratedVaadinProgre
      *
      * @return the {@code value} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected double getValueDouble() {
@@ -172,7 +172,7 @@ public abstract class GeneratedVaadinProgressBar<R extends GeneratedVaadinProgre
      * @param value
      *            the double value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setValue(double value) {
@@ -192,7 +192,7 @@ public abstract class GeneratedVaadinProgressBar<R extends GeneratedVaadinProgre
      *
      * @return the {@code min} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected double getMinDouble() {
@@ -210,7 +210,7 @@ public abstract class GeneratedVaadinProgressBar<R extends GeneratedVaadinProgre
      * @param min
      *            the double value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setMin(double min) {
@@ -230,7 +230,7 @@ public abstract class GeneratedVaadinProgressBar<R extends GeneratedVaadinProgre
      *
      * @return the {@code max} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected double getMaxDouble() {
@@ -248,7 +248,7 @@ public abstract class GeneratedVaadinProgressBar<R extends GeneratedVaadinProgre
      * @param max
      *            the double value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setMax(double max) {
@@ -269,7 +269,7 @@ public abstract class GeneratedVaadinProgressBar<R extends GeneratedVaadinProgre
      *
      * @return the {@code indeterminate} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected boolean isIndeterminateBoolean() {
@@ -288,7 +288,7 @@ public abstract class GeneratedVaadinProgressBar<R extends GeneratedVaadinProgre
      * @param indeterminate
      *            the boolean value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setIndeterminate(boolean indeterminate) {

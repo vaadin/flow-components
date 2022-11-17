@@ -80,7 +80,7 @@ import com.vaadin.flow.function.SerializableFunction;
  * – how to apply styles for shadow parts</a>
  * </p>
  *
- * @deprecated since v23.3, deprecated classes will be removed in v24.
+ * @deprecated since v23.3, generated classes will be removed in v24.
  */
 @Deprecated
 @Tag("vaadin-password-field")
@@ -105,7 +105,7 @@ public abstract class GeneratedVaadinPasswordField<R extends GeneratedVaadinPass
      *
      * @return the {@code revealButtonHidden} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected boolean isRevealButtonHiddenBoolean() {
@@ -123,7 +123,7 @@ public abstract class GeneratedVaadinPasswordField<R extends GeneratedVaadinPass
      * @param revealButtonHidden
      *            the boolean value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setRevealButtonHidden(boolean revealButtonHidden) {
@@ -143,7 +143,7 @@ public abstract class GeneratedVaadinPasswordField<R extends GeneratedVaadinPass
      *
      * @return the {@code passwordVisible} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected boolean isPasswordVisibleBoolean() {
@@ -167,7 +167,7 @@ public abstract class GeneratedVaadinPasswordField<R extends GeneratedVaadinPass
      * @param <P>
      *            the property type
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     public <P> GeneratedVaadinPasswordField(T initialValue, T defaultValue,
@@ -198,7 +198,7 @@ public abstract class GeneratedVaadinPasswordField<R extends GeneratedVaadinPass
      *            property value, otherwise element {@code "value"} property is
      *            ignored and the initial value is set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     public GeneratedVaadinPasswordField(T initialValue, T defaultValue,
@@ -226,7 +226,7 @@ public abstract class GeneratedVaadinPasswordField<R extends GeneratedVaadinPass
      * @param <P>
      *            the property type
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     public <P> GeneratedVaadinPasswordField(T initialValue, T defaultValue,
@@ -240,7 +240,7 @@ public abstract class GeneratedVaadinPasswordField<R extends GeneratedVaadinPass
     /**
      * Default constructor.
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     public GeneratedVaadinPasswordField() {

@@ -89,7 +89,7 @@ Tab 1
  * – how to apply styles for shadow parts</a>
  * </p>
  *
- * @deprecated since v23.3, deprecated classes will be removed in v24.
+ * @deprecated since v23.3, generated classes will be removed in v24.
  */
 @Deprecated
 @Tag("vaadin-tab")
@@ -107,7 +107,7 @@ public abstract class GeneratedVaadinTab<R extends GeneratedVaadinTab<R>>
      * @param variants
      *            theme variants to add
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     public void addThemeVariants(TabVariant... variants) {
@@ -121,7 +121,7 @@ public abstract class GeneratedVaadinTab<R extends GeneratedVaadinTab<R>>
      * @param variants
      *            theme variants to remove
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     public void removeThemeVariants(TabVariant... variants) {
@@ -143,7 +143,7 @@ public abstract class GeneratedVaadinTab<R extends GeneratedVaadinTab<R>>
      *
      * @return the {@code value} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected String getValueString() {
@@ -162,7 +162,7 @@ public abstract class GeneratedVaadinTab<R extends GeneratedVaadinTab<R>>
      * @param value
      *            the String value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setValue(String value) {
@@ -182,7 +182,7 @@ public abstract class GeneratedVaadinTab<R extends GeneratedVaadinTab<R>>
      *
      * @return the {@code disabled} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected boolean isDisabledBoolean() {
@@ -200,7 +200,7 @@ public abstract class GeneratedVaadinTab<R extends GeneratedVaadinTab<R>>
      * @param disabled
      *            the boolean value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setDisabled(boolean disabled) {
@@ -220,7 +220,7 @@ public abstract class GeneratedVaadinTab<R extends GeneratedVaadinTab<R>>
      *
      * @return the {@code selected} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected boolean isSelectedBoolean() {
@@ -238,7 +238,7 @@ public abstract class GeneratedVaadinTab<R extends GeneratedVaadinTab<R>>
      * @param selected
      *            the boolean value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setSelected(boolean selected) {

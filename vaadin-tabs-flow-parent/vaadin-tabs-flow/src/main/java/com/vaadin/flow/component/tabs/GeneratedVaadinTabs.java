@@ -97,7 +97,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * – how to apply styles for shadow parts</a>
  * </p>
  *
- * @deprecated since v23.3, deprecated classes will be removed in v24.
+ * @deprecated since v23.3, generated classes will be removed in v24.
  */
 @Deprecated
 @Tag("vaadin-tabs")
@@ -115,7 +115,7 @@ public abstract class GeneratedVaadinTabs<R extends GeneratedVaadinTabs<R>>
      * @param variants
      *            theme variants to add
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     public void addThemeVariants(TabsVariant... variants) {
@@ -129,7 +129,7 @@ public abstract class GeneratedVaadinTabs<R extends GeneratedVaadinTabs<R>>
      * @param variants
      *            theme variants to remove
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     public void removeThemeVariants(TabsVariant... variants) {
@@ -138,7 +138,7 @@ public abstract class GeneratedVaadinTabs<R extends GeneratedVaadinTabs<R>>
     }
 
     /**
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void focus() {

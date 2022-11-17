@@ -184,7 +184,7 @@ import com.vaadin.flow.shared.Registration;
  * propagated to the internal themable components listed above.
  * </p>
  *
- * @deprecated since v23.3, deprecated classes will be removed in v24.
+ * @deprecated since v23.3, generated classes will be removed in v24.
  */
 @Deprecated
 @Tag("vaadin-select")
@@ -211,7 +211,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      *
      * @return the {@code autofocus} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected boolean isAutofocusBoolean() {
@@ -229,7 +229,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      * @param autofocus
      *            the boolean value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setAutofocus(boolean autofocus) {
@@ -249,7 +249,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      *
      * @return the {@code disabled} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected boolean isDisabledBoolean() {
@@ -267,7 +267,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      * @param disabled
      *            the boolean value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setDisabled(boolean disabled) {
@@ -287,7 +287,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      *
      * @return the {@code opened} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     @Synchronize(property = "opened", value = "opened-changed")
@@ -306,7 +306,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      * @param opened
      *            the boolean value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setOpened(boolean opened) {
@@ -326,7 +326,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      *
      * @return the {@code errorMessage} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected String getErrorMessageString() {
@@ -344,7 +344,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      * @param errorMessage
      *            the String value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setErrorMessage(String errorMessage) {
@@ -365,7 +365,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      *
      * @return the {@code label} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected String getLabelString() {
@@ -383,7 +383,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      * @param label
      *            the String value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setLabel(String label) {
@@ -403,7 +403,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      *
      * @return the {@code required} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected boolean isRequiredBoolean() {
@@ -421,7 +421,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      * @param required
      *            the boolean value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setRequired(boolean required) {
@@ -441,7 +441,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      *
      * @return the {@code invalid} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected boolean isInvalidBoolean() {
@@ -459,7 +459,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      * @param invalid
      *            the boolean value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setInvalid(boolean invalid) {
@@ -479,7 +479,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      *
      * @return the {@code name} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected String getNameString() {
@@ -497,7 +497,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      * @param name
      *            the String value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setName(String name) {
@@ -520,7 +520,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      *
      * @return the {@code placeholder} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected String getPlaceholderString() {
@@ -541,7 +541,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      * @param placeholder
      *            the String value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setPlaceholder(String placeholder) {
@@ -562,7 +562,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      *
      * @return the {@code readonly} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected boolean isReadonlyBoolean() {
@@ -580,7 +580,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      * @param readonly
      *            the boolean value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setReadonly(boolean readonly) {
@@ -600,7 +600,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      * <code>boolean</code>. Functions with return types different than void are
      * not supported at this moment.
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     @NotSupported
@@ -608,7 +608,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
     }
 
     /**
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     public static class OpenedChangeEvent<R extends GeneratedVaadinSelect<R, ?>>
@@ -633,7 +633,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      *            the listener
      * @return a {@link Registration} for removing the event listener
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected Registration addOpenedChangeListener(
@@ -646,7 +646,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
     }
 
     /**
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     public static class InvalidChangeEvent<R extends GeneratedVaadinSelect<R, ?>>
@@ -671,7 +671,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      *            the listener
      * @return a {@link Registration} for removing the event listener
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected Registration addInvalidChangeListener(
@@ -696,7 +696,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void addToPrefix(Component... components) {
@@ -714,7 +714,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      * @throws IllegalArgumentException
      *             if any of the components is not a child of this component.
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void remove(Component... components) {
@@ -734,7 +734,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      * text content as well as child elements that have been added directly to
      * this component using the {@link Element} API.
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void removeAll() {
@@ -760,7 +760,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      * @param <P>
      *            the property type
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     public <P> GeneratedVaadinSelect(T initialValue, T defaultValue,
@@ -785,7 +785,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      * @param acceptNullValues
      *            whether <code>null</code> is accepted as a model value
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     public GeneratedVaadinSelect(T initialValue, T defaultValue,
@@ -815,7 +815,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      * @param <P>
      *            the property type
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     public <P> GeneratedVaadinSelect(T initialValue, T defaultValue,
@@ -854,7 +854,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      * @param <P>
      *            the property type
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     public <P> GeneratedVaadinSelect(T initialValue, T defaultValue,
@@ -873,7 +873,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
     /**
      * Default constructor.
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     public GeneratedVaadinSelect() {

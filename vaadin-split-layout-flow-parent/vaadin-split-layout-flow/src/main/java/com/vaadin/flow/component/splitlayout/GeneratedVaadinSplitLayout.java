@@ -188,7 +188,7 @@ import com.vaadin.flow.shared.Registration;
  * – how to apply styles for shadow parts</a>
  * </p>
  *
- * @deprecated since v23.3, deprecated classes will be removed in v24.
+ * @deprecated since v23.3, generated classes will be removed in v24.
  */
 @Deprecated
 @Tag("vaadin-split-layout")
@@ -204,7 +204,7 @@ public abstract class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitL
      * @param variants
      *            theme variants to add
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24. Use
+     * @deprecated since v23.3, generated classes will be removed in v24. Use
      *             {@link SplitLayout#addThemeVariants} instead.
      */
     @Deprecated
@@ -220,7 +220,7 @@ public abstract class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitL
      * @param variants
      *            theme variants to remove
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24. Use
+     * @deprecated since v23.3, generated classes will be removed in v24. Use
      *             {@link SplitLayout#removeThemeVariants} instead.
      */
     @Deprecated
@@ -244,7 +244,7 @@ public abstract class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitL
      *
      * @return the {@code orientation} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected String getOrientationString() {
@@ -263,7 +263,7 @@ public abstract class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitL
      * @param orientation
      *            the String value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setOrientation(String orientation) {
@@ -272,7 +272,7 @@ public abstract class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitL
     }
 
     /**
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @DomEvent("iron-resize")
     @Deprecated
@@ -290,8 +290,8 @@ public abstract class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitL
      *            the listener
      * @return a {@link Registration} for removing the event listener
      *
-     * @deprecated Since 23.2, this API is deprecated, deprecated classes will
-     *             be removed in v24.
+     * @deprecated Since 23.2, this API is deprecated, generated classes will be
+     *             removed in v24.
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Deprecated
@@ -302,7 +302,7 @@ public abstract class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitL
     }
 
     /**
-     * @deprecated since v23.3, deprecated classes will be removed in v24. Use
+     * @deprecated since v23.3, generated classes will be removed in v24. Use
      *             {@link SplitLayout.SplitterDragendEvent} instead.
      */
     @Deprecated
@@ -322,7 +322,7 @@ public abstract class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitL
      *            the listener
      * @return a {@link Registration} for removing the event listener
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -344,7 +344,7 @@ public abstract class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitL
      *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void addToPrimary(Component... components) {
@@ -367,7 +367,7 @@ public abstract class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitL
      *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
      *      website about slots</a>
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void addToSecondary(Component... components) {
@@ -385,7 +385,7 @@ public abstract class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitL
      * @throws IllegalArgumentException
      *             if any of the components is not a child of this component.
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void remove(Component... components) {
@@ -405,7 +405,7 @@ public abstract class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitL
      * text content as well as child elements that have been added directly to
      * this component using the {@link Element} API.
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void removeAll() {

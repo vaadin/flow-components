@@ -86,7 +86,7 @@ Your work has been saved
  * is propagated to the internal {@code <vaadin-notification-card>}.
  * </p>
  *
- * @deprecated since v23.3, deprecated classes will be removed in v24.
+ * @deprecated since v23.3, generated classes will be removed in v24.
  */
 @Deprecated
 @Tag("vaadin-notification")
@@ -113,7 +113,7 @@ public abstract class GeneratedVaadinNotification<R extends GeneratedVaadinNotif
      *
      * @return the {@code duration} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected double getDurationDouble() {
@@ -132,7 +132,7 @@ public abstract class GeneratedVaadinNotification<R extends GeneratedVaadinNotif
      * @param duration
      *            the double value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setDuration(double duration) {
@@ -152,7 +152,7 @@ public abstract class GeneratedVaadinNotification<R extends GeneratedVaadinNotif
      *
      * @return the {@code opened} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     @Synchronize(property = "opened", value = "opened-changed")
@@ -171,7 +171,7 @@ public abstract class GeneratedVaadinNotification<R extends GeneratedVaadinNotif
      * @param opened
      *            the boolean value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setOpened(boolean opened) {
@@ -192,7 +192,7 @@ public abstract class GeneratedVaadinNotification<R extends GeneratedVaadinNotif
      *
      * @return the {@code position} property from the webcomponent
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected String getPositionString() {
@@ -211,7 +211,7 @@ public abstract class GeneratedVaadinNotification<R extends GeneratedVaadinNotif
      * @param position
      *            the String value to set
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void setPosition(String position) {
@@ -226,7 +226,7 @@ public abstract class GeneratedVaadinNotification<R extends GeneratedVaadinNotif
      * Opens the notification.
      * </p>
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void open() {
@@ -241,7 +241,7 @@ public abstract class GeneratedVaadinNotification<R extends GeneratedVaadinNotif
      * Closes the notification.
      * </p>
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected void close() {
@@ -249,7 +249,7 @@ public abstract class GeneratedVaadinNotification<R extends GeneratedVaadinNotif
     }
 
     /**
-     * @deprecated since v23.3, deprecated classes will be removed in v24. Use
+     * @deprecated since v23.3, generated classes will be removed in v24. Use
      *             {@link Notification.OpenedChangeEvent} instead.
      */
     @Deprecated
@@ -275,7 +275,7 @@ public abstract class GeneratedVaadinNotification<R extends GeneratedVaadinNotif
      *            the listener
      * @return a {@link Registration} for removing the event listener
      *
-     * @deprecated since v23.3, deprecated classes will be removed in v24.
+     * @deprecated since v23.3, generated classes will be removed in v24.
      */
     @Deprecated
     protected Registration addOpenedChangeListener(
