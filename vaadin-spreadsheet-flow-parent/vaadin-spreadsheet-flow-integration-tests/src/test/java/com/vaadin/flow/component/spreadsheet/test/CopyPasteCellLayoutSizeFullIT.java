@@ -2,7 +2,6 @@ package com.vaadin.flow.component.spreadsheet.test;
 
 import com.vaadin.flow.component.spreadsheet.testbench.SpreadsheetElement;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class CopyPasteCellLayoutSizeFullIT extends AbstractSpreadsheetIT {
@@ -13,7 +12,6 @@ public class CopyPasteCellLayoutSizeFullIT extends AbstractSpreadsheetIT {
         createNewSpreadsheet();
     }
 
-    @Ignore("The test started to fail on CI. Ignore until the issue is resolved.")
     @Test
     public void spreadsheetHandlerOnPaste_PasteCellsWhichOtherCellsDependingOn_UpdatesDependentCells() {
         final SpreadsheetElement spreadsheet = getSpreadsheet();

@@ -5,7 +5,6 @@ import com.vaadin.flow.component.spreadsheet.tests.fixtures.TestFixtures;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.WebElement;
 
@@ -37,7 +36,6 @@ public class SheetTabSheetIT extends AbstractSpreadsheetIT {
         verifySheetFocused();
     }
 
-    @Ignore("The test started to fail on CI. Ignore until the issue is resolved.")
     @Test
     public void cellFocus_moveFromSheetOneToSheetTwoAndBack_cellSelectionRemains()
             throws InterruptedException {
