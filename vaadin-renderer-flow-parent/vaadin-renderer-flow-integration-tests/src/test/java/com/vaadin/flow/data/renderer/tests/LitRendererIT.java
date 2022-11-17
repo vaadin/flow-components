@@ -56,6 +56,7 @@ public class LitRendererIT extends AbstractComponentIT {
     @Test
     public void shouldRenderWithNoBoundValueProviders() {
         setSimpleLitRenderer.click();
+        waitForRender();
         WebElement item = findElement(By.id("item-0"));
         Assert.assertEquals("0", item.getText());
     }
@@ -63,6 +64,7 @@ public class LitRendererIT extends AbstractComponentIT {
     @Test
     public void shouldRemoveTheRenderer() {
         removeRenderer.click();
+        waitForRender();
         WebElement item = findElement(By.id("item-0"));
         Assert.assertEquals("[object Object]", item.getText());
     }
@@ -117,7 +119,9 @@ public class LitRendererIT extends AbstractComponentIT {
     @Test
     public void shouldRemoveAndAddLitRenderer() {
         removeRenderer.click();
+        waitForRender();
         setLitRenderer.click();
+        waitForRender();
         WebElement item = findElement(By.id("item-0"));
         Assert.assertEquals("Item: 0", item.getText());
     }
@@ -125,6 +129,7 @@ public class LitRendererIT extends AbstractComponentIT {
     @Test
     public void shouldSupportRendererInstanceSpecificProperties() {
         setDetailsLitRenderer.click();
+        waitForRender();
         WebElement main = findElement(By.cssSelector("#item-0 .main"));
         Assert.assertEquals("Item: 0", main.getText());
         WebElement details = findElement(By.cssSelector("#item-0 .details"));
@@ -143,4 +148,9 @@ public class LitRendererIT extends AbstractComponentIT {
         return message.split("\"")[1];
     }
 
+    private void waitForRender() {
+        // Wait for the template rendering to complete
+        getCommandExecutor().getDriver()
+                .executeAsyncScript("requestAnimationFrame(arguments[0])");
+    }
 }
