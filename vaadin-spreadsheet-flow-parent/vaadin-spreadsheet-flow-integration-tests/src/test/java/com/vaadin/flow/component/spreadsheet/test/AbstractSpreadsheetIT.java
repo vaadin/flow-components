@@ -87,6 +87,28 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
         }
     }
 
+    protected void undo() {
+        if (isMac()) {
+            new Actions(getDriver()).keyDown(Keys.CONTROL).keyDown(Keys.COMMAND)
+                    .sendKeys("z").keyUp(Keys.CONTROL).keyUp(Keys.COMMAND)
+                    .build().perform();
+        } else {
+            new Actions(getDriver()).keyDown(Keys.CONTROL).sendKeys("z")
+                    .keyUp(Keys.CONTROL).build().perform();
+        }
+    }
+
+    protected void redo() {
+        if (isMac()) {
+            new Actions(getDriver()).keyDown(Keys.CONTROL).keyDown(Keys.COMMAND)
+                    .sendKeys("y").keyUp(Keys.CONTROL).keyUp(Keys.COMMAND)
+                    .build().perform();
+        } else {
+            new Actions(getDriver()).keyDown(Keys.CONTROL).sendKeys("y")
+                    .keyUp(Keys.CONTROL).build().perform();
+        }
+    }
+
     protected boolean isMac() {
         return System.getProperty("os.name").toLowerCase().contains("mac");
     }
@@ -105,7 +127,8 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
 
     public void selectRegion(String from, String to) {
         new Actions(getDriver()).clickAndHold(getSpreadsheet().getCellAt(from))
-                .release(getSpreadsheet().getCellAt(to)).perform();
+                .moveToElement(getSpreadsheet().getCellAt(to)).release()
+                .perform();
         getCommandExecutor().waitForVaadin();
     }
 

@@ -348,28 +348,6 @@ public class UndoRedoIT extends AbstractSpreadsheetIT {
         new Actions(getDriver()).sendKeys(Keys.DELETE).build().perform();
     }
 
-    private void undo() {
-        if (isMac()) {
-            new Actions(getDriver()).keyDown(Keys.CONTROL).keyDown(Keys.COMMAND)
-                    .sendKeys("z").keyUp(Keys.CONTROL).keyUp(Keys.COMMAND)
-                    .build().perform();
-        } else {
-            new Actions(getDriver()).keyDown(Keys.CONTROL).sendKeys("z")
-                    .keyUp(Keys.CONTROL).build().perform();
-        }
-    }
-
-    private void redo() {
-        if (isMac()) {
-            new Actions(getDriver()).keyDown(Keys.CONTROL).keyDown(Keys.COMMAND)
-                    .sendKeys("y").keyUp(Keys.CONTROL).keyUp(Keys.COMMAND)
-                    .build().perform();
-        } else {
-            new Actions(getDriver()).keyDown(Keys.CONTROL).sendKeys("y")
-                    .keyUp(Keys.CONTROL).build().perform();
-        }
-    }
-
     private void assertCorrectCss(SpreadsheetElement c) {
         Assert.assertEquals(c.getCellAt("A2").getCssValue("text-align"),
                 "center");
