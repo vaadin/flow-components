@@ -65,15 +65,30 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
     }
 
     protected void paste() {
-        new Actions(getDriver()).keyDown(Keys.CONTROL).keyDown(Keys.COMMAND)
-                .sendKeys("v").keyUp(Keys.CONTROL).keyUp(Keys.COMMAND).build()
-                .perform();
+        if (isMac()) {
+            new Actions(getDriver()).keyDown(Keys.CONTROL).keyDown(Keys.COMMAND)
+                    .sendKeys("v").keyUp(Keys.CONTROL).keyUp(Keys.COMMAND).build()
+                    .perform();
+        } else {
+            new Actions(getDriver())
+                    .sendKeys(Keys.chord(Keys.CONTROL, "v")).build().perform();
+            getCommandExecutor().waitForVaadin();
+        }
     }
 
     protected void copy() {
-        new Actions(getDriver()).keyDown(Keys.CONTROL).keyDown(Keys.COMMAND)
-                .sendKeys("c").keyUp(Keys.CONTROL).keyUp(Keys.COMMAND).build()
-                .perform();
+        if (isMac()) {
+            new Actions(getDriver()).keyDown(Keys.CONTROL).keyDown(Keys.COMMAND)
+                    .sendKeys("c").keyUp(Keys.CONTROL).keyUp(Keys.COMMAND).build()
+                    .perform();
+        } else {
+            new Actions(getDriver())
+                    .sendKeys(Keys.chord(Keys.CONTROL, "c")).build().perform();
+        }
+    }
+
+    protected boolean isMac(){
+        return System.getProperty("os.name").toLowerCase().contains("mac");
     }
 
     public void selectColumn(String column) {

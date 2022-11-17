@@ -349,17 +349,25 @@ public class UndoRedoIT extends AbstractSpreadsheetIT {
     }
 
     private void undo() {
-        // TODO: cleanup modifier keys solution (for macOS)
-        new Actions(getDriver()).keyDown(Keys.CONTROL).keyDown(Keys.COMMAND)
-                .sendKeys("z").keyUp(Keys.CONTROL).keyUp(Keys.COMMAND).build()
-                .perform();
+        if (isMac()) {
+            new Actions(getDriver()).keyDown(Keys.CONTROL).keyDown(Keys.COMMAND)
+                    .sendKeys("z").keyUp(Keys.CONTROL).keyUp(Keys.COMMAND).build()
+                    .perform();
+        } else {
+            new Actions(getDriver())
+                    .sendKeys(Keys.chord(Keys.CONTROL, "z")).build().perform();
+        }
     }
 
     private void redo() {
-        // TODO: cleanup modifier keys solution (for macOS)
-        new Actions(getDriver()).keyDown(Keys.CONTROL).keyDown(Keys.COMMAND)
-                .sendKeys("y").keyUp(Keys.CONTROL).keyUp(Keys.COMMAND).build()
-                .perform();
+        if (isMac()) {
+            new Actions(getDriver()).keyDown(Keys.CONTROL).keyDown(Keys.COMMAND)
+                    .sendKeys("y").keyUp(Keys.CONTROL).keyUp(Keys.COMMAND).build()
+                    .perform();
+        } else {
+            new Actions(getDriver())
+                    .sendKeys(Keys.chord(Keys.CONTROL, "z")).build().perform();
+        }
     }
 
     private void assertCorrectCss(SpreadsheetElement c) {
