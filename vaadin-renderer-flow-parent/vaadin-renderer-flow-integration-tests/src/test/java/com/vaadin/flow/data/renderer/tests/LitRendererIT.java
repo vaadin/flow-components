@@ -17,6 +17,7 @@ package com.vaadin.flow.data.renderer.tests;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -42,6 +43,7 @@ public class LitRendererIT extends AbstractComponentIT {
     }
 
     @Test
+    @Ignore
     public void shouldRenderWithNoBoundValueProviders() {
         clickElementWithJs("setSimpleLitRendererButton");
         WebElement item = findElement(By.id("item-0"));
@@ -49,6 +51,7 @@ public class LitRendererIT extends AbstractComponentIT {
     }
 
     @Test
+    @Ignore
     public void shouldRemoveTheRenderer() {
         clickElementWithJs("removeRendererButton");
         WebElement item = findElement(By.id("item-0"));
@@ -111,6 +114,7 @@ public class LitRendererIT extends AbstractComponentIT {
     }
 
     @Test
+    @Ignore
     public void shouldSupportRendererInstanceSpecificProperties() {
         clickElementWithJs("setDetailsLitRendererButton");
         WebElement main = findElement(By.cssSelector("#item-0 .main"));
