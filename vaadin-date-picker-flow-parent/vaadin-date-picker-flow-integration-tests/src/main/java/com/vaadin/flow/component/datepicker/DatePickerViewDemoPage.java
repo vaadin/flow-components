@@ -116,9 +116,8 @@ public class DatePickerViewDemoPage extends Div {
         datePicker.setPlaceholder("Syntymäpäivä");
         datePicker.setLocale(new Locale("fi"));
 
-        datePicker.setI18n(new DatePicker.DatePickerI18n().setWeek("viikko")
-                .setCalendar("kalenteri").setClear("tyhjennä")
-                .setToday("tänään").setCancel("peruuta").setFirstDayOfWeek(1)
+        datePicker.setI18n(new DatePicker.DatePickerI18n().setToday("tänään")
+                .setCancel("peruuta").setFirstDayOfWeek(1)
                 .setMonthNames(Arrays.asList("tammiku", "helmikuu", "maaliskuu",
                         "huhtikuu", "toukokuu", "kesäkuu", "heinäkuu", "elokuu",
                         "syyskuu", "lokakuu", "marraskuu", "joulukuu"))
@@ -228,6 +227,9 @@ public class DatePickerViewDemoPage extends Div {
 
         datePicker.addValueChangeListener(
                 event -> updateMessage(message, datePicker));
+        DatePicker.DatePickerI18n i18n = new DatePicker.DatePickerI18n();
+        i18n.setReferenceDate(LocalDate.of(1980, 2, 2));
+        datePicker.setI18n(i18n);
         locale1.setId("Locale-US");
         locale2.setId("Locale-UK");
         locale3.setId("Locale-CHINA");

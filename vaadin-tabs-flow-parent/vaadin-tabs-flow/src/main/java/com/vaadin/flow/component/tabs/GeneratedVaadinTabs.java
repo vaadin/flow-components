@@ -98,10 +98,10 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * </p>
  */
 @Tag("vaadin-tabs")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha4")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/tabs/src/vaadin-tabs.js")
-@NpmPackage(value = "@vaadin/tabs", version = "24.0.0-alpha1")
+@NpmPackage(value = "@vaadin/tabs", version = "24.0.0-alpha4")
 public abstract class GeneratedVaadinTabs<R extends GeneratedVaadinTabs<R>>
         extends Component implements HasStyle, HasTheme {
 

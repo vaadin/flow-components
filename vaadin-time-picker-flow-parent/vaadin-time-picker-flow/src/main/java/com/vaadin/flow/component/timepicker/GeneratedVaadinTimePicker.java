@@ -124,9 +124,9 @@ import elemental.json.JsonObject;
  * </p>
  */
 @Tag("vaadin-time-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha4")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/time-picker", version = "24.0.0-alpha1")
+@NpmPackage(value = "@vaadin/time-picker", version = "24.0.0-alpha4")
 @JsModule("@vaadin/time-picker/src/vaadin-time-picker.js")
 public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePicker<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
@@ -290,38 +290,6 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      */
     protected void setRequired(boolean required) {
         getElement().setProperty("required", required);
-    }
-
-    /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
-     * Set to true to prevent the user from entering invalid input.
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
-     * </p>
-     *
-     * @return the {@code preventInvalidInput} property from the webcomponent
-     */
-    protected boolean isPreventInvalidInputBoolean() {
-        return getElement().getProperty("preventInvalidInput", false);
-    }
-
-    /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
-     * Set to true to prevent the user from entering invalid input.
-     * </p>
-     *
-     * @param preventInvalidInput
-     *            the boolean value to set
-     */
-    protected void setPreventInvalidInput(boolean preventInvalidInput) {
-        getElement().setProperty("preventInvalidInput", preventInvalidInput);
     }
 
     /**

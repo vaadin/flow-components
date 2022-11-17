@@ -73,7 +73,7 @@ import java.util.Objects;
  * using {@link #defineProjection(String, String)}.
  */
 @Tag("vaadin-map")
-@NpmPackage(value = "@vaadin/map", version = "24.0.0-alpha1")
+@NpmPackage(value = "@vaadin/map", version = "24.0.0-alpha4")
 @NpmPackage(value = "proj4", version = "2.8.0")
 @JsModule("@vaadin/map/src/vaadin-map.js")
 @JsModule("./vaadin-map/mapConnector.js")

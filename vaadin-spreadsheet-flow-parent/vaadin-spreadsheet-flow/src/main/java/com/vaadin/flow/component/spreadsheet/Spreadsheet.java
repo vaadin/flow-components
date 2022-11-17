@@ -31,6 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -72,7 +73,6 @@ import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTWorksheet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
@@ -104,10 +104,10 @@ import com.vaadin.pro.licensechecker.LicenseChecker;
 import elemental.json.JsonValue;
 
 /**
- * Vaadin Spreadsheet is a Vaadin Add-On Component which allows displaying and
- * interacting with the contents of an Excel file. The Spreadsheet can be used
- * in any Vaadin application for enabling users to view and manipulate Excel
- * files in their web browsers.
+ * Vaadin Spreadsheet is a component which allows displaying and interacting
+ * with the contents of an Excel file. The Spreadsheet can be used in any Vaadin
+ * application for enabling users to view and manipulate Excel files in their
+ * web browsers.
  *
  * @author Vaadin Ltd.
  */
@@ -233,6 +233,8 @@ public class Spreadsheet extends Component
     private String infoLabelValue;
 
     private boolean workbookChangeToggle;
+
+    private Locale locale;
 
     int getCols() {
         return cols;
@@ -1009,10 +1011,6 @@ public class Spreadsheet extends Component
 
     private Workbook workbook;
 
-    /** true if the component sheet should be reloaded on client side. */
-    // todo: already defined in shared state. Check!
-    // private boolean reload;
-
     /** are tables for currently active sheet loaded */
     private boolean tablesLoaded;
 
@@ -1171,7 +1169,6 @@ public class Spreadsheet extends Component
         sheetOverlays = new HashSet<SheetOverlayWrapper>();
         tables = new HashSet<SpreadsheetTable>();
         registerRpc(new SpreadsheetHandlerImpl(this));
-        setSizeFull(); // Default to full size
         defaultActionHandler = new SpreadsheetDefaultActionHandler();
         hyperlinkCellClickHandler = new DefaultHyperlinkCellClickHandler(this);
         addActionHandler(defaultActionHandler);
@@ -1448,7 +1445,7 @@ public class Spreadsheet extends Component
      * @see #setChartsEnabled(boolean)
      * @return
      */
-    public boolean isChartsEnabled() {
+    boolean isChartsEnabled() {
         return chartsEnabled;
     }
 
@@ -1458,7 +1455,7 @@ public class Spreadsheet extends Component
      *
      * @param chartsEnabled
      */
-    public void setChartsEnabled(boolean chartsEnabled) {
+    void setChartsEnabled(boolean chartsEnabled) {
         this.chartsEnabled = chartsEnabled;
         clearSheetOverlays();
         loadOrUpdateOverlays();
@@ -1636,30 +1633,38 @@ public class Spreadsheet extends Component
         return new CellRangeAddress(r1 - 1, r2 - 1, c1 - 1, c2 - 1);
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Set the Locale for the Spreadsheet. The locale is used for formatting
+     * cell values.
      *
-     * @see com.vaadin.ui.AbstractComponent#setLocale(java.util.Locale)
+     * @param locale
+     *            the locale set to the spreadsheet, cannot be null
      */
     public void setLocale(Locale locale) {
+        Objects.requireNonNull(locale, "Locale must not be null.");
+        this.locale = locale;
         valueManager.updateLocale(locale);
         refreshAllCellValues();
+    }
+
+    /**
+     * Gets the Locale for this spreadsheet
+     *
+     * @return the locale used for spreadsheet
+     */
+    @Override
+    public Locale getLocale() {
+        if (locale != null) {
+            return locale;
+        } else {
+            return super.getLocale();
+        }
     }
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         valueManager.updateLocale(getLocale());
-        if (!FeatureFlags
-                .get(UI.getCurrent().getSession().getService().getContext())
-                .isEnabled(FeatureFlags.SPREADSHEET_COMPONENT)) {
-            throw new RuntimeException("\n\n--------------\n\n"
-                    + "The spreadsheet component is currently an experimental feature and needs to be explicitly enabled. "
-                    + "The component can be enabled by using the Vaadin dev-mode Gizmo, in the experimental features tab, "
-                    + "or by adding a `src/main/resources/vaadin-featureflags.properties` file with the following content: "
-                    + "`com.vaadin.experimental.spreadsheetComponent=true`"
-                    + "\n\n--------------\n\n");
-        }
     }
 
     /**
@@ -1717,6 +1722,8 @@ public class Spreadsheet extends Component
                 reloadActiveSheetData();
                 SpreadsheetFactory.reloadSpreadsheetData(this,
                         getActiveSheet());
+
+                getSpreadsheetStyleFactory().reloadActiveSheetCellStyles();
             }
         }
     }
@@ -1811,7 +1818,6 @@ public class Spreadsheet extends Component
         if (!workbook.isSheetVeryHidden(sheetIndex)
                 && !workbook.isSheetHidden(sheetIndex)) {
             int ourIndex = getSpreadsheetSheetIndex(sheetIndex);
-            // todo: comprobar si esto es así
             String[] _sheetNames = Arrays.copyOf(getSheetNames(),
                     getSheetNames().length);
             _sheetNames[ourIndex] = sheetName;
@@ -2898,7 +2904,8 @@ public class Spreadsheet extends Component
                 } else if (numberOfRowsAboveWasChanged(row, last, first)) {
                     int newRow = cell.getRow() + n;
                     int col = cell.getCol();
-                    CellReference newCell = new CellReference(newRow, col);
+                    CellReference newCell = new CellReference(newRow, col, true,
+                            true);
                     pbutton.setCellReference(newCell);
                     updated.put(newCell, pbutton);
                 } else {
@@ -4679,7 +4686,7 @@ public class Spreadsheet extends Component
      * @param customComponentFactory
      *            The new component factory to use.
      */
-    public void setSpreadsheetComponentFactory(
+    void setSpreadsheetComponentFactory(
             SpreadsheetComponentFactory customComponentFactory) {
         this.customComponentFactory = customComponentFactory;
         if (firstRow != -1) {
@@ -4701,7 +4708,7 @@ public class Spreadsheet extends Component
      *
      * @return The currently used component factory.
      */
-    public SpreadsheetComponentFactory getSpreadsheetComponentFactory() {
+    SpreadsheetComponentFactory getSpreadsheetComponentFactory() {
         return customComponentFactory;
     }
 
@@ -5724,17 +5731,6 @@ public class Spreadsheet extends Component
                 invalidFormulaErrorMessage);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.vaadin.ui.AbstractComponent#focus()
-     */
-    // todo: no hace falta llamar al padre?
-    /*
-     * @Override public void focus() { super.focus(); }
-     *
-     */
-
     /**
      * Controls if a column group is collapsed or not.
      *
@@ -6010,10 +6006,5 @@ public class Spreadsheet extends Component
             RowHeaderDoubleClickListener listener) {
         return addListener(RowHeaderDoubleClickEvent.class,
                 listener::onRowHeaderDoubleClick);
-    }
-
-    @Override
-    public Locale getLocale() {
-        return super.getLocale();
     }
 }

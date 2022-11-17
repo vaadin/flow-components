@@ -36,8 +36,6 @@ public class MainView extends VerticalLayout {
         final Button newButton = new Button(
                 CrudI18n.createDefault().getNewItem());
         newButton.setThemeName(ButtonVariant.LUMO_PRIMARY.getVariantName());
-        newButton.getElement().setAttribute("new-button", "");
-        buttons.add(newButton);
 
         final Button serverSideNewButton = new Button(
                 CrudI18n.createDefault().getNewItem());
@@ -54,7 +52,8 @@ public class MainView extends VerticalLayout {
         buttons.add(serverSideEditButton);
 
         final Span footer = new Span();
-        crud.setToolbar(footer, newButton);
+        crud.setToolbar(footer);
+        crud.setNewButton(newButton);
 
         final PersonCrudDataProvider dataProvider = new PersonCrudDataProvider();
         dataProvider.setSizeChangeListener(count -> footer

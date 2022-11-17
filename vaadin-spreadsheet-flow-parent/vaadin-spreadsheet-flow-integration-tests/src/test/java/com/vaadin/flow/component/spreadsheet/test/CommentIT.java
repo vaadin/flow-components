@@ -11,8 +11,6 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 
-import java.util.NoSuchElementException;
-
 public class CommentIT extends AbstractSpreadsheetIT {
 
     @Before
@@ -108,8 +106,8 @@ public class CommentIT extends AbstractSpreadsheetIT {
 
     public void moveMouseOverCell(String cellAddress) {
         SheetCellElement cell = getSpreadsheet().getCellAt(cellAddress);
-        WebElement cornerElement = driver
-                .findElement(By.cssSelector(".v-spreadsheet > .corner"));
+        WebElement cornerElement = findElementInShadowRoot(
+                By.cssSelector(".corner"));
 
         new Actions(driver).moveToElement(cornerElement)
                 .moveToElement(cell.getWrappedElement()).build().perform();

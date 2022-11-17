@@ -13,7 +13,7 @@
     <url>https://vaadin.com/components</url>
     <properties>
         <flow.version>24.0-SNAPSHOT</flow.version>
-        <testbench.version>8.1.1</testbench.version>
+        <testbench.version>9.0.0.alpha4</testbench.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -63,7 +63,6 @@
         <module>vaadin-form-layout-flow-parent</module>
         <module>vaadin-grid-flow-parent</module>
         <module>vaadin-icons-flow-parent</module>
-        <module>vaadin-iron-list-flow-parent</module>
         <module>vaadin-virtual-list-flow-parent</module>
         <module>vaadin-list-box-flow-parent</module>
         <module>vaadin-login-flow-parent</module>
@@ -151,10 +150,6 @@
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
-        </repository>
-        <repository>
-            <id>apache snapshots</id>
-            <url>https://repository.apache.org/content/repositories/snapshots</url>
         </repository>
     </repositories>
     <pluginRepositories>
@@ -475,7 +470,7 @@
             <plugin>
                 <groupId>net.revelc.code.formatter</groupId>
                 <artifactId>formatter-maven-plugin</artifactId>
-                <version>2.20.0</version>
+                <version>2.21.0</version>
                 <configuration>
                     <configFile>https://raw.githubusercontent.com/vaadin/flow/master/eclipse/VaadinJavaConventions.xml</configFile>
                     <skipHtmlFormatting>true</skipHtmlFormatting>
