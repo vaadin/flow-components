@@ -35,7 +35,7 @@ import com.vaadin.flow.shared.Registration;
 import elemental.json.JsonValue;
 
 @Tag("lit-renderer-test-component")
-@JsModule("lit-renderer-test-component.ts")
+@JsModule("lit-renderer-test-component.js")
 public class LitRendererTestComponent extends Div
         implements HasDataProvider<String> {
 

@@ -3,6 +3,7 @@ package com.vaadin.flow.component.spreadsheet.tests;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.vaadin.flow.component.UI;
@@ -115,6 +116,7 @@ public class FormulasTest {
                 .getProperty("invalidFormulaErrorMessage"));
     }
 
+    @Ignore
     @Test
     public void createFormulaCell_updateCellValue() {
         spreadsheet.setSelection("A1");
