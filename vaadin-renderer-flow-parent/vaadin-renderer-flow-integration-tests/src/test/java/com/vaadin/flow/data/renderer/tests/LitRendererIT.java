@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.data.renderer.tests;
 
+import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,9 +31,20 @@ import com.vaadin.flow.testutil.TestPath;
 @TestPath("vaadin-renderer-flow/lit-renderer")
 public class LitRendererIT extends AbstractComponentIT {
 
+    private TestBenchElement setLitRenderer;
+    private TestBenchElement setSimpleLitRenderer;
+    private TestBenchElement removeRenderer;
+    private TestBenchElement setDetailsLitRenderer;
+    private TestBenchElement toggleAttached;
+
     @Before
     public void init() {
         open();
+        setLitRenderer = $("button").id("setLitRendererButton");
+        setSimpleLitRenderer = $("button").id("setSimpleLitRendererButton");
+        removeRenderer = $("button").id("removeRendererButton");
+        setDetailsLitRenderer = $("button").id("setDetailsLitRendererButton");
+        toggleAttached = $("button").id("toggleAttachedButton");
     }
 
     @Test
@@ -43,14 +55,14 @@ public class LitRendererIT extends AbstractComponentIT {
 
     @Test
     public void shouldRenderWithNoBoundValueProviders() {
-        clickElementWithJs("setSimpleLitRendererButton");
+        setSimpleLitRenderer.click();
         WebElement item = findElement(By.id("item-0"));
         Assert.assertEquals("0", item.getText());
     }
 
     @Test
     public void shouldRemoveTheRenderer() {
-        clickElementWithJs("removeRendererButton");
+        removeRenderer.click();
         WebElement item = findElement(By.id("item-0"));
         Assert.assertEquals("[object Object]", item.getText());
     }
@@ -58,9 +70,9 @@ public class LitRendererIT extends AbstractComponentIT {
     @Test
     public void shouldRenderAfterReattaching() {
         // Detach
-        clickElementWithJs("toggleAttachedButton");
+        toggleAttached.click();
         // Reattach
-        clickElementWithJs("toggleAttachedButton");
+        toggleAttached.click();
 
         WebElement item = findElement(By.id("item-0"));
         Assert.assertEquals("Item: 0", item.getText());
@@ -69,11 +81,11 @@ public class LitRendererIT extends AbstractComponentIT {
     @Test
     public void shouldNotRenderAfterReattaching() {
         // Remove renderer
-        clickElementWithJs("removeRendererButton");
+        removeRenderer.click();
         // Detach
-        clickElementWithJs("toggleAttachedButton");
+        toggleAttached.click();
         // Reattach
-        clickElementWithJs("toggleAttachedButton");
+        toggleAttached.click();
 
         WebElement item = findElement(By.id("item-0"));
         Assert.assertEquals("[object Object]", item.getText());
@@ -104,15 +116,15 @@ public class LitRendererIT extends AbstractComponentIT {
 
     @Test
     public void shouldRemoveAndAddLitRenderer() {
-        clickElementWithJs("removeRendererButton");
-        clickElementWithJs("setLitRendererButton");
+        removeRenderer.click();
+        setLitRenderer.click();
         WebElement item = findElement(By.id("item-0"));
         Assert.assertEquals("Item: 0", item.getText());
     }
 
     @Test
     public void shouldSupportRendererInstanceSpecificProperties() {
-        clickElementWithJs("setDetailsLitRendererButton");
+        setDetailsLitRenderer.click();
         WebElement main = findElement(By.cssSelector("#item-0 .main"));
         Assert.assertEquals("Item: 0", main.getText());
         WebElement details = findElement(By.cssSelector("#item-0 .details"));
@@ -124,6 +136,8 @@ public class LitRendererIT extends AbstractComponentIT {
                 // Discard lit-element warning lines
                 .filter(m -> !m.getMessage().contains(
                         "The main 'lit-element' module entrypoint is deprecated."))
+                // Discard lit dev mode warning
+                .filter(m -> !m.getMessage().contains("Lit is in dev mode"))
                 // Return first warning message in console
                 .findFirst().get().getMessage();
         return message.split("\"")[1];
