@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.data.renderer;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import com.vaadin.flow.component.Component;
@@ -58,19 +56,9 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
     public ComponentRenderer(
             SerializableFunction<SOURCE, COMPONENT> componentFunction,
             SerializableBiFunction<Component, SOURCE, Component> componentUpdateFunction) {
-        super("<flow-component-renderer nodeid=${item.nodeid} appid='"
-                + UI.getCurrent().getInternals().getAppId()
-                + "'></flow-component-renderer>");
-
+        super("");
         this.componentFunction = componentFunction;
         this.componentUpdateFunction = componentUpdateFunction;
-
-        withProperty("nodeid", item -> {
-            var component = createComponent(item);
-            // TODO: Clean up (Use ComponentDataGenerator)
-            container.appendVirtualChild(component.getElement());
-            return component.getElement().getNode().getId();
-        });
     }
 
     public ComponentRenderer(
@@ -80,19 +68,16 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
 
     public ComponentRenderer(SerializableSupplier<COMPONENT> componentSupplier,
             SerializableBiConsumer<COMPONENT, SOURCE> itemConsumer) {
-        super("<flow-component-renderer nodeid=${item.nodeid} appid='"
-                + UI.getCurrent().getInternals().getAppId()
-                + "'></flow-component-renderer>");
-
+        super("");
         this.componentSupplier = componentSupplier;
         this.itemConsumer = itemConsumer;
+    }
 
-        withProperty("nodeid", item -> {
-            var component = createComponent(item);
-            // TODO: Clean up (Use ComponentDataGenerator)
-            container.appendVirtualChild(component.getElement());
-            return component.getElement().getNode().getId();
-        });
+    @Override
+    protected String getTemplateExpression() {
+        return "<flow-component-renderer nodeid=${item.nodeid} appid='"
+                + UI.getCurrent().getInternals().getAppId()
+                + "'></flow-component-renderer>";
     }
 
     public ComponentRenderer(
@@ -114,15 +99,27 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
         this.container = container;
         var rendering = super.render(container, keyMapper, rendererName);
 
+        return getRendering(keyMapper, rendering.getDataGenerator(),
+                rendering.getRegistration());
+    }
+
+    Rendering<SOURCE> getRendering(DataKeyMapper<SOURCE> keyMapper,
+            Optional<DataGenerator<SOURCE>> dataGenerator,
+            Registration registration) {
         return new Rendering<SOURCE>() {
             @Override
             public Optional<DataGenerator<SOURCE>> getDataGenerator() {
                 var generator = new CompositeDataGenerator<SOURCE>();
+
                 var componentDataGenerator = new ComponentDataGenerator<SOURCE>(
                         ComponentRenderer.this,
                         keyMapper == null ? null : keyMapper::key);
+                componentDataGenerator.setContainer(container);
+                componentDataGenerator.setNodeIdPropertyName(
+                        getPropertyNamespace() + "nodeid");
                 generator.addDataGenerator(componentDataGenerator);
-                generator.addDataGenerator(rendering.getDataGenerator().get());
+
+                generator.addDataGenerator(dataGenerator.get());
                 return Optional.of(generator);
             }
 
@@ -133,14 +130,9 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
 
             @Override
             public Registration getRegistration() {
-                List<Registration> registrations = new ArrayList<>();
-                registrations.add(rendering.getRegistration());
-                // registrations.add(detachListenerRegistration);
-                // registrations.add(() -> clearComponents());
-                return () -> registrations.forEach(Registration::remove);
+                return registration;
             }
         };
-
     }
 
     /**

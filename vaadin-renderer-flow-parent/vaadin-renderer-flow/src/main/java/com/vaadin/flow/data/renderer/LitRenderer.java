@@ -224,6 +224,10 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
         return templateExpression;
     }
 
+    public String getPropertyNamespace() {
+        return propertyNamespace;
+    }
+
     private Registration createJsRendererFunction(Element container,
             DataKeyMapper<SOURCE> keyMapper, String rendererName) {
         ReturnChannelRegistration returnChannel = container.getNode()

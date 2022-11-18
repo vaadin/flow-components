@@ -15,19 +15,16 @@
  */
 package com.vaadin.flow.data.renderer;
 
-import java.util.Objects;
 import java.util.Optional;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
-import com.vaadin.flow.data.provider.AbstractComponentDataGenerator;
 import com.vaadin.flow.data.provider.DataGenerator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementFactory;
 import com.vaadin.flow.function.ValueProvider;
-
-import elemental.json.JsonObject;
+import com.vaadin.flow.shared.Registration;
 
 /**
  *
@@ -68,36 +65,25 @@ public abstract class BasicRenderer<SOURCE, TARGET>
     }
 
     @Override
-    public Rendering<SOURCE> render(Element container,
-            DataKeyMapper<SOURCE> keyMapper, Element contentTemplate) {
-        SimpleValueRendering rendering = new SimpleValueRendering(
-                keyMapper == null ? null : keyMapper::key);
-        return rendering;
-    }
+    Rendering<SOURCE> getRendering(DataKeyMapper<SOURCE> keyMapper,
+            Optional<DataGenerator<SOURCE>> dataGenerator,
+            Registration registration) {
+        return new Rendering<SOURCE>() {
+            @Override
+            public Optional<DataGenerator<SOURCE>> getDataGenerator() {
+                return dataGenerator;
+            }
 
-    /**
-     * Gets the name of the property to be transmitted and used inside the
-     * template. By default, it generates a unique name by using the class name
-     * of the renderer and the node id of the template element.
-     * <p>
-     * This method is only called when
-     * {@link #render(Element, DataKeyMapper, Element)} is invoked.
-     *
-     * @param context
-     *            the rendering context
-     * @return the property name to be used in template data bindings
-     *
-     * @see Rendering#getTemplateElement()
-     */
-    protected String getTemplatePropertyName(Rendering<SOURCE> context) {
-        Objects.requireNonNull(context, "The context should not be null");
-        Element templateElement = context.getTemplateElement();
-        if (templateElement == null) {
-            throw new IllegalArgumentException(
-                    "The provided rendering doesn't contain a template element");
-        }
-        return "_" + getClass().getSimpleName() + "_"
-                + templateElement.getNode().getId();
+            @Override
+            public Element getTemplateElement() {
+                return null;
+            }
+
+            @Override
+            public Registration getRegistration() {
+                return registration;
+            }
+        };
     }
 
     @Override
@@ -119,86 +105,6 @@ public abstract class BasicRenderer<SOURCE, TARGET>
      */
     protected String getFormattedValue(TARGET object) {
         return String.valueOf(object);
-    }
-
-    /*
-     * Package level visibility to allow unit testing.
-     */
-    class SimpleValueRendering extends AbstractComponentDataGenerator<SOURCE>
-            implements Rendering<SOURCE> {
-
-        private final ValueProvider<SOURCE, String> keyMapper;
-        private Element templateElement;
-        private String propertyName;
-        private Element container;
-
-        public SimpleValueRendering(ValueProvider<SOURCE, String> keyMapper) {
-            this.keyMapper = keyMapper;
-        }
-
-        public void setContainer(Element container) {
-            this.container = container;
-        }
-
-        public void setPropertyName(String propertyName) {
-            this.propertyName = propertyName;
-        }
-
-        public void setTemplateElement(Element templateElement) {
-            this.templateElement = templateElement;
-        }
-
-        @Override
-        public Element getTemplateElement() {
-            return templateElement;
-        }
-
-        @Override
-        public Optional<DataGenerator<SOURCE>> getDataGenerator() {
-            return Optional.of(this);
-        }
-
-        @Override
-        public void generateData(SOURCE item, JsonObject jsonObject) {
-            if (propertyName != null) {
-                String value = getFormattedValue(valueProvider.apply(item));
-                if (value != null) {
-                    jsonObject.put(propertyName, value);
-                }
-                jsonObject.put(propertyName + "_disabled",
-                        !templateElement.isEnabled());
-            } else if (container != null) {
-                String itemKey = getItemKey(item);
-                Component component = createComponent(item);
-                registerRenderedComponent(itemKey, component);
-            }
-        }
-
-        @Override
-        public void refreshData(SOURCE item) {
-            if (propertyName != null) {
-                return;
-            }
-            super.refreshData(item);
-        }
-
-        @Override
-        protected String getItemKey(SOURCE item) {
-            if (keyMapper == null) {
-                return null;
-            }
-            return keyMapper.apply(item);
-        }
-
-        @Override
-        protected Component createComponent(SOURCE item) {
-            return BasicRenderer.this.createComponent(item);
-        }
-
-        @Override
-        protected Element getContainer() {
-            return container;
-        }
     }
 
 }
