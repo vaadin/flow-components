@@ -46,7 +46,7 @@ public class TextRenderer<ITEM> extends ComponentRenderer<Component, ITEM> {
      * {@link ItemLabelGenerator}: <code>String::valueOf</code>.
      */
     public TextRenderer() {
-        this.itemLabelGenerator = String::valueOf;
+        this(String::valueOf);
     }
 
     /**
@@ -58,6 +58,13 @@ public class TextRenderer<ITEM> extends ComponentRenderer<Component, ITEM> {
      */
     public TextRenderer(ItemLabelGenerator<ITEM> itemLabelGenerator) {
         this.itemLabelGenerator = itemLabelGenerator;
+
+        withProperty("label", item -> itemLabelGenerator.apply(item));
+    }
+
+    @Override
+    protected String getTemplateExpression() {
+        return "<span>${item.label}</span>";
     }
 
     @Override
