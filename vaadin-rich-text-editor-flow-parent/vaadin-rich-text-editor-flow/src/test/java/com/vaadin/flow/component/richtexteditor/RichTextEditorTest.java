@@ -228,6 +228,60 @@ public class RichTextEditorTest {
                 rte.isRequiredIndicatorVisible());
     }
 
+    // asDelta
+
+    @Test
+    public void asDelta_setValue_getValue() {
+        String deltaValue = "[{\"insert\":\"Foo\"}]";
+        RichTextEditor rte = new RichTextEditor();
+        HasValue<ValueChangeEvent<String>, String> asDelta = rte.asDelta();
+        asDelta.setValue(deltaValue);
+
+        Assert.assertEquals("Should set value property", deltaValue,
+                rte.getElement().getProperty("value"));
+        Assert.assertEquals("Should get the same value as it was set",
+                deltaValue, asDelta.getValue());
+    }
+
+    @Test
+    public void asDelta_setReadOnly_rteIsReadonly() {
+        RichTextEditor rte = new RichTextEditor();
+        HasValue<ValueChangeEvent<String>, String> asDelta = rte.asDelta();
+        asDelta.setReadOnly(true);
+        Assert.assertTrue("Should be possible to set readonly on asDelta",
+                rte.isReadOnly());
+    }
+
+    @Test
+    public void asDelta_setRequiredIndicatorVisible_rteRequiredIndicatorVisible() {
+        RichTextEditor rte = new RichTextEditor();
+        HasValue<ValueChangeEvent<String>, String> asDelta = rte.asDelta();
+        asDelta.setRequiredIndicatorVisible(true);
+        Assert.assertTrue(
+                "Should be possible to set required indicator to be visible on asDelta",
+                rte.isRequiredIndicatorVisible());
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Test
+    public void asDelta_addChangeListener() {
+        String deltaValue = "[{\"insert\":\"Foo\"}]";
+        RichTextEditor rte = new RichTextEditor();
+        HasValue<ValueChangeEvent<String>, String> asDelta = rte.asDelta();
+
+        HasValue.ValueChangeListener valueChangeListenerMock = Mockito
+                .mock(HasValue.ValueChangeListener.class);
+        asDelta.addValueChangeListener(valueChangeListenerMock);
+
+        rte.asDelta().setValue(deltaValue);
+        Mockito.verify(valueChangeListenerMock, Mockito.times(1))
+                .valueChanged(Mockito.any());
+
+        rte.setValue("");
+        Mockito.verify(valueChangeListenerMock, Mockito.times(2))
+                .valueChanged(Mockito.any());
+    }
+
     @Test
     public void elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue() {
         Element element = new Element("vaadin-rich-text-editor");
