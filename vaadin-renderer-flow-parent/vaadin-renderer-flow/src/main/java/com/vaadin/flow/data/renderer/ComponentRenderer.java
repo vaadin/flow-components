@@ -15,11 +15,13 @@
  */
 package com.vaadin.flow.data.renderer;
 
-import java.util.Objects;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.DataGenerator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.dom.Element;
@@ -27,7 +29,7 @@ import com.vaadin.flow.function.SerializableBiConsumer;
 import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.SerializableSupplier;
-import com.vaadin.flow.function.ValueProvider;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * Base class for all renderers that support arbitrary {@link Component}s.
@@ -45,200 +47,96 @@ import com.vaadin.flow.function.ValueProvider;
  *            the type of the input model object
  */
 public class ComponentRenderer<COMPONENT extends Component, SOURCE>
-        extends Renderer<SOURCE> {
+        extends LitRenderer<SOURCE> {
 
+    private Element container;
     private SerializableSupplier<COMPONENT> componentSupplier;
     private SerializableFunction<SOURCE, COMPONENT> componentFunction;
     private SerializableBiFunction<Component, SOURCE, Component> componentUpdateFunction;
     private SerializableBiConsumer<COMPONENT, SOURCE> itemConsumer;
-    private String componentRendererTag = "flow-component-renderer";
 
-    /**
-     * Creates a new ComponentRenderer that uses the componentSupplier to
-     * generate new {@link Component} instances, and the itemConsumer to set the
-     * related items.
-     * <p>
-     * Some components may support several rendered components at once, so
-     * different component instances should be created for each different item
-     * for those components.
-     *
-     * @param componentSupplier
-     *            a supplier that can generate new component instances
-     * @param itemConsumer
-     *            a setter for the corresponding item for the rendered component
-     */
-    public ComponentRenderer(SerializableSupplier<COMPONENT> componentSupplier,
-            SerializableBiConsumer<COMPONENT, SOURCE> itemConsumer) {
-
-        this.componentSupplier = componentSupplier;
-        this.itemConsumer = itemConsumer;
-    }
-
-    /**
-     * Creates a new ComponentRenderer that uses the componentSupplier to
-     * generate new {@link Component} instances.
-     * <p>
-     * This constructor is a convenient way of providing components to a
-     * template when the actual model item doesn't matter for the component
-     * instance.
-     * <p>
-     * Some components may support several rendered components at once, so
-     * different component instances should be created for each different item
-     * for those components.
-     *
-     * @param componentSupplier
-     *            a supplier that can generate new component instances
-     */
     public ComponentRenderer(
-            SerializableSupplier<COMPONENT> componentSupplier) {
-        this(componentSupplier, null);
+            SerializableFunction<SOURCE, COMPONENT> componentFunction,
+            SerializableBiFunction<Component, SOURCE, Component> componentUpdateFunction) {
+        super("<flow-component-renderer nodeid=${item.nodeid} appid='"
+                + UI.getCurrent().getInternals().getAppId()
+                + "'></flow-component-renderer>");
+
+        this.componentFunction = componentFunction;
+        this.componentUpdateFunction = componentUpdateFunction;
+
+        withProperty("nodeid", item -> {
+            var component = createComponent(item);
+            // TODO: Clean up (Use ComponentDataGenerator)
+            container.appendVirtualChild(component.getElement());
+            return component.getElement().getNode().getId();
+        });
     }
 
-    /**
-     * Creates a new ComponentRenderer that uses the componentFunction to
-     * generate new {@link Component} instances. The function takes a model item
-     * and outputs a component instance.
-     * <p>
-     * Some components may support several rendered components at once, so
-     * different component instances should be created for each different item
-     * for those components.
-     *
-     * @param componentFunction
-     *            a function that can generate new component instances
-     * @see #ComponentRenderer(SerializableFunction, SerializableBiFunction)
-     */
     public ComponentRenderer(
             SerializableFunction<SOURCE, COMPONENT> componentFunction) {
         this(componentFunction, null);
     }
 
-    /**
-     * Creates a new ComponentRenderer that uses the componentFunction to
-     * generate new {@link Component} instances, and a componentUpdateFunction
-     * to update existing {@link Component} instances.
-     * <p>
-     * The componentUpdateFunction can return a different component than the one
-     * previously created. In those cases, the new instance is used, and the old
-     * is discarded.
-     * <p>
-     * Some components may support several rendered components at once, so
-     * different component instances should be created for each different item
-     * for those components.
-     *
-     * @param componentFunction
-     *            a function that can generate new component instances
-     * @param componentUpdateFunction
-     *            a function that can update the existing component instance for
-     *            the item, or generate a new component based on the item
-     *            update. When the function is <code>null</code>, the
-     *            componentFunction is always used instead
-     */
-    public ComponentRenderer(
-            SerializableFunction<SOURCE, COMPONENT> componentFunction,
-            SerializableBiFunction<Component, SOURCE, Component> componentUpdateFunction) {
-        this.componentFunction = componentFunction;
-        this.componentUpdateFunction = componentUpdateFunction;
+    public ComponentRenderer(SerializableSupplier<COMPONENT> componentSupplier,
+            SerializableBiConsumer<COMPONENT, SOURCE> itemConsumer) {
+        super("<flow-component-renderer nodeid=${item.nodeid} appid='"
+                + UI.getCurrent().getInternals().getAppId()
+                + "'></flow-component-renderer>");
+
+        this.componentSupplier = componentSupplier;
+        this.itemConsumer = itemConsumer;
+
+        withProperty("nodeid", item -> {
+            var component = createComponent(item);
+            // TODO: Clean up (Use ComponentDataGenerator)
+            container.appendVirtualChild(component.getElement());
+            return component.getElement().getNode().getId();
+        });
     }
 
-    /**
-     * Default constructor, that can be used by subclasses which supports
-     * different ways of creating components, other than those defined in the
-     * other constructors.
-     */
+    public ComponentRenderer(
+            SerializableSupplier<COMPONENT> componentSupplier) {
+        this(componentSupplier, null);
+    }
+
     protected ComponentRenderer() {
+        super("");
     }
 
     @Override
     public Rendering<SOURCE> render(Element container,
-            DataKeyMapper<SOURCE> keyMapper, Element contentTemplate) {
+            DataKeyMapper<SOURCE> keyMapper, String rendererName) {
+        this.container = container;
+        var rendering = super.render(container, keyMapper, rendererName);
 
-        ComponentRendering rendering = new ComponentRendering(
-                keyMapper == null ? null : keyMapper::key);
-        rendering.setTemplateElement(contentTemplate);
-        /*
-         * setupTemplateWhenAttached does some setup that will be needed by
-         * generateData. To ensure the setup has completed before it is needed,
-         * we forego the general convention of using beforeClientResponse to
-         * guard the action against duplicate invocation. This is not a big
-         * problem in this case since setupTemplateWhenAttached only sets
-         * properties but doesn't execute any JS.
-         */
-        container.getNode().runWhenAttached(ui -> setupTemplateWhenAttached(ui,
-                container, rendering, keyMapper));
-
-        return rendering;
-    }
-
-    /**
-     * Sets the tag of the webcomponent used at the client-side to manage
-     * component rendering inside {@code <template>}. By default it uses
-     * {@code <flow-component-renderer>}.
-     *
-     * @param componentRendererTag
-     *            the tag of the client-side webcomponent for component
-     *            rendering, not <code>null</code>
-     */
-    public void setComponentRendererTag(String componentRendererTag) {
-        Objects.requireNonNull(componentRendererTag,
-                "The componentRendererTag should not be null");
-        this.componentRendererTag = componentRendererTag;
-    }
-
-    private void setupTemplateWhenAttached(UI ui, Element owner,
-            ComponentRendering rendering, DataKeyMapper<SOURCE> keyMapper) {
-        String appId = ui.getInternals().getAppId();
-        Element templateElement = rendering.getTemplateElement();
-        owner.appendChild(templateElement);
-
-        Element container = new Element("div");
-        owner.appendVirtualChild(container);
-        rendering.setContainer(container);
-        String templateInnerHtml;
-
-        if (keyMapper != null) {
-            String nodeIdPropertyName = "_renderer_"
-                    + templateElement.getNode().getId();
-
-            templateInnerHtml = String.format(
-                    "<%s appid=\"%s\" nodeid=\"[[item.%s]]\"></%s>",
-                    componentRendererTag, appId, nodeIdPropertyName,
-                    componentRendererTag);
-            rendering.setNodeIdPropertyName(nodeIdPropertyName);
-        } else {
-            COMPONENT component = createComponent(null);
-            if (component != null) {
-                container.appendChild(component.getElement());
-
-                templateInnerHtml = String.format(
-                        "<%s appid=\"%s\" nodeid=\"%s\"></%s>",
-                        componentRendererTag, appId,
-                        component.getElement().getNode().getId(),
-                        componentRendererTag);
-            } else {
-                templateInnerHtml = "";
+        return new Rendering<SOURCE>() {
+            @Override
+            public Optional<DataGenerator<SOURCE>> getDataGenerator() {
+                var generator = new CompositeDataGenerator<SOURCE>();
+                var componentDataGenerator = new ComponentDataGenerator<SOURCE>(
+                        ComponentRenderer.this,
+                        keyMapper == null ? null : keyMapper::key);
+                generator.addDataGenerator(componentDataGenerator);
+                generator.addDataGenerator(rendering.getDataGenerator().get());
+                return Optional.of(generator);
             }
-        }
 
-        templateElement.setProperty("innerHTML", templateInnerHtml);
-    }
+            @Override
+            public Element getTemplateElement() {
+                return null;
+            }
 
-    /**
-     * Creates a component for a given object model item. Subclasses can
-     * override this method to provide specific behavior.
-     *
-     * @param item
-     *            the model item, possibly <code>null</code>
-     * @return a component instance representing the provided item
-     */
-    public COMPONENT createComponent(SOURCE item) {
-        if (componentFunction != null) {
-            return componentFunction.apply(item);
-        }
-        COMPONENT component = componentSupplier.get();
-        if (itemConsumer != null) {
-            itemConsumer.accept(component, item);
-        }
-        return component;
+            @Override
+            public Registration getRegistration() {
+                List<Registration> registrations = new ArrayList<>();
+                registrations.add(rendering.getRegistration());
+                // registrations.add(detachListenerRegistration);
+                // registrations.add(() -> clearComponents());
+                return () -> registrations.forEach(Registration::remove);
+            }
+        };
+
     }
 
     /**
@@ -264,28 +162,23 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
         return createComponent(item);
     }
 
-    private class ComponentRendering extends ComponentDataGenerator<SOURCE>
-            implements Rendering<SOURCE> {
-
-        private Element templateElement;
-
-        public ComponentRendering(ValueProvider<SOURCE, String> keyMapper) {
-            super(ComponentRenderer.this, keyMapper);
+    /**
+     * Creates a component for a given object model item. Subclasses can
+     * override this method to provide specific behavior.
+     *
+     * @param item
+     *            the model item, possibly <code>null</code>
+     * @return a component instance representing the provided item
+     */
+    public COMPONENT createComponent(SOURCE item) {
+        if (componentFunction != null) {
+            return componentFunction.apply(item);
         }
-
-        public void setTemplateElement(Element templateElement) {
-            this.templateElement = templateElement;
+        COMPONENT component = componentSupplier.get();
+        if (itemConsumer != null) {
+            itemConsumer.accept(component, item);
         }
-
-        @Override
-        public Element getTemplateElement() {
-            return templateElement;
-        }
-
-        @Override
-        public Optional<DataGenerator<SOURCE>> getDataGenerator() {
-            return Optional.of(this);
-        }
+        return component;
     }
 
 }

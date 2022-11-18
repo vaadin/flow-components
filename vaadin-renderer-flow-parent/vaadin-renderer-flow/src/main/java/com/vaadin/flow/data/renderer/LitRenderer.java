@@ -72,7 +72,7 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
 
     private final String ALPHANUMERIC_REGEX = "^[a-zA-Z0-9]+$";
 
-    private LitRenderer(String templateExpression) {
+    protected LitRenderer(String templateExpression) {
         this.templateExpression = templateExpression;
 
         // Generate a unique (in scope of the UI) namespace for the renderer
