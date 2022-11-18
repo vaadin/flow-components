@@ -19,17 +19,17 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.data.bean.Person;
-import com.vaadin.flow.data.renderer.TemplateRenderer;
+import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.router.Route;
 
-@Route("vaadin-grid/template-renderer-event-handler")
-public class TemplateRendererEventHandlerPage extends Div {
+@Route("vaadin-grid/lit-renderer-event-handler")
+public class LitRendererEventHandlerPage extends Div {
 
-    public TemplateRendererEventHandlerPage() {
-        TemplateRenderer<Person> renderer = TemplateRenderer.<Person> of(
-                "<div>[[item.name]] <button on-click='clicked'>Click</button></div>")
+    public LitRendererEventHandlerPage() {
+        LitRenderer<Person> renderer = LitRenderer.<Person> of(
+                "<div>${item.name} <button @click=${clicked}>Click</button></div>")
                 .withProperty("name", Person::getFirstName)
-                .withEventHandler("clicked", this::clicked);
+                .withFunction("clicked", this::clicked);
 
         Person person = new Person("John Doe", 1981);
 

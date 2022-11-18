@@ -24,6 +24,8 @@ import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.renderer.LitRenderer;
+
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
@@ -34,7 +36,6 @@ import org.junit.rules.ExpectedException;
 import com.vaadin.flow.component.grid.FooterRow.FooterCell;
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.HeaderRow.HeaderCell;
-import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.dom.Element;
 
 public class HeaderFooterTest {
@@ -743,7 +744,7 @@ public class HeaderFooterTest {
     public void getCellByColumnNotBelongingToGrid_throws() {
         HeaderRow row = grid.prependHeaderRow();
         Column<?> mockColumn = new Column<>(new Grid<String>(), "",
-                TemplateRenderer.of(""));
+                LitRenderer.of(""));
 
         thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage("Cannot find a cell");

@@ -47,7 +47,7 @@ public class AddingColumnsIT extends AbstractComponentIT {
     }
 
     @Test
-    public void gridRendered_addColumnWithTemplateRenderer_cellsRendered() {
+    public void gridRendered_addColumnWithLitRenderer_cellsRendered() {
         clickElementWithJs("add-template-column");
         assertCellContents("<div>20</div>", "<div>30</div>");
     }
