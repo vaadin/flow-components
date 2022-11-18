@@ -22,6 +22,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.data.provider.SortDirection;
@@ -56,6 +57,8 @@ public class GridColumnTest {
         thirdColumn = grid.addColumn(str -> str);
         renderer = new IconRenderer<String>(generator -> new Label(":D"));
         fourthColumn = grid.addColumn(renderer);
+
+        UI.setCurrent(new UI());
     }
 
     @Test

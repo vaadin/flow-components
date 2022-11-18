@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.LitRenderer;
 
@@ -57,6 +58,8 @@ public class HeaderFooterTest {
     public void setup() {
         grid = new Grid<>();
         addColumns();
+
+        UI.setCurrent(new UI());
     }
 
     private void addColumns() {
