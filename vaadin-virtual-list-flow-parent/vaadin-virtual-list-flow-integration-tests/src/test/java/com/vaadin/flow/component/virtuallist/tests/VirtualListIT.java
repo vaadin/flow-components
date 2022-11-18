@@ -100,11 +100,11 @@ public class VirtualListIT extends AbstractComponentIT {
             Assert.assertEquals(String.valueOf(i + 1),
                     items.getObject(i).getString("key"));
             Assert.assertEquals("Person " + (i + 1),
-                    items.getObject(i).getString("name"));
+                    items.getObject(i).getString("lr_0_name"));
             Assert.assertEquals(String.valueOf(i + 1),
-                    items.getObject(i).getString("age"));
+                    items.getObject(i).getString("lr_0_age"));
             Assert.assertEquals("person_" + (i + 1),
-                    items.getObject(i).getString("user"));
+                    items.getObject(i).getString("lr_0_user"));
         }
 
         WebElement update = findElement(
@@ -113,8 +113,8 @@ public class VirtualListIT extends AbstractComponentIT {
         scrollIntoViewAndClick(update);
         items = getItems(getDriver(), list);
         JsonObject person = items.getObject(0);
-        Assert.assertEquals("Person 1 Updated", person.getString("name"));
-        Assert.assertEquals("person_1_updated", person.getString("user"));
+        Assert.assertEquals("Person 1 Updated", person.getString("lr_0_name"));
+        Assert.assertEquals("person_1_updated", person.getString("lr_0_user"));
     }
 
     @Ignore("https://github.com/vaadin/flow-components/issues/3222")
@@ -189,9 +189,6 @@ public class VirtualListIT extends AbstractComponentIT {
         WebElement list = findElement(By.id("template-events"));
         WebElement message = findElement(By.id("template-events-message"));
 
-        JsonArray items = getItems(driver, list);
-        assertItemsArePresent(items, 0, 3, "Clickable item ");
-
         // clicks on the first item to remove it
         WebElement item = findElement(By.id("template-events-item-0"));
         scrollIntoViewAndClick(item);
@@ -223,14 +220,12 @@ public class VirtualListIT extends AbstractComponentIT {
         for (int i = 0; i < items.size(); i++) {
             WebElement item = items.get(i);
             Assert.assertEquals("div", item.getTagName());
-            Assert.assertEquals("Item " + (i + 1),
-                    item.getAttribute("innerHTML"));
+            Assert.assertEquals("Item " + (i + 1), item.getText());
         }
 
         scrollToBottom(list);
 
-        waitUntil(
-                driver -> list.getAttribute("innerHTML").contains("Item 100"));
+        waitUntil(driver -> list.getText().contains("Item 100"));
 
         items = list.findElements(By.className("component-rendered"));
 
