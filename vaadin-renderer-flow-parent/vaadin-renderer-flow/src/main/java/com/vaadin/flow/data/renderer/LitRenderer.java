@@ -75,6 +75,11 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
     protected LitRenderer(String templateExpression) {
         this.templateExpression = templateExpression;
 
+        // TODO: Temporary test workaround, remove
+        if (UI.getCurrent() == null) {
+            UI.setCurrent(new UI());
+        }
+
         // Generate a unique (in scope of the UI) namespace for the renderer
         // properties.
         int litRendererCount = UI.getCurrent().getElement()
