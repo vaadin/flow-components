@@ -30,7 +30,7 @@ import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
-import com.vaadin.flow.data.renderer.TemplateRenderer;
+import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.router.Route;
 
 /**
@@ -107,7 +107,7 @@ public class GridTestPage extends Div {
                     "grid-with-component-renderers-remove-" + item.getNumber());
             return remove;
         })).setKey("remove");
-        grid.addColumn(TemplateRenderer.<Item> of("hidden")).setHeader("hidden")
+        grid.addColumn(LitRenderer.<Item> of("hidden")).setHeader("hidden")
                 .setKey("hidden").setVisible(false);
 
         grid.setId("grid-with-component-renderers");
@@ -161,9 +161,9 @@ public class GridTestPage extends Div {
 
         grid.addColumn(Item::getName);
         grid.setItemDetailsRenderer(
-                TemplateRenderer.<Item> of("[[item.detailsProperty]]")
-                        .withProperty("detailsProperty",
-                                item -> "Details opened! " + item.getNumber()));
+                LitRenderer.<Item> of("${item.detailsProperty}").withProperty(
+                        "detailsProperty",
+                        item -> "Details opened! " + item.getNumber()));
 
         grid.setId("grid-with-template-details-row");
         grid.setWidth("500px");
