@@ -141,6 +141,9 @@ public class LocalDateRenderer<SOURCE>
 
         formatter = () -> DateTimeFormatter.ofPattern(formatPattern, locale);
         this.nullRepresentation = nullRepresentation;
+
+        withProperty("label",
+                item -> getFormattedValue(valueProvider.apply(item)));
     }
 
     /**
@@ -229,6 +232,9 @@ public class LocalDateRenderer<SOURCE>
 
         this.formatter = formatter;
         this.nullRepresentation = nullRepresentation;
+
+        withProperty("label",
+                item -> getFormattedValue(valueProvider.apply(item)));
     }
 
     @Override
@@ -240,5 +246,10 @@ public class LocalDateRenderer<SOURCE>
             throw new IllegalStateException("Could not format input date '"
                     + date + "' using formatter '" + formatter + "'", e);
         }
+    }
+
+    @Override
+    protected String getTemplateExpression() {
+        return "${item.label}";
     }
 }

@@ -97,7 +97,8 @@ public class NumberRenderer<SOURCE> extends BasicRenderer<SOURCE, Number> {
         formatString = null;
         this.nullRepresentation = nullRepresentation;
 
-        withProperty("label", item -> getFormattedValue(valueProvider.apply(item)));
+        withProperty("label",
+                item -> getFormattedValue(valueProvider.apply(item)));
     }
 
     /**
@@ -197,7 +198,8 @@ public class NumberRenderer<SOURCE> extends BasicRenderer<SOURCE, Number> {
         this.formatString = formatString;
         this.nullRepresentation = nullRepresentation;
 
-        withProperty("label", item -> getFormattedValue(valueProvider.apply(item)));
+        withProperty("label",
+                item -> getFormattedValue(valueProvider.apply(item)));
     }
 
     @Override
@@ -220,6 +222,6 @@ public class NumberRenderer<SOURCE> extends BasicRenderer<SOURCE, Number> {
 
     @Override
     protected String getTemplateExpression() {
-        return "<span>${item.label}</span>";
+        return "${item.label}";
     }
 }

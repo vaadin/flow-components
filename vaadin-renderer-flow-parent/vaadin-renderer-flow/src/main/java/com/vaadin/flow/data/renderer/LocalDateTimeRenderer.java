@@ -151,6 +151,9 @@ public class LocalDateTimeRenderer<SOURCE>
 
         this.formatter = formatter;
         this.nullRepresentation = nullRepresentation;
+
+        withProperty("label",
+                item -> getFormattedValue(valueProvider.apply(item)));
     }
 
     /**
@@ -239,11 +242,19 @@ public class LocalDateTimeRenderer<SOURCE>
 
         formatter = () -> DateTimeFormatter.ofPattern(formatPattern, locale);
         this.nullRepresentation = nullRepresentation;
+
+        withProperty("label",
+                item -> getFormattedValue(valueProvider.apply(item)));
     }
 
     @Override
     protected String getFormattedValue(LocalDateTime dateTime) {
         return dateTime == null ? nullRepresentation
                 : formatter.get().format(dateTime);
+    }
+
+    @Override
+    protected String getTemplateExpression() {
+        return "${item.label}";
     }
 }

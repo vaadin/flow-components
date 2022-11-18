@@ -64,7 +64,7 @@ public class TextRenderer<ITEM> extends ComponentRenderer<Component, ITEM> {
 
     @Override
     protected String getTemplateExpression() {
-        return "<span>${item.label}</span>";
+        return "${item.label}";
     }
 
     @Override
