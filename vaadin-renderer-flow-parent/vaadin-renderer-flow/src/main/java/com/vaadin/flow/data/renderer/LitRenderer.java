@@ -220,6 +220,10 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
                 clientCallablesArray, propertyNamespace);
     }
 
+    protected String getTemplateExpression() {
+        return templateExpression;
+    }
+
     private Registration createJsRendererFunction(Element container,
             DataKeyMapper<SOURCE> keyMapper, String rendererName) {
         ReturnChannelRegistration returnChannel = container.getNode()
@@ -251,11 +255,11 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
         // is no longer used so the registration is cleared by the renderer
         // registration.
         registrations.add(container.addAttachListener(e -> {
-            setElementRenderer(container, rendererName, templateExpression,
+            setElementRenderer(container, rendererName, getTemplateExpression(),
                     returnChannel, clientCallablesArray, propertyNamespace);
         }));
         // Call once initially
-        setElementRenderer(container, rendererName, templateExpression,
+        setElementRenderer(container, rendererName, getTemplateExpression(),
                 returnChannel, clientCallablesArray, propertyNamespace);
 
         // Get the renderer function cleared when the LitRenderer is

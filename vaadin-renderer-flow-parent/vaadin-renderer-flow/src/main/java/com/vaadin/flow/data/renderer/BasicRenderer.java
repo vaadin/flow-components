@@ -72,48 +72,48 @@ public abstract class BasicRenderer<SOURCE, TARGET>
             DataKeyMapper<SOURCE> keyMapper, Element contentTemplate) {
         SimpleValueRendering rendering = new SimpleValueRendering(
                 keyMapper == null ? null : keyMapper::key);
-        rendering.setTemplateElement(contentTemplate);
-        setupTemplate(container, rendering, keyMapper);
+        // rendering.setTemplateElement(contentTemplate);
+        // setupLitRendererBindings(container);
 
         return rendering;
     }
 
-    private void setupTemplate(Element owner, SimpleValueRendering rendering,
-            DataKeyMapper<SOURCE> keyMapper) {
-        /*
-         * setupTemplateWhenAttached does some setup that will be needed by
-         * generateData. To ensure the setup has completed before it is needed,
-         * we forego the general convention of using beforeClientResponse to
-         * guard the action against duplicate invocation. This is not a big
-         * problem in this case since setupTemplateWhenAttached only sets
-         * properties but doesn't execute any JS.
-         */
-        owner.getNode().runWhenAttached(
-                ui -> setupTemplateWhenAttached(owner, rendering, keyMapper));
-    }
+    // private void setupTemplate(Element owner, SimpleValueRendering rendering,
+    // DataKeyMapper<SOURCE> keyMapper) {
+    // /*
+    // * setupTemplateWhenAttached does some setup that will be needed by
+    // * generateData. To ensure the setup has completed before it is needed,
+    // * we forego the general convention of using beforeClientResponse to
+    // * guard the action against duplicate invocation. This is not a big
+    // * problem in this case since setupTemplateWhenAttached only sets
+    // * properties but doesn't execute any JS.
+    // */
+    // owner.getNode().runWhenAttached(
+    // ui -> setupTemplateWhenAttached(owner, rendering, keyMapper));
+    // }
 
-    private void setupTemplateWhenAttached(Element owner,
-            SimpleValueRendering rendering, DataKeyMapper<SOURCE> keyMapper) {
+    // private void setupTemplateWhenAttached(Element owner,
+    // SimpleValueRendering rendering, DataKeyMapper<SOURCE> keyMapper) {
 
-        Element templateElement = rendering.getTemplateElement();
-        owner.appendChild(templateElement);
+    // Element templateElement = rendering.getTemplateElement();
+    // owner.appendChild(templateElement);
 
-        if (keyMapper != null) {
-            String propertyName = getTemplatePropertyName(rendering);
+    // if (keyMapper != null) {
+    // String propertyName = getTemplatePropertyName(rendering);
 
-            templateElement.setProperty("innerHTML", getTemplateForProperty(
-                    "[[item." + propertyName + "]]", rendering));
-            rendering.setPropertyName(propertyName);
+    // templateElement.setProperty("innerHTML", getTemplateForProperty(
+    // "[[item." + propertyName + "]]", rendering));
+    // rendering.setPropertyName(propertyName);
 
-            RendererUtil.registerEventHandlers(this, templateElement, owner,
-                    keyMapper::get);
-        } else {
-            String value = getFormattedValue(null);
-            templateElement.setProperty("innerHTML",
-                    getTemplateForProperty(value, rendering));
-            rendering.setContainer(owner);
-        }
-    }
+    // RendererUtil.registerEventHandlers(this, templateElement, owner,
+    // keyMapper::get);
+    // } else {
+    // String value = getFormattedValue(null);
+    // templateElement.setProperty("innerHTML",
+    // getTemplateForProperty(value, rendering));
+    // rendering.setContainer(owner);
+    // }
+    // }
 
     /**
      * Gets the name of the property to be transmitted and used inside the

@@ -104,6 +104,10 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
         super("");
     }
 
+    protected Element getContainer() {
+        return container;
+    }
+
     @Override
     public Rendering<SOURCE> render(Element container,
             DataKeyMapper<SOURCE> keyMapper, String rendererName) {
