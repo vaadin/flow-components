@@ -92,12 +92,7 @@ public class NativeButtonRenderer<SOURCE> extends BasicRenderer<SOURCE, String>
         withProperty("label", getValueProvider());
         withProperty("disabled", item -> !getContainer().isEnabled());
         withFunction("click", item -> listeners
-                .forEach(listeners -> listeners.onItemClicked(item)));
-    }
-
-    @Override
-    protected String getTemplateExpression() {
-        return "<button @click=${click}>${item.label}</button>";
+                .forEach(listener -> listener.onItemClicked(item)));
     }
 
     /**
@@ -131,18 +126,6 @@ public class NativeButtonRenderer<SOURCE> extends BasicRenderer<SOURCE, String>
     }
 
     @Override
-    protected String getTemplateForProperty(String property,
-            Rendering<SOURCE> context) {
-        String templatePropertyName = getTemplatePropertyName(context);
-        String eventName = templatePropertyName + "_event";
-        String disabledName = templatePropertyName + "_disabled";
-        setEventHandler(eventName, this::onClick);
-        return String.format(
-                "<button on-click=\"%s\" disabled=\"[[item.%s]]\">%s</button>",
-                eventName, disabledName, property);
-    }
-
-    @Override
     public Component createComponent(SOURCE item) {
         Element button = ElementFactory
                 .createButton(getValueProvider().apply(item));
@@ -152,4 +135,8 @@ public class NativeButtonRenderer<SOURCE> extends BasicRenderer<SOURCE, String>
                 true);
     }
 
+    @Override
+    protected String getTemplateExpression() {
+        return "<button @click=${click}>${item.label}</button>";
+    }
 }
