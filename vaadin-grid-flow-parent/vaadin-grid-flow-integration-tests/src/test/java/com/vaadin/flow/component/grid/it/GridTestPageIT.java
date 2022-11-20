@@ -123,8 +123,11 @@ public class GridTestPageIT extends AbstractComponentIT {
         items.forEach((row, map) -> {
             Assert.assertEquals("Item " + row, map.get("col0"));
             if ("0".equals(row)) {
+                var detailsProperty = map.keySet().stream()
+                        .filter(key -> key.startsWith("lr_")).findFirst().get();
+
                 Assert.assertEquals("Details opened! 0",
-                        map.get("lr_1_detailsProperty"));
+                        map.get(detailsProperty));
             } else {
                 Assert.assertThat(map.keySet(), CoreMatchers
                         .not(CoreMatchers.hasItem("detailsProperty")));
