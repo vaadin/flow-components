@@ -43,10 +43,10 @@ import com.vaadin.flow.dom.Style;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-login-overlay")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.13")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.1.14")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/login", version = "23.1.13")
-@NpmPackage(value = "@vaadin/vaadin-login", version = "23.1.13")
+@NpmPackage(value = "@vaadin/login", version = "23.1.14")
+@NpmPackage(value = "@vaadin/vaadin-login", version = "23.1.14")
 @JsModule("@vaadin/login/src/vaadin-login-overlay.js")
 @JsModule("./loginOverlayConnector.js")
 public class LoginOverlay extends AbstractLogin implements HasStyle {
