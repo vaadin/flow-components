@@ -154,12 +154,12 @@ public class GridTestPageIT extends AbstractComponentIT {
             if ("0".equals(row)) {
                 Assert.assertTrue("_renderer_* property not found for item 0",
                         map.keySet().stream()
-                                .anyMatch(key -> key.startsWith("_renderer_")));
+                                .anyMatch(key -> key.startsWith("lr_")));
             } else {
                 Assert.assertFalse(
                         "_renderer_* property should not be present for item 0",
                         map.keySet().stream()
-                                .anyMatch(key -> key.startsWith("_renderer_")));
+                                .anyMatch(key -> key.startsWith("lr_")));
             }
         });
     }
