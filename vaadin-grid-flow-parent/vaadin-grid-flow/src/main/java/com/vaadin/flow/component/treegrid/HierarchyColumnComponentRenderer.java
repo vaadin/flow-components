@@ -24,8 +24,6 @@ public class HierarchyColumnComponentRenderer<COMPONENT extends Component, SOURC
             TreeGrid<SOURCE> grid) {
         super(componentProvider);
 
-        withProperty("expanded", item -> grid.isExpanded(item));
-
         withFunction("onClick", item -> {
             if (grid.isExpanded(item)) {
                 grid.collapse(List.of(item), true);
@@ -37,8 +35,7 @@ public class HierarchyColumnComponentRenderer<COMPONENT extends Component, SOURC
 
     @Override
     protected String getTemplateExpression() {
-        // TODO: Make level / expanded... available in LitRenderer
-        return "<vaadin-grid-tree-toggle @click=${onClick} class=${item.cssClassName} .leaf=${!item.children} .expanded=${item.expanded} level=${item.level}>"
+        return "<vaadin-grid-tree-toggle @click=${onClick} class=${item.cssClassName} .leaf=${!item.children} .expanded=${model.expanded} level=${model.level}>"
                 + super.getTemplateExpression() + "</vaadin-grid-tree-toggle>";
     }
 }
