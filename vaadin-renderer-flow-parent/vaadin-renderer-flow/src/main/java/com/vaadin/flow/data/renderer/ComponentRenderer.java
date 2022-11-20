@@ -48,6 +48,7 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
         extends LitRenderer<SOURCE> {
 
     private Element container;
+    private Element owner;
     private SerializableSupplier<COMPONENT> componentSupplier;
     private SerializableFunction<SOURCE, COMPONENT> componentFunction;
     private SerializableBiFunction<Component, SOURCE, Component> componentUpdateFunction;
@@ -89,15 +90,17 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
         super("");
     }
 
-    protected Element getContainer() {
-        return container;
+    protected Element getOwner() {
+        return owner;
     }
 
     @Override
-    public Rendering<SOURCE> render(Element container,
+    public Rendering<SOURCE> render(Element owner,
             DataKeyMapper<SOURCE> keyMapper, String rendererName) {
-        this.container = container;
-        var rendering = super.render(container, keyMapper, rendererName);
+        this.owner = owner;
+        this.container = new Element("div");
+        owner.appendVirtualChild(container);
+        var rendering = super.render(owner, keyMapper, rendererName);
 
         return getRendering(keyMapper, rendering.getDataGenerator(),
                 rendering.getRegistration());

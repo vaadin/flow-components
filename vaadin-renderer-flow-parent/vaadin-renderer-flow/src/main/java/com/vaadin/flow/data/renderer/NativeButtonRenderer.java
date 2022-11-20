@@ -89,7 +89,7 @@ public class NativeButtonRenderer<SOURCE> extends BasicRenderer<SOURCE, String>
     public NativeButtonRenderer(ValueProvider<SOURCE, String> labelProvider) {
         super(labelProvider);
 
-        withProperty("disabled", item -> !getContainer().isEnabled());
+        withProperty("disabled", item -> !getOwner().isEnabled());
         withFunction("click", item -> listeners
                 .forEach(listener -> listener.onItemClicked(item)));
     }
