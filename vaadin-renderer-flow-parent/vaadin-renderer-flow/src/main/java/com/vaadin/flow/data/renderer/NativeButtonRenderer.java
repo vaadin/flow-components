@@ -89,7 +89,6 @@ public class NativeButtonRenderer<SOURCE> extends BasicRenderer<SOURCE, String>
     public NativeButtonRenderer(ValueProvider<SOURCE, String> labelProvider) {
         super(labelProvider);
 
-        withProperty("label", getValueProvider());
         withProperty("disabled", item -> !getContainer().isEnabled());
         withFunction("click", item -> listeners
                 .forEach(listener -> listener.onItemClicked(item)));
@@ -137,6 +136,6 @@ public class NativeButtonRenderer<SOURCE> extends BasicRenderer<SOURCE, String>
 
     @Override
     protected String getTemplateExpression() {
-        return "<button @click=${click}>${item.label}</button>";
+        return "<button @click=${click} .disabled=${item.disabled}>${item.label}</button>";
     }
 }

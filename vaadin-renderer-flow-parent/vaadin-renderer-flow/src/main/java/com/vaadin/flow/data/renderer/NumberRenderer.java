@@ -96,9 +96,6 @@ public class NumberRenderer<SOURCE> extends BasicRenderer<SOURCE, Number> {
         this.numberFormat = numberFormat;
         formatString = null;
         this.nullRepresentation = nullRepresentation;
-
-        withProperty("label",
-                item -> getFormattedValue(valueProvider.apply(item)));
     }
 
     /**
@@ -197,9 +194,6 @@ public class NumberRenderer<SOURCE> extends BasicRenderer<SOURCE, Number> {
         numberFormat = null;
         this.formatString = formatString;
         this.nullRepresentation = nullRepresentation;
-
-        withProperty("label",
-                item -> getFormattedValue(valueProvider.apply(item)));
     }
 
     @Override
@@ -218,10 +212,5 @@ public class NumberRenderer<SOURCE> extends BasicRenderer<SOURCE, Number> {
                     locale, numberFormat, formatString));
         }
         return stringValue;
-    }
-
-    @Override
-    protected String getTemplateExpression() {
-        return "${item.label}";
     }
 }

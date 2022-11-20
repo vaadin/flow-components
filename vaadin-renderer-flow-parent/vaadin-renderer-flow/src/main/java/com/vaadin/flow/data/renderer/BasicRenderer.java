@@ -57,7 +57,14 @@ public abstract class BasicRenderer<SOURCE, TARGET>
             throw new IllegalArgumentException("valueProvider may not be null");
         }
 
+        withProperty("label", item -> getFormattedValue(valueProvider.apply(item)));
+
         this.valueProvider = valueProvider;
+    }
+
+    @Override
+    protected String getTemplateExpression() {
+        return "${item.label}";
     }
 
     protected ValueProvider<SOURCE, TARGET> getValueProvider() {

@@ -63,11 +63,6 @@ public class TextRenderer<ITEM> extends ComponentRenderer<Component, ITEM> {
     }
 
     @Override
-    protected String getTemplateExpression() {
-        return "${item.label}";
-    }
-
-    @Override
     public Component createComponent(ITEM item) {
         String text = itemLabelGenerator.apply(item);
         if (text == null) {
