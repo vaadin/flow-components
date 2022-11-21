@@ -4,6 +4,7 @@ import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
 import com.vaadin.flow.component.spreadsheet.testbench.SpreadsheetElement;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
@@ -22,6 +23,7 @@ public class CellShiftValuesUndoRedoIT extends AbstractSpreadsheetIT {
     }
 
     @Test
+    @Ignore
     public void undoRedo_CellShiftValues_ValuesAreUpdatedAsExpectedWithNoErrors() {
         loadFile("500x200test.xlsx");
         SheetCellElement target = getSpreadsheet().getCellAt("A9");
