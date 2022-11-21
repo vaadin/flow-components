@@ -35,7 +35,12 @@ public class HierarchyColumnComponentRenderer<COMPONENT extends Component, SOURC
 
     @Override
     protected String getTemplateExpression() {
-        return "<vaadin-grid-tree-toggle @click=${onClick} class=${item.cssClassName} .leaf=${!item.children} .expanded=${model.expanded} .level=${model.level}>"
+        // The click listener needs to check if the event gets canceled (by
+        // vaadin-grid-tree-toggle) and only invoke the callback if it does.
+        var clickListener = "e => requestAnimationFrame(() => { e.defaultPrevented && onClick(e) })";
+
+        return "<vaadin-grid-tree-toggle @click=${" + clickListener
+                + "} class=${item.cssClassName} .leaf=${!item.children} .expanded=${model.expanded} .level=${model.level}>"
                 + super.getTemplateExpression() + "</vaadin-grid-tree-toggle>";
     }
 }
