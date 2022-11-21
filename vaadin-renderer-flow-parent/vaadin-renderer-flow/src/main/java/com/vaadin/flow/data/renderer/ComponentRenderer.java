@@ -75,7 +75,9 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
     @Override
     protected String getTemplateExpression() {
         return "<flow-component-renderer nodeid=${item.nodeid} appid='"
-                + UI.getCurrent().getInternals().getAppId()
+                + (UI.getCurrent() != null
+                        ? UI.getCurrent().getInternals().getAppId()
+                        : "")
                 + "'></flow-component-renderer>";
     }
 
