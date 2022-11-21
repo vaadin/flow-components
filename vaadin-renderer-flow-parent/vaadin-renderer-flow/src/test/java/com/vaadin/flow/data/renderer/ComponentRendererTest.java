@@ -108,6 +108,7 @@ public class ComponentRendererTest {
     public void templateRenderered_childAttachedBeforeParent() {
         UI ui = new TestUI();
         TestUIInternals internals = (TestUIInternals) ui.getInternals();
+        UI.setCurrent(ui);
 
         ComponentRenderer<TestDiv, String> renderer = new ComponentRenderer<>(
                 e -> (new TestDiv()));
