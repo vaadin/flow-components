@@ -74,10 +74,10 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
 
     @Override
     protected String getTemplateExpression() {
-        return "<flow-component-renderer nodeid=${item.nodeid} appid='"
-                + (UI.getCurrent() != null
-                        ? UI.getCurrent().getInternals().getAppId()
-                        : "")
+        var appId = UI.getCurrent() != null
+                ? UI.getCurrent().getInternals().getAppId()
+                : "";
+        return "<flow-component-renderer nodeid=${item.nodeid} appid='" + appId
                 + "'></flow-component-renderer>";
     }
 
@@ -86,7 +86,7 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
         this(componentSupplier, null);
     }
 
-    protected Element getOwner() {
+    Element getOwner() {
         return owner;
     }
 
@@ -101,7 +101,16 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
         return configureRendering(rendering, keyMapper);
     }
 
-    protected Rendering<SOURCE> configureRendering(Rendering<SOURCE> rendering,
+    /**
+     * Configures the {@code Rendering} instance provided by {@link LitRenderer}
+     *
+     * @param rendering
+     *            the rendering instance
+     * @param keyMapper
+     *            the key mapper
+     * @return a rendering instance configured for the purposes of this renderer
+     */
+    Rendering<SOURCE> configureRendering(Rendering<SOURCE> rendering,
             DataKeyMapper<SOURCE> keyMapper) {
         return new Rendering<SOURCE>() {
             @Override

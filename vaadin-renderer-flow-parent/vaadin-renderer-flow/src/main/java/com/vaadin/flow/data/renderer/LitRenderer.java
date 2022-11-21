@@ -88,7 +88,7 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
         propertyNamespace = "lr_" + litRendererCount + "_";
     }
 
-    protected LitRenderer() {
+    LitRenderer() {
         this("");
     }
 
@@ -228,11 +228,22 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
                 clientCallablesArray, propertyNamespace);
     }
 
+    /**
+     * Returns the Lit template expression used to render items.
+     *
+     * @return the template expression
+     */
     protected String getTemplateExpression() {
         return templateExpression;
     }
 
-    public String getPropertyNamespace() {
+    /**
+     * Returns the namespace used to prefix property names when sending them to
+     * the client as part of an item.
+     *
+     * @return the property namespace
+     */
+    String getPropertyNamespace() {
         return propertyNamespace;
     }
 
