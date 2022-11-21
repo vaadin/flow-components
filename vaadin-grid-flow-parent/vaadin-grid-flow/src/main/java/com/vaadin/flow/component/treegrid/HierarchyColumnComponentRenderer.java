@@ -35,7 +35,7 @@ public class HierarchyColumnComponentRenderer<COMPONENT extends Component, SOURC
 
     @Override
     protected String getTemplateExpression() {
-        return "<vaadin-grid-tree-toggle @click=${onClick} class=${item.cssClassName} .leaf=${!item.children} .expanded=${model.expanded} level=${model.level}>"
+        return "<vaadin-grid-tree-toggle @click=${onClick} class=${item.cssClassName} .leaf=${!item.children} .expanded=${model.expanded} .level=${model.level}>"
                 + super.getTemplateExpression() + "</vaadin-grid-tree-toggle>";
     }
 }

@@ -57,7 +57,6 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
     public ComponentRenderer(
             SerializableFunction<SOURCE, COMPONENT> componentFunction,
             SerializableBiFunction<Component, SOURCE, Component> componentUpdateFunction) {
-        super("");
         this.componentFunction = componentFunction;
         this.componentUpdateFunction = componentUpdateFunction;
     }
@@ -69,7 +68,6 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
 
     public ComponentRenderer(SerializableSupplier<COMPONENT> componentSupplier,
             SerializableBiConsumer<COMPONENT, SOURCE> itemConsumer) {
-        super("");
         this.componentSupplier = componentSupplier;
         this.itemConsumer = itemConsumer;
     }
@@ -86,10 +84,6 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
         this(componentSupplier, null);
     }
 
-    protected ComponentRenderer() {
-        super("");
-    }
-
     protected Element getOwner() {
         return owner;
     }
@@ -102,13 +96,11 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
         owner.appendVirtualChild(container);
         var rendering = super.render(owner, keyMapper, rendererName);
 
-        return getRendering(keyMapper, rendering.getDataGenerator(),
-                rendering.getRegistration());
+        return configureRendering(rendering, keyMapper);
     }
 
-    Rendering<SOURCE> getRendering(DataKeyMapper<SOURCE> keyMapper,
-            Optional<DataGenerator<SOURCE>> dataGenerator,
-            Registration registration) {
+    protected Rendering<SOURCE> configureRendering(Rendering<SOURCE> rendering,
+            DataKeyMapper<SOURCE> keyMapper) {
         return new Rendering<SOURCE>() {
             @Override
             public Optional<DataGenerator<SOURCE>> getDataGenerator() {
@@ -122,7 +114,7 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
                         getPropertyNamespace() + "nodeid");
                 generator.addDataGenerator(componentDataGenerator);
 
-                generator.addDataGenerator(dataGenerator.get());
+                generator.addDataGenerator(rendering.getDataGenerator().get());
                 return Optional.of(generator);
             }
 
@@ -133,7 +125,7 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
 
             @Override
             public Registration getRegistration() {
-                return registration;
+                return rendering.getRegistration();
             }
         };
     }

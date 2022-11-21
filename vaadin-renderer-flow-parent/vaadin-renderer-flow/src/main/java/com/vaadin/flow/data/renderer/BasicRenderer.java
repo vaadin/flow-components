@@ -15,22 +15,26 @@
  */
 package com.vaadin.flow.data.renderer;
 
-import java.util.Optional;
-
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
-import com.vaadin.flow.data.provider.DataGenerator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementFactory;
+import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.function.ValueProvider;
-import com.vaadin.flow.shared.Registration;
 
 /**
  *
  * Abstract renderer used as the base implementation for renderers that outputs
  * a simple value in the UI, such as {@link NumberRenderer} and
  * {@link LocalDateRenderer}.
+ *
+ * For components that use a client-side renderer, such as {@code Grid} or
+ * {@code ComboBox}, the {@code BasicRenderer} works as a {@link LitRenderer}
+ * with a preconfigured template. It also implements the
+ * {@link ComponentRenderer} API, so components that use renderers server-side
+ * to generate content, such as {@code RadioButtonGroup} or {@code ListBox}, can
+ * use it as well.
  *
  * @author Vaadin Ltd
  *
@@ -53,14 +57,15 @@ public abstract class BasicRenderer<SOURCE, TARGET>
      *            <code>null</code>
      */
     protected BasicRenderer(ValueProvider<SOURCE, TARGET> valueProvider) {
+        super((SerializableSupplier<Component>) null);
+
         if (valueProvider == null) {
             throw new IllegalArgumentException("valueProvider may not be null");
         }
+        this.valueProvider = valueProvider;
 
         withProperty("label",
                 item -> getFormattedValue(valueProvider.apply(item)));
-
-        this.valueProvider = valueProvider;
     }
 
     @Override
@@ -73,25 +78,12 @@ public abstract class BasicRenderer<SOURCE, TARGET>
     }
 
     @Override
-    Rendering<SOURCE> getRendering(DataKeyMapper<SOURCE> keyMapper,
-            Optional<DataGenerator<SOURCE>> dataGenerator,
-            Registration registration) {
-        return new Rendering<SOURCE>() {
-            @Override
-            public Optional<DataGenerator<SOURCE>> getDataGenerator() {
-                return dataGenerator;
-            }
-
-            @Override
-            public Element getTemplateElement() {
-                return null;
-            }
-
-            @Override
-            public Registration getRegistration() {
-                return registration;
-            }
-        };
+    protected Rendering<SOURCE> configureRendering(Rendering<SOURCE> rendering,
+            DataKeyMapper<SOURCE> keyMapper) {
+        // Return rendering originating from LitRenderer as it is. We don't want
+        // BasicRenderer to render Components for client-side renderers even
+        // though it extends a ComponentRenderer.
+        return rendering;
     }
 
     @Override

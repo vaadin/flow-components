@@ -72,21 +72,24 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
 
     private final String ALPHANUMERIC_REGEX = "^[a-zA-Z0-9]+$";
 
-    protected LitRenderer(String templateExpression) {
+    private LitRenderer(String templateExpression) {
         this.templateExpression = templateExpression;
 
-        // TODO: Temporary test workaround, remove
-        if (UI.getCurrent() == null) {
-            UI.setCurrent(new UI());
-        }
+        int litRendererCount = 0;
+        if (UI.getCurrent() != null) {
+            // Generate a unique (in scope of the UI) namespace for the renderer
+            // properties.
+            litRendererCount = UI.getCurrent().getElement()
+                    .getProperty("__litRendererCount", 0);
+            UI.getCurrent().getElement().setProperty("__litRendererCount",
+                    litRendererCount + 1);
 
-        // Generate a unique (in scope of the UI) namespace for the renderer
-        // properties.
-        int litRendererCount = UI.getCurrent().getElement()
-                .getProperty("__litRendererCount", 0);
-        UI.getCurrent().getElement().setProperty("__litRendererCount",
-                litRendererCount + 1);
+        }
         propertyNamespace = "lr_" + litRendererCount + "_";
+    }
+
+    protected LitRenderer() {
+        this("");
     }
 
     /**
