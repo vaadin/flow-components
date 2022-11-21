@@ -1,20 +1,15 @@
 import { html, LitElement } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
 
-type ItemModel = { item: any; index: number };
-
-type Renderer = (root: HTMLElement, _: HTMLElement, model: ItemModel) => void;
-
-@customElement('lit-renderer-test-component')
 export class LitRendererTestComponent extends LitElement {
-  @property()
-  renderer?: Renderer;
+  static get properties() {
+    return {
+      renderer: { type: Object },
 
-  @property()
-  detailsRenderer?: Renderer;
+      detailsRenderer: { type: Object },
 
-  @property({ type: Array })
-  items: string[] = [];
+      items: { type: Array }
+    };
+  }
 
   createRenderRoot() {
     return this;
@@ -62,3 +57,5 @@ export class LitRendererTestComponent extends LitElement {
     `;
   }
 }
+
+customElements.define('lit-renderer-test-component', LitRendererTestComponent);

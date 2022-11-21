@@ -124,7 +124,7 @@ public class GridTestPageIT extends AbstractComponentIT {
             Assert.assertEquals("Item " + row, map.get("col0"));
             if ("0".equals(row)) {
                 Assert.assertEquals("Details opened! 0",
-                        map.get("detailsProperty"));
+                        map.get("lr_1_detailsProperty"));
             } else {
                 Assert.assertThat(map.keySet(), CoreMatchers
                         .not(CoreMatchers.hasItem("detailsProperty")));

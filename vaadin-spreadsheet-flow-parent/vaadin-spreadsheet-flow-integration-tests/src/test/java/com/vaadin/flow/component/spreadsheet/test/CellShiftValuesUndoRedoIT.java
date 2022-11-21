@@ -4,10 +4,8 @@ import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
 import com.vaadin.flow.component.spreadsheet.testbench.SpreadsheetElement;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
@@ -22,7 +20,6 @@ public class CellShiftValuesUndoRedoIT extends AbstractSpreadsheetIT {
         createNewSpreadsheet();
     }
 
-    @Ignore("The test started to fail on CI. Ignore until the issue is resolved.")
     @Test
     public void undoRedo_CellShiftValues_ValuesAreUpdatedAsExpectedWithNoErrors() {
         loadFile("500x200test.xlsx");
@@ -59,20 +56,6 @@ public class CellShiftValuesUndoRedoIT extends AbstractSpreadsheetIT {
                 return value == null;
             }
         });
-    }
-
-    private void undo() {
-        // TODO: cleanup modifier keys solution (for macOS)
-        new Actions(getDriver()).keyDown(Keys.CONTROL).keyDown(Keys.COMMAND)
-                .sendKeys("z").keyUp(Keys.CONTROL).keyUp(Keys.COMMAND).build()
-                .perform();
-    }
-
-    private void redo() {
-        // TODO: cleanup modifier keys solution (for macOS)
-        new Actions(getDriver()).keyDown(Keys.CONTROL).keyDown(Keys.COMMAND)
-                .sendKeys("y").keyUp(Keys.CONTROL).keyUp(Keys.COMMAND).build()
-                .perform();
     }
 
 }
