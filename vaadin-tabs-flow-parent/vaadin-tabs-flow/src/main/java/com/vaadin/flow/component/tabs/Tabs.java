@@ -85,10 +85,9 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
      * Constructs a new object enclosing the given tabs, with
      * {@link Orientation#HORIZONTAL HORIZONTAL} orientation.
      * <p>
-     * The first added {@link Tab} component will be automatically selected,
-     * firing a {@link SelectedChangeEvent}, unless autoselection is explicitly
-     * disabled with {@link #Tabs(boolean, Tab...)}, or
-     * {@link #setAutoselect(boolean)}.
+     * The first added {@link Tab} component will be automatically selected. Any
+     * selection change listener added afterwards will not be notified about the
+     * auto-selected tab.
      *
      * @param tabs
      *            the tabs to enclose
@@ -101,6 +100,10 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
     /**
      * Constructs a new object enclosing the given autoselect option and tabs,
      * with {@link Orientation#HORIZONTAL HORIZONTAL} orientation.
+     * <p>
+     * Unless auto-select is disabled, the first added {@link Tab} component
+     * will be automatically selected. Any selection change listener added
+     * afterwards will not be notified about the auto-selected tab.
      *
      * @param autoselect
      *            {@code true} to automatically select the first added tab,
@@ -118,9 +121,10 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
      * Adds the given tabs to the component.
      * <p>
      * The first added {@link Tab} component will be automatically selected,
-     * firing a {@link SelectedChangeEvent}, unless autoselection is explicitly
-     * disabled with {@link #Tabs(boolean, Tab...)}, or
-     * {@link #setAutoselect(boolean)}.
+     * unless auto-selection is explicitly disabled with
+     * {@link #Tabs(boolean, Tab...)}, or {@link #setAutoselect(boolean)}. If a
+     * selection change listener has been added before adding the tabs, it will
+     * be notified with the auto-selected tab.
      *
      * @param tabs
      *            the tabs to enclose
