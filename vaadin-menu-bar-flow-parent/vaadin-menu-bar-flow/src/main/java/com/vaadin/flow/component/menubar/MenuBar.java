@@ -40,6 +40,7 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.function.SerializableRunnable;
 import com.vaadin.flow.internal.JsonSerializer;
 
 import elemental.json.JsonObject;
@@ -77,7 +78,14 @@ public class MenuBar extends Component
      */
     public MenuBar() {
         menuItemsArrayGenerator = new MenuItemsArrayGenerator<>(this);
-        menuManager = new MenuManager<>(this, this::resetContent,
+        // Not a lambda because of UI serialization purposes
+        SerializableRunnable resetContent = new SerializableRunnable() {
+            @Override
+            public void run() {
+                resetContent();
+            }
+        };
+        menuManager = new MenuManager<>(this, resetContent,
                 (menu, contentReset) -> new MenuBarRootItem(this, contentReset),
                 MenuItem.class, null);
         addAttachListener(event -> {
