@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.data.renderer;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import com.vaadin.flow.component.Component;
@@ -53,6 +54,7 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
     private SerializableFunction<SOURCE, COMPONENT> componentFunction;
     private SerializableBiFunction<Component, SOURCE, Component> componentUpdateFunction;
     private SerializableBiConsumer<COMPONENT, SOURCE> itemConsumer;
+    private String componentRendererTag = "flow-component-renderer";
 
     public ComponentRenderer(
             SerializableFunction<SOURCE, COMPONENT> componentFunction,
@@ -77,8 +79,9 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
         var appId = UI.getCurrent() != null
                 ? UI.getCurrent().getInternals().getAppId()
                 : "";
-        return "<flow-component-renderer nodeid=${item.nodeid} appid='" + appId
-                + "'></flow-component-renderer>";
+
+        return String.format("<%s appid=\"%s\" nodeid=\"${item.nodeid}\"></%s>",
+                componentRendererTag, appId, componentRendererTag);
     }
 
     public ComponentRenderer(
@@ -142,26 +145,18 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
     }
 
     /**
-     * Called when the item is updated. By default, a new {@link Component} is
-     * created (via {@link #createComponent(Object)}) when the item is updated,
-     * but setting a update function via the
-     * {@link #ComponentRenderer(SerializableFunction, SerializableBiFunction)}
-     * can change the behavior.
+     * Sets the tag of the webcomponent used at the client-side to manage
+     * component rendering inside {@code <template>}. By default it uses
+     * {@code <flow-component-renderer>}.
      *
-     * @param currentComponent
-     *            the current component used to render the item, not
-     *            <code>null</code>
-     * @param item
-     *            the updated item
-     * @return the component that should be used to render the updated item. The
-     *         same instance can be returned, or a totally new one, but not
-     *         <code>null</code>.
+     * @param componentRendererTag
+     *            the tag of the client-side webcomponent for component
+     *            rendering, not <code>null</code>
      */
-    public Component updateComponent(Component currentComponent, SOURCE item) {
-        if (componentUpdateFunction != null) {
-            return componentUpdateFunction.apply(currentComponent, item);
-        }
-        return createComponent(item);
+    public void setComponentRendererTag(String componentRendererTag) {
+        Objects.requireNonNull(componentRendererTag,
+                "The componentRendererTag should not be null");
+        this.componentRendererTag = componentRendererTag;
     }
 
     /**
@@ -183,4 +178,26 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
         return component;
     }
 
+    /**
+     * Called when the item is updated. By default, a new {@link Component} is
+     * created (via {@link #createComponent(Object)}) when the item is updated,
+     * but setting a update function via the
+     * {@link #ComponentRenderer(SerializableFunction, SerializableBiFunction)}
+     * can change the behavior.
+     *
+     * @param currentComponent
+     *            the current component used to render the item, not
+     *            <code>null</code>
+     * @param item
+     *            the updated item
+     * @return the component that should be used to render the updated item. The
+     *         same instance can be returned, or a totally new one, but not
+     *         <code>null</code>.
+     */
+    public Component updateComponent(Component currentComponent, SOURCE item) {
+        if (componentUpdateFunction != null) {
+            return componentUpdateFunction.apply(currentComponent, item);
+        }
+        return createComponent(item);
+    }
 }

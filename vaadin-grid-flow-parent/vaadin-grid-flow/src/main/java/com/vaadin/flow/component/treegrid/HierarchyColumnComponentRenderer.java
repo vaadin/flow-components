@@ -38,7 +38,7 @@ public class HierarchyColumnComponentRenderer<COMPONENT extends Component, SOURC
         // The click listener needs to check if the event gets canceled (by
         // vaadin-grid-tree-toggle) and only invoke the callback if it does.
         // vaadin-grid-tree-toggle will cancel the event if the user clicks on
-        // a focusable element inside the toggle.
+        // a non-focusable element inside the toggle.
         var clickListener = "e => requestAnimationFrame(() => { e.defaultPrevented && onClick(e) })";
 
         return "<vaadin-grid-tree-toggle @click=${" + clickListener
