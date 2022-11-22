@@ -40,7 +40,7 @@ import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
-import com.vaadin.flow.data.renderer.TemplateRenderer;
+import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.dom.ElementConstants;
 import com.vaadin.flow.router.Route;
 
@@ -120,7 +120,7 @@ public class ComboBoxDemoPage extends VerticalLayout {
         createDisabledComboBox();
         createObjectComboBox();
         createComboBoxWithObjectStringSimpleValue();
-        createComboBoxUsingTemplateRenderer();
+        createComboBoxUsingLitRenderer();
         createComboBoxUsingComponentRenderer();
         createComboBoxWithInMemoryLazyLoading();
         createComboBoxWithCallbackLazyLoading();
@@ -234,7 +234,7 @@ public class ComboBoxDemoPage extends VerticalLayout {
         add(new Div(new H2("Disabled ComboBox"), comboBox, message));
     }
 
-    private void createComboBoxUsingTemplateRenderer() {
+    private void createComboBoxUsingLitRenderer() {
         Div message = createMessageDiv("template-selection-message");
 
         ComboBox<Song> comboBox = new ComboBox<>();
@@ -253,8 +253,8 @@ public class ComboBoxDemoPage extends VerticalLayout {
 
         comboBox.setItems(filter, listOfSongs);
         comboBox.setItemLabelGenerator(Song::getName);
-        comboBox.setRenderer(TemplateRenderer.<Song> of(
-                "<div>[[item.song]]<br><small>[[item.artist]]</small></div>")
+        comboBox.setRenderer(LitRenderer.<Song> of(
+                "<div>${item.song}<br><small>${item.artist}</small></div>")
                 .withProperty("song", Song::getName)
                 .withProperty("artist", Song::getArtist));
 
@@ -275,7 +275,7 @@ public class ComboBoxDemoPage extends VerticalLayout {
         comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, WIDTH_STRING);
         comboBox.setId("template-selection-box");
         add(new Div(new H2("Using templates"),
-                new H2("Rendering items using TemplateRenderer"), comboBox,
+                new H2("Rendering items using LitRenderer"), comboBox,
                 message));
     }
 
@@ -330,8 +330,8 @@ public class ComboBoxDemoPage extends VerticalLayout {
         comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, WIDTH_STRING);
         comboBox.setId("component-selection-box");
         add(new Div(new H2("Using components"),
-                new H2("Rendering items using ComponentTemplateRenderer"),
-                comboBox, message));
+                new H2("Rendering items using ComponentRenderer"), comboBox,
+                message));
     }
 
     private void createComboBoxWithInMemoryLazyLoading() {

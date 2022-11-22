@@ -32,12 +32,12 @@ import com.vaadin.flow.component.virtuallist.VirtualList;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.LocalDateRenderer;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 import com.vaadin.flow.data.renderer.NativeButtonRenderer;
 import com.vaadin.flow.data.renderer.NumberRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
-import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.Route;
 
@@ -193,8 +193,8 @@ public class VirtualListPage extends Div {
                 .ofCollection(people);
 
         list.setDataProvider(dataProvider);
-        list.setRenderer(TemplateRenderer
-                .<Person> of("[[item.name]] - [[item.age]] - [[item.user]]")
+        list.setRenderer(LitRenderer
+                .<Person> of("${item.name} - ${item.age} - ${item.user}")
                 .withProperty("name", Person::getName)
                 .withProperty("age", Person::getAge)
                 .withProperty("user", person -> person.getName().toLowerCase()
@@ -242,10 +242,10 @@ public class VirtualListPage extends Div {
         List<String> items = new ArrayList<>(Arrays.asList("Clickable item 1",
                 "Clickable item 2", "Clickable item 3"));
 
-        list.setRenderer(TemplateRenderer.<String> of(
-                "<div on-click='remove' id='template-events-item-[[index]]'>[[item.label]]</div>")
+        list.setRenderer(LitRenderer.<String> of(
+                "<div @click=${remove} id='template-events-item-${index}'>${item.label}</div>")
                 .withProperty("label", ValueProvider.identity())
-                .withEventHandler("remove", item -> {
+                .withFunction("remove", item -> {
                     items.remove(item);
                     list.getDataCommunicator().reset();
                     message.setText(item + " removed");

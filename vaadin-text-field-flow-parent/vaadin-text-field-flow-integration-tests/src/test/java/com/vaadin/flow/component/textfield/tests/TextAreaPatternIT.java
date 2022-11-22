@@ -38,7 +38,7 @@ public class TextAreaPatternIT extends AbstractComponentIT {
     private TestBenchElement clearPattern;
     private TestBenchElement checkValidity;
     private TestBenchElement validityOutput;
-    private TestBenchElement enablePreventInvalidInput;
+    private TestBenchElement enableAllowedCharPattern;
 
     @Before
     public void init() {
@@ -48,8 +48,8 @@ public class TextAreaPatternIT extends AbstractComponentIT {
         setNumberPattern = $("button").id("set-number-pattern");
         setInvalidPattern = $("button").id("set-invalid-pattern");
         clearPattern = $("button").id("clear-pattern");
-        enablePreventInvalidInput = $("button")
-                .id("enable-prevent-invalid-input");
+        enableAllowedCharPattern = $("button")
+                .id("enable-allowed-char-pattern");
         // These two are defined by TextFieldTestPageUtil.addInvalidCheck
         checkValidity = $("button").id("check-is-invalid");
         validityOutput = $("div").id("is-invalid");
@@ -94,9 +94,9 @@ public class TextAreaPatternIT extends AbstractComponentIT {
     }
 
     @Test
-    public void validPattern_preventInvalidInput_invalidInput_inputShouldBePrevented() {
+    public void validPattern_allowedCharPattern_invalidInput_inputShouldBePrevented() {
         setNumberPattern.click();
-        enablePreventInvalidInput.click();
+        enableAllowedCharPattern.click();
         textArea.sendKeys("abcd1234");
         blur();
 

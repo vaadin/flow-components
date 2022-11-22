@@ -27,10 +27,9 @@ import com.vaadin.flow.function.SerializableFunction;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-integer-field")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha4")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/integer-field", version = "23.3.0-alpha2")
-@NpmPackage(value = "@vaadin/vaadin-text-field", version = "23.3.0-alpha2")
+@NpmPackage(value = "@vaadin/integer-field", version = "24.0.0-alpha4")
 @JsModule("@vaadin/integer-field/src/vaadin-integer-field.js")
 public class IntegerField extends AbstractNumberField<IntegerField, Integer> {
 
@@ -180,7 +179,7 @@ public class IntegerField extends AbstractNumberField<IntegerField, Integer> {
     /**
      * Sets the allowed number intervals of the field. This specifies how much
      * the value will be increased/decreased when clicking on the
-     * {@link #setHasControls(boolean) control buttons}. It is also used to
+     * {@link #setStepButtonsVisible(boolean) step buttons}. It is also used to
      * invalidate the field, if the value doesn't align with the specified step
      * and {@link #setMin(int) min} (if specified by user).
      *

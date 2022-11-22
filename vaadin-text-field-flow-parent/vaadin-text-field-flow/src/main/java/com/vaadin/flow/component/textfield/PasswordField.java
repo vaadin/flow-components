@@ -281,7 +281,7 @@ public class PasswordField
      *            the maximum length
      */
     public void setMaxLength(int maxLength) {
-        super.setMaxlength(maxLength);
+        getElement().setProperty("maxlength", maxLength);
         getValidationSupport().setMaxLength(maxLength);
     }
 
@@ -292,7 +292,7 @@ public class PasswordField
      * @return the {@code maxlength} property from the webcomponent
      */
     public int getMaxLength() {
-        return (int) getMaxlengthDouble();
+        return (int) getElement().getProperty("maxlength", 0.0);
     }
 
     /**
@@ -303,7 +303,7 @@ public class PasswordField
      *            the minimum length
      */
     public void setMinLength(int minLength) {
-        super.setMinlength(minLength);
+        getElement().setProperty("minlength", minLength);
         getValidationSupport().setMinLength(minLength);
     }
 
@@ -314,7 +314,7 @@ public class PasswordField
      * @return the {@code minlength} property from the webcomponent
      */
     public int getMinLength() {
-        return (int) getMinlengthDouble();
+        return (int) getElement().getProperty("minlength", 0.0);
     }
 
     /**
@@ -333,31 +333,22 @@ public class PasswordField
     }
 
     /**
-     * When set to <code>true</code>, user is prevented from typing a value that
-     * conflicts with the given {@code pattern}.
+     * Sets a regular expression for the value to pass on the client-side. The
+     * pattern must be a valid JavaScript Regular Expression that matches the
+     * entire value, not just some subset.
      *
-     * @return the {@code preventInvalidInput} property from the webcomponent
+     * @param pattern
+     *            the new String pattern
      *
-     * @deprecated Since 23.2, this API is deprecated.
+     * @see <a href=
+     *      "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#htmlattrdefpattern">
+     *      https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#htmlattrdefpattern</>
+     * @see <a href=
+     *      "https://html.spec.whatwg.org/multipage/input.html#attr-input-pattern">
+     *      https://html.spec.whatwg.org/multipage/input.html#attr-input-pattern</>
      */
-    @Deprecated
-    public boolean isPreventInvalidInput() {
-        return isPreventInvalidInputBoolean();
-    }
-
-    /**
-     * @deprecated Since 23.2, this API is deprecated in favor of
-     *             {@link #setAllowedCharPattern(String)}
-     */
-    @Deprecated
-    @Override
-    public void setPreventInvalidInput(boolean preventInvalidInput) {
-        super.setPreventInvalidInput(preventInvalidInput);
-    }
-
-    @Override
     public void setPattern(String pattern) {
-        super.setPattern(pattern);
+        getElement().setProperty("pattern", pattern == null ? "" : pattern);
         getValidationSupport().setPattern(pattern);
     }
 
@@ -368,7 +359,7 @@ public class PasswordField
      * @return the {@code pattern} property from the webcomponent
      */
     public String getPattern() {
-        return getPatternString();
+        return getElement().getProperty("pattern");
     }
 
     /**

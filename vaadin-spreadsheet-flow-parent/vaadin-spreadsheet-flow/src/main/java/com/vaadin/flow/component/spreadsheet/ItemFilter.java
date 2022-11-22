@@ -246,6 +246,7 @@ public class ItemFilter extends Div implements SpreadsheetFilter {
         cancelValueChangeUpdate = false;
         filterOptionsProvider = new ListDataProvider<>(filterOptions);
         filterCheckbox.setItems(filterOptionsProvider);
+        firstUpdate = true;
         filterCheckbox.setValue(visibleValues);
     }
 

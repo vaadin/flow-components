@@ -42,8 +42,8 @@ public class WrongHashesOnScrollIT extends AbstractSpreadsheetIT {
 
         Thread.sleep(500);
 
-        final List<WebElement> elements = getSpreadsheet()
-                .findElements(By.cssSelector(".cell"));
+        final List<WebElement> elements = findElementsInShadowRoot(
+                By.cssSelector(".cell"));
 
         for (WebElement cell : elements) {
             assertNotEquals(

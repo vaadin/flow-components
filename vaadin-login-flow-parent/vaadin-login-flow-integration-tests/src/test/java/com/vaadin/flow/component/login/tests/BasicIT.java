@@ -35,7 +35,7 @@ public abstract class BasicIT extends AbstractParallelTest {
             Assert.assertEquals("", login.getErrorMessage());
         }
         Assert.assertEquals("Forgot password",
-                login.getForgotPasswordButton().getText());
+                login.getForgotPasswordButton().getText().trim());
         Assert.assertFalse(getLoginForm().getForgotPasswordButton()
                 .hasAttribute("hidden"));
         Assert.assertEquals("", login.getAdditionalInformation());
@@ -45,7 +45,7 @@ public abstract class BasicIT extends AbstractParallelTest {
             PasswordFieldElement password, ButtonElement submit) {
         Assert.assertEquals("Username", username.getLabel());
         Assert.assertEquals("Password", password.getLabel());
-        Assert.assertEquals("Log in", submit.getText());
+        Assert.assertEquals("Log in", submit.getText().trim());
     }
 
     protected void checkSuccessfulLogin(TextFieldElement usernameField,

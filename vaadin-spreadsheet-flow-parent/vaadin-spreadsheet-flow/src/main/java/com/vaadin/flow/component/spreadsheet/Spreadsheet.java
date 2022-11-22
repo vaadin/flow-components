@@ -31,6 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -52,12 +53,15 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.SheetVisibility;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.ClientAnchor.AnchorType;
 import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellRangeUtil;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.ss.util.PaneInformation;
 import org.apache.poi.ss.util.WorkbookUtil;
+import org.apache.poi.util.Units;
+import org.apache.poi.xssf.usermodel.XSSFClientAnchor;
 import org.apache.poi.xssf.usermodel.XSSFHyperlink;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -69,7 +73,6 @@ import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTWorksheet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
@@ -80,7 +83,6 @@ import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.spreadsheet.SheetOverlayWrapper.OverlayChangeListener;
 import com.vaadin.flow.component.spreadsheet.action.SpreadsheetDefaultActionHandler;
 import com.vaadin.flow.component.spreadsheet.client.CellData;
@@ -96,15 +98,16 @@ import com.vaadin.flow.component.spreadsheet.rpc.SpreadsheetClientRpc;
 import com.vaadin.flow.component.spreadsheet.shared.GroupingData;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.shared.Registration;
 import com.vaadin.pro.licensechecker.LicenseChecker;
 
 import elemental.json.JsonValue;
 
 /**
- * Vaadin Spreadsheet is a Vaadin Add-On Component which allows displaying and
- * interacting with the contents of an Excel file. The Spreadsheet can be used
- * in any Vaadin application for enabling users to view and manipulate Excel
- * files in their web browsers.
+ * Vaadin Spreadsheet is a component which allows displaying and interacting
+ * with the contents of an Excel file. The Spreadsheet can be used in any Vaadin
+ * application for enabling users to view and manipulate Excel files in their
+ * web browsers.
  *
  * @author Vaadin Ltd.
  */
@@ -139,33 +142,9 @@ public class Spreadsheet extends Component
         }
     }
 
-    /*
-     * FLOW RELATED STUFF
-     */
-
-    /*
-     * SHARED STATE PROPERTIES
-     */
-
-    // from TabIndexState
-
-    public int tabIndex = 0;
-
-    // from AbstractComponentState
-
     @Override
     public void setId(String id) {
         getElement().setProperty("id", id);
-    }
-
-    @Override
-    public void setHeight(String height) {
-        getElement().setProperty("height", height);
-    }
-
-    @Override
-    public void setWidth(String width) {
-        getElement().setProperty("width", width);
     }
 
     // from SaredState
@@ -254,6 +233,8 @@ public class Spreadsheet extends Component
     private String infoLabelValue;
 
     private boolean workbookChangeToggle;
+
+    private Locale locale;
 
     int getCols() {
         return cols;
@@ -1030,10 +1011,6 @@ public class Spreadsheet extends Component
 
     private Workbook workbook;
 
-    /** true if the component sheet should be reloaded on client side. */
-    // todo: already defined in shared state. Check!
-    // private boolean reload;
-
     /** are tables for currently active sheet loaded */
     private boolean tablesLoaded;
 
@@ -1192,7 +1169,6 @@ public class Spreadsheet extends Component
         sheetOverlays = new HashSet<SheetOverlayWrapper>();
         tables = new HashSet<SpreadsheetTable>();
         registerRpc(new SpreadsheetHandlerImpl(this));
-        setSizeFull(); // Default to full size
         defaultActionHandler = new SpreadsheetDefaultActionHandler();
         hyperlinkCellClickHandler = new DefaultHyperlinkCellClickHandler(this);
         addActionHandler(defaultActionHandler);
@@ -1469,7 +1445,7 @@ public class Spreadsheet extends Component
      * @see #setChartsEnabled(boolean)
      * @return
      */
-    public boolean isChartsEnabled() {
+    boolean isChartsEnabled() {
         return chartsEnabled;
     }
 
@@ -1479,7 +1455,7 @@ public class Spreadsheet extends Component
      *
      * @param chartsEnabled
      */
-    public void setChartsEnabled(boolean chartsEnabled) {
+    void setChartsEnabled(boolean chartsEnabled) {
         this.chartsEnabled = chartsEnabled;
         clearSheetOverlays();
         loadOrUpdateOverlays();
@@ -1657,30 +1633,38 @@ public class Spreadsheet extends Component
         return new CellRangeAddress(r1 - 1, r2 - 1, c1 - 1, c2 - 1);
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Set the Locale for the Spreadsheet. The locale is used for formatting
+     * cell values.
      *
-     * @see com.vaadin.ui.AbstractComponent#setLocale(java.util.Locale)
+     * @param locale
+     *            the locale set to the spreadsheet, cannot be null
      */
     public void setLocale(Locale locale) {
+        Objects.requireNonNull(locale, "Locale must not be null.");
+        this.locale = locale;
         valueManager.updateLocale(locale);
         refreshAllCellValues();
+    }
+
+    /**
+     * Gets the Locale for this spreadsheet
+     *
+     * @return the locale used for spreadsheet
+     */
+    @Override
+    public Locale getLocale() {
+        if (locale != null) {
+            return locale;
+        } else {
+            return super.getLocale();
+        }
     }
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         valueManager.updateLocale(getLocale());
-        if (!FeatureFlags
-                .get(UI.getCurrent().getSession().getService().getContext())
-                .isEnabled(FeatureFlags.SPREADSHEET_COMPONENT)) {
-            throw new RuntimeException("\n\n--------------\n\n"
-                    + "The spreadsheet component is currently an experimental feature and needs to be explicitly enabled. "
-                    + "The component can be enabled by using the Vaadin dev-mode Gizmo, in the experimental features tab, "
-                    + "or by adding a `src/main/resources/vaadin-featureflags.properties` file with the following content: "
-                    + "`com.vaadin.experimental.spreadsheetComponent=true`"
-                    + "\n\n--------------\n\n");
-        }
     }
 
     /**
@@ -1738,6 +1722,8 @@ public class Spreadsheet extends Component
                 reloadActiveSheetData();
                 SpreadsheetFactory.reloadSpreadsheetData(this,
                         getActiveSheet());
+
+                getSpreadsheetStyleFactory().reloadActiveSheetCellStyles();
             }
         }
     }
@@ -1832,7 +1818,6 @@ public class Spreadsheet extends Component
         if (!workbook.isSheetVeryHidden(sheetIndex)
                 && !workbook.isSheetHidden(sheetIndex)) {
             int ourIndex = getSpreadsheetSheetIndex(sheetIndex);
-            // todo: comprobar si esto es así
             String[] _sheetNames = Arrays.copyOf(getSheetNames(),
                     getSheetNames().length);
             _sheetNames[ourIndex] = sheetName;
@@ -1937,6 +1922,8 @@ public class Spreadsheet extends Component
         workbook.removeSheetAt(poiSheetIndex);
 
         // POI doesn't seem to shift the active sheet index ...
+        // TODO: This no longer seems to be the case. Remove the following
+        // logic?
         int oldIndex = getSheetIndex() - 1;
         if (removedVisibleIndex <= oldIndex) { // removed before current
             if (oldIndex == (getNumberOfVisibleSheets())) {
@@ -1965,9 +1952,9 @@ public class Spreadsheet extends Component
      *             index is invalid.
      */
     public void deleteSheet(int sheetIndex) throws IllegalArgumentException {
-        if (getNumberOfVisibleSheets() < 2) {
+        if (sheetIndex < 0 || sheetIndex >= getNumberOfVisibleSheets()) {
             throw new IllegalArgumentException(
-                    "A workbook must contain at least one visible worksheet");
+                    "Invalid index for visible sheet given.");
         }
         deleteSheetWithPOIIndex(getVisibleSheetPOIIndex(sheetIndex));
     }
@@ -2637,34 +2624,6 @@ public class Spreadsheet extends Component
     }
 
     /**
-     * This method is called when rowIndex auto-fit has been initiated from the
-     * browser by double-clicking the border of the target rowIndex header.
-     *
-     * @param rowIndex
-     *            Index of the target rowIndex, 0-based
-     */
-    protected void onRowHeaderDoubleClick(int rowIndex) {
-        fireRowHeaderDoubleClick(rowIndex);
-    }
-
-    private void fireRowHeaderDoubleClick(int rowIndex) {
-        fireEvent(new RowHeaderDoubleClickEvent(this, rowIndex));
-    }
-
-    /**
-     * adds a {@link RowHeaderDoubleClickListener} to the Spreadsheet
-     *
-     * @param listener
-     *            The listener to add
-     **/
-    public void addRowHeaderDoubleClickListener(
-            RowHeaderDoubleClickListener listener) {
-        addListener(RowHeaderDoubleClickEvent.class,
-                listener::onRowHeaderDoubleClick); // ,
-                                                   // RowHeaderDoubleClickListener.ON_ROW_ON_ROW_HEADER_DOUBLE_CLICK);
-    }
-
-    /**
      * This method is called when column auto-fit has been initiated from the
      * browser by double-clicking the border of the target column header.
      *
@@ -2945,7 +2904,8 @@ public class Spreadsheet extends Component
                 } else if (numberOfRowsAboveWasChanged(row, last, first)) {
                     int newRow = cell.getRow() + n;
                     int col = cell.getCol();
-                    CellReference newCell = new CellReference(newRow, col);
+                    CellReference newCell = new CellReference(newRow, col, true,
+                            true);
                     pbutton.setCellReference(newCell);
                     updated.put(newCell, pbutton);
                 } else {
@@ -3551,11 +3511,6 @@ public class Spreadsheet extends Component
                     Serializer.serialize(new ArrayList<>(resources.keySet())));
             getElement().setAttribute("resource-" + key, resource);
         }
-    }
-
-    protected void setResource(String key, Icon icon) {
-        // todo: ver que hacemos con esto
-        // super.setResource(key, resource);
     }
 
     void clearSheetServerSide() {
@@ -4228,10 +4183,23 @@ public class Spreadsheet extends Component
      * Decides if overlay is visible in the current view.
      */
     private boolean isOverlayVisible(SheetOverlayWrapper overlay) {
-        int col1 = overlay.getAnchor().getCol1();
-        int col2 = overlay.getAnchor().getCol2();
-        int row1 = overlay.getAnchor().getRow1();
-        int row2 = overlay.getAnchor().getRow2();
+        var anchor = overlay.getAnchor();
+
+        // Need special handling for XSSFClientAnchor anchors of type
+        // DONT_MOVE_AND_RESIZE.
+        // See https://github.com/vaadin/flow-components/issues/3261
+        if (AnchorType.DONT_MOVE_AND_RESIZE.equals(anchor.getAnchorType())
+                && anchor instanceof XSSFClientAnchor) {
+            // Since there's no way to know if an arbitrary x/y coordinate is
+            // inside the current viewport, always return true for these
+            // anchors.
+            return true;
+        }
+
+        int col1 = anchor.getCol1();
+        int col2 = anchor.getCol2();
+        int row1 = anchor.getRow1();
+        int row2 = anchor.getRow2();
 
         // type=2, doesn't size with cells
         final boolean isType2 = (col2 == 0 && row2 == 0);
@@ -4297,12 +4265,33 @@ public class Spreadsheet extends Component
 
         Sheet sheet = getActiveSheet();
 
-        int col = overlayWrapper.getAnchor().getCol1();
+        var anchor = overlayWrapper.getAnchor();
+
+        // Need special handling for XSSFClientAnchor anchors of type
+        // DONT_MOVE_AND_RESIZE.
+        // See https://github.com/vaadin/flow-components/issues/3261
+        if (AnchorType.DONT_MOVE_AND_RESIZE.equals(anchor.getAnchorType())
+                && anchor instanceof XSSFClientAnchor) {
+            info.col = 1;
+            info.row = 1;
+
+            var xssfAnchor = (XSSFClientAnchor) anchor;
+            info.dx = (Long) xssfAnchor.getPosition().getX()
+                    / Units.EMU_PER_PIXEL;
+            info.dy = (Long) xssfAnchor.getPosition().getY()
+                    / Units.EMU_PER_POINT;
+            info.width = xssfAnchor.getSize().getCx() / Units.EMU_PER_PIXEL;
+            info.height = xssfAnchor.getSize().getCy() / Units.EMU_PER_POINT;
+
+            return info;
+        }
+
+        int col = anchor.getCol1();
         while (isColumnHidden(col)) {
             col++;
         }
 
-        int row = overlayWrapper.getAnchor().getRow1();
+        int row = anchor.getRow1();
         while (isRowHidden(row)) {
             row++;
         }
@@ -4316,11 +4305,11 @@ public class Spreadsheet extends Component
         // FIXME: height and width can be -1, it is never handled anywhere
 
         // if original start row/column is hidden, use 0 dy/dx
-        if (col == overlayWrapper.getAnchor().getCol1()) {
+        if (col == anchor.getCol1()) {
             info.dx = overlayWrapper.getDx1(sheet);
         }
 
-        if (row == overlayWrapper.getAnchor().getRow1()) {
+        if (row == anchor.getRow1()) {
             info.dy = overlayWrapper.getDy1(sheet);
         }
 
@@ -4697,7 +4686,7 @@ public class Spreadsheet extends Component
      * @param customComponentFactory
      *            The new component factory to use.
      */
-    public void setSpreadsheetComponentFactory(
+    void setSpreadsheetComponentFactory(
             SpreadsheetComponentFactory customComponentFactory) {
         this.customComponentFactory = customComponentFactory;
         if (firstRow != -1) {
@@ -4719,7 +4708,7 @@ public class Spreadsheet extends Component
      *
      * @return The currently used component factory.
      */
-    public SpreadsheetComponentFactory getSpreadsheetComponentFactory() {
+    SpreadsheetComponentFactory getSpreadsheetComponentFactory() {
         return customComponentFactory;
     }
 
@@ -5246,10 +5235,12 @@ public class Spreadsheet extends Component
      *
      * @param listener
      *            Listener to add.
+     * @return a {@link Registration} for removing the event listener
      */
-    public void addSelectionChangeListener(SelectionChangeListener listener) {
-        addListener(SelectionChangeEvent.class, listener::onSelectionChange); // ,
-                                                                              // SelectionChangeListener.SELECTION_CHANGE_METHOD);
+    public Registration addSelectionChangeListener(
+            SelectionChangeListener listener) {
+        return addListener(SelectionChangeEvent.class,
+                listener::onSelectionChange);
     }
 
     /**
@@ -5257,10 +5248,12 @@ public class Spreadsheet extends Component
      *
      * @param listener
      *            Listener to add.
+     * @return a {@link Registration} for removing the event listener
      */
-    public void addCellValueChangeListener(CellValueChangeListener listener) {
-        addListener(CellValueChangeEvent.class, listener::onCellValueChange); // ,
-                                                                              // CellValueChangeListener.CELL_VALUE_CHANGE_METHOD);
+    public Registration addCellValueChangeListener(
+            CellValueChangeListener listener) {
+        return addListener(CellValueChangeEvent.class,
+                listener::onCellValueChange);
     }
 
     /**
@@ -5268,38 +5261,12 @@ public class Spreadsheet extends Component
      *
      * @param listener
      *            Listener to add.
+     * @return a {@link Registration} for removing the event listener
      */
-    public void addFormulaValueChangeListener(
+    public Registration addFormulaValueChangeListener(
             FormulaValueChangeListener listener) {
-        addListener(FormulaValueChangeEvent.class,
-                listener::onFormulaValueChange); // ,
-                                                 // FormulaValueChangeListener.FORMULA_VALUE_CHANGE_METHOD);
-    }
-
-    /**
-     * Removes the given SelectionChangeListener from this Spreadsheet.
-     *
-     * @param listener
-     *            Listener to remove.
-     */
-    public void removeSelectionChangeListener(
-            SelectionChangeListener listener) {
-        // todo: el método removeListener no existe en Component
-        // removeListener(SelectionChangeEvent.class, listener,
-        // SelectionChangeListener.SELECTION_CHANGE_METHOD);
-    }
-
-    /**
-     * Removes the given CellValueChangeListener from this Spreadsheet.
-     *
-     * @param listener
-     *            Listener to remove.
-     */
-    public void removeCellValueChangeListener(
-            CellValueChangeListener listener) {
-        // todo: el método removeListener no existe en Component
-        // removeListener(CellValueChangeEvent.class, listener,
-        // CellValueChangeListener.CELL_VALUE_CHANGE_METHOD);
+        return addListener(FormulaValueChangeEvent.class,
+                listener::onFormulaValueChange);
     }
 
     /**
@@ -5339,22 +5306,11 @@ public class Spreadsheet extends Component
      *
      * @param listener
      *            The listener to add.
+     * @return a {@link Registration} for removing the event listener
      */
-    public void addProtectedEditListener(ProtectedEditListener listener) {
-        addListener(ProtectedEditEvent.class, listener::writeAttempted); // ,
-                                                                         // ProtectedEditListener.SELECTION_CHANGE_METHOD);
-    }
-
-    /**
-     * Removes the given ProtectedEditListener.
-     *
-     * @param listener
-     *            The listener to remove.
-     */
-    public void removeProtectedEditListener(ProtectedEditListener listener) {
-        // todo: el método removeListener no existe en Component
-        // removeListener(ProtectedEditEvent.class, listener,
-        // ProtectedEditListener.SELECTION_CHANGE_METHOD);
+    public Registration addProtectedEditListener(
+            ProtectedEditListener listener) {
+        return addListener(ProtectedEditEvent.class, listener::writeAttempted);
     }
 
     /**
@@ -5510,22 +5466,10 @@ public class Spreadsheet extends Component
      *
      * @param listener
      *            Listener to add
+     * @return a {@link Registration} for removing the event listener
      */
-    public void addSheetChangeListener(SheetChangeListener listener) {
-        addListener(SheetChangeEvent.class, listener::onSheetChange); // ,
-                                                                      // SheetChangeListener.SHEET_CHANGE_METHOD);
-    }
-
-    /**
-     * Removes the given SheetChangeListener from this Spreadsheet.
-     *
-     * @param listener
-     *            Listener to remove
-     */
-    public void removeSheetChangeListener(SheetChangeListener listener) {
-        // todo: el método removeListener no existe en Component
-        // removeListener(SheetChangeEvent.class, listener,
-        // SheetChangeListener.SHEET_CHANGE_METHOD);
+    public Registration addSheetChangeListener(SheetChangeListener listener) {
+        return addListener(SheetChangeEvent.class, listener::onSheetChange);
     }
 
     private void fireSheetChangeEvent(Sheet previousSheet, Sheet newSheet) {
@@ -5533,19 +5477,6 @@ public class Spreadsheet extends Component
 
         fireEvent(new SheetChangeEvent(this, newSheet, previousSheet,
                 getSpreadsheetSheetIndex(newSheetPOIIndex), newSheetPOIIndex));
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.vaadin.ui.HasComponents#iterator()
-     */
-    // @Override
-    // todo: comprobar si esto es necesario
-    public Iterator<Component> iterator() {
-        return new IteratorChain<Component>(Arrays.asList(
-                customComponents.iterator(), attachedPopupButtons.iterator(),
-                overlayComponents.iterator()));
     }
 
     /**
@@ -5800,17 +5731,6 @@ public class Spreadsheet extends Component
                 invalidFormulaErrorMessage);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.vaadin.ui.AbstractComponent#focus()
-     */
-    // todo: no hace falta llamar al padre?
-    /*
-     * @Override public void focus() { super.focus(); }
-     *
-     */
-
     /**
      * Controls if a column group is collapsed or not.
      *
@@ -6060,8 +5980,31 @@ public class Spreadsheet extends Component
         void onRowHeaderDoubleClick(RowHeaderDoubleClickEvent event);
     }
 
-    @Override
-    public Locale getLocale() {
-        return super.getLocale();
+    /**
+     * This method is called when rowIndex auto-fit has been initiated from the
+     * browser by double-clicking the border of the target rowIndex header.
+     *
+     * @param rowIndex
+     *            Index of the target rowIndex, 0-based
+     */
+    protected void onRowHeaderDoubleClick(int rowIndex) {
+        fireRowHeaderDoubleClick(rowIndex);
+    }
+
+    private void fireRowHeaderDoubleClick(int rowIndex) {
+        fireEvent(new RowHeaderDoubleClickEvent(this, rowIndex));
+    }
+
+    /**
+     * adds a {@link RowHeaderDoubleClickListener} to the Spreadsheet
+     *
+     * @param listener
+     *            The listener to add
+     * @return a {@link Registration} for removing the event listener
+     **/
+    public Registration addRowHeaderDoubleClickListener(
+            RowHeaderDoubleClickListener listener) {
+        return addListener(RowHeaderDoubleClickEvent.class,
+                listener::onRowHeaderDoubleClick);
     }
 }

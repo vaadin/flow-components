@@ -22,6 +22,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.TabSheet;
@@ -158,6 +159,11 @@ public class TabSheetTest {
         tabSheet.add("Tab 0", (Span) null);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void addTextContent_throws() {
+        tabSheet.add("Tab 0", new Text("Tab 0 content"));
+    }
+
     @Test
     public void changeTab_selectedChangeEvent() {
         var tab0 = tabSheet.add("Tab 0", new Span("Content 0"));
@@ -184,6 +190,11 @@ public class TabSheetTest {
     @Test(expected = NullPointerException.class)
     public void removeNullContent_throws() {
         tabSheet.remove((Span) null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void removeTextContent_throws() {
+        tabSheet.remove(new Text("Tab 0 content"));
     }
 
     @Test
@@ -255,6 +266,8 @@ public class TabSheetTest {
         tabSheet.setSelectedIndex(1);
         Assert.assertEquals(1, tabSheet.getSelectedIndex());
         Assert.assertEquals(tab1, tabSheet.getSelectedTab());
+        Assert.assertEquals(1,
+                tabSheet.getElement().getProperty("selected", 0));
     }
 
     @Test
@@ -264,6 +277,8 @@ public class TabSheetTest {
         tabSheet.setSelectedTab(tab1);
         Assert.assertEquals(1, tabSheet.getSelectedIndex());
         Assert.assertEquals(tab1, tabSheet.getSelectedTab());
+        Assert.assertEquals(1,
+                tabSheet.getElement().getProperty("selected", 0));
     }
 
     @Test
@@ -273,11 +288,21 @@ public class TabSheetTest {
         Assert.assertEquals(prefix, tabSheet.getPrefixComponent());
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void setTextAsPrefix_throws() {
+        tabSheet.setPrefixComponent(new Text("Prefix"));
+    }
+
     @Test
     public void setSuffix_hasSuffix() {
         var suffix = new Span("suffix");
         tabSheet.setSuffixComponent(suffix);
         Assert.assertEquals(suffix, tabSheet.getSuffixComponent());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void setTextAsSuffix_throws() {
+        tabSheet.setSuffixComponent(new Text("Suffix"));
     }
 
     @Test
@@ -369,19 +394,28 @@ public class TabSheetTest {
     public void indexOfTab_returnsIndex() {
         var tab0 = tabSheet.add("Tab 0", new Span("Content 0"));
         var tab1 = tabSheet.add("Tab 1", new Span("Content 1"));
-        Assert.assertEquals(0, tabSheet.indexOf(tab0));
-        Assert.assertEquals(1, tabSheet.indexOf(tab1));
+        Assert.assertEquals(0, tabSheet.getIndexOf(tab0));
+        Assert.assertEquals(1, tabSheet.getIndexOf(tab1));
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void indexOfNull_throws() {
+    public void getIndexOfNull_throws() {
         tabSheet.add("Tab 0", new Span("Content 0"));
-        tabSheet.indexOf(null);
+        tabSheet.getIndexOf(null);
     }
 
     @Test
-    public void indexOfNonAttachedTab_returnsMinusOne() {
+    public void getIndexOfNonAttachedTab_returnsMinusOne() {
         tabSheet.add("Tab 0", new Span("Content 0"));
-        Assert.assertEquals(-1, tabSheet.indexOf(new Tab()));
+        Assert.assertEquals(-1, tabSheet.getIndexOf(new Tab()));
+    }
+
+    @Test
+    public void selectTabFromTabs_selectedUpdated() {
+        tabSheet.add("Tab 0", new Span("Content 0"));
+        tabSheet.add("Tab 1", new Span("Content 1"));
+        tabs.setSelectedIndex(1);
+        Assert.assertEquals(1,
+                tabSheet.getElement().getProperty("selected", 0));
     }
 }

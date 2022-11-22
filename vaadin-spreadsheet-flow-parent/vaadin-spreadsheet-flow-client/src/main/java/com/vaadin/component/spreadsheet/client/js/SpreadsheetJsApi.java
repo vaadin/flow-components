@@ -54,6 +54,7 @@ public class SpreadsheetJsApi {
 
     private void init(Element element) {
         spreadsheetConnector = new SpreadsheetConnector();
+        spreadsheetConnector.setHost(element);
         spreadsheetConnector.doInit("1", new ApplicationConnection());
         spreadsheetWidget = spreadsheetConnector.getWidget();
         RootPanel.getForElement(element).add(spreadsheetWidget);
@@ -493,6 +494,7 @@ public class SpreadsheetJsApi {
         } else {
             widget = popupButtonWidgets.get(key);
         }
+        widget.markActive(state.active);
         spreadsheetWidget.addPopupButton(widget);
     }
 
@@ -516,16 +518,16 @@ public class SpreadsheetJsApi {
     }
 
     private static native Element getPopupContentContainer(
-            String contentParentId) /*-{
+            String contentParentId, String appId) /*-{
         return $wnd.Vaadin
           && $wnd.Vaadin.Flow
-          && $wnd.Vaadin.Flow.clients.ROOT
-          && $wnd.Vaadin.Flow.clients.ROOT.getByNodeId(contentParentId);
+          && $wnd.Vaadin.Flow.clients[appId]
+          && $wnd.Vaadin.Flow.clients[appId].getByNodeId(contentParentId);
     }-*/;
 
-    public void onPopupButtonOpened(int row, int column,
-            String contentParentId) {
-        Element container = getPopupContentContainer(contentParentId);
+    public void onPopupButtonOpened(int row, int column, String contentParentId,
+            String appId) {
+        Element container = getPopupContentContainer(contentParentId, appId);
 
         if (container == null) {
             return;

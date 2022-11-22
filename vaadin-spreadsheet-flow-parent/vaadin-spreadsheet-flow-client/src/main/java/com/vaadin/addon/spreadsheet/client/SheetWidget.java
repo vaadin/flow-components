@@ -353,6 +353,7 @@ public class SheetWidget extends Panel {
     private boolean displayRowColHeadings;
 
     private Event mouseOverOrOutEvent;
+    private Element mouseOverOrOutEventTarget;
 
     private HashMap<MergedRegion, Cell> overflownMergedCells;
 
@@ -424,6 +425,14 @@ public class SheetWidget extends Panel {
                 }
             });
 
+    static native Element getEventTarget(NativeEvent event)
+    /*-{
+       if (!event.target || event.target.shadowRoot) {
+           return event.composedPath()[0];
+       }
+       return event.target;
+    }-*/;
+
     private VLazyExecutor onMouseOverOrOutHandler = new VLazyExecutor(100,
             new ScheduledCommand() {
 
@@ -432,8 +441,8 @@ public class SheetWidget extends Panel {
                     if (isEditingCell()) {
                         return;
                     }
-                    Element target = mouseOverOrOutEvent.getEventTarget()
-                            .cast();
+
+                    Element target = mouseOverOrOutEventTarget;
                     boolean targetParentIsPaneElement = target
                             .getParentElement().getAttribute("class")
                             .contains("sheet");
@@ -927,32 +936,29 @@ public class SheetWidget extends Panel {
         fontWidthDummyElement.setInnerText("5555555555");
     }
 
-    void postInit(String connectorId) {
+    void postInit(String connectorId, Node styleHost) {
         sheetId = "spreadsheet-" + connectorId;
         spreadsheet.addClassName(sheetId);
 
         // Dynamic position & size styles for this spreadsheet
         cellSizeAndPositionStyle.setType("text/css");
         cellSizeAndPositionStyle.setId(sheetId + "-dynamicStyle");
-        Document.get().getBody().getParentElement().getFirstChild()
-                .appendChild(cellSizeAndPositionStyle);
+        styleHost.appendChild(cellSizeAndPositionStyle);
 
         // Workbook styles
         sheetStyle.setType("text/css");
         sheetStyle.setId(sheetId + "-sheetStyle");
-        cellSizeAndPositionStyle.getParentElement().appendChild(sheetStyle);
+        styleHost.appendChild(sheetStyle);
 
         // Custom cell size styles (because of borders)
         shiftedBorderCellStyle.setType("text/css");
         shiftedBorderCellStyle.setId(sheetId + "-customCellSizeStyle");
-        cellSizeAndPositionStyle.getParentElement()
-                .appendChild(shiftedBorderCellStyle);
+        styleHost.appendChild(shiftedBorderCellStyle);
 
         // style for "hiding" the edited cell
         editedCellFreezeColumnStyle.setType("text/css");
         editedCellFreezeColumnStyle.setId(sheetId + "-editedCellStyle");
-        cellSizeAndPositionStyle.getParentElement()
-                .appendChild(editedCellFreezeColumnStyle);
+        styleHost.appendChild(editedCellFreezeColumnStyle);
         jsniUtil.insertRule(editedCellFreezeColumnStyle,
                 ".notusedselector" + EDITING_CELL_STYLE);
         jsniUtil.insertRule(editedCellFreezeColumnStyle,
@@ -961,12 +967,11 @@ public class SheetWidget extends Panel {
         // style for hiding the cell inside merged regions
         mergedRegionStyle.setType("text/css");
         mergedRegionStyle.setId(sheetId + "-mergedRegionStyle");
-        cellSizeAndPositionStyle.getParentElement()
-                .appendChild(mergedRegionStyle);
+        styleHost.appendChild(mergedRegionStyle);
 
         resizeStyle.setType("text/css");
         resizeStyle.setId(sheetId + "-resizeStyle");
-        cellSizeAndPositionStyle.getParentElement().appendChild(resizeStyle);
+        styleHost.appendChild(resizeStyle);
     }
 
     /**
@@ -1023,6 +1028,7 @@ public class SheetWidget extends Panel {
      */
     protected void onSheetMouseOverOrOut(Event event) {
         mouseOverOrOutEvent = event;
+        mouseOverOrOutEventTarget = getEventTarget(event);
         onMouseOverOrOutHandler.trigger();
     }
 
@@ -1037,7 +1043,7 @@ public class SheetWidget extends Panel {
 
     protected boolean isEventInCustomEditorCell(Event event) {
         if (customEditorWidget != null) {
-            final Element target = event.getEventTarget().cast();
+            final Element target = getEventTarget(event);
             final Element customWidgetElement = customEditorWidget.getElement();
             return (customWidgetElement.isOrHasChild(target)
                     || customWidgetElement.getParentElement() != null
@@ -1109,7 +1115,7 @@ public class SheetWidget extends Panel {
      *            The original event (that can be onClick or onTouchStart)
      */
     protected void onSheetMouseDown(Event event) {
-        Element target = event.getEventTarget().cast();
+        Element target = getEventTarget(event);
 
         String className = target.getAttribute("class");
 
@@ -1138,7 +1144,8 @@ public class SheetWidget extends Panel {
                 stoppedSelectingCellsWithDrag(event);
             }
         } else if (className.contains("cell")) {
-            if (className.equals("cell-comment-triangle")) {
+            if (className.equals("cell-comment-triangle")
+                    || className.equals("cell-invalidformula-triangle")) {
                 jsniUtil.parseColRow(
                         target.getParentElement().getAttribute("class"));
             } else {
@@ -1246,7 +1253,7 @@ public class SheetWidget extends Panel {
             JsArray<Touch> touches = event.getTouches();
             target = touches.get(touches.length() - 1).getTarget().cast();
         } else {
-            target = event.getEventTarget().cast();
+            target = getEventTarget(event);
         }
 
         // Update scroll deltas
@@ -1389,7 +1396,7 @@ public class SheetWidget extends Panel {
                     tempCol, selectedCellRow, tempRow);
         } else {
             actionHandler.onCellClick(tempCol, tempRow,
-                    ((Element) event.getEventTarget().cast()).getInnerText(),
+                    ((Element) getEventTarget(event)).getInnerText(),
                     event.getShiftKey(),
                     event.getMetaKey() || event.getCtrlKey(), true);
         }
@@ -1508,7 +1515,7 @@ public class SheetWidget extends Panel {
                     public void onPreviewNativeEvent(NativePreviewEvent event) {
                         int eventTypeInt = event.getTypeInt();
                         final NativeEvent nativeEvent = event.getNativeEvent();
-                        Element target = nativeEvent.getEventTarget().cast();
+                        Element target = getEventTarget(nativeEvent);
                         String className = "";
                         if (Element.is(target)) {
                             // In Firefox when dragging outside of the browser
@@ -1517,8 +1524,8 @@ public class SheetWidget extends Panel {
                             className = target.getAttribute("class");
                         }
 
-                        if (getElement().isOrHasChild(
-                                (Node) nativeEvent.getEventTarget().cast())) {
+                        if (getElement()
+                                .isOrHasChild(getEventTarget(nativeEvent))) {
                             if (Event.ONTOUCHSTART == eventTypeInt
                                     || Event.ONMOUSEDOWN == eventTypeInt
                                     || Event.ONMOUSEUP == eventTypeInt
@@ -1761,8 +1768,7 @@ public class SheetWidget extends Panel {
             @Override
             public void onContextMenu(ContextMenuEvent event) {
                 if (actionHandler.hasCustomContextMenu()) {
-                    Element target = event.getNativeEvent().getEventTarget()
-                            .cast();
+                    Element target = getEventTarget(event.getNativeEvent());
                     String className = target.getAttribute("class");
                     int i = jsniUtil.isHeader(className);
                     if (i == 1 || i == 2) {
@@ -3779,7 +3785,7 @@ public class SheetWidget extends Panel {
                 hyperlinkStyle = Document.get().createStyleElement();
                 hyperlinkStyle.setType("text/css");
                 hyperlinkStyle.setId(sheetId + "-hyperlinkstyle");
-                cellSizeAndPositionStyle.getParentElement()
+                cellSizeAndPositionStyle.getParentNode()
                         .appendChild(hyperlinkStyle);
                 sb.append(HYPERLINK_CELL_STYLE);
                 jsniUtil.insertRule(hyperlinkStyle, sb.toString());
@@ -5306,6 +5312,7 @@ public class SheetWidget extends Panel {
 
         jsniUtil.replaceSelector(editedCellFreezeColumnStyle,
                 ".notusedselector", 0);
+        input.setFocus(false);
         input.setValue("");
         input.setWidth("0");
         input.setHeight("");
