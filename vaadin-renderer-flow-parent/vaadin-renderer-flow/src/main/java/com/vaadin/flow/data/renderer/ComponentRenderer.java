@@ -148,7 +148,8 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
                 ? UI.getCurrent().getInternals().getAppId()
                 : "";
 
-        return String.format("<%s appid=\"%s\" nodeid=\"${item.nodeid}\"></%s>",
+        return String.format(
+                "<%s appid=\"%s\" .nodeid=\"${item.nodeid}\"></%s>",
                 componentRendererTag, appId, componentRendererTag);
     }
 
