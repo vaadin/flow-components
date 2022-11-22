@@ -27,8 +27,8 @@ import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
 import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("vaadin-grid/template-renderer-event-handler")
-public class TemplateRendererEventHandlerIT extends AbstractComponentIT {
+@TestPath("vaadin-grid/lit-renderer-event-handler")
+public class LitRendererEventHandlerIT extends AbstractComponentIT {
 
     @Test
     public void eventHandlersWorkOnReattach() {

@@ -20,8 +20,8 @@ import java.util.List;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.data.bean.Person;
+import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.NativeButtonRenderer;
-import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-grid-it-demo/item-details")
@@ -44,13 +44,13 @@ public class GridViewItemDetailsPage extends LegacyTestView {
 
         // You can use any renderer for the item details. By default, the
         // details are opened and closed by clicking the rows.
-        grid.setItemDetailsRenderer(TemplateRenderer.<Person> of(
+        grid.setItemDetailsRenderer(LitRenderer.<Person> of(
                 "<div class='custom-details' style='border: 1px solid gray; padding: 10px; width: 100%; box-sizing: border-box;'>"
-                        + "<div>Hi! My name is <b>[[item.firstName]]!</b></div>"
-                        + "<div><button on-click='handleClick'>Update Person</button></div>"
+                        + "<div>Hi! My name is <b>${item.firstName}!</b></div>"
+                        + "<div><button @click=${handleClick}>Update Person</button></div>"
                         + "</div>")
                 .withProperty("firstName", Person::getFirstName)
-                .withEventHandler("handleClick", person -> {
+                .withFunction("handleClick", person -> {
                     person.setFirstName(person.getFirstName() + " Updated");
                     grid.getDataProvider().refreshItem(person);
                 }));

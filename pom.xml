@@ -457,7 +457,7 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-install-plugin</artifactId>
-                    <version>3.0.1</version>
+                    <version>3.1.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -541,7 +541,7 @@
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-simple</artifactId>
-                <version>2.0.3</version>
+                <version>2.0.4</version>
             </dependency>
             <dependency>
                 <groupId>jakarta.servlet</groupId>
@@ -582,7 +582,7 @@
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
-                <version>4.8.1</version>
+                <version>4.9.0</version>
                 <scope>test</scope>
             </dependency>
             <dependency>

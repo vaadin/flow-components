@@ -34,7 +34,7 @@ import com.vaadin.flow.data.event.SortEvent;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.provider.SortOrder;
-import com.vaadin.flow.data.renderer.TemplateRenderer;
+import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.function.SerializableComparator;
 
 import elemental.json.Json;
@@ -163,13 +163,13 @@ public class GridSortingTest {
         nameColumn = grid.addColumn(Person::getName, "name").setHeader("Name");
         ageColumn = grid.addColumn(Person::getAge, "age").setHeader("Age");
 
-        templateColumn = grid.addColumn(TemplateRenderer.<Person> of(
-                "<div>[[item.street]], number [[item.number]]<br><small>[[item.postalCode]]</small></div>")
+        templateColumn = grid.addColumn(LitRenderer.<Person> of(
+                "<div>${item.street}, number ${item.number}<br><small>${item.postalCode}</small></div>")
                 .withProperty("street",
                         person -> person.getAddress().getStreet())
                 .withProperty("number",
-                        person -> person.getAddress().getNumber()),
-                "street", "number").setHeader("Address");
+                        person -> person.getAddress().getNumber()))
+                .setHeader("Address").setSortProperty("street", "number");
     }
 
     @Test
@@ -250,8 +250,9 @@ public class GridSortingTest {
 
     @Test
     public void template_renderer_non_comparable_property() {
-        Column<Person> column = grid.addColumn(TemplateRenderer.<Person> of("")
-                .withProperty("address", Person::getAddress), "address");
+        Column<Person> column = grid.addColumn(LitRenderer.<Person> of("")
+                .withProperty("address", Person::getAddress))
+                .setSortProperty("address");
         JsonArray sortersArray = Json.createArray();
         sortersArray.set(0, createSortObject(getColumnId(column), "asc"));
         callSortersChanged(sortersArray);
