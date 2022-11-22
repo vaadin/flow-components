@@ -3160,6 +3160,16 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     @ClientCallable(DisabledUpdateMode.ALWAYS)
     private void setRequestedRange(int start, int length) {
+        if (length > 500 && length / getPageSize() > 10 && isAllRowsVisible()) {
+            throw new IllegalArgumentException(
+                    "Attempted to fetch more items from server than allowed in one go. "
+                            + "Maximum allowed page count is 10. Consider not using setAllRowsVisible(true) "
+                            + "when you have a large amount of items (not only to cover this issue but also "
+                            + "to avoid performance bottlenecks resulting from transferring the full item data "
+                            + "set at once and then rendering an excess amount of DOM elements). If for some "
+                            + "reason this is not an option, increase the page size of the grid so that rendering "
+                            + "every item at once doesn't result in a request for over 10 pages.");
+        }
         getDataCommunicator().setRequestedRange(start, length);
     }
 
