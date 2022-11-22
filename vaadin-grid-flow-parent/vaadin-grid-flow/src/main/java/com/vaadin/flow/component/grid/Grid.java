@@ -3867,7 +3867,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @param enabled
      *            <code>true</code> to enable vertical scrolling,
      *            <code>false</code> to disabled it
+     * @deprecated since v23.3
      */
+    @Deprecated
     public void setVerticalScrollingEnabled(boolean enabled) {
         if (isVerticalScrollingEnabled() == enabled) {
             return;
@@ -3882,7 +3884,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *
      * @return <code>true</code> if the vertical scrolling is enabled,
      *         <code>false</code> otherwise
+     * @deprecated since v23.3
      */
+    @Deprecated
     public boolean isVerticalScrollingEnabled() {
         return verticalScrollingEnabled;
     }
