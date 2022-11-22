@@ -292,7 +292,7 @@ public class MultiSelectComboBox<TItem>
      */
     @Override
     public Set<TItem> getValue() {
-        return Collections.unmodifiableSet(super.getValue());
+        return Collections.unmodifiableSet(selectionModel.getSelectedItems());
     }
 
     /**
