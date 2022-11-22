@@ -56,22 +56,90 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
     private SerializableBiConsumer<COMPONENT, SOURCE> itemConsumer;
     private String componentRendererTag = "flow-component-renderer";
 
-    public ComponentRenderer(
-            SerializableFunction<SOURCE, COMPONENT> componentFunction,
-            SerializableBiFunction<Component, SOURCE, Component> componentUpdateFunction) {
-        this.componentFunction = componentFunction;
-        this.componentUpdateFunction = componentUpdateFunction;
+    /**
+     * Creates a new ComponentRenderer that uses the componentSupplier to
+     * generate new {@link Component} instances, and the itemConsumer to set the
+     * related items.
+     * <p>
+     * Some components may support several rendered components at once, so
+     * different component instances should be created for each different item
+     * for those components.
+     *
+     * @param componentSupplier
+     *            a supplier that can generate new component instances
+     * @param itemConsumer
+     *            a setter for the corresponding item for the rendered component
+     */
+    public ComponentRenderer(SerializableSupplier<COMPONENT> componentSupplier,
+            SerializableBiConsumer<COMPONENT, SOURCE> itemConsumer) {
+        this.componentSupplier = componentSupplier;
+        this.itemConsumer = itemConsumer;
     }
 
+    /**
+     * Creates a new ComponentRenderer that uses the componentSupplier to
+     * generate new {@link Component} instances.
+     * <p>
+     * This constructor is a convenient way of providing components to a
+     * template when the actual model item doesn't matter for the component
+     * instance.
+     * <p>
+     * Some components may support several rendered components at once, so
+     * different component instances should be created for each different item
+     * for those components.
+     *
+     * @param componentSupplier
+     *            a supplier that can generate new component instances
+     */
+    public ComponentRenderer(
+            SerializableSupplier<COMPONENT> componentSupplier) {
+        this(componentSupplier, null);
+    }
+
+    /**
+     * Creates a new ComponentRenderer that uses the componentFunction to
+     * generate new {@link Component} instances. The function takes a model item
+     * and outputs a component instance.
+     * <p>
+     * Some components may support several rendered components at once, so
+     * different component instances should be created for each different item
+     * for those components.
+     *
+     * @param componentFunction
+     *            a function that can generate new component instances
+     * @see #ComponentRenderer(SerializableFunction, SerializableBiFunction)
+     */
     public ComponentRenderer(
             SerializableFunction<SOURCE, COMPONENT> componentFunction) {
         this(componentFunction, null);
     }
 
-    public ComponentRenderer(SerializableSupplier<COMPONENT> componentSupplier,
-            SerializableBiConsumer<COMPONENT, SOURCE> itemConsumer) {
-        this.componentSupplier = componentSupplier;
-        this.itemConsumer = itemConsumer;
+    /**
+     * Creates a new ComponentRenderer that uses the componentFunction to
+     * generate new {@link Component} instances, and a componentUpdateFunction
+     * to update existing {@link Component} instances.
+     * <p>
+     * The componentUpdateFunction can return a different component than the one
+     * previously created. In those cases, the new instance is used, and the old
+     * is discarded.
+     * <p>
+     * Some components may support several rendered components at once, so
+     * different component instances should be created for each different item
+     * for those components.
+     *
+     * @param componentFunction
+     *            a function that can generate new component instances
+     * @param componentUpdateFunction
+     *            a function that can update the existing component instance for
+     *            the item, or generate a new component based on the item
+     *            update. When the function is <code>null</code>, the
+     *            componentFunction is always used instead
+     */
+    public ComponentRenderer(
+            SerializableFunction<SOURCE, COMPONENT> componentFunction,
+            SerializableBiFunction<Component, SOURCE, Component> componentUpdateFunction) {
+        this.componentFunction = componentFunction;
+        this.componentUpdateFunction = componentUpdateFunction;
     }
 
     @Override
@@ -82,11 +150,6 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
 
         return String.format("<%s appid=\"%s\" nodeid=\"${item.nodeid}\"></%s>",
                 componentRendererTag, appId, componentRendererTag);
-    }
-
-    public ComponentRenderer(
-            SerializableSupplier<COMPONENT> componentSupplier) {
-        this(componentSupplier, null);
     }
 
     Element getOwner() {
