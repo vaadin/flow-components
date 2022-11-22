@@ -21,6 +21,7 @@ import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
@@ -39,6 +40,7 @@ public class GridTooltipIT extends AbstractComponentIT {
     }
 
     @Test
+    @Ignore
     public void hoverOverTooltipColumnCell_showTooltip() {
         var grid = $(GridElement.class).first();
         flushScrolling(grid);
@@ -48,6 +50,7 @@ public class GridTooltipIT extends AbstractComponentIT {
     }
 
     @Test
+    @Ignore
     public void toggleGrid_hoverOverTooltipColumnCell_showTooltip() {
         // Remove the grid
         clickElementWithJs("toggle-grid-button");
@@ -62,6 +65,7 @@ public class GridTooltipIT extends AbstractComponentIT {
     }
 
     @Test
+    @Ignore
     public void dynamicallyAddGenerator_hoverOverTooltipColumnCell_showTooltip() {
         var grid = $(GridElement.class).first();
         clickElementWithJs("set-age-tooltip-button");
