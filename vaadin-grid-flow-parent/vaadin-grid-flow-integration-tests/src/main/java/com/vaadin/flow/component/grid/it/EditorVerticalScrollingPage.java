@@ -19,6 +19,7 @@ public class EditorVerticalScrollingPage extends Div {
 
     private Grid<Person> grid = new Grid<>();
 
+    @SuppressWarnings("deprecation")
     public EditorVerticalScrollingPage() {
         setSizeFull();
         grid.setSelectionMode(SelectionMode.NONE);
