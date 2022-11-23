@@ -155,7 +155,7 @@ public class GridTestPageIT extends AbstractComponentIT {
         items.forEach((row, map) -> {
             Assert.assertEquals("Item " + row, map.get("col0"));
             if ("0".equals(row)) {
-                Assert.assertTrue("_renderer_* property not found for item 0",
+                Assert.assertTrue("Should have loaded item details data for row 0",
                         map.keySet().stream()
                                 .anyMatch(key -> key.startsWith("lr_")));
             } else {
