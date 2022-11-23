@@ -1177,7 +1177,6 @@ public class Spreadsheet extends Component
     }
 
     private void registerRpc(SpreadsheetHandlerImpl spreadsheetHandler) {
-        LOGGER.info("Spreadsheet.registerRpc()");
         addListener(SpreadsheetEvent.class,
                 new SpreadsheetEventListener(spreadsheetHandler));
     }
