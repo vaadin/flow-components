@@ -18,6 +18,7 @@ package com.vaadin.flow.data.renderer;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.function.SerializableSupplier;
 
 /**
  * A renderer that renders each item as a text using provided
@@ -46,7 +47,7 @@ public class TextRenderer<ITEM> extends ComponentRenderer<Component, ITEM> {
      * {@link ItemLabelGenerator}: <code>String::valueOf</code>.
      */
     public TextRenderer() {
-        this.itemLabelGenerator = String::valueOf;
+        this(String::valueOf);
     }
 
     /**
@@ -57,7 +58,10 @@ public class TextRenderer<ITEM> extends ComponentRenderer<Component, ITEM> {
      *            the item label generator
      */
     public TextRenderer(ItemLabelGenerator<ITEM> itemLabelGenerator) {
+        super((SerializableSupplier<Component>) null);
         this.itemLabelGenerator = itemLabelGenerator;
+
+        withProperty("label", item -> itemLabelGenerator.apply(item));
     }
 
     @Override
