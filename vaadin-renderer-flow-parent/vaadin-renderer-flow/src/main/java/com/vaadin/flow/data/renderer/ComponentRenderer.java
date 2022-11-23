@@ -170,6 +170,7 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
 
     /**
      * Configures the {@code Rendering} instance provided by {@link LitRenderer}
+     * to make it create and update Components for items.
      *
      * @param rendering
      *            the rendering instance

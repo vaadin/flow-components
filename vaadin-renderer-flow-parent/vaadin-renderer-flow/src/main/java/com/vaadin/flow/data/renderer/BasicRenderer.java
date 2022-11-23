@@ -77,12 +77,20 @@ public abstract class BasicRenderer<SOURCE, TARGET>
         return valueProvider;
     }
 
+    /**
+     * Override to make the method return the {@code Rendering} originating from
+     * LitRenderer as it is. BasicRenderer should not render Components for
+     * client-side renderers even though it extends a ComponentRenderer.
+     *
+     * @param rendering
+     *            the rendering instance
+     * @param keyMapper
+     *            the key mapper
+     * @return a rendering instance configured for the purposes of this renderer
+     */
     @Override
-    protected Rendering<SOURCE> configureRendering(Rendering<SOURCE> rendering,
+    Rendering<SOURCE> configureRendering(Rendering<SOURCE> rendering,
             DataKeyMapper<SOURCE> keyMapper) {
-        // Return rendering originating from LitRenderer as it is. We don't want
-        // BasicRenderer to render Components for client-side renderers even
-        // though it extends a ComponentRenderer.
         return rendering;
     }
 
