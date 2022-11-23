@@ -18,7 +18,6 @@ package com.vaadin.flow.data.renderer;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.data.provider.DataGenerator;
 import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.dom.Element;
@@ -30,8 +29,6 @@ public class NativeButtonRendererTest {
 
     @Test
     public void templateRenderered_containerIsDisabled_buttonIsDisabled() {
-        UI.setCurrent(new UI());
-
         NativeButtonRenderer<String> renderer = new NativeButtonRenderer<>(
                 "Label");
         Element container = new Element("div");

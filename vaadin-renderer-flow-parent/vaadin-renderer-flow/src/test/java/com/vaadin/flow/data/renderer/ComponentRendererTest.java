@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.Component;
@@ -64,11 +63,6 @@ public class ComponentRendererTest {
         }
     }
 
-    @Before
-    public void init() {
-        UI.setCurrent(new TestUI());
-    }
-
     @Test
     public void templateRenderered_parentAttachedBeforeChild() {
         UI ui = new TestUI();
@@ -108,7 +102,6 @@ public class ComponentRendererTest {
     public void templateRenderered_childAttachedBeforeParent() {
         UI ui = new TestUI();
         TestUIInternals internals = (TestUIInternals) ui.getInternals();
-        UI.setCurrent(ui);
 
         ComponentRenderer<TestDiv, String> renderer = new ComponentRenderer<>(
                 e -> (new TestDiv()));

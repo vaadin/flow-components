@@ -20,15 +20,12 @@ import java.util.Locale;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.function.ValueProvider;
 
 public class NumberRendererTest {
 
     @Test
     public void getFormattedValue_numberIsFormattedUsingLocale() {
-        UI.setCurrent(new UI());
-
         NumberRenderer<Number> renderer = new NumberRenderer<>(
                 ValueProvider.identity(), Locale.GERMANY);
 
