@@ -160,7 +160,7 @@ public class GridTestPageIT extends AbstractComponentIT {
                                 .anyMatch(key -> key.startsWith("lr_")));
             } else {
                 Assert.assertFalse(
-                        "_renderer_* property should not be present for item 0",
+                        "Should not have loaded item details data for other rows",
                         map.keySet().stream()
                                 .anyMatch(key -> key.startsWith("lr_")));
             }
