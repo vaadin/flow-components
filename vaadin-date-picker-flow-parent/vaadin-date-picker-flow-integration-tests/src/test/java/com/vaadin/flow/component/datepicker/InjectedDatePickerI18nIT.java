@@ -33,8 +33,7 @@ public class InjectedDatePickerI18nIT extends AbstractComponentIT {
                 .$("input").first().click();
 
         TestBenchElement cancelButton = $("vaadin-date-picker-overlay").first()
-                .$("div").id("content").$("vaadin-date-picker-overlay-content")
-                .first().$("vaadin-button").id("cancelButton");
+                .$("vaadin-button").attribute("slot", "cancel-button").first();
 
         Assert.assertEquals("peruuta", cancelButton.getText());
     }

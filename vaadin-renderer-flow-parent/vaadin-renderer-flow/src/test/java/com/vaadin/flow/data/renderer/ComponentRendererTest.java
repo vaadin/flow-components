@@ -76,19 +76,15 @@ public class ComponentRendererTest {
 
         KeyMapper<String> keyMapper = new KeyMapper<>();
 
-        ComponentDataGenerator<String> rendering = (ComponentDataGenerator<String>) renderer
-                .render(container, keyMapper);
-
+        Rendering<String> rendering = renderer.render(container, keyMapper);
         // simulate a call from the grid to refresh data - template is not setup
         containerParent.getNode()
                 .runWhenAttached(ui2 -> ui2.getInternals().getStateTree()
                         .beforeClientResponse(containerParent.getNode(),
                                 context -> {
-                                    Assert.assertNotNull(
-                                            "NodeIdPropertyName should not be null",
-                                            rendering.getNodeIdPropertyName());
                                     JsonObject value = Json.createObject();
-                                    rendering.generateData("item", value);
+                                    rendering.getDataGenerator().get()
+                                            .generateData("item", value);
                                     Assert.assertEquals(
                                             "generateData should add one element in the jsonobject",
                                             1, value.keys().length);
@@ -114,20 +110,16 @@ public class ComponentRendererTest {
         Element container = new Element("div");
         KeyMapper<String> keyMapper = new KeyMapper<>();
 
-        ComponentDataGenerator<String> rendering = (ComponentDataGenerator<String>) renderer
+        Rendering<String> rendering = (Rendering<String>) renderer
                 .render(container, keyMapper);
 
         containerParent.getNode()
                 .runWhenAttached(ui2 -> ui2.getInternals().getStateTree()
                         .beforeClientResponse(containerParent.getNode(),
                                 context -> {
-                                    // if nodeid is null then the component
-                                    // won't be rendered correctly
-                                    Assert.assertNotNull(
-                                            "NodeIdPropertyName should not be null",
-                                            rendering.getNodeIdPropertyName());
                                     JsonObject value = Json.createObject();
-                                    rendering.generateData("item", value);
+                                    rendering.getDataGenerator().get()
+                                            .generateData("item", value);
                                     Assert.assertEquals(
                                             "generateData should add one element in the jsonobject",
                                             1, value.keys().length);

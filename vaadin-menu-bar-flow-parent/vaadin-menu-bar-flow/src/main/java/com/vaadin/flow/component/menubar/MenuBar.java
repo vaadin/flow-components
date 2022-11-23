@@ -40,6 +40,7 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.function.SerializableRunnable;
 import com.vaadin.flow.internal.JsonSerializer;
 
 import elemental.json.JsonObject;
@@ -52,14 +53,13 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-menu-bar")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.0-alpha3")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha4")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("./menubarConnector.js")
 @JsModule("@vaadin/menu-bar/src/vaadin-menu-bar.js")
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
-@NpmPackage(value = "@vaadin/menu-bar", version = "23.3.0-alpha3")
-@NpmPackage(value = "@vaadin/vaadin-menu-bar", version = "23.3.0-alpha3")
-@NpmPackage(value = "@vaadin/tooltip", version = "23.3.0-alpha3")
+@NpmPackage(value = "@vaadin/menu-bar", version = "24.0.0-alpha4")
+@NpmPackage(value = "@vaadin/tooltip", version = "24.0.0-alpha4")
 public class MenuBar extends Component
         implements HasMenuItems, HasSize, HasStyle, HasTheme, HasEnabled {
 
@@ -77,7 +77,14 @@ public class MenuBar extends Component
      */
     public MenuBar() {
         menuItemsArrayGenerator = new MenuItemsArrayGenerator<>(this);
-        menuManager = new MenuManager<>(this, this::resetContent,
+        // Not a lambda because of UI serialization purposes
+        SerializableRunnable resetContent = new SerializableRunnable() {
+            @Override
+            public void run() {
+                resetContent();
+            }
+        };
+        menuManager = new MenuManager<>(this, resetContent,
                 (menu, contentReset) -> new MenuBarRootItem(this, contentReset),
                 MenuItem.class, null);
         addAttachListener(event -> {

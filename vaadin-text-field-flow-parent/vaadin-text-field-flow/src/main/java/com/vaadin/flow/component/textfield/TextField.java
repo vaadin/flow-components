@@ -331,7 +331,7 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
      *            the maximum length
      */
     public void setMaxLength(int maxLength) {
-        super.setMaxlength(maxLength);
+        getElement().setProperty("maxlength", maxLength);
         getValidationSupport().setMaxLength(maxLength);
     }
 
@@ -342,7 +342,7 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
      * @return the {@code maxlength} property from the webcomponent
      */
     public int getMaxLength() {
-        return (int) getMaxlengthDouble();
+        return (int) getElement().getProperty("maxlength", 0.0);
     }
 
     /**
@@ -353,7 +353,7 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
      *            the minimum length
      */
     public void setMinLength(int minLength) {
-        super.setMinlength(minLength);
+        getElement().setProperty("minlength", minLength);
         getValidationSupport().setMinLength(minLength);
     }
 
@@ -364,7 +364,7 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
      * @return the {@code minlength} property from the webcomponent
      */
     public int getMinLength() {
-        return (int) getMinlengthDouble();
+        return (int) getElement().getProperty("minlength", 0.0);
     }
 
     /**
@@ -393,29 +393,6 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
     }
 
     /**
-     * When set to <code>true</code>, user is prevented from typing a value that
-     * conflicts with the given {@code pattern}.
-     *
-     * @return the {@code preventInvalidInput} property from the webcomponent
-     *
-     * @deprecated Since 23.2, this API is deprecated.
-     */
-    @Deprecated
-    public boolean isPreventInvalidInput() {
-        return isPreventInvalidInputBoolean();
-    }
-
-    /**
-     * @deprecated Since 23.2, this API is deprecated in favor of
-     *             {@link #setAllowedCharPattern(String)}
-     */
-    @Deprecated
-    @Override
-    public void setPreventInvalidInput(boolean preventInvalidInput) {
-        super.setPreventInvalidInput(preventInvalidInput);
-    }
-
-    /**
      * Sets a regular expression for the value to pass on the client-side. The
      * pattern must be a valid JavaScript Regular Expression that matches the
      * entire value, not just some subset.
@@ -430,9 +407,8 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
      *      "https://html.spec.whatwg.org/multipage/input.html#attr-input-pattern">
      *      https://html.spec.whatwg.org/multipage/input.html#attr-input-pattern</>
      */
-    @Override
     public void setPattern(String pattern) {
-        super.setPattern(pattern);
+        getElement().setProperty("pattern", pattern == null ? "" : pattern);
         getValidationSupport().setPattern(pattern);
     }
 
@@ -443,7 +419,7 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
      * @return the {@code pattern} property from the webcomponent
      */
     public String getPattern() {
-        return getPatternString();
+        return getElement().getProperty("pattern");
     }
 
     /**

@@ -178,27 +178,6 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
     }
 
     /**
-     * Set the current label text of this checkbox with HTML formatting.
-     *
-     * <p>
-     * XSS vulnerability warning: the given HTML is rendered in the browser as
-     * is and the developer is responsible for ensuring no harmful HTML is used.
-     * </p>
-     *
-     * @param htmlContent
-     *            the label html to set
-     *
-     * @deprecated Since 23.2, this API is deprecated in favor of
-     *             {@link #setLabelComponent(Component)}
-     */
-    @Deprecated
-    public void setLabelAsHtml(String htmlContent) {
-        setLabel("");
-        labelElement.getElement().setProperty("innerHTML", htmlContent);
-        getElement().appendChild(labelElement.getElement());
-    }
-
-    /**
      * Replaces the label content with the given label component.
      *
      * @param component

@@ -75,6 +75,7 @@ public class IconRenderer<ITEM> extends ComponentRenderer<Component, ITEM> {
     public IconRenderer(
             SerializableFunction<ITEM, ? extends Component> iconGenerator,
             ItemLabelGenerator<ITEM> itemLabelGenerator) {
+        super((SerializableFunction<ITEM, Component>) iconGenerator, null);
         this.iconGenerator = iconGenerator;
         this.itemLabelGenerator = itemLabelGenerator;
     }

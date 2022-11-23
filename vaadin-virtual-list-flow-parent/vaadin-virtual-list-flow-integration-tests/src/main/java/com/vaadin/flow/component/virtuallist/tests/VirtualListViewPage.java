@@ -37,7 +37,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
-import com.vaadin.flow.data.renderer.TemplateRenderer;
+import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.Route;
 
@@ -185,10 +185,10 @@ public class VirtualListViewPage extends Div {
                         .limit(query.getLimit()), query -> totalCount);
 
         list.setDataProvider(dataProvider);
-        list.setRenderer(TemplateRenderer.<String> of(
+        list.setRenderer(LitRenderer.<String> of(
                 "<div style='font-size:20px; margin:10px; padding:10px; "
                         + "border:1px solid lightgray; border-radius:5px;'>"
-                        + "#[[index]]. [[item.fact]]</div>")
+                        + "#${index}. ${item.fact}</div>")
                 .withProperty("fact", ValueProvider.identity()));
 
         list.setId("chuck-norris-facts");
@@ -204,13 +204,13 @@ public class VirtualListViewPage extends Div {
                 .ofCollection(createListOfPeople());
 
         list.setDataProvider(dataProvider);
-        list.setRenderer(TemplateRenderer.<Person> of(
+        list.setRenderer(LitRenderer.<Person> of(
                 "<div style='padding:10px; display:flex; min-width:250px'>"
                         + "<div style='margin-right:10px; width:40px; height:40px'>"
-                        + "<img src='[[item.picture]]' style='border-radius:50%; width:40px; height:40px; background-color:lightgray'/>"
+                        + "<img src='${item.picture}' style='border-radius:50%; width:40px; height:40px; background-color:lightgray'/>"
                         + "</div>" + "<div>"
-                        + "[[item.firstName]] [[item.lastName]]"
-                        + "<br><small>[[item.email]]</small>" + "</div>"
+                        + "${item.firstName} ${item.lastName}"
+                        + "<br><small>${item.email}</small>" + "</div>"
                         + "</div>")
                 .withProperty("firstName", Person::getFirstName)
                 .withProperty("lastName", Person::getLastName)
@@ -236,22 +236,22 @@ public class VirtualListViewPage extends Div {
         list.setItems(items);
 
         /*
-         * The name of the event handlers defined at 'on-click' are used inside
-         * the 'withEventHandler' calls.
+         * The name of the event handlers defined at '@click' are used inside
+         * the 'withFunction' calls.
          */
-        list.setRenderer(TemplateRenderer.<String> of(
+        list.setRenderer(LitRenderer.<String> of(
                 "<div style='display:flex; justify-content:space-between; padding:10px;'>"
-                        + "<div style='flex-grow:1'>#[[item.rank]]: [[item.name]]</div>"
-                        + "<div><button on-click='up' hidden='[[item.upHidden]]'>&uarr;</button>"
-                        + "<button on-click='down' hidden='[[item.downHidden]]'>&darr;</button>"
-                        + "<button on-click='remove' style='color:red'>X</button></div>"
+                        + "<div style='flex-grow:1'>#${item.rank}: ${item.name}</div>"
+                        + "<div><button @click=${up} hidden='${item.upHidden}'>&uarr;</button>"
+                        + "<button @click=${down} hidden='${item.downHidden}'>&darr;</button>"
+                        + "<button @click=${remove} style='color:red'>X</button></div>"
                         + "<div>")
                 .withProperty("name", ValueProvider.identity())
                 .withProperty("rank", item -> items.indexOf(item) + 1)
                 .withProperty("upHidden", item -> items.indexOf(item) == 0)
                 .withProperty("downHidden",
                         item -> items.indexOf(item) == items.size() - 1)
-                .withEventHandler("up", item -> {
+                .withFunction("up", item -> {
                     int previousRank = items.indexOf(item);
                     if (previousRank == 0) {
                         return;
@@ -259,7 +259,7 @@ public class VirtualListViewPage extends Div {
                     String previousItem = items.set(previousRank - 1, item);
                     items.set(previousRank, previousItem);
                     list.getDataCommunicator().reset();
-                }).withEventHandler("down", item -> {
+                }).withFunction("down", item -> {
                     int previousRank = items.indexOf(item);
                     if (previousRank == items.size() - 1) {
                         return;
@@ -267,7 +267,7 @@ public class VirtualListViewPage extends Div {
                     String previousItem = items.set(previousRank + 1, item);
                     items.set(previousRank, previousItem);
                     list.getDataCommunicator().reset();
-                }).withEventHandler("remove", item -> {
+                }).withFunction("remove", item -> {
                     items.remove(item);
                     list.getDataCommunicator().reset();
                 }));
@@ -301,16 +301,16 @@ public class VirtualListViewPage extends Div {
         list.setEnabled(false);
 
         /*
-         * The name of the event handlers defined at 'on-click' are used inside
-         * the 'withEventHandler' calls.
+         * The name of the event handlers defined at '@click' are used inside
+         * the 'withFunction' calls.
          */
-        list.setRenderer(TemplateRenderer.<String> of(
+        list.setRenderer(LitRenderer.<String> of(
                 "<div style='display:flex; justify-content:space-between; padding:10px;'>"
-                        + "<div style='flex-grow:1'>[[item.name]]</div>"
-                        + "<div><button on-click='removeItem' style='color:red'>X</button></div>"
+                        + "<div style='flex-grow:1'>${item.name}</div>"
+                        + "<div><button @click=${removeItem} style='color:red'>X</button></div>"
                         + "<div>")
                 .withProperty("name", ValueProvider.identity())
-                .withEventHandler("removeItem", item -> {
+                .withFunction("removeItem", item -> {
                     removalResult.setText(item);
                 }));
         NativeButton switchEnabled = new NativeButton("Switch enabled state",

@@ -52,7 +52,7 @@ public class SheetEventListener implements EventListener {
 
     @Override
     public void onBrowserEvent(Event event) {
-        if (((Element) event.getEventTarget().cast()).getAttribute("class")
+        if ((SheetWidget.getEventTarget(event)).getAttribute("class")
                 .contains(PopupButtonWidget.BUTTON_CLASSNAME)) {
             widget.setFocused(true);
             return;
@@ -113,7 +113,7 @@ public class SheetEventListener implements EventListener {
     }
 
     private void onSheetDoubleClick(Event event) {
-        Element target = event.getEventTarget().cast();
+        Element target = SheetWidget.getEventTarget(event);
         String targetClassName = target.getAttribute("class");
 
         if (target.getParentElement().getAttribute("class").contains("sheet")

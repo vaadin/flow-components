@@ -590,7 +590,7 @@ public class TreeGrid<T> extends Grid<T>
     public <V extends Component> Column<T> addComponentHierarchyColumn(
             ValueProvider<T, V> componentProvider) {
         return addColumn(new HierarchyColumnComponentRenderer<V, T>(
-                componentProvider).withProperty("children",
+                componentProvider, this).withProperty("children",
                         item -> getDataCommunicator().hasChildren(item)));
     }
 

@@ -217,9 +217,8 @@ public class UndoRedoIT extends AbstractSpreadsheetIT {
         waitUntil(new ExpectedCondition<Object>() {
             @Override
             public Object apply(WebDriver webDriver) {
-                return spreadsheet
-                        .findElement(By.cssSelector(".col1.row2.merged-cell"))
-                        .isDisplayed();
+                return findElementInShadowRoot(
+                        By.cssSelector(".col1.row2.merged-cell")).isDisplayed();
             }
         });
     }
@@ -347,20 +346,6 @@ public class UndoRedoIT extends AbstractSpreadsheetIT {
     private void deleteValueFromA1andA2(SpreadsheetElement spreadsheet) {
         dragFromCellToCell("A1", "A2");
         new Actions(getDriver()).sendKeys(Keys.DELETE).build().perform();
-    }
-
-    private void undo() {
-        // TODO: cleanup modifier keys solution (for macOS)
-        new Actions(getDriver()).keyDown(Keys.CONTROL).keyDown(Keys.COMMAND)
-                .sendKeys("z").keyUp(Keys.CONTROL).keyUp(Keys.COMMAND).build()
-                .perform();
-    }
-
-    private void redo() {
-        // TODO: cleanup modifier keys solution (for macOS)
-        new Actions(getDriver()).keyDown(Keys.CONTROL).keyDown(Keys.COMMAND)
-                .sendKeys("y").keyUp(Keys.CONTROL).keyUp(Keys.COMMAND).build()
-                .perform();
     }
 
     private void assertCorrectCss(SpreadsheetElement c) {

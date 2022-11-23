@@ -75,13 +75,21 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
     private LitRenderer(String templateExpression) {
         this.templateExpression = templateExpression;
 
-        // Generate a unique (in scope of the UI) namespace for the renderer
-        // properties.
-        int litRendererCount = UI.getCurrent().getElement()
-                .getProperty("__litRendererCount", 0);
-        UI.getCurrent().getElement().setProperty("__litRendererCount",
-                litRendererCount + 1);
+        int litRendererCount = 0;
+        if (UI.getCurrent() != null) {
+            // Generate a unique (in scope of the UI) namespace for the renderer
+            // properties.
+            litRendererCount = UI.getCurrent().getElement()
+                    .getProperty("__litRendererCount", 0);
+            UI.getCurrent().getElement().setProperty("__litRendererCount",
+                    litRendererCount + 1);
+
+        }
         propertyNamespace = "lr_" + litRendererCount + "_";
+    }
+
+    LitRenderer() {
+        this("");
     }
 
     /**
@@ -220,6 +228,25 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
                 clientCallablesArray, propertyNamespace);
     }
 
+    /**
+     * Returns the Lit template expression used to render items.
+     *
+     * @return the template expression
+     */
+    protected String getTemplateExpression() {
+        return templateExpression;
+    }
+
+    /**
+     * Returns the namespace used to prefix property names when sending them to
+     * the client as part of an item.
+     *
+     * @return the property namespace
+     */
+    String getPropertyNamespace() {
+        return propertyNamespace;
+    }
+
     private Registration createJsRendererFunction(Element container,
             DataKeyMapper<SOURCE> keyMapper, String rendererName) {
         ReturnChannelRegistration returnChannel = container.getNode()
@@ -251,11 +278,11 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
         // is no longer used so the registration is cleared by the renderer
         // registration.
         registrations.add(container.addAttachListener(e -> {
-            setElementRenderer(container, rendererName, templateExpression,
+            setElementRenderer(container, rendererName, getTemplateExpression(),
                     returnChannel, clientCallablesArray, propertyNamespace);
         }));
         // Call once initially
-        setElementRenderer(container, rendererName, templateExpression,
+        setElementRenderer(container, rendererName, getTemplateExpression(),
                 returnChannel, clientCallablesArray, propertyNamespace);
 
         // Get the renderer function cleared when the LitRenderer is
