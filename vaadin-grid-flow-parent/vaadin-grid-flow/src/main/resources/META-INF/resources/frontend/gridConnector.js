@@ -999,35 +999,6 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
         // Have the multi-selectable state updated on attach
         grid._createPropertyObserver('isAttached', () => grid.$connector.updateMultiSelectable());
 
-        // TODO: should be removed once https://github.com/vaadin/vaadin-grid/issues/1471 gets implemented
-        grid.$connector.setVerticalScrollingEnabled = tryCatchWrapper(function (enabled) {
-          // There are two scollable containers in grid so apply the changes for both
-          setVerticalScrollingEnabled(grid.$.table, enabled);
-        });
-
-        const setVerticalScrollingEnabled = function (scrollable, enabled) {
-          // Prevent Y axis scrolling with CSS. This will hide the vertical scrollbar.
-          scrollable.style.overflowY = enabled ? '' : 'hidden';
-          // Clean up an existing listener
-          scrollable.removeEventListener('wheel', scrollable.__wheelListener);
-          // Add a wheel event listener with the horizontal scrolling prevention logic
-          !enabled &&
-            scrollable.addEventListener(
-              'wheel',
-              (scrollable.__wheelListener = tryCatchWrapper((e) => {
-                if (e.deltaX) {
-                  // If there was some horizontal delta related to the wheel event, force the vertical
-                  // delta to 0 and let grid process the wheel event normally
-                  Object.defineProperty(e, 'deltaY', { value: 0 });
-                } else {
-                  // If there was verical delta only, skip the grid's wheel event processing to
-                  // enable scrolling the page even if grid isn't scrolled to end
-                  e.stopImmediatePropagation();
-                }
-              }))
-            );
-        };
-
         const singleTimeRenderer = (renderer) => {
           return (root) => {
             if (renderer) {
