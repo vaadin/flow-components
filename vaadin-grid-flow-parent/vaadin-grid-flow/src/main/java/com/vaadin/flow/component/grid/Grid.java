@@ -3342,6 +3342,16 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     @ClientCallable(DisabledUpdateMode.ALWAYS)
     private void setRequestedRange(int start, int length) {
+        if (length > 500 && length / getPageSize() > 10 && isAllRowsVisible()) {
+            throw new IllegalArgumentException(
+                    "Attempted to fetch more items from server than allowed in one go. "
+                            + "Maximum allowed page count is 10. Consider not using setAllRowsVisible(true) "
+                            + "when you have a large amount of items (not only to cover this issue but also "
+                            + "to avoid performance bottlenecks resulting from transferring the full item data "
+                            + "set at once and then rendering an excess amount of DOM elements). If for some "
+                            + "reason this is not an option, increase the page size of the grid so that rendering "
+                            + "every item at once doesn't result in a request for over 10 pages.");
+        }
         getDataCommunicator().setRequestedRange(start, length);
     }
 
@@ -3809,33 +3819,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             ComponentEventListener<CellFocusEvent<T>> listener) {
         return addListener(CellFocusEvent.class,
                 (ComponentEventListener) Objects.requireNonNull(listener));
-    }
-
-    /**
-     * Enables or disables the vertical scrolling on the Grid web component. By
-     * default, the scrolling is enabled.
-     *
-     * @param enabled
-     *            <code>true</code> to enable vertical scrolling,
-     *            <code>false</code> to disabled it
-     */
-    public void setVerticalScrollingEnabled(boolean enabled) {
-        if (isVerticalScrollingEnabled() == enabled) {
-            return;
-        }
-        verticalScrollingEnabled = enabled;
-        getElement().callJsFunction("$connector.setVerticalScrollingEnabled",
-                enabled);
-    }
-
-    /**
-     * Gets whether the vertical scrolling on the Grid web component is enabled.
-     *
-     * @return <code>true</code> if the vertical scrolling is enabled,
-     *         <code>false</code> otherwise
-     */
-    public boolean isVerticalScrollingEnabled() {
-        return verticalScrollingEnabled;
     }
 
     /**
