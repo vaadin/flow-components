@@ -1,6 +1,5 @@
 package com.vaadin.flow.component.gridpro.tests;
 
-import java.time.Year;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
