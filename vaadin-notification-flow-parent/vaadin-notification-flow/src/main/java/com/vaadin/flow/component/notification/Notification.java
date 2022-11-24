@@ -66,13 +66,14 @@ public class Notification extends GeneratedVaadinNotification<Notification>
 
     private Registration afterProgrammaticNavigationListenerRegistration;
 
-    private SerializableConsumer<UI> deferredJob = new AttachComponentTemplate();
+    private SerializableConsumer<UI> configureTemplate = new ConfigureComponentRenderer();
 
-    private class AttachComponentTemplate implements SerializableConsumer<UI> {
+    private class ConfigureComponentRenderer
+            implements SerializableConsumer<UI> {
 
         @Override
         public void accept(UI ui) {
-            if (this == deferredJob) {
+            if (this == configureTemplate) {
                 String appId = ui.getInternals().getAppId();
                 int nodeId = container.getNode().getId();
                 String template = String.format(
@@ -131,8 +132,6 @@ public class Notification extends GeneratedVaadinNotification<Notification>
      */
     public Notification() {
         initBaseElementsAndListeners();
-        getElement().getNode().runWhenAttached(ui -> ui
-                .beforeClientResponse(this, context -> deferredJob.accept(ui)));
         setPosition(DEFAULT_POSITION);
         setDuration(0);
     }
@@ -270,7 +269,7 @@ public class Notification extends GeneratedVaadinNotification<Notification>
      */
     public void setText(String text) {
         removeAll();
-        deferredJob = NO_OP;
+        configureTemplate = NO_OP;
         templateElement.setProperty("innerHTML", HtmlUtils.escape(text));
     }
 
@@ -351,7 +350,7 @@ public class Notification extends GeneratedVaadinNotification<Notification>
                     "Component to add cannot be null");
             container.appendChild(component.getElement());
         }
-        attachComponentTemplate();
+        configureComponentRenderer();
     }
 
     /**
@@ -402,7 +401,7 @@ public class Notification extends GeneratedVaadinNotification<Notification>
         // inside the method below
         container.insertChild(index, component.getElement());
 
-        attachComponentTemplate();
+        configureComponentRenderer();
     }
 
     /**
@@ -575,16 +574,17 @@ public class Notification extends GeneratedVaadinNotification<Notification>
                         .collect(Collectors.toList()));
     }
 
-    private void attachComponentTemplate() {
-        deferredJob = new AttachComponentTemplate();
-        getElement().getNode().runWhenAttached(ui -> ui
-                .beforeClientResponse(this, context -> deferredJob.accept(ui)));
+    private void configureComponentRenderer() {
+        configureTemplate = new ConfigureComponentRenderer();
+        getElement().getNode()
+                .runWhenAttached(ui -> configureTemplate.accept(ui));
     }
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         initConnector();
+        configureTemplate.accept(attachEvent.getUI());
     }
 
     @Override
