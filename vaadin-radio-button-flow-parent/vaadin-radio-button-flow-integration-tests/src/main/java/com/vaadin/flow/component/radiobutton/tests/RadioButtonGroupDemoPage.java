@@ -258,6 +258,7 @@ public class RadioButtonGroupDemoPage extends Div {
         return person.getName();
     }
 
+    @SuppressWarnings("deprecation")
     private void addComponentAfterItems() {
         RadioButtonGroup<String> group = new RadioButtonGroup<>();
         group.setItems("foo", "bar", "baz");
@@ -271,6 +272,7 @@ public class RadioButtonGroupDemoPage extends Div {
         addCard("Add component to group", group);
     }
 
+    @SuppressWarnings("deprecation")
     private void insertComponentsBetweenItems() {
         RadioButtonGroup<String> group = new RadioButtonGroup<>();
 
@@ -289,6 +291,7 @@ public class RadioButtonGroupDemoPage extends Div {
         addCard("Insert component after item in group", group);
     }
 
+    @SuppressWarnings("deprecation")
     private void prependAndInsertComponents() {
         RadioButtonGroup<String> group = new RadioButtonGroup<>();
 
@@ -308,6 +311,7 @@ public class RadioButtonGroupDemoPage extends Div {
 
     private Label below;
 
+    @SuppressWarnings("deprecation")
     private void dynamicComponents() {
         RadioButtonGroup<String> group = new RadioButtonGroup<>();
 

@@ -27,6 +27,7 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
@@ -749,5 +750,137 @@ public class RadioButtonGroup<T>
     @Override
     public void removeThemeVariants(RadioGroupVariant... variants) {
         super.removeThemeVariants(variants);
+    }
+    /**
+     * @deprecated since v23.3. This component is not intended to be used as a
+     *             generic component container, and its implementation of
+     *             {@link HasComponents} and {@link HasItemComponents} will be
+     *             removed in v24.
+     */
+
+    @Override
+    @Deprecated
+    public void add(Component... components) {
+        HasItemComponents.super.add(components);
+    }
+
+    /**
+     * @deprecated since v23.3. This component is not intended to be used as a
+     *             generic component container, and its implementation of
+     *             {@link HasComponents} and {@link HasItemComponents} will be
+     *             removed in v24.
+     */
+    @Override
+    @Deprecated
+    public void add(Collection<Component> components) {
+        HasItemComponents.super.add(components);
+    }
+
+    /**
+     * @deprecated since v23.3. This component is not intended to be used as a
+     *             generic component container, and its implementation of
+     *             {@link HasComponents} and {@link HasItemComponents} will be
+     *             removed in v24.
+     */
+    @Override
+    @Deprecated
+    public void add(String text) {
+        HasItemComponents.super.add(text);
+    }
+
+    /**
+     * @deprecated since v23.3. This component is not intended to be used as a
+     *             generic component container, and its implementation of
+     *             {@link HasComponents} and {@link HasItemComponents} will be
+     *             removed in v24.
+     */
+    @Override
+    @Deprecated
+    public void remove(Component... components) {
+        HasItemComponents.super.remove(components);
+    }
+
+    /**
+     * @deprecated since v23.3. This component is not intended to be used as a
+     *             generic component container, and its implementation of
+     *             {@link HasComponents} and {@link HasItemComponents} will be
+     *             removed in v24.
+     */
+    @Override
+    @Deprecated
+    public void remove(Collection<Component> components) {
+        HasItemComponents.super.remove(components);
+    }
+
+    /**
+     * @deprecated since v23.3. This component is not intended to be used as a
+     *             generic component container, and its implementation of
+     *             {@link HasComponents} and {@link HasItemComponents} will be
+     *             removed in v24.
+     */
+    @Override
+    @Deprecated
+    public void removeAll() {
+        HasItemComponents.super.removeAll();
+    }
+
+    /**
+     * @deprecated since v23.3. This component is not intended to be used as a
+     *             generic component container, and its implementation of
+     *             {@link HasComponents} and {@link HasItemComponents} will be
+     *             removed in v24.
+     */
+    @Override
+    @Deprecated
+    public void addComponentAtIndex(int index, Component component) {
+        HasItemComponents.super.addComponentAtIndex(index, component);
+    }
+
+    /**
+     * @deprecated since v23.3. This component is not intended to be used as a
+     *             generic component container, and its implementation of
+     *             {@link HasComponents} and {@link HasItemComponents} will be
+     *             removed in v24.
+     */
+    @Override
+    @Deprecated
+    public void addComponentAsFirst(Component component) {
+        HasItemComponents.super.addComponentAsFirst(component);
+    }
+
+    /**
+     * @deprecated since v23.3. This component is not intended to be used as a
+     *             generic component container, and its implementation of
+     *             {@link HasComponents} and {@link HasItemComponents} will be
+     *             removed in v24.
+     */
+    @Override
+    @Deprecated
+    public void addComponents(T afterItem, Component... components) {
+        HasItemComponents.super.addComponents(afterItem, components);
+    }
+
+    /**
+     * @deprecated since v23.3. This component is not intended to be used as a
+     *             generic component container, and its implementation of
+     *             {@link HasComponents} and {@link HasItemComponents} will be
+     *             removed in v24.
+     */
+    @Override
+    @Deprecated
+    public void prependComponents(T beforeItem, Component... components) {
+        HasItemComponents.super.prependComponents(beforeItem, components);
+    }
+
+    /**
+     * @deprecated since v23.3. This component is not intended to be used as a
+     *             generic component container, and its implementation of
+     *             {@link HasComponents} and {@link HasItemComponents} will be
+     *             removed in v24.
+     */
+    @Override
+    @Deprecated
+    public int getItemPosition(T item) {
+        return HasItemComponents.super.getItemPosition(item);
     }
 }
