@@ -42,12 +42,12 @@ import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.ValueProvider;
-import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.server.Command;
 import com.vaadin.flow.shared.Registration;
 
+import elemental.json.Json;
 import elemental.json.JsonValue;
 
 /**
@@ -142,6 +142,7 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
         getElement().setAttribute("suppress-template-warning", true);
         template = new Element("template");
         setRenderer((ValueProvider<T, String>) String::valueOf);
+        addAttachListener((e) -> this.setPlaceholderItem(this.placeholderItem));
     }
 
     private void initConnector() {
@@ -262,8 +263,16 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
      */
     public void setPlaceholderItem(T placeholderItem) {
         this.placeholderItem = placeholderItem;
-        getElement().callJsFunction("$connector.setPlaceholderItem",
-                JsonSerializer.toJson(placeholderItem));
+
+        runBeforeClientResponse(() -> {
+            var json = Json.createObject();
+            // Use the renderer's data generator to create the final placeholder
+            // item which shoul be sent send to the client
+            if (placeholderItem != null) {
+                dataGenerator.generateData(placeholderItem, json);
+            }
+            getElement().callJsFunction("$connector.setPlaceholderItem", json);
+        });
 
         registerTemplateUpdate();
     }
