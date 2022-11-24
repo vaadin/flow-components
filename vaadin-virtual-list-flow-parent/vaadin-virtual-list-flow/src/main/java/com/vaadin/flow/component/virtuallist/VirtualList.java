@@ -268,7 +268,7 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
         runBeforeClientResponse(() -> {
             var json = Json.createObject();
             // Use the renderer's data generator to create the final placeholder
-            // item which shoul be sent send to the client
+            // item which should be sent sent to the client
             if (placeholderItem != null) {
                 dataGenerator.generateData(placeholderItem, json);
             }
