@@ -41,17 +41,17 @@ public class SheetTabSheetIT extends AbstractSpreadsheetIT {
             throws InterruptedException {
         SpreadsheetElement spreadsheet = getSpreadsheet();
 
-        clickCell("C8");
+        clickCell("C5");
         spreadsheet.addSheet();
         spreadsheet.selectSheetAt(1);
-        selectRegion("C3", "G14");
+        selectRegion("C3", "E5");
         spreadsheet.selectSheetAt(0);
-        waitUntil(e -> spreadsheet.getCellAt("C8").isCellSelected());
+        waitUntil(e -> spreadsheet.getCellAt("C5").isCellSelected());
         spreadsheet.selectSheetAt(1);
         getCommandExecutor().waitForVaadin();
-        String[] cols = { "C", "D", "E", "F", "G" };
+        String[] cols = { "C", "D", "E" };
         for (String column : cols) {
-            for (int row = 3; row <= 14; row++) {
+            for (int row = 3; row <= 5; row++) {
                 Assert.assertTrue("Cell " + column + row + " is not selected",
                         spreadsheet.getCellAt(column + "" + row)
                                 .isCellSelected());
