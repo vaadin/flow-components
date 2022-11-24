@@ -751,6 +751,7 @@ public class RadioButtonGroup<T>
     public void removeThemeVariants(RadioGroupVariant... variants) {
         super.removeThemeVariants(variants);
     }
+
     /**
      * @deprecated since v23.3. This component is not intended to be used as a
      *             generic component container, and its implementation of
