@@ -74,8 +74,8 @@ public class EditColumnConfigurator<T> implements Serializable {
     }
 
     private <V> Column<T> configureColumn(ValueProvider<T, V> valueProvider,
-            ItemUpdater<T, String> itemUpdater,
-            EditorType type, HasValueAndElement<?, V> editorField) {
+            ItemUpdater<T, String> itemUpdater, EditorType type,
+            HasValueAndElement<?, V> editorField) {
         column.setEditorType(type);
         column.setItemUpdater(itemUpdater);
         column.setEditorField(editorField);
@@ -107,6 +107,23 @@ public class EditColumnConfigurator<T> implements Serializable {
                 Collections.emptyList());
     }
 
+    /**
+     * Configures the column to have a custom editor component.
+     * <p>
+     * When editing starts, the editor's value is initialized with the same
+     * presentation value that is used for the column. When committing the
+     * editor value, the item updater is called to update the edited item with
+     * the new value.
+     *
+     * @param component
+     *            the editor component, which must be an implementation of
+     *            {@link HasValueAndElement}
+     * @param itemUpdater
+     *            the callback function that is called when the editor value has
+     *            changed. It receives the edited item, and the new value from
+     *            the editor.
+     * @return the configured column
+     */
     public <V> Column<T> custom(HasValueAndElement<?, V> component,
             ItemUpdater<T, V> itemUpdater) {
         @SuppressWarnings("unchecked")
@@ -115,6 +132,25 @@ public class EditColumnConfigurator<T> implements Serializable {
         return custom(component, valueProvider, itemUpdater);
     }
 
+    /**
+     * Configures the column to have a custom editor component, using a custom
+     * value provider.
+     * <p>
+     * When editing starts, the editor's value is initialized using the custom
+     * value provider. When committing the editor value, the item updater is
+     * called to update the edited item with the new value.
+     *
+     * @param component
+     *            the editor component, which must be an implementation of
+     *            {@link HasValueAndElement}
+     * @param valueProvider
+     *            the value provider that is used to initialize the editor value
+     * @param itemUpdater
+     *            the callback function that is called when the editor value has
+     *            changed. It receives the edited item, and the new value from
+     *            the editor.
+     * @return the configured column
+     */
     public <V> Column<T> custom(HasValueAndElement<?, V> component,
             ValueProvider<T, V> valueProvider, ItemUpdater<T, V> itemUpdater) {
         column.getElement().appendVirtualChild(component.getElement());
@@ -128,9 +164,9 @@ public class EditColumnConfigurator<T> implements Serializable {
         column.getElement().getNode()
                 .runWhenAttached(ui -> ui.beforeClientResponse(column,
                         context -> setEditModeRenderer(component)));
-        return configureColumn(valueProvider,
-                (item, ignore) -> itemUpdater.accept(item,
-                component.getValue()), EditorType.CUSTOM, component);
+        return configureColumn(valueProvider, (item, ignore) -> itemUpdater
+                .accept(item, component.getValue()), EditorType.CUSTOM,
+                component);
     }
 
     private <V> void setEditModeRenderer(HasValueAndElement<?, V> component) {
