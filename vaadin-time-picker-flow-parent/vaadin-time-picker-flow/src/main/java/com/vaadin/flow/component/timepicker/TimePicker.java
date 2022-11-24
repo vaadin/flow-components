@@ -595,21 +595,6 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     }
 
     /**
-     * Sets the minimum time in the time picker. Times before that will be
-     * disabled in the popup.
-     *
-     * @deprecated Since 22.0, this API is deprecated in favor of
-     *             {@link TimePicker#setMin(LocalTime)}
-     * @param min
-     *            the minimum time that is allowed to be selected, or
-     *            <code>null</code> to remove any minimum constraints
-     */
-    @Deprecated
-    public void setMinTime(LocalTime min) {
-        this.setMin(min);
-    }
-
-    /**
      * Gets the minimum time in the time picker. Time before that will be
      * disabled in the popup.
      *
@@ -618,21 +603,6 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
      */
     public LocalTime getMin() {
         return this.min;
-    }
-
-    /**
-     * Gets the minimum time in the time picker. Time before that will be
-     * disabled in the popup.
-     *
-     * @deprecated Since 22.0, this API is deprecated in favor of
-     *             {@link TimePicker#getMin()}
-     *
-     * @return the minimum time that is allowed to be selected, or
-     *         <code>null</code> if there's no minimum
-     */
-    @Deprecated
-    public LocalTime getMinTime() {
-        return this.getMin();
     }
 
     /**
@@ -649,22 +619,6 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     }
 
     /**
-     * Sets the maximum time in the time picker. Times after that will be
-     * disabled in the popup.
-     *
-     * @deprecated Since 22.0, this API is deprecated in favor of
-     *             {@link TimePicker#setMax(LocalTime)}
-     *
-     * @param max
-     *            the maximum time that is allowed to be selected, or
-     *            <code>null</code> to remove any maximum constraints
-     */
-    @Deprecated
-    public void setMaxTime(LocalTime max) {
-        this.setMax(max);
-    }
-
-    /**
      * Gets the maximum time in the time picker. Times after that will be
      * disabled in the popup.
      *
@@ -673,21 +627,6 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
      */
     public LocalTime getMax() {
         return this.max;
-    }
-
-    /**
-     * Gets the maximum time in the time picker. Times after that will be
-     * disabled in the popup.
-     *
-     * @deprecated Since 22.0, this API is deprecated in favor of
-     *             {@link TimePicker#getMax()}
-     *
-     * @return the maximum time that is allowed to be selected, or
-     *         <code>null</code> if there's no maximum
-     */
-    @Deprecated
-    public LocalTime getMaxTime() {
-        return this.getMax();
     }
 
     private void runBeforeClientResponse(SerializableConsumer<UI> command) {
