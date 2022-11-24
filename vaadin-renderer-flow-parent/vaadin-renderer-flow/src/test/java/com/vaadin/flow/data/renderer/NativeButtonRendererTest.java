@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.data.renderer;
 
+import java.util.Arrays;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -42,15 +44,19 @@ public class NativeButtonRendererTest {
 
         JsonObject json = Json.createObject();
         dataGenerator.generateData("something", json);
+
+        // Find the mapped key for "disabled" property
+        var keyForDisabled = Arrays.stream(json.keys())
+                .filter(key -> key.endsWith("disabled")).findFirst().get();
         Assert.assertFalse("The button shouldn't be disabled",
-                json.getBoolean("lr_0_disabled"));
+                json.getBoolean(keyForDisabled));
 
         mockDisabled(container);
 
         json = Json.createObject();
         dataGenerator.generateData("something", json);
         Assert.assertTrue("The button should be disabled",
-                json.getBoolean("lr_0_disabled"));
+                json.getBoolean(keyForDisabled));
     }
 
     private void mockDisabled(Element container) {
