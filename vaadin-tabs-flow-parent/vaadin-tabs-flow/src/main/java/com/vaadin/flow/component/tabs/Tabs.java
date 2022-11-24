@@ -243,24 +243,6 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
          *
          * @param source
          *            The tabs that fired the event.
-         * @param fromClient
-         *            <code>true</code> for client-side events,
-         *            <code>false</code> otherwise.
-         *
-         * @deprecated use
-         *             {@link #SelectedChangeEvent(Tabs source, Tab previousTab, boolean fromClient)}
-         *             instead.
-         */
-        @Deprecated
-        public SelectedChangeEvent(Tabs source, boolean fromClient) {
-            this(source, null, fromClient);
-        }
-
-        /**
-         * Creates a new selected change event.
-         *
-         * @param source
-         *            The tabs that fired the event.
          * @param previousTab
          *            The previous selected tab.
          * @param fromClient
