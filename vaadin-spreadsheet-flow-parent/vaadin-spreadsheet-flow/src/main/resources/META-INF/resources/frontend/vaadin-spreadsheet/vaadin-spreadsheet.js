@@ -18,7 +18,9 @@ const overlayStyles = (() => {
 })();
 
 export class VaadinSpreadsheet extends LitElement {
-  static styles = spreadsheetStyles;
+  static get styles() {
+    return spreadsheetStyles;
+  }
 
   static get properties() {
     return {
