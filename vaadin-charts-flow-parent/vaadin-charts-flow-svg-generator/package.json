@@ -5,7 +5,7 @@
   "scripts": {
     "test": "mocha",
     "test:watch": "mocha --watch",
-    "postinstall": "webpack --config webpack.config.js"
+    "build":  "webpack --config webpack.config.js"
   },
   "dependencies": {
     "highcharts": "9.2.2",

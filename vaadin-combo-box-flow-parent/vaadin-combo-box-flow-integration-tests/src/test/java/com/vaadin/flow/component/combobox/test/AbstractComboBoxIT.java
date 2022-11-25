@@ -123,7 +123,8 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
     }
 
     protected String getItemLabel(TestBenchElement itemElement) {
-        return itemElement.getPropertyString("innerHTML");
+        String innerHtml = itemElement.getPropertyString("innerHTML");
+        return stripComments(innerHtml);
     }
 
     protected List<TestBenchElement> getItemElements() {
@@ -212,5 +213,16 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
 
             return condition.apply(comboItems);
         });
+    }
+
+    /**
+     * Strips comments from the given HTML string.
+     *
+     * @param html
+     *            the html String
+     * @return the stripped html
+     */
+    private static String stripComments(String html) {
+        return html.replaceAll("<!--.*?-->", "");
     }
 }
