@@ -39,7 +39,6 @@ import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.Rendering;
-import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.ValueProvider;
@@ -190,7 +189,7 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
     public void setRenderer(ValueProvider<T, String> valueProvider) {
         Objects.requireNonNull(valueProvider,
                 "The valueProvider must not be null");
-        this.setRenderer(TemplateRenderer.<T> of("[[item.label]]")
+        this.setRenderer(LitRenderer.<T> of("${item.label}")
                 .withProperty("label", valueProvider));
     }
 
