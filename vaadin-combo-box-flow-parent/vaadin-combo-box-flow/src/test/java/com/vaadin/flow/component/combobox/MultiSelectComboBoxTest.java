@@ -24,8 +24,10 @@ import org.mockito.Mockito;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class MultiSelectComboBoxTest extends ComboBoxBaseTest {
@@ -220,4 +222,42 @@ public class MultiSelectComboBoxTest extends ComboBoxBaseTest {
 
         comboBox.getSelectedItems().add("baz");
     }
+
+    @Test
+    public void preserveOrderTest() {
+        MultiSelectComboBox<String> select = new MultiSelectComboBox<>();
+        select.setItems("One", "Two", "Three", "Four", "Five", "Six", "Seven",
+                "Eight", "Nine", "Ten");
+
+        Set<String> value = null;
+        List<String> list1 = null;
+
+        select.select("Eight");
+        select.select("Two");
+        select.select("Four");
+        value = select.getValue();
+        list1 = value.stream().collect(Collectors.toList());
+        Assert.assertEquals("Eight", list1.get(0));
+        Assert.assertEquals("Two", list1.get(1));
+        Assert.assertEquals("Four", list1.get(2));
+        select.clear();
+
+        Set<String> list2 = new LinkedHashSet<>(Arrays.asList("Eight", "Two", "Four").stream()
+                .collect(Collectors.toList()));
+        select.setValue(list2);
+        value = select.getValue();
+        list1 = value.stream().collect(Collectors.toList());
+        Assert.assertEquals("Eight", list1.get(0));
+        Assert.assertEquals("Two", list1.get(1));
+        Assert.assertEquals("Four", list1.get(2));
+        select.clear();
+
+        select.select("Eight", "Two", "Four");
+        value = select.getValue();
+        list1 = value.stream().collect(Collectors.toList());
+        Assert.assertEquals("Eight", list1.get(0));
+        Assert.assertEquals("Two", list1.get(1));
+        Assert.assertEquals("Four", list1.get(2));
+    }
+
 }
