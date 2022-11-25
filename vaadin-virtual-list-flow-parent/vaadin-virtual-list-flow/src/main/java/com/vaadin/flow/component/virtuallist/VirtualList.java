@@ -240,6 +240,11 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
         registerTemplateUpdate();
 
         getDataCommunicator().reset();
+
+        // Changing the renderer may also affect how the placeholder item is
+        // processed by the data generator. Call setPlaceholderItem to make sure
+        // the sent placeholder item is up to date.
+        this.setPlaceholderItem(this.placeholderItem);
     }
 
     /**
@@ -267,11 +272,16 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
 
         runBeforeClientResponse(() -> {
             var json = Json.createObject();
-            // Use the renderer's data generator to create the final placeholder
-            // item which should be sent sent to the client
+
             if (placeholderItem != null) {
+                // Use the renderer's data generator to create the final
+                // placeholder item which should be sent to the client. In the
+                // case of ComponentRenderer, the generator also creates a
+                // placeholder element which is automatically sent to the client
+                // and the resulting json object will include its nodeid.
                 dataGenerator.generateData(placeholderItem, json);
             }
+
             var appId = UI.getCurrent() != null
                     ? UI.getCurrent().getInternals().getAppId()
                     : "";
