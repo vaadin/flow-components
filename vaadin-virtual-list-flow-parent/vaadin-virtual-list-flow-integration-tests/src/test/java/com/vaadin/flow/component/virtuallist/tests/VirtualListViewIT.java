@@ -207,12 +207,12 @@ public class VirtualListViewIT extends AbstractComponentIT {
         Map<String, String> obj = (Map<String, String>) executeScript(
                 "return arguments[0].$connector.placeholderItem;", list);
         // Find the mapped key for "firstName" property
-        var keyForDisabled = obj.keySet().stream()
+        var keyForFirstName = obj.keySet().stream()
                 .filter(key -> key.endsWith("firstName")).findFirst().get();
         Assert.assertEquals("The placeholderItem object of the '"
                 + list.getAttribute("id")
                 + "' virtual-list should have the '-----' as firstName property",
-                "-----", obj.get(keyForDisabled));
+                "-----", obj.get(keyForFirstName));
     }
 
 }
