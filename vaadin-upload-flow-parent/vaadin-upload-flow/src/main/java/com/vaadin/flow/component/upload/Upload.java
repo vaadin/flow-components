@@ -62,7 +62,7 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
      * Server-side component for the default {@code <vaadin-upload>} icon.
      */
     @Tag("vaadin-upload-icon")
-    public static class UploadIcon extends Component {
+    static class UploadIcon extends Component {
 
         public UploadIcon() {
         }

@@ -7,7 +7,6 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.upload.Upload;
 import net.jcip.annotations.NotThreadSafe;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -16,11 +15,9 @@ import static org.junit.Assert.assertEquals;
 @NotThreadSafe
 public class UploadSlotsTest {
 
-    private UI ui;
-
     @Before
     public void setup() {
-        ui = new UI();
+        UI ui = new UI();
         UI.setCurrent(ui);
     }
 
