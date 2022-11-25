@@ -39,7 +39,6 @@ import com.vaadin.flow.data.binder.PropertyDefinition;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
-import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
@@ -50,7 +49,7 @@ import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalQuery;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
-import com.vaadin.flow.data.renderer.TemplateRenderer;
+import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableBiFunction;
@@ -555,14 +554,28 @@ public class TreeGrid<T> extends Grid<T>
      * @return the created hierarchy column
      */
     public Column<T> addHierarchyColumn(ValueProvider<T, ?> valueProvider) {
-        Column<T> column = addColumn(TemplateRenderer
-                .<T> of("<vaadin-grid-tree-toggle "
-                        + "leaf='[[!item.children]]' expanded='{{expanded}}' level='[[level]]'>[[item.name]]"
-                        + "</vaadin-grid-tree-toggle>")
+
+        // The click listener needs to check if the event gets canceled (by
+        // vaadin-grid-tree-toggle) and only invoke the callback if it does.
+        // vaadin-grid-tree-toggle will cancel the event if the user clicks on
+        // a non-focusable element inside the toggle.
+        Column<T> column = addColumn(LitRenderer.<T> of(
+                "<vaadin-grid-tree-toggle @click=${onClick} .leaf=${!item.children} .expanded=${model.expanded} .level=${model.level}>"
+                        + "${item.name}</vaadin-grid-tree-toggle>")
                 .withProperty("children",
                         item -> getDataCommunicator().hasChildren(item))
                 .withProperty("name",
-                        value -> String.valueOf(valueProvider.apply(value))));
+                        value -> String.valueOf(valueProvider.apply(value)))
+                .withFunction("onClick", item -> {
+                    if (getDataCommunicator().hasChildren(item)) {
+                        if (isExpanded(item)) {
+                            collapse(List.of(item), true);
+                        } else {
+                            expand(List.of(item), true);
+                        }
+                    }
+                }));
+
         final SerializableComparator<T> comparator = (a,
                 b) -> compareMaybeComparables(valueProvider.apply(a),
                         valueProvider.apply(b));
