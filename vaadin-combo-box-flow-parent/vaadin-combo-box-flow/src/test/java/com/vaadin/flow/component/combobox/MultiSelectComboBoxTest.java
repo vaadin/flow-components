@@ -242,8 +242,9 @@ public class MultiSelectComboBoxTest extends ComboBoxBaseTest {
         Assert.assertEquals("Four", list1.get(2));
         select.clear();
 
-        Set<String> list2 = new LinkedHashSet<>(Arrays.asList("Eight", "Two", "Four").stream()
-                .collect(Collectors.toList()));
+        Set<String> list2 = new LinkedHashSet<>(
+                Arrays.asList("Eight", "Two", "Four").stream()
+                        .collect(Collectors.toList()));
         select.setValue(list2);
         value = select.getValue();
         list1 = value.stream().collect(Collectors.toList());
