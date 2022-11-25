@@ -94,11 +94,20 @@ public class MainView extends VerticalLayout {
                     subPropertyDisplayPanel.setText(newValue.toString());
                 }).setHeader("City").setWidth("300px");
 
-        Input customField = new Input();
+        Input customEmailField = new Input();
         grid.addEditColumn(Person::getEmail)
-                .custom(customField,
+                .custom(customEmailField,
                         (item, newValue) -> item.setEmail(newValue))
                 .setHeader("Email").setWidth("300px");
+
+        TextField customEmploymentYearField = new TextField();
+        grid.addEditColumn(Person::getEmploymentYear).custom(
+                // Convert int model value to string editor value
+                customEmploymentYearField,
+                item -> item.getEmploymentYear() + "",
+                // Convert string editor value back to int model value
+                (item, newValue) -> item
+                        .setEmploymentYear(Integer.parseInt(newValue)));
 
         disableGrid.addClickListener(click -> grid.setEnabled(false));
 
@@ -125,12 +134,6 @@ public class MainView extends VerticalLayout {
         beanGrid.addEditColumn("department").select((item, newValue) -> {
             item.setDepartment(fromStringRepresentation((newValue)));
         }, listOptions).setHeader("Department").setWidth("300px");
-
-        TextField employmentYearField = new TextField();
-        beanGrid.addEditColumn(Person::getEmploymentYear).custom(
-                employmentYearField, item -> item.getEmploymentYear() + "",
-                (item, newValue) -> item
-                        .setEmploymentYear(Integer.parseInt(newValue)));
 
         add(beanGrid);
     }

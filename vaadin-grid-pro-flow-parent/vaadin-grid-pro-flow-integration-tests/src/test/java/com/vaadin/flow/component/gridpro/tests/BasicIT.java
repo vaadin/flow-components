@@ -30,7 +30,7 @@ public class BasicIT extends AbstractParallelTest {
     public void editColumnsAdded() {
         List<TestBenchElement> columns = grid.$("vaadin-grid-pro-edit-column")
                 .all();
-        Assert.assertEquals(columns.size(), 5);
+        Assert.assertEquals(columns.size(), 6);
     }
 
     @Test
@@ -197,16 +197,6 @@ public class BasicIT extends AbstractParallelTest {
     }
 
     @Test
-    public void customTextFieldIsGettingConvertedValue() {
-        GridTHTDElement cell = beanGrid.getCell(0, 3);
-        assertCellEnterEditModeOnDoubleClick(0, 3, "vaadin-text-field",
-                beanGrid, true);
-        TestBenchElement textField = cell.$("vaadin-text-field").first();
-
-        Assert.assertEquals("2019", textField.getProperty("value"));
-    }
-
-    @Test
     public void disabledGridShouldNotBeActivatedByDoubleClick() {
         $("vaadin-button").id("disable-grid-id").click();
         assertCellEnterEditModeOnDoubleClick(0, 1,
@@ -259,6 +249,16 @@ public class BasicIT extends AbstractParallelTest {
 
         grid.scrollToRow(30);
         Assert.assertFalse(cell.innerHTMLContains("input"));
+    }
+
+    @Test
+    public void customTextFieldWithCustomValueProviderIsGettingConvertedValue() {
+        GridTHTDElement cell = grid.getCell(0, 6);
+        assertCellEnterEditModeOnDoubleClick(0, 6, "vaadin-text-field", grid,
+                true);
+        TestBenchElement textField = cell.$("vaadin-text-field").first();
+        // should have converted integer model value into string editor value
+        Assert.assertEquals("2019", textField.getProperty("value"));
     }
 
     private void assertCellEnterEditModeOnDoubleClick(Integer rowIndex,
