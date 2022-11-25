@@ -108,7 +108,7 @@ public class MultiSelectComboBox<TItem>
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public MultiSelectComboBox(int pageSize) {
-        super("selectedItems", Collections.emptySet(), JsonArray.class,
+        super("selectedItems", new LinkedHashSet<>(), JsonArray.class,
                 MultiSelectComboBox::presentationToModel,
                 MultiSelectComboBox::modelToPresentation);
 
@@ -253,7 +253,7 @@ public class MultiSelectComboBox<TItem>
             return multiSelectComboBox.getEmptyValue();
         }
 
-        Set<T> set = new HashSet<>();
+        Set<T> set = new LinkedHashSet<>();
         for (int i = 0; i < presentation.length(); i++) {
             String key = presentation.getObject(i).getString("key");
             set.add(keyMapper.get(key));
@@ -292,7 +292,7 @@ public class MultiSelectComboBox<TItem>
      */
     @Override
     public Set<TItem> getValue() {
-        return Collections.unmodifiableSet(selectionModel.getSelectedItems());
+        return Collections.unmodifiableSet(super.getValue());
     }
 
     /**
