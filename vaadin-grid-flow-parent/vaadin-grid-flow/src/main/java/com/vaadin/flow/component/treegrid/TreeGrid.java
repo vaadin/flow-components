@@ -554,11 +554,6 @@ public class TreeGrid<T> extends Grid<T>
      * @return the created hierarchy column
      */
     public Column<T> addHierarchyColumn(ValueProvider<T, ?> valueProvider) {
-
-        // The click listener needs to check if the event gets canceled (by
-        // vaadin-grid-tree-toggle) and only invoke the callback if it does.
-        // vaadin-grid-tree-toggle will cancel the event if the user clicks on
-        // a non-focusable element inside the toggle.
         Column<T> column = addColumn(LitRenderer.<T> of(
                 "<vaadin-grid-tree-toggle @click=${onClick} .leaf=${!item.children} .expanded=${model.expanded} .level=${model.level}>"
                         + "${item.name}</vaadin-grid-tree-toggle>")
