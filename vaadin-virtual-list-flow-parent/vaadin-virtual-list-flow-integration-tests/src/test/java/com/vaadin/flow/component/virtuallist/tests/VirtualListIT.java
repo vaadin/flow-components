@@ -507,9 +507,9 @@ public class VirtualListIT extends AbstractComponentIT {
     }
 
     private String getPropertyString(JsonObject json, String propertyName) {
-        var keyForLabel = Arrays.stream(json.keys())
+        var keyForProperty = Arrays.stream(json.keys())
                 .filter(key -> key.endsWith(propertyName)).findFirst().get();
-        return json.getString(keyForLabel);
+        return json.getString(keyForProperty);
     }
 
     private void clickToSet3Items_listIsUpdated(String listId,
