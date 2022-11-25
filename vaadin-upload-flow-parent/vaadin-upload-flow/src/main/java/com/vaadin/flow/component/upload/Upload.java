@@ -29,7 +29,10 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.dom.DomEventListener;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableConsumer;
@@ -55,6 +58,16 @@ import elemental.json.JsonType;
  */
 public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
 
+    /**
+     * Server-side component for the default {@code <vaadin-upload>} icon.
+     */
+    @Tag("vaadin-upload-icon")
+    public static class UploadIcon extends Component {
+
+        public UploadIcon() {
+        }
+    }
+
     private StreamVariable streamVariable;
     private boolean interrupted = false;
 
@@ -62,6 +75,15 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
     private boolean uploading;
 
     private UploadI18N i18n;
+
+    private Component uploadButton;
+    private Component defaultUploadButton;
+
+    private Component dropLabel;
+    private Component defaultDropLabel;
+
+    private Component dropLabelIcon;
+    private Component defaultDropLabelIcon;
 
     /**
      * The output of the upload is redirected to this receiver.
@@ -115,6 +137,15 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
                 .addEventData(elementFiles);
         getElement().addEventListener("upload-abort", allFinishedListener)
                 .addEventData(elementFiles);
+
+        defaultUploadButton = new Button();
+        setUploadButton(defaultUploadButton);
+
+        defaultDropLabel = new Span();
+        setDropLabel(defaultDropLabel);
+
+        defaultDropLabelIcon = new UploadIcon();
+        setDropLabelIcon(defaultDropLabelIcon);
     }
 
     /**
@@ -276,48 +307,60 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
      * Set the component as the actionable button inside the upload component,
      * that opens the dialog for choosing the files to be upload.
      *
-     * @param uploadButton
+     * @param button
      *            the component to be clicked by the user to open the dialog, or
      *            <code>null</code> to reset to the default button
      */
-    public void setUploadButton(Component uploadButton) {
+    public void setUploadButton(Component button) {
         removeElementsAtSlot("add-button");
-        if (uploadButton != null) {
-            addToAddButton(uploadButton);
+
+        if (button != null) {
+            uploadButton = button;
+        } else {
+            uploadButton = defaultUploadButton;
         }
+
+        uploadButton.getElement().setAttribute("slot", "add-button");
+        getElement().appendChild(uploadButton.getElement());
     }
 
     /**
-     * Get the component set as the upload button for the upload, if any.
+     * Get the component set as the upload button for the upload.
      *
-     * @return the actionable button, or <code>null</code> if none was set
+     * @return the actionable button, never <code>null</code>.
      */
     public Component getUploadButton() {
-        return getComponentAtSlot("add-button");
+        return uploadButton;
     }
 
     /**
      * Set the component to show as a message to the user to drop files in the
      * upload component. Despite of the name, the label can be any component.
      *
-     * @param dropLabel
+     * @param label
      *            the label to show for the users when it's possible drop files,
-     *            or <code>null</code> to clear it
+     *            or <code>null</code> to reset to the default label
      */
-    public void setDropLabel(Component dropLabel) {
+    public void setDropLabel(Component label) {
         removeElementsAtSlot("drop-label");
-        if (dropLabel != null) {
-            addToDropLabel(dropLabel);
+
+        if (label != null) {
+            dropLabel = label;
+        } else {
+            dropLabel = defaultDropLabel;
         }
+
+        dropLabel.getElement().setAttribute("slot", "drop-label");
+        getElement().appendChild(dropLabel.getElement());
     }
 
     /**
-     * Get the component set as the drop label, if any.
+     * Get the component set as the drop label.
      *
-     * @return the drop label component, or <code>null</code> if none was set
+     * @return the drop label component, never <code>null</code>.
      */
     public Component getDropLabel() {
-        return getComponentAtSlot("drop-label");
+        return dropLabel;
     }
 
     /**
@@ -325,25 +368,30 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
      * when the user can drop files to this upload component. Despite of the
      * name, the drop label icon can be any component.
      *
-     * @param dropLabelIcon
+     * @param icon
      *            the label icon to show for the users when it's possible to
-     *            drop files, or <code>null</code> to clear it
+     *            drop files, or <code>null</code> to reset to the default icon
      */
-    public void setDropLabelIcon(Component dropLabelIcon) {
+    public void setDropLabelIcon(Component icon) {
         removeElementsAtSlot("drop-label-icon");
-        if (dropLabelIcon != null) {
-            addToDropLabelIcon(dropLabelIcon);
+
+        if (icon != null) {
+            dropLabelIcon = icon;
+        } else {
+            dropLabelIcon = defaultDropLabelIcon;
         }
+
+        dropLabelIcon.getElement().setAttribute("slot", "drop-label-icon");
+        getElement().appendChild(dropLabelIcon.getElement());
     }
 
     /**
-     * Get the component set as the drop label icon, if any.
+     * Get the component set as the drop label icon.
      *
-     * @return the drop label icon component, or <code>null</code> if none was
-     *         set
+     * @return the drop label icon component, never <code>null</code>.
      */
     public Component getDropLabelIcon() {
-        return getComponentAtSlot("drop-label-icon");
+        return dropLabelIcon;
     }
 
     private void removeElementsAtSlot(String slot) {
@@ -351,14 +399,6 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
                 .filter(child -> slot.equals(child.getAttribute("slot")))
                 .collect(Collectors.toList())
                 .forEach(Element::removeFromParent);
-    }
-
-    private Component getComponentAtSlot(String slot) {
-        return getElement().getChildren()
-                .filter(child -> slot.equals(child.getAttribute("slot")))
-                .filter(child -> child.getComponent().isPresent())
-                .map(child -> child.getComponent().get()).findFirst()
-                .orElse(null);
     }
 
     /**
