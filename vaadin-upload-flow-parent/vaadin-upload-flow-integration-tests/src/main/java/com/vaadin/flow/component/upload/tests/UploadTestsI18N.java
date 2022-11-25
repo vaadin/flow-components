@@ -31,7 +31,6 @@ class UploadTestsI18N {
                     .setMany("Добавить файлы"))
             .setFile(new UploadI18N.File().setStart("Загрузить")
                     .setRetry("Повторить").setRemove("Удалить"))
-            .setCancel("Отменить")
             .setError(new UploadI18N.Error()
                     .setTooManyFiles("Слишком много файлов.")
                     .setFileIsTooBig("Слишком большой файл.")

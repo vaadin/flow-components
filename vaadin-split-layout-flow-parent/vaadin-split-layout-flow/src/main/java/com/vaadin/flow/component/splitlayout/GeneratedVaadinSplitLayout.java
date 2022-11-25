@@ -151,13 +151,6 @@ import com.vaadin.flow.shared.Registration;
  * 150px;&quot;&gt;First&lt;/div&gt; &lt;div&gt;Second&lt;/div&gt;
  * &lt;/vaadin-split-layout&gt;
  * </p>
- * <h3>Resize Notification</h3>
- * <p>
- * This element implements {@code IronResizableBehavior} to notify the nested
- * resizables when the splitter is dragged. In order to define a resizable and
- * receive that notification in a nested element, include
- * {@code IronResizableBehavior} and listen for the {@code iron-resize} event.
- * </p>
  * <h3>Styling</h3>
  * <p>
  * The following shadow DOM parts are available for styling:
@@ -189,7 +182,7 @@ import com.vaadin.flow.shared.Registration;
  * </p>
  */
 @Tag("vaadin-split-layout")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha4")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha5")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/split-layout/src/vaadin-split-layout.js")
 public abstract class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitLayout<R>>
@@ -252,32 +245,6 @@ public abstract class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitL
     protected void setOrientation(String orientation) {
         getElement().setProperty("orientation",
                 orientation == null ? "" : orientation);
-    }
-
-    @DomEvent("iron-resize")
-    @Deprecated
-    public static class IronResizeEvent<R extends GeneratedVaadinSplitLayout<R>>
-            extends ComponentEvent<R> {
-        public IronResizeEvent(R source, boolean fromClient) {
-            super(source, fromClient);
-        }
-    }
-
-    /**
-     * Adds a listener for {@code iron-resize} events fired by the webcomponent.
-     *
-     * @param listener
-     *            the listener
-     * @return a {@link Registration} for removing the event listener
-     *
-     * @deprecated Since 23.2, this API is deprecated.
-     */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    @Deprecated
-    protected Registration addIronResizeListener(
-            ComponentEventListener<IronResizeEvent<R>> listener) {
-        return addListener(IronResizeEvent.class,
-                (ComponentEventListener) listener);
     }
 
     @DomEvent("splitter-dragend")

@@ -77,10 +77,12 @@ public class AddingColumnsIT extends AbstractComponentIT {
     public void gridRendered_addColumnWithLocalDateTimeRenderer_cellsRendered() {
         clickElementWithJs("add-local-date-time-column");
         // JDK16 adds extra comma after year in en_US
-        Assert.assertTrue(grid.getCell(0, 0).getInnerHTML()
-                .matches("January 1, 1980,? 1:20 AM"));
-        Assert.assertTrue(grid.getCell(1, 0).getInnerHTML()
-                .matches("January 1, 1980,? 1:30 AM"));
+        Assert.assertTrue(
+                TestHelper.stripComments(grid.getCell(0, 0).getInnerHTML())
+                        .matches("January 1, 1980,? 1:20 AM"));
+        Assert.assertTrue(
+                TestHelper.stripComments(grid.getCell(1, 0).getInnerHTML())
+                        .matches("January 1, 1980,? 1:30 AM"));
     }
 
     @Test
@@ -92,16 +94,18 @@ public class AddingColumnsIT extends AbstractComponentIT {
     private void assertCellContents(String expectedFirstRow,
             String expectedSecondRow) {
         Assert.assertEquals(expectedFirstRow,
-                grid.getCell(0, 0).getInnerHTML());
+                TestHelper.stripComments(grid.getCell(0, 0).getInnerHTML()));
         Assert.assertEquals(expectedSecondRow,
-                grid.getCell(1, 0).getInnerHTML());
+                TestHelper.stripComments(grid.getCell(1, 0).getInnerHTML()));
     }
 
     private void assertCellContentsContain(String expectedFirstRow,
             String expectedSecondRow) {
-        MatcherAssert.assertThat(grid.getCell(0, 0).getInnerHTML(),
+        MatcherAssert.assertThat(
+                TestHelper.stripComments(grid.getCell(0, 0).getInnerHTML()),
                 CoreMatchers.containsString(expectedFirstRow));
-        MatcherAssert.assertThat(grid.getCell(1, 0).getInnerHTML(),
+        MatcherAssert.assertThat(
+                TestHelper.stripComments(grid.getCell(1, 0).getInnerHTML()),
                 CoreMatchers.containsString(expectedSecondRow));
     }
 

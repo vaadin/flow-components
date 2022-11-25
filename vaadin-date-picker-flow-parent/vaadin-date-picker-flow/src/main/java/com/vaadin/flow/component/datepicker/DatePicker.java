@@ -497,6 +497,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         return Validator.alwaysPass();
     }
 
+    @Override
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<LocalDate> listener) {
         if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
