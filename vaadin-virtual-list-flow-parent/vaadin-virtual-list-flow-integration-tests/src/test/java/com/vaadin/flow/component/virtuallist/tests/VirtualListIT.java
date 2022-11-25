@@ -463,7 +463,6 @@ public class VirtualListIT extends AbstractComponentIT {
                     "Object at index " + i + " is null, when it shouldn't be",
                     items.get(i),
                     CoreMatchers.not(CoreMatchers.instanceOf(JsonNull.class)));
-            System.out.println(items.getObject(i));
             Assert.assertEquals(itemLabelprefix + (i + 1),
                     getPropertyString(items.getObject(i), "label"));
         }
