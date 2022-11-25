@@ -79,7 +79,6 @@ window.Vaadin.Flow.virtualListConnector = {
           if (root.__hasComponentRendererPlaceholder) {
             // The root was previously populated with a placeholder. Clear it.
             root.innerHTML = '';
-            delete root._$litPart$;
             root.__hasComponentRendererPlaceholder = false;
           }
 
