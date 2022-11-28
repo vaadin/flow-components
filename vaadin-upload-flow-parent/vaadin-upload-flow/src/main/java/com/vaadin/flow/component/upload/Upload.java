@@ -87,8 +87,9 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
         // If client aborts upload mark upload as interrupted on server also
         addUploadAbortListener(event -> interruptUpload());
 
-        getElement().setAttribute("target", new StreamReceiver(
-                getElement().getNode(), "upload", getStreamVariable()));
+        runBeforeClientResponse(ui -> getElement().setAttribute("target",
+                new StreamReceiver(getElement().getNode(), "upload",
+                        getStreamVariable())));
 
         final String elementFiles = "element.files";
         DomEventListener allFinishedListener = e -> {
