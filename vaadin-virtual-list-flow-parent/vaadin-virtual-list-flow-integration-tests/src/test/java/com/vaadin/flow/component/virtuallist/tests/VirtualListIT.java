@@ -236,7 +236,6 @@ public class VirtualListIT extends AbstractComponentIT {
     }
 
     @Test
-
     public void listWithComponentRendererWithBeansAndPlaceholder_scrollToBottom_placeholderIsShown() {
         WebElement list = findElement(By.id("component-renderer-with-beans"));
         List<WebElement> items = list
