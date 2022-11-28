@@ -230,24 +230,24 @@ public class MultiSelectComboBoxTest extends ComboBoxBaseTest {
                 "Eight", "Nine", "Ten");
 
         Set<String> value = null;
-        List<String> valueAsList  = null;
+        List<String> valueAsList = null;
 
         comboBox.select("Eight");
         comboBox.select("Two");
         comboBox.select("Four");
         value = comboBox.getValue();
-        valueAsList  = value.stream().collect(Collectors.toList());
+        valueAsList = value.stream().collect(Collectors.toList());
         Assert.assertEquals("Eight", valueAsList.get(0));
         Assert.assertEquals("Two", valueAsList.get(1));
         Assert.assertEquals("Four", valueAsList.get(2));
         comboBox.clear();
 
-        Set<String> linkedHashSetValue  = new LinkedHashSet<>(
+        Set<String> linkedHashSetValue = new LinkedHashSet<>(
                 Arrays.asList("Eight", "Two", "Four").stream()
                         .collect(Collectors.toList()));
         comboBox.setValue(linkedHashSetValue);
         value = comboBox.getValue();
-        valueAsList  = value.stream().collect(Collectors.toList());
+        valueAsList = value.stream().collect(Collectors.toList());
         Assert.assertEquals("Eight", valueAsList.get(0));
         Assert.assertEquals("Two", valueAsList.get(1));
         Assert.assertEquals("Four", valueAsList.get(2));
@@ -255,7 +255,7 @@ public class MultiSelectComboBoxTest extends ComboBoxBaseTest {
 
         comboBox.select("Eight", "Two", "Four");
         value = comboBox.getValue();
-        valueAsList  = value.stream().collect(Collectors.toList());
+        valueAsList = value.stream().collect(Collectors.toList());
         Assert.assertEquals("Eight", valueAsList.get(0));
         Assert.assertEquals("Two", valueAsList.get(1));
         Assert.assertEquals("Four", valueAsList.get(2));
