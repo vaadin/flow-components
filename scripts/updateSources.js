@@ -124,8 +124,6 @@ async function main() {
     }
 
     content = ignore_test_method(content, source, 'EditOnClickIT.editButtonsAreHiddenIfEditOnClickIsEnabled');
-    content = ignore_test_method(content, source, 'RendererIT.testRenderer_initialComponentRendererSet_rendersComponentsThatWork');
-    content = ignore_test_method(content, source, 'RendererIT.testRenderer_componentRendererSet_rendersComponentsThatWork');
     content = ignore_test_method(content, source, 'CustomGridIT.editorShouldHaveRightTitleWhenOpenedInNewItemMode');
     content = ignore_test_method(content, source, 'VirtualListIT.listWithComponentRendererWithBeansAndPlaceholder_scrollToBottom_placeholderIsShown');
     content = ignore_test_method(content, source, 'MenuBarPageIT.disableItem_overflow_itemDisabled:262 NullPointer');
