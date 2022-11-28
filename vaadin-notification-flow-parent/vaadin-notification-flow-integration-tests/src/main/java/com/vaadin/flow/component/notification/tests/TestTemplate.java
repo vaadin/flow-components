@@ -20,16 +20,15 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
-import com.vaadin.flow.component.polymertemplate.Id;
-import com.vaadin.flow.component.polymertemplate.PolymerTemplate;
-import com.vaadin.flow.templatemodel.TemplateModel;
+import com.vaadin.flow.component.littemplate.LitTemplate;
+import com.vaadin.flow.component.template.Id;
 
 /**
  * Simple template example.
  */
 @Tag("vaadin-notification-flow-test-template")
 @JsModule("vaadin-notification-flow-test-template.js")
-public class TestTemplate extends PolymerTemplate<TemplateModel> {
+public class TestTemplate extends LitTemplate {
 
     @Id("container")
     private Div div;

@@ -1,15 +1,13 @@
-import { PolymerElement } from '@polymer/polymer/polymer-element.js';
-import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { html, LitElement } from 'lit';
 
-class GridInATemplate extends PolymerElement {
-  static get template() {
-    return html`
-        <vaadin-grid id="grid"></vaadin-grid>
-`;
+class GridInATemplate extends LitElement {
+  render() {
+    return html`<vaadin-grid id="grid"></vaadin-grid>`;
   }
 
   static get is() {
-      return 'grid-in-a-template'
+    return 'grid-in-a-template';
   }
 }
+
 customElements.define(GridInATemplate.is, GridInATemplate);
