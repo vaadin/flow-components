@@ -77,14 +77,6 @@ async function main() {
   const textFieldVersionSource = 'vaadin-text-field-flow-parent/vaadin-text-field-flow/src/main/java/com/vaadin/flow/component/textfield/GeneratedVaadinTextField.java';
   const textFieldVersion = fs.readFileSync(textFieldVersionSource,'utf-8').split(/\n/).filter(l => l.startsWith('@NpmPackage'))[0];
 
-  await visitFilesRecursive(`${mod}/${id}-integration-tests/frontend`, (source, target, content) => {
-    if (/test-template.js$/.test(target)) {
-      target = target.replace('test-template', `${id}-test-template`);
-      content = content.replace('test-template', `${id}-test-template`);
-    }
-    return [target, content];
-  });
-
   await visitFilesRecursive(`${mod}/${id}/src`, (source, target, content) => {
     if (/BigDecimalField\.java$/.test(source)) {
       content = content.replace(/( *)return (getElement\(\).getProperty\("_decimalSeparator"\).charAt\(0\);)/, '$1String prop = getElement().getProperty("_decimalSeparator");\n$1return prop == null || prop.isEmpty() ? \'.\' : $2');
@@ -93,8 +85,6 @@ async function main() {
   });
 
   await visitFilesRecursive(`${mod}/${id}-integration-tests/src`, (source, target, content) => {
-    // replace test-template localName for the new computed above
-    content = content.replace(/(\@Tag.*|\@JsModule.*|\$\(")test-template/g, `$1${id}-test-template`);
     const clname = path.basename(source, '.java');
     // change @Route in views
     content = replaceRoutes(wc, clname, content);
@@ -129,27 +119,6 @@ async function main() {
     content = content.replace(/\.attribute\("href", *"([^"]*)"\)/g, (...args) => {
       return `.attribute("href", "${wc}/${args[1]}")`;
     });
-    // Combo box - PreSelectedValueIT.selectedValueIsNotResetAfterClientResponse
-    // The test fails because when running in the project there is an iron-icon-set-svg element
-    // which contains an element with id "info", which conflicts with the element
-    // the test is trying to find.
-    if (/IT\.java$/.test(source)) {
-      content = content.replace(/findElement\(By.id\("info"\)\)/g, '$("div").id("info")')
-      content = content.replace(/findElement\(By.id\("close"\)\)/g, '$("button").id("close")')
-      content = content.replace(/findElement\(By.id\("filter"\)\)/g, '$("vaadin-text-field").id("filter")')
-      content = content.replace(/findElement\(By.id\("refresh"\)\)/g, '$("button").id("refresh")')
-      content = content.replace(/findElement\(By.id\("select"\)\)/g, '$("button").id("select")')
-      content = content.replace(/findElement\(By.id\("collapse"\)\)/g, '$("button").id("collapse")')
-      content = content.replace(/findElement\(By.id\("expand"\)\)/g, '$("button").id("expand")')
-    }
-    // Grid. Same as above for an element with id "grid"
-    if (/DetailsGridIT\.java$/.test(source)) {
-      content = content.replace(/findElements\(By.id\("grid"\)\).size/, '$("vaadin-grid").all().size')
-    }
-    // Combobox. Same as above for a vaadin-combo-box with id "list"
-    if (/StringItemsWithTextRendererIT\.java$/.test(source)) {
-      content = content.replace(/findElement\(By.id\("list"\)\)/g, '$("vaadin-combo-box").id("list")')
-    }
     function ignore_test_method(content, file, testMethod) {
       const [className, methodName] = testMethod.split(".");
       if(!className || new RegExp(`${className}\\.java$`).test(file)) {
