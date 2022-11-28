@@ -1392,8 +1392,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     private SerializableSupplier<Editor<T>> editorFactory = this::createEditor;
 
-    private boolean verticalScrollingEnabled = true;
-
     private SerializableFunction<T, String> classNameGenerator = item -> null;
     private SerializableFunction<T, String> partNameGenerator = item -> null;
     private SerializablePredicate<T> dropFilter = item -> true;
@@ -1735,7 +1733,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * {@link ComponentRenderer}.
      * <p>
      * <em>NOTE:</em> Using {@link ComponentRenderer} is not as efficient as the
-     * built in renderers or using {@link TemplateRenderer}.
+     * built in renderers or using {@link LitRenderer}.
      * </p>
      * <p>
      * Every added column sends data to the client side regardless of its
@@ -1797,12 +1795,12 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * <p>
      * See implementations of the {@link Renderer} interface for built-in
      * renderer options with type safe APIs. For a renderer using template
-     * binding, use {@link TemplateRenderer#of(String)}.
+     * binding, use {@link LitRenderer#of(String)}.
      * <p>
      * <em>NOTE:</em> You can add component columns easily using the
      * {@link #addComponentColumn(ValueProvider)}, but using
      * {@link ComponentRenderer} is not as efficient as the built in renderers
-     * or using {@link TemplateRenderer}.
+     * or using {@link LitRenderer}.
      * </p>
      * <p>
      * Every added column sends data to the client side regardless of its
@@ -1819,7 +1817,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @return the created column
      *
      * @see #getDefaultColumnFactory()
-     * @see TemplateRenderer#of(String)
+     * @see LitRenderer#of(String)
      * @see #addComponentColumn(ValueProvider)
      * @see #removeColumn(Column)
      * @see #addColumn(Renderer, BiFunction)
@@ -1835,12 +1833,12 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * <p>
      * See implementations of the {@link Renderer} interface for built-in
      * renderer options with type safe APIs. For a renderer using template
-     * binding, use {@link TemplateRenderer#of(String)}.
+     * binding, use {@link LitRenderer#of(String)}.
      * <p>
      * <em>NOTE:</em> You can add component columns easily using the
      * {@link #addComponentColumn(ValueProvider)}, but using
      * {@link ComponentRenderer} is not as efficient as the built in renderers
-     * or using {@link TemplateRenderer}.
+     * or using {@link LitRenderer}.
      * </p>
      * <p>
      * Every added column sends data to the client side regardless of its
@@ -1856,7 +1854,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @return the created column
      *
      * @see #addColumn(Renderer)
-     * @see TemplateRenderer#of(String)
+     * @see LitRenderer#of(String)
      * @see #addComponentColumn(ValueProvider)
      * @see #removeColumn(Column)
      */
@@ -1940,7 +1938,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * <em>NOTE:</em> You can add component columns easily using the
      * {@link #addComponentColumn(ValueProvider)}, but using
      * {@link ComponentRenderer} is not as efficient as the built in renderers
-     * or using {@link TemplateRenderer}.
+     * or using {@link LitRenderer}.
      * <p>
      *
      * Every added column sends data to the client side regardless of its
@@ -1982,7 +1980,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * <em>NOTE:</em> You can add component columns easily using the
      * {@link #addComponentColumn(ValueProvider)}, but using
      * {@link ComponentRenderer} is not as efficient as the built in renderers
-     * or using {@link TemplateRenderer}.
+     * or using {@link LitRenderer}.
      *
      * <p>
      * Every added column sends data to the client side regardless of its
@@ -2957,7 +2955,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             rendering = ((LitRenderer<T>) renderer).render(getElement(),
                     dataCommunicator.getKeyMapper(), "rowDetailsRenderer");
         } else {
-            // TemplateRenderer or ComponentRenderer
+            // TemplateRenderer
             if (detailsTemplate == null) {
                 rendering = renderer.render(getElement(),
                         getDataCommunicator().getKeyMapper());
