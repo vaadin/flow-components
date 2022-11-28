@@ -175,9 +175,6 @@ async function main() {
     // charts v14
     content = content.replace('getTestView().getCanonicalName();', '"vaadin-charts/" + getTestView().getCanonicalName();');
 
-    content = content.replace('import com.vaadin.testbench.parallel.ParallelTest','import com.vaadin.tests.ParallelTest');
-    content = content.replace('import com.vaadin.flow.testutil.AbstractComponentIT','import com.vaadin.tests.AbstractComponentIT');
-    content = content.replace('import com.vaadin.flow.testutil.AbstractValidationTest','import com.vaadin.tests.AbstractValidationTest');
     content = content.replace('import com.vaadin.testbench.annotations.BrowserConfiguration;','');
     content = content.replace(/.*@BrowserConfiguration.*/,'');
 
