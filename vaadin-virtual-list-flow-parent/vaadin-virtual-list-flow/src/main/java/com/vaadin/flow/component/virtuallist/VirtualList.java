@@ -39,7 +39,6 @@ import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.Rendering;
-import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.ValueProvider;
@@ -69,10 +68,10 @@ import elemental.json.JsonValue;
  *            the type of the items supported by the list
  */
 @Tag("vaadin-virtual-list")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha4")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha5")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
-@NpmPackage(value = "@vaadin/virtual-list", version = "24.0.0-alpha4")
+@NpmPackage(value = "@vaadin/virtual-list", version = "24.0.0-alpha5")
 @JsModule("@vaadin/virtual-list/vaadin-virtual-list.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./virtualListConnector.js")
@@ -190,7 +189,7 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
     public void setRenderer(ValueProvider<T, String> valueProvider) {
         Objects.requireNonNull(valueProvider,
                 "The valueProvider must not be null");
-        this.setRenderer(TemplateRenderer.<T> of("[[item.label]]")
+        this.setRenderer(LitRenderer.<T> of("${item.label}")
                 .withProperty("label", valueProvider));
     }
 
@@ -218,7 +217,7 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
             rendering = renderer.render(getElement(),
                     dataCommunicator.getKeyMapper());
         } else {
-            // TemplateRenderer or ComponentRenderer
+            // TemplateRenderer
             if (template.getParent() == null) {
                 getElement().appendChild(template);
             }
