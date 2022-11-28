@@ -18,13 +18,12 @@ package com.vaadin.flow.component.grid.it;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.polymertemplate.Id;
-import com.vaadin.flow.component.polymertemplate.PolymerTemplate;
-import com.vaadin.flow.templatemodel.TemplateModel;
+import com.vaadin.flow.component.littemplate.LitTemplate;
+import com.vaadin.flow.component.template.Id;
 
 @Tag("grid-in-a-template")
 @JsModule("src/grid-in-a-template.js")
-public class GridInATemplate extends PolymerTemplate<TemplateModel> {
+public class GridInATemplate extends LitTemplate {
 
     @Id
     Grid<String> grid;

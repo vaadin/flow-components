@@ -17,14 +17,13 @@ package com.vaadin.flow.component.radiobutton.tests;
 
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.component.polymertemplate.Id;
-import com.vaadin.flow.component.polymertemplate.PolymerTemplate;
+import com.vaadin.flow.component.littemplate.LitTemplate;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
-import com.vaadin.flow.templatemodel.TemplateModel;
+import com.vaadin.flow.component.template.Id;
 
 @JsModule("./src/detach-reattach.js")
 @Tag("detach-reattach")
-public class DetachReattachTemplate extends PolymerTemplate<TemplateModel> {
+public class DetachReattachTemplate extends LitTemplate {
     @Id("testGroup")
     RadioButtonGroup<String> testGroup;
 
