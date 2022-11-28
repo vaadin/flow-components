@@ -159,14 +159,6 @@ async function main() {
     content = content.replace('import com.vaadin.testbench.annotations.BrowserConfiguration;','');
     content = content.replace(/.*@BrowserConfiguration.*/,'');
 
-    // Remove W3C workaround from Grid tests.
-    const w3cReplacement = content.includes('com.vaadin.tests.AbstractComponentIT')? '':'import com.vaadin.tests.AbstractComponentIT;';
-    content = content.replace('import com.vaadin.flow.component.AbstractNoW3c;',w3cReplacement);
-    content = content.replace('extends AbstractNoW3c', 'extends AbstractComponentIT');
-
-    if (/GridViewIT\.java$/.test(source)) {
-      content = content.replace(/AbstractNoW3c[^;]+/,'null');
-    }
     return [target, content];
   });
 }
