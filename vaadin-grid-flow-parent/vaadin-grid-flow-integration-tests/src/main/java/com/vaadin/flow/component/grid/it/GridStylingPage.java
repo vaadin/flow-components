@@ -39,6 +39,7 @@ public class GridStylingPage extends Div {
         Grid.Column<String> col1 = grid
                 .addColumn(i -> String.valueOf(i.length())).setHeader("length");
 
+        // Class name generator
         NativeButton gridClassNameGenerator = new NativeButton(
                 "grid class name generator", e -> {
                     grid.setClassNameGenerator(item -> "grid" + item);
@@ -81,6 +82,49 @@ public class GridStylingPage extends Div {
                 });
         secondColumnClassNameGenerator.setId("second-column-generator");
 
+        // Part name generator
+        NativeButton gridPartNameGenerator = new NativeButton(
+                "grid part name generator", e -> {
+                    grid.setPartNameGenerator(item -> "grid" + item);
+                });
+        gridPartNameGenerator.setId("grid-part-generator");
+
+        NativeButton columnPartNameGenerator = new NativeButton(
+                "column part name generator", e -> {
+                    col0.setPartNameGenerator(item -> "col" + item);
+                });
+        columnPartNameGenerator.setId("column-part-generator");
+
+        NativeButton resetGridPartNameGenerator = new NativeButton(
+                "grid: reset part generator", e -> {
+                    grid.setPartNameGenerator(item -> null);
+                });
+        resetGridPartNameGenerator.setId("reset-grid-part-generator");
+
+        NativeButton resetColumnPartNameGenerator = new NativeButton(
+                "column: reset part generator", e -> {
+                    col0.setPartNameGenerator(item -> null);
+                });
+        resetColumnPartNameGenerator.setId("reset-column-part-generator");
+
+        NativeButton gridMultipleParts = new NativeButton(
+                "grid: generate multiple parts", e -> {
+                    grid.setPartNameGenerator(item -> "grid foo");
+                });
+        gridMultipleParts.setId("grid-multiple-parts");
+
+        NativeButton columnMultipleParts = new NativeButton(
+                "column: generate multiple parts", e -> {
+                    col0.setPartNameGenerator(item -> "col bar");
+                });
+        columnMultipleParts.setId("column-multiple-parts");
+
+        NativeButton secondColumnPartNameGenerator = new NativeButton(
+                "second column part name generator", e -> {
+                    col1.setPartNameGenerator(item -> "baz");
+                });
+        secondColumnPartNameGenerator.setId("second-column-part-generator");
+
         NativeButton toggleAttached = new NativeButton("detach/attach grid",
                 e -> {
                     if (grid.getParent().isPresent()) {
@@ -104,6 +148,11 @@ public class GridStylingPage extends Div {
                 new Div(resetGridClassNameGenerator,
                         resetColumnClassNameGenerator),
                 new Div(gridMultipleClasses, columnMultipleClasses),
+                new Div(gridPartNameGenerator, columnPartNameGenerator,
+                        secondColumnPartNameGenerator),
+                new Div(resetGridPartNameGenerator,
+                        resetColumnPartNameGenerator),
+                new Div(gridMultipleParts, columnMultipleParts),
                 new Div(toggleAttached), //
                 new Div(setDetailsRenderer));
     }
