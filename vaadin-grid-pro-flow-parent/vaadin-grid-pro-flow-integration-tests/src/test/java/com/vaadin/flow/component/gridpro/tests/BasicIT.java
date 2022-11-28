@@ -101,7 +101,6 @@ public class BasicIT extends AbstractParallelTest {
     }
 
     @Test
-
     public void customComboBox_circularReferencesInData_isEdited() {
         GridTHTDElement cell = grid.getCell(0, 4);
         Assert.assertEquals("City 1", cell.$("span").first().getText());
@@ -145,7 +144,6 @@ public class BasicIT extends AbstractParallelTest {
     }
 
     @Test
-
     public void customComboBoxIsUsedForEditColumn() {
         assertCellEnterEditModeOnDoubleClick(0, 2, "vaadin-combo-box");
     }
@@ -160,7 +158,6 @@ public class BasicIT extends AbstractParallelTest {
     }
 
     @Test
-
     public void checkboxEditorIsUsedForCheckboxColumn() {
         assertCellEnterEditModeOnDoubleClick(0, 3,
                 "vaadin-grid-pro-edit-checkbox");
