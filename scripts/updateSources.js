@@ -110,11 +110,6 @@ async function main() {
     if (/OverlayIT\.java$/.test(source)) {
       content = content.replace(/\/overlayselfattached/,`/${wc}$&`)
     }
-
-    // Accordion: Match textfield version
-    if (/AccordionInTemplate\.java$/.test(source)) {
-      content = content.replace(/@NpmPackage.*/,textFieldVersion);
-    }
     // App layout: IT tests search for links based on href
     content = content.replace(/\.attribute\("href", *"([^"]*)"\)/g, (...args) => {
       return `.attribute("href", "${wc}/${args[1]}")`;
