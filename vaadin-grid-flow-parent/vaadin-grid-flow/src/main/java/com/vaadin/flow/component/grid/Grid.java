@@ -1107,7 +1107,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          * Gets the function that is used for generating CSS part names for
          * cells in this column.
          *
-         * @return the class name generator
+         * @return the part name generator
          */
         public SerializableFunction<T, String> getPartNameGenerator() {
             return partNameGenerator;
