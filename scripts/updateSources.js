@@ -73,17 +73,6 @@ function replaceRoutes(wcname, clname, content) {
 }
 
 async function main() {
-
-  const textFieldVersionSource = 'vaadin-text-field-flow-parent/vaadin-text-field-flow/src/main/java/com/vaadin/flow/component/textfield/GeneratedVaadinTextField.java';
-  const textFieldVersion = fs.readFileSync(textFieldVersionSource,'utf-8').split(/\n/).filter(l => l.startsWith('@NpmPackage'))[0];
-
-  await visitFilesRecursive(`${mod}/${id}/src`, (source, target, content) => {
-    if (/BigDecimalField\.java$/.test(source)) {
-      content = content.replace(/( *)return (getElement\(\).getProperty\("_decimalSeparator"\).charAt\(0\);)/, '$1String prop = getElement().getProperty("_decimalSeparator");\n$1return prop == null || prop.isEmpty() ? \'.\' : $2');
-    }
-    return [target, content];
-  });
-
   await visitFilesRecursive(`${mod}/${id}-integration-tests/src`, (source, target, content) => {
     const clname = path.basename(source, '.java');
     // change @Route in views
