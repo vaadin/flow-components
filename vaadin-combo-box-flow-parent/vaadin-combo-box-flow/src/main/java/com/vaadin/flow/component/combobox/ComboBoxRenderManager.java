@@ -15,10 +15,8 @@
  */
 package com.vaadin.flow.component.combobox;
 
-import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.Rendering;
-import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.shared.Registration;
 
 import java.io.Serializable;
@@ -39,7 +37,6 @@ class ComboBoxRenderManager<TItem> implements Serializable {
 
     private boolean renderScheduled;
     private final List<Registration> renderingRegistrations = new ArrayList<>();
-    private Element template;
 
     ComboBoxRenderManager(ComboBoxBase<?, TItem, ?> comboBox) {
         this.comboBox = comboBox;
@@ -68,25 +65,8 @@ class ComboBoxRenderManager<TItem> implements Serializable {
         renderingRegistrations.forEach(Registration::remove);
         renderingRegistrations.clear();
 
-        Rendering<TItem> rendering;
-        if (renderer instanceof LitRenderer) {
-            // LitRenderer
-            if (template != null && template.getParent() != null) {
-                comboBox.getElement().removeChild(template);
-            }
-            rendering = renderer.render(comboBox.getElement(),
-                    comboBox.getDataCommunicator().getKeyMapper());
-        } else {
-            // TemplateRenderer
-            if (template == null) {
-                template = new Element("template");
-            }
-            if (template.getParent() == null) {
-                comboBox.getElement().appendChild(template);
-            }
-            rendering = renderer.render(comboBox.getElement(),
-                    comboBox.getDataCommunicator().getKeyMapper(), template);
-        }
+        Rendering<TItem> rendering = renderer.render(comboBox.getElement(),
+            comboBox.getDataCommunicator().getKeyMapper());
 
         rendering.getDataGenerator().ifPresent(renderingDataGenerator -> {
             Registration renderingDataGeneratorRegistration = comboBox
