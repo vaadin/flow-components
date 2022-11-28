@@ -1178,6 +1178,15 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           return (style.row || '') + ' ' + ((column && style[column._flowId]) || '');
         });
 
+
+        grid.cellPartNameGenerator = tryCatchWrapper(function (column, rowData) {
+          const part = rowData.item.part;
+          if (!part) {
+            return;
+          }
+          return (part.row || '') + ' ' + ((column && part[column._flowId]) || '');
+        });
+
         grid.dropFilter = tryCatchWrapper((rowData) => !rowData.item.dropDisabled);
 
         grid.dragFilter = tryCatchWrapper((rowData) => !rowData.item.dragDisabled);
