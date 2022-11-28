@@ -224,7 +224,7 @@ public class MultiSelectComboBoxTest extends ComboBoxBaseTest {
     }
 
     @Test
-    public void preserveOrderTest() {
+    public void changeSelection_preservesOrder() {
         MultiSelectComboBox<String> select = new MultiSelectComboBox<>();
         select.setItems("One", "Two", "Three", "Four", "Five", "Six", "Seven",
                 "Eight", "Nine", "Ten");
