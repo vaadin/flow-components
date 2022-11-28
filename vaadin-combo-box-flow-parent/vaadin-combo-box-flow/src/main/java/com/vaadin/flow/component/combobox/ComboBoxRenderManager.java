@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.combobox;
 
 import com.vaadin.flow.data.renderer.Renderer;
-import com.vaadin.flow.data.renderer.Rendering;
 import com.vaadin.flow.shared.Registration;
 
 import java.io.Serializable;
@@ -65,7 +64,7 @@ class ComboBoxRenderManager<TItem> implements Serializable {
         renderingRegistrations.forEach(Registration::remove);
         renderingRegistrations.clear();
 
-        Rendering<TItem> rendering = renderer.render(comboBox.getElement(),
+        var rendering = renderer.render(comboBox.getElement(),
                 comboBox.getDataCommunicator().getKeyMapper());
 
         rendering.getDataGenerator().ifPresent(renderingDataGenerator -> {
