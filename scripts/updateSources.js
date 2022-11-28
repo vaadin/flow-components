@@ -123,20 +123,13 @@ async function main() {
       return content;
     }
 
-    content = ignore_test_method(content, source, 'ServerSideEventsIT.chartClick_occured_eventIsFired');
-
     content = ignore_test_method(content, source, 'EditOnClickIT.editButtonsAreHiddenIfEditOnClickIsEnabled');
     content = ignore_test_method(content, source, 'RendererIT.testRenderer_initialComponentRendererSet_rendersComponentsThatWork');
     content = ignore_test_method(content, source, 'RendererIT.testRenderer_componentRendererSet_rendersComponentsThatWork');
     content = ignore_test_method(content, source, 'CustomGridIT.editorShouldHaveRightTitleWhenOpenedInNewItemMode');
-    content = ignore_test_method(content, source, 'TreeGridPageSizeIT.treegridWithPageSize10_changeTo80_revertBackTo10');
     content = ignore_test_method(content, source, 'VirtualListIT.listWithComponentRendererWithBeansAndPlaceholder_scrollToBottom_placeholderIsShown');
     content = ignore_test_method(content, source, 'MenuBarPageIT.disableItem_overflow_itemDisabled:262 NullPointer');
     content = ignore_test_method(content, source, 'ValueChangeModeIT.test\\w+');
-
-    content = ignore_test_method(content, source, 'DynamicEditorKBNavigationIT.navigateBetweenEditorsUsingKeybaord');
-    content = ignore_test_method(content, source, 'IntegerFieldPageIT.integerOverflow_noException_valueSetToNull');
-    content = ignore_test_method(content, source, 'TreeGridHugeTreeNavigationIT.keyboard_navigation');
 
     if (/TreeGridHugeTreeIT\.java$/.test(source)) {
       content = content.replace(/getRootURL\(\) \+ "\/"/, `getRootURL() + "/${wc}/"`);
