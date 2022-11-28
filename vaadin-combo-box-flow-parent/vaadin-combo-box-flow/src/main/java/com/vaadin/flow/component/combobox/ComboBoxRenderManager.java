@@ -77,7 +77,7 @@ class ComboBoxRenderManager<TItem> implements Serializable {
             rendering = renderer.render(comboBox.getElement(),
                     comboBox.getDataCommunicator().getKeyMapper());
         } else {
-            // TemplateRenderer or ComponentRenderer
+            // TemplateRenderer
             if (template == null) {
                 template = new Element("template");
             }

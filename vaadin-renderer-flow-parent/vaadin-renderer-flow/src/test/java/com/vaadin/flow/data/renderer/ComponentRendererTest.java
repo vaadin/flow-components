@@ -64,7 +64,7 @@ public class ComponentRendererTest {
     }
 
     @Test
-    public void templateRenderered_parentAttachedBeforeChild() {
+    public void componentRenderer_parentAttachedBeforeChild() {
         UI ui = new TestUI();
         TestUIInternals internals = (TestUIInternals) ui.getInternals();
 
@@ -77,7 +77,7 @@ public class ComponentRendererTest {
         KeyMapper<String> keyMapper = new KeyMapper<>();
 
         Rendering<String> rendering = renderer.render(container, keyMapper);
-        // simulate a call from the grid to refresh data - template is not setup
+        // simulate a call from the grid to refresh data
         containerParent.getNode()
                 .runWhenAttached(ui2 -> ui2.getInternals().getStateTree()
                         .beforeClientResponse(containerParent.getNode(),
@@ -99,7 +99,7 @@ public class ComponentRendererTest {
     }
 
     @Test
-    public void templateRenderered_childAttachedBeforeParent() {
+    public void componentRenderer_childAttachedBeforeParent() {
         UI ui = new TestUI();
         TestUIInternals internals = (TestUIInternals) ui.getInternals();
 
