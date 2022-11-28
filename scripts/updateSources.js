@@ -126,8 +126,6 @@ async function main() {
     content = ignore_test_method(content, source, 'EditOnClickIT.editButtonsAreHiddenIfEditOnClickIsEnabled');
     content = ignore_test_method(content, source, 'CustomGridIT.editorShouldHaveRightTitleWhenOpenedInNewItemMode');
     content = ignore_test_method(content, source, 'VirtualListIT.listWithComponentRendererWithBeansAndPlaceholder_scrollToBottom_placeholderIsShown');
-    content = ignore_test_method(content, source, 'MenuBarPageIT.disableItem_overflow_itemDisabled:262 NullPointer');
-    content = ignore_test_method(content, source, 'ValueChangeModeIT.test\\w+');
 
     if (/TreeGridHugeTreeIT\.java$/.test(source)) {
       content = content.replace(/getRootURL\(\) \+ "\/"/, `getRootURL() + "/${wc}/"`);
