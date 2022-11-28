@@ -1070,7 +1070,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          */
         public Column<T> setTooltipGenerator(
                 SerializableFunction<T, String> tooltipGenerator) {
-            Objects.requireNonNull(classNameGenerator,
+            Objects.requireNonNull(tooltipGenerator,
                     "Tooltip generator can not be null");
 
             if (!getGrid().getElement().getChildren().anyMatch(
