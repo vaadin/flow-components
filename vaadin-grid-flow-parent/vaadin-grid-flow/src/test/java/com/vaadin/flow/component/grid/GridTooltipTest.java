@@ -71,6 +71,11 @@ public class GridTooltipTest {
         Assert.assertEquals(1, getTooltipElements(grid).count());
     }
 
+    @Test(expected = NullPointerException.class)
+    public void setNullTooltipGenerator_throws() {
+        grid.addColumn(item -> item).setTooltipGenerator(null);
+    }
+
     private Optional<Element> getTooltipElement(Grid<?> grid) {
         return getTooltipElements(grid).findFirst();
     }
