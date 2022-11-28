@@ -225,40 +225,40 @@ public class MultiSelectComboBoxTest extends ComboBoxBaseTest {
 
     @Test
     public void changeSelection_preservesOrder() {
-        MultiSelectComboBox<String> select = new MultiSelectComboBox<>();
-        select.setItems("One", "Two", "Three", "Four", "Five", "Six", "Seven",
+        MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
+        comboBox.setItems("One", "Two", "Three", "Four", "Five", "Six", "Seven",
                 "Eight", "Nine", "Ten");
 
         Set<String> value = null;
-        List<String> list1 = null;
+        List<String> valueAsList  = null;
 
-        select.select("Eight");
-        select.select("Two");
-        select.select("Four");
-        value = select.getValue();
-        list1 = value.stream().collect(Collectors.toList());
-        Assert.assertEquals("Eight", list1.get(0));
-        Assert.assertEquals("Two", list1.get(1));
-        Assert.assertEquals("Four", list1.get(2));
-        select.clear();
+        comboBox.select("Eight");
+        comboBox.select("Two");
+        comboBox.select("Four");
+        value = comboBox.getValue();
+        valueAsList  = value.stream().collect(Collectors.toList());
+        Assert.assertEquals("Eight", valueAsList.get(0));
+        Assert.assertEquals("Two", valueAsList.get(1));
+        Assert.assertEquals("Four", valueAsList.get(2));
+        comboBox.clear();
 
-        Set<String> list2 = new LinkedHashSet<>(
+        Set<String> linkedHashSetValue  = new LinkedHashSet<>(
                 Arrays.asList("Eight", "Two", "Four").stream()
                         .collect(Collectors.toList()));
-        select.setValue(list2);
-        value = select.getValue();
-        list1 = value.stream().collect(Collectors.toList());
-        Assert.assertEquals("Eight", list1.get(0));
-        Assert.assertEquals("Two", list1.get(1));
-        Assert.assertEquals("Four", list1.get(2));
-        select.clear();
+        comboBox.setValue(linkedHashSetValue);
+        value = comboBox.getValue();
+        valueAsList  = value.stream().collect(Collectors.toList());
+        Assert.assertEquals("Eight", valueAsList.get(0));
+        Assert.assertEquals("Two", valueAsList.get(1));
+        Assert.assertEquals("Four", valueAsList.get(2));
+        comboBox.clear();
 
-        select.select("Eight", "Two", "Four");
-        value = select.getValue();
-        list1 = value.stream().collect(Collectors.toList());
-        Assert.assertEquals("Eight", list1.get(0));
-        Assert.assertEquals("Two", list1.get(1));
-        Assert.assertEquals("Four", list1.get(2));
+        comboBox.select("Eight", "Two", "Four");
+        value = comboBox.getValue();
+        valueAsList  = value.stream().collect(Collectors.toList());
+        Assert.assertEquals("Eight", valueAsList.get(0));
+        Assert.assertEquals("Two", valueAsList.get(1));
+        Assert.assertEquals("Four", valueAsList.get(2));
     }
 
 }
