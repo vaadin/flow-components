@@ -2956,7 +2956,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 detailsRenderingRegistrations
                         .add(detailsRenderingDataGeneratorRegistration);
             });
-    
+
             detailsRenderingRegistrations.add(rendering.getRegistration());
         }
     }

@@ -49,8 +49,8 @@ public abstract class BasicRenderer<SOURCE, TARGET>
     private final ValueProvider<SOURCE, TARGET> valueProvider;
 
     /**
-     * Builds a new renderer using the value provider as the source of
-     * values to be rendered.
+     * Builds a new renderer using the value provider as the source of values to
+     * be rendered.
      *
      * @param valueProvider
      *            the callback to provide a objects to the renderer, not

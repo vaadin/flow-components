@@ -202,7 +202,7 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
         renderingRegistrations.clear();
 
         var rendering = renderer.render(getElement(),
-        dataCommunicator.getKeyMapper());
+                dataCommunicator.getKeyMapper());
 
         rendering.getDataGenerator().ifPresent(renderingDataGenerator -> {
             Registration renderingDataGeneratorRegistration = dataGenerator
