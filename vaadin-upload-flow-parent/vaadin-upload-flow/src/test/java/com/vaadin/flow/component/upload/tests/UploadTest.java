@@ -8,6 +8,7 @@ public class UploadTest {
 
     @Test
     public void uploadNewUpload() {
+        // Test no NPE due missing UI when setAttribute is called.
         Upload upload = new Upload();
     }
 }
