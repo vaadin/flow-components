@@ -1,10 +1,9 @@
-import { PolymerElement } from '@polymer/polymer/polymer-element.js';
-import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import { html, LitElement } from 'lit';
 import '@vaadin/button/vaadin-button.js';
 import '@vaadin/icon/vaadin-icon.js';
 
-class TemplateButton extends PolymerElement {
-  static get template() {
+class TemplateButton extends LitElement {
+  render() {
     return html`
       <vaadin-button id="button">Template caption</vaadin-button>
 
