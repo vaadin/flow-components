@@ -128,10 +128,6 @@ async function main() {
       return content;
     }
 
-    // Dialog: Workaround for https://github.com/vaadin/vaadin-confirm-dialog-flow/issues/136
-    // Since this project contains a dependency to vaadin-confirm-dialog, the height is different
-    // and the tests fail.
-    content = ignore_test_method(content, source, 'DialogIT.openAndCloseBasicDialog_labelRendered');
     content = ignore_test_method(content, source, 'ServerSideEventsIT.chartClick_occured_eventIsFired');
     content = ignore_test_method(content, source, 'GridDetailsRowIT.gridUpdateItemUpdateDetails');
     content = ignore_test_method(content, source, 'BasicIT.customComboBox_circularReferencesInData_isEdited');
@@ -144,7 +140,6 @@ async function main() {
     content = ignore_test_method(content, source, 'CustomGridIT.editorShouldHaveRightTitleWhenOpenedInNewItemMode');
     content = ignore_test_method(content, source, 'TreeGridPageSizeIT.treegridWithPageSize10_changeTo80_revertBackTo10');
     content = ignore_test_method(content, source, 'DynamicChangingChartIT.setConfiguration_changes_chart');
-    content = ignore_test_method(content, source, 'IronListIT.listWithComponentRendererWithBeansAndPlaceholder_scrollToBottom_placeholderIsShown');
     content = ignore_test_method(content, source, 'VirtualListIT.listWithComponentRendererWithBeansAndPlaceholder_scrollToBottom_placeholderIsShown');
     content = ignore_test_method(content, source, 'BasicChartIT.Chart_TitleCanBeChanged');
     content = ignore_test_method(content, source, 'MenuBarPageIT.disableItem_overflow_itemDisabled:262 NullPointer');
