@@ -2,17 +2,19 @@ package com.vaadin.flow.component.spreadsheet.test;
 
 import com.vaadin.flow.component.spreadsheet.testbench.SpreadsheetElement;
 import com.vaadin.flow.component.tabs.testbench.TabSheetElement;
+import com.vaadin.flow.testutil.TestPath;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
+@TestPath("vaadin-spreadsheet/tabsheet")
 public class SpreadsheetTabSheetIT extends AbstractSpreadsheetIT {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL() + "/tabsheet");
+        open();
     }
 
     @Test

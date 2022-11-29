@@ -1,6 +1,8 @@
 package com.vaadin.flow.component.spreadsheet.test;
 
 import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
+import com.vaadin.flow.testutil.TestPath;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,11 +14,12 @@ import org.openqa.selenium.support.ui.ExpectedCondition;
 
 import static org.junit.Assert.assertFalse;
 
+@TestPath("vaadin-spreadsheet")
 public class CellShiftingIT extends AbstractSpreadsheetIT {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL());
+        open();
 
         createNewSpreadsheet();
     }

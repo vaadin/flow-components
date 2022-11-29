@@ -5,16 +5,18 @@ import java.util.List;
 import java.util.Locale;
 
 import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
+import com.vaadin.flow.testutil.TestPath;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+@TestPath("vaadin-spreadsheet")
 public class NumberFormatIT extends AbstractSpreadsheetIT {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL());
+        open();
         loadFile("number_format.xlsx");
     }
 
