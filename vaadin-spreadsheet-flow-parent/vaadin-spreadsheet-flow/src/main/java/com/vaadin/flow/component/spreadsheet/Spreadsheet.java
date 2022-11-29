@@ -135,7 +135,7 @@ public class Spreadsheet extends Component
         String version = properties.getProperty("spreadsheet.version");
 
         if (service != null) {
-            if (service.getDeploymentConfiguration().isProductionMode()) {
+            if (!service.getDeploymentConfiguration().isProductionMode()) {
                 LicenseChecker.checkLicenseFromStaticBlock(
                         "vaadin-spreadsheet-flow", version);
             }
