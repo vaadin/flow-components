@@ -111,6 +111,21 @@ public class EmailFieldValidationBinderIT
     }
 
     @Test
+    public void defaultPattern_changeInputValue_assertValidity() {
+        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("john@vaadin.com",
+                Keys.ENTER);
+
+        testField.setValue("arbitrary string");
+        assertClientInvalid();
+        assertServerInvalid();
+        assertErrorMessage("");
+
+        testField.setValue("john@vaadin.com");
+        assertClientValid();
+        assertServerValid();
+    }
+
+    @Test
     public void pattern_changeInputValue_assertValidity() {
         $("input").id(PATTERN_INPUT).sendKeys("^[^\\d]+@vaadin.com$",
                 Keys.ENTER);

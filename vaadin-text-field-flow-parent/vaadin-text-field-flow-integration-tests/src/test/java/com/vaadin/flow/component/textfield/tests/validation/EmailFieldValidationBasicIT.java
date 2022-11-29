@@ -121,6 +121,17 @@ public class EmailFieldValidationBasicIT
     }
 
     @Test
+    public void defaultPattern_changeInputValue_assertValidity() {
+        testField.setValue("arbitrary string");
+        assertClientInvalid();
+        assertServerInvalid();
+
+        testField.setValue("john@vaadin.com");
+        assertClientValid();
+        assertServerValid();
+    }
+
+    @Test
     public void pattern_changeInputValue_assertValidity() {
         $("input").id(PATTERN_INPUT).sendKeys("^[^\\d]+@vaadin.com$",
                 Keys.ENTER);
