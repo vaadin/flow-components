@@ -97,9 +97,7 @@ import com.vaadin.flow.component.spreadsheet.framework.ReflectTools;
 import com.vaadin.flow.component.spreadsheet.rpc.SpreadsheetClientRpc;
 import com.vaadin.flow.component.spreadsheet.shared.GroupingData;
 import com.vaadin.flow.server.StreamResource;
-import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.shared.Registration;
-import com.vaadin.pro.licensechecker.LicenseChecker;
 
 import elemental.json.JsonValue;
 
@@ -119,28 +117,6 @@ public class Spreadsheet extends Component
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(Spreadsheet.class);
-
-    static {
-        VaadinService service = VaadinService.getCurrent();
-
-        Properties properties = new Properties();
-        try {
-            properties.load(Spreadsheet.class
-                    .getResourceAsStream("spreadsheet.properties"));
-        } catch (Exception e) {
-            LOGGER.warn("Unable to read Spreadsheet properties file", e);
-            throw new ExceptionInInitializerError(e);
-        }
-
-        String version = properties.getProperty("spreadsheet.version");
-
-        if (service != null) {
-            if (service.getDeploymentConfiguration().isProductionMode()) {
-                LicenseChecker.checkLicenseFromStaticBlock(
-                        "vaadin-spreadsheet-flow", version);
-            }
-        }
-    }
 
     @Override
     public void setId(String id) {

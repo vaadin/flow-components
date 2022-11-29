@@ -54,11 +54,6 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>license-checker</artifactId>
-            <version>1.11.2</version>
-        </dependency>
-        <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi</artifactId>
         </dependency>
