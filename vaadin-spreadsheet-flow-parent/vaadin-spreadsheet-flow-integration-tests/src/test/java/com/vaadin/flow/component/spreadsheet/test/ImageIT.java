@@ -8,7 +8,9 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 
 import com.vaadin.flow.component.spreadsheet.testbench.SpreadsheetElement;
+import com.vaadin.flow.testutil.TestPath;
 
+@TestPath("vaadin-spreadsheet")
 public class ImageIT extends AbstractSpreadsheetIT {
 
     private SpreadsheetElement spreadsheet;
@@ -16,7 +18,7 @@ public class ImageIT extends AbstractSpreadsheetIT {
     @Before
     public void init() {
         getDriver().manage().window().setSize(WINDOW_SIZE_LARGE);
-        getDriver().get(getBaseURL());
+        open();
         loadFile("picture_sheet.xlsx");
         spreadsheet = $(SpreadsheetElement.class).first();
     }

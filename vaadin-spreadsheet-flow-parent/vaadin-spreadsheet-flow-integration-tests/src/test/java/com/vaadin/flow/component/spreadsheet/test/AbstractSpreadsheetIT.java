@@ -8,11 +8,13 @@ import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
 import com.vaadin.flow.component.spreadsheet.testbench.SpreadsheetElement;
 import com.vaadin.flow.component.spreadsheet.tests.fixtures.TestFixtures;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
+import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
-import com.vaadin.tests.AbstractParallelTest;
+import com.vaadin.tests.AbstractComponentIT;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.junit.Assert;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
@@ -28,12 +30,16 @@ import java.util.Objects;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
-public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
+public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
 
     // Should be COMMAND for macOS
     private Keys metaKey = Keys.CONTROL;
     private SpreadsheetElement spreadsheet;
     private static final String BACKGROUND_COLOR = "background-color";
+
+    public static final Dimension WINDOW_SIZE_LARGE = new Dimension(1920, 1080);
+    public static final Dimension WINDOW_SIZE_MEDIUM = new Dimension(768, 1024);
+    public static final Dimension WINDOW_SIZE_SMALL = new Dimension(375, 667);
 
     private TestBenchElement getSpreadsheetInShadowRoot() {
         var spreadsheet = $(SpreadsheetElement.class).first();
@@ -602,10 +608,5 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
                 .filter(logEntry -> !logEntry.getMessage()
                         .contains("favicon.ico"))
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    protected String getBaseURL() {
-        return super.getBaseURL() + "/vaadin-spreadsheet";
     }
 }
