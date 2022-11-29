@@ -2,20 +2,22 @@ package com.vaadin.flow.component.spreadsheet.test;
 
 import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
 import com.vaadin.flow.component.spreadsheet.testbench.SpreadsheetElement;
+import com.vaadin.flow.testutil.TestPath;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import java.io.IOException;
 
+@TestPath("vaadin-spreadsheet")
 public class ClosedGroupNumbersIT extends AbstractSpreadsheetIT {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL());
+        open();
 
         createNewSpreadsheet();
     }

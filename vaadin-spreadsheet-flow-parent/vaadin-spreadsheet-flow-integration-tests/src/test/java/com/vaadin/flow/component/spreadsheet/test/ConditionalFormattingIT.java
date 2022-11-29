@@ -1,15 +1,17 @@
 package com.vaadin.flow.component.spreadsheet.test;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import com.vaadin.flow.testutil.TestPath;
 
+@TestPath("vaadin-spreadsheet")
 public class ConditionalFormattingIT extends AbstractSpreadsheetIT {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL());
+        open();
 
         loadFile("conditional_formatting_with_Invalid_formula.xlsx");
     }
@@ -17,7 +19,7 @@ public class ConditionalFormattingIT extends AbstractSpreadsheetIT {
     @Test
     public void unsupportedFormula_parse_noAffectCondtionalFormat() {
         String value = "rgba(255, 235, 156, 1)";
-        assertEquals(value, getSpreadsheet().getCellAt("B1")
+        Assert.assertEquals(value, getSpreadsheet().getCellAt("B1")
                 .getCssValue("background-color"));
     }
 

@@ -1,6 +1,7 @@
 package com.vaadin.flow.component.spreadsheet.test;
 
 import com.vaadin.flow.component.spreadsheet.testbench.SpreadsheetElement;
+import com.vaadin.flow.testutil.TestPath;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -14,6 +15,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 
+@TestPath("vaadin-spreadsheet")
 public class UndoRedoIT extends AbstractSpreadsheetIT {
 
     @Rule
@@ -21,7 +23,7 @@ public class UndoRedoIT extends AbstractSpreadsheetIT {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL());
+        open();
         createNewSpreadsheet();
     }
 
