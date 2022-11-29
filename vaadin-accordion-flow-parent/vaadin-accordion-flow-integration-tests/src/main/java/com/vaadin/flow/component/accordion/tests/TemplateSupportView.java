@@ -5,15 +5,14 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.polymertemplate.Id;
-import com.vaadin.flow.component.polymertemplate.PolymerTemplate;
+import com.vaadin.flow.component.littemplate.LitTemplate;
+import com.vaadin.flow.component.template.Id;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.templatemodel.TemplateModel;
 
 @Route(value = "vaadin-accordion/template-support")
 @Tag("accordion-app")
 @JsModule("./accordion-in-template.js")
-public class TemplateSupportView extends PolymerTemplate<TemplateModel> {
+public class TemplateSupportView extends LitTemplate {
 
     @Id
     private Accordion accordion;

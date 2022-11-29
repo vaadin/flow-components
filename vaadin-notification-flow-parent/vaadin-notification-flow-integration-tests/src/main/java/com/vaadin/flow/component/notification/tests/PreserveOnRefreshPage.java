@@ -2,6 +2,7 @@ package com.vaadin.flow.component.notification.tests;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.router.PreserveOnRefresh;
 import com.vaadin.flow.router.Route;
@@ -26,5 +27,14 @@ public class PreserveOnRefreshPage extends Div {
         });
         closeNotification.setId("close-notification");
         add(closeNotification);
+
+        NativeButton addComponent = new NativeButton(
+                "Add component to notification", e -> {
+                    Span span = new Span("Component content");
+                    span.setId("component-content");
+                    notification.add(span);
+                });
+        addComponent.setId("add-component");
+        add(addComponent);
     }
 }

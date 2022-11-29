@@ -1,17 +1,17 @@
-import {PolymerElement} from '@polymer/polymer/polymer-element.js';
-import {html} from '@polymer/polymer/lib/utils/html-tag.js';
+import { html, LitElement } from 'lit';
 import '@vaadin/checkbox/vaadin-checkbox.js';
 
-class InjectChecbox extends PolymerElement {
-    static get template() {
-      return html`
-    <vaadin-checkbox id="accept" label="Accept"></vaadin-checkbox>
-    <div id="div">A</div>
-`;
+class InjectCheckbox extends LitElement {
+  render() {
+    return html`
+      <vaadin-checkbox id="accept" label="Accept"></vaadin-checkbox>
+      <div id="div">A</div>
+    `;
   }
-      static get is() {
-      return 'inject-checkbox'
+
+  static get is() {
+    return 'inject-checkbox';
   }
 }
 
-customElements.define(InjectChecbox.is, InjectChecbox);
+customElements.define(InjectCheckbox.is, InjectCheckbox);

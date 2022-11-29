@@ -17,15 +17,14 @@ package com.vaadin.flow.component.datepicker;
 
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.component.polymertemplate.Id;
-import com.vaadin.flow.component.polymertemplate.PolymerTemplate;
+import com.vaadin.flow.component.littemplate.LitTemplate;
+import com.vaadin.flow.component.template.Id;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.templatemodel.TemplateModel;
 
 @Route("vaadin-date-picker/injected-datepicker")
 @JsModule("injected-datepicker-i18n.js")
 @Tag("injected-datepicker-i18n")
-public class InjectedDatePickerI18nPage extends PolymerTemplate<TemplateModel> {
+public class InjectedDatePickerI18nPage extends LitTemplate {
 
     @Id("date-picker")
     private DatePicker datePicker;

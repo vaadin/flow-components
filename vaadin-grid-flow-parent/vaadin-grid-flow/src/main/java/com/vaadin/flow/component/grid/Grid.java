@@ -206,10 +206,10 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha4")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha5")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/grid", version = "24.0.0-alpha4")
-@NpmPackage(value = "@vaadin/tooltip", version = "24.0.0-alpha4")
+@NpmPackage(value = "@vaadin/grid", version = "24.0.0-alpha5")
+@NpmPackage(value = "@vaadin/tooltip", version = "24.0.0-alpha5")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -446,7 +446,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-column")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha4")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha5")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class Column<T> extends AbstractColumn<Column<T>> {
 
@@ -476,6 +476,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         private Rendering<T> rendering;
 
         private SerializableFunction<T, String> classNameGenerator = item -> null;
+        private SerializableFunction<T, String> partNameGenerator = item -> null;
         private SerializableFunction<T, String> tooltipGenerator = item -> null;
 
         /**
@@ -1031,6 +1032,32 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
 
         /**
+         * Sets the function that is used for generating CSS part names for
+         * cells in this column. Returning {@code null} from the generator
+         * results in no custom part name being set. Multiple part names can be
+         * returned from the generator as space-separated.
+         * <p>
+         * If {@link Grid#setPartNameGenerator(SerializableFunction)} is used
+         * together with this method, resulting part names from both methods
+         * will be effective.
+         *
+         * @param partNameGenerator
+         *            the part name generator to set, not {@code null}
+         * @return this column
+         * @throws NullPointerException
+         *             if {@code partNameGenerator} is {@code null}
+         * @see Grid#setPartNameGenerator(SerializableFunction)
+         */
+        public Column<T> setPartNameGenerator(
+                SerializableFunction<T, String> partNameGenerator) {
+            Objects.requireNonNull(partNameGenerator,
+                    "Part name generator can not be null");
+            this.partNameGenerator = partNameGenerator;
+            getGrid().getDataCommunicator().reset();
+            return this;
+        }
+
+        /**
          * Sets the function that is used for generating tooltip text for cells
          * in this column. Returning {@code null} from the generator results in
          * no tooltip being set.
@@ -1043,7 +1070,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          */
         public Column<T> setTooltipGenerator(
                 SerializableFunction<T, String> tooltipGenerator) {
-            Objects.requireNonNull(classNameGenerator,
+            Objects.requireNonNull(tooltipGenerator,
                     "Tooltip generator can not be null");
 
             if (!getGrid().getElement().getChildren().anyMatch(
@@ -1074,6 +1101,16 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          */
         public SerializableFunction<T, String> getClassNameGenerator() {
             return classNameGenerator;
+        }
+
+        /**
+         * Gets the function that is used for generating CSS part names for
+         * cells in this column.
+         *
+         * @return the part name generator
+         */
+        public SerializableFunction<T, String> getPartNameGenerator() {
+            return partNameGenerator;
         }
 
         public SerializableFunction<T, String> getTooltipGenerator() {
@@ -1355,9 +1392,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     private SerializableSupplier<Editor<T>> editorFactory = this::createEditor;
 
-    private boolean verticalScrollingEnabled = true;
-
     private SerializableFunction<T, String> classNameGenerator = item -> null;
+    private SerializableFunction<T, String> partNameGenerator = item -> null;
     private SerializablePredicate<T> dropFilter = item -> true;
     private SerializablePredicate<T> dragFilter = item -> true;
     private Map<String, SerializableFunction<T, String>> dragDataGenerators = new HashMap<>();
@@ -1511,6 +1547,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         gridDataGenerator = new CompositeDataGenerator<>();
         gridDataGenerator.addDataGenerator(this::generateUniqueKeyData);
         gridDataGenerator.addDataGenerator(this::generateStyleData);
+        gridDataGenerator.addDataGenerator(this::generatePartData);
         gridDataGenerator.addDataGenerator(this::generateTooltipTextData);
         gridDataGenerator.addDataGenerator(this::generateRowsDragAndDropAccess);
         gridDataGenerator.addDataGenerator(this::generateDragData);
@@ -1696,7 +1733,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * {@link ComponentRenderer}.
      * <p>
      * <em>NOTE:</em> Using {@link ComponentRenderer} is not as efficient as the
-     * built in renderers or using {@link TemplateRenderer}.
+     * built in renderers or using {@link LitRenderer}.
      * </p>
      * <p>
      * Every added column sends data to the client side regardless of its
@@ -1758,12 +1795,12 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * <p>
      * See implementations of the {@link Renderer} interface for built-in
      * renderer options with type safe APIs. For a renderer using template
-     * binding, use {@link TemplateRenderer#of(String)}.
+     * binding, use {@link LitRenderer#of(String)}.
      * <p>
      * <em>NOTE:</em> You can add component columns easily using the
      * {@link #addComponentColumn(ValueProvider)}, but using
      * {@link ComponentRenderer} is not as efficient as the built in renderers
-     * or using {@link TemplateRenderer}.
+     * or using {@link LitRenderer}.
      * </p>
      * <p>
      * Every added column sends data to the client side regardless of its
@@ -1780,7 +1817,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @return the created column
      *
      * @see #getDefaultColumnFactory()
-     * @see TemplateRenderer#of(String)
+     * @see LitRenderer#of(String)
      * @see #addComponentColumn(ValueProvider)
      * @see #removeColumn(Column)
      * @see #addColumn(Renderer, BiFunction)
@@ -1796,12 +1833,12 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * <p>
      * See implementations of the {@link Renderer} interface for built-in
      * renderer options with type safe APIs. For a renderer using template
-     * binding, use {@link TemplateRenderer#of(String)}.
+     * binding, use {@link LitRenderer#of(String)}.
      * <p>
      * <em>NOTE:</em> You can add component columns easily using the
      * {@link #addComponentColumn(ValueProvider)}, but using
      * {@link ComponentRenderer} is not as efficient as the built in renderers
-     * or using {@link TemplateRenderer}.
+     * or using {@link LitRenderer}.
      * </p>
      * <p>
      * Every added column sends data to the client side regardless of its
@@ -1817,7 +1854,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @return the created column
      *
      * @see #addColumn(Renderer)
-     * @see TemplateRenderer#of(String)
+     * @see LitRenderer#of(String)
      * @see #addComponentColumn(ValueProvider)
      * @see #removeColumn(Column)
      */
@@ -1901,7 +1938,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * <em>NOTE:</em> You can add component columns easily using the
      * {@link #addComponentColumn(ValueProvider)}, but using
      * {@link ComponentRenderer} is not as efficient as the built in renderers
-     * or using {@link TemplateRenderer}.
+     * or using {@link LitRenderer}.
      * <p>
      *
      * Every added column sends data to the client side regardless of its
@@ -1943,7 +1980,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * <em>NOTE:</em> You can add component columns easily using the
      * {@link #addComponentColumn(ValueProvider)}, but using
      * {@link ComponentRenderer} is not as efficient as the built in renderers
-     * or using {@link TemplateRenderer}.
+     * or using {@link LitRenderer}.
      *
      * <p>
      * Every added column sends data to the client side regardless of its
@@ -2918,7 +2955,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             rendering = ((LitRenderer<T>) renderer).render(getElement(),
                     dataCommunicator.getKeyMapper(), "rowDetailsRenderer");
         } else {
-            // TemplateRenderer or ComponentRenderer
+            // TemplateRenderer
             if (detailsTemplate == null) {
                 rendering = renderer.render(getElement(),
                         getDataCommunicator().getKeyMapper());
@@ -3864,6 +3901,30 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
+     * Sets the function that is used for generating CSS part names for all the
+     * cells in the rows in this grid. Returning {@code null} from the generator
+     * results in no custom part name being set. Multiple part names can be
+     * returned from the generator as space-separated.
+     * <p>
+     * If {@link Column#setPartNameGenerator(SerializableFunction)} is used
+     * together with this method, resulting part names from both methods will be
+     * effective.
+     *
+     * @param partNameGenerator
+     *            the part name generator to set, not {@code null}
+     * @throws NullPointerException
+     *             if {@code partNameGenerator} is {@code null}
+     * @see Column#setPartNameGenerator(SerializableFunction)
+     */
+    public void setPartNameGenerator(
+            SerializableFunction<T, String> partNameGenerator) {
+        Objects.requireNonNull(partNameGenerator,
+                "Part name generator can not be null");
+        this.partNameGenerator = partNameGenerator;
+        getDataCommunicator().reset();
+    }
+
+    /**
      * Updates the {@code width} of all columns which have {@code autoWidth} set
      * to {@code true}.
      *
@@ -3888,6 +3949,16 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public SerializableFunction<T, String> getClassNameGenerator() {
         return classNameGenerator;
+    }
+
+    /**
+     * Gets the function that is used for generating CSS part names for rows in
+     * this grid.
+     *
+     * @return the part name generator
+     */
+    public SerializableFunction<T, String> getPartNameGenerator() {
+        return partNameGenerator;
     }
 
     private void generateTooltipTextData(T item, JsonObject jsonObject) {
@@ -3922,6 +3993,26 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         if (style.keys().length > 0) {
             jsonObject.put("style", style);
+        }
+    }
+
+    private void generatePartData(T item, JsonObject jsonObject) {
+        JsonObject part = Json.createObject();
+
+        String rowPartName = partNameGenerator.apply(item);
+        if (rowPartName != null) {
+            part.put("row", rowPartName);
+        }
+
+        idToColumnMap.forEach((id, column) -> {
+            String cellPartName = column.getPartNameGenerator().apply(item);
+            if (cellPartName != null) {
+                part.put(id, cellPartName);
+            }
+        });
+
+        if (part.keys().length > 0) {
+            jsonObject.put("part", part);
         }
     }
 

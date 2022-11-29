@@ -31,6 +31,9 @@ public class HierarchyColumnComponentRenderer<COMPONENT extends Component, SOURC
                 grid.expand(List.of(item), true);
             }
         });
+
+        withProperty("children",
+                item -> grid.getDataCommunicator().hasChildren(item));
     }
 
     @Override
