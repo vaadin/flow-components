@@ -1,20 +1,23 @@
 package com.vaadin.flow.component.spreadsheet.test;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.Locale;
+
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.vaadin.flow.testutil.TestPath;
 
 /**
  * Test for formula field formatting.
  *
  */
+@TestPath("vaadin-spreadsheet")
 public class FormulaFieldFormatIT extends AbstractSpreadsheetIT {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL());
+        open();
         setDefaultLocale();
     }
 
@@ -57,9 +60,10 @@ public class FormulaFieldFormatIT extends AbstractSpreadsheetIT {
 
     private void assertFormat(String cell, String cellValue,
             String formulaFieldValue) {
-        assertEquals("Unexpected cell content,", cellValue, getCellValue(cell));
+        Assert.assertEquals("Unexpected cell content,", cellValue,
+                getCellValue(cell));
         clickCell(cell);
-        assertEquals("Unexpected formula bar value,", formulaFieldValue,
+        Assert.assertEquals("Unexpected formula bar value,", formulaFieldValue,
                 getFormulaFieldValue());
     }
 

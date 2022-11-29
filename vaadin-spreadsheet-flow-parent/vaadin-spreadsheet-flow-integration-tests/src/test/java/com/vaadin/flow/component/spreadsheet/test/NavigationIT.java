@@ -1,6 +1,7 @@
 package com.vaadin.flow.component.spreadsheet.test;
 
 import com.vaadin.flow.component.spreadsheet.testbench.AddressUtil;
+import com.vaadin.flow.testutil.TestPath;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -11,6 +12,7 @@ import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
+@TestPath("vaadin-spreadsheet")
 public class NavigationIT extends AbstractSpreadsheetIT {
 
     @Before
@@ -18,7 +20,7 @@ public class NavigationIT extends AbstractSpreadsheetIT {
         // set window size to large to avoid cells overlapping with the
         // dev tool popup
         getDriver().manage().window().setSize(WINDOW_SIZE_LARGE);
-        getDriver().get(getBaseURL());
+        open();
         createNewSpreadsheet();
     }
 
