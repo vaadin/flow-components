@@ -3,17 +3,14 @@ package com.vaadin.addon.spreadsheet.client;
 import com.gargoylesoftware.htmlunit.javascript.host.event.EventTarget;
 import com.google.gwt.core.client.JavaScriptObject;
 
-/*
- * #%L
- * Vaadin Spreadsheet
- * %%
- * Copyright (C) 2013 - 2022 Vaadin Ltd
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
+/**
+ * Copyright (C) 2022 Vaadin Ltd
  *
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
  */
 
 import com.google.gwt.dom.client.DivElement;
