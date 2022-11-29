@@ -217,7 +217,7 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
             rendering = renderer.render(getElement(),
                     dataCommunicator.getKeyMapper());
         } else {
-            // TemplateRenderer or ComponentRenderer
+            // TemplateRenderer
             if (template.getParent() == null) {
                 getElement().appendChild(template);
             }

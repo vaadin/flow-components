@@ -38,7 +38,6 @@ public class BasicChartIT extends AbstractTBTest {
     }
 
     @Test
-
     public void Chart_TitleCanBeChanged() {
         final TestBenchElement chart = getChartElement();
         final WebElement title = chart.$("*")
