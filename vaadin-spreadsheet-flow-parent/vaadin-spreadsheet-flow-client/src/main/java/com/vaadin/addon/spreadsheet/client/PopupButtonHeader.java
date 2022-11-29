@@ -4,7 +4,7 @@ import com.gargoylesoftware.htmlunit.javascript.host.event.EventTarget;
 import com.google.gwt.core.client.JavaScriptObject;
 
 /**
- * Copyright (C) 2022 Vaadin Ltd
+ * Copyright (C) 2000-2022 Vaadin Ltd
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *

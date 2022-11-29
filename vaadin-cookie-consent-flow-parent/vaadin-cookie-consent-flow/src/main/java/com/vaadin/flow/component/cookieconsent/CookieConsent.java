@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Locale;
 
 /**
- * Copyright (C) 2022 Vaadin Ltd
+ * Copyright (C) 2000-2022 Vaadin Ltd
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
