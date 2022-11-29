@@ -77,6 +77,10 @@
             <groupId>com.vaadin</groupId>
             <artifactId>flow-polymer-template</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-lumo-theme</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
