@@ -4,15 +4,18 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.testutil.TestPath;
+
 import java.util.List;
 
 import static org.junit.Assert.assertFalse;
 
+@TestPath("vaadin-spreadsheet")
 public class UngroupingIT extends AbstractSpreadsheetIT {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL());
+        open();
     }
 
     /**

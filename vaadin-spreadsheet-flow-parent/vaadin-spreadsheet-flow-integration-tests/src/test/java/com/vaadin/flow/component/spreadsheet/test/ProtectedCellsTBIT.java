@@ -2,6 +2,7 @@ package com.vaadin.flow.component.spreadsheet.test;
 
 import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
 import com.vaadin.flow.component.spreadsheet.tests.fixtures.TestFixtures;
+import com.vaadin.flow.testutil.TestPath;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -9,13 +10,14 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.WebDriverException;
 
+@TestPath("vaadin-spreadsheet")
 public class ProtectedCellsTBIT extends AbstractSpreadsheetIT {
 
     private final static String NEW_VALUE = "something";
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL());
+        open();
         loadFile("protected_sheet_examples.xlsx");
     }
 

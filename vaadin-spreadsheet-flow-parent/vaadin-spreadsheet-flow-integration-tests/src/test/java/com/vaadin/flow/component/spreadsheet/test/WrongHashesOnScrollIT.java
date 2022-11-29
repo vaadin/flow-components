@@ -5,6 +5,8 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.testutil.TestPath;
+
 import java.util.List;
 
 import static org.junit.Assert.assertNotEquals;
@@ -19,11 +21,12 @@ import static org.junit.Assert.assertNotEquals;
  * Because it's a race condition, it cannot be tested reliably, we are doing the
  * best here in hope that we catch an issue if there is one.
  */
+@TestPath("vaadin-spreadsheet")
 public class WrongHashesOnScrollIT extends AbstractSpreadsheetIT {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL());
+        open();
     }
 
     @Test
