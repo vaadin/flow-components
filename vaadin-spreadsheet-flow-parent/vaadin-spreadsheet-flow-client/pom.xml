@@ -38,7 +38,7 @@
     <!-- we dont put this dependencies in parent poms because they are only
          used in this module just for the compilation Java to JS -->
     <gwt.version>2.9.0</gwt.version>
-    <framework.version>8.17.0</framework.version>
+    <framework.version>8.18.0</framework.version>
   </properties>
 
   <dependencyManagement>
