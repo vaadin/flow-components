@@ -41,6 +41,9 @@ public class PasswordFieldValidationBinderIT
 
     @Test
     public void required_triggerInputBlur_assertValidity() {
+        // Tab to the show button
+        testField.sendKeys(Keys.TAB);
+        // Tab out of the field
         testField.sendKeys(Keys.TAB);
         assertServerInvalid();
         assertClientInvalid();
