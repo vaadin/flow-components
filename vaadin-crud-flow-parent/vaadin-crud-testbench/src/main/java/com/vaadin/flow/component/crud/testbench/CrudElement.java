@@ -52,7 +52,7 @@ public class CrudElement extends TestBenchElement {
      */
     public Optional<TestBenchElement> getNewItemButton() {
         ElementQuery<TestBenchElement> newButtonQuery = this
-                .$(TestBenchElement.class).attribute("new-button", "");
+                .$(TestBenchElement.class).attribute("slot", "new-button");
         return newButtonQuery.exists() ? Optional.of(newButtonQuery.last())
                 : Optional.empty();
     }

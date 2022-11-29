@@ -35,13 +35,12 @@ public class ColumnPathIT extends AbstractComponentIT {
 
         GridElement grid = $(GridElement.class).waitForFirst();
 
-        Assert.assertEquals("Person 1", grid.getCell(0, 0).getInnerHTML());
-        Assert.assertEquals("Person 1", grid.getCell(0, 1).getInnerHTML());
+        Assert.assertEquals("Person 1", grid.getCell(0, 0).getText());
+        Assert.assertEquals("Person 1", grid.getCell(0, 1).getText());
 
         // A column with an editor contains lot's of stuff, so let's just check
         // if the innerHTML contains Person 1
-        Assert.assertTrue(
-                grid.getCell(0, 2).getInnerHTML().contains("Person 1"));
+        Assert.assertTrue(grid.getCell(0, 2).getText().contains("Person 1"));
 
         List<WebElement> columns = grid
                 .findElements(By.tagName("vaadin-grid-column"));

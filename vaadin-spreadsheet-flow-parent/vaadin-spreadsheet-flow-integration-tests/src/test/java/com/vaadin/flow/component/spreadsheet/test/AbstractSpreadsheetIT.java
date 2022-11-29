@@ -2,6 +2,7 @@ package com.vaadin.flow.component.spreadsheet.test;
 
 import com.google.common.base.Predicate;
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
+import com.vaadin.flow.component.html.testbench.DivElement;
 import com.vaadin.flow.component.spreadsheet.testbench.AddressUtil;
 import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
 import com.vaadin.flow.component.spreadsheet.testbench.SpreadsheetElement;
@@ -34,6 +35,19 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
     private SpreadsheetElement spreadsheet;
     private static final String BACKGROUND_COLOR = "background-color";
 
+    private TestBenchElement getSpreadsheetInShadowRoot() {
+        var spreadsheet = $(SpreadsheetElement.class).first();
+        return spreadsheet.$(DivElement.class).first();
+    }
+
+    protected TestBenchElement findElementInShadowRoot(By by) {
+        return getSpreadsheetInShadowRoot().findElement(by);
+    }
+
+    protected List<WebElement> findElementsInShadowRoot(By by) {
+        return getSpreadsheetInShadowRoot().findElements(by);
+    }
+
     public void selectCell(String address) {
         selectElement(getSpreadsheet().getCellAt(address), false, false);
     }
@@ -51,15 +65,52 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
     }
 
     protected void paste() {
-        new Actions(getDriver()).keyDown(Keys.CONTROL).keyDown(Keys.COMMAND)
-                .sendKeys("v").keyUp(Keys.CONTROL).keyUp(Keys.COMMAND).build()
-                .perform();
+        if (isMac()) {
+            new Actions(getDriver()).keyDown(Keys.CONTROL).keyDown(Keys.COMMAND)
+                    .sendKeys("v").keyUp(Keys.CONTROL).keyUp(Keys.COMMAND)
+                    .build().perform();
+        } else {
+            new Actions(getDriver()).keyDown(Keys.CONTROL).sendKeys("v")
+                    .keyUp(Keys.CONTROL).build().perform();
+            getCommandExecutor().waitForVaadin();
+        }
     }
 
     protected void copy() {
-        new Actions(getDriver()).keyDown(Keys.CONTROL).keyDown(Keys.COMMAND)
-                .sendKeys("c").keyUp(Keys.CONTROL).keyUp(Keys.COMMAND).build()
-                .perform();
+        if (isMac()) {
+            new Actions(getDriver()).keyDown(Keys.CONTROL).keyDown(Keys.COMMAND)
+                    .sendKeys("c").keyUp(Keys.CONTROL).keyUp(Keys.COMMAND)
+                    .build().perform();
+        } else {
+            new Actions(getDriver()).keyDown(Keys.CONTROL).sendKeys("c")
+                    .keyUp(Keys.CONTROL).build().perform();
+        }
+    }
+
+    protected void undo() {
+        if (isMac()) {
+            new Actions(getDriver()).keyDown(Keys.CONTROL).keyDown(Keys.COMMAND)
+                    .sendKeys("z").keyUp(Keys.CONTROL).keyUp(Keys.COMMAND)
+                    .build().perform();
+        } else {
+            new Actions(getDriver()).keyDown(Keys.CONTROL).sendKeys("z")
+                    .keyUp(Keys.CONTROL).build().perform();
+        }
+    }
+
+    protected void redo() {
+        if (isMac()) {
+            new Actions(getDriver()).keyDown(Keys.CONTROL).keyDown(Keys.COMMAND)
+                    .sendKeys("y").keyUp(Keys.CONTROL).keyUp(Keys.COMMAND)
+                    .build().perform();
+        } else {
+            new Actions(getDriver()).keyDown(Keys.CONTROL).sendKeys("y")
+                    .keyUp(Keys.CONTROL).build().perform();
+        }
+    }
+
+    protected boolean isMac() {
+        return System.getProperty("os.name").toLowerCase().contains("mac");
     }
 
     public void selectColumn(String column) {
@@ -76,7 +127,9 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
 
     public void selectRegion(String from, String to) {
         new Actions(getDriver()).clickAndHold(getSpreadsheet().getCellAt(from))
-                .release(getSpreadsheet().getCellAt(to)).perform();
+                .moveToElement(getSpreadsheet().getCellAt(to)).release()
+                .perform();
+        getCommandExecutor().waitForVaadin();
     }
 
     private void selectElement(WebElement element, boolean ctrl,
@@ -98,7 +151,7 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
     }
 
     public void addSheet() {
-        findElement(By.className("add-new-tab")).click();
+        findElementInShadowRoot(By.className("add-new-tab")).click();
     }
 
     public void selectSheetAt(int sheetIndex) {
@@ -106,23 +159,23 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
     }
 
     public String getSelectedSheetName() {
-        WebElement selectedSheetTab = findElement(
+        WebElement selectedSheetTab = findElementInShadowRoot(
                 By.cssSelector(".sheet-tabsheet-tab.selected-tab"));
 
         return selectedSheetTab.getText();
     }
 
     public List<String> getNamedRanges() {
-        final List<WebElement> options = findElement(
+        final List<WebElement> options = findElementInShadowRoot(
                 By.className("namedrangebox"))
-                        .findElements(By.tagName("option"));
+                .findElements(By.tagName("option"));
 
         return options.stream().map(WebElement::getText)
                 .collect(Collectors.toList());
     }
 
     public void selectNamedRange(String name) {
-        TestBenchElement select = ((TestBenchElement) findElement(
+        TestBenchElement select = ((TestBenchElement) findElementInShadowRoot(
                 By.className("namedrangebox")));
         select.setProperty("value", name);
         select.dispatchEvent("change");
@@ -175,13 +228,14 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
 
     public void clickOnColumnHeader(int column, Keys... modifiers) {
         Actions actions = new Actions(driver);
-        WebElement header = driver
-                .findElement(By.cssSelector(".ch.col" + column));
+        WebElement header = findElementInShadowRoot(
+                By.cssSelector(".ch.col" + column));
         actions.moveToElement(header, 1, 1);
         for (Keys modifier : modifiers) {
             actions.keyDown(modifier);
         }
-        actions.click(driver.findElement(By.cssSelector(".ch.col" + column)));
+        actions.click(
+                findElementInShadowRoot(By.cssSelector(".ch.col" + column)));
         for (Keys modifier : modifiers) {
             actions.keyUp(modifier);
         }
@@ -191,11 +245,11 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
     public void clickOnRowHeader(int row, Keys... modifiers) {
         Actions actions = new Actions(driver);
         actions.moveToElement(
-                driver.findElement(By.cssSelector(".rh.row" + row)), 1, 1);
+                findElementInShadowRoot(By.cssSelector(".rh.row" + row)), 1, 1);
         for (Keys modifier : modifiers) {
             actions.keyDown(modifier);
         }
-        actions.click(driver.findElement(By.cssSelector(".rh.row" + row)));
+        actions.click(findElementInShadowRoot(By.cssSelector(".rh.row" + row)));
         for (Keys modifier : modifiers) {
             actions.keyUp(modifier);
         }
@@ -205,7 +259,7 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
     public void setSpreadsheet(SpreadsheetElement spreadsheet) {
         this.spreadsheet = spreadsheet;
         // Force sheet initial focus
-        spreadsheet.findElement(By.className("sheet-tabsheet")).click();
+        findElementInShadowRoot(By.className("sheet-tabsheet")).click();
     }
 
     public void setCellValue(String address, String value) {
@@ -217,7 +271,7 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
     }
 
     public WebElement getCellElement(String cell) {
-        return findElement(By.xpath(cellToXPath(cell)));
+        return findElementInShadowRoot(By.cssSelector(cellToCSS(cell)));
     }
 
     public String getCellValue(int col, int row) {
@@ -241,7 +295,7 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
 
     public WebElement getInlineEditor(String cell) {
         openInlineEditor(cell);
-        return getCellElement(cell).findElement(By.xpath("../input"));
+        return findElementInShadowRoot(By.cssSelector("input"));
     }
 
     public SpreadsheetElement getSpreadsheet() {
@@ -335,11 +389,11 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
     }
 
     private WebElement getAddressField() {
-        return findElement(By.cssSelector("input.addressfield"));
+        return findElementInShadowRoot(By.cssSelector("input.addressfield"));
     }
 
     private WebElement getFormulaField() {
-        return getDriver().findElement(By.className("functionfield"));
+        return findElementInShadowRoot(By.className("functionfield"));
     }
 
     public String getFormulaFieldValue() {
@@ -349,7 +403,7 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
     public String getSelectionFormula() {
         final var sprElement = getSpreadsheet();
 
-        WebElement selection = findElement(
+        WebElement selection = findElementInShadowRoot(
                 org.openqa.selenium.By.className("sheet-selection"));
         final String[] classes = selection.getAttribute("class").split(" ");
 
@@ -453,16 +507,9 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
         return coordinates;
     }
 
-    public String cellToXPath(String cell) {
+    public String cellToCSS(String cell) {
         int[] coordinates = numericCoordinates(cell);
-
-        // TODO - This will not work with multiple spreadsheets, add reference
-        // to sheet's XPath
-        return "//*["
-                + "contains(concat(' ', normalize-space(@class), ' '), ' col"
-                + coordinates[0] + " ')"
-                + "and contains(concat(' ', normalize-space(@class), ' '), ' row"
-                + coordinates[1] + " ')" + "]";
+        return ".col" + coordinates[0] + ".row" + coordinates[1];
     }
 
     public void dragFromCellToCell(String from, String to) {
@@ -473,19 +520,18 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
     }
 
     public String getMergedCellContent(String topLeftCell) {
-        return driver.findElement(mergedCell(topLeftCell)).getText();
+        return findElementInShadowRoot(mergedCell(topLeftCell)).getText();
     }
 
     public By mergedCell(String topLeftCell) {
         int[] coordinates = numericCoordinates(topLeftCell);
-        return By.xpath("//div[contains(@class,'col" + coordinates[0] + " row"
-                + coordinates[1] + "') and contains(@class, 'merged-cell')]");
+        return By.cssSelector("div.col" + coordinates[0] + ".row"
+                + coordinates[1] + ".merged-cell");
     }
 
     public void navigateToCell(String cell) {
-        getDriver().findElement(By.xpath("//*[@class='addressfield']")).clear();
-        getDriver().findElement(By.xpath("//*[@class='addressfield']"))
-                .sendKeys(cell);
+        findElementInShadowRoot(By.cssSelector(".addressfield")).clear();
+        findElementInShadowRoot(By.cssSelector(".addressfield")).sendKeys(cell);
         new Actions(getDriver()).sendKeys(Keys.RETURN).perform();
     }
 
@@ -510,8 +556,8 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
     }
 
     public List<WebElement> getGroupings() {
-        return getSpreadsheet()
-                .findElements(By.cssSelector(".col-group-pane .grouping.plus"));
+        return findElementsInShadowRoot(
+                By.cssSelector(".col-group-pane .grouping.plus"));
     }
 
     protected double getSize(String size) {
@@ -556,25 +602,6 @@ public abstract class AbstractSpreadsheetIT extends AbstractParallelTest {
                 .filter(logEntry -> !logEntry.getMessage()
                         .contains("favicon.ico"))
                 .collect(Collectors.toList());
-    }
-
-    public void putCellContent(String cell, CharSequence value) {
-        openInlineEditor(cell);
-        getCommandExecutor().waitForVaadin();
-        clearInput();
-        getCommandExecutor().waitForVaadin();
-        insertAndTab(value);
-    }
-
-    private void clearInput() {
-        WebElement inlineInput = driver.findElement(By.id("cellinput"));
-        inlineInput.clear();
-    }
-
-    private void insertAndTab(CharSequence k) {
-        action(k);
-        action(Keys.TAB);
-        getCommandExecutor().waitForVaadin();
     }
 
     @Override

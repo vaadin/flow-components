@@ -20,6 +20,7 @@ import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxListDataView;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.data.provider.AbstractDataProvider;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataCommunicatorTest;
@@ -30,6 +31,7 @@ import com.vaadin.flow.shared.Registration;
 import com.vaadin.tests.DataProviderListenersTest;
 import elemental.json.Json;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -64,6 +66,13 @@ public abstract class ComboBoxBaseTest {
     public void implementsHasAllowedCharPattern() {
         Assert.assertTrue("ComboBox should support allowed char pattern",
                 HasAllowedCharPattern.class.isAssignableFrom(
+                        createComboBox(String.class).getClass()));
+    }
+
+    @Test
+    public void implementsHasTooltip() {
+        Assert.assertTrue("ComboBox should support setting a tooltip",
+                HasTooltip.class.isAssignableFrom(
                         createComboBox(String.class).getClass()));
     }
 
@@ -155,6 +164,31 @@ public abstract class ComboBoxBaseTest {
         // removes the second listener
         registration2.remove();
         Assert.assertFalse(comboBox.isAllowCustomValue());
+    }
+
+    @Test
+    @Ignore // Only test if this compiles, can be removed after removing
+            // GeneratedVaadinComboBox.CustomValueSetEvent
+    public void addCustomValueSetListenerWithNewEventType() {
+        ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
+        comboBox.addCustomValueSetListener(this::handleNewCustomValueSetEvent);
+    }
+
+    private void handleNewCustomValueSetEvent(
+            ComboBoxBase.CustomValueSetEvent<?> event) {
+    }
+
+    @Test
+    @Ignore // Only test if this compiles, can be removed after removing
+            // GeneratedVaadinComboBox.CustomValueSetEvent
+    public void addCustomValueSetListenerWithDeprecatedEventType() {
+        ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
+        comboBox.addCustomValueSetListener(
+                this::handleDeprecatedCustomValueSetEvent);
+    }
+
+    private void handleDeprecatedCustomValueSetEvent(
+            GeneratedVaadinComboBox.CustomValueSetEvent<?> event) {
     }
 
     @Test

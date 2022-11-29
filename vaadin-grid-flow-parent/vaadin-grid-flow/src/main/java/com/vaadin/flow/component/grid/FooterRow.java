@@ -38,14 +38,25 @@ public class FooterRow extends AbstractRow<FooterCell> {
 
         FooterCell(AbstractColumn<?> column) {
             super(column);
-            if (column.getFooterRenderer() == null) {
+            if (column.getFooterText() == null
+                    && column.getFooterComponent() == null) {
                 column.setFooterText("");
             }
         }
 
         @Override
+        public String getText() {
+            return getColumn().getFooterText();
+        }
+
+        @Override
         public void setText(String text) {
             getColumn().setFooterText(text);
+        }
+
+        @Override
+        public Component getComponent() {
+            return getColumn().getFooterComponent();
         }
 
         @Override

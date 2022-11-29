@@ -38,6 +38,8 @@ import com.vaadin.flow.dom.ElementFactory;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.HtmlUtils;
+import com.vaadin.flow.internal.StateTree;
+import com.vaadin.flow.router.NavigationTrigger;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -61,13 +63,16 @@ public class Notification extends GeneratedVaadinNotification<Notification>
     private final Element templateElement = new Element("template");
     private boolean autoAddedToTheUi = false;
 
-    private SerializableConsumer<UI> deferredJob = new AttachComponentTemplate();
+    private Registration afterProgrammaticNavigationListenerRegistration;
 
-    private class AttachComponentTemplate implements SerializableConsumer<UI> {
+    private SerializableConsumer<UI> configureTemplate = new ConfigureComponentRenderer();
+
+    private class ConfigureComponentRenderer
+            implements SerializableConsumer<UI> {
 
         @Override
         public void accept(UI ui) {
-            if (this == deferredJob) {
+            if (this == configureTemplate) {
                 String appId = ui.getInternals().getAppId();
                 int nodeId = container.getNode().getId();
                 String template = String.format(
@@ -126,8 +131,6 @@ public class Notification extends GeneratedVaadinNotification<Notification>
      */
     public Notification() {
         initBaseElementsAndListeners();
-        getElement().getNode().runWhenAttached(ui -> ui
-                .beforeClientResponse(this, context -> deferredJob.accept(ui)));
         setPosition(DEFAULT_POSITION);
         setDuration(0);
     }
@@ -204,13 +207,6 @@ public class Notification extends GeneratedVaadinNotification<Notification>
 
         getElement().addEventListener("opened-changed",
                 event -> removeAutoAdded());
-
-        addDetachListener(event -> {
-            // If the notification gets detached, it needs to be marked
-            // as closed so it won't auto-open when reattached.
-            setOpened(false);
-            removeAutoAdded();
-        });
     }
 
     /**
@@ -272,7 +268,7 @@ public class Notification extends GeneratedVaadinNotification<Notification>
      */
     public void setText(String text) {
         removeAll();
-        deferredJob = NO_OP;
+        configureTemplate = NO_OP;
         templateElement.setProperty("innerHTML", HtmlUtils.escape(text));
     }
 
@@ -353,7 +349,7 @@ public class Notification extends GeneratedVaadinNotification<Notification>
                     "Component to add cannot be null");
             container.appendChild(component.getElement());
         }
-        attachComponentTemplate();
+        configureComponentRenderer();
     }
 
     /**
@@ -404,7 +400,7 @@ public class Notification extends GeneratedVaadinNotification<Notification>
         // inside the method below
         container.insertChild(index, component.getElement());
 
-        attachComponentTemplate();
+        configureComponentRenderer();
     }
 
     /**
@@ -445,14 +441,29 @@ public class Notification extends GeneratedVaadinNotification<Notification>
                     + "That may happen if you call the method from the custom thread without "
                     + "'UI::access' or from tests without proper initialization.");
         }
-
-        ui.beforeClientResponse(ui, context -> {
-            if (isOpened() && getElement().getNode().getParent() == null) {
-                ui.addToModalComponent(this);
-                autoAddedToTheUi = true;
-            }
-        });
-
+        StateTree.ExecutionRegistration addToUiRegistration = ui
+                .beforeClientResponse(ui, context -> {
+                    if (isOpened()
+                            && getElement().getNode().getParent() == null) {
+                        ui.addToModalComponent(this);
+                        autoAddedToTheUi = true;
+                    }
+                    if (afterProgrammaticNavigationListenerRegistration != null) {
+                        afterProgrammaticNavigationListenerRegistration
+                                .remove();
+                    }
+                });
+        if (ui.getSession() != null) {
+            afterProgrammaticNavigationListenerRegistration = ui
+                    .addAfterNavigationListener(event -> {
+                        if (event.getLocationChangeEvent()
+                                .getTrigger() == NavigationTrigger.PROGRAMMATIC) {
+                            addToUiRegistration.remove();
+                            afterProgrammaticNavigationListenerRegistration
+                                    .remove();
+                        }
+                    });
+        }
         super.setOpened(opened);
     }
 
@@ -562,16 +573,35 @@ public class Notification extends GeneratedVaadinNotification<Notification>
                         .collect(Collectors.toList()));
     }
 
-    private void attachComponentTemplate() {
-        deferredJob = new AttachComponentTemplate();
-        getElement().getNode().runWhenAttached(ui -> ui
-                .beforeClientResponse(this, context -> deferredJob.accept(ui)));
+    private void configureComponentRenderer() {
+        configureTemplate = new ConfigureComponentRenderer();
+        getElement().getNode()
+                .runWhenAttached(ui -> configureTemplate.accept(ui));
     }
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         initConnector();
+        configureTemplate.accept(attachEvent.getUI());
+    }
+
+    @Override
+    protected void onDetach(DetachEvent detachEvent) {
+        super.onDetach(detachEvent);
+        // When reloading a page using preserve on refresh, the notification
+        // should keep its opened state. To prevent it from auto-closing, delay
+        // the auto-closing logic to before client response, which is not called
+        // when reloading the page. This also prevents an exception when trying
+        // to remove an auto-added notification from its parent.
+        detachEvent.getUI().beforeClientResponse(this, executionContext -> {
+            // Close the notification, and remove it from its parent if it was
+            // auto-added. This ensures that the notification doesn't re-open
+            // itself when its parent, for example a dialog, gets attached
+            // again.
+            setOpened(false);
+            removeAutoAdded();
+        });
     }
 
     private void initConnector() {

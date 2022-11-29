@@ -1,16 +1,16 @@
-import { PolymerElement } from '@polymer/polymer/polymer-element.js';
+import { html, LitElement } from 'lit';
 
-import { html } from '@polymer/polymer/lib/utils/html-tag.js';
-class TestTemplate extends PolymerElement {
-  static get template() {
+class TestTemplate extends LitElement {
+  render() {
     return html`
-        <div id="container" style="height:20px;"></div>
-        <button id="btn">Click me!</button>
-`;
+      <div id="container" style="height:20px;"></div>
+      <button id="btn">Click me!</button>
+    `;
   }
 
   static get is() {
-      return 'vaadin-grid-flow-test-template'
+    return 'vaadin-grid-flow-test-template';
   }
 }
+
 customElements.define(TestTemplate.is, TestTemplate);

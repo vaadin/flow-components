@@ -18,6 +18,8 @@ package com.vaadin.flow.component.textfield;
 
 import java.math.BigDecimal;
 
+import com.vaadin.experimental.Feature;
+import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.CompositionNotifier;
 import com.vaadin.flow.component.HasHelper;
@@ -29,6 +31,7 @@ import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasClearButton;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
@@ -36,6 +39,7 @@ import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.server.VaadinService;
 
 /**
  * Abstract base class for components based on {@code vaadin-number-field}
@@ -49,11 +53,9 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
         HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper, HasLabel,
         HasClearButton, HasAllowedCharPattern,
-        HasThemeVariant<TextFieldVariant>, HasValidator<T> {
+        HasThemeVariant<TextFieldVariant>, HasTooltip, HasValidator<T> {
 
     private ValueChangeMode currentMode;
-
-    private boolean isConnectorAttached;
 
     private int valueChangeTimeout = DEFAULT_CHANGE_TIMEOUT;
 
@@ -204,30 +206,28 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     }
 
     /**
-     * Sets the visibility of the control buttons for increasing/decreasing the
-     * value accordingly to the default or specified step.
+     * Sets the visibility of the buttons for increasing/decreasing the value
+     * accordingly to the default or specified step.
      *
      * @see #setStep(double)
      *
-     * @param hasControls
+     * @param stepButtonsVisible
      *            {@code true} if control buttons should be visible;
      *            {@code false} if those should be hidden
      */
-    @Override
-    public void setHasControls(boolean hasControls) {
-        super.setHasControls(hasControls);
+    public void setStepButtonsVisible(boolean stepButtonsVisible) {
+        getElement().setProperty("stepButtonsVisible", stepButtonsVisible);
     }
 
     /**
-     * Gets whether the control buttons for increasing/decreasing the value are
-     * visible.
+     * Gets whether the buttons for increasing/decreasing the value are visible.
      *
      * @see #setStep(double)
      *
      * @return {@code true} if buttons are visible, {@code false} otherwise
      */
-    public boolean hasControls() {
-        return super.hasControlsBoolean();
+    public boolean isStepButtonsVisible() {
+        return getElement().getProperty("stepButtonsVisible", false);
     }
 
     /**
@@ -370,7 +370,11 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
 
     @Override
     public Validator<T> getDefaultValidator() {
-        return (value, context) -> checkValidity(value);
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            return (value, context) -> checkValidity(value);
+        }
+
+        return Validator.alwaysPass();
     }
 
     private ValidationResult checkValidity(T value) {
@@ -453,5 +457,26 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     @Override
     public void removeThemeVariants(TextFieldVariant... variants) {
         HasThemeVariant.super.removeThemeVariants(variants);
+    }
+
+    /**
+     * Returns true if the given feature flag is enabled, false otherwise.
+     * <p>
+     * Exposed with protected visibility to support mocking
+     * <p>
+     * The method requires the {@code VaadinService} instance to obtain the
+     * available feature flags, otherwise, the feature is considered disabled.
+     *
+     * @param feature
+     *            the feature flag.
+     * @return whether the feature flag is enabled.
+     */
+    protected boolean isFeatureFlagEnabled(Feature feature) {
+        VaadinService service = VaadinService.getCurrent();
+        if (service == null) {
+            return false;
+        }
+
+        return FeatureFlags.get(service.getContext()).isEnabled(feature);
     }
 }

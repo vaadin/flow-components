@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.textfield;
 
+import com.vaadin.experimental.Feature;
+import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.CompositionNotifier;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
@@ -23,14 +25,17 @@ import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.InputNotifier;
 import com.vaadin.flow.component.KeyNotifier;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.server.VaadinService;
 
 /**
  * Text Area is an input field component for multi-line text input. Text Area is
@@ -44,7 +49,7 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
         HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
         HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper, HasLabel,
         HasClearButton, HasAllowedCharPattern, HasThemeVariant<TextAreaVariant>,
-        HasValidator<String> {
+        HasTooltip, HasValidator<String> {
     private ValueChangeMode currentMode;
 
     private boolean isConnectorAttached;
@@ -318,7 +323,7 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
      *            the maximum length
      */
     public void setMaxLength(int maxLength) {
-        super.setMaxlength(maxLength);
+        getElement().setProperty("maxlength", maxLength);
         getValidationSupport().setMaxLength(maxLength);
     }
 
@@ -329,7 +334,7 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
      * @return the {@code maxlength} property from the webcomponent
      */
     public int getMaxLength() {
-        return (int) getMaxlengthDouble();
+        return (int) getElement().getProperty("maxlength", 0.0);
     }
 
     /**
@@ -340,7 +345,7 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
      *            the minimum length
      */
     public void setMinLength(int minLength) {
-        super.setMinlength(minLength);
+        getElement().setProperty("minlength", minLength);
         getValidationSupport().setMinLength(minLength);
     }
 
@@ -351,7 +356,7 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
      * @return the {@code minlength} property from the webcomponent
      */
     public int getMinLength() {
-        return (int) getMinlengthDouble();
+        return (int) getElement().getProperty("minlength", 0.0);
     }
 
     /**
@@ -370,28 +375,6 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
     }
 
     /**
-     * When set to <code>true</code>, user is prevented from typing a value that
-     * conflicts with the given {@code pattern}.
-     *
-     * @return the {@code preventInvalidInput} property from the webcomponent
-     *
-     * @deprecated Since 23.2, this API is deprecated.
-     */
-    @Deprecated
-    public boolean isPreventInvalidInput() {
-        return isPreventInvalidInputBoolean();
-    }
-
-    /**
-     * @deprecated Since 23.2, this API is deprecated in favor of
-     *             {@link #setAllowedCharPattern(String)}
-     */
-    @Override
-    public void setPreventInvalidInput(boolean preventInvalidInput) {
-        super.setPreventInvalidInput(preventInvalidInput);
-    }
-
-    /**
      * Sets a regular expression for the value to pass on the client-side. The
      * pattern must be a valid JavaScript Regular Expression that matches the
      * entire value, not just some subset.
@@ -407,7 +390,7 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
      *      https://html.spec.whatwg.org/multipage/input.html#attr-input-pattern</>
      */
     public void setPattern(String pattern) {
-        getElement().setProperty("pattern", pattern);
+        getElement().setProperty("pattern", pattern == null ? "" : pattern);
         getValidationSupport().setPattern(pattern);
     }
 
@@ -461,7 +444,12 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
 
     @Override
     public Validator<String> getDefaultValidator() {
-        return (value, context) -> getValidationSupport().checkValidity(value);
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            return (value, context) -> getValidationSupport()
+                    .checkValidity(value);
+        }
+
+        return Validator.alwaysPass();
     }
 
     /**
@@ -492,5 +480,26 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
     @Override
     public void removeThemeVariants(TextAreaVariant... variants) {
         HasThemeVariant.super.removeThemeVariants(variants);
+    }
+
+    /**
+     * Returns true if the given feature flag is enabled, false otherwise.
+     * <p>
+     * Exposed with protected visibility to support mocking
+     * <p>
+     * The method requires the {@code VaadinService} instance to obtain the
+     * available feature flags, otherwise, the feature is considered disabled.
+     *
+     * @param feature
+     *            the feature flag.
+     * @return whether the feature flag is enabled.
+     */
+    protected boolean isFeatureFlagEnabled(Feature feature) {
+        VaadinService service = VaadinService.getCurrent();
+        if (service == null) {
+            return false;
+        }
+
+        return FeatureFlags.get(service.getContext()).isEnabled(feature);
     }
 }

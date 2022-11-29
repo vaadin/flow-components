@@ -49,7 +49,7 @@ function computeRoute(wcname, clname, prefix, route, suffix) {
   if (!route) {
     rootRoutes[wcname] = rootRoutes[wcname] || '';
   }
-  route = new RegExp(wcname).test(route) || /^\/?iron-list$/.test(route)? route
+  route = new RegExp(wcname).test(route) ? route
     : `${wcname}/${route ? route : rootRoutes[wcname]}`;
   return `${prefix}${route}${suffix}`;
 }
@@ -73,28 +73,7 @@ function replaceRoutes(wcname, clname, content) {
 }
 
 async function main() {
-
-  const textFieldVersionSource = 'vaadin-text-field-flow-parent/vaadin-text-field-flow/src/main/java/com/vaadin/flow/component/textfield/GeneratedVaadinTextField.java';
-  const textFieldVersion = fs.readFileSync(textFieldVersionSource,'utf-8').split(/\n/).filter(l => l.startsWith('@NpmPackage'))[0];
-
-  await visitFilesRecursive(`${mod}/${id}-integration-tests/frontend`, (source, target, content) => {
-    if (/test-template.js$/.test(target)) {
-      target = target.replace('test-template', `${id}-test-template`);
-      content = content.replace('test-template', `${id}-test-template`);
-    }
-    return [target, content];
-  });
-
-  await visitFilesRecursive(`${mod}/${id}/src`, (source, target, content) => {
-    if (/BigDecimalField\.java$/.test(source)) {
-      content = content.replace(/( *)return (getElement\(\).getProperty\("_decimalSeparator"\).charAt\(0\);)/, '$1String prop = getElement().getProperty("_decimalSeparator");\n$1return prop == null || prop.isEmpty() ? \'.\' : $2');
-    }
-    return [target, content];
-  });
-
   await visitFilesRecursive(`${mod}/${id}-integration-tests/src`, (source, target, content) => {
-    // replace test-template localName for the new computed above
-    content = content.replace(/(\@Tag.*|\@JsModule.*|\$\(")test-template/g, `$1${id}-test-template`);
     const clname = path.basename(source, '.java');
     // change @Route in views
     content = replaceRoutes(wc, clname, content);
@@ -120,36 +99,10 @@ async function main() {
     if (/OverlayIT\.java$/.test(source)) {
       content = content.replace(/\/overlayselfattached/,`/${wc}$&`)
     }
-
-    // Accordion: Match textfield version
-    if (/AccordionInTemplate\.java$/.test(source)) {
-      content = content.replace(/@NpmPackage.*/,textFieldVersion);
-    }
     // App layout: IT tests search for links based on href
     content = content.replace(/\.attribute\("href", *"([^"]*)"\)/g, (...args) => {
       return `.attribute("href", "${wc}/${args[1]}")`;
     });
-    // Combo box - PreSelectedValueIT.selectedValueIsNotResetAfterClientResponse
-    // The test fails because when running in the project there is an iron-icon-set-svg element
-    // which contains an element with id "info", which conflicts with the element
-    // the test is trying to find.
-    if (/IT\.java$/.test(source)) {
-      content = content.replace(/findElement\(By.id\("info"\)\)/g, '$("div").id("info")')
-      content = content.replace(/findElement\(By.id\("close"\)\)/g, '$("button").id("close")')
-      content = content.replace(/findElement\(By.id\("filter"\)\)/g, '$("vaadin-text-field").id("filter")')
-      content = content.replace(/findElement\(By.id\("refresh"\)\)/g, '$("button").id("refresh")')
-      content = content.replace(/findElement\(By.id\("select"\)\)/g, '$("button").id("select")')
-      content = content.replace(/findElement\(By.id\("collapse"\)\)/g, '$("button").id("collapse")')
-      content = content.replace(/findElement\(By.id\("expand"\)\)/g, '$("button").id("expand")')
-    }
-    // Grid. Same as above for an element with id "grid"
-    if (/DetailsGridIT\.java$/.test(source)) {
-      content = content.replace(/findElements\(By.id\("grid"\)\).size/, '$("vaadin-grid").all().size')
-    }
-    // Combobox. Same as above for a vaadin-combo-box with id "list"
-    if (/StringItemsWithTextRendererIT\.java$/.test(source)) {
-      content = content.replace(/findElement\(By.id\("list"\)\)/g, '$("vaadin-combo-box").id("list")')
-    }
     function ignore_test_method(content, file, testMethod) {
       const [className, methodName] = testMethod.split(".");
       if(!className || new RegExp(`${className}\\.java$`).test(file)) {
@@ -159,32 +112,8 @@ async function main() {
       return content;
     }
 
-    // Dialog: Workaround for https://github.com/vaadin/vaadin-confirm-dialog-flow/issues/136
-    // Since this project contains a dependency to vaadin-confirm-dialog, the height is different
-    // and the tests fail.
-    content = ignore_test_method(content, source, 'DialogIT.openAndCloseBasicDialog_labelRendered');
-    content = ignore_test_method(content, source, 'ServerSideEventsIT.chartClick_occured_eventIsFired');
-    content = ignore_test_method(content, source, 'GridDetailsRowIT.gridUpdateItemUpdateDetails');
-    content = ignore_test_method(content, source, 'BasicIT.customComboBox_circularReferencesInData_isEdited');
-    content = ignore_test_method(content, source, 'BasicIT.customComboBoxIsUsedForEditColumn');
-    content = ignore_test_method(content, source, 'BasicIT.checkboxEditorIsUsedForCheckboxColumn');
-
     content = ignore_test_method(content, source, 'EditOnClickIT.editButtonsAreHiddenIfEditOnClickIsEnabled');
-    content = ignore_test_method(content, source, 'RendererIT.testRenderer_initialComponentRendererSet_rendersComponentsThatWork');
-    content = ignore_test_method(content, source, 'RendererIT.testRenderer_componentRendererSet_rendersComponentsThatWork');
     content = ignore_test_method(content, source, 'CustomGridIT.editorShouldHaveRightTitleWhenOpenedInNewItemMode');
-    content = ignore_test_method(content, source, 'TreeGridPageSizeIT.treegridWithPageSize10_changeTo80_revertBackTo10');
-    content = ignore_test_method(content, source, 'DynamicChangingChartIT.setConfiguration_changes_chart');
-    content = ignore_test_method(content, source, 'IronListIT.listWithComponentRendererWithBeansAndPlaceholder_scrollToBottom_placeholderIsShown');
-    content = ignore_test_method(content, source, 'VirtualListIT.listWithComponentRendererWithBeansAndPlaceholder_scrollToBottom_placeholderIsShown');
-    content = ignore_test_method(content, source, 'BasicChartIT.Chart_TitleCanBeChanged');
-    content = ignore_test_method(content, source, 'MenuBarPageIT.disableItem_overflow_itemDisabled:262 NullPointer');
-    content = ignore_test_method(content, source, 'BasicIT.customEditorValueIsUpdatedByLeavingEditorWithTab');
-    content = ignore_test_method(content, source, 'ValueChangeModeIT.test\\w+');
-
-    content = ignore_test_method(content, source, 'DynamicEditorKBNavigationIT.navigateBetweenEditorsUsingKeybaord');
-    content = ignore_test_method(content, source, 'IntegerFieldPageIT.integerOverflow_noException_valueSetToNull');
-    content = ignore_test_method(content, source, 'TreeGridHugeTreeNavigationIT.keyboard_navigation');
 
     if (/TreeGridHugeTreeIT\.java$/.test(source)) {
       content = content.replace(/getRootURL\(\) \+ "\/"/, `getRootURL() + "/${wc}/"`);
@@ -216,22 +145,9 @@ async function main() {
     // charts v14
     content = content.replace('getTestView().getCanonicalName();', '"vaadin-charts/" + getTestView().getCanonicalName();');
 
-    content = content.replace('import com.vaadin.flow.demo.ComponentDemoTest','import com.vaadin.tests.ComponentDemoTest');
-    content = content.replace('import com.vaadin.flow.demo.TabbedComponentDemoTest','import com.vaadin.tests.TabbedComponentDemoTest');
-    content = content.replace('import com.vaadin.testbench.parallel.ParallelTest','import com.vaadin.tests.ParallelTest');
-    content = content.replace('import com.vaadin.flow.testutil.AbstractComponentIT','import com.vaadin.tests.AbstractComponentIT');
-    content = content.replace('import com.vaadin.flow.testutil.AbstractValidationTest','import com.vaadin.tests.AbstractValidationTest');
     content = content.replace('import com.vaadin.testbench.annotations.BrowserConfiguration;','');
     content = content.replace(/.*@BrowserConfiguration.*/,'');
 
-    // Remove W3C workaround from Grid tests.
-    const w3cReplacement = content.includes('com.vaadin.tests.AbstractComponentIT')? '':'import com.vaadin.tests.AbstractComponentIT;';
-    content = content.replace('import com.vaadin.flow.component.AbstractNoW3c;',w3cReplacement);
-    content = content.replace('extends AbstractNoW3c', 'extends AbstractComponentIT');
-
-    if (/GridViewIT\.java$/.test(source)) {
-      content = content.replace(/AbstractNoW3c[^;]+/,'null');
-    }
     return [target, content];
   });
 }

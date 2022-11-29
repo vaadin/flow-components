@@ -33,8 +33,6 @@ public class GridDetailsRowIT extends AbstractComponentIT {
     public void gridTwoItemsSelectedWhenOpen() {
         open();
         GridElement grid = $(GridElement.class).first();
-        // detail configured
-        assertAmountOfOpenDetails(grid, 1);
 
         waitUntil(driver -> grid
                 .findElements(By.tagName("flow-component-renderer"))
@@ -89,7 +87,6 @@ public class GridDetailsRowIT extends AbstractComponentIT {
      * should be updated
      */
     @Test
-
     public void gridUpdateItemUpdateDetails() {
         open();
         GridElement grid = $(GridElement.class).first();
@@ -134,14 +131,6 @@ public class GridDetailsRowIT extends AbstractComponentIT {
     private WebElement getRow(TestBenchElement grid, int row) {
         return grid.$("*").id("items").findElements(By.cssSelector("tr"))
                 .get(row);
-    }
-
-    private void assertAmountOfOpenDetails(WebElement grid,
-            int expectedAmount) {
-        waitUntil(driver -> grid.findElements(By.className("row-details"))
-                .size() == expectedAmount);
-        Assert.assertEquals(expectedAmount,
-                grid.findElements(By.className("row-details")).size());
     }
 
     private void assertElementHasButton(WebElement componentRenderer,

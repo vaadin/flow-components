@@ -51,7 +51,7 @@ import elemental.json.JsonObject;
  * The following custom properties are available for styling:
  * </p>
  * <table>
- * <thead>
+ * <caption>Custom properties available for styling</caption> <thead>
  * <tr>
  * <th>Part name</th>
  * <th>Description</th>
@@ -72,7 +72,7 @@ import elemental.json.JsonObject;
  * The following state attributes are available for styling:
  * </p>
  * <table>
- * <thead>
+ * <caption>State attributes available for styling</caption> <thead>
  * <tr>
  * <th>Attribute</th>
  * <th>Description</th>
@@ -124,10 +124,9 @@ import elemental.json.JsonObject;
  * </p>
  */
 @Tag("vaadin-time-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha5")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha5")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/time-picker", version = "23.2.0-alpha5")
-@NpmPackage(value = "@vaadin/vaadin-time-picker", version = "23.2.0-alpha5")
+@NpmPackage(value = "@vaadin/time-picker", version = "24.0.0-alpha5")
 @JsModule("@vaadin/time-picker/src/vaadin-time-picker.js")
 public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePicker<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
@@ -291,38 +290,6 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      */
     protected void setRequired(boolean required) {
         getElement().setProperty("required", required);
-    }
-
-    /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
-     * Set to true to prevent the user from entering invalid input.
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
-     * </p>
-     *
-     * @return the {@code preventInvalidInput} property from the webcomponent
-     */
-    protected boolean isPreventInvalidInputBoolean() {
-        return getElement().getProperty("preventInvalidInput", false);
-    }
-
-    /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
-     * Set to true to prevent the user from entering invalid input.
-     * </p>
-     *
-     * @param preventInvalidInput
-     *            the boolean value to set
-     */
-    protected void setPreventInvalidInput(boolean preventInvalidInput) {
-        getElement().setProperty("preventInvalidInput", preventInvalidInput);
     }
 
     /**
@@ -662,19 +629,19 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      *
      * <pre>
      * <code>            {
-     * 	              // A function to format given {@code Object} as
-     * 	              // time string. Object is in the format {@code { hours: ..., minutes: ..., seconds: ..., milliseconds: ... }}
+     * 	              // A function to format given Object  as
+     * 	              // time string. Object is in the format { hours: ..., minutes: ..., seconds: ..., milliseconds: ... }
      * 	              formatTime: (time) =&gt; {
      * 	                // returns a string representation of the given
-     * 	                // object in {@code hh} / 'hh:mm' / 'hh:mm:ss' / 'hh:mm:ss.fff' - formats
+     * 	                // object in 'hh' / 'hh:mm' / 'hh:mm:ss' / 'hh:mm:ss.fff' - formats
      * 	              },
      *
-     * 	              // A function to parse the given text to an {@code Object} in the format
-     * 	              // {@code { hours: ..., minutes: ..., seconds: ..., milliseconds: ... }}.
+     * 	              // A function to parse the given text to an Object in the format
+     * 	              // { hours: ..., minutes: ..., seconds: ..., milliseconds: ... }.
      * 	              // Must properly parse (at least) text
-     * 	              // formatted by {@code formatTime}.
+     * 	              // formatted by formatTime.
      * 	              parseTime: text =&gt; {
-     * 	                // Parses a string in object/string that can be formatted by{@code formatTime}.
+     * 	                // Parses a string in object/string that can be formatted by formatTime.
      * 	              }
      *
      * 	              // Translation of the time selector icon button title.
@@ -708,19 +675,19 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      *
      * <pre>
      * <code>            {
-     * 	              // A function to format given {@code Object} as
-     * 	              // time string. Object is in the format {@code { hours: ..., minutes: ..., seconds: ..., milliseconds: ... }}
+     * 	              // A function to format given Object as
+     * 	              // time string. Object is in the format { hours: ..., minutes: ..., seconds: ..., milliseconds: ... }
      * 	              formatTime: (time) =&gt; {
      * 	                // returns a string representation of the given
-     * 	                // object in {@code hh} / 'hh:mm' / 'hh:mm:ss' / 'hh:mm:ss.fff' - formats
+     * 	                // object in 'hh' / 'hh:mm' / 'hh:mm:ss' / 'hh:mm:ss.fff' - formats
      * 	              },
      *
-     * 	              // A function to parse the given text to an {@code Object} in the format
-     * 	              // {@code { hours: ..., minutes: ..., seconds: ..., milliseconds: ... }}.
+     * 	              // A function to parse the given text to an Object in the format
+     * 	              // { hours: ..., minutes: ..., seconds: ..., milliseconds: ... }.
      * 	              // Must properly parse (at least) text
-     * 	              // formatted by {@code formatTime}.
+     * 	              // formatted by formatTime.
      * 	              parseTime: text =&gt; {
-     * 	                // Parses a string in object/string that can be formatted by{@code formatTime}.
+     * 	                // Parses a string in object/string that can be formatted by formatTime.
      * 	              }
      *
      * 	              // Translation of the time selector icon button title.
@@ -825,7 +792,7 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      *            if {@code isInitialValueOptional} is {@code true} then the
      *            initial value is used only if element has no {@code "value"}
      *            property value, otherwise element {@code "value"} property is
-     *            ignored and the initial value is set <<<<<<< HEAD
+     *            ignored and the initial value is set
      * @param <P>
      *            the property type
      */

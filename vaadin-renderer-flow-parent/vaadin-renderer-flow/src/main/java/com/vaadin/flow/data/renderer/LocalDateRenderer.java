@@ -24,7 +24,7 @@ import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.function.ValueProvider;
 
 /**
- * A template renderer for presenting date values.
+ * A renderer for presenting date values.
  *
  * @author Vaadin Ltd
  *

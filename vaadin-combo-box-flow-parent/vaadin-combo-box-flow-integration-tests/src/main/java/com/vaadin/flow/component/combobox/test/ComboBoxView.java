@@ -51,7 +51,7 @@ import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
-import com.vaadin.flow.data.renderer.TemplateRenderer;
+import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.dom.ElementConstants;
 import com.vaadin.flow.router.Route;
 
@@ -86,7 +86,7 @@ public class ComboBoxView extends Div {
         filteringAndSortingWithDataView();
         filteringWithTypesOtherThanString();
         customOptionsDemo(); // Presentation
-        usingTemplateRenderer();
+        usingLitRenderer();
         themeVariantsTextAlign(); // Theme variants
         themeVariantsSmallSize();
         helperTextAbove();
@@ -490,7 +490,7 @@ public class ComboBoxView extends Div {
         ComboBox<Person> comboBox = new ComboBox<>("Person");
         comboBox.setPlaceholder("Enter minimum age to filter");
         comboBox.setPattern("^\\d+$");
-        comboBox.setPreventInvalidInput(true);
+        comboBox.setAllowedCharPattern("^\\d+$");
 
         // Configuring fetch callback with a filter converter, so entered filter
         // strings can refer also to other typed properties like age (integer):
@@ -543,7 +543,7 @@ public class ComboBoxView extends Div {
                 "Customizing drop down items with ComponentRenderer", comboBox);
     }
 
-    private void usingTemplateRenderer() {
+    private void usingLitRenderer() {
 
         ComboBox<Song> comboBox = new ComboBox<>();
         comboBox.setLabel("Song");
@@ -562,15 +562,15 @@ public class ComboBoxView extends Div {
         comboBox.setItems(filter, listOfSongs);
         comboBox.setClearButtonVisible(true);
         comboBox.setItemLabelGenerator(Song::getName);
-        comboBox.setRenderer(TemplateRenderer.<Song> of(
-                "<div>[[item.song]]<br><small>[[item.artist]]</small></div>")
+        comboBox.setRenderer(LitRenderer.<Song> of(
+                "<div>${item.song}<br><small>${item.artist}</small></div>")
                 .withProperty("song", Song::getName)
                 .withProperty("artist", Song::getArtist));
 
         comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, WIDTH_STRING);
         comboBox.setId("template-selection-box");
-        addCard("Presentation",
-                "Customizing drop down items with TemplateRenderer", comboBox);
+        addCard("Presentation", "Customizing drop down items with LitRenderer",
+                comboBox);
     }
 
     private void themeVariantsTextAlign() {

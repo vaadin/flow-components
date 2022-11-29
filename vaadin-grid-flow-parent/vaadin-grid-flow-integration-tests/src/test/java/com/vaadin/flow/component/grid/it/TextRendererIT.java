@@ -35,8 +35,7 @@ public class TextRendererIT extends AbstractComponentIT {
 
         Set<String> initialCells = findElements(
                 By.tagName("vaadin-grid-cell-content")).stream()
-                        .map(cell -> cell.getText())
-                        .collect(Collectors.toSet());
+                .map(cell -> cell.getText()).collect(Collectors.toSet());
 
         $("button").id("refresh").click();
 
@@ -47,8 +46,7 @@ public class TextRendererIT extends AbstractComponentIT {
 
         Set<String> cellsAfterRefresh = findElements(
                 By.tagName("vaadin-grid-cell-content")).stream()
-                        .map(cell -> cell.getText())
-                        .collect(Collectors.toSet());
+                .map(cell -> cell.getText()).collect(Collectors.toSet());
 
         Assert.assertEquals(initialCells, cellsAfterRefresh);
     }

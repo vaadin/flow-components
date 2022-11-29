@@ -37,6 +37,7 @@ import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.checkbox.dataview.CheckboxGroupDataView;
 import com.vaadin.flow.component.checkbox.dataview.CheckboxGroupListDataView;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.provider.DataChangeEvent;
@@ -79,7 +80,7 @@ public class CheckboxGroup<T>
         MultiSelect<CheckboxGroup<T>, T>,
         HasListDataView<T, CheckboxGroupListDataView<T>>,
         HasDataView<T, Void, CheckboxGroupDataView<T>>, HasHelper, HasLabel,
-        HasValidator<T> {
+        HasTooltip, HasValidator<T> {
 
     private static final String VALUE = "value";
 

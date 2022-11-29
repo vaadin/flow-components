@@ -17,6 +17,7 @@ package com.vaadin.flow.component.datepicker;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -24,22 +25,31 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.experimental.Feature;
+import com.vaadin.experimental.FeatureFlags;
+import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasClearButton;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
+import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
+import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
@@ -66,10 +76,11 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd
  */
 @JsModule("./datepickerConnector.js")
-@NpmPackage(value = "date-fns", version = "2.28.0")
+@NpmPackage(value = "date-fns", version = "2.29.3")
 public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         implements HasSize, HasValidation, HasHelper, HasTheme, HasLabel,
-        HasClearButton, HasAllowedCharPattern, HasValidator<LocalDate> {
+        HasClearButton, HasAllowedCharPattern, HasValidator<LocalDate>,
+        HasClientValidation, HasTooltip {
 
     private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
@@ -135,6 +146,10 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         setInvalid(false);
 
         addValueChangeListener(e -> validate());
+
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            addClientValidatedEventListener(e -> validate());
+        }
     }
 
     /**
@@ -339,7 +354,12 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         super.onAttach(attachEvent);
         initConnector();
         requestI18nUpdate();
-        FieldValidationUtil.disableClientValidation(this);
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            ClientValidationUtil
+                    .preventWebComponentFromSettingItselfToValid(this);
+        } else {
+            FieldValidationUtil.disableClientValidation(this);
+        }
     }
 
     private void initConnector() {
@@ -394,14 +414,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      * custom date formats specified in DatePickerI18N.
      */
     private void executeI18nUpdate() {
-        JsonObject i18nObject = i18n != null
-                ? (JsonObject) JsonSerializer.toJson(i18n)
-                : null;
-        // Remove properties with null values to prevent errors in web
-        // component
-        if (i18nObject != null) {
-            removeNullValuesFromJsonObject(i18nObject);
-        }
+        JsonObject i18nObject = getI18nAsJsonObject();
 
         // For ill-formed locales, Locale.toLanguageTag() will append subtag
         // "lvariant" to it, which will cause the client side
@@ -425,6 +438,22 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         // The connector is expected to handle that either of those can be null
         getElement().callJsFunction("$connector.updateI18n", languageTag,
                 i18nObject);
+    }
+
+    private JsonObject getI18nAsJsonObject() {
+        if (i18n == null) {
+            return null;
+        }
+        JsonObject i18nObject = (JsonObject) JsonSerializer.toJson(i18n);
+        // LocalDate objects have to be explicitly added to the serialized i18n
+        // object in order to be formatted correctly
+        if (i18n.getReferenceDate() != null) {
+            i18nObject.put("referenceDate",
+                    i18n.getReferenceDate().format(DateTimeFormatter.ISO_DATE));
+        }
+        // Remove properties with null values to prevent errors in web component
+        removeNullValuesFromJsonObject(i18nObject);
+        return i18nObject;
     }
 
     private void removeNullValuesFromJsonObject(JsonObject jsonObject) {
@@ -461,7 +490,24 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
 
     @Override
     public Validator<LocalDate> getDefaultValidator() {
-        return (value, context) -> checkValidity(value);
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            return (value, context) -> checkValidity(value);
+        }
+
+        return Validator.alwaysPass();
+    }
+
+    @Override
+    public Registration addValidationStatusChangeListener(
+            ValidationStatusChangeListener<LocalDate> listener) {
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            return addClientValidatedEventListener(
+                    event -> listener.validationStatusChanged(
+                            new ValidationStatusChangeEvent<LocalDate>(this,
+                                    !isInvalid())));
+        }
+
+        return null;
     }
 
     @Override
@@ -482,6 +528,14 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     }
 
     private ValidationResult checkValidity(LocalDate value) {
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            boolean hasNonParsableValue = value == getEmptyValue()
+                    && isInputValuePresent();
+            if (hasNonParsableValue) {
+                return ValidationResult.error("");
+            }
+        }
+
         var greaterThanMax = ValidationUtil.checkGreaterThanMax(value, max);
         if (greaterThanMax.isError()) {
             return greaterThanMax;
@@ -505,6 +559,17 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
                 getEmptyValue());
 
         return requiredValidation.isError() || checkValidity(value).isError();
+    }
+
+    /**
+     * Returns whether the input element has a value or not.
+     *
+     * @return <code>true</code> if the input element's value is populated,
+     *         <code>false</code> otherwise
+     */
+    @Synchronize(property = "_hasInputValue", value = "has-input-value-changed")
+    private boolean isInputValuePresent() {
+        return getElement().getProperty("_hasInputValue", false);
     }
 
     /**
@@ -745,6 +810,27 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     }
 
     /**
+     * Returns true if the given feature flag is enabled, false otherwise.
+     * <p>
+     * Exposed with protected visibility to support mocking
+     * <p>
+     * The method requires the {@code VaadinService} instance to obtain the
+     * available feature flags, otherwise, the feature is considered disabled.
+     *
+     * @param feature
+     *            the feature flag.
+     * @return whether the feature flag is enabled.
+     */
+    protected boolean isFeatureFlagEnabled(Feature feature) {
+        VaadinService service = VaadinService.getCurrent();
+        if (service == null) {
+            return false;
+        }
+
+        return FeatureFlags.get(service.getContext()).isEnabled(feature);
+    }
+
+    /**
      * The internationalization properties for {@link DatePicker}.
      */
     public static class DatePickerI18n implements Serializable {
@@ -758,6 +844,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         private String clear;
         private String today;
         private String cancel;
+        private LocalDate referenceDate;
 
         /**
          * Gets the name of the months.
@@ -951,81 +1038,6 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         }
 
         /**
-         * Gets the translated word for {@code week}.
-         *
-         * @return the translated word for week
-         */
-        public String getWeek() {
-            return week;
-        }
-
-        /**
-         * Sets the translated word for {@code week}.
-         *
-         * @param week
-         *            the translated word for week
-         * @return this instance for method chaining
-         */
-        public DatePickerI18n setWeek(String week) {
-            this.week = week;
-            return this;
-        }
-
-        /**
-         * Gets the translated word for {@code calendar}.
-         *
-         * @deprecated the toggle button is no longer announced by screen
-         *             readers, so this property is now unused.
-         * @return the translated word for calendar
-         */
-        @Deprecated
-        public String getCalendar() {
-            return calendar;
-        }
-
-        /**
-         * Sets the translated word for {@code calendar}.
-         *
-         * @deprecated the toggle button is no longer announced by screen
-         *             readers, so this property is now unused.
-         * @param calendar
-         *            the translated word for calendar
-         * @return this instance for method chaining
-         */
-        @Deprecated
-        public DatePickerI18n setCalendar(String calendar) {
-            this.calendar = calendar;
-            return this;
-        }
-
-        /**
-         * Gets the translated word for {@code clear}.
-         *
-         * @deprecated the clear button is no longer announced by screen
-         *             readers, so this property is now unused.
-         * @return the translated word for clear
-         */
-        @Deprecated
-        public String getClear() {
-            return clear;
-        }
-
-        /**
-         * Sets the translated word for {@code clear}.
-         *
-         * @deprecated the clear button is no longer announced by screen
-         *             readers, so this property is now unused.
-         * @param clear
-         *            the translated word for clear
-         * @return this instance for method chaining
-         */
-        @Deprecated
-        public DatePickerI18n setClear(String clear) {
-            this.clear = clear;
-            return this;
-        }
-
-        /**
          * Gets the translated word for {@code today}.
          *
          * @return the translated word for today
@@ -1064,6 +1076,34 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
          */
         public DatePickerI18n setCancel(String cancel) {
             this.cancel = cancel;
+            return this;
+        }
+
+        /**
+         * Gets the {@code referenceDate}.
+         *
+         * @return the reference date
+         */
+        public LocalDate getReferenceDate() {
+            return referenceDate;
+        }
+
+        /**
+         * Sets the {@code referenceDate}.
+         *
+         * The reference date is used to determine the century when parsing
+         * two-digit years. The century that makes the date closest to the
+         * reference date is applied. The default value is the current date.
+         *
+         * Example: for a reference date of 1970-10-30; years {10, 40, 80}
+         * become {2010, 1940, 1980}.
+         *
+         * @param referenceDate
+         *            the date used to base relative dates on
+         * @return this instance for method chaining
+         */
+        public DatePickerI18n setReferenceDate(LocalDate referenceDate) {
+            this.referenceDate = referenceDate;
             return this;
         }
     }

@@ -36,45 +36,12 @@ import com.vaadin.flow.function.SerializableFunction;
  * </p>
  */
 @Tag("vaadin-number-field")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha5")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha5")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/number-field", version = "23.2.0-alpha5")
-@NpmPackage(value = "@vaadin/vaadin-text-field", version = "23.2.0-alpha5")
+@NpmPackage(value = "@vaadin/number-field", version = "24.0.0-alpha5")
 @JsModule("@vaadin/number-field/src/vaadin-number-field.js")
 public abstract class GeneratedVaadinNumberField<R extends GeneratedVaadinNumberField<R, T>, T>
         extends GeneratedVaadinTextField<R, T> implements HasStyle {
-
-    /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
-     * Set to true to display value increase/decrease controls.
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
-     * </p>
-     *
-     * @return the {@code hasControls} property from the webcomponent
-     */
-    protected boolean hasControlsBoolean() {
-        return getElement().getProperty("hasControls", false);
-    }
-
-    /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
-     * Set to true to display value increase/decrease controls.
-     * </p>
-     *
-     * @param hasControls
-     *            the boolean value to set
-     */
-    protected void setHasControls(boolean hasControls) {
-        getElement().setProperty("hasControls", hasControls);
-    }
 
     /**
      * <p>

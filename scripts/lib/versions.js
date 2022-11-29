@@ -61,7 +61,7 @@ async function getVersions() {
         const branch = version && version.replace('{{version}}', 'master').replace(/^(\d+\.\d+).*$/, '$1');
         json[k][pkg].name = pkg;
         json[k][pkg].branch = branch;
-        json[k][pkg].module = pkg === 'iron-list' ? 'vaadin-' + pkg : pkg;
+        json[k][pkg].module = pkg;
         return json[k][pkg];
       }));
     }, []);
@@ -90,7 +90,7 @@ async function getAnnotations(){
   return lines.map(line => {
     const r = /(.*(vaadin-.*)-parent.*):(.*value *= *"([^"]+).*version *= *"((\d+)\.(\d+)[^"]*).*)/.exec(line);
     if (!r){
-      const errorPackage = /(.*(vaadin-.*)-parent.*)*/.exec(line); 
+      const errorPackage = /(.*(vaadin-.*)-parent.*)*/.exec(line);
       console.log(`versions.js::getAnnotations : cannot get the annotation properly for ${errorPackage[2]} in ${errorPackage[1]}`);
       process.exit(1);
     }
@@ -111,13 +111,20 @@ async function getLatestNpmVersion(package, version, major, minor) {
   if (!cachedNpmVersions[package]) {
     cmd = `npm view ${package} versions --json`;
     const json = await JSON.parse(await run(cmd))
-    const versions = json
+
+    try {
+      const versions = json
        .filter(version => version.startsWith(`${major}.${minor}`) && !version.includes('-dev'))
        .map(a => a.replace(/\d+$/, n => +n+900000))
        .sort()
        .map(a => a.replace(/\d+$/, n => +n-900000));
-    const next =  versions.pop();
-    console.log(`Checking next Npm version for ${package} ${version} ${next}`);
+      next =  versions.pop();
+      console.log(`Checking next Npm version for ${package} ${version} ${next}`);
+    } catch (e){
+      // when the package has only one version available, we just use the available one
+      // mainly for new added WC has only one alpha1 release
+      next = json
+    }
     cachedNpmVersions[package] = next;
   }
   return cachedNpmVersions[package];

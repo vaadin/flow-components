@@ -28,7 +28,7 @@ import com.vaadin.flow.shared.Registration;
 
 /**
  *
- * A template renderer to create a clickable button.
+ * A renderer to create a clickable button.
  * <p>
  * {@link ItemClickListener}s are notified when the rendered buttons are either
  * clicked or tapped (in touch devices).
@@ -88,6 +88,10 @@ public class NativeButtonRenderer<SOURCE> extends BasicRenderer<SOURCE, String>
      */
     public NativeButtonRenderer(ValueProvider<SOURCE, String> labelProvider) {
         super(labelProvider);
+
+        withProperty("disabled", item -> !getOwner().isEnabled());
+        withFunction("click", item -> listeners
+                .forEach(listener -> listener.onItemClicked(item)));
     }
 
     /**
@@ -121,18 +125,6 @@ public class NativeButtonRenderer<SOURCE> extends BasicRenderer<SOURCE, String>
     }
 
     @Override
-    protected String getTemplateForProperty(String property,
-            Rendering<SOURCE> context) {
-        String templatePropertyName = getTemplatePropertyName(context);
-        String eventName = templatePropertyName + "_event";
-        String disabledName = templatePropertyName + "_disabled";
-        setEventHandler(eventName, this::onClick);
-        return String.format(
-                "<button on-click=\"%s\" disabled=\"[[item.%s]]\">%s</button>",
-                eventName, disabledName, property);
-    }
-
-    @Override
     public Component createComponent(SOURCE item) {
         Element button = ElementFactory
                 .createButton(getValueProvider().apply(item));
@@ -142,4 +134,8 @@ public class NativeButtonRenderer<SOURCE> extends BasicRenderer<SOURCE, String>
                 true);
     }
 
+    @Override
+    protected String getTemplateExpression() {
+        return "<button @click=${click} .disabled=${item.disabled}>${item.label}</button>";
+    }
 }

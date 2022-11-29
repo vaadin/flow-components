@@ -37,6 +37,7 @@ public class LeadingQuoteIT extends AbstractSpreadsheetIT {
 
         final String cell = "D15";
 
+        selectCell("A1");
         setCellValue(cell, "'567");
 
         assertCellValues(cell, "567", "'567", "'567");
@@ -47,6 +48,7 @@ public class LeadingQuoteIT extends AbstractSpreadsheetIT {
 
         final String cell = "D10";
 
+        selectCell("A1");
         setCellValue(cell, "''567");
 
         assertCellValues(cell, "'567", "''567", "''567");

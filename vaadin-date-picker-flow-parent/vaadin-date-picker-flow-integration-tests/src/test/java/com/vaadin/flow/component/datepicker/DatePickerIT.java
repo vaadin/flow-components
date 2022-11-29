@@ -49,6 +49,12 @@ public class DatePickerIT extends AbstractComponentIT {
     }
 
     @Test
+    public void openSimpleDatePickerFromServer_overlayVisible() {
+        scrollIntoViewAndClick(findElement(By.id("open-simple-picker")));
+        waitForElementVisible(By.tagName("vaadin-date-picker-overlay"));
+    }
+
+    @Test
     public void selectDateOnSimpleDatePicker() {
         WebElement picker = layout.findElement(By.id("simple-picker"));
         WebElement message = layout.findElement(By.id("simple-picker-message"));
@@ -115,9 +121,8 @@ public class DatePickerIT extends AbstractComponentIT {
         waitForElementPresent(By.tagName(DATEPICKER_OVERLAY));
 
         TestBenchElement overlay = $(DATEPICKER_OVERLAY).first();
-        TestBenchElement content = overlay.$("*").id("content");
-        TestBenchElement overlayContent = content.$("*").id("overlay-content");
-        WebElement todayButton = overlayContent.$("*").id("todayButton");
+        WebElement todayButton = overlay.$("*")
+                .attribute("slot", "today-button").first();
 
         waitUntil(driver -> "tänään".equals(todayButton.getText()));
     }
@@ -207,36 +212,36 @@ public class DatePickerIT extends AbstractComponentIT {
                 .id("Customize-locale-picker-message");
 
         setDateAndAssert(localePicker, LocalDate.of(900, Month.MARCH, 7),
-                "3/7/900");
+                "3/7/0900");
         setDateAndAssert(localePicker, LocalDate.of(87, Month.MARCH, 7),
-                "3/7/87");
+                "3/7/0087");
 
         $("button").id("Locale-UK").click();
-        Assert.assertEquals("07/03/87", localePicker.getInputValue());
+        Assert.assertEquals("07/03/0087", localePicker.getInputValue());
 
         setDateAndAssert(localePicker, LocalDate.of(900, Month.MARCH, 6),
-                "06/03/900");
+                "06/03/0900");
         setDateAndAssert(localePicker, LocalDate.of(87, Month.MARCH, 6),
-                "06/03/87");
+                "06/03/0087");
 
         $("button").id("Locale-US").click();
-        Assert.assertEquals("3/6/87", localePicker.getInputValue());
+        Assert.assertEquals("3/6/0087", localePicker.getInputValue());
 
         setDateAndAssert(localePicker, LocalDate.of(900, Month.MARCH, 5),
-                "3/5/900");
+                "3/5/0900");
         setDateAndAssert(localePicker, LocalDate.of(87, Month.MARCH, 5),
-                "3/5/87");
+                "3/5/0087");
 
         $("button").id("Locale-CHINA").click();
-        Assert.assertEquals("87/3/5", localePicker.getInputValue());
+        Assert.assertEquals("0087/3/5", localePicker.getInputValue());
 
         setDateAndAssert(localePicker, LocalDate.of(900, Month.MARCH, 4),
-                "900/3/4");
+                "0900/3/4");
         setDateAndAssert(localePicker, LocalDate.of(87, Month.MARCH, 4),
-                "87/3/4");
+                "0087/3/4");
 
         $("button").id("Locale-UK").click();
-        Assert.assertEquals("04/03/87", localePicker.getInputValue());
+        Assert.assertEquals("04/03/0087", localePicker.getInputValue());
     }
 
     /**
@@ -266,55 +271,71 @@ public class DatePickerIT extends AbstractComponentIT {
         TestBenchElement message = $("div")
                 .id("Customize-locale-picker-message");
 
-        setInputValueAndAssert(localePicker, "3/7/0900", "3/7/900",
+        setInputValueAndAssert(localePicker, "3/7/0900",
                 LocalDate.of(900, Month.MARCH, 7));
 
-        setInputValueAndAssert(localePicker, "3/6/900",
+        setInputValueAndAssert(localePicker, "3/6/900", "3/6/0900",
                 LocalDate.of(900, Month.MARCH, 6));
-        setInputValueAndAssert(localePicker, "3/5/0087", "3/5/87",
+        setInputValueAndAssert(localePicker, "3/5/0087",
                 LocalDate.of(87, Month.MARCH, 5));
-        setInputValueAndAssert(localePicker, "3/6/87",
-                LocalDate.of(87, Month.MARCH, 6));
-        setInputValueAndAssert(localePicker, "3/7/20",
-                LocalDate.of(20, Month.MARCH, 7));
-        setInputValueAndAssert(localePicker, "3/8/0020", "3/8/20",
+        setInputValueAndAssert(localePicker, "3/6/87", "3/6/1987",
+                LocalDate.of(1987, Month.MARCH, 6));
+        setInputValueAndAssert(localePicker, "3/7/20", "3/7/2020",
+                LocalDate.of(2020, Month.MARCH, 7));
+        setInputValueAndAssert(localePicker, "3/8/0020",
                 LocalDate.of(20, Month.MARCH, 8));
 
         $("button").id("Locale-UK").click();
-        Assert.assertEquals("08/03/20", localePicker.getInputValue());
+        Assert.assertEquals("08/03/0020", localePicker.getInputValue());
 
-        setInputValueAndAssert(localePicker, "7/3/0900", "07/03/900",
+        setInputValueAndAssert(localePicker, "7/3/0900", "07/03/0900",
                 LocalDate.of(900, Month.MARCH, 7));
 
-        setInputValueAndAssert(localePicker, "6/3/900", "06/03/900",
+        setInputValueAndAssert(localePicker, "6/3/900", "06/03/0900",
                 LocalDate.of(900, Month.MARCH, 6));
-        setInputValueAndAssert(localePicker, "5/3/0087", "05/03/87",
+        setInputValueAndAssert(localePicker, "5/3/0087", "05/03/0087",
                 LocalDate.of(87, Month.MARCH, 5));
-        setInputValueAndAssert(localePicker, "6/3/87", "06/03/87",
-                LocalDate.of(87, Month.MARCH, 6));
-        setInputValueAndAssert(localePicker, "7/3/20", "07/03/20",
-                LocalDate.of(20, Month.MARCH, 7));
-        setInputValueAndAssert(localePicker, "8/3/0020", "08/03/20",
+        setInputValueAndAssert(localePicker, "6/3/87", "06/03/1987",
+                LocalDate.of(1987, Month.MARCH, 6));
+        setInputValueAndAssert(localePicker, "7/3/20", "07/03/2020",
+                LocalDate.of(2020, Month.MARCH, 7));
+        setInputValueAndAssert(localePicker, "8/3/0020", "08/03/0020",
                 LocalDate.of(20, Month.MARCH, 8));
 
         $("button").id("Locale-CHINA").click();
-        Assert.assertEquals("20/3/8", localePicker.getInputValue());
+        Assert.assertEquals("0020/3/8", localePicker.getInputValue());
 
-        setInputValueAndAssert(localePicker, "0900/3/7", "900/3/7",
+        setInputValueAndAssert(localePicker, "0900/3/7",
                 LocalDate.of(900, Month.MARCH, 7));
-
-        setInputValueAndAssert(localePicker, "900/3/6",
+        setInputValueAndAssert(localePicker, "900/3/6", "0900/3/6",
                 LocalDate.of(900, Month.MARCH, 6));
-        setInputValueAndAssert(localePicker, "0087/3/5", "87/3/5",
+        setInputValueAndAssert(localePicker, "0087/3/5",
                 LocalDate.of(87, Month.MARCH, 5));
-        setInputValueAndAssert(localePicker, "87/3/6",
-                LocalDate.of(87, Month.MARCH, 6));
-        setInputValueAndAssert(localePicker, "20/3/7",
-                LocalDate.of(20, Month.MARCH, 7));
-        setInputValueAndAssert(localePicker, "0020/3/8", "20/3/8",
+        setInputValueAndAssert(localePicker, "87/3/6", "1987/3/6",
+                LocalDate.of(1987, Month.MARCH, 6));
+        setInputValueAndAssert(localePicker, "20/3/7", "2020/3/7",
+                LocalDate.of(2020, Month.MARCH, 7));
+        setInputValueAndAssert(localePicker, "0020/3/8",
                 LocalDate.of(20, Month.MARCH, 8));
 
         $("button").id("Locale-US").click();
-        Assert.assertEquals("3/8/20", localePicker.getInputValue());
+        Assert.assertEquals("3/8/0020", localePicker.getInputValue());
+    }
+
+    @Test
+    public void datePickerInsideDisabledParent_pickerIsDisabled() {
+        WebElement picker = findElement(By.id("picker-inside-disabled-parent"));
+        Assert.assertFalse(
+                "The date picker should be disabled, when the parent component is disabled.",
+                picker.isEnabled());
+    }
+
+    @Test
+    public void datePickerInsideDisabledParent_enableParent_pickerIsEnabled() {
+        WebElement picker = findElement(By.id("picker-inside-disabled-parent"));
+        findElement(By.id("enable-parent")).click();
+        Assert.assertTrue(
+                "The date picker should be enabled after parent component is enabled.",
+                picker.isEnabled());
     }
 }

@@ -65,6 +65,13 @@ abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
         }
 
         /**
+         * Gets the text content of this cell.
+         *
+         * @return text content of the cell
+         */
+        public abstract String getText();
+
+        /**
          * Sets the text content of this cell.
          * <p>
          * This will remove a component set with
@@ -74,6 +81,13 @@ abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
          *            the text to be shown in this cell
          */
         public abstract void setText(String text);
+
+        /**
+         * Gets the component content of this cell.
+         *
+         * @return component content of the cell
+         */
+        public abstract Component getComponent();
 
         /**
          * Sets the component as the content of this cell.
@@ -399,8 +413,8 @@ abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
                 ColumnGroup group = ColumnGroupHelpers.wrapInColumnGroup(grid,
                         col);
                 AbstractColumn<?> oldGroup = leftColumns.next();
-                group.setHeaderRenderer(oldGroup.getHeaderRenderer());
-                group.setFooterRenderer(oldGroup.getFooterRenderer());
+                oldGroup.moveHeaderContent(group);
+                oldGroup.moveFooterContent(group);
                 newColumns.add(group);
 
                 CELL next = leftCells.next();

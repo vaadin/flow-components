@@ -16,6 +16,8 @@
 
 package com.vaadin.flow.component.textfield;
 
+import com.vaadin.experimental.Feature;
+import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.CompositionNotifier;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
@@ -24,6 +26,7 @@ import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.InputNotifier;
 import com.vaadin.flow.component.KeyNotifier;
@@ -32,6 +35,7 @@ import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.server.VaadinService;
 
 /**
  * Email Field is an extension of Text Field that only accepts email addresses
@@ -50,7 +54,7 @@ public class EmailField extends GeneratedVaadinEmailField<EmailField, String>
         HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
         HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper, HasLabel,
         HasClearButton, HasAllowedCharPattern,
-        HasThemeVariant<TextFieldVariant>, HasValidator<String> {
+        HasThemeVariant<TextFieldVariant>, HasTooltip, HasValidator<String> {
     private static final String EMAIL_PATTERN = "^" + "([a-zA-Z0-9_\\.\\-+])+" // local
             + "@" + "[a-zA-Z0-9-.]+" // domain
             + "\\." + "[a-zA-Z0-9-]{2,}" // tld
@@ -270,7 +274,7 @@ public class EmailField extends GeneratedVaadinEmailField<EmailField, String>
      *            the maximum length
      */
     public void setMaxLength(int maxLength) {
-        super.setMaxlength(maxLength);
+        getElement().setProperty("maxlength", maxLength);
         getValidationSupport().setMaxLength(maxLength);
     }
 
@@ -281,7 +285,7 @@ public class EmailField extends GeneratedVaadinEmailField<EmailField, String>
      * @return the {@code maxlength} property from the webcomponent
      */
     public int getMaxLength() {
-        return (int) getMaxlengthDouble();
+        return (int) getElement().getProperty("maxlength", 0.0);
     }
 
     /**
@@ -292,7 +296,7 @@ public class EmailField extends GeneratedVaadinEmailField<EmailField, String>
      *            the minimum length
      */
     public void setMinLength(int minLength) {
-        super.setMinlength(minLength);
+        getElement().setProperty("minlength", minLength);
         getValidationSupport().setMinLength(minLength);
     }
 
@@ -303,35 +307,26 @@ public class EmailField extends GeneratedVaadinEmailField<EmailField, String>
      * @return the {@code minlength} property from the webcomponent
      */
     public int getMinLength() {
-        return (int) getMinlengthDouble();
+        return (int) getElement().getProperty("minlength", 0.0);
     }
 
     /**
-     * When set to <code>true</code>, user is prevented from typing a value that
-     * conflicts with the given {@code pattern}.
+     * Sets a regular expression for the value to pass on the client-side. The
+     * pattern must be a valid JavaScript Regular Expression that matches the
+     * entire value, not just some subset.
      *
-     * @return the {@code preventInvalidInput} property from the webcomponent
+     * @param pattern
+     *            the new String pattern
      *
-     * @deprecated Since 23.2, this API is deprecated.
+     * @see <a href=
+     *      "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#htmlattrdefpattern">
+     *      https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#htmlattrdefpattern</>
+     * @see <a href=
+     *      "https://html.spec.whatwg.org/multipage/input.html#attr-input-pattern">
+     *      https://html.spec.whatwg.org/multipage/input.html#attr-input-pattern</>
      */
-    @Deprecated
-    public boolean isPreventInvalidInput() {
-        return isPreventInvalidInputBoolean();
-    }
-
-    /**
-     * @deprecated Since 23.2, this API is deprecated in favor of
-     *             {@link #setAllowedCharPattern(String)}
-     */
-    @Deprecated
-    @Override
-    public void setPreventInvalidInput(boolean preventInvalidInput) {
-        super.setPreventInvalidInput(preventInvalidInput);
-    }
-
-    @Override
     public void setPattern(String pattern) {
-        super.setPattern(pattern);
+        getElement().setProperty("pattern", pattern == null ? "" : pattern);
         getValidationSupport().setPattern(pattern);
     }
 
@@ -342,7 +337,7 @@ public class EmailField extends GeneratedVaadinEmailField<EmailField, String>
      * @return the {@code pattern} property from the webcomponent
      */
     public String getPattern() {
-        return getPatternString();
+        return getElement().getProperty("pattern");
     }
 
     /**
@@ -424,7 +419,12 @@ public class EmailField extends GeneratedVaadinEmailField<EmailField, String>
 
     @Override
     public Validator<String> getDefaultValidator() {
-        return (value, context) -> getValidationSupport().checkValidity(value);
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            return (value, context) -> getValidationSupport()
+                    .checkValidity(value);
+        }
+
+        return Validator.alwaysPass();
     }
 
     /**
@@ -455,5 +455,26 @@ public class EmailField extends GeneratedVaadinEmailField<EmailField, String>
     @Override
     public void removeThemeVariants(TextFieldVariant... variants) {
         HasThemeVariant.super.removeThemeVariants(variants);
+    }
+
+    /**
+     * Returns true if the given feature flag is enabled, false otherwise.
+     * <p>
+     * Exposed with protected visibility to support mocking
+     * <p>
+     * The method requires the {@code VaadinService} instance to obtain the
+     * available feature flags, otherwise, the feature is considered disabled.
+     *
+     * @param feature
+     *            the feature flag.
+     * @return whether the feature flag is enabled.
+     */
+    protected boolean isFeatureFlagEnabled(Feature feature) {
+        VaadinService service = VaadinService.getCurrent();
+        if (service == null) {
+            return false;
+        }
+
+        return FeatureFlags.get(service.getContext()).isEnabled(feature);
     }
 }

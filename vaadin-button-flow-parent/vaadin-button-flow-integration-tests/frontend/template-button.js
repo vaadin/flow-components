@@ -1,24 +1,22 @@
-import {PolymerElement} from '@polymer/polymer/polymer-element.js';
-import {html} from '@polymer/polymer/lib/utils/html-tag.js';
+import { html, LitElement } from 'lit';
 import '@vaadin/button/vaadin-button.js';
-import '@polymer/iron-icon/iron-icon.js';
+import '@vaadin/icon/vaadin-icon.js';
 
-class TemplateButton extends PolymerElement {
-  static get template() {
+class TemplateButton extends LitElement {
+  render() {
     return html`
-        <vaadin-button id="button">
-            Template caption
-        </vaadin-button>
+      <vaadin-button id="button">Template caption</vaadin-button>
 
-        <vaadin-button id="icon-button">
-            <iron-icon icon="lumo:edit"></iron-icon>
-            <span>Template with icon</span>
-        </vaadin-button>
-`;
+      <vaadin-button id="icon-button">
+        <vaadin-icon icon="lumo:edit"></vaadin-icon>
+        <span>Template with icon</span>
+      </vaadin-button>
+    `;
   }
-    static get is() {
-      return 'template-button'
+
+  static get is() {
+    return 'template-button';
   }
 }
-  
+
 customElements.define(TemplateButton.is, TemplateButton);

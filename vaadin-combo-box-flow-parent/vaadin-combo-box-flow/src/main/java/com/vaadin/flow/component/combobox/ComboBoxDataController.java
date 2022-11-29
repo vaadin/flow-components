@@ -246,6 +246,9 @@ class ComboBoxDataController<TItem>
     /**
      * Called to confirm that an update has been processed by the client-side
      * connector
+     *
+     * @param id
+     *            the update identifier
      */
     void confirmUpdate(int id) {
         dataCommunicator.confirmUpdate(id);
@@ -476,9 +479,10 @@ class ComboBoxDataController<TItem>
         setDataProvider(listDataProvider, filterText -> {
             Optional<SerializablePredicate<TItem>> componentInMemoryFilter = DataViewUtils
                     .getComponentFilter(comboBox);
+            SerializablePredicate<TItem> componentInMemoryFilterOrAlwaysPass = componentInMemoryFilter
+                    .orElse(ignore -> true);
             return item -> itemFilter.test(item, filterText)
-                    && componentInMemoryFilter.orElse(ignore -> true)
-                            .test(item);
+                    && componentInMemoryFilterOrAlwaysPass.test(item);
         });
     }
 

@@ -34,6 +34,7 @@ import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupDataView;
 import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupListDataView;
 import com.vaadin.flow.data.binder.HasItemComponents;
@@ -65,14 +66,13 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author Vaadin Ltd.
  */
-@NpmPackage(value = "@vaadin/radio-group", version = "23.2.0-alpha5")
-@NpmPackage(value = "@vaadin/vaadin-radio-button", version = "23.2.0-alpha5")
+@NpmPackage(value = "@vaadin/radio-group", version = "24.0.0-alpha5")
 public class RadioButtonGroup<T>
         extends GeneratedVaadinRadioGroup<RadioButtonGroup<T>, T>
-        implements HasItemComponents<T>, SingleSelect<RadioButtonGroup<T>, T>,
+        implements SingleSelect<RadioButtonGroup<T>, T>,
         HasListDataView<T, RadioButtonGroupListDataView<T>>,
         HasDataView<T, Void, RadioButtonGroupDataView<T>>, HasValidation,
-        HasHelper, HasSize, HasLabel, HasValidator<T> {
+        HasHelper, HasSize, HasLabel, HasTooltip, HasValidator<T> {
 
     private final KeyMapper<T> keyMapper = new KeyMapper<>();
 
@@ -553,7 +553,8 @@ public class RadioButtonGroup<T>
 
             // Remove all known children (doesn't remove client-side-only
             // children such as the label)
-            getChildren().forEach(this::remove);
+            getChildren()
+                    .forEach(child -> child.getElement().removeFromParent());
 
             // reinsert helper component
             setHelperComponent(helperComponent);
@@ -562,7 +563,8 @@ public class RadioButtonGroup<T>
             getDataProvider().fetch(DataViewUtils.getQuery(this))
                     .map(item -> createRadioButton((T) item))
                     .forEach(component -> {
-                        add((Component) component);
+                        getElement().appendChild(
+                                ((Component) component).getElement());
                         itemCounter.incrementAndGet();
                     });
             lastFetchedDataSize = itemCounter.get();

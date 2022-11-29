@@ -62,11 +62,10 @@ import java.util.stream.Stream;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-avatar-group")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha5")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha5")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/avatar-group/src/vaadin-avatar-group.js")
-@NpmPackage(value = "@vaadin/avatar-group", version = "23.2.0-alpha5")
-@NpmPackage(value = "@vaadin/vaadin-avatar", version = "23.2.0-alpha5")
+@NpmPackage(value = "@vaadin/avatar-group", version = "24.0.0-alpha5")
 public class AvatarGroup extends Component
         implements HasStyle, HasSize, HasThemeVariant<AvatarGroupVariant> {
 
@@ -477,6 +476,9 @@ public class AvatarGroup extends Component
     /**
      * Creates an avatar group with the provided items to be displayed as
      * avatars.
+     *
+     * @param items
+     *            the items to be displayed
      */
     public AvatarGroup(Collection<AvatarGroupItem> items) {
         setItems(items);
@@ -485,6 +487,9 @@ public class AvatarGroup extends Component
     /**
      * Creates an avatar group with the provided items to be displayed as
      * avatars.
+     *
+     * @param items
+     *            the items to be displayed
      */
     public AvatarGroup(AvatarGroupItem... items) {
         setItems(items);

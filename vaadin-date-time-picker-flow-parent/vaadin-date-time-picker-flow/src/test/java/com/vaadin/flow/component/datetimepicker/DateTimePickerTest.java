@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.datetimepicker;
 
 import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.VaadinService;
@@ -158,7 +159,6 @@ public class DateTimePickerTest {
         DateTimePicker picker = new DateTimePicker();
 
         DatePicker.DatePickerI18n i18n = new DatePicker.DatePickerI18n()
-                .setWeek("viikko").setCalendar("kalenteri").setClear("tyhjennä")
                 .setToday("tänään").setCancel("peruuta").setFirstDayOfWeek(1)
                 .setMonthNames(Arrays.asList("tammikuu", "helmikuu",
                         "maaliskuu", "huhtikuu", "toukokuu", "kesäkuu",
@@ -208,5 +208,11 @@ public class DateTimePickerTest {
 
         DateTimePicker field = Component.from(element, DateTimePicker.class);
         Assert.assertEquals(value, field.getElement().getProperty("value"));
+    }
+
+    @Test
+    public void implementsHasTooltip() {
+        DateTimePicker picker = new DateTimePicker();
+        Assert.assertTrue(picker instanceof HasTooltip);
     }
 }

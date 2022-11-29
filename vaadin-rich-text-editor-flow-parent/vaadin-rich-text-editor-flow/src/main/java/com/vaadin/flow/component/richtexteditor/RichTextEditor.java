@@ -20,7 +20,6 @@ import java.util.Objects;
  */
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.CompositionNotifier;
-import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.InputNotifier;
@@ -55,12 +54,12 @@ import elemental.json.JsonObject;
  *
  */
 @Tag("vaadin-rich-text-editor")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha5")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha5")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 public class RichTextEditor
         extends GeneratedVaadinRichTextEditor<RichTextEditor, String>
         implements HasSize, HasValueChangeMode, InputNotifier, KeyNotifier,
-        CompositionNotifier, HasLabel {
+        CompositionNotifier {
 
     private ValueChangeMode currentMode;
     private RichTextEditorI18n i18n;
@@ -117,19 +116,6 @@ public class RichTextEditor
     }
 
     /**
-     * Constructs a {@code RichTextEditor} with the initial value
-     *
-     * @param initialValue
-     *            the initial value in Delta format, not {@code null}
-     *
-     * @see #setValue(Object)
-     */
-    public RichTextEditor(String initialValue) {
-        this();
-        setValue(initialValue);
-    }
-
-    /**
      * Constructs an empty {@code RichTextEditor} with a value change listener.
      *
      * @param listener
@@ -140,25 +126,6 @@ public class RichTextEditor
     public RichTextEditor(
             ValueChangeListener<? super ComponentValueChangeEvent<RichTextEditor, String>> listener) {
         this();
-        addValueChangeListener(listener);
-    }
-
-    /**
-     * Constructs an empty {@code RichTextEditor} with a value change listener
-     * and an initial value.
-     *
-     * @param initialValue
-     *            the initial value
-     * @param listener
-     *            the value change listener
-     *
-     * @see #setValue(Object)
-     * @see #addValueChangeListener(com.vaadin.flow.component.HasValue.ValueChangeListener)
-     */
-    public RichTextEditor(String initialValue,
-            ValueChangeListener<? super ComponentValueChangeEvent<RichTextEditor, String>> listener) {
-        this();
-        setValue(initialValue);
         addValueChangeListener(listener);
     }
 
