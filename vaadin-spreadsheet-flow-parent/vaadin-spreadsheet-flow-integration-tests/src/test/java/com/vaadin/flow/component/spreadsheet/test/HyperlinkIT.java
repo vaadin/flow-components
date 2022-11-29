@@ -3,6 +3,7 @@ package com.vaadin.flow.component.spreadsheet.test;
 import java.io.IOException;
 
 import com.vaadin.flow.component.spreadsheet.test.util.PopupHelper;
+import com.vaadin.flow.testutil.TestPath;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -16,6 +17,7 @@ import org.openqa.selenium.support.ui.ExpectedCondition;
  * Tests for hyperlinks.
  *
  */
+@TestPath("vaadin-spreadsheet")
 public class HyperlinkIT extends AbstractSpreadsheetIT {
 
     private PopupHelper popup;
@@ -23,7 +25,7 @@ public class HyperlinkIT extends AbstractSpreadsheetIT {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL());
+        open();
         loadFile("spreadsheet_hyperlinks.xlsx");
         popup = new PopupHelper(driver);
     }

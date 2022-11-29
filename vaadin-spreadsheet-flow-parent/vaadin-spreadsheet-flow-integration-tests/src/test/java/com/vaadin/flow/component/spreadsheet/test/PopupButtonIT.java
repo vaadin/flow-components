@@ -5,14 +5,17 @@ import static org.junit.Assert.assertTrue;
 import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
 import com.vaadin.flow.component.spreadsheet.testbench.SpreadsheetElement;
 import com.vaadin.flow.component.spreadsheet.tests.fixtures.TestFixtures;
+import com.vaadin.flow.testutil.TestPath;
+
 import org.junit.Before;
 import org.junit.Test;
 
+@TestPath("vaadin-spreadsheet")
 public class PopupButtonIT extends AbstractSpreadsheetIT {
 
     @Before
     public void init() throws Exception {
-        getDriver().get(getBaseURL());
+        open();
         createNewSpreadsheet();
     }
 

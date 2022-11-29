@@ -1,16 +1,18 @@
 package com.vaadin.flow.component.spreadsheet.test;
 
-import static org.junit.Assert.assertEquals;
-
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.testutil.TestPath;
+
+@TestPath("vaadin-spreadsheet")
 public class LeadingQuoteIT extends AbstractSpreadsheetIT {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL());
+        open();
         loadFile("leading_quotes.xlsx");
     }
 
@@ -72,11 +74,11 @@ public class LeadingQuoteIT extends AbstractSpreadsheetIT {
     private void assertCellValues(String cell, String cellValue,
             String formulaBarValue, String inlineEditorValue) {
 
-        assertEquals(cellValue, getCellValue(cell));
+        Assert.assertEquals(cellValue, getCellValue(cell));
 
-        assertEquals(formulaBarValue, getFormulaBarValue(cell));
+        Assert.assertEquals(formulaBarValue, getFormulaBarValue(cell));
 
-        assertEquals(inlineEditorValue, getInlineEditorValue(cell));
+        Assert.assertEquals(inlineEditorValue, getInlineEditorValue(cell));
     }
 
     private String getInlineEditorValue(String cell) {
