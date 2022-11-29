@@ -21,7 +21,12 @@ import com.vaadin.tests.validation.AbstractValidationIT;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
-import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBinderPage.*;
+import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBinderPage.EXPECTED_VALUE_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBinderPage.MAX_LENGTH_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBinderPage.MIN_LENGTH_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBinderPage.PATTERN_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBinderPage.REQUIRED_ERROR_MESSAGE;
+import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBinderPage.UNEXPECTED_VALUE_ERROR_MESSAGE;
 
 @TestPath("vaadin-text-area/validation/binder")
 public class TextAreaValidationBinderIT
