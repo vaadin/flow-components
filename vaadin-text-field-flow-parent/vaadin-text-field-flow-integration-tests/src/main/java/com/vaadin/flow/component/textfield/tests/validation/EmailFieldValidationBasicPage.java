@@ -60,7 +60,7 @@ public class EmailFieldValidationBasicPage
         NativeButton attachButton = createButton(ATTACH_FIELD_BUTTON,
                 "Attach field", event -> add(testField));
         NativeButton detachButton = createButton(DETACH_FIELD_BUTTON,
-                "Detach field", event -> add(testField));
+                "Detach field", event -> remove(testField));
 
         add(new Div(attachButton, detachButton));
     }
