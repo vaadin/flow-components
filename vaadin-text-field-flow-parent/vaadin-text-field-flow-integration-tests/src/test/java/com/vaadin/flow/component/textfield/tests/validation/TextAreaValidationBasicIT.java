@@ -86,6 +86,15 @@ public class TextAreaValidationBasicIT
     }
 
     @Test
+    public void minLength_triggerInputBlur_assertValidity() {
+        $("input").id(MIN_LENGTH_INPUT).sendKeys("2", Keys.ENTER);
+
+        testField.sendKeys(Keys.TAB);
+        assertServerValid();
+        assertClientValid();
+    }
+
+    @Test
     public void minLength_changeInputValue_assertValidity() {
         $("input").id(MIN_LENGTH_INPUT).sendKeys("2", Keys.ENTER);
 
@@ -117,6 +126,15 @@ public class TextAreaValidationBasicIT
         testField.setValue("A");
         assertClientValid();
         assertServerValid();
+    }
+
+    @Test
+    public void pattern_triggerInputBlur_assertValidity() {
+        $("input").id(PATTERN_INPUT).sendKeys("^\\d+$", Keys.ENTER);
+
+        testField.sendKeys(Keys.TAB);
+        assertServerValid();
+        assertClientValid();
     }
 
     @Test
