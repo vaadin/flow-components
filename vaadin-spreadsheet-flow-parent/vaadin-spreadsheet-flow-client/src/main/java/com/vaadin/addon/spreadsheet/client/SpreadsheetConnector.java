@@ -17,7 +17,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
@@ -52,9 +51,6 @@ import static com.vaadin.addon.spreadsheet.client.OverlayInfo.COMPONENT;
 @SuppressWarnings("serial")
 public class SpreadsheetConnector extends AbstractHasComponentsConnector
         implements PostLayoutListener {
-
-    final static Logger consoleLog = Logger
-            .getLogger("spreadsheet SpreadsheetConnector");
 
     SpreadsheetClientRpc clientRPC = new SpreadsheetClientRpc() {
 
@@ -279,7 +275,6 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
 
     @Override
     protected Widget createWidget() {
-        consoleLog.info("createWidget()");
         return GWT.create(SpreadsheetWidget.class);
     }
 
@@ -306,7 +301,6 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
         SpreadsheetState state = getState();
         // in case the component client side is just created, but server side
         // has been existing (like when component has been invisible
-        consoleLog.fine("onStateChanged reload = " + state.reload);
         if (state.reload || stateChangeEvent.isInitialStateChange()) {
             state.reload = false;
             loadInitialStateDataToWidget(stateChangeEvent);
