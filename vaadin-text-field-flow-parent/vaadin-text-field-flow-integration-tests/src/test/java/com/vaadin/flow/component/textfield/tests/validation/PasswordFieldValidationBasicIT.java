@@ -93,6 +93,9 @@ public class PasswordFieldValidationBasicIT
     public void minLength_triggerInputBlur_assertValidity() {
         $("input").id(MIN_LENGTH_INPUT).sendKeys("2", Keys.ENTER);
 
+        // Tab to the show button
+        testField.sendKeys(Keys.TAB);
+        // Tab out of the field
         testField.sendKeys(Keys.TAB);
         assertServerValid();
         assertClientValid();
@@ -136,6 +139,9 @@ public class PasswordFieldValidationBasicIT
     public void pattern_triggerInputBlur_assertValidity() {
         $("input").id(PATTERN_INPUT).sendKeys("^\\d+$", Keys.ENTER);
 
+        // Tab to the show button
+        testField.sendKeys(Keys.TAB);
+        // Tab out of the field
         testField.sendKeys(Keys.TAB);
         assertServerValid();
         assertClientValid();
