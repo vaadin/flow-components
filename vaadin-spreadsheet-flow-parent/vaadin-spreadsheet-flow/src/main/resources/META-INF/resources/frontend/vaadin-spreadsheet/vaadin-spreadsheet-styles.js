@@ -17,6 +17,7 @@ export const spreadsheetStyles = css`
     height: 100%;
     flex: 1 1 auto;
     isolation: isolate;
+    background-color: #fff;
   }
 
   .v-disabled {
