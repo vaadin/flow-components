@@ -378,16 +378,18 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     }
 
     private ValidationResult checkValidity(T value) {
-        final boolean isGreaterThanMax = value != null
-                && value.doubleValue() > max;
-        if (isGreaterThanMax) {
-            return ValidationResult.error("");
+        Double doubleValue = value != null ? value.doubleValue() : null;
+
+        ValidationResult greaterThanMax = ValidationUtil
+                .checkGreaterThanMax(doubleValue, max);
+        if (greaterThanMax.isError()) {
+            return greaterThanMax;
         }
 
-        final boolean isSmallerThanMin = value != null
-                && value.doubleValue() < min;
-        if (isSmallerThanMin) {
-            return ValidationResult.error("");
+        ValidationResult smallerThanMin = ValidationUtil
+                .checkSmallerThanMin(doubleValue, min);
+        if (smallerThanMin.isError()) {
+            return smallerThanMin;
         }
 
         if (!isValidByStep(value)) {
