@@ -87,6 +87,15 @@ public class EmailFieldValidationBasicIT
     }
 
     @Test
+    public void minLength_triggerInputBlur_assertValidity() {
+        $("input").id(MIN_LENGTH_INPUT).sendKeys("13", Keys.ENTER);
+
+        testField.sendKeys(Keys.TAB);
+        assertServerValid();
+        assertClientValid();
+    }
+
+    @Test
     public void minLength_changeInputValue_assertValidity() {
         $("input").id(MIN_LENGTH_INPUT).sendKeys("13", Keys.ENTER);
 
@@ -118,6 +127,13 @@ public class EmailFieldValidationBasicIT
         testField.setValue("a@vaadin.com");
         assertClientValid();
         assertServerValid();
+    }
+
+    @Test
+    public void defaultPattern_triggerInputBlur_assertValidity() {
+        testField.sendKeys(Keys.TAB);
+        assertServerValid();
+        assertClientValid();
     }
 
     @Test
