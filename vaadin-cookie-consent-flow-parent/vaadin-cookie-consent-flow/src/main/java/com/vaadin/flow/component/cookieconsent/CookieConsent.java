@@ -3,20 +3,14 @@ package com.vaadin.flow.component.cookieconsent;
 import java.util.Arrays;
 import java.util.Locale;
 
-/*
- * #%L
- * Cookie Consent for Vaadin Flow
- * %%
- * Copyright 2000-2022 Vaadin Ltd.
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
+/**
+ * Copyright (C) 2000-2022 Vaadin Ltd
  *
- * See the file license.html distributed with this software for more
- * information about licensing.
+ * This program is available under Vaadin Commercial License and Service Terms.
  *
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
  */
 
 import com.vaadin.flow.component.AttachEvent;
