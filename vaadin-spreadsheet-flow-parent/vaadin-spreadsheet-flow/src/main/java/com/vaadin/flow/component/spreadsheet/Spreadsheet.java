@@ -4687,7 +4687,7 @@ public class Spreadsheet extends Component
      * @param customComponentFactory
      *            The new component factory to use.
      */
-    void setSpreadsheetComponentFactory(
+    public void setSpreadsheetComponentFactory(
             SpreadsheetComponentFactory customComponentFactory) {
         this.customComponentFactory = customComponentFactory;
         if (firstRow != -1) {

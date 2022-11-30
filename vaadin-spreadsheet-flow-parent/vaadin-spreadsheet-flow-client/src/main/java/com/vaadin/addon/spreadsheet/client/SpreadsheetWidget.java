@@ -2079,5 +2079,6 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
 
     public void setHost(Element element) {
         this.host = element;
+        sheetWidget.setHost(element);
     }
 }

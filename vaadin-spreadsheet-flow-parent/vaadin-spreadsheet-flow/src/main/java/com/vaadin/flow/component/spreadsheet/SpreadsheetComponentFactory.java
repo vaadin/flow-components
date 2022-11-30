@@ -47,7 +47,7 @@ import com.vaadin.flow.component.Component;
  *
  * @author Vaadin Ltd.
  */
-interface SpreadsheetComponentFactory extends Serializable {
+public interface SpreadsheetComponentFactory extends Serializable {
 
     /**
      * Should return a unique component that is displayed inside the cell

@@ -3469,16 +3469,32 @@ public class SheetWidget extends Panel {
         }
         cell.setValue(null);
         Widget parent = customWidget.getParent();
+
+        DivElement cellElement = cell.getElement();
+        Element customWidgetElement = customWidget.getElement();
+
+        Element slot = DOM.createElement("slot");
+        String slotName = "customWidget-" + cell.getCol() + "-" + cell.getRow();
+        slot.setAttribute("name", slotName);
+
+
+        Element spreadSheetWebComponent = (Element) host.getPropertyObject("host");
+        customWidgetElement.setAttribute("slot", slotName);
+
+
         if (parent != null) {
             if (equals(parent)) {
-                cell.getElement().appendChild(customWidget.getElement());
+                cellElement.appendChild(slot);
+                spreadSheetWebComponent.appendChild(customWidgetElement);
             } else {
                 customWidget.removeFromParent();
-                cell.getElement().appendChild(customWidget.getElement());
+                cellElement.appendChild(slot);
+                spreadSheetWebComponent.appendChild(customWidgetElement);
                 adopt(customWidget);
             }
         } else {
-            cell.getElement().appendChild(customWidget.getElement());
+            cellElement.appendChild(slot);
+            spreadSheetWebComponent.appendChild(customWidgetElement);
             adopt(customWidget);
         }
     }
@@ -5291,6 +5307,7 @@ public class SheetWidget extends Panel {
                     horizontalSplitPosition);
         }
     };
+    private Element host;
 
     public void updateInputValue(String value) {
         if (customCellEditorDisplayed) {
@@ -6622,5 +6639,9 @@ public class SheetWidget extends Panel {
     public void setInvalidFormulaMessage(String invalidFormulaMessage) {
         this.invalidFormulaMessage = invalidFormulaMessage;
         updateAllVisibleComments();
+    }
+
+    public void setHost(Element element) {
+        this.host = element;
     }
 }
