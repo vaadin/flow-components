@@ -3,9 +3,12 @@ package com.vaadin.flow.component.spreadsheet.test;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.vaadin.flow.testutil.TestPath;
+
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+@TestPath("vaadin-spreadsheet")
 public class MergedCellFrozenIT extends AbstractSpreadsheetIT {
 
     private static final int WINDOW_WIDTH = 1280;
@@ -13,7 +16,7 @@ public class MergedCellFrozenIT extends AbstractSpreadsheetIT {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL());
+        open();
     }
 
     @Test

@@ -69,7 +69,7 @@ import com.vaadin.flow.shared.Registration;
 @NpmPackage(value = "@vaadin/radio-group", version = "24.0.0-alpha5")
 public class RadioButtonGroup<T>
         extends GeneratedVaadinRadioGroup<RadioButtonGroup<T>, T>
-        implements HasItemComponents<T>, SingleSelect<RadioButtonGroup<T>, T>,
+        implements SingleSelect<RadioButtonGroup<T>, T>,
         HasListDataView<T, RadioButtonGroupListDataView<T>>,
         HasDataView<T, Void, RadioButtonGroupDataView<T>>, HasValidation,
         HasHelper, HasSize, HasLabel, HasTooltip, HasValidator<T> {
@@ -553,7 +553,8 @@ public class RadioButtonGroup<T>
 
             // Remove all known children (doesn't remove client-side-only
             // children such as the label)
-            getChildren().forEach(this::remove);
+            getChildren()
+                    .forEach(child -> child.getElement().removeFromParent());
 
             // reinsert helper component
             setHelperComponent(helperComponent);
@@ -562,7 +563,8 @@ public class RadioButtonGroup<T>
             getDataProvider().fetch(DataViewUtils.getQuery(this))
                     .map(item -> createRadioButton((T) item))
                     .forEach(component -> {
-                        add((Component) component);
+                        getElement().appendChild(
+                                ((Component) component).getElement());
                         itemCounter.incrementAndGet();
                     });
             lastFetchedDataSize = itemCounter.get();

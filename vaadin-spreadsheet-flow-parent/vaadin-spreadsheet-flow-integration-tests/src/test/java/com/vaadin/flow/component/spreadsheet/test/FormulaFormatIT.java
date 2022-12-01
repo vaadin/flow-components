@@ -5,16 +5,18 @@ import java.util.Locale;
 import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
 import com.vaadin.flow.component.spreadsheet.testbench.SpreadsheetElement;
 import com.vaadin.flow.component.spreadsheet.tests.fixtures.TestFixtures;
+import com.vaadin.flow.testutil.TestPath;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
+@TestPath("vaadin-spreadsheet")
 public class FormulaFormatIT extends AbstractSpreadsheetIT {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL());
+        open();
         createNewSpreadsheet();
     }
 
