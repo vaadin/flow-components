@@ -139,7 +139,7 @@ public class NumberFieldValidationBasicIT
 
     @Test
     public void badInput_changeInputValue_assertValidity() {
-        testField.setValue("INVALID");
+        testField.sendKeys("--2", Keys.ENTER);
         assertServerInvalid();
         assertClientInvalid();
 
@@ -147,7 +147,21 @@ public class NumberFieldValidationBasicIT
         assertServerValid();
         assertClientValid();
 
-        testField.setValue("INVALID");
+        testField.sendKeys("--2", Keys.ENTER);
+        assertServerInvalid();
+        assertClientInvalid();
+    }
+
+    @Test
+    public void badInput_setInputValueBeyondMaxLimit_assertValidity() {
+        testField.sendKeys("999999999", Keys.ENTER);
+        assertServerInvalid();
+        assertClientInvalid();
+    }
+
+    @Test
+    public void badInput_setInputValueBeyondMinLimit_assertValidity() {
+        testField.sendKeys("-999999999", Keys.ENTER);
         assertServerInvalid();
         assertClientInvalid();
     }
