@@ -149,6 +149,22 @@ public class NumberFieldValidationBinderIT
         assertErrorMessage("");
     }
 
+    @Test
+    public void badInput_setInputValueBeyondMaxLimit_assertValidity() {
+        testField.sendKeys("999999999", Keys.ENTER);
+        assertServerInvalid();
+        assertClientInvalid();
+        assertErrorMessage("");
+    }
+
+    @Test
+    public void badInput_setInputValueBeyondMinLimit_assertValidity() {
+        testField.sendKeys("-999999999", Keys.ENTER);
+        assertServerInvalid();
+        assertClientInvalid();
+        assertErrorMessage("");
+    }
+
     protected NumberFieldElement getTestField() {
         return $(NumberFieldElement.class).first();
     }
