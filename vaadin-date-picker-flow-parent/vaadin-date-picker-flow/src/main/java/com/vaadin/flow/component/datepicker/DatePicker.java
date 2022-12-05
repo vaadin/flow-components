@@ -775,13 +775,13 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
 
     @Override
     public Registration addOpenedChangeListener(
-            ComponentEventListener<OpenedChangeEvent> listener) {
+            ComponentEventListener<OpenedChangeEvent<DatePicker>> listener) {
         return super.addOpenedChangeListener(listener);
     }
 
     @Override
     public Registration addInvalidChangeListener(
-            ComponentEventListener<InvalidChangeEvent> listener) {
+            ComponentEventListener<InvalidChangeEvent<DatePicker>> listener) {
         return super.addInvalidChangeListener(listener);
     }
 
@@ -1185,16 +1185,16 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         }
     }
 
-    public static class InvalidChangeEvent
-            extends GeneratedVaadinDatePicker.InvalidChangeEvent<DatePicker> {
-        public InvalidChangeEvent(DatePicker source, boolean fromClient) {
+    public static class InvalidChangeEvent<T extends GeneratedVaadinDatePicker<T, ?>>
+            extends GeneratedVaadinDatePicker.InvalidChangeEvent<T> {
+        public InvalidChangeEvent(T source, boolean fromClient) {
             super(source, fromClient);
         }
     }
 
-    public static class OpenedChangeEvent
-            extends GeneratedVaadinDatePicker.OpenedChangeEvent<DatePicker> {
-        public OpenedChangeEvent(DatePicker source, boolean fromClient) {
+    public static class OpenedChangeEvent<T extends GeneratedVaadinDatePicker<T, ?>>
+            extends GeneratedVaadinDatePicker.OpenedChangeEvent<T> {
+        public OpenedChangeEvent(T source, boolean fromClient) {
             super(source, fromClient);
         }
     }
