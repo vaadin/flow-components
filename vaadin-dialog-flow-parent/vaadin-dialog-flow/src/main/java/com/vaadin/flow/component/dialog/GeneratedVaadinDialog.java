@@ -171,11 +171,10 @@ public abstract class GeneratedVaadinDialog<R extends GeneratedVaadinDialog<R>>
      */
     @Deprecated
     protected Registration addOpenedChangeListener(
-            ComponentEventListener<Dialog.OpenedChangeEvent> listener) {
-        return getElement()
-                .addPropertyChangeListener("opened",
-                        event -> listener.onComponentEvent(
-                                new Dialog.OpenedChangeEvent((Dialog) this,
-                                        event.isUserOriginated())));
+            ComponentEventListener<Dialog.OpenedChangeEvent<Dialog>> listener) {
+        return getElement().addPropertyChangeListener("opened",
+                event -> listener.onComponentEvent(
+                        new Dialog.OpenedChangeEvent<>((Dialog) this,
+                                event.isUserOriginated())));
     }
 }

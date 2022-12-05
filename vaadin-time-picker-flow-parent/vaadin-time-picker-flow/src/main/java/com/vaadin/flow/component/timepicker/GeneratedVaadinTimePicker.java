@@ -871,10 +871,10 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      */
     @Deprecated
     protected Registration addInvalidChangeListener(
-            ComponentEventListener<TimePicker.InvalidChangeEvent> listener) {
+            ComponentEventListener<TimePicker.InvalidChangeEvent<TimePicker>> listener) {
         return getElement().addPropertyChangeListener("invalid",
                 event -> listener.onComponentEvent(
-                        new TimePicker.InvalidChangeEvent((TimePicker) this,
+                        new TimePicker.InvalidChangeEvent<>((TimePicker) this,
                                 event.isUserOriginated())));
     }
 

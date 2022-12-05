@@ -279,10 +279,11 @@ public abstract class GeneratedVaadinNotification<R extends GeneratedVaadinNotif
      */
     @Deprecated
     protected Registration addOpenedChangeListener(
-            ComponentEventListener<Notification.OpenedChangeEvent> listener) {
+            ComponentEventListener<Notification.OpenedChangeEvent<Notification>> listener) {
         return getElement().addPropertyChangeListener("opened",
-                event -> listener.onComponentEvent(
-                        new Notification.OpenedChangeEvent((Notification) this,
+                event -> listener
+                        .onComponentEvent(new Notification.OpenedChangeEvent<>(
+                                (Notification) this,
                                 event.isUserOriginated())));
     }
 }

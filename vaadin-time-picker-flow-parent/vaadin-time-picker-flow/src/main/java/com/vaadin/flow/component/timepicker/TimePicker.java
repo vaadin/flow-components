@@ -442,7 +442,7 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
 
     @Override
     public Registration addInvalidChangeListener(
-            ComponentEventListener<TimePicker.InvalidChangeEvent> listener) {
+            ComponentEventListener<TimePicker.InvalidChangeEvent<TimePicker>> listener) {
         return super.addInvalidChangeListener(listener);
     }
 
@@ -762,9 +762,9 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         return FeatureFlags.get(service.getContext()).isEnabled(feature);
     }
 
-    public static class InvalidChangeEvent
-            extends GeneratedVaadinTimePicker.InvalidChangeEvent<TimePicker> {
-        public InvalidChangeEvent(TimePicker source, boolean fromClient) {
+    public static class InvalidChangeEvent<T extends GeneratedVaadinTimePicker<T, ?>>
+            extends GeneratedVaadinTimePicker.InvalidChangeEvent<T> {
+        public InvalidChangeEvent(T source, boolean fromClient) {
             super(source, fromClient);
         }
     }

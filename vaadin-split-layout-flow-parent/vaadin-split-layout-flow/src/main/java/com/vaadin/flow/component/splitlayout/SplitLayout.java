@@ -305,7 +305,7 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
      */
     @Override
     public Registration addSplitterDragendListener(
-            ComponentEventListener<SplitterDragendEvent> listener) {
+            ComponentEventListener<SplitterDragendEvent<SplitLayout>> listener) {
         return super.addSplitterDragendListener(listener);
     }
 
@@ -344,9 +344,9 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
         super.removeThemeVariants(variants);
     }
 
-    public static class SplitterDragendEvent extends
-            GeneratedVaadinSplitLayout.SplitterDragendEvent<SplitLayout> {
-        public SplitterDragendEvent(SplitLayout source, boolean fromClient) {
+    public static class SplitterDragendEvent<T extends GeneratedVaadinSplitLayout<T>>
+            extends GeneratedVaadinSplitLayout.SplitterDragendEvent<T> {
+        public SplitterDragendEvent(T source, boolean fromClient) {
             super(source, fromClient);
         }
     }
