@@ -853,7 +853,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
      */
     @Override
     public Registration addOpenedChangeListener(
-            ComponentEventListener<OpenedChangeEvent> listener) {
+            ComponentEventListener<OpenedChangeEvent<Dialog>> listener) {
         return super.addOpenedChangeListener(listener);
     }
 
@@ -965,9 +965,9 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
                 "Dialog does not support adding styles to overlay");
     }
 
-    public static class OpenedChangeEvent
-            extends GeneratedVaadinDialog.OpenedChangeEvent<Dialog> {
-        public OpenedChangeEvent(Dialog source, boolean fromClient) {
+    public static class OpenedChangeEvent<T extends GeneratedVaadinDialog<T>>
+            extends GeneratedVaadinDialog.OpenedChangeEvent<T> {
+        public OpenedChangeEvent(T source, boolean fromClient) {
             super(source, fromClient);
         }
     }

@@ -487,7 +487,7 @@ public class Notification extends GeneratedVaadinNotification<Notification>
 
     @Override
     public Registration addOpenedChangeListener(
-            ComponentEventListener<OpenedChangeEvent> listener) {
+            ComponentEventListener<OpenedChangeEvent<Notification>> listener) {
         return super.addOpenedChangeListener(listener);
     }
 
@@ -620,9 +620,9 @@ public class Notification extends GeneratedVaadinNotification<Notification>
                 "Notification does not support adding styles to card element");
     }
 
-    public static class OpenedChangeEvent extends
-            GeneratedVaadinNotification.OpenedChangeEvent<Notification> {
-        public OpenedChangeEvent(Notification source, boolean fromClient) {
+    public static class OpenedChangeEvent<T extends GeneratedVaadinNotification<T>>
+            extends GeneratedVaadinNotification.OpenedChangeEvent<T> {
+        public OpenedChangeEvent(T source, boolean fromClient) {
             super(source, fromClient);
         }
     }

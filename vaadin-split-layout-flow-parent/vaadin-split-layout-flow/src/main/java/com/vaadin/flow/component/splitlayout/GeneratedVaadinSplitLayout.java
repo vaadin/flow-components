@@ -327,8 +327,9 @@ public abstract class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitL
     @Deprecated
     @SuppressWarnings({ "rawtypes", "unchecked" })
     protected Registration addSplitterDragendListener(
-            ComponentEventListener<SplitLayout.SplitterDragendEvent> listener) {
-        return addListener(SplitLayout.SplitterDragendEvent.class, listener);
+            ComponentEventListener<SplitLayout.SplitterDragendEvent<SplitLayout>> listener) {
+        return addListener(SplitLayout.SplitterDragendEvent.class,
+                (ComponentEventListener) listener);
     }
 
     /**
