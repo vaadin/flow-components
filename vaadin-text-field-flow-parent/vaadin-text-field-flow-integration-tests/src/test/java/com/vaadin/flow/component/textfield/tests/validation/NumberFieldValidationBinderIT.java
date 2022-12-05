@@ -67,7 +67,7 @@ public class NumberFieldValidationBinderIT
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("3", Keys.ENTER);
 
         // Constraint validation fails:
-        testField.setValue("1");
+        testField.setValue("1.8");
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage("");
@@ -79,7 +79,7 @@ public class NumberFieldValidationBinderIT
         assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
 
         // Both validations pass:
-        testField.setValue("3");
+        testField.setValue("2.2");
         assertClientValid();
         assertServerValid();
     }
@@ -90,7 +90,7 @@ public class NumberFieldValidationBinderIT
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("1", Keys.ENTER);
 
         // Constraint validation fails:
-        testField.setValue("3");
+        testField.setValue("2.2");
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage("");
@@ -102,7 +102,7 @@ public class NumberFieldValidationBinderIT
         assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
 
         // Both validations pass:
-        testField.setValue("1");
+        testField.setValue("1.8");
         assertClientValid();
         assertServerValid();
     }
@@ -119,13 +119,13 @@ public class NumberFieldValidationBinderIT
         assertErrorMessage("");
 
         // Binder validation fails:
-        testField.setValue("2");
+        testField.setValue("1.5");
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
 
         // Both validations pass:
-        testField.setValue("4");
+        testField.setValue("2");
         assertClientValid();
         assertServerValid();
     }
