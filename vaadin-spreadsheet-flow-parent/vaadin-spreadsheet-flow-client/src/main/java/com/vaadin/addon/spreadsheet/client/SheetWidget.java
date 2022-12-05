@@ -933,29 +933,29 @@ public class SheetWidget extends Panel {
         fontWidthDummyElement.setInnerText("5555555555");
     }
 
-    void postInit(String connectorId, Node styleHost) {
+    void postInit(String connectorId) {
         sheetId = "spreadsheet-" + connectorId;
         spreadsheet.addClassName(sheetId);
 
         // Dynamic position & size styles for this spreadsheet
         cellSizeAndPositionStyle.setType("text/css");
         cellSizeAndPositionStyle.setId(sheetId + "-dynamicStyle");
-        styleHost.appendChild(cellSizeAndPositionStyle);
+        renderRoot.appendChild(cellSizeAndPositionStyle);
 
         // Workbook styles
         sheetStyle.setType("text/css");
         sheetStyle.setId(sheetId + "-sheetStyle");
-        styleHost.appendChild(sheetStyle);
+        renderRoot.appendChild(sheetStyle);
 
         // Custom cell size styles (because of borders)
         shiftedBorderCellStyle.setType("text/css");
         shiftedBorderCellStyle.setId(sheetId + "-customCellSizeStyle");
-        styleHost.appendChild(shiftedBorderCellStyle);
+        renderRoot.appendChild(shiftedBorderCellStyle);
 
         // style for "hiding" the edited cell
         editedCellFreezeColumnStyle.setType("text/css");
         editedCellFreezeColumnStyle.setId(sheetId + "-editedCellStyle");
-        styleHost.appendChild(editedCellFreezeColumnStyle);
+        renderRoot.appendChild(editedCellFreezeColumnStyle);
         jsniUtil.insertRule(editedCellFreezeColumnStyle,
                 ".notusedselector" + EDITING_CELL_STYLE);
         jsniUtil.insertRule(editedCellFreezeColumnStyle,
@@ -964,11 +964,11 @@ public class SheetWidget extends Panel {
         // style for hiding the cell inside merged regions
         mergedRegionStyle.setType("text/css");
         mergedRegionStyle.setId(sheetId + "-mergedRegionStyle");
-        styleHost.appendChild(mergedRegionStyle);
+        renderRoot.appendChild(mergedRegionStyle);
 
         resizeStyle.setType("text/css");
         resizeStyle.setId(sheetId + "-resizeStyle");
-        styleHost.appendChild(resizeStyle);
+        renderRoot.appendChild(resizeStyle);
     }
 
     /**
@@ -3477,24 +3477,22 @@ public class SheetWidget extends Panel {
         String slotName = "customWidget-" + cell.getCol() + "-" + cell.getRow();
         slot.setAttribute("name", slotName);
 
-
-        Element spreadSheetWebComponent = (Element) host.getPropertyObject("host");
         customWidgetElement.setAttribute("slot", slotName);
 
 
         if (parent != null) {
             if (equals(parent)) {
                 cellElement.appendChild(slot);
-                spreadSheetWebComponent.appendChild(customWidgetElement);
+                host.appendChild(customWidgetElement);
             } else {
                 customWidget.removeFromParent();
                 cellElement.appendChild(slot);
-                spreadSheetWebComponent.appendChild(customWidgetElement);
+                host.appendChild(customWidgetElement);
                 adopt(customWidget);
             }
         } else {
             cellElement.appendChild(slot);
-            spreadSheetWebComponent.appendChild(customWidgetElement);
+            host.appendChild(customWidgetElement);
             adopt(customWidget);
         }
     }
@@ -5308,6 +5306,7 @@ public class SheetWidget extends Panel {
         }
     };
     private Element host;
+    private Node renderRoot;
 
     public void updateInputValue(String value) {
         if (customCellEditorDisplayed) {
@@ -6641,7 +6640,8 @@ public class SheetWidget extends Panel {
         updateAllVisibleComments();
     }
 
-    public void setHost(Element element) {
-        this.host = element;
+    public void setHost(Element host, Node renderRoot) {
+        this.host = host;
+        this.renderRoot = renderRoot;
     }
 }
