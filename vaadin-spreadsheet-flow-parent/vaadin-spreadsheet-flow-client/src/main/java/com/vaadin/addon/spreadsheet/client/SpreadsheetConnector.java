@@ -24,6 +24,7 @@ import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.dom.client.Node;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -184,6 +185,8 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
 
     private HandlerRegistration contextMenuHandler;
     private SpreadsheetServerRpcImpl serverRPC;
+
+    private Element host;
 
     // spreadsheet: we need the server side proxy
     public <T extends ServerRpc> T getProtectedRpcProxy(Class<T> rpcInterface) {
@@ -549,11 +552,8 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
         void sendUpdates();
     }
 
-    private Element host;
-
-    public void setHost(Element element) {
-        // TODO: This will be properly fixed with custom component support
-        this.host = (Element) element.getPropertyObject("host");
-        getWidget().setHost(element);
+    public void setHost(Element host, Node renderRoot) {
+        this.host = host;
+        getWidget().setHost(host, renderRoot);
     }
 }
