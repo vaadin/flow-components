@@ -107,7 +107,7 @@ public class IntegerFieldValidationBasicIT
     public void max_changeInputValue_assertValidity() {
         $("input").id(MAX_INPUT).sendKeys("2", Keys.ENTER);
 
-        testField.setValue("1");
+        testField.setValue("3");
         assertClientInvalid();
         assertServerInvalid();
 
@@ -115,7 +115,7 @@ public class IntegerFieldValidationBasicIT
         assertClientValid();
         assertServerValid();
 
-        testField.setValue("3");
+        testField.setValue("1");
         assertClientValid();
         assertServerValid();
     }
