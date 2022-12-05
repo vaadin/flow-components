@@ -19,23 +19,27 @@ import com.vaadin.experimental.Feature;
 import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.CompositionNotifier;
+import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasClearButton;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.InputNotifier;
 import com.vaadin.flow.component.KeyNotifier;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.HasValidator;
+import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
+import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * Text Area is an input field component for multi-line text input. Text Area is
@@ -49,7 +53,7 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
         HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
         HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper, HasLabel,
         HasClearButton, HasAllowedCharPattern, HasThemeVariant<TextAreaVariant>,
-        HasTooltip, HasValidator<String> {
+        HasTooltip, HasValidator<String>, HasClientValidation {
     private ValueChangeMode currentMode;
 
     private boolean isConnectorAttached;
@@ -87,6 +91,10 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
         setValueChangeMode(ValueChangeMode.ON_CHANGE);
 
         addValueChangeListener(e -> validate());
+
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            addClientValidatedEventListener(e -> validate());
+        }
     }
 
     /**
@@ -452,6 +460,19 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
         return Validator.alwaysPass();
     }
 
+    @Override
+    public Registration addValidationStatusChangeListener(
+            ValidationStatusChangeListener<String> listener) {
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            return addClientValidatedEventListener(
+                    event -> listener.validationStatusChanged(
+                            new ValidationStatusChangeEvent<>(this,
+                                    !isInvalid())));
+        }
+
+        return null;
+    }
+
     /**
      * Performs server-side validation of the current value. This is needed
      * because it is possible to circumvent the client-side validation
@@ -465,7 +486,12 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        FieldValidationUtil.disableClientValidation(this);
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            ClientValidationUtil
+                    .preventWebComponentFromSettingItselfToValid(this);
+        } else {
+            FieldValidationUtil.disableClientValidation(this);
+        }
     }
 
     // Override is only required to keep binary compatibility with other 23.x
