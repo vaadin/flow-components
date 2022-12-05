@@ -23,7 +23,6 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.textfield.BigDecimalField;
 import com.vaadin.flow.component.textfield.IntegerField;
-import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.Setter;
@@ -49,10 +48,6 @@ public class BinderValidationPage extends Div {
                 value -> value != null
                         && value.compareTo(new BigDecimal(2)) > 0,
                 field -> field.setRequiredIndicatorVisible(true));
-
-        NumberField numberField = new NumberField();
-        addComponent(numberField, Bean::getNumber, Bean::setNumber,
-                value -> value != null && value > 2, field -> field.setMin(1));
 
         IntegerField integerField = new IntegerField();
         addComponent(integerField, Bean::getInteger, Bean::setInteger,
@@ -84,7 +79,6 @@ public class BinderValidationPage extends Div {
 
     public static class Bean {
         private String string;
-        private Double number;
         private Integer integer;
         private BigDecimal bigDecimal;
 
@@ -94,14 +88,6 @@ public class BinderValidationPage extends Div {
 
         public void setString(String string) {
             this.string = string;
-        }
-
-        public Double getNumber() {
-            return number;
-        }
-
-        public void setNumber(Double number) {
-            this.number = number;
         }
 
         public Integer getInteger() {
