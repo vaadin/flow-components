@@ -3476,6 +3476,7 @@ public class SheetWidget extends Panel {
         Element slot = DOM.createElement("slot");
         String slotName = "customWidget-" + cell.getCol() + "-" + cell.getRow();
         slot.setAttribute("name", slotName);
+        removeOnSlotDisconnect(slot, customWidgetElement);
 
         customWidgetElement.setAttribute("slot", slotName);
 
@@ -3497,6 +3498,15 @@ public class SheetWidget extends Panel {
         }
     }
 
+    private native void removeOnSlotDisconnect(Element slot, Element assignedWidget) /*-{
+        slot.addEventListener('slotchange', function () {
+            if (!slot.isConnected) {
+                // If the slot gets disconnected, remove the associated widget from the DOM
+                assignedWidget.remove();
+            }
+        });
+    }-*/;
+    
     public void addSheetOverlay(String key, SheetOverlay overlay) {
         boolean inTop = verticalSplitPosition >= overlay.getRow();
         boolean inLeft = horizontalSplitPosition >= overlay.getCol();
