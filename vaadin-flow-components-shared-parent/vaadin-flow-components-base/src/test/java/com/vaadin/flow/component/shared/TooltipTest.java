@@ -56,7 +56,7 @@ public class TooltipTest {
     public void addComponent_createTooltip_changeUI_tooltipAttached() {
         ui.add(component);
         Tooltip.forComponent(component);
-        
+
         // Create a new UI and move the component to it (@PreserveOnRefresh)
         ui = new UI();
         UI.setCurrent(ui);
