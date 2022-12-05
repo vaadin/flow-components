@@ -42,8 +42,8 @@ public class SpreadsheetJsApi {
     private Map<String, PopupButtonState> popupButtonStates = new HashMap<>();
 
     /**
-     * receives the host element and the render root where the widget must be embedded into, and
-     * publishes the methods which can be used from JS
+     * receives the host element and the render root where the widget must be
+     * embedded into, and publishes the methods which can be used from JS
      *
      * @param element
      */

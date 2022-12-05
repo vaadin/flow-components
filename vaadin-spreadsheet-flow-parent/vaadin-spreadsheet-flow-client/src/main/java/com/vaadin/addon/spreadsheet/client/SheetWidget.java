@@ -375,6 +375,9 @@ public class SheetWidget extends Panel {
 
     private String invalidFormulaMessage = null;
 
+    private Element host;
+    private Node renderRoot;
+
     static class CellCoord {
         private int col;
         private int row;
@@ -3480,7 +3483,6 @@ public class SheetWidget extends Panel {
 
         customWidgetElement.setAttribute("slot", slotName);
 
-
         if (parent != null) {
             if (equals(parent)) {
                 cellElement.appendChild(slot);
@@ -3498,7 +3500,8 @@ public class SheetWidget extends Panel {
         }
     }
 
-    private native void removeOnSlotDisconnect(Element slot, Element assignedWidget) /*-{
+    private native void removeOnSlotDisconnect(Element slot,
+            Element assignedWidget) /*-{
         slot.addEventListener('slotchange', function () {
             if (!slot.isConnected) {
                 // If the slot gets disconnected, remove the associated widget from the DOM
@@ -3506,7 +3509,7 @@ public class SheetWidget extends Panel {
             }
         });
     }-*/;
-    
+
     public void addSheetOverlay(String key, SheetOverlay overlay) {
         boolean inTop = verticalSplitPosition >= overlay.getRow();
         boolean inLeft = horizontalSplitPosition >= overlay.getCol();
@@ -5315,8 +5318,6 @@ public class SheetWidget extends Panel {
                     horizontalSplitPosition);
         }
     };
-    private Element host;
-    private Node renderRoot;
 
     public void updateInputValue(String value) {
         if (customCellEditorDisplayed) {
