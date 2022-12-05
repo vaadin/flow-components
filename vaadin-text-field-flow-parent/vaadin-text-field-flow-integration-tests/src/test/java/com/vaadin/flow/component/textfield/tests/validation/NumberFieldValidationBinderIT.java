@@ -159,7 +159,8 @@ public class NumberFieldValidationBinderIT
 
     @Test
     public void badInput_setInputValueBeyondMinLimit_assertValidity() {
-        testField.sendKeys("-", String.valueOf(Double.MAX_VALUE), "1", Keys.ENTER);
+        testField.sendKeys("-", String.valueOf(Double.MAX_VALUE), "1",
+                Keys.ENTER);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage("");
