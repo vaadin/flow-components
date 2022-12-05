@@ -134,7 +134,7 @@ public class NumberFieldValidationBinderIT
     public void badInput_changeInputValue_assertValidity() {
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("2", Keys.ENTER);
 
-        testField.setValue("--2");
+        testField.sendKeys("--2", Keys.ENTER);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage("");
@@ -143,7 +143,7 @@ public class NumberFieldValidationBinderIT
         assertServerValid();
         assertClientValid();
 
-        testField.setValue("--2");
+        testField.sendKeys("--2", Keys.ENTER);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage("");
@@ -151,7 +151,7 @@ public class NumberFieldValidationBinderIT
 
     @Test
     public void badInput_setInputValueBeyondMaxLimit_assertValidity() {
-        testField.sendKeys("999999999", Keys.ENTER);
+        testField.sendKeys(String.valueOf(Double.MAX_VALUE), "1", Keys.ENTER);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage("");
@@ -159,7 +159,7 @@ public class NumberFieldValidationBinderIT
 
     @Test
     public void badInput_setInputValueBeyondMinLimit_assertValidity() {
-        testField.sendKeys("-999999999", Keys.ENTER);
+        testField.sendKeys("-", String.valueOf(Double.MAX_VALUE), "1", Keys.ENTER);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage("");

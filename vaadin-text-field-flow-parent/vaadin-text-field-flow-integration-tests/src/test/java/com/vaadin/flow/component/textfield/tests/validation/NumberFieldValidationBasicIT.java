@@ -154,14 +154,14 @@ public class NumberFieldValidationBasicIT
 
     @Test
     public void badInput_setInputValueBeyondMaxLimit_assertValidity() {
-        testField.sendKeys("999999999", Keys.ENTER);
+        testField.sendKeys(String.valueOf(Double.MAX_VALUE), "1", Keys.ENTER);
         assertServerInvalid();
         assertClientInvalid();
     }
 
     @Test
     public void badInput_setInputValueBeyondMinLimit_assertValidity() {
-        testField.sendKeys("-999999999", Keys.ENTER);
+        testField.sendKeys("-", String.valueOf(Double.MAX_VALUE), "1", Keys.ENTER);
         assertServerInvalid();
         assertClientInvalid();
     }
