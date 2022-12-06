@@ -1068,6 +1068,10 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<T> listener) {
         validationStatusListener = listener;
-        return null;
+        return () -> {
+            if (validationStatusListener == listener) {
+                validationStatusListener = null;
+            }
+        };
     }
 }
