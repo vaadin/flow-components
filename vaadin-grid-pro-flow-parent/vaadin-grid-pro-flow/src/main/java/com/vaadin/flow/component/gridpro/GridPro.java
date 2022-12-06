@@ -115,6 +115,9 @@ public class GridPro<E> extends Grid<E> {
 
     private void setup() {
         addItemPropertyChangedListener(e -> {
+            if (e.getItem() == null) {
+                return;
+            }
             EditColumn<E> column = (EditColumn<E>) this.idToColumnMap
                     .get(e.getPath());
 
