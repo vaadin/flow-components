@@ -27,8 +27,6 @@ import com.vaadin.flow.component.textfield.testbench.BigDecimalFieldElement;
 import com.vaadin.flow.component.textfield.testbench.EmailFieldElement;
 import com.vaadin.flow.component.textfield.testbench.IntegerFieldElement;
 import com.vaadin.flow.component.textfield.testbench.NumberFieldElement;
-import com.vaadin.flow.component.textfield.testbench.PasswordFieldElement;
-import com.vaadin.flow.component.textfield.testbench.TextAreaElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
@@ -60,10 +58,8 @@ public class BinderValidationPageIT extends AbstractComponentIT {
     }
 
     private List<Class<? extends TestBenchElement>> fieldClasses = Arrays
-            .asList(TextFieldElement.class, TextAreaElement.class,
-                    PasswordFieldElement.class, EmailFieldElement.class,
-                    BigDecimalFieldElement.class, IntegerFieldElement.class,
-                    NumberFieldElement.class);
+            .asList(TextFieldElement.class, BigDecimalFieldElement.class,
+                    IntegerFieldElement.class, NumberFieldElement.class);
 
     @Test
     public void fields_internalValidationPass_binderValidationFail_fieldInvalid() {
