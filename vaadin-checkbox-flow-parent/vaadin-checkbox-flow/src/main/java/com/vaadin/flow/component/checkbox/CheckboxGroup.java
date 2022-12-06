@@ -56,8 +56,6 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
-import com.vaadin.flow.dom.PropertyChangeEvent;
-import com.vaadin.flow.dom.PropertyChangeListener;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
@@ -97,8 +95,6 @@ public class CheckboxGroup<T>
 
     private ComponentRenderer<? extends Component, T> itemRenderer;
 
-    private final PropertyChangeListener validationListener = this::validateSelectionEnabledState;
-    private Registration validationRegistration;
     private Registration dataProviderListenerRegistration;
 
     private int lastNotifiedDataSize = -1;
@@ -114,7 +110,6 @@ public class CheckboxGroup<T>
         super(Collections.emptySet(), Collections.emptySet(), JsonArray.class,
                 CheckboxGroup::presentationToModel,
                 CheckboxGroup::modelToPresentation, true);
-        registerValidation();
     }
 
     /**
@@ -694,35 +689,6 @@ public class CheckboxGroup<T>
         // may end up rendering as enabled.
         // Enforce the Web Component state using JS.
         checkbox.getElement().executeJs("this.disabled = $0", disabled);
-    }
-
-    private void validateSelectionEnabledState(PropertyChangeEvent event) {
-        if (!hasValidValue()) {
-            Set<T> oldValue = presentationToModel(this,
-                    (JsonArray) event.getOldValue());
-            // return the value back on the client side
-            try {
-                validationRegistration.remove();
-                getElement().setPropertyJson(VALUE,
-                        modelToPresentation(this, oldValue));
-            } finally {
-                registerValidation();
-            }
-            // Now make sure that the checkbox is still in the correct state
-            Set<T> value = presentationToModel(this,
-                    (JsonArray) event.getValue());
-            getCheckboxItems()
-                    .filter(checkbox -> value.contains(checkbox.getItem()))
-                    .forEach(this::updateEnabled);
-        }
-    }
-
-    private void registerValidation() {
-        if (validationRegistration != null) {
-            validationRegistration.remove();
-        }
-        validationRegistration = getElement().addPropertyChangeListener(VALUE,
-                validationListener);
     }
 
     private static <T> Set<T> presentationToModel(CheckboxGroup<T> group,
