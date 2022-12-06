@@ -49,13 +49,10 @@ import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.data.selection.SingleSelect;
-import com.vaadin.flow.dom.PropertyChangeEvent;
-import com.vaadin.flow.dom.PropertyChangeListener;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
@@ -95,8 +92,6 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
 
     private ItemLabelGenerator<T> itemLabelGenerator = null;
 
-    private final PropertyChangeListener validationListener = this::validateSelectionEnabledState;
-    private Registration validationRegistration;
     private Registration dataProviderListenerRegistration;
 
     private boolean resetPending = true;
@@ -131,8 +126,6 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         setPresentationValue(null);
 
         getElement().appendChild(listBox.getElement());
-
-        registerValidation();
     }
 
     /**
@@ -206,15 +199,14 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
 
     private static <T> T presentationToModel(Select<T> select,
             String presentation) {
-        if (select.keyMapper == null
-                || !select.keyMapper.containsKey(presentation)) {
+        if (!select.keyMapper.containsKey(presentation)) {
             return null;
         }
         return select.keyMapper.get(presentation);
     }
 
     private static <T> String modelToPresentation(Select<T> select, T model) {
-        if (model == null || select.keyMapper == null) {
+        if (model == null) {
             return "";
         }
         if (!select.keyMapper.has(model)) {
@@ -996,13 +988,6 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         }
     }
 
-    private T getValue(Serializable key) {
-        if (key == null || "".equals(key)) {
-            return null;
-        }
-        return keyMapper.get(key.toString());
-    }
-
     private void addEmptySelectionItem() {
         if (emptySelectionItem == null) {
             emptySelectionItem = new VaadinItem<>("", null);
@@ -1020,37 +1005,6 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
             listBox.remove(emptySelectionItem);
         }
         emptySelectionItem = null;
-    }
-
-    private void validateSelectionEnabledState(PropertyChangeEvent event) {
-        if (!event.isUserOriginated()) {
-            return;
-        }
-        if (!hasValidValue() || isReadOnly()) {
-            T oldValue = getValue(event.getOldValue());
-            // return the value back on the client side
-            try {
-                validationRegistration.remove();
-                getElement().setProperty(VALUE_PROPERTY_NAME,
-                        keyMapper.key(oldValue));
-            } finally {
-                registerValidation();
-            }
-            // Now make sure that the item is still in the correct state
-            Optional<VaadinItem<T>> selectedItem = getItems().filter(
-                    item -> item.getItem() == getValue(event.getValue()))
-                    .findFirst();
-
-            selectedItem.ifPresent(this::updateItemEnabled);
-        }
-    }
-
-    private void registerValidation() {
-        if (validationRegistration != null) {
-            validationRegistration.remove();
-        }
-        validationRegistration = getElement().addPropertyChangeListener(
-                VALUE_PROPERTY_NAME, validationListener);
     }
 
     private void runBeforeClientResponse(SerializableConsumer<UI> command) {
