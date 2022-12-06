@@ -34,6 +34,9 @@ import com.vaadin.flow.component.select.data.SelectListDataView;
 import com.vaadin.flow.component.select.generated.GeneratedVaadinSelect;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.data.binder.HasItemComponents;
+import com.vaadin.flow.data.binder.HasValidator;
+import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
+import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderWrapper;
@@ -75,7 +78,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         implements HasItemComponents<T>, HasSize, HasValidation,
         SingleSelect<Select<T>, T>, HasListDataView<T, SelectListDataView<T>>,
         HasDataView<T, Void, SelectDataView<T>>, HasHelper, HasLabel, HasTheme,
-        HasTooltip {
+        HasTooltip, HasValidator<T> {
 
     public static final String LABEL_ATTRIBUTE = "label";
 
@@ -109,6 +112,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
     private volatile int lastFetchedDataSize = -1;
 
     private SerializableConsumer<UI> sizeRequest;
+    private ValidationStatusChangeListener<T> validationStatusListener;
 
     /**
      * Constructs a select.
@@ -1054,5 +1058,16 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         boolean isInvalid = isRequired && getValue() == null;
 
         setInvalid(isInvalid);
+        if (validationStatusListener != null) {
+            validationStatusListener.validationStatusChanged(
+                    new ValidationStatusChangeEvent<>(this, !isInvalid()));
+        }
+    }
+
+    @Override
+    public Registration addValidationStatusChangeListener(
+            ValidationStatusChangeListener<T> listener) {
+        validationStatusListener = listener;
+        return null;
     }
 }
