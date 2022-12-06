@@ -122,7 +122,7 @@ public class NumberFieldValidationBasicIT
 
     @Test
     public void step_changeInputValue_assertValidity() {
-        $("input").id(STEP_INPUT).sendKeys("2", Keys.ENTER);
+        $("input").id(STEP_INPUT).sendKeys("1.5", Keys.ENTER);
 
         testField.setValue("1");
         assertClientInvalid();

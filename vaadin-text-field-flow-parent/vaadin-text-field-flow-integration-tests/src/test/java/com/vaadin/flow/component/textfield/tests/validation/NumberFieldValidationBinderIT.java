@@ -64,7 +64,7 @@ public class NumberFieldValidationBinderIT
     @Test
     public void min_changeInputValue_assertValidity() {
         $("input").id(MIN_INPUT).sendKeys("2", Keys.ENTER);
-        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("3", Keys.ENTER);
+        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("2.2", Keys.ENTER);
 
         // Constraint validation fails:
         testField.setValue("1.8");
@@ -87,7 +87,7 @@ public class NumberFieldValidationBinderIT
     @Test
     public void max_changeInputValue_assertValidity() {
         $("input").id(MAX_INPUT).sendKeys("2", Keys.ENTER);
-        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("1", Keys.ENTER);
+        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("1.8", Keys.ENTER);
 
         // Constraint validation fails:
         testField.setValue("2.2");
@@ -109,8 +109,8 @@ public class NumberFieldValidationBinderIT
 
     @Test
     public void step_changeInputValue_assertValidity() {
-        $("input").id(STEP_INPUT).sendKeys("2", Keys.ENTER);
-        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("4", Keys.ENTER);
+        $("input").id(STEP_INPUT).sendKeys("1.5", Keys.ENTER);
+        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("3", Keys.ENTER);
 
         // Constraint validation fails:
         testField.setValue("1");
@@ -125,7 +125,7 @@ public class NumberFieldValidationBinderIT
         assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
 
         // Both validations pass:
-        testField.setValue("2");
+        testField.setValue("3");
         assertClientValid();
         assertServerValid();
     }

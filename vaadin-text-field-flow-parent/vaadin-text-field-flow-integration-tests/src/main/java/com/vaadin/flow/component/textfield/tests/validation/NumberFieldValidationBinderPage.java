@@ -66,12 +66,12 @@ public class NumberFieldValidationBinderPage
         }));
 
         add(createInput(MIN_INPUT, "Set min", event -> {
-            int value = Integer.parseInt(event.getValue());
+            double value = Double.parseDouble(event.getValue());
             testField.setMin(value);
         }));
 
         add(createInput(MAX_INPUT, "Set max", event -> {
-            int value = Integer.parseInt(event.getValue());
+            double value = Double.parseDouble(event.getValue());
             testField.setMax(value);
         }));
     }
