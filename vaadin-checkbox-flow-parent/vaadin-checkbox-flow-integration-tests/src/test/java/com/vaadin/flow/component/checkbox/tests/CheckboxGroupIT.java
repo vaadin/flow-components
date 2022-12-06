@@ -29,7 +29,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -112,23 +111,13 @@ public class CheckboxGroupIT extends AbstractComponentIT {
         WebElement infoLabel = layout
                 .findElement(By.id("checkbox-group-disabled-items-info"));
 
-        Assert.assertEquals("'foo' should be selected", "[foo]",
+        Assert.assertEquals("'foo' should be selected server-side", "[foo]",
                 infoLabel.getText());
 
         group.selectByText("bar");
 
-        try {
-            waitUntil(driver -> !group.getCheckboxes().get(1).isChecked());
-        } catch (WebDriverException wde) {
-            Assert.fail("Server should have disabled the checkbox again.");
-        }
-
-        Assert.assertEquals("Value 'foo' should have been re-selected", "[foo]",
-                infoLabel.getText());
-
-        Assert.assertTrue(
-                "Value 'foo' should have been re-selected on the client side",
-                checkboxes.get(0).isChecked());
+        Assert.assertEquals("Still only 'foo' should be selected server-side",
+                "[foo]", infoLabel.getText());
     }
 
     @Test
