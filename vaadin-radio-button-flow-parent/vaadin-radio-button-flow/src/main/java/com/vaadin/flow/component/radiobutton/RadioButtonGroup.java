@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.radiobutton;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
@@ -37,7 +36,6 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupDataView;
 import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupListDataView;
-import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -54,8 +52,6 @@ import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.data.selection.SingleSelect;
-import com.vaadin.flow.dom.PropertyChangeEvent;
-import com.vaadin.flow.dom.PropertyChangeListener;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
@@ -86,8 +82,6 @@ public class RadioButtonGroup<T>
     private ComponentRenderer<? extends Component, T> itemRenderer = new TextRenderer<>(
             itemLabelGenerator);
 
-    private final PropertyChangeListener validationListener = this::validateSelectionEnabledState;
-    private Registration validationRegistration;
     private Registration dataProviderListenerRegistration;
 
     private int lastNotifiedDataSize = -1;
@@ -118,8 +112,6 @@ public class RadioButtonGroup<T>
     public RadioButtonGroup() {
         super(null, null, String.class, RadioButtonGroup::presentationToModel,
                 RadioButtonGroup::modelToPresentation, true);
-
-        registerValidation();
     }
 
     /**
@@ -646,25 +638,6 @@ public class RadioButtonGroup<T>
         button.setLabelComponent(labelComponent);
     }
 
-    private void validateSelectionEnabledState(PropertyChangeEvent event) {
-        if (!hasValidValue()) {
-            T oldValue = getValue(event.getOldValue());
-            // return the value back on the client side
-            try {
-                validationRegistration.remove();
-                getElement().setProperty("value", keyMapper.key(oldValue));
-            } finally {
-                registerValidation();
-            }
-            // Now make sure that the button is still in the correct state
-            Optional<RadioButton<T>> selectedButton = getRadioButtons().filter(
-                    button -> button.getItem() == getValue(event.getValue()))
-                    .findFirst();
-
-            selectedButton.ifPresent(this::updateEnabled);
-        }
-    }
-
     /**
      * Compares two value instances to each other to determine whether they are
      * equal. Equality is used to determine whether to update internal state and
@@ -707,21 +680,6 @@ public class RadioButtonGroup<T>
         // may end up rendering as enabled.
         // Enforce the Web Component state using JS.
         button.getElement().executeJs("this.disabled = $0", disabled);
-    }
-
-    private T getValue(Serializable key) {
-        if (key == null) {
-            return null;
-        }
-        return keyMapper.get(key.toString());
-    }
-
-    private void registerValidation() {
-        if (validationRegistration != null) {
-            validationRegistration.remove();
-        }
-        validationRegistration = getElement().addPropertyChangeListener("value",
-                validationListener);
     }
 
     private void identifierProviderChanged(
