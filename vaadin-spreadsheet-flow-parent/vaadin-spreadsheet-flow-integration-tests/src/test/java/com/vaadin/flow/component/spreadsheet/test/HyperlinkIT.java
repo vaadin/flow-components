@@ -101,6 +101,9 @@ public class HyperlinkIT extends AbstractSpreadsheetIT {
         loadFile("hyper_links.xlsx");
         // ensure hyperlink switches to correct cell
         getSpreadsheet().scroll(29 * CELL_HEIGHT);
+        // wait for cell to be rendered after scrolling
+        waitForCell(30, 2); // == "B30"
+
         testInternal("B30", "B10");
         // ensure correct sheet
         testInternal("A3", "A3");
@@ -239,4 +242,10 @@ public class HyperlinkIT extends AbstractSpreadsheetIT {
         });
     }
 
+    public void waitForCell(int row, int column) {
+        String cellSelector = String.format(".col%d.row%d.cell", column, row);
+
+        waitUntil(d -> getSpreadsheet()
+                .findElements(By.cssSelector(cellSelector)).size() > 0);
+    }
 }
