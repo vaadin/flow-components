@@ -24,7 +24,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.radiobutton.testbench.RadioButtonElement;
@@ -133,28 +132,16 @@ public class RadioButtonGroupIT extends AbstractComponentIT {
         WebElement infoLabel = findElement(
                 By.id("button-group-disabled-items-info"));
 
-        Assert.assertEquals("'foo' should be selected", "foo",
+        Assert.assertEquals("'foo' should be selected server-side", "foo",
                 infoLabel.getText());
 
+        // Enable 'bar' button on client-side and click it
         executeScript("arguments[0].removeAttribute(\"disabled\");",
                 buttons.get(1));
-
         buttons.get(1).click();
 
-        try {
-            waitUntil(driver -> group
-                    .findElements(By.tagName("vaadin-radio-button")).get(1)
-                    .getAttribute("disabled") != null);
-        } catch (WebDriverException wde) {
-            Assert.fail("Server should have disabled the button again.");
-        }
-
-        Assert.assertEquals("Value 'foo' should have been re-selected", "foo",
-                infoLabel.getText());
-
-        Assert.assertTrue(
-                "Value 'foo' should have been re-selected on the client side",
-                Boolean.valueOf(buttons.get(0).getAttribute("checked")));
+        Assert.assertEquals("Value 'foo' should still be selected server-side",
+                "foo", infoLabel.getText());
     }
 
     @Test
