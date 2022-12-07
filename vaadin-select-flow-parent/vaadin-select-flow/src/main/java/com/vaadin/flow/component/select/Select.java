@@ -845,7 +845,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
 
         if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
             ClientValidationUtil
-                    .preventWebComponentFromChangingInvalidState(this);
+                    .preventWebComponentFromModifyingInvalidState(this);
         } else {
             FieldValidationUtil.disableClientValidation(this);
         }

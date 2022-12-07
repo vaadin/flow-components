@@ -63,7 +63,7 @@ public class BasicValidationIT extends AbstractValidationIT<SelectElement> {
     }
 
     @Test
-    public void preventWebComponentFromChangingInvalidState() {
+    public void webComponentCanNotModifyInvalidState() {
         assertWebComponentCanNotModifyInvalidState();
 
         $("button").id(DETACH_FIELD_BUTTON).click();

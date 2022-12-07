@@ -47,7 +47,7 @@ public final class ClientValidationUtil {
         component.getElement().executeJs(expression.toString());
     }
 
-    public static <C extends Component & HasValidation> void preventWebComponentFromChangingInvalidState(
+    public static <C extends Component & HasValidation> void preventWebComponentFromModifyingInvalidState(
             C component) {
         StringBuilder expression = new StringBuilder(
                 "this._shouldSetInvalid = function (invalid) { return false };");
