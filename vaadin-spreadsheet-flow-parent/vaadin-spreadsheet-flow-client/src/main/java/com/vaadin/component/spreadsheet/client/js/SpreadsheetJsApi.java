@@ -58,8 +58,7 @@ public class SpreadsheetJsApi {
         spreadsheetConnector.setHost(host, renderRoot);
         spreadsheetConnector.doInit("1", new ApplicationConnection());
         spreadsheetWidget = spreadsheetConnector.getWidget();
-        renderRoot.appendChild(spreadsheetWidget.getElement());
-        // RootPanel.getForElement(renderRoot).add(spreadsheetWidget);
+        RootPanel.getForElement((Element) renderRoot).add(spreadsheetWidget);
     }
 
     public void disconnected() {
