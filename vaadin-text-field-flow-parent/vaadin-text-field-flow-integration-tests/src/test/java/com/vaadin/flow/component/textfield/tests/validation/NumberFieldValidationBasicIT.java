@@ -39,29 +39,28 @@ public class NumberFieldValidationBasicIT
     }
 
     @Test
-    public void onlyServerCanSetFieldToValid() {
+    public void detach_attach_preservesInvalidState() {
+        // Make field invalid
         $("button").id(REQUIRED_BUTTON).click();
+        testField.sendKeys(Keys.TAB);
 
-        executeScript("arguments[0].validate()", testField);
+        $("button").id(DETACH_FIELD_BUTTON).click();
+        $("button").id(ATTACH_FIELD_BUTTON).click();
+        testField = getTestField();
+
+        assertServerInvalid();
         assertClientInvalid();
-
-        testField.sendKeys("1234");
-        executeScript("arguments[0].validate()", testField);
-        assertClientInvalid();
-
-        testField.sendKeys(Keys.ENTER);
-        assertServerValid();
-        assertClientValid();
     }
 
     @Test
-    public void detach_attach_onlyServerCanSetFieldToValid() {
+    public void webComponentCanNotModifyInvalidState() {
+        assertWebComponentCanNotModifyInvalidState();
+
         $("button").id(DETACH_FIELD_BUTTON).click();
         $("button").id(ATTACH_FIELD_BUTTON).click();
-
         testField = getTestField();
 
-        onlyServerCanSetFieldToValid();
+        assertWebComponentCanNotModifyInvalidState();
     }
 
     @Test
