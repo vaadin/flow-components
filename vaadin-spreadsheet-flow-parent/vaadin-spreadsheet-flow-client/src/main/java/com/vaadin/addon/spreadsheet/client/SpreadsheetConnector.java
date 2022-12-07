@@ -420,6 +420,10 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
         }
     }
 
+    native void log(String msg) /*-{
+        console.log("##", msg);
+    }-*/;
+
     private void addOverlay(String id, OverlayInfo overlayInfo) {
         switch (overlayInfo.type) {
         case IMAGE:
@@ -427,11 +431,11 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
                     overlayInfo);
             break;
         case COMPONENT:
-            for (ComponentConnector c : getChildComponents()) {
-                if (c.getConnectorId().equals(id)) {
-                    getWidget().addOverlay(id, c.getWidget(), overlayInfo);
-                }
-            }
+            // TODO: Create a flow component wrapper with the node id
+
+            String appid = "ROOT";
+            
+            getWidget().addOverlay(id, new FlowComponentRenderer(appid, id), overlayInfo);
             break;
         }
     }

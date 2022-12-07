@@ -987,8 +987,7 @@ public class Spreadsheet extends Component
     /** The last visible column in the scroll area **/
     private int lastColumn;
 
-    /** Spreadsheet Flow does not support charts yet **/
-    private boolean chartsEnabled = false;
+    private boolean chartsEnabled = true;
 
     /**
      * This is used for making sure the cells are sent to client side in when
@@ -1441,7 +1440,7 @@ public class Spreadsheet extends Component
      * @see #setChartsEnabled(boolean)
      * @return
      */
-    boolean isChartsEnabled() {
+    public boolean isChartsEnabled() {
         return chartsEnabled;
     }
 
@@ -1451,7 +1450,7 @@ public class Spreadsheet extends Component
      *
      * @param chartsEnabled
      */
-    void setChartsEnabled(boolean chartsEnabled) {
+    public void setChartsEnabled(boolean chartsEnabled) {
         this.chartsEnabled = chartsEnabled;
         clearSheetOverlays();
         loadOrUpdateOverlays();
@@ -4658,7 +4657,9 @@ public class Spreadsheet extends Component
     }
 
     private void registerCustomComponent(Component component) {
-        if (!equals(component.getParent())) {
+        if (!getElement().equals(component.getElement().getParent())) {
+            getElement().appendVirtualChild(component.getElement());
+            
             // todo: se puede eliminar esto? en v8, setparent provoca que se
             // añada el componente en la jerarquía
             // component.setParent(this);

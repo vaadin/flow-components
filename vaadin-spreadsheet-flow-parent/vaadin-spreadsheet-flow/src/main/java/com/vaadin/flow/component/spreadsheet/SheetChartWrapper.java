@@ -47,7 +47,6 @@ public class SheetChartWrapper extends SheetOverlayWrapper
             + "disable them. Visit <a href=\"https://vaadin.com/spreadsheet\">vaadin.com/spreadsheet</a> for more info.";
 
     private MinimizableComponentContainer wrapper;
-    private String connectorId;
 
     private static ChartCreator chartCreator;
     private final XSSFChart chartXml;
@@ -115,11 +114,10 @@ public class SheetChartWrapper extends SheetOverlayWrapper
     @Override
     public String getId() {
         if (wrapper != null && wrapper.isAttached()) {
-            connectorId = wrapper.getId().orElse("");
-            // connectorId = wrapper.getConnectorId();
+            return Integer.toString(wrapper.getElement().getNode().getId());
         }
 
-        return connectorId;
+        return null;
     }
 
     @Override
