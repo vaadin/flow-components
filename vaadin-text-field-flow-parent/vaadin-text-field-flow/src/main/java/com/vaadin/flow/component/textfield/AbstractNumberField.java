@@ -124,9 +124,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
 
         addValueChangeListener(e -> validate());
 
-        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
-            addClientValidatedEventListener(e -> validate());
-        }
+        addClientValidatedEventListener(e -> validate());
     }
 
     /**
@@ -391,33 +389,23 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
 
     @Override
     public Validator<T> getDefaultValidator() {
-        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
-            return (value, context) -> checkValidity(value);
-        }
-
-        return Validator.alwaysPass();
+        return (value, context) -> checkValidity(value);
     }
 
     @Override
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<T> listener) {
-        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
-            return addClientValidatedEventListener(
-                    event -> listener.validationStatusChanged(
-                            new ValidationStatusChangeEvent<T>(this,
-                                    !isInvalid())));
-        }
-
-        return null;
+        return addClientValidatedEventListener(
+                event -> listener.validationStatusChanged(
+                        new ValidationStatusChangeEvent<T>(this,
+                                !isInvalid())));
     }
 
     private ValidationResult checkValidity(T value) {
-        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
-            boolean hasNonParsableValue = value == getEmptyValue()
-                    && isInputValuePresent();
-            if (hasNonParsableValue) {
-                return ValidationResult.error("");
-            }
+        boolean hasNonParsableValue = value == getEmptyValue()
+                && isInputValuePresent();
+        if (hasNonParsableValue) {
+            return ValidationResult.error("");
         }
 
         Double doubleValue = value != null ? value.doubleValue() : null;
@@ -486,12 +474,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
-            ClientValidationUtil
-                    .preventWebComponentFromSettingItselfToValid(this);
-        } else {
-            FieldValidationUtil.disableClientValidation(this);
-        }
+        ClientValidationUtil.preventWebComponentFromSettingItselfToValid(this);
     }
 
     // Override is only required to keep binary compatibility with other 23.x
@@ -506,26 +489,5 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     @Override
     public void removeThemeVariants(TextFieldVariant... variants) {
         HasThemeVariant.super.removeThemeVariants(variants);
-    }
-
-    /**
-     * Returns true if the given feature flag is enabled, false otherwise.
-     * <p>
-     * Exposed with protected visibility to support mocking
-     * <p>
-     * The method requires the {@code VaadinService} instance to obtain the
-     * available feature flags, otherwise, the feature is considered disabled.
-     *
-     * @param feature
-     *            the feature flag.
-     * @return whether the feature flag is enabled.
-     */
-    protected boolean isFeatureFlagEnabled(Feature feature) {
-        VaadinService service = VaadinService.getCurrent();
-        if (service == null) {
-            return false;
-        }
-
-        return FeatureFlags.get(service.getContext()).isEnabled(feature);
     }
 }
