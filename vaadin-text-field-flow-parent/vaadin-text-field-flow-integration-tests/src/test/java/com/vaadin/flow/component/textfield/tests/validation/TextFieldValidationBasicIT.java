@@ -26,8 +26,6 @@ import static com.vaadin.flow.component.textfield.tests.validation.TextFieldVali
 import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBasicPage.MAX_LENGTH_INPUT;
 import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBasicPage.PATTERN_INPUT;
 import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBasicPage.REQUIRED_BUTTON;
-import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBasicPage.DETACH_FIELD_BUTTON;
-import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBasicPage.ATTACH_FIELD_BUTTON;
 
 @TestPath("vaadin-text-field/validation/basic")
 public class TextFieldValidationBasicIT
@@ -56,11 +54,7 @@ public class TextFieldValidationBasicIT
 
     @Test
     public void detach_attach_onlyServerCanSetFieldToValid() {
-        $("button").id(DETACH_FIELD_BUTTON).click();
-        $("button").id(ATTACH_FIELD_BUTTON).click();
-
-        testField = getTestField();
-
+        detachAndReattachField();
         onlyServerCanSetFieldToValid();
     }
 

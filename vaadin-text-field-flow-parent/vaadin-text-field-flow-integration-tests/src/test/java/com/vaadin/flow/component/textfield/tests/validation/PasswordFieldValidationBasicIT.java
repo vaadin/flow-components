@@ -26,8 +26,6 @@ import static com.vaadin.flow.component.textfield.tests.validation.PasswordField
 import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldValidationBasicPage.MAX_LENGTH_INPUT;
 import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldValidationBasicPage.PATTERN_INPUT;
 import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldValidationBasicPage.REQUIRED_BUTTON;
-import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldValidationBasicPage.DETACH_FIELD_BUTTON;
-import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldValidationBasicPage.ATTACH_FIELD_BUTTON;
 
 @TestPath("vaadin-password-field/validation/basic")
 public class PasswordFieldValidationBasicIT
@@ -56,11 +54,7 @@ public class PasswordFieldValidationBasicIT
 
     @Test
     public void detach_attach_onlyServerCanSetFieldToValid() {
-        $("button").id(DETACH_FIELD_BUTTON).click();
-        $("button").id(ATTACH_FIELD_BUTTON).click();
-
-        testField = getTestField();
-
+        detachAndReattachField();
         onlyServerCanSetFieldToValid();
     }
 
