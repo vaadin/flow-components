@@ -128,12 +128,12 @@ public class NumberFieldValidationBasicIT
         assertServerInvalid();
 
         testField.setValue("1.5");
-        assertClientInvalid();
-        assertServerInvalid();
-
-        testField.setValue("2");
         assertClientValid();
         assertServerValid();
+
+        testField.setValue("2");
+        assertClientInvalid();
+        assertServerInvalid();
     }
 
     @Test
