@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.select;
 
+import com.vaadin.experimental.Feature;
+import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
@@ -32,6 +34,8 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.select.data.SelectDataView;
 import com.vaadin.flow.component.select.data.SelectListDataView;
 import com.vaadin.flow.component.select.generated.GeneratedVaadinSelect;
+import com.vaadin.flow.component.shared.ClientValidationUtil;
+import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.binder.HasValidator;
@@ -54,6 +58,7 @@ import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.data.selection.SingleSelect;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
+import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.shared.Registration;
 
 import java.util.Collection;
@@ -78,7 +83,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         implements HasItemComponents<T>, HasSize, HasValidation,
         SingleSelect<Select<T>, T>, HasListDataView<T, SelectListDataView<T>>,
         HasDataView<T, Void, SelectDataView<T>>, HasHelper, HasLabel, HasTheme,
-        HasTooltip, HasValidator<T> {
+        HasTooltip, HasValidator<T>, HasClientValidation {
 
     public static final String LABEL_ATTRIBUTE = "label";
 
@@ -112,7 +117,6 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
     private volatile int lastFetchedDataSize = -1;
 
     private SerializableConsumer<UI> sizeRequest;
-    private ValidationStatusChangeListener<T> validationStatusListener;
 
     /**
      * Constructs a select.
@@ -132,7 +136,10 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         getElement().appendChild(listBox.getElement());
 
         addValueChangeListener(e -> validate());
-        addBlurListener(e -> validate());
+
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            addClientValidatedEventListener(e -> validate());
+        }
     }
 
     /**
@@ -835,7 +842,13 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         initConnector();
-        FieldValidationUtil.disableClientValidation(this);
+
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            ClientValidationUtil
+                    .preventWebComponentFromChangingInvalidState(this);
+        } else {
+            FieldValidationUtil.disableClientValidation(this);
+        }
     }
 
     /**
@@ -1055,23 +1068,42 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
     @Override
     protected void validate() {
         boolean isRequired = this.isRequiredIndicatorVisible();
-        boolean isInvalid = isRequired && getValue() == null;
+        boolean isInvalid = isRequired && getValue() == getEmptyValue();
 
         setInvalid(isInvalid);
-        if (validationStatusListener != null) {
-            validationStatusListener.validationStatusChanged(
-                    new ValidationStatusChangeEvent<>(this, !isInvalid()));
-        }
     }
 
     @Override
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<T> listener) {
-        validationStatusListener = listener;
-        return () -> {
-            if (validationStatusListener == listener) {
-                validationStatusListener = null;
-            }
-        };
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            return addClientValidatedEventListener(
+                    event -> listener.validationStatusChanged(
+                            new ValidationStatusChangeEvent<>(this,
+                                    !isInvalid())));
+        }
+
+        return null;
+    }
+
+    /**
+     * Returns true if the given feature flag is enabled, false otherwise.
+     * <p>
+     * Exposed with protected visibility to support mocking
+     * <p>
+     * The method requires the {@code VaadinService} instance to obtain the
+     * available feature flags, otherwise, the feature is considered disabled.
+     *
+     * @param feature
+     *            the feature flag.
+     * @return whether the feature flag is enabled.
+     */
+    protected boolean isFeatureFlagEnabled(Feature feature) {
+        VaadinService service = VaadinService.getCurrent();
+        if (service == null) {
+            return false;
+        }
+
+        return FeatureFlags.get(service.getContext()).isEnabled(feature);
     }
 }
