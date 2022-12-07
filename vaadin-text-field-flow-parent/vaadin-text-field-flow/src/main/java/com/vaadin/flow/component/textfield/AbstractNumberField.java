@@ -38,11 +38,14 @@ import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
+import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
+import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * Abstract base class for components based on {@code vaadin-number-field}
@@ -393,6 +396,19 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         }
 
         return Validator.alwaysPass();
+    }
+
+    @Override
+    public Registration addValidationStatusChangeListener(
+            ValidationStatusChangeListener<T> listener) {
+        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
+            return addClientValidatedEventListener(
+                    event -> listener.validationStatusChanged(
+                            new ValidationStatusChangeEvent<T>(this,
+                                    !isInvalid())));
+        }
+
+        return null;
     }
 
     private ValidationResult checkValidity(T value) {
