@@ -32,8 +32,14 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.select.data.SelectDataView;
 import com.vaadin.flow.component.select.data.SelectListDataView;
 import com.vaadin.flow.component.select.generated.GeneratedVaadinSelect;
+import com.vaadin.flow.component.shared.ClientValidationUtil;
+import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasItemComponents;
+import com.vaadin.flow.data.binder.HasValidator;
+import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
+import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderWrapper;
@@ -75,7 +81,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         implements HasItemComponents<T>, HasSize, HasValidation,
         SingleSelect<Select<T>, T>, HasListDataView<T, SelectListDataView<T>>,
         HasDataView<T, Void, SelectDataView<T>>, HasHelper, HasLabel, HasTheme,
-        HasTooltip {
+        HasTooltip, HasValidator<T>, HasClientValidation {
 
     public static final String LABEL_ATTRIBUTE = "label";
 
@@ -126,6 +132,10 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         setPresentationValue(null);
 
         getElement().appendChild(listBox.getElement());
+
+        addValueChangeListener(e -> validate());
+
+        addClientValidatedEventListener(e -> validate());
     }
 
     /**
@@ -828,7 +838,8 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         initConnector();
-        FieldValidationUtil.disableClientValidation(this);
+
+        ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
     }
 
     /**
@@ -1045,4 +1056,21 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         keyMapper.setIdentifierGetter(identifierProvider);
     }
 
+    @Override
+    protected void validate() {
+        boolean isRequired = this.isRequiredIndicatorVisible();
+        boolean isInvalid = ValidationUtil
+                .checkRequired(isRequired, getValue(), getEmptyValue())
+                .isError();
+
+        setInvalid(isInvalid);
+    }
+
+    @Override
+    public Registration addValidationStatusChangeListener(
+            ValidationStatusChangeListener<T> listener) {
+        return addClientValidatedEventListener(
+                event -> listener.validationStatusChanged(
+                        new ValidationStatusChangeEvent<>(this, !isInvalid())));
+    }
 }
