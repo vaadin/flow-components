@@ -37,6 +37,7 @@ import com.vaadin.flow.component.select.generated.GeneratedVaadinSelect;
 import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
@@ -1068,7 +1069,9 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
     @Override
     protected void validate() {
         boolean isRequired = this.isRequiredIndicatorVisible();
-        boolean isInvalid = isRequired && getValue() == getEmptyValue();
+        boolean isInvalid = ValidationUtil
+                .checkRequired(isRequired, getValue(), getEmptyValue())
+                .isError();
 
         setInvalid(isInvalid);
     }
