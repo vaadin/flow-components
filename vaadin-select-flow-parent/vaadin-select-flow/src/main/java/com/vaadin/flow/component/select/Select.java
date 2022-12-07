@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.select;
 
-import com.vaadin.experimental.Feature;
-import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
@@ -59,7 +57,6 @@ import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.data.selection.SingleSelect;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
-import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.shared.Registration;
 
 import java.util.Collection;
@@ -138,9 +135,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
 
         addValueChangeListener(e -> validate());
 
-        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
-            addClientValidatedEventListener(e -> validate());
-        }
+        addClientValidatedEventListener(e -> validate());
     }
 
     /**
@@ -844,12 +839,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         super.onAttach(attachEvent);
         initConnector();
 
-        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
-            ClientValidationUtil
-                    .preventWebComponentFromModifyingInvalidState(this);
-        } else {
-            FieldValidationUtil.disableClientValidation(this);
-        }
+        ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
     }
 
     /**
@@ -1079,34 +1069,8 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
     @Override
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<T> listener) {
-        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
-            return addClientValidatedEventListener(
-                    event -> listener.validationStatusChanged(
-                            new ValidationStatusChangeEvent<>(this,
-                                    !isInvalid())));
-        }
-
-        return null;
-    }
-
-    /**
-     * Returns true if the given feature flag is enabled, false otherwise.
-     * <p>
-     * Exposed with protected visibility to support mocking
-     * <p>
-     * The method requires the {@code VaadinService} instance to obtain the
-     * available feature flags, otherwise, the feature is considered disabled.
-     *
-     * @param feature
-     *            the feature flag.
-     * @return whether the feature flag is enabled.
-     */
-    protected boolean isFeatureFlagEnabled(Feature feature) {
-        VaadinService service = VaadinService.getCurrent();
-        if (service == null) {
-            return false;
-        }
-
-        return FeatureFlags.get(service.getContext()).isEnabled(feature);
+        return addClientValidatedEventListener(
+                event -> listener.validationStatusChanged(
+                        new ValidationStatusChangeEvent<>(this, !isInvalid())));
     }
 }
