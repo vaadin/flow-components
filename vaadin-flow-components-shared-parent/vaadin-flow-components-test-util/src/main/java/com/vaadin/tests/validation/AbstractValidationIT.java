@@ -20,7 +20,10 @@ import com.vaadin.tests.AbstractComponentIT;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 
+import static com.vaadin.tests.validation.AbstractValidationPage.ATTACH_FIELD_BUTTON;
+import static com.vaadin.tests.validation.AbstractValidationPage.DETACH_FIELD_BUTTON;
 import static com.vaadin.tests.validation.AbstractValidationPage.SERVER_VALIDITY_STATE;
 import static com.vaadin.tests.validation.AbstractValidationPage.SERVER_VALIDITY_STATE_BUTTON;
 
@@ -87,5 +90,15 @@ public abstract class AbstractValidationIT<T extends TestBenchElement>
         return (Boolean) getCommandExecutor().executeScript(
                 "const field = arguments[0]; const invalid = arguments[1]; return field._shouldSetInvalid(invalid)",
                 testField, invalid);
+    }
+
+    protected void detachAndReattachField() {
+        $("button").id(DETACH_FIELD_BUTTON).click();
+        // Verify element has been removed
+        waitUntil(ExpectedConditions.stalenessOf(testField));
+
+        $("button").id(ATTACH_FIELD_BUTTON).click();
+        // Retrieve new element instance
+        testField = getTestField();
     }
 }

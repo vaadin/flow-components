@@ -56,11 +56,7 @@ public class EmailFieldValidationBasicIT
 
     @Test
     public void detach_attach_onlyServerCanSetFieldToValid() {
-        $("button").id(DETACH_FIELD_BUTTON).click();
-        $("button").id(ATTACH_FIELD_BUTTON).click();
-
-        testField = getTestField();
-
+        detachAndReattachField();
         onlyServerCanSetFieldToValid();
     }
 

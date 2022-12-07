@@ -6,8 +6,6 @@ import com.vaadin.tests.validation.AbstractValidationIT;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
-import static com.vaadin.flow.component.select.tests.validation.BasicValidationPage.ATTACH_FIELD_BUTTON;
-import static com.vaadin.flow.component.select.tests.validation.BasicValidationPage.DETACH_FIELD_BUTTON;
 import static com.vaadin.flow.component.select.tests.validation.BasicValidationPage.REQUIRED_BUTTON;
 
 @TestPath("vaadin-select/validation/basic")
@@ -54,9 +52,7 @@ public class BasicValidationIT extends AbstractValidationIT<SelectElement> {
         $("button").id(REQUIRED_BUTTON).click();
         testField.sendKeys(Keys.TAB);
 
-        $("button").id(DETACH_FIELD_BUTTON).click();
-        $("button").id(ATTACH_FIELD_BUTTON).click();
-        testField = getTestField();
+        detachAndReattachField();
 
         assertServerInvalid();
         assertClientInvalid();
@@ -66,9 +62,7 @@ public class BasicValidationIT extends AbstractValidationIT<SelectElement> {
     public void webComponentCanNotModifyInvalidState() {
         assertWebComponentCanNotModifyInvalidState();
 
-        $("button").id(DETACH_FIELD_BUTTON).click();
-        $("button").id(ATTACH_FIELD_BUTTON).click();
-        testField = getTestField();
+        detachAndReattachField();
 
         assertWebComponentCanNotModifyInvalidState();
     }
