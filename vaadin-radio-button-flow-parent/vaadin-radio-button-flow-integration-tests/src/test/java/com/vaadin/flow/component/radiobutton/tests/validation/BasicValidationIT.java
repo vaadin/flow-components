@@ -7,8 +7,6 @@ import com.vaadin.tests.validation.AbstractValidationIT;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
-import static com.vaadin.flow.component.radiobutton.tests.validation.BasicValidationPage.ATTACH_FIELD_BUTTON;
-import static com.vaadin.flow.component.radiobutton.tests.validation.BasicValidationPage.DETACH_FIELD_BUTTON;
 import static com.vaadin.flow.component.radiobutton.tests.validation.BasicValidationPage.REQUIRED_BUTTON;
 
 @TestPath("vaadin-radio-button-group/validation/basic")
@@ -52,9 +50,7 @@ public class BasicValidationIT
         $("button").id(REQUIRED_BUTTON).click();
         testField.$(RadioButtonElement.class).last().sendKeys(Keys.TAB);
 
-        $("button").id(DETACH_FIELD_BUTTON).click();
-        $("button").id(ATTACH_FIELD_BUTTON).click();
-        testField = getTestField();
+        detachAndReattachField();
 
         assertServerInvalid();
         assertClientInvalid();
@@ -64,9 +60,7 @@ public class BasicValidationIT
     public void webComponentCanNotModifyInvalidState() {
         assertWebComponentCanNotModifyInvalidState();
 
-        $("button").id(DETACH_FIELD_BUTTON).click();
-        $("button").id(ATTACH_FIELD_BUTTON).click();
-        testField = getTestField();
+        detachAndReattachField();
 
         assertWebComponentCanNotModifyInvalidState();
     }
