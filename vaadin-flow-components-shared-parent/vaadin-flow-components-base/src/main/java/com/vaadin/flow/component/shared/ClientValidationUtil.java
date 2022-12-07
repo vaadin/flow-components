@@ -33,24 +33,7 @@ public final class ClientValidationUtil {
     public static <C extends Component & HasValidation> void preventWebComponentFromSettingItselfToValid(
             C component) {
         StringBuilder expression = new StringBuilder(
-                "this._shouldSetInvalid = function (invalid) { return false };");
-
-        if (component.isInvalid()) {
-            /*
-             * By default the invalid flag is set to false. Workaround the case
-             * where the client side validation overrides the invalid state
-             * before the `_shouldSetInvalid` method is overridden above.
-             */
-            expression.append("this.invalid = true;");
-        }
-
-        component.getElement().executeJs(expression.toString());
-    }
-
-    public static <C extends Component & HasValidation> void preventWebComponentFromModifyingInvalidState(
-            C component) {
-        StringBuilder expression = new StringBuilder(
-                "this._shouldSetInvalid = function (invalid) { return false };");
+                "this._shouldSetInvalid = function (invalid) { return invalid };");
 
         if (component.isInvalid()) {
             /*
