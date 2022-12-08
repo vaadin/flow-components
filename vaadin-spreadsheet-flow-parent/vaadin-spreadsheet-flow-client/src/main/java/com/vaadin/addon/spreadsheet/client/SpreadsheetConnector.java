@@ -421,10 +421,6 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
         }
     }
 
-    native void log(String msg) /*-{
-        console.log("##", msg);
-    }-*/;
-
     private void addOverlay(String id, OverlayInfo overlayInfo) {
         switch (overlayInfo.type) {
         case IMAGE:
@@ -443,14 +439,6 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
             SheetJsniUtil.removeOnSlotDisconnect(slot.getElement(), element);
             getWidget().addOverlay(id, slot, overlayInfo);
             break;
-        }
-    }
-
-    public class Slot extends Widget {
-        public Slot(String name) {
-            Element element = Document.get().createElement("slot");
-            element.setAttribute("name", name);
-            setElement(element);
         }
     }
 
@@ -564,7 +552,7 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
     private Element host;
 
     public void setHost(Element element) {
-        // TODO: THis will be properly fixed with custom component support
+        // TODO: This will be properly fixed with custom component support
         this.host = (Element) element.getPropertyObject("host");
         getWidget().setHost(element);
     }

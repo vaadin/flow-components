@@ -1672,9 +1672,8 @@ public class Spreadsheet extends Component
         if (overlays != null) {
             // The node id's of component overlays attached as virtual children
             // may no longer be valid after a detach/attach. Remove all
-            // component overlays and reload them (with updated node id's).
-            overlays.values().removeIf(
-                    overlay -> overlay.type == OverlayInfo.Type.COMPONENT);
+            // overlays and reload them (with updated node id's).
+            overlays.clear();
             loadOrUpdateOverlays();
         }
     }
@@ -4676,10 +4675,6 @@ public class Spreadsheet extends Component
     private void registerCustomComponent(Component component) {
         if (!getElement().equals(component.getElement().getParent())) {
             getElement().appendVirtualChild(component.getElement());
-
-            // todo: se puede eliminar esto? en v8, setparent provoca que se
-            // añada el componente en la jerarquía
-            // component.setParent(this);
         }
     }
 
