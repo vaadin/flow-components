@@ -37,25 +37,31 @@ public class TextFieldValidationBasicIT
     }
 
     @Test
-    public void onlyServerCanSetFieldToValid() {
+    public void detach_attach_preservesInvalidState() {
+        // Make field invalid
         $("button").id(REQUIRED_BUTTON).click();
+        testField.sendKeys(Keys.TAB);
 
-        executeScript("arguments[0].validate()", testField);
+        detachAndReattachField();
+
+        assertServerInvalid();
         assertClientInvalid();
-
-        testField.sendKeys("Value");
-        executeScript("arguments[0].validate()", testField);
-        assertClientInvalid();
-
-        testField.sendKeys(Keys.ENTER);
-        assertServerValid();
-        assertClientValid();
     }
 
     @Test
-    public void detach_attach_onlyServerCanSetFieldToValid() {
+    public void webComponentCanNotModifyInvalidState() {
+        assertWebComponentCanNotModifyInvalidState();
+
         detachAndReattachField();
-        onlyServerCanSetFieldToValid();
+
+        assertWebComponentCanNotModifyInvalidState();
+    }
+
+    @Test
+    public void triggerInputBlur_assertValidity() {
+        testField.sendKeys(Keys.TAB);
+        assertServerValid();
+        assertClientValid();
     }
 
     @Test
