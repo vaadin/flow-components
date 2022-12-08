@@ -21,7 +21,6 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.details.Details;
-import com.vaadin.flow.component.html.Span;
 
 /**
  * An accordion panel which could be opened or closed.
