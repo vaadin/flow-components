@@ -25,7 +25,6 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.textfield.testbench.BigDecimalFieldElement;
 import com.vaadin.flow.component.textfield.testbench.EmailFieldElement;
-import com.vaadin.flow.component.textfield.testbench.IntegerFieldElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
