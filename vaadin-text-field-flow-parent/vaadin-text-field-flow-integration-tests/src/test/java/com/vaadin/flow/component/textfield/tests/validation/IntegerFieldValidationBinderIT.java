@@ -134,7 +134,7 @@ public class IntegerFieldValidationBinderIT
     public void badInput_changeInputValue_assertValidity() {
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("2", Keys.ENTER);
 
-        testField.sendKeys("--2", Keys.ENTER);
+        testField.sendKeys("--2", Keys.TAB);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage("");
@@ -143,7 +143,7 @@ public class IntegerFieldValidationBinderIT
         assertServerValid();
         assertClientValid();
 
-        testField.sendKeys("--2", Keys.ENTER);
+        testField.sendKeys("--2", Keys.TAB);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage("");
@@ -151,7 +151,7 @@ public class IntegerFieldValidationBinderIT
 
     @Test
     public void integerOverflow_setInputValueExceedingMaxInteger_assertValidity() {
-        testField.sendKeys("999999999999", Keys.ENTER);
+        testField.sendKeys("999999999999", Keys.TAB);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage("");
@@ -159,7 +159,7 @@ public class IntegerFieldValidationBinderIT
 
     @Test
     public void integerOverflow_setInputValueExceedingMinInteger_assertValidity() {
-        testField.sendKeys("-999999999999", Keys.ENTER);
+        testField.sendKeys("-999999999999", Keys.TAB);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage("");

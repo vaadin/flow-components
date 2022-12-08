@@ -166,7 +166,7 @@ public class IntegerFieldValidationBasicIT
 
     @Test
     public void badInput_changeInputValue_assertValidity() {
-        testField.sendKeys("--2", Keys.ENTER);
+        testField.sendKeys("--2", Keys.TAB);
         assertServerInvalid();
         assertClientInvalid();
 
@@ -174,21 +174,21 @@ public class IntegerFieldValidationBasicIT
         assertServerValid();
         assertClientValid();
 
-        testField.sendKeys("--2", Keys.ENTER);
+        testField.sendKeys("--2", Keys.TAB);
         assertServerInvalid();
         assertClientInvalid();
     }
 
     @Test
     public void integerOverflow_setInputValueExceedingMaxInteger_assertValidity() {
-        testField.sendKeys("999999999999", Keys.ENTER);
+        testField.sendKeys("999999999999", Keys.TAB);
         assertServerInvalid();
         assertClientInvalid();
     }
 
     @Test
     public void integerOverflow_setInputValueExceedingMinInteger_assertValidity() {
-        testField.sendKeys("-999999999999", Keys.ENTER);
+        testField.sendKeys("-999999999999", Keys.TAB);
         assertServerInvalid();
         assertClientInvalid();
     }
