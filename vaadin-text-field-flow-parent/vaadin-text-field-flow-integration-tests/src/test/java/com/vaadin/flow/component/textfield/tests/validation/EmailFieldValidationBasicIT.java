@@ -26,8 +26,6 @@ import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldVal
 import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldValidationBasicPage.MAX_LENGTH_INPUT;
 import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldValidationBasicPage.PATTERN_INPUT;
 import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldValidationBasicPage.REQUIRED_BUTTON;
-import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldValidationBasicPage.DETACH_FIELD_BUTTON;
-import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldValidationBasicPage.ATTACH_FIELD_BUTTON;
 
 @TestPath("vaadin-email-field/validation/basic")
 public class EmailFieldValidationBasicIT
@@ -39,25 +37,31 @@ public class EmailFieldValidationBasicIT
     }
 
     @Test
-    public void onlyServerCanSetFieldToValid() {
+    public void detach_attach_preservesInvalidState() {
+        // Make field invalid
         $("button").id(REQUIRED_BUTTON).click();
+        testField.sendKeys(Keys.TAB);
 
-        executeScript("arguments[0].validate()", testField);
+        detachAndReattachField();
+
+        assertServerInvalid();
         assertClientInvalid();
-
-        testField.sendKeys("john@vaadin.com");
-        executeScript("arguments[0].validate()", testField);
-        assertClientInvalid();
-
-        testField.sendKeys(Keys.ENTER);
-        assertServerValid();
-        assertClientValid();
     }
 
     @Test
-    public void detach_attach_onlyServerCanSetFieldToValid() {
+    public void webComponentCanNotModifyInvalidState() {
+        assertWebComponentCanNotModifyInvalidState();
+
         detachAndReattachField();
-        onlyServerCanSetFieldToValid();
+
+        assertWebComponentCanNotModifyInvalidState();
+    }
+
+    @Test
+    public void triggerInputBlur_assertValidity() {
+        testField.sendKeys(Keys.TAB);
+        assertServerValid();
+        assertClientValid();
     }
 
     @Test
