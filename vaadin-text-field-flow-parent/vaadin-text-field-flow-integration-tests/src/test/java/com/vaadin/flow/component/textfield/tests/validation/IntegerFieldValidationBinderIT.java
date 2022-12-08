@@ -151,7 +151,7 @@ public class IntegerFieldValidationBinderIT
 
     @Test
     public void badInput_setInputValueBeyondMaxLimit_assertValidity() {
-        testField.sendKeys(String.valueOf(Integer.MAX_VALUE), "1", Keys.ENTER);
+        testField.sendKeys("999999999999", Keys.ENTER);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage("");
@@ -159,8 +159,7 @@ public class IntegerFieldValidationBinderIT
 
     @Test
     public void badInput_setInputValueBeyondMinLimit_assertValidity() {
-        testField.sendKeys("-", String.valueOf(Integer.MAX_VALUE), "1",
-                Keys.ENTER);
+        testField.sendKeys("-999999999999", Keys.ENTER);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage("");
