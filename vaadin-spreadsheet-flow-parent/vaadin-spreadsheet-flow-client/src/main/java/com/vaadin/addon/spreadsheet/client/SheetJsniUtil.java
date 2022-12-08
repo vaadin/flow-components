@@ -163,10 +163,10 @@ public class SheetJsniUtil {
             });
         }-*/;
 
-    public static native Element getVirtualChild(int nodeId, String appId) /*-{
+    public static native Element getVirtualChild(String nodeId, String appId) /*-{
         return $wnd.Vaadin
           && $wnd.Vaadin.Flow
           && $wnd.Vaadin.Flow.clients[appId]
-          && $wnd.Vaadin.Flow.clients[appId].getByNodeId(nodeId);
+          && $wnd.Vaadin.Flow.clients[appId].getByNodeId(parseInt(nodeId));
     }-*/;
 }

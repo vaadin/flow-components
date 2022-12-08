@@ -432,17 +432,15 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
                     overlayInfo);
             break;
         case COMPONENT:
-            // TODO: Get APPID from a property
-            String appid = "ROOT";
             var slotName = "overlay-component-" + id;
 
-            var element = SheetJsniUtil.getVirtualChild(Integer.parseInt(id), appid);
+            var element = SheetJsniUtil.getVirtualChild(id,
+                    host.getPropertyString("appId"));
             element.setAttribute("slot", slotName);
             host.appendChild(element);
 
             var slot = new Slot(slotName);
-            SheetJsniUtil.removeOnSlotDisconnect(slot.getElement(),
-                    element);
+            SheetJsniUtil.removeOnSlotDisconnect(slot.getElement(), element);
             getWidget().addOverlay(id, slot, overlayInfo);
             break;
         }

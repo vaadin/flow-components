@@ -520,8 +520,8 @@ public class SpreadsheetJsApi {
 
     public void onPopupButtonOpened(int row, int column, String contentParentId,
             String appId) {
-        Element container = SheetJsniUtil
-                .getVirtualChild(Integer.parseInt(contentParentId), appId);
+        Element container = SheetJsniUtil.getVirtualChild(contentParentId,
+                appId);
 
         if (container == null) {
             return;

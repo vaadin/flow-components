@@ -1161,6 +1161,7 @@ public class Spreadsheet extends Component
     }
 
     private void init() {
+        updateAppId();
         valueManager = createCellValueManager();
         sheetOverlays = new HashSet<SheetOverlayWrapper>();
         tables = new HashSet<SpreadsheetTable>();
@@ -1170,6 +1171,11 @@ public class Spreadsheet extends Component
         addActionHandler(defaultActionHandler);
         setId(UUID.randomUUID().toString());
         customInit();
+    }
+
+    private void updateAppId() {
+        getElement().setProperty("appId",
+                UI.getCurrent().getInternals().getAppId());
     }
 
     private void registerRpc(SpreadsheetHandlerImpl spreadsheetHandler) {
@@ -1660,6 +1666,8 @@ public class Spreadsheet extends Component
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         valueManager.updateLocale(getLocale());
+
+        updateAppId();
 
         if (overlays != null) {
             // The node id's of component overlays attached as virtual children
