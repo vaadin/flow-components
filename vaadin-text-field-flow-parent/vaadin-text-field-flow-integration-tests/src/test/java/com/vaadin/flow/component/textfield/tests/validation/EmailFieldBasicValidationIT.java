@@ -77,16 +77,6 @@ public class EmailFieldBasicValidationIT
     }
 
     @Test
-    public void required_clientSidePropertyIsNotPropagatedToServer() {
-        $("button").id(REQUIRED_BUTTON).click();
-
-        executeScript("arguments[0].required = false", testField);
-
-        testField.sendKeys(Keys.TAB);
-        assertServerInvalid();
-    }
-
-    @Test
     public void minLength_triggerBlur_assertValidity() {
         $("input").id(MIN_LENGTH_INPUT).sendKeys("13", Keys.ENTER);
 
@@ -113,16 +103,6 @@ public class EmailFieldBasicValidationIT
     }
 
     @Test
-    public void minLength_clientSidePropertyIsNotPropagatedToServer() {
-        $("input").id(MIN_LENGTH_INPUT).sendKeys("13", Keys.ENTER);
-
-        executeScript("arguments[0].minLength = 0", testField);
-
-        testField.setValue("a@vaadin.com");
-        assertServerInvalid();
-    }
-
-    @Test
     public void maxLength_changeValue_assertValidity() {
         $("input").id(MAX_LENGTH_INPUT).sendKeys("13", Keys.ENTER);
 
@@ -137,16 +117,6 @@ public class EmailFieldBasicValidationIT
         testField.setValue("a@vaadin.com");
         assertClientValid();
         assertServerValid();
-    }
-
-    @Test
-    public void maxLength_clientSidePropertyIsNotPropagatedToServer() {
-        $("input").id(MAX_LENGTH_INPUT).sendKeys("13", Keys.ENTER);
-
-        executeScript("arguments[0].maxLength = 130", testField);
-
-        testField.setValue("aaa@vaadin.com");
-        assertServerInvalid();
     }
 
     @Test
