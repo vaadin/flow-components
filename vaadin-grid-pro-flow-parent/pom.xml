@@ -11,8 +11,8 @@
     <name>Vaadin Grid Pro Parent</name>
     <licenses>
         <license>
-            <name>Commercial Vaadin Developer License version 4.0</name>
-            <url>https://vaadin.com/license/cvdl-4.0</url>
+            <name>Vaadin Commercial License and Service Terms</name>
+            <url>https://vaadin.com/commercial-license-and-service-terms</url>
         </license>
     </licenses>
     <modules>

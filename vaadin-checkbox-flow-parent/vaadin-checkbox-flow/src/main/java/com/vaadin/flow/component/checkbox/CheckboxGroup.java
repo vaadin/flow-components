@@ -37,9 +37,14 @@ import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.checkbox.dataview.CheckboxGroupDataView;
 import com.vaadin.flow.component.checkbox.dataview.CheckboxGroupListDataView;
+import com.vaadin.flow.component.shared.ClientValidationUtil;
+import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.binder.HasValidator;
+import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
+import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderWrapper;
@@ -56,8 +61,6 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
-import com.vaadin.flow.dom.PropertyChangeEvent;
-import com.vaadin.flow.dom.PropertyChangeListener;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
@@ -80,7 +83,7 @@ public class CheckboxGroup<T>
         MultiSelect<CheckboxGroup<T>, T>,
         HasListDataView<T, CheckboxGroupListDataView<T>>,
         HasDataView<T, Void, CheckboxGroupDataView<T>>, HasHelper, HasLabel,
-        HasTooltip, HasValidator<T> {
+        HasTooltip, HasValidator<Set<T>>, HasClientValidation {
 
     private static final String VALUE = "value";
 
@@ -97,8 +100,6 @@ public class CheckboxGroup<T>
 
     private ComponentRenderer<? extends Component, T> itemRenderer;
 
-    private final PropertyChangeListener validationListener = this::validateSelectionEnabledState;
-    private Registration validationRegistration;
     private Registration dataProviderListenerRegistration;
 
     private int lastNotifiedDataSize = -1;
@@ -114,7 +115,10 @@ public class CheckboxGroup<T>
         super(Collections.emptySet(), Collections.emptySet(), JsonArray.class,
                 CheckboxGroup::presentationToModel,
                 CheckboxGroup::modelToPresentation, true);
-        registerValidation();
+
+        addValueChangeListener(e -> validate());
+
+        addClientValidatedEventListener(e -> validate());
     }
 
     /**
@@ -220,7 +224,7 @@ public class CheckboxGroup<T>
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
 
-        FieldValidationUtil.disableClientValidation(this);
+        ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
     }
 
     @Override
@@ -696,35 +700,6 @@ public class CheckboxGroup<T>
         checkbox.getElement().executeJs("this.disabled = $0", disabled);
     }
 
-    private void validateSelectionEnabledState(PropertyChangeEvent event) {
-        if (!hasValidValue()) {
-            Set<T> oldValue = presentationToModel(this,
-                    (JsonArray) event.getOldValue());
-            // return the value back on the client side
-            try {
-                validationRegistration.remove();
-                getElement().setPropertyJson(VALUE,
-                        modelToPresentation(this, oldValue));
-            } finally {
-                registerValidation();
-            }
-            // Now make sure that the checkbox is still in the correct state
-            Set<T> value = presentationToModel(this,
-                    (JsonArray) event.getValue());
-            getCheckboxItems()
-                    .filter(checkbox -> value.contains(checkbox.getItem()))
-                    .forEach(this::updateEnabled);
-        }
-    }
-
-    private void registerValidation() {
-        if (validationRegistration != null) {
-            validationRegistration.remove();
-        }
-        validationRegistration = getElement().addPropertyChangeListener(VALUE,
-                validationListener);
-    }
-
     private static <T> Set<T> presentationToModel(CheckboxGroup<T> group,
             JsonArray presentation) {
         if (group.keyMapper == null) {
@@ -788,4 +763,21 @@ public class CheckboxGroup<T>
         keyMapper.setIdentifierGetter(identifierProvider);
     }
 
+    @Override
+    protected void validate() {
+        boolean isRequired = isRequiredIndicatorVisible();
+        boolean isInvalid = ValidationUtil
+                .checkRequired(isRequired, getValue(), getEmptyValue())
+                .isError();
+
+        setInvalid(isInvalid);
+    }
+
+    @Override
+    public Registration addValidationStatusChangeListener(
+            ValidationStatusChangeListener<Set<T>> listener) {
+        return addClientValidatedEventListener(
+                event -> listener.validationStatusChanged(
+                        new ValidationStatusChangeEvent<>(this, !isInvalid())));
+    }
 }

@@ -87,7 +87,6 @@ public class GridDetailsRowIT extends AbstractComponentIT {
      * should be updated
      */
     @Test
-
     public void gridUpdateItemUpdateDetails() {
         open();
         GridElement grid = $(GridElement.class).first();

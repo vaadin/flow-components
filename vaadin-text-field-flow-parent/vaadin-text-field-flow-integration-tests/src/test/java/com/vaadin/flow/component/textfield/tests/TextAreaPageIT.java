@@ -152,12 +152,6 @@ public class TextAreaPageIT extends AbstractComponentIT {
     }
 
     @Test
-    public void assertCantMakeInvalidValueValidThroughClientManipulation() {
-        ValidationTestHelper.testValidation(getCommandExecutor(), getContext(),
-                $(TextAreaElement.class).id("invalid-test-field"));
-    }
-
-    @Test
     public void assertHelperText() {
         TextAreaElement textAreaElement = $(TextAreaElement.class)
                 .id("helper-text-field");

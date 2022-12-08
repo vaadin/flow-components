@@ -1,23 +1,25 @@
 package com.vaadin.flow.component.spreadsheet.test;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.List;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.testutil.TestPath;
+
 /**
  * Test for spreadsheets that have both hidden and frozen rows/columns.
  *
  */
+@TestPath("vaadin-spreadsheet")
 public class HiddenAndFrozenIT extends AbstractSpreadsheetIT {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL());
+        open();
     }
 
     @Test
@@ -52,7 +54,7 @@ public class HiddenAndFrozenIT extends AbstractSpreadsheetIT {
 
         assertVisibleChildCount(topLeft, "rh", frozenRows);
         assertVisibleChildCount(topLeft, "ch", frozenColumns);
-        assertEquals("First regular cell not where it's supposed to be,",
+        Assert.assertEquals("First regular cell not where it's supposed to be,",
                 "regular", getCellValue(regularCell));
     }
 
@@ -69,7 +71,7 @@ public class HiddenAndFrozenIT extends AbstractSpreadsheetIT {
             ++actualChildCount;
         }
 
-        assertEquals(
+        Assert.assertEquals(
                 String.format("Unexpected child count (%s),", childClassName),
                 expectedChildCount, actualChildCount);
     }

@@ -76,7 +76,7 @@ public class GridViewUsingTemplatesPage extends LegacyTestView {
 
         grid.setSelectionMode(SelectionMode.NONE);
         grid.setId("template-renderer");
-        addCard("Using templates", "Grid with columns using template renderer",
+        addCard("Using templates", "Grid with columns using Lit renderer",
                 grid);
     }
 }

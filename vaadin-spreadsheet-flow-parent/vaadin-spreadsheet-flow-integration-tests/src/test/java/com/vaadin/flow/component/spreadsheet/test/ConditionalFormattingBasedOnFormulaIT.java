@@ -3,8 +3,11 @@ package com.vaadin.flow.component.spreadsheet.test;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import com.vaadin.flow.testutil.TestPath;
 
+import org.junit.Assert;
+
+@TestPath("vaadin-spreadsheet")
 public class ConditionalFormattingBasedOnFormulaIT
         extends AbstractSpreadsheetIT {
 
@@ -15,7 +18,7 @@ public class ConditionalFormattingBasedOnFormulaIT
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL());
+        open();
 
         loadFile("conditional_formatting_with_formula_on_second_sheet.xlsx");
         selectSheetAt(1);
@@ -25,14 +28,14 @@ public class ConditionalFormattingBasedOnFormulaIT
     public void loadSpreadsheetWithConditionalFormattingInA2_MakeConditionFalse_CellA2FilledWhite() {
         setCellValue("A1", VALUE);
         setCellValue("A2", "Not" + VALUE);
-        assertEquals(FALSE_CONDITION_COLOR, getCellColor("A2"));
+        Assert.assertEquals(FALSE_CONDITION_COLOR, getCellColor("A2"));
     }
 
     @Test
     public void loadSpreadsheetWithConditionalFormattingInA2_MakeConditionTrue_CellA2FilledRed() {
         setCellValue("A1", VALUE);
         setCellValue("A2", VALUE);
-        assertEquals(TRUE_CONDITION_COLOR, getCellColor("A2"));
+        Assert.assertEquals(TRUE_CONDITION_COLOR, getCellColor("A2"));
     }
 
     @Test
@@ -41,12 +44,13 @@ public class ConditionalFormattingBasedOnFormulaIT
         String b10WithConditionEqualsToZero = getCellColor("B10");
         String c10WithConditionGreaterOfZero = getCellColor("C10");
         String d10WithConditionLowerOfZero = getCellColor("D10");
-        assertEquals(DIFFERENT_FROM_ZERO_CONDITION_COLOR,
+        Assert.assertEquals(DIFFERENT_FROM_ZERO_CONDITION_COLOR,
                 a10WithConditionEqualsToOne);
-        assertEquals(FALSE_CONDITION_COLOR, b10WithConditionEqualsToZero);
-        assertEquals(DIFFERENT_FROM_ZERO_CONDITION_COLOR,
+        Assert.assertEquals(FALSE_CONDITION_COLOR,
+                b10WithConditionEqualsToZero);
+        Assert.assertEquals(DIFFERENT_FROM_ZERO_CONDITION_COLOR,
                 c10WithConditionGreaterOfZero);
-        assertEquals(DIFFERENT_FROM_ZERO_CONDITION_COLOR,
+        Assert.assertEquals(DIFFERENT_FROM_ZERO_CONDITION_COLOR,
                 d10WithConditionLowerOfZero);
     }
 }

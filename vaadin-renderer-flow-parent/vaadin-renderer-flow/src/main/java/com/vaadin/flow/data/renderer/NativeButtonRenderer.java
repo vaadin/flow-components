@@ -28,7 +28,7 @@ import com.vaadin.flow.shared.Registration;
 
 /**
  *
- * A template renderer to create a clickable button.
+ * A renderer to create a clickable button.
  * <p>
  * {@link ItemClickListener}s are notified when the rendered buttons are either
  * clicked or tapped (in touch devices).
