@@ -27,7 +27,6 @@ import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetWidget.SheetContextMenuHandler;
@@ -433,21 +432,17 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
                     overlayInfo);
             break;
         case COMPONENT:
-            // TODO: Create a flow component wrapper with the node id
-
+            // TODO: Get APPID from a property
             String appid = "ROOT";
-
             var slotName = "overlay-component-" + id;
+
+            var element = SheetJsniUtil.getVirtualChild(Integer.parseInt(id), appid);
+            element.setAttribute("slot", slotName);
+            host.appendChild(element);
+
             var slot = new Slot(slotName);
-
-            var componentWidget = new FlowComponentRenderer(appid, id);
-            componentWidget.getElement().setAttribute("slot", slotName);
-
             SheetJsniUtil.removeOnSlotDisconnect(slot.getElement(),
-                    componentWidget.getElement());
-
-            host.appendChild(componentWidget.getElement());
-
+                    element);
             getWidget().addOverlay(id, slot, overlayInfo);
             break;
         }

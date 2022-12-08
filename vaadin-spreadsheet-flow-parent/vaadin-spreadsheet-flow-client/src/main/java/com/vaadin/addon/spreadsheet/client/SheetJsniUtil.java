@@ -163,4 +163,10 @@ public class SheetJsniUtil {
             });
         }-*/;
 
+    public static native Element getVirtualChild(int nodeId, String appId) /*-{
+        return $wnd.Vaadin
+          && $wnd.Vaadin.Flow
+          && $wnd.Vaadin.Flow.clients[appId]
+          && $wnd.Vaadin.Flow.clients[appId].getByNodeId(nodeId);
+    }-*/;
 }

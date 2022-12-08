@@ -12,6 +12,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.addon.spreadsheet.client.PopupButtonConnector;
 import com.vaadin.addon.spreadsheet.client.PopupButtonState;
 import com.vaadin.addon.spreadsheet.client.PopupButtonWidget;
+import com.vaadin.addon.spreadsheet.client.SheetJsniUtil;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetClientRpc;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetConnector;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetServerRpc;
@@ -517,17 +518,10 @@ public class SpreadsheetJsApi {
         }
     }
 
-    private static native Element getPopupContentContainer(
-            String contentParentId, String appId) /*-{
-        return $wnd.Vaadin
-          && $wnd.Vaadin.Flow
-          && $wnd.Vaadin.Flow.clients[appId]
-          && $wnd.Vaadin.Flow.clients[appId].getByNodeId(contentParentId);
-    }-*/;
-
     public void onPopupButtonOpened(int row, int column, String contentParentId,
             String appId) {
-        Element container = getPopupContentContainer(contentParentId, appId);
+        Element container = SheetJsniUtil
+                .getVirtualChild(Integer.parseInt(contentParentId), appId);
 
         if (container == null) {
             return;
