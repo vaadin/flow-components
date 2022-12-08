@@ -30,14 +30,14 @@ public class DetailsElement extends TestBenchElement {
      * Returns summary element
      */
     public TestBenchElement getSummary() {
-        return $(TestBenchElement.class).attribute("slot", "summary").first();
+        return getSummaryWrapper().$("*").first();
     }
 
     /**
      * Returns summary element as string
      */
     public String getSummaryText() {
-        return getSummary().getText();
+        return getSummaryWrapper().getText();
     }
 
     /**
@@ -70,7 +70,7 @@ public class DetailsElement extends TestBenchElement {
      * Returns a wrapper of the summary component
      */
     public TestBenchElement getSummaryWrapper() {
-        return $(TestBenchElement.class).attribute("part", "summary").first();
+        return $(TestBenchElement.class).attribute("slot", "summary").first();
     }
 
     /**

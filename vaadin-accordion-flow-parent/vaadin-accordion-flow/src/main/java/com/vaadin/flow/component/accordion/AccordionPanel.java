@@ -26,11 +26,21 @@ import com.vaadin.flow.component.details.Details;
  * An accordion panel which could be opened or closed.
  */
 @Tag("vaadin-accordion-panel")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha5")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha6")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/accordion", version = "24.0.0-alpha5")
+@NpmPackage(value = "@vaadin/accordion", version = "24.0.0-alpha6")
 @JsModule("@vaadin/accordion/src/vaadin-accordion-panel.js")
 public class AccordionPanel extends Details {
+
+    /**
+     * Server-side component for the {@code <vaadin-accordion-heading>} element.
+     */
+    @Tag("vaadin-accordion-heading")
+    static class AccordionHeading extends Component {
+
+        public AccordionHeading() {
+        }
+    }
 
     /**
      * Creates an empty panel.
@@ -118,5 +128,14 @@ public class AccordionPanel extends Details {
     public AccordionPanel(Component summary, Component... components) {
         this(summary);
         addContent(components);
+    }
+
+    /**
+     * Creates the summary container component.
+     *
+     * @return the summary container
+     */
+    protected Component createSummaryContainer() {
+        return new AccordionHeading();
     }
 }
