@@ -86,7 +86,9 @@ public class Details extends Component
     public Details() {
         contentContainer = new Div();
         getElement().appendChild(contentContainer.getElement());
-        setSummaryContainer();
+        summaryContainer = createSummaryContainer();
+        summaryContainer.getElement().setAttribute("slot", "summary");
+        getElement().appendChild(summaryContainer.getElement());
     }
 
     /**
@@ -182,12 +184,12 @@ public class Details extends Component
     }
 
     /**
-     * Sets the summary container component.
+     * Creates the summary container component.
+     *
+     * @return the summary container
      */
-    protected void setSummaryContainer() {
-        summaryContainer = new DetailsSummary();
-        summaryContainer.getElement().setAttribute("slot", "summary");
-        getElement().appendChild(summaryContainer.getElement());
+    protected Component createSummaryContainer() {
+        return new DetailsSummary();
     }
 
     /**

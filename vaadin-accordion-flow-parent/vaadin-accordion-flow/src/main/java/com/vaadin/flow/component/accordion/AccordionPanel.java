@@ -33,9 +33,6 @@ import com.vaadin.flow.component.html.Span;
 @JsModule("@vaadin/accordion/src/vaadin-accordion-panel.js")
 public class AccordionPanel extends Details {
 
-    private Component summary;
-    private Component summaryContainer;
-
     /**
      * Server-side component for the {@code <vaadin-accordion-heading>} element.
      */
@@ -135,62 +132,11 @@ public class AccordionPanel extends Details {
     }
 
     /**
-     * Sets the summary container component.
-     */
-    protected void setSummaryContainer() {
-        summaryContainer = new AccordionHeading();
-        summaryContainer.getElement().setAttribute("slot", "summary");
-        getElement().appendChild(summaryContainer.getElement());
-    }
-
-    /**
-     * Sets the component summary
+     * Creates the summary container component.
      *
-     * @see #getSummary()
-     * @param summary
-     *            the summary component to set, or <code>null</code> to remove
-     *            any previously set summary
+     * @return the summary container
      */
-    @Override
-    public void setSummary(Component summary) {
-        summaryContainer.getElement().removeAllChildren();
-        if (summary == null) {
-            return;
-        }
-
-        this.summary = summary;
-        summaryContainer.getElement().appendChild(summary.getElement());
-    }
-
-    /**
-     * Returns summary component which was set via
-     * {@link #setSummary(Component)} or {@link #setSummaryText(String)}
-     *
-     * @return the summary component, <code>null</code> if nothing was set
-     */
-    @Override
-    public Component getSummary() {
-        return summary;
-    }
-
-    /**
-     * Creates a text wrapper and sets a summary via
-     * {@link #setSummary(Component)}
-     */
-    @Override
-    public void setSummaryText(String summary) {
-        if (summary == null) {
-            summary = "";
-        }
-        setSummary(new Span(summary));
-    }
-
-    /**
-     * @return summary section content as string (empty string if nothing was
-     *         set)
-     */
-    @Override
-    public String getSummaryText() {
-        return summary == null ? "" : summary.getElement().getText();
+    protected Component createSummaryContainer() {
+        return new AccordionHeading();
     }
 }
