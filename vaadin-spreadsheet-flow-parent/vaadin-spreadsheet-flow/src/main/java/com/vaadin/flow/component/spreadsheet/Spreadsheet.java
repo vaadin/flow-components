@@ -1660,6 +1660,15 @@ public class Spreadsheet extends Component
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         valueManager.updateLocale(getLocale());
+
+        if (overlays != null) {
+            // The node id's of component overlays attached as virtual children
+            // may no longer be valid after a detach/attach. Remove all
+            // component overlays and reload them (with updated node id's).
+            overlays.values().removeIf(
+                    overlay -> overlay.type == OverlayInfo.Type.COMPONENT);
+            loadOrUpdateOverlays();
+        }
     }
 
     /**
