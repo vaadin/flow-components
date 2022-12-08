@@ -245,6 +245,9 @@ public class DatePickerViewDemoPage extends DemoView {
 
         datePicker.addValueChangeListener(
                 event -> updateMessage(message, datePicker));
+        DatePicker.DatePickerI18n i18n = new DatePicker.DatePickerI18n();
+        i18n.setReferenceDate(LocalDate.of(1980, 2, 2));
+        datePicker.setI18n(i18n);
         // end-source-example
         locale1.setId("Locale-US");
         locale2.setId("Locale-UK");

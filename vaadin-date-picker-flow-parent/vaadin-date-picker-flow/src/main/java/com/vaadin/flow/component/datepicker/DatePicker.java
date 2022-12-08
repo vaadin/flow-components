@@ -17,6 +17,7 @@ package com.vaadin.flow.component.datepicker;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -34,6 +35,7 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.JsonSerializer;
@@ -56,6 +58,7 @@ import elemental.json.JsonType;
 @JsModule("./datepickerConnector.js")
 @JavaScript("frontend://date-picker-datefns.js")
 @JavaScript("frontend://datepickerConnector.js")
+@NpmPackage(value = "date-fns", version = "2.29.3")
 public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         implements HasSize, HasValidation, HasHelper, HasLabel {
 
@@ -360,14 +363,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      * custom date formats specified in DatePickerI18N.
      */
     private void executeI18nUpdate() {
-        JsonObject i18nObject = i18n != null
-                ? (JsonObject) JsonSerializer.toJson(i18n)
-                : null;
-        // Remove properties with null values to prevent errors in web
-        // component
-        if (i18nObject != null) {
-            removeNullValuesFromJsonObject(i18nObject);
-        }
+        JsonObject i18nObject = getI18nAsJsonObject();
 
         // For ill-formed locales, Locale.toLanguageTag() will append subtag
         // "lvariant" to it, which will cause the client side
@@ -391,6 +387,22 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         // The connector is expected to handle that either of those can be null
         getElement().callJsFunction("$connector.updateI18n", languageTag,
                 i18nObject);
+    }
+
+    private JsonObject getI18nAsJsonObject() {
+        if (i18n == null) {
+            return null;
+        }
+        JsonObject i18nObject = (JsonObject) JsonSerializer.toJson(i18n);
+        // LocalDate objects have to be explicitly added to the serialized i18n
+        // object in order to be formatted correctly
+        if (i18n.getReferenceDate() != null) {
+            i18nObject.put("referenceDate",
+                    i18n.getReferenceDate().format(DateTimeFormatter.ISO_DATE));
+        }
+        // Remove properties with null values to prevent errors in web component
+        removeNullValuesFromJsonObject(i18nObject);
+        return i18nObject;
     }
 
     private void removeNullValuesFromJsonObject(JsonObject jsonObject) {
@@ -710,6 +722,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         private String clear;
         private String today;
         private String cancel;
+        private LocalDate referenceDate;
 
         /**
          * Gets the name of the months.
@@ -1004,6 +1017,33 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
          */
         public DatePickerI18n setCancel(String cancel) {
             this.cancel = cancel;
+            return this;
+        }
+
+        /**
+         * Gets the {@code referenceDate}.
+         *
+         * @return the reference date
+         */
+        public LocalDate getReferenceDate() {
+            return referenceDate;
+        }
+
+        /**
+         * Sets the {@code referenceDate}.
+         * <p>
+         * The reference date is used to determine the century when parsing
+         * two-digit years. The century that makes the date closest to the
+         * reference date is applied. The default value is the current date.
+         * <p>
+         * Example: for a reference date of 1970-10-30; years {10, 40, 80}
+         * become {2010, 1940, 1980}.
+         *
+         * @param referenceDate the date used to base relative dates on
+         * @return this instance for method chaining
+         */
+        public DatePickerI18n setReferenceDate(LocalDate referenceDate) {
+            this.referenceDate = referenceDate;
             return this;
         }
     }
