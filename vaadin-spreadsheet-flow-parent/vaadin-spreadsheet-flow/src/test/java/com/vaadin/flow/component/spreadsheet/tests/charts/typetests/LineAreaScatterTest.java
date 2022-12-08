@@ -24,21 +24,27 @@ public class LineAreaScatterTest extends ChartTestBase {
         assertSeriesType(conf.getSeries(), ChartType.LINE);
         assertData(conf.getSeries(), data);
 
-        assertLineSeriesMarker(((PlotOptionsLine) conf.getSeries().get(0)
-                .getPlotOptions()).getMarker().getSymbol(), MarkerSymbolEnum.TRIANGLE);
-        assertLineSeriesMarker(((PlotOptionsLine) conf.getSeries().get(2)
-                .getPlotOptions()).getMarker().getSymbol(), null);
+        assertLineSeriesMarker(
+                ((PlotOptionsLine) conf.getSeries().get(0).getPlotOptions())
+                        .getMarker().getSymbol(),
+                MarkerSymbolEnum.TRIANGLE);
+        assertLineSeriesMarker(
+                ((PlotOptionsLine) conf.getSeries().get(2).getPlotOptions())
+                        .getMarker().getSymbol(),
+                null);
 
-        assertLineSeriesDash(((PlotOptionsLine) conf.getSeries().get(3)
-                .getPlotOptions()).getDashStyle(), DashStyle.LONGDASHDOT);
-        assertLineSeriesDash(((PlotOptionsLine) conf.getSeries().get(0)
-                .getPlotOptions()).getDashStyle(), DashStyle.SOLID);
+        assertLineSeriesDash(
+                ((PlotOptionsLine) conf.getSeries().get(3).getPlotOptions())
+                        .getDashStyle(),
+                DashStyle.LONGDASHDOT);
+        assertLineSeriesDash(
+                ((PlotOptionsLine) conf.getSeries().get(0).getPlotOptions())
+                        .getDashStyle(),
+                DashStyle.SOLID);
     }
 
-    private void assertLineSeriesDash(DashStyle actual,
-            DashStyle expected) {
-        Assert.assertEquals("Wrong dash for line", expected,
-                actual);
+    private void assertLineSeriesDash(DashStyle actual, DashStyle expected) {
+        Assert.assertEquals("Wrong dash for line", expected, actual);
     }
 
     private void assertLineSeriesMarker(MarkerSymbol foundSymbol,
@@ -75,19 +81,24 @@ public class LineAreaScatterTest extends ChartTestBase {
         assertData(conf.getSeries(), data);
         assertStacking(conf.getSeries(), Stacking.NORMAL);
     }
-    
+
     @Test
     public void scatterChartWithOrWithoutMarkerAndLine() throws Exception {
         Configuration conf = getChartFromSampleFile("TypeSample - Scatter.xlsx",
                 "A3").getConfiguration();
 
         assertSeriesType(conf.getSeries(), ChartType.SCATTER);
-        assertDataXY((DataSeries) conf.getSeries().get(0), new Double[][] { data[0], data[1] });
+        assertDataXY((DataSeries) conf.getSeries().get(0),
+                new Double[][] { data[0], data[1] });
 
-        assertLineSeriesMarker(((PlotOptionsScatter) conf.getSeries().get(0)
-                .getPlotOptions()).getMarker().getSymbol(), MarkerSymbolEnum.TRIANGLE);
-        assertLineSeriesDash(((PlotOptionsScatter) conf.getSeries().get(0)
-                .getPlotOptions()).getDashStyle(), DashStyle.LONGDASHDOT);
+        assertLineSeriesMarker(
+                ((PlotOptionsScatter) conf.getSeries().get(0).getPlotOptions())
+                        .getMarker().getSymbol(),
+                MarkerSymbolEnum.TRIANGLE);
+        assertLineSeriesDash(
+                ((PlotOptionsScatter) conf.getSeries().get(0).getPlotOptions())
+                        .getDashStyle(),
+                DashStyle.LONGDASHDOT);
     }
 
 }

@@ -8,10 +8,10 @@ package com.vaadin.flow.component.spreadsheet.charts.converter.confwriter;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file license.html distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <http://vaadin.com/license/cval-3>.
  * #L%
@@ -82,7 +82,7 @@ public abstract class AbstractSeriesDataWriter {
                 } else {
                     item.setY(cellValue);
                 }
-                
+
                 dataSeries.update(item);
             }
 
@@ -135,8 +135,8 @@ public abstract class AbstractSeriesDataWriter {
         }
 
         if (getSeriesData().categories.size() > point.xValue.intValue()) {
-            result.setName(getSeriesData().categories.get(point.xValue
-                    .intValue()));
+            result.setName(
+                    getSeriesData().categories.get(point.xValue.intValue()));
         }
         return result;
     }

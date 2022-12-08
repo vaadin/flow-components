@@ -8,10 +8,10 @@ package com.vaadin.flow.component.spreadsheet.charts.converter.confwriter;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file license.html distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <http://vaadin.com/license/cval-3>.
  * #L%
@@ -50,13 +50,12 @@ public class BarSeriesDataWriter extends AbstractSeriesDataWriter {
         super.configureDataSeries(dataSeries);
 
         String stacking = getSeriesData().stacking.toString();
-        if(getSeriesData().isColorByPoint){
+        if (getSeriesData().isColorByPoint) {
             getPlotOptions().setColorByPoint(true);
         }
 
-        getPlotOptions().setStacking(
-                Utils.getEnumValueOrDefault(Stacking.class, stacking,
-                        Stacking.NONE));
+        getPlotOptions().setStacking(Utils.getEnumValueOrDefault(Stacking.class,
+                stacking, Stacking.NONE));
 
         if (getSeriesData().is3d) {
             getPlotOptions().setPointPadding(0.2);

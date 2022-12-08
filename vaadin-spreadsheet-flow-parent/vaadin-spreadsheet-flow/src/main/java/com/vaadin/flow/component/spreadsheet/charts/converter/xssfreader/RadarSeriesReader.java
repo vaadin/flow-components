@@ -8,10 +8,10 @@ package com.vaadin.flow.component.spreadsheet.charts.converter.xssfreader;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file license.html distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <http://vaadin.com/license/cval-3>.
  * #L%
@@ -24,8 +24,8 @@ import org.openxmlformats.schemas.drawingml.x2006.chart.STRadarStyle;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.RadarSeriesData;
 
-public class RadarSeriesReader extends
-        AbstractSeriesReader<CTRadarSer, RadarSeriesData> {
+public class RadarSeriesReader
+        extends AbstractSeriesReader<CTRadarSer, RadarSeriesData> {
 
     public RadarSeriesReader(CTRadarChart ctChart, Spreadsheet spreadsheet,
             boolean showDataInHiddenCells) {
@@ -44,7 +44,8 @@ public class RadarSeriesReader extends
     }
 
     @Override
-    protected void fillSeriesData(RadarSeriesData seriesData, CTRadarSer serie) {
+    protected void fillSeriesData(RadarSeriesData seriesData,
+            CTRadarSer serie) {
         super.fillSeriesData(seriesData, serie);
 
         if (serie.getMarker() != null)

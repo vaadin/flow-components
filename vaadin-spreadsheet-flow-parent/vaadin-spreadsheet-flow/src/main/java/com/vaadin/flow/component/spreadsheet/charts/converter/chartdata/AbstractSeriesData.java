@@ -8,10 +8,10 @@ package com.vaadin.flow.component.spreadsheet.charts.converter.chartdata;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file license.html distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <http://vaadin.com/license/cval-3>.
  * #L%
@@ -39,7 +39,7 @@ public abstract class AbstractSeriesData {
         public Number yValue = 0;
         public Number zValue = 0;
     }
-    
+
     public String name = "";
     public List<SeriesPoint> seriesData = Collections.emptyList();
     public List<String> categories = Collections.emptyList();

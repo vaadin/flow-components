@@ -8,10 +8,10 @@ package com.vaadin.flow.component.spreadsheet.charts.converter.xssfreader;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file license.html distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <http://vaadin.com/license/cval-3>.
  * #L%
@@ -66,7 +66,8 @@ public abstract class AbstractSeriesReader<CT_SER_TYPE extends XmlObject, SERIES
         this.showDataInHiddenCells = showDataInHiddenCells;
     }
 
-    protected abstract SERIES_DATA_TYPE createSeriesDataObject(CT_SER_TYPE serie);
+    protected abstract SERIES_DATA_TYPE createSeriesDataObject(
+            CT_SER_TYPE serie);
 
     public List<SERIES_DATA_TYPE> getSeries() {
         List<SERIES_DATA_TYPE> list = new ArrayList<>();
@@ -94,7 +95,8 @@ public abstract class AbstractSeriesReader<CT_SER_TYPE extends XmlObject, SERIES
                 "getSerList");
     }
 
-    protected void fillSeriesData(SERIES_DATA_TYPE seriesData, CT_SER_TYPE serie) {
+    protected void fillSeriesData(SERIES_DATA_TYPE seriesData,
+            CT_SER_TYPE serie) {
         CTSerAdapter ctSerAdapter = new CTSerAdapter(serie);
 
         seriesData.name = tryGetSeriesName(ctSerAdapter.getTx());
@@ -109,22 +111,22 @@ public abstract class AbstractSeriesReader<CT_SER_TYPE extends XmlObject, SERIES
             return;
         }
 
-        final List<CellReference> cellReferences = getCategoryCellReferences(axisDataSource);
+        final List<CellReference> cellReferences = getCategoryCellReferences(
+                axisDataSource);
 
         // AbstractList is not serializable, so we wrap it into an ArrayList
-        seriesData.categories = new ArrayList<>(
-                new AbstractList<String>() {
-                    @Override
-                    public String get(int index) {
-                        return Utils.getStringValue(cellReferences.get(index),
-                                getSpreadsheet());
-                    }
+        seriesData.categories = new ArrayList<>(new AbstractList<String>() {
+            @Override
+            public String get(int index) {
+                return Utils.getStringValue(cellReferences.get(index),
+                        getSpreadsheet());
+            }
 
-                    @Override
-                    public int size() {
-                        return cellReferences.size();
-                    }
-                });
+            @Override
+            public int size() {
+                return cellReferences.size();
+            }
+        });
         handleReferencedValueUpdates(cellReferences, seriesData,
                 ValueUpdateMode.CATEGORIES);
     }
@@ -152,8 +154,8 @@ public abstract class AbstractSeriesReader<CT_SER_TYPE extends XmlObject, SERIES
             CTAxDataSource axisDataSource) {
         // HighChart doesn't support multilevel, take only the first one
         final CTMultiLvlStrRef multiLvlStrRef = axisDataSource
-            .getMultiLvlStrRef();
-        
+                .getMultiLvlStrRef();
+
         String formula = multiLvlStrRef.getF();
 
         final List<CellReference> allReferencedCells = Utils
@@ -164,7 +166,7 @@ public abstract class AbstractSeriesReader<CT_SER_TYPE extends XmlObject, SERIES
             return allReferencedCells;
         } else {
             return getCategoryCellsFromMultilevelReferences(multiLvlStrRef,
-                allReferencedCells);
+                    allReferencedCells);
         }
     }
 
@@ -173,12 +175,11 @@ public abstract class AbstractSeriesReader<CT_SER_TYPE extends XmlObject, SERIES
      * multilevel category cells and cached values.
      */
     private List<CellReference> getCategoryCellsFromMultilevelReferences(
-        CTMultiLvlStrRef multiLvlStrRef,
-        final List<CellReference> allReferencedCells) {
+            CTMultiLvlStrRef multiLvlStrRef,
+            final List<CellReference> allReferencedCells) {
         final CellReference firstCell = allReferencedCells.get(0);
         final CellReference lastCell = allReferencedCells
-                .get(allReferencedCells
-                .size() - 1);
+                .get(allReferencedCells.size() - 1);
 
         final int width = lastCell.getCol() - firstCell.getCol() + 1;
         final int height = lastCell.getRow() - firstCell.getRow() + 1;
@@ -191,8 +192,8 @@ public abstract class AbstractSeriesReader<CT_SER_TYPE extends XmlObject, SERIES
             return new AbstractList<CellReference>() {
                 @Override
                 public CellReference get(int index) {
-                    return allReferencedCells.get((numOfLevels - 1) + index
-                            * numOfLevels);
+                    return allReferencedCells
+                            .get((numOfLevels - 1) + index * numOfLevels);
                 }
 
                 @Override
@@ -204,8 +205,8 @@ public abstract class AbstractSeriesReader<CT_SER_TYPE extends XmlObject, SERIES
             return new AbstractList<CellReference>() {
                 @Override
                 public CellReference get(int index) {
-                    return allReferencedCells.get(allReferencedCells.size()
-                            - width + index);
+                    return allReferencedCells
+                            .get(allReferencedCells.size() - width + index);
                 }
 
                 @Override
@@ -242,8 +243,9 @@ public abstract class AbstractSeriesReader<CT_SER_TYPE extends XmlObject, SERIES
         seriesData.dataSelectListener = new DataSelectListener() {
             @Override
             public void dataSelected() {
-                AreaReference[] areaReferences = Utils
-                        .getAreaReferences(getSpreadsheet().getWorkbook().getSpreadsheetVersion(), formula);
+                AreaReference[] areaReferences = Utils.getAreaReferences(
+                        getSpreadsheet().getWorkbook().getSpreadsheetVersion(),
+                        formula);
 
                 getSpreadsheet().setSelectionRange(
                         areaReferences[0].getFirstCell().getRow(),
@@ -278,7 +280,7 @@ public abstract class AbstractSeriesReader<CT_SER_TYPE extends XmlObject, SERIES
             return -1;
         }
 
-        //In formatting strings "." is always used it seems.
+        // In formatting strings "." is always used it seems.
         char sep = '.';
 
         // Take the last occurrence if the user has the same symbol as thousand
@@ -294,9 +296,8 @@ public abstract class AbstractSeriesReader<CT_SER_TYPE extends XmlObject, SERIES
     }
 
     void onValueChange(final List<CellReference> referencedCells,
-                               final SERIES_DATA_TYPE seriesData,
-                               final ValueUpdateMode updateMode,
-                               Spreadsheet.ValueChangeEvent event) {
+            final SERIES_DATA_TYPE seriesData, final ValueUpdateMode updateMode,
+            Spreadsheet.ValueChangeEvent event) {
         if (seriesData.dataUpdateListener == null) {
             return;
         }
@@ -306,8 +307,7 @@ public abstract class AbstractSeriesReader<CT_SER_TYPE extends XmlObject, SERIES
             // if this gets fixed, this conversion method should be
             // removed
             // https://dev.vaadin.com/ticket/19717
-            updatePoint(referencedCells, seriesData, updateMode,
-                    changedCell);
+            updatePoint(referencedCells, seriesData, updateMode, changedCell);
         }
     }
 
@@ -324,18 +324,22 @@ public abstract class AbstractSeriesReader<CT_SER_TYPE extends XmlObject, SERIES
             }
         });
 
-        spreadsheet.addFormulaValueChangeListener(new Spreadsheet.FormulaValueChangeListener() {
-            @Override
-            public void onFormulaValueChange(Spreadsheet.FormulaValueChangeEvent event) {
-                onValueChange(referencedCells, seriesData, updateMode, event);
-            }
-        });
+        spreadsheet.addFormulaValueChangeListener(
+                new Spreadsheet.FormulaValueChangeListener() {
+                    @Override
+                    public void onFormulaValueChange(
+                            Spreadsheet.FormulaValueChangeEvent event) {
+                        onValueChange(referencedCells, seriesData, updateMode,
+                                event);
+                    }
+                });
     }
 
     private void updatePoint(List<CellReference> referencedCells,
-                             SERIES_DATA_TYPE seriesData, ValueUpdateMode updateMode,
-                             CellReference changedCell) {
-        CellReference absoluteChangedCell = SpreadsheetUtil.relativeToAbsolute(spreadsheet, changedCell);
+            SERIES_DATA_TYPE seriesData, ValueUpdateMode updateMode,
+            CellReference changedCell) {
+        CellReference absoluteChangedCell = SpreadsheetUtil
+                .relativeToAbsolute(spreadsheet, changedCell);
         if (!referencedCells.contains(absoluteChangedCell)) {
             return;
         }
@@ -356,8 +360,7 @@ public abstract class AbstractSeriesReader<CT_SER_TYPE extends XmlObject, SERIES
             }
             if (updateMode == ValueUpdateMode.Z_VALUES) {
                 item.zValue = cellValue;
-                seriesData.dataUpdateListener.zDataModified(index,
-                        cellValue);
+                seriesData.dataUpdateListener.zDataModified(index, cellValue);
             }
         } else {
             final String cellValue = Utils.getStringValue(absoluteChangedCell,

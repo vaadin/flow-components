@@ -8,10 +8,10 @@ package com.vaadin.flow.component.spreadsheet.charts.converter;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file license.html distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <http://vaadin.com/license/cval-3>.
  * #L%
@@ -63,7 +63,8 @@ public class Utils {
             Spreadsheet spreadsheet) {
         List<String> strings = new ArrayList<String>();
 
-        for (CellReference ref : getAllReferencedCells(spreadsheet.getWorkbook().getSpreadsheetVersion(), formula)) {
+        for (CellReference ref : getAllReferencedCells(
+                spreadsheet.getWorkbook().getSpreadsheetVersion(), formula)) {
             strings.add(getStringValue(ref, spreadsheet));
         }
 
@@ -82,11 +83,13 @@ public class Utils {
     }
 
     /**
-     * @param version for inferring ranges for column-only references
+     * @param version
+     *            for inferring ranges for column-only references
      * @param formula
      * @return all cells in the referenced areas
      */
-    public static List<CellReference> getAllReferencedCells(SpreadsheetVersion version, String formula) {
+    public static List<CellReference> getAllReferencedCells(
+            SpreadsheetVersion version, String formula) {
         ArrayList<CellReference> cellRefs = new ArrayList<CellReference>();
         for (AreaReference area : getAreaReferences(version, formula)) {
             cellRefs.addAll(Arrays.asList(area.getAllReferencedCells()));
@@ -97,11 +100,15 @@ public class Utils {
     /**
      * Returns an array of contiguous area references addressed by the given
      * formula.
-     * @param version to infer max # of rows for column-only formula references
-     * @param formula containing possibly non-contiguous area refrences
+     *
+     * @param version
+     *            to infer max # of rows for column-only formula references
+     * @param formula
+     *            containing possibly non-contiguous area refrences
      * @return array of references
      */
-    public static AreaReference[] getAreaReferences(SpreadsheetVersion version, String formula) {
+    public static AreaReference[] getAreaReferences(SpreadsheetVersion version,
+            String formula) {
         String formulaIn = formula;
         // generateContiguous cannot parse a formula in parentheses
         if (formulaIn.startsWith("(") && formulaIn.endsWith(")")) {
@@ -125,7 +132,7 @@ public class Utils {
      * This function returns all the cells that the given formula references.
      * You can optionally filter out all the hidden rows from the list honoring
      * filtering of charts based on spreadsheettable filter settings.
-     * 
+     *
      * @param formula
      *            The formula to find referenced cells for
      * @param spreadsheet
@@ -133,11 +140,12 @@ public class Utils {
      * @param includeHiddenCells
      *            <code>true</code> to include cells residing on hidden rows or
      *            columns, <code>false</code> to omit them
-     * 
+     *
      */
     public static List<CellReference> getAllReferencedCells(String formula,
             Spreadsheet spreadsheet, boolean includeHiddenCells) {
-        final List<CellReference> cellRefs = getAllReferencedCells(spreadsheet.getWorkbook().getSpreadsheetVersion(), formula);
+        final List<CellReference> cellRefs = getAllReferencedCells(
+                spreadsheet.getWorkbook().getSpreadsheetVersion(), formula);
 
         if (includeHiddenCells) {
             return cellRefs;

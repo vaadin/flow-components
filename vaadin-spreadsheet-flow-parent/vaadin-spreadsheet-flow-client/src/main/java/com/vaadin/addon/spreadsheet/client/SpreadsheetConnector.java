@@ -434,8 +434,9 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
             // TODO: Create a flow component wrapper with the node id
 
             String appid = "ROOT";
-            
-            getWidget().addOverlay(id, new FlowComponentRenderer(appid, id), overlayInfo);
+
+            getWidget().addOverlay(id, new FlowComponentRenderer(appid, id),
+                    overlayInfo);
             break;
         }
     }

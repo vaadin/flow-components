@@ -8,10 +8,10 @@ package com.vaadin.flow.component.spreadsheet.charts.converter.xssfreader;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file license.html distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <http://vaadin.com/license/cval-3>.
  * #L%
@@ -67,8 +67,8 @@ class ChartStylesReader {
 
     private Map<String, byte[]> colorMap;
 
-    private static Logger logger = Logger.getLogger(ChartStylesReader.class
-            .getName());
+    private static Logger logger = Logger
+            .getLogger(ChartStylesReader.class.getName());
 
     public ChartStylesReader(Spreadsheet spreadsheet, XSSFChart xssfChart) {
         this.spreadsheet = spreadsheet;
@@ -84,19 +84,18 @@ class ChartStylesReader {
         BackgroundProperties backgroundProperties = new BackgroundProperties();
 
         if (spPr.isSetNoFill())
-            backgroundProperties.color = new ColorProperties(new int[] { 0xFF,
-                    0xFF, 0xFF }, 0);
+            backgroundProperties.color = new ColorProperties(
+                    new int[] { 0xFF, 0xFF, 0xFF }, 0);
         else if (spPr.isSetSolidFill())
             backgroundProperties.color = ColorUtils
                     .createColorPropertiesFromFill(spPr.getSolidFill(),
                             getColorMap());
         else if (spPr.isSetGradFill()) {
-            backgroundProperties.gradient = ColorUtils
-                    .createGradientProperties(spPr.getGradFill(), getColorMap());
+            backgroundProperties.gradient = ColorUtils.createGradientProperties(
+                    spPr.getGradFill(), getColorMap());
         } else {
             boolean onlyBorderIsSet = (spPr.getDomNode().getChildNodes()
-                    .getLength() == 1)
-                    && spPr.isSetLn();
+                    .getLength() == 1) && spPr.isSetLn();
 
             if (!onlyBorderIsSet)
                 logger.warning("Unsupported fill for shape " + spPr);
@@ -149,8 +148,7 @@ class ChartStylesReader {
                 .getValAxList();
 
         for (CTValAx valAx : valAxList) {
-            result.put(valAx.getAxId().getVal(),
-                    getAxisProperties(valAx));
+            result.put(valAx.getAxId().getVal(), getAxisProperties(valAx));
         }
 
         return result;
@@ -200,9 +198,10 @@ class ChartStylesReader {
 
     /**
      * Allows for overriding to wrap in additional property detection/conversion
-     * NOTE: POI needs a meta-API for the generated OOXML CT* classes,
-     * so shared properties like these can come from a common interface
-     * @param yAx 
+     * NOTE: POI needs a meta-API for the generated OOXML CT* classes, so shared
+     * properties like these can come from a common interface
+     *
+     * @param yAx
      * @return axis properties
      */
     protected AxisProperties getAxisProperties(CTValAx yAx) {
@@ -223,9 +222,10 @@ class ChartStylesReader {
 
     /**
      * Allows for overriding to wrap in additional property detection/conversion
-     * NOTE: POI needs a meta-API for the generated OOXML CT* classes,
-     * so shared properties like these can come from a common interface
-     * @param xAx 
+     * NOTE: POI needs a meta-API for the generated OOXML CT* classes, so shared
+     * properties like these can come from a common interface
+     *
+     * @param xAx
      * @return axis properties
      */
     protected AxisProperties getAxisProperties(CTCatAx xAx) {
@@ -253,8 +253,8 @@ class ChartStylesReader {
             for (CTRegularTextRun r : p.getRList())
                 axisProperties.title += r.getT();
 
-            axisProperties.textProperties = createFontProperties(p.getPPr()
-                    .getDefRPr());
+            axisProperties.textProperties = createFontProperties(
+                    p.getPPr().getDefRPr());
 
             if (axisProperties.textProperties == null) {
                 axisProperties.textProperties = new TextProperties();
@@ -275,8 +275,8 @@ class ChartStylesReader {
             }
             ThemeDocument themeDocument;
             try {
-                themeDocument = ThemeDocument.Factory.parse(theme
-                        .getPackagePart().getInputStream());
+                themeDocument = ThemeDocument.Factory
+                        .parse(theme.getPackagePart().getInputStream());
             } catch (XmlException e) {
                 return null;
             } catch (IOException e) {
@@ -289,7 +289,8 @@ class ChartStylesReader {
         return themeElements;
     }
 
-    private String getFontFamilyConsideringTheme(CTTextCharacterProperties pPr) {
+    private String getFontFamilyConsideringTheme(
+            CTTextCharacterProperties pPr) {
         try {
             String fontString = pPr.getLatin().getTypeface();
 

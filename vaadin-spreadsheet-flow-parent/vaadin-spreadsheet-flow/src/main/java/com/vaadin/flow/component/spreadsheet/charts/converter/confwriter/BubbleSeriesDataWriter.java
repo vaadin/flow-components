@@ -21,9 +21,7 @@ public class BubbleSeriesDataWriter extends AbstractSeriesDataWriter {
     @Override
     protected DataSeriesItem createDataSeriesItem(SeriesPoint point,
             boolean blanksAsZeros) {
-        return new DataSeriesItem3d(point.xValue,
-                point.yValue,
-                point.zValue);
+        return new DataSeriesItem3d(point.xValue, point.yValue, point.zValue);
     }
 
 }

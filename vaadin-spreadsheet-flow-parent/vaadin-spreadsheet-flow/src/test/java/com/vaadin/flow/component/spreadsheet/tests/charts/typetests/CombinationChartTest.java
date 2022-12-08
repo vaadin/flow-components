@@ -11,16 +11,16 @@ public class CombinationChartTest extends ChartTestBase {
     @Test
     public void columnAndLineTest() throws Exception {
         Configuration conf = getChartFromSampleFile(
-                "TypeSample - Combination (Column + Line + Dual Axis).xlsx", "A6")
-                .getConfiguration();
+                "TypeSample - Combination (Column + Line + Dual Axis).xlsx",
+                "A6").getConfiguration();
 
         assertCombinationChartSeriesType(conf);
 
         Assert.assertEquals("", conf.getxAxis().getTitle().getText());
-        Assert.assertEquals("", conf.getyAxes().getAxes().get(0).getTitle()
-                .getText());
-        Assert.assertEquals("", conf.getyAxes().getAxes().get(1).getTitle()
-                .getText());
+        Assert.assertEquals("",
+                conf.getyAxes().getAxes().get(0).getTitle().getText());
+        Assert.assertEquals("",
+                conf.getyAxes().getAxes().get(1).getTitle().getText());
     }
 
     private void assertCombinationChartSeriesType(Configuration conf) {
@@ -35,15 +35,15 @@ public class CombinationChartTest extends ChartTestBase {
     @Test
     public void columnAndLineWithAxisTitlesTest() throws Exception {
         Configuration conf = getChartFromSampleFile(
-                "TypeSample - Combination (Column + Line + Dual Axis).xlsx", "A24")
-                .getConfiguration();
+                "TypeSample - Combination (Column + Line + Dual Axis).xlsx",
+                "A24").getConfiguration();
 
         assertCombinationChartSeriesType(conf);
 
         Assert.assertEquals("Title on the left",
                 conf.getyAxes().getAxes().get(0).getTitle().getText());
-        
-        Assert.assertEquals("Title on the right", conf.getyAxes().getAxes()
-                .get(1).getTitle().getText());
+
+        Assert.assertEquals("Title on the right",
+                conf.getyAxes().getAxes().get(1).getTitle().getText());
     }
 }

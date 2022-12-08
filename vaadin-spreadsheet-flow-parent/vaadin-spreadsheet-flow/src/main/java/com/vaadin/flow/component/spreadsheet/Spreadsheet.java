@@ -4659,7 +4659,7 @@ public class Spreadsheet extends Component
     private void registerCustomComponent(Component component) {
         if (!getElement().equals(component.getElement().getParent())) {
             getElement().appendVirtualChild(component.getElement());
-            
+
             // todo: se puede eliminar esto? en v8, setparent provoca que se
             // añada el componente en la jerarquía
             // component.setParent(this);

@@ -8,10 +8,10 @@ package com.vaadin.flow.component.spreadsheet.charts.converter.confwriter;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file license.html distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <http://vaadin.com/license/cval-3>.
  * #L%
@@ -43,7 +43,7 @@ public class RadarSeriesWriter extends AreaSeriesDataWriter {
         YAxis yaxs = new YAxis();
         conf.addyAxis(yaxs);
         yaxs.setGridLineInterpolation("polygon");
-        
+
         Style style = new Style();
         style.setFontSize("75%");
         conf.getxAxis().getLabels().setStyle(style);
@@ -52,12 +52,15 @@ public class RadarSeriesWriter extends AreaSeriesDataWriter {
     @Override
     protected void configureDataSeries(DataSeries dataSeriesForWriting) {
         super.configureDataSeries(dataSeriesForWriting);
-        if(!getSeriesData().filled){
-            getPlotOptions().setFillColor(new SolidColor(0,0,0,0));
-            /*The code line:
-            *   getPlotOptions().setFillColor(new SolidColor(0,0,0,0));
-            * is because of bug HighChart bug #4888 and it is fixed in 4.2.2 version and can be replaced by the following line of code when migrate to new HighChart version:
-            *   getPlotOptions().setFillOpacity(0);*/
+        if (!getSeriesData().filled) {
+            getPlotOptions().setFillColor(new SolidColor(0, 0, 0, 0));
+            /*
+             * The code line: getPlotOptions().setFillColor(new
+             * SolidColor(0,0,0,0)); is because of bug HighChart bug #4888 and
+             * it is fixed in 4.2.2 version and can be replaced by the following
+             * line of code when migrate to new HighChart version:
+             * getPlotOptions().setFillOpacity(0);
+             */
         }
 
         getPlotOptions().setDashStyle(

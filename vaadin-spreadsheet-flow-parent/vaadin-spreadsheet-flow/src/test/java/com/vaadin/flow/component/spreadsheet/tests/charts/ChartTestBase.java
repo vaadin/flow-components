@@ -27,8 +27,7 @@ public class ChartTestBase {
     private static String sampleFileDiretory = "";
 
     protected Double[][] data = { { 100d, 200d, 2000d, 800d, 99d },
-            { 230d, 300d, 600d, 1000d, 44d },
-            { 400d, 800d, 800d, 1200d, 123d },
+            { 230d, 300d, 600d, 1000d, 44d }, { 400d, 800d, 800d, 1200d, 123d },
             { 800d, 550d, 1000d, 1500d, 650d },
             { 1600d, 600d, 1200d, 400d, 990d } };
 
@@ -85,12 +84,13 @@ public class ChartTestBase {
         Assert.assertEquals("The number of series is not correct", data.length,
                 ((DataSeries) seriesList.get(0)).getData().size());
         for (int i = 0; i < data.length; i++) {
-                final Number y = ((DataSeries) seriesList.get(0)).getData().get(i).getY();
-                if (data[i] != null) {
-                    Assert.assertEquals((Double) y, data[i].doubleValue(), 0.1);
-                } else {
-                    Assert.assertNull(y);
-                }
+            final Number y = ((DataSeries) seriesList.get(0)).getData().get(i)
+                    .getY();
+            if (data[i] != null) {
+                Assert.assertEquals((Double) y, data[i].doubleValue(), 0.1);
+            } else {
+                Assert.assertNull(y);
+            }
         }
     }
 
@@ -127,8 +127,8 @@ public class ChartTestBase {
     }
 
     protected void assert3dEnabled(Configuration conf) {
-        Assert.assertTrue("3D should be enabled for this chart", conf
-                .getChart().getOptions3d().getEnabled());
+        Assert.assertTrue("3D should be enabled for this chart",
+                conf.getChart().getOptions3d().getEnabled());
     }
 
     protected void assertSeriesType(List<Series> seriesList, ChartType type) {
@@ -138,8 +138,8 @@ public class ChartTestBase {
     }
 
     protected void assertSingleSeriesType(Series series, ChartType type) {
-        Assert.assertEquals("Wrong series type", type, series.getPlotOptions()
-                .getChartType());
+        Assert.assertEquals("Wrong series type", type,
+                series.getPlotOptions().getChartType());
     }
 
     protected void assertStacking(List<Series> seriesList, Stacking stacking) {
@@ -156,8 +156,10 @@ public class ChartTestBase {
                 actualStacking = ((PlotOptionsBar) plotOptions).getStacking();
             }
 
-            Assert.assertEquals("Stacking type is wrong for series "
-                    + seriesList.indexOf(series), stacking, actualStacking);
+            Assert.assertEquals(
+                    "Stacking type is wrong for series "
+                            + seriesList.indexOf(series),
+                    stacking, actualStacking);
         }
     }
 

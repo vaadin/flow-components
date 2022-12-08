@@ -15,8 +15,8 @@ import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.Abstract
 import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.AbstractSeriesData.SeriesPoint;
 import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.BubbleSeriesData;
 
-public class BubbleSeriesReader extends
-        AbstractSeriesReader<CTBubbleSer, BubbleSeriesData> {
+public class BubbleSeriesReader
+        extends AbstractSeriesReader<CTBubbleSer, BubbleSeriesData> {
 
     public BubbleSeriesReader(XmlObject ctChart, Spreadsheet spreadsheet,
             boolean showDataInHiddenCells) {
@@ -29,7 +29,8 @@ public class BubbleSeriesReader extends
     }
 
     @Override
-    protected void fillSeriesData(BubbleSeriesData seriesData, CTBubbleSer serie) {
+    protected void fillSeriesData(BubbleSeriesData seriesData,
+            CTBubbleSer serie) {
         seriesData.name = tryGetSeriesName(serie.getTx());
 
         if (serie.getXVal() == null) {
@@ -43,8 +44,9 @@ public class BubbleSeriesReader extends
     private void createSeriesDataPointsForBubble(CTAxDataSource xVal,
             CTNumDataSource yVal, CTNumDataSource bubbleSize,
             BubbleSeriesData seriesData) {
-        final List<CellReference> ptListX = Utils.getAllReferencedCells(xVal
-                .getNumRef().getF(), getSpreadsheet(), showDataInHiddenCells);
+        final List<CellReference> ptListX = Utils.getAllReferencedCells(
+                xVal.getNumRef().getF(), getSpreadsheet(),
+                showDataInHiddenCells);
         final String formulaY = yVal.getNumRef().getF();
         final List<CellReference> ptListY = Utils.getAllReferencedCells(
                 formulaY, getSpreadsheet(), showDataInHiddenCells);
@@ -56,8 +58,9 @@ public class BubbleSeriesReader extends
                 sizes.add(new Double(1));
             }
         } else {
-            ptListSize = Utils.getAllReferencedCells(bubbleSize.getNumRef()
-                    .getF(), getSpreadsheet(), showDataInHiddenCells);
+            ptListSize = Utils.getAllReferencedCells(
+                    bubbleSize.getNumRef().getF(), getSpreadsheet(),
+                    showDataInHiddenCells);
             for (int i = 0; i < ptListSize.size(); i++) {
                 sizes.add(getNumericValueFromCellRef(ptListSize.get(i)));
             }
@@ -66,8 +69,7 @@ public class BubbleSeriesReader extends
         final List<SeriesPoint> list = new ArrayList<SeriesPoint>();
 
         for (int i = 0; i < ptListY.size(); i++) {
-            list.add(new SeriesPoint(
-                    getNumericValueFromCellRef(ptListX.get(i)),
+            list.add(new SeriesPoint(getNumericValueFromCellRef(ptListX.get(i)),
                     getNumericValueFromCellRef(ptListY.get(i)), sizes.get(i)));
         }
 

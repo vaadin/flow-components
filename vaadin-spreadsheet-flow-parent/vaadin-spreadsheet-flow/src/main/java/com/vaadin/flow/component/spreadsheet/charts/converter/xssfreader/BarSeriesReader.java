@@ -8,10 +8,10 @@ package com.vaadin.flow.component.spreadsheet.charts.converter.xssfreader;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file license.html distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <http://vaadin.com/license/cval-3>.
  * #L%
@@ -31,14 +31,16 @@ import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.BarSerie
 import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.ColumnSeriesData;
 import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.Stacking;
 
-public class BarSeriesReader extends
-        AbstractSeriesReader<CTBarSer, ColumnSeriesData> {
+public class BarSeriesReader
+        extends AbstractSeriesReader<CTBarSer, ColumnSeriesData> {
 
-    public BarSeriesReader(CTBarChart ctChart, Spreadsheet spreadsheet, boolean showDataInHiddenCells) {
+    public BarSeriesReader(CTBarChart ctChart, Spreadsheet spreadsheet,
+            boolean showDataInHiddenCells) {
         super(ctChart, spreadsheet, showDataInHiddenCells);
     }
 
-    public BarSeriesReader(CTBar3DChart ctChart, Spreadsheet spreadsheet, boolean showDataInHiddenCells) {
+    public BarSeriesReader(CTBar3DChart ctChart, Spreadsheet spreadsheet,
+            boolean showDataInHiddenCells) {
         super(ctChart, spreadsheet, true, showDataInHiddenCells);
     }
 
@@ -64,13 +66,13 @@ public class BarSeriesReader extends
     @Override
     protected void fillSeriesData(ColumnSeriesData seriesData, CTBarSer serie) {
         super.fillSeriesData(seriesData, serie);
-        if(getChart() instanceof CTBarChart) {
+        if (getChart() instanceof CTBarChart) {
             CTBarChart chart = (CTBarChart) getChart();
             if (chart.getVaryColors() != null
                     && chart.getVaryColors().getVal()) {
                 seriesData.isColorByPoint = true;
             }
-        } else if(getChart() instanceof CTBar3DChart){
+        } else if (getChart() instanceof CTBar3DChart) {
             CTBar3DChart chart = (CTBar3DChart) getChart();
             if (chart.getVaryColors() != null
                     && chart.getVaryColors().getVal()) {
@@ -82,11 +84,12 @@ public class BarSeriesReader extends
 
         // I need this trick because for some reason "reversed x-axis" doesn't
         // work in Highcharts
-        
-        // FIXME: commented it out because with the latest version it breaks column and bar charts
-//        reverseSeriesData(seriesData.seriesData);
-//        if (seriesData.categories != null)
-//            Collections.reverse(seriesData.categories);
+
+        // FIXME: commented it out because with the latest version it breaks
+        // column and bar charts
+        // reverseSeriesData(seriesData.seriesData);
+        // if (seriesData.categories != null)
+        // Collections.reverse(seriesData.categories);
     }
 
     // private void reverseSeriesData(List<SeriesPoint> seriesData) {

@@ -8,10 +8,10 @@ package com.vaadin.flow.component.spreadsheet.charts.converter.xssfreader;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file license.html distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <http://vaadin.com/license/cval-3>.
  * #L%
@@ -32,8 +32,8 @@ import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.Abstract
 import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.AbstractSeriesData.SeriesPoint;
 import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.ScatterSeriesData;
 
-public class ScatterSeriesReader extends
-        AbstractSeriesReader<CTScatterSer, ScatterSeriesData> {
+public class ScatterSeriesReader
+        extends AbstractSeriesReader<CTScatterSer, ScatterSeriesData> {
 
     public ScatterSeriesReader(CTScatterChart ctChart, Spreadsheet spreadsheet,
             boolean showDataInHiddenCells) {
@@ -75,8 +75,9 @@ public class ScatterSeriesReader extends
      */
     protected void createSeriesDataPointsForScatter(CTAxDataSource xVal,
             CTNumDataSource yVal, ScatterSeriesData seriesData) {
-        final List<CellReference> ptListX = Utils.getAllReferencedCells(xVal
-                .getNumRef().getF(), getSpreadsheet(), showDataInHiddenCells);
+        final List<CellReference> ptListX = Utils.getAllReferencedCells(
+                xVal.getNumRef().getF(), getSpreadsheet(),
+                showDataInHiddenCells);
 
         final String formulaY = yVal.getNumRef().getF();
         final List<CellReference> ptListY = Utils.getAllReferencedCells(
@@ -85,8 +86,7 @@ public class ScatterSeriesReader extends
         final List<SeriesPoint> list = new ArrayList<SeriesPoint>();
 
         for (int i = 0; i < ptListY.size(); i++) {
-            list.add(new SeriesPoint(
-                    getNumericValueFromCellRef(ptListX.get(i)),
+            list.add(new SeriesPoint(getNumericValueFromCellRef(ptListX.get(i)),
                     getNumericValueFromCellRef(ptListY.get(i))));
         }
 

@@ -8,10 +8,10 @@ package com.vaadin.flow.component.spreadsheet.charts.converter.confwriter;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file license.html distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <http://vaadin.com/license/cval-3>.
  * #L%
@@ -28,7 +28,8 @@ public class PieToDonutConverter {
 
     private static final double DONUT_GAP_BETWEEN_RINGS = 0.02;
 
-    public static void convertIfNeeded(ChartData definition, Configuration conf) {
+    public static void convertIfNeeded(ChartData definition,
+            Configuration conf) {
         if (definition.plotData.size() > 0
                 && definition.plotData.get(0) instanceof PieSeriesData) {
             PieSeriesData pieSeriesData = (PieSeriesData) definition.plotData
@@ -54,11 +55,11 @@ public class PieToDonutConverter {
                 double innerSize = (currentShare - onePieShare + gap)
                         / currentShare;
 
-                ((PlotOptionsPie) ser.getPlotOptions()).setInnerSize(Math
-                        .round(innerSize * 100) + "%");
+                ((PlotOptionsPie) ser.getPlotOptions())
+                        .setInnerSize(Math.round(innerSize * 100) + "%");
 
-                ((PlotOptionsPie) ser.getPlotOptions()).setSize(Math
-                        .round(currentShare * 100) + "%");
+                ((PlotOptionsPie) ser.getPlotOptions())
+                        .setSize(Math.round(currentShare * 100) + "%");
 
                 currentPieSeries++;
             }
