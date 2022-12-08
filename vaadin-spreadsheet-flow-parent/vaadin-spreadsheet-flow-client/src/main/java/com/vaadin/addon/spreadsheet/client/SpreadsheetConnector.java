@@ -21,11 +21,13 @@ import java.util.Set;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetWidget.SheetContextMenuHandler;
@@ -435,9 +437,27 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
 
             String appid = "ROOT";
 
-            getWidget().addOverlay(id, new FlowComponentRenderer(appid, id),
-                    overlayInfo);
+            var slotName = "overlay-component-" + id;
+            var slot = new Slot(slotName);
+
+            var componentWidget = new FlowComponentRenderer(appid, id);
+            componentWidget.getElement().setAttribute("slot", slotName);
+
+            SheetJsniUtil.removeOnSlotDisconnect(slot.getElement(),
+                    componentWidget.getElement());
+
+            host.appendChild(componentWidget.getElement());
+
+            getWidget().addOverlay(id, slot, overlayInfo);
             break;
+        }
+    }
+
+    public class Slot extends Widget {
+        public Slot(String name) {
+            Element element = Document.get().createElement("slot");
+            element.setAttribute("name", name);
+            setElement(element);
         }
     }
 
@@ -548,7 +568,11 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
         void sendUpdates();
     }
 
+    private Element host;
+
     public void setHost(Element element) {
+        // TODO: THis will be properly fixed with custom component support
+        this.host = (Element) element.getPropertyObject("host");
         getWidget().setHost(element);
     }
 }

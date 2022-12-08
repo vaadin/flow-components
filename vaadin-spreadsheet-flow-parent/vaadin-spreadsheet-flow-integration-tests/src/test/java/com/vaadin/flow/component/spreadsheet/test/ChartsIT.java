@@ -67,8 +67,7 @@ public class ChartsIT extends AbstractSpreadsheetIT {
                 CHART1_PADDING_LEFT);
 
         WebElement chartWrapperElement = getOverlayElement(CHART1_CELL);
-        WebElement minimizeButton = chartWrapperElement
-                .findElement(By.className("minimize-button"));
+        WebElement minimizeButton = getMinimizeButton(chartWrapperElement);
 
         minimizeButton.click();
 
@@ -147,9 +146,18 @@ public class ChartsIT extends AbstractSpreadsheetIT {
     }
 
     private TestBenchElement getChartInShadowRoot(WebElement overlayElement) {
-        var chart = (TestBenchElement) overlayElement
-                .findElement(By.tagName("vaadin-chart"));
+        var slot = overlayElement.findElement(By.tagName("slot"));
+        var slotName = slot.getAttribute("name");
+        var chart = getSpreadsheet().findElement(
+                By.cssSelector("[slot=\"" + slotName + "\"] vaadin-chart"));
         return chart.$(DivElement.class).first();
+    }
+
+    private TestBenchElement getMinimizeButton(WebElement overlayElement) {
+        var slot = overlayElement.findElement(By.tagName("slot"));
+        var slotName = slot.getAttribute("name");
+        return getSpreadsheet().findElement(
+                By.cssSelector("[slot=\"" + slotName + "\"] .minimize-button"));
     }
 
     public WebElement getOverlayElement(String cell) {

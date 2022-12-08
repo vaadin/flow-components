@@ -1,5 +1,7 @@
 package com.vaadin.addon.spreadsheet.client;
 
+import com.google.gwt.dom.client.Element;
+
 /**
  * Copyright (C) 2000-2022 Vaadin Ltd
  *
@@ -150,5 +152,15 @@ public class SheetJsniUtil {
         }
         return overlayRules;
     }-*/;
+
+    public static native void removeOnSlotDisconnect(Element slot,
+            Element assignedWidget) /*-{
+            slot.addEventListener('slotchange', function () {
+                if (!slot.isConnected) {
+                    // If the slot gets disconnected, remove the associated widget from the DOM
+                    assignedWidget.remove();
+                }
+            });
+        }-*/;
 
 }

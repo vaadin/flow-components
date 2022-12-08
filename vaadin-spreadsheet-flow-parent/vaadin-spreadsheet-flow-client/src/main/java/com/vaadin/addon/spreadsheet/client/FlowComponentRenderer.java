@@ -11,5 +11,7 @@ public class FlowComponentRenderer extends Widget {
         element.setAttribute("appid", appId);
         element.setAttribute("nodeid", nodeId);
         setElement(element);
+
+        setSize("100%", "100%");
     }
 }

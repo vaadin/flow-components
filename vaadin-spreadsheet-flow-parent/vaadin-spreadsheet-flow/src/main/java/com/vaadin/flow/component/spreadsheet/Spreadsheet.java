@@ -4672,8 +4672,7 @@ public class Spreadsheet extends Component
     }
 
     private void unRegisterCustomComponent(Component component) {
-        // todo: se puede eliminar esto?
-        // component.setParent(null);
+        getElement().removeVirtualChild(component.getElement());
     }
 
     /**
