@@ -29,9 +29,6 @@ public class IntegerFieldValidationBasicPage
     public static final String MIN_INPUT = "min-input";
     public static final String MAX_INPUT = "max-input";
 
-    public static final String ATTACH_FIELD_BUTTON = "attach-field-button";
-    public static final String DETACH_FIELD_BUTTON = "detach-field-button";
-
     public IntegerFieldValidationBasicPage() {
         super();
 
@@ -53,17 +50,6 @@ public class IntegerFieldValidationBasicPage
             int value = Integer.parseInt(event.getValue());
             testField.setMax(value);
         }));
-
-        addAttachDetachControls();
-    }
-
-    private void addAttachDetachControls() {
-        NativeButton attachButton = createButton(ATTACH_FIELD_BUTTON,
-                "Attach field", event -> add(testField));
-        NativeButton detachButton = createButton(DETACH_FIELD_BUTTON,
-                "Detach field", event -> remove(testField));
-
-        add(new Div(attachButton, detachButton));
     }
 
     protected IntegerField createTestField() {
