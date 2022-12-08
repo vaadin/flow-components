@@ -77,14 +77,14 @@ final class TextFieldValidationSupport implements Serializable {
             return ValidationResult.error("");
         }
 
-        final boolean isMinLengthNotReached = value != null && minLength != null
-                && value.length() < minLength;
+        final boolean isMinLengthNotReached = value != null && !value.isEmpty()
+                && minLength != null && value.length() < minLength;
         if (isMinLengthNotReached) {
             return ValidationResult.error("");
         }
 
-        final boolean valueViolatePattern = value != null && pattern != null
-                && !pattern.matcher(value).matches();
+        final boolean valueViolatePattern = value != null && !value.isEmpty()
+                && pattern != null && !pattern.matcher(value).matches();
         if (valueViolatePattern) {
             return ValidationResult.error("");
         }

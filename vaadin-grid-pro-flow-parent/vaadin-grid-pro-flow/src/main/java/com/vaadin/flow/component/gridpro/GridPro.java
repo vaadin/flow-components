@@ -1,19 +1,13 @@
 package com.vaadin.flow.component.gridpro;
 
-/*
- * #%L
- * Vaadin GridPro
- * %%
- * Copyright 2000-2022 Vaadin Ltd.
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
+/**
+ * Copyright (C) 2000-2022 Vaadin Ltd
  *
- * See the file license.html distributed with this software for more
- * information about licensing.
+ * This program is available under Vaadin Commercial License and Service Terms.
  *
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
  */
 
 import java.util.HashMap;
@@ -52,9 +46,9 @@ import elemental.json.JsonObject;
 import org.slf4j.LoggerFactory;
 
 @Tag("vaadin-grid-pro")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha5")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha6")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/grid-pro", version = "24.0.0-alpha5")
+@NpmPackage(value = "@vaadin/grid-pro", version = "24.0.0-alpha6")
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro.js")
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro-edit-column.js")
 @JsModule("./gridProConnector.js")
@@ -116,6 +110,9 @@ public class GridPro<E> extends Grid<E> {
 
     private void setup() {
         addItemPropertyChangedListener(e -> {
+            if (e.getItem() == null) {
+                return;
+            }
             EditColumn<E> column = (EditColumn<E>) this.idToColumnMap
                     .get(e.getPath());
 
@@ -185,7 +182,7 @@ public class GridPro<E> extends Grid<E> {
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-pro-edit-column")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha5")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha6")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class EditColumn<T> extends Column<T> {
 

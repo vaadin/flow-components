@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.textfield.tests.validation;
 
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 import com.vaadin.tests.validation.AbstractValidationPage;
@@ -28,9 +26,6 @@ public class TextFieldValidationBasicPage
     public static final String PATTERN_INPUT = "pattern-input";
     public static final String MIN_LENGTH_INPUT = "min-length-input";
     public static final String MAX_LENGTH_INPUT = "max-length-input";
-
-    public static final String ATTACH_FIELD_BUTTON = "attach-field-button";
-    public static final String DETACH_FIELD_BUTTON = "detach-field-button";
 
     public TextFieldValidationBasicPage() {
         super();
@@ -52,17 +47,6 @@ public class TextFieldValidationBasicPage
             int value = Integer.parseInt(event.getValue());
             testField.setMaxLength(value);
         }));
-
-        addAttachDetachControls();
-    }
-
-    private void addAttachDetachControls() {
-        NativeButton attachButton = createButton(ATTACH_FIELD_BUTTON,
-                "Attach field", event -> add(testField));
-        NativeButton detachButton = createButton(DETACH_FIELD_BUTTON,
-                "Detach field", event -> add(testField));
-
-        add(new Div(attachButton, detachButton));
     }
 
     protected TextField createTestField() {

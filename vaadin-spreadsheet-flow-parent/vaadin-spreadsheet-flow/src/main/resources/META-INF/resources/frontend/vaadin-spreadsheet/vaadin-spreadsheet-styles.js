@@ -1,7 +1,12 @@
 /**
  * @license
- * Copyright (c) 2022 Vaadin Ltd.
- * This program is available under Commercial Vaadin Developer License 4.0, available at https://vaadin.com/license/cvdl-4.0.
+ * Copyright (C) 2000-2022 Vaadin Ltd
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
  */
 import { css } from 'lit';
 
@@ -12,6 +17,7 @@ export const spreadsheetStyles = css`
     height: 100%;
     flex: 1 1 auto;
     isolation: isolate;
+    background-color: #fff;
   }
 
   .v-disabled {
@@ -99,6 +105,7 @@ export const spreadsheetStyles = css`
     border: none;
     color: #474747;
     outline: none;
+    background-color: initial;
   }
   .v-spreadsheet .functionbar .arrow {
     position: absolute;
@@ -1247,7 +1254,7 @@ export const spreadsheetOverlayStyles = css`
   #spreadsheet-overlays .v-spreadsheet-popupbutton-overlay {
     padding: 4px 4px;
     border-radius: 4px;
-    background-color: white;
+    background-color: var(--lumo-base-color, #fff);
     color: #474747;
     box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.1), 0 3px 5px 0 rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.091);
     -webkit-backface-visibility: hidden;
@@ -1284,7 +1291,6 @@ export const spreadsheetOverlayStyles = css`
     gap: 4px;
   }
   #spreadsheet-overlays .v-spreadsheet-popupbutton-overlay-header {
-    background: white;
     height: 18px;
     position: relative;
     width: 100%;
@@ -1316,5 +1322,6 @@ export const spreadsheetOverlayStyles = css`
     height: 18px;
     line-height: 18px;
     text-align: center;
+    color: var(--lumo-body-text-color);
   }
 `;

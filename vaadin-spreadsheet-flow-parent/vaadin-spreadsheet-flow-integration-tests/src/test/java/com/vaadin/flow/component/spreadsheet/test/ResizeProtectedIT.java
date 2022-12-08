@@ -2,6 +2,7 @@ package com.vaadin.flow.component.spreadsheet.test;
 
 import com.vaadin.flow.component.spreadsheet.testbench.SheetHeaderElement;
 import com.vaadin.flow.component.spreadsheet.testbench.SpreadsheetElement;
+import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 
 import org.junit.Assert;
@@ -9,11 +10,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.interactions.Actions;
 
+@TestPath("vaadin-spreadsheet")
 public class ResizeProtectedIT extends AbstractSpreadsheetIT {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL());
+        open();
         createNewSpreadsheet();
     }
 

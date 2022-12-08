@@ -1,16 +1,13 @@
 package com.vaadin.flow.component.spreadsheet;
 
-/*
- * #%L
- * Vaadin Spreadsheet
- * %%
- * Copyright (C) 2013 - 2022 Vaadin Ltd
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
+/**
+ * Copyright (C) 2000-2022 Vaadin Ltd
  *
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
  */
 
 import java.io.File;
@@ -135,7 +132,7 @@ public class Spreadsheet extends Component
         String version = properties.getProperty("spreadsheet.version");
 
         if (service != null) {
-            if (service.getDeploymentConfiguration().isProductionMode()) {
+            if (!service.getDeploymentConfiguration().isProductionMode()) {
                 LicenseChecker.checkLicenseFromStaticBlock(
                         "vaadin-spreadsheet-flow", version);
             }
