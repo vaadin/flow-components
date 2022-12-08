@@ -21,6 +21,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.details.Details;
+import com.vaadin.flow.component.html.Span;
 
 /**
  * An accordion panel which could be opened or closed.
@@ -31,6 +32,19 @@ import com.vaadin.flow.component.details.Details;
 @NpmPackage(value = "@vaadin/accordion", version = "24.0.0-alpha6")
 @JsModule("@vaadin/accordion/src/vaadin-accordion-panel.js")
 public class AccordionPanel extends Details {
+
+    private Component summary;
+    private Component summaryContainer;
+
+    /**
+     * Server-side component for the {@code <vaadin-accordion-heading>} element.
+     */
+    @Tag("vaadin-accordion-heading")
+    static class AccordionHeading extends Component {
+
+        public AccordionHeading() {
+        }
+    }
 
     /**
      * Creates an empty panel.
@@ -118,5 +132,65 @@ public class AccordionPanel extends Details {
     public AccordionPanel(Component summary, Component... components) {
         this(summary);
         addContent(components);
+    }
+
+    /**
+     * Sets the summary container component.
+     */
+    protected void setSummaryContainer() {
+        summaryContainer = new AccordionHeading();
+        summaryContainer.getElement().setAttribute("slot", "summary");
+        getElement().appendChild(summaryContainer.getElement());
+    }
+
+    /**
+     * Sets the component summary
+     *
+     * @see #getSummary()
+     * @param summary
+     *            the summary component to set, or <code>null</code> to remove
+     *            any previously set summary
+     */
+    @Override
+    public void setSummary(Component summary) {
+        summaryContainer.getElement().removeAllChildren();
+        if (summary == null) {
+            return;
+        }
+
+        this.summary = summary;
+        summaryContainer.getElement().appendChild(summary.getElement());
+    }
+
+    /**
+     * Returns summary component which was set via
+     * {@link #setSummary(Component)} or {@link #setSummaryText(String)}
+     *
+     * @return the summary component, <code>null</code> if nothing was set
+     */
+    @Override
+    public Component getSummary() {
+        return summary;
+    }
+
+    /**
+     * Creates a text wrapper and sets a summary via
+     * {@link #setSummary(Component)}
+     */
+    @Override
+    public void setSummaryText(String summary) {
+        if (summary == null) {
+            summary = "";
+        }
+        setSummary(new Span(summary));
+    }
+
+    /**
+     * @return summary section content as string (empty string if nothing was
+     *         set)
+     */
+    @Override
+    public String getSummaryText() {
+        return summary == null ? "" : summary.getElement().getText();
     }
 }

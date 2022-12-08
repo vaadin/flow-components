@@ -67,7 +67,18 @@ public class Details extends Component
         implements HasEnabled, HasTheme, HasStyle, HasSize, HasTooltip {
 
     private Component summary;
+    private Component summaryContainer;
     private final Div contentContainer;
+
+    /**
+     * Server-side component for the {@code <vaadin-details-summary>} element.
+     */
+    @Tag("vaadin-details-summary")
+    static class DetailsSummary extends Component {
+
+        public DetailsSummary() {
+        }
+    }
 
     /**
      * Initializes a new Details component.
@@ -75,6 +86,7 @@ public class Details extends Component
     public Details() {
         contentContainer = new Div();
         getElement().appendChild(contentContainer.getElement());
+        setSummaryContainer();
     }
 
     /**
@@ -170,6 +182,15 @@ public class Details extends Component
     }
 
     /**
+     * Sets the summary container component.
+     */
+    protected void setSummaryContainer() {
+        summaryContainer = new DetailsSummary();
+        summaryContainer.getElement().setAttribute("slot", "summary");
+        getElement().appendChild(summaryContainer.getElement());
+    }
+
+    /**
      * Sets the component summary
      *
      * @see #getSummary()
@@ -178,18 +199,13 @@ public class Details extends Component
      *            any previously set summary
      */
     public void setSummary(Component summary) {
-        if (this.summary != null) {
-            this.summary.getElement().removeAttribute("slot");
-            this.summary.getElement().removeFromParent();
-        }
-
-        this.summary = summary;
+        summaryContainer.getElement().removeAllChildren();
         if (summary == null) {
             return;
         }
 
-        summary.getElement().setAttribute("slot", "summary");
-        getElement().appendChild(summary.getElement());
+        this.summary = summary;
+        summaryContainer.getElement().appendChild(summary.getElement());
     }
 
     /**
