@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.textfield.tests.validation;
 
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.router.Route;
 import com.vaadin.tests.validation.AbstractValidationPage;
@@ -28,9 +26,6 @@ public class NumberFieldValidationBasicPage
     public static final String STEP_INPUT = "step-input";
     public static final String MIN_INPUT = "min-input";
     public static final String MAX_INPUT = "max-input";
-
-    public static final String ATTACH_FIELD_BUTTON = "attach-field-button";
-    public static final String DETACH_FIELD_BUTTON = "detach-field-button";
 
     public NumberFieldValidationBasicPage() {
         super();
@@ -53,17 +48,6 @@ public class NumberFieldValidationBasicPage
             double value = Double.parseDouble(event.getValue());
             testField.setMax(value);
         }));
-
-        addAttachDetachControls();
-    }
-
-    private void addAttachDetachControls() {
-        NativeButton attachButton = createButton(ATTACH_FIELD_BUTTON,
-                "Attach field", event -> add(testField));
-        NativeButton detachButton = createButton(DETACH_FIELD_BUTTON,
-                "Detach field", event -> remove(testField));
-
-        add(new Div(attachButton, detachButton));
     }
 
     protected NumberField createTestField() {

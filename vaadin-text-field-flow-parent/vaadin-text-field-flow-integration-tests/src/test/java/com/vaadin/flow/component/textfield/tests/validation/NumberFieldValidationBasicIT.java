@@ -26,8 +26,6 @@ import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldVa
 import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldValidationBasicPage.MAX_INPUT;
 import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldValidationBasicPage.STEP_INPUT;
 import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldValidationBasicPage.REQUIRED_BUTTON;
-import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldValidationBasicPage.DETACH_FIELD_BUTTON;
-import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldValidationBasicPage.ATTACH_FIELD_BUTTON;
 
 @TestPath("vaadin-number-field/validation/basic")
 public class NumberFieldValidationBasicIT
@@ -44,9 +42,7 @@ public class NumberFieldValidationBasicIT
         $("button").id(REQUIRED_BUTTON).click();
         testField.sendKeys(Keys.TAB);
 
-        $("button").id(DETACH_FIELD_BUTTON).click();
-        $("button").id(ATTACH_FIELD_BUTTON).click();
-        testField = getTestField();
+        detachAndReattachField();
 
         assertServerInvalid();
         assertClientInvalid();
@@ -56,9 +52,7 @@ public class NumberFieldValidationBasicIT
     public void webComponentCanNotModifyInvalidState() {
         assertWebComponentCanNotModifyInvalidState();
 
-        $("button").id(DETACH_FIELD_BUTTON).click();
-        $("button").id(ATTACH_FIELD_BUTTON).click();
-        testField = getTestField();
+        detachAndReattachField();
 
         assertWebComponentCanNotModifyInvalidState();
     }
