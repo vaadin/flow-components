@@ -41,6 +41,7 @@ public class PasswordFieldValidationBasicIT
         // Make field invalid
         $("button").id(REQUIRED_BUTTON).click();
         testField.sendKeys(Keys.TAB);
+        testField.sendKeys(Keys.TAB);
 
         detachAndReattachField();
 
@@ -59,6 +60,9 @@ public class PasswordFieldValidationBasicIT
 
     @Test
     public void triggerInputBlur_assertValidity() {
+        // Tab to the show button
+        testField.sendKeys(Keys.TAB);
+        // Tab out of the field
         testField.sendKeys(Keys.TAB);
         assertServerValid();
         assertClientValid();
