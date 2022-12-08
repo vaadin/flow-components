@@ -37,9 +37,14 @@ import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.checkbox.dataview.CheckboxGroupDataView;
 import com.vaadin.flow.component.checkbox.dataview.CheckboxGroupListDataView;
+import com.vaadin.flow.component.shared.ClientValidationUtil;
+import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.binder.HasValidator;
+import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
+import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderWrapper;
@@ -78,7 +83,7 @@ public class CheckboxGroup<T>
         MultiSelect<CheckboxGroup<T>, T>,
         HasListDataView<T, CheckboxGroupListDataView<T>>,
         HasDataView<T, Void, CheckboxGroupDataView<T>>, HasHelper, HasLabel,
-        HasTooltip, HasValidator<T> {
+        HasTooltip, HasValidator<Set<T>>, HasClientValidation {
 
     private static final String VALUE = "value";
 
@@ -110,6 +115,10 @@ public class CheckboxGroup<T>
         super(Collections.emptySet(), Collections.emptySet(), JsonArray.class,
                 CheckboxGroup::presentationToModel,
                 CheckboxGroup::modelToPresentation, true);
+
+        addValueChangeListener(e -> validate());
+
+        addClientValidatedEventListener(e -> validate());
     }
 
     /**
@@ -215,7 +224,7 @@ public class CheckboxGroup<T>
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
 
-        FieldValidationUtil.disableClientValidation(this);
+        ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
     }
 
     @Override
@@ -754,4 +763,21 @@ public class CheckboxGroup<T>
         keyMapper.setIdentifierGetter(identifierProvider);
     }
 
+    @Override
+    protected void validate() {
+        boolean isRequired = isRequiredIndicatorVisible();
+        boolean isInvalid = ValidationUtil
+                .checkRequired(isRequired, getValue(), getEmptyValue())
+                .isError();
+
+        setInvalid(isInvalid);
+    }
+
+    @Override
+    public Registration addValidationStatusChangeListener(
+            ValidationStatusChangeListener<Set<T>> listener) {
+        return addClientValidatedEventListener(
+                event -> listener.validationStatusChanged(
+                        new ValidationStatusChangeEvent<>(this, !isInvalid())));
+    }
 }

@@ -24,7 +24,6 @@ import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.TestBenchTestCase;
 
-import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -172,27 +171,6 @@ public class CheckboxGroupIT extends AbstractComponentIT {
     }
 
     @Test
-    public void groupHasLabelAndErrorMessage_setInvalidShowEM_setValueRemoveEM() {
-        CheckboxGroupElement group = $(CheckboxGroupElement.class)
-                .id("group-with-label-and-error-message");
-
-        Assert.assertEquals("Label Attribute should present with correct text",
-                group.getAttribute("label"), "Group label");
-
-        TestBenchElement errorMessage = group.getErrorMessageComponent();
-
-        verifyGroupValid(group, errorMessage);
-
-        layout.findElement(By.id("group-with-label-button")).click();
-        verifyGroupInvalid(group, errorMessage);
-
-        Assert.assertEquals(
-                "Correct error message should be shown after the button clicks",
-                "Field has been set to invalid from server side",
-                errorMessage.getText());
-    }
-
-    @Test
     public void assertHelperText() {
         CheckboxGroupElement group = $(CheckboxGroupElement.class)
                 .id("checkbox-helper-text");
@@ -232,23 +210,5 @@ public class CheckboxGroupIT extends AbstractComponentIT {
                 anchor.getAttribute("src"));
 
         Assert.assertEquals("Bill", checkboxes.get(2).getText());
-    }
-
-    private void verifyGroupInvalid(TestBenchElement group,
-            TestBenchElement errorMessage) {
-        Assert.assertEquals("Checkbox group is invalid.", true,
-                group.getPropertyBoolean("invalid"));
-        Assert.assertFalse("Error message should be shown.",
-                errorMessage.getText().isEmpty());
-    }
-
-    private void verifyGroupValid(TestBenchElement group,
-            TestBenchElement errorMessage) {
-        Boolean isInvalid = group.getPropertyBoolean("invalid");
-        Assert.assertThat("Checkbox group is not invalid.", isInvalid,
-                CoreMatchers.anyOf(CoreMatchers.equalTo(isInvalid),
-                        CoreMatchers.equalTo(false)));
-        Assert.assertTrue("Error message should be empty.",
-                errorMessage.getText().isEmpty());
     }
 }

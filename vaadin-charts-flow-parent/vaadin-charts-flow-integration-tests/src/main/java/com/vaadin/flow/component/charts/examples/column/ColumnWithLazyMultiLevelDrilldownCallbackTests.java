@@ -12,6 +12,7 @@ import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
 import com.vaadin.flow.component.charts.model.DrilldownCallback;
 import com.vaadin.flow.component.charts.model.PlotOptionsColumn;
+import com.vaadin.flow.component.charts.model.PlotOptionsSeries;
 import com.vaadin.flow.component.charts.model.Series;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.ListItem;
@@ -93,6 +94,13 @@ public class ColumnWithLazyMultiLevelDrilldownCallbackTests
     private Series getPointDrilldown(DataSeriesItem point) {
         String prefix = point.getId() + "_";
         DataSeries series = new DataSeries(prefix + "drill");
+
+        final PlotOptionsSeries plotOptions = new PlotOptionsSeries();
+        series.setPlotOptions(plotOptions);
+        DataLabels dataLabels = new DataLabels(true);
+        dataLabels.setFormatter("return this.key.toUpperCase();");
+        plotOptions.setDataLabels(dataLabels);
+
         createItems(prefix).forEach(series::addItemWithDrilldown);
         return series;
     }
