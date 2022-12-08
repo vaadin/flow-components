@@ -134,7 +134,7 @@ public class NumberFieldValidationBinderIT
     public void badInput_changeInputValue_assertValidity() {
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("2", Keys.ENTER);
 
-        testField.sendKeys("--2", Keys.ENTER);
+        testField.sendKeys("--2", Keys.TAB);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage("");
@@ -143,7 +143,7 @@ public class NumberFieldValidationBinderIT
         assertServerValid();
         assertClientValid();
 
-        testField.sendKeys("--2", Keys.ENTER);
+        testField.sendKeys("--2", Keys.TAB);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage("");

@@ -166,7 +166,7 @@ public class NumberFieldValidationBasicIT
 
     @Test
     public void badInput_changeInputValue_assertValidity() {
-        testField.sendKeys("--2", Keys.ENTER);
+        testField.sendKeys("--2", Keys.TAB);
         assertServerInvalid();
         assertClientInvalid();
 
@@ -174,7 +174,7 @@ public class NumberFieldValidationBasicIT
         assertServerValid();
         assertClientValid();
 
-        testField.sendKeys("--2", Keys.ENTER);
+        testField.sendKeys("--2", Keys.TAB);
         assertServerInvalid();
         assertClientInvalid();
     }
