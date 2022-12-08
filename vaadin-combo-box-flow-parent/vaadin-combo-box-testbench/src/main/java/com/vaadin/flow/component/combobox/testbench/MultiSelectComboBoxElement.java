@@ -133,8 +133,7 @@ public class MultiSelectComboBoxElement extends TestBenchElement
      * Deselects all items, effectively clearing the value.
      */
     public void deselectAll() {
-        String script =
-                "const combobox = arguments[0]; combobox.selectedItems = [];";
+        String script = "const combobox = arguments[0]; combobox.selectedItems = [];";
         executeScript(script, this);
     }
 
