@@ -374,9 +374,17 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
                 expected, actual);
     }
 
+    protected void assertSelectedCell(String cell) {
+        assertSelectedCell(cell, isCellSelected(cell));
+    }
+
     protected void assertSelectedCell(String cell, boolean selected) {
         Assert.assertTrue("Cell " + cell + " should be the selected cell",
                 selected);
+    }
+
+    protected void assertNotSelectedCell(String cell) {
+        assertNotSelectedCell(cell, isCellSelected(cell));
     }
 
     protected void assertNotSelectedCell(String cell, boolean selected) {
