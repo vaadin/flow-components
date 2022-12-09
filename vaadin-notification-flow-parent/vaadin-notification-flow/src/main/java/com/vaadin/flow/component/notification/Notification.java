@@ -530,7 +530,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
      *            the value to set
      */
     public void setDuration(int duration) {
-        getElement().setProperty("duration", (double) duration);
+        getElement().setProperty("duration", duration);
     }
 
     /**
@@ -545,7 +545,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
      * @return the {@code duration} property from the webcomponent
      */
     public int getDuration() {
-        return (int) getElement().getProperty("duration", 0.0);
+        return getElement().getProperty("duration", 0);
     }
 
     /**
