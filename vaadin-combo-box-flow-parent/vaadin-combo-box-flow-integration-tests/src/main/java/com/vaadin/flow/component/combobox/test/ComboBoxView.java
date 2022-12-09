@@ -81,7 +81,6 @@ public class ComboBoxView extends Div {
         lazyLoadingWithCustomItemCountEstimate();
         pagedRepository();
         helperText();
-        configurationForRequired(); // Validation
         customFiltering(); // Filtering
         filteringAndSortingWithDataView();
         filteringWithTypesOtherThanString();
@@ -413,19 +412,6 @@ public class ComboBoxView extends Div {
         div.add(helperTextCombobox, helperComponentCombobox);
 
         addCard("Helper text and helper component", div);
-    }
-
-    private void configurationForRequired() {
-        ComboBox<String> requiredComboBox = new ComboBox<>();
-        requiredComboBox.setItems("Option one", "Option two", "Option three");
-        requiredComboBox.setLabel("Required");
-        requiredComboBox.setPlaceholder("Select an option");
-
-        requiredComboBox.setRequired(true);
-        requiredComboBox.setClearButtonVisible(true);
-        FlexLayout layout = new FlexLayout(requiredComboBox);
-        layout.getStyle().set("flex-wrap", "wrap");
-        addCard("Validation", "Required", layout);
     }
 
     private void customFiltering() {
