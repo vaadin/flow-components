@@ -8,7 +8,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.tests.validation.AbstractValidationPage;
 
 @Route("vaadin-time-picker/validation/binder")
-public class TimePickerValidationBinderPage
+public class BinderValidationPage
         extends AbstractValidationPage<TimePicker> {
     public static final String MIN_INPUT = "min-input";
     public static final String MAX_INPUT = "max-input";
@@ -33,7 +33,7 @@ public class TimePickerValidationBinderPage
 
     private LocalTime expectedValue;
 
-    public TimePickerValidationBinderPage() {
+    public BinderValidationPage() {
         super();
 
         binder = new Binder<>(Bean.class);
