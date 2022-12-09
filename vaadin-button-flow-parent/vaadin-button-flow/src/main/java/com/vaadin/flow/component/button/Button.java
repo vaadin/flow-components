@@ -17,16 +17,25 @@ package com.vaadin.flow.component.button;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.HasText;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.nodefeature.ElementAttributeMap;
 import com.vaadin.flow.internal.nodefeature.NodeFeature;
 import com.vaadin.flow.shared.Registration;
+
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
@@ -40,8 +49,14 @@ import java.util.stream.Stream;
  *
  * @author Vaadin Ltd
  */
-public class Button extends GeneratedVaadinButton<Button>
-        implements HasSize, HasEnabled, HasTooltip {
+@Tag("vaadin-button")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha6")
+@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@NpmPackage(value = "@vaadin/button", version = "24.0.0-alpha6")
+@JsModule("@vaadin/button/src/vaadin-button.js")
+public class Button extends Component implements ClickNotifier<Button>,
+        Focusable<Button>, HasSize, HasEnabled, HasStyle, HasText,
+        HasThemeVariant<ButtonVariant>, HasTooltip {
 
     private Component iconComponent;
     private boolean iconAfterText;
@@ -293,9 +308,8 @@ public class Button extends GeneratedVaadinButton<Button>
      * @param autofocus
      *            the boolean value to set
      */
-    @Override
     public void setAutofocus(boolean autofocus) {
-        super.setAutofocus(autofocus);
+        getElement().setProperty("autofocus", autofocus);
     }
 
     /**
@@ -307,7 +321,7 @@ public class Button extends GeneratedVaadinButton<Button>
      * @return the {@code autofocus} property from the button
      */
     public boolean isAutofocus() {
-        return isAutofocusBoolean();
+        return getElement().getProperty("autofocus", false);
     }
 
     /**
@@ -350,6 +364,66 @@ public class Button extends GeneratedVaadinButton<Button>
     private void updateIconSlot() {
         iconComponent.getElement().setAttribute("slot",
                 iconAfterText ? "suffix" : "prefix");
+    }
+
+    /**
+     * Adds the given components as children of this component at the slot
+     * 'prefix'.
+     *
+     * @param components
+     *            The components to add.
+     * @see <a href=
+     *      "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
+     *      page about slots</a>
+     * @see <a href=
+     *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
+     *      website about slots</a>
+     */
+    protected void addToPrefix(Component... components) {
+        for (Component component : components) {
+            component.getElement().setAttribute("slot", "prefix");
+            getElement().appendChild(component.getElement());
+        }
+    }
+
+    /**
+     * Adds the given components as children of this component at the slot
+     * 'suffix'.
+     *
+     * @param components
+     *            The components to add.
+     * @see <a href=
+     *      "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
+     *      page about slots</a>
+     * @see <a href=
+     *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
+     *      website about slots</a>
+     */
+    protected void addToSuffix(Component... components) {
+        for (Component component : components) {
+            component.getElement().setAttribute("slot", "suffix");
+            getElement().appendChild(component.getElement());
+        }
+    }
+
+    /**
+     * Removes the given child components from this component.
+     *
+     * @param components
+     *            The components to remove.
+     * @throws IllegalArgumentException
+     *             if any of the components is not a child of this component.
+     */
+    protected void remove(Component... components) {
+        for (Component component : components) {
+            if (getElement().equals(component.getElement().getParent())) {
+                component.getElement().removeAttribute("slot");
+                getElement().removeChild(component.getElement());
+            } else {
+                throw new IllegalArgumentException("The given component ("
+                        + component + ") is not a child of this component");
+            }
+        }
     }
 
     /**
