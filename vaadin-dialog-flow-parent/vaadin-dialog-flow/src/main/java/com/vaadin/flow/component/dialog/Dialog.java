@@ -189,7 +189,8 @@ public class Dialog extends Component implements HasComponents, HasSize,
     }
 
     /**
-     * `opened-changed` event is sent when the overlay opened state changes.
+     * {@code opened-changed} event is sent when the overlay opened state
+     * changes.
      */
     public static class OpenedChangeEvent extends ComponentEvent<Dialog> {
         private final boolean opened;
