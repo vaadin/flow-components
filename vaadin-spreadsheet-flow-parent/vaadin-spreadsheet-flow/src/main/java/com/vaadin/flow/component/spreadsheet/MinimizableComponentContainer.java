@@ -2,6 +2,7 @@ package com.vaadin.flow.component.spreadsheet;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -19,18 +20,23 @@ class MinimizableComponentContainer extends Div {
         this.minimizeButton = createMinimizeButton();
 
         this.add(minimizeButton, content);
+        this.getStyle().set("position", "relative");
     }
 
     public MinimizableComponentContainer() {
         this.minimizeButton = createMinimizeButton();
         this.add(minimizeButton);
+        this.getStyle().set("position", "relative");
     }
 
     private Button createMinimizeButton() {
         final Button minimizeButton = new Button(new Icon(VaadinIcon.MINUS));
 
-        // minimizeButton.setClassName(ValoTheme.BUTTON_LINK);
         minimizeButton.addClassName("minimize-button");
+        minimizeButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY,
+                ButtonVariant.LUMO_SMALL);
+        minimizeButton.getStyle().set("position", "absolute");
+        minimizeButton.getStyle().set("top", "-30px");
 
         minimizeButton.addClickListener(event -> {
             content.setVisible(!content.isVisible());

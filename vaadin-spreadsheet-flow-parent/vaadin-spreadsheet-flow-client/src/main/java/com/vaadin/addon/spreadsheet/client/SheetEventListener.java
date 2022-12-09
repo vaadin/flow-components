@@ -117,7 +117,7 @@ public class SheetEventListener implements EventListener {
             // The target's parent element may be a shadow root
             return;
         }
-        
+
         if (target.getParentElement().getAttribute("class").contains("sheet")
                 && targetClassName != null
                 && targetClassName.contains("cell")) {
