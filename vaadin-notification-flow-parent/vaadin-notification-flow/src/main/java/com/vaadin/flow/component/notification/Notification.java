@@ -480,8 +480,8 @@ public class Notification extends Component implements HasComponents, HasStyle,
     /**
      * True if the notification is currently displayed.
      * <p>
-     * This property is synchronized automatically from client side when a
-     * 'opened-changed' event happens.
+     * This property is synchronized automatically from client side when an
+     * {@code opened-changed} event happens.
      *
      * @return the {@code opened} property from the webcomponent
      */
@@ -491,7 +491,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
     }
 
     /**
-     * `opened-changed` event is sent when the notification opened state
+     * {@code opened-changed} event is sent when the notification opened state
      * changes.
      */
     public static class OpenedChangeEvent extends ComponentEvent<Notification> {
