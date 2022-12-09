@@ -834,7 +834,7 @@ public class DateTimePicker
         super.onAttach(attachEvent);
         if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
             ClientValidationUtil
-                    .preventWebComponentFromSettingItselfToValid(this);
+                    .preventWebComponentFromModifyingInvalidState(this);
         } else {
             FieldValidationUtil.disableClientValidation(this);
         }

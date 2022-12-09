@@ -7,8 +7,6 @@ import com.vaadin.tests.validation.AbstractValidationIT;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
-import static com.vaadin.flow.component.datepicker.validation.DatePickerValidationBasicPage.DETACH_FIELD_BUTTON;
-import static com.vaadin.flow.component.datepicker.validation.DatePickerValidationBasicPage.ATTACH_FIELD_BUTTON;
 import static com.vaadin.flow.component.datepicker.validation.DatePickerValidationBasicPage.MIN_INPUT;
 import static com.vaadin.flow.component.datepicker.validation.DatePickerValidationBasicPage.MAX_INPUT;
 import static com.vaadin.flow.component.datepicker.validation.DatePickerValidationBasicPage.REQUIRED_BUTTON;
@@ -23,29 +21,24 @@ public class DatePickerValidationBasicIT
     }
 
     @Test
-    public void onlyServerCanSetFieldToValid() {
+    public void detach_attach_preservesInvalidState() {
+        // Make field invalid
         $("button").id(REQUIRED_BUTTON).click();
+        testField.sendKeys(Keys.TAB);
 
-        executeScript("arguments[0].validate()", testField);
+        detachAndReattachField();
+
+        assertServerInvalid();
         assertClientInvalid();
-
-        testField.sendKeys("1/1/2022");
-        executeScript("arguments[0].validate()", testField);
-        assertClientInvalid();
-
-        testField.sendKeys(Keys.ENTER);
-        assertServerValid();
-        assertClientValid();
     }
 
     @Test
-    public void detach_attach_onlyServerCanSetFieldToValid() {
-        $("button").id(DETACH_FIELD_BUTTON).click();
-        $("button").id(ATTACH_FIELD_BUTTON).click();
+    public void webComponentCanNotModifyInvalidState() {
+        assertWebComponentCanNotModifyInvalidState();
 
-        testField = getTestField();
+        detachAndReattachField();
 
-        onlyServerCanSetFieldToValid();
+        assertWebComponentCanNotModifyInvalidState();
     }
 
     @Test
