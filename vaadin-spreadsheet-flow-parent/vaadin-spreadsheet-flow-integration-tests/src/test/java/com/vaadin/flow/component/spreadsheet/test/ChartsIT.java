@@ -160,7 +160,7 @@ public class ChartsIT extends AbstractSpreadsheetIT {
                 By.cssSelector("[slot=\"" + slotName + "\"] .minimize-button"));
     }
 
-    public WebElement getOverlayElement(String cell) {
+    private WebElement getOverlayElement(String cell) {
         int[] coordinates = numericCoordinates(cell);
 
         WebElement element = findElementInShadowRoot(By.cssSelector(
@@ -169,7 +169,7 @@ public class ChartsIT extends AbstractSpreadsheetIT {
         return element;
     }
 
-    public boolean isOverlayPresent(String cell) {
+    private boolean isOverlayPresent(String cell) {
         int[] coordinates = numericCoordinates(cell);
 
         List<WebElement> elements = findElementsInShadowRoot(By.cssSelector(
@@ -177,7 +177,7 @@ public class ChartsIT extends AbstractSpreadsheetIT {
         return elements.size() > 0;
     }
 
-    public int[] numericCoordinates(String cell) {
+    private int[] numericCoordinates(String cell) {
         CellReference cellReference = new CellReference(cell);
         return new int[] { cellReference.getCol() + 1,
                 cellReference.getRow() + 1 };
