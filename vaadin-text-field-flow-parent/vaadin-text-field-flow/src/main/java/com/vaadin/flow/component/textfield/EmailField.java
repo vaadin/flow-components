@@ -87,9 +87,7 @@ public class EmailField extends GeneratedVaadinEmailField<EmailField, String>
 
         addValueChangeListener(e -> validate());
 
-        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
-            addClientValidatedEventListener(e -> validate());
-        }
+        addClientValidatedEventListener(e -> validate());
     }
 
     /**
@@ -429,25 +427,17 @@ public class EmailField extends GeneratedVaadinEmailField<EmailField, String>
 
     @Override
     public Validator<String> getDefaultValidator() {
-        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
-            return (value, context) -> getValidationSupport()
-                    .checkValidity(value);
-        }
-
-        return Validator.alwaysPass();
+        return (value, context) -> getValidationSupport()
+                .checkValidity(value);
     }
 
     @Override
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<String> listener) {
-        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
-            return addClientValidatedEventListener(
-                    event -> listener.validationStatusChanged(
-                            new ValidationStatusChangeEvent<String>(this,
-                                    !isInvalid())));
-        }
-
-        return null;
+        return addClientValidatedEventListener(
+                event -> listener.validationStatusChanged(
+                        new ValidationStatusChangeEvent<String>(this,
+                                !isInvalid())));
     }
 
     /**
@@ -463,12 +453,8 @@ public class EmailField extends GeneratedVaadinEmailField<EmailField, String>
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
-            ClientValidationUtil
-                    .preventWebComponentFromModifyingInvalidState(this);
-        } else {
-            FieldValidationUtil.disableClientValidation(this);
-        }
+        ClientValidationUtil
+                .preventWebComponentFromModifyingInvalidState(this);
     }
 
     // Override is only required to keep binary compatibility with other 23.x
@@ -483,26 +469,5 @@ public class EmailField extends GeneratedVaadinEmailField<EmailField, String>
     @Override
     public void removeThemeVariants(TextFieldVariant... variants) {
         HasThemeVariant.super.removeThemeVariants(variants);
-    }
-
-    /**
-     * Returns true if the given feature flag is enabled, false otherwise.
-     * <p>
-     * Exposed with protected visibility to support mocking
-     * <p>
-     * The method requires the {@code VaadinService} instance to obtain the
-     * available feature flags, otherwise, the feature is considered disabled.
-     *
-     * @param feature
-     *            the feature flag.
-     * @return whether the feature flag is enabled.
-     */
-    protected boolean isFeatureFlagEnabled(Feature feature) {
-        VaadinService service = VaadinService.getCurrent();
-        if (service == null) {
-            return false;
-        }
-
-        return FeatureFlags.get(service.getContext()).isEnabled(feature);
     }
 }
