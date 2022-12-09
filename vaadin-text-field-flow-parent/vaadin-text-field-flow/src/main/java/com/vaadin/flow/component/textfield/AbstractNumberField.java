@@ -28,18 +28,24 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.InputNotifier;
 import com.vaadin.flow.component.KeyNotifier;
+import com.vaadin.flow.component.Synchronize;
+import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasClearButton;
+import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
+import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
+import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * Abstract base class for components based on {@code vaadin-number-field}
@@ -48,12 +54,12 @@ import com.vaadin.flow.server.VaadinService;
  * @author Vaadin Ltd.
  */
 public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T extends Number>
-        extends GeneratedVaadinNumberField<C, T>
-        implements HasSize, HasValidation, HasValueChangeMode,
-        HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
-        HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper, HasLabel,
-        HasClearButton, HasAllowedCharPattern,
-        HasThemeVariant<TextFieldVariant>, HasTooltip, HasValidator<T> {
+        extends GeneratedVaadinNumberField<C, T> implements HasSize,
+        HasValidation, HasValueChangeMode, HasPrefixAndSuffix, InputNotifier,
+        KeyNotifier, CompositionNotifier, HasAutocomplete, HasAutocapitalize,
+        HasAutocorrect, HasHelper, HasLabel, HasClearButton,
+        HasAllowedCharPattern, HasThemeVariant<TextFieldVariant>, HasTooltip,
+        HasValidator<T>, HasClientValidation {
 
     private ValueChangeMode currentMode;
 
@@ -117,6 +123,8 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         setValueChangeMode(ValueChangeMode.ON_CHANGE);
 
         addValueChangeListener(e -> validate());
+
+        addClientValidatedEventListener(e -> validate());
     }
 
     /**
@@ -368,26 +376,50 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         return isInvalidBoolean();
     }
 
+    /**
+     * Returns whether the input element has a value or not.
+     *
+     * @return <code>true</code> if the input element's value is populated,
+     *         <code>false</code> otherwise
+     */
+    @Synchronize(property = "_hasInputValue", value = "has-input-value-changed")
+    private boolean isInputValuePresent() {
+        return getElement().getProperty("_hasInputValue", false);
+    }
+
     @Override
     public Validator<T> getDefaultValidator() {
-        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
-            return (value, context) -> checkValidity(value);
-        }
+        return (value, context) -> checkValidity(value);
+    }
 
-        return Validator.alwaysPass();
+    @Override
+    public Registration addValidationStatusChangeListener(
+            ValidationStatusChangeListener<T> listener) {
+        return addClientValidatedEventListener(
+                event -> listener.validationStatusChanged(
+                        new ValidationStatusChangeEvent<T>(this,
+                                !isInvalid())));
     }
 
     private ValidationResult checkValidity(T value) {
-        final boolean isGreaterThanMax = value != null
-                && value.doubleValue() > max;
-        if (isGreaterThanMax) {
+        boolean hasNonParsableValue = value == getEmptyValue()
+                && isInputValuePresent();
+        if (hasNonParsableValue) {
             return ValidationResult.error("");
         }
 
-        final boolean isSmallerThanMin = value != null
-                && value.doubleValue() < min;
-        if (isSmallerThanMin) {
-            return ValidationResult.error("");
+        Double doubleValue = value != null ? value.doubleValue() : null;
+
+        ValidationResult greaterThanMax = ValidationUtil
+                .checkGreaterThanMax(doubleValue, max);
+        if (greaterThanMax.isError()) {
+            return greaterThanMax;
+        }
+
+        ValidationResult smallerThanMin = ValidationUtil
+                .checkSmallerThanMin(doubleValue, min);
+        if (smallerThanMin.isError()) {
+            return smallerThanMin;
         }
 
         if (!isValidByStep(value)) {
@@ -442,7 +474,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        FieldValidationUtil.disableClientValidation(this);
+        ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
     }
 
     // Override is only required to keep binary compatibility with other 23.x
@@ -457,26 +489,5 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     @Override
     public void removeThemeVariants(TextFieldVariant... variants) {
         HasThemeVariant.super.removeThemeVariants(variants);
-    }
-
-    /**
-     * Returns true if the given feature flag is enabled, false otherwise.
-     * <p>
-     * Exposed with protected visibility to support mocking
-     * <p>
-     * The method requires the {@code VaadinService} instance to obtain the
-     * available feature flags, otherwise, the feature is considered disabled.
-     *
-     * @param feature
-     *            the feature flag.
-     * @return whether the feature flag is enabled.
-     */
-    protected boolean isFeatureFlagEnabled(Feature feature) {
-        VaadinService service = VaadinService.getCurrent();
-        if (service == null) {
-            return false;
-        }
-
-        return FeatureFlags.get(service.getContext()).isEnabled(feature);
     }
 }
