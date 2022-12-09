@@ -6,8 +6,8 @@ import com.vaadin.tests.validation.AbstractValidationIT;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
-import static com.vaadin.flow.component.combobox.test.validation.ComboBoxBasicValidationPage.ENABLE_CUSTOM_VALUE_BUTTON;
-import static com.vaadin.flow.component.combobox.test.validation.ComboBoxBasicValidationPage.REQUIRED_BUTTON;
+import static com.vaadin.flow.component.combobox.test.validation.MultiSelectComboBoxBasicValidationPage.ENABLE_CUSTOM_VALUE_BUTTON;
+import static com.vaadin.flow.component.combobox.test.validation.MultiSelectComboBoxBasicValidationPage.REQUIRED_BUTTON;
 
 @TestPath("vaadin-multi-select-combo-box/validation/basic")
 public class MultiSelectComboBoxBasicValidationIT

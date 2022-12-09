@@ -6,7 +6,10 @@ import com.vaadin.tests.validation.AbstractValidationIT;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
-import static com.vaadin.flow.component.combobox.test.validation.ComboBoxBinderValidationPage.*;
+import static com.vaadin.flow.component.combobox.test.validation.MultiSelectComboBoxBinderValidationPage.ENABLE_CUSTOM_VALUE_BUTTON;
+import static com.vaadin.flow.component.combobox.test.validation.MultiSelectComboBoxBinderValidationPage.EXPECTED_VALUE_INPUT;
+import static com.vaadin.flow.component.combobox.test.validation.MultiSelectComboBoxBinderValidationPage.REQUIRED_ERROR_MESSAGE;
+import static com.vaadin.flow.component.combobox.test.validation.MultiSelectComboBoxBinderValidationPage.UNEXPECTED_VALUE_ERROR_MESSAGE;
 
 @TestPath("vaadin-multi-select-combo-box/validation/binder")
 public class MultiSelectComboBoxBinderValidationIT
