@@ -22,6 +22,7 @@ import com.vaadin.flow.component.charts.model.Stacking;
 import com.vaadin.flow.component.spreadsheet.SheetChartWrapper;
 import com.vaadin.flow.component.spreadsheet.SheetOverlayWrapper;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
+import com.vaadin.flow.component.spreadsheet.tests.TestHelper;
 
 public class ChartTestBase {
     private static String sampleFileDiretory = "";
@@ -37,7 +38,8 @@ public class ChartTestBase {
 
     protected Chart getChartFromSampleFile(String filename, String cell)
             throws Exception {
-        Spreadsheet spreadsheet = new Spreadsheet(getSampleFile(filename));
+
+        Spreadsheet spreadsheet = TestHelper.createSpreadsheet(filename);
 
         CellReference cellRef = new CellReference(cell);
 

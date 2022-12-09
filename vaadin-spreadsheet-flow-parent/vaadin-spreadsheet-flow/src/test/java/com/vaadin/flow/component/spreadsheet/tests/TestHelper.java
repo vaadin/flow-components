@@ -10,7 +10,7 @@ import com.vaadin.flow.component.spreadsheet.Spreadsheet.SpreadsheetEvent;
 
 import elemental.json.impl.JsonUtil;
 
-class TestHelper {
+public class TestHelper {
 
     /**
      * Fires a SpreadsheetEvent with the given event name and data. Can be used
@@ -23,8 +23,8 @@ class TestHelper {
      * @param jsonDataArray
      *            the data of the event as a JSON array, for example "[1, 1, 0]"
      */
-    static void fireClientEvent(Spreadsheet spreadsheet, String eventName,
-            String jsonDataArray) {
+    public static void fireClientEvent(Spreadsheet spreadsheet,
+            String eventName, String jsonDataArray) {
         ComponentUtil.fireEvent(spreadsheet, new SpreadsheetEvent(spreadsheet,
                 true, eventName, JsonUtil.parse(jsonDataArray)));
     }
@@ -38,7 +38,7 @@ class TestHelper {
      *            folder.
      * @return the created Spreadsheet component
      */
-    static Spreadsheet createSpreadsheet(String fileName) {
+    public static Spreadsheet createSpreadsheet(String fileName) {
         File testSheetFile = getTestSheetFile(fileName);
         try {
             return new Spreadsheet(testSheetFile);
@@ -55,7 +55,7 @@ class TestHelper {
      *            folder.
      * @return the File object
      */
-    static File getTestSheetFile(String fileName) {
+    public static File getTestSheetFile(String fileName) {
         try {
             return new File(TestHelper.class.getClassLoader()
                     .getResource("test_sheets" + File.separator + fileName)

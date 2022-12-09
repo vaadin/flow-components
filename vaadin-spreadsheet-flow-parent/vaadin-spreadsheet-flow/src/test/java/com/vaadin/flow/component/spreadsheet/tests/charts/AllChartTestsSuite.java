@@ -1,5 +1,6 @@
 package com.vaadin.flow.component.spreadsheet.tests.charts;
 
+import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
@@ -11,5 +12,4 @@ import com.vaadin.flow.component.spreadsheet.tests.charts.typetests.PieAndDonutT
 @Suite.SuiteClasses({ LineAreaScatterTest.class, ChartFeatureTest.class,
         ColumnAndBarTest.class, PieAndDonutTest.class, StyleTest.class })
 public class AllChartTestsSuite {
-
 }

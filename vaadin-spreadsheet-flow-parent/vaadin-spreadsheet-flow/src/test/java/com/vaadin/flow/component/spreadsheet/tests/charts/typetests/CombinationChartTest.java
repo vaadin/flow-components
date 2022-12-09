@@ -1,13 +1,22 @@
 package com.vaadin.flow.component.spreadsheet.tests.charts.typetests;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.spreadsheet.tests.charts.ChartTestBase;
 
 public class CombinationChartTest extends ChartTestBase {
+
+    @Before
+    public void init() {
+        var ui = new UI();
+        UI.setCurrent(ui);
+    }
+
     @Test
     public void columnAndLineTest() throws Exception {
         Configuration conf = getChartFromSampleFile(

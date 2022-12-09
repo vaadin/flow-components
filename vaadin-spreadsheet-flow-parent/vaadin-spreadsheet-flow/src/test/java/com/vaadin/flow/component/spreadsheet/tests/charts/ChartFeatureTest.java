@@ -1,8 +1,11 @@
 package com.vaadin.flow.component.spreadsheet.tests.charts;
 
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.charts.model.AxisType;
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.DataSeries;
@@ -10,8 +13,15 @@ import com.vaadin.flow.component.charts.model.HorizontalAlign;
 import com.vaadin.flow.component.charts.model.LayoutDirection;
 import com.vaadin.flow.component.charts.model.VerticalAlign;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
+import com.vaadin.flow.component.spreadsheet.tests.TestHelper;
 
 public class ChartFeatureTest extends ChartTestBase {
+
+    @Before
+    public void init() {
+        var ui = new UI();
+        UI.setCurrent(ui);
+    }
 
     @Test
     public void axisTitles_loadSampleB3_titlesAbsent() throws Exception {
@@ -39,10 +49,12 @@ public class ChartFeatureTest extends ChartTestBase {
     @Test
     public void chartTitle_loadSampleJ13_titlesEqualsCellValue()
             throws Exception {
+
         String fileName = "Tagetik 6.xlsx";
         Configuration conf = getChartFromSampleFile(fileName, "J13")
                 .getConfiguration();
-        Spreadsheet spreadsheet = new Spreadsheet(getSampleFile(fileName));
+        UI.setCurrent(new UI());
+        Spreadsheet spreadsheet = TestHelper.createSpreadsheet(fileName);
 
         Assert.assertEquals(spreadsheet.getCell("B14").getStringCellValue(),
                 conf.getTitle().getText());

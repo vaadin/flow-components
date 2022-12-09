@@ -1,8 +1,10 @@
 package com.vaadin.flow.component.spreadsheet.tests.charts;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.charts.model.AbstractConfigurationObject;
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.style.Color;
@@ -12,6 +14,13 @@ import com.vaadin.flow.component.charts.model.style.Style;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
 
 public class StyleTest extends ChartTestBase {
+
+    @Before
+    public void init() {
+        var ui = new UI();
+        UI.setCurrent(ui);
+    }
+
     @Test
     public void axisTitles_loadSampleO4_axisTitleFont() throws Exception {
         Configuration conf = getChartFromSampleFile(
