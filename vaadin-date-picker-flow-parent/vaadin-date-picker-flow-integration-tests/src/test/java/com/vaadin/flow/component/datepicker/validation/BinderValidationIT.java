@@ -24,7 +24,7 @@ public class BinderValidationIT
     }
 
     @Test
-    public void required_triggerInputBlur_assertValidity() {
+    public void required_triggerBlur_assertValidity() {
         testField.sendKeys(Keys.TAB);
         assertServerInvalid();
         assertClientInvalid();
@@ -32,7 +32,7 @@ public class BinderValidationIT
     }
 
     @Test
-    public void required_changeInputValue_assertValidity() {
+    public void required_changeValue_assertValidity() {
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("2022-01-01", Keys.ENTER);
 
         testField.setInputValue("1/1/2022");
@@ -46,7 +46,7 @@ public class BinderValidationIT
     }
 
     @Test
-    public void min_changeInputValue_assertValidity() {
+    public void min_changeValue_assertValidity() {
         $("input").id(MIN_INPUT).sendKeys("2022-03-01", Keys.ENTER);
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("2022-04-01", Keys.ENTER);
 
@@ -69,7 +69,7 @@ public class BinderValidationIT
     }
 
     @Test
-    public void max_changeInputValue_assertValidity() {
+    public void max_changeValue_assertValidity() {
         $("input").id(MAX_INPUT).sendKeys("2022-03-01", Keys.ENTER);
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("2022-02-01", Keys.ENTER);
 
@@ -92,7 +92,7 @@ public class BinderValidationIT
     }
 
     @Test
-    public void badInput_changeInputValue_assertValidity() {
+    public void badInput_changeValue_assertValidity() {
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("2022-01-01", Keys.ENTER);
 
         testField.setInputValue("INVALID");

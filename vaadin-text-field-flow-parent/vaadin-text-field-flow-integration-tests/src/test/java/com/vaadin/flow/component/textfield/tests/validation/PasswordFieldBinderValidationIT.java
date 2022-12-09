@@ -40,7 +40,7 @@ public class PasswordFieldBinderValidationIT
     }
 
     @Test
-    public void required_triggerInputBlur_assertValidity() {
+    public void required_triggerBlur_assertValidity() {
         // Tab to the show button
         testField.sendKeys(Keys.TAB);
         // Tab out of the field
@@ -51,7 +51,7 @@ public class PasswordFieldBinderValidationIT
     }
 
     @Test
-    public void required_changeInputValue_assertValidity() {
+    public void required_changeValue_assertValidity() {
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("Value", Keys.ENTER);
 
         testField.setValue("Value");
@@ -65,7 +65,7 @@ public class PasswordFieldBinderValidationIT
     }
 
     @Test
-    public void minLength_changeInputValue_assertValidity() {
+    public void minLength_changeValue_assertValidity() {
         $("input").id(MIN_LENGTH_INPUT).sendKeys("2", Keys.ENTER);
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("AAA", Keys.ENTER);
 
@@ -88,7 +88,7 @@ public class PasswordFieldBinderValidationIT
     }
 
     @Test
-    public void maxLength_changeInputValue_assertValidity() {
+    public void maxLength_changeValue_assertValidity() {
         $("input").id(MAX_LENGTH_INPUT).sendKeys("2", Keys.ENTER);
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("A", Keys.ENTER);
 
@@ -111,7 +111,7 @@ public class PasswordFieldBinderValidationIT
     }
 
     @Test
-    public void pattern_changeInputValue_assertValidity() {
+    public void pattern_changeValue_assertValidity() {
         $("input").id(PATTERN_INPUT).sendKeys("^\\d+$", Keys.ENTER);
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("1234", Keys.ENTER);
 

@@ -67,7 +67,7 @@ public class BasicValidationIT
     }
 
     @Test
-    public void required_changeInputValue_assertValidity() {
+    public void required_changeValue_assertValidity() {
         $("button").id(REQUIRED_BUTTON).click();
 
         setInputValue(dateInput, "1/1/2000");
@@ -85,7 +85,7 @@ public class BasicValidationIT
     }
 
     @Test
-    public void badInput_changeInputValue_assertValidity() {
+    public void badInput_changeValue_assertValidity() {
         setInputValue(dateInput, "INVALID");
         setInputValue(timeInput, "INVALID");
         assertServerInvalid();
@@ -103,7 +103,7 @@ public class BasicValidationIT
     }
 
     @Test
-    public void min_changeInputValue_assertValidity() {
+    public void min_changeValue_assertValidity() {
         $("input").id(MIN_INPUT).sendKeys("2000-02-02T12:00", Keys.ENTER);
 
         setInputValue(dateInput, "1/1/2000");

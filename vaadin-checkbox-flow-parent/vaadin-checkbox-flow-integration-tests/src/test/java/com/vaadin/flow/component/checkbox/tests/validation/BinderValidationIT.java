@@ -21,7 +21,7 @@ public class BinderValidationIT
     }
 
     @Test
-    public void required_triggerInputBlur_assertValidity() {
+    public void required_triggerBlur_assertValidity() {
         testField.$(CheckboxElement.class).last().sendKeys(Keys.TAB);
         assertServerInvalid();
         assertClientInvalid();

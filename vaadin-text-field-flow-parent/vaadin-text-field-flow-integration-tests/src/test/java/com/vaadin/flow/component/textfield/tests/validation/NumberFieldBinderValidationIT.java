@@ -40,7 +40,7 @@ public class NumberFieldBinderValidationIT
     }
 
     @Test
-    public void required_triggerInputBlur_assertValidity() {
+    public void required_triggerBlur_assertValidity() {
         testField.sendKeys(Keys.TAB);
         assertServerInvalid();
         assertClientInvalid();
@@ -48,7 +48,7 @@ public class NumberFieldBinderValidationIT
     }
 
     @Test
-    public void required_changeInputValue_assertValidity() {
+    public void required_changeValue_assertValidity() {
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("1234", Keys.ENTER);
 
         testField.setValue("1234");
@@ -62,7 +62,7 @@ public class NumberFieldBinderValidationIT
     }
 
     @Test
-    public void min_changeInputValue_assertValidity() {
+    public void min_changeValue_assertValidity() {
         $("input").id(MIN_INPUT).sendKeys("2", Keys.ENTER);
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("2.2", Keys.ENTER);
 
@@ -85,7 +85,7 @@ public class NumberFieldBinderValidationIT
     }
 
     @Test
-    public void max_changeInputValue_assertValidity() {
+    public void max_changeValue_assertValidity() {
         $("input").id(MAX_INPUT).sendKeys("2", Keys.ENTER);
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("1.8", Keys.ENTER);
 
@@ -108,7 +108,7 @@ public class NumberFieldBinderValidationIT
     }
 
     @Test
-    public void step_changeInputValue_assertValidity() {
+    public void step_changeValue_assertValidity() {
         $("input").id(STEP_INPUT).sendKeys("1.5", Keys.ENTER);
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("3", Keys.ENTER);
 
@@ -131,7 +131,7 @@ public class NumberFieldBinderValidationIT
     }
 
     @Test
-    public void badInput_changeInputValue_assertValidity() {
+    public void badInput_changeValue_assertValidity() {
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("2", Keys.ENTER);
 
         testField.sendKeys("--2", Keys.TAB);

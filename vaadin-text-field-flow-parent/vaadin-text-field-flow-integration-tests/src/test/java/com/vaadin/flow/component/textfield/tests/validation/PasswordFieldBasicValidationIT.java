@@ -59,7 +59,7 @@ public class PasswordFieldBasicValidationIT
     }
 
     @Test
-    public void triggerInputBlur_assertValidity() {
+    public void triggerBlur_assertValidity() {
         // Tab to the show button
         testField.sendKeys(Keys.TAB);
         // Tab out of the field
@@ -69,7 +69,7 @@ public class PasswordFieldBasicValidationIT
     }
 
     @Test
-    public void required_triggerInputBlur_assertValidity() {
+    public void required_triggerBlur_assertValidity() {
         $("button").id(REQUIRED_BUTTON).click();
 
         // Tab to the show button
@@ -81,7 +81,7 @@ public class PasswordFieldBasicValidationIT
     }
 
     @Test
-    public void required_changeInputValue_assertValidity() {
+    public void required_changeValue_assertValidity() {
         $("button").id(REQUIRED_BUTTON).click();
 
         testField.setValue("Value");
@@ -94,7 +94,7 @@ public class PasswordFieldBasicValidationIT
     }
 
     @Test
-    public void minLength_triggerInputBlur_assertValidity() {
+    public void minLength_triggerBlur_assertValidity() {
         $("input").id(MIN_LENGTH_INPUT).sendKeys("2", Keys.ENTER);
 
         // Tab to the show button
@@ -106,7 +106,7 @@ public class PasswordFieldBasicValidationIT
     }
 
     @Test
-    public void minLength_changeInputValue_assertValidity() {
+    public void minLength_changeValue_assertValidity() {
         $("input").id(MIN_LENGTH_INPUT).sendKeys("2", Keys.ENTER);
 
         testField.setValue("A");
@@ -123,7 +123,7 @@ public class PasswordFieldBasicValidationIT
     }
 
     @Test
-    public void maxLength_changeInputValue_assertValidity() {
+    public void maxLength_changeValue_assertValidity() {
         $("input").id(MAX_LENGTH_INPUT).sendKeys("2", Keys.ENTER);
 
         testField.setValue("AAA");
@@ -140,7 +140,7 @@ public class PasswordFieldBasicValidationIT
     }
 
     @Test
-    public void pattern_triggerInputBlur_assertValidity() {
+    public void pattern_triggerBlur_assertValidity() {
         $("input").id(PATTERN_INPUT).sendKeys("^\\d+$", Keys.ENTER);
 
         // Tab to the show button
@@ -152,7 +152,7 @@ public class PasswordFieldBasicValidationIT
     }
 
     @Test
-    public void pattern_changeInputValue_assertValidity() {
+    public void pattern_changeValue_assertValidity() {
         $("input").id(PATTERN_INPUT).sendKeys("^\\d+$", Keys.ENTER);
 
         testField.setValue("Word");

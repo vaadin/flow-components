@@ -53,7 +53,7 @@ public class BinderValidationIT
     }
 
     @Test
-    public void required_changeInputValue_assertValidity() {
+    public void required_changeValue_assertValidity() {
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("2000-01-01T12:00",
                 Keys.ENTER);
 
@@ -93,7 +93,7 @@ public class BinderValidationIT
     }
 
     @Test
-    public void badInput_changeInputValue_assertValidity() {
+    public void badInput_changeValue_assertValidity() {
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("2000-01-01T10:00",
                 Keys.ENTER);
 
@@ -116,7 +116,7 @@ public class BinderValidationIT
     }
 
     @Test
-    public void min_changeInputValue_assertValidity() {
+    public void min_changeValue_assertValidity() {
         $("input").id(MIN_INPUT).sendKeys("2000-02-02T12:00", Keys.ENTER);
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("2000-03-03T11:00",
                 Keys.ENTER);
@@ -152,7 +152,7 @@ public class BinderValidationIT
     }
 
     @Test
-    public void max_changeInputValue_assertValidity() {
+    public void max_changeValue_assertValidity() {
         $("input").id(MAX_INPUT).sendKeys("2000-02-02T12:00", Keys.ENTER);
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("2000-01-01T13:00",
                 Keys.ENTER);

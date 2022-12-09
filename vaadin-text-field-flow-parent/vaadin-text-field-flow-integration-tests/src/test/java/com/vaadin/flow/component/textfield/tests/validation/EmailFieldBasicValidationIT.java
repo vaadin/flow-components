@@ -58,14 +58,14 @@ public class EmailFieldBasicValidationIT
     }
 
     @Test
-    public void triggerInputBlur_assertValidity() {
+    public void triggerBlur_assertValidity() {
         testField.sendKeys(Keys.TAB);
         assertServerValid();
         assertClientValid();
     }
 
     @Test
-    public void required_triggerInputBlur_assertValidity() {
+    public void required_triggerBlur_assertValidity() {
         $("button").id(REQUIRED_BUTTON).click();
 
         testField.sendKeys(Keys.TAB);
@@ -74,7 +74,7 @@ public class EmailFieldBasicValidationIT
     }
 
     @Test
-    public void required_changeInputValue_assertValidity() {
+    public void required_changeValue_assertValidity() {
         $("button").id(REQUIRED_BUTTON).click();
 
         testField.setValue("john@vaadin.com");
@@ -87,7 +87,7 @@ public class EmailFieldBasicValidationIT
     }
 
     @Test
-    public void minLength_triggerInputBlur_assertValidity() {
+    public void minLength_triggerBlur_assertValidity() {
         $("input").id(MIN_LENGTH_INPUT).sendKeys("13", Keys.ENTER);
 
         testField.sendKeys(Keys.TAB);
@@ -96,7 +96,7 @@ public class EmailFieldBasicValidationIT
     }
 
     @Test
-    public void minLength_changeInputValue_assertValidity() {
+    public void minLength_changeValue_assertValidity() {
         $("input").id(MIN_LENGTH_INPUT).sendKeys("13", Keys.ENTER);
 
         testField.setValue("a@vaadin.com");
@@ -113,7 +113,7 @@ public class EmailFieldBasicValidationIT
     }
 
     @Test
-    public void maxLength_changeInputValue_assertValidity() {
+    public void maxLength_changeValue_assertValidity() {
         $("input").id(MAX_LENGTH_INPUT).sendKeys("13", Keys.ENTER);
 
         testField.setValue("aaa@vaadin.com");
@@ -130,14 +130,14 @@ public class EmailFieldBasicValidationIT
     }
 
     @Test
-    public void defaultPattern_triggerInputBlur_assertValidity() {
+    public void defaultPattern_triggerBlur_assertValidity() {
         testField.sendKeys(Keys.TAB);
         assertServerValid();
         assertClientValid();
     }
 
     @Test
-    public void defaultPattern_changeInputValue_assertValidity() {
+    public void defaultPattern_changeValue_assertValidity() {
         testField.setValue("arbitrary string");
         assertClientInvalid();
         assertServerInvalid();
@@ -148,7 +148,7 @@ public class EmailFieldBasicValidationIT
     }
 
     @Test
-    public void pattern_changeInputValue_assertValidity() {
+    public void pattern_changeValue_assertValidity() {
         $("input").id(PATTERN_INPUT).sendKeys("^[^\\d]+@vaadin.com$",
                 Keys.ENTER);
 

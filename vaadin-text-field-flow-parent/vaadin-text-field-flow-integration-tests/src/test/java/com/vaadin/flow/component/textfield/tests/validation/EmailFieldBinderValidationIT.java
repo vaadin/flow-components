@@ -40,7 +40,7 @@ public class EmailFieldBinderValidationIT
     }
 
     @Test
-    public void required_triggerInputBlur_assertValidity() {
+    public void required_triggerBlur_assertValidity() {
         testField.sendKeys(Keys.TAB);
         assertServerInvalid();
         assertClientInvalid();
@@ -48,7 +48,7 @@ public class EmailFieldBinderValidationIT
     }
 
     @Test
-    public void required_changeInputValue_assertValidity() {
+    public void required_changeValue_assertValidity() {
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("john@vaadin.com",
                 Keys.ENTER);
 
@@ -63,7 +63,7 @@ public class EmailFieldBinderValidationIT
     }
 
     @Test
-    public void minLength_changeInputValue_assertValidity() {
+    public void minLength_changeValue_assertValidity() {
         $("input").id(MIN_LENGTH_INPUT).sendKeys("13", Keys.ENTER);
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("aaa@vaadin.com",
                 Keys.ENTER);
@@ -87,7 +87,7 @@ public class EmailFieldBinderValidationIT
     }
 
     @Test
-    public void maxLength_changeInputValue_assertValidity() {
+    public void maxLength_changeValue_assertValidity() {
         $("input").id(MAX_LENGTH_INPUT).sendKeys("13", Keys.ENTER);
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("a@vaadin.com",
                 Keys.ENTER);
@@ -111,7 +111,7 @@ public class EmailFieldBinderValidationIT
     }
 
     @Test
-    public void defaultPattern_changeInputValue_assertValidity() {
+    public void defaultPattern_changeValue_assertValidity() {
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("john@vaadin.com",
                 Keys.ENTER);
 
@@ -126,7 +126,7 @@ public class EmailFieldBinderValidationIT
     }
 
     @Test
-    public void pattern_changeInputValue_assertValidity() {
+    public void pattern_changeValue_assertValidity() {
         $("input").id(PATTERN_INPUT).sendKeys("^[^\\d]+@vaadin.com$",
                 Keys.ENTER);
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("john@vaadin.com",

@@ -69,14 +69,14 @@ public class NumberFieldBasicValidationIT
     }
 
     @Test
-    public void triggerInputBlur_assertValidity() {
+    public void triggerBlur_assertValidity() {
         testField.sendKeys(Keys.TAB);
         assertServerValid();
         assertClientValid();
     }
 
     @Test
-    public void required_triggerInputBlur_assertValidity() {
+    public void required_triggerBlur_assertValidity() {
         $("button").id(REQUIRED_BUTTON).click();
 
         testField.sendKeys(Keys.TAB);
@@ -85,7 +85,7 @@ public class NumberFieldBasicValidationIT
     }
 
     @Test
-    public void required_changeInputValue_assertValidity() {
+    public void required_changeValue_assertValidity() {
         $("button").id(REQUIRED_BUTTON).click();
 
         testField.setValue("1234");
@@ -98,7 +98,7 @@ public class NumberFieldBasicValidationIT
     }
 
     @Test
-    public void min_triggerInputBlur_assertValidity() {
+    public void min_triggerBlur_assertValidity() {
         $("input").id(MIN_INPUT).sendKeys("2", Keys.ENTER);
 
         testField.sendKeys(Keys.TAB);
@@ -107,7 +107,7 @@ public class NumberFieldBasicValidationIT
     }
 
     @Test
-    public void min_changeInputValue_assertValidity() {
+    public void min_changeValue_assertValidity() {
         $("input").id(MIN_INPUT).sendKeys("2", Keys.ENTER);
 
         testField.setValue("1.8");
@@ -124,7 +124,7 @@ public class NumberFieldBasicValidationIT
     }
 
     @Test
-    public void max_triggerInputBlur_assertValidity() {
+    public void max_triggerBlur_assertValidity() {
         $("input").id(MAX_INPUT).sendKeys("2", Keys.ENTER);
 
         testField.sendKeys(Keys.TAB);
@@ -133,7 +133,7 @@ public class NumberFieldBasicValidationIT
     }
 
     @Test
-    public void max_changeInputValue_assertValidity() {
+    public void max_changeValue_assertValidity() {
         $("input").id(MAX_INPUT).sendKeys("2", Keys.ENTER);
 
         testField.setValue("2.2");
@@ -150,7 +150,7 @@ public class NumberFieldBasicValidationIT
     }
 
     @Test
-    public void step_triggerInputBlur_assertValidity() {
+    public void step_triggerBlur_assertValidity() {
         $("input").id(STEP_INPUT).sendKeys("2", Keys.ENTER);
 
         testField.sendKeys(Keys.TAB);
@@ -159,7 +159,7 @@ public class NumberFieldBasicValidationIT
     }
 
     @Test
-    public void step_changeInputValue_assertValidity() {
+    public void step_changeValue_assertValidity() {
         $("input").id(STEP_INPUT).sendKeys("1.5", Keys.ENTER);
 
         testField.setValue("1");
@@ -176,7 +176,7 @@ public class NumberFieldBasicValidationIT
     }
 
     @Test
-    public void badInput_changeInputValue_assertValidity() {
+    public void badInput_changeValue_assertValidity() {
         testField.sendKeys("--2", Keys.TAB);
         assertServerInvalid();
         assertClientInvalid();

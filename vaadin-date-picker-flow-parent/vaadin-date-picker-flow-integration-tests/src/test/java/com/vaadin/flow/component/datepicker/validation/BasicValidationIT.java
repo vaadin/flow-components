@@ -42,7 +42,7 @@ public class BasicValidationIT
     }
 
     @Test
-    public void required_triggerInputBlur_assertValidity() {
+    public void required_triggerBlur_assertValidity() {
         $("button").id(REQUIRED_BUTTON).click();
 
         testField.sendKeys(Keys.TAB);
@@ -51,7 +51,7 @@ public class BasicValidationIT
     }
 
     @Test
-    public void required_changeInputValue_assertValidity() {
+    public void required_changeValue_assertValidity() {
         $("button").id(REQUIRED_BUTTON).click();
 
         testField.setInputValue("1/1/2022");
@@ -64,7 +64,7 @@ public class BasicValidationIT
     }
 
     @Test
-    public void min_changeInputValue_assertValidity() {
+    public void min_changeValue_assertValidity() {
         $("input").id(MIN_INPUT).sendKeys("2022-03-01", Keys.ENTER);
 
         testField.setInputValue("2/1/2022");
@@ -81,7 +81,7 @@ public class BasicValidationIT
     }
 
     @Test
-    public void max_changeInputValue_assertValidity() {
+    public void max_changeValue_assertValidity() {
         $("input").id(MAX_INPUT).sendKeys("2022-03-01", Keys.ENTER);
 
         testField.setInputValue("4/1/2022");
@@ -98,7 +98,7 @@ public class BasicValidationIT
     }
 
     @Test
-    public void badInput_changeInputValue_assertValidity() {
+    public void badInput_changeValue_assertValidity() {
         testField.setInputValue("INVALID");
         assertServerInvalid();
         assertClientInvalid();

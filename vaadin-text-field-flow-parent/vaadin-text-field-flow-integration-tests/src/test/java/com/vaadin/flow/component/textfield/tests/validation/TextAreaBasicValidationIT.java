@@ -57,14 +57,14 @@ public class TextAreaBasicValidationIT
     }
 
     @Test
-    public void triggerInputBlur_assertValidity() {
+    public void triggerBlur_assertValidity() {
         testField.sendKeys(Keys.TAB);
         assertServerValid();
         assertClientValid();
     }
 
     @Test
-    public void required_triggerInputBlur_assertValidity() {
+    public void required_triggerBlur_assertValidity() {
         $("button").id(REQUIRED_BUTTON).click();
 
         testField.sendKeys(Keys.TAB);
@@ -73,7 +73,7 @@ public class TextAreaBasicValidationIT
     }
 
     @Test
-    public void required_changeInputValue_assertValidity() {
+    public void required_changeValue_assertValidity() {
         $("button").id(REQUIRED_BUTTON).click();
 
         testField.setValue("Value");
@@ -86,7 +86,7 @@ public class TextAreaBasicValidationIT
     }
 
     @Test
-    public void minLength_triggerInputBlur_assertValidity() {
+    public void minLength_triggerBlur_assertValidity() {
         $("input").id(MIN_LENGTH_INPUT).sendKeys("2", Keys.ENTER);
 
         testField.sendKeys(Keys.TAB);
@@ -95,7 +95,7 @@ public class TextAreaBasicValidationIT
     }
 
     @Test
-    public void minLength_changeInputValue_assertValidity() {
+    public void minLength_changeValue_assertValidity() {
         $("input").id(MIN_LENGTH_INPUT).sendKeys("2", Keys.ENTER);
 
         testField.setValue("A");
@@ -112,7 +112,7 @@ public class TextAreaBasicValidationIT
     }
 
     @Test
-    public void maxLength_changeInputValue_assertValidity() {
+    public void maxLength_changeValue_assertValidity() {
         $("input").id(MAX_LENGTH_INPUT).sendKeys("2", Keys.ENTER);
 
         testField.setValue("AAA");
@@ -129,7 +129,7 @@ public class TextAreaBasicValidationIT
     }
 
     @Test
-    public void pattern_triggerInputBlur_assertValidity() {
+    public void pattern_triggerBlur_assertValidity() {
         $("input").id(PATTERN_INPUT).sendKeys("^\\d+$", Keys.ENTER);
 
         testField.sendKeys(Keys.TAB);
@@ -138,7 +138,7 @@ public class TextAreaBasicValidationIT
     }
 
     @Test
-    public void pattern_changeInputValue_assertValidity() {
+    public void pattern_changeValue_assertValidity() {
         $("input").id(PATTERN_INPUT).sendKeys("^\\d+$", Keys.ENTER);
 
         testField.setValue("Word");
