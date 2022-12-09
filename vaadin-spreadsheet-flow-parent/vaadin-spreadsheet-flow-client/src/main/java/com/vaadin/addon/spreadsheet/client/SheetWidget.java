@@ -440,6 +440,12 @@ public class SheetWidget extends Panel {
                     }
 
                     Element target = mouseOverOrOutEventTarget;
+
+                    if (target.getParentElement() == null) {
+                        // The target's parent element may be a shadow root
+                        return;
+                    }
+
                     boolean targetParentIsPaneElement = target
                             .getParentElement().getAttribute("class")
                             .contains("sheet");
