@@ -17,7 +17,6 @@ package com.vaadin.flow.component.dialog;
 
 import java.io.Serializable;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.Stream.Builder;
 
@@ -34,8 +33,12 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.Shortcuts;
+import com.vaadin.flow.component.Synchronize;
+import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementConstants;
 import com.vaadin.flow.dom.Style;
@@ -69,10 +72,16 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author Vaadin Ltd
  */
+@Tag("vaadin-dialog")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha6")
+@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@NpmPackage(value = "@vaadin/dialog", version = "24.0.0-alpha6")
+@JsModule("@vaadin/dialog/src/vaadin-dialog.js")
+@JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 @JsModule("./dialogConnector.js")
 @JsModule("./flow-component-renderer.js")
-public class Dialog extends GeneratedVaadinDialog<Dialog>
-        implements HasComponents, HasSize, HasTheme, HasStyle {
+public class Dialog extends Component implements HasComponents, HasSize,
+        HasStyle, HasThemeVariant<DialogVariant> {
 
     private static final String OVERLAY_LOCATOR_JS = "this.$.overlay";
     private Element template;
@@ -176,6 +185,23 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
          */
         public String getHeight() {
             return height;
+        }
+    }
+
+    /**
+     * {@code opened-changed} event is sent when the overlay opened state
+     * changes.
+     */
+    public static class OpenedChangeEvent extends ComponentEvent<Dialog> {
+        private final boolean opened;
+
+        public OpenedChangeEvent(Dialog source, boolean fromClient) {
+            super(source, fromClient);
+            this.opened = source.isOpened();
+        }
+
+        public boolean isOpened() {
+            return opened;
         }
     }
 
@@ -811,13 +837,12 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
      * @param opened
      *            {@code true} to open the dialog, {@code false} to close it
      */
-    @Override
     public void setOpened(boolean opened) {
         if (opened) {
             ensureAttached();
         }
         setModality(opened && isModal());
-        super.setOpened(opened);
+        getElement().setProperty("opened", opened);
     }
 
     /**
@@ -825,8 +850,9 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
      *
      * @return the {@code opened} property from the dialog
      */
+    @Synchronize(property = "opened", value = "opened-changed")
     public boolean isOpened() {
-        return super.isOpenedBoolean();
+        return getElement().getProperty("opened", false);
     }
 
     private void setModality(boolean modal) {
@@ -850,10 +876,11 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
      *            the listener to add
      * @return a Registration for removing the event listener
      */
-    @Override
     public Registration addOpenedChangeListener(
-            ComponentEventListener<OpenedChangeEvent<Dialog>> listener) {
-        return super.addOpenedChangeListener(listener);
+            ComponentEventListener<OpenedChangeEvent> listener) {
+        return getElement().addPropertyChangeListener("opened",
+                event -> listener.onComponentEvent(
+                        new OpenedChangeEvent(this, event.isUserOriginated())));
     }
 
     /**
@@ -881,30 +908,6 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         return super.addDetachListener(listener);
     }
 
-    /**
-     * Adds theme variants to the component.
-     *
-     * @param variants
-     *            theme variants to add
-     */
-    public void addThemeVariants(DialogVariant... variants) {
-        getThemeNames()
-                .addAll(Stream.of(variants).map(DialogVariant::getVariantName)
-                        .collect(Collectors.toList()));
-    }
-
-    /**
-     * Removes theme variants from the component.
-     *
-     * @param variants
-     *            theme variants to remove
-     */
-    public void removeThemeVariants(DialogVariant... variants) {
-        getThemeNames().removeAll(
-                Stream.of(variants).map(DialogVariant::getVariantName)
-                        .collect(Collectors.toList()));
-    }
-
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
@@ -915,6 +918,35 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         Shortcuts.setShortcutListenOnElement(OVERLAY_LOCATOR_JS, this);
         initConnector();
         initHeaderFooterRenderer();
+    }
+
+    /**
+     * Set the {@code aria-label} attribute for assistive technologies like
+     * screen readers. An {@code undefined} value for this property (the
+     * default) means that the {@code aria-label} attribute is not present at
+     * all.
+     * <p>
+     * This property is not synchronized automatically from the client side, so
+     * the returned value may not be the same as in client side.
+     *
+     * @return the {@code ariaLabel} property from the webcomponent
+     */
+    protected String getAriaLabel() {
+        return getElement().getProperty("ariaLabel");
+    }
+
+    /**
+     * Set the {@code aria-label} attribute for assistive technologies like
+     * screen readers. An {@code undefined} value for this property (the
+     * default) means that the {@code aria-label} attribute is not present at
+     * all.
+     *
+     * @param ariaLabel
+     *            the String value to set
+     */
+    protected void setAriaLabel(String ariaLabel) {
+        getElement().setProperty("ariaLabel",
+                ariaLabel == null ? "" : ariaLabel);
     }
 
     private void initConnector() {
