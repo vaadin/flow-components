@@ -427,8 +427,7 @@ public class EmailField extends GeneratedVaadinEmailField<EmailField, String>
 
     @Override
     public Validator<String> getDefaultValidator() {
-        return (value, context) -> getValidationSupport()
-                .checkValidity(value);
+        return (value, context) -> getValidationSupport().checkValidity(value);
     }
 
     @Override
@@ -453,8 +452,7 @@ public class EmailField extends GeneratedVaadinEmailField<EmailField, String>
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        ClientValidationUtil
-                .preventWebComponentFromModifyingInvalidState(this);
+        ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
     }
 
     // Override is only required to keep binary compatibility with other 23.x

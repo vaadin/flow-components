@@ -299,14 +299,14 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
             return ValidationResult.error("");
         }
 
-        ValidationResult greaterThanMaxValidation = ValidationUtil.checkGreaterThanMax(value,
-                max);
+        ValidationResult greaterThanMaxValidation = ValidationUtil
+                .checkGreaterThanMax(value, max);
         if (greaterThanMaxValidation.isError()) {
             return greaterThanMaxValidation;
         }
 
-        ValidationResult smallThanMinValidation = ValidationUtil.checkSmallerThanMin(value,
-                min);
+        ValidationResult smallThanMinValidation = ValidationUtil
+                .checkSmallerThanMin(value, min);
         if (smallThanMinValidation.isError()) {
             return smallThanMinValidation;
         }
@@ -473,7 +473,7 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         initConnector();
         requestLocaleUpdate();
         ClientValidationUtil
-                .preventWebComponentFromModifyingInvalidState(this);
+            .preventWebComponentFromModifyingInvalidState(this);
     }
 
     private void initConnector() {

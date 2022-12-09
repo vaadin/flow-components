@@ -651,10 +651,9 @@ public class DateTimePicker
     @Override
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<LocalDateTime> listener) {
-        return addClientValidatedEventListener(
-                event -> listener.validationStatusChanged(
-                        new ValidationStatusChangeEvent<>(this,
-                                event.isValid())));
+        return addClientValidatedEventListener(event -> listener
+                .validationStatusChanged(new ValidationStatusChangeEvent<>(this,
+                        event.isValid())));
     }
 
     private ValidationResult checkValidity(LocalDateTime value) {
@@ -666,17 +665,18 @@ public class DateTimePicker
                 .getValue() == timePicker.getEmptyValue()
                 && timePicker.isInputValuePresent();
 
-        if (hasNonParsableDatePickerValue
-                || hasNonParsableTimePickerValue) {
+        if (hasNonParsableDatePickerValue || hasNonParsableTimePickerValue) {
             return ValidationResult.error("");
         }
 
-        ValidationResult greaterThanMax = ValidationUtil.checkGreaterThanMax(value, max);
+        ValidationResult greaterThanMax = ValidationUtil
+                .checkGreaterThanMax(value, max);
         if (greaterThanMax.isError()) {
             return greaterThanMax;
         }
 
-        ValidationResult smallerThanMin = ValidationUtil.checkSmallerThanMin(value, min);
+        ValidationResult smallerThanMin = ValidationUtil
+                .checkSmallerThanMin(value, min);
         if (smallerThanMin.isError()) {
             return smallerThanMin;
         }
@@ -821,7 +821,7 @@ public class DateTimePicker
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         ClientValidationUtil
-                .preventWebComponentFromModifyingInvalidState(this);
+            .preventWebComponentFromModifyingInvalidState(this);
     }
 
     /**
