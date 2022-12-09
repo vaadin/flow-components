@@ -1,8 +1,5 @@
 package com.vaadin.flow.component.datetimepicker;
 
-import com.vaadin.experimental.Feature;
-import com.vaadin.experimental.FeatureFlags;
-import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.BindingValidationStatus;
 import com.vaadin.flow.data.binder.BindingValidationStatusHandler;
