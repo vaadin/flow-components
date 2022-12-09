@@ -1,8 +1,6 @@
 package com.vaadin.flow.component.spreadsheet.tests.charts;
 
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.UI;
@@ -16,12 +14,6 @@ import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 import com.vaadin.flow.component.spreadsheet.tests.TestHelper;
 
 public class ChartFeatureTest extends ChartTestBase {
-
-    @Before
-    public void init() {
-        var ui = new UI();
-        UI.setCurrent(ui);
-    }
 
     @Test
     public void axisTitles_loadSampleB3_titlesAbsent() throws Exception {

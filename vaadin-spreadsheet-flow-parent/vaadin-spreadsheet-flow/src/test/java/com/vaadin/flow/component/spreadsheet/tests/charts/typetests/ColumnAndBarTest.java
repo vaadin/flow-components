@@ -5,10 +5,8 @@ import static org.junit.Assert.assertEquals;
 import java.util.List;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.DataSeries;
@@ -22,12 +20,6 @@ public class ColumnAndBarTest extends ChartTestBase {
 
     protected Integer[][] columnAndBarData = { { 100, 200 }, { 200, 300 },
             { 400, 400 }, { 800, 500 }, { 1600, 600 } };
-
-    @Before
-    public void init() {
-        var ui = new UI();
-        UI.setCurrent(ui);
-    }
 
     @Test
     public void columnClusteredChart() throws Exception {

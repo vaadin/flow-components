@@ -1174,8 +1174,9 @@ public class Spreadsheet extends Component
     }
 
     private void updateAppId() {
-        getElement().setProperty("appId",
-                UI.getCurrent().getInternals().getAppId());
+        Optional.ofNullable(UI.getCurrent()).ifPresent(ui -> {
+            getElement().setProperty("appId", ui.getInternals().getAppId());
+        });
     }
 
     private void registerRpc(SpreadsheetHandlerImpl spreadsheetHandler) {
