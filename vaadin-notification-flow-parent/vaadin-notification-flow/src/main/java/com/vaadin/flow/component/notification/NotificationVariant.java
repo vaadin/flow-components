@@ -15,10 +15,12 @@
  */
 package com.vaadin.flow.component.notification;
 
+import com.vaadin.flow.component.shared.ThemeVariant;
+
 /**
  * Set of theme variants applicable for {@code vaadin-notification} component.
  */
-public enum NotificationVariant {
+public enum NotificationVariant implements ThemeVariant {
     LUMO_PRIMARY("primary"), LUMO_CONTRAST("contrast"), LUMO_SUCCESS(
             "success"), LUMO_ERROR("error");
 
