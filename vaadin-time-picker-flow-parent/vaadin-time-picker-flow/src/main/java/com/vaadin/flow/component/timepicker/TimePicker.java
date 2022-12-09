@@ -486,7 +486,7 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         requestLocaleUpdate();
         if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
             ClientValidationUtil
-                    .preventWebComponentFromSettingItselfToValid(this);
+                    .preventWebComponentFromModifyingInvalidState(this);
         } else {
             FieldValidationUtil.disableClientValidation(this);
         }

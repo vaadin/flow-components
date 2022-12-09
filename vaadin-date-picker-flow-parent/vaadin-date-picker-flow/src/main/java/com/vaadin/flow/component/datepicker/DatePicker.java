@@ -356,7 +356,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         requestI18nUpdate();
         if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
             ClientValidationUtil
-                    .preventWebComponentFromSettingItselfToValid(this);
+                    .preventWebComponentFromModifyingInvalidState(this);
         } else {
             FieldValidationUtil.disableClientValidation(this);
         }

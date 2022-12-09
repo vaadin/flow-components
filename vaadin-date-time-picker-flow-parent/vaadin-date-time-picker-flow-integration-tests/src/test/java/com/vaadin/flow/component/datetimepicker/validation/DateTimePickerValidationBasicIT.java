@@ -35,33 +35,25 @@ public class DateTimePickerValidationBasicIT
     }
 
     @Test
-    public void onlyServerCanSetFieldToValid() {
+    public void detach_attach_preservesInvalidState() {
+        // Make field invalid
         $("button").id(REQUIRED_BUTTON).click();
+        dateInput.sendKeys(Keys.TAB);
+        timeInput.sendKeys(Keys.TAB);
 
-        executeScript("arguments[0].validate()", testField);
+        detachAndReattachField();
+
+        assertServerInvalid();
         assertClientInvalid();
-
-        dateInput.sendKeys("1/1/2000");
-        timeInput.sendKeys("10:00");
-        executeScript("arguments[0].validate()", testField);
-        assertClientInvalid();
-
-        dateInput.sendKeys(Keys.ENTER);
-        timeInput.sendKeys(Keys.ENTER);
-        assertServerValid();
-        assertClientValid();
     }
 
     @Test
-    public void detach_attach_onlyServerCanSetFieldToValid() {
-        $("button").id(DETACH_FIELD_BUTTON).click();
-        $("button").id(ATTACH_FIELD_BUTTON).click();
+    public void webComponentCanNotModifyInvalidState() {
+        assertWebComponentCanNotModifyInvalidState();
 
-        testField = getTestField();
-        dateInput = testField.$("input").first();
-        timeInput = testField.$("input").last();
+        detachAndReattachField();
 
-        onlyServerCanSetFieldToValid();
+        assertWebComponentCanNotModifyInvalidState();
     }
 
     @Test
