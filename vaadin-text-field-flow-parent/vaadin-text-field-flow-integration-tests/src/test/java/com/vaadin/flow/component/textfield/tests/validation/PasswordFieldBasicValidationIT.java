@@ -18,18 +18,18 @@ package com.vaadin.flow.component.textfield.tests.validation;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
-import com.vaadin.flow.component.textfield.testbench.NumberFieldElement;
+import com.vaadin.flow.component.textfield.testbench.PasswordFieldElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.validation.AbstractValidationIT;
 
-import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldValidationBasicPage.MIN_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldValidationBasicPage.MAX_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldValidationBasicPage.STEP_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldValidationBasicPage.REQUIRED_BUTTON;
+import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldBasicValidationPage.MIN_LENGTH_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldBasicValidationPage.MAX_LENGTH_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldBasicValidationPage.PATTERN_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldBasicValidationPage.REQUIRED_BUTTON;
 
-@TestPath("vaadin-number-field/validation/basic")
-public class NumberFieldValidationBasicIT
-        extends AbstractValidationIT<NumberFieldElement> {
+@TestPath("vaadin-password-field/validation/basic")
+public class PasswordFieldBasicValidationIT
+        extends AbstractValidationIT<PasswordFieldElement> {
     @Test
     public void fieldIsInitiallyValid() {
         assertClientValid();
@@ -40,6 +40,7 @@ public class NumberFieldValidationBasicIT
     public void detach_attach_preservesInvalidState() {
         // Make field invalid
         $("button").id(REQUIRED_BUTTON).click();
+        testField.sendKeys(Keys.TAB);
         testField.sendKeys(Keys.TAB);
 
         detachAndReattachField();
@@ -58,18 +59,10 @@ public class NumberFieldValidationBasicIT
     }
 
     @Test
-    public void clientSideInvalidStateIsNotPropagatedToServer() {
-        // Make the field invalid
-        $("button").id(REQUIRED_BUTTON).click();
-        testField.sendKeys(Keys.TAB);
-
-        executeScript("arguments[0].invalid = false", testField);
-
-        assertServerInvalid();
-    }
-
-    @Test
     public void triggerInputBlur_assertValidity() {
+        // Tab to the show button
+        testField.sendKeys(Keys.TAB);
+        // Tab out of the field
         testField.sendKeys(Keys.TAB);
         assertServerValid();
         assertClientValid();
@@ -79,6 +72,9 @@ public class NumberFieldValidationBasicIT
     public void required_triggerInputBlur_assertValidity() {
         $("button").id(REQUIRED_BUTTON).click();
 
+        // Tab to the show button
+        testField.sendKeys(Keys.TAB);
+        // Tab out of the field
         testField.sendKeys(Keys.TAB);
         assertServerInvalid();
         assertClientInvalid();
@@ -88,7 +84,7 @@ public class NumberFieldValidationBasicIT
     public void required_changeInputValue_assertValidity() {
         $("button").id(REQUIRED_BUTTON).click();
 
-        testField.setValue("1234");
+        testField.setValue("Value");
         assertServerValid();
         assertClientValid();
 
@@ -98,99 +94,77 @@ public class NumberFieldValidationBasicIT
     }
 
     @Test
-    public void min_triggerInputBlur_assertValidity() {
-        $("input").id(MIN_INPUT).sendKeys("2", Keys.ENTER);
+    public void minLength_triggerInputBlur_assertValidity() {
+        $("input").id(MIN_LENGTH_INPUT).sendKeys("2", Keys.ENTER);
 
+        // Tab to the show button
+        testField.sendKeys(Keys.TAB);
+        // Tab out of the field
         testField.sendKeys(Keys.TAB);
         assertServerValid();
         assertClientValid();
     }
 
     @Test
-    public void min_changeInputValue_assertValidity() {
-        $("input").id(MIN_INPUT).sendKeys("2", Keys.ENTER);
+    public void minLength_changeInputValue_assertValidity() {
+        $("input").id(MIN_LENGTH_INPUT).sendKeys("2", Keys.ENTER);
 
-        testField.setValue("1.8");
+        testField.setValue("A");
         assertClientInvalid();
         assertServerInvalid();
 
-        testField.setValue("2");
+        testField.setValue("AA");
         assertClientValid();
         assertServerValid();
 
-        testField.setValue("2.2");
+        testField.setValue("AAA");
         assertClientValid();
         assertServerValid();
     }
 
     @Test
-    public void max_triggerInputBlur_assertValidity() {
-        $("input").id(MAX_INPUT).sendKeys("2", Keys.ENTER);
+    public void maxLength_changeInputValue_assertValidity() {
+        $("input").id(MAX_LENGTH_INPUT).sendKeys("2", Keys.ENTER);
 
+        testField.setValue("AAA");
+        assertClientInvalid();
+        assertServerInvalid();
+
+        testField.setValue("AA");
+        assertClientValid();
+        assertServerValid();
+
+        testField.setValue("A");
+        assertClientValid();
+        assertServerValid();
+    }
+
+    @Test
+    public void pattern_triggerInputBlur_assertValidity() {
+        $("input").id(PATTERN_INPUT).sendKeys("^\\d+$", Keys.ENTER);
+
+        // Tab to the show button
+        testField.sendKeys(Keys.TAB);
+        // Tab out of the field
         testField.sendKeys(Keys.TAB);
         assertServerValid();
         assertClientValid();
     }
 
     @Test
-    public void max_changeInputValue_assertValidity() {
-        $("input").id(MAX_INPUT).sendKeys("2", Keys.ENTER);
+    public void pattern_changeInputValue_assertValidity() {
+        $("input").id(PATTERN_INPUT).sendKeys("^\\d+$", Keys.ENTER);
 
-        testField.setValue("2.2");
+        testField.setValue("Word");
         assertClientInvalid();
         assertServerInvalid();
 
-        testField.setValue("2");
-        assertClientValid();
-        assertServerValid();
-
-        testField.setValue("1.8");
+        testField.setValue("1234");
         assertClientValid();
         assertServerValid();
     }
 
-    @Test
-    public void step_triggerInputBlur_assertValidity() {
-        $("input").id(STEP_INPUT).sendKeys("2", Keys.ENTER);
-
-        testField.sendKeys(Keys.TAB);
-        assertServerValid();
-        assertClientValid();
-    }
-
-    @Test
-    public void step_changeInputValue_assertValidity() {
-        $("input").id(STEP_INPUT).sendKeys("1.5", Keys.ENTER);
-
-        testField.setValue("1");
-        assertClientInvalid();
-        assertServerInvalid();
-
-        testField.setValue("1.5");
-        assertClientValid();
-        assertServerValid();
-
-        testField.setValue("2");
-        assertClientInvalid();
-        assertServerInvalid();
-    }
-
-    @Test
-    public void badInput_changeInputValue_assertValidity() {
-        testField.sendKeys("--2", Keys.TAB);
-        assertServerInvalid();
-        assertClientInvalid();
-
-        testField.setValue("2");
-        assertServerValid();
-        assertClientValid();
-
-        testField.sendKeys("--2", Keys.TAB);
-        assertServerInvalid();
-        assertClientInvalid();
-    }
-
-    protected NumberFieldElement getTestField() {
-        return $(NumberFieldElement.class).first();
+    protected PasswordFieldElement getTestField() {
+        return $(PasswordFieldElement.class).first();
     }
 }

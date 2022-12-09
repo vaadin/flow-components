@@ -15,22 +15,23 @@
  */
 package com.vaadin.flow.component.textfield.tests.validation;
 
-import com.vaadin.flow.component.textfield.testbench.TextAreaElement;
-import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.tests.validation.AbstractValidationIT;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
-import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBinderPage.EXPECTED_VALUE_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBinderPage.MAX_LENGTH_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBinderPage.MIN_LENGTH_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBinderPage.PATTERN_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBinderPage.REQUIRED_ERROR_MESSAGE;
-import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBinderPage.UNEXPECTED_VALUE_ERROR_MESSAGE;
+import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.validation.AbstractValidationIT;
 
-@TestPath("vaadin-text-area/validation/binder")
-public class TextAreaValidationBinderIT
-        extends AbstractValidationIT<TextAreaElement> {
+import static com.vaadin.flow.component.textfield.tests.validation.TextFieldBinderValidationPage.PATTERN_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.TextFieldBinderValidationPage.MIN_LENGTH_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.TextFieldBinderValidationPage.MAX_LENGTH_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.TextFieldBinderValidationPage.EXPECTED_VALUE_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.TextFieldBinderValidationPage.REQUIRED_ERROR_MESSAGE;
+import static com.vaadin.flow.component.textfield.tests.validation.TextFieldBinderValidationPage.UNEXPECTED_VALUE_ERROR_MESSAGE;
+
+@TestPath("vaadin-text-field/validation/binder")
+public class TextFieldBinderValidationIT
+        extends AbstractValidationIT<TextFieldElement> {
     @Test
     public void fieldIsInitiallyValid() {
         assertClientValid();
@@ -129,7 +130,7 @@ public class TextAreaValidationBinderIT
         assertServerValid();
     }
 
-    protected TextAreaElement getTestField() {
-        return $(TextAreaElement.class).first();
+    protected TextFieldElement getTestField() {
+        return $(TextFieldElement.class).first();
     }
 }

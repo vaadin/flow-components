@@ -15,20 +15,21 @@
  */
 package com.vaadin.flow.component.textfield.tests.validation;
 
-import com.vaadin.flow.component.textfield.testbench.TextAreaElement;
-import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.tests.validation.AbstractValidationIT;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
-import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBasicPage.MAX_LENGTH_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBasicPage.MIN_LENGTH_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBasicPage.PATTERN_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBasicPage.REQUIRED_BUTTON;
+import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.validation.AbstractValidationIT;
 
-@TestPath("vaadin-text-area/validation/basic")
-public class TextAreaValidationBasicIT
-        extends AbstractValidationIT<TextAreaElement> {
+import static com.vaadin.flow.component.textfield.tests.validation.TextFieldBasicValidationPage.MIN_LENGTH_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.TextFieldBasicValidationPage.MAX_LENGTH_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.TextFieldBasicValidationPage.PATTERN_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.TextFieldBasicValidationPage.REQUIRED_BUTTON;
+
+@TestPath("vaadin-text-field/validation/basic")
+public class TextFieldBasicValidationIT
+        extends AbstractValidationIT<TextFieldElement> {
     @Test
     public void fieldIsInitiallyValid() {
         assertClientValid();
@@ -150,7 +151,7 @@ public class TextAreaValidationBasicIT
         assertServerValid();
     }
 
-    protected TextAreaElement getTestField() {
-        return $(TextAreaElement.class).first();
+    protected TextFieldElement getTestField() {
+        return $(TextFieldElement.class).first();
     }
 }

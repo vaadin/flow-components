@@ -15,14 +15,14 @@
  */
 package com.vaadin.flow.component.textfield.tests.validation;
 
-import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.router.Route;
 import com.vaadin.tests.validation.AbstractValidationPage;
 
-@Route("vaadin-text-area/validation/binder")
-public class TextAreaValidationBinderPage
-        extends AbstractValidationPage<TextArea> {
+@Route("vaadin-password-field/validation/binder")
+public class PasswordFieldBinderValidationPage
+        extends AbstractValidationPage<PasswordField> {
     public static final String PATTERN_INPUT = "pattern-input";
     public static final String MIN_LENGTH_INPUT = "min-length-input";
     public static final String MAX_LENGTH_INPUT = "max-length-input";
@@ -47,7 +47,7 @@ public class TextAreaValidationBinderPage
 
     private String expectedValue;
 
-    public TextAreaValidationBinderPage() {
+    public PasswordFieldBinderValidationPage() {
         super();
 
         binder = new Binder<>(Bean.class);
@@ -75,7 +75,7 @@ public class TextAreaValidationBinderPage
         }));
     }
 
-    protected TextArea createTestField() {
-        return new TextArea();
+    protected PasswordField createTestField() {
+        return new PasswordField();
     }
 }

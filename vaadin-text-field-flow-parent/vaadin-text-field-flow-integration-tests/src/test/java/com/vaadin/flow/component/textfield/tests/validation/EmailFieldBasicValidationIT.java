@@ -18,18 +18,18 @@ package com.vaadin.flow.component.textfield.tests.validation;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
-import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
+import com.vaadin.flow.component.textfield.testbench.EmailFieldElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.validation.AbstractValidationIT;
 
-import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBasicPage.MIN_LENGTH_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBasicPage.MAX_LENGTH_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBasicPage.PATTERN_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBasicPage.REQUIRED_BUTTON;
+import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBasicValidationPage.MIN_LENGTH_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBasicValidationPage.MAX_LENGTH_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBasicValidationPage.PATTERN_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBasicValidationPage.REQUIRED_BUTTON;
 
-@TestPath("vaadin-text-field/validation/basic")
-public class TextFieldValidationBasicIT
-        extends AbstractValidationIT<TextFieldElement> {
+@TestPath("vaadin-email-field/validation/basic")
+public class EmailFieldBasicValidationIT
+        extends AbstractValidationIT<EmailFieldElement> {
     @Test
     public void fieldIsInitiallyValid() {
         assertClientValid();
@@ -77,7 +77,7 @@ public class TextFieldValidationBasicIT
     public void required_changeInputValue_assertValidity() {
         $("button").id(REQUIRED_BUTTON).click();
 
-        testField.setValue("Value");
+        testField.setValue("john@vaadin.com");
         assertServerValid();
         assertClientValid();
 
@@ -88,7 +88,7 @@ public class TextFieldValidationBasicIT
 
     @Test
     public void minLength_triggerInputBlur_assertValidity() {
-        $("input").id(MIN_LENGTH_INPUT).sendKeys("2", Keys.ENTER);
+        $("input").id(MIN_LENGTH_INPUT).sendKeys("13", Keys.ENTER);
 
         testField.sendKeys(Keys.TAB);
         assertServerValid();
@@ -97,61 +97,71 @@ public class TextFieldValidationBasicIT
 
     @Test
     public void minLength_changeInputValue_assertValidity() {
-        $("input").id(MIN_LENGTH_INPUT).sendKeys("2", Keys.ENTER);
+        $("input").id(MIN_LENGTH_INPUT).sendKeys("13", Keys.ENTER);
 
-        testField.setValue("A");
+        testField.setValue("a@vaadin.com");
         assertClientInvalid();
         assertServerInvalid();
 
-        testField.setValue("AA");
+        testField.setValue("aa@vaadin.com");
         assertClientValid();
         assertServerValid();
 
-        testField.setValue("AAA");
+        testField.setValue("aaa@vaadin.com");
         assertClientValid();
         assertServerValid();
     }
 
     @Test
     public void maxLength_changeInputValue_assertValidity() {
-        $("input").id(MAX_LENGTH_INPUT).sendKeys("2", Keys.ENTER);
+        $("input").id(MAX_LENGTH_INPUT).sendKeys("13", Keys.ENTER);
 
-        testField.setValue("AAA");
+        testField.setValue("aaa@vaadin.com");
         assertClientInvalid();
         assertServerInvalid();
 
-        testField.setValue("AA");
+        testField.setValue("aa@vaadin.com");
         assertClientValid();
         assertServerValid();
 
-        testField.setValue("A");
+        testField.setValue("a@vaadin.com");
         assertClientValid();
         assertServerValid();
     }
 
     @Test
-    public void pattern_triggerInputBlur_assertValidity() {
-        $("input").id(PATTERN_INPUT).sendKeys("^\\d+$", Keys.ENTER);
-
+    public void defaultPattern_triggerInputBlur_assertValidity() {
         testField.sendKeys(Keys.TAB);
         assertServerValid();
         assertClientValid();
     }
 
     @Test
-    public void pattern_changeInputValue_assertValidity() {
-        $("input").id(PATTERN_INPUT).sendKeys("^\\d+$", Keys.ENTER);
-
-        testField.setValue("Word");
+    public void defaultPattern_changeInputValue_assertValidity() {
+        testField.setValue("arbitrary string");
         assertClientInvalid();
         assertServerInvalid();
 
-        testField.setValue("1234");
+        testField.setValue("john@vaadin.com");
         assertClientValid();
         assertServerValid();
     }
 
-    protected TextFieldElement getTestField() {
-        return $(TextFieldElement.class).first();
+    @Test
+    public void pattern_changeInputValue_assertValidity() {
+        $("input").id(PATTERN_INPUT).sendKeys("^[^\\d]+@vaadin.com$",
+                Keys.ENTER);
+
+        testField.setValue("2222@vaadin.com");
+        assertClientInvalid();
+        assertServerInvalid();
+
+        testField.setValue("john@vaadin.com");
+        assertClientValid();
+        assertServerValid();
+    }
+
+    protected EmailFieldElement getTestField() {
+        return $(EmailFieldElement.class).first();
     }
 }

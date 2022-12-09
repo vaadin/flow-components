@@ -22,67 +22,37 @@ import com.vaadin.flow.component.textfield.testbench.PasswordFieldElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.validation.AbstractValidationIT;
 
-import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldValidationBasicPage.MIN_LENGTH_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldValidationBasicPage.MAX_LENGTH_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldValidationBasicPage.PATTERN_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldValidationBasicPage.REQUIRED_BUTTON;
+import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldBinderValidationPage.PATTERN_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldBinderValidationPage.MIN_LENGTH_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldBinderValidationPage.MAX_LENGTH_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldBinderValidationPage.EXPECTED_VALUE_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldBinderValidationPage.REQUIRED_ERROR_MESSAGE;
+import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldBinderValidationPage.UNEXPECTED_VALUE_ERROR_MESSAGE;
 
-@TestPath("vaadin-password-field/validation/basic")
-public class PasswordFieldValidationBasicIT
+@TestPath("vaadin-password-field/validation/binder")
+public class PasswordFieldBinderValidationIT
         extends AbstractValidationIT<PasswordFieldElement> {
     @Test
     public void fieldIsInitiallyValid() {
         assertClientValid();
         assertServerValid();
-    }
-
-    @Test
-    public void detach_attach_preservesInvalidState() {
-        // Make field invalid
-        $("button").id(REQUIRED_BUTTON).click();
-        testField.sendKeys(Keys.TAB);
-        testField.sendKeys(Keys.TAB);
-
-        detachAndReattachField();
-
-        assertServerInvalid();
-        assertClientInvalid();
-    }
-
-    @Test
-    public void webComponentCanNotModifyInvalidState() {
-        assertWebComponentCanNotModifyInvalidState();
-
-        detachAndReattachField();
-
-        assertWebComponentCanNotModifyInvalidState();
-    }
-
-    @Test
-    public void triggerInputBlur_assertValidity() {
-        // Tab to the show button
-        testField.sendKeys(Keys.TAB);
-        // Tab out of the field
-        testField.sendKeys(Keys.TAB);
-        assertServerValid();
-        assertClientValid();
+        assertErrorMessage(null);
     }
 
     @Test
     public void required_triggerInputBlur_assertValidity() {
-        $("button").id(REQUIRED_BUTTON).click();
-
         // Tab to the show button
         testField.sendKeys(Keys.TAB);
         // Tab out of the field
         testField.sendKeys(Keys.TAB);
         assertServerInvalid();
         assertClientInvalid();
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
     @Test
     public void required_changeInputValue_assertValidity() {
-        $("button").id(REQUIRED_BUTTON).click();
+        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("Value", Keys.ENTER);
 
         testField.setValue("Value");
         assertServerValid();
@@ -91,32 +61,27 @@ public class PasswordFieldValidationBasicIT
         testField.setValue("");
         assertServerInvalid();
         assertClientInvalid();
-    }
-
-    @Test
-    public void minLength_triggerInputBlur_assertValidity() {
-        $("input").id(MIN_LENGTH_INPUT).sendKeys("2", Keys.ENTER);
-
-        // Tab to the show button
-        testField.sendKeys(Keys.TAB);
-        // Tab out of the field
-        testField.sendKeys(Keys.TAB);
-        assertServerValid();
-        assertClientValid();
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
     @Test
     public void minLength_changeInputValue_assertValidity() {
         $("input").id(MIN_LENGTH_INPUT).sendKeys("2", Keys.ENTER);
+        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("AAA", Keys.ENTER);
 
+        // Constraint validation fails:
         testField.setValue("A");
         assertClientInvalid();
         assertServerInvalid();
+        assertErrorMessage("");
 
+        // Binder validation fails:
         testField.setValue("AA");
-        assertClientValid();
-        assertServerValid();
+        assertClientInvalid();
+        assertServerInvalid();
+        assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
 
+        // Both validations pass:
         testField.setValue("AAA");
         assertClientValid();
         assertServerValid();
@@ -125,40 +90,44 @@ public class PasswordFieldValidationBasicIT
     @Test
     public void maxLength_changeInputValue_assertValidity() {
         $("input").id(MAX_LENGTH_INPUT).sendKeys("2", Keys.ENTER);
+        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("A", Keys.ENTER);
 
+        // Constraint validation fails:
         testField.setValue("AAA");
         assertClientInvalid();
         assertServerInvalid();
+        assertErrorMessage("");
 
+        // Binder validation fails:
         testField.setValue("AA");
-        assertClientValid();
-        assertServerValid();
+        assertClientInvalid();
+        assertServerInvalid();
+        assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
 
+        // Both validations pass:
         testField.setValue("A");
         assertClientValid();
         assertServerValid();
     }
 
     @Test
-    public void pattern_triggerInputBlur_assertValidity() {
-        $("input").id(PATTERN_INPUT).sendKeys("^\\d+$", Keys.ENTER);
-
-        // Tab to the show button
-        testField.sendKeys(Keys.TAB);
-        // Tab out of the field
-        testField.sendKeys(Keys.TAB);
-        assertServerValid();
-        assertClientValid();
-    }
-
-    @Test
     public void pattern_changeInputValue_assertValidity() {
         $("input").id(PATTERN_INPUT).sendKeys("^\\d+$", Keys.ENTER);
+        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("1234", Keys.ENTER);
 
+        // Constraint validation fails:
         testField.setValue("Word");
         assertClientInvalid();
         assertServerInvalid();
+        assertErrorMessage("");
 
+        // Binder validation fails:
+        testField.setValue("12");
+        assertClientInvalid();
+        assertServerInvalid();
+        assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
+
+        // Both validations pass:
         testField.setValue("1234");
         assertClientValid();
         assertServerValid();

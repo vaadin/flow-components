@@ -20,14 +20,14 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.tests.validation.AbstractValidationPage;
 
 @Route("vaadin-text-field/validation/basic")
-public class TextFieldValidationBasicPage
+public class TextFieldBasicValidationPage
         extends AbstractValidationPage<TextField> {
     public static final String REQUIRED_BUTTON = "required-button";
     public static final String PATTERN_INPUT = "pattern-input";
     public static final String MIN_LENGTH_INPUT = "min-length-input";
     public static final String MAX_LENGTH_INPUT = "max-length-input";
 
-    public TextFieldValidationBasicPage() {
+    public TextFieldBasicValidationPage() {
         super();
 
         add(createButton(REQUIRED_BUTTON, "Enable required", event -> {

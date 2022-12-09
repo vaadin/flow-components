@@ -15,19 +15,19 @@
  */
 package com.vaadin.flow.component.textfield.tests.validation;
 
-import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.router.Route;
 import com.vaadin.tests.validation.AbstractValidationPage;
 
-@Route("vaadin-text-area/validation/basic")
-public class TextAreaValidationBasicPage
-        extends AbstractValidationPage<TextArea> {
+@Route("vaadin-email-field/validation/basic")
+public class EmailFieldBasicValidationPage
+        extends AbstractValidationPage<EmailField> {
     public static final String REQUIRED_BUTTON = "required-button";
     public static final String PATTERN_INPUT = "pattern-input";
     public static final String MIN_LENGTH_INPUT = "min-length-input";
     public static final String MAX_LENGTH_INPUT = "max-length-input";
 
-    public TextAreaValidationBasicPage() {
+    public EmailFieldBasicValidationPage() {
         super();
 
         add(createButton(REQUIRED_BUTTON, "Enable required", event -> {
@@ -49,7 +49,7 @@ public class TextAreaValidationBasicPage
         }));
     }
 
-    protected TextArea createTestField() {
-        return new TextArea();
+    protected EmailField createTestField() {
+        return new EmailField();
     }
 }

@@ -18,20 +18,20 @@ package com.vaadin.flow.component.textfield.tests.validation;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
-import com.vaadin.flow.component.textfield.testbench.PasswordFieldElement;
+import com.vaadin.flow.component.textfield.testbench.EmailFieldElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.validation.AbstractValidationIT;
 
-import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldValidationBinderPage.PATTERN_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldValidationBinderPage.MIN_LENGTH_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldValidationBinderPage.MAX_LENGTH_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldValidationBinderPage.EXPECTED_VALUE_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldValidationBinderPage.REQUIRED_ERROR_MESSAGE;
-import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldValidationBinderPage.UNEXPECTED_VALUE_ERROR_MESSAGE;
+import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBinderValidationPage.PATTERN_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBinderValidationPage.MIN_LENGTH_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBinderValidationPage.MAX_LENGTH_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBinderValidationPage.EXPECTED_VALUE_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBinderValidationPage.REQUIRED_ERROR_MESSAGE;
+import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBinderValidationPage.UNEXPECTED_VALUE_ERROR_MESSAGE;
 
-@TestPath("vaadin-password-field/validation/binder")
-public class PasswordFieldValidationBinderIT
-        extends AbstractValidationIT<PasswordFieldElement> {
+@TestPath("vaadin-email-field/validation/binder")
+public class EmailFieldBinderValidationIT
+        extends AbstractValidationIT<EmailFieldElement> {
     @Test
     public void fieldIsInitiallyValid() {
         assertClientValid();
@@ -41,9 +41,6 @@ public class PasswordFieldValidationBinderIT
 
     @Test
     public void required_triggerInputBlur_assertValidity() {
-        // Tab to the show button
-        testField.sendKeys(Keys.TAB);
-        // Tab out of the field
         testField.sendKeys(Keys.TAB);
         assertServerInvalid();
         assertClientInvalid();
@@ -52,9 +49,10 @@ public class PasswordFieldValidationBinderIT
 
     @Test
     public void required_changeInputValue_assertValidity() {
-        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("Value", Keys.ENTER);
+        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("john@vaadin.com",
+                Keys.ENTER);
 
-        testField.setValue("Value");
+        testField.setValue("john@vaadin.com");
         assertServerValid();
         assertClientValid();
 
@@ -66,74 +64,93 @@ public class PasswordFieldValidationBinderIT
 
     @Test
     public void minLength_changeInputValue_assertValidity() {
-        $("input").id(MIN_LENGTH_INPUT).sendKeys("2", Keys.ENTER);
-        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("AAA", Keys.ENTER);
+        $("input").id(MIN_LENGTH_INPUT).sendKeys("13", Keys.ENTER);
+        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("aaa@vaadin.com",
+                Keys.ENTER);
 
         // Constraint validation fails:
-        testField.setValue("A");
+        testField.setValue("a@vaadin.com");
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage("");
 
         // Binder validation fails:
-        testField.setValue("AA");
+        testField.setValue("aa@vaadin.com");
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
 
         // Both validations pass:
-        testField.setValue("AAA");
+        testField.setValue("aaa@vaadin.com");
         assertClientValid();
         assertServerValid();
     }
 
     @Test
     public void maxLength_changeInputValue_assertValidity() {
-        $("input").id(MAX_LENGTH_INPUT).sendKeys("2", Keys.ENTER);
-        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("A", Keys.ENTER);
+        $("input").id(MAX_LENGTH_INPUT).sendKeys("13", Keys.ENTER);
+        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("a@vaadin.com",
+                Keys.ENTER);
 
         // Constraint validation fails:
-        testField.setValue("AAA");
+        testField.setValue("aaa@vaadin.com");
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage("");
 
         // Binder validation fails:
-        testField.setValue("AA");
+        testField.setValue("aa@vaadin.com");
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
 
         // Both validations pass:
-        testField.setValue("A");
+        testField.setValue("a@vaadin.com");
+        assertClientValid();
+        assertServerValid();
+    }
+
+    @Test
+    public void defaultPattern_changeInputValue_assertValidity() {
+        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("john@vaadin.com",
+                Keys.ENTER);
+
+        testField.setValue("arbitrary string");
+        assertClientInvalid();
+        assertServerInvalid();
+        assertErrorMessage("");
+
+        testField.setValue("john@vaadin.com");
         assertClientValid();
         assertServerValid();
     }
 
     @Test
     public void pattern_changeInputValue_assertValidity() {
-        $("input").id(PATTERN_INPUT).sendKeys("^\\d+$", Keys.ENTER);
-        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("1234", Keys.ENTER);
+        $("input").id(PATTERN_INPUT).sendKeys("^[^\\d]+@vaadin.com$",
+                Keys.ENTER);
+        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("john@vaadin.com",
+                Keys.ENTER);
 
         // Constraint validation fails:
-        testField.setValue("Word");
+        testField.setValue("2222@vaadin.com");
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage("");
 
         // Binder validation fails:
-        testField.setValue("12");
+        testField.setValue("oliver@vaadin.com");
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
 
         // Both validations pass:
-        testField.setValue("1234");
+        testField.setValue("john@vaadin.com");
         assertClientValid();
         assertServerValid();
     }
 
-    protected PasswordFieldElement getTestField() {
-        return $(PasswordFieldElement.class).first();
+    protected EmailFieldElement getTestField() {
+        return $(EmailFieldElement.class).first();
     }
 }
