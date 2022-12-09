@@ -146,43 +146,6 @@ public class NumberFieldPageIT extends AbstractComponentIT {
     }
 
     @Test
-    public void assertInvalidAfterClientChange() {
-        final boolean valid = true;
-        NumberFieldElement field = $(NumberFieldElement.class)
-                .id("step-number-field");
-        assertValidStateOfStepNumberField(valid);
-
-        // max is 10
-        field.setValue("11");
-        assertValidStateOfStepNumberField(!valid);
-
-        // Forcing max to 11 on the client does not make the field valid
-        field.setProperty("max", "11");
-        getCommandExecutor().waitForVaadin();
-        assertValidStateOfStepNumberField(!valid);
-
-        // Forcing the field to be valid does not work
-        field.setProperty("invalid", false);
-        getCommandExecutor().waitForVaadin();
-        assertValidStateOfStepNumberField(!valid);
-
-        // Setting a valid value makes the field return to valid mode
-        field.setValue("10");
-        getCommandExecutor().waitForVaadin();
-        assertValidStateOfStepNumberField(valid);
-    }
-
-    private void assertValidStateOfStepNumberField(boolean valid) {
-        final WebElement checkIsInvalid = findElement(
-                By.id("check-is-invalid"));
-        checkIsInvalid.click();
-
-        final String expectedValue = !valid ? "invalid" : "valid";
-        Assert.assertEquals(expectedValue,
-                findElement(By.id("is-invalid")).getText());
-    }
-
-    @Test
     public void assertValueChange() {
         NumberFieldElement field = $(NumberFieldElement.class)
                 .id("clear-number-field");
