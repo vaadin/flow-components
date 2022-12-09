@@ -920,10 +920,6 @@ public class Dialog extends Component implements HasComponents, HasSize,
     }
 
     /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
      * Set the {@code aria-label} attribute for assistive technologies like
      * screen readers. An {@code undefined} value for this property (the
      * default) means that the {@code aria-label} attribute is not present at
@@ -931,7 +927,6 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * <p>
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
-     * </p>
      *
      * @return the {@code ariaLabel} property from the webcomponent
      */
@@ -940,15 +935,10 @@ public class Dialog extends Component implements HasComponents, HasSize,
     }
 
     /**
-     * <p>
-     * Description copied from corresponding location in WebComponent:
-     * </p>
-     * <p>
      * Set the {@code aria-label} attribute for assistive technologies like
      * screen readers. An {@code undefined} value for this property (the
      * default) means that the {@code aria-label} attribute is not present at
      * all.
-     * </p>
      *
      * @param ariaLabel
      *            the String value to set
