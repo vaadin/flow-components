@@ -147,9 +147,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
 
         addValueChangeListener(e -> validate());
 
-        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
-            addClientValidatedEventListener(e -> validate());
-        }
+        addClientValidatedEventListener(e -> validate());
     }
 
     /**
@@ -354,12 +352,8 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         super.onAttach(attachEvent);
         initConnector();
         requestI18nUpdate();
-        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
-            ClientValidationUtil
-                    .preventWebComponentFromModifyingInvalidState(this);
-        } else {
-            FieldValidationUtil.disableClientValidation(this);
-        }
+        ClientValidationUtil.
+                .preventWebComponentFromModifyingInvalidState(this);
     }
 
     private void initConnector() {
@@ -490,24 +484,16 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
 
     @Override
     public Validator<LocalDate> getDefaultValidator() {
-        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
-            return (value, context) -> checkValidity(value);
-        }
-
-        return Validator.alwaysPass();
+        return (value, context) -> checkValidity(value);
     }
 
     @Override
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<LocalDate> listener) {
-        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
-            return addClientValidatedEventListener(
-                    event -> listener.validationStatusChanged(
-                            new ValidationStatusChangeEvent<LocalDate>(this,
-                                    !isInvalid())));
-        }
-
-        return null;
+        return addClientValidatedEventListener(
+                event -> listener.validationStatusChanged(
+                        new ValidationStatusChangeEvent<LocalDate>(this,
+                                !isInvalid())));
     }
 
     @Override
@@ -528,20 +514,18 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     }
 
     private ValidationResult checkValidity(LocalDate value) {
-        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
-            boolean hasNonParsableValue = value == getEmptyValue()
-                    && isInputValuePresent();
-            if (hasNonParsableValue) {
-                return ValidationResult.error("");
-            }
+        boolean hasNonParsableValue = value == getEmptyValue()
+                && isInputValuePresent();
+        if (hasNonParsableValue) {
+            return ValidationResult.error("");
         }
 
-        var greaterThanMax = ValidationUtil.checkGreaterThanMax(value, max);
+        ValidationResult greaterThanMax = ValidationUtil.checkGreaterThanMax(value, max);
         if (greaterThanMax.isError()) {
             return greaterThanMax;
         }
 
-        var smallerThanMin = ValidationUtil.checkSmallerThanMin(value, min);
+        ValidationResult smallerThanMin = ValidationUtil.checkSmallerThanMin(value, min);
         if (smallerThanMin.isError()) {
             return smallerThanMin;
         }
@@ -807,27 +791,6 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         getThemeNames().removeAll(
                 Stream.of(variants).map(DatePickerVariant::getVariantName)
                         .collect(Collectors.toList()));
-    }
-
-    /**
-     * Returns true if the given feature flag is enabled, false otherwise.
-     * <p>
-     * Exposed with protected visibility to support mocking
-     * <p>
-     * The method requires the {@code VaadinService} instance to obtain the
-     * available feature flags, otherwise, the feature is considered disabled.
-     *
-     * @param feature
-     *            the feature flag.
-     * @return whether the feature flag is enabled.
-     */
-    protected boolean isFeatureFlagEnabled(Feature feature) {
-        VaadinService service = VaadinService.getCurrent();
-        if (service == null) {
-            return false;
-        }
-
-        return FeatureFlags.get(service.getContext()).isEnabled(feature);
     }
 
     /**
