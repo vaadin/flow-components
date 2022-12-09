@@ -73,7 +73,7 @@ public class BasicValidationIT
     public void clientSideInvalidStateIsNotPropagatedToServer() {
         // Make the field invalid
         $("button").id(REQUIRED_BUTTON).click();
-        testField.sendKeys(Keys.TAB);
+        testField.$(CheckboxElement.class).last().sendKeys(Keys.TAB);
 
         executeScript("arguments[0].invalid = false", testField);
 
