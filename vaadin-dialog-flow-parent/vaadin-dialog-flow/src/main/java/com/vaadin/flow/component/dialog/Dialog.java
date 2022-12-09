@@ -935,7 +935,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      *
      * @return the {@code ariaLabel} property from the webcomponent
      */
-    protected String getAriaLabelString() {
+    protected String getAriaLabel() {
         return getElement().getProperty("ariaLabel");
     }
 
