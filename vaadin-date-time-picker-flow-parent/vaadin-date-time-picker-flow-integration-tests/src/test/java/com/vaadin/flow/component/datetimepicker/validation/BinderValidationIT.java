@@ -9,14 +9,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
-import static com.vaadin.flow.component.datetimepicker.validation.DateTimePickerValidationBinderPage.MIN_INPUT;
-import static com.vaadin.flow.component.datetimepicker.validation.DateTimePickerValidationBinderPage.MAX_INPUT;
-import static com.vaadin.flow.component.datetimepicker.validation.DateTimePickerValidationBinderPage.EXPECTED_VALUE_INPUT;
-import static com.vaadin.flow.component.datetimepicker.validation.DateTimePickerValidationBinderPage.REQUIRED_ERROR_MESSAGE;
-import static com.vaadin.flow.component.datetimepicker.validation.DateTimePickerValidationBinderPage.UNEXPECTED_VALUE_ERROR_MESSAGE;
+import static com.vaadin.flow.component.datetimepicker.validation.BinderValidationPage.MIN_INPUT;
+import static com.vaadin.flow.component.datetimepicker.validation.BinderValidationPage.MAX_INPUT;
+import static com.vaadin.flow.component.datetimepicker.validation.BinderValidationPage.EXPECTED_VALUE_INPUT;
+import static com.vaadin.flow.component.datetimepicker.validation.BinderValidationPage.REQUIRED_ERROR_MESSAGE;
+import static com.vaadin.flow.component.datetimepicker.validation.BinderValidationPage.UNEXPECTED_VALUE_ERROR_MESSAGE;
 
 @TestPath("vaadin-date-time-picker/validation/binder")
-public class DateTimePickerValidationBinderIT
+public class BinderValidationIT
         extends AbstractValidationIT<DateTimePickerElement> {
     private TestBenchElement dateInput;
     private TestBenchElement timeInput;

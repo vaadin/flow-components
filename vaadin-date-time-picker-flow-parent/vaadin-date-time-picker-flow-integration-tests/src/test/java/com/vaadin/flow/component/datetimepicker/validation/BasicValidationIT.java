@@ -9,14 +9,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
-import static com.vaadin.flow.component.datetimepicker.validation.DateTimePickerValidationBasicPage.DETACH_FIELD_BUTTON;
-import static com.vaadin.flow.component.datetimepicker.validation.DateTimePickerValidationBasicPage.ATTACH_FIELD_BUTTON;
-import static com.vaadin.flow.component.datetimepicker.validation.DateTimePickerValidationBasicPage.MIN_INPUT;
-import static com.vaadin.flow.component.datetimepicker.validation.DateTimePickerValidationBasicPage.MAX_INPUT;
-import static com.vaadin.flow.component.datetimepicker.validation.DateTimePickerValidationBasicPage.REQUIRED_BUTTON;
+import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.DETACH_FIELD_BUTTON;
+import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.ATTACH_FIELD_BUTTON;
+import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.MIN_INPUT;
+import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.MAX_INPUT;
+import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.REQUIRED_BUTTON;
 
 @TestPath("vaadin-date-time-picker/validation/basic")
-public class DateTimePickerValidationBasicIT
+public class BasicValidationIT
         extends AbstractValidationIT<DateTimePickerElement> {
     private TestBenchElement dateInput;
     private TestBenchElement timeInput;
