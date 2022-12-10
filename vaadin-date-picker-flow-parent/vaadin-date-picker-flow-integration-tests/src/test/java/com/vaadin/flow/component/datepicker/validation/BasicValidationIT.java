@@ -12,8 +12,7 @@ import static com.vaadin.flow.component.datepicker.validation.BasicValidationPag
 import static com.vaadin.flow.component.datepicker.validation.BasicValidationPage.REQUIRED_BUTTON;
 
 @TestPath("vaadin-date-picker/validation/basic")
-public class BasicValidationIT
-        extends AbstractValidationIT<DatePickerElement> {
+public class BasicValidationIT extends AbstractValidationIT<DatePickerElement> {
     @Test
     public void fieldIsInitiallyValid() {
         assertClientValid();
