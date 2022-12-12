@@ -22,9 +22,7 @@ import com.vaadin.flow.component.textfield.testbench.BigDecimalFieldElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.validation.AbstractValidationIT;
 
-import static com.vaadin.flow.component.textfield.tests.validation.BigDecimalFieldBinderValidationPage.EXPECTED_VALUE_INPUT;
 import static com.vaadin.flow.component.textfield.tests.validation.BigDecimalFieldBinderValidationPage.REQUIRED_ERROR_MESSAGE;
-import static com.vaadin.flow.component.textfield.tests.validation.BigDecimalFieldBinderValidationPage.UNEXPECTED_VALUE_ERROR_MESSAGE;
 
 @TestPath("vaadin-big-decimal-field/validation/binder")
 public class BigDecimalFieldBinderValidationIT

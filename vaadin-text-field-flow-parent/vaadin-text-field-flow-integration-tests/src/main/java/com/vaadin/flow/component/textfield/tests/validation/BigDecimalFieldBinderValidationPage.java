@@ -25,10 +25,7 @@ import com.vaadin.tests.validation.AbstractValidationPage;
 @Route("vaadin-big-decimal-field/validation/binder")
 public class BigDecimalFieldBinderValidationPage
         extends AbstractValidationPage<BigDecimalField> {
-    public static final String EXPECTED_VALUE_INPUT = "expected-value-input";
-
     public static final String REQUIRED_ERROR_MESSAGE = "The field is required";
-    public static final String UNEXPECTED_VALUE_ERROR_MESSAGE = "The field doesn't match the expected value";
 
     public static class Bean {
         private BigDecimal property;
@@ -44,20 +41,12 @@ public class BigDecimalFieldBinderValidationPage
 
     protected Binder<Bean> binder;
 
-    private BigDecimal expectedValue;
-
     public BigDecimalFieldBinderValidationPage() {
         super();
 
         binder = new Binder<>(Bean.class);
         binder.forField(testField).asRequired(REQUIRED_ERROR_MESSAGE)
-                .withValidator(value -> value.equals(expectedValue),
-                        UNEXPECTED_VALUE_ERROR_MESSAGE)
                 .bind("property");
-
-        add(createInput(EXPECTED_VALUE_INPUT, "Set expected value", event -> {
-            expectedValue = new BigDecimal(event.getValue());
-        }));
     }
 
     protected BigDecimalField createTestField() {
