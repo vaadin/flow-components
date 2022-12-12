@@ -223,6 +223,10 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
 
     private static <T> T presentationToModel(Select<T> select,
             String presentation) {
+        if (select.keyMapper == null) {
+            return null;
+        }
+
         if (!select.keyMapper.containsKey(presentation)) {
             return null;
         }

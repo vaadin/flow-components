@@ -12,7 +12,6 @@ import java.util.stream.Stream;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -670,8 +669,7 @@ public class SelectTest {
     }
 
     @Test
-    @Ignore
-    public void elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue() {
+    public void elementHasValue_wrapIntoField_doesNotThrow() {
         Element element = new Element("vaadin-select");
         element.setProperty("value", "foo");
         UI ui = new UI();
@@ -688,7 +686,6 @@ public class SelectTest {
         Mockito.when(instantiator.createComponent(Select.class))
                 .thenAnswer(invocation -> new Select());
         Select field = Component.from(element, Select.class);
-        Assert.assertEquals("foo", field.getElement().getPropertyRaw("value"));
     }
 
     @Test
