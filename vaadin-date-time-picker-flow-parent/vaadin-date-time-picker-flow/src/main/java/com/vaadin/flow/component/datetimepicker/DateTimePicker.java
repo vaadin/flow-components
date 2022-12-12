@@ -25,8 +25,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.vaadin.experimental.Feature;
-import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -42,7 +40,6 @@ import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
 import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.function.SerializableFunction;
-import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.shared.Registration;
 
 @Tag("vaadin-date-time-picker-date-picker")
@@ -192,9 +189,7 @@ public class DateTimePicker
 
         addValueChangeListener(e -> validate());
 
-        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
-            addClientValidatedEventListener(e -> validate());
-        }
+        addClientValidatedEventListener(e -> validate());
     }
 
     /**
@@ -647,48 +642,38 @@ public class DateTimePicker
 
     @Override
     public Validator<LocalDateTime> getDefaultValidator() {
-        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
-            return (value, context) -> checkValidity(value);
-        }
-
-        return Validator.alwaysPass();
+        return (value, context) -> checkValidity(value);
     }
 
     @Override
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<LocalDateTime> listener) {
-        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
-            return addClientValidatedEventListener(
-                    event -> listener.validationStatusChanged(
-                            new ValidationStatusChangeEvent<>(this,
-                                    event.isValid())));
-        }
-
-        return null;
+        return addClientValidatedEventListener(event -> listener
+                .validationStatusChanged(new ValidationStatusChangeEvent<>(this,
+                        event.isValid())));
     }
 
     private ValidationResult checkValidity(LocalDateTime value) {
-        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
-            boolean hasNonParsableDatePickerValue = datePicker
-                    .getValue() == datePicker.getEmptyValue()
-                    && datePicker.isInputValuePresent();
+        boolean hasNonParsableDatePickerValue = datePicker
+                .getValue() == datePicker.getEmptyValue()
+                && datePicker.isInputValuePresent();
 
-            boolean hasNonParsableTimePickerValue = timePicker
-                    .getValue() == timePicker.getEmptyValue()
-                    && timePicker.isInputValuePresent();
+        boolean hasNonParsableTimePickerValue = timePicker
+                .getValue() == timePicker.getEmptyValue()
+                && timePicker.isInputValuePresent();
 
-            if (hasNonParsableDatePickerValue
-                    || hasNonParsableTimePickerValue) {
-                return ValidationResult.error("");
-            }
+        if (hasNonParsableDatePickerValue || hasNonParsableTimePickerValue) {
+            return ValidationResult.error("");
         }
 
-        var greaterThanMax = ValidationUtil.checkGreaterThanMax(value, max);
+        ValidationResult greaterThanMax = ValidationUtil
+                .checkGreaterThanMax(value, max);
         if (greaterThanMax.isError()) {
             return greaterThanMax;
         }
 
-        var smallerThanMin = ValidationUtil.checkSmallerThanMin(value, min);
+        ValidationResult smallerThanMin = ValidationUtil
+                .checkSmallerThanMin(value, min);
         if (smallerThanMin.isError()) {
             return smallerThanMin;
         }
@@ -832,12 +817,7 @@ public class DateTimePicker
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
-            ClientValidationUtil
-                    .preventWebComponentFromModifyingInvalidState(this);
-        } else {
-            FieldValidationUtil.disableClientValidation(this);
-        }
+        ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
     }
 
     /**
@@ -862,26 +842,5 @@ public class DateTimePicker
         getThemeNames().removeAll(
                 Stream.of(variants).map(DateTimePickerVariant::getVariantName)
                         .collect(Collectors.toList()));
-    }
-
-    /**
-     * Returns true if the given feature flag is enabled, false otherwise.
-     * <p>
-     * Exposed with protected visibility to support mocking
-     * <p>
-     * The method requires the {@code VaadinService} instance to obtain the
-     * available feature flags, otherwise, the feature is considered disabled.
-     *
-     * @param feature
-     *            the feature flag.
-     * @return whether the feature flag is enabled.
-     */
-    protected boolean isFeatureFlagEnabled(Feature feature) {
-        VaadinService service = VaadinService.getCurrent();
-        if (service == null) {
-            return false;
-        }
-
-        return FeatureFlags.get(service.getContext()).isEnabled(feature);
     }
 }
