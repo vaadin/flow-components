@@ -261,6 +261,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
                 setItems();
             }
         });
+
+        addValueChangeListener(e -> validate());
     }
 
     /**
@@ -586,6 +588,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         if (dataProvider != null && dataProviderListener == null) {
             setupDataProviderListener(dataProvider);
         }
+        FieldValidationUtil.disableClientValidation(this);
     }
 
     @Override
@@ -1044,9 +1047,6 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     @Override
     public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
         super.setRequiredIndicatorVisible(requiredIndicatorVisible);
-        runBeforeClientResponse(ui -> getElement().callJsFunction(
-                "$connector.enableClientValidation",
-                !requiredIndicatorVisible));
     }
 
     /**
@@ -1075,6 +1075,13 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
      */
     public boolean isClearButtonVisible() {
         return super.isClearButtonVisibleBoolean();
+    }
+
+    protected void validate() {
+        boolean isRequired = isRequiredIndicatorVisible();
+        boolean isInvalid = isRequired && Objects.equals(getValue(), getEmptyValue());
+
+        setInvalid(isInvalid);
     }
 
     CompositeDataGenerator<T> getDataGenerator() {
