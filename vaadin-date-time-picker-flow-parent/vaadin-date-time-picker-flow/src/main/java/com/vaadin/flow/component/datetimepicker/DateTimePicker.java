@@ -820,8 +820,7 @@ public class DateTimePicker
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        ClientValidationUtil
-            .preventWebComponentFromModifyingInvalidState(this);
+        ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
     }
 
     /**

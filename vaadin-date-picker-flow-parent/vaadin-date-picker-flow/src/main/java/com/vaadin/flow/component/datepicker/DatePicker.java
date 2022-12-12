@@ -352,8 +352,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         super.onAttach(attachEvent);
         initConnector();
         requestI18nUpdate();
-        ClientValidationUtil
-            .preventWebComponentFromModifyingInvalidState(this);
+        ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
     }
 
     private void initConnector() {

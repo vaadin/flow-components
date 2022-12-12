@@ -472,8 +472,7 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         super.onAttach(attachEvent);
         initConnector();
         requestLocaleUpdate();
-        ClientValidationUtil
-            .preventWebComponentFromModifyingInvalidState(this);
+        ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
     }
 
     private void initConnector() {
