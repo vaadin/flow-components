@@ -186,7 +186,7 @@ public class ChartsIT extends AbstractSpreadsheetIT {
 
     private void assertSelection(String... cells) {
         for (String cell : cells) {
-            assertSelectedCell(cell, true);
+            assertSelectedCell(cell);
         }
     }
 
