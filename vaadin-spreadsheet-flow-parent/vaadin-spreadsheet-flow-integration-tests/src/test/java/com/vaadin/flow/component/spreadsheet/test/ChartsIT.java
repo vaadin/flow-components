@@ -81,6 +81,42 @@ public class ChartsIT extends AbstractSpreadsheetIT {
     }
 
     @Test
+    public void minimizeButtonMouseOver_noErrors() throws IOException {
+        loadFile("charts.xlsx");
+
+        // Get any element from the shadow root of the minimize button
+        var shadowRootElement = $("vaadin-button")
+                .attribute("class", "minimize-button").first().$("div")
+                .attribute("class", "vaadin-button-container").first();
+
+        // Dispatch a mouseover event to the shadow root element
+        executeScript(
+                "arguments[0].dispatchEvent(new CustomEvent('mouseover', { bubbles: true, composed: true }))",
+                shadowRootElement);
+        selectCell("A1");
+
+        checkLogsForErrors();
+    }
+
+    @Test
+    public void minimizeButtonDoubleClick_noErrors() throws IOException {
+        loadFile("charts.xlsx");
+
+        // Get any element from the shadow root of the minimize button
+        var shadowRootElement = $("vaadin-button")
+                .attribute("class", "minimize-button").first().$("div")
+                .attribute("class", "vaadin-button-container").first();
+
+        // Dispatch a dblclick event to the shadow root element
+        executeScript(
+                "arguments[0].dispatchEvent(new CustomEvent('dblclick', { bubbles: true, composed: true }))",
+                shadowRootElement);
+        selectCell("A1");
+
+        checkLogsForErrors();
+    }
+
+    @Test
     public void userSelectsPoint_spreadsheetSelectionUpdated()
             throws Exception {
         loadFile("InteractionSample.xlsx");
