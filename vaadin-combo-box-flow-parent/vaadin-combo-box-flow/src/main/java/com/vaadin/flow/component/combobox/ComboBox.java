@@ -1079,7 +1079,8 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
     protected void validate() {
         boolean isRequired = isRequiredIndicatorVisible();
-        boolean isInvalid = isRequired && Objects.equals(getValue(), getEmptyValue());
+        boolean isInvalid = isRequired
+                && Objects.equals(getValue(), getEmptyValue());
 
         setInvalid(isInvalid);
     }

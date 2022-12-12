@@ -50,8 +50,7 @@ final class FieldValidationUtil {
                                 component)));
     }
 
-    private static void overrideClientValidation(
-            ComboBox<?> component) {
+    private static void overrideClientValidation(ComboBox<?> component) {
         // Overwrite client validation method to simply return validation state
         // set from server
         StringBuilder expression = new StringBuilder(
