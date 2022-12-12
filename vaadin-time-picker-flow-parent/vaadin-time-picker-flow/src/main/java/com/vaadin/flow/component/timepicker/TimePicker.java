@@ -345,7 +345,7 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
      *         <code>false</code> otherwise
      */
     @Synchronize(property = "_hasInputValue", value = "has-input-value-changed")
-    private boolean isInputValuePresent() {
+    protected boolean isInputValuePresent() {
         return getElement().getProperty("_hasInputValue", false);
     }
 
@@ -486,7 +486,7 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         requestLocaleUpdate();
         if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
             ClientValidationUtil
-                    .preventWebComponentFromSettingItselfToValid(this);
+                    .preventWebComponentFromModifyingInvalidState(this);
         } else {
             FieldValidationUtil.disableClientValidation(this);
         }

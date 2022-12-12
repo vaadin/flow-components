@@ -23,7 +23,7 @@ public class ComboBoxBinderValidationIT
     }
 
     @Test
-    public void required_triggerInputBlur_assertValidity() {
+    public void required_triggerBlur_assertValidity() {
         testField.sendKeys(Keys.TAB);
         assertServerInvalid();
         assertClientInvalid();

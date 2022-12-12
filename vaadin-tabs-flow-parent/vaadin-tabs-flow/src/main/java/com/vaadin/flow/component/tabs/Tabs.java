@@ -28,7 +28,12 @@ import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasOrderedComponents;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Synchronize;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -54,8 +59,13 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author Vaadin Ltd.
  */
-public class Tabs extends GeneratedVaadinTabs<Tabs>
-        implements HasOrderedComponents, HasSize {
+@Tag("vaadin-tabs")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha6")
+@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@JsModule("@vaadin/tabs/src/vaadin-tabs.js")
+@NpmPackage(value = "@vaadin/tabs", version = "24.0.0-alpha6")
+public class Tabs extends Component implements HasOrderedComponents, HasSize,
+        HasStyle, HasThemeVariant<TabsVariant> {
 
     private static final String SELECTED = "selected";
 

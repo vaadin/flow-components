@@ -356,7 +356,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         requestI18nUpdate();
         if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
             ClientValidationUtil
-                    .preventWebComponentFromSettingItselfToValid(this);
+                    .preventWebComponentFromModifyingInvalidState(this);
         } else {
             FieldValidationUtil.disableClientValidation(this);
         }
@@ -568,7 +568,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      *         <code>false</code> otherwise
      */
     @Synchronize(property = "_hasInputValue", value = "has-input-value-changed")
-    private boolean isInputValuePresent() {
+    protected boolean isInputValuePresent() {
         return getElement().getProperty("_hasInputValue", false);
     }
 
