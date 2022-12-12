@@ -13,10 +13,13 @@ import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.AbstractPlotOptions;
 import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
+import com.vaadin.flow.component.charts.model.DashStyle;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.PlotOptionsArea;
 import com.vaadin.flow.component.charts.model.PlotOptionsBar;
 import com.vaadin.flow.component.charts.model.PlotOptionsColumn;
+import com.vaadin.flow.component.charts.model.PlotOptionsLine;
+import com.vaadin.flow.component.charts.model.PlotOptionsScatter;
 import com.vaadin.flow.component.charts.model.Series;
 import com.vaadin.flow.component.charts.model.Stacking;
 import com.vaadin.flow.component.spreadsheet.SheetChartWrapper;
@@ -162,6 +165,33 @@ public class ChartTestBase {
                     "Stacking type is wrong for series "
                             + seriesList.indexOf(series),
                     stacking, actualStacking);
+        }
+    }
+
+    protected void assertDashStyle(List<Series> seriesList,
+            DashStyle... dashStyles) {
+        int index = 0;
+        for (Series series : seriesList) {
+            var plotOptions = series.getPlotOptions();
+            DashStyle actualDashStyle = null;
+            if (plotOptions instanceof PlotOptionsArea) {
+                actualDashStyle = ((PlotOptionsArea) plotOptions)
+                        .getDashStyle();
+            } else if (plotOptions instanceof PlotOptionsLine) {
+                actualDashStyle = ((PlotOptionsLine) plotOptions)
+                        .getDashStyle();
+            } else if (plotOptions instanceof PlotOptionsScatter) {
+                actualDashStyle = ((PlotOptionsScatter) plotOptions)
+                        .getDashStyle();
+            }
+
+            System.out.println("Dash style is " + actualDashStyle);
+
+            Assert.assertEquals(
+                    "Dash style is wrong for series "
+                            + seriesList.indexOf(series),
+                    dashStyles[Math.min(dashStyles.length - 1, index++)],
+                    actualDashStyle);
         }
     }
 

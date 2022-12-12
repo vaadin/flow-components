@@ -5,6 +5,7 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
+import com.vaadin.flow.component.charts.model.DashStyle;
 import com.vaadin.flow.component.charts.model.PlotOptionsArea;
 import com.vaadin.flow.component.spreadsheet.tests.charts.ChartTestBase;
 
@@ -38,6 +39,7 @@ public class RadarTest extends ChartTestBase {
                 "Type Sample - Filled Radar.xlsx", "G14").getConfiguration();
 
         assertSeriesType(conf.getSeries(), ChartType.AREA);
+        assertDashStyle(conf.getSeries(), DashStyle.SOLID);
         Assert.assertTrue(conf.getChart().getPolar());
         Assert.assertNull(
                 ((PlotOptionsArea) conf.getSeries().get(0).getPlotOptions())

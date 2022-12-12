@@ -22,6 +22,8 @@ public class LineAreaScatterTest extends ChartTestBase {
                 "I10").getConfiguration();
 
         assertSeriesType(conf.getSeries(), ChartType.LINE);
+        assertDashStyle(conf.getSeries(), DashStyle.SOLID, DashStyle.SOLID,
+                DashStyle.SOLID, DashStyle.LONGDASHDOT, DashStyle.SOLID);
         assertData(conf.getSeries(), data);
 
         assertLineSeriesMarker(
@@ -60,6 +62,7 @@ public class LineAreaScatterTest extends ChartTestBase {
         assertSeriesType(conf.getSeries(), ChartType.AREA);
         assertData(conf.getSeries(), data);
         assertStacking(conf.getSeries(), Stacking.NONE);
+        assertDashStyle(conf.getSeries(), DashStyle.SOLID);
     }
 
     @Test
@@ -88,6 +91,7 @@ public class LineAreaScatterTest extends ChartTestBase {
                 "A3").getConfiguration();
 
         assertSeriesType(conf.getSeries(), ChartType.SCATTER);
+        assertDashStyle(conf.getSeries(), DashStyle.LONGDASHDOT);
         assertDataXY((DataSeries) conf.getSeries().get(0),
                 new Double[][] { data[0], data[1] });
 
@@ -100,5 +104,4 @@ public class LineAreaScatterTest extends ChartTestBase {
                         .getDashStyle(),
                 DashStyle.LONGDASHDOT);
     }
-
 }
