@@ -33,6 +33,14 @@ public class BasicValidationIT
     }
 
     @Test
+    public void triggerBlur_assertValidity() {
+        dateInput.sendKeys(Keys.TAB);
+        timeInput.sendKeys(Keys.TAB);
+        assertServerValid();
+        assertClientValid();
+    }
+
+    @Test
     public void required_triggerBlur_assertValidity() {
         $("button").id(REQUIRED_BUTTON).click();
 
