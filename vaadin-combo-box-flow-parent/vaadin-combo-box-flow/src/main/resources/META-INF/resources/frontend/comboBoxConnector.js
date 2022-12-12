@@ -257,48 +257,6 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
           comboBox.$server.confirmUpdate(id);
         });
 
-        comboBox.$connector.enableClientValidation = tryCatchWrapper(function (enable) {
-          if (comboBox.$) {
-            if (enable) {
-              enableClientValidation(comboBox);
-            } else {
-              disableClientValidation(comboBox);
-            }
-
-            comboBox.validate();
-          } else {
-            setTimeout(function () {
-              comboBox.$connector.enableClientValidation(enable);
-            }, 10);
-          }
-        });
-
-        const disableClientValidation = tryCatchWrapper(function (combo) {
-          if (typeof combo.$checkValidity == 'undefined') {
-            combo.$checkValidity = combo.checkValidity;
-            combo.checkValidity = function () {
-              return !comboBox.invalid;
-            };
-          }
-          if (typeof combo.$validate == 'undefined') {
-            combo.$validate = combo.validate;
-            combo.validate = function () {
-              return !(comboBox.focusElement.invalid = comboBox.invalid);
-            };
-          }
-        });
-
-        const enableClientValidation = tryCatchWrapper(function (combo) {
-          if (combo.$checkValidity) {
-            combo.checkValidity = combo.$checkValidity;
-            delete combo.$checkValidity;
-          }
-          if (combo.$validate) {
-            combo.validate = combo.$validate;
-            delete combo.$validate;
-          }
-        });
-
         const commitPage = tryCatchWrapper(function (page, callback) {
           let data = cache[page];
 
