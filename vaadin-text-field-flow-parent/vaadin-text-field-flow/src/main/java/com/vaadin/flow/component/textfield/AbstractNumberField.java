@@ -19,8 +19,6 @@ package com.vaadin.flow.component.textfield;
 import java.math.BigDecimal;
 import java.util.Objects;
 
-import com.vaadin.experimental.Feature;
-import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.CompositionNotifier;
 import com.vaadin.flow.component.HasHelper;
@@ -45,7 +43,6 @@ import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.SerializableFunction;
-import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.shared.Registration;
 
 /**

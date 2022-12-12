@@ -25,8 +25,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.vaadin.experimental.Feature;
-import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -42,7 +40,6 @@ import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
 import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.function.SerializableFunction;
-import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.shared.Registration;
 
 @Tag("vaadin-date-time-picker-date-picker")
