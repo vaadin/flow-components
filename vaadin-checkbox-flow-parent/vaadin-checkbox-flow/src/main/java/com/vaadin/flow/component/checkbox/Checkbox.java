@@ -281,7 +281,7 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
      * @param disabled
      *            the boolean value to set
      */
-    protected void setDisabled(boolean disabled) {
+    void setDisabled(boolean disabled) {
         getElement().setProperty("disabled", disabled);
     }
 
@@ -290,7 +290,7 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
      *
      * @return the {@code disabled} property from the webcomponent
      */
-    protected boolean isDisabledBoolean() {
+    boolean isDisabledBoolean() {
         return getElement().getProperty("disabled", false);
     }
 }
