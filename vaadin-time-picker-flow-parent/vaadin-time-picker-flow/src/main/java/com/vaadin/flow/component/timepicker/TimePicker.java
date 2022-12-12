@@ -293,7 +293,7 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     }
 
     private ValidationResult checkValidity(LocalTime value) {
-        boolean hasNonParsableValue = value.equals(getEmptyValue())
+        boolean hasNonParsableValue = Objects.equals(value, getEmptyValue())
                 && isInputValuePresent();
         if (hasNonParsableValue) {
             return ValidationResult.error("");

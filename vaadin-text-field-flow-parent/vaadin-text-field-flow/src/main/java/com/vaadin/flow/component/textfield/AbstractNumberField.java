@@ -17,6 +17,7 @@
 package com.vaadin.flow.component.textfield;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
 import com.vaadin.experimental.Feature;
 import com.vaadin.experimental.FeatureFlags;
@@ -402,7 +403,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     }
 
     private ValidationResult checkValidity(T value) {
-        boolean hasNonParsableValue = value.equals(getEmptyValue())
+        boolean hasNonParsableValue = Objects.equals(value, getEmptyValue())
                 && isInputValuePresent();
         if (hasNonParsableValue) {
             return ValidationResult.error("");
