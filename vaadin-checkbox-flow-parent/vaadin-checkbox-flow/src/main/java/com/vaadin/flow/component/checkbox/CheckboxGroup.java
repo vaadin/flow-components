@@ -26,19 +26,27 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.ItemLabelGenerator;
+import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.checkbox.dataview.CheckboxGroupDataView;
 import com.vaadin.flow.component.checkbox.dataview.CheckboxGroupListDataView;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasClientValidation;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasItemComponents;
@@ -77,13 +85,18 @@ import elemental.json.JsonArray;
  *
  * @author Vaadin Ltd
  */
+@Tag("vaadin-checkbox-group")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha6")
+@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@NpmPackage(value = "@vaadin/checkbox-group", version = "24.0.0-alpha6")
+@JsModule("@vaadin/checkbox-group/src/vaadin-checkbox-group.js")
 public class CheckboxGroup<T>
-        extends GeneratedVaadinCheckboxGroup<CheckboxGroup<T>, Set<T>>
-        implements HasItemComponents<T>, HasSize, HasValidation,
-        MultiSelect<CheckboxGroup<T>, T>,
-        HasListDataView<T, CheckboxGroupListDataView<T>>,
-        HasDataView<T, Void, CheckboxGroupDataView<T>>, HasHelper, HasLabel,
-        HasTooltip, HasValidator<Set<T>>, HasClientValidation {
+        extends AbstractSinglePropertyField<CheckboxGroup<T>, Set<T>> implements
+        HasClientValidation, HasDataView<T, Void, CheckboxGroupDataView<T>>,
+        HasHelper, HasItemComponents<T>, HasLabel,
+        HasListDataView<T, CheckboxGroupListDataView<T>>, HasSize, HasStyle,
+        HasThemeVariant<CheckboxGroupVariant>, HasTooltip, HasValidation,
+        HasValidator<Set<T>>, MultiSelect<CheckboxGroup<T>, T> {
 
     private static final String VALUE = "value";
 
@@ -112,9 +125,9 @@ public class CheckboxGroup<T>
      * Creates an empty checkbox group
      */
     public CheckboxGroup() {
-        super(Collections.emptySet(), Collections.emptySet(), JsonArray.class,
+        super("value", Collections.emptySet(), JsonArray.class,
                 CheckboxGroup::presentationToModel,
-                CheckboxGroup::modelToPresentation, true);
+                CheckboxGroup::modelToPresentation);
 
         addValueChangeListener(e -> validate());
 
@@ -492,9 +505,8 @@ public class CheckboxGroup<T>
      * @param label
      *            value for the {@code label} property in the checkbox group
      */
-    @Override
     public void setLabel(String label) {
-        super.setLabel(label);
+        getElement().setProperty("label", label == null ? "" : label);
     }
 
     /**
@@ -502,14 +514,19 @@ public class CheckboxGroup<T>
      *
      * @return the {@code label} property of the checkbox group
      */
-    @Override
     public String getLabel() {
-        return super.getLabelString();
+        return getElement().getProperty("label");
     }
 
-    @Override
+    /**
+     * Sets the error message to display when the value is invalid.
+     *
+     * @param errorMessage
+     *            the String value to set
+     */
     public void setErrorMessage(String errorMessage) {
-        super.setErrorMessage(errorMessage);
+        getElement().setProperty("errorMessage",
+                errorMessage == null ? "" : errorMessage);
     }
 
     /**
@@ -517,14 +534,18 @@ public class CheckboxGroup<T>
      *
      * @return the current error message
      */
-    @Override
     public String getErrorMessage() {
-        return getErrorMessageString();
+        return getElement().getProperty("errorMessage");
     }
 
-    @Override
+    /**
+     * Specifies that the user must fill in a value.
+     *
+     * @param required
+     *            the boolean value to set
+     */
     public void setRequired(boolean required) {
-        super.setRequired(required);
+        getElement().setProperty("required", required);
     }
 
     /**
@@ -536,17 +557,40 @@ public class CheckboxGroup<T>
      * @return {@code true} if the input is required, {@code false} otherwise
      */
     public boolean isRequired() {
-        return isRequiredBoolean();
+        return getElement().getProperty("required", false);
     }
 
-    @Override
+    /**
+     * Whether the component has an invalid value or not.
+     */
     public boolean isInvalid() {
-        return isInvalidBoolean();
+        return getElement().getProperty("invalid", false);
     }
 
-    @Override
+    /**
+     * Sets whether the component has an invalid value or not.
+     */
     public void setInvalid(boolean invalid) {
-        super.setInvalid(invalid);
+        getElement().setProperty("invalid", invalid);
+    }
+
+    /**
+     * If true, the user cannot interact with this element.
+     *
+     * @param disabled
+     *            the boolean value to set
+     */
+    protected void setDisabled(boolean disabled) {
+        getElement().setProperty("disabled", disabled);
+    }
+
+    /**
+     * If true, the user cannot interact with this element.
+     *
+     * @return the {@code disabled} property from the webcomponent
+     */
+    protected boolean isDisabledBoolean() {
+        return getElement().getProperty("disabled", false);
     }
 
     @Override
@@ -763,7 +807,6 @@ public class CheckboxGroup<T>
         keyMapper.setIdentifierGetter(identifierProvider);
     }
 
-    @Override
     protected void validate() {
         boolean isRequired = isRequiredIndicatorVisible();
         boolean isInvalid = ValidationUtil
