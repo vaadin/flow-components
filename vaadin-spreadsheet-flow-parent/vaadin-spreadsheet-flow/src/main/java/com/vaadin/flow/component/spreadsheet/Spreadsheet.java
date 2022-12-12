@@ -3661,7 +3661,8 @@ public class Spreadsheet extends Component
                     && customComponents != null) {
                 String componentId = cellKeysToEditorIdMap.get(key);
                 for (Component c : customComponents) {
-                    if (c.getId().orElse("").equals(componentId)) {
+                    if (Integer.toString(c.getElement().getNode().getId())
+                            .equals(componentId)) {
                         // todo: ver que hacemos con esto
                         // if (c.getConnectorId().equals(componentId)) {
                         customComponentFactory.onCustomEditorDisplayed(
@@ -4558,7 +4559,8 @@ public class Spreadsheet extends Component
                             }
                             _cellKeysToEditorIdMap.put(key,
                                     // todo: revisar
-                                    customEditor.getId().orElse("")
+                                    Integer.toString(customEditor.getElement()
+                                            .getNode().getId())
                             // customEditor.getConnectorId()
                             );
                             newCustomComponents.add(customEditor);

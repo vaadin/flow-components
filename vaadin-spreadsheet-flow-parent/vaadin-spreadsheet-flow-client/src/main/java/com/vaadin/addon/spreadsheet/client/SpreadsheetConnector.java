@@ -366,6 +366,7 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
             if (cellKeysToComponentIdMap != null
                     && !cellKeysToComponentIdMap.isEmpty()) {
                 cellKeysToComponentIdMap.forEach((nodeId, key) -> {
+                    // TODO revisar
                     // Should be passed from the server based on
                     // ui.getInternals().getAppId()
                     String appid = "ROOT";
@@ -465,13 +466,19 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
                     public Widget getCustomEditor(String key) {
                         String editorId = getState().cellKeysToEditorIdMap
                                 .get(key);
-                        List<ComponentConnector> childComponents = getChildComponents();
-                        for (ComponentConnector cc : childComponents) {
-                            if (editorId.equals(cc.getConnectorId())) {
-                                return cc.getWidget();
-                            }
-                        }
-                        return null;
+                        String slotName = "custom-editor-" + editorId;
+                        Slot slot = new Slot(slotName);
+                        // TODO revisar
+                        // Should be passed from the server based on
+                        // ui.getInternals().getAppId()
+                        FlowComponentRenderer componentRenderer = new FlowComponentRenderer(
+                                "ROOT", editorId);
+                        componentRenderer.getElement().setAttribute("slot",
+                                slotName);
+                        SheetWidget.removeOnSlotDisconnect(slot.getElement(),
+                                componentRenderer.getElement());
+                        host.appendChild(componentRenderer.getElement());
+                        return slot;
                     }
 
                 };
@@ -542,7 +549,10 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
         void sendUpdates();
     }
 
+    private Element host;
+
     public void setHost(Element host, Node renderRoot) {
+        this.host = host;
         getWidget().setHost(host, renderRoot);
     }
 }

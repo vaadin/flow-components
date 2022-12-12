@@ -3500,7 +3500,7 @@ public class SheetWidget extends Panel {
         }
     }
 
-    private native void removeOnSlotDisconnect(Element slot,
+    static native void removeOnSlotDisconnect(Element slot,
             Element assignedWidget) /*-{
         slot.addEventListener('slotchange', function () {
             if (!slot.isConnected) {
