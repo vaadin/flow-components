@@ -46,7 +46,10 @@ public class SpreadsheetJsApi {
      * receives the host element and the render root where the widget must be
      * embedded into, and publishes the methods which can be used from JS
      *
-     * @param element
+     * @param host
+     *            the host element
+     * @param renderRoot
+     *            render root of the host
      */
     public SpreadsheetJsApi(Element host, Node renderRoot) {
         if (host != null) {

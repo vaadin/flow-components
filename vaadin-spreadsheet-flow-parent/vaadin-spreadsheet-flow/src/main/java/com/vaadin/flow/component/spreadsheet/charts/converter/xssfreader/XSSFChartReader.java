@@ -124,15 +124,13 @@ public class XSSFChartReader {
     }
 
     private LegendPosition getLegendPosition() {
-        Map<STLegendPos.Enum, LegendPosition> translationMap = new HashMap<STLegendPos.Enum, LegendPosition>() {
-            {
-                put(STLegendPos.B, LegendPosition.BOTTOM);
-                put(STLegendPos.L, LegendPosition.LEFT);
-                put(STLegendPos.T, LegendPosition.TOP);
-                put(STLegendPos.TR, LegendPosition.TOP_RIGHT);
-                put(STLegendPos.R, LegendPosition.RIGHT);
-            }
-        };
+        Map<STLegendPos.Enum, LegendPosition> translationMap = new HashMap<STLegendPos.Enum, LegendPosition>();
+        translationMap.put(STLegendPos.B, LegendPosition.BOTTOM);
+        translationMap.put(STLegendPos.L, LegendPosition.LEFT);
+        translationMap.put(STLegendPos.T, LegendPosition.TOP);
+        translationMap.put(STLegendPos.TR, LegendPosition.TOP_RIGHT);
+        translationMap.put(STLegendPos.R, LegendPosition.RIGHT);
+
         try {
             STLegendPos.Enum legendPos = xssfChart.getCTChart().getLegend()
                     .getLegendPos().getVal();

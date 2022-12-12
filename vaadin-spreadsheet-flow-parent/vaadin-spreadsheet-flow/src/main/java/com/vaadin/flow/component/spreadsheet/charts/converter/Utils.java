@@ -37,7 +37,8 @@ public class Utils {
             return (T) method.invoke(o);
         } catch (Exception e) {
             // this should never happen
-            e.printStackTrace();
+            LOGGER.warning("Was not able to call method " + name
+                    + " using reflection");
         }
         return null;
     }
@@ -76,6 +77,8 @@ public class Utils {
     }
 
     /**
+     * Returns all cells in the referenced areas.
+     *
      * @param version
      *            for inferring ranges for column-only references
      * @param formula
@@ -169,14 +172,19 @@ public class Utils {
             Cell cell = spreadsheet.getCell(ref, sheet);
             spreadsheet.getFormulaEvaluator().evaluateFormulaCell(cell);
 
-            if (cell.getCellType() == CellType.NUMERIC
-                    || cell.getCellType() == CellType.FORMULA) {
+            if (cell != null && (cell.getCellType() == CellType.NUMERIC
+                    || cell.getCellType() == CellType.FORMULA)) {
                 return cell.getNumericCellValue();
             }
         } catch (NullPointerException e) {
+            LOGGER.warning("Could not parse number from cell on column "
+                    + ref.getCol() + " and row " + ref.getRow());
         } catch (IllegalStateException e) {
+            LOGGER.warning("Could not parse number from cell on column "
+                    + ref.getCol() + " and row " + ref.getRow());
         } catch (NumberFormatException e) {
-
+            LOGGER.warning("Could not parse number from cell on column "
+                    + ref.getCol() + " and row " + ref.getRow());
         } catch (FormulaParseException e) {
             logError();
         }

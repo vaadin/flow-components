@@ -62,23 +62,20 @@ public class LineSeriesReaderUtils {
 
     private static String getDashStyleString(STPresetLineDashVal.Enum val) {
         @SuppressWarnings("serial")
-        final Map<STPresetLineDashVal.Enum, String> map = new HashMap<STPresetLineDashVal.Enum, String>() {
-            {
-                // see comment in
-                // com.vaadin.flow.component.spreadsheet.chartconverter.chartdata.LineSeriesData.dashStyle
-                put(STPresetLineDashVal.SOLID, "SOLID");
-                put(STPresetLineDashVal.DASH, "DASH");
-                put(STPresetLineDashVal.DASH_DOT, "DASHDOT");
-                put(STPresetLineDashVal.LG_DASH, "LONGDASH");
-                put(STPresetLineDashVal.LG_DASH_DOT, "LONGDASHDOT");
-                put(STPresetLineDashVal.LG_DASH_DOT_DOT, "LONGDASHDOTDOT");
-                put(STPresetLineDashVal.SYS_DASH, "SHORTDASH");
-                put(STPresetLineDashVal.SYS_DASH_DOT, "SHORTDASHDOT");
-                put(STPresetLineDashVal.SYS_DASH_DOT_DOT, "SHORTDASHDOTDOT");
-                put(STPresetLineDashVal.DOT, "DOT");
-                put(STPresetLineDashVal.SYS_DOT, "SHORTDOT");
-            }
-        };
+        final Map<STPresetLineDashVal.Enum, String> map = new HashMap<STPresetLineDashVal.Enum, String>();
+        // see comment in
+        // com.vaadin.flow.component.spreadsheet.chartconverter.chartdata.LineSeriesData.dashStyle
+        map.put(STPresetLineDashVal.SOLID, "SOLID");
+        map.put(STPresetLineDashVal.DASH, "DASH");
+        map.put(STPresetLineDashVal.DASH_DOT, "DASHDOT");
+        map.put(STPresetLineDashVal.LG_DASH, "LONGDASH");
+        map.put(STPresetLineDashVal.LG_DASH_DOT, "LONGDASHDOT");
+        map.put(STPresetLineDashVal.LG_DASH_DOT_DOT, "LONGDASHDOTDOT");
+        map.put(STPresetLineDashVal.SYS_DASH, "SHORTDASH");
+        map.put(STPresetLineDashVal.SYS_DASH_DOT, "SHORTDASHDOT");
+        map.put(STPresetLineDashVal.SYS_DASH_DOT_DOT, "SHORTDASHDOTDOT");
+        map.put(STPresetLineDashVal.DOT, "DOT");
+        map.put(STPresetLineDashVal.SYS_DOT, "SHORTDOT");
 
         if (map.containsKey(val))
             return map.get(val);

@@ -194,7 +194,6 @@ class ChartStylesReader {
      * NOTE: POI needs a meta-API for the generated OOXML CT* classes, so shared
      * properties like these can come from a common interface
      *
-     * @param yAx
      * @return axis properties
      */
     protected AxisProperties getAxisProperties(CTValAx yAx) {

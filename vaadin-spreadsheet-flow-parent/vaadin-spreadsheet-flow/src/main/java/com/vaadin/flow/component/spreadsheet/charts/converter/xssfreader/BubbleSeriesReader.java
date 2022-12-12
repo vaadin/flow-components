@@ -65,7 +65,7 @@ public class BubbleSeriesReader
         List<CellReference> ptListSize = new ArrayList<CellReference>();
         if (bubbleSize.getNumRef() == null) {
             for (int i = 0; i < ptListY.size(); i++) {
-                sizes.add(new Double(1));
+                sizes.add(Double.valueOf(1));
             }
         } else {
             ptListSize = Utils.getAllReferencedCells(

@@ -43,7 +43,7 @@ public class PieToDonutConverter {
         final double gap = DONUT_GAP_BETWEEN_RINGS;
 
         for (Series ser : conf.getSeries()) {
-            if (ser.getPlotOptions().getChartType() == ChartType.PIE) {
+            if (ChartType.PIE.equals(ser.getPlotOptions().getChartType())) {
                 double currentShare = 1 - currentPieSeries * onePieShare;
                 double innerSize = (currentShare - onePieShare + gap)
                         / currentShare;
@@ -62,7 +62,7 @@ public class PieToDonutConverter {
     private static int countPieSeries(Configuration conf) {
         int count = 0;
         for (Series ser : conf.getSeries()) {
-            if (ser.getPlotOptions().getChartType() == ChartType.PIE)
+            if (ChartType.PIE.equals(ser.getPlotOptions().getChartType()))
                 count++;
         }
         return count;
