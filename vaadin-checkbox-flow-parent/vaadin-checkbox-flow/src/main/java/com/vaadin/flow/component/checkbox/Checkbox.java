@@ -68,6 +68,10 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
                 "indeterminate-changed", NO_OP);
         getElement().addPropertyChangeListener("checked", "checked-changed",
                 NO_OP);
+        // Avoid overwriting initial checked set in a template.
+        if (getElement().getProperty("checked") == null) {
+            setPresentationValue(false);
+        }
         // https://github.com/vaadin/vaadin-checkbox/issues/25
         setIndeterminate(false);
 
