@@ -117,6 +117,26 @@ public class ChartsIT extends AbstractSpreadsheetIT {
     }
 
     @Test
+    public void scrollOutOfViewportAndBack_oneChartVisible()
+            throws IOException {
+        loadFile("chart.xlsx");
+        Assert.assertEquals(1, findElements(By.tagName("vaadin-chart")).size());
+
+        // Scroll the chart out of viewport (the slot element gets removed from
+        // the cell)
+        getSpreadsheet().scrollLeft(1000);
+        // Scroll the chart back to the viewport (a new slot with the same name
+        // is created for the cell)
+        getSpreadsheet().scrollLeft(0);
+        selectCell("A1");
+
+        // There should only be one chart visible. The first chart should have
+        // been removed from the DOM when the associated slot got removed from
+        // the cell.
+        Assert.assertEquals(1, findElements(By.tagName("vaadin-chart")).size());
+    }
+
+    @Test
     public void userSelectsPoint_spreadsheetSelectionUpdated()
             throws Exception {
         loadFile("InteractionSample.xlsx");
