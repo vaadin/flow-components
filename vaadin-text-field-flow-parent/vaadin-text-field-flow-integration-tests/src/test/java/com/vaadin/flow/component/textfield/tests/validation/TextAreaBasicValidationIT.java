@@ -43,18 +43,6 @@ public class TextAreaBasicValidationIT
     }
 
     @Test
-
-    public void clientSideInvalidStateIsNotPropagatedToServer() {
-        // Make the field invalid
-        $("button").id(REQUIRED_BUTTON).click();
-        testField.sendKeys(Keys.TAB);
-
-        executeScript("arguments[0].invalid = false", testField);
-
-        assertServerInvalid();
-    }
-
-    @Test
     public void required_triggerBlur_assertValidity() {
         $("button").id(REQUIRED_BUTTON).click();
 
@@ -160,6 +148,17 @@ public class TextAreaBasicValidationIT
         detachAndReattachField();
 
         assertWebComponentCanNotModifyInvalidState();
+    }
+
+    @Test
+    public void clientSideInvalidStateIsNotPropagatedToServer() {
+        // Make the field invalid
+        $("button").id(REQUIRED_BUTTON).click();
+        testField.sendKeys(Keys.TAB);
+
+        executeScript("arguments[0].invalid = false", testField);
+
+        assertServerInvalid();
     }
 
     protected TextAreaElement getTestField() {

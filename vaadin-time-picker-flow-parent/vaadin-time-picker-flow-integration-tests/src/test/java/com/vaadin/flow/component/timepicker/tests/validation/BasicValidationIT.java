@@ -38,6 +38,13 @@ public class BasicValidationIT extends AbstractValidationIT<TimePickerElement> {
     }
 
     @Test
+    public void triggerBlur_assertValidity() {
+        testField.sendKeys(Keys.TAB);
+        assertServerValid();
+        assertClientValid();
+    }
+
+    @Test
     public void required_triggerBlur_assertValidity() {
         $("button").id(REQUIRED_BUTTON).click();
 
