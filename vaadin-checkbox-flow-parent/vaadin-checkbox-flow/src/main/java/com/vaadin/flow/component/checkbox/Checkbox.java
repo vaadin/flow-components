@@ -68,7 +68,7 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
                 "indeterminate-changed", NO_OP);
         getElement().addPropertyChangeListener("checked", "checked-changed",
                 NO_OP);
-        // Avoid overwriting initial checked set in a template.
+        // Initialize property value unless it has already been set from a template
         if (getElement().getProperty("checked") == null) {
             setPresentationValue(false);
         }
