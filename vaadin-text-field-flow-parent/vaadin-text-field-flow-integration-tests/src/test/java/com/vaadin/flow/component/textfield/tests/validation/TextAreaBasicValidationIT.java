@@ -43,9 +43,7 @@ public class TextAreaBasicValidationIT
     }
 
     @Test
-<<<<<<< HEAD:vaadin-text-field-flow-parent/vaadin-text-field-flow-integration-tests/src/test/java/com/vaadin/flow/component/textfield/tests/validation/TextAreaBasicValidationIT.java
-    public void required_triggerBlur_assertValidity() {
-=======
+
     public void clientSideInvalidStateIsNotPropagatedToServer() {
         // Make the field invalid
         $("button").id(REQUIRED_BUTTON).click();
@@ -57,8 +55,7 @@ public class TextAreaBasicValidationIT
     }
 
     @Test
-    public void required_triggerInputBlur_assertValidity() {
->>>>>>> 5c24c890b (add tests to other components):vaadin-text-field-flow-parent/vaadin-text-field-flow-integration-tests/src/test/java/com/vaadin/flow/component/textfield/tests/validation/TextAreaValidationBasicIT.java
+    public void required_triggerBlur_assertValidity() {
         $("button").id(REQUIRED_BUTTON).click();
 
         testField.sendKeys(Keys.TAB);
