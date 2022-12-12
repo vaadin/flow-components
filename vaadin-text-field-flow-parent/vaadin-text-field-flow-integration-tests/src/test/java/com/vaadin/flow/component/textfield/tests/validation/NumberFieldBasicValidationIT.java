@@ -37,38 +37,6 @@ public class NumberFieldBasicValidationIT
     }
 
     @Test
-    public void detach_attach_preservesInvalidState() {
-        // Make field invalid
-        $("button").id(REQUIRED_BUTTON).click();
-        testField.sendKeys(Keys.TAB);
-
-        detachAndReattachField();
-
-        assertServerInvalid();
-        assertClientInvalid();
-    }
-
-    @Test
-    public void webComponentCanNotModifyInvalidState() {
-        assertWebComponentCanNotModifyInvalidState();
-
-        detachAndReattachField();
-
-        assertWebComponentCanNotModifyInvalidState();
-    }
-
-    @Test
-    public void clientSideInvalidStateIsNotPropagatedToServer() {
-        // Make the field invalid
-        $("button").id(REQUIRED_BUTTON).click();
-        testField.sendKeys(Keys.TAB);
-
-        executeScript("arguments[0].invalid = false", testField);
-
-        assertServerInvalid();
-    }
-
-    @Test
     public void triggerBlur_assertValidity() {
         testField.sendKeys(Keys.TAB);
         assertServerValid();
@@ -188,6 +156,38 @@ public class NumberFieldBasicValidationIT
         testField.sendKeys("--2", Keys.TAB);
         assertServerInvalid();
         assertClientInvalid();
+    }
+
+    @Test
+    public void detach_attach_preservesInvalidState() {
+        // Make field invalid
+        $("button").id(REQUIRED_BUTTON).click();
+        testField.sendKeys(Keys.TAB);
+
+        detachAndReattachField();
+
+        assertServerInvalid();
+        assertClientInvalid();
+    }
+
+    @Test
+    public void webComponentCanNotModifyInvalidState() {
+        assertWebComponentCanNotModifyInvalidState();
+
+        detachAndReattachField();
+
+        assertWebComponentCanNotModifyInvalidState();
+    }
+
+    @Test
+    public void clientSideInvalidStateIsNotPropagatedToServer() {
+        // Make the field invalid
+        $("button").id(REQUIRED_BUTTON).click();
+        testField.sendKeys(Keys.TAB);
+
+        executeScript("arguments[0].invalid = false", testField);
+
+        assertServerInvalid();
     }
 
     protected NumberFieldElement getTestField() {

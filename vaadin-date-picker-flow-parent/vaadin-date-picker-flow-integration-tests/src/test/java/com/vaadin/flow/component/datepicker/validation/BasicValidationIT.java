@@ -20,24 +20,10 @@ public class BasicValidationIT extends AbstractValidationIT<DatePickerElement> {
     }
 
     @Test
-    public void detach_attach_preservesInvalidState() {
-        // Make field invalid
-        $("button").id(REQUIRED_BUTTON).click();
+    public void triggerBlur_assertValidity() {
         testField.sendKeys(Keys.TAB);
-
-        detachAndReattachField();
-
-        assertServerInvalid();
-        assertClientInvalid();
-    }
-
-    @Test
-    public void webComponentCanNotModifyInvalidState() {
-        assertWebComponentCanNotModifyInvalidState();
-
-        detachAndReattachField();
-
-        assertWebComponentCanNotModifyInvalidState();
+        assertServerValid();
+        assertClientValid();
     }
 
     @Test
@@ -109,6 +95,27 @@ public class BasicValidationIT extends AbstractValidationIT<DatePickerElement> {
         testField.setInputValue("INVALID");
         assertServerInvalid();
         assertClientInvalid();
+    }
+
+    @Test
+    public void detach_attach_preservesInvalidState() {
+        // Make field invalid
+        $("button").id(REQUIRED_BUTTON).click();
+        testField.sendKeys(Keys.TAB);
+
+        detachAndReattachField();
+
+        assertServerInvalid();
+        assertClientInvalid();
+    }
+
+    @Test
+    public void webComponentCanNotModifyInvalidState() {
+        assertWebComponentCanNotModifyInvalidState();
+
+        detachAndReattachField();
+
+        assertWebComponentCanNotModifyInvalidState();
     }
 
     protected DatePickerElement getTestField() {
