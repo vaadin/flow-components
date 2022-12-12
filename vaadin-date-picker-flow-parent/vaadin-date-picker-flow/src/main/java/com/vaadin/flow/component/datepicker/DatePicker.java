@@ -513,7 +513,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     }
 
     private ValidationResult checkValidity(LocalDate value) {
-        boolean hasNonParsableValue = value == getEmptyValue()
+        boolean hasNonParsableValue = value.equals(getEmptyValue())
                 && isInputValuePresent();
         if (hasNonParsableValue) {
             return ValidationResult.error("");

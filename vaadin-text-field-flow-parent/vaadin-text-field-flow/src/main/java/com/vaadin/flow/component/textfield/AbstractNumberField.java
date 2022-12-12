@@ -402,7 +402,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     }
 
     private ValidationResult checkValidity(T value) {
-        boolean hasNonParsableValue = value == getEmptyValue()
+        boolean hasNonParsableValue = value.equals(getEmptyValue())
                 && isInputValuePresent();
         if (hasNonParsableValue) {
             return ValidationResult.error("");
