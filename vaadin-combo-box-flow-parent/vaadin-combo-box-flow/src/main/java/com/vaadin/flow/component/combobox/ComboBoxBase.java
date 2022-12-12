@@ -18,8 +18,10 @@ package com.vaadin.flow.component.combobox;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClientCallable;
+import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.shared.ClientValidationUtil;
@@ -1293,11 +1295,19 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * @param <TComponent>
      *            The specific combo box component type
      */
+    @DomEvent("custom-value-set")
     public static class CustomValueSetEvent<TComponent extends ComboBoxBase<TComponent, ?, ?>>
-            extends GeneratedVaadinComboBox.CustomValueSetEvent<TComponent> {
+            extends ComponentEvent<TComponent> {
+        private final String detail;
+
         public CustomValueSetEvent(TComponent source, boolean fromClient,
                 @EventData("event.detail") String detail) {
-            super(source, fromClient, detail);
+            super(source, fromClient);
+            this.detail = detail;
+        }
+
+        public String getDetail() {
+            return detail;
         }
     }
 }
