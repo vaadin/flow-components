@@ -1,12 +1,12 @@
-package com.vaadin.flow.component.textfield.binder;
+package com.vaadin.flow.component.textfield.validation;
 
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.function.SerializablePredicate;
 
 import java.util.Objects;
 
-public class PasswordFieldValidationTest
-        extends AbstractTextFieldValidationTest<String, PasswordField> {
+public class PasswordFieldBinderValidationTest
+        extends AbstractBinderValidationTest<String, PasswordField> {
 
     @Override
     protected void initField() {

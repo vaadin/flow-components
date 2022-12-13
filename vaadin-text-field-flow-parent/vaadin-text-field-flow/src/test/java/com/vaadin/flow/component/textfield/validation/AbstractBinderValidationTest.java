@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.textfield.binder;
+package com.vaadin.flow.component.textfield.validation;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
@@ -11,7 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.*;
 
-public abstract class AbstractTextFieldValidationTest<T, K extends Component & HasValue<?, T>> {
+public abstract class AbstractBinderValidationTest<T, K extends Component & HasValue<?, T>> {
 
     private static final String BINDER_FAIL_MESSAGE = "BINDER_VALIDATION_FAIL";
     private static final String BINDER_REQUIRED_MESSAGE = "REQUIRED";

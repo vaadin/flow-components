@@ -1,10 +1,10 @@
-package com.vaadin.flow.component.textfield.binder;
+package com.vaadin.flow.component.textfield.validation;
 
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.function.SerializablePredicate;
 
-public class NumberFieldValidationTest
-        extends AbstractTextFieldValidationTest<Double, NumberField> {
+public class NumberFieldBinderValidationTest
+        extends AbstractBinderValidationTest<Double, NumberField> {
 
     @Override
     protected void initField() {

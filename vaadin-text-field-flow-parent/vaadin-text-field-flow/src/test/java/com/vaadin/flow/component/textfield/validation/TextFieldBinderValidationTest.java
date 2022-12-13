@@ -1,12 +1,12 @@
-package com.vaadin.flow.component.textfield.binder;
+package com.vaadin.flow.component.textfield.validation;
 
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.function.SerializablePredicate;
 
 import java.util.Objects;
 
-public class TextFieldValidationTest
-        extends AbstractTextFieldValidationTest<String, TextField> {
+public class TextFieldBinderValidationTest
+        extends AbstractBinderValidationTest<String, TextField> {
 
     protected void initField() {
         field = new TextField();

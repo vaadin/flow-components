@@ -1,12 +1,12 @@
-package com.vaadin.flow.component.textfield.binder;
+package com.vaadin.flow.component.textfield.validation;
 
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.function.SerializablePredicate;
 
 import java.util.Objects;
 
-public class EmailFieldValidationTest
-        extends AbstractTextFieldValidationTest<String, EmailField> {
+public class EmailFieldBinderValidationTest
+        extends AbstractBinderValidationTest<String, EmailField> {
 
     @Override
     protected void initField() {

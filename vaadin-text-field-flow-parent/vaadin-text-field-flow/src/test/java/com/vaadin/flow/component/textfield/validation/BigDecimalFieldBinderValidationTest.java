@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.textfield.binder;
+package com.vaadin.flow.component.textfield.validation;
 
 import com.vaadin.flow.component.textfield.BigDecimalField;
 import com.vaadin.flow.function.SerializablePredicate;
@@ -6,8 +6,8 @@ import org.junit.Ignore;
 
 import java.math.BigDecimal;
 
-public class BigDecimalFieldValidationTest
-        extends AbstractTextFieldValidationTest<BigDecimal, BigDecimalField> {
+public class BigDecimalFieldBinderValidationTest
+        extends AbstractBinderValidationTest<BigDecimal, BigDecimalField> {
 
     @Override
     protected void initField() {
