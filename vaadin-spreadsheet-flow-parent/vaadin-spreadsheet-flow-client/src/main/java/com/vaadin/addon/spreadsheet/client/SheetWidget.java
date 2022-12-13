@@ -3473,42 +3473,19 @@ public class SheetWidget extends Panel {
         cell.setValue(null);
         Widget parent = customWidget.getParent();
 
-        DivElement cellElement = cell.getElement();
-        Element customWidgetElement = customWidget.getElement();
-
-        Element slot = DOM.createElement("slot");
-        String slotName = "customWidget-" + cell.getCol() + "-" + cell.getRow();
-        slot.setAttribute("name", slotName);
-        removeOnSlotDisconnect(slot, customWidgetElement);
-
-        customWidgetElement.setAttribute("slot", slotName);
-
         if (parent != null) {
             if (equals(parent)) {
-                cellElement.appendChild(slot);
-                host.appendChild(customWidgetElement);
+                cell.getElement().appendChild(customWidget.getElement());
             } else {
                 customWidget.removeFromParent();
-                cellElement.appendChild(slot);
-                host.appendChild(customWidgetElement);
+                cell.getElement().appendChild(customWidget.getElement());
                 adopt(customWidget);
             }
         } else {
-            cellElement.appendChild(slot);
-            host.appendChild(customWidgetElement);
+            cell.getElement().appendChild(customWidget.getElement());
             adopt(customWidget);
         }
     }
-
-    static native void removeOnSlotDisconnect(Element slot,
-            Element assignedWidget) /*-{
-        slot.addEventListener('slotchange', function () {
-            if (!slot.isConnected) {
-                // If the slot gets disconnected, remove the associated widget from the DOM
-                assignedWidget.remove();
-            }
-        });
-    }-*/;
 
     public void addSheetOverlay(String key, SheetOverlay overlay) {
         boolean inTop = verticalSplitPosition >= overlay.getRow();

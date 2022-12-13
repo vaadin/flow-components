@@ -185,6 +185,8 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
     private HandlerRegistration contextMenuHandler;
     private SpreadsheetServerRpcImpl serverRPC;
 
+    private Element host;
+
     // spreadsheet: we need the server side proxy
     public <T extends ServerRpc> T getProtectedRpcProxy(Class<T> rpcInterface) {
         return getRpcProxy(rpcInterface);
@@ -366,12 +368,12 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
             if (cellKeysToComponentIdMap != null
                     && !cellKeysToComponentIdMap.isEmpty()) {
                 cellKeysToComponentIdMap.forEach((nodeId, key) -> {
-                    // TODO revisar
-                    // Should be passed from the server based on
-                    // ui.getInternals().getAppId()
-                    String appid = "ROOT";
-                    customWidgetMap.put(key,
-                            new FlowComponentRenderer(appid, nodeId));
+                    var appId = host.getPropertyString("appId");
+                    // TODO: falling back to "ROOT" can be removed once
+                    // https://github.com/vaadin/flow-components/pull/4330 is merged
+                    var component = SheetJsniUtil.getVirtualChild(nodeId, appId != null ? appId : "ROOT");
+                    var slot = new Slot("custom-component-" + nodeId, component, host);
+                    customWidgetMap.put(key, slot);
                 });
             }
             widget.showCellCustomComponents(customWidgetMap);
@@ -466,19 +468,11 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
                     public Widget getCustomEditor(String key) {
                         String editorId = getState().cellKeysToEditorIdMap
                                 .get(key);
-                        String slotName = "custom-editor-" + editorId;
-                        Slot slot = new Slot(slotName);
-                        // TODO revisar
-                        // Should be passed from the server based on
-                        // ui.getInternals().getAppId()
-                        FlowComponentRenderer componentRenderer = new FlowComponentRenderer(
-                                "ROOT", editorId);
-                        componentRenderer.getElement().setAttribute("slot",
-                                slotName);
-                        SheetWidget.removeOnSlotDisconnect(slot.getElement(),
-                                componentRenderer.getElement());
-                        host.appendChild(componentRenderer.getElement());
-                        return slot;
+                        var appId = host.getPropertyString("appId");
+                        // TODO: falling back to "ROOT" can be removed once
+                        // https://github.com/vaadin/flow-components/pull/4330 is merged
+                        var editor = SheetJsniUtil.getVirtualChild(editorId, appId != null ? appId : "ROOT");
+                        return new Slot("custom-editor-" + editorId, editor, host);
                     }
 
                 };
@@ -548,8 +542,6 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
     public interface CommsTrigger {
         void sendUpdates();
     }
-
-    private Element host;
 
     public void setHost(Element host, Node renderRoot) {
         this.host = host;
