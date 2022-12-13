@@ -370,9 +370,12 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
                 cellKeysToComponentIdMap.forEach((nodeId, key) -> {
                     var appId = host.getPropertyString("appId");
                     // TODO: falling back to "ROOT" can be removed once
-                    // https://github.com/vaadin/flow-components/pull/4330 is merged
-                    var component = SheetJsniUtil.getVirtualChild(nodeId, appId != null ? appId : "ROOT");
-                    var slot = new Slot("custom-component-" + nodeId, component, host);
+                    // https://github.com/vaadin/flow-components/pull/4330 is
+                    // merged
+                    var component = SheetJsniUtil.getVirtualChild(nodeId,
+                            appId != null ? appId : "ROOT");
+                    var slot = new Slot("custom-component-" + nodeId, component,
+                            host);
                     customWidgetMap.put(key, slot);
                 });
             }
@@ -470,9 +473,12 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
                                 .get(key);
                         var appId = host.getPropertyString("appId");
                         // TODO: falling back to "ROOT" can be removed once
-                        // https://github.com/vaadin/flow-components/pull/4330 is merged
-                        var editor = SheetJsniUtil.getVirtualChild(editorId, appId != null ? appId : "ROOT");
-                        return new Slot("custom-editor-" + editorId, editor, host);
+                        // https://github.com/vaadin/flow-components/pull/4330
+                        // is merged
+                        var editor = SheetJsniUtil.getVirtualChild(editorId,
+                                appId != null ? appId : "ROOT");
+                        return new Slot("custom-editor-" + editorId, editor,
+                                host);
                     }
 
                 };
