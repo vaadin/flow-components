@@ -78,8 +78,6 @@ public class BigDecimalField
 
     private int valueChangeTimeout = DEFAULT_CHANGE_TIMEOUT;
 
-    private boolean required;
-
     private Locale locale;
 
     private static final SerializableBiFunction<BigDecimalField, String, BigDecimal> PARSER = (
@@ -397,8 +395,9 @@ public class BigDecimalField
     protected void validate() {
         BigDecimal value = getValue();
 
+        boolean isRequired = isRequiredIndicatorVisible();
         ValidationResult requiredValidation = ValidationUtil
-                .checkRequired(required, value, getEmptyValue());
+                .checkRequired(isRequired, value, getEmptyValue());
 
         setInvalid(
                 requiredValidation.isError() || checkValidity(value).isError());
@@ -426,12 +425,6 @@ public class BigDecimalField
                 event -> listener.validationStatusChanged(
                         new ValidationStatusChangeEvent<BigDecimal>(this,
                                 !isInvalid())));
-    }
-
-    @Override
-    public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
-        super.setRequiredIndicatorVisible(requiredIndicatorVisible);
-        this.required = requiredIndicatorVisible;
     }
 
     /**
