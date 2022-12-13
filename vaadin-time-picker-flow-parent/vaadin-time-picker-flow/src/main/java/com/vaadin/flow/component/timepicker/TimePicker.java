@@ -23,8 +23,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.vaadin.experimental.Feature;
-import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.shared.ClientValidationUtil;
@@ -51,7 +49,6 @@ import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.StateTree;
-import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -123,9 +120,7 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
 
         addValueChangeListener(e -> validate());
 
-        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
-            addClientValidatedEventListener(event -> validate());
-        }
+        addClientValidatedEventListener(event -> validate());
     }
 
     /**
@@ -282,43 +277,33 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
 
     @Override
     public Validator<LocalTime> getDefaultValidator() {
-        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
-            return (value, context) -> checkValidity(value);
-        }
-
-        return Validator.alwaysPass();
+        return (value, context) -> checkValidity(value);
     }
 
     @Override
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<LocalTime> listener) {
-        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
-            return addClientValidatedEventListener(
-                    event -> listener.validationStatusChanged(
-                            new ValidationStatusChangeEvent<LocalTime>(this,
-                                    !isInvalid())));
-        }
-
-        return null;
+        return addClientValidatedEventListener(
+                event -> listener.validationStatusChanged(
+                        new ValidationStatusChangeEvent<LocalTime>(this,
+                                !isInvalid())));
     }
 
     private ValidationResult checkValidity(LocalTime value) {
-        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
-            boolean hasNonParsableValue = value == getEmptyValue()
-                    && isInputValuePresent();
-            if (hasNonParsableValue) {
-                return ValidationResult.error("");
-            }
+        boolean hasNonParsableValue = Objects.equals(value, getEmptyValue())
+                && isInputValuePresent();
+        if (hasNonParsableValue) {
+            return ValidationResult.error("");
         }
 
-        var greaterThanMaxValidation = ValidationUtil.checkGreaterThanMax(value,
-                max);
+        ValidationResult greaterThanMaxValidation = ValidationUtil
+                .checkGreaterThanMax(value, max);
         if (greaterThanMaxValidation.isError()) {
             return greaterThanMaxValidation;
         }
 
-        var smallThanMinValidation = ValidationUtil.checkSmallerThanMin(value,
-                min);
+        ValidationResult smallThanMinValidation = ValidationUtil
+                .checkSmallerThanMin(value, min);
         if (smallThanMinValidation.isError()) {
             return smallThanMinValidation;
         }
@@ -345,7 +330,7 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
      *         <code>false</code> otherwise
      */
     @Synchronize(property = "_hasInputValue", value = "has-input-value-changed")
-    private boolean isInputValuePresent() {
+    protected boolean isInputValuePresent() {
         return getElement().getProperty("_hasInputValue", false);
     }
 
@@ -484,12 +469,7 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         super.onAttach(attachEvent);
         initConnector();
         requestLocaleUpdate();
-        if (isFeatureFlagEnabled(FeatureFlags.ENFORCE_FIELD_VALIDATION)) {
-            ClientValidationUtil
-                    .preventWebComponentFromSettingItselfToValid(this);
-        } else {
-            FieldValidationUtil.disableClientValidation(this);
-        }
+        ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
     }
 
     private void initConnector() {
@@ -677,26 +657,5 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
 
     private static String format(LocalTime time) {
         return time != null ? time.toString() : null;
-    }
-
-    /**
-     * Returns true if the given feature flag is enabled, false otherwise.
-     * <p>
-     * Exposed with protected visibility to support mocking
-     * <p>
-     * The method requires the {@code VaadinService} instance to obtain the
-     * available feature flags, otherwise, the feature is considered disabled.
-     *
-     * @param feature
-     *            the feature flag.
-     * @return whether the feature flag is enabled.
-     */
-    protected boolean isFeatureFlagEnabled(Feature feature) {
-        VaadinService service = VaadinService.getCurrent();
-        if (service == null) {
-            return false;
-        }
-
-        return FeatureFlags.get(service.getContext()).isEnabled(feature);
     }
 }

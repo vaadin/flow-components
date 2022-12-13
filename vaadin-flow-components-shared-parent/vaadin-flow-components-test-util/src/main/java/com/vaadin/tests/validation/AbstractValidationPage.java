@@ -30,6 +30,9 @@ public abstract class AbstractValidationPage<T extends Component & HasValidation
     public static final String SERVER_VALIDITY_STATE = "server-validity-state";
     public static final String SERVER_VALIDITY_STATE_BUTTON = "server-validity-state-button";
 
+    public static final String ATTACH_FIELD_BUTTON = "attach-field-button";
+    public static final String DETACH_FIELD_BUTTON = "detach-field-button";
+
     protected T testField;
 
     protected AbstractValidationPage() {
@@ -37,6 +40,7 @@ public abstract class AbstractValidationPage<T extends Component & HasValidation
         add(testField);
 
         addServerValidityStateControls();
+        addAttachDetachControls();
     }
 
     private void addServerValidityStateControls() {
@@ -51,6 +55,15 @@ public abstract class AbstractValidationPage<T extends Component & HasValidation
                 });
 
         add(new Div(validityState, validityStateButton));
+    }
+
+    private void addAttachDetachControls() {
+        NativeButton attachButton = createButton(ATTACH_FIELD_BUTTON,
+                "Attach field", event -> add(testField));
+        NativeButton detachButton = createButton(DETACH_FIELD_BUTTON,
+                "Detach field", event -> remove(testField));
+
+        add(new Div(attachButton, detachButton));
     }
 
     /**

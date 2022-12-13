@@ -18,10 +18,13 @@ package com.vaadin.flow.component.combobox;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClientCallable;
+import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasClearButton;
 import com.vaadin.flow.component.HasHelper;
@@ -36,8 +39,12 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxDataView;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxLazyDataView;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxListDataView;
+import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasValidator;
+import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
+import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
@@ -80,7 +87,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
         HasDataView<TItem, String, ComboBoxDataView<TItem>>,
         HasListDataView<TItem, ComboBoxListDataView<TItem>>,
         HasLazyDataView<TItem, String, ComboBoxLazyDataView<TItem>>, HasTooltip,
-        HasValidator<TValue> {
+        HasValidator<TValue>, HasClientValidation {
 
     /**
      * Registration for custom value listeners that disallows entering custom
@@ -158,6 +165,10 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
         // the selection
         addValueChangeListener(
                 e -> getDataCommunicator().notifySelectionChanged());
+
+        addValueChangeListener(e -> validate());
+
+        addClientValidatedEventListener(e -> validate());
     }
 
     /**
@@ -315,7 +326,6 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     /**
      * Whether the component has an invalid value or not.
      */
-    @Synchronize(property = "invalid", value = "invalid-changed")
     public boolean isInvalid() {
         return getElement().getProperty("invalid", false);
     }
@@ -406,14 +416,6 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      */
     public void setAutoOpen(boolean autoOpen) {
         getElement().setProperty("autoOpenDisabled", !autoOpen);
-    }
-
-    @Override
-    public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
-        super.setRequiredIndicatorVisible(requiredIndicatorVisible);
-        runBeforeClientResponse(ui -> getElement().callJsFunction(
-                "$connector.enableClientValidation",
-                !requiredIndicatorVisible));
     }
 
     /**
@@ -513,6 +515,8 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
         super.onAttach(attachEvent);
         initConnector();
         dataController.onAttach();
+
+        ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
     }
 
     @Override
@@ -1266,6 +1270,23 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
                 "window.Vaadin.Flow.comboBoxConnector.initLazy(this)");
     }
 
+    protected void validate() {
+        boolean isRequired = isRequiredIndicatorVisible();
+        boolean isInvalid = ValidationUtil
+                .checkRequired(isRequired, getValue(), getEmptyValue())
+                .isError();
+
+        setInvalid(isInvalid);
+    }
+
+    @Override
+    public Registration addValidationStatusChangeListener(
+            ValidationStatusChangeListener<TValue> listener) {
+        return addClientValidatedEventListener(
+                event -> listener.validationStatusChanged(
+                        new ValidationStatusChangeEvent<>(this, !isInvalid())));
+    }
+
     /**
      * Event that is dispatched from a combo box component, if the component
      * allows setting custom values, and the user has entered a non-empty value
@@ -1274,11 +1295,19 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * @param <TComponent>
      *            The specific combo box component type
      */
+    @DomEvent("custom-value-set")
     public static class CustomValueSetEvent<TComponent extends ComboBoxBase<TComponent, ?, ?>>
-            extends GeneratedVaadinComboBox.CustomValueSetEvent<TComponent> {
+            extends ComponentEvent<TComponent> {
+        private final String detail;
+
         public CustomValueSetEvent(TComponent source, boolean fromClient,
                 @EventData("event.detail") String detail) {
-            super(source, fromClient, detail);
+            super(source, fromClient);
+            this.detail = detail;
+        }
+
+        public String getDetail() {
+            return detail;
         }
     }
 }

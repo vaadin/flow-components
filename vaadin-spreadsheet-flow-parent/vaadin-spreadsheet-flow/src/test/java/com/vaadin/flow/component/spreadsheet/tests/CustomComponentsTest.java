@@ -1,7 +1,6 @@
 package com.vaadin.flow.component.spreadsheet.tests;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 import com.vaadin.flow.component.spreadsheet.SpreadsheetComponentFactory;
@@ -18,9 +17,6 @@ public class CustomComponentsTest {
 
     @Before
     public void init() {
-        var ui = new UI();
-        UI.setCurrent(ui);
-
         customComponent = new Span("Custom component");
 
         spreadsheet = new Spreadsheet();
