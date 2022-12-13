@@ -80,7 +80,7 @@ enum ComponentType {
 
     private int columnIndex;
 
-    private String headerText;
+    private final String headerText;
 
     ComponentType(int columnIndex, String headerText) {
         this.columnIndex = columnIndex;
