@@ -1,8 +1,5 @@
 package com.vaadin.flow.component.textfield.binder;
 
-import com.vaadin.experimental.Feature;
-import com.vaadin.experimental.FeatureFlags;
-import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.function.SerializablePredicate;
 
@@ -11,20 +8,8 @@ import java.util.Objects;
 public class TextFieldValidationTest
         extends AbstractTextFieldValidationTest<String, TextField> {
 
-    @Tag("test-text-field")
-    private class TestTextField extends TextField {
-        protected boolean isFeatureFlagEnabled(Feature feature) {
-            if (feature.getId() == FeatureFlags.ENFORCE_FIELD_VALIDATION
-                    .getId()) {
-                return true;
-            }
-
-            return super.isFeatureFlagEnabled(feature);
-        }
-    }
-
     protected void initField() {
-        field = new TestTextField();
+        field = new TextField();
         field.setMaxLength(8);
     }
 

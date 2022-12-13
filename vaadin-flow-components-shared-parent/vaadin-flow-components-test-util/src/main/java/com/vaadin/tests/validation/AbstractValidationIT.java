@@ -20,7 +20,10 @@ import com.vaadin.tests.AbstractComponentIT;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 
+import static com.vaadin.tests.validation.AbstractValidationPage.ATTACH_FIELD_BUTTON;
+import static com.vaadin.tests.validation.AbstractValidationPage.DETACH_FIELD_BUTTON;
 import static com.vaadin.tests.validation.AbstractValidationPage.SERVER_VALIDITY_STATE;
 import static com.vaadin.tests.validation.AbstractValidationPage.SERVER_VALIDITY_STATE_BUTTON;
 
@@ -70,5 +73,32 @@ public abstract class AbstractValidationIT<T extends TestBenchElement>
 
     private boolean isClientValid() {
         return !testField.getPropertyBoolean("invalid");
+    }
+
+    protected void assertWebComponentCanNotModifyInvalidState() {
+        // There is no good integration test for this, as triggering client
+        // validation will also trigger server validation, with the same
+        // validation constraints as the client validation, making it impossible
+        // to test a difference.
+        // Instead, we test that the web component has been properly configured
+        // to prevent itself from changing the invalid state.
+        Assert.assertFalse(shouldSetInvalid(true));
+        Assert.assertFalse(shouldSetInvalid(false));
+    }
+
+    private boolean shouldSetInvalid(boolean invalid) {
+        return (Boolean) getCommandExecutor().executeScript(
+                "const field = arguments[0]; const invalid = arguments[1]; return field._shouldSetInvalid(invalid)",
+                testField, invalid);
+    }
+
+    protected void detachAndReattachField() {
+        $("button").id(DETACH_FIELD_BUTTON).click();
+        // Verify element has been removed
+        waitUntil(ExpectedConditions.stalenessOf(testField));
+
+        $("button").id(ATTACH_FIELD_BUTTON).click();
+        // Retrieve new element instance
+        testField = getTestField();
     }
 }
