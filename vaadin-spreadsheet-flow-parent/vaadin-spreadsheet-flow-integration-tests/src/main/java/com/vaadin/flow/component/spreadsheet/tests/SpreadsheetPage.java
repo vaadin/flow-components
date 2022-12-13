@@ -433,10 +433,10 @@ public class SpreadsheetPage extends VerticalLayout implements Receiver {
             button.setId("submitValues");
             button.addClickListener(event -> {
                 try {
-                    int vSprlit = Integer.parseInt(vSplitTF.getValue());
-                    int hSprlit = Integer.parseInt(hSplitTF.getValue());
+                    int vSplit = Integer.parseInt(vSplitTF.getValue());
+                    int hSplit = Integer.parseInt(hSplitTF.getValue());
 
-                    spreadsheet.createFreezePane(vSprlit, hSprlit);
+                    spreadsheet.createFreezePane(vSplit, hSplit);
                 } catch (NumberFormatException e) {
 
                 }
