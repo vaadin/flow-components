@@ -3661,10 +3661,7 @@ public class Spreadsheet extends Component
                     && customComponents != null) {
                 String componentId = cellKeysToEditorIdMap.get(key);
                 for (Component c : customComponents) {
-                    if (Integer.toString(c.getElement().getNode().getId())
-                            .equals(componentId)) {
-                        // todo: ver que hacemos con esto
-                        // if (c.getConnectorId().equals(componentId)) {
+                    if (getComponentNodeId(c).equals(componentId)) {
                         customComponentFactory.onCustomEditorDisplayed(
                                 getCell(row, col), row, col, this,
                                 getActiveSheet(), c);
@@ -4538,9 +4535,8 @@ public class Spreadsheet extends Component
                         if (!customComponents.contains(customComponent)) {
                             registerCustomComponent(customComponent);
                         }
-                        _componentIDtoCellKeysMap.put(Integer.toString(
-                                customComponent.getElement().getNode().getId()),
-                                key);
+                        _componentIDtoCellKeysMap
+                                .put(getComponentNodeId(customComponent), key);
                         newCustomComponents.add(customComponent);
                         rowsWithComponents.add(r);
                     } else if (!isCellLocked(cell)) {
@@ -4558,11 +4554,7 @@ public class Spreadsheet extends Component
                                 registerCustomComponent(customEditor);
                             }
                             _cellKeysToEditorIdMap.put(key,
-                                    // todo: revisar
-                                    Integer.toString(customEditor.getElement()
-                                            .getNode().getId())
-                            // customEditor.getConnectorId()
-                            );
+                                    getComponentNodeId(customEditor));
                             newCustomComponents.add(customEditor);
                             rowsWithComponents.add(r);
                         }
@@ -4575,6 +4567,10 @@ public class Spreadsheet extends Component
         }
         setCellKeysToEditorIdMap(_cellKeysToEditorIdMap);
         setComponentIDtoCellKeysMap(_componentIDtoCellKeysMap);
+    }
+
+    private String getComponentNodeId(Component component) {
+        return Integer.toString(component.getElement().getNode().getId());
     }
 
     private void handleRowSizes(Set<Integer> rowsWithComponents) {
@@ -4661,9 +4657,6 @@ public class Spreadsheet extends Component
     private void registerCustomComponent(Component component) {
         if (!getElement().equals(component.getElement().getParent())) {
             getElement().appendVirtualChild(component.getElement());
-            // todo: se puede eliminar esto? en v8, setparent provoca que se
-            // añada el componente en la jerarquía
-            // component.setParent(this);
         }
     }
 
@@ -4678,8 +4671,6 @@ public class Spreadsheet extends Component
                 && getElement().equals(element.getParent())) {
             getElement().removeVirtualChild(element);
         }
-        // todo: se puede eliminar esto?
-        // component.setParent(null);
     }
 
     /**

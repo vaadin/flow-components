@@ -22,8 +22,6 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
         loadTestFixture(TestFixtures.CustomEditor);
     }
 
-    // TODO revisar - fix tests
-
     @Test
     public void setValueToTextField_valueAppliedToTextField() {
         String sampleText = "text";

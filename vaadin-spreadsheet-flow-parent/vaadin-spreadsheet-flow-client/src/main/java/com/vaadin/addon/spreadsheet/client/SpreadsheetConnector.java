@@ -346,7 +346,6 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
 
     private void loadInitialStateDataToWidget(
             StateChangeEvent stateChangeEvent) {
-        // debugger();
         SpreadsheetState state = getState();
         SpreadsheetWidget widget = getWidget();
         setupCustomEditors();
