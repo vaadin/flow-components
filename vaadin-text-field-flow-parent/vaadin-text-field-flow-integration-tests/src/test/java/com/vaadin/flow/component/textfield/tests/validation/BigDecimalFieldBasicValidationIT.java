@@ -53,7 +53,7 @@ public class BigDecimalFieldBasicValidationIT
     public void required_changeValue_assertValidity() {
         $("button").id(REQUIRED_BUTTON).click();
 
-        testField.setValue("Value");
+        testField.setValue("1234");
         assertServerValid();
         assertClientValid();
 
