@@ -153,16 +153,6 @@ public class SheetJsniUtil {
         return overlayRules;
     }-*/;
 
-    public static native void removeOnSlotDisconnect(Element slot,
-            Element assignedWidget) /*-{
-            slot.addEventListener('slotchange', function () {
-                if (!slot.isConnected) {
-                    // If the slot gets disconnected, remove the associated widget from the DOM
-                    assignedWidget.remove();
-                }
-            });
-        }-*/;
-
     public static native Element getVirtualChild(String nodeId, String appId) /*-{
         return $wnd.Vaadin
           && $wnd.Vaadin.Flow

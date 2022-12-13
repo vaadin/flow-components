@@ -431,15 +431,9 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
                     overlayInfo);
             break;
         case COMPONENT:
-            var slotName = "overlay-component-" + id;
-
             var element = SheetJsniUtil.getVirtualChild(id,
                     host.getPropertyString("appId"));
-            element.setAttribute("slot", slotName);
-            host.appendChild(element);
-
-            var slot = new Slot(slotName);
-            SheetJsniUtil.removeOnSlotDisconnect(slot.getElement(), element);
+            var slot = new Slot("overlay-component-" + id, element, host);
             getWidget().addOverlay(id, slot, overlayInfo);
             break;
         }

@@ -11,12 +11,27 @@ package com.vaadin.addon.spreadsheet.client;
  */
 
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.ui.Widget;
 
 public class Slot extends Widget {
-    public Slot(String name) {
-        var element = Document.get().createElement("slot");
-        element.setAttribute("name", name);
-        setElement(element);
+
+    public Slot(String name, Element assignedElement, Element host) {
+        // Create the slot element with the given name
+        var slotElement = Document.get().createElement("slot");
+        slotElement.setAttribute("name", name);
+        setElement(slotElement);
+
+        // Use the given name as the slot attribute of the assigned element
+        assignedElement.setAttribute("slot", name);
+
+        // Keep the assigned element in the DOM while the slot is attached
+        addAttachHandler(e -> {
+            if (e.isAttached()) {
+                host.appendChild(assignedElement);
+            } else {
+                assignedElement.removeFromParent();
+            }
+        });
     }
 }
