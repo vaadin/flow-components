@@ -56,16 +56,10 @@ class ComponentEditorFactory implements SpreadsheetComponentFactory {
             Component customEditor) {
     }
 
-    private Object getCellValueForComponent(ComponentType componentType,
-            Cell cell) {
-        return cell.getStringCellValue();
-    }
-
     private Component getCustomComponent(ComponentType componentType) {
         if (componentType != null) {
             switch (componentType) {
             case BUTTON:
-                // TODO revisar - js exception in mouseover
                 return button;
             }
         }
@@ -75,7 +69,6 @@ class ComponentEditorFactory implements SpreadsheetComponentFactory {
 
 enum ComponentType {
 
-    // TODO revisar - add more components
     BUTTON(1, "Button");
 
     private int columnIndex;
