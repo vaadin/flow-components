@@ -9,8 +9,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
-import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.DETACH_FIELD_BUTTON;
-import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.ATTACH_FIELD_BUTTON;
 import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.MIN_INPUT;
 import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.MAX_INPUT;
 import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.REQUIRED_BUTTON;
@@ -35,25 +33,11 @@ public class BasicValidationIT
     }
 
     @Test
-    public void detach_attach_preservesInvalidState() {
-        // Make field invalid
-        $("button").id(REQUIRED_BUTTON).click();
+    public void triggerBlur_assertValidity() {
         dateInput.sendKeys(Keys.TAB);
         timeInput.sendKeys(Keys.TAB);
-
-        detachAndReattachField();
-
-        assertServerInvalid();
-        assertClientInvalid();
-    }
-
-    @Test
-    public void webComponentCanNotModifyInvalidState() {
-        assertWebComponentCanNotModifyInvalidState();
-
-        detachAndReattachField();
-
-        assertWebComponentCanNotModifyInvalidState();
+        assertServerValid();
+        assertClientValid();
     }
 
     @Test
@@ -160,6 +144,28 @@ public class BasicValidationIT
         setInputValue(timeInput, "13:00");
         assertClientValid();
         assertServerValid();
+    }
+
+    @Test
+    public void detach_attach_preservesInvalidState() {
+        // Make field invalid
+        $("button").id(REQUIRED_BUTTON).click();
+        dateInput.sendKeys(Keys.TAB);
+        timeInput.sendKeys(Keys.TAB);
+
+        detachAndReattachField();
+
+        assertServerInvalid();
+        assertClientInvalid();
+    }
+
+    @Test
+    public void webComponentCanNotModifyInvalidState() {
+        assertWebComponentCanNotModifyInvalidState();
+
+        detachAndReattachField();
+
+        assertWebComponentCanNotModifyInvalidState();
     }
 
     protected DateTimePickerElement getTestField() {

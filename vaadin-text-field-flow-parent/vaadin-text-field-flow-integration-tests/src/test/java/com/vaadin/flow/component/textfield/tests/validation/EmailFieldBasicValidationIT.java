@@ -37,27 +37,6 @@ public class EmailFieldBasicValidationIT
     }
 
     @Test
-    public void detach_attach_preservesInvalidState() {
-        // Make field invalid
-        $("button").id(REQUIRED_BUTTON).click();
-        testField.sendKeys(Keys.TAB);
-
-        detachAndReattachField();
-
-        assertServerInvalid();
-        assertClientInvalid();
-    }
-
-    @Test
-    public void webComponentCanNotModifyInvalidState() {
-        assertWebComponentCanNotModifyInvalidState();
-
-        detachAndReattachField();
-
-        assertWebComponentCanNotModifyInvalidState();
-    }
-
-    @Test
     public void triggerBlur_assertValidity() {
         testField.sendKeys(Keys.TAB);
         assertServerValid();
@@ -159,6 +138,27 @@ public class EmailFieldBasicValidationIT
         testField.setValue("john@vaadin.com");
         assertClientValid();
         assertServerValid();
+    }
+
+    @Test
+    public void detach_attach_preservesInvalidState() {
+        // Make field invalid
+        $("button").id(REQUIRED_BUTTON).click();
+        testField.sendKeys(Keys.TAB);
+
+        detachAndReattachField();
+
+        assertServerInvalid();
+        assertClientInvalid();
+    }
+
+    @Test
+    public void webComponentCanNotModifyInvalidState() {
+        assertWebComponentCanNotModifyInvalidState();
+
+        detachAndReattachField();
+
+        assertWebComponentCanNotModifyInvalidState();
     }
 
     protected EmailFieldElement getTestField() {
