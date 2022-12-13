@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
-import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.textfield.TextArea;
