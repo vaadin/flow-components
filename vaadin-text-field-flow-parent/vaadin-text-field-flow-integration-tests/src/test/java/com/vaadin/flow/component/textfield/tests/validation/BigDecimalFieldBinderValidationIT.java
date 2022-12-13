@@ -54,6 +54,23 @@ public class BigDecimalFieldBinderValidationIT
         assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
+    @Test
+    public void badInput_changeValue_assertValidity() {
+        testField.sendKeys("--2", Keys.TAB);
+        assertServerInvalid();
+        assertClientInvalid();
+        assertErrorMessage("");
+
+        testField.setValue("2");
+        assertServerValid();
+        assertClientValid();
+
+        testField.sendKeys("--2", Keys.TAB);
+        assertServerInvalid();
+        assertClientInvalid();
+        assertErrorMessage("");
+    }
+
     protected BigDecimalFieldElement getTestField() {
         return $(BigDecimalFieldElement.class).first();
     }

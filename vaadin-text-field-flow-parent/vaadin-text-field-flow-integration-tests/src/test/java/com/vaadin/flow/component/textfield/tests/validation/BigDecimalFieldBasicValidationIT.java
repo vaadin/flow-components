@@ -63,6 +63,21 @@ public class BigDecimalFieldBasicValidationIT
     }
 
     @Test
+    public void badInput_changeValue_assertValidity() {
+        testField.sendKeys("--2", Keys.TAB);
+        assertServerInvalid();
+        assertClientInvalid();
+
+        testField.setValue("2");
+        assertServerValid();
+        assertClientValid();
+
+        testField.sendKeys("--2", Keys.TAB);
+        assertServerInvalid();
+        assertClientInvalid();
+    }
+
+    @Test
     public void detach_attach_preservesInvalidState() {
         // Make field invalid
         $("button").id(REQUIRED_BUTTON).click();
