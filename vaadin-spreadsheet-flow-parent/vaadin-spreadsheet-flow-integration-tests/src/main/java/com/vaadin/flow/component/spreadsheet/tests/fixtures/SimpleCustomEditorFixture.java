@@ -72,7 +72,6 @@ class CustomEditorFactory implements SpreadsheetComponentFactory {
     public void onCustomEditorDisplayed(Cell cell, int rowIndex,
             int columnIndex, Spreadsheet spreadsheet, Sheet sheet,
             Component customEditor) {
-        // TODO revisar - what should be done here?
     }
 
     private Component getCustomEditor(EditorType editorType, int rowIndex,
@@ -113,7 +112,6 @@ class CustomEditorFactory implements SpreadsheetComponentFactory {
                 }
                 return textArea;
             case COMBO_BOX:
-                // TODO revisar - js exception in mouseover
                 if (comboBox == null) {
                     initComboBox();
                     comboBox.addValueChangeListener(e -> spreadsheet
