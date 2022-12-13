@@ -633,7 +633,7 @@ public class TimePicker
     public void setMax(LocalTime max) {
         this.max = max;
         String maxString = format(max);
-        getElement().setProperty("min", maxString == null ? "" : maxString);
+        getElement().setProperty("max", maxString == null ? "" : maxString);
     }
 
     /**
