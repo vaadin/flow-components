@@ -69,6 +69,17 @@ public class BasicValidationIT
         assertWebComponentCanNotModifyInvalidState();
     }
 
+    @Test
+    public void clientSideInvalidStateIsNotPropagatedToServer() {
+        // Make the field invalid
+        $("button").id(REQUIRED_BUTTON).click();
+        testField.$(CheckboxElement.class).last().sendKeys(Keys.TAB);
+
+        executeScript("arguments[0].invalid = false", testField);
+
+        assertServerInvalid();
+    }
+
     @Override
     protected CheckboxGroupElement getTestField() {
         return $(CheckboxGroupElement.class).first();
