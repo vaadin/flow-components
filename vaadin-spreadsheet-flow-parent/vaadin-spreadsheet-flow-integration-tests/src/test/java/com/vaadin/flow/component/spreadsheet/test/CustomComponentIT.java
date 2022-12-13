@@ -2,8 +2,10 @@ package com.vaadin.flow.component.spreadsheet.test;
 
 import com.vaadin.flow.component.spreadsheet.tests.fixtures.TestFixtures;
 import com.vaadin.flow.testutil.TestPath;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.By;
 
 @TestPath("vaadin-spreadsheet")
 public class CustomComponentIT extends AbstractSpreadsheetIT {
@@ -16,7 +18,9 @@ public class CustomComponentIT extends AbstractSpreadsheetIT {
     }
 
     @Test
-    public void testButton() {
-        // TODO revisar - implement
+    public void clickButtonInsideCell_notificationShown() {
+        clickCell("B2");
+        Assert.assertTrue(
+                !findElements(By.tagName("vaadin-notification")).isEmpty());
     }
 }
