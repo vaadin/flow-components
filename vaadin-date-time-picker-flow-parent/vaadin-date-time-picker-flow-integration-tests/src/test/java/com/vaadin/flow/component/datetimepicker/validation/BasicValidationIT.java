@@ -168,6 +168,18 @@ public class BasicValidationIT
         assertWebComponentCanNotModifyInvalidState();
     }
 
+    @Test
+    public void clientSideInvalidStateIsNotPropagatedToServer() {
+        // Make the field invalid
+        $("button").id(REQUIRED_BUTTON).click();
+        dateInput.sendKeys(Keys.TAB);
+        timeInput.sendKeys(Keys.TAB);
+
+        executeScript("arguments[0].invalid = false", testField);
+
+        assertServerInvalid();
+    }
+
     protected DateTimePickerElement getTestField() {
         return $(DateTimePickerElement.class).first();
     }
