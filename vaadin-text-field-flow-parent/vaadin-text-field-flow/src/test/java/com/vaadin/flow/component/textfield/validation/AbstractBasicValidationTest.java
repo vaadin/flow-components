@@ -51,7 +51,7 @@ public abstract class AbstractBasicValidationTest<T extends Component & HasValid
 
         testField.setInvalid(true);
 
-        Assert.assertEquals(true, testField.isInvalid());
+        Assert.assertTrue(testField.isInvalid());
         Assert.assertEquals("true",
                 testField.getElement().getProperty("invalid"));
     }
