@@ -50,7 +50,8 @@ public class CheckboxGroupBasicValidationTest {
     @Test
     public void setInvalid_isInvalid() {
         Assert.assertFalse(testField.isInvalid());
-        Assert.assertFalse(testField.getElement().getProperty("invalid", false));
+        Assert.assertFalse(
+                testField.getElement().getProperty("invalid", false));
 
         testField.setInvalid(true);
 
@@ -58,4 +59,3 @@ public class CheckboxGroupBasicValidationTest {
         Assert.assertTrue(testField.getElement().getProperty("invalid", false));
     }
 }
-
