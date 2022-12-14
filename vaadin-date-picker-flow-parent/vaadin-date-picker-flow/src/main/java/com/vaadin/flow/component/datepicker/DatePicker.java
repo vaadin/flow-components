@@ -25,23 +25,28 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.shared.ClientValidationUtil;
-import com.vaadin.flow.component.shared.HasAllowedCharPattern;
-import com.vaadin.flow.component.shared.HasClearButton;
-import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.HasTheme;
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Synchronize;
+import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.ClientValidationUtil;
+import com.vaadin.flow.component.shared.HasAllowedCharPattern;
+import com.vaadin.flow.component.shared.HasClearButton;
 import com.vaadin.flow.component.shared.HasClientValidation;
+import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
@@ -72,12 +77,19 @@ import elemental.json.JsonType;
  *
  * @author Vaadin Ltd
  */
+@Tag("vaadin-date-picker")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha6")
+@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@NpmPackage(value = "@vaadin/date-picker", version = "24.0.0-alpha6")
+@JsModule("@vaadin/date-picker/src/vaadin-date-picker.js")
 @JsModule("./datepickerConnector.js")
 @NpmPackage(value = "date-fns", version = "2.29.3")
-public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
-        implements HasSize, HasValidation, HasHelper, HasTheme, HasLabel,
-        HasClearButton, HasAllowedCharPattern, HasValidator<LocalDate>,
-        HasClientValidation, HasTooltip {
+public class DatePicker
+        extends AbstractSinglePropertyField<DatePicker, LocalDate>
+        implements Focusable<DatePicker>, HasAllowedCharPattern, HasClearButton,
+        HasClientValidation, HasHelper, HasLabel, HasSize, HasStyle,
+        HasThemeVariant<DatePickerVariant>, HasTooltip, HasValidation,
+        HasValidator<LocalDate> {
 
     private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
@@ -136,8 +148,14 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      * @see #setValue(Object)
      */
     private DatePicker(LocalDate initialDate, boolean isInitialValueOptional) {
-        super(initialDate, null, String.class, PARSER, FORMATTER,
-                isInitialValueOptional);
+        super("value", initialDate, String.class, PARSER, FORMATTER);
+
+        // Initialize property value unless it has already been set from a
+        // template
+        if ((getElement().getProperty("value") == null
+                || !isInitialValueOptional)) {
+            setPresentationValue(initialDate);
+        }
 
         // workaround for https://github.com/vaadin/flow/issues/3496
         setInvalid(false);
@@ -268,7 +286,8 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      *            <code>null</code> to remove any minimum constraints
      */
     public void setMin(LocalDate min) {
-        setMinAsString(FORMATTER.apply(min));
+        String minAsString = FORMATTER.apply(min);
+        getElement().setProperty("min", minAsString == null ? "" : minAsString);
         this.min = min;
     }
 
@@ -280,7 +299,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      *         <code>null</code> if there's no minimum
      */
     public LocalDate getMin() {
-        return PARSER.apply(getMinAsStringString());
+        return PARSER.apply(getElement().getProperty("min"));
     }
 
     /**
@@ -292,7 +311,8 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      *            <code>null</code> to remove any maximum constraints
      */
     public void setMax(LocalDate max) {
-        setMaxAsString(FORMATTER.apply(max));
+        String maxAsString = FORMATTER.apply(max);
+        getElement().setProperty("max", maxAsString == null ? "" : maxAsString);
         this.max = max;
     }
 
@@ -304,7 +324,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      *         <code>null</code> if there's no maximum
      */
     public LocalDate getMax() {
-        return PARSER.apply(getMaxAsStringString());
+        return PARSER.apply(getElement().getProperty("max"));
     }
 
     /**
@@ -459,13 +479,16 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
                 .beforeClientResponse(this, context -> command.accept(ui)));
     }
 
-    @Override
+    /**
+     * Sets the error message that should be displayed when the component
+     * becomes invalid.
+     *
+     * @param errorMessage
+     *            the String value to set
+     */
     public void setErrorMessage(String errorMessage) {
-        if (errorMessage == null) {
-            super.setErrorMessage("");
-        } else {
-            super.setErrorMessage(errorMessage);
-        }
+        getElement().setProperty("errorMessage",
+                errorMessage == null ? "" : errorMessage);
     }
 
     /**
@@ -473,9 +496,8 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      *
      * @return the current error message
      */
-    @Override
     public String getErrorMessage() {
-        return getErrorMessageString();
+        return getElement().getProperty("errorMessage");
     }
 
     @Override
@@ -492,9 +514,14 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
                                 !isInvalid())));
     }
 
-    @Override
+    /**
+     * Sets whether the component has an invalid value or not.
+     *
+     * @param invalid
+     *            {@code true} for invalid, {@code false} for valid
+     */
     public void setInvalid(boolean invalid) {
-        super.setInvalid(invalid);
+        getElement().setProperty("invalid", invalid);
     }
 
     /**
@@ -504,9 +531,8 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      *
      * @return the {@code validity} property from the datepicker
      */
-    @Override
     public boolean isInvalid() {
-        return isInvalidBoolean();
+        return getElement().getProperty("invalid", false);
     }
 
     private ValidationResult checkValidity(LocalDate value) {
@@ -560,9 +586,8 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      * @param label
      *            value for the {@code label} property in the datepicker
      */
-    @Override
     public void setLabel(String label) {
-        super.setLabel(label);
+        getElement().setProperty("label", label == null ? "" : label);
     }
 
     /**
@@ -570,27 +595,30 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      *
      * @return the {@code label} property of the datePicker
      */
-    @Override
     public String getLabel() {
-        return getLabelString();
-    }
-
-    @Override
-    public void setPlaceholder(String placeholder) {
-        super.setPlaceholder(placeholder);
+        return getElement().getProperty("label");
     }
 
     /**
-     * Gets the placeholder of the datepicker.
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
-     * </p>
+     * Sets the placeholder text that should be displayed in the input element,
+     * when the user has not entered a value.
      *
-     * @return the {@code placeholder} property of the datePicker
+     * @param placeholder
+     *            the placeholder text
+     */
+    public void setPlaceholder(String placeholder) {
+        getElement().setProperty("placeholder",
+                placeholder == null ? "" : placeholder);
+    }
+
+    /**
+     * The placeholder text that should be displayed in the input element, when
+     * the user has not entered a value.
+     *
+     * @return the {@code placeholder} property of the datepicker
      */
     public String getPlaceholder() {
-        return getPlaceholderString();
+        return getElement().getProperty("placeholder");
     }
 
     /**
@@ -603,7 +631,9 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      *            the LocalDate value to set
      */
     public void setInitialPosition(LocalDate initialPosition) {
-        setInitialPosition(FORMATTER.apply(initialPosition));
+        String initialPositionString = FORMATTER.apply(initialPosition);
+        getElement().setProperty("initialPosition",
+                initialPositionString == null ? "" : initialPositionString);
     }
 
     /**
@@ -618,12 +648,17 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      * @return the {@code initialPosition} property from the datepicker
      */
     public LocalDate getInitialPosition() {
-        return PARSER.apply(getInitialPositionString());
+        return PARSER.apply(getElement().getProperty("initialPosition"));
     }
 
-    @Override
+    /**
+     * Sets whether the date picker is marked as input required.
+     *
+     * @param required
+     *            the boolean value to set
+     */
     public void setRequired(boolean required) {
-        super.setRequired(required);
+        getElement().setProperty("required", required);
         this.required = required;
     }
 
@@ -642,7 +677,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      * @return {@code true} if the input is required, {@code false} otherwise
      */
     public boolean isRequired() {
-        return isRequiredBoolean();
+        return getElement().getProperty("required", false);
     }
 
     /**
@@ -657,7 +692,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      *            the boolean value to set
      */
     public void setWeekNumbersVisible(boolean weekNumbersVisible) {
-        super.setShowWeekNumbers(weekNumbersVisible);
+        getElement().setProperty("showWeekNumbers", weekNumbersVisible);
     }
 
     /**
@@ -670,7 +705,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      * @return the {@code showWeekNumbers} property from the datepicker
      */
     public boolean isWeekNumbersVisible() {
-        return isShowWeekNumbersBoolean();
+        return getElement().getProperty("showWeekNumbers", false);
     }
 
     /**
@@ -680,25 +715,22 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      *            {@code true} to open the datepicker overlay, {@code false} to
      *            close it
      */
-    @Override
     public void setOpened(boolean opened) {
-        super.setOpened(opened);
+        getElement().setProperty("opened", opened);
     }
 
     /**
      * Opens the datepicker overlay.
      */
-    @Override
     public void open() {
-        super.setOpened(true);
+        setOpened(true);
     }
 
     /**
      * Closes the datepicker overlay.
      */
-    @Override
     protected void close() {
-        super.setOpened(false);
+        setOpened(false);
     }
 
     /**
@@ -707,12 +739,17 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      * @return {@code true} if the drop-down is opened, {@code false} otherwise
      */
     public boolean isOpened() {
-        return isOpenedBoolean();
+        return getElement().getProperty("opened", false);
     }
 
-    @Override
+    /**
+     * Sets the name of the DatePicker.
+     *
+     * @param name
+     *            the string value to set
+     */
     public void setName(String name) {
-        super.setName(name);
+        getElement().setProperty("name", name == null ? "" : name);
     }
 
     /**
@@ -721,7 +758,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      * @return the {@code name} property from the DatePicker
      */
     public String getName() {
-        return getNameString();
+        return getElement().getProperty("name");
     }
 
     /**
@@ -755,40 +792,67 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         setInvalid(isInvalid(getValue()));
     }
 
-    @Override
+    /**
+     * {@code opened-changed} event is sent when the overlay opened state
+     * changes.
+     */
+    public static class OpenedChangeEvent extends ComponentEvent<DatePicker> {
+        private final boolean opened;
+
+        public OpenedChangeEvent(DatePicker source, boolean fromClient) {
+            super(source, fromClient);
+            this.opened = source.isOpened();
+        }
+
+        public boolean isOpened() {
+            return opened;
+        }
+    }
+
+    /**
+     * Adds a listener for {@code opened-changed} events fired by the
+     * webcomponent.
+     *
+     * @param listener
+     *            the listener
+     * @return a {@link Registration} for removing the event listener
+     */
     public Registration addOpenedChangeListener(
-            ComponentEventListener<OpenedChangeEvent<DatePicker>> listener) {
-        return super.addOpenedChangeListener(listener);
+            ComponentEventListener<OpenedChangeEvent> listener) {
+        return getElement().addPropertyChangeListener("opened",
+                event -> listener.onComponentEvent(
+                        new OpenedChangeEvent(this, event.isUserOriginated())));
     }
 
-    @Override
+    /**
+     * {@code invalid-changed} event is sent when the invalid state changes.
+     */
+    public static class InvalidChangeEvent extends ComponentEvent<DatePicker> {
+        private final boolean invalid;
+
+        public InvalidChangeEvent(DatePicker source, boolean fromClient) {
+            super(source, fromClient);
+            this.invalid = source.isInvalid();
+        }
+
+        public boolean isInvalid() {
+            return invalid;
+        }
+    }
+
+    /**
+     * Adds a listener for {@code invalid-changed} events fired by the
+     * webcomponent.
+     *
+     * @param listener
+     *            the listener
+     * @return a {@link Registration} for removing the event listener
+     */
     public Registration addInvalidChangeListener(
-            ComponentEventListener<InvalidChangeEvent<DatePicker>> listener) {
-        return super.addInvalidChangeListener(listener);
-    }
-
-    /**
-     * Adds theme variants to the component.
-     *
-     * @param variants
-     *            theme variants to add
-     */
-    public void addThemeVariants(DatePickerVariant... variants) {
-        getThemeNames().addAll(
-                Stream.of(variants).map(DatePickerVariant::getVariantName)
-                        .collect(Collectors.toList()));
-    }
-
-    /**
-     * Removes theme variants from the component.
-     *
-     * @param variants
-     *            theme variants to remove
-     */
-    public void removeThemeVariants(DatePickerVariant... variants) {
-        getThemeNames().removeAll(
-                Stream.of(variants).map(DatePickerVariant::getVariantName)
-                        .collect(Collectors.toList()));
+            ComponentEventListener<InvalidChangeEvent> listener) {
+        return getElement().addPropertyChangeListener("invalid",
+                event -> listener.onComponentEvent(new InvalidChangeEvent(this,
+                        event.isUserOriginated())));
     }
 
     /**
