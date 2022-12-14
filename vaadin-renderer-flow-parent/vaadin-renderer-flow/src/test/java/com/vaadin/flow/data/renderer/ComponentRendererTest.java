@@ -140,6 +140,44 @@ public class ComponentRendererTest {
 
     }
 
+    @Test
+    public void allowNullValues() {
+        UI ui = new TestUI();
+        TestUIInternals internals = (TestUIInternals) ui.getInternals();
+
+        ComponentRenderer<TestDiv, String> nullRenderer = new ComponentRenderer<>(
+                e -> null);
+
+        Element containerParent = new Element("div");
+        Element container = new Element("div");
+        KeyMapper<String> keyMapper = new KeyMapper<>();
+
+        ComponentDataGenerator<String> rendering = (ComponentDataGenerator<String>) nullRenderer
+                .render(container, keyMapper);
+
+        containerParent.getNode()
+                .runWhenAttached(ui2 -> ui2.getInternals().getStateTree()
+                        .beforeClientResponse(containerParent.getNode(),
+                                context -> {
+                                    // if nodeid is null then the component
+                                    // won't be rendered correctly
+                                    Assert.assertNotNull(
+                                            "NodeIdPropertyName should not be null",
+                                            rendering.getNodeIdPropertyName());
+                                    JsonObject value = Json.createObject();
+                                    rendering.generateData("item", value);
+                                    Assert.assertEquals(
+                                            "generateData should not add elements in the jsonobject",
+                                            0, value.keys().length);
+                                }));
+        // attach the child (ex: container) before the parent (ex: grid)
+        attachElement(ui, container);
+        attachElement(ui, containerParent);
+
+        internals.getStateTree().runExecutionsBeforeClientResponse();
+
+    }
+
     private void attachElement(UI ui, Element contentTemplate) {
         ui.getElement().appendChild(contentTemplate);
     }
