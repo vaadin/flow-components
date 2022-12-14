@@ -69,14 +69,8 @@ class CustomEditorFactory implements SpreadsheetComponentFactory {
         if (cell == null) {
             return;
         }
-        EditorType editorType = EditorType.getEditorTypeByIndex(rowIndex,
-                columnIndex);
-        if (editorType == null) {
-            return;
-        }
-        Component editor = getCustomEditor(editorType, rowIndex, columnIndex,
-                spreadsheet);
-        ((HasValue) editor).setValue(getCellValueForEditor(editorType, cell));
+        ((HasValue) customEditor)
+                .setValue(getCellValueForEditor(rowIndex, columnIndex, cell));
     }
 
     private Component getCustomEditor(EditorType editorType, int rowIndex,
@@ -129,7 +123,10 @@ class CustomEditorFactory implements SpreadsheetComponentFactory {
         return null;
     }
 
-    private Object getCellValueForEditor(EditorType editorType, Cell cell) {
+    private Object getCellValueForEditor(int rowIndex, int columnIndex,
+            Cell cell) {
+        EditorType editorType = EditorType.getEditorTypeByIndex(rowIndex,
+                columnIndex);
         if (editorType == EditorType.DATE_PICKER) {
             return LocalDate.parse(cell.getStringCellValue(),
                     DateTimeFormatter.ISO_DATE);
