@@ -12,7 +12,8 @@ import com.vaadin.flow.component.HasValidation;
  * logic.
  */
 public class HasValidationTestHelper {
-    public static <F extends Component & HasValidation> void setErrorMessage_getErrorMessage(F field) {
+    public static <F extends Component & HasValidation> void setErrorMessage_getErrorMessage(
+            F field) {
         Assert.assertNull(field.getErrorMessage());
         Assert.assertNull(field.getElement().getProperty("errorMessage"));
 
@@ -23,10 +24,10 @@ public class HasValidationTestHelper {
                 field.getElement().getProperty("errorMessage"));
     }
 
-    public static <F extends Component & HasValidation> void setInvalid_isInvalid(F field) {
+    public static <F extends Component & HasValidation> void setInvalid_isInvalid(
+            F field) {
         Assert.assertFalse(field.isInvalid());
-        Assert.assertFalse(
-                field.getElement().getProperty("invalid", false));
+        Assert.assertFalse(field.getElement().getProperty("invalid", false));
 
         field.setInvalid(true);
 
