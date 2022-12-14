@@ -18,11 +18,18 @@ package com.vaadin.flow.component.splitlayout;
 import java.util.Locale;
 import java.util.Objects;
 
+import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
@@ -33,9 +40,14 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author Vaadin Ltd
  */
+@Tag("vaadin-split-layout")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha6")
+@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/split-layout", version = "24.0.0-alpha6")
-public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
-        implements HasSize {
+@JsModule("@vaadin/split-layout/src/vaadin-split-layout.js")
+public class SplitLayout extends Component
+        implements ClickNotifier<SplitLayout>, HasSize, HasStyle,
+        HasThemeVariant<SplitLayoutVariant> {
 
     private Component primaryComponent;
     private Component secondaryComponent;
@@ -115,7 +127,8 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
      */
     public void setOrientation(Orientation orientation) {
         Objects.requireNonNull(orientation, "Orientation cannot be null");
-        this.setOrientation(orientation.toString().toLowerCase(Locale.ENGLISH));
+        getElement().setProperty("orientation",
+                orientation.toString().toLowerCase(Locale.ENGLISH));
     }
 
     /**
@@ -131,7 +144,8 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
      * @return the {@code orientation} property of the SplitLayout.
      */
     public Orientation getOrientation() {
-        return Orientation.valueOf(super.getOrientationString().toUpperCase());
+        String orientation = getElement().getProperty("orientation");
+        return Orientation.valueOf(orientation.toUpperCase());
     }
 
     /**
@@ -147,7 +161,6 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
      *
      * @see #setOrientation(Orientation)
      */
-    @Override
     public void addToPrimary(Component... components) {
         if (components.length == 1) {
             primaryComponent = components[0];
@@ -178,7 +191,6 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
      *
      * @see #setOrientation(Orientation)
      */
-    @Override
     public void addToSecondary(Component... components) {
         if (components.length == 1) {
             secondaryComponent = components[0];
@@ -266,31 +278,53 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
         setInnerComponentStyle(styleName, value, false);
     }
 
-    private void setComponents() {
-        removeAll();
-        if (primaryComponent == null) {
-            super.addToPrimary(new Div());
-        } else {
-            super.addToPrimary(primaryComponent);
-        }
-        if (secondaryComponent == null) {
-            super.addToSecondary(new Div());
-        } else {
-            super.addToSecondary(secondaryComponent);
-        }
+    private void setComponent(Component component, String slot) {
+        Component child = component == null ? new Div() : component;
+        child.getElement().setAttribute("slot", slot);
+        getElement().appendChild(child.getElement());
     }
 
-    @Override
+    private void setComponents() {
+        removeAll();
+        setComponent(primaryComponent, "primary");
+        setComponent(secondaryComponent, "secondary");
+    }
+
+    /**
+     * Removes the given child components from this component.
+     *
+     * @param components
+     *            The components to remove.
+     * @throws IllegalArgumentException
+     *             if any of the components is not a child of this component.
+     */
     public void remove(Component... components) {
-        super.remove(components);
+        for (Component component : components) {
+            if (getElement().equals(component.getElement().getParent())) {
+                component.getElement().removeAttribute("slot");
+                getElement().removeChild(component.getElement());
+            } else {
+                throw new IllegalArgumentException("The given component ("
+                        + component + ") is not a child of this component");
+            }
+        }
     }
 
     /**
      * Removes the primary and the secondary components.
      */
-    @Override
     public void removeAll() {
-        super.removeAll();
+        getElement().getChildren()
+                .forEach(child -> child.removeAttribute("slot"));
+        getElement().removeAllChildren();
+    }
+
+    @DomEvent("splitter-dragend")
+    public static class SplitterDragendEvent
+            extends ComponentEvent<SplitLayout> {
+        public SplitterDragendEvent(SplitLayout source, boolean fromClient) {
+            super(source, fromClient);
+        }
     }
 
     /**
@@ -301,10 +335,10 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
      *            the listener to add
      * @return a registration for removing the listener
      */
-    @Override
     public Registration addSplitterDragendListener(
-            ComponentEventListener<SplitterDragendEvent<SplitLayout>> listener) {
-        return super.addSplitterDragendListener(listener);
+            ComponentEventListener<SplitterDragendEvent> listener) {
+        return addListener(SplitterDragendEvent.class,
+                (ComponentEventListener) listener);
     }
 
     private void setInnerComponentStyle(String styleName, String value,
