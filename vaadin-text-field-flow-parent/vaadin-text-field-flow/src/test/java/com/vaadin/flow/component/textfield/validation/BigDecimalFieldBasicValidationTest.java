@@ -15,11 +15,27 @@
  */
 package com.vaadin.flow.component.textfield.validation;
 
-import com.vaadin.flow.component.textfield.BigDecimalField;
+import org.junit.Before;
+import org.junit.Test;
 
-public class BigDecimalFieldBasicValidationTest
-        extends AbstractBasicValidationTest<BigDecimalField> {
-    protected BigDecimalField createTestField() {
-        return new BigDecimalField();
+import com.vaadin.flow.component.textfield.BigDecimalField;
+import com.vaadin.tests.validation.HasValidationTestHelper;
+
+public class BigDecimalFieldBasicValidationTest {
+    private BigDecimalField testField;
+
+    @Before
+    public void setup() {
+        testField = new BigDecimalField();
+    }
+
+    @Test
+    public void setErrorMessage_getErrorMessage() {
+        HasValidationTestHelper.setErrorMessage_getErrorMessage(testField);
+    }
+
+    @Test
+    public void setInvalid_isInvalid() {
+        HasValidationTestHelper.setInvalid_isInvalid(testField);
     }
 }

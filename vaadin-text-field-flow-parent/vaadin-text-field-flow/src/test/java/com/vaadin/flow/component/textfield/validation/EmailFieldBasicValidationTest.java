@@ -15,11 +15,27 @@
  */
 package com.vaadin.flow.component.textfield.validation;
 
-import com.vaadin.flow.component.textfield.EmailField;
+import org.junit.Before;
+import org.junit.Test;
 
-public class EmailFieldBasicValidationTest
-        extends AbstractBasicValidationTest<EmailField> {
-    protected EmailField createTestField() {
-        return new EmailField();
+import com.vaadin.flow.component.textfield.EmailField;
+import com.vaadin.tests.validation.HasValidationTestHelper;
+
+public class EmailFieldBasicValidationTest {
+    private EmailField testField;
+
+    @Before
+    public void setup() {
+        testField = new EmailField();
+    }
+
+    @Test
+    public void setErrorMessage_getErrorMessage() {
+        HasValidationTestHelper.setErrorMessage_getErrorMessage(testField);
+    }
+
+    @Test
+    public void setInvalid_isInvalid() {
+        HasValidationTestHelper.setInvalid_isInvalid(testField);
     }
 }
