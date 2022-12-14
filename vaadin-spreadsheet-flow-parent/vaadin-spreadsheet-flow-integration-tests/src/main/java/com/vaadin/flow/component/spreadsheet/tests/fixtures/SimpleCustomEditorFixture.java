@@ -59,19 +59,24 @@ class CustomEditorFactory implements SpreadsheetComponentFactory {
         if (editorType == null) {
             return null;
         }
-        Component editor = getCustomEditor(editorType, rowIndex, columnIndex,
-                spreadsheet);
-        if (cell != null) {
-            ((HasValue) editor)
-                    .setValue(getCellValueForEditor(editorType, cell));
-        }
-        return editor;
+        return getCustomEditor(editorType, rowIndex, columnIndex, spreadsheet);
     }
 
     @Override
     public void onCustomEditorDisplayed(Cell cell, int rowIndex,
             int columnIndex, Spreadsheet spreadsheet, Sheet sheet,
             Component customEditor) {
+        if (cell == null) {
+            return;
+        }
+        EditorType editorType = EditorType.getEditorTypeByIndex(rowIndex,
+                columnIndex);
+        if (editorType == null) {
+            return;
+        }
+        Component editor = getCustomEditor(editorType, rowIndex, columnIndex,
+                spreadsheet);
+        ((HasValue) editor).setValue(getCellValueForEditor(editorType, cell));
     }
 
     private Component getCustomEditor(EditorType editorType, int rowIndex,
