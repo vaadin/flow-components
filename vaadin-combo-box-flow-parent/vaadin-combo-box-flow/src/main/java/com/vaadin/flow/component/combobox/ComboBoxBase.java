@@ -36,6 +36,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxDataView;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxLazyDataView;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxListDataView;
+import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
@@ -157,6 +158,8 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
         // the selection
         addValueChangeListener(
                 e -> getDataCommunicator().notifySelectionChanged());
+
+        addValueChangeListener(e -> validate());
     }
 
     /**
@@ -314,7 +317,6 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     /**
      * Whether the component has an invalid value or not.
      */
-    @Synchronize(property = "invalid", value = "invalid-changed")
     public boolean isInvalid() {
         return getElement().getProperty("invalid", false);
     }
@@ -410,9 +412,6 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     @Override
     public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
         super.setRequiredIndicatorVisible(requiredIndicatorVisible);
-        runBeforeClientResponse(ui -> getElement().callJsFunction(
-                "$connector.enableClientValidation",
-                !requiredIndicatorVisible));
     }
 
     /**
@@ -512,6 +511,8 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
         super.onAttach(attachEvent);
         initConnector();
         dataController.onAttach();
+
+        FieldValidationUtil.disableClientValidation(this);
     }
 
     @Override
@@ -1263,6 +1264,15 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     private void initConnector() {
         getElement().executeJs(
                 "window.Vaadin.Flow.comboBoxConnector.initLazy(this)");
+    }
+
+    protected void validate() {
+        boolean isRequired = isRequiredIndicatorVisible();
+        boolean isInvalid = ValidationUtil
+                .checkRequired(isRequired, getValue(), getEmptyValue())
+                .isError();
+
+        setInvalid(isInvalid);
     }
 
     /**
