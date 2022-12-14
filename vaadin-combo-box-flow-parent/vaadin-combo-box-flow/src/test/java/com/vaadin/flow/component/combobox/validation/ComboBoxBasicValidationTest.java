@@ -13,21 +13,21 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.checkbox.tests.validation;
+package com.vaadin.flow.component.combobox.validation;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.HasValidation;
-import com.vaadin.flow.component.checkbox.CheckboxGroup;
+import com.vaadin.flow.component.combobox.ComboBox;
 
-public class CheckboxGroupBasicValidationTest {
-    private CheckboxGroup<String> testField;
+public class ComboBoxBasicValidationTest {
+    private ComboBox<String> testField;
 
     @Before
     public void setup() {
-        testField = new CheckboxGroup<>();
+        testField = new ComboBox<>();
     }
 
     @Test
