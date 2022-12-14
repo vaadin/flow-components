@@ -1039,7 +1039,8 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
          * Example: for a reference date of 1970-10-30; years {10, 40, 80}
          * become {2010, 1940, 1980}.
          *
-         * @param referenceDate the date used to base relative dates on
+         * @param referenceDate
+         *            the date used to base relative dates on
          * @return this instance for method chaining
          */
         public DatePickerI18n setReferenceDate(LocalDate referenceDate) {
