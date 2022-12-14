@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import com.vaadin.flow.component.spreadsheet.testbench.SpreadsheetElement;
+import com.vaadin.flow.testutil.TestPath;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -11,13 +12,14 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
+@TestPath("vaadin-spreadsheet")
 public class GroupingIT extends AbstractSpreadsheetIT {
 
     private static final String IMAGE_CSS_SELECTOR = "div.sheet-image";
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL());
+        open();
     }
 
     @Test

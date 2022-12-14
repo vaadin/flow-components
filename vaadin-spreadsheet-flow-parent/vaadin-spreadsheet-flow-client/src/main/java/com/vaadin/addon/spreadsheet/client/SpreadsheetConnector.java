@@ -1,16 +1,13 @@
 package com.vaadin.addon.spreadsheet.client;
 
-/*
- * #%L
- * Vaadin Spreadsheet
- * %%
- * Copyright (C) 2013 - 2022 Vaadin Ltd
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
+/**
+ * Copyright (C) 2000-2022 Vaadin Ltd
  *
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
  */
 
 import java.util.ArrayList;
@@ -20,13 +17,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.dom.client.Node;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -55,9 +53,6 @@ import static com.vaadin.addon.spreadsheet.client.OverlayInfo.COMPONENT;
 @SuppressWarnings("serial")
 public class SpreadsheetConnector extends AbstractHasComponentsConnector
         implements PostLayoutListener {
-
-    final static Logger consoleLog = Logger
-            .getLogger("spreadsheet SpreadsheetConnector");
 
     SpreadsheetClientRpc clientRPC = new SpreadsheetClientRpc() {
 
@@ -191,6 +186,8 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
     private HandlerRegistration contextMenuHandler;
     private SpreadsheetServerRpcImpl serverRPC;
 
+    private Element host;
+
     // spreadsheet: we need the server side proxy
     public <T extends ServerRpc> T getProtectedRpcProxy(Class<T> rpcInterface) {
         return getRpcProxy(rpcInterface);
@@ -282,7 +279,6 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
 
     @Override
     protected Widget createWidget() {
-        consoleLog.info("createWidget()");
         return GWT.create(SpreadsheetWidget.class);
     }
 
@@ -309,7 +305,6 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
         SpreadsheetState state = getState();
         // in case the component client side is just created, but server side
         // has been existing (like when component has been invisible
-        consoleLog.fine("onStateChanged reload = " + state.reload);
         if (state.reload || stateChangeEvent.isInitialStateChange()) {
             state.reload = false;
             loadInitialStateDataToWidget(stateChangeEvent);
@@ -436,11 +431,10 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
                     overlayInfo);
             break;
         case COMPONENT:
-            for (ComponentConnector c : getChildComponents()) {
-                if (c.getConnectorId().equals(id)) {
-                    getWidget().addOverlay(id, c.getWidget(), overlayInfo);
-                }
-            }
+            var element = SheetJsniUtil.getVirtualChild(id,
+                    host.getPropertyString("appId"));
+            var slot = new Slot("overlay-component-" + id, element, host);
+            getWidget().addOverlay(id, slot, overlayInfo);
             break;
         }
     }
@@ -552,7 +546,8 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
         void sendUpdates();
     }
 
-    public void setHost(Element element) {
-        getWidget().setHost(element);
+    public void setHost(Element host, Node renderRoot) {
+        this.host = host;
+        getWidget().setHost(host, renderRoot);
     }
 }

@@ -19,6 +19,11 @@ package com.vaadin.flow.component.tabs;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasLabel;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
 
 /**
@@ -27,8 +32,13 @@ import com.vaadin.flow.component.shared.HasTooltip;
  *
  * @author Vaadin Ltd.
  */
-public class Tab extends GeneratedVaadinTab<Tab>
-        implements HasComponents, HasLabel, HasTooltip {
+@Tag("vaadin-tab")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha6")
+@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@JsModule("@vaadin/tabs/src/vaadin-tab.js")
+@NpmPackage(value = "@vaadin/tabs", version = "24.0.0-alpha6")
+public class Tab extends Component implements HasComponents, HasLabel, HasStyle,
+        HasThemeVariant<TabVariant>, HasTooltip {
 
     private static final String FLEX_GROW_CSS_PROPERTY = "flexGrow";
 
@@ -129,9 +139,14 @@ public class Tab extends GeneratedVaadinTab<Tab>
         }
     }
 
-    @Override
+    /**
+     * If true, the item is in selected state.
+     *
+     * @param selected
+     *            the boolean value to set
+     */
     public void setSelected(boolean selected) {
-        super.setSelected(selected);
+        getElement().setProperty("selected", selected);
     }
 
     /**
@@ -149,7 +164,7 @@ public class Tab extends GeneratedVaadinTab<Tab>
      * @return the {@code selected} property from the webcomponent
      */
     public boolean isSelected() {
-        return super.isSelectedBoolean();
+        return getElement().getProperty("selected", false);
     }
 
     @Override

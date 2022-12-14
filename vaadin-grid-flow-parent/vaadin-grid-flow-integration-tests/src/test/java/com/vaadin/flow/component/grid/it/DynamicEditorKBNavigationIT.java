@@ -34,8 +34,7 @@ import com.vaadin.testbench.TestBenchElement;
 public class DynamicEditorKBNavigationIT extends AbstractComponentIT {
 
     @Test
-
-    public void navigateBetweenEditorsUsingKeybaord() {
+    public void navigateBetweenEditorsUsingKeyboard() {
         open();
 
         GridElement grid = $(GridElement.class).first();

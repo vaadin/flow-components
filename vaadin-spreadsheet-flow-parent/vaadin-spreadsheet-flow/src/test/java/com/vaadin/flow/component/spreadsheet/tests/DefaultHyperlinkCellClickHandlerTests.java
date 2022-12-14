@@ -37,7 +37,7 @@ public class DefaultHyperlinkCellClickHandlerTests {
         }
 
         /**
-         * @see com.vaadin.addon.spreadsheet.DefaultHyperlinkCellClickHandler#getFirstArgumentFromFormula(org.apache.poi.ss.usermodel.Cell)
+         * @see com.vaadin.flow.component.spreadsheet.DefaultHyperlinkCellClickHandler#getFirstArgumentFromFormula(org.apache.poi.ss.usermodel.Cell)
          */
         @Override
         public String getFirstArgumentFromFormula(Cell cell) {

@@ -132,6 +132,28 @@
                 </pluginManagement>
             </build>
         </profile>
+        <profile>
+            <id>sonar-cloud</id>
+            <properties>
+                <!-- SonarQube rule exclusions for: Integration tests -->
+                <sonar.issue.ignore.multicriteria>e1,e2,e3,e4,e5</sonar.issue.ignore.multicriteria>
+                <!-- Disable: Public types, methods and fields (API) should be documented with Javadoc -->
+                <sonar.issue.ignore.multicriteria.e1.ruleKey>java:S1176</sonar.issue.ignore.multicriteria.e1.ruleKey>
+                <sonar.issue.ignore.multicriteria.e1.resourceKey>**/*-integration-tests/**/*.java</sonar.issue.ignore.multicriteria.e1.resourceKey>
+                <!-- Disable: Constructors should only call non-overridable methods -->
+                <sonar.issue.ignore.multicriteria.e2.ruleKey>java:S1699</sonar.issue.ignore.multicriteria.e2.ruleKey>
+                <sonar.issue.ignore.multicriteria.e2.resourceKey>**/*-integration-tests/**/*.java</sonar.issue.ignore.multicriteria.e2.resourceKey>
+                <!-- Disable: String literals should not be duplicated -->
+                <sonar.issue.ignore.multicriteria.e3.ruleKey>java:S1192</sonar.issue.ignore.multicriteria.e3.ruleKey>
+                <sonar.issue.ignore.multicriteria.e3.resourceKey>**/*-integration-tests/**/*.java</sonar.issue.ignore.multicriteria.e3.resourceKey>
+                <!-- Disable: Inheritance tree of classes should not be too deep -->
+                <sonar.issue.ignore.multicriteria.e4.ruleKey>java:S110</sonar.issue.ignore.multicriteria.e4.ruleKey>
+                <sonar.issue.ignore.multicriteria.e4.resourceKey>**/*-integration-tests/**/*.java</sonar.issue.ignore.multicriteria.e4.resourceKey>
+                <!-- Disable: Standard outputs should not be used directly to log anything -->
+                <sonar.issue.ignore.multicriteria.e5.ruleKey>java:S106</sonar.issue.ignore.multicriteria.e5.ruleKey>
+                <sonar.issue.ignore.multicriteria.e5.resourceKey>**/*-integration-tests/**/*.java</sonar.issue.ignore.multicriteria.e5.resourceKey>
+            </properties>
+        </profile>
     </profiles>
     <repositories>
         <repository>
@@ -209,7 +231,7 @@
                 <plugin>
                     <groupId>biz.aQute.bnd</groupId>
                     <artifactId>bnd-maven-plugin</artifactId>
-                    <version>6.3.1</version>
+                    <version>6.4.0</version>
                     <configuration>
                         <bnd><![CDATA[
                           // macro reference: https://bnd.bndtools.org/chapters/855-macros-ref.html
@@ -541,7 +563,7 @@
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-simple</artifactId>
-                <version>2.0.4</version>
+                <version>2.0.5</version>
             </dependency>
             <dependency>
                 <groupId>jakarta.servlet</groupId>

@@ -10,7 +10,7 @@
     <packaging>jar</packaging>
     <name>Vaadin Spreadsheet</name>
     <properties>
-        <osgi.bundle.license>https://vaadin.com/license/cvdl-4.0</osgi.bundle.license>
+        <osgi.bundle.license>https://vaadin.com/commercial-license-and-service-terms</osgi.bundle.license>
         <cvdlName>vaadin-spreadsheet</cvdlName>
     </properties>
     <dependencies>
@@ -42,6 +42,11 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-ordered-layout-flow</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-charts-flow</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

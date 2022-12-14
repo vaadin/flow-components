@@ -1,14 +1,16 @@
 package com.vaadin.flow.component.spreadsheet.test;
 
 import com.google.common.collect.Sets;
+import com.vaadin.flow.testutil.TestPath;
+
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-
+@TestPath("vaadin-spreadsheet")
 public class ConditionalFormattingBasedOnSharedFormulaIT
         extends AbstractSpreadsheetIT {
 
@@ -21,7 +23,7 @@ public class ConditionalFormattingBasedOnSharedFormulaIT
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL());
+        open();
 
         loadFile("conditional_formatting_shared_formula.xlsx");
     }
@@ -29,11 +31,13 @@ public class ConditionalFormattingBasedOnSharedFormulaIT
     @Test
     public void loadSpreadsheetWithConditionalFormattingInA1A2_A3B4_D1G5___CheckCellFormatting() {
         for (String cellAddress : cellWithTrueCondition) {
-            assertEquals(TRUE_CONDITION_COLOR, getCellColor(cellAddress));
+            Assert.assertEquals(TRUE_CONDITION_COLOR,
+                    getCellColor(cellAddress));
         }
         for (String cellAddress : cellWithFormattingCondition) {
             if (!cellWithTrueCondition.contains(cellAddress)) {
-                assertEquals(FALSE_CONDITION_COLOR, getCellColor(cellAddress));
+                Assert.assertEquals(FALSE_CONDITION_COLOR,
+                        getCellColor(cellAddress));
             }
         }
     }

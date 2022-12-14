@@ -30,10 +30,10 @@ public final class ClientValidationUtil {
         // utility class should not be instantiated
     }
 
-    public static <C extends Component & HasValidation> void preventWebComponentFromSettingItselfToValid(
+    public static <C extends Component & HasValidation> void preventWebComponentFromModifyingInvalidState(
             C component) {
         StringBuilder expression = new StringBuilder(
-                "this._shouldSetInvalid = function (invalid) { return invalid };");
+                "this._shouldSetInvalid = function (invalid) { return false };");
 
         if (component.isInvalid()) {
             /*

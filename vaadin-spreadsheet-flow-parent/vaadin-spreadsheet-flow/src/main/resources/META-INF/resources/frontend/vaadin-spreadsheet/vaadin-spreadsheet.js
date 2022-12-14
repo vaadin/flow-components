@@ -1,7 +1,12 @@
 /**
  * @license
- * Copyright (c) 2019 - 2022 Vaadin Ltd.
- * This program is available under Commercial Vaadin Developer License 4.0, available at https://vaadin.com/license/cvdl-4.0.
+ * Copyright (C) 2000-2022 Vaadin Ltd
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
  */
 import { LitElement, html } from 'lit';
 import { Spreadsheet } from './spreadsheet-export.js';
@@ -172,7 +177,7 @@ export class VaadinSpreadsheet extends LitElement {
         document.body.appendChild(overlays);
       }
 
-      this.api = new Spreadsheet(this.renderRoot);
+      this.api = new Spreadsheet(this, this.renderRoot);
       this.api.setHeight('100%');
       this.api.setWidth('100%');
       this.createCallbacks();

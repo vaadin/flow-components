@@ -31,7 +31,7 @@ import com.vaadin.flow.function.SerializableRunnable;
  *
  * @author Vaadin Ltd
  */
-@NpmPackage(value = "@vaadin/tooltip", version = "24.0.0-alpha5")
+@NpmPackage(value = "@vaadin/tooltip", version = "24.0.0-alpha6")
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
 public class Tooltip implements Serializable {
 
@@ -85,11 +85,13 @@ public class Tooltip implements Serializable {
         // Create a new Tooltip handle instance
         var tooltip = new Tooltip();
 
-        // The host under which the <vaadin-tooltip> element is auto-attached
-        var tooltipHost = UI.getCurrent().getElement();
-
         // Handle target attach
         SerializableRunnable onTargetAttach = () -> {
+            // Remove the tooltip from its current state tree
+            tooltip.tooltipElement.removeFromTree();
+
+            // The host under which the <vaadin-tooltip> element is auto-attached
+            var tooltipHost = UI.getCurrent().getElement();
             tooltipHost.appendChild(tooltip.tooltipElement);
             tooltip.tooltipElement.executeJs("this.target = $0;", element);
         };

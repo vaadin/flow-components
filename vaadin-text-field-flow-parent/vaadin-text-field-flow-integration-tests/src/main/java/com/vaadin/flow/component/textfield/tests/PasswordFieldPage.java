@@ -67,7 +67,6 @@ public class PasswordFieldPage extends Div {
         addFocusShortcut();
         addBasicField();
         addDisabledField();
-        addInvalidCheck();
     }
 
     private void addFocusShortcut() {
@@ -115,12 +114,4 @@ public class PasswordFieldPage extends Div {
 
         add(passwordField, message);
     }
-
-    private void addInvalidCheck() {
-        final PasswordField field = new PasswordField();
-        field.setMaxLength(10);
-        field.setMinLength(5);
-        TextFieldTestPageUtil.addInvalidCheck(this, field);
-    }
-
 }

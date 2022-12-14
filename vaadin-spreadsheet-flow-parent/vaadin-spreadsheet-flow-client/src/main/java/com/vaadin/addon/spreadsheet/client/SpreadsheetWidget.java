@@ -1,16 +1,13 @@
 package com.vaadin.addon.spreadsheet.client;
 
-/*
- * #%L
- * Vaadin Spreadsheet
- * %%
- * Copyright (C) 2013 - 2022 Vaadin Ltd
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
+/**
+ * Copyright (C) 2000-2022 Vaadin Ltd
  *
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
  */
 
 import java.util.ArrayList;
@@ -27,6 +24,7 @@ import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.dom.client.Node;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.TouchEvent;
 import com.google.gwt.event.logical.shared.AttachEvent;
@@ -1998,7 +1996,6 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             commsTrigger.sendUpdates();
         }
     };
-    private Element host;
 
     void startDelayedSendingTimer() {
         delayedSending.schedule(DELAYED_SERVER_REQUEST_DELAY);
@@ -2036,7 +2033,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     }
 
     public void setId(String connectorId) {
-        sheetWidget.postInit(connectorId, this.host);
+        sheetWidget.postInit(connectorId);
     }
 
     @Override
@@ -2080,7 +2077,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         formulaBarWidget.setNamedRanges(namedRanges);
     }
 
-    public void setHost(Element element) {
-        this.host = element;
+    public void setHost(Element host, Node renderRoot) {
+        sheetWidget.setHost(host, renderRoot);
     }
 }
