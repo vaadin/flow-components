@@ -113,6 +113,11 @@ public class SheetEventListener implements EventListener {
         Element target = SheetWidget.getEventTarget(event);
         String targetClassName = target.getAttribute("class");
 
+        if (target.getParentElement() == null) {
+            // The target's parent element may be a shadow root
+            return;
+        }
+
         if (target.getParentElement().getAttribute("class").contains("sheet")
                 && targetClassName != null
                 && targetClassName.contains("cell")) {
