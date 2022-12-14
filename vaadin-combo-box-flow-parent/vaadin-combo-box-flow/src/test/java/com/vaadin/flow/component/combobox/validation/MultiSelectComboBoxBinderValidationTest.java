@@ -1,5 +1,6 @@
-package com.vaadin.flow.component.combobox;
+package com.vaadin.flow.component.combobox.validation;
 
+import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.Validator;
