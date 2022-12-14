@@ -1,5 +1,6 @@
-package com.vaadin.flow.component.datetimepicker;
+package com.vaadin.flow.component.datetimepicker.validation;
 
+import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.BindingValidationStatus;
 import com.vaadin.flow.data.binder.BindingValidationStatusHandler;
@@ -14,7 +15,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.time.LocalDateTime;
 
-public class DateTimePickerBinderValidationTest {
+public class BinderValidationTest {
 
     private static final String BINDER_FAIL_MESSAGE = "BINDER_FAIL_MESSAGE";
     private static final String BINDER_REQUIRED_MESSAGE = "REQUIRED";
