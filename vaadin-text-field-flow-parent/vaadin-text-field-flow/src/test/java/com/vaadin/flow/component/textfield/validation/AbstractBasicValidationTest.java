@@ -32,7 +32,7 @@ public abstract class AbstractBasicValidationTest<T extends Component & HasValid
 
     @Test
     public void setErrorMessage_getErrorMessage() {
-        Assert.assertEquals(null, testField.getErrorMessage());
+        Assert.assertNull(testField.getErrorMessage());
         Assert.assertEquals(null,
                 testField.getElement().getProperty("errorMessage"));
 
