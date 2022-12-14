@@ -301,7 +301,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
     /**
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
-     * 
+     *
      * @return the {@code autofocus} property from the webcomponent
      */
     protected boolean isAutofocusBoolean() {
@@ -326,7 +326,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code disabled} property from the webcomponent
      */
     protected boolean isDisabledBoolean() {
@@ -340,7 +340,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * <p>
      * Set to true to disable this input.
      * </p>
-     * 
+     *
      * @param disabled
      *            the boolean value to set
      */
@@ -358,7 +358,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code pageSize} property from the webcomponent
      */
     protected double getPageSizeDouble() {
@@ -372,7 +372,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * <p>
      * Number of items fetched at a time from the dataprovider.
      * </p>
-     * 
+     *
      * @param pageSize
      *            the double value to set
      */
@@ -390,7 +390,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code size} property from the webcomponent
      */
     protected double getSizeDouble() {
@@ -404,7 +404,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * <p>
      * Total number of items.
      * </p>
-     * 
+     *
      * @param size
      *            the double value to set
      */
@@ -422,7 +422,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * This property is synchronized automatically from client side when a
      * 'opened-changed' event happens.
      * </p>
-     * 
+     *
      * @return the {@code opened} property from the webcomponent
      */
     @Synchronize(property = "opened", value = "opened-changed")
@@ -437,7 +437,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * <p>
      * True if the dropdown is open, false otherwise.
      * </p>
-     * 
+     *
      * @param opened
      *            the boolean value to set
      */
@@ -448,7 +448,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
     /**
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
-     * 
+     *
      * @return the {@code readonly} property from the webcomponent
      */
     protected boolean isReadonlyBoolean() {
@@ -474,7 +474,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code items} property from the webcomponent
      */
     protected JsonArray getItemsJsonArray() {
@@ -489,7 +489,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * A full set of items to filter the visible options from. The items can be
      * of either {@code String} or {@code Object} type.
      * </p>
-     * 
+     *
      * @param items
      *            the JsonArray value to set
      */
@@ -510,7 +510,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code allowCustomValue} property from the webcomponent
      */
     protected boolean isAllowCustomValueBoolean() {
@@ -527,7 +527,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * case. Also, when {@code value} is set programmatically, the input value
      * will be set to reflect that value.
      * </p>
-     * 
+     *
      * @param allowCustomValue
      *            the boolean value to set
      */
@@ -547,7 +547,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code filteredItems} property from the webcomponent
      */
     protected JsonArray getFilteredItemsJsonArray() {
@@ -563,7 +563,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * be assigned directly to omit the internal filtering functionality. The
      * items can be of either {@code String} or {@code Object} type.
      * </p>
-     * 
+     *
      * @param filteredItems
      *            the JsonArray value to set
      */
@@ -582,7 +582,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code loading} property from the webcomponent
      */
     protected boolean isLoadingBoolean() {
@@ -597,7 +597,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * When set to {@code true}, &quot;loading&quot; attribute is added to host
      * and the overlay element.
      * </p>
-     * 
+     *
      * @param loading
      *            the boolean value to set
      */
@@ -615,7 +615,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * This property is synchronized automatically from client side when a
      * 'filter-changed' event happens.
      * </p>
-     * 
+     *
      * @return the {@code filter} property from the webcomponent
      */
     @Synchronize(property = "filter", value = "filter-changed")
@@ -630,7 +630,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * <p>
      * Filtering string the user has typed into the input field.
      * </p>
-     * 
+     *
      * @param filter
      *            the String value to set
      */
@@ -648,7 +648,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * This property is synchronized automatically from client side when a
      * 'selected-item-changed' event happens.
      * </p>
-     * 
+     *
      * @return the {@code selectedItem} property from the webcomponent
      */
     @Synchronize(property = "selectedItem", value = "selected-item-changed")
@@ -663,7 +663,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * <p>
      * The selected item from the {@code items} array.
      * </p>
-     * 
+     *
      * @param selectedItem
      *            the JsonObject value to set
      */
@@ -692,7 +692,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code itemLabelPath} property from the webcomponent
      */
     protected String getItemLabelPathString() {
@@ -717,7 +717,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * used for filtering, and for displaying the selected item value in the
      * input box.
      * </p>
-     * 
+     *
      * @param itemLabelPath
      *            the String value to set
      */
@@ -742,7 +742,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code itemValuePath} property from the webcomponent
      */
     protected String getItemValuePathString() {
@@ -762,7 +762,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * The item value is used in the {@code value} property of the combo box, to
      * provide the form value.
      * </p>
-     * 
+     *
      * @param itemValuePath
      *            the String value to set
      */
@@ -784,7 +784,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code itemIdPath} property from the webcomponent
      */
     protected String getItemIdPathString() {
@@ -801,7 +801,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * {@code selectedItem} and {@code filteredItems} (items given by the
      * {@code dataProvider} callback).
      * </p>
-     * 
+     *
      * @param itemIdPath
      *            the String value to set
      */
@@ -820,7 +820,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code name} property from the webcomponent
      */
     protected String getNameString() {
@@ -834,7 +834,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * <p>
      * The name of this element.
      * </p>
-     * 
+     *
      * @param name
      *            the String value to set
      */
@@ -852,10 +852,9 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * This property is synchronized automatically from client side when a
      * 'invalid-changed' event happens.
      * </p>
-     * 
+     *
      * @return the {@code invalid} property from the webcomponent
      */
-    @Synchronize(property = "invalid", value = "invalid-changed")
     protected boolean isInvalidBoolean() {
         return getElement().getProperty("invalid", false);
     }
@@ -867,7 +866,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * <p>
      * Set to true if the value is invalid.
      * </p>
-     * 
+     *
      * @param invalid
      *            the boolean value to set
      */
@@ -885,7 +884,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code label} property from the webcomponent
      */
     protected String getLabelString() {
@@ -899,7 +898,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * <p>
      * The label for this element.
      * </p>
-     * 
+     *
      * @param label
      *            the String value to set
      */
@@ -917,7 +916,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code required} property from the webcomponent
      */
     protected boolean isRequiredBoolean() {
@@ -931,7 +930,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * <p>
      * Set to true to mark the input as required.
      * </p>
-     * 
+     *
      * @param required
      *            the boolean value to set
      */
@@ -949,7 +948,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code preventInvalidInput} property from the webcomponent
      */
     protected boolean isPreventInvalidInputBoolean() {
@@ -963,7 +962,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * <p>
      * Set to true to prevent the user from entering invalid input.
      * </p>
-     * 
+     *
      * @param preventInvalidInput
      *            the boolean value to set
      */
@@ -981,7 +980,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code pattern} property from the webcomponent
      */
     protected String getPatternString() {
@@ -995,7 +994,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * <p>
      * A pattern to validate the {@code input} with.
      * </p>
-     * 
+     *
      * @param pattern
      *            the String value to set
      */
@@ -1013,7 +1012,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code errorMessage} property from the webcomponent
      */
     protected String getErrorMessageString() {
@@ -1027,7 +1026,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * <p>
      * The error message to display when the input is invalid.
      * </p>
-     * 
+     *
      * @param errorMessage
      *            the String value to set
      */
@@ -1046,7 +1045,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code placeholder} property from the webcomponent
      */
     protected String getPlaceholderString() {
@@ -1060,7 +1059,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * <p>
      * A placeholder string in addition to the label.
      * </p>
-     * 
+     *
      * @param placeholder
      *            the String value to set
      */
@@ -1079,7 +1078,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code clearButtonVisible} property from the webcomponent
      */
     protected boolean isClearButtonVisibleBoolean() {
@@ -1093,7 +1092,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
      * <p>
      * Set to true to display the clear icon which clears the input.
      * </p>
-     * 
+     *
      * @param clearButtonVisible
      *            the boolean value to set
      */
@@ -1213,7 +1212,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
     /**
      * Adds a listener for {@code custom-value-set} events fired by the
      * webcomponent.
-     * 
+     *
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
@@ -1242,7 +1241,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
     /**
      * Adds a listener for {@code selected-item-changed} events fired by the
      * webcomponent.
-     * 
+     *
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
@@ -1272,7 +1271,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
     /**
      * Adds a listener for {@code opened-changed} events fired by the
      * webcomponent.
-     * 
+     *
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
@@ -1303,7 +1302,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
     /**
      * Adds a listener for {@code filter-changed} events fired by the
      * webcomponent.
-     * 
+     *
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
@@ -1334,7 +1333,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
     /**
      * Adds a listener for {@code invalid-changed} events fired by the
      * webcomponent.
-     * 
+     *
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
@@ -1351,7 +1350,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
     /**
      * Adds the given components as children of this component at the slot
      * 'prefix'.
-     * 
+     *
      * @param components
      *            The components to add.
      * @see <a href=
@@ -1370,7 +1369,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
 
     /**
      * Removes the given child components from this component.
-     * 
+     *
      * @param components
      *            The components to remove.
      * @throws IllegalArgumentException
@@ -1402,7 +1401,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
     /**
      * Constructs a new GeneratedVaadinComboBox component with the given
      * arguments.
-     * 
+     *
      * @param initialValue
      *            the initial value to set to the value
      * @param defaultValue
@@ -1431,7 +1430,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
     /**
      * Constructs a new GeneratedVaadinComboBox component with the given
      * arguments.
-     * 
+     *
      * @param initialValue
      *            the initial value to set to the value
      * @param defaultValue
@@ -1451,7 +1450,7 @@ public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<
     /**
      * Constructs a new GeneratedVaadinComboBox component with the given
      * arguments.
-     * 
+     *
      * @param initialValue
      *            the initial value to set to the value
      * @param defaultValue

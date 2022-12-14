@@ -260,68 +260,6 @@
                 comboBox.$server.confirmUpdate(id);
             });
 
-            comboBox.$connector.enableClientValidation = tryCatchWrapper(function( enable ){
-                let input = null;
-                if ( comboBox.$ ){
-                    input = comboBox.$["input"];
-                }
-                if (input){
-                    if ( enable){
-                        enableClientValidation(comboBox);
-                        enableTextFieldClientValidation(input);
-                    }
-                    else {
-                        disableClientValidation(comboBox);
-                        disableTextFieldClientValidation(input,comboBox );
-                    }
-
-                    comboBox.validate();
-                }
-                else {
-                    setTimeout( function(){
-                        comboBox.$connector.enableClientValidation(enable);
-                    }, 10);
-                }
-            });
-
-            const disableClientValidation =  tryCatchWrapper(function (combo){
-                if ( typeof combo.$checkValidity == 'undefined'){
-                    combo.$checkValidity = combo.checkValidity;
-                    combo.checkValidity = function() { return !comboBox.invalid; };
-                }
-                if ( typeof combo.$validate == 'undefined'){
-                    combo.$validate = combo.validate;
-                    combo.validate = function() {
-                        return !(comboBox.focusElement.invalid = comboBox.invalid);
-                    };
-                }
-            });
-
-            const disableTextFieldClientValidation =  tryCatchWrapper(function (field, comboBox){
-                if ( typeof field.$checkValidity == 'undefined'){
-                    field.$checkValidity = field.checkValidity;
-                    field.checkValidity = function() { return !comboBox.invalid; };
-                }
-            });
-
-            const enableTextFieldClientValidation = tryCatchWrapper(function (field){
-                if ( field.$checkValidity ){
-                    field.checkValidity = field.$checkValidity;
-                    delete field.$checkValidity;
-                }
-            });
-
-            const enableClientValidation = tryCatchWrapper(function (combo){
-                if ( combo.$checkValidity ){
-                    combo.checkValidity = combo.$checkValidity;
-                    delete combo.$checkValidity;
-                }
-                if ( combo.$validate ){
-                    combo.validate = combo.$validate;
-                    delete combo.$validate;
-                }
-            });
-
             const commitPage = tryCatchWrapper(function (page, callback) {
                 let data = cache[page];
 
