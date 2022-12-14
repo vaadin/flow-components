@@ -13,16 +13,13 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.textfield.tests;
+package com.vaadin.flow.component.textfield.validation;
 
-import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.tests.AbstractValidationTest;
-import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.flow.component.textfield.IntegerField;
 
-/**
- * Integration tests for {@link TextField} validation.
- */
-@TestPath("vaadin-text-field/text-field-validation")
-public class TextFieldValidationPageIT extends AbstractValidationTest {
-
+public class IntegerFieldBasicValidationTest
+        extends AbstractBasicValidationTest<IntegerField> {
+    protected IntegerField createTestField() {
+        return new IntegerField();
+    }
 }
