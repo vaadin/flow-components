@@ -368,12 +368,8 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
             if (cellKeysToComponentIdMap != null
                     && !cellKeysToComponentIdMap.isEmpty()) {
                 cellKeysToComponentIdMap.forEach((nodeId, key) -> {
-                    var appId = host.getPropertyString("appId");
-                    // TODO: falling back to "ROOT" can be removed once
-                    // https://github.com/vaadin/flow-components/pull/4330 is
-                    // merged
                     var component = SheetJsniUtil.getVirtualChild(nodeId,
-                            appId != null ? appId : "ROOT");
+                            host.getPropertyString("appId"));
                     var slot = new Slot("custom-component-" + nodeId, component,
                             host);
                     customWidgetMap.put(key, slot);
@@ -470,12 +466,8 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
                     public Widget getCustomEditor(String key) {
                         String editorId = getState().cellKeysToEditorIdMap
                                 .get(key);
-                        var appId = host.getPropertyString("appId");
-                        // TODO: falling back to "ROOT" can be removed once
-                        // https://github.com/vaadin/flow-components/pull/4330
-                        // is merged
                         var editor = SheetJsniUtil.getVirtualChild(editorId,
-                                appId != null ? appId : "ROOT");
+                                host.getPropertyString("appId"));
                         return new Slot("custom-editor-" + editorId, editor,
                                 host);
                     }

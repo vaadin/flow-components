@@ -3478,7 +3478,6 @@ public class SheetWidget extends Panel {
         }
         cell.setValue(null);
         Widget parent = customWidget.getParent();
-
         if (parent != null) {
             if (equals(parent)) {
                 cell.getElement().appendChild(customWidget.getElement());
