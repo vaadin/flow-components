@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.checkbox.tests;
+package com.vaadin.flow.component.checkbox.tests.validation;
 
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.data.binder.Binder;
@@ -50,7 +50,7 @@ public class CheckboxGroupBinderValidationTest {
 
     @Test
     public void elementWithBinderValidation_invalidValue_binderValidationFails() {
-        var binder = attachBinderToField();
+        attachBinderToField();
 
         field.setValue(Collections.singleton("bar"));
         Mockito.verify(statusHandlerMock).statusChange(statusCaptor.capture());
