@@ -1,5 +1,7 @@
 package com.vaadin.addon.spreadsheet.client;
 
+import com.google.gwt.dom.client.Element;
+
 /**
  * Copyright (C) 2000-2022 Vaadin Ltd
  *
@@ -151,4 +153,10 @@ public class SheetJsniUtil {
         return overlayRules;
     }-*/;
 
+    public static native Element getVirtualChild(String nodeId, String appId) /*-{
+        return $wnd.Vaadin
+          && $wnd.Vaadin.Flow
+          && $wnd.Vaadin.Flow.clients[appId]
+          && $wnd.Vaadin.Flow.clients[appId].getByNodeId(parseInt(nodeId));
+    }-*/;
 }

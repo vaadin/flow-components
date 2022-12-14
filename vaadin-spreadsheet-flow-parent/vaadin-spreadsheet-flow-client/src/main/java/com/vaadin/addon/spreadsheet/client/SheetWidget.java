@@ -375,6 +375,9 @@ public class SheetWidget extends Panel {
 
     private String invalidFormulaMessage = null;
 
+    private Element host;
+    private Node renderRoot;
+
     static class CellCoord {
         private int col;
         private int row;
@@ -440,6 +443,12 @@ public class SheetWidget extends Panel {
                     }
 
                     Element target = mouseOverOrOutEventTarget;
+
+                    if (target.getParentElement() == null) {
+                        // The target's parent element may be a shadow root
+                        return;
+                    }
+
                     boolean targetParentIsPaneElement = target
                             .getParentElement().getAttribute("class")
                             .contains("sheet");
@@ -933,29 +942,29 @@ public class SheetWidget extends Panel {
         fontWidthDummyElement.setInnerText("5555555555");
     }
 
-    void postInit(String connectorId, Node styleHost) {
+    void postInit(String connectorId) {
         sheetId = "spreadsheet-" + connectorId;
         spreadsheet.addClassName(sheetId);
 
         // Dynamic position & size styles for this spreadsheet
         cellSizeAndPositionStyle.setType("text/css");
         cellSizeAndPositionStyle.setId(sheetId + "-dynamicStyle");
-        styleHost.appendChild(cellSizeAndPositionStyle);
+        renderRoot.appendChild(cellSizeAndPositionStyle);
 
         // Workbook styles
         sheetStyle.setType("text/css");
         sheetStyle.setId(sheetId + "-sheetStyle");
-        styleHost.appendChild(sheetStyle);
+        renderRoot.appendChild(sheetStyle);
 
         // Custom cell size styles (because of borders)
         shiftedBorderCellStyle.setType("text/css");
         shiftedBorderCellStyle.setId(sheetId + "-customCellSizeStyle");
-        styleHost.appendChild(shiftedBorderCellStyle);
+        renderRoot.appendChild(shiftedBorderCellStyle);
 
         // style for "hiding" the edited cell
         editedCellFreezeColumnStyle.setType("text/css");
         editedCellFreezeColumnStyle.setId(sheetId + "-editedCellStyle");
-        styleHost.appendChild(editedCellFreezeColumnStyle);
+        renderRoot.appendChild(editedCellFreezeColumnStyle);
         jsniUtil.insertRule(editedCellFreezeColumnStyle,
                 ".notusedselector" + EDITING_CELL_STYLE);
         jsniUtil.insertRule(editedCellFreezeColumnStyle,
@@ -964,11 +973,11 @@ public class SheetWidget extends Panel {
         // style for hiding the cell inside merged regions
         mergedRegionStyle.setType("text/css");
         mergedRegionStyle.setId(sheetId + "-mergedRegionStyle");
-        styleHost.appendChild(mergedRegionStyle);
+        renderRoot.appendChild(mergedRegionStyle);
 
         resizeStyle.setType("text/css");
         resizeStyle.setId(sheetId + "-resizeStyle");
-        styleHost.appendChild(resizeStyle);
+        renderRoot.appendChild(resizeStyle);
     }
 
     /**
@@ -6622,5 +6631,10 @@ public class SheetWidget extends Panel {
     public void setInvalidFormulaMessage(String invalidFormulaMessage) {
         this.invalidFormulaMessage = invalidFormulaMessage;
         updateAllVisibleComments();
+    }
+
+    public void setHost(Element host, Node renderRoot) {
+        this.host = host;
+        this.renderRoot = renderRoot;
     }
 }

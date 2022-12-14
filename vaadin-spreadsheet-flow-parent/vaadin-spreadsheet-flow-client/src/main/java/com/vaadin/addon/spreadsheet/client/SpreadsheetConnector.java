@@ -21,8 +21,10 @@ import java.util.Set;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.dom.client.Node;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -183,6 +185,8 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
 
     private HandlerRegistration contextMenuHandler;
     private SpreadsheetServerRpcImpl serverRPC;
+
+    private Element host;
 
     // spreadsheet: we need the server side proxy
     public <T extends ServerRpc> T getProtectedRpcProxy(Class<T> rpcInterface) {
@@ -427,11 +431,10 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
                     overlayInfo);
             break;
         case COMPONENT:
-            for (ComponentConnector c : getChildComponents()) {
-                if (c.getConnectorId().equals(id)) {
-                    getWidget().addOverlay(id, c.getWidget(), overlayInfo);
-                }
-            }
+            var element = SheetJsniUtil.getVirtualChild(id,
+                    host.getPropertyString("appId"));
+            var slot = new Slot("overlay-component-" + id, element, host);
+            getWidget().addOverlay(id, slot, overlayInfo);
             break;
         }
     }
@@ -543,7 +546,8 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
         void sendUpdates();
     }
 
-    public void setHost(Element element) {
-        getWidget().setHost(element);
+    public void setHost(Element host, Node renderRoot) {
+        this.host = host;
+        getWidget().setHost(host, renderRoot);
     }
 }
