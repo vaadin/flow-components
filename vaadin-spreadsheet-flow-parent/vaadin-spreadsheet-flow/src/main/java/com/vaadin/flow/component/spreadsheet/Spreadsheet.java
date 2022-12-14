@@ -988,8 +988,7 @@ public class Spreadsheet extends Component
     /** The last visible column in the scroll area **/
     private int lastColumn;
 
-    /** Spreadsheet Flow does not support charts yet **/
-    private boolean chartsEnabled = false;
+    private boolean chartsEnabled = true;
 
     /**
      * This is used for making sure the cells are sent to client side in when
@@ -1163,6 +1162,7 @@ public class Spreadsheet extends Component
     }
 
     private void init() {
+        updateAppId();
         valueManager = createCellValueManager();
         sheetOverlays = new HashSet<SheetOverlayWrapper>();
         tables = new HashSet<SpreadsheetTable>();
@@ -1172,6 +1172,12 @@ public class Spreadsheet extends Component
         addActionHandler(defaultActionHandler);
         setId(UUID.randomUUID().toString());
         customInit();
+    }
+
+    private void updateAppId() {
+        Optional.ofNullable(UI.getCurrent()).ifPresent(ui -> {
+            getElement().setProperty("appId", ui.getInternals().getAppId());
+        });
     }
 
     private void registerRpc(SpreadsheetHandlerImpl spreadsheetHandler) {
@@ -1442,7 +1448,7 @@ public class Spreadsheet extends Component
      * @see #setChartsEnabled(boolean)
      * @return
      */
-    boolean isChartsEnabled() {
+    public boolean isChartsEnabled() {
         return chartsEnabled;
     }
 
@@ -1452,7 +1458,7 @@ public class Spreadsheet extends Component
      *
      * @param chartsEnabled
      */
-    void setChartsEnabled(boolean chartsEnabled) {
+    public void setChartsEnabled(boolean chartsEnabled) {
         this.chartsEnabled = chartsEnabled;
         clearSheetOverlays();
         loadOrUpdateOverlays();
@@ -1662,6 +1668,16 @@ public class Spreadsheet extends Component
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         valueManager.updateLocale(getLocale());
+
+        updateAppId();
+
+        if (overlays != null) {
+            // The node id's of component overlays attached as virtual children
+            // may no longer be valid after a detach/attach. Remove all
+            // overlays and reload them (with updated node id's).
+            overlays.clear();
+            loadOrUpdateOverlays();
+        }
     }
 
     /**

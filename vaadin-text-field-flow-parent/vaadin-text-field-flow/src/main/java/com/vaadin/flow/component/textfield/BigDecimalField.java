@@ -23,7 +23,9 @@ import java.util.Optional;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.CompositionNotifier;
+import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasClearButton;
+import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
@@ -32,15 +34,21 @@ import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.InputNotifier;
 import com.vaadin.flow.component.KeyNotifier;
+import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasValidator;
+import com.vaadin.flow.data.binder.ValidationResult;
+import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
+import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
+import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.SerializableBiFunction;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * BigDecimalField is an input field for handling decimal numbers with high
@@ -63,14 +71,12 @@ public class BigDecimalField
         HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
         HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper, HasLabel,
         HasClearButton, HasThemeVariant<TextFieldVariant>, HasTooltip,
-        HasValidator<BigDecimal> {
+        HasValidator<BigDecimal>, HasClientValidation {
     private ValueChangeMode currentMode;
 
     private boolean isConnectorAttached;
 
     private int valueChangeTimeout = DEFAULT_CHANGE_TIMEOUT;
-
-    private boolean required;
 
     private Locale locale;
 
@@ -107,6 +113,8 @@ public class BigDecimalField
         setValueChangeMode(ValueChangeMode.ON_CHANGE);
 
         addValueChangeListener(e -> validate());
+
+        addClientValidatedEventListener(e -> validate());
     }
 
     /**
@@ -385,15 +393,49 @@ public class BigDecimalField
      */
     @Override
     protected void validate() {
-        var requiredValidation = ValidationUtil.checkRequired(required,
-                getValue(), getEmptyValue());
-        setInvalid(requiredValidation.isError());
+        BigDecimal value = getValue();
+
+        boolean isRequired = isRequiredIndicatorVisible();
+        ValidationResult requiredValidation = ValidationUtil
+                .checkRequired(isRequired, value, getEmptyValue());
+
+        setInvalid(
+                requiredValidation.isError() || checkValidity(value).isError());
+    }
+
+    private ValidationResult checkValidity(BigDecimal value) {
+        boolean hasNonParsableValue = Objects.equals(value, getEmptyValue())
+                && isInputValuePresent();
+        if (hasNonParsableValue) {
+            return ValidationResult.error("");
+        }
+
+        return ValidationResult.ok();
     }
 
     @Override
-    public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
-        super.setRequiredIndicatorVisible(requiredIndicatorVisible);
-        this.required = requiredIndicatorVisible;
+    public Validator<BigDecimal> getDefaultValidator() {
+        return (value, context) -> checkValidity(value);
+    }
+
+    @Override
+    public Registration addValidationStatusChangeListener(
+            ValidationStatusChangeListener<BigDecimal> listener) {
+        return addClientValidatedEventListener(
+                event -> listener.validationStatusChanged(
+                        new ValidationStatusChangeEvent<BigDecimal>(this,
+                                !isInvalid())));
+    }
+
+    /**
+     * Returns whether the input element has a value or not.
+     *
+     * @return <code>true</code> if the input element's value is populated,
+     *         <code>false</code> otherwise
+     */
+    @Synchronize(property = "_hasInputValue", value = "has-input-value-changed")
+    private boolean isInputValuePresent() {
+        return getElement().getProperty("_hasInputValue", false);
     }
 
     /**
@@ -440,7 +482,7 @@ public class BigDecimalField
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        FieldValidationUtil.disableClientValidation(this);
+        ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
     }
 
     // Override is only required to keep binary compatibility with other 23.x
