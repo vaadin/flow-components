@@ -64,8 +64,11 @@ class ComboBoxRenderManager<TItem> implements Serializable {
         renderingRegistrations.forEach(Registration::remove);
         renderingRegistrations.clear();
 
+        var dataCommunicator = comboBox.getDataCommunicator();
+
         var rendering = renderer.render(comboBox.getElement(),
-                comboBox.getDataCommunicator().getKeyMapper());
+                dataCommunicator != null ? dataCommunicator.getKeyMapper()
+                        : null);
 
         rendering.getDataGenerator().ifPresent(renderingDataGenerator -> {
             Registration renderingDataGeneratorRegistration = comboBox
