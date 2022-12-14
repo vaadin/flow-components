@@ -96,15 +96,6 @@ class RadioButton<T> extends Component
     /**
      * If true, the user cannot interact with this element.
      *
-     * @return the {@code disabled} property from the webcomponent
-     */
-    protected boolean isDisabledBoolean() {
-        return getElement().getProperty("disabled", false);
-    }
-
-    /**
-     * If true, the user cannot interact with this element.
-     *
      * @param disabled
      *            the boolean value to set
      */
