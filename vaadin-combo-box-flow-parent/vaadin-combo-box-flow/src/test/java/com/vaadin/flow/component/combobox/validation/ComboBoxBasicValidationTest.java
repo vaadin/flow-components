@@ -50,12 +50,12 @@ public class ComboBoxBasicValidationTest {
     @Test
     public void setInvalid_isInvalid() {
         Assert.assertFalse(testField.isInvalid());
-        Assert.assertFalse(testField.getElement().hasProperty("invalid"));
+        Assert.assertFalse(testField.getElement().getProperty("invalid", false));
 
         testField.setInvalid(true);
 
         Assert.assertTrue(testField.isInvalid());
-        Assert.assertTrue(testField.getElement().hasProperty("invalid"));
+        Assert.assertTrue(testField.getElement().getProperty("invalid", false));
     }
 }
 
