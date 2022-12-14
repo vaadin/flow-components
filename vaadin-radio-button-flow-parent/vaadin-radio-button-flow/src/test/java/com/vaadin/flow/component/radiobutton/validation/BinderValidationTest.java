@@ -1,5 +1,6 @@
-package com.vaadin.flow.component.radiobutton;
+package com.vaadin.flow.component.radiobutton.validation;
 
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.BindingValidationStatus;
 import com.vaadin.flow.data.binder.BindingValidationStatusHandler;
@@ -15,7 +16,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.Arrays;
 import java.util.Objects;
 
-public class RadioButtonGroupBinderValidationTest {
+public class BinderValidationTest {
     private static final String BINDER_FAIL_MESSAGE = "BINDER_FAIL_MESSAGE";
     private static final String BINDER_REQUIRED_MESSAGE = "REQUIRED";
 
