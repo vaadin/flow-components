@@ -15,8 +15,14 @@
  */
 package com.vaadin.flow.component.radiobutton;
 
+import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasComponents;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.Synchronize;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.data.binder.HasItemComponents;
@@ -26,9 +32,14 @@ import com.vaadin.flow.data.binder.HasItemComponents;
  *
  * @author Vaadin Ltd.
  */
+@Tag("vaadin-radio-button")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha6")
+@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/radio-group", version = "24.0.0-alpha6")
-class RadioButton<T> extends GeneratedVaadinRadioButton<RadioButton<T>>
-        implements HasItemComponents.ItemComponent<T>, HasComponents {
+@JsModule("@vaadin/radio-group/src/vaadin-radio-button.js")
+class RadioButton<T> extends Component
+        implements ClickNotifier<RadioButton<T>>, Focusable<RadioButton<T>>,
+        HasComponents, HasItemComponents.ItemComponent<T>, HasStyle {
 
     private T item;
 
@@ -61,4 +72,44 @@ class RadioButton<T> extends GeneratedVaadinRadioButton<RadioButton<T>>
         getElement().appendChild(label.getElement());
         return label;
     }
+
+    /**
+     * True if the radio button is checked.
+     *
+     * @return the {@code checked} property from the webcomponent
+     */
+    @Synchronize(property = "checked", value = "checked-changed")
+    boolean isCheckedBoolean() {
+        return getElement().getProperty("checked", false);
+    }
+
+    /**
+     * True if the radio button is checked.
+     *
+     * @param checked
+     *            the boolean value to set
+     */
+    void setChecked(boolean checked) {
+        getElement().setProperty("checked", checked);
+    }
+
+    /**
+     * If true, the user cannot interact with this element.
+     *
+     * @return the {@code disabled} property from the webcomponent
+     */
+    protected boolean isDisabledBoolean() {
+        return getElement().getProperty("disabled", false);
+    }
+
+    /**
+     * If true, the user cannot interact with this element.
+     *
+     * @param disabled
+     *            the boolean value to set
+     */
+    void setDisabled(boolean disabled) {
+        getElement().setProperty("disabled", disabled);
+    }
+
 }
