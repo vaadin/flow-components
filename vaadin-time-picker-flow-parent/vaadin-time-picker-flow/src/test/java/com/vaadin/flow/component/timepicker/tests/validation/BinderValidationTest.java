@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.timepicker.tests;
+package com.vaadin.flow.component.timepicker.tests.validation;
 
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.data.binder.Binder;
@@ -16,7 +16,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.time.LocalTime;
 
-public class TimePickerBinderValidationTest {
+public class BinderValidationTest {
     private static final String BINDER_FAIL_MESSAGE = "BINDER_VALIDATION_FAILED";
     private static final String BINDER_REQUIRED_MESSAGE = "REQUIRED";
 
