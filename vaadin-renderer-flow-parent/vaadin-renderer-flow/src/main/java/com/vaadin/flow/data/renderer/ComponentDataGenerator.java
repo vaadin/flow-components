@@ -18,6 +18,7 @@ package com.vaadin.flow.data.renderer;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.data.provider.AbstractComponentDataGenerator;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.ValueProvider;
@@ -62,6 +63,10 @@ public class ComponentDataGenerator<T>
         this.keyMapper = keyMapper;
     }
 
+    @Tag("div")
+    private class EmptySlot extends Component {
+    }
+
     @Override
     public void generateData(T item, JsonObject jsonObject) {
         /*
@@ -83,8 +88,9 @@ public class ComponentDataGenerator<T>
             nodeId = oldRenderedComponent.getElement().getNode().getId();
         } else {
             Component renderedComponent = createComponent(item);
+
             if (renderedComponent == null) {
-                return;
+                renderedComponent = new EmptySlot();
             }
             if (renderedComponent.getParent().isPresent()) {
                 LoggerFactory.getLogger(ComponentDataGenerator.class).warn(
