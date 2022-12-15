@@ -15,20 +15,26 @@
  */
 package com.vaadin.flow.component.textfield;
 
+import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.CompositionNotifier;
-import com.vaadin.flow.component.shared.ClientValidationUtil;
-import com.vaadin.flow.component.shared.HasAllowedCharPattern;
-import com.vaadin.flow.component.shared.HasClearButton;
+import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.shared.HasClientValidation;
-import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.InputNotifier;
 import com.vaadin.flow.component.KeyNotifier;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.ClientValidationUtil;
+import com.vaadin.flow.component.shared.HasAllowedCharPattern;
+import com.vaadin.flow.component.shared.HasClearButton;
+import com.vaadin.flow.component.shared.HasClientValidation;
+import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
@@ -45,12 +51,18 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author Vaadin Ltd.
  */
-public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
-        implements HasSize, HasValidation, HasValueChangeMode,
-        HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
-        HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper, HasLabel,
-        HasClearButton, HasAllowedCharPattern, HasThemeVariant<TextAreaVariant>,
-        HasTooltip, HasValidator<String>, HasClientValidation {
+@Tag("vaadin-text-area")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha6")
+@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@NpmPackage(value = "@vaadin/text-area", version = "24.0.0-alpha6")
+@JsModule("@vaadin/text-area/src/vaadin-text-area.js")
+public class TextArea extends AbstractSinglePropertyField<TextArea, String>
+        implements CompositionNotifier, Focusable<TextArea>,
+        HasAllowedCharPattern, HasAutocapitalize, HasAutocomplete,
+        HasAutocorrect, HasClearButton, HasClientValidation, HasHelper,
+        HasLabel, HasPrefixAndSuffix, HasSize, HasStyle,
+        HasThemeVariant<TextAreaVariant>, HasTooltip, HasValidation,
+        HasValidator<String>, HasValueChangeMode, InputNotifier, KeyNotifier {
     private ValueChangeMode currentMode;
 
     private boolean isConnectorAttached;
@@ -63,24 +75,12 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
      * Constructs an empty {@code TextArea}.
      */
     public TextArea() {
-        this(true);
-    }
+        super("value", "", false);
 
-    /**
-     * Constructs an empty {@code TextArea}.
-     * <p>
-     * If {@code isInitialValueOptional} is {@code true} then the initial value
-     * is used only if element has no {@code "value"} property value, otherwise
-     * element {@code "value"} property is ignored and the initial value is set.
-     *
-     * @param isInitialValueOptional
-     *            if {@code isInitialValueOptional} is {@code true} then the
-     *            initial value is used only if element has no {@code "value"}
-     *            property value, otherwise element {@code "value"} property is
-     *            ignored and the initial value is set
-     */
-    private TextArea(boolean isInitialValueOptional) {
-        super("", "", false, isInitialValueOptional);
+        if (getElement().getProperty("value") == null) {
+            setModelValue("", false);
+            setPresentationValue("");
+        }
 
         // workaround for https://github.com/vaadin/flow/issues/3496
         setInvalid(false);
@@ -231,29 +231,55 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
                 getValueChangeTimeout(), getSynchronizationRegistration());
     }
 
-    @Override
+    /**
+     * Gets the current error message from the checkbox group.
+     *
+     * @return the current error message
+     */
     public String getErrorMessage() {
-        return super.getErrorMessageString();
+        return getElement().getProperty("errorMessage");
     }
 
-    @Override
+    /**
+     * Sets the error message that should be displayed when the component
+     * becomes invalid
+     *
+     * @param errorMessage
+     *            the String value to set
+     */
     public void setErrorMessage(String errorMessage) {
-        super.setErrorMessage(errorMessage);
+        getElement().setProperty("errorMessage",
+                errorMessage == null ? "" : errorMessage);
     }
 
-    @Override
+    /**
+     * Whether the component has an invalid value or not.
+     *
+     * @return the {@code invalid} property from the field
+     */
     public boolean isInvalid() {
-        return isInvalidBoolean();
+        return getElement().getProperty("invalid", false);
     }
 
-    @Override
+    /**
+     * Sets whether the component has an invalid value or not.
+     *
+     *
+     * @param invalid
+     *            {@code true} for invalid, {@code false} for valid
+     */
     public void setInvalid(boolean invalid) {
-        super.setInvalid(invalid);
+        getElement().setProperty("invalid", invalid);
     }
 
-    @Override
+    /**
+     * Sets the label for the component.
+     *
+     * @param label
+     *            value for the {@code label} property
+     */
     public void setLabel(String label) {
-        super.setLabel(label);
+        getElement().setProperty("label", label == null ? "" : label);
     }
 
     /**
@@ -261,14 +287,20 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
      *
      * @return the {@code label} property from the webcomponent
      */
-    @Override
     public String getLabel() {
-        return getLabelString();
+        return getElement().getProperty("label");
     }
 
-    @Override
+    /**
+     * Sets the placeholder text that should be displayed in the input element,
+     * when the user has not entered a value
+     *
+     * @param placeholder
+     *            the placeholder text
+     */
     public void setPlaceholder(String placeholder) {
-        super.setPlaceholder(placeholder);
+        getElement().setProperty("placeholder",
+                placeholder == null ? "" : placeholder);
     }
 
     /**
@@ -277,7 +309,7 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
      * @return the {@code placeholder} property from the webcomponent
      */
     public String getPlaceholder() {
-        return getPlaceholderString();
+        return getElement().getProperty("placeholder");
     }
 
     /**
@@ -288,7 +320,7 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
      *         otherwise
      */
     public boolean isAutoselect() {
-        return super.isAutoselectBoolean();
+        return getElement().getProperty("autoselect", false);
     }
 
     /**
@@ -299,14 +331,19 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
      *            <code>true</code> to set auto select on, <code>false</code>
      *            otherwise
      */
-    @Override
     public void setAutoselect(boolean autoselect) {
-        super.setAutoselect(autoselect);
+        getElement().setProperty("autoselect", autoselect);
     }
 
-    @Override
+    /**
+     * Sets the whether the component should automatically receive focus when
+     * the page loads. Defaults to {@code false}.
+     *
+     * @param autofocus
+     *            {@code true} component should automatically receive focus
+     */
     public void setAutofocus(boolean autofocus) {
-        super.setAutofocus(autofocus);
+        getElement().setProperty("autofocus", autofocus);
     }
 
     /**
@@ -315,7 +352,7 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
      * @return the {@code autofocus} property from the webcomponent
      */
     public boolean isAutofocus() {
-        return isAutofocusBoolean();
+        return getElement().getProperty("autofocus", false);
     }
 
     /**
@@ -368,12 +405,20 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
      * @return the {@code required} property from the webcomponent
      */
     public boolean isRequired() {
-        return isRequiredBoolean();
+        return getElement().getProperty("required", false);
     }
 
-    @Override
+    /**
+     * Specifies that the user must fill in a value.
+     * <p>
+     * NOTE: The required indicator will not be visible, if there is no
+     * {@code label} property set for the component.
+     *
+     * @param required
+     *            the boolean value to set
+     */
     public void setRequired(boolean required) {
-        super.setRequired(required);
+        getElement().setProperty("required", required);
         getValidationSupport().setRequired(required);
     }
 
@@ -463,7 +508,6 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
      * because it is possible to circumvent the client-side validation
      * constraints using browser development tools.
      */
-    @Override
     protected void validate() {
         setInvalid(getValidationSupport().isInvalid(getValue()));
     }
