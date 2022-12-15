@@ -902,6 +902,17 @@ public class HeaderFooterTest {
     }
 
     @Test
+    public void gridWithJoinedHeaders_textAlignSetToChildColumn_textAlignShouldNotPropagate() {
+        firstColumn.setHeader("");
+        secondColumn.setHeader("");
+        var headerRow = grid.prependHeaderRow();
+
+        var joinedCell = headerRow.join(firstColumn, secondColumn);
+        firstColumn.setTextAlign(ColumnTextAlign.CENTER);
+        Assert.assertNotEquals(ColumnTextAlign.CENTER, joinedCell.getColumn().getTextAlign());
+    }
+
+    @Test
     public void gridHasPrependFooterRow_columnHasTextAlignment_prependedColumnHasSameTextAlignment() {
         firstColumn.setFooter("").setTextAlign(ColumnTextAlign.CENTER);
         var footerRow = grid.prependFooterRow();
@@ -978,6 +989,17 @@ public class HeaderFooterTest {
                 prependFooterColumnGroup.getTextAlign());
         Assert.assertEquals(ColumnTextAlign.END,
                 appendFooterColumnGroup.getTextAlign());
+    }
+
+    @Test
+    public void gridWithJoinedFooters_textAlignSetToChildColumn_textAlignShouldNotPropagate() {
+        firstColumn.setFooter("");
+        secondColumn.setFooter("");
+        var footerRow = grid.appendFooterRow();
+
+        var joinedCell = footerRow.join(firstColumn, secondColumn);
+        firstColumn.setTextAlign(ColumnTextAlign.CENTER);
+        Assert.assertNotEquals(ColumnTextAlign.CENTER, joinedCell.getColumn().getTextAlign());
     }
 
     private void assertHeaderRowOrder(HeaderRow... rows) {
