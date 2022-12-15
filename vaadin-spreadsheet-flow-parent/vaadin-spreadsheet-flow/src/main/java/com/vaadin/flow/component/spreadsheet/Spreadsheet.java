@@ -1678,6 +1678,13 @@ public class Spreadsheet extends Component
             overlays.clear();
             loadOrUpdateOverlays();
         }
+
+        if (componentIDtoCellKeysMap != null || cellKeysToEditorIdMap != null) {
+            // The node id's of custom components may no longer be valid after a
+            // detach/attach. Remove all custom components and reload them (with
+            // updated node id's).
+            loadCustomComponents();
+        }
     }
 
     /**
