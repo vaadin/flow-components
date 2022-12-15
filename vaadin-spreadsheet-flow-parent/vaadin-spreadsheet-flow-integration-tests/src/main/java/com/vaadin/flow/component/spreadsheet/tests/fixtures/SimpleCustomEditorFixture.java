@@ -167,7 +167,7 @@ public class SimpleCustomEditorFixture implements SpreadsheetFixture {
 
         private final int columnIndex;
 
-        private String headerText;
+        private final String headerText;
 
         EditorType(int columnIndex, String headerText) {
             this.columnIndex = columnIndex;
