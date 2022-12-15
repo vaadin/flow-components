@@ -18,6 +18,7 @@ package com.vaadin.flow.component.textfield;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.CompositionNotifier;
+import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
@@ -56,8 +57,8 @@ import com.vaadin.flow.shared.Registration;
 @NpmPackage(value = "@vaadin/password-field", version = "24.0.0-alpha6")
 @JsModule("@vaadin/password-field/src/vaadin-password-field.js")
 public class PasswordField
-        extends GeneratedVaadinTextField<PasswordField, String>
-        implements CompositionNotifier, HasAllowedCharPattern,
+        extends GeneratedVaadinTextField<PasswordField, String> implements
+        CompositionNotifier, Focusable<PasswordField>, HasAllowedCharPattern,
         HasAutocapitalize, HasAutocomplete, HasAutocorrect, HasClearButton,
         HasClientValidation, HasHelper, HasLabel, HasPrefixAndSuffix, HasSize,
         HasStyle, HasThemeVariant<TextFieldVariant>, HasTooltip, HasValidation,
