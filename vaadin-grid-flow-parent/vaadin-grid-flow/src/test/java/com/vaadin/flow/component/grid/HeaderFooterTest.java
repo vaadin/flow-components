@@ -909,7 +909,8 @@ public class HeaderFooterTest {
 
         var joinedCell = headerRow.join(firstColumn, secondColumn);
         firstColumn.setTextAlign(ColumnTextAlign.CENTER);
-        Assert.assertNotEquals(ColumnTextAlign.CENTER, joinedCell.getColumn().getTextAlign());
+        Assert.assertNotEquals(ColumnTextAlign.CENTER,
+                joinedCell.getColumn().getTextAlign());
     }
 
     @Test
@@ -999,7 +1000,8 @@ public class HeaderFooterTest {
 
         var joinedCell = footerRow.join(firstColumn, secondColumn);
         firstColumn.setTextAlign(ColumnTextAlign.CENTER);
-        Assert.assertNotEquals(ColumnTextAlign.CENTER, joinedCell.getColumn().getTextAlign());
+        Assert.assertNotEquals(ColumnTextAlign.CENTER,
+                joinedCell.getColumn().getTextAlign());
     }
 
     private void assertHeaderRowOrder(HeaderRow... rows) {
