@@ -224,7 +224,7 @@ public class RichTextEditor
      * @return the {@code htmlValue} property from the webcomponent
      */
     @Synchronize(property = "htmlValue", value = "html-value-changed")
-    protected String getHtmlValueString() {
+    private String getHtmlValueString() {
         return getElement().getProperty("htmlValue");
     }
 
