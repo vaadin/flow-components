@@ -27,11 +27,18 @@ import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.DomEvent;
+import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.dom.DomEventListener;
 import com.vaadin.flow.dom.Element;
@@ -56,7 +63,12 @@ import elemental.json.JsonType;
  *
  * @author Vaadin Ltd.
  */
-public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
+@Tag("vaadin-upload")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha6")
+@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@NpmPackage(value = "@vaadin/upload", version = "24.0.0-alpha6")
+@JsModule("@vaadin/upload/src/vaadin-upload.js")
+public class Upload extends Component implements HasSize, HasStyle {
 
     /**
      * Server-side component for the default {@code <vaadin-upload>} icon.
@@ -188,7 +200,7 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
      *            the maximum number of files allowed for the user to select
      */
     public void setMaxFiles(int maxFiles) {
-        super.setMaxFiles(maxFiles);
+        getElement().setProperty("maxFiles", maxFiles);
     }
 
     /**
@@ -197,7 +209,7 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
      * @return the maximum number of files
      */
     public int getMaxFiles() {
-        return (int) getMaxFilesDouble();
+        return (int) getElement().getProperty("maxFiles", 0.0);
     }
 
     /**
@@ -209,7 +221,7 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
      *            the maximum file size in bytes
      */
     public void setMaxFileSize(int maxFileSize) {
-        super.setMaxFileSize(maxFileSize);
+        getElement().setProperty("maxFileSize", maxFileSize);
     }
 
     /**
@@ -218,7 +230,7 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
      * @return the maximum file size in bytes
      */
     public int getMaxFileSize() {
-        return (int) getMaxFileSizeDouble();
+        return (int) getElement().getProperty("maxFileSize", 0.0);
     }
 
     /**
@@ -230,7 +242,7 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
      *            selecting files, <code>false</code> otherwise.
      */
     public void setAutoUpload(boolean autoUpload) {
-        setNoAuto(!autoUpload);
+        getElement().setProperty("noAuto", !autoUpload);
     }
 
     /**
@@ -240,7 +252,7 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
      *         after they are selected, <code>false</code> otherwise.
      */
     public boolean isAutoUpload() {
-        return isNoAutoBoolean();
+        return !getElement().getProperty("noAuto", false);
     }
 
     /**
@@ -255,7 +267,7 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
      *            otherwise
      */
     public void setDropAllowed(boolean dropAllowed) {
-        setNodrop(!dropAllowed);
+        getElement().setProperty("nodrop", !dropAllowed);
     }
 
     /**
@@ -267,7 +279,7 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
      *         otherwise.
      */
     public boolean isDropAllowed() {
-        return !isNodropBoolean();
+        return !getElement().getProperty("nodrop", false);
     }
 
     /**
@@ -288,7 +300,7 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
         if (acceptedFileTypes != null) {
             accepted = String.join(",", acceptedFileTypes);
         }
-        setAccept(accepted);
+        getElement().setProperty("accept", accepted);
     }
 
     /**
@@ -297,7 +309,7 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
      * @return a list of allowed file types, never <code>null</code>.
      */
     public List<String> getAcceptedFileTypes() {
-        String accepted = getAcceptString();
+        String accepted = getElement().getProperty("accept");
         if (accepted == null) {
             return Collections.emptyList();
         }
@@ -491,6 +503,517 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
      */
     protected void fireUpdateProgress(long totalBytes, long contentLength) {
         fireEvent(new ProgressUpdateEvent(this, totalBytes, contentLength));
+    }
+
+    @DomEvent("file-reject")
+    public static class FileRejectEvent extends ComponentEvent<Upload> {
+        private final JsonObject detail;
+        private final JsonObject detailFile;
+        private final String detailError;
+
+        public FileRejectEvent(Upload source, boolean fromClient,
+                @EventData("event.detail") JsonObject detail,
+                @EventData("event.detail.file") JsonObject detailFile,
+                @EventData("event.detail.error") String detailError) {
+            super(source, fromClient);
+            this.detail = detail;
+            this.detailFile = detailFile;
+            this.detailError = detailError;
+        }
+
+        public JsonObject getDetail() {
+            return detail;
+        }
+
+        public JsonObject getDetailFile() {
+            return detailFile;
+        }
+
+        public String getDetailError() {
+            return detailError;
+        }
+    }
+
+    /**
+     * Adds a listener for {@code file-reject} events fired by the webcomponent.
+     *
+     * @param listener
+     *            the listener
+     * @return a {@link Registration} for removing the event listener
+     */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    protected Registration addFileRejectListener(
+            ComponentEventListener<FileRejectEvent> listener) {
+        return addListener(FileRejectEvent.class,
+                (ComponentEventListener) listener);
+    }
+
+    @DomEvent("upload-abort")
+    public static class UploadAbortEvent extends ComponentEvent<Upload> {
+        private final JsonObject detail;
+        private final JsonObject detailXhr;
+        private final JsonObject detailFile;
+
+        public UploadAbortEvent(Upload source, boolean fromClient,
+                @EventData("event.detail") JsonObject detail,
+                @EventData("event.detail.xhr") JsonObject detailXhr,
+                @EventData("event.detail.file") JsonObject detailFile) {
+            super(source, fromClient);
+            this.detail = detail;
+            this.detailXhr = detailXhr;
+            this.detailFile = detailFile;
+        }
+
+        public JsonObject getDetail() {
+            return detail;
+        }
+
+        public JsonObject getDetailXhr() {
+            return detailXhr;
+        }
+
+        public JsonObject getDetailFile() {
+            return detailFile;
+        }
+    }
+
+    /**
+     * Adds a listener for {@code upload-abort} events fired by the
+     * webcomponent.
+     *
+     * @param listener
+     *            the listener
+     * @return a {@link Registration} for removing the event listener
+     */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    protected Registration addUploadAbortListener(
+            ComponentEventListener<UploadAbortEvent> listener) {
+        return addListener(UploadAbortEvent.class,
+                (ComponentEventListener) listener);
+    }
+
+    @DomEvent("upload-before")
+    public static class UploadBeforeEvent extends ComponentEvent<Upload> {
+        private final JsonObject detail;
+        private final JsonObject detailXhr;
+        private final JsonObject detailFile;
+        private final JsonObject detailFileUploadTarget;
+
+        public UploadBeforeEvent(Upload source, boolean fromClient,
+                @EventData("event.detail") JsonObject detail,
+                @EventData("event.detail.xhr") JsonObject detailXhr,
+                @EventData("event.detail.file") JsonObject detailFile,
+                @EventData("event.detail.file.uploadTarget") JsonObject detailFileUploadTarget) {
+            super(source, fromClient);
+            this.detail = detail;
+            this.detailXhr = detailXhr;
+            this.detailFile = detailFile;
+            this.detailFileUploadTarget = detailFileUploadTarget;
+        }
+
+        public JsonObject getDetail() {
+            return detail;
+        }
+
+        public JsonObject getDetailXhr() {
+            return detailXhr;
+        }
+
+        public JsonObject getDetailFile() {
+            return detailFile;
+        }
+
+        public JsonObject getDetailFileUploadTarget() {
+            return detailFileUploadTarget;
+        }
+    }
+
+    /**
+     * Adds a listener for {@code upload-before} events fired by the
+     * webcomponent.
+     *
+     * @param listener
+     *            the listener
+     * @return a {@link Registration} for removing the event listener
+     */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    protected Registration addUploadBeforeListener(
+            ComponentEventListener<UploadBeforeEvent> listener) {
+        return addListener(UploadBeforeEvent.class,
+                (ComponentEventListener) listener);
+    }
+
+    @DomEvent("upload-error")
+    public static class UploadErrorEvent extends ComponentEvent<Upload> {
+        private final JsonObject detail;
+        private final JsonObject detailXhr;
+        private final JsonObject detailFile;
+
+        public UploadErrorEvent(Upload source, boolean fromClient,
+                @EventData("event.detail") JsonObject detail,
+                @EventData("event.detail.xhr") JsonObject detailXhr,
+                @EventData("event.detail.file") JsonObject detailFile) {
+            super(source, fromClient);
+            this.detail = detail;
+            this.detailXhr = detailXhr;
+            this.detailFile = detailFile;
+        }
+
+        public JsonObject getDetail() {
+            return detail;
+        }
+
+        public JsonObject getDetailXhr() {
+            return detailXhr;
+        }
+
+        public JsonObject getDetailFile() {
+            return detailFile;
+        }
+    }
+
+    /**
+     * Adds a listener for {@code upload-error} events fired by the
+     * webcomponent.
+     *
+     * @param listener
+     *            the listener
+     * @return a {@link Registration} for removing the event listener
+     */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    protected Registration addUploadErrorListener(
+            ComponentEventListener<UploadErrorEvent> listener) {
+        return addListener(UploadErrorEvent.class,
+                (ComponentEventListener) listener);
+    }
+
+    @DomEvent("upload-progress")
+    public static class UploadProgressEvent extends ComponentEvent<Upload> {
+        private final JsonObject detail;
+        private final JsonObject detailXhr;
+        private final JsonObject detailFile;
+
+        public UploadProgressEvent(Upload source, boolean fromClient,
+                @EventData("event.detail") JsonObject detail,
+                @EventData("event.detail.xhr") JsonObject detailXhr,
+                @EventData("event.detail.file") JsonObject detailFile) {
+            super(source, fromClient);
+            this.detail = detail;
+            this.detailXhr = detailXhr;
+            this.detailFile = detailFile;
+        }
+
+        public JsonObject getDetail() {
+            return detail;
+        }
+
+        public JsonObject getDetailXhr() {
+            return detailXhr;
+        }
+
+        public JsonObject getDetailFile() {
+            return detailFile;
+        }
+    }
+
+    /**
+     * Adds a listener for {@code upload-progress} events fired by the
+     * webcomponent.
+     *
+     * @param listener
+     *            the listener
+     * @return a {@link Registration} for removing the event listener
+     */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    protected Registration addUploadProgressListener(
+            ComponentEventListener<UploadProgressEvent> listener) {
+        return addListener(UploadProgressEvent.class,
+                (ComponentEventListener) listener);
+    }
+
+    @DomEvent("upload-request")
+    public static class UploadRequestEvent extends ComponentEvent<Upload> {
+        private final JsonObject detail;
+        private final JsonObject detailXhr;
+        private final JsonObject detailFile;
+        private final JsonObject detailFormData;
+
+        public UploadRequestEvent(Upload source, boolean fromClient,
+                @EventData("event.detail") JsonObject detail,
+                @EventData("event.detail.xhr") JsonObject detailXhr,
+                @EventData("event.detail.file") JsonObject detailFile,
+                @EventData("event.detail.formData") JsonObject detailFormData) {
+            super(source, fromClient);
+            this.detail = detail;
+            this.detailXhr = detailXhr;
+            this.detailFile = detailFile;
+            this.detailFormData = detailFormData;
+        }
+
+        public JsonObject getDetail() {
+            return detail;
+        }
+
+        public JsonObject getDetailXhr() {
+            return detailXhr;
+        }
+
+        public JsonObject getDetailFile() {
+            return detailFile;
+        }
+
+        public JsonObject getDetailFormData() {
+            return detailFormData;
+        }
+    }
+
+    /**
+     * Adds a listener for {@code upload-request} events fired by the
+     * webcomponent.
+     *
+     * @param listener
+     *            the listener
+     * @return a {@link Registration} for removing the event listener
+     */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    protected Registration addUploadRequestListener(
+            ComponentEventListener<UploadRequestEvent> listener) {
+        return addListener(UploadRequestEvent.class,
+                (ComponentEventListener) listener);
+    }
+
+    @DomEvent("upload-response")
+    public static class UploadResponseEvent extends ComponentEvent<Upload> {
+        private final JsonObject detail;
+        private final JsonObject detailXhr;
+        private final JsonObject detailFile;
+
+        public UploadResponseEvent(Upload source, boolean fromClient,
+                @EventData("event.detail") JsonObject detail,
+                @EventData("event.detail.xhr") JsonObject detailXhr,
+                @EventData("event.detail.file") JsonObject detailFile) {
+            super(source, fromClient);
+            this.detail = detail;
+            this.detailXhr = detailXhr;
+            this.detailFile = detailFile;
+        }
+
+        public JsonObject getDetail() {
+            return detail;
+        }
+
+        public JsonObject getDetailXhr() {
+            return detailXhr;
+        }
+
+        public JsonObject getDetailFile() {
+            return detailFile;
+        }
+    }
+
+    /**
+     * Adds a listener for {@code upload-response} events fired by the
+     * webcomponent.
+     *
+     * @param listener
+     *            the listener
+     * @return a {@link Registration} for removing the event listener
+     */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    protected Registration addUploadResponseListener(
+            ComponentEventListener<UploadResponseEvent> listener) {
+        return addListener(UploadResponseEvent.class,
+                (ComponentEventListener) listener);
+    }
+
+    @DomEvent("upload-retry")
+    public static class UploadRetryEvent extends ComponentEvent<Upload> {
+        private final JsonObject detail;
+        private final JsonObject detailXhr;
+        private final JsonObject detailFile;
+
+        public UploadRetryEvent(Upload source, boolean fromClient,
+                @EventData("event.detail") JsonObject detail,
+                @EventData("event.detail.xhr") JsonObject detailXhr,
+                @EventData("event.detail.file") JsonObject detailFile) {
+            super(source, fromClient);
+            this.detail = detail;
+            this.detailXhr = detailXhr;
+            this.detailFile = detailFile;
+        }
+
+        public JsonObject getDetail() {
+            return detail;
+        }
+
+        public JsonObject getDetailXhr() {
+            return detailXhr;
+        }
+
+        public JsonObject getDetailFile() {
+            return detailFile;
+        }
+    }
+
+    /**
+     * Adds a listener for {@code upload-retry} events fired by the
+     * webcomponent.
+     *
+     * @param listener
+     *            the listener
+     * @return a {@link Registration} for removing the event listener
+     */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    protected Registration addUploadRetryListener(
+            ComponentEventListener<UploadRetryEvent> listener) {
+        return addListener(UploadRetryEvent.class,
+                (ComponentEventListener) listener);
+    }
+
+    @DomEvent("upload-start")
+    public static class UploadStartEvent extends ComponentEvent<Upload> {
+        private final JsonObject detail;
+        private final JsonObject detailXhr;
+        private final JsonObject detailFile;
+
+        public UploadStartEvent(Upload source, boolean fromClient,
+                @EventData("event.detail") JsonObject detail,
+                @EventData("event.detail.xhr") JsonObject detailXhr,
+                @EventData("event.detail.file") JsonObject detailFile) {
+            super(source, fromClient);
+            this.detail = detail;
+            this.detailXhr = detailXhr;
+            this.detailFile = detailFile;
+        }
+
+        public JsonObject getDetail() {
+            return detail;
+        }
+
+        public JsonObject getDetailXhr() {
+            return detailXhr;
+        }
+
+        public JsonObject getDetailFile() {
+            return detailFile;
+        }
+    }
+
+    /**
+     * Adds a listener for {@code upload-start} events fired by the
+     * webcomponent.
+     *
+     * @param listener
+     *            the listener
+     * @return a {@link Registration} for removing the event listener
+     */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    protected Registration addUploadStartListener(
+            ComponentEventListener<UploadStartEvent> listener) {
+        return addListener(UploadStartEvent.class,
+                (ComponentEventListener) listener);
+    }
+
+    @DomEvent("upload-success")
+    public static class UploadSuccessEvent extends ComponentEvent<Upload> {
+        private final JsonObject detail;
+        private final JsonObject detailXhr;
+        private final JsonObject detailFile;
+
+        public UploadSuccessEvent(Upload source, boolean fromClient,
+                @EventData("event.detail") JsonObject detail,
+                @EventData("event.detail.xhr") JsonObject detailXhr,
+                @EventData("event.detail.file") JsonObject detailFile) {
+            super(source, fromClient);
+            this.detail = detail;
+            this.detailXhr = detailXhr;
+            this.detailFile = detailFile;
+        }
+
+        public JsonObject getDetail() {
+            return detail;
+        }
+
+        public JsonObject getDetailXhr() {
+            return detailXhr;
+        }
+
+        public JsonObject getDetailFile() {
+            return detailFile;
+        }
+    }
+
+    /**
+     * Adds a listener for {@code upload-success} events fired by the
+     * webcomponent.
+     *
+     * @param listener
+     *            the listener
+     * @return a {@link Registration} for removing the event listener
+     */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    protected Registration addUploadSuccessListener(
+            ComponentEventListener<UploadSuccessEvent> listener) {
+        return addListener(UploadSuccessEvent.class,
+                (ComponentEventListener) listener);
+    }
+
+    public static class FilesChangeEvent extends ComponentEvent<Upload> {
+        private final JsonArray files;
+
+        public FilesChangeEvent(Upload source, boolean fromClient) {
+            super(source, fromClient);
+            this.files = source.getFilesJsonArray();
+        }
+
+        public JsonArray getFiles() {
+            return files;
+        }
+    }
+
+    /**
+     * Adds a listener for {@code files-changed} events fired by the
+     * webcomponent.
+     *
+     * @param listener
+     *            the listener
+     * @return a {@link Registration} for removing the event listener
+     */
+    protected Registration addFilesChangeListener(
+            ComponentEventListener<FilesChangeEvent> listener) {
+        return getElement().addPropertyChangeListener("files",
+                event -> listener.onComponentEvent(
+                        new FilesChangeEvent(this, event.isUserOriginated())));
+    }
+
+    public static class MaxFilesReachedChangeEvent
+            extends ComponentEvent<Upload> {
+        private final boolean maxFilesReached;
+
+        public MaxFilesReachedChangeEvent(Upload source, boolean fromClient) {
+            super(source, fromClient);
+            this.maxFilesReached = source.isMaxFilesReachedBoolean();
+        }
+
+        public boolean isMaxFilesReached() {
+            return maxFilesReached;
+        }
+    }
+
+    /**
+     * Adds a listener for {@code max-files-reached-changed} events fired by the
+     * webcomponent.
+     *
+     * @param listener
+     *            the listener
+     * @return a {@link Registration} for removing the event listener
+     */
+    protected Registration addMaxFilesReachedChangeListener(
+            ComponentEventListener<MaxFilesReachedChangeEvent> listener) {
+        return getElement().addPropertyChangeListener("maxFilesReached",
+                event -> listener
+                        .onComponentEvent(new MaxFilesReachedChangeEvent(this,
+                                event.isUserOriginated())));
     }
 
     /**
@@ -710,7 +1233,27 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
      * Clear the list of files being processed, or already uploaded.
      */
     public void clearFileList() {
-        setFiles(Json.createArray());
+        getElement().setPropertyJson("files", Json.createArray());
+    }
+
+    /**
+     * The array of files being processed, or already uploaded.
+     *
+     * @return the {@code files} property from the webcomponent
+     */
+    @Synchronize(property = "files", value = "files-changed")
+    protected JsonArray getFilesJsonArray() {
+        return (JsonArray) getElement().getPropertyRaw("files");
+    }
+
+    /**
+     * Specifies if the maximum number of files have been uploaded
+     *
+     * @return the {@code maxFilesReached} property from the webcomponent
+     */
+    @Synchronize(property = "maxFilesReached", value = "max-files-reached-changed")
+    protected boolean isMaxFilesReachedBoolean() {
+        return getElement().getProperty("maxFilesReached", false);
     }
 
     private static class DefaultStreamVariable implements StreamVariable {
