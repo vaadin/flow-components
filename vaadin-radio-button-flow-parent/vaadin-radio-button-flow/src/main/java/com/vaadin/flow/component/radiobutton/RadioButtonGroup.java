@@ -705,7 +705,7 @@ public class RadioButtonGroup<T>
      * @param disabled
      *            the boolean value to set
      */
-    protected void setDisabled(boolean disabled) {
+    private void setDisabled(boolean disabled) {
         getElement().setProperty("disabled", disabled);
     }
 
@@ -714,12 +714,12 @@ public class RadioButtonGroup<T>
      *
      * @return the {@code disabled} property from the webcomponent
      */
-    protected boolean isDisabledBoolean() {
+    private boolean isDisabled() {
         return getElement().getProperty("disabled", false);
     }
 
     private void updateEnabled(RadioButton<T> button) {
-        boolean disabled = isDisabledBoolean()
+        boolean disabled = isDisabled()
                 || !getItemEnabledProvider().test(button.getItem());
 
         if (this.isReadOnly() && !button.isCheckedBoolean()) {
