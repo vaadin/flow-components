@@ -112,7 +112,7 @@ class ColumnGroupHelpers {
      * @param source
      *            list of columns the text align values are copied from
      * @param destination
-     *            list of columns the text align values are copied tox
+     *            list of columns the text align values are copied to
      */
     public static void propagateTextAlign(List<AbstractColumn<?>> source,
             List<AbstractColumn<?>> destination) {
