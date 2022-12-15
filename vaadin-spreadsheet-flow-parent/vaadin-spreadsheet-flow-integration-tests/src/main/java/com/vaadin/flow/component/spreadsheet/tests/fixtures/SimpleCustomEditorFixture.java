@@ -165,7 +165,7 @@ public class SimpleCustomEditorFixture implements SpreadsheetFixture {
                 "DatePicker"), TEXT_AREA(4,
                         "TextArea"), COMBO_BOX(5, "ComboBox");
 
-        private int columnIndex;
+        private final int columnIndex;
 
         private String headerText;
 
