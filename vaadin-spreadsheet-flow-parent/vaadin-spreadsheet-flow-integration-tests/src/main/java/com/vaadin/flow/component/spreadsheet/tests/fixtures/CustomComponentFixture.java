@@ -24,7 +24,7 @@ public class CustomComponentFixture implements SpreadsheetFixture {
                 .setSpreadsheetComponentFactory(new CustomComponentFactory());
     }
 
-    private class CustomComponentFactory
+    private static class CustomComponentFactory
             implements SpreadsheetComponentFactory {
 
         private final Button button = new Button("Click",
