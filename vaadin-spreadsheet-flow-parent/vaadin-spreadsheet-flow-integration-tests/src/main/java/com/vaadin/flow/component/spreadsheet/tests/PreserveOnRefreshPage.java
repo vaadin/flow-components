@@ -73,7 +73,7 @@ public class PreserveOnRefreshPage extends Div {
         add(spreadsheet);
     }
 
-    private class CustomComponentFactory
+    private static class CustomComponentFactory
             implements SpreadsheetComponentFactory {
 
         private final Button button = new Button("Click",
