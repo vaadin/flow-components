@@ -83,6 +83,9 @@ public class ComponentDataGenerator<T>
             nodeId = oldRenderedComponent.getElement().getNode().getId();
         } else {
             Component renderedComponent = createComponent(item);
+            if (renderedComponent == null) {
+                return;
+            }
             if (renderedComponent.getParent().isPresent()) {
                 LoggerFactory.getLogger(ComponentDataGenerator.class).warn(
                         "The 'createComponent' method returned a component '{}' which already has a parent."
