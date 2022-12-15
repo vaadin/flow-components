@@ -15,10 +15,12 @@
  */
 package com.vaadin.flow.component.splitlayout;
 
+import com.vaadin.flow.component.shared.ThemeVariant;
+
 /**
  * Set of theme variants applicable for {@code vaadin-split-layout} component.
  */
-public enum SplitLayoutVariant {
+public enum SplitLayoutVariant implements ThemeVariant {
     LUMO_SMALL("small"), LUMO_MINIMAL("minimal");
 
     private final String variant;
