@@ -64,7 +64,7 @@ public class ComponentDataGenerator<T>
     }
 
     @Tag("div")
-    private class EmptySlot extends Component {
+    private static class EmptySlot extends Component {
     }
 
     @Override
@@ -88,10 +88,6 @@ public class ComponentDataGenerator<T>
             nodeId = oldRenderedComponent.getElement().getNode().getId();
         } else {
             Component renderedComponent = createComponent(item);
-
-            if (renderedComponent == null) {
-                renderedComponent = new EmptySlot();
-            }
             if (renderedComponent.getParent().isPresent()) {
                 LoggerFactory.getLogger(ComponentDataGenerator.class).warn(
                         "The 'createComponent' method returned a component '{}' which already has a parent."
@@ -109,7 +105,11 @@ public class ComponentDataGenerator<T>
 
     @Override
     protected Component createComponent(T item) {
-        return componentRenderer.createComponent(item);
+        Component c = componentRenderer.createComponent(item);
+        if (c == null) {
+            c = new EmptySlot();
+        }
+        return c;
     }
 
     @Override
