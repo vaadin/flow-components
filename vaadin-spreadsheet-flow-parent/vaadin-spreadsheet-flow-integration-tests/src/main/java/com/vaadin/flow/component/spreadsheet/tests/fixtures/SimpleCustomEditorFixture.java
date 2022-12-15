@@ -32,7 +32,8 @@ public class SimpleCustomEditorFixture implements SpreadsheetFixture {
         spreadsheet.setSpreadsheetComponentFactory(new CustomEditorFactory());
     }
 
-    private static class CustomEditorFactory implements SpreadsheetComponentFactory {
+    private static class CustomEditorFactory
+            implements SpreadsheetComponentFactory {
 
         private TextField textField;
 
