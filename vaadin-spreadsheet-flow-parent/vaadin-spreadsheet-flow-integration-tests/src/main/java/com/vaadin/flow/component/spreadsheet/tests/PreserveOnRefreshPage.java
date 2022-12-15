@@ -102,7 +102,7 @@ public class PreserveOnRefreshPage extends Div {
         }
     }
 
-    private class CustomEditorFactory implements SpreadsheetComponentFactory {
+    private static class CustomEditorFactory implements SpreadsheetComponentFactory {
 
         private TextField textField;
 
