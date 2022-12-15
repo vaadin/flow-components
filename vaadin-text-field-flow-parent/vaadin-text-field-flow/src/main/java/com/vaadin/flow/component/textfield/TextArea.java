@@ -78,7 +78,6 @@ public class TextArea extends AbstractSinglePropertyField<TextArea, String>
         super("value", "", false);
 
         if (getElement().getProperty("value") == null) {
-            setModelValue("", false);
             setPresentationValue("");
         }
 
