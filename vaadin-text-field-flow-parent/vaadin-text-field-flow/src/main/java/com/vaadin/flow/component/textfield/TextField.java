@@ -16,30 +16,16 @@
 package com.vaadin.flow.component.textfield;
 
 import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.CompositionNotifier;
-import com.vaadin.flow.component.Focusable;
-import com.vaadin.flow.component.HasHelper;
-import com.vaadin.flow.component.HasLabel;
-import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.HasValidation;
-import com.vaadin.flow.component.InputNotifier;
-import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
-import com.vaadin.flow.component.shared.HasClearButton;
-import com.vaadin.flow.component.shared.HasClientValidation;
-import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.ClientValidationUtil;
-import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
 import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.binder.Validator;
-import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.shared.Registration;
 
@@ -54,13 +40,8 @@ import com.vaadin.flow.shared.Registration;
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/text-field", version = "24.0.0-alpha6")
 @JsModule("@vaadin/text-field/src/vaadin-text-field.js")
-public class TextField extends GeneratedVaadinTextField<TextField, String>
-        implements CompositionNotifier, Focusable<TextField>,
-        HasAllowedCharPattern, HasAutocapitalize, HasAutocomplete,
-        HasAutocorrect, HasClearButton, HasClientValidation, HasHelper,
-        HasLabel, HasPrefixAndSuffix, HasSize, HasStyle,
-        HasThemeVariant<TextFieldVariant>, HasTooltip, HasValidation,
-        HasValidator<String>, HasValueChangeMode, InputNotifier, KeyNotifier {
+public class TextField extends FieldBase<TextField, String>
+        implements HasAllowedCharPattern, HasValidator<String> {
     private ValueChangeMode currentMode;
 
     private boolean isConnectorAttached;
@@ -241,93 +222,6 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
                 getValueChangeTimeout(), getSynchronizationRegistration());
     }
 
-    @Override
-    public String getErrorMessage() {
-        return super.getErrorMessageString();
-    }
-
-    @Override
-    public void setErrorMessage(String errorMessage) {
-        super.setErrorMessage(errorMessage);
-    }
-
-    @Override
-    public boolean isInvalid() {
-        return isInvalidBoolean();
-    }
-
-    @Override
-    public void setInvalid(boolean invalid) {
-        super.setInvalid(invalid);
-    }
-
-    @Override
-    public void setLabel(String label) {
-        super.setLabel(label);
-    }
-
-    /**
-     * String used for the label element.
-     *
-     * @return the {@code label} property from the webcomponent
-     */
-    @Override
-    public String getLabel() {
-        return getLabelString();
-    }
-
-    @Override
-    public void setPlaceholder(String placeholder) {
-        super.setPlaceholder(placeholder);
-    }
-
-    /**
-     * A hint to the user of what can be entered in the component.
-     *
-     * @return the {@code placeholder} property from the webcomponent
-     */
-    public String getPlaceholder() {
-        return getPlaceholderString();
-    }
-
-    /**
-     * Specifies if the field value gets automatically selected when the field
-     * gains focus.
-     *
-     * @return <code>true</code> if autoselect is active, <code>false</code>
-     *         otherwise
-     */
-    public boolean isAutoselect() {
-        return super.isAutoselectBoolean();
-    }
-
-    /**
-     * Set to <code>true</code> to always have the field value automatically
-     * selected when the field gains focus, <code>false</code> otherwise.
-     *
-     * @param autoselect
-     *            <code>true</code> to set auto select on, <code>false</code>
-     *            otherwise
-     */
-    @Override
-    public void setAutoselect(boolean autoselect) {
-        super.setAutoselect(autoselect);
-    }
-
-    @Override
-    public void setAutofocus(boolean autofocus) {
-        super.setAutofocus(autofocus);
-    }
-
-    /**
-     * Specify that this control should have input focus when the page loads.
-     *
-     * @return the {@code autofocus} property from the webcomponent
-     */
-    public boolean isAutofocus() {
-        return isAutofocusBoolean();
-    }
-
     /**
      * Maximum number of characters (in Unicode code points) that the user can
      * enter.
@@ -370,15 +264,6 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
      */
     public int getMinLength() {
         return (int) getElement().getProperty("minlength", 0.0);
-    }
-
-    /**
-     * Specifies that the user must fill in a value.
-     *
-     * @return the {@code required} property from the webcomponent
-     */
-    public boolean isRequired() {
-        return isRequiredBoolean();
     }
 
     /**
@@ -425,21 +310,6 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
      */
     public String getPattern() {
         return getElement().getProperty("pattern");
-    }
-
-    /**
-     * The text usually displayed in a tooltip popup when the mouse is over the
-     * field.
-     *
-     * @return the {@code title} property from the webcomponent
-     */
-    public String getTitle() {
-        return super.getTitleString();
-    }
-
-    @Override
-    public void setTitle(String title) {
-        super.setTitle(title);
     }
 
     @Override
@@ -500,7 +370,6 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
      * needed because it is possible to circumvent the client-side validation
      * constraints using browser development tools.
      */
-    @Override
     protected void validate() {
         setInvalid(getValidationSupport().isInvalid(getValue()));
     }
