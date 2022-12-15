@@ -17,18 +17,23 @@ package com.vaadin.flow.component.textfield;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.CompositionNotifier;
-import com.vaadin.flow.component.shared.HasAllowedCharPattern;
-import com.vaadin.flow.component.shared.HasClearButton;
-import com.vaadin.flow.component.shared.HasClientValidation;
+import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.flow.component.shared.ClientValidationUtil;
-import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.InputNotifier;
 import com.vaadin.flow.component.KeyNotifier;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasAllowedCharPattern;
+import com.vaadin.flow.component.shared.HasClearButton;
+import com.vaadin.flow.component.shared.HasClientValidation;
+import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.ClientValidationUtil;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
@@ -44,13 +49,18 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author Vaadin Ltd
  */
+@Tag("vaadin-text-field")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha6")
+@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@NpmPackage(value = "@vaadin/text-field", version = "24.0.0-alpha6")
+@JsModule("@vaadin/text-field/src/vaadin-text-field.js")
 public class TextField extends GeneratedVaadinTextField<TextField, String>
-        implements HasSize, HasValidation, HasValueChangeMode,
-        HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
-        HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper, HasLabel,
-        HasClearButton, HasAllowedCharPattern,
-        HasThemeVariant<TextFieldVariant>, HasTooltip, HasValidator<String>,
-        HasClientValidation {
+        implements CompositionNotifier, Focusable<TextField>,
+        HasAllowedCharPattern, HasAutocapitalize, HasAutocomplete,
+        HasAutocorrect, HasClearButton, HasClientValidation, HasHelper,
+        HasLabel, HasPrefixAndSuffix, HasSize, HasStyle,
+        HasThemeVariant<TextFieldVariant>, HasTooltip, HasValidation,
+        HasValidator<String>, HasValueChangeMode, InputNotifier, KeyNotifier {
     private ValueChangeMode currentMode;
 
     private boolean isConnectorAttached;

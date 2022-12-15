@@ -20,12 +20,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.DomEvent;
-import com.vaadin.flow.component.Focusable;
-import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.NotSupported;
-import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableFunction;
@@ -161,14 +156,8 @@ import com.vaadin.flow.shared.Registration;
  * – how to apply styles for shadow parts</a>
  * </p>
  */
-@Tag("vaadin-text-field")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha6")
-@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/text-field", version = "24.0.0-alpha6")
-@JsModule("@vaadin/text-field/src/vaadin-text-field.js")
 public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextField<R, T>, T>
-        extends AbstractSinglePropertyField<R, T>
-        implements HasStyle, Focusable<R> {
+        extends AbstractSinglePropertyField<R, T> {
 
     /**
      * <p>
