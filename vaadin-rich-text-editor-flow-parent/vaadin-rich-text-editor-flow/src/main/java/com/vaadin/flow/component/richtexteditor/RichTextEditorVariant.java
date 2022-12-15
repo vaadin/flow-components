@@ -10,13 +10,18 @@ package com.vaadin.flow.component.richtexteditor;
  * license.
  */
 
+import com.vaadin.flow.component.shared.ThemeVariant;
+
 /**
  * Set of theme variants applicable for {@code vaadin-rich-text-editor}
  * component.
  */
-public enum RichTextEditorVariant {
-    LUMO_NO_BORDER("no-border"), LUMO_COMPACT("compact"), MATERIAL_NO_BORDER(
-            "no-border");
+public enum RichTextEditorVariant implements ThemeVariant {
+    //@formatter:off
+    LUMO_NO_BORDER("no-border"),
+    LUMO_COMPACT("compact"),
+    MATERIAL_NO_BORDER("no-border");
+    //@formatter:on
 
     private final String variant;
 
