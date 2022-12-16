@@ -24,6 +24,7 @@ import java.util.Locale;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.function.SerializableFunction;
 
 /**
@@ -38,7 +39,8 @@ import com.vaadin.flow.function.SerializableFunction;
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/number-field", version = "24.0.0-alpha6")
 @JsModule("@vaadin/number-field/src/vaadin-number-field.js")
-public class NumberField extends AbstractNumberField<NumberField, Double> {
+public class NumberField extends AbstractNumberField<NumberField, Double>
+        implements HasAllowedCharPattern {
 
     /**
      * Constructs an empty {@code NumberField}.
