@@ -50,14 +50,6 @@ public class RadioButtonGroupTest {
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
-    private class RadioButtonWithInitialValue extends
-            GeneratedVaadinRadioGroup<RadioButtonWithInitialValue, String> {
-        RadioButtonWithInitialValue() {
-            super("", null, String.class, (group, value) -> value,
-                    (group, value) -> value, true);
-        }
-    }
-
     @Test
     public void setReadOnlyRadioGroup_groupIsReadOnly() {
         RadioButtonGroup<String> group = new RadioButtonGroup<>();
@@ -305,11 +297,10 @@ public class RadioButtonGroupTest {
 
         Mockito.when(service.getInstantiator()).thenReturn(instantiator);
 
-        Mockito.when(
-                instantiator.createComponent(RadioButtonWithInitialValue.class))
-                .thenAnswer(invocation -> new RadioButtonWithInitialValue());
-        RadioButtonWithInitialValue field = Component.from(element,
-                RadioButtonWithInitialValue.class);
+        Mockito.when(instantiator.createComponent(RadioButtonGroup.class))
+                .thenAnswer(invocation -> new RadioButtonGroup());
+        RadioButtonGroup field = Component.from(element,
+                RadioButtonGroup.class);
         Assert.assertEquals("foo", field.getElement().getPropertyRaw("value"));
     }
 

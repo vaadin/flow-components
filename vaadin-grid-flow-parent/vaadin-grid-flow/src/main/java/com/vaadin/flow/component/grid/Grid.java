@@ -2387,6 +2387,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         List<AbstractColumn<?>> groups = ColumnGroupHelpers
                 .wrapInSeparateColumnGroups(innerLayer.getColumns(), this);
 
+        ColumnGroupHelpers.propagateTextAlign(innerLayer.getColumns(), groups);
+
         ColumnLayer layer = new ColumnLayer(this, groups);
         columnLayers.add(index, layer);
 
@@ -2444,6 +2446,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         List<AbstractColumn<?>> groups = ColumnGroupHelpers
                 .wrapInSeparateColumnGroups(columns, this);
+
+        ColumnGroupHelpers.propagateTextAlign(columns, groups);
 
         ColumnLayer newBottomLayer = new ColumnLayer(this, columns);
 
