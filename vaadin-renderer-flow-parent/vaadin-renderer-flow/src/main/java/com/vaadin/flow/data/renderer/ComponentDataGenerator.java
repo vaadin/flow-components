@@ -18,7 +18,7 @@ package com.vaadin.flow.data.renderer;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.data.provider.AbstractComponentDataGenerator;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.ValueProvider;
@@ -63,10 +63,6 @@ public class ComponentDataGenerator<T>
         this.keyMapper = keyMapper;
     }
 
-    @Tag("div")
-    private static class EmptySlot extends Component {
-    }
-
     @Override
     public void generateData(T item, JsonObject jsonObject) {
         /*
@@ -107,7 +103,7 @@ public class ComponentDataGenerator<T>
     protected Component createComponent(T item) {
         Component c = componentRenderer.createComponent(item);
         if (c == null) {
-            c = new EmptySlot();
+            c = new Text("");
         }
         return c;
     }
