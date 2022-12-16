@@ -276,6 +276,7 @@ public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
     // Override is only required to keep binary compatibility with other 23.x
     // minor versions, will be removed with the method in v24
     @Override
+    @Deprecated
     public void addThemeVariants(ButtonVariant... variants) {
         HasThemeVariant.super.addThemeVariants(variants);
     }
@@ -283,6 +284,7 @@ public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
     // Override is only required to keep binary compatibility with other 23.x
     // minor versions, will be removed with the method in v24
     @Override
+    @Deprecated
     public void removeThemeVariants(ButtonVariant... variants) {
         HasThemeVariant.super.removeThemeVariants(variants);
     }
