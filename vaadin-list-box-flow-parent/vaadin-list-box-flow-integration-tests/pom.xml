@@ -160,7 +160,7 @@
                         <groupId>org.eclipse.jetty</groupId>
                         <artifactId>jetty-maven-plugin</artifactId>
                         <configuration>
-                            <scanIntervalSeconds>5</scanIntervalSeconds>
+                            <scan>5</scan>
                         </configuration>
                     </plugin>
                 </plugins>
