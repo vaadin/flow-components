@@ -50,6 +50,7 @@ then
     for i in $modified
     do
       modules="vaadin-$i-flow-parent/vaadin-$i-flow,vaadin-$i-flow-parent/vaadin-$i-flow-integration-tests,$modules"
+	  USE_MERGED_MODULE=""
       elements="$elements $i"
     done
   fi
