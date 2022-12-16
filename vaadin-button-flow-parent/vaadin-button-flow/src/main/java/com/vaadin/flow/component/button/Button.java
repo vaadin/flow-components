@@ -425,4 +425,13 @@ public class Button extends GeneratedVaadinButton<Button>
         initDisableOnClick();
     }
 
+    @Override
+    public void addThemeVariants(ButtonVariant... variants) {
+        super.addThemeVariants(variants);
+    }
+
+    @Override
+    public void removeThemeVariants(ButtonVariant... variants) {
+        super.removeThemeVariants(variants);
+    }
 }
