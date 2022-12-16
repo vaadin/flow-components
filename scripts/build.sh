@@ -19,7 +19,7 @@ then
       image=*)
         SELENIUM_IMAGE=`echo $i | cut -d = -f2`;;
       *)
-        modules="vaadin-$i-flow-parent/vaadin-$i-flow-integration-tests,$modules"
+        modules="vaadin-$i-flow-parent/vaadin-$i-flow,vaadin-$i-flow-parent/vaadin-$i-flow-integration-tests,$modules"
         elements="$elements $i"
        ;;
      esac
@@ -49,7 +49,7 @@ then
   then
     for i in $modified
     do
-      modules="vaadin-$i-flow-parent/vaadin-$i-flow-integration-tests,$modules"
+      modules="vaadin-$i-flow-parent/vaadin-$i-flow,vaadin-$i-flow-parent/vaadin-$i-flow-integration-tests,$modules"
       elements="$elements $i"
     done
   fi
@@ -185,7 +185,7 @@ fi
 if [ -n "$modules" ] && [ -z "$USE_MERGED_MODULE" ]
 then
   ### Run IT's in original modules
-  cmd="mvn clean $verify -Dfailsafe.forkCount=$FORK_COUNT $args -pl $modules -Dtest=none"
+  cmd="mvn clean -amd $verify -Dfailsafe.forkCount=$FORK_COUNT $args -pl $modules -Dtest=none"
   tcLog "Running module ITs ($elements) - mvn clean $verify -pl ..."
   echo $cmd
   $cmd
