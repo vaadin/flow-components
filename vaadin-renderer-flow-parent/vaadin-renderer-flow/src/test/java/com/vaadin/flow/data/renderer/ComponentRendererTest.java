@@ -28,7 +28,6 @@ import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.internal.UIInternals;
 import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.function.ValueProvider;
 
 import elemental.json.Json;
 import elemental.json.JsonObject;
@@ -131,23 +130,6 @@ public class ComponentRendererTest {
 
         internals.getStateTree().runExecutionsBeforeClientResponse();
 
-    }
-
-    @Test
-    public void nullValues() {
-        ComponentRenderer<Component, String> renderer = new ComponentRenderer<>(
-                e -> {
-                    return null;
-                });
-
-        ValueProvider<String, String> keyMapper = s -> "foo";
-        ComponentDataGenerator cdg = new ComponentDataGenerator<>(renderer,
-                keyMapper);
-
-        Component c = cdg.createComponent("foo");
-        Assert.assertNotNull(
-                "Placeholder component should be generated for null values", c);
-        Assert.assertEquals(0, c.getElement().getChildCount());
     }
 
     private void attachElement(UI ui, Element contentTemplate) {

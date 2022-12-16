@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.data.renderer;
 
-import com.vaadin.flow.component.Text;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.Component;
@@ -101,11 +100,7 @@ public class ComponentDataGenerator<T>
 
     @Override
     protected Component createComponent(T item) {
-        Component c = componentRenderer.createComponent(item);
-        if (c == null) {
-            c = new Text("");
-        }
-        return c;
+        return componentRenderer.createComponent(item);
     }
 
     @Override
