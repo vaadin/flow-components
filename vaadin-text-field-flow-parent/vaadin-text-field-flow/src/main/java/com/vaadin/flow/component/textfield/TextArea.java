@@ -516,18 +516,4 @@ public class TextArea extends AbstractSinglePropertyField<TextArea, String>
         super.onAttach(attachEvent);
         ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
     }
-
-    // Override is only required to keep binary compatibility with other 23.x
-    // minor versions, can be removed in a future major
-    @Override
-    public void addThemeVariants(TextAreaVariant... variants) {
-        HasThemeVariant.super.addThemeVariants(variants);
-    }
-
-    // Override is only required to keep binary compatibility with other 23.x
-    // minor versions, can be removed in a future major
-    @Override
-    public void removeThemeVariants(TextAreaVariant... variants) {
-        HasThemeVariant.super.removeThemeVariants(variants);
-    }
 }

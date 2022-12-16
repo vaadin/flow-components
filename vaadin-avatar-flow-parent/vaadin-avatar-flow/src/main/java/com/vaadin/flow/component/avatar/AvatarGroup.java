@@ -657,18 +657,4 @@ public class AvatarGroup extends Component
 
         return null;
     }
-
-    // Override is only required to keep binary compatibility with other 23.x
-    // minor versions, can be removed in a future major
-    @Override
-    public void addThemeVariants(AvatarGroupVariant... variants) {
-        HasThemeVariant.super.addThemeVariants(variants);
-    }
-
-    // Override is only required to keep binary compatibility with other 23.x
-    // minor versions, can be removed in a future major
-    @Override
-    public void removeThemeVariants(AvatarGroupVariant... variants) {
-        HasThemeVariant.super.removeThemeVariants(variants);
-    }
 }
