@@ -347,7 +347,6 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
 
     private void loadInitialStateDataToWidget(
             StateChangeEvent stateChangeEvent) {
-        // debugger();
         SpreadsheetState state = getState();
         SpreadsheetWidget widget = getWidget();
         setupCustomEditors();
@@ -368,15 +367,13 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
             HashMap<String, Widget> customWidgetMap = new HashMap<String, Widget>();
             if (cellKeysToComponentIdMap != null
                     && !cellKeysToComponentIdMap.isEmpty()) {
-                List<ComponentConnector> childComponents = getChildComponents();
-                for (ComponentConnector cc : childComponents) {
-                    String connectorId = cc.getConnectorId();
-                    if (cellKeysToComponentIdMap.containsKey(connectorId)) {
-                        customWidgetMap.put(
-                                cellKeysToComponentIdMap.get(connectorId),
-                                cc.getWidget());
-                    }
-                }
+                cellKeysToComponentIdMap.forEach((nodeId, key) -> {
+                    var component = SheetJsniUtil.getVirtualChild(nodeId,
+                            host.getPropertyString("appId"));
+                    var slot = new Slot("custom-component-" + nodeId, component,
+                            host);
+                    customWidgetMap.put(key, slot);
+                });
             }
             widget.showCellCustomComponents(customWidgetMap);
         }
@@ -469,13 +466,10 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
                     public Widget getCustomEditor(String key) {
                         String editorId = getState().cellKeysToEditorIdMap
                                 .get(key);
-                        List<ComponentConnector> childComponents = getChildComponents();
-                        for (ComponentConnector cc : childComponents) {
-                            if (editorId.equals(cc.getConnectorId())) {
-                                return cc.getWidget();
-                            }
-                        }
-                        return null;
+                        var editor = SheetJsniUtil.getVirtualChild(editorId,
+                                host.getPropertyString("appId"));
+                        return new Slot("custom-editor-" + editorId, editor,
+                                host);
                     }
 
                 };
