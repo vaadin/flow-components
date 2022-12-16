@@ -19,11 +19,14 @@ package com.vaadin.flow.component.textfield;
 import java.math.BigDecimal;
 import java.util.Objects;
 
+import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.CompositionNotifier;
+import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.InputNotifier;
 import com.vaadin.flow.component.KeyNotifier;
@@ -52,12 +55,12 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T extends Number>
-        extends GeneratedVaadinNumberField<C, T> implements HasSize,
-        HasValidation, HasValueChangeMode, HasPrefixAndSuffix, InputNotifier,
-        KeyNotifier, CompositionNotifier, HasAutocomplete, HasAutocapitalize,
-        HasAutocorrect, HasHelper, HasLabel, HasClearButton,
-        HasAllowedCharPattern, HasThemeVariant<TextFieldVariant>, HasTooltip,
-        HasValidator<T>, HasClientValidation {
+        extends AbstractSinglePropertyField<C, T>
+        implements CompositionNotifier, Focusable<C>, HasAllowedCharPattern,
+        HasAutocapitalize, HasAutocomplete, HasAutocorrect, HasClearButton,
+        HasClientValidation, HasHelper, HasLabel, HasPrefixAndSuffix, HasSize,
+        HasStyle, HasThemeVariant<TextFieldVariant>, HasTooltip, HasValidation,
+        HasValidator<T>, HasValueChangeMode, InputNotifier, KeyNotifier {
 
     private ValueChangeMode currentMode;
 
@@ -80,53 +83,6 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
 
     /**
      * Sets up the common logic for number fields.
-     * <p>
-     * If {@code isInitialValueOptional} is {@code true} then the initial value
-     * is used only if element has no {@code "value"} property value, otherwise
-     * element {@code "value"} property is ignored and the initial value is set.
-     *
-     * @param parser
-     *            function to parse the client-side value string into
-     *            server-side value
-     * @param formatter
-     *            function to format the server-side value into client-side
-     *            value string
-     * @param absoluteMin
-     *            the smallest possible value of the number type of the field,
-     *            will be used as the default min value at server-side
-     * @param absoluteMax
-     *            the largest possible value of the number type of the field,
-     *            will be used as the default max value at server-side
-     * @param isInitialValueOptional
-     *            if {@code isInitialValueOptional} is {@code true} then the
-     *            initial value is used only if element has no {@code "value"}
-     *            property value, otherwise element {@code "value"} property is
-     *            ignored and the initial value is set
-     */
-    public AbstractNumberField(SerializableFunction<String, T> parser,
-            SerializableFunction<T, String> formatter, double absoluteMin,
-            double absoluteMax, boolean isInitialValueOptional) {
-        super(null, null, String.class, parser, formatter,
-                isInitialValueOptional);
-
-        // workaround for https://github.com/vaadin/flow/issues/3496
-        setInvalid(false);
-
-        // Not setting these defaults to the web component, so it will have
-        // undefined as min and max
-        this.min = absoluteMin;
-        this.max = absoluteMax;
-        this.step = 1.0;
-
-        setValueChangeMode(ValueChangeMode.ON_CHANGE);
-
-        addValueChangeListener(e -> validate());
-
-        addClientValidatedEventListener(e -> validate());
-    }
-
-    /**
-     * Sets up the common logic for number fields.
      *
      * @param parser
      *            function to parse the client-side value string into
@@ -144,7 +100,22 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     public AbstractNumberField(SerializableFunction<String, T> parser,
             SerializableFunction<T, String> formatter, double absoluteMin,
             double absoluteMax) {
-        this(parser, formatter, absoluteMin, absoluteMax, false);
+        super("value", null, String.class, parser, formatter);
+
+        // workaround for https://github.com/vaadin/flow/issues/3496
+        setInvalid(false);
+
+        // Not setting these defaults to the web component, so it will have
+        // undefined as min and max
+        this.min = absoluteMin;
+        this.max = absoluteMax;
+        this.step = 1.0;
+
+        setValueChangeMode(ValueChangeMode.ON_CHANGE);
+
+        addValueChangeListener(e -> validate());
+
+        addClientValidatedEventListener(e -> validate());
     }
 
     /**
@@ -181,19 +152,35 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
                 getValueChangeTimeout(), getSynchronizationRegistration());
     }
 
-    @Override
+    /**
+     * Gets the current error message from the checkbox group.
+     *
+     * @return the current error message
+     */
     public String getErrorMessage() {
-        return super.getErrorMessageString();
+        return getElement().getProperty("errorMessage");
     }
 
-    @Override
+    /**
+     * Sets the error message that should be displayed when the component
+     * becomes invalid
+     *
+     * @param errorMessage
+     *            the String value to set
+     */
     public void setErrorMessage(String errorMessage) {
-        super.setErrorMessage(errorMessage);
+        getElement().setProperty("errorMessage",
+                errorMessage == null ? "" : errorMessage);
     }
 
-    @Override
+    /**
+     * Sets the label for the field.
+     *
+     * @param label
+     *            value for the {@code label} property in the field
+     */
     public void setLabel(String label) {
-        super.setLabel(label);
+        getElement().setProperty("label", label == null ? "" : label);
     }
 
     /**
@@ -201,14 +188,20 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
      *
      * @return the {@code label} property from the webcomponent
      */
-    @Override
     public String getLabel() {
-        return getLabelString();
+        return getElement().getProperty("label");
     }
 
-    @Override
+    /**
+     * Sets the placeholder text that should be displayed in the input element,
+     * when the user has not entered a value
+     *
+     * @param placeholder
+     *            the placeholder text
+     */
     public void setPlaceholder(String placeholder) {
-        super.setPlaceholder(placeholder);
+        getElement().setProperty("placeholder",
+                placeholder == null ? "" : placeholder);
     }
 
     /**
@@ -242,12 +235,18 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
      * @return the {@code placeholder} property from the webcomponent
      */
     public String getPlaceholder() {
-        return getPlaceholderString();
+        return getElement().getProperty("placeholder");
     }
 
-    @Override
+    /**
+     * Sets the whether the component should automatically receive focus when
+     * the page loads. Defaults to {@code false}.
+     *
+     * @param autofocus
+     *            {@code true} component should automatically receive focus
+     */
     public void setAutofocus(boolean autofocus) {
-        super.setAutofocus(autofocus);
+        getElement().setProperty("autofocus", autofocus);
     }
 
     /**
@@ -256,7 +255,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
      * @return the {@code autofocus} property from the webcomponent
      */
     public boolean isAutofocus() {
-        return isAutofocusBoolean();
+        return getElement().getProperty("autofocus", false);
     }
 
     /**
@@ -266,12 +265,18 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
      * @return the {@code title} property from the webcomponent
      */
     public String getTitle() {
-        return super.getTitleString();
+        return getElement().getProperty("title");
     }
 
-    @Override
+    /**
+     * The text usually displayed in a tooltip popup when the mouse is over the
+     * field.
+     *
+     * @param title
+     *            the String value to set
+     */
     public void setTitle(String title) {
-        super.setTitle(title);
+        getElement().setProperty("title", title == null ? "" : title);
     }
 
     /**
@@ -282,7 +287,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
      *         otherwise
      */
     public boolean isAutoselect() {
-        return super.isAutoselectBoolean();
+        return getElement().getProperty("autoselect", false);
     }
 
     /**
@@ -293,9 +298,8 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
      *            <code>true</code> to set auto select on, <code>false</code>
      *            otherwise
      */
-    @Override
     public void setAutoselect(boolean autoselect) {
-        super.setAutoselect(autoselect);
+        getElement().setProperty("autoselect", autoselect);
     }
 
     /**
@@ -329,49 +333,80 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         return super.getValue();
     }
 
-    @Override
+    /**
+     * Sets the minimum value of the field.
+     *
+     * @param min
+     *            the double value to set
+     */
     protected void setMin(double min) {
-        super.setMin(min);
+        getElement().setProperty("min", min);
         this.min = min;
         minSetByUser = true;
     }
 
-    @Override
+    /**
+     * The minimum value of the field.
+     */
     protected double getMinDouble() {
         return min;
     }
 
-    @Override
+    /**
+     * Sets the maximum value of the field.
+     *
+     * @param max
+     *            the double value to set
+     */
     protected void setMax(double max) {
-        super.setMax(max);
+        getElement().setProperty("max", max);
         this.max = max;
     }
 
-    @Override
+    /**
+     * The maximum value of the field.
+     */
     protected double getMaxDouble() {
         return max;
     }
 
-    @Override
+    /**
+     * Sets the allowed number intervals of the field.
+     *
+     * @param step
+     *            the double value to set
+     */
     protected void setStep(double step) {
-        super.setStep(step);
+        getElement().setProperty("step", step);
         this.step = step;
         stepSetByUser = true;
     }
 
-    @Override
+    /**
+     * The allowed number intervals of the field.
+     */
     protected double getStepDouble() {
         return step;
     }
 
-    @Override
+    /**
+     * Sets whether the component has an invalid value or not.
+     *
+     *
+     * @param invalid
+     *            {@code true} for invalid, {@code false} for valid
+     */
     public void setInvalid(boolean invalid) {
-        super.setInvalid(invalid);
+        getElement().setProperty("invalid", invalid);
     }
 
-    @Override
+    /**
+     * Whether the component has an invalid value or not.
+     *
+     * @return the {@code invalid} property from the field
+     */
     public boolean isInvalid() {
-        return isInvalidBoolean();
+        return getElement().getProperty("invalid", false);
     }
 
     /**
@@ -432,7 +467,6 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
      * because it is possible to circumvent the client-side validation
      * constraints using browser development tools.
      */
-    @Override
     protected void validate() {
         T value = getValue();
 
