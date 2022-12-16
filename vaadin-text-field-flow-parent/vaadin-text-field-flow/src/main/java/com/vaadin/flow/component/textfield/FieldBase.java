@@ -36,6 +36,7 @@ import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableBiFunction;
+import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -276,6 +277,85 @@ public abstract class FieldBase<TComponent extends FieldBase<TComponent, TValue>
         for (Component component : components) {
             component.getElement().setAttribute("slot", "suffix");
             getElement().appendChild(component.getElement());
+        }
+    }
+
+    /**
+     * Constructs a new component with the given arguments.
+     * <p>
+     * If {@code isInitialValueOptional} is {@code true} then the initial value
+     * is used only if element has no {@code "value"} property value, otherwise
+     * element {@code "value"} property is ignored and the initial value is set.
+     *
+     * @param initialValue
+     *            the initial value to set to the value
+     * @param defaultValue
+     *            the default value to use if the value isn't defined
+     * @param elementPropertyType
+     *            the type of the element property
+     * @param presentationToModel
+     *            a function that converts a string value to a model value
+     * @param modelToPresentation
+     *            a function that converts a model value to a string value
+     *
+     * @param isInitialValueOptional
+     *            if {@code isInitialValueOptional} is {@code true} then the
+     *            initial value is used only if element has no {@code "value"}
+     *            property value, otherwise element {@code "value"} property is
+     *            ignored and the initial value is set
+     * @param <P>
+     *            the property type
+     */
+    public <P> FieldBase(TValue initialValue, TValue defaultValue,
+            Class<P> elementPropertyType,
+            SerializableFunction<P, TValue> presentationToModel,
+            SerializableFunction<TValue, P> modelToPresentation,
+            boolean isInitialValueOptional) {
+        super("value", defaultValue, elementPropertyType, presentationToModel,
+                modelToPresentation);
+        if ((getElement().getProperty("value") == null
+                || !isInitialValueOptional) && initialValue != null) {
+            setPresentationValue(initialValue);
+        }
+    }
+
+    /**
+     * Constructs a new component with the given arguments.
+     * <p>
+     * If {@code isInitialValueOptional} is {@code true} then the initial value
+     * is used only if element has no {@code "value"} property value, otherwise
+     * element {@code "value"} property is ignored and the initial value is set.
+     *
+     * @param initialValue
+     *            the initial value to set to the value
+     * @param defaultValue
+     *            the default value to use if the value isn't defined
+     * @param elementPropertyType
+     *            the type of the element property
+     * @param presentationToModel
+     *            a function that accepts this component and a property value
+     *            and returns a model value
+     * @param modelToPresentation
+     *            a function that accepts this component and a model value and
+     *            returns a property value
+     * @param isInitialValueOptional
+     *            if {@code isInitialValueOptional} is {@code true} then the
+     *            initial value is used only if element has no {@code "value"}
+     *            property value, otherwise element {@code "value"} property is
+     *            ignored and the initial value is set
+     * @param <P>
+     *            the property type
+     */
+    public <P> FieldBase(TValue initialValue, TValue defaultValue,
+            Class<P> elementPropertyType,
+            SerializableBiFunction<TComponent, P, TValue> presentationToModel,
+            SerializableBiFunction<TComponent, TValue, P> modelToPresentation,
+            boolean isInitialValueOptional) {
+        super("value", defaultValue, elementPropertyType, presentationToModel,
+                modelToPresentation);
+        if ((getElement().getProperty("value") == null
+                || !isInitialValueOptional) && initialValue != null) {
+            setPresentationValue(initialValue);
         }
     }
 
