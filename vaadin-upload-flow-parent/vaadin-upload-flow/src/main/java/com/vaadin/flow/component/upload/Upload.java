@@ -32,7 +32,6 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -728,26 +727,6 @@ public class Upload extends Component implements HasSize, HasStyle {
      */
     public void clearFileList() {
         getElement().setPropertyJson("files", Json.createArray());
-    }
-
-    /**
-     * The array of files being processed, or already uploaded.
-     *
-     * @return the {@code files} property from the webcomponent
-     */
-    @Synchronize(property = "files", value = "files-changed")
-    private JsonArray getFilesJsonArray() {
-        return (JsonArray) getElement().getPropertyRaw("files");
-    }
-
-    /**
-     * Specifies if the maximum number of files have been uploaded
-     *
-     * @return the {@code maxFilesReached} property from the webcomponent
-     */
-    @Synchronize(property = "maxFilesReached", value = "max-files-reached-changed")
-    private boolean isMaxFilesReachedBoolean() {
-        return getElement().getProperty("maxFilesReached", false);
     }
 
     private static class DefaultStreamVariable implements StreamVariable {
