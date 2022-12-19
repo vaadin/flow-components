@@ -56,11 +56,8 @@ import com.vaadin.flow.shared.Registration;
 public class BigDecimalField
         extends InternalFieldBase<BigDecimalField, BigDecimal>
         implements HasThemeVariant<TextFieldVariant> {
-    private ValueChangeMode currentMode;
 
     private boolean isConnectorAttached;
-
-    private int valueChangeTimeout = DEFAULT_CHANGE_TIMEOUT;
 
     private Locale locale;
 
@@ -195,40 +192,6 @@ public class BigDecimalField
         this(label);
         setValue(initialValue);
         addValueChangeListener(listener);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * The default value is {@link ValueChangeMode#ON_CHANGE}.
-     */
-    @Override
-    public ValueChangeMode getValueChangeMode() {
-        return currentMode;
-    }
-
-    @Override
-    public void setValueChangeMode(ValueChangeMode valueChangeMode) {
-        currentMode = valueChangeMode;
-        setSynchronizedEvent(
-                ValueChangeMode.eventForMode(valueChangeMode, "value-changed"));
-        applyChangeTimeout();
-    }
-
-    @Override
-    public void setValueChangeTimeout(int valueChangeTimeout) {
-        this.valueChangeTimeout = valueChangeTimeout;
-        applyChangeTimeout();
-    }
-
-    @Override
-    public int getValueChangeTimeout() {
-        return valueChangeTimeout;
-    }
-
-    private void applyChangeTimeout() {
-        ValueChangeMode.applyChangeTimeout(getValueChangeMode(),
-                getValueChangeTimeout(), getSynchronizationRegistration());
     }
 
     @Override

@@ -40,10 +40,6 @@ import com.vaadin.flow.shared.Registration;
 public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T extends Number>
         extends InternalFieldBase<C, T> {
 
-    private ValueChangeMode currentMode;
-
-    private int valueChangeTimeout = DEFAULT_CHANGE_TIMEOUT;
-
     private boolean required;
 
     /*
@@ -94,40 +90,6 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         addValueChangeListener(e -> validate());
 
         addClientValidatedEventListener(e -> validate());
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * The default value is {@link ValueChangeMode#ON_CHANGE}.
-     */
-    @Override
-    public ValueChangeMode getValueChangeMode() {
-        return currentMode;
-    }
-
-    @Override
-    public void setValueChangeMode(ValueChangeMode valueChangeMode) {
-        currentMode = valueChangeMode;
-        setSynchronizedEvent(
-                ValueChangeMode.eventForMode(valueChangeMode, "value-changed"));
-        applyChangeTimeout();
-    }
-
-    @Override
-    public void setValueChangeTimeout(int valueChangeTimeout) {
-        this.valueChangeTimeout = valueChangeTimeout;
-        applyChangeTimeout();
-    }
-
-    @Override
-    public int getValueChangeTimeout() {
-        return valueChangeTimeout;
-    }
-
-    private void applyChangeTimeout() {
-        ValueChangeMode.applyChangeTimeout(getValueChangeMode(),
-                getValueChangeTimeout(), getSynchronizationRegistration());
     }
 
     /**
