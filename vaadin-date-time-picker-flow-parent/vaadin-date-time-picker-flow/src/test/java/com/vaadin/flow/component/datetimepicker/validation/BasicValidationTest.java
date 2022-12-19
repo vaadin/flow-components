@@ -13,14 +13,14 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.textfield.validation;
+package com.vaadin.flow.component.datetimepicker.validation;
 
-import com.vaadin.flow.component.textfield.PasswordField;
+import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
-public class PasswordFieldBasicValidationTest
-        extends AbstractBasicValidationTest<PasswordField> {
-    protected PasswordField createTestField() {
-        return new PasswordField();
+public class BasicValidationTest
+        extends AbstractBasicValidationTest<DateTimePicker> {
+    protected DateTimePicker createTestField() {
+        return new DateTimePicker();
     }
 }

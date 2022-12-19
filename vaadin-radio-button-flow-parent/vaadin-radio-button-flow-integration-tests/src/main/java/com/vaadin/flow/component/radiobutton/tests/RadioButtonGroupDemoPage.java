@@ -66,7 +66,6 @@ public class RadioButtonGroupDemoPage extends Div {
     public RadioButtonGroupDemoPage() {
         addBasicFeatures();
         addHelperText();
-        addComponentWithLabelAndErrorMessage();
         addItemRenderer();
         addItemLabelGenerator();
         addItemIconGenerator();
@@ -74,19 +73,6 @@ public class RadioButtonGroupDemoPage extends Div {
         addDisabledItems();
         addReadOnlyGroup();
         addComponentWithThemeVariant();
-    }
-
-    private void addComponentWithLabelAndErrorMessage() {
-        RadioButtonGroup<String> group = new RadioButtonGroup<>();
-        group.setItems("foo", "bar", "baz");
-        group.setLabel("Group label");
-        group.setErrorMessage("Field has been set to invalid from server side");
-        NativeButton button = new NativeButton("Switch validity state",
-                event -> group.setInvalid(!group.isInvalid()));
-
-        group.setId("group-with-label-and-error-message");
-        button.setId("group-with-label-button");
-        addCard("Group with label and error message", group, button);
     }
 
     private void addHelperText() {

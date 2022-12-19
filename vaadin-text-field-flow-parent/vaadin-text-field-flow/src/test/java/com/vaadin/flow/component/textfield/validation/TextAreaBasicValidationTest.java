@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.textfield.validation;
 
 import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
 public class TextAreaBasicValidationTest
         extends AbstractBasicValidationTest<TextArea> {

@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.textfield.validation;
+package com.vaadin.tests.validation;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -22,6 +22,10 @@ import org.junit.Test;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValidation;
 
+/**
+ * An abstract class that provides tests verifying that a component correctly
+ * implements the {@link HasValidation} interface.
+ */
 public abstract class AbstractBasicValidationTest<T extends Component & HasValidation> {
     protected T testField;
 
@@ -45,15 +49,14 @@ public abstract class AbstractBasicValidationTest<T extends Component & HasValid
     @Test
     public void setInvalid_isInvalid() {
         Assert.assertFalse(testField.isInvalid());
-        Assert.assertEquals("false",
-                testField.getElement().getProperty("invalid"));
+        Assert.assertFalse(
+                testField.getElement().getProperty("invalid", false));
 
         testField.setInvalid(true);
 
         Assert.assertTrue(testField.isInvalid());
-        Assert.assertEquals("true",
-                testField.getElement().getProperty("invalid"));
+        Assert.assertTrue(testField.getElement().getProperty("invalid", false));
     }
 
-    abstract protected T createTestField();
+    protected abstract T createTestField();
 }
