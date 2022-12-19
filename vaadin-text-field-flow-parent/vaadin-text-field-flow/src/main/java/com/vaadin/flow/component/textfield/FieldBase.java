@@ -17,10 +17,7 @@ package com.vaadin.flow.component.textfield;
 
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentEvent;
-import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.CompositionNotifier;
-import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasHelper;
@@ -34,10 +31,8 @@ import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.value.HasValueChangeMode;
-import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableFunction;
-import com.vaadin.flow.shared.Registration;
 
 /**
  * Provides base functionality for input field components, such as
