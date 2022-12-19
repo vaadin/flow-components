@@ -106,13 +106,6 @@ public class Upload extends Component implements HasSize, HasStyle {
      * The receiver must be set before performing an upload.
      */
     public Upload() {
-        // Get a server round trip for upload error and success.
-        getElement().addEventListener("upload-error", event -> {
-        });
-
-        getElement().addEventListener("upload-success", event -> {
-        });
-
         final String eventDetailError = "event.detail.error";
         getElement().addEventListener("file-rejected", event -> {
             String detailError = event.getEventData()
