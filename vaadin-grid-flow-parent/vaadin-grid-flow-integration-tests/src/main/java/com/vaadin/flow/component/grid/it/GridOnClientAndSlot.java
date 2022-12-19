@@ -19,7 +19,6 @@ import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.littemplate.LitTemplate;
-import com.vaadin.flow.component.template.Id;
 
 @Tag("grid-on-client-and-slot")
 @JsModule("src/grid-on-client-and-slot.js")

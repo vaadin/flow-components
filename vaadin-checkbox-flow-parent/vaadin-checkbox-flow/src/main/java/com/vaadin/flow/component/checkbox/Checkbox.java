@@ -19,8 +19,6 @@ import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentEvent;
-import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
