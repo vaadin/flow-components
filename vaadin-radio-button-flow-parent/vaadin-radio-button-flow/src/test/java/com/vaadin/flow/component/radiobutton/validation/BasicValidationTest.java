@@ -15,27 +15,11 @@
  */
 package com.vaadin.flow.component.radiobutton.validation;
 
-import org.junit.Before;
-import org.junit.Test;
-
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
-import com.vaadin.tests.validation.HasValidationTestHelper;
+import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
-public class BasicValidationTest {
-    private RadioButtonGroup<String> testField;
-
-    @Before
-    public void setup() {
-        testField = new RadioButtonGroup<>();
-    }
-
-    @Test
-    public void setErrorMessage_getErrorMessage() {
-        HasValidationTestHelper.setErrorMessage_getErrorMessage(testField);
-    }
-
-    @Test
-    public void setInvalid_isInvalid() {
-        HasValidationTestHelper.setInvalid_isInvalid(testField);
+public class BasicValidationTest extends AbstractBasicValidationTest<RadioButtonGroup<String>> {
+    protected RadioButtonGroup<String> createTestField() {
+        return new RadioButtonGroup<String>();
     }
 }

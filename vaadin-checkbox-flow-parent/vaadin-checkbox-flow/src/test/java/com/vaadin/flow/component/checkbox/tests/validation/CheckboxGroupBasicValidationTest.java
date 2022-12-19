@@ -15,27 +15,11 @@
  */
 package com.vaadin.flow.component.checkbox.tests.validation;
 
-import org.junit.Before;
-import org.junit.Test;
-
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
-import com.vaadin.tests.validation.HasValidationTestHelper;
+import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
-public class CheckboxGroupBasicValidationTest {
-    private CheckboxGroup<String> testField;
-
-    @Before
-    public void setup() {
-        testField = new CheckboxGroup<>();
-    }
-
-    @Test
-    public void setErrorMessage_getErrorMessage() {
-        HasValidationTestHelper.setErrorMessage_getErrorMessage(testField);
-    }
-
-    @Test
-    public void setInvalid_isInvalid() {
-        HasValidationTestHelper.setInvalid_isInvalid(testField);
+public class CheckboxGroupBasicValidationTest extends AbstractBasicValidationTest<CheckboxGroup<String>> {
+    protected CheckboxGroup<String> createTestField() {
+        return new CheckboxGroup<String>();
     }
 }

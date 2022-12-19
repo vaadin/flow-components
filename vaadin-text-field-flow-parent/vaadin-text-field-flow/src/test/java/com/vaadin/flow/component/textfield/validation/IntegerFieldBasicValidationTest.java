@@ -15,27 +15,11 @@
  */
 package com.vaadin.flow.component.textfield.validation;
 
-import org.junit.Before;
-import org.junit.Test;
-
 import com.vaadin.flow.component.textfield.IntegerField;
-import com.vaadin.tests.validation.HasValidationTestHelper;
+import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
-public class IntegerFieldBasicValidationTest {
-    private IntegerField testField;
-
-    @Before
-    public void setup() {
-        testField = new IntegerField();
-    }
-
-    @Test
-    public void setErrorMessage_getErrorMessage() {
-        HasValidationTestHelper.setErrorMessage_getErrorMessage(testField);
-    }
-
-    @Test
-    public void setInvalid_isInvalid() {
-        HasValidationTestHelper.setInvalid_isInvalid(testField);
+public class IntegerFieldBasicValidationTest extends AbstractBasicValidationTest<IntegerField> {
+    protected IntegerField createTestField() {
+        return new IntegerField();
     }
 }

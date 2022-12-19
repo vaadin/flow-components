@@ -15,27 +15,11 @@
  */
 package com.vaadin.flow.component.combobox.validation;
 
-import org.junit.Before;
-import org.junit.Test;
-
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
-import com.vaadin.tests.validation.HasValidationTestHelper;
+import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
-public class MultiSelectComboBoxBasicValidationTest {
-    private MultiSelectComboBox<String> testField;
-
-    @Before
-    public void setup() {
-        testField = new MultiSelectComboBox<>();
-    }
-
-    @Test
-    public void setErrorMessage_getErrorMessage() {
-        HasValidationTestHelper.setErrorMessage_getErrorMessage(testField);
-    }
-
-    @Test
-    public void setInvalid_isInvalid() {
-        HasValidationTestHelper.setInvalid_isInvalid(testField);
+public class MultiSelectComboBoxBasicValidationTest extends AbstractBasicValidationTest<MultiSelectComboBox<String>> {
+    protected MultiSelectComboBox<String> createTestField() {
+        return new MultiSelectComboBox<String>();
     }
 }

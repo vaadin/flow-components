@@ -15,27 +15,11 @@
  */
 package com.vaadin.flow.component.combobox.validation;
 
-import org.junit.Before;
-import org.junit.Test;
-
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.tests.validation.HasValidationTestHelper;
+import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
-public class ComboBoxBasicValidationTest {
-    private ComboBox<String> testField;
-
-    @Before
-    public void setup() {
-        testField = new ComboBox<>();
-    }
-
-    @Test
-    public void setErrorMessage_getErrorMessage() {
-        HasValidationTestHelper.setErrorMessage_getErrorMessage(testField);
-    }
-
-    @Test
-    public void setInvalid_isInvalid() {
-        HasValidationTestHelper.setInvalid_isInvalid(testField);
+public class ComboBoxBasicValidationTest extends AbstractBasicValidationTest<ComboBox<String>> {
+    protected ComboBox<String> createTestField() {
+        return new ComboBox<String>();
     }
 }

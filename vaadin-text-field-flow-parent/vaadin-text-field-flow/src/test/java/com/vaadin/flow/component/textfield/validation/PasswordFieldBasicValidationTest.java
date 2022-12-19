@@ -15,27 +15,11 @@
  */
 package com.vaadin.flow.component.textfield.validation;
 
-import org.junit.Before;
-import org.junit.Test;
-
 import com.vaadin.flow.component.textfield.PasswordField;
-import com.vaadin.tests.validation.HasValidationTestHelper;
+import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
-public class PasswordFieldBasicValidationTest {
-    private PasswordField testField;
-
-    @Before
-    public void setup() {
-        testField = new PasswordField();
-    }
-
-    @Test
-    public void setErrorMessage_getErrorMessage() {
-        HasValidationTestHelper.setErrorMessage_getErrorMessage(testField);
-    }
-
-    @Test
-    public void setInvalid_isInvalid() {
-        HasValidationTestHelper.setInvalid_isInvalid(testField);
+public class PasswordFieldBasicValidationTest extends AbstractBasicValidationTest<PasswordField> {
+    protected PasswordField createTestField() {
+        return new PasswordField();
     }
 }

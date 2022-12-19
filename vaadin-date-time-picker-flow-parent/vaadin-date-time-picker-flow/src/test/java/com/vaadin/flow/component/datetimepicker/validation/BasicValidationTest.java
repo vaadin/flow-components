@@ -15,27 +15,11 @@
  */
 package com.vaadin.flow.component.datetimepicker.validation;
 
-import org.junit.Before;
-import org.junit.Test;
-
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
-import com.vaadin.tests.validation.HasValidationTestHelper;
+import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
-public class BasicValidationTest {
-    private DateTimePicker testField;
-
-    @Before
-    public void setup() {
-        testField = new DateTimePicker();
-    }
-
-    @Test
-    public void setErrorMessage_getErrorMessage() {
-        HasValidationTestHelper.setErrorMessage_getErrorMessage(testField);
-    }
-
-    @Test
-    public void setInvalid_isInvalid() {
-        HasValidationTestHelper.setInvalid_isInvalid(testField);
+public class BasicValidationTest extends AbstractBasicValidationTest<DateTimePicker> {
+    protected DateTimePicker createTestField() {
+        return new DateTimePicker();
     }
 }

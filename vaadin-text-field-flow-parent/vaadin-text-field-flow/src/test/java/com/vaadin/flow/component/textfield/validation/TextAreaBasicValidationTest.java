@@ -15,27 +15,11 @@
  */
 package com.vaadin.flow.component.textfield.validation;
 
-import org.junit.Before;
-import org.junit.Test;
-
 import com.vaadin.flow.component.textfield.TextArea;
-import com.vaadin.tests.validation.HasValidationTestHelper;
+import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
-public class TextAreaBasicValidationTest {
-    private TextArea testField;
-
-    @Before
-    public void setup() {
-        testField = new TextArea();
-    }
-
-    @Test
-    public void setErrorMessage_getErrorMessage() {
-        HasValidationTestHelper.setErrorMessage_getErrorMessage(testField);
-    }
-
-    @Test
-    public void setInvalid_isInvalid() {
-        HasValidationTestHelper.setInvalid_isInvalid(testField);
+public class TextAreaBasicValidationTest extends AbstractBasicValidationTest<TextArea> {
+    protected TextArea createTestField() {
+        return new TextArea();
     }
 }
