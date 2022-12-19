@@ -19,8 +19,9 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.ClientValidationUtil;
+import com.vaadin.flow.component.shared.HasAllowedCharPattern;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
 import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
@@ -40,7 +41,7 @@ import com.vaadin.flow.shared.Registration;
 @NpmPackage(value = "@vaadin/text-field", version = "24.0.0-alpha6")
 @JsModule("@vaadin/text-field/src/vaadin-text-field.js")
 public class TextField extends FieldBase<TextField, String>
-        implements HasAllowedCharPattern {
+        implements HasAllowedCharPattern, HasThemeVariant<TextFieldVariant> {
     private ValueChangeMode currentMode;
 
     private boolean isConnectorAttached;

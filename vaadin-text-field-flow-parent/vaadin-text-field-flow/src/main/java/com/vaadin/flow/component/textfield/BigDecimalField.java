@@ -28,6 +28,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.ClientValidationUtil;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
@@ -52,7 +53,8 @@ import com.vaadin.flow.shared.Registration;
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha6")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("./vaadin-big-decimal-field.js")
-public class BigDecimalField extends FieldBase<BigDecimalField, BigDecimal> {
+public class BigDecimalField extends FieldBase<BigDecimalField, BigDecimal>
+        implements HasThemeVariant<TextFieldVariant> {
     private ValueChangeMode currentMode;
 
     private boolean isConnectorAttached;

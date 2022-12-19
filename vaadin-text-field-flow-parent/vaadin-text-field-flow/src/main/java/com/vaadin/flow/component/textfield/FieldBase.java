@@ -31,7 +31,6 @@ import com.vaadin.flow.component.InputNotifier;
 import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.component.shared.HasClearButton;
 import com.vaadin.flow.component.shared.HasClientValidation;
-import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.value.HasValueChangeMode;
@@ -53,9 +52,9 @@ public abstract class FieldBase<TComponent extends FieldBase<TComponent, TValue>
         extends AbstractSinglePropertyField<TComponent, TValue>
         implements CompositionNotifier, Focusable<TComponent>,
         HasAutocapitalize, HasAutocomplete, HasAutocorrect, HasClearButton,
-        HasClientValidation, HasLabel, HasHelper, HasPrefixAndSuffix, HasSize,
-        HasStyle, HasThemeVariant<TextFieldVariant>, HasTooltip, HasValidation,
-        HasValidator<TValue>, HasValueChangeMode, InputNotifier, KeyNotifier {
+        HasClientValidation, HasHelper, HasLabel, HasPrefixAndSuffix, HasSize,
+        HasStyle, HasTooltip, HasValidation, HasValidator<TValue>,
+        HasValueChangeMode, InputNotifier, KeyNotifier {
 
     /**
      * Sets the label for the field.
