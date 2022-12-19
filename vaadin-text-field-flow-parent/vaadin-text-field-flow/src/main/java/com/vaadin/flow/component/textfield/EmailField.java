@@ -23,7 +23,6 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
 import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.binder.Validator;
@@ -48,7 +47,7 @@ import com.vaadin.flow.shared.Registration;
 @NpmPackage(value = "@vaadin/email-field", version = "24.0.0-alpha6")
 @JsModule("@vaadin/email-field/src/vaadin-email-field.js")
 public class EmailField extends FieldBase<EmailField, String>
-        implements HasAllowedCharPattern, HasValidator<String> {
+        implements HasAllowedCharPattern {
     private static final String EMAIL_PATTERN = "^" + "([a-zA-Z0-9_\\.\\-+])+" // local
             + "@" + "[a-zA-Z0-9-.]+" // domain
             + "\\." + "[a-zA-Z0-9-]{2,}" // tld

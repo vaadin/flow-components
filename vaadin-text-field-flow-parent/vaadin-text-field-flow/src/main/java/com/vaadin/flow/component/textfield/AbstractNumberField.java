@@ -23,7 +23,6 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.ValidationUtil;
-import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
 import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
@@ -39,7 +38,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T extends Number>
-        extends FieldBase<C, T> implements HasValidator<T> {
+        extends FieldBase<C, T> {
 
     private ValueChangeMode currentMode;
 
