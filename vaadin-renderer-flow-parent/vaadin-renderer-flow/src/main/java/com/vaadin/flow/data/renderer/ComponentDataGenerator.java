@@ -18,6 +18,7 @@ package com.vaadin.flow.data.renderer;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.data.provider.AbstractComponentDataGenerator;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.ValueProvider;
@@ -100,7 +101,11 @@ public class ComponentDataGenerator<T>
 
     @Override
     protected Component createComponent(T item) {
-        return componentRenderer.createComponent(item);
+        Component c = componentRenderer.createComponent(item);
+        if (c == null) {
+            c = new Text("");
+        }
+        return c;
     }
 
     @Override
