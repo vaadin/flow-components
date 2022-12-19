@@ -38,7 +38,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T extends Number>
-        extends FieldBase<C, T> {
+        extends InternalFieldBase<C, T> {
 
     private ValueChangeMode currentMode;
 

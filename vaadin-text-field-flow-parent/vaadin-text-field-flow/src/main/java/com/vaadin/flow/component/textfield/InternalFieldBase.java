@@ -35,15 +35,15 @@ import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableFunction;
 
 /**
- * Provides base functionality for input field components, such as
- * {@link TextField}
+ * Internal class that provides base functionality for input field components,
+ * such as {@link TextField}. Not intended to be used publicly.
  *
  * @param <TComponent>
  *            Type of the component that extends from this class
  * @param <TValue>
  *            Type of the value of the extending component
  */
-public abstract class FieldBase<TComponent extends FieldBase<TComponent, TValue>, TValue>
+public abstract class InternalFieldBase<TComponent extends InternalFieldBase<TComponent, TValue>, TValue>
         extends AbstractSinglePropertyField<TComponent, TValue>
         implements CompositionNotifier, Focusable<TComponent>,
         HasAutocapitalize, HasAutocomplete, HasAutocorrect, HasClearButton,
@@ -301,7 +301,7 @@ public abstract class FieldBase<TComponent extends FieldBase<TComponent, TValue>
      * @param <P>
      *            the property type
      */
-    public <P> FieldBase(TValue initialValue, TValue defaultValue,
+    public <P> InternalFieldBase(TValue initialValue, TValue defaultValue,
             Class<P> elementPropertyType,
             SerializableFunction<P, TValue> presentationToModel,
             SerializableFunction<TValue, P> modelToPresentation,
@@ -341,7 +341,7 @@ public abstract class FieldBase<TComponent extends FieldBase<TComponent, TValue>
      * @param <P>
      *            the property type
      */
-    public <P> FieldBase(TValue initialValue, TValue defaultValue,
+    public <P> InternalFieldBase(TValue initialValue, TValue defaultValue,
             Class<P> elementPropertyType,
             SerializableBiFunction<TComponent, P, TValue> presentationToModel,
             SerializableBiFunction<TComponent, TValue, P> modelToPresentation,
@@ -373,7 +373,7 @@ public abstract class FieldBase<TComponent extends FieldBase<TComponent, TValue>
      *            property value, otherwise element {@code "value"} property is
      *            ignored and the initial value is set
      */
-    public FieldBase(TValue initialValue, TValue defaultValue,
+    public InternalFieldBase(TValue initialValue, TValue defaultValue,
             boolean acceptNullValues, boolean isInitialValueOptional) {
         super("value", defaultValue, acceptNullValues);
         if ((getElement().getProperty("value") == null

@@ -42,7 +42,7 @@ import com.vaadin.flow.shared.Registration;
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/password-field", version = "24.0.0-alpha6")
 @JsModule("@vaadin/password-field/src/vaadin-password-field.js")
-public class PasswordField extends FieldBase<PasswordField, String>
+public class PasswordField extends InternalFieldBase<PasswordField, String>
         implements HasAllowedCharPattern, HasThemeVariant<TextFieldVariant> {
     private ValueChangeMode currentMode;
 

@@ -53,7 +53,8 @@ import com.vaadin.flow.shared.Registration;
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha6")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("./vaadin-big-decimal-field.js")
-public class BigDecimalField extends FieldBase<BigDecimalField, BigDecimal>
+public class BigDecimalField
+        extends InternalFieldBase<BigDecimalField, BigDecimal>
         implements HasThemeVariant<TextFieldVariant> {
     private ValueChangeMode currentMode;
 
