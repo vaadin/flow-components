@@ -40,7 +40,7 @@ import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.shared.Registration;
 
 /**
- * Provides base functionality for combo box related components, such as
+ * Provides base functionality for input field components, such as
  * {@link TextField}
  *
  * @param <TComponent>
