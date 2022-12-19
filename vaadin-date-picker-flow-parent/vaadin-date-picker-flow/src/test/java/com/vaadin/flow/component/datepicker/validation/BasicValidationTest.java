@@ -18,7 +18,8 @@ package com.vaadin.flow.component.datepicker.validation;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
-public class BasicValidationTest extends AbstractBasicValidationTest<DatePicker> {
+public class BasicValidationTest
+        extends AbstractBasicValidationTest<DatePicker> {
     protected DatePicker createTestField() {
         return new DatePicker();
     }

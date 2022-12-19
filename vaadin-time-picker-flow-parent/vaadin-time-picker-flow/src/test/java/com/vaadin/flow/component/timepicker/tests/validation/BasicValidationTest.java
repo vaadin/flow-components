@@ -18,7 +18,8 @@ package com.vaadin.flow.component.timepicker.tests.validation;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
-public class BasicValidationTest extends AbstractBasicValidationTest<TimePicker> {
+public class BasicValidationTest
+        extends AbstractBasicValidationTest<TimePicker> {
     protected TimePicker createTestField() {
         return new TimePicker();
     }

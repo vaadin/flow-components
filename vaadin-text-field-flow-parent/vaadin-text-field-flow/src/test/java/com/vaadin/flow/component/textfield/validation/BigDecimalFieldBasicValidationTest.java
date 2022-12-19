@@ -18,7 +18,8 @@ package com.vaadin.flow.component.textfield.validation;
 import com.vaadin.flow.component.textfield.BigDecimalField;
 import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
-public class BigDecimalFieldBasicValidationTest extends AbstractBasicValidationTest<BigDecimalField> {
+public class BigDecimalFieldBasicValidationTest
+        extends AbstractBasicValidationTest<BigDecimalField> {
     protected BigDecimalField createTestField() {
         return new BigDecimalField();
     }

@@ -18,7 +18,8 @@ package com.vaadin.flow.component.radiobutton.validation;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
-public class BasicValidationTest extends AbstractBasicValidationTest<RadioButtonGroup<String>> {
+public class BasicValidationTest
+        extends AbstractBasicValidationTest<RadioButtonGroup<String>> {
     protected RadioButtonGroup<String> createTestField() {
         return new RadioButtonGroup<String>();
     }

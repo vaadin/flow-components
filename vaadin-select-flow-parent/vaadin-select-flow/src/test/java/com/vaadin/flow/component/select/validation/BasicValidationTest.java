@@ -18,7 +18,8 @@ package com.vaadin.flow.component.select.validation;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
-public class BasicValidationTest extends AbstractBasicValidationTest<Select<String>> {
+public class BasicValidationTest
+        extends AbstractBasicValidationTest<Select<String>> {
     protected Select<String> createTestField() {
         return new Select<String>();
     }
