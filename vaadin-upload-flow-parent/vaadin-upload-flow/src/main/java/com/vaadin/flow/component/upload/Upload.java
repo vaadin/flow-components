@@ -29,7 +29,6 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
@@ -115,11 +114,16 @@ public class Upload extends Component implements HasSize, HasStyle {
         getElement().addEventListener("upload-success", event -> {
         });
 
-        addFileRejectListener(event -> fireEvent(
-                new FileRejectedEvent(this, event.getDetailError())));
+        final String eventDetailError = "event.detail.error";
+        getElement().addEventListener("file-rejected", event -> {
+            String detailError = event.getEventData()
+                    .getString(eventDetailError);
+            fireEvent(new FileRejectedEvent(this, detailError));
+        }).addEventData(eventDetailError);
 
         // If client aborts upload mark upload as interrupted on server also
-        getElement().addEventListener("upload-abort", event -> interruptUpload());
+        getElement().addEventListener("upload-abort",
+                event -> interruptUpload());
 
         runBeforeClientResponse(ui -> getElement().setAttribute("target",
                 new StreamReceiver(getElement().getNode(), "upload",
@@ -142,7 +146,8 @@ public class Upload extends Component implements HasSize, HasStyle {
             this.uploading = isUploading;
         };
 
-        getElement().addEventListener("upload-start", e -> this.uploading = true);
+        getElement().addEventListener("upload-start",
+                e -> this.uploading = true);
 
         getElement().addEventListener("upload-success", allFinishedListener)
                 .addEventData(elementFiles);
@@ -503,49 +508,6 @@ public class Upload extends Component implements HasSize, HasStyle {
      */
     protected void fireUpdateProgress(long totalBytes, long contentLength) {
         fireEvent(new ProgressUpdateEvent(this, totalBytes, contentLength));
-    }
-
-    @DomEvent("file-reject")
-    public static class FileRejectEvent extends ComponentEvent<Upload> {
-        private final JsonObject detail;
-        private final JsonObject detailFile;
-        private final String detailError;
-
-        public FileRejectEvent(Upload source, boolean fromClient,
-                @EventData("event.detail") JsonObject detail,
-                @EventData("event.detail.file") JsonObject detailFile,
-                @EventData("event.detail.error") String detailError) {
-            super(source, fromClient);
-            this.detail = detail;
-            this.detailFile = detailFile;
-            this.detailError = detailError;
-        }
-
-        public JsonObject getDetail() {
-            return detail;
-        }
-
-        public JsonObject getDetailFile() {
-            return detailFile;
-        }
-
-        public String getDetailError() {
-            return detailError;
-        }
-    }
-
-    /**
-     * Adds a listener for {@code file-reject} events fired by the webcomponent.
-     *
-     * @param listener
-     *            the listener
-     * @return a {@link Registration} for removing the event listener
-     */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    private Registration addFileRejectListener(
-            ComponentEventListener<FileRejectEvent> listener) {
-        return addListener(FileRejectEvent.class,
-                (ComponentEventListener) listener);
     }
 
     /**
