@@ -542,7 +542,7 @@ public class Upload extends Component implements HasSize, HasStyle {
      * @return a {@link Registration} for removing the event listener
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    protected Registration addFileRejectListener(
+    private Registration addFileRejectListener(
             ComponentEventListener<FileRejectEvent> listener) {
         return addListener(FileRejectEvent.class,
                 (ComponentEventListener) listener);
@@ -586,7 +586,7 @@ public class Upload extends Component implements HasSize, HasStyle {
      * @return a {@link Registration} for removing the event listener
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    protected Registration addUploadAbortListener(
+    private Registration addUploadAbortListener(
             ComponentEventListener<UploadAbortEvent> listener) {
         return addListener(UploadAbortEvent.class,
                 (ComponentEventListener) listener);
@@ -681,7 +681,7 @@ public class Upload extends Component implements HasSize, HasStyle {
      * @return a {@link Registration} for removing the event listener
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    protected Registration addUploadErrorListener(
+    private Registration addUploadErrorListener(
             ComponentEventListener<UploadErrorEvent> listener) {
         return addListener(UploadErrorEvent.class,
                 (ComponentEventListener) listener);
@@ -908,7 +908,7 @@ public class Upload extends Component implements HasSize, HasStyle {
      * @return a {@link Registration} for removing the event listener
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    protected Registration addUploadStartListener(
+    private Registration addUploadStartListener(
             ComponentEventListener<UploadStartEvent> listener) {
         return addListener(UploadStartEvent.class,
                 (ComponentEventListener) listener);
@@ -952,7 +952,7 @@ public class Upload extends Component implements HasSize, HasStyle {
      * @return a {@link Registration} for removing the event listener
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    protected Registration addUploadSuccessListener(
+    private Registration addUploadSuccessListener(
             ComponentEventListener<UploadSuccessEvent> listener) {
         return addListener(UploadSuccessEvent.class,
                 (ComponentEventListener) listener);
@@ -1242,7 +1242,7 @@ public class Upload extends Component implements HasSize, HasStyle {
      * @return the {@code files} property from the webcomponent
      */
     @Synchronize(property = "files", value = "files-changed")
-    protected JsonArray getFilesJsonArray() {
+    private JsonArray getFilesJsonArray() {
         return (JsonArray) getElement().getPropertyRaw("files");
     }
 
@@ -1252,7 +1252,7 @@ public class Upload extends Component implements HasSize, HasStyle {
      * @return the {@code maxFilesReached} property from the webcomponent
      */
     @Synchronize(property = "maxFilesReached", value = "max-files-reached-changed")
-    protected boolean isMaxFilesReachedBoolean() {
+    private boolean isMaxFilesReachedBoolean() {
         return getElement().getProperty("maxFilesReached", false);
     }
 
