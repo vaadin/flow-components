@@ -1,8 +1,10 @@
-package com.vaadin.flow.component.radiobutton;
+package com.vaadin.flow.component.timepicker.tests.validation;
 
+import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.BindingValidationStatus;
 import com.vaadin.flow.data.binder.BindingValidationStatusHandler;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,14 +14,13 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import java.util.Arrays;
-import java.util.Objects;
+import java.time.LocalTime;
 
-public class RadioButtonGroupBinderValidationTest {
-    private static final String BINDER_FAIL_MESSAGE = "BINDER_FAIL_MESSAGE";
+public class BinderValidationTest {
+    private static final String BINDER_FAIL_MESSAGE = "BINDER_VALIDATION_FAILED";
     private static final String BINDER_REQUIRED_MESSAGE = "REQUIRED";
 
-    private RadioButtonGroup<String> field;
+    private TimePicker field;
 
     @Captor
     private ArgumentCaptor<BindingValidationStatus<?>> statusCaptor;
@@ -28,32 +29,43 @@ public class RadioButtonGroupBinderValidationTest {
     private BindingValidationStatusHandler statusHandlerMock;
 
     public static class Bean {
-        private String value;
+        private LocalTime time;
 
-        public String getValue() {
-            return value;
+        public LocalTime getTime() {
+            return time;
         }
 
-        public void setValue(String value) {
-            this.value = value;
+        public void setTime(LocalTime time) {
+            this.time = time;
         }
     }
 
     @Before
     public void init() {
         MockitoAnnotations.openMocks(this);
-        field = new RadioButtonGroup<>();
-        field.setItems(Arrays.asList("foo", "bar", "baz"));
+        field = new TimePicker();
+        field.setMax(LocalTime.now().plusHours(1));
     }
 
     @Test
-    public void elementWithBinderValidation_invalidValue_binderValidationFails() {
-        var binder = attachBinderToField();
+    public void elementWithConstraints_componentValidationNotMet_elementValidationFails() {
+        attachBinderToField();
 
-        field.setValue("bar");
+        field.setValue(LocalTime.now().plusHours(2));
+
         Mockito.verify(statusHandlerMock).statusChange(statusCaptor.capture());
+        Assert.assertTrue("Validation should fail",
+                statusCaptor.getValue().isError());
+    }
 
-        Assert.assertTrue(statusCaptor.getValue().isError());
+    @Test
+    public void elementWithConstraints_binderValidationNotMet_binderValidationFails() {
+        attachBinderToField();
+        field.setValue(LocalTime.now().minusHours(2));
+
+        Mockito.verify(statusHandlerMock).statusChange(statusCaptor.capture());
+        Assert.assertTrue("Validation should fail",
+                statusCaptor.getValue().isError());
         Assert.assertEquals(BINDER_FAIL_MESSAGE,
                 statusCaptor.getValue().getMessage().orElse(""));
     }
@@ -64,6 +76,7 @@ public class RadioButtonGroupBinderValidationTest {
         binder.validate();
 
         Mockito.verify(statusHandlerMock).statusChange(statusCaptor.capture());
+
         Assert.assertTrue(statusCaptor.getValue().isError());
         Assert.assertEquals(BINDER_REQUIRED_MESSAGE,
                 statusCaptor.getValue().getMessage().orElse(""));
@@ -77,14 +90,13 @@ public class RadioButtonGroupBinderValidationTest {
 
         Mockito.verify(statusHandlerMock).statusChange(statusCaptor.capture());
         Assert.assertFalse(statusCaptor.getValue().isError());
-
     }
 
     @Test
-    public void setValidValue_binderValidationPasses() {
+    public void elementWithConstraints_validValue_validationPasses() {
         attachBinderToField();
 
-        field.setValue("foo");
+        field.setValue(LocalTime.now());
 
         Mockito.verify(statusHandlerMock).statusChange(statusCaptor.capture());
         Assert.assertFalse(statusCaptor.getValue().isError());
@@ -96,9 +108,10 @@ public class RadioButtonGroupBinderValidationTest {
 
     private Binder<Bean> attachBinderToField(boolean isRequired) {
         var binder = new Binder<>(Bean.class);
-        var binding = binder.forField(field)
+        Binder.BindingBuilder<Bean, LocalTime> binding = binder.forField(field)
                 .withValidator(
-                        value -> value == null || Objects.equals(value, "foo"),
+                        value -> value == null
+                                || value.isAfter(LocalTime.now().minusHours(1)),
                         BINDER_FAIL_MESSAGE)
                 .withValidationStatusHandler(statusHandlerMock);
 
@@ -106,7 +119,7 @@ public class RadioButtonGroupBinderValidationTest {
             binding.asRequired(BINDER_REQUIRED_MESSAGE);
         }
 
-        binding.bind("value");
+        binding.bind("time");
 
         return binder;
     }

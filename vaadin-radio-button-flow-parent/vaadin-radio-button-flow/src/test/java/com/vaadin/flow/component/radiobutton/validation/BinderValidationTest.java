@@ -1,5 +1,6 @@
-package com.vaadin.flow.component.combobox;
+package com.vaadin.flow.component.radiobutton.validation;
 
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.BindingValidationStatus;
 import com.vaadin.flow.data.binder.BindingValidationStatusHandler;
@@ -15,11 +16,11 @@ import org.mockito.MockitoAnnotations;
 import java.util.Arrays;
 import java.util.Objects;
 
-public class ComboBoxBinderValidationTest {
+public class BinderValidationTest {
     private static final String BINDER_FAIL_MESSAGE = "BINDER_FAIL_MESSAGE";
     private static final String BINDER_REQUIRED_MESSAGE = "REQUIRED";
 
-    private ComboBox<String> field;
+    private RadioButtonGroup<String> field;
 
     @Captor
     private ArgumentCaptor<BindingValidationStatus<?>> statusCaptor;
@@ -42,7 +43,7 @@ public class ComboBoxBinderValidationTest {
     @Before
     public void init() {
         MockitoAnnotations.openMocks(this);
-        field = new ComboBox<>();
+        field = new RadioButtonGroup<>();
         field.setItems(Arrays.asList("foo", "bar", "baz"));
     }
 
