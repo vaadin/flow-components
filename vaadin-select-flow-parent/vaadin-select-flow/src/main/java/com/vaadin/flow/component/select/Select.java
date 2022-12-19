@@ -150,22 +150,6 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
     }
 
     /**
-     * Constructs a select with the given items.
-     *
-     * @param items
-     *            the items for the select
-     * @see #setItems(Object...)
-     * @deprecated as of 23.1. Please use {@link #setItems(Object[])} instead.
-     */
-    @Deprecated
-    @SafeVarargs
-    public Select(T... items) {
-        this();
-
-        setItems(items);
-    }
-
-    /**
      * Constructs a select with the initial value change listener.
      *
      * @param listener
