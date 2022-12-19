@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.textfield.validation;
 
 import com.vaadin.flow.component.textfield.NumberField;
+import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
 public class NumberFieldBasicValidationTest
         extends AbstractBasicValidationTest<NumberField> {

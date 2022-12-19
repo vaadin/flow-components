@@ -132,12 +132,6 @@ public class TestView extends Div implements HasUrlParameter<String> {
         requiredIndicatorVisible.setId("requiredIndicatorVisible");
         options.add(requiredIndicatorVisible);
 
-        Input errorMessage = new Input();
-        errorMessage.setId("errorMessage");
-        errorMessage.addValueChangeListener(
-                event -> select.setErrorMessage(event.getValue()));
-        options.add(new Span("errorMessage"), errorMessage);
-
         Input placeholder = new Input();
         placeholder.setId("placeholder");
         placeholder.addValueChangeListener(

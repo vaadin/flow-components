@@ -13,17 +13,14 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.timepicker.tests;
+package com.vaadin.flow.component.datepicker.validation;
 
-import com.vaadin.tests.AbstractValidationTest;
-import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
-/**
- * Integration tests verifying that the {@code HasValidation} interface is
- * implemented for {@code TimePicker}
- *
- * TODO: Can be tested with unit tests.
- */
-@TestPath("vaadin-time-picker/time-picker-validation")
-public class TimePickerValidationPageIT extends AbstractValidationTest {
+public class BasicValidationTest
+        extends AbstractBasicValidationTest<DatePicker> {
+    protected DatePicker createTestField() {
+        return new DatePicker();
+    }
 }
