@@ -18,6 +18,7 @@ package com.vaadin.flow.data.renderer;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
+import com.vaadin.flow.internal.UsageStatistics;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.function.SerializableConsumer;
@@ -41,6 +42,10 @@ import com.vaadin.flow.internal.JsonSerializer;
  */
 @Deprecated
 public final class TemplateRenderer<SOURCE> extends Renderer<SOURCE> {
+
+    static {
+        UsageStatistics.markAsUsed("flow-components/TemplateRenderer", null);
+    }
 
     private static final Pattern BINDING_MISSING_DOLLAR = Pattern
             .compile("\\s(class|style)\\s*=\\s*['\"]?[{\\[]{2}");
