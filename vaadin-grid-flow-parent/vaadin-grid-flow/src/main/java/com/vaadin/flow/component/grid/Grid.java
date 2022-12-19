@@ -99,7 +99,6 @@ import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.Rendering;
-import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
 import com.vaadin.flow.data.selection.SelectionEvent;
