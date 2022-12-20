@@ -1,5 +1,7 @@
 package com.vaadin.flow.component.details;
 
+import com.vaadin.flow.component.shared.ThemeVariant;
+
 /*
  * #%L
  * Details for Vaadin Flow
@@ -23,7 +25,8 @@ package com.vaadin.flow.component.details;
 /**
  * The set of theme variants applicable to the {@code vaadin-details} component.
  */
-public enum DetailsVariant {
+
+public enum DetailsVariant implements ThemeVariant {
 
     FILLED("filled"), REVERSE("reverse"), SMALL("small");
 
