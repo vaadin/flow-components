@@ -61,7 +61,7 @@ import com.vaadin.flow.dom.Element;
 @NpmPackage(value = "@vaadin/custom-field", version = "24.0.0-alpha6")
 @JsModule("@vaadin/custom-field/src/vaadin-custom-field.js")
 public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
-        implements HasSize, HasValidation, Focusable<CustomField>, HasHelper,
+        implements Focusable<CustomField<T>>, HasHelper, HasSize, HasValidation,
         HasLabel, HasTheme, HasStyle, HasTooltip {
 
     /**
