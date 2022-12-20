@@ -91,25 +91,6 @@ public abstract class InternalFieldBase<TComponent extends InternalFieldBase<TCo
     }
 
     /**
-     * Sets the label for the field.
-     *
-     * @param label
-     *            value for the {@code label} property in the field
-     */
-    public void setLabel(String label) {
-        getElement().setProperty("label", label == null ? "" : label);
-    }
-
-    /**
-     * String used for the label element.
-     *
-     * @return the {@code label} property from the web component
-     */
-    public String getLabel() {
-        return getElement().getProperty("label");
-    }
-
-    /**
      * Sets the placeholder text that should be displayed in the input element,
      * when the user has not entered a value
      *
