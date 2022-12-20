@@ -14,7 +14,7 @@ import com.vaadin.flow.component.charts.model.XAxis;
 import com.vaadin.flow.component.charts.model.style.Style;
 import com.vaadin.flow.component.dependency.CssImport;
 
-@CssImport(value = "./styles/ColumnLineAndPie.css", themeFor = "vaadin-chart", include = "vaadin-chart-default-theme")
+@CssImport(value = "./styles/ColumnLineAndPie.css", themeFor = "vaadin-chart")
 public class ColumnLineAndPie extends AbstractChartExample {
 
     @Override
