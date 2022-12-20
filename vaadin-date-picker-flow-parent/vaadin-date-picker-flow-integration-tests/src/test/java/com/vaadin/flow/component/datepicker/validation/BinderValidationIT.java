@@ -12,6 +12,7 @@ import static com.vaadin.flow.component.datepicker.validation.BinderValidationPa
 import static com.vaadin.flow.component.datepicker.validation.BinderValidationPage.EXPECTED_VALUE_INPUT;
 import static com.vaadin.flow.component.datepicker.validation.BinderValidationPage.REQUIRED_ERROR_MESSAGE;
 import static com.vaadin.flow.component.datepicker.validation.BinderValidationPage.UNEXPECTED_VALUE_ERROR_MESSAGE;
+import static com.vaadin.flow.component.datepicker.validation.BinderValidationPage.SET_EMPTY_BEAN_BUTTON;
 
 @TestPath("vaadin-date-picker/validation/binder")
 public class BinderValidationIT
@@ -108,6 +109,23 @@ public class BinderValidationIT
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage("");
+    }
+
+    @Test
+    public void badInput_setValue_setEmptyBean_triggerBlur_assertValidity() {
+        testField.setInputValue("INVALID");
+        assertServerInvalid();
+        assertClientInvalid();
+        assertErrorMessage("");
+
+        $("button").id(SET_EMPTY_BEAN_BUTTON).click();
+        assertServerValid();
+        assertServerValid();
+
+        testField.sendKeys(Keys.TAB);
+        assertServerInvalid();
+        assertClientInvalid();
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
     protected DatePickerElement getTestField() {

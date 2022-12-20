@@ -580,6 +580,17 @@ public class DatePicker
         return getElement().getProperty("_hasInputValue", false);
     }
 
+    @Override
+    public void setValue(LocalDate value) {
+        super.setValue(value);
+
+        if (value == null && isInputValuePresent()) {
+            // Clear the input element from possible bad input.
+            getElement().executeJs("this.inputElement.value = $1", "");
+            getElement().executeJs("this._hasInputValue = $1", false);
+        }
+    }
+
     /**
      * Sets the label for the datepicker.
      *

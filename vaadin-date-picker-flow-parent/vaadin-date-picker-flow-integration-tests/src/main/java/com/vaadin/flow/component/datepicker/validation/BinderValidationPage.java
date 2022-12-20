@@ -11,6 +11,7 @@ import com.vaadin.tests.validation.AbstractValidationPage;
 public class BinderValidationPage extends AbstractValidationPage<DatePicker> {
     public static final String MIN_INPUT = "min-input";
     public static final String MAX_INPUT = "max-input";
+    public static final String SET_EMPTY_BEAN_BUTTON = "set-empty-bean-button";
     public static final String EXPECTED_VALUE_INPUT = "expected-value-input";
 
     public static final String REQUIRED_ERROR_MESSAGE = "The field is required";
@@ -54,6 +55,10 @@ public class BinderValidationPage extends AbstractValidationPage<DatePicker> {
         add(createInput(MAX_INPUT, "Set max date", event -> {
             LocalDate value = LocalDate.parse(event.getValue());
             testField.setMax(value);
+        }));
+
+        add(createButton(SET_EMPTY_BEAN_BUTTON, "Set an empty bean", event -> {
+            binder.setBean(new Bean());
         }));
     }
 

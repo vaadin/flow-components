@@ -18,15 +18,6 @@ import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/s
 
         datepicker.$connector = {};
 
-        datepicker.addEventListener(
-          'blur',
-          tryCatchWrapper((e) => {
-            if (!e.target.value && e.target.invalid) {
-              console.warn('Invalid value in the DatePicker.');
-            }
-          })
-        );
-
         const createLocaleBasedDateFormat = function (locale) {
           try {
             // Check whether the locale is supported or not
