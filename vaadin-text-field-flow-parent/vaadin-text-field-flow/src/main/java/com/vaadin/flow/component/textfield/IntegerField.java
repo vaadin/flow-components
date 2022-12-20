@@ -19,6 +19,7 @@ package com.vaadin.flow.component.textfield;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.function.SerializableFunction;
 
 /**
@@ -31,7 +32,8 @@ import com.vaadin.flow.function.SerializableFunction;
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/integer-field", version = "24.0.0-alpha6")
 @JsModule("@vaadin/integer-field/src/vaadin-integer-field.js")
-public class IntegerField extends AbstractNumberField<IntegerField, Integer> {
+public class IntegerField extends AbstractNumberField<IntegerField, Integer>
+        implements HasThemeVariant<TextFieldVariant> {
 
     private static final SerializableFunction<String, Integer> PARSER = valueFormClient -> {
         if (valueFormClient == null || valueFormClient.isEmpty()) {

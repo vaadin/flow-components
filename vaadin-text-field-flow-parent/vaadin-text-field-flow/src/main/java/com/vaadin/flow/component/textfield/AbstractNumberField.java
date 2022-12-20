@@ -19,31 +19,14 @@ package com.vaadin.flow.component.textfield;
 import java.math.BigDecimal;
 import java.util.Objects;
 
-import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.CompositionNotifier;
-import com.vaadin.flow.component.Focusable;
-import com.vaadin.flow.component.HasHelper;
-import com.vaadin.flow.component.HasLabel;
-import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.HasValidation;
-import com.vaadin.flow.component.InputNotifier;
-import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.shared.ClientValidationUtil;
-import com.vaadin.flow.component.shared.HasAllowedCharPattern;
-import com.vaadin.flow.component.shared.HasClearButton;
-import com.vaadin.flow.component.shared.HasClientValidation;
-import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.ValidationUtil;
-import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
 import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.binder.Validator;
-import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.shared.Registration;
@@ -55,16 +38,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T extends Number>
-        extends AbstractSinglePropertyField<C, T>
-        implements CompositionNotifier, Focusable<C>, HasAllowedCharPattern,
-        HasAutocapitalize, HasAutocomplete, HasAutocorrect, HasClearButton,
-        HasClientValidation, HasHelper, HasLabel, HasPrefixAndSuffix, HasSize,
-        HasStyle, HasThemeVariant<TextFieldVariant>, HasTooltip, HasValidation,
-        HasValidator<T>, HasValueChangeMode, InputNotifier, KeyNotifier {
-
-    private ValueChangeMode currentMode;
-
-    private int valueChangeTimeout = DEFAULT_CHANGE_TIMEOUT;
+        extends InternalFieldBase<C, T> {
 
     private boolean required;
 
@@ -100,7 +74,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     public AbstractNumberField(SerializableFunction<String, T> parser,
             SerializableFunction<T, String> formatter, double absoluteMin,
             double absoluteMax) {
-        super("value", null, String.class, parser, formatter);
+        super(null, null, String.class, parser, formatter, true);
 
         // workaround for https://github.com/vaadin/flow/issues/3496
         setInvalid(false);
@@ -116,92 +90,6 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         addValueChangeListener(e -> validate());
 
         addClientValidatedEventListener(e -> validate());
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * The default value is {@link ValueChangeMode#ON_CHANGE}.
-     */
-    @Override
-    public ValueChangeMode getValueChangeMode() {
-        return currentMode;
-    }
-
-    @Override
-    public void setValueChangeMode(ValueChangeMode valueChangeMode) {
-        currentMode = valueChangeMode;
-        setSynchronizedEvent(
-                ValueChangeMode.eventForMode(valueChangeMode, "value-changed"));
-        applyChangeTimeout();
-    }
-
-    @Override
-    public void setValueChangeTimeout(int valueChangeTimeout) {
-        this.valueChangeTimeout = valueChangeTimeout;
-        applyChangeTimeout();
-    }
-
-    @Override
-    public int getValueChangeTimeout() {
-        return valueChangeTimeout;
-    }
-
-    private void applyChangeTimeout() {
-        ValueChangeMode.applyChangeTimeout(getValueChangeMode(),
-                getValueChangeTimeout(), getSynchronizationRegistration());
-    }
-
-    /**
-     * Gets the current error message from the checkbox group.
-     *
-     * @return the current error message
-     */
-    public String getErrorMessage() {
-        return getElement().getProperty("errorMessage");
-    }
-
-    /**
-     * Sets the error message that should be displayed when the component
-     * becomes invalid
-     *
-     * @param errorMessage
-     *            the String value to set
-     */
-    public void setErrorMessage(String errorMessage) {
-        getElement().setProperty("errorMessage",
-                errorMessage == null ? "" : errorMessage);
-    }
-
-    /**
-     * Sets the label for the field.
-     *
-     * @param label
-     *            value for the {@code label} property in the field
-     */
-    public void setLabel(String label) {
-        getElement().setProperty("label", label == null ? "" : label);
-    }
-
-    /**
-     * String used for the label element.
-     *
-     * @return the {@code label} property from the webcomponent
-     */
-    public String getLabel() {
-        return getElement().getProperty("label");
-    }
-
-    /**
-     * Sets the placeholder text that should be displayed in the input element,
-     * when the user has not entered a value
-     *
-     * @param placeholder
-     *            the placeholder text
-     */
-    public void setPlaceholder(String placeholder) {
-        getElement().setProperty("placeholder",
-                placeholder == null ? "" : placeholder);
     }
 
     /**
@@ -227,79 +115,6 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
      */
     public boolean isStepButtonsVisible() {
         return getElement().getProperty("stepButtonsVisible", false);
-    }
-
-    /**
-     * A hint to the user of what can be entered in the component.
-     *
-     * @return the {@code placeholder} property from the webcomponent
-     */
-    public String getPlaceholder() {
-        return getElement().getProperty("placeholder");
-    }
-
-    /**
-     * Sets the whether the component should automatically receive focus when
-     * the page loads. Defaults to {@code false}.
-     *
-     * @param autofocus
-     *            {@code true} component should automatically receive focus
-     */
-    public void setAutofocus(boolean autofocus) {
-        getElement().setProperty("autofocus", autofocus);
-    }
-
-    /**
-     * Specify that this control should have input focus when the page loads.
-     *
-     * @return the {@code autofocus} property from the webcomponent
-     */
-    public boolean isAutofocus() {
-        return getElement().getProperty("autofocus", false);
-    }
-
-    /**
-     * The text usually displayed in a tooltip popup when the mouse is over the
-     * field.
-     *
-     * @return the {@code title} property from the webcomponent
-     */
-    public String getTitle() {
-        return getElement().getProperty("title");
-    }
-
-    /**
-     * The text usually displayed in a tooltip popup when the mouse is over the
-     * field.
-     *
-     * @param title
-     *            the String value to set
-     */
-    public void setTitle(String title) {
-        getElement().setProperty("title", title == null ? "" : title);
-    }
-
-    /**
-     * Specifies if the field value gets automatically selected when the field
-     * gains focus.
-     *
-     * @return <code>true</code> if autoselect is active, <code>false</code>
-     *         otherwise
-     */
-    public boolean isAutoselect() {
-        return getElement().getProperty("autoselect", false);
-    }
-
-    /**
-     * Set to <code>true</code> to always have the field value automatically
-     * selected when the field gains focus, <code>false</code> otherwise.
-     *
-     * @param autoselect
-     *            <code>true</code> to set auto select on, <code>false</code>
-     *            otherwise
-     */
-    public void setAutoselect(boolean autoselect) {
-        getElement().setProperty("autoselect", autoselect);
     }
 
     /**
@@ -387,26 +202,6 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
      */
     protected double getStepDouble() {
         return step;
-    }
-
-    /**
-     * Sets whether the component has an invalid value or not.
-     *
-     *
-     * @param invalid
-     *            {@code true} for invalid, {@code false} for valid
-     */
-    public void setInvalid(boolean invalid) {
-        getElement().setProperty("invalid", invalid);
-    }
-
-    /**
-     * Whether the component has an invalid value or not.
-     *
-     * @return the {@code invalid} property from the field
-     */
-    public boolean isInvalid() {
-        return getElement().getProperty("invalid", false);
     }
 
     /**
