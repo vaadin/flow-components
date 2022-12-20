@@ -321,7 +321,7 @@ public abstract class InternalFieldBase<TComponent extends InternalFieldBase<TCo
      * @param <P>
      *            the property type
      */
-    public <P> InternalFieldBase(TValue initialValue, TValue defaultValue,
+    <P> InternalFieldBase(TValue initialValue, TValue defaultValue,
             Class<P> elementPropertyType,
             SerializableFunction<P, TValue> presentationToModel,
             SerializableFunction<TValue, P> modelToPresentation,
@@ -361,7 +361,7 @@ public abstract class InternalFieldBase<TComponent extends InternalFieldBase<TCo
      * @param <P>
      *            the property type
      */
-    public <P> InternalFieldBase(TValue initialValue, TValue defaultValue,
+    <P> InternalFieldBase(TValue initialValue, TValue defaultValue,
             Class<P> elementPropertyType,
             SerializableBiFunction<TComponent, P, TValue> presentationToModel,
             SerializableBiFunction<TComponent, TValue, P> modelToPresentation,
@@ -393,7 +393,7 @@ public abstract class InternalFieldBase<TComponent extends InternalFieldBase<TCo
      *            property value, otherwise element {@code "value"} property is
      *            ignored and the initial value is set
      */
-    public InternalFieldBase(TValue initialValue, TValue defaultValue,
+    InternalFieldBase(TValue initialValue, TValue defaultValue,
             boolean acceptNullValues, boolean isInitialValueOptional) {
         super("value", defaultValue, acceptNullValues);
         if ((getElement().getProperty("value") == null
