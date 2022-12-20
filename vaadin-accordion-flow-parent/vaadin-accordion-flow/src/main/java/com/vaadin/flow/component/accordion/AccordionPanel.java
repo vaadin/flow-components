@@ -1,5 +1,3 @@
-package com.vaadin.flow.component.accordion;
-
 /*
  * Copyright 2000-2022 Vaadin Ltd.
  *
@@ -15,6 +13,7 @@ package com.vaadin.flow.component.accordion;
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+package com.vaadin.flow.component.accordion;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
