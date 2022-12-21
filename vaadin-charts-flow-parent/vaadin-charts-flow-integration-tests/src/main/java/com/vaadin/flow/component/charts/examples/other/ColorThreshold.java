@@ -4,7 +4,7 @@ import com.vaadin.flow.component.charts.model.PlotOptionsArearange;
 import com.vaadin.flow.component.charts.model.style.SolidColor;
 import com.vaadin.flow.component.dependency.CssImport;
 
-@CssImport(value = "./styles/ColorThreshold.css", themeFor = "vaadin-chart", include = "vaadin-chart-default-theme")
+@CssImport(value = "./styles/ColorThreshold.css", themeFor = "vaadin-chart")
 public class ColorThreshold extends AreaRange {
 
     @Override
