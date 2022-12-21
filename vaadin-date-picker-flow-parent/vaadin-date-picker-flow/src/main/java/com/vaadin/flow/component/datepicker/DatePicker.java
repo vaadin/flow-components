@@ -43,6 +43,7 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
+import com.vaadin.flow.component.shared.HasAutoOpen;
 import com.vaadin.flow.component.shared.HasClearButton;
 import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasThemeVariant;
@@ -86,12 +87,10 @@ import elemental.json.JsonType;
 @NpmPackage(value = "date-fns", version = "2.29.3")
 public class DatePicker
         extends AbstractSinglePropertyField<DatePicker, LocalDate>
-        implements Focusable<DatePicker>, HasAllowedCharPattern, HasClearButton,
-        HasClientValidation, HasHelper, HasLabel, HasSize, HasStyle,
-        HasThemeVariant<DatePickerVariant>, HasTooltip, HasValidation,
+        implements Focusable<DatePicker>, HasAllowedCharPattern, HasAutoOpen,
+        HasClearButton, HasClientValidation, HasHelper, HasLabel, HasSize,
+        HasStyle, HasThemeVariant<DatePickerVariant>, HasTooltip, HasValidation,
         HasValidator<LocalDate> {
-
-    private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
     private DatePickerI18n i18n;
 
@@ -759,28 +758,6 @@ public class DatePicker
      */
     public String getName() {
         return getElement().getProperty("name");
-    }
-
-    /**
-     * When auto open is enabled, the dropdown will open when the field is
-     * clicked.
-     *
-     * @param autoOpen
-     *            Value for the auto open property,
-     */
-    public void setAutoOpen(boolean autoOpen) {
-        getElement().setProperty(PROP_AUTO_OPEN_DISABLED, !autoOpen);
-    }
-
-    /**
-     * When auto open is enabled, the dropdown will open when the field is
-     * clicked.
-     *
-     * @return {@code true} if auto open is enabled. {@code false} otherwise.
-     *         Default is {@code true}
-     */
-    public boolean isAutoOpen() {
-        return !getElement().getProperty(PROP_AUTO_OPEN_DISABLED, false);
     }
 
     /**

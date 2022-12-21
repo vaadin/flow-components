@@ -39,6 +39,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxDataView;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxLazyDataView;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxListDataView;
+import com.vaadin.flow.component.shared.HasAutoOpen;
 import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.ValidationUtil;
@@ -82,12 +83,12 @@ import java.util.stream.Stream;
  */
 public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, TItem, TValue>, TItem, TValue>
         extends AbstractSinglePropertyField<TComponent, TValue>
-        implements HasStyle, Focusable<TComponent>, HasSize, HasValidation,
-        HasHelper, HasTheme, HasLabel, HasClearButton, HasAllowedCharPattern,
-        HasDataView<TItem, String, ComboBoxDataView<TItem>>,
-        HasListDataView<TItem, ComboBoxListDataView<TItem>>,
-        HasLazyDataView<TItem, String, ComboBoxLazyDataView<TItem>>, HasTooltip,
-        HasValidator<TValue>, HasClientValidation {
+        implements Focusable<TComponent>, HasAllowedCharPattern, HasAutoOpen,
+        HasClearButton, HasClientValidation,
+        HasDataView<TItem, String, ComboBoxDataView<TItem>>, HasHelper,
+        HasLabel, HasLazyDataView<TItem, String, ComboBoxLazyDataView<TItem>>,
+        HasListDataView<TItem, ComboBoxListDataView<TItem>>, HasSize, HasStyle,
+        HasTheme, HasTooltip, HasValidation, HasValidator<TValue> {
 
     /**
      * Registration for custom value listeners that disallows entering custom
@@ -394,28 +395,6 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     public void setPlaceholder(String placeholder) {
         getElement().setProperty("placeholder",
                 placeholder == null ? "" : placeholder);
-    }
-
-    /**
-     * Gets whether dropdown will open automatically or not.
-     *
-     * @return {@code true} if enabled, {@code false} otherwise
-     */
-    public boolean isAutoOpen() {
-        return !getElement().getProperty("autoOpenDisabled", false);
-    }
-
-    /**
-     * Enables or disables the dropdown opening automatically. If {@code false}
-     * the dropdown is only opened when clicking the toggle button or pressing
-     * Up or Down arrow keys.
-     *
-     * @param autoOpen
-     *            {@code false} to prevent the dropdown from opening
-     *            automatically
-     */
-    public void setAutoOpen(boolean autoOpen) {
-        getElement().setProperty("autoOpenDisabled", !autoOpen);
     }
 
     /**
