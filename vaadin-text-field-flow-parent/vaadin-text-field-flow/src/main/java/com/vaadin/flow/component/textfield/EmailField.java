@@ -206,6 +206,22 @@ public class EmailField extends InternalFieldBase<EmailField, String>
     }
 
     /**
+     * <p>
+     * Specifies that the user must fill in a value.
+     * </p>
+     * NOTE: The required indicator will not be visible, if there is no
+     * {@code label} property set for the textfield.
+     *
+     * @param required
+     *            the boolean value to set
+     */
+    @Override
+    public void setRequired(boolean required) {
+        super.setRequired(required);
+        getValidationSupport().setRequired(required);
+    }
+
+    /**
      * Sets a regular expression for the value to pass on the client-side. The
      * pattern must be a valid JavaScript Regular Expression that matches the
      * entire value, not just some subset.
