@@ -582,12 +582,16 @@ public class DatePicker
 
     @Override
     public void setValue(LocalDate value) {
+        LocalDate oldValue = getValue();
+
         super.setValue(value);
 
-        if (value == null && isInputValuePresent()) {
+        if (oldValue == null && value == null && isInputValuePresent()) {
             // Clear the input element from possible bad input.
             getElement().executeJs("this.inputElement.value = $1", "");
-            getElement().executeJs("this._hasInputValue = $1", false);
+            getElement().setProperty("_hasInputValue", false);
+            fireEvent(new ClientValidatedEvent(this, false,
+                    checkValidity(value).isError()));
         }
     }
 
