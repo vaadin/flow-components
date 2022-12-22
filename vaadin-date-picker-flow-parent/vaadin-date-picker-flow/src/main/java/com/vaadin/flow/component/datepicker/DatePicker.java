@@ -841,9 +841,6 @@ public class DatePicker
         private List<String> weekdaysShort;
         private List<String> dateFormats;
         private int firstDayOfWeek;
-        private String week;
-        private String calendar;
-        private String clear;
         private String today;
         private String cancel;
         private LocalDate referenceDate;
