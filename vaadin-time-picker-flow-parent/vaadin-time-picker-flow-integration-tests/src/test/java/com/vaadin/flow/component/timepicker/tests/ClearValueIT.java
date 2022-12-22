@@ -23,8 +23,8 @@ public class ClearValueIT extends AbstractComponentIT {
 
     @Test
     public void setInputValue_clearValue_inputValueIsEmpty() {
-        timePicker.sendKeys("12:00", Keys.ENTER);
-        Assert.assertEquals("12:00", timePicker.getTimePickerInputValue());
+        timePicker.selectByText("12:00 PM");
+        Assert.assertEquals("12:00 PM", timePicker.getTimePickerInputValue());
 
         $("button").id(CLEAR_BUTTON).click();
         Assert.assertEquals("", timePicker.getTimePickerInputValue());
@@ -32,7 +32,7 @@ public class ClearValueIT extends AbstractComponentIT {
 
     @Test
     public void setBadInputValue_clearValue_inputValueIsEmpty() {
-        timePicker.sendKeys("INVALID", Keys.ENTER);
+        timePicker.selectByText("INVALID");
         Assert.assertEquals("INVALID", timePicker.getTimePickerInputValue());
 
         $("button").id(CLEAR_BUTTON).click();
