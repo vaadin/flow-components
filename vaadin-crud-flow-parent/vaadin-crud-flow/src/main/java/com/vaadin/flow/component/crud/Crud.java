@@ -23,6 +23,7 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.dom.Element;
@@ -135,24 +136,20 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
         registerHandlers();
 
         newButton = new Button();
-        newButton.getElement().setAttribute("slot", "new-button");
         newButton.getElement().setAttribute("theme", "primary");
-        getElement().appendChild(newButton.getElement());
+        SlotUtils.addToSlot(this, "new-button", newButton);
 
         saveButton = new SaveButton();
-        saveButton.getElement().setAttribute("slot", "save-button");
         saveButton.addThemeName("primary");
-        getElement().appendChild(saveButton.getElement());
+        SlotUtils.addToSlot(this, "save-button", saveButton);
 
         cancelButton = new Button();
-        cancelButton.getElement().setAttribute("slot", "cancel-button");
         cancelButton.addThemeName("tertiary");
-        getElement().appendChild(cancelButton.getElement());
+        SlotUtils.addToSlot(this, "cancel-button", cancelButton);
 
         deleteButton = new Button();
-        deleteButton.getElement().setAttribute("slot", "delete-button");
         deleteButton.addThemeNames("tertiary", "error");
-        getElement().appendChild(deleteButton.getElement());
+        SlotUtils.addToSlot(this, "delete-button", deleteButton);
     }
 
     private class SaveButton extends Button {

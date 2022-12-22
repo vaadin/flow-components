@@ -23,6 +23,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.router.NavigationTrigger;
@@ -196,8 +197,7 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
             return;
         }
 
-        title.getElement().setAttribute("slot", "title");
-        getElement().appendChild(title.getElement());
+        SlotUtils.addToSlot(this, "title", title);
     }
 
     /**

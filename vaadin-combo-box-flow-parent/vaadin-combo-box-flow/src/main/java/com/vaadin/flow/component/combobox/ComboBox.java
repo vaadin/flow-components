@@ -25,6 +25,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -345,10 +346,7 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
      */
     @Deprecated
     protected void addToPrefix(Component... components) {
-        for (Component component : components) {
-            component.getElement().setAttribute("slot", "prefix");
-            getElement().appendChild(component.getElement());
-        }
+        SlotUtils.addToSlot(this, "prefix", components);
     }
 
     /**

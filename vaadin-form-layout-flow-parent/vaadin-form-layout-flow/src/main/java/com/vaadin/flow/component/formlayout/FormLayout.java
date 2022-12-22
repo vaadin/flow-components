@@ -32,8 +32,8 @@ import com.vaadin.flow.component.JsonSerializable;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-
 import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.shared.SlotUtils;
 
 import elemental.json.Json;
 import elemental.json.JsonArray;
@@ -234,10 +234,7 @@ public class FormLayout extends Component
          *      website about slots</a>
          */
         protected void addToLabel(Component... components) {
-            for (Component component : components) {
-                component.getElement().setAttribute("slot", "label");
-                getElement().appendChild(component.getElement());
-            }
+            SlotUtils.addToSlot(this, "label", components);
         }
 
         /**

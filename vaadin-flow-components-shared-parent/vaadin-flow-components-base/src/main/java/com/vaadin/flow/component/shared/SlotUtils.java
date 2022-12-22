@@ -19,6 +19,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.dom.Element;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -72,5 +73,28 @@ public class SlotUtils {
     public static Component getChildInSlot(HasElement parent, String slot) {
         Optional<Element> element = getElementsInSlot(parent, slot).findFirst();
         return element.flatMap(Element::getComponent).orElse(null);
+    }
+
+    /**
+     * Adds components to the specified slot in the parent component.
+     *
+     * @param parent
+     *            the component to add the components to, not {@code null}
+     * @param slot
+     *            the name of the slot inside the parent, not {@code null}
+     * @param components
+     *            components to add to the specified slot.
+     * @throws NullPointerException
+     *             if any of the components is null or if the components array
+     *             is null.
+     */
+    public static void addToSlot(HasElement parent, String slot,
+            Component... components) {
+        Objects.requireNonNull(parent, "Parent cannot be null");
+
+        for (Component component : components) {
+            component.getElement().setAttribute("slot", slot);
+            parent.getElement().appendChild(component.getElement());
+        }
     }
 }
