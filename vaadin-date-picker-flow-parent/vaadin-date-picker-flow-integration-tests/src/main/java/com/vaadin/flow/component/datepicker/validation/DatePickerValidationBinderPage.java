@@ -12,6 +12,7 @@ public class DatePickerValidationBinderPage
         extends AbstractValidationPage<DatePicker> {
     public static final String MIN_INPUT = "min-input";
     public static final String MAX_INPUT = "max-input";
+    public static final String CLEAR_VALUE_BUTTON = "clear-value-button";
     public static final String EXPECTED_VALUE_INPUT = "expected-value-input";
 
     public static final String REQUIRED_ERROR_MESSAGE = "The field is required";
@@ -55,6 +56,10 @@ public class DatePickerValidationBinderPage
         add(createInput(MAX_INPUT, "Set max date", event -> {
             LocalDate value = LocalDate.parse(event.getValue());
             testField.setMax(value);
+        }));
+
+        add(createButton(CLEAR_VALUE_BUTTON, "Clear value", event -> {
+            testField.clear();
         }));
     }
 

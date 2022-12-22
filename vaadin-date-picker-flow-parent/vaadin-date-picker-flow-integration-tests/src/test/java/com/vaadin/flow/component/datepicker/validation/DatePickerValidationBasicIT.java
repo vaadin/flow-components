@@ -12,6 +12,7 @@ import static com.vaadin.flow.component.datepicker.validation.DatePickerValidati
 import static com.vaadin.flow.component.datepicker.validation.DatePickerValidationBasicPage.MIN_INPUT;
 import static com.vaadin.flow.component.datepicker.validation.DatePickerValidationBasicPage.MAX_INPUT;
 import static com.vaadin.flow.component.datepicker.validation.DatePickerValidationBasicPage.REQUIRED_BUTTON;
+import static com.vaadin.flow.component.datepicker.validation.DatePickerValidationBasicPage.CLEAR_VALUE_BUTTON;
 
 @TestPath("vaadin-date-picker/validation/basic")
 public class DatePickerValidationBasicIT
@@ -117,6 +118,17 @@ public class DatePickerValidationBasicIT
         testField.setInputValue("INVALID");
         assertServerInvalid();
         assertClientInvalid();
+    }
+
+    @Test
+    public void badInput_setValue_clearValue_assertValidity() {
+        testField.setInputValue("INVALID");
+        assertServerInvalid();
+        assertClientInvalid();
+
+        $("button").id(CLEAR_VALUE_BUTTON).click();
+        assertServerValid();
+        assertClientValid();
     }
 
     protected DatePickerElement getTestField() {
