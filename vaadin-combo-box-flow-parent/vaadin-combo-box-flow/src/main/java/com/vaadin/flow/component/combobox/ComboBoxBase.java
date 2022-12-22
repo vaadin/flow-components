@@ -63,9 +63,11 @@ import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.SerializablePredicate;
+import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.shared.Registration;
 
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -147,8 +149,16 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
         super(valuePropertyName, defaultValue, valuePropertyType,
                 presentationToModel, modelToPresentation);
 
+        @SuppressWarnings("serial")
+        SerializableSupplier<Locale> localeSupplier = new SerializableSupplier<Locale>() {
+            @Override
+            public Locale get() {
+                return ComboBoxBase.this.getLocale();
+            }
+        };
+
         renderManager = new ComboBoxRenderManager<>(this);
-        dataController = new ComboBoxDataController<>(this, this::getLocale);
+        dataController = new ComboBoxDataController<>(this, localeSupplier);
         dataController.getDataGenerator().addDataGenerator((item,
                 jsonObject) -> jsonObject.put("label", generateLabel(item)));
 
