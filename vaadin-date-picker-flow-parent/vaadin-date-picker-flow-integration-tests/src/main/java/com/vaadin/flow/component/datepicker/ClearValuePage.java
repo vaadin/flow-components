@@ -13,9 +13,7 @@ public class ClearValuePage extends Div {
 
         NativeButton clearButton = new NativeButton("Clear value");
         clearButton.setId(CLEAR_BUTTON);
-        clearButton.addClickListener((event) -> {
-            datePicker.clear();
-        });
+        clearButton.addClickListener(event -> datePicker.clear());
 
         add(datePicker, clearButton);
     }
