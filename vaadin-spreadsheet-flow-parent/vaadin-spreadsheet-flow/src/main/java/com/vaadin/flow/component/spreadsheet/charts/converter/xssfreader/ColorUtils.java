@@ -1,3 +1,11 @@
+/**
+ * Copyright 2000-2022 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
+ */
 package com.vaadin.flow.component.spreadsheet.charts.converter.xssfreader;
 
 import org.openxmlformats.schemas.drawingml.x2006.main.CTColorScheme;
@@ -11,16 +19,6 @@ import org.openxmlformats.schemas.drawingml.x2006.main.CTSolidColorFillPropertie
 
 import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.ChartData.ColorProperties;
 import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.ChartData.GradientProperties;
-
-/**
- * Copyright (C) 2000-2022 Vaadin Ltd
- *
- * This program is available under Vaadin Commercial License and Service Terms.
- *
- *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
- * license.
- */
 
 import java.util.HashMap;
 import java.util.List;
