@@ -586,7 +586,9 @@ public class DatePicker
 
         super.setValue(value);
 
-        if (oldValue == null && value == null && isInputValuePresent()) {
+        if (Objects.equals(oldValue, getEmptyValue())
+                && Objects.equals(value, getEmptyValue())
+                && isInputValuePresent()) {
             // Clear the input element from possible bad input.
             getElement().executeJs("this.inputElement.value = $0", "");
             getElement().setProperty("_hasInputValue", false);
