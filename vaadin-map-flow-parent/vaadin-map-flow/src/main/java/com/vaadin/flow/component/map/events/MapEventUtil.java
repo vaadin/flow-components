@@ -49,15 +49,6 @@ class MapEventUtil {
         JsonValue xValue = jsonCoordinates.get(0);
         JsonValue yValue = jsonCoordinates.get(1);
 
-        boolean hasNullValue = xValue.getType() == JsonType.NULL
-                || yValue.getType() == JsonType.NULL;
-
-        if (hasNullValue) {
-            logger.error("Received invalid map coordinates from client. "
-                    + "This can happen when using Coordinate.fromLonLat together with the default coordinate system. "
-                    + "If you have upgraded to Vaadin 23.2, please replace usages of Coordinate.fromLonLat.");
-        }
-
         double x = xValue.getType() == JsonType.NULL ? 0 : xValue.asNumber();
         double y = yValue.getType() == JsonType.NULL ? 0 : yValue.asNumber();
 
