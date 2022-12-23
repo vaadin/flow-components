@@ -12,6 +12,7 @@ import org.openqa.selenium.Keys;
 import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.MIN_INPUT;
 import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.MAX_INPUT;
 import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.REQUIRED_BUTTON;
+import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.CLEAR_VALUE_BUTTON;
 
 @TestPath("vaadin-date-time-picker/validation/basic")
 public class BasicValidationIT
@@ -64,24 +65,6 @@ public class BasicValidationIT
         assertClientInvalid();
 
         setInputValue(timeInput, "");
-        assertServerInvalid();
-        assertClientInvalid();
-    }
-
-    @Test
-    public void badInput_changeValue_assertValidity() {
-        setInputValue(dateInput, "INVALID");
-        setInputValue(timeInput, "INVALID");
-        assertServerInvalid();
-        assertClientInvalid();
-
-        setInputValue(dateInput, "1/1/2000");
-        setInputValue(timeInput, "10:00");
-        assertServerValid();
-        assertClientValid();
-
-        setInputValue(dateInput, "INVALID");
-        setInputValue(timeInput, "INVALID");
         assertServerInvalid();
         assertClientInvalid();
     }
@@ -144,6 +127,36 @@ public class BasicValidationIT
         setInputValue(timeInput, "13:00");
         assertClientValid();
         assertServerValid();
+    }
+
+    @Test
+    public void badInput_changeValue_assertValidity() {
+        setInputValue(dateInput, "INVALID");
+        setInputValue(timeInput, "INVALID");
+        assertServerInvalid();
+        assertClientInvalid();
+
+        setInputValue(dateInput, "1/1/2000");
+        setInputValue(timeInput, "10:00");
+        assertServerValid();
+        assertClientValid();
+
+        setInputValue(dateInput, "INVALID");
+        setInputValue(timeInput, "INVALID");
+        assertServerInvalid();
+        assertClientInvalid();
+    }
+
+    @Test
+    public void badInput_setValue_clearValue_assertValidity() {
+        setInputValue(dateInput, "INVALID");
+        setInputValue(timeInput, "INVALID");
+        assertServerInvalid();
+        assertClientInvalid();
+
+        $("button").id(CLEAR_VALUE_BUTTON).click();
+        assertServerValid();
+        assertClientValid();
     }
 
     @Test
