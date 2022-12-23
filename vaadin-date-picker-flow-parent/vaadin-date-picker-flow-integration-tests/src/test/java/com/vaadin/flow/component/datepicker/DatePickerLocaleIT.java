@@ -12,7 +12,6 @@ import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.logging.LogEntries;
 import org.openqa.selenium.logging.LogEntry;
@@ -135,17 +134,17 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
         applyLocale(new Locale("i", "i", "i"));
 
         waitUntil(driver -> getWarningEntries().toString().contains(
-                "The locale is not supported, using default locale setting(en-US)."));
+                "The locale is not supported, using default format setting (ISO 8601)."));
     }
 
     @Test
-    public void datePicker_setInvalidLocale_defaultUSLocaleIsUsed() {
+    public void datePicker_setInvalidLocale_defaultISO8601FormatIsUsed() {
         applyLocale(new Locale("i", "i", "i"));
         picker.setDate(LocalDate.of(2018, Month.MAY, 3));
 
         Assert.assertEquals(
-                "Should display the value using the default US date format",
-                "5/3/2018", picker.getInputValue());
+                "Should display the value using the default (ISO 8601) date format",
+                "2018-05-03", picker.getInputValue());
     }
 
     @Test
@@ -155,23 +154,23 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
         applyLocale(new Locale("th", "TH"));
 
         waitUntil(driver -> getWarningEntries().toString().contains(
-                "The locale is not supported, using default locale setting(en-US)."));
+                "The locale is not supported, using default format setting (ISO 8601)."));
     }
 
     @Test
-    public void datePicker_setUnsupportedLocale_defaultUSLocaleIsUsed() {
+    public void datePicker_setUnsupportedLocale_defaultISO8601FormatIsUsed() {
         picker.setDate(LocalDate.of(2018, Month.MAY, 3));
 
         List<Locale> unsupportedLocales = List.of(new Locale("ar", "SA"),
-                new Locale("th", "TH"), new Locale("fa"), new Locale("ks"));
+                new Locale("th", "TH"), new Locale("fa"));
 
         unsupportedLocales.forEach(unsupportedLocale -> {
             applyLocale(unsupportedLocale);
 
             Assert.assertEquals(
-                    "Should display the value using the default US date format for locale "
+                    "Should display the value using the default ISO date format for locale "
                             + unsupportedLocale,
-                    "5/3/2018", picker.getInputValue());
+                    "2018-05-03", picker.getInputValue());
         });
     }
 

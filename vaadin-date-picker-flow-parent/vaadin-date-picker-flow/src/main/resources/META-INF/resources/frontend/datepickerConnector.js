@@ -18,22 +18,13 @@ import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/s
 
         datepicker.$connector = {};
 
-        datepicker.addEventListener(
-          'blur',
-          tryCatchWrapper((e) => {
-            if (!e.target.value && e.target.invalid) {
-              console.warn('Invalid value in the DatePicker.');
-            }
-          })
-        );
-
         const createLocaleBasedDateFormat = function (locale) {
           try {
             // Check whether the locale is supported or not
             new Date().toLocaleDateString(locale);
           } catch (e) {
-            console.warn('The locale is not supported, using default locale setting(en-US).');
-            return 'M/d/yyyy';
+            console.warn('The locale is not supported, using default format setting (ISO 8601).');
+            return 'yyyy-MM-dd';
           }
 
           // format test date and convert to date-fns pattern
@@ -52,8 +43,8 @@ import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/s
             .replace('1234', 'yyyy');
           const isValidPattern = pattern.includes('d') && pattern.includes('M') && pattern.includes('y');
           if (!isValidPattern) {
-            console.warn('The locale is not supported, using default locale setting(en-US).');
-            return 'M/d/yyyy';
+            console.warn('The locale is not supported, using default format setting (ISO 8601).');
+            return 'yyyy-MM-dd';
           }
 
           return pattern;

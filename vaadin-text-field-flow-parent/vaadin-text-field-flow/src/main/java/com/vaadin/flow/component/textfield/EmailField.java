@@ -17,29 +17,16 @@
 package com.vaadin.flow.component.textfield;
 
 import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.CompositionNotifier;
-import com.vaadin.flow.component.HasHelper;
-import com.vaadin.flow.component.HasLabel;
-import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.HasValidation;
-import com.vaadin.flow.component.InputNotifier;
-import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
-import com.vaadin.flow.component.shared.HasClearButton;
-import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
 import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.binder.Validator;
-import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.shared.Registration;
 
@@ -60,22 +47,14 @@ import com.vaadin.flow.shared.Registration;
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/email-field", version = "24.0.0-alpha6")
 @JsModule("@vaadin/email-field/src/vaadin-email-field.js")
-public class EmailField extends GeneratedVaadinTextField<EmailField, String>
-        implements CompositionNotifier, HasAllowedCharPattern,
-        HasAutocapitalize, HasAutocomplete, HasAutocorrect, HasClearButton,
-        HasClientValidation, HasHelper, HasLabel, HasPrefixAndSuffix, HasSize,
-        HasStyle, HasThemeVariant<TextFieldVariant>, HasTooltip, HasValidation,
-        HasValidator<String>, HasValueChangeMode, InputNotifier, KeyNotifier {
+public class EmailField extends InternalFieldBase<EmailField, String>
+        implements HasAllowedCharPattern, HasThemeVariant<TextFieldVariant> {
     private static final String EMAIL_PATTERN = "^" + "([a-zA-Z0-9_\\.\\-+])+" // local
             + "@" + "[a-zA-Z0-9-.]+" // domain
             + "\\." + "[a-zA-Z0-9-]{2,}" // tld
             + "$";
 
-    private ValueChangeMode currentMode;
-
     private boolean isConnectorAttached;
-
-    private int valueChangeTimeout = DEFAULT_CHANGE_TIMEOUT;
 
     private TextFieldValidationSupport validationSupport;
 
@@ -183,103 +162,6 @@ public class EmailField extends GeneratedVaadinTextField<EmailField, String>
     }
 
     /**
-     * {@inheritDoc}
-     * <p>
-     * The default value is {@link ValueChangeMode#ON_CHANGE}.
-     */
-    @Override
-    public ValueChangeMode getValueChangeMode() {
-        return currentMode;
-    }
-
-    @Override
-    public void setValueChangeMode(ValueChangeMode valueChangeMode) {
-        currentMode = valueChangeMode;
-        setSynchronizedEvent(
-                ValueChangeMode.eventForMode(valueChangeMode, "value-changed"));
-        applyChangeTimeout();
-    }
-
-    @Override
-    public void setValueChangeTimeout(int valueChangeTimeout) {
-        this.valueChangeTimeout = valueChangeTimeout;
-        applyChangeTimeout();
-    }
-
-    @Override
-    public int getValueChangeTimeout() {
-        return valueChangeTimeout;
-    }
-
-    private void applyChangeTimeout() {
-        ValueChangeMode.applyChangeTimeout(getValueChangeMode(),
-                getValueChangeTimeout(), getSynchronizationRegistration());
-    }
-
-    @Override
-    public String getErrorMessage() {
-        return super.getErrorMessageString();
-    }
-
-    @Override
-    public void setErrorMessage(String errorMessage) {
-        super.setErrorMessage(errorMessage);
-    }
-
-    @Override
-    public boolean isInvalid() {
-        return isInvalidBoolean();
-    }
-
-    @Override
-    public void setInvalid(boolean invalid) {
-        super.setInvalid(invalid);
-    }
-
-    @Override
-    public void setLabel(String label) {
-        super.setLabel(label);
-    }
-
-    /**
-     * String used for the label element.
-     *
-     * @return the {@code label} property from the webcomponent
-     */
-    @Override
-    public String getLabel() {
-        return getLabelString();
-    }
-
-    @Override
-    public void setPlaceholder(String placeholder) {
-        super.setPlaceholder(placeholder);
-    }
-
-    /**
-     * A hint to the user of what can be entered in the component.
-     *
-     * @return the {@code placeholder} property from the webcomponent
-     */
-    public String getPlaceholder() {
-        return getPlaceholderString();
-    }
-
-    @Override
-    public void setAutofocus(boolean autofocus) {
-        super.setAutofocus(autofocus);
-    }
-
-    /**
-     * Specify that this control should have input focus when the page loads.
-     *
-     * @return the {@code autofocus} property from the webcomponent
-     */
-    public boolean isAutofocus() {
-        return isAutofocusBoolean();
-    }
-
-    /**
      * Maximum number of characters (in Unicode code points) that the user can
      * enter.
      *
@@ -324,6 +206,22 @@ public class EmailField extends GeneratedVaadinTextField<EmailField, String>
     }
 
     /**
+     * <p>
+     * Specifies that the user must fill in a value.
+     * </p>
+     * NOTE: The required indicator will not be visible, if there is no
+     * {@code label} property set for the textfield.
+     *
+     * @param required
+     *            the boolean value to set
+     */
+    @Override
+    public void setRequired(boolean required) {
+        super.setRequired(required);
+        getValidationSupport().setRequired(required);
+    }
+
+    /**
      * Sets a regular expression for the value to pass on the client-side. The
      * pattern must be a valid JavaScript Regular Expression that matches the
      * entire value, not just some subset.
@@ -351,45 +249,6 @@ public class EmailField extends GeneratedVaadinTextField<EmailField, String>
      */
     public String getPattern() {
         return getElement().getProperty("pattern");
-    }
-
-    /**
-     * The text usually displayed in a tooltip popup when the mouse is over the
-     * field.
-     *
-     * @return the {@code title} property from the webcomponent
-     */
-    public String getTitle() {
-        return super.getTitleString();
-    }
-
-    @Override
-    public void setTitle(String title) {
-        super.setTitle(title);
-    }
-
-    /**
-     * Specifies if the field value gets automatically selected when the field
-     * gains focus.
-     *
-     * @return <code>true</code> if autoselect is active, <code>false</code>
-     *         otherwise
-     */
-    public boolean isAutoselect() {
-        return super.isAutoselectBoolean();
-    }
-
-    /**
-     * Set to <code>true</code> to always have the field value automatically
-     * selected when the field gains focus, <code>false</code> otherwise.
-     *
-     * @param autoselect
-     *            <code>true</code> to set auto select on, <code>false</code>
-     *            otherwise
-     */
-    @Override
-    public void setAutoselect(boolean autoselect) {
-        super.setAutoselect(autoselect);
     }
 
     @Override
@@ -449,7 +308,6 @@ public class EmailField extends GeneratedVaadinTextField<EmailField, String>
      * because it is possible to circumvent the client-side validation
      * constraints using browser development tools.
      */
-    @Override
     protected void validate() {
         setInvalid(getValidationSupport().isInvalid(getValue()));
     }

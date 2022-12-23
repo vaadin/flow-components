@@ -1,9 +1,3 @@
-package com.vaadin.flow.component.accordion;
-
-import java.util.Objects;
-import java.util.Optional;
-import java.util.OptionalInt;
-
 /*
  * Copyright 2000-2022 Vaadin Ltd.
  *
@@ -19,6 +13,11 @@ import java.util.OptionalInt;
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+package com.vaadin.flow.component.accordion;
+
+import java.util.Objects;
+import java.util.Optional;
+import java.util.OptionalInt;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
