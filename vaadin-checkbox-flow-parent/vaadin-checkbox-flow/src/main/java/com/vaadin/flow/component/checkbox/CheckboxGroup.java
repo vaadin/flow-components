@@ -693,13 +693,6 @@ public class CheckboxGroup<T>
                 runBeforeClientResponse(sizeRequest);
             }
         }
-
-        Set<Object> currentItemIds = getCheckboxItems()
-                .map(CheckBoxItem::getItem).map(this::getItemId)
-                .collect(Collectors.toSet());
-        getValue().stream()
-                .filter(item -> !currentItemIds.contains(getItemId(item)))
-                .forEach(this::deselect);
     }
 
     private void refreshCheckboxes() {
