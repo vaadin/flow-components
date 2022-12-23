@@ -91,6 +91,7 @@ public class ValueChangeModeIT extends AbstractComponentIT {
     @Test
     public void testValueChangeModesForEmailField()
             throws InterruptedException {
+        emailField.sendKeys("foo@test.com");
         testValueChangeModes(emailField, "emailfield");
     }
 
