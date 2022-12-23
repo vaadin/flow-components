@@ -572,6 +572,22 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         return getElement().getProperty("_hasInputValue", false);
     }
 
+    @Override
+    public void setValue(LocalDate value) {
+        LocalDate oldValue = getValue();
+
+        super.setValue(value);
+
+        if (Objects.equals(oldValue, getEmptyValue())
+                && Objects.equals(value, getEmptyValue())
+                && isInputValuePresent()) {
+            // Clear the input element from possible bad input.
+            getElement().executeJs("this.inputElement.value = ''");
+            getElement().setProperty("_hasInputValue", false);
+            fireEvent(new ClientValidatedEvent(this, false, true));
+        }
+    }
+
     /**
      * Sets the label for the datepicker.
      *
