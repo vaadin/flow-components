@@ -148,9 +148,51 @@ public class BasicValidationIT
     }
 
     @Test
+    public void badInput_setDateInputValue_blur_assertValidity() {
+        setInputValue(dateInput, "INVALID");
+        dateInput.sendKeys(Keys.TAB);
+        timeInput.sendKeys(Keys.TAB);
+        assertServerInvalid();
+        assertClientInvalid();
+    }
+
+    @Test
+    public void badInput_setTimeInputValue_blur_assertValidity() {
+        setInputValue(timeInput, "INVALID");
+        timeInput.sendKeys(Keys.TAB);
+        assertServerInvalid();
+        assertClientInvalid();
+    }
+
+    @Test
     public void badInput_setValue_clearValue_assertValidity() {
         setInputValue(dateInput, "INVALID");
         setInputValue(timeInput, "INVALID");
+        assertServerInvalid();
+        assertClientInvalid();
+
+        $("button").id(CLEAR_VALUE_BUTTON).click();
+        assertServerValid();
+        assertClientValid();
+    }
+
+    @Test
+    public void badInput_setDateInputValue_blur_clearValue_assertValidity() {
+        setInputValue(dateInput, "INVALID");
+        dateInput.sendKeys(Keys.TAB);
+        timeInput.sendKeys(Keys.TAB);
+        assertServerInvalid();
+        assertClientInvalid();
+
+        $("button").id(CLEAR_VALUE_BUTTON).click();
+        assertServerValid();
+        assertClientValid();
+    }
+
+    @Test
+    public void badInput_setTimeInputValue_blur_clearValue_assertValidity() {
+        setInputValue(timeInput, "INVALID");
+        timeInput.sendKeys(Keys.TAB);
         assertServerInvalid();
         assertClientInvalid();
 

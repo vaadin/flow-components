@@ -27,7 +27,25 @@ public class ClearValueIT extends AbstractComponentIT {
     }
 
     @Test
-    public void setInputValue_clearValue_inputValueIsEmpty() {
+    public void setDateInputValue_clearValue_inputValueIsEmpty() {
+        dateInput.sendKeys("1/1/2022", Keys.ENTER);
+        Assert.assertEquals("1/1/2022", dateInput.getPropertyString("value"));
+
+        $("button").id(CLEAR_BUTTON).click();
+        Assert.assertEquals("", dateInput.getPropertyString("value"));
+    }
+
+    @Test
+    public void setTimeInputValue_clearValue_inputValueIsEmpty() {
+        timeInput.sendKeys("12:00 PM", Keys.ENTER);
+        Assert.assertEquals("12:00 PM", timeInput.getPropertyString("value"));
+
+        $("button").id(CLEAR_BUTTON).click();
+        Assert.assertEquals("", timeInput.getPropertyString("value"));
+    }
+
+    @Test
+    public void setDateAndTimeInputValue_clearValue_inputValueIsEmpty() {
         dateInput.sendKeys("1/1/2022", Keys.ENTER);
         timeInput.sendKeys("12:00 PM", Keys.ENTER);
         Assert.assertEquals("1/1/2022", dateInput.getPropertyString("value"));
@@ -39,7 +57,25 @@ public class ClearValueIT extends AbstractComponentIT {
     }
 
     @Test
-    public void setBadInputValue_clearValue_inputValueIsEmpty() {
+    public void setBadDateInputValue_clearValue_inputValueIsEmpty() {
+        dateInput.sendKeys("INVALID", Keys.ENTER);
+        Assert.assertEquals("INVALID", dateInput.getPropertyString("value"));
+
+        $("button").id(CLEAR_BUTTON).click();
+        Assert.assertEquals("", dateInput.getPropertyString("value"));
+    }
+
+    @Test
+    public void setBadTimeInputValue_clearValue_inputValueIsEmpty() {
+        timeInput.sendKeys("INVALID", Keys.ENTER);
+        Assert.assertEquals("INVALID", timeInput.getPropertyString("value"));
+
+        $("button").id(CLEAR_BUTTON).click();
+        Assert.assertEquals("", timeInput.getPropertyString("value"));
+    }
+
+    @Test
+    public void setBadDateAndTimeInputValue_clearValue_inputValueIsEmpty() {
         dateInput.sendKeys("INVALID", Keys.ENTER);
         timeInput.sendKeys("INVALID", Keys.ENTER);
         Assert.assertEquals("INVALID", dateInput.getPropertyString("value"));

@@ -183,25 +183,6 @@ public class BinderValidationIT
         assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
-    @Test
-    public void badInput_setDateInputValue_blur_assertValidity() {
-        setInputValue(dateInput, "INVALID");
-        dateInput.sendKeys(Keys.TAB);
-        timeInput.sendKeys(Keys.TAB);
-        assertServerInvalid();
-        assertClientInvalid();
-        assertErrorMessage("");
-    }
-
-    @Test
-    public void badInput_setTimeInputValue_blur_assertValidity() {
-        setInputValue(timeInput, "INVALID");
-        timeInput.sendKeys(Keys.TAB);
-        assertServerInvalid();
-        assertClientInvalid();
-        assertErrorMessage("");
-    }
-
     protected DateTimePickerElement getTestField() {
         return $(DateTimePickerElement.class).first();
     }

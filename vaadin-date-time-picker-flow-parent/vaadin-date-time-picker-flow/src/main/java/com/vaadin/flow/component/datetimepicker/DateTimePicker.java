@@ -22,8 +22,6 @@ import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
@@ -56,6 +54,13 @@ class DateTimePickerDatePicker
 
     void passThroughPresentationValue(LocalDate newPresentationValue) {
         super.setPresentationValue(newPresentationValue);
+
+        if (Objects.equals(newPresentationValue, getEmptyValue())
+                && isInputValuePresent()) {
+            // Clear the input element from possible bad input.
+            getElement().executeJs("this.inputElement.value = ''");
+            getElement().setProperty("_hasInputValue", false);
+        }
     }
 
     @Override
@@ -76,6 +81,13 @@ class DateTimePickerTimePicker
 
     void passThroughPresentationValue(LocalTime newPresentationValue) {
         super.setPresentationValue(newPresentationValue);
+
+        if (Objects.equals(newPresentationValue, getEmptyValue())
+                && isInputValuePresent()) {
+            // Clear the input element from possible bad input.
+            getElement().executeJs("this.inputElement.value = ''");
+            getElement().setProperty("_hasInputValue", false);
+        }
     }
 
     @Override
@@ -293,9 +305,22 @@ public class DateTimePicker extends
      */
     @Override
     public void setValue(LocalDateTime value) {
+        LocalDateTime oldValue = getValue();
+
         value = sanitizeValue(value);
         super.setValue(value);
-        synchronizeChildComponentValues(value);
+
+        if (Objects.equals(oldValue, getEmptyValue())
+                && Objects.equals(value, getEmptyValue())
+                && (timePicker.isInputValuePresent()
+                        || datePicker.isInputValuePresent())) {
+            // Clear the input elements from possible bad input.
+            synchronizeChildComponentValues(value);
+            fireEvent(new ClientValidatedEvent(this, false, true));
+        } else {
+            synchronizeChildComponentValues(value);
+        }
+
     }
 
     /**
