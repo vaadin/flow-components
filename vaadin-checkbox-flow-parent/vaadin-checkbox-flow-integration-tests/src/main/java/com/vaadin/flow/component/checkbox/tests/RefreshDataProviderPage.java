@@ -18,6 +18,7 @@ package com.vaadin.flow.component.checkbox.tests;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.html.Div;
@@ -36,14 +37,31 @@ public class RefreshDataProviderPage extends Div {
         List<String> items = new LinkedList<>(Arrays.asList("foo", "bar"));
         group.setItems(new ListDataProvider<>(items));
 
-        NativeButton button = new NativeButton("Update items", e -> {
+        Div valueDiv = new Div();
+        valueDiv.setId("value-div");
+        group.addValueChangeListener(e -> valueDiv.setText(e.getValue().stream()
+                .sorted(String::compareTo).collect(Collectors.joining(", "))));
+
+        NativeButton refreshAllButton = new NativeButton("Refresh all items",
+                e -> {
+                    group.getListDataView().refreshAll();
+                });
+        refreshAllButton.setId("refresh-all-items");
+
+        NativeButton updateItemsButton = new NativeButton("Update items", e -> {
             items.add("baz");
             items.remove(0);
-            group.getDataProvider().refreshAll();
+            group.getListDataView().refreshAll();
         });
+        updateItemsButton.setId("update-items");
 
-        button.setId("reset");
+        NativeButton updateItemLabelGeneratorButton = new NativeButton(
+                "Update labels", e -> {
+                    group.setItemLabelGenerator(item -> item + " (Updated)");
+                });
+        updateItemLabelGeneratorButton.setId("update-labels");
 
-        add(group, button);
+        add(group, refreshAllButton, updateItemsButton,
+                updateItemLabelGeneratorButton, valueDiv);
     }
 }

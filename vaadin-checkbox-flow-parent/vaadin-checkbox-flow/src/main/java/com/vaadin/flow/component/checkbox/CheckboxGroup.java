@@ -342,6 +342,7 @@ public class CheckboxGroup<T>
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         this.dataProvider.set(dataProvider);
         DataViewUtils.removeComponentFilterAndSortComparator(this);
+        clear();
         reset();
 
         if (dataProviderListenerRegistration != null) {
@@ -651,13 +652,12 @@ public class CheckboxGroup<T>
     public void setRenderer(
             ComponentRenderer<? extends Component, T> renderer) {
         this.itemRenderer = Objects.requireNonNull(renderer);
-        refreshCheckboxItems();
+        refreshCheckboxes();
     }
 
     @SuppressWarnings("unchecked")
     private void reset() {
         keyMapper.removeAll();
-        clear();
 
         synchronized (dataProvider) {
             // Cache helper component before removal
@@ -693,6 +693,13 @@ public class CheckboxGroup<T>
                 runBeforeClientResponse(sizeRequest);
             }
         }
+
+        Set<Object> currentItemIds = getCheckboxItems()
+                .map(CheckBoxItem::getItem).map(this::getItemId)
+                .collect(Collectors.toSet());
+        getValue().stream()
+                .filter(item -> !currentItemIds.contains(getItemId(item)))
+                .forEach(this::deselect);
     }
 
     private void refreshCheckboxes() {
@@ -710,10 +717,6 @@ public class CheckboxGroup<T>
                 item);
         updateCheckbox(checkbox);
         return checkbox;
-    }
-
-    private void refreshCheckboxItems() {
-        getCheckboxItems().forEach(this::updateCheckbox);
     }
 
     private void updateCheckbox(CheckBoxItem<T> checkbox) {

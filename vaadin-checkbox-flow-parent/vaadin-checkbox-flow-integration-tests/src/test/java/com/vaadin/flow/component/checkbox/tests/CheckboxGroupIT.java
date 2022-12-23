@@ -141,15 +141,13 @@ public class CheckboxGroupIT extends AbstractComponentIT {
 
         // make the group not read-only
         WebElement switchReadOnly = findElement(By.id("switch-read-only"));
-        new Actions(getDriver()).moveToElement(switchReadOnly).click().build()
-                .perform();
+        scrollIntoViewAndClick(switchReadOnly);
 
         group.selectByText("bar");
         Assert.assertEquals("[bar]", valueInfo.getText());
 
         // make it read-only again
-        new Actions(getDriver()).moveToElement(switchReadOnly).click().build()
-                .perform();
+        scrollIntoViewAndClick(switchReadOnly);
 
         // click to the first item
         group.selectByText("foo");
