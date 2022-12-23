@@ -57,7 +57,7 @@ public class ClearValueIT extends AbstractComponentIT {
     }
 
     @Test
-    public void setBadDateInputValue_clearValue_inputValueIsEmpty() {
+    public void badInput_setDateInputValue_clearValue_inputValueIsEmpty() {
         dateInput.sendKeys("INVALID", Keys.ENTER);
         Assert.assertEquals("INVALID", dateInput.getPropertyString("value"));
 
@@ -66,7 +66,7 @@ public class ClearValueIT extends AbstractComponentIT {
     }
 
     @Test
-    public void setBadTimeInputValue_clearValue_inputValueIsEmpty() {
+    public void badInput_setTimeInputValue_clearValue_inputValueIsEmpty() {
         timeInput.sendKeys("INVALID", Keys.ENTER);
         Assert.assertEquals("INVALID", timeInput.getPropertyString("value"));
 
@@ -75,7 +75,7 @@ public class ClearValueIT extends AbstractComponentIT {
     }
 
     @Test
-    public void setBadDateAndTimeInputValue_clearValue_inputValueIsEmpty() {
+    public void badInput_setDateAndTimeInputValue_clearValue_inputValueIsEmpty() {
         dateInput.sendKeys("INVALID", Keys.ENTER);
         timeInput.sendKeys("INVALID", Keys.ENTER);
         Assert.assertEquals("INVALID", dateInput.getPropertyString("value"));
