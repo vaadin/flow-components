@@ -277,14 +277,14 @@ public class ConfirmDialog extends Component
      * Whether to show or hide Cancel button.
      */
     public void setCancelable(boolean cancelable) {
-        getElement().setProperty("cancel", cancelable);
+        getElement().setProperty("cancelButtonVisible", cancelable);
     }
 
     /**
      * Whether to show or hide Reject button.
      */
     public void setRejectable(boolean rejectable) {
-        getElement().setProperty("reject", rejectable);
+        getElement().setProperty("rejectButtonVisible", rejectable);
     }
 
     /**
