@@ -17,6 +17,7 @@ public class TimePickerValidationBasicPage
     public static final String REQUIRED_BUTTON = "required-button";
     public static final String MIN_INPUT = "min-input";
     public static final String MAX_INPUT = "max-input";
+    public static final String CLEAR_VALUE_BUTTON = "clear-value-button";
 
     public TimePickerValidationBasicPage() {
         super();
@@ -33,6 +34,10 @@ public class TimePickerValidationBasicPage
         add(createInput(MAX_INPUT, "Set max time", event -> {
             LocalTime value = LocalTime.parse(event.getValue());
             testField.setMax(value);
+        }));
+
+        add(createButton(CLEAR_VALUE_BUTTON, "Clear value", event -> {
+            testField.clear();
         }));
 
         addAttachDetachControls();
