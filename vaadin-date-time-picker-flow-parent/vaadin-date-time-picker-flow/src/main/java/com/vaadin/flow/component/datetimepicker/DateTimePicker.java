@@ -310,10 +310,11 @@ public class DateTimePicker extends
         value = sanitizeValue(value);
         super.setValue(value);
 
-        if (Objects.equals(oldValue, getEmptyValue())
-                && Objects.equals(value, getEmptyValue())
-                && (timePicker.isInputValuePresent()
-                        || datePicker.isInputValuePresent())) {
+        boolean isInputValuePresent = timePicker.isInputValuePresent()
+                || datePicker.isInputValuePresent();
+        boolean isValueRemainedEmpty = Objects.equals(oldValue, getEmptyValue())
+                && Objects.equals(value, getEmptyValue());
+        if (isValueRemainedEmpty && isInputValuePresent) {
             // Clear the input elements from possible bad input.
             synchronizeChildComponentValues(value);
             fireEvent(new ClientValidatedEvent(this, false, true));
