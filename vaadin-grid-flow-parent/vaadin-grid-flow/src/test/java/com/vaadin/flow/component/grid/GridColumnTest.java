@@ -280,8 +280,6 @@ public class GridColumnTest {
                 extendedGrid::createCustomColumn));
         columnsList.add(extendedGrid.addColumn(LitRenderer.of(""),
                 extendedGrid::createCustomColumn));
-        columnsList.add(extendedGrid.addColumn(LitRenderer.of(""),
-                extendedGrid::createCustomColumn, ""));
 
         columnsList.forEach(column -> {
             assertNotNull(column);
