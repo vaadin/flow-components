@@ -22,6 +22,8 @@ import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.vaadin.experimental.Feature;
 import com.vaadin.experimental.FeatureFlags;
