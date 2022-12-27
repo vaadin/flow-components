@@ -122,8 +122,7 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
                     if (event instanceof DataRefreshEvent) {
                         refresh(((DataRefreshEvent<ITEM>) event).getItem());
                     } else {
-                        clear();
-                        rebuild();
+                        handleDataChangeEvent();
                     }
                 });
     }
@@ -464,4 +463,7 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
         return IdentifierProvider.identity();
     }
 
+    void handleDataChangeEvent() {
+        rebuild();
+    }
 }

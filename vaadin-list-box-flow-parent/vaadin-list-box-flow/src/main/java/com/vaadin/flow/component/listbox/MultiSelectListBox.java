@@ -163,4 +163,28 @@ public class MultiSelectListBox<T>
                 .collect(Collectors.toSet());
         return ids1.equals(ids2);
     }
+
+    @Override
+    void handleDataChangeEvent() {
+        super.handleDataChangeEvent();
+
+        Set<T> value = getValue();
+        if (value.isEmpty()) {
+            return;
+        }
+
+        Set<Object> currentItemIds = getItems().stream().map(this::getItemId)
+                .collect(Collectors.toSet());
+        Set<T> obsoleteSelectedItems = value.stream()
+                .filter(item -> !currentItemIds.contains(getItemId(item)))
+                .collect(Collectors.toSet());
+        if (!obsoleteSelectedItems.isEmpty()) {
+            // Clear obsolete selected items
+            updateSelection(Collections.emptySet(), obsoleteSelectedItems);
+        } else {
+            // Force refresh selected items
+            setValue(Collections.emptySet());
+            setValue(value);
+        }
+    }
 }

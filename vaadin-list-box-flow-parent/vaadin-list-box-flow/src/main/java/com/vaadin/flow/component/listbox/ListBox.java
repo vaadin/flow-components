@@ -106,4 +106,25 @@ public class ListBox<T> extends ListBoxBase<ListBox<T>, T, T>
             return false;
         return getItemId(value1).equals(getItemId(value2));
     }
+
+    @Override
+    void handleDataChangeEvent() {
+        super.handleDataChangeEvent();
+
+        T value = getValue();
+        if (value == null) {
+            return;
+        }
+
+        Object valueId = getItemId(value);
+        if (getItems().stream().map(this::getItemId)
+                .noneMatch(valueId::equals)) {
+            // Clear obsolete selected item
+            setValue(null);
+        } else {
+            // Force refresh selected item
+            setValue(null);
+            setValue(value);
+        }
+    }
 }

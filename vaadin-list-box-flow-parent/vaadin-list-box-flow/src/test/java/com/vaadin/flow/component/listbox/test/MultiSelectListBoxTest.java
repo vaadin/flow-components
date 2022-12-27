@@ -94,13 +94,6 @@ public class MultiSelectListBoxTest {
     }
 
     @Test
-    public void setValue_refreshAll_valueCleared() {
-        listBox.setValue(createSet(foo));
-        dataProvider.refreshAll();
-        Assert.assertEquals(Collections.emptySet(), listBox.getValue());
-    }
-
-    @Test
     public void setValue_eventFired() {
         listBox.setValue(createSet(foo));
         assertValueChangeEvents(createSet(foo));

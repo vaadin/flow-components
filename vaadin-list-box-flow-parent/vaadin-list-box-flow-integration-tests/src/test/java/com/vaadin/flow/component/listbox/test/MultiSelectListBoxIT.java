@@ -51,33 +51,58 @@ public class MultiSelectListBoxIT extends AbstractComponentIT {
 
     @Test
     public void setValueFromServer_checkValueChangeEvents() {
-        findElement(By.id("setValue")).click();
+        findElement(By.id("set-value")).click();
         assertValueChanges(false, "bar, qux");
     }
 
     @Test
     public void setValueFromServer_checkSelectedItemsProperty() {
-        findElement(By.id("setValue")).click();
+        findElement(By.id("set-value")).click();
         assertSelectedValues("1,3");
     }
 
     @Test
     public void setValueFromServer_clickItems_checkValueChangeEvents() {
-        findElement(By.id("setValue")).click();
+        findElement(By.id("set-value")).click();
         clickItem(1);
         assertValueChanges(true, "bar, qux", "qux");
     }
 
     @Test
     public void setValueFromServer_clickItems_checkSelectedItemsProperty() {
-        findElement(By.id("setValue")).click();
+        findElement(By.id("set-value")).click();
         clickItem(1);
         assertSelectedValues("3");
     }
 
+    @Test
+    public void selectItem_refreshAll_itemIsSelected() {
+        clickItem(0);
+        assertSelectedValues("0");
+        findElement(By.id("refresh-all-items")).click();
+        assertSelectedValues("0");
+    }
+
+    @Test
+    public void selectItem_removeItemFromDataSource_refreshAll_itemIsNotSelected() {
+        clickItem(0);
+        clickItem(1);
+        assertSelectedValues("0,1");
+        findElement(By.id("update-items")).click();
+        assertSelectedValues("0");
+    }
+
+    @Test
+    public void selectItem_setItemLabelGenerator_itemIsSelected() {
+        clickItem(0);
+        assertSelectedValues("0");
+        findElement(By.id("update-labels")).click();
+        assertSelectedValues("0");
+    }
+
     private void assertValueChanges(boolean fromClient, String... expected) {
         assertLastEventFromClient(fromClient);
-        String[] values = $("div").id("valueChanges").$("p").all().stream()
+        String[] values = $("div").id("value-changes").$("p").all().stream()
                 .map(TestBenchElement::getText).toArray(String[]::new);
         Assert.assertArrayEquals(expected, values);
     }
@@ -85,7 +110,8 @@ public class MultiSelectListBoxIT extends AbstractComponentIT {
     private void assertLastEventFromClient(boolean expected) {
         Assert.assertEquals(
                 "Unexpected value of isClient flag of the ValueChangeEvent",
-                String.valueOf(expected), $("span").id("fromClient").getText());
+                String.valueOf(expected),
+                $("span").id("from-client").getText());
     }
 
     private void assertSelectedValues(String expected) {
