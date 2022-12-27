@@ -17,6 +17,7 @@
 package com.vaadin.flow.component.textfield;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
 import com.vaadin.experimental.Feature;
 import com.vaadin.experimental.FeatureFlags;
@@ -342,7 +343,15 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
      */
     @Override
     public void setValue(T value) {
+        T oldValue = getValue();
+
         super.setValue(value);
+
+        if (Objects.equals(oldValue, getEmptyValue())
+                && Objects.equals(value, getEmptyValue())) {
+            // Clear the input element from possible bad input.
+            getElement().executeJs("this.inputElement.value = ''");
+        }
     }
 
     /**
