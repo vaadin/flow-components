@@ -194,8 +194,8 @@ public class DateTimePicker extends
             setPresentationValue(null);
         }
 
-        addToSlot(datePicker, "date-picker");
-        addToSlot(timePicker, "time-picker");
+        SlotUtils.addToSlot(this, "date-picker", datePicker);
+        SlotUtils.addToSlot(this, "time-picker", timePicker);
 
         // workaround for https://github.com/vaadin/flow/issues/3496
         setInvalid(false);
@@ -352,14 +352,6 @@ public class DateTimePicker extends
             datePicker.passThroughPresentationValue(null);
             timePicker.passThroughPresentationValue(null);
         }
-    }
-
-    /**
-     * Adds the given Component to the specified slot of this component.
-     */
-    private void addToSlot(Component component, String slot) {
-        Objects.requireNonNull(component, "Component to add cannot be null");
-        SlotUtils.addToSlot(this, slot, component);
     }
 
     @Override
