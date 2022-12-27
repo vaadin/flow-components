@@ -57,10 +57,6 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
 
     private static final String EDIT_COLUMN_KEY = "vaadin-crud-edit-column";
     private static final String EVENT_PREVENT_DEFAULT_JS = "event.preventDefault()";
-    private static final String FORM_SLOT_NAME = "form";
-    private static final String GRID_SLOT_NAME = "grid";
-    private static final String SLOT_KEY = "slot";
-    private static final String TOOLBAR_SLOT_NAME = "toolbar";
 
     private final Set<ComponentEventListener<NewEvent<E>>> newListeners = new LinkedHashSet<>();
     private final Set<ComponentEventListener<EditEvent<E>>> editListeners = new LinkedHashSet<>();
@@ -374,7 +370,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
         }
 
         this.grid = grid;
-        grid.getElement().setAttribute(SLOT_KEY, GRID_SLOT_NAME);
+        grid.getElement().setAttribute("slot", "grid");
 
         // It might already have a parent e.g when injected from a template
         if (grid.getElement().getParent() == null) {
@@ -416,9 +412,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
         // It might already have a parent e.g when injected from a template
         if (editor.getView() != null
                 && editor.getView().getElement().getParent() == null) {
-            editor.getView().getElement().setAttribute(SLOT_KEY,
-                    FORM_SLOT_NAME);
-            getElement().appendChild(editor.getView().getElement());
+            SlotUtils.addToSlot(this, "form", editor.getView());
         }
     }
 
@@ -508,16 +502,8 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
      *            the content to be set
      */
     public void setToolbar(Component... components) {
-        final Element[] existingToolbarElements = getElement().getChildren()
-                .filter(e -> TOOLBAR_SLOT_NAME.equals(e.getAttribute(SLOT_KEY)))
-                .toArray(Element[]::new);
-        getElement().removeChild(existingToolbarElements);
-
-        final Element[] newToolbarElements = Arrays.stream(components)
-                .map(Component::getElement)
-                .map(e -> e.setAttribute(SLOT_KEY, TOOLBAR_SLOT_NAME))
-                .toArray(Element[]::new);
-        getElement().appendChild(newToolbarElements);
+        SlotUtils.clearSlot(this, "toolbar");
+        SlotUtils.addToSlot(this, "toolbar", components);
     }
 
     /**
@@ -578,15 +564,12 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
      * @param button
      */
     public void setNewButton(Component button) {
-        getElement().getChildren().filter(
-                child -> "new-button".equals(child.getAttribute("slot")))
-                .findAny().ifPresent(getElement()::removeChild);
+        SlotUtils.clearSlot(this, "new-button");
 
         newButton = button;
 
         if (button != null) {
-            button.getElement().setAttribute("slot", "new-button");
-            getElement().appendChild(button.getElement());
+            SlotUtils.addToSlot(this, "new-button", button);
         }
     }
 
