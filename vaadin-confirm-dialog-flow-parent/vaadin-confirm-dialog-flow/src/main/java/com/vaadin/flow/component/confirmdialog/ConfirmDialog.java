@@ -569,6 +569,7 @@ public class ConfirmDialog extends Component
      *            the element to display instead of default header text
      */
     public void setHeader(Element element) {
+        SlotUtils.clearSlot(this, "header");
         SlotUtils.addToSlot(this, "header", element);
     }
 
