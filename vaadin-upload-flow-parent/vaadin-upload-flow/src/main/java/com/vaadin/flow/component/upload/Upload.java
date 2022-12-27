@@ -62,9 +62,9 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-upload")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/upload", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/upload", version = "24.0.0-alpha7")
 @JsModule("@vaadin/upload/src/vaadin-upload.js")
 public class Upload extends Component implements HasSize, HasStyle {
 
@@ -652,6 +652,24 @@ public class Upload extends Component implements HasSize, HasStyle {
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
+
+        if (uploadButton == defaultUploadButton) {
+            // FIXME: the "_isDefault" flag is being set too late,
+            // so we have to trigger the slot controller manually
+            getElement().executeJs(
+                    "$0._addButton = null; $1._isDefault = true;"
+                            + "$0._addButtonController.initNode($1)",
+                    getElement(), defaultUploadButton.getElement());
+        }
+
+        if (dropLabel == defaultDropLabel) {
+            // FIXME: the "_isDefault" flag is being set too late,
+            // so we have to trigger the slot controller manually
+            getElement().executeJs(
+                    "$0._dropLabel = null; $1._isDefault = true;"
+                            + "$0._dropLabelController.initNode($1)",
+                    getElement(), defaultDropLabel.getElement());
+        }
 
         // Element state is not persisted across attach/detach
         if (this.i18n != null) {

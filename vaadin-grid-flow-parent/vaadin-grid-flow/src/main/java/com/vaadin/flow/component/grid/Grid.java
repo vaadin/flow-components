@@ -205,10 +205,10 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/grid", version = "24.0.0-alpha6")
-@NpmPackage(value = "@vaadin/tooltip", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/grid", version = "24.0.0-alpha7")
+@NpmPackage(value = "@vaadin/tooltip", version = "24.0.0-alpha7")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -445,7 +445,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-column")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha6")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha7")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class Column<T> extends AbstractColumn<Column<T>> {
 
@@ -1927,88 +1927,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     protected BiFunction<Renderer<T>, String, Column<T>> getDefaultColumnFactory() {
         return this::createColumn;
-    }
-
-    /**
-     * Adds a new column to this {@link Grid} with a renderer, sorting
-     * properties and default column factory. The values inside the renderer are
-     * converted to JSON values by using {@link JsonSerializer#toJson(Object)}.
-     * <p>
-     * <em>NOTE:</em> You can add component columns easily using the
-     * {@link #addComponentColumn(ValueProvider)}, but using
-     * {@link ComponentRenderer} is not as efficient as the built in renderers
-     * or using {@link LitRenderer}.
-     * <p>
-     *
-     * Every added column sends data to the client side regardless of its
-     * visibility state. Don't add a new column at all or use
-     * {@link Grid#removeColumn(Column)} to avoid sending extra data.
-     * </p>
-     *
-     * <p>
-     * <strong>Note:</strong> This method is a shorthand for
-     * {@link ##addColumn(Renderer, BiFunction, String...)}
-     * </p>
-     *
-     * @see #getDefaultColumnFactory()
-     * @see #addColumn(Renderer, BiFunction, String...)
-     * @see #removeColumn(Column)
-     *
-     * @param renderer
-     *            the renderer used to create the grid cell structure
-     * @param sortingProperties
-     *            the sorting properties to use for this column
-     * @return the created column
-     * @deprecated since 23.2 - use
-     *             <code>addColumn(renderer).setSortProperty(sortingProperties)</code>
-     *             instead.
-     */
-    @Deprecated
-    public Column<T> addColumn(Renderer<T> renderer,
-            String... sortingProperties) {
-        BiFunction<Renderer<T>, String, Column<T>> defaultFactory = getDefaultColumnFactory();
-        return addColumn(renderer, defaultFactory, sortingProperties);
-    }
-
-    /**
-     * Adds a new column to this {@link Grid} with a renderer, sorting
-     * properties and column factory provided. The values inside the renderer
-     * are converted to JSON values by using
-     * {@link JsonSerializer#toJson(Object)}.
-     * <p>
-     * <em>NOTE:</em> You can add component columns easily using the
-     * {@link #addComponentColumn(ValueProvider)}, but using
-     * {@link ComponentRenderer} is not as efficient as the built in renderers
-     * or using {@link LitRenderer}.
-     *
-     * <p>
-     * Every added column sends data to the client side regardless of its
-     * visibility state. Don't add a new column at all or use
-     * {@link Grid#removeColumn(Column)} to avoid sending extra data.
-     * </p>
-     *
-     * @see #addColumn(Renderer, String...)
-     * @see #removeColumn(Column)
-     *
-     * @param renderer
-     *            the renderer used to create the grid cell structure
-     * @param columnFactory
-     *            the method that creates a new column instance for this
-     *            {@link Grid} instance.
-     * @param sortingProperties
-     *            the sorting properties to use for this column
-     * @return the created column
-     * @deprecated since 23.2 - use
-     *             <code>addColumn(renderer, columnFactory).setSortProperty(sortingProperties)</code>
-     *             instead.
-     */
-    @Deprecated
-    protected <C extends Column<T>> C addColumn(Renderer<T> renderer,
-            BiFunction<Renderer<T>, String, C> columnFactory,
-            String... sortingProperties) {
-        C column = addColumn(renderer, columnFactory);
-        column.setSortProperty(sortingProperties);
-        return column;
     }
 
     /**

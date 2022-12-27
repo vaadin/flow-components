@@ -42,7 +42,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-tabsheet")
-@NpmPackage(value = "@vaadin/tabsheet", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/tabsheet", version = "24.0.0-alpha7")
 @JsModule("@vaadin/tabsheet/src/vaadin-tabsheet.js")
 public class TabSheet extends Component
         implements HasStyle, HasSize, HasThemeVariant<TabSheetVariant> {

@@ -43,6 +43,7 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
+import com.vaadin.flow.component.shared.HasAutoOpen;
 import com.vaadin.flow.component.shared.HasClearButton;
 import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasThemeVariant;
@@ -78,20 +79,18 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-date-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/date-picker", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/date-picker", version = "24.0.0-alpha7")
 @JsModule("@vaadin/date-picker/src/vaadin-date-picker.js")
 @JsModule("./datepickerConnector.js")
 @NpmPackage(value = "date-fns", version = "2.29.3")
 public class DatePicker
         extends AbstractSinglePropertyField<DatePicker, LocalDate>
-        implements Focusable<DatePicker>, HasAllowedCharPattern, HasClearButton,
-        HasClientValidation, HasHelper, HasLabel, HasSize, HasStyle,
-        HasThemeVariant<DatePickerVariant>, HasTooltip, HasValidation,
+        implements Focusable<DatePicker>, HasAllowedCharPattern, HasAutoOpen,
+        HasClearButton, HasClientValidation, HasHelper, HasLabel, HasSize,
+        HasStyle, HasThemeVariant<DatePickerVariant>, HasTooltip, HasValidation,
         HasValidator<LocalDate> {
-
-    private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
     private DatePickerI18n i18n;
 
@@ -580,6 +579,22 @@ public class DatePicker
         return getElement().getProperty("_hasInputValue", false);
     }
 
+    @Override
+    public void setValue(LocalDate value) {
+        LocalDate oldValue = getValue();
+
+        super.setValue(value);
+
+        if (Objects.equals(oldValue, getEmptyValue())
+                && Objects.equals(value, getEmptyValue())
+                && isInputValuePresent()) {
+            // Clear the input element from possible bad input.
+            getElement().executeJs("this.inputElement.value = ''");
+            getElement().setProperty("_hasInputValue", false);
+            fireEvent(new ClientValidatedEvent(this, false, true));
+        }
+    }
+
     /**
      * Sets the label for the datepicker.
      *
@@ -762,28 +777,6 @@ public class DatePicker
     }
 
     /**
-     * When auto open is enabled, the dropdown will open when the field is
-     * clicked.
-     *
-     * @param autoOpen
-     *            Value for the auto open property,
-     */
-    public void setAutoOpen(boolean autoOpen) {
-        getElement().setProperty(PROP_AUTO_OPEN_DISABLED, !autoOpen);
-    }
-
-    /**
-     * When auto open is enabled, the dropdown will open when the field is
-     * clicked.
-     *
-     * @return {@code true} if auto open is enabled. {@code false} otherwise.
-     *         Default is {@code true}
-     */
-    public boolean isAutoOpen() {
-        return !getElement().getProperty(PROP_AUTO_OPEN_DISABLED, false);
-    }
-
-    /**
      * Performs server-side validation of the current value. This is needed
      * because it is possible to circumvent the client-side validation
      * constraints using browser development tools.
@@ -864,9 +857,6 @@ public class DatePicker
         private List<String> weekdaysShort;
         private List<String> dateFormats;
         private int firstDayOfWeek;
-        private String week;
-        private String calendar;
-        private String clear;
         private String today;
         private String cancel;
         private LocalDate referenceDate;

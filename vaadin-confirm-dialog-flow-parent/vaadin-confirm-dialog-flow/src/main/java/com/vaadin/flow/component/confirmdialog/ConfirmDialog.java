@@ -57,9 +57,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-confirm-dialog")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/confirm-dialog", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/confirm-dialog", version = "24.0.0-alpha7")
 @JsModule("@vaadin/confirm-dialog/src/vaadin-confirm-dialog.js")
 @JsModule("./confirmDialogConnector.js")
 public class ConfirmDialog extends Component
@@ -277,14 +277,14 @@ public class ConfirmDialog extends Component
      * Whether to show or hide Cancel button.
      */
     public void setCancelable(boolean cancelable) {
-        getElement().setProperty("cancel", cancelable);
+        getElement().setProperty("cancelButtonVisible", cancelable);
     }
 
     /**
      * Whether to show or hide Reject button.
      */
     public void setRejectable(boolean rejectable) {
-        getElement().setProperty("reject", rejectable);
+        getElement().setProperty("rejectButtonVisible", rejectable);
     }
 
     /**
