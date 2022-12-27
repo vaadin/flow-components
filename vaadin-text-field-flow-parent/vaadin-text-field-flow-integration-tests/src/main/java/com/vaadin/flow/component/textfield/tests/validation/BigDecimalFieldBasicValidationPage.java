@@ -23,12 +23,17 @@ import com.vaadin.tests.validation.AbstractValidationPage;
 public class BigDecimalFieldBasicValidationPage
         extends AbstractValidationPage<BigDecimalField> {
     public static final String REQUIRED_BUTTON = "required-button";
+    public static final String CLEAR_VALUE_BUTTON = "clear-value-button";
 
     public BigDecimalFieldBasicValidationPage() {
         super();
 
         add(createButton(REQUIRED_BUTTON, "Enable required", event -> {
             testField.setRequiredIndicatorVisible(true);
+        }));
+
+        add(createButton(CLEAR_VALUE_BUTTON, "Clear value", event -> {
+            testField.clear();
         }));
     }
 
