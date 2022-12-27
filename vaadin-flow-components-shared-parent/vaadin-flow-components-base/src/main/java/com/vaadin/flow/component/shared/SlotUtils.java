@@ -99,17 +99,16 @@ public class SlotUtils {
     }
 
     /**
-     * Adds element to the specified slot in the parent component.
+     * Adds elements to the specified slot in the parent component.
      *
      * @param parent
-     *            the parent component to add the components to, not
-     *            {@code null}
+     *            the parent component to add the elements to, not {@code null}
      * @param slot
      *            the name of the slot inside the parent, not {@code null}
-     * @param element
-     *            element to add to the specified slot.
+     * @param elements
+     *            elements to add to the specified slot.
      * @throws NullPointerException
-     *             if any of the element is null or if the element array is
+     *             if any of the elements is null or if the elements array is
      *             null.
      */
     public static void addToSlot(HasElement parent, String slot,
