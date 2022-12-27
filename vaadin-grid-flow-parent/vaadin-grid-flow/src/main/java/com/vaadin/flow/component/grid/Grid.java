@@ -66,6 +66,7 @@ import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.grid.editor.EditorImpl;
 import com.vaadin.flow.component.grid.editor.EditorRenderer;
+import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.data.binder.BeanPropertySet;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.PropertyDefinition;
@@ -1075,16 +1076,15 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             if (!getGrid().getElement().getChildren().anyMatch(
                     child -> "tooltip".equals(child.getAttribute("slot")))) {
                 // No <vaadin-tooltip> yet added to the grid, add one
-                var tooltipElement = new Element("vaadin-tooltip");
-                tooltipElement.setAttribute("slot", "tooltip");
+                Element tooltipElement = new Element("vaadin-tooltip");
 
                 tooltipElement.addAttachListener(e -> {
-                    // Assigns a generator that returns a column-specfic
+                    // Assigns a generator that returns a column-specific
                     // tooltip text from the item
                     tooltipElement.executeJs(
                             "this.generator = ({item, column}) => { return (item && item.gridtooltips && column) ? item.gridtooltips[column._flowId] : ''; }");
                 });
-                getGrid().getElement().appendChild(tooltipElement);
+                SlotUtils.addToSlot(getGrid(), "tooltip", tooltipElement);
             }
 
             this.tooltipGenerator = tooltipGenerator;
