@@ -149,9 +149,13 @@ public class Upload extends Component implements HasSize, HasStyle {
                 .addEventData(elementFiles);
 
         defaultUploadButton = new Button();
+        // Ensure the flag is set before the element is added to the slot
+        defaultUploadButton.getElement().setProperty("_isDefault", true);
         setUploadButton(defaultUploadButton);
 
         defaultDropLabel = new Span();
+        // Ensure the flag is set before the element is added to the slot
+        defaultDropLabel.getElement().setProperty("_isDefault", true);
         setDropLabel(defaultDropLabel);
 
         defaultDropLabelIcon = new UploadIcon();
@@ -652,24 +656,6 @@ public class Upload extends Component implements HasSize, HasStyle {
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-
-        if (uploadButton == defaultUploadButton) {
-            // FIXME: the "_isDefault" flag is being set too late,
-            // so we have to trigger the slot controller manually
-            getElement().executeJs(
-                    "$0._addButton = null; $1._isDefault = true;"
-                            + "$0._addButtonController.initNode($1)",
-                    getElement(), defaultUploadButton.getElement());
-        }
-
-        if (dropLabel == defaultDropLabel) {
-            // FIXME: the "_isDefault" flag is being set too late,
-            // so we have to trigger the slot controller manually
-            getElement().executeJs(
-                    "$0._dropLabel = null; $1._isDefault = true;"
-                            + "$0._dropLabelController.initNode($1)",
-                    getElement(), defaultDropLabel.getElement());
-        }
 
         // Element state is not persisted across attach/detach
         if (this.i18n != null) {
