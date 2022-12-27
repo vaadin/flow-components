@@ -32,6 +32,7 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.shared.Registration;
@@ -82,8 +83,7 @@ public class Details extends Component implements HasEnabled, HasSize, HasStyle,
         contentContainer = new Div();
         getElement().appendChild(contentContainer.getElement());
         summaryContainer = createSummaryContainer();
-        summaryContainer.getElement().setAttribute("slot", "summary");
-        getElement().appendChild(summaryContainer.getElement());
+        SlotUtils.addToSlot(this, "summary", summaryContainer);
     }
 
     /**

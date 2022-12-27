@@ -40,6 +40,7 @@ import com.vaadin.flow.component.select.data.SelectListDataView;
 import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.binder.HasValidator;
@@ -747,10 +748,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      *      website about slots</a>
      */
     public void addToPrefix(Component... components) {
-        for (Component component : components) {
-            component.getElement().setAttribute("slot", "prefix");
-            getElement().appendChild(component.getElement());
-        }
+        SlotUtils.addToSlot(this, "prefix", components);
     }
 
     @Override

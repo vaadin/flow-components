@@ -37,6 +37,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.dom.DomEventListener;
 import com.vaadin.flow.dom.Element;
@@ -326,7 +327,7 @@ public class Upload extends Component implements HasSize, HasStyle {
      *            <code>null</code> to reset to the default button
      */
     public void setUploadButton(Component button) {
-        removeElementsAtSlot("add-button");
+        SlotUtils.clearSlot(this, "add-button");
 
         if (button != null) {
             uploadButton = button;
@@ -334,8 +335,7 @@ public class Upload extends Component implements HasSize, HasStyle {
             uploadButton = defaultUploadButton;
         }
 
-        uploadButton.getElement().setAttribute("slot", "add-button");
-        getElement().appendChild(uploadButton.getElement());
+        SlotUtils.addToSlot(this, "add-button", uploadButton);
     }
 
     /**
@@ -356,7 +356,7 @@ public class Upload extends Component implements HasSize, HasStyle {
      *            or <code>null</code> to reset to the default label
      */
     public void setDropLabel(Component label) {
-        removeElementsAtSlot("drop-label");
+        SlotUtils.clearSlot(this, "drop-label");
 
         if (label != null) {
             dropLabel = label;
@@ -364,8 +364,7 @@ public class Upload extends Component implements HasSize, HasStyle {
             dropLabel = defaultDropLabel;
         }
 
-        dropLabel.getElement().setAttribute("slot", "drop-label");
-        getElement().appendChild(dropLabel.getElement());
+        SlotUtils.addToSlot(this, "drop-label", dropLabel);
     }
 
     /**
@@ -387,7 +386,7 @@ public class Upload extends Component implements HasSize, HasStyle {
      *            drop files, or <code>null</code> to reset to the default icon
      */
     public void setDropLabelIcon(Component icon) {
-        removeElementsAtSlot("drop-label-icon");
+        SlotUtils.clearSlot(this, "drop-label-icon");
 
         if (icon != null) {
             dropLabelIcon = icon;
@@ -395,8 +394,7 @@ public class Upload extends Component implements HasSize, HasStyle {
             dropLabelIcon = defaultDropLabelIcon;
         }
 
-        dropLabelIcon.getElement().setAttribute("slot", "drop-label-icon");
-        getElement().appendChild(dropLabelIcon.getElement());
+        SlotUtils.addToSlot(this, "drop-label-icon", dropLabelIcon);
     }
 
     /**
@@ -406,13 +404,6 @@ public class Upload extends Component implements HasSize, HasStyle {
      */
     public Component getDropLabelIcon() {
         return dropLabelIcon;
-    }
-
-    private void removeElementsAtSlot(String slot) {
-        getElement().getChildren()
-                .filter(child -> slot.equals(child.getAttribute("slot")))
-                .collect(Collectors.toList())
-                .forEach(Element::removeFromParent);
     }
 
     /**

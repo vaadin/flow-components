@@ -30,6 +30,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
@@ -280,8 +281,7 @@ public class SplitLayout extends Component
 
     private void setComponent(Component component, String slot) {
         Component child = component == null ? new Div() : component;
-        child.getElement().setAttribute("slot", slot);
-        getElement().appendChild(child.getElement());
+        SlotUtils.addToSlot(this, slot, child);
     }
 
     private void setComponents() {

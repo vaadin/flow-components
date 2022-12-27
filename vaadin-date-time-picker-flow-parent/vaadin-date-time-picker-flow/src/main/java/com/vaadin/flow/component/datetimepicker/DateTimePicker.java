@@ -33,6 +33,7 @@ import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.ValidationUtil;
+import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.component.timepicker.StepsUtil;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
@@ -193,8 +194,8 @@ public class DateTimePicker extends
             setPresentationValue(null);
         }
 
-        addToSlot(datePicker, "date-picker");
-        addToSlot(timePicker, "time-picker");
+        SlotUtils.addToSlot(this, "date-picker", datePicker);
+        SlotUtils.addToSlot(this, "time-picker", timePicker);
 
         // workaround for https://github.com/vaadin/flow/issues/3496
         setInvalid(false);
@@ -351,15 +352,6 @@ public class DateTimePicker extends
             datePicker.passThroughPresentationValue(null);
             timePicker.passThroughPresentationValue(null);
         }
-    }
-
-    /**
-     * Adds the given Component to the specified slot of this component.
-     */
-    private void addToSlot(Component component, String slot) {
-        Objects.requireNonNull(component, "Component to add cannot be null");
-        component.getElement().setAttribute("slot", slot);
-        getElement().appendChild(component.getElement());
     }
 
     @Override
