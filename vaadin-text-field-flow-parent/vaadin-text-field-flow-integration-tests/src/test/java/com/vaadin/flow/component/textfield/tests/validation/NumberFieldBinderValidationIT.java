@@ -26,6 +26,7 @@ import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBi
 import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBinderValidationPage.MIN_INPUT;
 import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBinderValidationPage.MAX_INPUT;
 import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBinderValidationPage.EXPECTED_VALUE_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBinderValidationPage.CLEAR_VALUE_BUTTON;
 import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBinderValidationPage.REQUIRED_ERROR_MESSAGE;
 import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBinderValidationPage.UNEXPECTED_VALUE_ERROR_MESSAGE;
 
@@ -147,6 +148,19 @@ public class NumberFieldBinderValidationIT
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage("");
+    }
+
+    @Test
+    public void badInput_setValue_clearValue_assertValidity() {
+        testField.sendKeys("--2", Keys.TAB);
+        assertServerInvalid();
+        assertClientInvalid();
+        assertErrorMessage("");
+
+        $("button").id(CLEAR_VALUE_BUTTON).click();
+        assertServerInvalid();
+        assertClientInvalid();
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
     protected NumberFieldElement getTestField() {

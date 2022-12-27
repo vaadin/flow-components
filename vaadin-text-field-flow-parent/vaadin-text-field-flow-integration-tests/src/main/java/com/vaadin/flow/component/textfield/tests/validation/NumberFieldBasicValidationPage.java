@@ -26,6 +26,7 @@ public class NumberFieldBasicValidationPage
     public static final String STEP_INPUT = "step-input";
     public static final String MIN_INPUT = "min-input";
     public static final String MAX_INPUT = "max-input";
+    public static final String CLEAR_VALUE_BUTTON = "clear-value-button";
 
     public NumberFieldBasicValidationPage() {
         super();
@@ -47,6 +48,10 @@ public class NumberFieldBasicValidationPage
         add(createInput(MAX_INPUT, "Set max", event -> {
             double value = Double.parseDouble(event.getValue());
             testField.setMax(value);
+        }));
+
+        add(createButton(CLEAR_VALUE_BUTTON, "Clear value", event -> {
+            testField.clear();
         }));
     }
 

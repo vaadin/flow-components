@@ -26,6 +26,7 @@ import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBa
 import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBasicValidationPage.MAX_INPUT;
 import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBasicValidationPage.STEP_INPUT;
 import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBasicValidationPage.REQUIRED_BUTTON;
+import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBasicValidationPage.CLEAR_VALUE_BUTTON;
 
 @TestPath("vaadin-number-field/validation/basic")
 public class NumberFieldBasicValidationIT
@@ -156,6 +157,17 @@ public class NumberFieldBasicValidationIT
         testField.sendKeys("--2", Keys.TAB);
         assertServerInvalid();
         assertClientInvalid();
+    }
+
+    @Test
+    public void badInput_setValue_clearValue_assertValidity() {
+        testField.sendKeys("--2", Keys.TAB);
+        assertServerInvalid();
+        assertClientInvalid();
+
+        $("button").id(CLEAR_VALUE_BUTTON).click();
+        assertServerValid();
+        assertClientValid();
     }
 
     @Test
