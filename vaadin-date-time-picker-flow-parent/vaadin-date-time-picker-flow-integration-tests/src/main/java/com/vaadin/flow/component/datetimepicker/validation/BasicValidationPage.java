@@ -12,6 +12,7 @@ public class BasicValidationPage
     public static final String REQUIRED_BUTTON = "required-button";
     public static final String MIN_INPUT = "min-input";
     public static final String MAX_INPUT = "max-input";
+    public static final String CLEAR_VALUE_BUTTON = "clear-value-button";
 
     public BasicValidationPage() {
         super();
@@ -28,6 +29,10 @@ public class BasicValidationPage
         add(createInput(MAX_INPUT, "Set max date time", event -> {
             var value = LocalDateTime.parse(event.getValue());
             testField.setMax(value);
+        }));
+
+        add(createButton(CLEAR_VALUE_BUTTON, "Clear value", event -> {
+            testField.clear();
         }));
     }
 
