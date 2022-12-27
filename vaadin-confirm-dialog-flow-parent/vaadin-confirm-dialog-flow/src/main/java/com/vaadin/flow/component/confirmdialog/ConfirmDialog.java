@@ -29,6 +29,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.internal.StateTree;
@@ -337,7 +338,8 @@ public class ConfirmDialog extends Component
      *            the element to display instead of default Reject button
      */
     public void setRejectButton(Element element) {
-        addToSlot("reject-button", element);
+        SlotUtils.clearSlot(this, "reject-button");
+        SlotUtils.addToSlot(this, "reject-button", element);
     }
 
     /**
@@ -390,7 +392,8 @@ public class ConfirmDialog extends Component
      *            the element to display instead of default Cancel button
      */
     public void setCancelButton(Element element) {
-        addToSlot("cancel-button", element);
+        SlotUtils.clearSlot(this, "cancel-button");
+        SlotUtils.addToSlot(this, "cancel-button", element);
     }
 
     /**
@@ -442,17 +445,8 @@ public class ConfirmDialog extends Component
      *            the element to display instead of default Confirm button
      */
     public void setConfirmButton(Element element) {
-        addToSlot("confirm-button", element);
-    }
-
-    private void addToSlot(String slotName, Element element) {
-        // Remove existing elements with the same slot name
-        getElement().getChildren()
-                .filter(child -> slotName.equals(child.getAttribute("slot")))
-                .forEach(Element::removeFromParent);
-
-        element.setAttribute("slot", slotName);
-        getElement().appendChild(element);
+        SlotUtils.clearSlot(this, "confirm-button");
+        SlotUtils.addToSlot(this, "confirm-button", element);
     }
 
     /**
@@ -575,7 +569,7 @@ public class ConfirmDialog extends Component
      *            the element to display instead of default header text
      */
     public void setHeader(Element element) {
-        addToSlot("header", element);
+        SlotUtils.addToSlot(this, "header", element);
     }
 
     /**

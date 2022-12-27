@@ -79,7 +79,8 @@ public class SlotUtils {
      * Adds components to the specified slot in the parent component.
      *
      * @param parent
-     *            the component to add the components to, not {@code null}
+     *            the parent component to add the components to, not
+     *            {@code null}
      * @param slot
      *            the name of the slot inside the parent, not {@code null}
      * @param components
@@ -93,8 +94,36 @@ public class SlotUtils {
         Objects.requireNonNull(parent, "Parent cannot be null");
 
         for (Component component : components) {
-            component.getElement().setAttribute("slot", slot);
-            parent.getElement().appendChild(component.getElement());
+            addElementToSlot(parent, component.getElement(), slot);
         }
+    }
+
+    /**
+     * Adds element to the specified slot in the parent component.
+     *
+     * @param parent
+     *            the parent component to add the components to, not
+     *            {@code null}
+     * @param slot
+     *            the name of the slot inside the parent, not {@code null}
+     * @param element
+     *            element to add to the specified slot.
+     * @throws NullPointerException
+     *             if any of the element is null or if the element array is
+     *             null.
+     */
+    public static void addToSlot(HasElement parent, String slot,
+            Element... elements) {
+        Objects.requireNonNull(parent, "Parent cannot be null");
+
+        for (Element element : elements) {
+            addElementToSlot(parent, element, slot);
+        }
+    }
+
+    private static void addElementToSlot(HasElement parent, Element element,
+            String slot) {
+        element.setAttribute("slot", slot);
+        parent.getElement().appendChild(element);
     }
 }
