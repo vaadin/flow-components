@@ -75,7 +75,7 @@ public class DateTimePickerValidationBinderIT
     }
 
     @Test
-    public void min_changeValue_assertValidity() {
+    public void min_changeInputValue_assertValidity() {
         $("input").id(MIN_INPUT).sendKeys("2000-02-02T12:00", Keys.ENTER);
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("2000-03-03T11:00",
                 Keys.ENTER);
