@@ -24,6 +24,7 @@ import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.data.binder.HasItemComponents;
 
@@ -33,9 +34,9 @@ import com.vaadin.flow.data.binder.HasItemComponents;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-radio-button")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/radio-group", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/radio-group", version = "24.0.0-alpha7")
 @JsModule("@vaadin/radio-group/src/vaadin-radio-button.js")
 class RadioButton<T> extends Component
         implements ClickNotifier<RadioButton<T>>, Focusable<RadioButton<T>>,
@@ -68,8 +69,7 @@ class RadioButton<T> extends Component
 
     private Label appendLabelElement() {
         Label label = new Label();
-        label.getElement().setAttribute("slot", "label");
-        getElement().appendChild(label.getElement());
+        SlotUtils.addToSlot(this, "label", label);
         return label;
     }
 

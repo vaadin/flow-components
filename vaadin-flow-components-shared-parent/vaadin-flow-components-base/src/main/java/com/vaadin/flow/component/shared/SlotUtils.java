@@ -19,6 +19,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.dom.Element;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -72,5 +73,56 @@ public class SlotUtils {
     public static Component getChildInSlot(HasElement parent, String slot) {
         Optional<Element> element = getElementsInSlot(parent, slot).findFirst();
         return element.flatMap(Element::getComponent).orElse(null);
+    }
+
+    /**
+     * Adds components to the specified slot in the parent component.
+     *
+     * @param parent
+     *            the parent component to add the components to, not
+     *            {@code null}
+     * @param slot
+     *            the name of the slot inside the parent, not {@code null}
+     * @param components
+     *            components to add to the specified slot.
+     * @throws NullPointerException
+     *             if any of the components is null or if the components array
+     *             is null.
+     */
+    public static void addToSlot(HasElement parent, String slot,
+            Component... components) {
+        Objects.requireNonNull(parent, "Parent cannot be null");
+
+        for (Component component : components) {
+            addElementToSlot(parent, component.getElement(), slot);
+        }
+    }
+
+    /**
+     * Adds elements to the specified slot in the parent component.
+     *
+     * @param parent
+     *            the parent component to add the elements to, not {@code null}
+     * @param slot
+     *            the name of the slot inside the parent, not {@code null}
+     * @param elements
+     *            elements to add to the specified slot.
+     * @throws NullPointerException
+     *             if any of the elements is null or if the elements array is
+     *             null.
+     */
+    public static void addToSlot(HasElement parent, String slot,
+            Element... elements) {
+        Objects.requireNonNull(parent, "Parent cannot be null");
+
+        for (Element element : elements) {
+            addElementToSlot(parent, element, slot);
+        }
+    }
+
+    private static void addElementToSlot(HasElement parent, Element element,
+            String slot) {
+        element.setAttribute("slot", slot);
+        parent.getElement().appendChild(element);
     }
 }

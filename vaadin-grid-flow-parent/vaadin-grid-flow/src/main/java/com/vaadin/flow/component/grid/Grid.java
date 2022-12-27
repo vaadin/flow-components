@@ -66,6 +66,7 @@ import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.grid.editor.EditorImpl;
 import com.vaadin.flow.component.grid.editor.EditorRenderer;
+import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.data.binder.BeanPropertySet;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.PropertyDefinition;
@@ -205,10 +206,10 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/grid", version = "24.0.0-alpha6")
-@NpmPackage(value = "@vaadin/tooltip", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/grid", version = "24.0.0-alpha7")
+@NpmPackage(value = "@vaadin/tooltip", version = "24.0.0-alpha7")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -445,7 +446,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-column")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha6")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha7")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class Column<T> extends AbstractColumn<Column<T>> {
 
@@ -1075,16 +1076,15 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             if (!getGrid().getElement().getChildren().anyMatch(
                     child -> "tooltip".equals(child.getAttribute("slot")))) {
                 // No <vaadin-tooltip> yet added to the grid, add one
-                var tooltipElement = new Element("vaadin-tooltip");
-                tooltipElement.setAttribute("slot", "tooltip");
+                Element tooltipElement = new Element("vaadin-tooltip");
 
                 tooltipElement.addAttachListener(e -> {
-                    // Assigns a generator that returns a column-specfic
+                    // Assigns a generator that returns a column-specific
                     // tooltip text from the item
                     tooltipElement.executeJs(
                             "this.generator = ({item, column}) => { return (item && item.gridtooltips && column) ? item.gridtooltips[column._flowId] : ''; }");
                 });
-                getGrid().getElement().appendChild(tooltipElement);
+                SlotUtils.addToSlot(getGrid(), "tooltip", tooltipElement);
             }
 
             this.tooltipGenerator = tooltipGenerator;

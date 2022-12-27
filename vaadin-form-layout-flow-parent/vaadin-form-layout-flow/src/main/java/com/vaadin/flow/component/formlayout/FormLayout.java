@@ -32,8 +32,8 @@ import com.vaadin.flow.component.JsonSerializable;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-
 import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.shared.SlotUtils;
 
 import elemental.json.Json;
 import elemental.json.JsonArray;
@@ -69,9 +69,9 @@ import elemental.json.JsonValue;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-form-layout")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/form-layout", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/form-layout", version = "24.0.0-alpha7")
 @JsModule("@vaadin/form-layout/src/vaadin-form-layout.js")
 public class FormLayout extends Component
         implements HasSize, HasStyle, HasComponents, ClickNotifier<FormLayout> {
@@ -191,9 +191,9 @@ public class FormLayout extends Component
      * @author Vaadin Ltd
      */
     @Tag("vaadin-form-item")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha6")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha7")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-    @NpmPackage(value = "@vaadin/form-layout", version = "24.0.0-alpha6")
+    @NpmPackage(value = "@vaadin/form-layout", version = "24.0.0-alpha7")
     @JsModule("@vaadin/form-layout/src/vaadin-form-item.js")
     public static class FormItem extends Component
             implements HasComponents, HasStyle, ClickNotifier<FormItem> {
@@ -234,10 +234,7 @@ public class FormLayout extends Component
          *      website about slots</a>
          */
         protected void addToLabel(Component... components) {
-            for (Component component : components) {
-                component.getElement().setAttribute("slot", "label");
-                getElement().appendChild(component.getElement());
-            }
+            SlotUtils.addToSlot(this, "label", components);
         }
 
         /**

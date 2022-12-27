@@ -31,7 +31,7 @@ import com.vaadin.flow.function.SerializableRunnable;
  *
  * @author Vaadin Ltd
  */
-@NpmPackage(value = "@vaadin/tooltip", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/tooltip", version = "24.0.0-alpha7")
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
 public class Tooltip implements Serializable {
 
@@ -149,8 +149,7 @@ public class Tooltip implements Serializable {
         SlotUtils.clearSlot(hasTooltip, "tooltip");
 
         var tooltip = new Tooltip();
-        tooltip.tooltipElement.setAttribute("slot", "tooltip");
-        hasTooltip.getElement().appendChild(tooltip.tooltipElement);
+        SlotUtils.addToSlot(hasTooltip, "tooltip", tooltip.tooltipElement);
         elementTooltips.put(hasTooltip.getElement(), tooltip);
         return tooltip;
     }

@@ -30,6 +30,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.router.RouterLayout;
@@ -51,9 +52,9 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-app-layout")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/app-layout", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/app-layout", version = "24.0.0-alpha7")
 @JsModule("@vaadin/app-layout/src/vaadin-app-layout.js")
 public class AppLayout extends Component implements RouterLayout, HasStyle {
     private static final PropertyDescriptor<String, String> primarySectionProperty = PropertyDescriptors
@@ -241,7 +242,7 @@ public class AppLayout extends Component implements RouterLayout, HasStyle {
      *             is null.
      */
     public void addToDrawer(Component... components) {
-        addToSlot("drawer", components);
+        SlotUtils.addToSlot(this, "drawer", components);
     }
 
     /**
@@ -273,7 +274,7 @@ public class AppLayout extends Component implements RouterLayout, HasStyle {
     public void addToNavbar(boolean touchOptimized, Component... components) {
         final String slot = "navbar"
                 + (touchOptimized ? " touch-optimized" : "");
-        addToSlot(slot, components);
+        SlotUtils.addToSlot(this, slot, components);
     }
 
     /**
@@ -321,19 +322,8 @@ public class AppLayout extends Component implements RouterLayout, HasStyle {
         }
     }
 
-    private void addToSlot(String slot, Component... components) {
-        for (Component component : components) {
-            setSlot(component, slot);
-            add(component);
-        }
-    }
-
     private void add(Component component) {
         getElement().appendChild(component.getElement());
-    }
-
-    private static void setSlot(Component component, String slot) {
-        component.getElement().setAttribute("slot", slot);
     }
 
     /**

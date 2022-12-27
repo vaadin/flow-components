@@ -42,7 +42,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-tabsheet")
-@NpmPackage(value = "@vaadin/tabsheet", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/tabsheet", version = "24.0.0-alpha7")
 @JsModule("@vaadin/tabsheet/src/vaadin-tabsheet.js")
 public class TabSheet extends Component
         implements HasStyle, HasSize, HasThemeVariant<TabSheetVariant> {
@@ -57,8 +57,7 @@ public class TabSheet extends Component
     public TabSheet() {
         super();
 
-        tabs.getElement().setAttribute("slot", "tabs");
-        getElement().appendChild(tabs.getElement());
+        SlotUtils.addToSlot(this, "tabs", tabs);
 
         addSelectedChangeListener(e -> {
             getElement().setProperty("selected", tabs.getSelectedIndex());
@@ -299,8 +298,7 @@ public class TabSheet extends Component
                         "Text as a prefix is not supported. Consider wrapping the Text inside a Div.");
             }
 
-            component.getElement().setAttribute("slot", "prefix");
-            getElement().appendChild(component.getElement());
+            SlotUtils.addToSlot(this, "prefix", component);
         }
     }
 
@@ -335,8 +333,7 @@ public class TabSheet extends Component
                         "Text as a suffix is not supported. Consider wrapping the Text inside a Div.");
             }
 
-            component.getElement().setAttribute("slot", "suffix");
-            getElement().appendChild(component.getElement());
+            SlotUtils.addToSlot(this, "suffix", component);
         }
     }
 

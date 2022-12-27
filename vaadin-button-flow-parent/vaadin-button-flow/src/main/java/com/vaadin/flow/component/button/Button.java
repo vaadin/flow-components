@@ -31,6 +31,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.nodefeature.ElementAttributeMap;
 import com.vaadin.flow.internal.nodefeature.NodeFeature;
@@ -50,9 +51,9 @@ import java.util.stream.Stream;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-button")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/button", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/button", version = "24.0.0-alpha7")
 @JsModule("@vaadin/button/src/vaadin-button.js")
 public class Button extends Component implements ClickNotifier<Button>,
         Focusable<Button>, HasSize, HasEnabled, HasStyle, HasText,
@@ -380,10 +381,7 @@ public class Button extends Component implements ClickNotifier<Button>,
      *      website about slots</a>
      */
     protected void addToPrefix(Component... components) {
-        for (Component component : components) {
-            component.getElement().setAttribute("slot", "prefix");
-            getElement().appendChild(component.getElement());
-        }
+        SlotUtils.addToSlot(this, "prefix", components);
     }
 
     /**
@@ -400,10 +398,7 @@ public class Button extends Component implements ClickNotifier<Button>,
      *      website about slots</a>
      */
     protected void addToSuffix(Component... components) {
-        for (Component component : components) {
-            component.getElement().setAttribute("slot", "suffix");
-            getElement().appendChild(component.getElement());
-        }
+        SlotUtils.addToSlot(this, "suffix", components);
     }
 
     /**

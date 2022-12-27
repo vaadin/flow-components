@@ -23,6 +23,7 @@ import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.validation.AbstractValidationIT;
 
 import static com.vaadin.flow.component.textfield.tests.validation.BigDecimalFieldBinderValidationPage.REQUIRED_ERROR_MESSAGE;
+import static com.vaadin.flow.component.textfield.tests.validation.BigDecimalFieldBinderValidationPage.CLEAR_VALUE_BUTTON;
 
 @TestPath("vaadin-big-decimal-field/validation/binder")
 public class BigDecimalFieldBinderValidationIT
@@ -69,6 +70,19 @@ public class BigDecimalFieldBinderValidationIT
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage("");
+    }
+
+    @Test
+    public void badInput_setValue_clearValue_assertValidity() {
+        testField.sendKeys("--2", Keys.TAB);
+        assertServerInvalid();
+        assertClientInvalid();
+        assertErrorMessage("");
+
+        $("button").id(CLEAR_VALUE_BUTTON).click();
+        assertServerInvalid();
+        assertClientInvalid();
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
     protected BigDecimalFieldElement getTestField() {
