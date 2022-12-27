@@ -502,8 +502,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
      *            the content to be set
      */
     public void setToolbar(Component... components) {
-        SlotUtils.clearSlot(this, "toolbar");
-        SlotUtils.addToSlot(this, "toolbar", components);
+        SlotUtils.setSlot(this, "toolbar", components);
     }
 
     /**
@@ -564,13 +563,8 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
      * @param button
      */
     public void setNewButton(Component button) {
-        SlotUtils.clearSlot(this, "new-button");
-
         newButton = button;
-
-        if (button != null) {
-            SlotUtils.addToSlot(this, "new-button", button);
-        }
+        SlotUtils.setSlot(this, "new-button", button);
     }
 
     /**

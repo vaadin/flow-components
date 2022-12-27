@@ -338,8 +338,7 @@ public class ConfirmDialog extends Component
      *            the element to display instead of default Reject button
      */
     public void setRejectButton(Element element) {
-        SlotUtils.clearSlot(this, "reject-button");
-        SlotUtils.addToSlot(this, "reject-button", element);
+        SlotUtils.setSlot(this, "reject-button", element);
     }
 
     /**
@@ -392,8 +391,7 @@ public class ConfirmDialog extends Component
      *            the element to display instead of default Cancel button
      */
     public void setCancelButton(Element element) {
-        SlotUtils.clearSlot(this, "cancel-button");
-        SlotUtils.addToSlot(this, "cancel-button", element);
+        SlotUtils.setSlot(this, "cancel-button", element);
     }
 
     /**
@@ -445,8 +443,7 @@ public class ConfirmDialog extends Component
      *            the element to display instead of default Confirm button
      */
     public void setConfirmButton(Element element) {
-        SlotUtils.clearSlot(this, "confirm-button");
-        SlotUtils.addToSlot(this, "confirm-button", element);
+        SlotUtils.setSlot(this, "confirm-button", element);
     }
 
     /**
@@ -569,8 +566,7 @@ public class ConfirmDialog extends Component
      *            the element to display instead of default header text
      */
     public void setHeader(Element element) {
-        SlotUtils.clearSlot(this, "header");
-        SlotUtils.addToSlot(this, "header", element);
+        SlotUtils.setSlot(this, "header", element);
     }
 
     /**

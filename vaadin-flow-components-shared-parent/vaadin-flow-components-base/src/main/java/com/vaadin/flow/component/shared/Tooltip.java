@@ -145,11 +145,8 @@ public class Tooltip implements Serializable {
      * @return the tooltip handle
      */
     static Tooltip forHasTooltip(HasTooltip hasTooltip) {
-        // Clear any existing tooltip
-        SlotUtils.clearSlot(hasTooltip, "tooltip");
-
         var tooltip = new Tooltip();
-        SlotUtils.addToSlot(hasTooltip, "tooltip", tooltip.tooltipElement);
+        SlotUtils.setSlot(hasTooltip, "tooltip", tooltip.tooltipElement);
         elementTooltips.put(hasTooltip.getElement(), tooltip);
         return tooltip;
     }
