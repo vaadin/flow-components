@@ -57,8 +57,7 @@ public class TabSheet extends Component
     public TabSheet() {
         super();
 
-        tabs.getElement().setAttribute("slot", "tabs");
-        getElement().appendChild(tabs.getElement());
+        SlotUtils.addToSlot(this, "tabs", tabs);
 
         addSelectedChangeListener(e -> {
             getElement().setProperty("selected", tabs.getSelectedIndex());
@@ -299,8 +298,7 @@ public class TabSheet extends Component
                         "Text as a prefix is not supported. Consider wrapping the Text inside a Div.");
             }
 
-            component.getElement().setAttribute("slot", "prefix");
-            getElement().appendChild(component.getElement());
+            SlotUtils.addToSlot(this, "prefix", component);
         }
     }
 
@@ -335,8 +333,7 @@ public class TabSheet extends Component
                         "Text as a suffix is not supported. Consider wrapping the Text inside a Div.");
             }
 
-            component.getElement().setAttribute("slot", "suffix");
-            getElement().appendChild(component.getElement());
+            SlotUtils.addToSlot(this, "suffix", component);
         }
     }
 
