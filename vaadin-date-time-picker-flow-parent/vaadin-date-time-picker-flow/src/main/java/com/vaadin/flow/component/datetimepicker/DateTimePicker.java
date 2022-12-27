@@ -22,8 +22,6 @@ import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import com.vaadin.experimental.Feature;
 import com.vaadin.experimental.FeatureFlags;
@@ -57,6 +55,13 @@ class DateTimePickerDatePicker
 
     void passThroughPresentationValue(LocalDate newPresentationValue) {
         super.setPresentationValue(newPresentationValue);
+
+        if (Objects.equals(newPresentationValue, getEmptyValue())
+                && isInputValuePresent()) {
+            // Clear the input element from possible bad input.
+            getElement().executeJs("this.inputElement.value = ''");
+            getElement().setProperty("_hasInputValue", false);
+        }
     }
 
     @Synchronize(property = "_hasInputValue", value = "has-input-value-changed")
@@ -77,6 +82,13 @@ class DateTimePickerTimePicker
 
     void passThroughPresentationValue(LocalTime newPresentationValue) {
         super.setPresentationValue(newPresentationValue);
+
+        if (Objects.equals(newPresentationValue, getEmptyValue())
+                && isInputValuePresent()) {
+            // Clear the input element from possible bad input.
+            getElement().executeJs("this.inputElement.value = ''");
+            getElement().setProperty("_hasInputValue", false);
+        }
     }
 
     @Synchronize(property = "_hasInputValue", value = "has-input-value-changed")
@@ -299,9 +311,23 @@ public class DateTimePicker
      */
     @Override
     public void setValue(LocalDateTime value) {
+        LocalDateTime oldValue = getValue();
+
         value = sanitizeValue(value);
         super.setValue(value);
-        synchronizeChildComponentValues(value);
+
+        boolean isInputValuePresent = timePicker.isInputValuePresent()
+                || datePicker.isInputValuePresent();
+        boolean isValueRemainedEmpty = Objects.equals(oldValue, getEmptyValue())
+                && Objects.equals(value, getEmptyValue());
+        if (isValueRemainedEmpty && isInputValuePresent) {
+            // Clear the input elements from possible bad input.
+            synchronizeChildComponentValues(value);
+            fireEvent(new ClientValidatedEvent(this, false, true));
+        } else {
+            synchronizeChildComponentValues(value);
+        }
+
     }
 
     /**
