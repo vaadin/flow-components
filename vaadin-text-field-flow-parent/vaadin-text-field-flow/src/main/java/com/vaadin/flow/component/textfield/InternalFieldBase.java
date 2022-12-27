@@ -29,6 +29,7 @@ import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.component.shared.HasClearButton;
 import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
@@ -249,10 +250,7 @@ public abstract class InternalFieldBase<TComponent extends InternalFieldBase<TCo
      *      website about slots</a>
      */
     protected void addToPrefix(Component... components) {
-        for (Component component : components) {
-            component.getElement().setAttribute("slot", "prefix");
-            getElement().appendChild(component.getElement());
-        }
+        SlotUtils.addToSlot(this, "prefix", components);
     }
 
     /**
@@ -269,10 +267,7 @@ public abstract class InternalFieldBase<TComponent extends InternalFieldBase<TCo
      *      website about slots</a>
      */
     protected void addToInput(Component... components) {
-        for (Component component : components) {
-            component.getElement().setAttribute("slot", "input");
-            getElement().appendChild(component.getElement());
-        }
+        SlotUtils.addToSlot(this, "input", components);
     }
 
     /**
@@ -289,10 +284,7 @@ public abstract class InternalFieldBase<TComponent extends InternalFieldBase<TCo
      *      website about slots</a>
      */
     protected void addToSuffix(Component... components) {
-        for (Component component : components) {
-            component.getElement().setAttribute("slot", "suffix");
-            getElement().appendChild(component.getElement());
-        }
+        SlotUtils.addToSlot(this, "suffix", components);
     }
 
     /**
