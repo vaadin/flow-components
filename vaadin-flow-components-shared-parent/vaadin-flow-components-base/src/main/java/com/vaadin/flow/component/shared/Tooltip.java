@@ -149,8 +149,7 @@ public class Tooltip implements Serializable {
         SlotUtils.clearSlot(hasTooltip, "tooltip");
 
         var tooltip = new Tooltip();
-        tooltip.tooltipElement.setAttribute("slot", "tooltip");
-        hasTooltip.getElement().appendChild(tooltip.tooltipElement);
+        SlotUtils.addToSlot(hasTooltip, "tooltip", tooltip.tooltipElement);
         elementTooltips.put(hasTooltip.getElement(), tooltip);
         return tooltip;
     }
