@@ -62,9 +62,9 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-upload")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/upload", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/upload", version = "24.0.0-alpha7")
 @JsModule("@vaadin/upload/src/vaadin-upload.js")
 public class Upload extends Component implements HasSize, HasStyle {
 
@@ -149,9 +149,13 @@ public class Upload extends Component implements HasSize, HasStyle {
                 .addEventData(elementFiles);
 
         defaultUploadButton = new Button();
+        // Ensure the flag is set before the element is added to the slot
+        defaultUploadButton.getElement().setProperty("_isDefault", true);
         setUploadButton(defaultUploadButton);
 
         defaultDropLabel = new Span();
+        // Ensure the flag is set before the element is added to the slot
+        defaultDropLabel.getElement().setProperty("_isDefault", true);
         setDropLabel(defaultDropLabel);
 
         defaultDropLabelIcon = new UploadIcon();

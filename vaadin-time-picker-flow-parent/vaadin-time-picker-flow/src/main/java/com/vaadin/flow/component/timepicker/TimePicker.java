@@ -65,9 +65,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-time-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/time-picker", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/time-picker", version = "24.0.0-alpha7")
 @JsModule("@vaadin/time-picker/src/vaadin-time-picker.js")
 @JsModule("./vaadin-time-picker/timepickerConnector.js")
 public class TimePicker
@@ -245,7 +245,19 @@ public class TimePicker
         if (value != null) {
             value = value.truncatedTo(ChronoUnit.MILLIS);
         }
+
+        LocalTime oldValue = getValue();
+
         super.setValue(value);
+
+        if (Objects.equals(oldValue, getEmptyValue())
+                && Objects.equals(value, getEmptyValue())
+                && isInputValuePresent()) {
+            // Clear the input element from possible bad input.
+            getElement().executeJs("this.inputElement.value = ''");
+            getElement().setProperty("_hasInputValue", false);
+            fireEvent(new ClientValidatedEvent(this, false, true));
+        }
     }
 
     /**
