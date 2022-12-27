@@ -4,7 +4,7 @@
     <parent>
         <artifactId>vaadin-grid-flow-parent</artifactId>
         <groupId>com.vaadin</groupId>
-        <version>14.9-SNAPSHOT</version>
+        <version>14.10-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-grid-testbench</artifactId>
     <packaging>jar</packaging>

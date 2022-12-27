@@ -4,7 +4,7 @@
     <parent>
         <artifactId>vaadin-context-menu-flow-parent</artifactId>
         <groupId>com.vaadin</groupId>
-        <version>14.9-SNAPSHOT</version>
+        <version>14.10-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-context-menu-testbench</artifactId>
     <packaging>jar</packaging>
