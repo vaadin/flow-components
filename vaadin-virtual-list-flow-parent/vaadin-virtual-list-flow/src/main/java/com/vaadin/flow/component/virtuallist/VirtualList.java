@@ -354,4 +354,34 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
     private void setRequestedRange(int start, int length) {
         getDataCommunicator().setRequestedRange(start, length);
     }
+
+    /**
+     * Scrolls to the given row index. Scrolls so that the element is shown at the
+     * start of the visible area whenever possible.
+     *
+     * If the index parameter exceeds current item set size the grid will scroll
+     * to the end.
+     *
+     * @param rowIndex
+     *            zero based index of the item to scroll to in the current view.
+     */
+    public void scrollToIndex(int rowIndex) {
+        getElement().callJsFunction("scrollToIndex", rowIndex);
+    }
+
+    /**
+     * Scrolls to the first element.
+     */
+    public void scrollToStart() {
+        scrollToIndex(0);
+    }
+
+    /**
+     * Scrolls to the last element of the list.
+     */
+    public void scrollToEnd() {
+        getUI().ifPresent(
+                ui -> ui.beforeClientResponse(this, ctx -> getElement()
+                        .executeJs("this.scrollToIndex(this.items.length - 1)")));
+    }
 }
