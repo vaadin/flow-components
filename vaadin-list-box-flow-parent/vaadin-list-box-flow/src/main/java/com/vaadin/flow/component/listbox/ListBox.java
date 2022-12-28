@@ -110,21 +110,14 @@ public class ListBox<T> extends ListBoxBase<ListBox<T>, T, T>
     @Override
     void handleDataChangeEvent() {
         super.handleDataChangeEvent();
-
         T value = getValue();
-        if (value == null) {
-            return;
-        }
-
-        Object valueId = getItemId(value);
-        if (getItems().stream().map(this::getItemId)
-                .noneMatch(valueId::equals)) {
-            // Clear obsolete selected item
-            setValue(null);
-        } else {
-            // Force refresh selected item
-            setValue(null);
-            setValue(value);
+        if (value != null) {
+            clear();
+            Object valueId = getItemId(value);
+            if (getItems().stream().map(this::getItemId)
+                    .anyMatch(valueId::equals)) {
+                setValue(value);
+            }
         }
     }
 }

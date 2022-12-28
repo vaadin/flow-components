@@ -21,6 +21,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -170,6 +172,58 @@ public class MultiSelectListBoxTest {
         listBox.setValue(createSet(foo));
         listBox.updateSelection(createSet(bar), createSet(foo));
         assertValueChangeEvents(createSet(foo), createSet(bar));
+    }
+
+    @Test
+    public void selectItem_changeDataProvider_selectionIsReset() {
+        AtomicReference<String> capture = new AtomicReference<>();
+        listBox.addValueChangeListener(
+                event -> capture.set(getItemsString(event.getValue())));
+
+        listBox.setValue(Set.of(foo));
+
+        Assert.assertEquals(foo.getName(), capture.get());
+        Assert.assertEquals(Set.of(foo), listBox.getValue());
+
+        listBox.setItems(new Item("baz"), new Item("qux"));
+
+        Assert.assertEquals(Collections.emptySet(), listBox.getValue());
+        Assert.assertEquals("", capture.get());
+    }
+
+    @Test
+    public void selectItems_removeItemFromDataSource_refreshAll_removedItemsAreDeselected() {
+        AtomicReference<String> capture = new AtomicReference<>();
+        listBox.addValueChangeListener(
+                event -> capture.set(getItemsString(event.getValue())));
+
+        listBox.setValue(Set.of(foo, bar));
+
+        Assert.assertEquals(getItemsString(Set.of(foo, bar)), capture.get());
+        Assert.assertEquals(Set.of(foo, bar), listBox.getValue());
+
+        items.remove(0);
+        listBox.getListDataView().refreshAll();
+
+        Assert.assertEquals(Set.of(bar), listBox.getValue());
+        Assert.assertEquals(bar.getName(), capture.get());
+    }
+
+    @Test
+    public void selectItem_setItemLabelGenerator_selectionIsRetained() {
+        AtomicReference<String> capture = new AtomicReference<>();
+        listBox.addValueChangeListener(
+                event -> capture.set(getItemsString(event.getValue())));
+
+        listBox.setValue(Set.of(foo));
+
+        Assert.assertEquals(foo.getName(), capture.get());
+        Assert.assertEquals(Set.of(foo), listBox.getValue());
+
+        listBox.setItemLabelGenerator(item -> item.getName() + " (Updated)");
+
+        Assert.assertEquals(foo.getName(), capture.get());
+        Assert.assertEquals(Set.of(foo), listBox.getValue());
     }
 
     @Test(expected = UnsupportedOperationException.class)
@@ -366,6 +420,11 @@ public class MultiSelectListBoxTest {
             set.add((int) jsonArray.getNumber(i));
         });
         return set;
+    }
+
+    private String getItemsString(Set<Item> itemSet) {
+        return itemSet.stream().map(Item::getName).sorted()
+                .collect(Collectors.joining(", "));
     }
 
     public static class Item {

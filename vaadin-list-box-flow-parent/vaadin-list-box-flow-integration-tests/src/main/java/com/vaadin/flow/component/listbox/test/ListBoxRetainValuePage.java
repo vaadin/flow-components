@@ -17,12 +17,10 @@
 package com.vaadin.flow.component.listbox.test;
 
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.listbox.ListBox;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
@@ -31,44 +29,20 @@ import com.vaadin.flow.router.Route;
 public class ListBoxRetainValuePage extends VerticalLayout {
 
     public ListBoxRetainValuePage() {
-        List<String> listBoxItems = new LinkedList<>(
-                Arrays.asList("1", "2", "3", "4"));
-
+        List<String> listBoxItems = Arrays.asList("1", "2", "3", "4");
         ListBox<String> listBox = new ListBox<>();
         listBox.setItems(listBoxItems);
         listBox.setValue("2");
-
-        Div value = new Div();
-        value.setId("list-box-value");
-        value.setText(listBox.getValue());
-
-        listBox.addValueChangeListener(e -> value.setText(e.getValue()));
-
         Button addButton = new Button("add");
         addButton.setId("add-button");
+        Div value = new Div();
+        value.setId("list-box-value");
+        add(value, addButton, listBox);
+        value.setText(listBox.getValue());
         addButton.addClickListener(event -> {
             remove(listBox);
             add(listBox);
             value.setText(listBox.getValue());
         });
-
-        NativeButton refreshAllButton = new NativeButton("Refresh all items",
-                e -> listBox.getListDataView().refreshAll());
-        refreshAllButton.setId("refresh-all-items");
-
-        NativeButton updateItemsButton = new NativeButton("Update items", e -> {
-            listBoxItems.remove(1);
-            listBoxItems.add("5");
-            listBox.getListDataView().refreshAll();
-        });
-        updateItemsButton.setId("update-items");
-
-        NativeButton updateItemLabelGeneratorButton = new NativeButton(
-                "Update labels", e -> listBox
-                        .setItemLabelGenerator(item -> item + " (Updated)"));
-        updateItemLabelGeneratorButton.setId("update-labels");
-
-        add(listBox, addButton, refreshAllButton, updateItemsButton,
-                updateItemLabelGeneratorButton, value);
     }
 }

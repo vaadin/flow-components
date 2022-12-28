@@ -19,7 +19,6 @@ package com.vaadin.flow.component.listbox.test;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -27,39 +26,12 @@ import org.openqa.selenium.WebElement;
 @TestPath("vaadin-list-box/list-box-retain-value")
 public class ListBoxRetainValueIT extends AbstractComponentIT {
 
-    private WebElement valueSpan;
-
-    @Before
-    public void init() {
-        open();
-        valueSpan = findElement(By.id("list-box-value"));
-    }
-
     @Test
     public void listBoxRetainValueWhenRemovedAndAdded() {
-        Assert.assertEquals("2", valueSpan.getText());
+        open();
+        WebElement value = findElement(By.id("list-box-value"));
+        Assert.assertEquals(value.getText(), "2");
         findElement(By.id("add-button")).click();
-        Assert.assertEquals("2", valueSpan.getText());
-    }
-
-    @Test
-    public void selectItem_refreshAll_itemIsSelected() {
-        Assert.assertEquals("2", valueSpan.getText());
-        findElement(By.id("refresh-all-items")).click();
-        Assert.assertEquals("2", valueSpan.getText());
-    }
-
-    @Test
-    public void selectItem_removeItemFromDataSource_refreshAll_itemIsNotSelected() {
-        Assert.assertEquals("2", valueSpan.getText());
-        findElement(By.id("update-items")).click();
-        Assert.assertEquals("", valueSpan.getText());
-    }
-
-    @Test
-    public void selectItem_setItemLabelGenerator_itemIsSelected() {
-        Assert.assertEquals("2", valueSpan.getText());
-        findElement(By.id("update-labels")).click();
-        Assert.assertEquals("2", valueSpan.getText());
+        Assert.assertEquals(value.getText(), "2");
     }
 }

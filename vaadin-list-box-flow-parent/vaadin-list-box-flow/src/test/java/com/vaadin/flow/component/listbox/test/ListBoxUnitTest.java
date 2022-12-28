@@ -3,6 +3,7 @@ package com.vaadin.flow.component.listbox.test;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -48,6 +49,85 @@ public class ListBoxUnitTest {
         listBox.setValue(ITEM1);
         listBox.setItems("a");
         Assert.assertNull(listBox.getValue());
+    }
+
+    @Test
+    public void selectItem_changeDataProvider_selectionIsReset() {
+        AtomicReference<String> capture = new AtomicReference<>();
+        listBox.addValueChangeListener(event -> capture.set(event.getValue()));
+
+        listBox.setValue(ITEM1);
+
+        Assert.assertEquals(ITEM1, capture.get());
+        Assert.assertEquals(ITEM1, listBox.getValue());
+
+        listBox.setItems("Foo", "Bar");
+
+        Assert.assertEquals(null, listBox.getValue());
+        Assert.assertEquals(null, capture.get());
+    }
+
+    @Test
+    public void selectItem_updateDataSource_refreshAll_selectionIsRetained() {
+        List<String> items = new ArrayList<>();
+        items.add("Foo");
+        items.add("Bar");
+
+        listBox.setItems(items);
+
+        AtomicReference<String> capture = new AtomicReference<>();
+        listBox.addValueChangeListener(event -> capture.set(event.getValue()));
+
+        listBox.setValue("Foo");
+
+        Assert.assertEquals("Foo", capture.get());
+        Assert.assertEquals("Foo", listBox.getValue());
+
+        items.add("Baz");
+        items.remove(1);
+        listBox.getListDataView().refreshAll();
+
+        Assert.assertEquals("Foo", capture.get());
+        Assert.assertEquals("Foo", listBox.getValue());
+    }
+
+    @Test
+    public void selectItem_removeItemFromDataSource_refreshAll_selectionIsReset() {
+        List<String> items = new ArrayList<>();
+        items.add("Foo");
+        items.add("Bar");
+
+        listBox.setItems(items);
+
+        AtomicReference<String> capture = new AtomicReference<>();
+        listBox.addValueChangeListener(event -> capture.set(event.getValue()));
+
+        listBox.setValue("Foo");
+
+        Assert.assertEquals("Foo", capture.get());
+        Assert.assertEquals("Foo", listBox.getValue());
+
+        items.remove(0);
+        listBox.getListDataView().refreshAll();
+
+        Assert.assertEquals(null, listBox.getValue());
+        Assert.assertEquals(null, capture.get());
+    }
+
+    @Test
+    public void selectItem_setItemLabelGenerator_selectionIsRetained() {
+        AtomicReference<String> capture = new AtomicReference<>();
+        listBox.addValueChangeListener(event -> capture.set(event.getValue()));
+
+        listBox.setValue(ITEM1);
+
+        Assert.assertEquals(ITEM1, capture.get());
+        Assert.assertEquals(ITEM1, listBox.getValue());
+
+        listBox.setItemLabelGenerator(item -> item + " (Updated)");
+
+        Assert.assertEquals(ITEM1, capture.get());
+        Assert.assertEquals(ITEM1, listBox.getValue());
     }
 
     @Test
