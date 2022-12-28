@@ -328,6 +328,7 @@ public class RadioButtonGroup<T>
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         this.dataProvider.set(dataProvider);
         DataViewUtils.removeComponentFilterAndSortComparator(this);
+        clear();
         reset();
 
         setupDataProviderListener(dataProvider);
@@ -345,6 +346,16 @@ public class RadioButtonGroup<T>
                                         .getItem());
                     } else {
                         reset();
+                        T value = getValue();
+                        if (value != null) {
+                            clear();
+                            Object valueId = getItemId(value);
+                            if (getRadioButtons().map(RadioButton::getItem)
+                                    .map(this::getItemId)
+                                    .anyMatch(valueId::equals)) {
+                                setValue(value);
+                            }
+                        }
                     }
                 });
     }
@@ -572,7 +583,6 @@ public class RadioButtonGroup<T>
     @SuppressWarnings("unchecked")
     private void reset() {
         keyMapper.removeAll();
-        clear();
 
         synchronized (dataProvider) {
             // Cache helper component before removal

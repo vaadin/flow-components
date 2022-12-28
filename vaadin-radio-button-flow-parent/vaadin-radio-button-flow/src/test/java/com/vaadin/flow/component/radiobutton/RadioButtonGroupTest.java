@@ -207,7 +207,7 @@ public class RadioButtonGroupTest {
     }
 
     @Test
-    public void changeItems_selectionIsReset() {
+    public void changeDataProvider_selectionIsReset() {
         RadioButtonGroup<String> radioButtonGroup = new RadioButtonGroup<>();
         radioButtonGroup.setItems("Foo", "Bar");
 
@@ -225,6 +225,77 @@ public class RadioButtonGroupTest {
 
         Assert.assertEquals(null, radioButtonGroup.getValue());
         Assert.assertEquals(null, capture.get());
+    }
+
+    @Test
+    public void selectItem_updateDataSource_refreshAll_selectionIsRetained() {
+        List<String> items = new ArrayList<>();
+        items.add("Foo");
+        items.add("Bar");
+
+        RadioButtonGroup<String> radioButtonGroup = new RadioButtonGroup<>();
+        radioButtonGroup.setItems(items);
+
+        AtomicReference<String> capture = new AtomicReference<>();
+        radioButtonGroup
+                .addValueChangeListener(event -> capture.set(event.getValue()));
+
+        radioButtonGroup.setValue("Foo");
+
+        Assert.assertEquals("Foo", capture.get());
+        Assert.assertEquals("Foo", radioButtonGroup.getValue());
+
+        items.add("Baz");
+        items.remove(1);
+        radioButtonGroup.getListDataView().refreshAll();
+
+        Assert.assertEquals("Foo", capture.get());
+        Assert.assertEquals("Foo", radioButtonGroup.getValue());
+    }
+
+    @Test
+    public void selectItem_removeItemFromDataSource_refreshAll_selectionIsReset() {
+        List<String> items = new ArrayList<>();
+        items.add("Foo");
+        items.add("Bar");
+
+        RadioButtonGroup<String> radioButtonGroup = new RadioButtonGroup<>();
+        radioButtonGroup.setItems(items);
+
+        AtomicReference<String> capture = new AtomicReference<>();
+        radioButtonGroup
+                .addValueChangeListener(event -> capture.set(event.getValue()));
+
+        radioButtonGroup.setValue("Foo");
+
+        Assert.assertEquals("Foo", capture.get());
+        Assert.assertEquals("Foo", radioButtonGroup.getValue());
+
+        items.remove(0);
+        radioButtonGroup.getListDataView().refreshAll();
+
+        Assert.assertEquals(null, radioButtonGroup.getValue());
+        Assert.assertEquals(null, capture.get());
+    }
+
+    @Test
+    public void selectItem_setItemLabelGenerator_selectionIsRetained() {
+        RadioButtonGroup<String> radioButtonGroup = new RadioButtonGroup<>();
+        radioButtonGroup.setItems("Foo", "Bar");
+
+        AtomicReference<String> capture = new AtomicReference<>();
+        radioButtonGroup
+                .addValueChangeListener(event -> capture.set(event.getValue()));
+
+        radioButtonGroup.setValue("Foo");
+
+        Assert.assertEquals("Foo", capture.get());
+        Assert.assertEquals("Foo", radioButtonGroup.getValue());
+
+        radioButtonGroup.setItemLabelGenerator(item -> item + " (Updated)");
+
+        Assert.assertEquals("Foo", capture.get());
+        Assert.assertEquals("Foo", radioButtonGroup.getValue());
     }
 
     @Test
