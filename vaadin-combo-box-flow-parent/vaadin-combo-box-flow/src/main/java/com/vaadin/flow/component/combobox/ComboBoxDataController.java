@@ -632,8 +632,12 @@ class ComboBoxDataController<TItem>
                         .refresh(((DataChangeEvent.DataRefreshEvent<TItem>) e)
                                 .getItem());
             } else {
-                refreshAllData(shouldForceServerSideFiltering);
+                handleDataChange();
             }
         });
+    }
+
+    void handleDataChange() {
+        refreshAllData(shouldForceServerSideFiltering);
     }
 }

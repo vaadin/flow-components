@@ -1,13 +1,20 @@
 package com.vaadin.flow.component.combobox;
 
+import com.vaadin.flow.data.provider.AbstractBackEndDataProvider;
+import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class MultiSelectComboBoxSelectionTest {
 
@@ -161,5 +168,102 @@ public class MultiSelectComboBoxSelectionTest {
         comboBox.deselectAll();
         Mockito.verify(selectionListenerSpy, Mockito.times(0))
                 .selectionChange(Mockito.any());
+    }
+
+    @Test
+    public void selectItem_changeDataProvider_selectionIsReset() {
+        AtomicReference<String> capture = new AtomicReference<>();
+        comboBox.addValueChangeListener(
+                event -> capture.set(getItemsString(event.getValue())));
+
+        comboBox.setValue("1");
+
+        Assert.assertEquals("1", capture.get());
+        Assert.assertEquals(Set.of("1"), comboBox.getValue());
+
+        comboBox.setItems("Foo", "Bar");
+
+        Assert.assertEquals(Collections.emptySet(), comboBox.getValue());
+        Assert.assertEquals("", capture.get());
+    }
+
+    @Test
+    public void selectItems_removeItemFromDataSource_refreshAll_removedItemsAreDeselected() {
+        List<String> items = new ArrayList<>();
+        items.add("Foo");
+        items.add("Bar");
+
+        comboBox.setItems(items);
+
+        AtomicReference<String> capture = new AtomicReference<>();
+        comboBox.addValueChangeListener(
+                event -> capture.set(getItemsString(event.getValue())));
+
+        comboBox.setValue("Foo", "Bar");
+
+        Assert.assertEquals(getItemsString(Set.of("Foo", "Bar")),
+                capture.get());
+        Assert.assertEquals(Set.of("Foo", "Bar"), comboBox.getValue());
+
+        items.add("Baz");
+        items.remove(0);
+        comboBox.getListDataView().refreshAll();
+
+        Assert.assertEquals(Set.of("Bar"), comboBox.getValue());
+        Assert.assertEquals("Bar", capture.get());
+    }
+
+    @Test
+    public void selectItem_setItemLabelGenerator_selectionIsRetained() {
+        AtomicReference<String> capture = new AtomicReference<>();
+        comboBox.addValueChangeListener(
+                event -> capture.set(getItemsString(event.getValue())));
+
+        comboBox.setValue("1");
+
+        Assert.assertEquals("1", capture.get());
+        Assert.assertEquals(Set.of("1"), comboBox.getValue());
+
+        comboBox.setItemLabelGenerator(item -> item + " (Updated)");
+
+        Assert.assertEquals("1", capture.get());
+        Assert.assertEquals(Set.of("1"), comboBox.getValue());
+    }
+
+    @Test
+    public void useLazyLoading_setValue_refreshAll_valueIsReset() {
+        List<String> items = List.of("Foo", "Bar");
+
+        comboBox.setItems(new AbstractBackEndDataProvider<String, String>() {
+            @Override
+            protected Stream<String> fetchFromBackEnd(
+                    Query<String, String> query) {
+                return items.stream().skip(query.getOffset())
+                        .limit(query.getLimit());
+            }
+
+            @Override
+            protected int sizeInBackEnd(Query<String, String> query) {
+                return (int) fetchFromBackEnd(query).count();
+            }
+        });
+
+        AtomicReference<String> capture = new AtomicReference<>();
+        comboBox.addValueChangeListener(
+                event -> capture.set(getItemsString(event.getValue())));
+
+        comboBox.setValue("Foo");
+
+        Assert.assertEquals(Set.of("Foo"), comboBox.getValue());
+        Assert.assertEquals("Foo", capture.get());
+
+        comboBox.getLazyDataView().refreshAll();
+
+        Assert.assertEquals(Collections.emptySet(), comboBox.getValue());
+        Assert.assertEquals("", capture.get());
+    }
+
+    private String getItemsString(Set<String> itemSet) {
+        return itemSet.stream().sorted().collect(Collectors.joining(", "));
     }
 }

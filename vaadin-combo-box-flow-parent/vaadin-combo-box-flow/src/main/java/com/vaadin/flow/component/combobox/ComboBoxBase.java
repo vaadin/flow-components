@@ -149,7 +149,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
                 presentationToModel, modelToPresentation);
 
         renderManager = new ComboBoxRenderManager<>(this);
-        dataController = new ComboBoxDataController<>(this, this::getLocale);
+        dataController = createItemComboBoxDataController();
         dataController.getDataGenerator().addDataGenerator((item,
                 jsonObject) -> jsonObject.put("label", generateLabel(item)));
 
@@ -1288,5 +1288,13 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
         public String getDetail() {
             return detail;
         }
+    }
+
+    ComboBoxDataController<TItem> createItemComboBoxDataController() {
+        return new ComboBoxDataController<>(this, this::getLocale);
+    }
+
+    boolean isLazyLoadingMode() {
+        return getDataProvider() instanceof BackEndDataProvider;
     }
 }

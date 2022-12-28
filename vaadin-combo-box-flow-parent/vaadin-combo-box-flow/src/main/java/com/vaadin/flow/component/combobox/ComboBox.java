@@ -17,6 +17,7 @@ package com.vaadin.flow.component.combobox;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -32,6 +33,7 @@ import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableBiPredicate;
 
+import com.vaadin.flow.function.SerializableSupplier;
 import elemental.json.Json;
 import elemental.json.JsonObject;
 
@@ -383,5 +385,40 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
         getElement().getChildren()
                 .forEach(child -> child.removeAttribute("slot"));
         getElement().removeAllChildren();
+    }
+
+    @Override
+    ComboBoxDataController<T> createItemComboBoxDataController() {
+        return new SingleSelectComboBoxDataController<>(this, this::getLocale);
+    }
+
+    class SingleSelectComboBoxDataController<TValue>
+            extends ComboBoxDataController<TValue> {
+
+        SingleSelectComboBoxDataController(ComboBox<TValue> comboBox,
+                SerializableSupplier<Locale> localeSupplier) {
+            super(comboBox, localeSupplier);
+        }
+
+        @Override
+        void handleDataChange() {
+            if (ComboBox.this.isLazyLoadingMode()) {
+                clear();
+                super.handleDataChange();
+                return;
+            }
+            T value = getValue();
+            super.handleDataChange();
+            if (value != null) {
+                // Retain selected values that are not obsolete
+                Object valueId = getDataProvider().getId((TValue) value);
+                if (getListDataView().getItems().map(getDataProvider()::getId)
+                        .anyMatch(valueId::equals)) {
+                    setValue(value);
+                } else {
+                    clear();
+                }
+            }
+        }
     }
 }

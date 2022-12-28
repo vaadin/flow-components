@@ -28,6 +28,7 @@ import com.vaadin.flow.data.provider.IdentifierProviderChangeEvent;
 import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
+import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
 import elemental.json.Json;
@@ -37,11 +38,12 @@ import elemental.json.JsonType;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * MultiSelectComboBox allows the user to select one or more values from a
@@ -444,6 +446,44 @@ public class MultiSelectComboBox<TItem>
         for (String key : jsonObject.keys()) {
             if (jsonObject.get(key).getType() == JsonType.NULL) {
                 jsonObject.remove(key);
+            }
+        }
+    }
+
+    @Override
+    ComboBoxDataController<TItem> createItemComboBoxDataController() {
+        return new MultiSelectComboBoxBaseDataController<>(this,
+                this::getLocale);
+    }
+
+    class MultiSelectComboBoxBaseDataController<TValue>
+            extends ComboBoxDataController<TValue> {
+
+        MultiSelectComboBoxBaseDataController(
+                MultiSelectComboBox<TValue> comboBox,
+                SerializableSupplier<Locale> localeSupplier) {
+            super(comboBox, localeSupplier);
+        }
+
+        @Override
+        void handleDataChange() {
+            if (MultiSelectComboBox.this.isLazyLoadingMode()) {
+                clear();
+                super.handleDataChange();
+                return;
+            }
+            Set<TItem> value = getValue();
+            super.handleDataChange();
+            if (!value.isEmpty()) {
+                // Retain selected values that are not obsolete
+                Set<Object> itemIds = getListDataView().getItems()
+                        .map(getDataProvider()::getId)
+                        .collect(Collectors.toSet());
+                Set<TItem> filteredValues = value.stream()
+                        .filter(item -> itemIds.contains(
+                                getDataProvider().getId((TValue) item)))
+                        .collect(Collectors.toSet());
+                setValue(filteredValues);
             }
         }
     }

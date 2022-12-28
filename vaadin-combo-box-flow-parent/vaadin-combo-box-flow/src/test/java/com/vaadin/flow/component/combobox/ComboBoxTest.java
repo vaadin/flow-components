@@ -19,6 +19,8 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.provider.AbstractBackEndDataProvider;
+import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.VaadinService;
@@ -29,7 +31,10 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 public class ComboBoxTest extends ComboBoxBaseTest {
@@ -95,6 +100,107 @@ public class ComboBoxTest extends ComboBoxBaseTest {
         Assert.assertEquals("bar", comboBox.getValue());
         comboBox.setItems(Arrays.asList("foo", "bar"));
         Assert.assertNull(comboBox.getValue());
+    }
+
+    @Test
+    public void setValue_updateDataSource_refreshAll_valueIsRetained() {
+        List<String> items = new ArrayList<>();
+        items.add("foo");
+        items.add("bar");
+
+        ComboBox<String> comboBox = new ComboBox<>();
+        comboBox.setItems(items);
+
+        AtomicReference<String> capture = new AtomicReference<>();
+        comboBox.addValueChangeListener(event -> capture.set(event.getValue()));
+
+        comboBox.setValue("foo");
+
+        Assert.assertEquals("foo", capture.get());
+        Assert.assertEquals("foo", comboBox.getValue());
+
+        items.add("baz");
+        items.remove(1);
+        comboBox.getListDataView().refreshAll();
+
+        Assert.assertEquals("foo", capture.get());
+        Assert.assertEquals("foo", comboBox.getValue());
+    }
+
+    @Test
+    public void setValue_removeItemFromDataSource_refreshAll_valueIsReset() {
+        List<String> items = new ArrayList<>();
+        items.add("foo");
+        items.add("bar");
+
+        ComboBox<String> comboBox = new ComboBox<>();
+        comboBox.setItems(items);
+
+        AtomicReference<String> capture = new AtomicReference<>();
+        comboBox.addValueChangeListener(event -> capture.set(event.getValue()));
+
+        comboBox.setValue("foo");
+
+        Assert.assertEquals("foo", capture.get());
+        Assert.assertEquals("foo", comboBox.getValue());
+
+        items.remove(0);
+        comboBox.getListDataView().refreshAll();
+
+        Assert.assertEquals(null, comboBox.getValue());
+        Assert.assertEquals(null, capture.get());
+    }
+
+    @Test
+    public void setValue_setItemLabelGenerator_valueIsRetained() {
+        ComboBox<String> comboBox = new ComboBox<>();
+        comboBox.setItems("foo", "bar");
+
+        AtomicReference<String> capture = new AtomicReference<>();
+        comboBox.addValueChangeListener(event -> capture.set(event.getValue()));
+
+        comboBox.setValue("foo");
+
+        Assert.assertEquals("foo", capture.get());
+        Assert.assertEquals("foo", comboBox.getValue());
+
+        comboBox.setItemLabelGenerator(item -> item + " (Updated)");
+
+        Assert.assertEquals("foo", capture.get());
+        Assert.assertEquals("foo", comboBox.getValue());
+    }
+
+    @Test
+    public void useLazyLoading_setValue_refreshAll_valueIsReset() {
+        List<String> items = List.of("foo", "bar");
+
+        ComboBox<String> comboBox = new ComboBox<>();
+        comboBox.setItems(new AbstractBackEndDataProvider<String, String>() {
+            @Override
+            protected Stream<String> fetchFromBackEnd(
+                    Query<String, String> query) {
+                return items.stream().skip(query.getOffset())
+                        .limit(query.getLimit());
+            }
+
+            @Override
+            protected int sizeInBackEnd(Query<String, String> query) {
+                return (int) fetchFromBackEnd(query).count();
+            }
+        });
+
+        AtomicReference<String> capture = new AtomicReference<>();
+        comboBox.addValueChangeListener(event -> capture.set(event.getValue()));
+
+        comboBox.setValue("foo");
+
+        Assert.assertEquals("foo", capture.get());
+        Assert.assertEquals("foo", comboBox.getValue());
+
+        comboBox.getLazyDataView().refreshAll();
+
+        Assert.assertEquals(null, comboBox.getValue());
+        Assert.assertEquals(null, capture.get());
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
