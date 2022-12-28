@@ -950,7 +950,6 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
     private void reset() {
         keyMapper.removeAll();
         listBox.removeAll();
-        clear();
         requestClientSideContentUpdateIfNotPending();
 
         if (isEmptySelectionAllowed()) {
@@ -1005,6 +1004,15 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
                     .findAny().ifPresent(this::updateItem);
         } else {
             reset();
+            T value = getValue();
+            if (value != null) {
+                clear();
+                Object valueId = getItemId(value);
+                if (getItems().map(VaadinItem::getItem).map(this::getItemId)
+                        .anyMatch(valueId::equals)) {
+                    setValue(value);
+                }
+            }
         }
     }
 
