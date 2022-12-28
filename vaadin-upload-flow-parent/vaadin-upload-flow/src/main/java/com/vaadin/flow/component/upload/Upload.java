@@ -327,15 +327,13 @@ public class Upload extends Component implements HasSize, HasStyle {
      *            <code>null</code> to reset to the default button
      */
     public void setUploadButton(Component button) {
-        SlotUtils.clearSlot(this, "add-button");
-
         if (button != null) {
             uploadButton = button;
         } else {
             uploadButton = defaultUploadButton;
         }
 
-        SlotUtils.addToSlot(this, "add-button", uploadButton);
+        SlotUtils.setSlot(this, "add-button", uploadButton);
     }
 
     /**
@@ -356,15 +354,13 @@ public class Upload extends Component implements HasSize, HasStyle {
      *            or <code>null</code> to reset to the default label
      */
     public void setDropLabel(Component label) {
-        SlotUtils.clearSlot(this, "drop-label");
-
         if (label != null) {
             dropLabel = label;
         } else {
             dropLabel = defaultDropLabel;
         }
 
-        SlotUtils.addToSlot(this, "drop-label", dropLabel);
+        SlotUtils.setSlot(this, "drop-label", dropLabel);
     }
 
     /**
@@ -386,15 +382,13 @@ public class Upload extends Component implements HasSize, HasStyle {
      *            drop files, or <code>null</code> to reset to the default icon
      */
     public void setDropLabelIcon(Component icon) {
-        SlotUtils.clearSlot(this, "drop-label-icon");
-
         if (icon != null) {
             dropLabelIcon = icon;
         } else {
             dropLabelIcon = defaultDropLabelIcon;
         }
 
-        SlotUtils.addToSlot(this, "drop-label-icon", dropLabelIcon);
+        SlotUtils.setSlot(this, "drop-label-icon", dropLabelIcon);
     }
 
     /**
