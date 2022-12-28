@@ -54,8 +54,24 @@ public class SlotUtilsTest {
     }
 
     @Test
+    public void addToSlot_elementIsAdded() {
+        SlotUtils.addToSlot(parent, TEST_SLOT, new Element("div"));
+
+        Assert.assertEquals(1,
+                SlotUtils.getElementsInSlot(parent, TEST_SLOT).count());
+    }
+
+    @Test
     public void setSlot_componentIsAdded() {
         SlotUtils.setSlot(parent, TEST_SLOT, new TestComponent());
+
+        Assert.assertEquals(1,
+                SlotUtils.getElementsInSlot(parent, TEST_SLOT).count());
+    }
+
+    @Test
+    public void setSlot_elementIsAdded() {
+        SlotUtils.setSlot(parent, TEST_SLOT, new Element("div"));
 
         Assert.assertEquals(1,
                 SlotUtils.getElementsInSlot(parent, TEST_SLOT).count());
