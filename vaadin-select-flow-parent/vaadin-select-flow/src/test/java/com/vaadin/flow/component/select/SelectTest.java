@@ -185,6 +185,90 @@ public class SelectTest {
     }
 
     @Test
+    public void selectItem_changeDataProvider_selectionIsReset() {
+        select.setItems("Foo", "Bar");
+
+        AtomicReference<String> capture = new AtomicReference<>();
+        select.addValueChangeListener(event -> capture.set(event.getValue()));
+
+        select.setValue("Foo");
+
+        Assert.assertEquals("Foo", capture.get());
+
+        Assert.assertEquals("Foo", select.getValue());
+
+        select.setItems("Foo", "Baz");
+
+        Assert.assertEquals(null, select.getValue());
+        Assert.assertEquals(null, capture.get());
+    }
+
+    @Test
+    public void selectItem_updateDataSource_refreshAll_selectionIsRetained() {
+        List<String> items = new ArrayList<>();
+        items.add("Foo");
+        items.add("Bar");
+
+        select.setItems(items);
+
+        AtomicReference<String> capture = new AtomicReference<>();
+        select.addValueChangeListener(event -> capture.set(event.getValue()));
+
+        select.setValue("Foo");
+
+        Assert.assertEquals("Foo", capture.get());
+        Assert.assertEquals("Foo", select.getValue());
+
+        items.add("Baz");
+        items.remove(1);
+        select.getListDataView().refreshAll();
+
+        Assert.assertEquals("Foo", capture.get());
+        Assert.assertEquals("Foo", select.getValue());
+    }
+
+    @Test
+    public void selectItem_removeItemFromDataSource_refreshAll_selectionIsReset() {
+        List<String> items = new ArrayList<>();
+        items.add("Foo");
+        items.add("Bar");
+
+        select.setItems(items);
+
+        AtomicReference<String> capture = new AtomicReference<>();
+        select.addValueChangeListener(event -> capture.set(event.getValue()));
+
+        select.setValue("Foo");
+
+        Assert.assertEquals("Foo", capture.get());
+        Assert.assertEquals("Foo", select.getValue());
+
+        items.remove(0);
+        select.getListDataView().refreshAll();
+
+        Assert.assertEquals(null, select.getValue());
+        Assert.assertEquals(null, capture.get());
+    }
+
+    @Test
+    public void selectItem_setItemLabelGenerator_selectionIsRetained() {
+        select.setItems("Foo", "Bar");
+
+        AtomicReference<String> capture = new AtomicReference<>();
+        select.addValueChangeListener(event -> capture.set(event.getValue()));
+
+        select.setValue("Foo");
+
+        Assert.assertEquals("Foo", capture.get());
+        Assert.assertEquals("Foo", select.getValue());
+
+        select.setItemLabelGenerator(item -> item + " (Updated)");
+
+        Assert.assertEquals("Foo", capture.get());
+        Assert.assertEquals("Foo", select.getValue());
+    }
+
+    @Test
     public void itemEnabledProvider_updatedEnabledState() {
         select.setItems("1", "2", "3");
         select.setItemEnabledProvider(item -> item.contains("1"));

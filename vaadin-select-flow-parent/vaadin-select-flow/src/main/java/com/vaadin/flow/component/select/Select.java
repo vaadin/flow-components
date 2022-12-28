@@ -517,6 +517,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         this.dataProvider.set(dataProvider);
         DataViewUtils.removeComponentFilterAndSortComparator(this);
+        clear();
         reset();
 
         if (dataProviderListenerRegistration != null) {
