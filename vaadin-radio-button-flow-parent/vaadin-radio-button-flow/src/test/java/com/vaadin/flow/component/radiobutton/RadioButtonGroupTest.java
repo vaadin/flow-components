@@ -207,7 +207,7 @@ public class RadioButtonGroupTest {
     }
 
     @Test
-    public void changeDataProvider_selectionIsReset() {
+    public void selectItem_changeDataProvider_selectionIsReset() {
         RadioButtonGroup<String> radioButtonGroup = new RadioButtonGroup<>();
         radioButtonGroup.setItems("Foo", "Bar");
 
