@@ -290,16 +290,7 @@ public class TabSheet extends Component
      *            prefix component
      */
     public void setPrefixComponent(Component component) {
-        SlotUtils.clearSlot(this, "prefix");
-
-        if (component != null) {
-            if (component instanceof Text) {
-                throw new IllegalArgumentException(
-                        "Text as a prefix is not supported. Consider wrapping the Text inside a Div.");
-            }
-
-            SlotUtils.addToSlot(this, "prefix", component);
-        }
+        SlotUtils.setSlot(this, "prefix", component);
     }
 
     /**
@@ -325,16 +316,7 @@ public class TabSheet extends Component
      *            suffix component
      */
     public void setSuffixComponent(Component component) {
-        SlotUtils.clearSlot(this, "suffix");
-
-        if (component != null) {
-            if (component instanceof Text) {
-                throw new IllegalArgumentException(
-                        "Text as a suffix is not supported. Consider wrapping the Text inside a Div.");
-            }
-
-            SlotUtils.addToSlot(this, "suffix", component);
-        }
+        SlotUtils.setSlot(this, "suffix", component);
     }
 
     /**

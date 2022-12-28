@@ -39,11 +39,7 @@ public interface HasPrefixAndSuffix extends HasElement {
      *            prefix component
      */
     default void setPrefixComponent(Component component) {
-        SlotUtils.clearSlot(this, "prefix");
-
-        if (component != null) {
-            SlotUtils.addToSlot(this, "prefix", component);
-        }
+        SlotUtils.setSlot(this, "prefix", component);
     }
 
     /**
@@ -69,11 +65,7 @@ public interface HasPrefixAndSuffix extends HasElement {
      *            suffix component
      */
     default void setSuffixComponent(Component component) {
-        SlotUtils.clearSlot(this, "suffix");
-
-        if (component != null) {
-            SlotUtils.addToSlot(this, "suffix", component);
-        }
+        SlotUtils.setSlot(this, "suffix", component);
     }
 
     /**
