@@ -12,6 +12,7 @@ import org.openqa.selenium.Keys;
 import static com.vaadin.flow.component.datetimepicker.validation.DateTimePickerValidationBinderPage.MIN_INPUT;
 import static com.vaadin.flow.component.datetimepicker.validation.DateTimePickerValidationBinderPage.MAX_INPUT;
 import static com.vaadin.flow.component.datetimepicker.validation.DateTimePickerValidationBinderPage.EXPECTED_VALUE_INPUT;
+import static com.vaadin.flow.component.datetimepicker.validation.DateTimePickerValidationBinderPage.CLEAR_VALUE_BUTTON;
 import static com.vaadin.flow.component.datetimepicker.validation.DateTimePickerValidationBinderPage.REQUIRED_ERROR_MESSAGE;
 import static com.vaadin.flow.component.datetimepicker.validation.DateTimePickerValidationBinderPage.UNEXPECTED_VALUE_ERROR_MESSAGE;
 
@@ -71,48 +72,6 @@ public class DateTimePickerValidationBinderIT
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage(REQUIRED_ERROR_MESSAGE);
-    }
-
-    @Test
-    public void required_badInput_setDateInputValue_blur_assertValidity() {
-        setInputValue(dateInput, "INVALID");
-        dateInput.sendKeys(Keys.TAB);
-        timeInput.sendKeys(Keys.TAB);
-        assertServerInvalid();
-        assertClientInvalid();
-        assertErrorMessage("");
-    }
-
-    @Test
-    public void required_badInput_setTimeInputValue_blur_assertValidity() {
-        setInputValue(timeInput, "INVALID");
-        timeInput.sendKeys(Keys.TAB);
-        assertServerInvalid();
-        assertClientInvalid();
-        assertErrorMessage("");
-    }
-
-    @Test
-    public void badInput_changeInputValue_assertValidity() {
-        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("2000-01-01T10:00",
-                Keys.ENTER);
-
-        setInputValue(dateInput, "INVALID");
-        setInputValue(timeInput, "INVALID");
-        assertServerInvalid();
-        assertClientInvalid();
-        assertErrorMessage("");
-
-        setInputValue(dateInput, "1/1/2000");
-        setInputValue(timeInput, "10:00");
-        assertServerValid();
-        assertClientValid();
-
-        setInputValue(dateInput, "INVALID");
-        setInputValue(timeInput, "INVALID");
-        assertServerInvalid();
-        assertClientInvalid();
-        assertErrorMessage("");
     }
 
     @Test
@@ -185,6 +144,43 @@ public class DateTimePickerValidationBinderIT
         setInputValue(timeInput, "13:00");
         assertClientValid();
         assertServerValid();
+    }
+
+    @Test
+    public void badInput_changeValue_assertValidity() {
+        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("2000-01-01T10:00",
+                Keys.ENTER);
+
+        setInputValue(dateInput, "INVALID");
+        setInputValue(timeInput, "INVALID");
+        assertServerInvalid();
+        assertClientInvalid();
+        assertErrorMessage("");
+
+        setInputValue(dateInput, "1/1/2000");
+        setInputValue(timeInput, "10:00");
+        assertServerValid();
+        assertClientValid();
+
+        setInputValue(dateInput, "INVALID");
+        setInputValue(timeInput, "INVALID");
+        assertServerInvalid();
+        assertClientInvalid();
+        assertErrorMessage("");
+    }
+
+    @Test
+    public void badInput_setValue_clearValue_assertValidity() {
+        setInputValue(dateInput, "INVALID");
+        setInputValue(timeInput, "INVALID");
+        assertServerInvalid();
+        assertClientInvalid();
+        assertErrorMessage("");
+
+        $("button").id(CLEAR_VALUE_BUTTON).click();
+        assertServerInvalid();
+        assertClientInvalid();
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
     protected DateTimePickerElement getTestField() {
