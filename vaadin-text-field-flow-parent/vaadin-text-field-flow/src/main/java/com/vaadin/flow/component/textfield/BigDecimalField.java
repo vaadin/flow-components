@@ -365,7 +365,15 @@ public class BigDecimalField
      */
     @Override
     public void setValue(BigDecimal value) {
+        BigDecimal oldValue = getValue();
+
         super.setValue(value);
+
+        if (Objects.equals(oldValue, getEmptyValue())
+                && Objects.equals(value, getEmptyValue())) {
+            // Clear the input element from possible bad input.
+            getElement().executeJs("this.inputElement.value = ''");
+        }
     }
 
     /**
