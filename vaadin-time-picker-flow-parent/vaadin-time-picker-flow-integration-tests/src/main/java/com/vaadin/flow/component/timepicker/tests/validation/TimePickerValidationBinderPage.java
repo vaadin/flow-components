@@ -13,6 +13,7 @@ public class TimePickerValidationBinderPage
     public static final String MIN_INPUT = "min-input";
     public static final String MAX_INPUT = "max-input";
     public static final String EXPECTED_VALUE_INPUT = "expected-value-input";
+    public static final String CLEAR_VALUE_BUTTON = "clear-value-button";
 
     public static final String REQUIRED_ERROR_MESSAGE = "The field is required";
     public static final String UNEXPECTED_VALUE_ERROR_MESSAGE = "The field doesn't match the expected value";
@@ -55,6 +56,10 @@ public class TimePickerValidationBinderPage
         add(createInput(MAX_INPUT, "Set max time", event -> {
             LocalTime value = LocalTime.parse(event.getValue());
             testField.setMax(value);
+        }));
+
+        add(createButton(CLEAR_VALUE_BUTTON, "Clear value", event -> {
+            testField.clear();
         }));
     }
 
