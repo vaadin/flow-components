@@ -15,12 +15,9 @@
  */
 package com.vaadin.flow.component.checkbox.tests;
 
-import java.util.Arrays;
 import java.util.List;
 
-import com.vaadin.flow.component.checkbox.testbench.CheckboxGroupElement;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
@@ -31,14 +28,11 @@ import com.vaadin.testbench.TestBenchElement;
 @TestPath("vaadin-checkbox/refresh-data-provider")
 public class RefreshDataProviderPageIT extends AbstractComponentIT {
 
-    @Before
-    public void init() {
-        open();
-    }
-
     @Test
     public void resetComponentOnDataProviderRefresh() {
-        findElement(By.id("update-items")).click();
+        open();
+
+        findElement(By.id("reset")).click();
 
         List<TestBenchElement> radioButtons = $("vaadin-checkbox").all();
         Assert.assertEquals(2, radioButtons.size());
@@ -49,57 +43,13 @@ public class RefreshDataProviderPageIT extends AbstractComponentIT {
 
     @Test
     public void resetComponentExpectLabel() {
-        findElement(By.id("update-items")).click();
+        open();
+
+        findElement(By.id("reset")).click();
 
         TestBenchElement group = $(TestBenchElement.class).id("group");
         String label = group.findElement(By.cssSelector("label[slot='label']"))
                 .getText();
         Assert.assertEquals("Label", label);
-    }
-
-    @Test
-    public void selectItem_refreshAll_itemIsSelected() {
-        CheckboxGroupElement group = $(CheckboxGroupElement.class).first();
-        group.selectByText("foo");
-        Assert.assertEquals(Arrays.asList("foo"), group.getSelectedTexts());
-        Assert.assertEquals("foo", findElement(By.id("value-div")).getText());
-
-        findElement(By.id("refresh-all-items")).click();
-
-        Assert.assertEquals(Arrays.asList("foo"), group.getSelectedTexts());
-        Assert.assertEquals("foo", findElement(By.id("value-div")).getText());
-    }
-
-    @Test
-    public void selectItem_removeItemFromDataSource_refreshAll_itemIsNotSelected() {
-        CheckboxGroupElement group = $(CheckboxGroupElement.class).first();
-
-        group.selectByText("foo");
-        group.selectByText("bar");
-        Assert.assertEquals(Arrays.asList("foo", "bar"),
-                group.getSelectedTexts());
-        Assert.assertEquals("bar, foo",
-                findElement(By.id("value-div")).getText());
-
-        findElement(By.id("update-items")).click();
-
-        Assert.assertEquals(Arrays.asList("bar"), group.getSelectedTexts());
-        Assert.assertEquals("bar", findElement(By.id("value-div")).getText());
-    }
-
-    @Test
-    public void selectItem_setItemLabelGenerator_itemIsSelected() {
-        CheckboxGroupElement group = $(CheckboxGroupElement.class).first();
-
-        group.selectByText("foo");
-        Assert.assertEquals(Arrays.asList("foo"), group.getSelectedTexts());
-        Assert.assertEquals("foo", findElement(By.id("value-div")).getText());
-
-        findElement(By.id("update-labels")).click();
-
-        Assert.assertEquals(Arrays.asList("foo (Updated)"),
-                group.getSelectedTexts());
-        Assert.assertEquals("foo", findElement(By.id("value-div")).getText());
-
     }
 }

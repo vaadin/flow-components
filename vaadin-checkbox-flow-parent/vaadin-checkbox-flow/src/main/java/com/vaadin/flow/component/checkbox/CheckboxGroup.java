@@ -119,6 +119,8 @@ public class CheckboxGroup<T>
 
     private SerializableConsumer<UI> sizeRequest;
 
+    private boolean dataChangeHandlingInProgress = false;
+
     /**
      * Creates an empty checkbox group
      */
@@ -359,9 +361,38 @@ public class CheckboxGroup<T>
                                         getItemId(otherItem)))
                                 .findFirst().ifPresent(this::updateCheckbox);
                     } else {
-                        reset();
+                        handleDataChange();
                     }
                 });
+    }
+
+    private void handleDataChange() {
+        Set<T> value = getValue();
+        if (value.isEmpty()) {
+            reset();
+            return;
+        }
+        // Prevent probable loop caused by refreshing all data on value change
+        if (dataChangeHandlingInProgress) {
+            return;
+        }
+        dataChangeHandlingInProgress = true;
+        reset();
+        Set<Object> currentItemIds = getCheckboxItems()
+                .map(CheckBoxItem::getItem).map(this::getItemId)
+                .collect(Collectors.toSet());
+        Set<T> obsoleteSelectedItems = value.stream()
+                .filter(item -> !currentItemIds.contains(getItemId(item)))
+                .collect(Collectors.toSet());
+        if (!obsoleteSelectedItems.isEmpty()) {
+            // Clear obsolete selected items
+            updateSelection(Collections.emptySet(), obsoleteSelectedItems);
+        } else {
+            // Force refresh selected items
+            clear();
+            setValue(value);
+        }
+        dataChangeHandlingInProgress = false;
     }
 
     @Override

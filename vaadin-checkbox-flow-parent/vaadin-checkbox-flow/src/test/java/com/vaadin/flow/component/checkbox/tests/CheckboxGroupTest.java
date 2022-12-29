@@ -303,6 +303,72 @@ public class CheckboxGroupTest {
     }
 
     @Test
+    public void selectItem_changeDataProvider_selectionIsReset() {
+        CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
+        checkboxGroup.setItems("foo", "bar");
+
+        AtomicReference<String> capture = new AtomicReference<>();
+        checkboxGroup.addValueChangeListener(
+                event -> capture.set(getItemsString(event.getValue())));
+
+        checkboxGroup.setValue(Set.of("foo"));
+
+        Assert.assertEquals("foo", capture.get());
+        Assert.assertEquals(Set.of("foo"), checkboxGroup.getValue());
+
+        checkboxGroup.setItems("foo", "baz");
+
+        Assert.assertEquals(Collections.emptySet(), checkboxGroup.getValue());
+        Assert.assertEquals("", capture.get());
+    }
+
+    @Test
+    public void selectItems_removeItemFromDataSource_refreshAll_removedItemsAreDeselected() {
+        List<String> items = new ArrayList<>();
+        items.add("foo");
+        items.add("bar");
+
+        CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
+        checkboxGroup.setItems(items);
+
+        AtomicReference<String> capture = new AtomicReference<>();
+        checkboxGroup.addValueChangeListener(
+                event -> capture.set(getItemsString(event.getValue())));
+
+        checkboxGroup.setValue(Set.of("foo", "bar"));
+
+        Assert.assertEquals(getItemsString(Set.of("foo", "bar")),
+                capture.get());
+        Assert.assertEquals(Set.of("foo", "bar"), checkboxGroup.getValue());
+
+        items.remove(0);
+        checkboxGroup.getListDataView().refreshAll();
+
+        Assert.assertEquals("bar", capture.get());
+        Assert.assertEquals(Set.of("bar"), checkboxGroup.getValue());
+    }
+
+    @Test
+    public void selectItem_setItemLabelGenerator_selectionIsRetained() {
+        CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
+        checkboxGroup.setItems("foo", "bar");
+
+        AtomicReference<String> capture = new AtomicReference<>();
+        checkboxGroup.addValueChangeListener(
+                event -> capture.set(getItemsString(event.getValue())));
+
+        checkboxGroup.setValue(Set.of("foo"));
+
+        Assert.assertEquals("foo", capture.get());
+        Assert.assertEquals(Set.of("foo"), checkboxGroup.getValue());
+
+        checkboxGroup.setItemLabelGenerator(item -> item + " (Updated)");
+
+        Assert.assertEquals("foo", capture.get());
+        Assert.assertEquals(Set.of("foo"), checkboxGroup.getValue());
+    }
+
+    @Test
     public void addSelectionListener_selectionEventIsFired() {
         CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
         checkboxGroup.setItems("foo", "bar");
@@ -572,6 +638,10 @@ public class CheckboxGroupTest {
                 ((Checkbox) components.get(0)).getLabel());
         Assert.assertEquals(secondLabel,
                 ((Checkbox) components.get(1)).getLabel());
+    }
+
+    private String getItemsString(Set<String> itemSet) {
+        return itemSet.stream().sorted().collect(Collectors.joining(", "));
     }
 
     /**
