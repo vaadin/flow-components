@@ -46,6 +46,7 @@ import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasAutoOpen;
 import com.vaadin.flow.component.shared.HasClearButton;
 import com.vaadin.flow.component.shared.HasClientValidation;
+import com.vaadin.flow.component.shared.HasPrefix;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.ValidationUtil;
@@ -88,9 +89,9 @@ import elemental.json.JsonType;
 public class DatePicker
         extends AbstractSinglePropertyField<DatePicker, LocalDate>
         implements Focusable<DatePicker>, HasAllowedCharPattern, HasAutoOpen,
-        HasClearButton, HasClientValidation, HasHelper, HasLabel, HasSize,
-        HasStyle, HasThemeVariant<DatePickerVariant>, HasTooltip, HasValidation,
-        HasValidator<LocalDate> {
+        HasClearButton, HasClientValidation, HasHelper, HasLabel, HasPrefix,
+        HasSize, HasStyle, HasThemeVariant<DatePickerVariant>, HasTooltip,
+        HasValidation, HasValidator<LocalDate> {
 
     private DatePickerI18n i18n;
 
