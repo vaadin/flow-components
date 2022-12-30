@@ -28,6 +28,8 @@ import com.vaadin.flow.component.InputNotifier;
 import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.component.shared.HasClearButton;
 import com.vaadin.flow.component.shared.HasClientValidation;
+import com.vaadin.flow.component.shared.HasPrefix;
+import com.vaadin.flow.component.shared.HasSuffix;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.data.binder.HasValidator;
@@ -49,8 +51,8 @@ public abstract class InternalFieldBase<TComponent extends InternalFieldBase<TCo
         extends AbstractSinglePropertyField<TComponent, TValue>
         implements CompositionNotifier, Focusable<TComponent>,
         HasAutocapitalize, HasAutocomplete, HasAutocorrect, HasClearButton,
-        HasClientValidation, HasHelper, HasLabel, HasPrefixAndSuffix, HasSize,
-        HasStyle, HasTooltip, HasValidation, HasValidator<TValue>,
+        HasClientValidation, HasHelper, HasLabel, HasPrefix, HasSize, HasStyle,
+        HasSuffix, HasTooltip, HasValidation, HasValidator<TValue>,
         HasValueChangeMode, InputNotifier, KeyNotifier {
 
     private ValueChangeMode currentMode;
