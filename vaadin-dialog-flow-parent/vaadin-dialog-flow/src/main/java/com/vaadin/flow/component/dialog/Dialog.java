@@ -995,4 +995,36 @@ public class Dialog extends Component implements HasComponents, HasSize,
                 "Dialog does not support adding styles to overlay");
     }
 
+    /**
+     * Close all the Dialog components associated within the current UI.
+     */
+    public static void closeAllDialogs() {
+        if (UI.getCurrent() == null || !UI.getCurrent().isAttached()) {
+            throw new IllegalStateException(
+                    "Can't remove Dialogs when current UI is null or detached.");
+        }
+        UI.getCurrent().getChildren().forEach(component -> {
+            if (component instanceof Dialog) {
+                Dialog dialog = (Dialog) component;
+                if (dialog.isModal()) {
+                    removeModals(dialog);
+                }
+                dialog.close();
+            }
+        });
+    }
+
+    private static void removeModals(Component modalComponent) {
+        if (modalComponent instanceof HasComponents) {
+            modalComponent.getChildren().forEach(component -> {
+                if (component instanceof Dialog) {
+                    Dialog dialog = (Dialog) component;
+                    if (dialog.isModal()) {
+                        removeModals(dialog);
+                    }
+                    dialog.close();
+                }
+            });
+        }
+    }
 }
