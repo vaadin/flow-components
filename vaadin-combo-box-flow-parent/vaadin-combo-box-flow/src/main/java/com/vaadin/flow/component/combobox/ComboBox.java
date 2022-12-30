@@ -24,8 +24,8 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasPrefix;
 import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -69,7 +69,7 @@ import elemental.json.JsonObject;
 @JsModule("./flow-component-renderer.js")
 @JsModule("./comboBoxConnector.js")
 public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
-        implements HasThemeVariant<ComboBoxVariant> {
+        implements HasPrefix, HasThemeVariant<ComboBoxVariant> {
 
     private static final String PROP_SELECTED_ITEM = "selectedItem";
     private static final String PROP_VALUE = "value";
@@ -328,25 +328,6 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
     @Override
     public T getEmptyValue() {
         return null;
-    }
-
-    /**
-     * Adds the given components as children of this component at the slot
-     * 'prefix'.
-     *
-     * @param components
-     *            The components to add.
-     * @see <a href=
-     *      "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
-     *      page about slots</a>
-     * @see <a href=
-     *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
-     *      website about slots</a>
-     * @deprecated since v23.3
-     */
-    @Deprecated
-    protected void addToPrefix(Component... components) {
-        SlotUtils.addToSlot(this, "prefix", components);
     }
 
     /**
