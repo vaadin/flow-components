@@ -17,9 +17,9 @@ package com.vaadin.flow.component.dialog.tests;
 
 import org.junit.Test;
 import org.openqa.selenium.By;
-import org.vaadin.addons.tatu.AbstractComponentIT;
 
 import com.vaadin.flow.component.html.testbench.NativeButtonElement;
+import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
 @TestPath("remove-dialogs-view")
