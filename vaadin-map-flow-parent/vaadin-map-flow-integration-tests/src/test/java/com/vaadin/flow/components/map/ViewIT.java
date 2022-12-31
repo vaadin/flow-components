@@ -27,8 +27,8 @@ public class ViewIT extends AbstractComponentIT {
         MapElement.ViewReference view = mapReference.getView();
 
         MapElement.Coordinate center = view.getCenter();
-        Assert.assertEquals(2482424.644689998, center.getX(), 0.0001);
-        Assert.assertEquals(8500614.173537256, center.getY(), 0.0001);
+        Assert.assertEquals(22.3, center.getX(), 0.0001);
+        Assert.assertEquals(60.45, center.getY(), 0.0001);
 
         // Testing setZoom
         TestBenchElement setZoomButton = $("button").id("set-zoom-button");

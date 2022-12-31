@@ -32,6 +32,7 @@ import org.mockito.Mockito;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.HasValue.ValueChangeEvent;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupListDataView;
 import com.vaadin.flow.data.provider.DataCommunicatorTest;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -48,14 +49,6 @@ public class RadioButtonGroupTest {
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
-
-    private class RadioButtonWithInitialValue extends
-            GeneratedVaadinRadioGroup<RadioButtonWithInitialValue, String> {
-        RadioButtonWithInitialValue() {
-            super("", null, String.class, (group, value) -> value,
-                    (group, value) -> value, true);
-        }
-    }
 
     @Test
     public void setReadOnlyRadioGroup_groupIsReadOnly() {
@@ -304,11 +297,10 @@ public class RadioButtonGroupTest {
 
         Mockito.when(service.getInstantiator()).thenReturn(instantiator);
 
-        Mockito.when(
-                instantiator.createComponent(RadioButtonWithInitialValue.class))
-                .thenAnswer(invocation -> new RadioButtonWithInitialValue());
-        RadioButtonWithInitialValue field = Component.from(element,
-                RadioButtonWithInitialValue.class);
+        Mockito.when(instantiator.createComponent(RadioButtonGroup.class))
+                .thenAnswer(invocation -> new RadioButtonGroup());
+        RadioButtonGroup field = Component.from(element,
+                RadioButtonGroup.class);
         Assert.assertEquals("foo", field.getElement().getPropertyRaw("value"));
     }
 
@@ -456,5 +448,11 @@ public class RadioButtonGroupTest {
                 .checkOldListenersRemovedOnComponentAttachAndDetach(
                         new RadioButtonGroup<>(), 1, 1, new int[] { 0, 1 },
                         new DataCommunicatorTest.MockUI());
+    }
+
+    @Test
+    public void implementsHasTooltip() {
+        RadioButtonGroup<String> group = new RadioButtonGroup<>();
+        Assert.assertTrue(group instanceof HasTooltip);
     }
 }

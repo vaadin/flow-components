@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-menu-bar-flow-parent</artifactId>
-        <version>23.2-SNAPSHOT</version>
+        <version>24.0-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-menu-bar-integration-tests</artifactId>
     <packaging>war</packaging>
@@ -81,13 +81,14 @@
                             <includes>
                                 <include>package*.json</include>
                                 <include>pnpm*</include>
-                                <include>webpack.*</include>
+                                <include>vite.generated.ts</include>
                                 <include>types.d.ts</include>
                                 <include>tsconfig.json</include>
                             </includes>
                         </fileset>
                         <fileset>
                             <directory>${project.basedir}/node_modules</directory>
+                            <directory>${project.basedir}/frontend/generated</directory>
                         </fileset>
                     </filesets>
                 </configuration>

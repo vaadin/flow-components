@@ -1,20 +1,12 @@
-package com.vaadin.flow.component.gridpro.testbench;
-
-/*
- * #%L
- * Vaadin GridPro Testbench API
- * %%
+/**
  * Copyright 2000-2022 Vaadin Ltd.
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
  *
- * See the file license.html distributed with this software for more
- * information about licensing.
+ * This program is available under Vaadin Commercial License and Service Terms.
  *
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
  */
+package com.vaadin.flow.component.gridpro.testbench;
 
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.SearchContext;
@@ -29,11 +21,10 @@ public class GridTHTDElement extends TestBenchElement {
 
     @Override
     public String getText() {
-        // The first child element of a cell is a slot. The following JS finds
-        // the elements assigned to that slot and then joins the `textContent`
-        // of the elements slots
+        // The following JS finds the elements assigned to a cell's slot and
+        // then joins their `textContent`
         String text = (String) executeScript("var cell = arguments[0];"
-                + "return Array.from(cell.firstElementChild.assignedNodes()).map(function(node) { return node.textContent;}).join('');",
+                + "return Array.from(cell.querySelector('slot').assignedNodes()).map(function(node) { return node.textContent;}).join('');",
                 this);
         if (text.trim().isEmpty()) {
             return "";
@@ -43,11 +34,10 @@ public class GridTHTDElement extends TestBenchElement {
     }
 
     public String getInnerHTML() {
-        // The first child element of a cell is a slot. The following JS finds
-        // the elements assigned to that slot and then joins the `innerHTML`
-        // of the elements slots
+        // The following JS finds the elements assigned to a cell's slot and
+        // then joins their `innerHTML`
         String text = (String) executeScript("var cell = arguments[0];"
-                + "return Array.from(cell.firstElementChild.assignedNodes()).map(function(node) { return node.innerHTML;}).join('');",
+                + "return Array.from(cell.querySelector('slot').assignedNodes()).map(function(node) { return node.innerHTML;}).join('');",
                 this);
         if (text.trim().isEmpty()) {
             return "";
@@ -87,13 +77,13 @@ public class GridTHTDElement extends TestBenchElement {
     public GridProElement getGrid() {
         return ((TestBenchElement) executeScript(
                 "return arguments[0].getRootNode().host", this))
-                        .wrap(GridProElement.class);
+                .wrap(GridProElement.class);
     }
 
     @Override
     public SearchContext getContext() {
         return (SearchContext) executeScript(
-                "return arguments[0].firstElementChild.assignedNodes()[0];",
+                "return arguments[0].querySelector('slot').assignedNodes()[0];",
                 this);
     }
 }

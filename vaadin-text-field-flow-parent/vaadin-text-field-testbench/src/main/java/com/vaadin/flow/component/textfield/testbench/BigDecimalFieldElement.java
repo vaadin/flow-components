@@ -15,7 +15,7 @@
  */
 package com.vaadin.flow.component.textfield.testbench;
 
-import java.util.Collections;
+import org.openqa.selenium.By;
 
 import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasLabel;
@@ -32,11 +32,22 @@ import com.vaadin.testbench.elementsbase.Element;
 public class BigDecimalFieldElement extends TestBenchElement
         implements HasStringValueProperty, HasLabel, HasPlaceholder, HasHelper {
 
+    /**
+     * Emulates the user changing the value, which in practice means setting
+     * {@code value} of the {@code input} element to the given value and then
+     * triggering {@code input} and {@code change} DOM events.
+     *
+     * @param string
+     *            the value to set
+     */
     @Override
     public void setValue(String string) {
-        HasStringValueProperty.super.setValue(string);
-        dispatchEvent("change", Collections.singletonMap("bubbles", true));
-        dispatchEvent("blur");
+        TestBenchElement input = $("input").first();
+        TextFieldElementHelper.setValue(input, string);
     }
 
+    @Override
+    public void sendKeys(CharSequence... keysToSend) {
+        findElement(By.tagName("input")).sendKeys(keysToSend);
+    }
 }

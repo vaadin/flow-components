@@ -51,7 +51,7 @@ public class IntegerFieldPageIT extends AbstractComponentIT {
     public void assertDefaultMinMaxStepNotOverridden() {
         Assert.assertNull(field.getProperty("min"));
         Assert.assertNull(field.getProperty("max"));
-        Assert.assertEquals("1", field.getPropertyString("step"));
+        Assert.assertEquals(null, field.getPropertyString("step"));
     }
 
     @Test
@@ -194,7 +194,6 @@ public class IntegerFieldPageIT extends AbstractComponentIT {
     }
 
     @Test
-
     public void integerOverflow_noException_valueSetToNull() {
         // max int
         field.setValue("2147483647");

@@ -1,22 +1,15 @@
+/**
+ * Copyright 2000-2022 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
+ */
 package com.vaadin.flow.component.map.configuration;
 
-/*
- * #%L
- * Vaadin Map
- * %%
- * Copyright 2000-2022 Vaadin Ltd.
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
- *
- * See the file license.html distributed with this software for more
- * information about licensing.
- *
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
- */
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.vaadin.flow.component.map.Map;
 import com.vaadin.flow.component.map.configuration.source.Source;
 
 import java.util.Objects;
@@ -43,7 +36,7 @@ public class View extends AbstractConfigurationObject {
     }
 
     /**
-     * Constructs a new view using a custom coordinate projection. A custom
+     * Constructs a new view using a custom coordinate projection. A custom view
      * projection is only necessary when using a map service and corresponding
      * {@link Source} that uses a projection other than {@code EPSG:3857} / Web
      * Mercator Sphere projection.
@@ -74,8 +67,17 @@ public class View extends AbstractConfigurationObject {
     }
 
     /**
-     * Sets the center of the view in format specified by projection set on the
-     * view, which defaults to {@code EPSG:3857}
+     * Sets the center of the map's viewport. Coordinates must be specified in
+     * the map's user projection, which by default is {@code EPSG:4326}, also
+     * referred to as GPS coordinates. If the user projection has been changed
+     * using {@link Map#setUserProjection(String)}, then coordinates must be
+     * specified in that projection instead.
+     * <p>
+     * Note that the user projection is a different concept than the view
+     * projection set in this view. The view projection affects how map data is
+     * interpreted and rendered, while the user projection defines the
+     * coordinate system that all coordinates passed to, or returned from the
+     * public API must be in.
      *
      * @param center
      *            coordinates of the center of the view

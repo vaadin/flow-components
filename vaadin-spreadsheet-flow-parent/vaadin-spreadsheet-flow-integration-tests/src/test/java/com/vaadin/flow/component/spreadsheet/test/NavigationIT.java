@@ -1,6 +1,7 @@
 package com.vaadin.flow.component.spreadsheet.test;
 
 import com.vaadin.flow.component.spreadsheet.testbench.AddressUtil;
+import com.vaadin.flow.testutil.TestPath;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -11,6 +12,7 @@ import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
+@TestPath("vaadin-spreadsheet")
 public class NavigationIT extends AbstractSpreadsheetIT {
 
     @Before
@@ -18,7 +20,7 @@ public class NavigationIT extends AbstractSpreadsheetIT {
         // set window size to large to avoid cells overlapping with the
         // dev tool popup
         getDriver().manage().window().setSize(WINDOW_SIZE_LARGE);
-        getDriver().get(getBaseURL());
+        open();
         createNewSpreadsheet();
     }
 
@@ -235,7 +237,6 @@ public class NavigationIT extends AbstractSpreadsheetIT {
     }
 
     @Test
-    @Ignore("Keys.RETURN loses active position indication")
     public void testNavigationInSelectionWithEnterAndTab() throws Exception {
         setAddressFieldValue("A1:C2");
         // Assert that everything is selected
@@ -243,11 +244,9 @@ public class NavigationIT extends AbstractSpreadsheetIT {
 
         // Press enter/return 2 times to end up in cell B1
         assertActiveCellInsideSelection("A1");
-        new Actions(getDriver()).sendKeys(Keys.ENTER, Keys.ENTER).build()
-                .perform();
+        new Actions(getDriver()).sendKeys(Keys.ENTER).build().perform();
         assertActiveCellInsideSelection("A2");
-        new Actions(getDriver()).sendKeys(Keys.ENTER, Keys.ENTER).build()
-                .perform();
+        new Actions(getDriver()).sendKeys(Keys.ENTER).build().perform();
         assertActiveCellInsideSelection("B1");
 
         // Continue from B1 by pressing TAB twice, getting to A2 and shift tab

@@ -3,6 +3,7 @@ package com.vaadin.flow.component.charts.tests;
 import com.vaadin.flow.component.charts.examples.AbstractChartExample;
 import com.vaadin.flow.component.charts.examples.column.ColumnWithLazyMultiLevelDrilldownCallbackTests;
 import com.vaadin.flow.component.charts.testbench.ChartElement;
+import com.vaadin.testbench.TestBenchElement;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -62,6 +63,21 @@ public class ColumnWithLazyMultiLevelDrilldownCallbackTestsIT
         // Can't drilldown with null callback
         clickDrilldownPoint(chart, 0);
         assertLastLogText("ChartDrillupEvent");
+    }
+
+    @Test
+    public void drilldownSeriesWithLabelFormatter_formatterCallbackIsCalled() {
+        ChartElement chart = $(ChartElement.class).first();
+
+        // Set new callback
+        findElement(By.id("setNew")).click();
+        // Showing nested drilldowns
+        clickDrilldownPoint(chart, 0);
+
+        // Get the first label
+        TestBenchElement label = getElementFromShadowRoot(chart,
+                ".highcharts-data-labels.highcharts-series-0 tspan");
+        assertEquals("ITEM1_1", label.getText());
     }
 
     private void clickDrilldownPoint(ChartElement chart, int index) {

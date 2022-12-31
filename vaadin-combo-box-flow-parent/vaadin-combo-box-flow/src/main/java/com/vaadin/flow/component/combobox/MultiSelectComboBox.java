@@ -71,9 +71,9 @@ import java.util.Set;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-multi-select-combo-box")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha3")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/multi-select-combo-box", version = "23.2.0-alpha3")
+@NpmPackage(value = "@vaadin/multi-select-combo-box", version = "24.0.0-alpha7")
 @JsModule("@vaadin/multi-select-combo-box/src/vaadin-multi-select-combo-box.js")
 @JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 @JsModule("./flow-component-renderer.js")
@@ -108,7 +108,7 @@ public class MultiSelectComboBox<TItem>
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public MultiSelectComboBox(int pageSize) {
-        super("selectedItems", Collections.emptySet(), JsonArray.class,
+        super("selectedItems", new LinkedHashSet<>(), JsonArray.class,
                 MultiSelectComboBox::presentationToModel,
                 MultiSelectComboBox::modelToPresentation);
 
@@ -253,7 +253,7 @@ public class MultiSelectComboBox<TItem>
             return multiSelectComboBox.getEmptyValue();
         }
 
-        Set<T> set = new HashSet<>();
+        Set<T> set = new LinkedHashSet<>();
         for (int i = 0; i < presentation.length(); i++) {
             String key = presentation.getObject(i).getString("key");
             set.add(keyMapper.get(key));

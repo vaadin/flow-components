@@ -79,8 +79,8 @@ public class ComponentColumnsIT extends AbstractComponentIT {
 
     private void assertCellContents(GridElement grid, int rowIndex,
             int colIndex, String expected) {
-        Assert.assertEquals(expected,
-                grid.getCell(rowIndex, colIndex).getInnerHTML());
+        Assert.assertEquals(expected, TestHelper.stripComments(
+                grid.getCell(rowIndex, colIndex).getInnerHTML()));
     }
 
     private void assertCellContains(GridElement grid, int rowIndex,

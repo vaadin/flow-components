@@ -1,17 +1,12 @@
-package com.vaadin.flow.component.spreadsheet;
-
-/*
- * #%L
- * Vaadin Spreadsheet
- * %%
- * Copyright (C) 2013 - 2022 Vaadin Ltd
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
+/**
+ * Copyright 2000-2022 Vaadin Ltd.
  *
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
  */
+package com.vaadin.flow.component.spreadsheet;
 
 import org.apache.poi.common.usermodel.HyperlinkType;
 import org.apache.poi.ss.formula.LazyRefEval;
@@ -204,8 +199,8 @@ public class DefaultHyperlinkCellClickHandler
 
         try {
             ValueEval value = ((WorkbookEvaluatorProvider) spreadsheet
-                    .getFormulaEvaluator())._getWorkbookEvaluator().evaluate(
-                            formula,
+                    .getFormulaEvaluator())._getWorkbookEvaluator()
+                    .evaluate(formula,
                             new CellReference(cell.getSheet().getSheetName(),
                                     cell.getRowIndex(), cell.getColumnIndex(),
                                     false, false));

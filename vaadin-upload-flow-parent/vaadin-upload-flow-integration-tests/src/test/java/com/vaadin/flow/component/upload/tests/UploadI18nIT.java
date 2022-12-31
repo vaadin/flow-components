@@ -27,6 +27,7 @@ import elemental.json.JsonType;
 import elemental.json.JsonValue;
 import org.junit.Assert;
 import org.junit.Test;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import java.util.HashMap;
@@ -39,8 +40,10 @@ public class UploadI18nIT extends AbstractUploadIT {
         open();
 
         UploadElement upload = $(UploadElement.class).id("upload-full-i18n");
-        WebElement addButton = upload.$("*").id("addButton");
-        WebElement dropLabel = upload.$("*").id("dropLabel");
+        WebElement addButton = upload.$("*").attribute("slot", "add-button")
+                .first();
+        WebElement dropLabel = upload.$("*").attribute("slot", "drop-label")
+                .first();
 
         Assert.assertEquals(UploadTestsI18N.RUSSIAN_FULL.getAddFiles().getOne(),
                 addButton.getText());
@@ -76,8 +79,10 @@ public class UploadI18nIT extends AbstractUploadIT {
         open();
 
         UploadElement upload = $(UploadElement.class).id("upload-partial-i18n");
-        WebElement addButton = upload.$("*").id("addButton");
-        WebElement dropLabel = upload.$("*").id("dropLabel");
+        WebElement addButton = upload.$("*").attribute("slot", "add-button")
+                .first();
+        WebElement dropLabel = upload.$("*").attribute("slot", "drop-label")
+                .first();
 
         // This label should still be the default one
         Assert.assertEquals("Upload File...", addButton.getText());
@@ -110,6 +115,30 @@ public class UploadI18nIT extends AbstractUploadIT {
 
         assertTranslationMapsHaveSameKeys(fullTranslationMap, translationMap);
         assertTranslationMapHasNoMissingTranslations(translationMap);
+    }
+
+    @Test
+    public void testDetachReattachI18nIsPreserved() {
+        open();
+
+        WebElement btnSetI18n = findElement(By.id("btn-set-i18n"));
+        WebElement btnToggleAttached = findElement(
+                By.id("btn-toggle-attached"));
+
+        btnSetI18n.click();
+
+        btnToggleAttached.click();
+        btnToggleAttached.click();
+
+        UploadElement upload = $(UploadElement.class)
+                .id("upload-detach-reattach-i18n");
+
+        WebElement dropLabel = upload.$("*").attribute("slot", "drop-label")
+                .first();
+
+        Assert.assertEquals(
+                UploadTestsI18N.RUSSIAN_FULL.getDropFiles().getOne(),
+                dropLabel.getText());
     }
 
     private void assertTranslationMapsAreEqual(Map<String, String> expected,

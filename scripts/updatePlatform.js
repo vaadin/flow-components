@@ -113,7 +113,7 @@ async function main() {
     process.exit(1);
   }
   const annotations = await getAnnotations();
-  const branch = await currentBranch();
+  const branch = process.env['baseBranch'] || await currentBranch();
   process.chdir(platformDir);
   console.log(`Using ${branch} platform branch`);
   await run(`git checkout ${branch}`);
@@ -128,7 +128,7 @@ async function main() {
       prev[pkg]['org'] = json[k][pkg];
       prev[pkg].package = pkg;
       prev[pkg].branch = branch;
-      prev[pkg].module = pkg === 'iron-list' ? 'vaadin-' + pkg : pkg;
+      prev[pkg].module = pkg;
     });
     return prev;
   }, {});

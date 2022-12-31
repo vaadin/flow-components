@@ -25,6 +25,7 @@ import org.junit.Test;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageInputI18n;
+import com.vaadin.flow.component.shared.HasTooltip;
 
 public class MessageInputTest {
 
@@ -67,5 +68,10 @@ public class MessageInputTest {
                 messageInput, false, "foo");
         ComponentUtil.fireEvent(messageInput, event);
         Assert.assertSame(event, eventRef.get());
+    }
+
+    @Test
+    public void implementsHasTooltip() {
+        Assert.assertTrue(messageInput instanceof HasTooltip);
     }
 }

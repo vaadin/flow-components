@@ -64,13 +64,11 @@ public class MessageInputIT extends AbstractComponentIT {
     public void setI18n_textTranslated() {
         clickElementWithJs("set-i18n");
 
-        String inputPlaceholder = messageInput
-                .$("vaadin-message-input-text-area").first()
+        String inputPlaceholder = messageInput.$("vaadin-text-area").first()
                 .getPropertyString("placeholder");
         Assert.assertEquals("Viesti", inputPlaceholder);
 
-        String buttonText = messageInput.$("vaadin-message-input-button")
-                .first().getText();
+        String buttonText = messageInput.$("vaadin-button").first().getText();
         Assert.assertEquals("Lähetä", buttonText);
     }
 }

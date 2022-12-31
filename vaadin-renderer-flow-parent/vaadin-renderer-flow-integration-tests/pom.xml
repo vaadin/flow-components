@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-renderer-flow-parent</artifactId>
-        <version>23.2-SNAPSHOT</version>
+        <version>24.0-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-renderer-flow-integration-tests</artifactId>
     <packaging>war</packaging>
@@ -42,11 +42,11 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-test-util</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-testbench-core</artifactId>
-            <version>${testbench.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -67,13 +67,14 @@
                             <includes>
                                 <include>package*.json</include>
                                 <include>pnpm*</include>
-                                <include>webpack.*</include>
+                                <include>vite.generated.ts</include>
                                 <include>types.d.ts</include>
                                 <include>tsconfig.json</include>
                             </includes>
                         </fileset>
                         <fileset>
                             <directory>${project.basedir}/node_modules</directory>
+                            <directory>${project.basedir}/frontend/generated</directory>
                         </fileset>
                     </filesets>
                 </configuration>

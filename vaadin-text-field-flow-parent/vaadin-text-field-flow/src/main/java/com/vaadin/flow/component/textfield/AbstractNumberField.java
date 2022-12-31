@@ -20,19 +20,16 @@ import java.math.BigDecimal;
 import java.util.Objects;
 
 import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.CompositionNotifier;
-import com.vaadin.flow.component.shared.HasAllowedCharPattern;
-import com.vaadin.flow.component.shared.HasClearButton;
-import com.vaadin.flow.component.HasHelper;
-import com.vaadin.flow.component.HasLabel;
-import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.flow.component.HasValidation;
-import com.vaadin.flow.component.InputNotifier;
-import com.vaadin.flow.component.KeyNotifier;
-import com.vaadin.flow.data.value.HasValueChangeMode;
+import com.vaadin.flow.component.Synchronize;
+import com.vaadin.flow.component.shared.ClientValidationUtil;
+import com.vaadin.flow.component.shared.ValidationUtil;
+import com.vaadin.flow.data.binder.ValidationResult;
+import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
+import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
+import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * Abstract base class for components based on {@code vaadin-number-field}
@@ -41,17 +38,7 @@ import com.vaadin.flow.function.SerializableFunction;
  * @author Vaadin Ltd.
  */
 public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T extends Number>
-        extends GeneratedVaadinNumberField<C, T> implements HasSize,
-        HasValidation, HasValueChangeMode, HasPrefixAndSuffix, InputNotifier,
-        KeyNotifier, CompositionNotifier, HasAutocomplete, HasAutocapitalize,
-        HasAutocorrect, HasHelper, HasLabel, HasClearButton,
-        HasAllowedCharPattern, HasThemeVariant<TextFieldVariant> {
-
-    private ValueChangeMode currentMode;
-
-    private boolean isConnectorAttached;
-
-    private int valueChangeTimeout = DEFAULT_CHANGE_TIMEOUT;
+        extends InternalFieldBase<C, T> {
 
     private boolean required;
 
@@ -67,51 +54,6 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
 
     private boolean stepSetByUser;
     private boolean minSetByUser;
-
-    /**
-     * Sets up the common logic for number fields.
-     * <p>
-     * If {@code isInitialValueOptional} is {@code true} then the initial value
-     * is used only if element has no {@code "value"} property value, otherwise
-     * element {@code "value"} property is ignored and the initial value is set.
-     *
-     * @param parser
-     *            function to parse the client-side value string into
-     *            server-side value
-     * @param formatter
-     *            function to format the server-side value into client-side
-     *            value string
-     * @param absoluteMin
-     *            the smallest possible value of the number type of the field,
-     *            will be used as the default min value at server-side
-     * @param absoluteMax
-     *            the largest possible value of the number type of the field,
-     *            will be used as the default max value at server-side
-     * @param isInitialValueOptional
-     *            if {@code isInitialValueOptional} is {@code true} then the
-     *            initial value is used only if element has no {@code "value"}
-     *            property value, otherwise element {@code "value"} property is
-     *            ignored and the initial value is set
-     */
-    public AbstractNumberField(SerializableFunction<String, T> parser,
-            SerializableFunction<T, String> formatter, double absoluteMin,
-            double absoluteMax, boolean isInitialValueOptional) {
-        super(null, null, String.class, parser, formatter,
-                isInitialValueOptional);
-
-        // workaround for https://github.com/vaadin/flow/issues/3496
-        setInvalid(false);
-
-        // Not setting these defaults to the web component, so it will have
-        // undefined as min and max
-        this.min = absoluteMin;
-        this.max = absoluteMax;
-        this.step = 1.0;
-
-        setValueChangeMode(ValueChangeMode.ON_CHANGE);
-
-        addValueChangeListener(e -> validate());
-    }
 
     /**
      * Sets up the common logic for number fields.
@@ -132,160 +74,47 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     public AbstractNumberField(SerializableFunction<String, T> parser,
             SerializableFunction<T, String> formatter, double absoluteMin,
             double absoluteMax) {
-        this(parser, formatter, absoluteMin, absoluteMax, false);
+        super(null, null, String.class, parser, formatter, true);
+
+        // workaround for https://github.com/vaadin/flow/issues/3496
+        setInvalid(false);
+
+        // Not setting these defaults to the web component, so it will have
+        // undefined as min and max
+        this.min = absoluteMin;
+        this.max = absoluteMax;
+        this.step = 1.0;
+
+        setValueChangeMode(ValueChangeMode.ON_CHANGE);
+
+        addValueChangeListener(e -> validate());
+
+        addClientValidatedEventListener(e -> validate());
     }
 
     /**
-     * {@inheritDoc}
-     * <p>
-     * The default value is {@link ValueChangeMode#ON_CHANGE}.
-     */
-    @Override
-    public ValueChangeMode getValueChangeMode() {
-        return currentMode;
-    }
-
-    @Override
-    public void setValueChangeMode(ValueChangeMode valueChangeMode) {
-        currentMode = valueChangeMode;
-        setSynchronizedEvent(
-                ValueChangeMode.eventForMode(valueChangeMode, "value-changed"));
-        applyChangeTimeout();
-    }
-
-    @Override
-    public void setValueChangeTimeout(int valueChangeTimeout) {
-        this.valueChangeTimeout = valueChangeTimeout;
-        applyChangeTimeout();
-    }
-
-    @Override
-    public int getValueChangeTimeout() {
-        return valueChangeTimeout;
-    }
-
-    private void applyChangeTimeout() {
-        ValueChangeMode.applyChangeTimeout(getValueChangeMode(),
-                getValueChangeTimeout(), getSynchronizationRegistration());
-    }
-
-    @Override
-    public String getErrorMessage() {
-        return super.getErrorMessageString();
-    }
-
-    @Override
-    public void setErrorMessage(String errorMessage) {
-        super.setErrorMessage(errorMessage);
-    }
-
-    @Override
-    public void setLabel(String label) {
-        super.setLabel(label);
-    }
-
-    /**
-     * String used for the label element.
-     *
-     * @return the {@code label} property from the webcomponent
-     */
-    @Override
-    public String getLabel() {
-        return getLabelString();
-    }
-
-    @Override
-    public void setPlaceholder(String placeholder) {
-        super.setPlaceholder(placeholder);
-    }
-
-    /**
-     * Sets the visibility of the control buttons for increasing/decreasing the
-     * value accordingly to the default or specified step.
+     * Sets the visibility of the buttons for increasing/decreasing the value
+     * accordingly to the default or specified step.
      *
      * @see #setStep(double)
      *
-     * @param hasControls
+     * @param stepButtonsVisible
      *            {@code true} if control buttons should be visible;
      *            {@code false} if those should be hidden
      */
-    @Override
-    public void setHasControls(boolean hasControls) {
-        super.setHasControls(hasControls);
+    public void setStepButtonsVisible(boolean stepButtonsVisible) {
+        getElement().setProperty("stepButtonsVisible", stepButtonsVisible);
     }
 
     /**
-     * Gets whether the control buttons for increasing/decreasing the value are
-     * visible.
+     * Gets whether the buttons for increasing/decreasing the value are visible.
      *
      * @see #setStep(double)
      *
      * @return {@code true} if buttons are visible, {@code false} otherwise
      */
-    public boolean hasControls() {
-        return super.hasControlsBoolean();
-    }
-
-    /**
-     * A hint to the user of what can be entered in the component.
-     *
-     * @return the {@code placeholder} property from the webcomponent
-     */
-    public String getPlaceholder() {
-        return getPlaceholderString();
-    }
-
-    @Override
-    public void setAutofocus(boolean autofocus) {
-        super.setAutofocus(autofocus);
-    }
-
-    /**
-     * Specify that this control should have input focus when the page loads.
-     *
-     * @return the {@code autofocus} property from the webcomponent
-     */
-    public boolean isAutofocus() {
-        return isAutofocusBoolean();
-    }
-
-    /**
-     * The text usually displayed in a tooltip popup when the mouse is over the
-     * field.
-     *
-     * @return the {@code title} property from the webcomponent
-     */
-    public String getTitle() {
-        return super.getTitleString();
-    }
-
-    @Override
-    public void setTitle(String title) {
-        super.setTitle(title);
-    }
-
-    /**
-     * Specifies if the field value gets automatically selected when the field
-     * gains focus.
-     *
-     * @return <code>true</code> if autoselect is active, <code>false</code>
-     *         otherwise
-     */
-    public boolean isAutoselect() {
-        return super.isAutoselectBoolean();
-    }
-
-    /**
-     * Set to <code>true</code> to always have the field value automatically
-     * selected when the field gains focus, <code>false</code> otherwise.
-     *
-     * @param autoselect
-     *            <code>true</code> to set auto select on, <code>false</code>
-     *            otherwise
-     */
-    @Override
-    public void setAutoselect(boolean autoselect) {
-        super.setAutoselect(autoselect);
+    public boolean isStepButtonsVisible() {
+        return getElement().getProperty("stepButtonsVisible", false);
     }
 
     /**
@@ -305,7 +134,18 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
      */
     @Override
     public void setValue(T value) {
+        T oldValue = getValue();
+
         super.setValue(value);
+
+        if (Objects.equals(oldValue, getEmptyValue())
+                && Objects.equals(value, getEmptyValue())
+                && isInputValuePresent()) {
+            // Clear the input element from possible bad input.
+            getElement().executeJs("this.inputElement.value = ''");
+            getElement().setProperty("_hasInputValue", false);
+            fireEvent(new ClientValidatedEvent(this, false, true));
+        }
     }
 
     /**
@@ -319,49 +159,113 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         return super.getValue();
     }
 
-    @Override
+    /**
+     * Sets the minimum value of the field.
+     *
+     * @param min
+     *            the double value to set
+     */
     protected void setMin(double min) {
-        super.setMin(min);
+        getElement().setProperty("min", min);
         this.min = min;
         minSetByUser = true;
     }
 
-    @Override
+    /**
+     * The minimum value of the field.
+     */
     protected double getMinDouble() {
         return min;
     }
 
-    @Override
+    /**
+     * Sets the maximum value of the field.
+     *
+     * @param max
+     *            the double value to set
+     */
     protected void setMax(double max) {
-        super.setMax(max);
+        getElement().setProperty("max", max);
         this.max = max;
     }
 
-    @Override
+    /**
+     * The maximum value of the field.
+     */
     protected double getMaxDouble() {
         return max;
     }
 
-    @Override
+    /**
+     * Sets the allowed number intervals of the field.
+     *
+     * @param step
+     *            the double value to set
+     */
     protected void setStep(double step) {
-        super.setStep(step);
+        getElement().setProperty("step", step);
         this.step = step;
         stepSetByUser = true;
     }
 
-    @Override
+    /**
+     * The allowed number intervals of the field.
+     */
     protected double getStepDouble() {
         return step;
     }
 
-    @Override
-    public void setInvalid(boolean invalid) {
-        super.setInvalid(invalid);
+    /**
+     * Returns whether the input element has a value or not.
+     *
+     * @return <code>true</code> if the input element's value is populated,
+     *         <code>false</code> otherwise
+     */
+    @Synchronize(property = "_hasInputValue", value = "has-input-value-changed")
+    private boolean isInputValuePresent() {
+        return getElement().getProperty("_hasInputValue", false);
     }
 
     @Override
-    public boolean isInvalid() {
-        return isInvalidBoolean();
+    public Validator<T> getDefaultValidator() {
+        return (value, context) -> checkValidity(value);
+    }
+
+    @Override
+    public Registration addValidationStatusChangeListener(
+            ValidationStatusChangeListener<T> listener) {
+        return addClientValidatedEventListener(
+                event -> listener.validationStatusChanged(
+                        new ValidationStatusChangeEvent<T>(this,
+                                !isInvalid())));
+    }
+
+    private ValidationResult checkValidity(T value) {
+        boolean hasNonParsableValue = Objects.equals(value, getEmptyValue())
+                && isInputValuePresent();
+        if (hasNonParsableValue) {
+            return ValidationResult.error("");
+        }
+
+        Double doubleValue = value != null ? value.doubleValue() : null;
+
+        ValidationResult greaterThanMax = ValidationUtil
+                .checkGreaterThanMax(doubleValue, max);
+        if (greaterThanMax.isError()) {
+            return greaterThanMax;
+        }
+
+        ValidationResult smallerThanMin = ValidationUtil
+                .checkSmallerThanMin(doubleValue, min);
+        if (smallerThanMin.isError()) {
+            return smallerThanMin;
+        }
+
+        if (!isValidByStep(value)) {
+            return ValidationResult.error("");
+        }
+
+        return ValidationResult.ok();
     }
 
     /**
@@ -369,19 +273,14 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
      * because it is possible to circumvent the client-side validation
      * constraints using browser development tools.
      */
-    @Override
     protected void validate() {
         T value = getValue();
 
-        final boolean isRequiredButEmpty = required
-                && Objects.equals(getEmptyValue(), value);
-        final boolean isGreaterThanMax = value != null
-                && value.doubleValue() > max;
-        final boolean isSmallerThanMin = value != null
-                && value.doubleValue() < min;
+        final var requiredValidation = ValidationUtil.checkRequired(required,
+                value, getEmptyValue());
 
-        setInvalid(isRequiredButEmpty || isGreaterThanMax || isSmallerThanMin
-                || !isValidByStep(value));
+        setInvalid(
+                requiredValidation.isError() || checkValidity(value).isError());
     }
 
     private boolean isValidByStep(T value) {
@@ -413,20 +312,6 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        FieldValidationUtil.disableClientValidation(this);
-    }
-
-    // Override is only required to keep binary compatibility with other 23.x
-    // minor versions, can be removed in a future major
-    @Override
-    public void addThemeVariants(TextFieldVariant... variants) {
-        HasThemeVariant.super.addThemeVariants(variants);
-    }
-
-    // Override is only required to keep binary compatibility with other 23.x
-    // minor versions, can be removed in a future major
-    @Override
-    public void removeThemeVariants(TextFieldVariant... variants) {
-        HasThemeVariant.super.removeThemeVariants(variants);
+        ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
     }
 }

@@ -4,7 +4,7 @@
     <parent>
         <artifactId>vaadin-charts-flow-parent</artifactId>
         <groupId>com.vaadin</groupId>
-        <version>23.2-SNAPSHOT</version>
+        <version>24.0-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-charts-flow-svg-generator</artifactId>
     <packaging>jar</packaging>
@@ -59,7 +59,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
-                <version>3.0.0</version>
+                <version>3.1.0</version>
                 <executions>
                     <execution>
                         <id>npm-install</id>
@@ -71,6 +71,20 @@
                             <executable>npm</executable>
                             <arguments>
                                 <argument>install</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generator-build</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>npm</executable>
+                            <arguments>
+                                <argument>run</argument>
+                                <argument>build</argument>
                             </arguments>
                         </configuration>
                     </execution>

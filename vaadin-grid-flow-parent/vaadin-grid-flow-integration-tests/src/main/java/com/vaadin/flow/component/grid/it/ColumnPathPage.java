@@ -19,7 +19,7 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.bean.Person;
-import com.vaadin.flow.data.renderer.TemplateRenderer;
+import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-grid/column-path")
@@ -32,7 +32,7 @@ public class ColumnPathPage extends Div {
                 new Person("Person 2", null, null, 42, null, null));
 
         grid.addColumn(Person::getFirstName).setHeader("Using path");
-        grid.addColumn(TemplateRenderer.<Person> of("[[item.firstName]]")
+        grid.addColumn(LitRenderer.<Person> of("${item.firstName}")
                 .withProperty("firstName", Person::getFirstName))
                 .setHeader("Using template");
         grid.addColumn(Person::getFirstName)

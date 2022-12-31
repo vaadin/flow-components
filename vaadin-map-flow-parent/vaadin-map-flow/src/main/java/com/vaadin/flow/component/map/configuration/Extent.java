@@ -1,27 +1,25 @@
+/**
+ * Copyright 2000-2022 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
+ */
 package com.vaadin.flow.component.map.configuration;
 
-/*
- * #%L
- * Vaadin Map
- * %%
- * Copyright 2000-2022 Vaadin Ltd.
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
- *
- * See the file license.html distributed with this software for more
- * information about licensing.
- *
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
- */
+import com.vaadin.flow.component.map.Map;
+
+import java.io.Serializable;
 
 /**
- * Defines an area within a map using min/max coordinates. The coordinates are
- * by default in {@code EPSG:3857} / Web Mercator Sphere projection, unless the
- * map's {@link View} uses a custom projection.
+ * Defines an area within a map using min/max coordinates. Coordinates must be
+ * specified in the map's user projection, which by default is
+ * {@code EPSG:4326}, also referred to as GPS coordinates. If the user
+ * projection has been changed using {@link Map#setUserProjection(String)}, then
+ * coordinates must be specified in that projection instead.
  */
-public class Extent {
+public class Extent implements Serializable {
     private final double minX;
     private final double minY;
     private final double maxX;

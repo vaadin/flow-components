@@ -1,9 +1,3 @@
-package com.vaadin.flow.component.accordion;
-
-import java.util.Objects;
-import java.util.Optional;
-import java.util.OptionalInt;
-
 /*
  * Copyright 2000-2022 Vaadin Ltd.
  *
@@ -19,6 +13,11 @@ import java.util.OptionalInt;
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+package com.vaadin.flow.component.accordion;
+
+import java.util.Objects;
+import java.util.Optional;
+import java.util.OptionalInt;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
@@ -53,10 +52,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-accordion")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha3")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/accordion", version = "23.2.0-alpha3")
-@NpmPackage(value = "@vaadin/vaadin-accordion", version = "23.2.0-alpha3")
+@NpmPackage(value = "@vaadin/accordion", version = "24.0.0-alpha7")
 @JsModule("@vaadin/accordion/src/vaadin-accordion.js")
 public class Accordion extends Component implements HasSize, HasStyle {
 

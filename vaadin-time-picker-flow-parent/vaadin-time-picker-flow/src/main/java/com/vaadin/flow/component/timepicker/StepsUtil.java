@@ -42,7 +42,8 @@ public class StepsUtil {
      * by the time picker web component.
      *
      * @param duration
-     * @return
+     *            Duration to convert
+     * @return Value that is used by the web component
      */
     public static double convertDurationToStepsValue(Duration duration) {
         long stepAsMilliseconds = duration.getSeconds() * 1000
@@ -66,7 +67,8 @@ public class StepsUtil {
      * component into a Duration instance
      *
      * @param stepsValue
-     * @return
+     *            Value that is used by the web component
+     * @return Converted Duration
      */
     public static Duration convertStepsValueToDuration(double stepsValue) {
         return Duration.ofNanos((long) (stepsValue * 1E9));

@@ -1,17 +1,12 @@
-package com.vaadin.flow.component.spreadsheet;
-
-/*
- * #%L
- * Vaadin Spreadsheet
- * %%
- * Copyright (C) 2013 - 2022 Vaadin Ltd
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
+/**
+ * Copyright 2000-2022 Vaadin Ltd.
  *
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
  */
+package com.vaadin.flow.component.spreadsheet;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -227,7 +222,6 @@ public class ContextMenuManager implements Serializable {
             if (actions2 != null) {
                 for (Action action : actions2) {
                     String key = actionMapper.key(action);
-                    spreadsheet.setResource(key, action.getIcon());
                     SpreadsheetActionDetails spreadsheetActionDetails = new SpreadsheetActionDetails();
                     spreadsheetActionDetails.caption = action.getCaption();
                     spreadsheetActionDetails.key = key;
@@ -254,7 +248,6 @@ public class ContextMenuManager implements Serializable {
         for (Handler handler : actionHandlers) {
             for (Action action : handler.getActions(column, spreadsheet)) {
                 String key = actionMapper.key(action);
-                spreadsheet.setResource(key, action.getIcon());
                 SpreadsheetActionDetails spreadsheetActionDetails = new SpreadsheetActionDetails();
                 spreadsheetActionDetails.caption = action.getCaption();
                 spreadsheetActionDetails.key = key;
@@ -280,7 +273,6 @@ public class ContextMenuManager implements Serializable {
         for (Handler handler : actionHandlers) {
             for (Action action : handler.getActions(row, spreadsheet)) {
                 String key = actionMapper.key(action);
-                spreadsheet.setResource(key, action.getIcon());
                 SpreadsheetActionDetails spreadsheetActionDetails = new SpreadsheetActionDetails();
                 spreadsheetActionDetails.caption = action.getCaption();
                 spreadsheetActionDetails.key = key;

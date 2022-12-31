@@ -1,20 +1,12 @@
-package com.vaadin.flow.component.board;
-
-/*-
- * #%L
- * Vaadin Board for Vaadin 10
- * %%
+/**
  * Copyright 2000-2022 Vaadin Ltd.
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
  *
- * See the file license.html distributed with this software for more
- * information about licensing.
+ * This program is available under Vaadin Commercial License and Service Terms.
  *
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
  */
+package com.vaadin.flow.component.board;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasOrderedComponents;
@@ -33,22 +25,11 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * one column each, or fewer components with multiple columns each as long as
  * sum of columns stays less than or equal to four.
  * <p>
- * Here is a simple usage example:
- *
- * <pre>
- * Board board = new Board();
- * Label lbl1 = new Label("LABEL1");
- * Label lbl2 = new Label("LABEL2");
- * Label lbl3 = new Label("LABEL3");
- * Label lbl4 = new Label("LABEL4");
- * board.addRow(lbl1, lbl2, lbl3, lbl4);
- * </pre>
  */
 @Tag("vaadin-board")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha3")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/board", version = "23.2.0-alpha3")
-@NpmPackage(value = "@vaadin/vaadin-board", version = "23.2.0-alpha3")
+@NpmPackage(value = "@vaadin/board", version = "24.0.0-alpha7")
 @JsModule("@vaadin/board/vaadin-board.js")
 public class Board extends Component
         implements HasSize, HasStyle, HasOrderedComponents {

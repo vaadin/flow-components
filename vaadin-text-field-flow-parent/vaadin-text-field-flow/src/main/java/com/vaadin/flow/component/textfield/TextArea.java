@@ -16,19 +16,18 @@
 package com.vaadin.flow.component.textfield;
 
 import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.CompositionNotifier;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
-import com.vaadin.flow.component.shared.HasClearButton;
-import com.vaadin.flow.component.HasHelper;
-import com.vaadin.flow.component.HasLabel;
-import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.flow.component.HasValidation;
-import com.vaadin.flow.component.InputNotifier;
-import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.data.value.HasValueChangeMode;
+import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
+import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
+import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * Text Area is an input field component for multi-line text input. Text Area is
@@ -37,17 +36,15 @@ import com.vaadin.flow.data.value.ValueChangeMode;
  *
  * @author Vaadin Ltd.
  */
-public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
-        implements HasSize, HasValidation, HasValueChangeMode,
-        HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
-        HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper, HasLabel,
-        HasClearButton, HasAllowedCharPattern,
-        HasThemeVariant<TextAreaVariant> {
-    private ValueChangeMode currentMode;
+@Tag("vaadin-text-area")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha7")
+@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@NpmPackage(value = "@vaadin/text-area", version = "24.0.0-alpha7")
+@JsModule("@vaadin/text-area/src/vaadin-text-area.js")
+public class TextArea extends InternalFieldBase<TextArea, String>
+        implements HasAllowedCharPattern, HasThemeVariant<TextAreaVariant> {
 
     private boolean isConnectorAttached;
-
-    private int valueChangeTimeout = DEFAULT_CHANGE_TIMEOUT;
 
     private TextFieldValidationSupport validationSupport;
 
@@ -80,6 +77,8 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
         setValueChangeMode(ValueChangeMode.ON_CHANGE);
 
         addValueChangeListener(e -> validate());
+
+        addClientValidatedEventListener(e -> validate());
     }
 
     /**
@@ -188,127 +187,6 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
     }
 
     /**
-     * {@inheritDoc}
-     * <p>
-     * The default value is {@link ValueChangeMode#ON_CHANGE}.
-     */
-    @Override
-    public ValueChangeMode getValueChangeMode() {
-        return currentMode;
-    }
-
-    @Override
-    public void setValueChangeMode(ValueChangeMode valueChangeMode) {
-        currentMode = valueChangeMode;
-        setSynchronizedEvent(
-                ValueChangeMode.eventForMode(valueChangeMode, "value-changed"));
-        applyChangeTimeout();
-    }
-
-    @Override
-    public void setValueChangeTimeout(int valueChangeTimeout) {
-        this.valueChangeTimeout = valueChangeTimeout;
-        applyChangeTimeout();
-    }
-
-    @Override
-    public int getValueChangeTimeout() {
-        return valueChangeTimeout;
-    }
-
-    private void applyChangeTimeout() {
-        ValueChangeMode.applyChangeTimeout(getValueChangeMode(),
-                getValueChangeTimeout(), getSynchronizationRegistration());
-    }
-
-    @Override
-    public String getErrorMessage() {
-        return super.getErrorMessageString();
-    }
-
-    @Override
-    public void setErrorMessage(String errorMessage) {
-        super.setErrorMessage(errorMessage);
-    }
-
-    @Override
-    public boolean isInvalid() {
-        return isInvalidBoolean();
-    }
-
-    @Override
-    public void setInvalid(boolean invalid) {
-        super.setInvalid(invalid);
-    }
-
-    @Override
-    public void setLabel(String label) {
-        super.setLabel(label);
-    }
-
-    /**
-     * String used for the label element.
-     *
-     * @return the {@code label} property from the webcomponent
-     */
-    @Override
-    public String getLabel() {
-        return getLabelString();
-    }
-
-    @Override
-    public void setPlaceholder(String placeholder) {
-        super.setPlaceholder(placeholder);
-    }
-
-    /**
-     * A hint to the user of what can be entered in the component.
-     *
-     * @return the {@code placeholder} property from the webcomponent
-     */
-    public String getPlaceholder() {
-        return getPlaceholderString();
-    }
-
-    /**
-     * Specifies if the field value gets automatically selected when the field
-     * gains focus.
-     *
-     * @return <code>true</code> if autoselect is active, <code>false</code>
-     *         otherwise
-     */
-    public boolean isAutoselect() {
-        return super.isAutoselectBoolean();
-    }
-
-    /**
-     * Set to <code>true</code> to always have the field value automatically
-     * selected when the field gains focus, <code>false</code> otherwise.
-     *
-     * @param autoselect
-     *            <code>true</code> to set auto select on, <code>false</code>
-     *            otherwise
-     */
-    @Override
-    public void setAutoselect(boolean autoselect) {
-        super.setAutoselect(autoselect);
-    }
-
-    @Override
-    public void setAutofocus(boolean autofocus) {
-        super.setAutofocus(autofocus);
-    }
-
-    /**
-     * Specify that this control should have input focus when the page loads.
-     *
-     * @return the {@code autofocus} property from the webcomponent
-     */
-    public boolean isAutofocus() {
-        return isAutofocusBoolean();
-    }
-
-    /**
      * Maximum number of characters (in Unicode code points) that the user can
      * enter.
      *
@@ -316,7 +194,7 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
      *            the maximum length
      */
     public void setMaxLength(int maxLength) {
-        super.setMaxlength(maxLength);
+        getElement().setProperty("maxlength", maxLength);
         getValidationSupport().setMaxLength(maxLength);
     }
 
@@ -327,7 +205,7 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
      * @return the {@code maxlength} property from the webcomponent
      */
     public int getMaxLength() {
-        return (int) getMaxlengthDouble();
+        return (int) getElement().getProperty("maxlength", 0.0);
     }
 
     /**
@@ -338,7 +216,7 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
      *            the minimum length
      */
     public void setMinLength(int minLength) {
-        super.setMinlength(minLength);
+        getElement().setProperty("minlength", minLength);
         getValidationSupport().setMinLength(minLength);
     }
 
@@ -349,44 +227,23 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
      * @return the {@code minlength} property from the webcomponent
      */
     public int getMinLength() {
-        return (int) getMinlengthDouble();
+        return (int) getElement().getProperty("minlength", 0.0);
     }
 
     /**
+     * <p>
      * Specifies that the user must fill in a value.
+     * </p>
+     * NOTE: The required indicator will not be visible, if there is no
+     * {@code label} property set for the textfield.
      *
-     * @return the {@code required} property from the webcomponent
+     * @param required
+     *            the boolean value to set
      */
-    public boolean isRequired() {
-        return isRequiredBoolean();
-    }
-
     @Override
     public void setRequired(boolean required) {
         super.setRequired(required);
         getValidationSupport().setRequired(required);
-    }
-
-    /**
-     * When set to <code>true</code>, user is prevented from typing a value that
-     * conflicts with the given {@code pattern}.
-     *
-     * @return the {@code preventInvalidInput} property from the webcomponent
-     *
-     * @deprecated Since 23.2, this API is deprecated.
-     */
-    @Deprecated
-    public boolean isPreventInvalidInput() {
-        return isPreventInvalidInputBoolean();
-    }
-
-    /**
-     * @deprecated Since 23.2, this API is deprecated in favor of
-     *             {@link #setAllowedCharPattern(String)}
-     */
-    @Override
-    public void setPreventInvalidInput(boolean preventInvalidInput) {
-        super.setPreventInvalidInput(preventInvalidInput);
     }
 
     /**
@@ -405,7 +262,7 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
      *      https://html.spec.whatwg.org/multipage/input.html#attr-input-pattern</>
      */
     public void setPattern(String pattern) {
-        getElement().setProperty("pattern", pattern);
+        getElement().setProperty("pattern", pattern == null ? "" : pattern);
         getValidationSupport().setPattern(pattern);
     }
 
@@ -457,12 +314,24 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
         getValidationSupport().setRequired(requiredIndicatorVisible);
     }
 
+    @Override
+    public Validator<String> getDefaultValidator() {
+        return (value, context) -> getValidationSupport().checkValidity(value);
+    }
+
+    @Override
+    public Registration addValidationStatusChangeListener(
+            ValidationStatusChangeListener<String> listener) {
+        return addClientValidatedEventListener(
+                event -> listener.validationStatusChanged(
+                        new ValidationStatusChangeEvent<>(this, !isInvalid())));
+    }
+
     /**
      * Performs server-side validation of the current value. This is needed
      * because it is possible to circumvent the client-side validation
      * constraints using browser development tools.
      */
-    @Override
     protected void validate() {
         setInvalid(getValidationSupport().isInvalid(getValue()));
     }
@@ -470,20 +339,6 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        FieldValidationUtil.disableClientValidation(this);
-    }
-
-    // Override is only required to keep binary compatibility with other 23.x
-    // minor versions, can be removed in a future major
-    @Override
-    public void addThemeVariants(TextAreaVariant... variants) {
-        HasThemeVariant.super.addThemeVariants(variants);
-    }
-
-    // Override is only required to keep binary compatibility with other 23.x
-    // minor versions, can be removed in a future major
-    @Override
-    public void removeThemeVariants(TextAreaVariant... variants) {
-        HasThemeVariant.super.removeThemeVariants(variants);
+        ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
     }
 }

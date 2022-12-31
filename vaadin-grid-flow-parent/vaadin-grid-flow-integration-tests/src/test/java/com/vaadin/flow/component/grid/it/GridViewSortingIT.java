@@ -15,6 +15,9 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
+import com.vaadin.flow.data.provider.SortDirection;
+import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,14 +37,31 @@ import com.vaadin.tests.AbstractComponentIT;
 @TestPath("vaadin-grid-it-demo/sorting")
 public class GridViewSortingIT extends AbstractComponentIT {
 
+    private GridElement grid;
+    private CheckboxElement multiSortToggle;
+    private CheckboxElement multiSortPriorityToggle;
+    private TestBenchElement invertSortDirections;
+    private TestBenchElement resetSortDirections;
+    private TestBenchElement sortByAgeThenName;
+    private TestBenchElement message;
+
     @Before
     public void init() {
         open();
+        grid = $(GridElement.class).id("grid-sortable-columns");
+        multiSortToggle = $(CheckboxElement.class).id("grid-multi-sort-toggle");
+        multiSortPriorityToggle = $(CheckboxElement.class)
+                .id("grid-multi-sort-priority-toggle");
+        invertSortDirections = $("button")
+                .id("grid-sortable-columns-invert-sortings");
+        resetSortDirections = $("button")
+                .id("grid-sortable-columns-reset-sortings");
+        sortByAgeThenName = $("button").id("grid-sortable-columns-sort-by-two");
+        message = $("*").id("grid-sortable-columns-message");
     }
 
     @Test
     public void gridWithSorting() {
-        GridElement grid = $(GridElement.class).id("grid-sortable-columns");
         scrollToElement(grid);
 
         getCellContent(grid.getHeaderCell(0)).click();
@@ -56,7 +76,7 @@ public class GridViewSortingIT extends AbstractComponentIT {
         assertSortMessageEquals(Collections.emptyList(), true);
 
         // enable multi sort
-        clickElementWithJs(findElement(By.id("grid-multi-sort-toggle")));
+        multiSortToggle.click();
         getCellContent(grid.getHeaderCell(0)).click();
         getCellContent(grid.getHeaderCell(1)).click();
         assertSortMessageEquals(
@@ -65,7 +85,6 @@ public class GridViewSortingIT extends AbstractComponentIT {
 
     @Test
     public void gridWithSorting_switchColumnSorting() {
-        GridElement grid = $(GridElement.class).id("grid-sortable-columns");
         scrollToElement(grid);
 
         getCellContent(grid.getHeaderCell(0)).click();
@@ -74,51 +93,44 @@ public class GridViewSortingIT extends AbstractComponentIT {
 
         Assert.assertEquals(
                 "Current sort order: . Sort originates from the client: true.",
-                findElement(By.id("grid-sortable-columns-message")).getText());
+                message.getText());
     }
 
     @Test
     public void gridWithSorting_invertAndResetSortings() {
-        GridElement grid = $(GridElement.class).id("grid-sortable-columns");
         scrollToElement(grid);
-
-        WebElement invertButton = findElement(
-                By.id("grid-sortable-columns-invert-sortings"));
-        WebElement resetButton = findElement(
-                By.id("grid-sortable-columns-reset-sortings"));
 
         getCellContent(grid.getHeaderCell(0)).click();
         assertSortMessageEquals(QuerySortOrder.asc("firstName").build(), true);
 
-        clickElementWithJs(invertButton);
+        invertSortDirections.click();
         assertSortMessageEquals(QuerySortOrder.desc("firstName").build(),
                 false);
 
-        clickElementWithJs(invertButton);
+        invertSortDirections.click();
         assertSortMessageEquals(QuerySortOrder.asc("firstName").build(), false);
 
-        clickElementWithJs(resetButton);
+        resetSortDirections.click();
         assertSortMessageEquals(Collections.emptyList(), false);
 
         // enable multi sort
-        clickElementWithJs(findElement(By.id("grid-multi-sort-toggle")));
+        multiSortToggle.click();
         getCellContent(grid.getHeaderCell(0)).click();
         getCellContent(grid.getHeaderCell(1)).click();
         assertSortMessageEquals(
                 QuerySortOrder.asc("age").thenAsc("firstName").build(), true);
-        clickElementWithJs(invertButton);
+
+        invertSortDirections.click();
         assertSortMessageEquals(
                 QuerySortOrder.desc("age").thenDesc("firstName").build(),
                 false);
 
-        clickElementWithJs(resetButton);
+        resetSortDirections.click();
         assertSortMessageEquals(Collections.emptyList(), false);
-
     }
 
     @Test
     public void gridWithSorting_toggleColumnVisibilityAndReset() {
-        GridElement grid = $(GridElement.class).id("grid-sortable-columns");
         scrollToElement(grid);
 
         WebElement toggleFirstColumnButton = findElement(
@@ -135,45 +147,30 @@ public class GridViewSortingIT extends AbstractComponentIT {
 
         WebElement sorter = grid.getHeaderCell(0).$("vaadin-grid-sorter")
                 .first();
-        Assert.assertEquals(null, sorter.getAttribute("direction"));
+        Assert.assertNull(sorter.getAttribute("direction"));
     }
 
     @Test
     public void gridWithSorting_noMultiSort_secondSortColumnIgnored() {
-        GridElement grid = $(GridElement.class).id("grid-sortable-columns");
         scrollToElement(grid);
-
-        WebElement sortByTwoColumnsButton = findElement(
-                By.id("grid-sortable-columns-sort-by-two"));
-        WebElement resetButton = findElement(
-                By.id("grid-sortable-columns-reset-sortings"));
-
-        clickElementWithJs(sortByTwoColumnsButton);
-
+        sortByAgeThenName.click();
         assertSortMessageEquals(QuerySortOrder.asc("age").build(), false);
 
-        clickElementWithJs(resetButton);
-
+        resetSortDirections.click();
         // enable multi sort
-        clickElementWithJs(findElement(By.id("grid-multi-sort-toggle")));
-
-        clickElementWithJs(sortByTwoColumnsButton);
-
+        multiSortToggle.click();
+        sortByAgeThenName.click();
         assertSortMessageEquals(
                 QuerySortOrder.asc("age").thenDesc("firstName").build(), false);
     }
 
     @Test
     public void gridWithSorting_multiSortPriorityAppend() {
-        GridElement grid = $(GridElement.class).id("grid-sortable-columns");
         scrollToElement(grid);
-
         // enable multi sort
-        clickElementWithJs(findElement(By.id("grid-multi-sort-toggle")));
-
+        multiSortToggle.click();
         // set multi-sort priority to append
-        clickElementWithJs(
-                findElement(By.id("grid-multi-sort-priority-toggle")));
+        multiSortPriorityToggle.click();
 
         getCellContent(grid.getHeaderCell(0)).click();
         getCellContent(grid.getHeaderCell(1)).click();
@@ -187,6 +184,32 @@ public class GridViewSortingIT extends AbstractComponentIT {
                 QuerySortOrder.asc("firstName").thenDesc("age").build(), true);
     }
 
+    @Test
+    public void multiSortPrepend_sortByAgeThenFirstName_sortIndicatorsOrderedByAgeThenFirstName() {
+        scrollToElement(grid);
+        // enable multi sort
+        multiSortToggle.click();
+        sortByAgeThenName.click();
+
+        List<QuerySortOrder> expectedSortOrder = QuerySortOrder.asc("Age")
+                .thenDesc("Name").build();
+        assertSortIndicatorOrder(expectedSortOrder);
+    }
+
+    @Test
+    public void multiSortAppend_sortByAgeThenFirstName_sortIndicatorsOrderedByAgeThenFirstName() {
+        scrollToElement(grid);
+        // enable multi sort
+        multiSortToggle.click();
+        // set multi-sort priority to append
+        multiSortPriorityToggle.click();
+        sortByAgeThenName.click();
+
+        List<QuerySortOrder> expectedSortOrder = QuerySortOrder.asc("Age")
+                .thenDesc("Name").build();
+        assertSortIndicatorOrder(expectedSortOrder);
+    }
+
     private void assertSortMessageEquals(List<QuerySortOrder> querySortOrders,
             boolean fromClient) {
         String sortOrdersString = querySortOrders.stream()
@@ -197,8 +220,7 @@ public class GridViewSortingIT extends AbstractComponentIT {
                 .collect(Collectors.joining(", "));
         Assert.assertEquals(String.format(
                 "Current sort order: %s. Sort originates from the client: %s.",
-                sortOrdersString, fromClient),
-                findElement(By.id("grid-sortable-columns-message")).getText());
+                sortOrdersString, fromClient), message.getText());
     }
 
     private WebElement getCellContent(GridTHTDElement cell) {
@@ -207,4 +229,34 @@ public class GridViewSortingIT extends AbstractComponentIT {
                 cell);
     }
 
+    private void assertSortIndicatorOrder(
+            List<QuerySortOrder> querySortOrders) {
+        List<TestBenchElement> sorters = grid.$("vaadin-grid-sorter")
+                .hasAttribute("direction").all();
+
+        querySortOrders.forEach((querySortOrder) -> {
+            // Lookup sorter for column
+            String columnName = querySortOrder.getSorted();
+            TestBenchElement columnSorter = sorters.stream()
+                    .filter(sorter -> sorter.getText().startsWith(columnName))
+                    .findFirst().orElse(null);
+            Assert.assertNotNull(
+                    "Could not find sorter for column: " + columnName,
+                    columnSorter);
+
+            // Check sort direction attribute
+            SortDirection direction = querySortOrder.getDirection();
+            String directionValue = direction == SortDirection.ASCENDING ? "asc"
+                    : "desc";
+            Assert.assertEquals(directionValue,
+                    columnSorter.getAttribute("direction"));
+
+            // Check order part displays correct order value
+            String orderValue = String
+                    .valueOf(querySortOrders.indexOf(querySortOrder) + 1);
+            TestBenchElement orderElement = columnSorter.$("*")
+                    .attribute("part", "order").first();
+            Assert.assertEquals(orderValue, orderElement.getText());
+        });
+    }
 }

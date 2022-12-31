@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-flow-components-shared-parent</artifactId>
-    <version>23.2-SNAPSHOT</version>
+    <version>24.0-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-flow-components-base</artifactId>
   <packaging>jar</packaging>
@@ -25,6 +25,10 @@
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
+  </dependency>
   </dependencies>
   <build>
     <plugins>

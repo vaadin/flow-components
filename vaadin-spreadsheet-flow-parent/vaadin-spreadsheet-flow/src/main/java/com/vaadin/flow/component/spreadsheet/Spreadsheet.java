@@ -1,17 +1,12 @@
-package com.vaadin.flow.component.spreadsheet;
-
-/*
- * #%L
- * Vaadin Spreadsheet
- * %%
- * Copyright (C) 2013 - 2022 Vaadin Ltd
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
+/**
+ * Copyright 2000-2022 Vaadin Ltd.
  *
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
  */
+package com.vaadin.flow.component.spreadsheet;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -31,6 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -52,12 +48,15 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.SheetVisibility;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.ClientAnchor.AnchorType;
 import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellRangeUtil;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.ss.util.PaneInformation;
 import org.apache.poi.ss.util.WorkbookUtil;
+import org.apache.poi.util.Units;
+import org.apache.poi.xssf.usermodel.XSSFClientAnchor;
 import org.apache.poi.xssf.usermodel.XSSFHyperlink;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -69,7 +68,6 @@ import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTWorksheet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
@@ -80,7 +78,6 @@ import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.spreadsheet.SheetOverlayWrapper.OverlayChangeListener;
 import com.vaadin.flow.component.spreadsheet.action.SpreadsheetDefaultActionHandler;
 import com.vaadin.flow.component.spreadsheet.client.CellData;
@@ -93,20 +90,20 @@ import com.vaadin.flow.component.spreadsheet.command.SizeChangeCommand.Type;
 import com.vaadin.flow.component.spreadsheet.framework.Action;
 import com.vaadin.flow.component.spreadsheet.framework.ReflectTools;
 import com.vaadin.flow.component.spreadsheet.rpc.SpreadsheetClientRpc;
-import com.vaadin.flow.component.spreadsheet.shared.ContentMode;
-import com.vaadin.flow.component.spreadsheet.shared.ErrorLevel;
 import com.vaadin.flow.component.spreadsheet.shared.GroupingData;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.shared.Registration;
 import com.vaadin.pro.licensechecker.LicenseChecker;
 
 import elemental.json.JsonValue;
 
 /**
- * Vaadin Spreadsheet is a Vaadin Add-On Component which allows displaying and
- * interacting with the contents of an Excel file. The Spreadsheet can be used
- * in any Vaadin application for enabling users to view and manipulate Excel
- * files in their web browsers.
+ * Vaadin Spreadsheet is a component which allows displaying and interacting
+ * with the contents of an Excel file. The Spreadsheet can be used in any Vaadin
+ * application for enabling users to view and manipulate Excel files in their
+ * web browsers.
  *
  * @author Vaadin Ltd.
  */
@@ -134,80 +131,22 @@ public class Spreadsheet extends Component
         String version = properties.getProperty("spreadsheet.version");
 
         if (service != null) {
-            if (service.getDeploymentConfiguration().isProductionMode()) {
+            if (!service.getDeploymentConfiguration().isProductionMode()) {
                 LicenseChecker.checkLicenseFromStaticBlock(
                         "vaadin-spreadsheet-flow", version);
             }
         }
     }
 
-    private SpreadsheetHandlerImpl spreadsheetHandler;
-
-    /*
-     * FLOW RELATED STUFF
-     */
-
-    /*
-     * SHARED STATE PROPERTIES
-     */
-
-    // from TabIndexState
-
-    public int tabIndex = 0;
-
-    // from AbstractComponentState
-
-    private String height = "100%";
-    private String width = "100%";
-
     @Override
     public void setId(String id) {
-        this.id = id;
         getElement().setProperty("id", id);
     }
-
-    @Override
-    public void setHeight(String height) {
-        this.height = height;
-        getElement().setProperty("height", height);
-    }
-
-    @Override
-    public void setWidth(String width) {
-        this.width = width;
-        getElement().setProperty("width", width);
-    }
-
-    private String description = "";
-    private ContentMode descriptionContentMode = ContentMode.PREFORMATTED;
-    // Note: for the caption, there is a difference between null and an empty
-    // string!
-    private String caption = null;
-    private List<String> styles = null;
-    private String id = null;
-    private String primaryStyleName = null;
-
-    /** HTML formatted error message for the component. */
-    private String errorMessage = null;
-
-    /**
-     * Level of error.
-     *
-     * @since 8.2
-     */
-    private ErrorLevel errorLevel = null;
-
-    private boolean captionAsHtml = false;
 
     // from SaredState
 
     // private Map<String, URLReference> resources = new HashMap<>();
     private Map<String, String> resources = new HashMap<>();
-
-    /**
-     * A set of event identifiers with registered listeners.
-     */
-    private Set<String> registeredEventListeners;
 
     // spreadsheetState
 
@@ -220,7 +159,6 @@ public class Spreadsheet extends Component
     private int cols;
 
     private List<GroupingData> colGroupingData;
-    private List<GroupingData> rowGroupingData;
 
     private int colGroupingMax;
     private int rowGroupingMax;
@@ -267,8 +205,6 @@ public class Spreadsheet extends Component
 
     private boolean sheetProtected;
 
-    private boolean workbookProtected;
-
     private HashMap<String, String> cellKeysToEditorIdMap;
 
     private HashMap<String, String> componentIDtoCellKeysMap;
@@ -283,15 +219,9 @@ public class Spreadsheet extends Component
 
     private Set<String> invalidFormulaCells;
 
-    private boolean hasActions;
-
     private HashMap<String, OverlayInfo> overlays;
 
     private ArrayList<MergedRegion> mergedRegions;
-
-    private boolean displayGridlines = true;
-
-    private boolean displayRowColHeadings = true;
 
     private int verticalSplitPosition = 0;
     private int horizontalSplitPosition = 0;
@@ -300,521 +230,412 @@ public class Spreadsheet extends Component
 
     private boolean workbookChangeToggle;
 
-    private String invalidFormulaErrorMessage = "Invalid formula";
+    private Locale locale;
 
-    private boolean lockFormatColumns = true;
-
-    private boolean lockFormatRows = true;
-
-    private List<String> namedRanges;
-
-    public String getDescription() {
-        return description;
-    }
-
-    public ContentMode getDescriptionContentMode() {
-        return descriptionContentMode;
-    }
-
-    public String getCaption() {
-        return caption;
-    }
-
-    public List<String> getStyles() {
-        return styles;
-    }
-
-    public String getPrimaryStyleName() {
-        return primaryStyleName;
-    }
-
-    public String getErrorMessage() {
-        return errorMessage;
-    }
-
-    public ErrorLevel getErrorLevel() {
-        return errorLevel;
-    }
-
-    public boolean isCaptionAsHtml() {
-        return captionAsHtml;
-    }
-
-    public Map<String, String> getResources() {
-        return resources;
-    }
-
-    public Set<String> getRegisteredEventListeners() {
-        return registeredEventListeners;
-    }
-
-    public int getColumnBufferSize() {
-        return columnBufferSize;
-    }
-
-    public int getCols() {
+    int getCols() {
         return cols;
     }
 
-    public List<GroupingData> getColGroupingData() {
+    private List<GroupingData> getColGroupingData() {
         return colGroupingData;
     }
 
-    public List<GroupingData> getRowGroupingData() {
-        return rowGroupingData;
-    }
-
-    public int getColGroupingMax() {
+    int getColGroupingMax() {
         return colGroupingMax;
     }
 
-    public int getRowGroupingMax() {
+    int getRowGroupingMax() {
         return rowGroupingMax;
     }
 
-    public boolean isColGroupingInversed() {
+    boolean isColGroupingInversed() {
         return colGroupingInversed;
     }
 
-    public boolean isRowGroupingInversed() {
+    boolean isRowGroupingInversed() {
         return rowGroupingInversed;
     }
 
-    public float getDefRowH() {
+    float getDefRowH() {
         return defRowH;
     }
 
-    public int getDefColW() {
+    int getDefColW() {
         return defColW;
     }
 
-    public float[] getRowH() {
+    private float[] getRowH() {
         return rowH;
     }
 
-    public int[] getColW() {
+    int[] getColW() {
         return colW;
     }
 
-    public boolean isReload() {
-        return reload;
-    }
-
-    public int getSheetIndex() {
+    private int getSheetIndex() {
         return sheetIndex;
     }
 
-    public String[] getSheetNames() {
+    String[] getSheetNames() {
         return sheetNames;
     }
 
-    public HashMap<Integer, String> getCellStyleToCSSStyle() {
+    HashMap<Integer, String> getCellStyleToCSSStyle() {
         return cellStyleToCSSStyle;
     }
 
-    public HashMap<Integer, Integer> getRowIndexToStyleIndex() {
+    HashMap<Integer, Integer> getRowIndexToStyleIndex() {
         return rowIndexToStyleIndex;
     }
 
-    public HashMap<Integer, Integer> getColumnIndexToStyleIndex() {
+    HashMap<Integer, Integer> getColumnIndexToStyleIndex() {
         return columnIndexToStyleIndex;
     }
 
-    public Set<Integer> getLockedColumnIndexes() {
+    Set<Integer> getLockedColumnIndexes() {
         return lockedColumnIndexes;
     }
 
-    public Set<Integer> getLockedRowIndexes() {
+    Set<Integer> getLockedRowIndexes() {
         return lockedRowIndexes;
     }
 
-    public ArrayList<String> getShiftedCellBorderStyles() {
+    ArrayList<String> getShiftedCellBorderStyles() {
         return shiftedCellBorderStyles;
     }
 
-    public HashMap<Integer, String> getConditionalFormattingStyles() {
+    HashMap<Integer, String> getConditionalFormattingStyles() {
         return conditionalFormattingStyles;
     }
 
-    public ArrayList<Integer> getHiddenColumnIndexes() {
+    private ArrayList<Integer> getHiddenColumnIndexes() {
         return hiddenColumnIndexes;
     }
 
-    public ArrayList<Integer> getHiddenRowIndexes() {
+    private ArrayList<Integer> getHiddenRowIndexes() {
         return hiddenRowIndexes;
     }
 
-    public int[] getVerticalScrollPositions() {
+    int[] getVerticalScrollPositions() {
         return verticalScrollPositions;
     }
 
-    public int[] getHorizontalScrollPositions() {
+    int[] getHorizontalScrollPositions() {
         return horizontalScrollPositions;
     }
 
-    public boolean isSheetProtected() {
+    private boolean isSheetProtected() {
         return sheetProtected;
     }
 
-    public boolean isWorkbookProtected() {
-        return workbookProtected;
-    }
-
-    public HashMap<String, String> getCellKeysToEditorIdMap() {
+    private HashMap<String, String> getCellKeysToEditorIdMap() {
         return cellKeysToEditorIdMap;
     }
 
-    public HashMap<String, String> getComponentIDtoCellKeysMap() {
+    HashMap<String, String> getComponentIDtoCellKeysMap() {
         return componentIDtoCellKeysMap;
     }
 
-    public HashMap<String, String> getHyperlinksTooltips() {
+    private HashMap<String, String> getHyperlinksTooltips() {
         return hyperlinksTooltips;
     }
 
-    public HashMap<String, String> getCellComments() {
+    private HashMap<String, String> getCellComments() {
         return cellComments;
     }
 
-    public HashMap<String, String> getCellCommentAuthors() {
+    private HashMap<String, String> getCellCommentAuthors() {
         return cellCommentAuthors;
     }
 
-    public ArrayList<String> getVisibleCellComments() {
+    private ArrayList<String> getVisibleCellComments() {
         return visibleCellComments;
     }
 
-    public Set<String> getInvalidFormulaCells() {
+    private Set<String> getInvalidFormulaCells() {
         return invalidFormulaCells;
     }
 
-    public boolean isHasActions() {
-        return hasActions;
-    }
-
-    public HashMap<String, OverlayInfo> getOverlays() {
+    private HashMap<String, OverlayInfo> getOverlays() {
         return overlays;
     }
 
-    public ArrayList<MergedRegion> getMergedRegions() {
+    private ArrayList<MergedRegion> getMergedRegions() {
         return mergedRegions;
     }
 
-    public boolean isDisplayGridlines() {
-        return displayGridlines;
-    }
-
-    public boolean isDisplayRowColHeadings() {
-        return displayRowColHeadings;
-    }
-
-    public int getVerticalSplitPosition() {
+    private int getVerticalSplitPosition() {
         return verticalSplitPosition;
     }
 
-    public int getHorizontalSplitPosition() {
+    private int getHorizontalSplitPosition() {
         return horizontalSplitPosition;
     }
 
-    public String getInfoLabelValue() {
+    private String getInfoLabelValue() {
         return infoLabelValue;
     }
 
-    public boolean isWorkbookChangeToggle() {
+    private boolean isWorkbookChangeToggle() {
         return workbookChangeToggle;
     }
 
-    public String getInvalidFormulaErrorMessage() {
-        return invalidFormulaErrorMessage;
-    }
-
-    public boolean isLockFormatColumns() {
-        return lockFormatColumns;
-    }
-
-    public boolean isLockFormatRows() {
-        return lockFormatRows;
-    }
-
-    public List<String> getNamedRanges() {
-        return namedRanges;
-    }
-
-    public void _setRowBufferSize(int rowBufferSize) {
-        setRowBufferSize(rowBufferSize);
-    }
-
-    public void setColumnBufferSize(int columnBufferSize) {
-        this.columnBufferSize = columnBufferSize;
-        getElement().setProperty("columnBufferSize", columnBufferSize);
-    }
-
-    public void setRows(int rows) {
+    void setRows(int rows) {
         this.rows = rows;
         getElement().setProperty("rows", rows);
     }
 
-    public void setCols(int cols) {
+    void setCols(int cols) {
         this.cols = cols;
         getElement().setProperty("cols", cols);
     }
 
-    public void setColGroupingData(List<GroupingData> colGroupingData) {
+    void setColGroupingData(List<GroupingData> colGroupingData) {
         this.colGroupingData = colGroupingData;
         getElement().setProperty("colGroupingData",
                 Serializer.serialize(colGroupingData));
     }
 
-    public void setRowGroupingData(List<GroupingData> rowGroupingData) {
-        this.rowGroupingData = rowGroupingData;
+    void setRowGroupingData(List<GroupingData> rowGroupingData) {
         getElement().setProperty("rowGroupingData",
                 Serializer.serialize(rowGroupingData));
     }
 
-    public void setColGroupingMax(int colGroupingMax) {
+    void setColGroupingMax(int colGroupingMax) {
         this.colGroupingMax = colGroupingMax;
         getElement().setProperty("colGroupingMax", colGroupingMax);
     }
 
-    public void setRowGroupingMax(int rowGroupingMax) {
+    void setRowGroupingMax(int rowGroupingMax) {
         this.rowGroupingMax = rowGroupingMax;
         getElement().setProperty("rowGroupingMax", rowGroupingMax);
     }
 
-    public void setColGroupingInversed(boolean colGroupingInversed) {
+    void setColGroupingInversed(boolean colGroupingInversed) {
         this.colGroupingInversed = colGroupingInversed;
         getElement().setProperty("colGroupingInversed", colGroupingInversed);
     }
 
-    public void setRowGroupingInversed(boolean rowGroupingInversed) {
+    void setRowGroupingInversed(boolean rowGroupingInversed) {
         this.rowGroupingInversed = rowGroupingInversed;
         getElement().setProperty("rowGroupingInversed", rowGroupingInversed);
     }
 
-    public void setDefRowH(float defRowH) {
+    void setDefRowH(float defRowH) {
         this.defRowH = defRowH;
         getElement().setProperty("defRowH", defRowH);
     }
 
-    public void setDefColW(int defColW) {
+    void setDefColW(int defColW) {
         this.defColW = defColW;
         getElement().setProperty("defColW", defColW);
     }
 
-    public void setRowH(float[] rowH) {
+    void setRowH(float[] rowH) {
         this.rowH = rowH;
         getElement().setProperty("rowH", Serializer.serialize(rowH));
     }
 
-    public void setColW(int[] colW) {
+    void setColW(int[] colW) {
         this.colW = colW;
         getElement().setProperty("colW", Serializer.serialize(colW));
     }
 
-    public void setReload(boolean reload) {
+    private void setReload(boolean reload) {
         if (reload)
             getElement().setProperty("reload", System.currentTimeMillis());
     }
 
-    public void setSheetIndex(int sheetIndex) {
+    private void setSheetIndex(int sheetIndex) {
         this.sheetIndex = sheetIndex;
         getElement().setProperty("sheetIndex", sheetIndex);
     }
 
-    public void setSheetNames(String[] sheetNames) {
+    private void setSheetNames(String[] sheetNames) {
         this.sheetNames = sheetNames;
         getElement().setProperty("sheetNames",
                 Serializer.serialize(sheetNames));
     }
 
-    public void setCellStyleToCSSStyle(
-            HashMap<Integer, String> cellStyleToCSSStyle) {
+    void setCellStyleToCSSStyle(HashMap<Integer, String> cellStyleToCSSStyle) {
         this.cellStyleToCSSStyle = cellStyleToCSSStyle;
         getElement().setProperty("cellStyleToCSSStyle",
                 Serializer.serialize(cellStyleToCSSStyle));
     }
 
-    public void setRowIndexToStyleIndex(
+    void setRowIndexToStyleIndex(
             HashMap<Integer, Integer> rowIndexToStyleIndex) {
         this.rowIndexToStyleIndex = rowIndexToStyleIndex;
         getElement().setProperty("rowIndexToStyleIndex",
                 Serializer.serialize(rowIndexToStyleIndex));
     }
 
-    public void setColumnIndexToStyleIndex(
+    void setColumnIndexToStyleIndex(
             HashMap<Integer, Integer> columnIndexToStyleIndex) {
         this.columnIndexToStyleIndex = columnIndexToStyleIndex;
         getElement().setProperty("columnIndexToStyleIndex",
                 Serializer.serialize(columnIndexToStyleIndex));
     }
 
-    public void setLockedColumnIndexes(Set<Integer> lockedColumnIndexes) {
+    void setLockedColumnIndexes(Set<Integer> lockedColumnIndexes) {
         this.lockedColumnIndexes = lockedColumnIndexes;
         getElement().setProperty("lockedColumnIndexes",
                 Serializer.serialize(lockedColumnIndexes));
     }
 
-    public void setLockedRowIndexes(Set<Integer> lockedRowIndexes) {
+    void setLockedRowIndexes(Set<Integer> lockedRowIndexes) {
         this.lockedRowIndexes = lockedRowIndexes;
         getElement().setProperty("lockedRowIndexes",
                 Serializer.serialize(lockedRowIndexes));
     }
 
-    public void setShiftedCellBorderStyles(
-            ArrayList<String> shiftedCellBorderStyles) {
+    void setShiftedCellBorderStyles(ArrayList<String> shiftedCellBorderStyles) {
         this.shiftedCellBorderStyles = shiftedCellBorderStyles;
         getElement().setProperty("shiftedCellBorderStyles",
                 Serializer.serialize(shiftedCellBorderStyles));
     }
 
-    public void setConditionalFormattingStyles(
+    void setConditionalFormattingStyles(
             HashMap<Integer, String> conditionalFormattingStyles) {
         this.conditionalFormattingStyles = conditionalFormattingStyles;
         getElement().setProperty("conditionalFormattingStyles",
                 Serializer.serialize(conditionalFormattingStyles));
     }
 
-    public void setHiddenColumnIndexes(ArrayList<Integer> hiddenColumnIndexes) {
+    void setHiddenColumnIndexes(ArrayList<Integer> hiddenColumnIndexes) {
         this.hiddenColumnIndexes = hiddenColumnIndexes;
         getElement().setProperty("hiddenColumnIndexes",
                 Serializer.serialize(hiddenColumnIndexes));
     }
 
-    public void setHiddenRowIndexes(ArrayList<Integer> hiddenRowIndexes) {
+    void setHiddenRowIndexes(ArrayList<Integer> hiddenRowIndexes) {
         this.hiddenRowIndexes = hiddenRowIndexes;
         getElement().setProperty("hiddenRowIndexes",
                 Serializer.serialize(hiddenRowIndexes));
     }
 
-    public void setVerticalScrollPositions(int[] verticalScrollPositions) {
+    void setVerticalScrollPositions(int[] verticalScrollPositions) {
         this.verticalScrollPositions = verticalScrollPositions;
         getElement().setProperty("verticalScrollPositions",
                 Serializer.serialize(verticalScrollPositions));
     }
 
-    public void setHorizontalScrollPositions(int[] horizontalScrollPositions) {
+    void setHorizontalScrollPositions(int[] horizontalScrollPositions) {
         this.horizontalScrollPositions = horizontalScrollPositions;
         getElement().setProperty("horizontalScrollPositions",
                 Serializer.serialize(horizontalScrollPositions));
     }
 
-    public void setSheetProtected(boolean sheetProtected) {
+    private void setSheetProtected(boolean sheetProtected) {
         this.sheetProtected = sheetProtected;
         getElement().setProperty("sheetProtected", sheetProtected);
     }
 
-    public void setWorkbookProtected(boolean workbookProtected) {
-        this.workbookProtected = workbookProtected;
+    private void setWorkbookProtected(boolean workbookProtected) {
         getElement().setProperty("workbookProtected", workbookProtected);
     }
 
-    public void setCellKeysToEditorIdMap(
+    private void setCellKeysToEditorIdMap(
             HashMap<String, String> cellKeysToEditorIdMap) {
         this.cellKeysToEditorIdMap = cellKeysToEditorIdMap;
         getElement().setProperty("cellKeysToEditorIdMap",
                 Serializer.serialize(cellKeysToEditorIdMap));
     }
 
-    public void setComponentIDtoCellKeysMap(
+    private void setComponentIDtoCellKeysMap(
             HashMap<String, String> componentIDtoCellKeysMap) {
         this.componentIDtoCellKeysMap = componentIDtoCellKeysMap;
         getElement().setProperty("componentIDtoCellKeysMap",
                 Serializer.serialize(componentIDtoCellKeysMap));
     }
 
-    public void setHyperlinksTooltips(
+    private void setHyperlinksTooltips(
             HashMap<String, String> hyperlinksTooltips) {
         this.hyperlinksTooltips = hyperlinksTooltips;
         getElement().setProperty("hyperlinksTooltips",
                 Serializer.serialize(hyperlinksTooltips));
     }
 
-    public void setCellComments(HashMap<String, String> cellComments) {
+    private void setCellComments(HashMap<String, String> cellComments) {
         this.cellComments = cellComments;
         getElement().setProperty("cellComments",
                 Serializer.serialize(cellComments));
     }
 
-    public void setCellCommentAuthors(
+    private void setCellCommentAuthors(
             HashMap<String, String> cellCommentAuthors) {
         this.cellCommentAuthors = cellCommentAuthors;
         getElement().setProperty("cellCommentAuthors",
                 Serializer.serialize(cellCommentAuthors));
     }
 
-    public void setVisibleCellComments(ArrayList<String> visibleCellComments) {
+    private void setVisibleCellComments(ArrayList<String> visibleCellComments) {
         this.visibleCellComments = visibleCellComments;
         getElement().setProperty("visibleCellComments",
                 Serializer.serialize(visibleCellComments));
     }
 
-    public void setInvalidFormulaCells(Set<String> invalidFormulaCells) {
+    private void setInvalidFormulaCells(Set<String> invalidFormulaCells) {
         this.invalidFormulaCells = invalidFormulaCells;
         getElement().setProperty("invalidFormulaCells",
                 Serializer.serialize(invalidFormulaCells));
     }
 
-    public void setHasActions(boolean hasActions) {
-        this.hasActions = hasActions;
+    private void setHasActions(boolean hasActions) {
         getElement().setProperty("hasActions", hasActions);
     }
 
-    public void setOverlays(HashMap<String, OverlayInfo> overlays) {
+    private void setOverlays(HashMap<String, OverlayInfo> overlays) {
         this.overlays = overlays;
         getElement().setProperty("overlays", Serializer.serialize(overlays));
     }
 
-    public void setMergedRegions(ArrayList<MergedRegion> mergedRegions) {
+    void setMergedRegions(ArrayList<MergedRegion> mergedRegions) {
         this.mergedRegions = mergedRegions;
         getElement().setProperty("mergedRegions",
                 Serializer.serialize(mergedRegions));
     }
 
-    public void setDisplayGridlines(boolean displayGridlines) {
-        this.displayGridlines = displayGridlines;
+    private void setDisplayGridlines(boolean displayGridlines) {
         getElement().setProperty("displayGridlines", displayGridlines);
     }
 
-    public void setDisplayRowColHeadings(boolean displayRowColHeadings) {
-        this.displayRowColHeadings = displayRowColHeadings;
+    private void setDisplayRowColHeadings(boolean displayRowColHeadings) {
         getElement().setProperty("displayRowColHeadings",
                 displayRowColHeadings);
     }
 
-    public void setVerticalSplitPosition(int verticalSplitPosition) {
+    void setVerticalSplitPosition(int verticalSplitPosition) {
         this.verticalSplitPosition = verticalSplitPosition;
         getElement().setProperty("verticalSplitPosition",
                 verticalSplitPosition);
     }
 
-    public void setHorizontalSplitPosition(int horizontalSplitPosition) {
+    void setHorizontalSplitPosition(int horizontalSplitPosition) {
         this.horizontalSplitPosition = horizontalSplitPosition;
         getElement().setProperty("horizontalSplitPosition",
                 horizontalSplitPosition);
     }
 
-    public void setInfoLabelValue(String infoLabelValue) {
+    private void setInfoLabelValue(String infoLabelValue) {
         this.infoLabelValue = infoLabelValue;
         getElement().setProperty("infoLabelValue", infoLabelValue);
     }
 
-    public void setWorkbookChangeToggle(boolean workbookChangeToggle) {
+    private void setWorkbookChangeToggle(boolean workbookChangeToggle) {
         this.workbookChangeToggle = workbookChangeToggle;
         getElement().setProperty("workbookChangeToggle", workbookChangeToggle);
     }
 
-    public void setLockFormatColumns(boolean lockFormatColumns) {
-        this.lockFormatColumns = lockFormatColumns;
+    void setLockFormatColumns(boolean lockFormatColumns) {
         getElement().setProperty("lockFormatColumns", lockFormatColumns);
     }
 
-    public void setLockFormatRows(boolean lockFormatRows) {
-        this.lockFormatRows = lockFormatRows;
+    void setLockFormatRows(boolean lockFormatRows) {
         getElement().setProperty("lockFormatRows", lockFormatRows);
     }
 
-    public void setNamedRanges(List<String> namedRanges) {
-        this.namedRanges = namedRanges;
+    void setNamedRanges(List<String> namedRanges) {
         getElement().setProperty("namedRanges",
                 Serializer.serialize(namedRanges));
     }
@@ -987,7 +808,6 @@ public class Spreadsheet extends Component
             getElement().callJsFunction("editCellComment", col, row);
         }
     };
-    private Locale locale;
 
     /**
      * An interface for handling the edited cell value from user input.
@@ -1166,8 +986,7 @@ public class Spreadsheet extends Component
     /** The last visible column in the scroll area **/
     private int lastColumn;
 
-    /** Spreadsheet Flow does not support charts yet **/
-    private boolean chartsEnabled = false;
+    private boolean chartsEnabled = true;
 
     /**
      * This is used for making sure the cells are sent to client side in when
@@ -1186,10 +1005,6 @@ public class Spreadsheet extends Component
     protected int mergedRegionCounter;
 
     private Workbook workbook;
-
-    /** true if the component sheet should be reloaded on client side. */
-    // todo: already defined in shared state. Check!
-    // private boolean reload;
 
     /** are tables for currently active sheet loaded */
     private boolean tablesLoaded;
@@ -1345,11 +1160,11 @@ public class Spreadsheet extends Component
     }
 
     private void init() {
+        updateAppId();
         valueManager = createCellValueManager();
         sheetOverlays = new HashSet<SheetOverlayWrapper>();
         tables = new HashSet<SpreadsheetTable>();
         registerRpc(new SpreadsheetHandlerImpl(this));
-        setSizeFull(); // Default to full size
         defaultActionHandler = new SpreadsheetDefaultActionHandler();
         hyperlinkCellClickHandler = new DefaultHyperlinkCellClickHandler(this);
         addActionHandler(defaultActionHandler);
@@ -1357,9 +1172,13 @@ public class Spreadsheet extends Component
         customInit();
     }
 
+    private void updateAppId() {
+        Optional.ofNullable(UI.getCurrent()).ifPresent(ui -> {
+            getElement().setProperty("appId", ui.getInternals().getAppId());
+        });
+    }
+
     private void registerRpc(SpreadsheetHandlerImpl spreadsheetHandler) {
-        LOGGER.info("Spreadsheet.registerRpc()");
-        this.spreadsheetHandler = spreadsheetHandler;
         addListener(SpreadsheetEvent.class,
                 new SpreadsheetEventListener(spreadsheetHandler));
     }
@@ -1815,30 +1634,54 @@ public class Spreadsheet extends Component
         return new CellRangeAddress(r1 - 1, r2 - 1, c1 - 1, c2 - 1);
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Set the Locale for the Spreadsheet. The locale is used for formatting
+     * cell values.
      *
-     * @see com.vaadin.ui.AbstractComponent#setLocale(java.util.Locale)
+     * @param locale
+     *            the locale set to the spreadsheet, cannot be null
      */
     public void setLocale(Locale locale) {
+        Objects.requireNonNull(locale, "Locale must not be null.");
         this.locale = locale;
         valueManager.updateLocale(locale);
         refreshAllCellValues();
+    }
+
+    /**
+     * Gets the Locale for this spreadsheet
+     *
+     * @return the locale used for spreadsheet
+     */
+    @Override
+    public Locale getLocale() {
+        if (locale != null) {
+            return locale;
+        } else {
+            return super.getLocale();
+        }
     }
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         valueManager.updateLocale(getLocale());
-        if (!FeatureFlags
-                .get(UI.getCurrent().getSession().getService().getContext())
-                .isEnabled(FeatureFlags.SPREADSHEET_COMPONENT)) {
-            throw new RuntimeException("\n\n--------------\n\n"
-                    + "The spreadsheet component is currently an experimental feature and needs to be explicitly enabled. "
-                    + "The component can be enabled by using the Vaadin dev-mode Gizmo, in the experimental features tab, "
-                    + "or by adding a `src/main/resources/vaadin-featureflags.properties` file with the following content: "
-                    + "`com.vaadin.experimental.spreadsheetComponent=true`"
-                    + "\n\n--------------\n\n");
+
+        updateAppId();
+
+        if (overlays != null) {
+            // The node id's of component overlays attached as virtual children
+            // may no longer be valid after a detach/attach. Remove all
+            // overlays and reload them (with updated node id's).
+            overlays.clear();
+            loadOrUpdateOverlays();
+        }
+
+        if (componentIDtoCellKeysMap != null || cellKeysToEditorIdMap != null) {
+            // The node id's of custom components may no longer be valid after a
+            // detach/attach. Remove all custom components and reload them (with
+            // updated node id's).
+            loadCustomComponents();
         }
     }
 
@@ -1897,6 +1740,8 @@ public class Spreadsheet extends Component
                 reloadActiveSheetData();
                 SpreadsheetFactory.reloadSpreadsheetData(this,
                         getActiveSheet());
+
+                getSpreadsheetStyleFactory().reloadActiveSheetCellStyles();
             }
         }
     }
@@ -1991,7 +1836,6 @@ public class Spreadsheet extends Component
         if (!workbook.isSheetVeryHidden(sheetIndex)
                 && !workbook.isSheetHidden(sheetIndex)) {
             int ourIndex = getSpreadsheetSheetIndex(sheetIndex);
-            // todo: comprobar si esto es así
             String[] _sheetNames = Arrays.copyOf(getSheetNames(),
                     getSheetNames().length);
             _sheetNames[ourIndex] = sheetName;
@@ -2096,6 +1940,8 @@ public class Spreadsheet extends Component
         workbook.removeSheetAt(poiSheetIndex);
 
         // POI doesn't seem to shift the active sheet index ...
+        // TODO: This no longer seems to be the case. Remove the following
+        // logic?
         int oldIndex = getSheetIndex() - 1;
         if (removedVisibleIndex <= oldIndex) { // removed before current
             if (oldIndex == (getNumberOfVisibleSheets())) {
@@ -2124,9 +1970,9 @@ public class Spreadsheet extends Component
      *             index is invalid.
      */
     public void deleteSheet(int sheetIndex) throws IllegalArgumentException {
-        if (getNumberOfVisibleSheets() < 2) {
+        if (sheetIndex < 0 || sheetIndex >= getNumberOfVisibleSheets()) {
             throw new IllegalArgumentException(
-                    "A workbook must contain at least one visible worksheet");
+                    "Invalid index for visible sheet given.");
         }
         deleteSheetWithPOIIndex(getVisibleSheetPOIIndex(sheetIndex));
     }
@@ -2796,34 +2642,6 @@ public class Spreadsheet extends Component
     }
 
     /**
-     * This method is called when rowIndex auto-fit has been initiated from the
-     * browser by double-clicking the border of the target rowIndex header.
-     *
-     * @param rowIndex
-     *            Index of the target rowIndex, 0-based
-     */
-    protected void onRowHeaderDoubleClick(int rowIndex) {
-        fireRowHeaderDoubleClick(rowIndex);
-    }
-
-    private void fireRowHeaderDoubleClick(int rowIndex) {
-        fireEvent(new RowHeaderDoubleClickEvent(this, rowIndex));
-    }
-
-    /**
-     * adds a {@link RowHeaderDoubleClickListener} to the Spreadsheet
-     *
-     * @param listener
-     *            The listener to add
-     **/
-    public void addRowHeaderDoubleClickListener(
-            RowHeaderDoubleClickListener listener) {
-        addListener(RowHeaderDoubleClickEvent.class,
-                listener::onRowHeaderDoubleClick); // ,
-                                                   // RowHeaderDoubleClickListener.ON_ROW_ON_ROW_HEADER_DOUBLE_CLICK);
-    }
-
-    /**
      * This method is called when column auto-fit has been initiated from the
      * browser by double-clicking the border of the target column header.
      *
@@ -3104,7 +2922,8 @@ public class Spreadsheet extends Component
                 } else if (numberOfRowsAboveWasChanged(row, last, first)) {
                     int newRow = cell.getRow() + n;
                     int col = cell.getCol();
-                    CellReference newCell = new CellReference(newRow, col);
+                    CellReference newCell = new CellReference(newRow, col, true,
+                            true);
                     pbutton.setCellReference(newCell);
                     updated.put(newCell, pbutton);
                 } else {
@@ -3712,11 +3531,6 @@ public class Spreadsheet extends Component
         }
     }
 
-    protected void setResource(String key, Icon icon) {
-        // todo: ver que hacemos con esto
-        // super.setResource(key, resource);
-    }
-
     void clearSheetServerSide() {
         workbook = null;
         styler = null;
@@ -3868,9 +3682,7 @@ public class Spreadsheet extends Component
                     && customComponents != null) {
                 String componentId = cellKeysToEditorIdMap.get(key);
                 for (Component c : customComponents) {
-                    if (c.getId().orElse("").equals(componentId)) {
-                        // todo: ver que hacemos con esto
-                        // if (c.getConnectorId().equals(componentId)) {
+                    if (getComponentNodeId(c).equals(componentId)) {
                         customComponentFactory.onCustomEditorDisplayed(
                                 getCell(row, col), row, col, this,
                                 getActiveSheet(), c);
@@ -4387,10 +4199,23 @@ public class Spreadsheet extends Component
      * Decides if overlay is visible in the current view.
      */
     private boolean isOverlayVisible(SheetOverlayWrapper overlay) {
-        int col1 = overlay.getAnchor().getCol1();
-        int col2 = overlay.getAnchor().getCol2();
-        int row1 = overlay.getAnchor().getRow1();
-        int row2 = overlay.getAnchor().getRow2();
+        var anchor = overlay.getAnchor();
+
+        // Need special handling for XSSFClientAnchor anchors of type
+        // DONT_MOVE_AND_RESIZE.
+        // See https://github.com/vaadin/flow-components/issues/3261
+        if (AnchorType.DONT_MOVE_AND_RESIZE.equals(anchor.getAnchorType())
+                && anchor instanceof XSSFClientAnchor) {
+            // Since there's no way to know if an arbitrary x/y coordinate is
+            // inside the current viewport, always return true for these
+            // anchors.
+            return true;
+        }
+
+        int col1 = anchor.getCol1();
+        int col2 = anchor.getCol2();
+        int row1 = anchor.getRow1();
+        int row2 = anchor.getRow2();
 
         // type=2, doesn't size with cells
         final boolean isType2 = (col2 == 0 && row2 == 0);
@@ -4456,12 +4281,33 @@ public class Spreadsheet extends Component
 
         Sheet sheet = getActiveSheet();
 
-        int col = overlayWrapper.getAnchor().getCol1();
+        var anchor = overlayWrapper.getAnchor();
+
+        // Need special handling for XSSFClientAnchor anchors of type
+        // DONT_MOVE_AND_RESIZE.
+        // See https://github.com/vaadin/flow-components/issues/3261
+        if (AnchorType.DONT_MOVE_AND_RESIZE.equals(anchor.getAnchorType())
+                && anchor instanceof XSSFClientAnchor) {
+            info.col = 1;
+            info.row = 1;
+
+            var xssfAnchor = (XSSFClientAnchor) anchor;
+            info.dx = (Long) xssfAnchor.getPosition().getX()
+                    / Units.EMU_PER_PIXEL;
+            info.dy = (Long) xssfAnchor.getPosition().getY()
+                    / Units.EMU_PER_POINT;
+            info.width = xssfAnchor.getSize().getCx() / Units.EMU_PER_PIXEL;
+            info.height = xssfAnchor.getSize().getCy() / Units.EMU_PER_POINT;
+
+            return info;
+        }
+
+        int col = anchor.getCol1();
         while (isColumnHidden(col)) {
             col++;
         }
 
-        int row = overlayWrapper.getAnchor().getRow1();
+        int row = anchor.getRow1();
         while (isRowHidden(row)) {
             row++;
         }
@@ -4475,11 +4321,11 @@ public class Spreadsheet extends Component
         // FIXME: height and width can be -1, it is never handled anywhere
 
         // if original start row/column is hidden, use 0 dy/dx
-        if (col == overlayWrapper.getAnchor().getCol1()) {
+        if (col == anchor.getCol1()) {
             info.dx = overlayWrapper.getDx1(sheet);
         }
 
-        if (row == overlayWrapper.getAnchor().getRow1()) {
+        if (row == anchor.getRow1()) {
             info.dy = overlayWrapper.getDy1(sheet);
         }
 
@@ -4710,11 +4556,8 @@ public class Spreadsheet extends Component
                         if (!customComponents.contains(customComponent)) {
                             registerCustomComponent(customComponent);
                         }
-                        _componentIDtoCellKeysMap.put(
-                                // todo: revisar
-                                customComponent.getId().orElse(""),
-                                // customComponent.getConnectorId(),
-                                key);
+                        _componentIDtoCellKeysMap
+                                .put(getComponentNodeId(customComponent), key);
                         newCustomComponents.add(customComponent);
                         rowsWithComponents.add(r);
                     } else if (!isCellLocked(cell)) {
@@ -4732,10 +4575,7 @@ public class Spreadsheet extends Component
                                 registerCustomComponent(customEditor);
                             }
                             _cellKeysToEditorIdMap.put(key,
-                                    // todo: revisar
-                                    customEditor.getId().orElse("")
-                            // customEditor.getConnectorId()
-                            );
+                                    getComponentNodeId(customEditor));
                             newCustomComponents.add(customEditor);
                             rowsWithComponents.add(r);
                         }
@@ -4748,6 +4588,10 @@ public class Spreadsheet extends Component
         }
         setCellKeysToEditorIdMap(_cellKeysToEditorIdMap);
         setComponentIDtoCellKeysMap(_componentIDtoCellKeysMap);
+    }
+
+    private String getComponentNodeId(Component component) {
+        return Integer.toString(component.getElement().getNode().getId());
     }
 
     private void handleRowSizes(Set<Integer> rowsWithComponents) {
@@ -4832,10 +4676,8 @@ public class Spreadsheet extends Component
     }
 
     private void registerCustomComponent(Component component) {
-        if (!equals(component.getParent())) {
-            // todo: se puede eliminar esto? en v8, setparent provoca que se
-            // añada el componente en la jerarquía
-            // component.setParent(this);
+        if (!getElement().equals(component.getElement().getParent())) {
+            getElement().appendVirtualChild(component.getElement());
         }
     }
 
@@ -4845,8 +4687,11 @@ public class Spreadsheet extends Component
     }
 
     private void unRegisterCustomComponent(Component component) {
-        // todo: se puede eliminar esto?
-        // component.setParent(null);
+        Element element = component.getElement();
+        if (element.isVirtualChild()
+                && getElement().equals(element.getParent())) {
+            getElement().removeVirtualChild(element);
+        }
     }
 
     /**
@@ -4878,7 +4723,7 @@ public class Spreadsheet extends Component
      *
      * @return The currently used component factory.
      */
-    public SpreadsheetComponentFactory getSpreadsheetComponentFactory() {
+    SpreadsheetComponentFactory getSpreadsheetComponentFactory() {
         return customComponentFactory;
     }
 
@@ -5405,10 +5250,12 @@ public class Spreadsheet extends Component
      *
      * @param listener
      *            Listener to add.
+     * @return a {@link Registration} for removing the event listener
      */
-    public void addSelectionChangeListener(SelectionChangeListener listener) {
-        addListener(SelectionChangeEvent.class, listener::onSelectionChange); // ,
-                                                                              // SelectionChangeListener.SELECTION_CHANGE_METHOD);
+    public Registration addSelectionChangeListener(
+            SelectionChangeListener listener) {
+        return addListener(SelectionChangeEvent.class,
+                listener::onSelectionChange);
     }
 
     /**
@@ -5416,10 +5263,12 @@ public class Spreadsheet extends Component
      *
      * @param listener
      *            Listener to add.
+     * @return a {@link Registration} for removing the event listener
      */
-    public void addCellValueChangeListener(CellValueChangeListener listener) {
-        addListener(CellValueChangeEvent.class, listener::onCellValueChange); // ,
-                                                                              // CellValueChangeListener.CELL_VALUE_CHANGE_METHOD);
+    public Registration addCellValueChangeListener(
+            CellValueChangeListener listener) {
+        return addListener(CellValueChangeEvent.class,
+                listener::onCellValueChange);
     }
 
     /**
@@ -5427,38 +5276,12 @@ public class Spreadsheet extends Component
      *
      * @param listener
      *            Listener to add.
+     * @return a {@link Registration} for removing the event listener
      */
-    public void addFormulaValueChangeListener(
+    public Registration addFormulaValueChangeListener(
             FormulaValueChangeListener listener) {
-        addListener(FormulaValueChangeEvent.class,
-                listener::onFormulaValueChange); // ,
-                                                 // FormulaValueChangeListener.FORMULA_VALUE_CHANGE_METHOD);
-    }
-
-    /**
-     * Removes the given SelectionChangeListener from this Spreadsheet.
-     *
-     * @param listener
-     *            Listener to remove.
-     */
-    public void removeSelectionChangeListener(
-            SelectionChangeListener listener) {
-        // todo: el método removeListener no existe en Component
-        // removeListener(SelectionChangeEvent.class, listener,
-        // SelectionChangeListener.SELECTION_CHANGE_METHOD);
-    }
-
-    /**
-     * Removes the given CellValueChangeListener from this Spreadsheet.
-     *
-     * @param listener
-     *            Listener to remove.
-     */
-    public void removeCellValueChangeListener(
-            CellValueChangeListener listener) {
-        // todo: el método removeListener no existe en Component
-        // removeListener(CellValueChangeEvent.class, listener,
-        // CellValueChangeListener.CELL_VALUE_CHANGE_METHOD);
+        return addListener(FormulaValueChangeEvent.class,
+                listener::onFormulaValueChange);
     }
 
     /**
@@ -5498,22 +5321,11 @@ public class Spreadsheet extends Component
      *
      * @param listener
      *            The listener to add.
+     * @return a {@link Registration} for removing the event listener
      */
-    public void addProtectedEditListener(ProtectedEditListener listener) {
-        addListener(ProtectedEditEvent.class, listener::writeAttempted); // ,
-                                                                         // ProtectedEditListener.SELECTION_CHANGE_METHOD);
-    }
-
-    /**
-     * Removes the given ProtectedEditListener.
-     *
-     * @param listener
-     *            The listener to remove.
-     */
-    public void removeProtectedEditListener(ProtectedEditListener listener) {
-        // todo: el método removeListener no existe en Component
-        // removeListener(ProtectedEditEvent.class, listener,
-        // ProtectedEditListener.SELECTION_CHANGE_METHOD);
+    public Registration addProtectedEditListener(
+            ProtectedEditListener listener) {
+        return addListener(ProtectedEditEvent.class, listener::writeAttempted);
     }
 
     /**
@@ -5669,22 +5481,10 @@ public class Spreadsheet extends Component
      *
      * @param listener
      *            Listener to add
+     * @return a {@link Registration} for removing the event listener
      */
-    public void addSheetChangeListener(SheetChangeListener listener) {
-        addListener(SheetChangeEvent.class, listener::onSheetChange); // ,
-                                                                      // SheetChangeListener.SHEET_CHANGE_METHOD);
-    }
-
-    /**
-     * Removes the given SheetChangeListener from this Spreadsheet.
-     *
-     * @param listener
-     *            Listener to remove
-     */
-    public void removeSheetChangeListener(SheetChangeListener listener) {
-        // todo: el método removeListener no existe en Component
-        // removeListener(SheetChangeEvent.class, listener,
-        // SheetChangeListener.SHEET_CHANGE_METHOD);
+    public Registration addSheetChangeListener(SheetChangeListener listener) {
+        return addListener(SheetChangeEvent.class, listener::onSheetChange);
     }
 
     private void fireSheetChangeEvent(Sheet previousSheet, Sheet newSheet) {
@@ -5692,19 +5492,6 @@ public class Spreadsheet extends Component
 
         fireEvent(new SheetChangeEvent(this, newSheet, previousSheet,
                 getSpreadsheetSheetIndex(newSheetPOIIndex), newSheetPOIIndex));
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.vaadin.ui.HasComponents#iterator()
-     */
-    // @Override
-    // todo: comprobar si esto es necesario
-    public Iterator<Component> iterator() {
-        return new IteratorChain<Component>(Arrays.asList(
-                customComponents.iterator(), attachedPopupButtons.iterator(),
-                overlayComponents.iterator()));
     }
 
     /**
@@ -5955,21 +5742,9 @@ public class Spreadsheet extends Component
 
     public void setInvalidFormulaErrorMessage(
             String invalidFormulaErrorMessage) {
-        this.invalidFormulaErrorMessage = invalidFormulaErrorMessage;
         getElement().setProperty("invalidFormulaErrorMessage",
                 invalidFormulaErrorMessage);
     }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.vaadin.ui.AbstractComponent#focus()
-     */
-    // todo: no hace falta llamar al padre?
-    /*
-     * @Override public void focus() { super.focus(); }
-     *
-     */
 
     /**
      * Controls if a column group is collapsed or not.
@@ -6220,8 +5995,31 @@ public class Spreadsheet extends Component
         void onRowHeaderDoubleClick(RowHeaderDoubleClickEvent event);
     }
 
-    @Override
-    public Locale getLocale() {
-        return super.getLocale();
+    /**
+     * This method is called when rowIndex auto-fit has been initiated from the
+     * browser by double-clicking the border of the target rowIndex header.
+     *
+     * @param rowIndex
+     *            Index of the target rowIndex, 0-based
+     */
+    protected void onRowHeaderDoubleClick(int rowIndex) {
+        fireRowHeaderDoubleClick(rowIndex);
+    }
+
+    private void fireRowHeaderDoubleClick(int rowIndex) {
+        fireEvent(new RowHeaderDoubleClickEvent(this, rowIndex));
+    }
+
+    /**
+     * adds a {@link RowHeaderDoubleClickListener} to the Spreadsheet
+     *
+     * @param listener
+     *            The listener to add
+     * @return a {@link Registration} for removing the event listener
+     **/
+    public Registration addRowHeaderDoubleClickListener(
+            RowHeaderDoubleClickListener listener) {
+        return addListener(RowHeaderDoubleClickEvent.class,
+                listener::onRowHeaderDoubleClick);
     }
 }

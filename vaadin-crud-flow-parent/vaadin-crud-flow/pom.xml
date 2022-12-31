@@ -4,24 +4,28 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-crud-flow-parent</artifactId>
-        <version>23.2-SNAPSHOT</version>
+        <version>24.0-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-crud-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Crud</name>
     <properties>
-        <osgi.bundle.license>https://vaadin.com/license/cvdl-4.0</osgi.bundle.license>
+        <osgi.bundle.license>https://vaadin.com/commercial-license-and-service-terms</osgi.bundle.license>
     </properties>
     <dependencies>
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <scope>provided</scope>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-data</artifactId>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-flow-components-base</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>

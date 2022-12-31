@@ -1,17 +1,12 @@
-package com.vaadin.flow.component.spreadsheet;
-
-/*
- * #%L
- * Vaadin Spreadsheet
- * %%
- * Copyright (C) 2013 - 2022 Vaadin Ltd
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
+/**
+ * Copyright 2000-2022 Vaadin Ltd.
  *
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
  */
+package com.vaadin.flow.component.spreadsheet;
 
 import java.io.Serializable;
 
@@ -84,7 +79,7 @@ public interface SpreadsheetComponentFactory extends Serializable {
      *         becomes visible or <code>null</code> if no component should be
      *         displayed when the cell is not selected.
      */
-    public Component getCustomComponentForCell(Cell cell, int rowIndex,
+    Component getCustomComponentForCell(Cell cell, int rowIndex,
             int columnIndex, Spreadsheet spreadsheet, Sheet sheet);
 
     /**
@@ -123,8 +118,8 @@ public interface SpreadsheetComponentFactory extends Serializable {
      *         <code>null</code> if the default editor (input field) should be
      *         used.
      */
-    public Component getCustomEditorForCell(Cell cell, int rowIndex,
-            int columnIndex, Spreadsheet spreadsheet, Sheet sheet);
+    Component getCustomEditorForCell(Cell cell, int rowIndex, int columnIndex,
+            Spreadsheet spreadsheet, Sheet sheet);
 
     /**
      * This method is called when a cell with a custom editor is displayed (the
@@ -149,7 +144,6 @@ public interface SpreadsheetComponentFactory extends Serializable {
      * @param customEditor
      *            The component that is displayed inside the cell
      */
-    public void onCustomEditorDisplayed(Cell cell, int rowIndex,
-            int columnIndex, Spreadsheet spreadsheet, Sheet sheet,
-            Component customEditor);
+    void onCustomEditorDisplayed(Cell cell, int rowIndex, int columnIndex,
+            Spreadsheet spreadsheet, Sheet sheet, Component customEditor);
 }

@@ -41,6 +41,7 @@ import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.checkbox.dataview.CheckboxGroupListDataView;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
@@ -536,6 +537,12 @@ public class CheckboxGroupTest {
 
         Assert.assertEquals("Invalid label for checkbox group ", "label",
                 checkboxGroup.getElement().getProperty("label"));
+    }
+
+    @Test
+    public void implementsHasTooltip() {
+        CheckboxGroup<String> group = new CheckboxGroup<>();
+        Assert.assertTrue(group instanceof HasTooltip);
     }
 
     private CheckboxGroup<Wrapper> getRefreshEventCheckboxGroup(

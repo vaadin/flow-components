@@ -1,5 +1,5 @@
-import { color } from '@vaadin/vaadin-lumo-styles';
-import { typography } from '@vaadin/vaadin-lumo-styles';
+import { color } from '@vaadin/vaadin-lumo-styles/color.js';
+import { typography } from '@vaadin/vaadin-lumo-styles/typography.js';
 
 const tpl = document.createElement('template');
 tpl.innerHTML = `<style>

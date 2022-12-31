@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.textfield.tests;
 
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.flow.dom.ThemeList;
@@ -87,5 +88,11 @@ public class EmailFieldTest {
         assertTrue("EmailField should support char pattern",
                 HasAllowedCharPattern.class
                         .isAssignableFrom(new EmailField().getClass()));
+    }
+
+    @Test
+    public void implementsHasTooltip() {
+        EmailField field = new EmailField();
+        Assert.assertTrue(field instanceof HasTooltip);
     }
 }

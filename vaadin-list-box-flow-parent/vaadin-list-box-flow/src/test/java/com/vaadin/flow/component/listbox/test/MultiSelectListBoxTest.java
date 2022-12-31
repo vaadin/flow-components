@@ -35,6 +35,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.listbox.ListBox;
 import com.vaadin.flow.component.listbox.MultiSelectListBox;
 import com.vaadin.flow.component.listbox.dataview.ListBoxListDataView;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
@@ -325,6 +326,11 @@ public class MultiSelectListBoxTest {
         listDataView.setIdentifierProvider(CustomItem::getId);
 
         multiSelectListBox.setValue(new CustomItem(null, "First"));
+    }
+
+    @Test
+    public void implementsHasTooltip() {
+        Assert.assertTrue(listBox instanceof HasTooltip);
     }
 
     private void assertValueChangeEvents(Set<Item>... expectedValues) {

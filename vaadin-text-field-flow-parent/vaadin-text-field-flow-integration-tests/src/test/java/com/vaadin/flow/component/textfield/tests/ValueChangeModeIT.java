@@ -74,7 +74,7 @@ public class ValueChangeModeIT extends AbstractComponentIT {
 
     @Test
     public void testValueChangeModesForTextField() throws InterruptedException {
-        testValueChangeModes(textField.$("input").first(), "textfield");
+        testValueChangeModes(textField, "textfield");
     }
 
     @Test
@@ -91,6 +91,7 @@ public class ValueChangeModeIT extends AbstractComponentIT {
     @Test
     public void testValueChangeModesForEmailField()
             throws InterruptedException {
+        emailField.sendKeys("foo@test.com");
         testValueChangeModes(emailField, "emailfield");
     }
 
@@ -109,8 +110,7 @@ public class ValueChangeModeIT extends AbstractComponentIT {
     @Test
     public void testValueChangeModesForBigDecimalField()
             throws InterruptedException {
-        testValueChangeModes(bigDecimalField.$("input").first(),
-                "bigdecimalfield");
+        testValueChangeModes(bigDecimalField, "bigdecimalfield");
     }
 
     private void testValueChangeModes(TestBenchElement field,

@@ -1,31 +1,22 @@
-package com.vaadin.flow.component.map.configuration.feature;
-
-/*
- * #%L
- * Vaadin Map
- * %%
+/**
  * Copyright 2000-2022 Vaadin Ltd.
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
  *
- * See the file license.html distributed with this software for more
- * information about licensing.
+ * This program is available under Vaadin Commercial License and Service Terms.
  *
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
  */
+package com.vaadin.flow.component.map.configuration.feature;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.vaadin.flow.component.map.Map;
 import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.Feature;
-import com.vaadin.flow.component.map.configuration.View;
 import com.vaadin.flow.component.map.configuration.geometry.Point;
 import com.vaadin.flow.component.map.configuration.geometry.SimpleGeometry;
-import com.vaadin.flow.component.map.configuration.source.Source;
 
 import java.util.Objects;
 
@@ -47,9 +38,11 @@ public abstract class PointBasedFeature extends Feature {
     }
 
     /**
-     * The coordinates that define where the feature is located on the map. The
-     * coordinates must be in the same projection as the
-     * {@link View#getProjection()} and {@link Source#getProjection()}.
+     * The coordinates that define where the feature is located on the map.
+     * Coordinates are returned in the map's user projection, which by default
+     * is {@code EPSG:4326}, also referred to as GPS coordinates. If the user
+     * projection has been changed using {@link Map#setUserProjection(String)},
+     * then coordinates must be specified in that projection instead.
      *
      * @return the current coordinates
      */
@@ -60,8 +53,11 @@ public abstract class PointBasedFeature extends Feature {
 
     /**
      * Sets the coordinates that define where the feature is located on the map.
-     * The coordinates must be in the same projection as the
-     * {@link View#getProjection()} and {@link Source#getProjection()}.
+     * Coordinates must be specified in the map's user projection, which by
+     * default is {@code EPSG:4326}, also referred to as GPS coordinates. If the
+     * user projection has been changed using
+     * {@link Map#setUserProjection(String)}, then coordinates must be specified
+     * in that projection instead.
      *
      * @param coordinates
      *            the new coordinates

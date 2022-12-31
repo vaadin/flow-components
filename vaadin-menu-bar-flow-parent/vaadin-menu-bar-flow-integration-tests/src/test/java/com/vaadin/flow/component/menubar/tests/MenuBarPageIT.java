@@ -72,7 +72,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
         openSubSubMenu();
 
         String[] menuItemContents = getOverlayMenuItemContents(
-                getAllOverlays().get(1));
+                menuBar.getAllSubMenus().get(1));
         Assert.assertArrayEquals(
                 new String[] { "<p>sub sub item 1</p>", "checkable" },
                 menuItemContents);
@@ -81,7 +81,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
     @Test
     public void openSubMenu_clickItem_listenerCalled() {
         menuBar.getButtons().get(0).click();
-        getOverlayMenuItems().get(0).click();
+        menuBar.getSubMenuItems().get(0).click();
         assertMessage("clicked sub item 1");
     }
 
@@ -89,17 +89,17 @@ public class MenuBarPageIT extends AbstractComponentIT {
     public void openSubSubMenu_clickCheckableItem_checkableStateChanges() {
         openSubSubMenu();
 
-        getOverlayMenuItems(getAllOverlays().get(1)).get(1).click();
+        menuBar.getSubMenuItems(menuBar.getAllSubMenus().get(1)).get(1).click();
         verifyClosed();
 
         assertMessage("true");
 
         menuBar.$("vaadin-menu-bar-button").first().click();
-        hoverOn(getOverlayMenuItems().get(1));
+        hoverOn(menuBar.getSubMenuItems().get(1));
 
-        waitUntil(driver -> getAllOverlays().size() == 2);
-        TestBenchElement checkableItem = getOverlayMenuItems(
-                getAllOverlays().get(1)).get(1);
+        waitUntil(driver -> menuBar.getAllSubMenus().size() == 2);
+        TestBenchElement checkableItem = menuBar
+                .getSubMenuItems(menuBar.getAllSubMenus().get(1)).get(1);
         Assert.assertTrue(checkableItem.hasAttribute("menu-item-checked"));
 
         checkableItem.click();
@@ -107,7 +107,8 @@ public class MenuBarPageIT extends AbstractComponentIT {
         assertMessage("false");
 
         openSubSubMenu();
-        checkableItem = getOverlayMenuItems(getAllOverlays().get(1)).get(1);
+        checkableItem = menuBar.getSubMenuItems(menuBar.getAllSubMenus().get(1))
+                .get(1);
         Assert.assertFalse(checkableItem.hasAttribute("menu-item-checked"));
     }
 
@@ -115,8 +116,8 @@ public class MenuBarPageIT extends AbstractComponentIT {
     public void setCheckedExternally_openSubMenu_itemChecked() {
         click("toggle-checked");
         openSubSubMenu();
-        TestBenchElement checkableItem = getOverlayMenuItems(
-                getAllOverlays().get(1)).get(1);
+        TestBenchElement checkableItem = menuBar
+                .getSubMenuItems(menuBar.getAllSubMenus().get(1)).get(1);
         Assert.assertTrue(checkableItem.hasAttribute("menu-item-checked"));
     }
 
@@ -201,7 +202,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
         click("set-width");
         waitForResizeObserver();
         menuBar.getOverflowButton().click();
-        getOverlayMenuItems().get(0).click();
+        menuBar.getSubMenuItems().get(0).click();
         assertMessage("clicked item 2");
     }
 
@@ -269,7 +270,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
         waitForResizeObserver();
         menuBar.getOverflowButton().click();
         verifyOpened();
-        assertDisabled(getOverlayMenuItems().get(0), true);
+        assertDisabled(menuBar.getSubMenuItems().get(0), true);
     }
 
     @Test
@@ -279,12 +280,12 @@ public class MenuBarPageIT extends AbstractComponentIT {
         click("toggle-disable");
         menuBar.getOverflowButton().click();
         verifyOpened();
-        assertDisabled(getOverlayMenuItems().get(0), true);
+        assertDisabled(menuBar.getSubMenuItems().get(0), true);
         // repeat
         clickBody();
         menuBar.getOverflowButton().click();
         verifyOpened();
-        assertDisabled(getOverlayMenuItems().get(0), true);
+        assertDisabled(menuBar.getSubMenuItems().get(0), true);
     }
 
     @Test
@@ -468,20 +469,23 @@ public class MenuBarPageIT extends AbstractComponentIT {
     @Test
     public void toggleSubMenuItemTheme_themeIsToggled() {
         menuBar.getButtons().get(0).click();
-        Assert.assertFalse(getOverlayMenuItems().get(1).hasAttribute("theme"));
+        Assert.assertFalse(
+                menuBar.getSubMenuItems().get(1).hasAttribute("theme"));
 
         click("toggle-sub-theme");
         verifyClosed();
 
         menuBar.getButtons().get(0).click();
-        Assert.assertEquals(getOverlayMenuItems().get(1).getAttribute("theme"),
+        Assert.assertEquals(
+                menuBar.getSubMenuItems().get(1).getAttribute("theme"),
                 MenuBarTestPage.SUB_ITEM_THEME);
 
         click("toggle-sub-theme");
         verifyClosed();
 
         menuBar.getButtons().get(0).click();
-        Assert.assertFalse(getOverlayMenuItems().get(1).hasAttribute("theme"));
+        Assert.assertFalse(
+                menuBar.getSubMenuItems().get(1).hasAttribute("theme"));
     }
 
     @Test
@@ -520,7 +524,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
     private void openSubSubMenu() {
         menuBar.getButtons().get(0).click();
         verifyOpened();
-        hoverOn(getOverlayMenuItems().get(1));
+        hoverOn(menuBar.getSubMenuItems().get(1));
         verifyNumOfOverlays(2);
     }
 
@@ -536,25 +540,8 @@ public class MenuBarPageIT extends AbstractComponentIT {
         $("body").first().click();
     }
 
-    private TestBenchElement getOverlay() {
-        verifyOpened();
-        return $(OVERLAY_TAG).first();
-    }
-
-    private List<TestBenchElement> getAllOverlays() {
-        return $(OVERLAY_TAG).all();
-    }
-
     private void verifyNumOfOverlays(int expected) {
-        waitUntil(driver -> getAllOverlays().size() == expected);
-    }
-
-    private void verifyClosed() {
-        waitForElementNotPresent(By.tagName(OVERLAY_TAG));
-    }
-
-    private void verifyOpened() {
-        waitForElementPresent(By.tagName(OVERLAY_TAG));
+        waitUntil(driver -> menuBar.getAllSubMenus().size() == expected);
     }
 
     private void assertOverlayContents(String... expected) {
@@ -562,26 +549,17 @@ public class MenuBarPageIT extends AbstractComponentIT {
     }
 
     private String[] getOverlayMenuItemContents() {
-        return getOverlayMenuItemContents(getOverlayMenuItems());
+        return getOverlayMenuItemContents(menuBar.getSubMenuItems());
     }
 
     private String[] getOverlayMenuItemContents(TestBenchElement overlay) {
-        return getOverlayMenuItemContents(getOverlayMenuItems(overlay));
+        return getOverlayMenuItemContents(menuBar.getSubMenuItems(overlay));
     }
 
     private String[] getOverlayMenuItemContents(
             List<TestBenchElement> menuItems) {
         return menuItems.stream().map(item -> item.getAttribute("innerHTML"))
                 .toArray(String[]::new);
-    }
-
-    private List<TestBenchElement> getOverlayMenuItems() {
-        return getOverlayMenuItems(getOverlay());
-    }
-
-    private List<TestBenchElement> getOverlayMenuItems(
-            TestBenchElement overlay) {
-        return overlay.$("vaadin-context-menu-item").all();
     }
 
     private void hoverOn(TestBenchElement hoverTarget) {
@@ -595,5 +573,13 @@ public class MenuBarPageIT extends AbstractComponentIT {
                 "var callback = arguments[arguments.length - 1];"
                         + "requestAnimationFrame(callback)");
 
+    }
+
+    public void verifyClosed() {
+        waitForElementNotPresent(By.tagName(OVERLAY_TAG));
+    }
+
+    public void verifyOpened() {
+        waitForElementPresent(By.tagName(OVERLAY_TAG));
     }
 }

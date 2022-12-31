@@ -128,15 +128,13 @@ public class TreeGridPreloadIT extends AbstractTreeGridIT {
     }
 
     @Test
-    public void firstExpanded_reExpand_shouldPreLoadDataForExpandedChildren() {
+    public void firstExpanded_reExpand_shouldUseCachedDataForExpandedChildren() {
         open(Arrays.asList(0), null, null, null, null);
         requestCountReset.click();
 
         getTreeGrid().collapseWithClick(0);
         getTreeGrid().expandWithClick(0);
-        // Expanding a recursively expanded parent doesn't yet trigger a preload
-        // so a second request is made from client.
-        Assert.assertEquals("2", requestCount.getValue());
+        Assert.assertEquals("0", requestCount.getValue());
     }
 
     @Test
@@ -149,13 +147,13 @@ public class TreeGridPreloadIT extends AbstractTreeGridIT {
     }
 
     @Test
-    public void firstExpanded_reExpandChild_shouldPreLoadDataForExpandedChildren() {
+    public void firstExpanded_reExpandChild_shouldUseCachedDataForExpandedChildren() {
         open(Arrays.asList(0), null, null, null, null);
         requestCountReset.click();
 
         getTreeGrid().collapseWithClick(2);
         getTreeGrid().expandWithClick(2);
-        Assert.assertEquals("1", requestCount.getValue());
+        Assert.assertEquals("0", requestCount.getValue());
     }
 
     @Test

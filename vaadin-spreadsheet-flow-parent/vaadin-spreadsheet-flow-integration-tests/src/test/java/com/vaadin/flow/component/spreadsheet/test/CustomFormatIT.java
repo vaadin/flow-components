@@ -1,17 +1,21 @@
 package com.vaadin.flow.component.spreadsheet.test;
 
 import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
+import com.vaadin.flow.testutil.TestPath;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Locale;
 
+@TestPath("vaadin-spreadsheet")
 public class CustomFormatIT extends AbstractSpreadsheetIT {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL());
+        open();
+        getDriver().manage().window().setSize(WINDOW_SIZE_LARGE);
 
         loadFile("custom_format.xlsx");
         setLocale(Locale.US);

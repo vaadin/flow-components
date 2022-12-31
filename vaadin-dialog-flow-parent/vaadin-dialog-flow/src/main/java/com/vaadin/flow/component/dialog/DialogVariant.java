@@ -15,10 +15,12 @@
  */
 package com.vaadin.flow.component.dialog;
 
+import com.vaadin.flow.component.shared.ThemeVariant;
+
 /**
  * Set of theme variants applicable for {@code vaadin-dialog} component.
  */
-public enum DialogVariant {
+public enum DialogVariant implements ThemeVariant {
     LUMO_NO_PADDING("no-padding"), MATERIAL_NO_PADDING("no-padding");
 
     private final String variant;

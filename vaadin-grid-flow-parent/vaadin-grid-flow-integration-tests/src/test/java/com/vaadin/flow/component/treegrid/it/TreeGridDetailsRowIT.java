@@ -34,8 +34,6 @@ public class TreeGridDetailsRowIT extends AbstractComponentIT {
     public void gridRootItemDetailsDisplayedWhenOpen() {
         open();
         TreeGridElement treegrid = $(TreeGridElement.class).first();
-        // detail configured
-        assertAmountOfOpenDetails(treegrid, 1);
 
         waitUntil(driver -> treegrid
                 .findElements(By.tagName("flow-component-renderer"))
@@ -54,8 +52,6 @@ public class TreeGridDetailsRowIT extends AbstractComponentIT {
     public void gridChildItemDetailsDisplayedWhenClicked() {
         open();
         TreeGridElement treegrid = $(TreeGridElement.class).first();
-        // detail configured
-        assertAmountOfOpenDetails(treegrid, 1);
         treegrid.expandWithClick(0);
         clickElementWithJs(getRow(treegrid, 2).findElement(By.tagName("td")));
 
@@ -78,8 +74,6 @@ public class TreeGridDetailsRowIT extends AbstractComponentIT {
     public void gridChildItemDetailsDisplayedAfterCollapseWhenClicked() {
         open();
         TreeGridElement treegrid = $(TreeGridElement.class).first();
-        // detail configured
-        assertAmountOfOpenDetails(treegrid, 1);
         treegrid.expandWithClick(0);
         treegrid.collapseWithClick(0);
         treegrid.expandWithClick(0);
@@ -105,8 +99,6 @@ public class TreeGridDetailsRowIT extends AbstractComponentIT {
     public void gridChildItemDetailsDisplayedAfterCollapse2WhenClicked() {
         open();
         TreeGridElement treegrid = $(TreeGridElement.class).first();
-        // detail configured
-        assertAmountOfOpenDetails(treegrid, 1);
         treegrid.expandWithClick(1);
         treegrid.collapseWithClick(1);
         treegrid.expandWithClick(1);
@@ -130,14 +122,6 @@ public class TreeGridDetailsRowIT extends AbstractComponentIT {
     private WebElement getRow(TestBenchElement grid, int row) {
         return grid.$("*").id("items").findElements(By.cssSelector("tr"))
                 .get(row);
-    }
-
-    private void assertAmountOfOpenDetails(WebElement grid,
-            int expectedAmount) {
-        waitUntil(driver -> grid.findElements(By.className("row-details"))
-                .size() == expectedAmount);
-        Assert.assertEquals(expectedAmount,
-                grid.findElements(By.className("row-details")).size());
     }
 
     private void assertElementHasButton(WebElement componentRenderer,

@@ -1,10 +1,10 @@
 package com.vaadin.flow.component.textfield;
 
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.shared.ValidationUtil;
+import com.vaadin.flow.data.binder.ValidationResult;
 
 import java.io.Serializable;
-import java.util.Objects;
-import java.util.function.BooleanSupplier;
 import java.util.regex.Pattern;
 
 /**
@@ -27,28 +27,28 @@ final class TextFieldValidationSupport implements Serializable {
     }
 
     /**
-     * @see GeneratedVaadinTextField#setRequired
+     * @see TextField#setRequired
      */
     void setRequired(boolean required) {
         this.required = required;
     }
 
     /**
-     * @see GeneratedVaadinTextField#setMinlength(double)
+     * @see TextField#setMinlength(double)
      */
     void setMinLength(Integer minLength) {
         this.minLength = minLength;
     }
 
     /**
-     * @see GeneratedVaadinTextField#setMaxlength(double)
+     * @see TextField#setMaxlength(double)
      */
     void setMaxLength(Integer maxLength) {
         this.maxLength = maxLength;
     }
 
     /**
-     * @see GeneratedVaadinTextField#setPattern(String)
+     * @see TextField#setPattern(String)
      */
     void setPattern(String pattern) {
         this.pattern = pattern == null || pattern.isEmpty() ? null
@@ -63,18 +63,33 @@ final class TextFieldValidationSupport implements Serializable {
      * @return <code>true</code> if the value is invalid.
      */
     boolean isInvalid(String value) {
-        final boolean isRequiredButEmpty = required
-                && Objects.equals(field.getEmptyValue(), value);
+        var requiredValidation = ValidationUtil.checkRequired(required, value,
+                field.getEmptyValue());
+
+        return requiredValidation.isError() || checkValidity(value).isError();
+    }
+
+    ValidationResult checkValidity(String value) {
+
         final boolean isMaxLengthExceeded = value != null && maxLength != null
                 && value.length() > maxLength;
-        final boolean isMinLengthNotReached = value != null && minLength != null
-                && value.length() < minLength;
-        // Only evaluate if necessary.
-        final BooleanSupplier doesValueViolatePattern = () -> value != null
+        if (isMaxLengthExceeded) {
+            return ValidationResult.error("");
+        }
+
+        final boolean isMinLengthNotReached = value != null && !value.isEmpty()
+                && minLength != null && value.length() < minLength;
+        if (isMinLengthNotReached) {
+            return ValidationResult.error("");
+        }
+
+        final boolean valueViolatePattern = value != null && !value.isEmpty()
                 && pattern != null && !pattern.matcher(value).matches();
-        return isRequiredButEmpty || isMaxLengthExceeded
-                || isMinLengthNotReached
-                || doesValueViolatePattern.getAsBoolean();
+        if (valueViolatePattern) {
+            return ValidationResult.error("");
+        }
+
+        return ValidationResult.ok();
     }
 
 }

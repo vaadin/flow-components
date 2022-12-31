@@ -7,6 +7,8 @@ import org.mockito.Mockito;
 
 import java.util.function.Consumer;
 
+import com.vaadin.flow.component.shared.HasTooltip;
+
 @SuppressWarnings("unchecked")
 public class CustomFieldTest {
 
@@ -43,4 +45,8 @@ public class CustomFieldTest {
                 .addValueChangeListener(e -> listener.accept(e.getValue()));
     }
 
+    @Test
+    public void implementsHasTooltip() {
+        Assert.assertTrue(systemUnderTest instanceof HasTooltip);
+    }
 }

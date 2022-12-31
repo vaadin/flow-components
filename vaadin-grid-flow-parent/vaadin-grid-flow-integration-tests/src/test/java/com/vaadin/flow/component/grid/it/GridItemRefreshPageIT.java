@@ -34,14 +34,14 @@ import com.vaadin.flow.testutil.TestPath;
 public class GridItemRefreshPageIT extends AbstractComponentIT {
 
     @Test
-    public void updateAndRefreshItemsOnTheServerUsingDataProvider_withTemplateRenderer() {
+    public void updateAndRefreshItemsOnTheServerUsingDataProvider_withLitRenderer() {
         updateAndRefreshItemsOnTheServer("template-grid",
                 "template-refresh-first", "template-refresh-multiple",
                 "template-refresh-all");
     }
 
     @Test
-    public void updateAndRefreshItemsOnTheServerUsingDataCommunicator_withTemplateRenderer() {
+    public void updateAndRefreshItemsOnTheServerUsingDataCommunicator_withLitRenderer() {
         updateAndRefreshItemsOnTheServer("template-grid",
                 "template-refresh-first-communicator",
                 "template-refresh-multiple-communicator",

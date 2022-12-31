@@ -1,17 +1,14 @@
+/**
+ * Copyright 2000-2022 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
+ */
 package com.vaadin.addon.spreadsheet.client;
 
-/*
- * #%L
- * Vaadin Spreadsheet
- * %%
- * Copyright (C) 2013 - 2022 Vaadin Ltd
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
- *
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
- */
+import com.google.gwt.dom.client.Element;
 
 import com.google.gwt.dom.client.StyleElement;
 
@@ -114,6 +111,9 @@ public class SheetJsniUtil {
     public native int replaceSelector(StyleElement stylesheet, String selector,
             int ruleindex)
     /*-{
+        if (!stylesheet.sheet.cssRules[ruleindex]) {
+            return -1;
+        }
         var oldSelector = stylesheet.sheet.cssRules[ruleindex].selectorText;
         var cssText = stylesheet.sheet.cssRules[ruleindex].cssText.replace(oldSelector, selector);
         stylesheet.sheet.deleteRule(ruleindex);
@@ -151,4 +151,10 @@ public class SheetJsniUtil {
         return overlayRules;
     }-*/;
 
+    public static native Element getVirtualChild(String nodeId, String appId) /*-{
+        return $wnd.Vaadin
+          && $wnd.Vaadin.Flow
+          && $wnd.Vaadin.Flow.clients[appId]
+          && $wnd.Vaadin.Flow.clients[appId].getByNodeId(parseInt(nodeId));
+    }-*/;
 }

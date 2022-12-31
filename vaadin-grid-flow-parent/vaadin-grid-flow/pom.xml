@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-grid-flow-parent</artifactId>
-        <version>23.2-SNAPSHOT</version>
+        <version>24.0-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-grid-flow</artifactId>
     <packaging>jar</packaging>
@@ -28,6 +28,11 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-flow-components-base</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
             <artifactId>vaadin-context-menu-flow</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -36,10 +41,8 @@
             <artifactId>commons-lang3</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <version>3.1.0</version>
-            <scope>test</scope>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -101,6 +104,7 @@
             <plugin>
                 <groupId>org.apache.karaf.tooling</groupId>
                 <artifactId>karaf-maven-plugin</artifactId>
+                <version>${karaf-maven-plugin.version}</version>
                 <configuration>
                     <enableGeneration>true</enableGeneration>
                     <includeProjectArtifact>true</includeProjectArtifact>

@@ -4,24 +4,24 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-confirm-dialog-flow-parent</artifactId>
-        <version>23.2-SNAPSHOT</version>
+        <version>24.0-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-confirm-dialog-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Confirm Dialog</name>
-    <properties>
-        <osgi.bundle.license>https://vaadin.com/license/cvdl-4.0</osgi.bundle.license>
-    </properties>
     <dependencies>
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <version>3.0.1</version>
-            <scope>provided</scope>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-server</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-flow-components-base</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

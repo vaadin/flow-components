@@ -15,13 +15,15 @@
  */
 package com.vaadin.flow.component.checkbox.tests;
 
-import java.util.List;
-
+import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
+import com.vaadin.flow.component.checkbox.testbench.CheckboxGroupElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.List;
 
 @TestPath("vaadin-checkbox-group-disabled-item")
 public class CheckboxGroupDisabledItemIT extends AbstractComponentIT {
@@ -29,32 +31,30 @@ public class CheckboxGroupDisabledItemIT extends AbstractComponentIT {
     @Test
     public void disabledGroupItemChecked() {
         open();
-        TestBenchElement group = $(TestBenchElement.class)
+        CheckboxGroupElement group = $(CheckboxGroupElement.class)
                 .id("checkbox-group-disabled-item");
 
-        List<TestBenchElement> checkboxes = group.$("vaadin-checkbox").all();
+        List<CheckboxElement> checkboxes = group.getCheckboxes();
 
-        Assert.assertEquals(Boolean.TRUE.toString(),
-                checkboxes.get(1).getAttribute("checked"));
+        Assert.assertTrue(checkboxes.get(1).isChecked());
     }
 
     @Test
     public void disabledItemCanBeCheckedProgrammatically() {
         open();
-        TestBenchElement group = $(TestBenchElement.class)
+        CheckboxGroupElement group = $(CheckboxGroupElement.class)
                 .id("checkbox-group-disabled-item");
-        List<TestBenchElement> checkboxes = group.$("vaadin-checkbox").all();
-        TestBenchElement secondCheckbox = checkboxes.get(1);
+        List<CheckboxElement> checkboxes = group.getCheckboxes();
+        CheckboxElement secondCheckbox = checkboxes.get(1);
         TestBenchElement toggleBarButton = $("button").id("toggle-bar-button");
 
         // Deselect
         toggleBarButton.click();
-        Assert.assertNull(secondCheckbox.getAttribute("checked"));
+        Assert.assertFalse(secondCheckbox.isChecked());
 
         // Reselect
         toggleBarButton.click();
-        Assert.assertEquals(Boolean.TRUE.toString(),
-                secondCheckbox.getAttribute("checked"));
+        Assert.assertTrue(secondCheckbox.isChecked());
     }
 
     /**
@@ -64,27 +64,26 @@ public class CheckboxGroupDisabledItemIT extends AbstractComponentIT {
     @Test
     public void enabledItemCanBeCheckedManuallyWhenSettingItemEnabledProviderAfterSelectingValue() {
         open();
-        TestBenchElement group = $(TestBenchElement.class)
+        CheckboxGroupElement group = $(CheckboxGroupElement.class)
                 .id("checkbox-group-disabled-item");
-        List<TestBenchElement> checkboxes = group.$("vaadin-checkbox").all();
-        TestBenchElement firstCheckbox = checkboxes.get(0);
+        List<CheckboxElement> checkboxes = group.getCheckboxes();
+        CheckboxElement firstCheckbox = checkboxes.get(0);
 
         // Select
         firstCheckbox.click();
-        Assert.assertEquals(Boolean.TRUE.toString(),
-                firstCheckbox.getAttribute("checked"));
+        Assert.assertTrue(firstCheckbox.isChecked());
 
         // Deselect
         firstCheckbox.click();
-        Assert.assertNull(firstCheckbox.getAttribute("checked"));
+        Assert.assertFalse(firstCheckbox.isChecked());
     }
 
     @Test
-    public void enablingTheGroupDoesnNotEnableItemDisabledWithItemEnabledProvider() {
+    public void enablingTheGroupDoesNotEnableItemDisabledWithItemEnabledProvider() {
         open();
-        TestBenchElement group = $(TestBenchElement.class)
+        CheckboxGroupElement group = $(CheckboxGroupElement.class)
                 .id("checkbox-group-disabled-item");
-        List<TestBenchElement> checkboxes = group.$("vaadin-checkbox").all();
+        List<CheckboxElement> checkboxes = group.getCheckboxes();
         TestBenchElement toggleEnabledButton = $("button")
                 .id("toggle-enabled-button");
 

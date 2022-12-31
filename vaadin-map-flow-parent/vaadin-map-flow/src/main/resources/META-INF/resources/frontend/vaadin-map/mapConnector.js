@@ -1,5 +1,21 @@
+/**
+ * @license
+ * Copyright 2000-2022 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
+ */
+import { setUserProjection as openLayersSetUserProjection } from 'ol/proj';
+import { register as openLayersRegisterProjections } from 'ol/proj/proj4';
+import proj4 from 'proj4';
 import { synchronize } from './synchronization';
 import { createLookup, getLayerForFeature } from './util';
+
+// By default, use EPSG:4326 projection for all coordinates passed to, and return from the public API.
+// Internally coordinates will be converted to the projection used by the map's view.
+openLayersSetUserProjection('EPSG:4326');
 
 (function () {
   function init(mapElement) {
@@ -19,7 +35,7 @@ import { createLookup, getLayerForFeature } from './util';
        */
       synchronize(changedObjects) {
         // Provide synchronization function and the OL instance lookup through context object
-        const context = { synchronize, lookup: this.lookup };
+        const context = { synchronize, lookup: this.lookup, mapElement, connector: mapElement.$connector };
 
         changedObjects.forEach((change) => {
           // The OL map instance already exists and should not be created by the
@@ -29,6 +45,28 @@ import { createLookup, getLayerForFeature } from './util';
           }
 
           synchronize(change, context);
+        });
+      },
+      /**
+       * Forces a render of the OpenLayers map. Some objects in OpenLayers are not observable
+       * and do not trigger change events, for example Style objects or any of their children.
+       * In these cases this method can be called from the synchronization functions of these
+       * objects.
+       * This method will trigger a debounced render of the map by firing a change event from
+       * each layer. We simply render all layers as a sync. function does not know which layer
+       * its synced object is in. Even if the change event is fired from multiple layers, this
+       * only results in a single render of the map.
+       */
+      forceRender() {
+        if (this._forceRenderTimeout) {
+          return;
+        }
+        this._forceRenderTimeout = setTimeout(() => {
+          this._forceRenderTimeout = null;
+          mapElement.configuration
+            .getLayers()
+            .getArray()
+            .forEach((layer) => layer.changed());
         });
       }
     };
@@ -98,7 +136,33 @@ import { createLookup, getLayerForFeature } from './util';
     });
   }
 
+  /**
+   * Set a custom user projection for all coordinates passing through the public API.
+   * Internally coordinates will be converted to the projection used by the map's view.
+   * @param projection
+   */
+  function setUserProjection(projection) {
+    openLayersSetUserProjection(projection);
+  }
+
+  /**
+   * Define a coordinate projection that can be used as view or user projection.
+   * Projection definitions must be provided in the WKT (well known text) format.
+   * Internally the proj4 library is used to define the projection, which is then
+   * integrated with OpenLayers.
+   * @param projection
+   * @param wksDefinition
+   */
+  function defineProjection(projection, wksDefinition) {
+    // Define projection in proj4, and then integrate it with OpenLayers
+    // There should not be any side effects from calling either multiple times
+    proj4.defs(projection, wksDefinition);
+    openLayersRegisterProjections(proj4);
+  }
+
   window.Vaadin.Flow.mapConnector = {
-    init
+    init,
+    setUserProjection,
+    defineProjection
   };
 })();

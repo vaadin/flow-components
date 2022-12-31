@@ -1,11 +1,15 @@
 package com.vaadin.flow.component.spreadsheet.test;
 
 import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
+import com.vaadin.flow.testutil.TestPath;
+
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.By;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.Assert;
 
+@TestPath("vaadin-spreadsheet")
 public class FormulaIT extends AbstractSpreadsheetIT {
 
     private final String[] integerColumn = { "1", "2", "3", "4" };
@@ -16,24 +20,24 @@ public class FormulaIT extends AbstractSpreadsheetIT {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL());
+        open();
     }
 
     @Test
     public void testSimpleFormulaSheet() throws Exception {
         loadFile("formulasheet.xlsx");
         selectCell("A2");
-        assertEquals("1", getSpreadsheet().getCellAt("A1").getValue());
+        Assert.assertEquals("1", getSpreadsheet().getCellAt("A1").getValue());
         selectCell("A1");
-        assertEquals("1", getFormulaFieldValue());
+        Assert.assertEquals("1", getFormulaFieldValue());
 
-        assertEquals("2", getSpreadsheet().getCellAt("B1").getValue());
+        Assert.assertEquals("2", getSpreadsheet().getCellAt("B1").getValue());
         selectCell("B1");
-        assertEquals("=A1+1", getFormulaFieldValue());
+        Assert.assertEquals("=A1+1", getFormulaFieldValue());
 
-        assertEquals("10", getSpreadsheet().getCellAt("C8").getValue());
+        Assert.assertEquals("10", getSpreadsheet().getCellAt("C8").getValue());
         selectCell("C8");
-        assertEquals("=C7+1", getFormulaFieldValue());
+        Assert.assertEquals("=C7+1", getFormulaFieldValue());
     }
 
     @Test
@@ -50,7 +54,7 @@ public class FormulaIT extends AbstractSpreadsheetIT {
         // Change A1 to an invalid formula
         cellA1.setValue("=A+2");
         // Check reference to A1 was updated
-        assertEquals("=A+2", cellB1.getValue());
+        Assert.assertEquals("=A+2", cellB1.getValue());
     }
 
     @Test
@@ -65,10 +69,10 @@ public class FormulaIT extends AbstractSpreadsheetIT {
         setCellValue("B3", "=PRODUCT(A1:A4)");
         setCellValue("B4", "=A1*A2*A3*A4");
 
-        assertEquals("10", getCellContent("B1"));
-        assertEquals("10", getCellContent("B2"));
-        assertEquals("24", getCellContent("B3"));
-        assertEquals("24", getCellContent("B4"));
+        Assert.assertEquals("10", getCellContent("B1"));
+        Assert.assertEquals("10", getCellContent("B2"));
+        Assert.assertEquals("24", getCellContent("B3"));
+        Assert.assertEquals("24", getCellContent("B4"));
     }
 
     @Test
@@ -81,8 +85,8 @@ public class FormulaIT extends AbstractSpreadsheetIT {
         setCellValue("B2", "=COUNTA(A1:A6)");
 
         // Date strings must be interpreted as numeric
-        assertEquals("2", getCellValue("B1"));
-        assertEquals("5", getCellValue("B2"));
+        Assert.assertEquals("2", getCellValue("B1"));
+        Assert.assertEquals("5", getCellValue("B2"));
     }
 
     @Test
@@ -106,15 +110,15 @@ public class FormulaIT extends AbstractSpreadsheetIT {
         setCellValue("C3", "=SUBTOTAL(9,A1:A5)");
         setCellValue("C4", "=SUBTOTAL(9,A1:A6)");
 
-        assertEquals("280", getCellContent("B1"));
-        assertEquals("60", getCellContent("B2"));
-        assertEquals("130", getCellContent("B3"));
-        assertEquals("230", getCellContent("B4"));
+        Assert.assertEquals("280", getCellContent("B1"));
+        Assert.assertEquals("60", getCellContent("B2"));
+        Assert.assertEquals("130", getCellContent("B3"));
+        Assert.assertEquals("230", getCellContent("B4"));
 
-        assertEquals("150", getCellContent("C1"));
-        assertEquals("30", getCellContent("C2"));
-        assertEquals("100", getCellContent("C3"));
-        assertEquals("100", getCellContent("C4"));
+        Assert.assertEquals("150", getCellContent("C1"));
+        Assert.assertEquals("30", getCellContent("C2"));
+        Assert.assertEquals("100", getCellContent("C3"));
+        Assert.assertEquals("100", getCellContent("C4"));
     }
 
     @Test
@@ -127,11 +131,11 @@ public class FormulaIT extends AbstractSpreadsheetIT {
         setCellValue("B1", "=A1+A2");
         setCellValue("B2", "=B1+A3");
         setCellValue("A3", "30");
-        assertEquals("60", getCellValue("B2"));
+        Assert.assertEquals("60", getCellValue("B2"));
 
         // Change a basic cell value and check if other cells are updated.
         setCellValue("A1", "40");
-        assertEquals("90", getCellValue("B2"));
+        Assert.assertEquals("90", getCellValue("B2"));
     }
 
     @Test
@@ -147,11 +151,27 @@ public class FormulaIT extends AbstractSpreadsheetIT {
         setCellValue("B5", "=AVERAGE(A1:A10)");
         setCellValue("B6", "=AVERAGE(A1:A2, A4)");
 
-        assertEquals("31.08", getCellContent("B1"));
-        assertEquals("7", getCellContent("B2"));
-        assertEquals("3", getCellContent("B3"));
-        assertEquals("19.98", getCellContent("B4"));
-        assertEquals("4.44", getCellContent("B5"));
-        assertEquals("2.59", getCellContent("B6"));
+        Assert.assertEquals("31.08", getCellContent("B1"));
+        Assert.assertEquals("7", getCellContent("B2"));
+        Assert.assertEquals("3", getCellContent("B3"));
+        Assert.assertEquals("19.98", getCellContent("B4"));
+        Assert.assertEquals("4.44", getCellContent("B5"));
+        Assert.assertEquals("2.59", getCellContent("B6"));
+    }
+
+    @Test
+    public void invalidFormulaIndicatorMouseDown_cellSelected() {
+        createNewSpreadsheet();
+
+        setCellValue("A1", "=a");
+        selectCell("B1");
+
+        var invalidFormulaIndicator = getCellElement("A1")
+                .findElement(By.className("cell-invalidformula-triangle"));
+        executeScript(
+                "arguments[0].dispatchEvent(new Event('mousedown', {bubbles:true}))",
+                invalidFormulaIndicator);
+
+        Assert.assertTrue(isCellSelected("A1"));
     }
 }

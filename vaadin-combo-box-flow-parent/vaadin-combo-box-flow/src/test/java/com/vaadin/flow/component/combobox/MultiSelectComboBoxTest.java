@@ -24,8 +24,10 @@ import org.mockito.Mockito;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class MultiSelectComboBoxTest extends ComboBoxBaseTest {
@@ -220,4 +222,43 @@ public class MultiSelectComboBoxTest extends ComboBoxBaseTest {
 
         comboBox.getSelectedItems().add("baz");
     }
+
+    @Test
+    public void changeSelection_preservesOrder() {
+        MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
+        comboBox.setItems("One", "Two", "Three", "Four", "Five", "Six", "Seven",
+                "Eight", "Nine", "Ten");
+
+        Set<String> value = null;
+        List<String> valueAsList = null;
+
+        comboBox.select("Eight");
+        comboBox.select("Two");
+        comboBox.select("Four");
+        value = comboBox.getValue();
+        valueAsList = value.stream().collect(Collectors.toList());
+        Assert.assertEquals("Eight", valueAsList.get(0));
+        Assert.assertEquals("Two", valueAsList.get(1));
+        Assert.assertEquals("Four", valueAsList.get(2));
+        comboBox.clear();
+
+        Set<String> linkedHashSetValue = new LinkedHashSet<>(
+                Arrays.asList("Eight", "Two", "Four").stream()
+                        .collect(Collectors.toList()));
+        comboBox.setValue(linkedHashSetValue);
+        value = comboBox.getValue();
+        valueAsList = value.stream().collect(Collectors.toList());
+        Assert.assertEquals("Eight", valueAsList.get(0));
+        Assert.assertEquals("Two", valueAsList.get(1));
+        Assert.assertEquals("Four", valueAsList.get(2));
+        comboBox.clear();
+
+        comboBox.select("Eight", "Two", "Four");
+        value = comboBox.getValue();
+        valueAsList = value.stream().collect(Collectors.toList());
+        Assert.assertEquals("Eight", valueAsList.get(0));
+        Assert.assertEquals("Two", valueAsList.get(1));
+        Assert.assertEquals("Four", valueAsList.get(2));
+    }
+
 }

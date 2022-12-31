@@ -15,14 +15,11 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-
-import static org.junit.Assert.assertThat;
 
 import java.util.List;
 import java.util.Locale;
@@ -81,21 +78,18 @@ public class GridViewItemDetailsIT extends AbstractComponentIT {
 
         getCellContent(grid.getCell(1, 2)).click();
         assertAmountOfOpenDetails(grid, 1);
-        assertThat(
-                grid.findElement(By.className("custom-details"))
-                        .getAttribute("innerHTML"),
-                CoreMatchers.containsString("Hi! My name is <b>Person 2!</b>"));
+        Assert.assertTrue(grid.findElement(By.className("custom-details"))
+                .getText().contains("Hi! My name is Person 2!"));
 
         getCellContent(grid.getCell(3, 2)).click();
         assertAmountOfOpenDetails(grid, 2);
 
         getCellContent(grid.getCell(1, 2)).click();
         getCellContent(grid.getCell(3, 2)).click();
-        assertThat("Details should be closed after clicking the button again",
-                grid.findElement(By.className("custom-details"))
-                        .getAttribute("innerHTML"),
-                CoreMatchers.not(CoreMatchers
-                        .containsString("Hi! My name is <b>Person 2!</b>")));
+        Assert.assertFalse(
+                "Details should be closed after clicking the button again",
+                grid.findElement(By.className("custom-details")).getText()
+                        .contains("Hi! My name is Person 2!"));
     }
 
     private void assertAmountOfOpenDetails(WebElement grid,

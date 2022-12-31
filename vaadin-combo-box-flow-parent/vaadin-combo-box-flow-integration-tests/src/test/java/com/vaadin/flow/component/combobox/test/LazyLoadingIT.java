@@ -38,6 +38,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
     private ComboBoxElement emptyCallbackBox;
     private ComboBoxElement lazyCustomPageSize;
     private ComboBoxElement disabledLazyLoadingBox;
+    private ComboBoxElement lazyWithSmallCustomPageSize;
 
     private WebElement lazySizeRequestCountSpan;
 
@@ -62,6 +63,8 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
                 By.id("callback-dataprovider-size-request-count"));
         disabledLazyLoadingBox = $(ComboBoxElement.class)
                 .id("disabled-lazy-loading");
+        lazyWithSmallCustomPageSize = $(ComboBoxElement.class)
+                .id("lazy-small-custom-page-size");
     }
 
     @Test
@@ -91,85 +94,6 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         stringBox.setFilter("Item 111");
         assertRendered("Item 111");
         assertNotRendered("Item 2");
-    }
-
-    @Test
-    public void scrollOverlay_morePagesLoaded_overflowingPagesDiscarded() {
-        stringBox.openPopup();
-        scrollToItem(stringBox, 50);
-        waitUntilTextInContent("Item 52");
-
-        assertLoadedItemsCount(
-                "There should be 100 items after loading two pages", 100,
-                stringBox);
-        assertRendered("Item 52");
-
-        scrollToItem(stringBox, 100);
-        waitUntilTextInContent("Item 102");
-
-        assertLoadedItemsCount(
-                "There should be 150 items after loading three pages", 150,
-                stringBox);
-        assertRendered("Item 102");
-
-        // The first pages should get discarded (active range has default limit
-        // of 500)
-        for (int i = 150; i <= 600; i += 50) {
-            scrollToItem(stringBox, i);
-            waitUntilTextInContent("Item " + i);
-        }
-
-        assertLoadedItemsCount(
-                "There should be 500 items after loading multiple pages", 500,
-                stringBox);
-        assertRendered("Item 602");
-
-        // The last pages should get discarded (active range has default limit
-        // of 500)
-        for (int i = 600; i >= 0; i -= 50) {
-            scrollToItem(stringBox, i);
-            waitUntilTextInContent("Item " + i);
-        }
-
-        assertLoadedItemsCount(
-                "There should be 500 items after scrolling back to start", 500,
-                stringBox);
-        assertRendered("Item 2");
-    }
-
-    @Test
-    public void openPopup_scrollToEnd_onlyLastPageLoaded() {
-        stringBox.openPopup();
-        scrollToItem(stringBox, 1000);
-        waitUntil(e -> getOverlayContents().contains("Item 999"));
-        assertLoadedItemsCount(
-                "Expected the last page to be loaded (50 items).", 50,
-                stringBox);
-        assertRendered("Item 999");
-    }
-
-    @Test
-    public void scrollToEnd_scrollUpwards_pagesLoaded() {
-        stringBox.openPopup();
-        scrollToItem(stringBox, 1000);
-        waitUntilTextInContent("Item 999");
-        scrollToItem(stringBox, 920);
-        waitUntilTextInContent("Item 919");
-
-        assertLoadedItemsCount(
-                "Expected the two last pages to be loaded (100 items).", 100,
-                stringBox);
-        assertRendered("Item 920");
-
-        scrollToItem(stringBox, 870);
-        waitUntilTextInContent("Item 869");
-
-        assertLoadedItemsCount(
-                "Expected the three last pages to be loaded (150 items).", 150,
-                stringBox);
-        assertRendered("Item 870");
-        assertNotRendered("Item 990");
-
     }
 
     @Test
@@ -371,6 +295,8 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
 
         filterBox.setFilter("Person");
 
+        waitForElementNotPresent(By.tagName("vaadin-combo-box-overlay"));
+
         Assert.assertEquals(
                 "None of the items should match the filter "
                         + "and overlay is not displayed",
@@ -560,7 +486,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         disabledLazyLoadingBox.openPopup();
         assertLoadedItemsCount("Initially all 100 items should be loaded", 100,
                 disabledLazyLoadingBox);
-        lazyCustomPageSize.closePopup();
+        disabledLazyLoadingBox.closePopup();
 
         clickButton("enable-lazy-loading");
         disabledLazyLoadingBox.openPopup();
@@ -572,6 +498,24 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         assertLoadedItemsCount("Scrolling down should load further pages", 100,
                 disabledLazyLoadingBox);
         assertRendered("99");
+    }
+
+    @Test
+    // https://github.com/vaadin/flow-components/issues/3595
+    public void smallCustomPageSize_filter_selectItem_loadingStateResolved() {
+        String item = "2";
+
+        lazyWithSmallCustomPageSize.selectByText(item);
+        lazyWithSmallCustomPageSize.setFilter(item);
+        Assert.assertEquals(item,
+                getSelectedItemLabel(lazyWithSmallCustomPageSize));
+
+        lazyWithSmallCustomPageSize.closePopup();
+        Assert.assertEquals(item,
+                getSelectedItemLabel(lazyWithSmallCustomPageSize));
+
+        lazyWithSmallCustomPageSize.click();
+        assertLoadingStateResolved(lazyWithSmallCustomPageSize);
     }
 
     private void assertMessage(String expectedMessage) {

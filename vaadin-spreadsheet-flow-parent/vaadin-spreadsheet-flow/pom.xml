@@ -4,13 +4,14 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-spreadsheet-flow-parent</artifactId>
-        <version>23.2-SNAPSHOT</version>
+        <version>24.0-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-spreadsheet-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Spreadsheet</name>
     <properties>
-        <osgi.bundle.license>https://vaadin.com/license/cvdl-4.0</osgi.bundle.license>
+        <osgi.bundle.license>https://vaadin.com/commercial-license-and-service-terms</osgi.bundle.license>
+        <cvdlName>vaadin-spreadsheet-flow</cvdlName>
     </properties>
     <dependencies>
         <dependency>
@@ -45,6 +46,11 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-charts-flow</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
             <artifactId>flow-html-components</artifactId>
         </dependency>
         <dependency>
@@ -55,7 +61,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>license-checker</artifactId>
-            <version>1.5.1</version>
+            <version>1.11.2</version>
         </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>
@@ -80,9 +86,8 @@
             <artifactId>poi-ooxml-full</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <scope>provided</scope>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
         </dependency>
     </dependencies>
     <build>
@@ -96,6 +101,9 @@
                 <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
                     <archive>
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                        </manifest>
                         <manifestFile>
                             ${project.build.outputDirectory}/META-INF/MANIFEST.MF
                         </manifestFile>

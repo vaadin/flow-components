@@ -46,7 +46,7 @@ public class CustomHelperIT extends AbstractComponentIT {
     public void assertHelperComponentLazy() {
         final CustomFieldElement customFieldHelperComponent = $(
                 CustomFieldElement.class)
-                        .id("custom-field-helper-component-lazy");
+                .id("custom-field-helper-component-lazy");
 
         $("button").id("button-add-helper-component").click();
 

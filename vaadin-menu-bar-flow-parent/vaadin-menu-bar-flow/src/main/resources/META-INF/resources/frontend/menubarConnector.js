@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+import './contextMenuConnector.js';
 
 (function () {
   const tryCatchWrapper = function (callback) {

@@ -17,8 +17,13 @@
 
 package com.vaadin.flow.component.progressbar;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 
 /**
  * Progress Bar shows the completion status of a task or process. The progress
@@ -27,10 +32,13 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  *
  * @author Vaadin Ltd.
  */
-@NpmPackage(value = "@vaadin/progress-bar", version = "23.2.0-alpha3")
-@NpmPackage(value = "@vaadin/vaadin-progress-bar", version = "23.2.0-alpha3")
-public class ProgressBar extends GeneratedVaadinProgressBar<ProgressBar>
-        implements HasSize {
+@Tag("vaadin-progress-bar")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha7")
+@NpmPackage(value = "@vaadin/progress-bar", version = "24.0.0-alpha7")
+@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@JsModule("@vaadin/progress-bar/src/vaadin-progress-bar.js")
+public class ProgressBar extends Component
+        implements HasSize, HasStyle, HasThemeVariant<ProgressBarVariant> {
 
     /**
      * Constructs a new object with a scale of 0 to 1, and an initial value of
@@ -100,7 +108,7 @@ public class ProgressBar extends GeneratedVaadinProgressBar<ProgressBar>
                     "value must be between min ('%s') and max ('%s')", min,
                     max));
         }
-        super.setValue(value);
+        getElement().setProperty("value", value);
     }
 
     /**
@@ -109,7 +117,7 @@ public class ProgressBar extends GeneratedVaadinProgressBar<ProgressBar>
      * @return the {@code value} property of the progressbar
      */
     public double getValue() {
-        return getValueDouble();
+        return getElement().getProperty("value", 0.0);
     }
 
     /**
@@ -119,7 +127,7 @@ public class ProgressBar extends GeneratedVaadinProgressBar<ProgressBar>
      *            the double value to set
      */
     public void setMax(double max) {
-        super.setMax(max);
+        getElement().setProperty("max", max);
     }
 
     /**
@@ -128,7 +136,7 @@ public class ProgressBar extends GeneratedVaadinProgressBar<ProgressBar>
      * @return the {@code max} property of the progressbar
      */
     public double getMax() {
-        return getMaxDouble();
+        return getElement().getProperty("max", 0.0);
     }
 
     /**
@@ -138,7 +146,7 @@ public class ProgressBar extends GeneratedVaadinProgressBar<ProgressBar>
      *            the double value to set
      */
     public void setMin(double min) {
-        super.setMin(min);
+        getElement().setProperty("min", min);
     }
 
     /**
@@ -147,12 +155,18 @@ public class ProgressBar extends GeneratedVaadinProgressBar<ProgressBar>
      * @return the {@code min} property of the progressbar
      */
     public double getMin() {
-        return getMinDouble();
+        return getElement().getProperty("min", 0.0);
     }
 
-    @Override
+    /**
+     * Indeterminate state of the progressbar. This property takes precedence
+     * over other state properties (min, max, value).
+     *
+     * @param indeterminate
+     *            the boolean value to set
+     */
     public void setIndeterminate(boolean indeterminate) {
-        super.setIndeterminate(indeterminate);
+        getElement().setProperty("indeterminate", indeterminate);
     }
 
     /**
@@ -165,6 +179,6 @@ public class ProgressBar extends GeneratedVaadinProgressBar<ProgressBar>
      * @return the {@code indeterminate} property of the progressbar
      */
     public boolean isIndeterminate() {
-        return isIndeterminateBoolean();
+        return getElement().getProperty("indeterminate", false);
     }
 }

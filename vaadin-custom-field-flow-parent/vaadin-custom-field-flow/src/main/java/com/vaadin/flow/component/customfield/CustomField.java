@@ -1,24 +1,19 @@
-package com.vaadin.flow.component.customfield;
-
 /*
- * #%L
- * Vaadin CustomField for Vaadin 10
- * %%
  * Copyright 2000-2022 Vaadin Ltd.
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
+package com.vaadin.flow.component.customfield;
 
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -29,6 +24,7 @@ import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasTooltip;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.AbstractField;
@@ -39,7 +35,6 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
-import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.dom.Element;
 
@@ -56,14 +51,13 @@ import com.vaadin.flow.dom.Element;
  *            field value type
  */
 @Tag("vaadin-custom-field")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha3")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/custom-field", version = "23.2.0-alpha3")
-@NpmPackage(value = "@vaadin/vaadin-custom-field", version = "23.2.0-alpha3")
+@NpmPackage(value = "@vaadin/custom-field", version = "24.0.0-alpha7")
 @JsModule("@vaadin/custom-field/src/vaadin-custom-field.js")
 public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
-        implements HasSize, HasValidation, Focusable<CustomField>, HasHelper,
-        HasLabel, HasTheme, HasStyle {
+        implements Focusable<CustomField<T>>, HasHelper, HasSize, HasValidation,
+        HasLabel, HasTheme, HasStyle, HasTooltip {
 
     /**
      * Default constructor.

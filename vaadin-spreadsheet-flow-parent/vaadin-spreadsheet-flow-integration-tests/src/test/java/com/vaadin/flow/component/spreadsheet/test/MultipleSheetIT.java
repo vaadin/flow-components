@@ -1,6 +1,7 @@
 package com.vaadin.flow.component.spreadsheet.test;
 
 import com.vaadin.flow.component.spreadsheet.tests.fixtures.TestFixtures;
+import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
 import org.junit.Before;
@@ -11,11 +12,12 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.interactions.Actions;
 
+@TestPath("vaadin-spreadsheet")
 public class MultipleSheetIT extends AbstractSpreadsheetIT {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL());
+        open();
         createNewSpreadsheet();
     }
 
@@ -23,10 +25,10 @@ public class MultipleSheetIT extends AbstractSpreadsheetIT {
     public void testMultipleSheet() {
         var spreadsheet = getSpreadsheet();
 
-        findElement(By.xpath("//div[contains(@class,'col4 row4')]")).click();
+        findElementInShadowRoot(By.cssSelector("div.col4.row4")).click();
 
-        var cell = (TestBenchElement) findElement(
-                By.xpath("//div[contains(@class, 'col6 row6')]"));
+        var cell = (TestBenchElement) findElementInShadowRoot(
+                By.cssSelector("div.col6.row6"));
         cell.click(8, 8, Keys.CONTROL);
 
         spreadsheet.getCellAt("B2").setValue("sheet0 value");
@@ -73,23 +75,21 @@ public class MultipleSheetIT extends AbstractSpreadsheetIT {
     @Test
     public void testMultipleSheetByAPI() {
         loadTestFixture(TestFixtures.CreateSheet);
-        var spreadsheet = getSpreadsheet();
-        spreadsheet.findElement(By.xpath("//*[text()='newSheet1']"));
-        spreadsheet.findElement(By.xpath("//*[text()='newSheet2']"));
+
+        findElementInShadowRoot(By.cssSelector("[title='newSheet1']"));
+        findElementInShadowRoot(By.cssSelector("[title='newSheet2']"));
     }
 
     @Test(expected = NoSuchElementException.class)
     public void multiplySheets_removeSheetBySpreadsheetAPI_sheetIsRemoved() {
         loadTestFixture(TestFixtures.CreateSheet);
-        var spreadsheet = getSpreadsheet();
-        spreadsheet.findElement(By.xpath("//*[text()='dontSee']"));
+        findElementInShadowRoot(By.cssSelector("[title='dontSee']"));
     }
 
     @Test(expected = NoSuchElementException.class)
     public void multiplySheets_removeSheetByPOI_sheetIsRemoved() {
         loadTestFixture(TestFixtures.CreateSheet);
-        var spreadsheet = getSpreadsheet();
-        spreadsheet.findElement(By.xpath("//*[text()='dontSee2']"));
+        findElementInShadowRoot(By.cssSelector("[title='dontSee2']"));
     }
 
 }

@@ -10,13 +10,14 @@ public class Person implements Serializable {
     private String email;
     private Department department;
     private City city;
+    private int employmentYear;
 
     public Person() {
         super();
     }
 
     public Person(String name, boolean isSubscriber, String email, int age,
-            Department department, City city) {
+            Department department, City city, int employmentYear) {
         super();
         this.name = name;
         this.isSubscriber = isSubscriber;
@@ -24,6 +25,7 @@ public class Person implements Serializable {
         this.age = age;
         this.department = department;
         this.city = city;
+        this.employmentYear = employmentYear;
     }
 
     public int getId() {
@@ -82,6 +84,14 @@ public class Person implements Serializable {
         this.city = city;
     }
 
+    public int getEmploymentYear() {
+        return employmentYear;
+    }
+
+    public void setEmploymentYear(int employmentYear) {
+        this.employmentYear = employmentYear;
+    }
+
     @Override
     public int hashCode() {
         return id;
@@ -103,7 +113,8 @@ public class Person implements Serializable {
         return "Person{" + "id=" + id + ", age=" + age + ", name='" + name
                 + '\'' + ", isSubscriber=" + isSubscriber + ", email='" + email
                 + '\'' + ", department=" + department + ", city='"
-                + city.getName() + "'}";
+                + city.getName() + '\'' + ", employmentYear=" + employmentYear
+                + "}";
     }
 
     @Override

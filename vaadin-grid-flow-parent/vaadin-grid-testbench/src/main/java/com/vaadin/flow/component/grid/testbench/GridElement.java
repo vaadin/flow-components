@@ -308,20 +308,6 @@ public class GridElement extends TestBenchElement {
     }
 
     /**
-     * Find all {@link WebElement}s using the given {@link By} selector.
-     *
-     * @deprecated this method will not working for Chrome 96+, because of the
-     *             breaking changes in ChromeDriver.
-     * @param by
-     *            the selector used to find elements
-     * @return a list of found elements
-     */
-    @Deprecated
-    public List<WebElement> findInShadowRoot(By by) {
-        return getShadowRoot().findElements(by);
-    }
-
-    /**
      * Gets the footer cell for the given visible column index.
      *
      * @param columnIndex

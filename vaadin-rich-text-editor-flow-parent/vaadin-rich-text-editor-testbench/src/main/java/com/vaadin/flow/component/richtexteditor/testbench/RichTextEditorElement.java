@@ -1,20 +1,12 @@
-package com.vaadin.flow.component.richtexteditor.testbench;
-
-/*
- * #%L
- * Vaadin Rich Text Editor Testbench API
- * %%
+/**
  * Copyright 2000-2022 Vaadin Ltd.
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
  *
- * See the file license.html distributed with this software for more
- * information about licensing.
+ * This program is available under Vaadin Commercial License and Service Terms.
  *
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
  */
+package com.vaadin.flow.component.richtexteditor.testbench;
 
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
@@ -32,8 +24,10 @@ public class RichTextEditorElement extends TestBenchElement {
     public List getTitles() {
         TestBenchElement toolbar = $("div").attributeContains("part", "toolbar")
                 .first();
-        List<TestBenchElement> buttons = toolbar.$("button").all();
-        return buttons.stream().map(btn -> btn.getAttribute("title"))
+        List<TestBenchElement> buttonTooltips = toolbar
+                .$("button + vaadin-tooltip").all();
+        return buttonTooltips.stream()
+                .map(tooltip -> tooltip.getProperty("text"))
                 .collect(Collectors.toList());
     }
 

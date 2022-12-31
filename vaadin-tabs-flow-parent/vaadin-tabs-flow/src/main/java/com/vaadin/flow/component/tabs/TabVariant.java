@@ -15,10 +15,12 @@
  */
 package com.vaadin.flow.component.tabs;
 
+import com.vaadin.flow.component.shared.ThemeVariant;
+
 /**
  * Set of theme variants applicable for {@code vaadin-tab} component.
  */
-public enum TabVariant {
+public enum TabVariant implements ThemeVariant {
     LUMO_ICON_ON_TOP("icon-on-top");
 
     private final String variant;

@@ -5,10 +5,11 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertNotNull;
 
-import java.io.IOException;
 import java.util.List;
 
 import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
+import com.vaadin.flow.testutil.TestPath;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
@@ -16,11 +17,12 @@ import org.openqa.selenium.WebElement;
 
 import com.vaadin.testbench.TestBenchElement;
 
+@TestPath("vaadin-spreadsheet")
 public class MergedCellNarrowFirstColumnIT extends AbstractSpreadsheetIT {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL());
+        open();
     }
 
     @Test
@@ -35,7 +37,8 @@ public class MergedCellNarrowFirstColumnIT extends AbstractSpreadsheetIT {
         assertThat(a2.getValue(), equalTo(cellText));
 
         String cellSelector = String.format(".col%d.row%d.cell", 1, 2);
-        List<WebElement> elements = findElements(By.cssSelector(cellSelector));
+        List<WebElement> elements = findElementsInShadowRoot(
+                By.cssSelector(cellSelector));
         TestBenchElement underlyingCell = null;
         for (WebElement element : elements) {
             if (a2.getWrappedElement().equals(element)) {

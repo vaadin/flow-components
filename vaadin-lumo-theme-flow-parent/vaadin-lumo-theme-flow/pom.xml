@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-lumo-theme-flow-parent</artifactId>
-        <version>23.2-SNAPSHOT</version>
+        <version>24.0-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-lumo-theme</artifactId>
     <packaging>jar</packaging>
@@ -17,6 +17,11 @@
             <groupId>com.vaadin</groupId>
             <artifactId>flow-server</artifactId>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-icons-flow</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
     <build>

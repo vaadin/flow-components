@@ -30,6 +30,7 @@ import org.mockito.Mockito;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
@@ -173,41 +174,11 @@ public class TimePickerTest {
     }
 
     @Test
-    public void setMinTime_getMin() {
-        TimePicker timePicker = new TimePicker();
-        final String min = "12:00";
-        LocalTime minTime = LocalTime.parse(min);
-        timePicker.setMinTime(minTime);
-        assertEquals(minTime, timePicker.getMin());
-        assertEquals(minTime, timePicker.getMinTime());
-    }
-
-    @Test
     public void setMin_getMin_null() {
         TimePicker timePicker = new TimePicker();
         assertEquals(null, timePicker.getMin());
         timePicker.setMin(null);
         assertEquals(null, timePicker.getMin());
-        assertEquals(null, timePicker.getMinTime());
-    }
-
-    @Test
-    public void setMinTime_getMin_null() {
-        TimePicker timePicker = new TimePicker();
-        assertEquals(null, timePicker.getMinTime());
-        timePicker.setMinTime(null);
-        assertEquals(null, timePicker.getMin());
-        assertEquals(null, timePicker.getMinTime());
-    }
-
-    @Test
-    public void setMaxTime_getMax() {
-        TimePicker timePicker = new TimePicker();
-        final String max = "12:00";
-        LocalTime maxTime = LocalTime.parse(max);
-        timePicker.setMaxTime(maxTime);
-        assertEquals(maxTime, timePicker.getMax());
-        assertEquals(maxTime, timePicker.getMaxTime());
     }
 
     @Test
@@ -216,16 +187,6 @@ public class TimePickerTest {
         assertEquals(null, timePicker.getMax());
         timePicker.setMax(null);
         assertEquals(null, timePicker.getMax());
-        assertEquals(null, timePicker.getMaxTime());
-    }
-
-    @Test
-    public void setMaxTime_getMax_null() {
-        TimePicker timePicker = new TimePicker();
-        assertEquals(null, timePicker.getMaxTime());
-        timePicker.setMaxTime(null);
-        assertEquals(null, timePicker.getMax());
-        assertEquals(null, timePicker.getMaxTime());
     }
 
     @Test
@@ -285,5 +246,11 @@ public class TimePickerTest {
         Assert.assertTrue("TimePicker should support char pattern",
                 HasAllowedCharPattern.class
                         .isAssignableFrom(new TimePicker().getClass()));
+    }
+
+    @Test
+    public void implementsHasTooltip() {
+        TimePicker timePicker = new TimePicker();
+        Assert.assertTrue(timePicker instanceof HasTooltip);
     }
 }

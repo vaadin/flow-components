@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-grid-flow-parent</artifactId>
-        <version>23.2-SNAPSHOT</version>
+        <version>24.0-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-grid-integration-tests</artifactId>
     <packaging>war</packaging>
@@ -34,6 +34,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-test-util</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -97,6 +98,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-testbench-core</artifactId>
+            <scope>test</scope>
             <exclusions>
                 <exclusion>
                     <groupId>org.hamcrest</groupId>
@@ -163,9 +165,8 @@
             <version>${flow.version}</version>
         </dependency>
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <scope>provided</scope>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
         </dependency>
     </dependencies>
     <build>
@@ -179,13 +180,14 @@
                             <includes>
                                 <include>package*.json</include>
                                 <include>pnpm*</include>
-                                <include>webpack.*</include>
+                                <include>vite.generated.ts</include>
                                 <include>types.d.ts</include>
                                 <include>tsconfig.json</include>
                             </includes>
                         </fileset>
                         <fileset>
                             <directory>${project.basedir}/node_modules</directory>
+                            <directory>${project.basedir}/frontend/generated</directory>
                         </fileset>
                     </filesets>
                 </configuration>

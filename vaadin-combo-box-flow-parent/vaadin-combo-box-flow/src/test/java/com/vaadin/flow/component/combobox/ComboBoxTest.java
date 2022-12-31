@@ -30,7 +30,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.stream.Stream;
 
 public class ComboBoxTest extends ComboBoxBaseTest {

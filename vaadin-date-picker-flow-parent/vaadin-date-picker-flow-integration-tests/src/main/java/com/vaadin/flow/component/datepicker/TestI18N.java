@@ -22,7 +22,6 @@ import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 public class TestI18N {
 
     public static final DatePickerI18n FINNISH = new DatePickerI18n()
-            .setWeek("viikko").setCalendar("kalenteri").setClear("tyhjennä")
             .setToday("tänään").setCancel("peruuta").setFirstDayOfWeek(1)
             .setMonthNames(Arrays.asList("tammikuu", "helmikuu", "maaliskuu",
                     "huhtikuu", "toukokuu", "kesäkuu", "heinäkuu", "elokuu",

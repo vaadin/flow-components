@@ -69,8 +69,8 @@ public class TreeGridHugeTreePage extends Div {
         addRootItems("Granddad", 3, data, parentPathMap)
                 .forEach(granddad -> addItems("Dad", dadCount, granddad, data,
                         parentPathMap)
-                                .forEach(dad -> addItems("Son", 300, dad, data,
-                                        parentPathMap)));
+                        .forEach(dad -> addItems("Son", 300, dad, data,
+                                parentPathMap)));
 
         return new TreeDataProvider<>(data);
     }

@@ -1,22 +1,16 @@
+/**
+ * Copyright 2000-2022 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
+ */
 package com.vaadin.flow.component.map;
 
-/*
- * #%L
- * Vaadin Map
- * %%
- * Copyright 2000-2022 Vaadin Ltd.
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
- *
- * See the file license.html distributed with this software for more
- * information about licensing.
- *
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
- */
-
 import com.vaadin.flow.server.StreamResource;
+
+import java.io.Serializable;
 
 /**
  * Defines the default assets that the Map component provides
@@ -28,7 +22,7 @@ public class Assets {
             "/META-INF/resources/frontend/vaadin-map/assets/point.png", 128,
             128);
 
-    public static class Asset {
+    public static class Asset implements Serializable {
         private final String fileName;
         private final StreamResource resource;
 

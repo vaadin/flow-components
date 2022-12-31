@@ -24,8 +24,6 @@ import com.vaadin.testbench.HasStringValueProperty;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
-import java.util.Collections;
-
 /**
  * A TestBench element representing a <code>&lt;vaadin-email-field&gt;</code>
  * element.
@@ -34,11 +32,18 @@ import java.util.Collections;
 public class EmailFieldElement extends TestBenchElement
         implements HasStringValueProperty, HasLabel, HasPlaceholder, HasHelper {
 
+    /**
+     * Emulates the user changing the value, which in practice means setting
+     * {@code value} of the {@code input} element to the given value and then
+     * triggering {@code input} and {@code change} DOM events.
+     *
+     * @param string
+     *            the value to set
+     */
     @Override
     public void setValue(String string) {
-        HasStringValueProperty.super.setValue(string);
-        dispatchEvent("change", Collections.singletonMap("bubbles", true));
-        dispatchEvent("blur");
+        TestBenchElement input = $("input").first();
+        TextFieldElementHelper.setValue(input, string);
     }
 
     @Override

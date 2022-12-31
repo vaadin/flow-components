@@ -1,17 +1,12 @@
-package com.vaadin.flow.component.spreadsheet;
-
-/*
- * #%L
- * Vaadin Spreadsheet
- * %%
- * Copyright (C) 2013 - 2022 Vaadin Ltd
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
+/**
+ * Copyright 2000-2022 Vaadin Ltd.
  *
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
  */
+package com.vaadin.flow.component.spreadsheet;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -677,6 +672,12 @@ public class CellValueManager implements Serializable {
                         spreadsheet.markInvalidFormula(col, row);
                     }
                 } else {
+                    if (oldCellType == CellType.FORMULA) {
+                        // The old cell type was formula.
+                        // Set the cell blank to clear the old formula first.
+                        cell.setBlank();
+                    }
+
                     spreadsheet.removeInvalidFormulaMark(col, row);
                     Double percentage = SpreadsheetUtil.parsePercentage(value,
                             spreadsheetLocale);
@@ -1323,6 +1324,10 @@ public class CellValueManager implements Serializable {
                         }
                         cell.setCellValue((String) null);
                         getFormulaEvaluator().notifyUpdateCell(cell);
+
+                        spreadsheet.removeInvalidFormulaMark(
+                                cell.getColumnIndex() + 1,
+                                cell.getRowIndex() + 1);
                     }
                 }
             }
@@ -1376,6 +1381,9 @@ public class CellValueManager implements Serializable {
                 }
                 cell.setCellValue((String) null);
                 getFormulaEvaluator().notifyUpdateCell(cell);
+
+                spreadsheet.removeInvalidFormulaMark(cell.getColumnIndex() + 1,
+                        cell.getRowIndex() + 1);
             }
         }
     }

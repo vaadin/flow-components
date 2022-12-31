@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-progress-bar-flow-parent</artifactId>
-        <version>23.2-SNAPSHOT</version>
+        <version>24.0-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-progress-bar-integration-tests</artifactId>
     <packaging>war</packaging>
@@ -17,7 +17,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-testbench-core</artifactId>
-            <version>${testbench.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -52,17 +52,17 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-test-generic</artifactId>
-            <version>${flow.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-test-util</artifactId>
-            <version>${flow.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
-            <version>1.7.36</version>
+            <version>2.0.6</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -90,13 +90,14 @@
                             <includes>
                                 <include>package*.json</include>
                                 <include>pnpm*</include>
-                                <include>webpack.*</include>
+                                <include>vite.generated.ts</include>
                                 <include>types.d.ts</include>
                                 <include>tsconfig.json</include>
                             </includes>
                         </fileset>
                         <fileset>
                             <directory>${project.basedir}/node_modules</directory>
+                            <directory>${project.basedir}/frontend/generated</directory>
                         </fileset>
                     </filesets>
                 </configuration>

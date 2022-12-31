@@ -45,7 +45,7 @@ public interface HasAllowedCharPattern extends HasElement {
      * {@code setAllowedCharPattern("[0-9/]")}`.
      * </p>
      *
-     * @param allowedCharPattern
+     * @param pattern
      *            the String pattern to set
      */
     default void setAllowedCharPattern(String pattern) {

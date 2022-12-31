@@ -53,9 +53,10 @@ public class CustomSearchView extends VerticalLayout {
         ComponentUtil.addListener(searchBar, FilterChanged.class,
                 e -> filterableDataProvider.setFilter(searchBar.getValue()));
 
+        crud.setToolbar(searchBar);
+
         Anchor newItemLink = new Anchor("javascript:", "New person");
-        newItemLink.getElement().setAttribute("new-button", true);
-        crud.setToolbar(searchBar, newItemLink);
+        crud.setNewButton(newItemLink);
 
         crud.getElement().getStyle().set("flex-direction", "column-reverse");
 

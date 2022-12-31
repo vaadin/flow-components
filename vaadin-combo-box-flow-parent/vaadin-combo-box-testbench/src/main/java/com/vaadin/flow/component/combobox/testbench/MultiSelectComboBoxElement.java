@@ -130,6 +130,14 @@ public class MultiSelectComboBoxElement extends TestBenchElement
     }
 
     /**
+     * Deselects all items, effectively clearing the value.
+     */
+    public void deselectAll() {
+        String script = "const combobox = arguments[0]; combobox.selectedItems = [];";
+        executeScript(script, this);
+    }
+
+    /**
      * Gets the labels of the currently selected items.
      *
      * @return the labels of the currently selected items
@@ -176,7 +184,7 @@ public class MultiSelectComboBoxElement extends TestBenchElement
     /**
      * Gets whether dropdown will open automatically or not.
      *
-     * @return @{code true} if enabled, {@code false} otherwise
+     * @return {@code true} if enabled, {@code false} otherwise
      */
     public boolean isAutoOpen() {
         return !getPropertyBoolean("autoOpenDisabled");

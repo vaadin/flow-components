@@ -5,6 +5,8 @@ import java.util.GregorianCalendar;
 import java.util.Locale;
 
 import com.vaadin.flow.component.spreadsheet.tests.fixtures.TestFixtures;
+import com.vaadin.flow.testutil.TestPath;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -12,11 +14,12 @@ import org.junit.Test;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.interactions.Actions;
 
+@TestPath("vaadin-spreadsheet")
 public class GenericIT extends AbstractSpreadsheetIT {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL());
+        open();
         createNewSpreadsheet();
     }
 

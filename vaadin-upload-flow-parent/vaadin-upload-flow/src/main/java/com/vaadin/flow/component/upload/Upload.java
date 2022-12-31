@@ -25,10 +25,20 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.dom.DomEventListener;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableConsumer;
@@ -52,7 +62,22 @@ import elemental.json.JsonType;
  *
  * @author Vaadin Ltd.
  */
-public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
+@Tag("vaadin-upload")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha7")
+@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@NpmPackage(value = "@vaadin/upload", version = "24.0.0-alpha7")
+@JsModule("@vaadin/upload/src/vaadin-upload.js")
+public class Upload extends Component implements HasSize, HasStyle {
+
+    /**
+     * Server-side component for the default {@code <vaadin-upload>} icon.
+     */
+    @Tag("vaadin-upload-icon")
+    static class UploadIcon extends Component {
+
+        public UploadIcon() {
+        }
+    }
 
     private StreamVariable streamVariable;
     private boolean interrupted = false;
@@ -61,6 +86,15 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
     private boolean uploading;
 
     private UploadI18N i18n;
+
+    private Component uploadButton;
+    private Component defaultUploadButton;
+
+    private Component dropLabel;
+    private Component defaultDropLabel;
+
+    private Component dropLabelIcon;
+    private Component defaultDropLabelIcon;
 
     /**
      * The output of the upload is redirected to this receiver.
@@ -73,21 +107,20 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
      * The receiver must be set before performing an upload.
      */
     public Upload() {
-        // Get a server round trip for upload error and success.
-        addUploadErrorListener(event -> {
-        });
-
-        addUploadSuccessListener(event -> {
-        });
-
-        addFileRejectListener(event -> fireEvent(
-                new FileRejectedEvent(this, event.getDetailError())));
+        final String eventDetailError = "event.detail.error";
+        getElement().addEventListener("file-rejected", event -> {
+            String detailError = event.getEventData()
+                    .getString(eventDetailError);
+            fireEvent(new FileRejectedEvent(this, detailError));
+        }).addEventData(eventDetailError);
 
         // If client aborts upload mark upload as interrupted on server also
-        addUploadAbortListener(event -> interruptUpload());
+        getElement().addEventListener("upload-abort",
+                event -> interruptUpload());
 
-        getElement().setAttribute("target", new StreamReceiver(
-                getElement().getNode(), "upload", getStreamVariable()));
+        runBeforeClientResponse(ui -> getElement().setAttribute("target",
+                new StreamReceiver(getElement().getNode(), "upload",
+                        getStreamVariable())));
 
         final String elementFiles = "element.files";
         DomEventListener allFinishedListener = e -> {
@@ -106,7 +139,8 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
             this.uploading = isUploading;
         };
 
-        addUploadStartListener(e -> this.uploading = true);
+        getElement().addEventListener("upload-start",
+                e -> this.uploading = true);
 
         getElement().addEventListener("upload-success", allFinishedListener)
                 .addEventData(elementFiles);
@@ -114,6 +148,19 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
                 .addEventData(elementFiles);
         getElement().addEventListener("upload-abort", allFinishedListener)
                 .addEventData(elementFiles);
+
+        defaultUploadButton = new Button();
+        // Ensure the flag is set before the element is added to the slot
+        defaultUploadButton.getElement().setProperty("_isDefault", true);
+        setUploadButton(defaultUploadButton);
+
+        defaultDropLabel = new Span();
+        // Ensure the flag is set before the element is added to the slot
+        defaultDropLabel.getElement().setProperty("_isDefault", true);
+        setDropLabel(defaultDropLabel);
+
+        defaultDropLabelIcon = new UploadIcon();
+        setDropLabelIcon(defaultDropLabelIcon);
     }
 
     /**
@@ -155,7 +202,7 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
      *            the maximum number of files allowed for the user to select
      */
     public void setMaxFiles(int maxFiles) {
-        super.setMaxFiles(maxFiles);
+        getElement().setProperty("maxFiles", maxFiles);
     }
 
     /**
@@ -164,7 +211,7 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
      * @return the maximum number of files
      */
     public int getMaxFiles() {
-        return (int) getMaxFilesDouble();
+        return (int) getElement().getProperty("maxFiles", 0.0);
     }
 
     /**
@@ -176,7 +223,7 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
      *            the maximum file size in bytes
      */
     public void setMaxFileSize(int maxFileSize) {
-        super.setMaxFileSize(maxFileSize);
+        getElement().setProperty("maxFileSize", maxFileSize);
     }
 
     /**
@@ -185,7 +232,7 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
      * @return the maximum file size in bytes
      */
     public int getMaxFileSize() {
-        return (int) getMaxFileSizeDouble();
+        return (int) getElement().getProperty("maxFileSize", 0.0);
     }
 
     /**
@@ -197,7 +244,7 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
      *            selecting files, <code>false</code> otherwise.
      */
     public void setAutoUpload(boolean autoUpload) {
-        setNoAuto(!autoUpload);
+        getElement().setProperty("noAuto", !autoUpload);
     }
 
     /**
@@ -207,7 +254,7 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
      *         after they are selected, <code>false</code> otherwise.
      */
     public boolean isAutoUpload() {
-        return isNoAutoBoolean();
+        return !getElement().getProperty("noAuto", false);
     }
 
     /**
@@ -222,7 +269,7 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
      *            otherwise
      */
     public void setDropAllowed(boolean dropAllowed) {
-        setNodrop(!dropAllowed);
+        getElement().setProperty("nodrop", !dropAllowed);
     }
 
     /**
@@ -234,7 +281,7 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
      *         otherwise.
      */
     public boolean isDropAllowed() {
-        return !isNodropBoolean();
+        return !getElement().getProperty("nodrop", false);
     }
 
     /**
@@ -255,7 +302,7 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
         if (acceptedFileTypes != null) {
             accepted = String.join(",", acceptedFileTypes);
         }
-        setAccept(accepted);
+        getElement().setProperty("accept", accepted);
     }
 
     /**
@@ -264,7 +311,7 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
      * @return a list of allowed file types, never <code>null</code>.
      */
     public List<String> getAcceptedFileTypes() {
-        String accepted = getAcceptString();
+        String accepted = getElement().getProperty("accept");
         if (accepted == null) {
             return Collections.emptyList();
         }
@@ -275,48 +322,54 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
      * Set the component as the actionable button inside the upload component,
      * that opens the dialog for choosing the files to be upload.
      *
-     * @param uploadButton
+     * @param button
      *            the component to be clicked by the user to open the dialog, or
      *            <code>null</code> to reset to the default button
      */
-    public void setUploadButton(Component uploadButton) {
-        removeElementsAtSlot("add-button");
-        if (uploadButton != null) {
-            addToAddButton(uploadButton);
+    public void setUploadButton(Component button) {
+        if (button != null) {
+            uploadButton = button;
+        } else {
+            uploadButton = defaultUploadButton;
         }
+
+        SlotUtils.setSlot(this, "add-button", uploadButton);
     }
 
     /**
-     * Get the component set as the upload button for the upload, if any.
+     * Get the component set as the upload button for the upload.
      *
-     * @return the actionable button, or <code>null</code> if none was set
+     * @return the actionable button, never <code>null</code>.
      */
     public Component getUploadButton() {
-        return getComponentAtSlot("add-button");
+        return uploadButton;
     }
 
     /**
      * Set the component to show as a message to the user to drop files in the
      * upload component. Despite of the name, the label can be any component.
      *
-     * @param dropLabel
+     * @param label
      *            the label to show for the users when it's possible drop files,
-     *            or <code>null</code> to clear it
+     *            or <code>null</code> to reset to the default label
      */
-    public void setDropLabel(Component dropLabel) {
-        removeElementsAtSlot("drop-label");
-        if (dropLabel != null) {
-            addToDropLabel(dropLabel);
+    public void setDropLabel(Component label) {
+        if (label != null) {
+            dropLabel = label;
+        } else {
+            dropLabel = defaultDropLabel;
         }
+
+        SlotUtils.setSlot(this, "drop-label", dropLabel);
     }
 
     /**
-     * Get the component set as the drop label, if any.
+     * Get the component set as the drop label.
      *
-     * @return the drop label component, or <code>null</code> if none was set
+     * @return the drop label component, never <code>null</code>.
      */
     public Component getDropLabel() {
-        return getComponentAtSlot("drop-label");
+        return dropLabel;
     }
 
     /**
@@ -324,40 +377,27 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
      * when the user can drop files to this upload component. Despite of the
      * name, the drop label icon can be any component.
      *
-     * @param dropLabelIcon
+     * @param icon
      *            the label icon to show for the users when it's possible to
-     *            drop files, or <code>null</code> to clear it
+     *            drop files, or <code>null</code> to reset to the default icon
      */
-    public void setDropLabelIcon(Component dropLabelIcon) {
-        removeElementsAtSlot("drop-label-icon");
-        if (dropLabelIcon != null) {
-            addToDropLabelIcon(dropLabelIcon);
+    public void setDropLabelIcon(Component icon) {
+        if (icon != null) {
+            dropLabelIcon = icon;
+        } else {
+            dropLabelIcon = defaultDropLabelIcon;
         }
+
+        SlotUtils.setSlot(this, "drop-label-icon", dropLabelIcon);
     }
 
     /**
-     * Get the component set as the drop label icon, if any.
+     * Get the component set as the drop label icon.
      *
-     * @return the drop label icon component, or <code>null</code> if none was
-     *         set
+     * @return the drop label icon component, never <code>null</code>.
      */
     public Component getDropLabelIcon() {
-        return getComponentAtSlot("drop-label-icon");
-    }
-
-    private void removeElementsAtSlot(String slot) {
-        getElement().getChildren()
-                .filter(child -> slot.equals(child.getAttribute("slot")))
-                .collect(Collectors.toList())
-                .forEach(Element::removeFromParent);
-    }
-
-    private Component getComponentAtSlot(String slot) {
-        return getElement().getChildren()
-                .filter(child -> slot.equals(child.getAttribute("slot")))
-                .filter(child -> child.getComponent().isPresent())
-                .map(child -> child.getComponent().get()).findFirst()
-                .orElse(null);
+        return dropLabelIcon;
     }
 
     /**
@@ -598,6 +638,16 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
                 i18nJson);
     }
 
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+
+        // Element state is not persisted across attach/detach
+        if (this.i18n != null) {
+            setI18nWithJS();
+        }
+    }
+
     private void deeplyRemoveNullValuesFromJsonObject(JsonObject jsonObject) {
         for (String key : jsonObject.keys()) {
             if (jsonObject.get(key).getType() == JsonType.OBJECT) {
@@ -658,7 +708,7 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
      * Clear the list of files being processed, or already uploaded.
      */
     public void clearFileList() {
-        setFiles(Json.createArray());
+        getElement().setPropertyJson("files", Json.createArray());
     }
 
     private static class DefaultStreamVariable implements StreamVariable {

@@ -15,14 +15,21 @@
  */
 package com.vaadin.flow.component.tabs;
 
+import com.vaadin.flow.component.shared.ThemeVariant;
+
 /**
  * Set of theme variants applicable for {@code vaadin-tabs} component.
  */
-public enum TabsVariant {
-    LUMO_ICON_ON_TOP("icon-on-top"), LUMO_CENTERED("centered"), LUMO_SMALL(
-            "small"), LUMO_MINIMAL("minimal"), LUMO_HIDE_SCROLL_BUTTONS(
-                    "hide-scroll-buttons"), LUMO_EQUAL_WIDTH_TABS(
-                            "equal-width-tabs"), MATERIAL_FIXED("fixed");
+public enum TabsVariant implements ThemeVariant {
+    //@formatter:off
+    LUMO_ICON_ON_TOP("icon-on-top"),
+    LUMO_CENTERED("centered"),
+    LUMO_SMALL("small"),
+    LUMO_MINIMAL("minimal"),
+    LUMO_HIDE_SCROLL_BUTTONS("hide-scroll-buttons"),
+    LUMO_EQUAL_WIDTH_TABS("equal-width-tabs"),
+    MATERIAL_FIXED("fixed");
+    //@formatter:on
 
     private final String variant;
 

@@ -17,6 +17,8 @@ pom.xml.bak
 types.d.ts
 tsconfig.json
 webpack.*
+vite.generated.ts
+/vite.config.ts
 node_modules
 .driver
 package*json

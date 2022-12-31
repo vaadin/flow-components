@@ -1,28 +1,19 @@
-package com.vaadin.flow.component.map.configuration.feature;
-
-/*
- * #%L
- * Vaadin Map
- * %%
+/**
  * Copyright 2000-2022 Vaadin Ltd.
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
  *
- * See the file license.html distributed with this software for more
- * information about licensing.
+ * This program is available under Vaadin Commercial License and Service Terms.
  *
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
  */
+package com.vaadin.flow.component.map.configuration.feature;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vaadin.flow.component.map.Assets;
+import com.vaadin.flow.component.map.Map;
 import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.Feature;
-import com.vaadin.flow.component.map.configuration.View;
 import com.vaadin.flow.component.map.configuration.geometry.Point;
-import com.vaadin.flow.component.map.configuration.source.Source;
 import com.vaadin.flow.component.map.configuration.style.Icon;
 import com.vaadin.flow.component.map.configuration.style.Style;
 import com.vaadin.flow.component.map.configuration.style.Text;
@@ -83,9 +74,11 @@ public class MarkerFeature extends PointBasedFeature {
 
     /**
      * Creates a new marker feature located at the specified coordinates,
-     * displaying a default marker icon. The coordinates must be in the same
-     * projection as the {@link View#getProjection()} and
-     * {@link Source#getProjection()}.
+     * displaying a default marker icon. Coordinates must be specified in the
+     * map's user projection, which by default is {@code EPSG:4326}, also
+     * referred to as GPS coordinates. If the user projection has been changed
+     * using {@link Map#setUserProjection(String)}, then coordinates must be
+     * specified in that projection instead.
      *
      * @param coordinates
      *            the coordinates that locate the feature
@@ -96,9 +89,11 @@ public class MarkerFeature extends PointBasedFeature {
 
     /**
      * Creates a new marker feature located at the specified coordinates,
-     * displaying the specified custom icon.The coordinates must be in the same
-     * projection as the {@link View#getProjection()} and
-     * {@link Source#getProjection()}.
+     * displaying the specified custom icon. Coordinates must be specified in
+     * the map's user projection, which by default is {@code EPSG:4326}, also
+     * referred to as GPS coordinates. If the user projection has been changed
+     * using {@link Map#setUserProjection(String)}, then coordinates must be
+     * specified in that projection instead.
      * <p>
      * <b>NOTE:</b> Icon instances should be reused between features in order to
      * optimize memory-usage in the client-side component / browser. Creating a

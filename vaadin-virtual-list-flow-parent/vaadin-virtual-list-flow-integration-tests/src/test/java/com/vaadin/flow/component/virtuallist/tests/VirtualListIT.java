@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.virtuallist.tests;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
@@ -100,11 +101,11 @@ public class VirtualListIT extends AbstractComponentIT {
             Assert.assertEquals(String.valueOf(i + 1),
                     items.getObject(i).getString("key"));
             Assert.assertEquals("Person " + (i + 1),
-                    items.getObject(i).getString("name"));
+                    getPropertyString(items.getObject(i), "name"));
             Assert.assertEquals(String.valueOf(i + 1),
-                    items.getObject(i).getString("age"));
+                    getPropertyString(items.getObject(i), "age"));
             Assert.assertEquals("person_" + (i + 1),
-                    items.getObject(i).getString("user"));
+                    getPropertyString(items.getObject(i), "user"));
         }
 
         WebElement update = findElement(
@@ -113,8 +114,10 @@ public class VirtualListIT extends AbstractComponentIT {
         scrollIntoViewAndClick(update);
         items = getItems(getDriver(), list);
         JsonObject person = items.getObject(0);
-        Assert.assertEquals("Person 1 Updated", person.getString("name"));
-        Assert.assertEquals("person_1_updated", person.getString("user"));
+        Assert.assertEquals("Person 1 Updated",
+                getPropertyString(person, "name"));
+        Assert.assertEquals("person_1_updated",
+                getPropertyString(person, "user"));
     }
 
     @Ignore("https://github.com/vaadin/flow-components/issues/3222")
@@ -189,9 +192,6 @@ public class VirtualListIT extends AbstractComponentIT {
         WebElement list = findElement(By.id("template-events"));
         WebElement message = findElement(By.id("template-events-message"));
 
-        JsonArray items = getItems(driver, list);
-        assertItemsArePresent(items, 0, 3, "Clickable item ");
-
         // clicks on the first item to remove it
         WebElement item = findElement(By.id("template-events-item-0"));
         scrollIntoViewAndClick(item);
@@ -223,14 +223,12 @@ public class VirtualListIT extends AbstractComponentIT {
         for (int i = 0; i < items.size(); i++) {
             WebElement item = items.get(i);
             Assert.assertEquals("div", item.getTagName());
-            Assert.assertEquals("Item " + (i + 1),
-                    item.getAttribute("innerHTML"));
+            Assert.assertEquals("Item " + (i + 1), item.getText());
         }
 
         scrollToBottom(list);
 
-        waitUntil(
-                driver -> list.getAttribute("innerHTML").contains("Item 100"));
+        waitUntil(driver -> list.getText().contains("Item 100"));
 
         items = list.findElements(By.className("component-rendered"));
 
@@ -238,7 +236,6 @@ public class VirtualListIT extends AbstractComponentIT {
     }
 
     @Test
-
     public void listWithComponentRendererWithBeansAndPlaceholder_scrollToBottom_placeholderIsShown() {
         WebElement list = findElement(By.id("component-renderer-with-beans"));
         List<WebElement> items = list
@@ -452,7 +449,8 @@ public class VirtualListIT extends AbstractComponentIT {
         Assert.assertEquals(length, items.length());
         for (int i = 0; i < items.length(); i++) {
             JsonObject obj = items.getObject(i);
-            Assert.assertEquals("Person " + (i + 1), obj.getString("label"));
+            Assert.assertEquals("Person " + (i + 1),
+                    getPropertyString(obj, "label"));
         }
     }
 
@@ -465,7 +463,7 @@ public class VirtualListIT extends AbstractComponentIT {
                     items.get(i),
                     CoreMatchers.not(CoreMatchers.instanceOf(JsonNull.class)));
             Assert.assertEquals(itemLabelprefix + (i + 1),
-                    items.getObject(i).getString("label"));
+                    getPropertyString(items.getObject(i), "label"));
         }
     }
 
@@ -503,8 +501,14 @@ public class VirtualListIT extends AbstractComponentIT {
                     "The label of the initial object at the index " + i
                             + " of the list '" + listId + "' is wrong",
                     itemLabelPrefixForSecondSet + (i + 1),
-                    items.getObject(i).getString("label"));
+                    getPropertyString(items.getObject(i), "label"));
         }
+    }
+
+    private String getPropertyString(JsonObject json, String propertyName) {
+        var keyForProperty = Arrays.stream(json.keys())
+                .filter(key -> key.endsWith(propertyName)).findFirst().get();
+        return json.getString(keyForProperty);
     }
 
     private void clickToSet3Items_listIsUpdated(String listId,
@@ -521,7 +525,7 @@ public class VirtualListIT extends AbstractComponentIT {
                     "The label of the updated object at the index " + i
                             + " of the list '" + listId + "' is wrong",
                     itemLabelPrefixForFirstSet + (i + 1),
-                    items.getObject(i).getString("label"));
+                    getPropertyString(items.getObject(i), "label"));
         }
     }
 

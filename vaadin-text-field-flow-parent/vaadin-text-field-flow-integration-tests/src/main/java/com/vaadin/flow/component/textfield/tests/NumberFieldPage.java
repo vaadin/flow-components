@@ -76,21 +76,13 @@ public class NumberFieldPage extends Div {
         numberFieldStep.setStep(0.5);
         numberFieldStep.setMin(0);
         numberFieldStep.setMax(10);
-        numberFieldStep.setHasControls(true);
+        numberFieldStep.setStepButtonsVisible(true);
         Div stepValueMessage = new Div();
         stepValueMessage.setId("step-message");
         numberFieldStep.addValueChangeListener(
                 logValueChangeListener(stepValueMessage));
 
         add(numberFieldStep, stepValueMessage);
-        Div isValid = new Div();
-        isValid.setId("is-invalid");
-        NativeButton checkIsValid = new NativeButton(
-                "Check if current value of step-number-field is invalid");
-        checkIsValid.setId("check-is-invalid");
-        checkIsValid.addClickListener(event -> isValid
-                .setText(numberFieldStep.isInvalid() ? "invalid" : "valid"));
-        add(checkIsValid, isValid);
         addNumberFields();
     }
 
@@ -112,7 +104,7 @@ public class NumberFieldPage extends Div {
         stepperField.setValue(1d);
         stepperField.setMin(0);
         stepperField.setMax(10);
-        stepperField.setHasControls(true);
+        stepperField.setStepButtonsVisible(true);
 
         euroField.setSuffixComponent(new Span("€"));
 

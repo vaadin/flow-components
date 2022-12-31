@@ -39,7 +39,6 @@ import com.vaadin.flow.data.binder.PropertyDefinition;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
-import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
@@ -50,7 +49,7 @@ import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalQuery;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
-import com.vaadin.flow.data.renderer.TemplateRenderer;
+import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableBiFunction;
@@ -212,8 +211,6 @@ public class TreeGrid<T> extends Grid<T>
         }
     }
 
-    private Registration dataProviderRegistration;
-
     /**
      * Creates a new {@code TreeGrid} without support for creating columns based
      * on property names. Use an alternative constructor, such as
@@ -337,6 +334,21 @@ public class TreeGrid<T> extends Grid<T>
                 (ComponentEventListener) listener);
     }
 
+    /**
+     * Tree grid only supports hierarchical data providers. Use
+     * {@link #setDataProvider(HierarchicalDataProvider)} instead.
+     * <p>
+     * This method is inherited from Grid and has been marked as deprecated to
+     * indicate that it is not supported. This method will throw an
+     * {@link UnsupportedOperationException}.
+     *
+     * @param dataProvider
+     *            the data provider
+     * @deprecated use {@link #setDataProvider(HierarchicalDataProvider)},
+     *             {@link #setItems(Collection, ValueProvider)},
+     *             {@link #setItems(Stream, ValueProvider)} or
+     *             {@link #setTreeData(TreeData)} instead.
+     */
     @Override
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         if (dataProvider instanceof HierarchicalDataProvider) {
@@ -351,25 +363,15 @@ public class TreeGrid<T> extends Grid<T>
     @Override
     public void setDataProvider(
             HierarchicalDataProvider<T, ?> hierarchicalDataProvider) {
-        if (dataProviderRegistration != null) {
-            dataProviderRegistration.remove();
-        }
-        dataProviderRegistration = hierarchicalDataProvider
-                .addDataProviderListener(e -> {
-                    if (!(e instanceof DataChangeEvent.DataRefreshEvent)) {
-                        // refreshAll was called
-                        getElement().executeJs(
-                                "$0.$connector && $0.$connector.reset()",
-                                getElement());
-                    }
-                });
         super.setDataProvider(hierarchicalDataProvider);
     }
 
     /**
      * Tree grid does not support data views. Use
-     * {@link #setDataProvider(HierarchicalDataProvider)} instead. This method
-     * is inherited from Grid and it will throw an
+     * {@link #setDataProvider(HierarchicalDataProvider)} instead.
+     * <p>
+     * This method is inherited from Grid and has been marked as deprecated to
+     * indicate that it is not supported. This method will throw an
      * {@link UnsupportedOperationException}.
      *
      * @param dataProvider
@@ -392,7 +394,9 @@ public class TreeGrid<T> extends Grid<T>
 
     /**
      * Tree grid supports only hierarchical data so use another method instead.
-     * This method is inherited from Grid and it will throw an
+     * <p>
+     * This method is inherited from Grid and has been marked as deprecated to
+     * indicate that it is not supported. This method will throw an
      * {@link UnsupportedOperationException}.
      *
      * @param fetchCallback
@@ -415,7 +419,10 @@ public class TreeGrid<T> extends Grid<T>
 
     /**
      * Tree grid supports only hierarchical data providers so use another method
-     * instead. This method is inherited from Grid and it will throw an
+     * instead.
+     * <p>
+     * This method is inherited from Grid and has been marked as deprecated to
+     * indicate that it is not supported. This method will throw an
      * {@link UnsupportedOperationException}.
      *
      * @param dataProvider
@@ -437,7 +444,9 @@ public class TreeGrid<T> extends Grid<T>
 
     /**
      * Tree grid supports only hierarchical data so use another method instead.
-     * This method is inherited from Grid and it will throw an
+     * <p>
+     * This method is inherited from Grid and has been marked as deprecated to
+     * indicate that it is not supported. This method will throw an
      * {@link UnsupportedOperationException}.
      *
      * @param items
@@ -459,7 +468,9 @@ public class TreeGrid<T> extends Grid<T>
 
     /**
      * Tree grid supports only hierarchical data, so use another method instead.
-     * This method is inherited from Grid and it will throw an
+     * <p>
+     * This method is inherited from Grid and has been marked as deprecated to
+     * indicate that it is not supported. This method will throw an
      * {@link UnsupportedOperationException}.
      *
      * @param items
@@ -480,7 +491,10 @@ public class TreeGrid<T> extends Grid<T>
     }
 
     /**
-     * Tree grid does not support list data view, this will throw an
+     * Tree grid does not support list data view.
+     * <p>
+     * This method is inherited from Grid and has been marked as deprecated to
+     * indicate that it is not supported. This method will throw an
      * {@link UnsupportedOperationException}.
      *
      * @return exception is thrown
@@ -494,7 +508,10 @@ public class TreeGrid<T> extends Grid<T>
     }
 
     /**
-     * Tree grid does not support list data view, this will throw an
+     * Tree grid does not support list data view.
+     * <p>
+     * This method is inherited from Grid and has been marked as deprecated to
+     * indicate that it is not supported. This method will throw an
      * {@link UnsupportedOperationException}.
      *
      * @return exception is thrown
@@ -508,7 +525,10 @@ public class TreeGrid<T> extends Grid<T>
     }
 
     /**
-     * Tree grid does not support list data view, this will throw an
+     * Tree grid does not support list data view.
+     * <p>
+     * This method is inherited from Grid and has been marked as deprecated to
+     * indicate that it is not supported. This method will throw an
      * {@link UnsupportedOperationException}.
      *
      * @return exception is thrown
@@ -534,14 +554,23 @@ public class TreeGrid<T> extends Grid<T>
      * @return the created hierarchy column
      */
     public Column<T> addHierarchyColumn(ValueProvider<T, ?> valueProvider) {
-        Column<T> column = addColumn(TemplateRenderer
-                .<T> of("<vaadin-grid-tree-toggle "
-                        + "leaf='[[!item.children]]' expanded='{{expanded}}' level='[[level]]'>[[item.name]]"
-                        + "</vaadin-grid-tree-toggle>")
+        Column<T> column = addColumn(LitRenderer.<T> of(
+                "<vaadin-grid-tree-toggle @click=${onClick} .leaf=${!item.children} .expanded=${model.expanded} .level=${model.level}>"
+                        + "${item.name}</vaadin-grid-tree-toggle>")
                 .withProperty("children",
                         item -> getDataCommunicator().hasChildren(item))
                 .withProperty("name",
-                        value -> String.valueOf(valueProvider.apply(value))));
+                        value -> String.valueOf(valueProvider.apply(value)))
+                .withFunction("onClick", item -> {
+                    if (getDataCommunicator().hasChildren(item)) {
+                        if (isExpanded(item)) {
+                            collapse(List.of(item), true);
+                        } else {
+                            expand(List.of(item), true);
+                        }
+                    }
+                }));
+
         final SerializableComparator<T> comparator = (a,
                 b) -> compareMaybeComparables(valueProvider.apply(a),
                         valueProvider.apply(b));
@@ -569,7 +598,7 @@ public class TreeGrid<T> extends Grid<T>
     public <V extends Component> Column<T> addComponentHierarchyColumn(
             ValueProvider<T, V> componentProvider) {
         return addColumn(new HierarchyColumnComponentRenderer<V, T>(
-                componentProvider).withProperty("children",
+                componentProvider, this).withProperty("children",
                         item -> getDataCommunicator().hasChildren(item)));
     }
 
@@ -722,7 +751,7 @@ public class TreeGrid<T> extends Grid<T>
     private Column<T> addHierarchyColumn(PropertyDefinition<T, ?> property) {
         Column<T> column = addHierarchyColumn(
                 item -> String.valueOf(property.getGetter().apply(item)))
-                        .setHeader(property.getCaption());
+                .setHeader(property.getCaption());
         try {
             return column.setKey(property.getName());
         } catch (IllegalArgumentException exception) {

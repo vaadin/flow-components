@@ -23,9 +23,7 @@ public class MarkerFeaturePage extends Div {
 
         NativeButton addCustomMarkerFeature = new NativeButton(
                 "Add custom marker feature", e -> {
-                    Coordinate coordinate = Coordinate
-                            .fromLonLat(-73.96746522524636, 40.749310492492796); // United
-                                                                                 // Nations
+                    Coordinate coordinate = new Coordinate(-73.96746522524636, 40.749310492492796); // United Nations
                     Icon icon = createCustomIcon();
                     MarkerFeature feature = new MarkerFeature(coordinate, icon);
                     map.getFeatureLayer().addFeature(feature);
@@ -37,8 +35,7 @@ public class MarkerFeaturePage extends Div {
                     if (map.getFeatureLayer().getFeatures().size() > 0) {
                         MarkerFeature feature = (MarkerFeature) map
                                 .getFeatureLayer().getFeatures().get(0);
-                        Coordinate coordinate = Coordinate.fromLonLat(22.29985,
-                                60.45234); // Vaadin HQ
+                        Coordinate coordinate = new Coordinate(22.29985, 60.45234); // Vaadin HQ
                         feature.setCoordinates(coordinate);
                     }
                 });

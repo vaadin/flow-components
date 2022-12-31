@@ -34,7 +34,6 @@ public class TreeGridPageSizeIT extends AbstractTreeGridIT {
     }
 
     @Test
-
     public void treegridWithPageSize10_changeTo80_revertBackTo10() {
         TreeGridElement grid = getTreeGrid();
 

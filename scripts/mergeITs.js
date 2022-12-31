@@ -43,7 +43,11 @@ function addDependency(arr, groupId, artifactId, version, scope, exclusions) {
       artifactId: [artifactId]
     }
     version && (obj.version = [version]);
-    scope && (obj.scope = [scope]);
+    // some components like TP are using this dependency under default scope instead of test scope
+    if (artifactId !== "vaadin-flow-components-test-util"){
+      scope && (obj.scope = [scope]);
+    }
+
     exclusions && (obj.exclusions = exclusions);
     arr.push(obj);
   }

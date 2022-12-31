@@ -64,43 +64,42 @@ public class MessageListIT extends AbstractComponentIT {
 
     @Test
     public void updateItemPropertiesAfterRendering_messagesUpdated() {
-        MessageElement msg = messageList.getMessageElements().get(0);
-
         /*
          * Testing each setter separately to make sure that they all trigger the
          * client-side property update.
          */
 
         clickElementWithJs("setText");
-        Assert.assertEquals("Unexpected text content", "foo2", msg.getText());
+        Assert.assertEquals("Unexpected text content", "foo2",
+                getFirstMessage(messageList).getText());
 
         clickElementWithJs("setTime");
-        Assert.assertTrue("Unexpected time prop",
-                msg.getTime().matches("Feb 2, 2000, [0-9]+:[0-9]+ [A|P]M"));
+        Assert.assertTrue("Unexpected time prop", getFirstMessage(messageList)
+                .getTime().matches("Feb 2, 2000, [0-9]+:[0-9]+ [A|P]M"));
 
         clickElementWithJs("setUserName");
         Assert.assertEquals("Unexpected userName prop", "sender2",
-                msg.getUserName());
+                getFirstMessage(messageList).getUserName());
 
         clickElementWithJs("setUserImage");
         Assert.assertEquals("Unexpected userImage prop", "/test2.jpg",
-                msg.getUserImg());
+                getFirstMessage(messageList).getUserImg());
 
         clickElementWithJs("setAbbreviation");
         Assert.assertEquals("Unexpected userAbbreviation prop", "CD",
-                msg.getUserAbbr());
+                getFirstMessage(messageList).getUserAbbr());
 
         clickElementWithJs("setUserColorIndex");
         Assert.assertEquals("Unexpected userColorIndex prop", 2,
-                msg.getUserColorIndex());
+                getFirstMessage(messageList).getUserColorIndex());
 
         clickElementWithJs("addThemeNames");
         Assert.assertEquals("Unexpected theme prop after adding theme names",
-                "foo bar", msg.getTheme());
+                "foo bar", getFirstMessage(messageList).getTheme());
 
         clickElementWithJs("removeThemeNames");
         Assert.assertEquals("Unexpected theme prop after removing theme names",
-                null, msg.getTheme());
+                null, getFirstMessage(messageList).getTheme());
     }
 
     @Test
@@ -145,5 +144,9 @@ public class MessageListIT extends AbstractComponentIT {
         String imageUrl = messageList.getMessageElements().get(0).getUserImg();
         MatcherAssert.assertThat(imageUrl, startsWith("VAADIN/dynamic"));
         checkLogsForErrors(); // would fail if the image wasn't hosted
+    }
+
+    private MessageElement getFirstMessage(MessageListElement list) {
+        return list.getMessageElements().get(0);
     }
 }

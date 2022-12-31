@@ -1,3 +1,11 @@
+/**
+ * Copyright 2000-2022 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
+ */
 package com.vaadin.flow.component.spreadsheet.testbench;
 
 import java.util.List;
@@ -6,6 +14,7 @@ import com.vaadin.testbench.TestBenchElement;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 
 /**
  * This class represents one cell within the currently active sheet of a
@@ -37,8 +46,10 @@ public class SheetCellElement extends TestBenchElement {
             WebElement cellValueInput = parent.getCellValueInput();
             executeScript("arguments[0].value=''",
                     ((TestBenchElement) cellValueInput).getWrappedElement());
-            cellValueInput.sendKeys(newValue);
-            cellValueInput.sendKeys(Keys.TAB);
+            new Actions(getDriver()).moveToElement(cellValueInput)
+                    .sendKeys(newValue).build().perform();
+            new Actions(getDriver()).moveToElement(cellValueInput)
+                    .sendKeys(Keys.TAB).build().perform();
             getCommandExecutor().waitForVaadin();
         }
     }
@@ -69,7 +80,7 @@ public class SheetCellElement extends TestBenchElement {
      *         cell has e.g. a custom editor component.
      */
     public boolean isNormalCell() {
-        List<WebElement> children = findElements(By.xpath(".//*"));
+        List<WebElement> children = findElements(By.cssSelector("*"));
         // might have an inner div for example when content is overflowing, cell
         // has a comment
         // or cell contains an invalid formula

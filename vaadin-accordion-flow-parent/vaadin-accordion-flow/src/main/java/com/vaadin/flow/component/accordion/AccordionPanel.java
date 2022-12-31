@@ -1,5 +1,3 @@
-package com.vaadin.flow.component.accordion;
-
 /*
  * Copyright 2000-2022 Vaadin Ltd.
  *
@@ -15,6 +13,7 @@ package com.vaadin.flow.component.accordion;
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+package com.vaadin.flow.component.accordion;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
@@ -26,9 +25,21 @@ import com.vaadin.flow.component.details.Details;
  * An accordion panel which could be opened or closed.
  */
 @Tag("vaadin-accordion-panel")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha3")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@NpmPackage(value = "@vaadin/accordion", version = "24.0.0-alpha7")
+@JsModule("@vaadin/accordion/src/vaadin-accordion-panel.js")
 public class AccordionPanel extends Details {
+
+    /**
+     * Server-side component for the {@code <vaadin-accordion-heading>} element.
+     */
+    @Tag("vaadin-accordion-heading")
+    static class AccordionHeading extends Component {
+
+        public AccordionHeading() {
+        }
+    }
 
     /**
      * Creates an empty panel.
@@ -116,5 +127,14 @@ public class AccordionPanel extends Details {
     public AccordionPanel(Component summary, Component... components) {
         this(summary);
         addContent(components);
+    }
+
+    /**
+     * Creates the summary container component.
+     *
+     * @return the summary container
+     */
+    protected Component createSummaryContainer() {
+        return new AccordionHeading();
     }
 }

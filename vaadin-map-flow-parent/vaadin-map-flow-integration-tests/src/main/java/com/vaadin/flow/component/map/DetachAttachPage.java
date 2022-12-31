@@ -11,8 +11,7 @@ public class DetachAttachPage extends Div {
         Map map = new Map();
         add(map);
         // Modify viewport, so we can test some non-default values
-        map.getView().setCenter(
-                new Coordinate(2482424.644689998, 8500614.173537256));
+        map.getView().setCenter(new Coordinate(22.3, 60.45));
         map.getView().setZoom(14);
 
         Div newContainer = new Div();

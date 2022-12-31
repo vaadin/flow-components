@@ -15,38 +15,38 @@
  */
 package com.vaadin.flow.component.checkbox.tests;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
+import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
+import com.vaadin.flow.component.checkbox.testbench.CheckboxGroupElement;
 import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
+import java.util.Arrays;
+import java.util.List;
+
 @TestPath("vaadin-checkbox-group-list-data-view")
 public class CheckboxGroupListDataViewIT extends AbstractComponentIT {
 
-    private TestBenchElement checkboxGroup;
-    private TestBenchElement otherCheckboxGroup;
+    private CheckboxGroupElement checkboxGroup;
+    private CheckboxGroupElement otherCheckboxGroup;
 
     @Before
     public void init() {
         open();
 
-        checkboxGroup = $("vaadin-checkbox-group")
+        checkboxGroup = $(CheckboxGroupElement.class)
                 .id(CheckboxGroupListDataViewPage.CHECKBOX_GROUP);
 
-        otherCheckboxGroup = $("vaadin-checkbox-group")
+        otherCheckboxGroup = $(CheckboxGroupElement.class)
                 .id(CheckboxGroupListDataViewPage.OTHER_CHECKBOX_GROUP);
     }
 
     @Test
     public void getItems_showsCheckboxContent() {
-        List<TestBenchElement> checkboxes = checkboxGroup.$("vaadin-checkbox")
-                .all();
+        List<CheckboxElement> checkboxes = checkboxGroup.getCheckboxes();
 
         // Checkbox items size
         Assert.assertEquals("Unexpected checkbox count", 3, checkboxes.size());
@@ -101,21 +101,20 @@ public class CheckboxGroupListDataViewIT extends AbstractComponentIT {
         Assert.assertEquals(
                 "Unexpected item count after adding a new item in first "
                         + "CheckboxGroup",
-                4, checkboxGroup.$("vaadin-checkbox").all().size());
+                4, checkboxGroup.getCheckboxes().size());
 
         Assert.assertEquals(
                 "Wrong name for added person in first CheckboxGroup", "Peter",
-                checkboxGroup.$("vaadin-checkbox").all().get(3).getText());
+                checkboxGroup.getCheckboxes().get(3).getLabel());
 
         Assert.assertEquals(
                 "Unexpected item count after adding a new item in"
                         + " second CheckboxGroup",
-                4, checkboxGroup.$("vaadin-checkbox").all().size());
+                4, checkboxGroup.getCheckboxes().size());
 
         Assert.assertEquals(
                 "Wrong name for added person in second " + "CheckboxGroup",
-                "Peter",
-                otherCheckboxGroup.$("vaadin-checkbox").all().get(3).getText());
+                "Peter", otherCheckboxGroup.getCheckboxes().get(3).getLabel());
     }
 
     @Test
@@ -123,12 +122,10 @@ public class CheckboxGroupListDataViewIT extends AbstractComponentIT {
         findElement(By.id(CheckboxGroupListDataViewPage.UPDATE_ITEM)).click();
 
         Assert.assertEquals("Wrong name for updated person in first Checkbox",
-                "Jack",
-                checkboxGroup.$("vaadin-checkbox").all().get(0).getText());
+                "Jack", checkboxGroup.getCheckboxes().get(0).getLabel());
 
         Assert.assertEquals("Wrong name for updated person in second Checkbox",
-                "Jack",
-                otherCheckboxGroup.$("vaadin-checkbox").all().get(0).getText());
+                "Jack", otherCheckboxGroup.getCheckboxes().get(0).getLabel());
     }
 
     @Test
@@ -136,46 +133,43 @@ public class CheckboxGroupListDataViewIT extends AbstractComponentIT {
         findElement(By.id(CheckboxGroupListDataViewPage.DELETE_ITEM)).click();
 
         Assert.assertEquals("Unexpected item count in first Checkbox", 2,
-                checkboxGroup.$("vaadin-checkbox").all().size());
+                checkboxGroup.getCheckboxes().size());
 
         Assert.assertEquals("Unexpected item count in second Checkbox", 2,
-                otherCheckboxGroup.$("vaadin-checkbox").all().size());
+                otherCheckboxGroup.getCheckboxes().size());
     }
 
     @Test
     public void sorting_itemsSortedOnlyInOneComponent() {
         findElement(By.id(CheckboxGroupListDataViewPage.SORT_BUTTON)).click();
 
-        Assert.assertEquals("Unexpected sort order", "John,Mike,Paul",
-                checkboxGroup.$("vaadin-checkbox").all().stream()
-                        .map(TestBenchElement::getText)
-                        .collect(Collectors.joining(",")));
+        Assert.assertEquals("Unexpected sort order",
+                Arrays.asList("John", "Mike", "Paul"),
+                checkboxGroup.getOptions());
 
-        Assert.assertEquals("Unexpected sort order", "John,Paul,Mike",
-                otherCheckboxGroup.$("vaadin-checkbox").all().stream()
-                        .map(TestBenchElement::getText)
-                        .collect(Collectors.joining(",")));
+        Assert.assertEquals("Unexpected sort order",
+                Arrays.asList("John", "Paul", "Mike"),
+                otherCheckboxGroup.getOptions());
     }
 
     @Test
     public void filtering_itemsFilteredOnlyInOneComponent() {
         findElement(By.id(CheckboxGroupListDataViewPage.FILTER_BUTTON)).click();
 
-        List<TestBenchElement> checkboxes = checkboxGroup.$("vaadin-checkbox")
-                .all();
+        List<CheckboxElement> checkboxes = checkboxGroup.getCheckboxes();
         Assert.assertEquals("Unexpected filtered checkbox count", 1,
                 checkboxes.size());
         Assert.assertEquals("Unexpected filtered checkbox item", "Paul",
-                checkboxes.get(0).getText());
+                checkboxes.get(0).getLabel());
 
         // Verify no impact on other component bound to the same data provider
-        checkboxes = otherCheckboxGroup.$("vaadin-checkbox").all();
+        checkboxes = otherCheckboxGroup.getCheckboxes();
         Assert.assertEquals("No filter expected on other CheckboxGroup bound "
                 + "to the same data provider", 3, checkboxes.size());
         Assert.assertArrayEquals(
                 "No filtering expected on other "
                         + "CheckboxGroup bound to the same data provider",
                 new String[] { "John", "Paul", "Mike" },
-                checkboxes.stream().map(TestBenchElement::getText).toArray());
+                otherCheckboxGroup.getOptions().toArray());
     }
 }

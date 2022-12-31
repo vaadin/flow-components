@@ -13,14 +13,12 @@ public class ViewPage extends Div {
 
         NativeButton setCenterButton = new NativeButton("Set Center", e -> {
             // here we set center
-            map.getView().setCenter(
-                    new Coordinate(2482424.644689998, 8500614.173537256));
+            map.getView().setCenter(new Coordinate(22.3, 60.45));
         });
         setCenterButton.setId("set-center-button");
 
         NativeButton setZoom = new NativeButton("Set Zoom", e -> {
-            map.getView().setCenter(
-                    new Coordinate(2482424.644689998, 8500614.173537256));
+            map.getView().setCenter(new Coordinate(22.3, 60.45));
             map.getView().setZoom(14);
         });
         setZoom.setId("set-zoom-button");

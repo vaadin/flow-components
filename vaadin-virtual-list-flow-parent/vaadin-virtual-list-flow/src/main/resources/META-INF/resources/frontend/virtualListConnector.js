@@ -59,11 +59,29 @@ window.Vaadin.Flow.virtualListConnector = {
         root.__virtualListIndex = model.index;
 
         if (model.item === undefined) {
-          originalRenderer.call(list, root, list, {
-            ...model,
-            item: list.$connector.placeholderItem
-          });
+          if (list.$connector.placeholderElement) {
+            // ComponentRenderer
+            if (!root.__hasComponentRendererPlaceholder) {
+              // The root was previously rendered by the ComponentRenderer. Clear and add a placeholder.
+              root.innerHTML = '';
+              delete root._$litPart$;
+              root.appendChild(list.$connector.placeholderElement.cloneNode(true));
+              root.__hasComponentRendererPlaceholder = true;
+            }
+          } else {
+            // LitRenderer
+            originalRenderer.call(list, root, list, {
+              ...model,
+              item: list.$connector.placeholderItem
+            });
+          }
         } else {
+          if (root.__hasComponentRendererPlaceholder) {
+            // The root was previously populated with a placeholder. Clear it.
+            root.innerHTML = '';
+            root.__hasComponentRendererPlaceholder = false;
+          }
+
           originalRenderer.call(list, root, list, model);
         }
 
@@ -97,12 +115,20 @@ window.Vaadin.Flow.virtualListConnector = {
     };
 
     list.$connector.updateData = function (items) {
-      const mapByKey = items.reduce((map, item) => {
+      const updatedItemsMap = items.reduce((map, item) => {
         map[item.key] = item;
         return map;
       }, {});
 
-      list.items = list.items.map((item) => mapByKey[item.key] || item);
+      list.items = list.items.map((item) => {
+        // Items can be undefined if they are outside the viewport
+        if (!item) {
+          return item;
+        }
+        // Replace existing item with updated item,
+        // return existing item as fallback if it was not updated
+        return updatedItemsMap[item.key] || item;
+      });
     };
 
     list.$connector.updateSize = function (newSize) {
@@ -114,9 +140,11 @@ window.Vaadin.Flow.virtualListConnector = {
       }
     };
 
-    list.$connector.setPlaceholderItem = function (placeholderItem = {}) {
+    list.$connector.setPlaceholderItem = function (placeholderItem = {}, appId) {
       placeholderItem.__placeholder = true;
       list.$connector.placeholderItem = placeholderItem;
+      const nodeId = Object.entries(placeholderItem).find(([key]) => key.endsWith('_nodeid'));
+      list.$connector.placeholderElement = nodeId ? Vaadin.Flow.clients[appId].getByNodeId(nodeId[1]) : null;
     };
   }
 };

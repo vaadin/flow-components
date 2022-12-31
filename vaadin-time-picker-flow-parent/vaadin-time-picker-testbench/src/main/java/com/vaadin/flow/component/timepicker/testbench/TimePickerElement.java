@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.timepicker.testbench;
 
+import java.util.Collections;
 import java.util.Objects;
 
 import com.vaadin.testbench.HasHelper;
@@ -203,18 +204,19 @@ public class TimePickerElement extends TestBenchElement
     }
 
     /**
-     * Enter the given time input to the text field.
+     * Simulates the user selecting a time via the input element. This
+     * effectively clears the input element with a key shortcut, then types the
+     * given time string and finally presses {@code Enter} to commit the new
+     * time.
      *
      * @param timeInput
-     *            the time input to enter, not {@code null}
+     *            the time string to enter, not {@code null}
      */
     @Override
     public void selectByText(String timeInput) {
         Objects.requireNonNull(timeInput, "null input not accepted");
-
-        TestBenchElement timePickerInputElement = getTimePickerInputElement();
-        executeScript("arguments[0].value = ''", timePickerInputElement);
-        timePickerInputElement.sendKeys(timeInput + Keys.RETURN);
+        sendKeys(Keys.chord(Keys.SHIFT, Keys.HOME), Keys.BACK_SPACE);
+        sendKeys(timeInput, Keys.ENTER);
     }
 
     @Override
@@ -225,10 +227,14 @@ public class TimePickerElement extends TestBenchElement
     /**
      * Gets whether dropdown will open automatically or not.
      *
-     * @return @{code true} if enabled, {@code false} otherwise
+     * @return {@code true} if enabled, {@code false} otherwise
      */
     public boolean isAutoOpen() {
         return !getPropertyBoolean("autoOpenDisabled");
     }
 
+    @Override
+    public void sendKeys(CharSequence... keysToSend) {
+        getTimePickerInputElement().sendKeys(keysToSend);
+    }
 }

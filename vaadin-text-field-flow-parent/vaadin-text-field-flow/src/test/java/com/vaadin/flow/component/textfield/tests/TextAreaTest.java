@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.textfield.tests;
 
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextAreaVariant;
 import com.vaadin.flow.dom.ThemeList;
@@ -130,5 +131,11 @@ public class TextAreaTest {
         assertTrue("TextArea should support char pattern",
                 HasAllowedCharPattern.class
                         .isAssignableFrom(new TextArea().getClass()));
+    }
+
+    @Test
+    public void implementsHasTooltip() {
+        TextArea textArea = new TextArea();
+        Assert.assertTrue(textArea instanceof HasTooltip);
     }
 }

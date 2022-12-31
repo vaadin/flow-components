@@ -20,6 +20,7 @@ import java.util.Optional;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.DataGenerator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.dom.Element;
@@ -27,7 +28,7 @@ import com.vaadin.flow.function.SerializableBiConsumer;
 import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.SerializableSupplier;
-import com.vaadin.flow.function.ValueProvider;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * Base class for all renderers that support arbitrary {@link Component}s.
@@ -45,8 +46,10 @@ import com.vaadin.flow.function.ValueProvider;
  *            the type of the input model object
  */
 public class ComponentRenderer<COMPONENT extends Component, SOURCE>
-        extends Renderer<SOURCE> {
+        extends LitRenderer<SOURCE> {
 
+    private Element container;
+    private Element owner;
     private SerializableSupplier<COMPONENT> componentSupplier;
     private SerializableFunction<SOURCE, COMPONENT> componentFunction;
     private SerializableBiFunction<Component, SOURCE, Component> componentUpdateFunction;
@@ -69,7 +72,6 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
      */
     public ComponentRenderer(SerializableSupplier<COMPONENT> componentSupplier,
             SerializableBiConsumer<COMPONENT, SOURCE> itemConsumer) {
-
         this.componentSupplier = componentSupplier;
         this.itemConsumer = itemConsumer;
     }
@@ -140,33 +142,71 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
         this.componentUpdateFunction = componentUpdateFunction;
     }
 
-    /**
-     * Default constructor, that can be used by subclasses which supports
-     * different ways of creating components, other than those defined in the
-     * other constructors.
-     */
-    protected ComponentRenderer() {
+    @Override
+    protected String getTemplateExpression() {
+        var appId = UI.getCurrent() != null
+                ? UI.getCurrent().getInternals().getAppId()
+                : "";
+
+        return String.format(
+                "<%s appid=\"%s\" .nodeid=\"${item.nodeid}\"></%s>",
+                componentRendererTag, appId, componentRendererTag);
+    }
+
+    Element getOwner() {
+        return owner;
     }
 
     @Override
-    public Rendering<SOURCE> render(Element container,
-            DataKeyMapper<SOURCE> keyMapper, Element contentTemplate) {
+    public Rendering<SOURCE> render(Element owner,
+            DataKeyMapper<SOURCE> keyMapper, String rendererName) {
+        this.owner = owner;
+        this.container = new Element("div");
+        owner.appendVirtualChild(container);
+        var rendering = super.render(owner, keyMapper, rendererName);
 
-        ComponentRendering rendering = new ComponentRendering(
-                keyMapper == null ? null : keyMapper::key);
-        rendering.setTemplateElement(contentTemplate);
-        /*
-         * setupTemplateWhenAttached does some setup that will be needed by
-         * generateData. To ensure the setup has completed before it is needed,
-         * we forego the general convention of using beforeClientResponse to
-         * guard the action against duplicate invocation. This is not a big
-         * problem in this case since setupTemplateWhenAttached only sets
-         * properties but doesn't execute any JS.
-         */
-        container.getNode().runWhenAttached(ui -> setupTemplateWhenAttached(ui,
-                container, rendering, keyMapper));
+        return configureRendering(rendering, keyMapper);
+    }
 
-        return rendering;
+    /**
+     * Configures the {@code Rendering} instance provided by {@link LitRenderer}
+     * to make it create and update Components for items.
+     *
+     * @param rendering
+     *            the rendering instance
+     * @param keyMapper
+     *            the key mapper
+     * @return a rendering instance configured for the purposes of this renderer
+     */
+    Rendering<SOURCE> configureRendering(Rendering<SOURCE> rendering,
+            DataKeyMapper<SOURCE> keyMapper) {
+        return new Rendering<SOURCE>() {
+            @Override
+            public Optional<DataGenerator<SOURCE>> getDataGenerator() {
+                var generator = new CompositeDataGenerator<SOURCE>();
+
+                var componentDataGenerator = new ComponentDataGenerator<SOURCE>(
+                        ComponentRenderer.this,
+                        keyMapper == null ? null : keyMapper::key);
+                componentDataGenerator.setContainer(container);
+                componentDataGenerator.setNodeIdPropertyName(
+                        getPropertyNamespace() + "nodeid");
+                generator.addDataGenerator(componentDataGenerator);
+
+                generator.addDataGenerator(rendering.getDataGenerator().get());
+                return Optional.of(generator);
+            }
+
+            @Override
+            public Element getTemplateElement() {
+                return null;
+            }
+
+            @Override
+            public Registration getRegistration() {
+                return rendering.getRegistration();
+            }
+        };
     }
 
     /**
@@ -182,44 +222,6 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
         Objects.requireNonNull(componentRendererTag,
                 "The componentRendererTag should not be null");
         this.componentRendererTag = componentRendererTag;
-    }
-
-    private void setupTemplateWhenAttached(UI ui, Element owner,
-            ComponentRendering rendering, DataKeyMapper<SOURCE> keyMapper) {
-        String appId = ui.getInternals().getAppId();
-        Element templateElement = rendering.getTemplateElement();
-        owner.appendChild(templateElement);
-
-        Element container = new Element("div");
-        owner.appendVirtualChild(container);
-        rendering.setContainer(container);
-        String templateInnerHtml;
-
-        if (keyMapper != null) {
-            String nodeIdPropertyName = "_renderer_"
-                    + templateElement.getNode().getId();
-
-            templateInnerHtml = String.format(
-                    "<%s appid=\"%s\" nodeid=\"[[item.%s]]\"></%s>",
-                    componentRendererTag, appId, nodeIdPropertyName,
-                    componentRendererTag);
-            rendering.setNodeIdPropertyName(nodeIdPropertyName);
-        } else {
-            COMPONENT component = createComponent(null);
-            if (component != null) {
-                container.appendChild(component.getElement());
-
-                templateInnerHtml = String.format(
-                        "<%s appid=\"%s\" nodeid=\"%s\"></%s>",
-                        componentRendererTag, appId,
-                        component.getElement().getNode().getId(),
-                        componentRendererTag);
-            } else {
-                templateInnerHtml = "";
-            }
-        }
-
-        templateElement.setProperty("innerHTML", templateInnerHtml);
     }
 
     /**
@@ -263,29 +265,4 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
         }
         return createComponent(item);
     }
-
-    private class ComponentRendering extends ComponentDataGenerator<SOURCE>
-            implements Rendering<SOURCE> {
-
-        private Element templateElement;
-
-        public ComponentRendering(ValueProvider<SOURCE, String> keyMapper) {
-            super(ComponentRenderer.this, keyMapper);
-        }
-
-        public void setTemplateElement(Element templateElement) {
-            this.templateElement = templateElement;
-        }
-
-        @Override
-        public Element getTemplateElement() {
-            return templateElement;
-        }
-
-        @Override
-        public Optional<DataGenerator<SOURCE>> getDataGenerator() {
-            return Optional.of(this);
-        }
-    }
-
 }

@@ -1,23 +1,15 @@
+/**
+ * Copyright 2000-2022 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
+ */
 package com.vaadin.flow.component.cookieconsent;
 
 import java.util.Arrays;
 import java.util.Locale;
-
-/*
- * #%L
- * Cookie Consent for Vaadin Flow
- * %%
- * Copyright 2000-2022 Vaadin Ltd.
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
- *
- * See the file license.html distributed with this software for more
- * information about licensing.
- *
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
- */
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
@@ -42,10 +34,9 @@ import com.vaadin.flow.dom.Style;
  */
 @SuppressWarnings("serial")
 @Tag("vaadin-cookie-consent")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha3")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/cookie-consent", version = "23.2.0-alpha3")
-@NpmPackage(value = "@vaadin/vaadin-cookie-consent", version = "23.2.0-alpha3")
+@NpmPackage(value = "@vaadin/cookie-consent", version = "24.0.0-alpha7")
 @JsModule("@vaadin/cookie-consent/src/vaadin-cookie-consent.js")
 @JsModule("./cookieConsentConnector.js")
 public class CookieConsent extends Component implements HasStyle {

@@ -20,11 +20,12 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.Locale;
 
+import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.function.ValueProvider;
 
 /**
  *
- * A template renderer for presenting {@code LocalDateTime} objects.
+ * A renderer for presenting {@code LocalDateTime} objects.
  *
  * @author Vaadin Ltd
  *
@@ -35,7 +36,7 @@ import com.vaadin.flow.function.ValueProvider;
 public class LocalDateTimeRenderer<SOURCE>
         extends BasicRenderer<SOURCE, LocalDateTime> {
 
-    private DateTimeFormatter formatter;
+    private SerializableSupplier<DateTimeFormatter> formatter;
     private String nullRepresentation;
 
     /**
@@ -58,8 +59,30 @@ public class LocalDateTimeRenderer<SOURCE>
      */
     public LocalDateTimeRenderer(
             ValueProvider<SOURCE, LocalDateTime> valueProvider) {
-        this(valueProvider, DateTimeFormatter
+        this(valueProvider, () -> DateTimeFormatter
                 .ofLocalizedDateTime(FormatStyle.LONG, FormatStyle.SHORT), "");
+    }
+
+    /**
+     * Creates a new LocalDateTimeRenderer.
+     * <p>
+     * The renderer is configured to render with the given formatter, with the
+     * empty string as its null representation.
+     *
+     * @param valueProvider
+     *            the callback to provide a {@link LocalDateTime} to the
+     *            renderer, not <code>null</code>
+     * @param formatter
+     *            the formatter to use, not <code>null</code>
+     * @deprecated Via this constructor renderer is not serializable, use
+     *             {@link LocalDateTimeRenderer(ValueProvider,
+     *             SerializableSupplier)} instead.
+     */
+    @Deprecated
+    public LocalDateTimeRenderer(
+            ValueProvider<SOURCE, LocalDateTime> valueProvider,
+            DateTimeFormatter formatter) {
+        this(valueProvider, () -> formatter, "");
     }
 
     /**
@@ -76,8 +99,31 @@ public class LocalDateTimeRenderer<SOURCE>
      */
     public LocalDateTimeRenderer(
             ValueProvider<SOURCE, LocalDateTime> valueProvider,
-            DateTimeFormatter formatter) {
+            SerializableSupplier<DateTimeFormatter> formatter) {
         this(valueProvider, formatter, "");
+    }
+
+    /**
+     * Creates a new LocalDateTimeRenderer.
+     * <p>
+     * The renderer is configured to render with the given formatter.
+     *
+     * @param valueProvider
+     *            the callback to provide a {@link LocalDateTime} to the
+     *            renderer, not <code>null</code>
+     * @param formatter
+     *            the formatter to use, not <code>null</code>
+     * @param nullRepresentation
+     *            the textual representation of the <code>null</code> value
+     * @deprecated Via this constructor renderer is not serializable, use
+     *             {@link LocalDateTimeRenderer(ValueProvider,
+     *             SerializableSupplier, String)} instead.
+     */
+    @Deprecated
+    public LocalDateTimeRenderer(
+            ValueProvider<SOURCE, LocalDateTime> valueProvider,
+            DateTimeFormatter formatter, String nullRepresentation) {
+        this(valueProvider, () -> formatter, nullRepresentation);
     }
 
     /**
@@ -95,7 +141,8 @@ public class LocalDateTimeRenderer<SOURCE>
      */
     public LocalDateTimeRenderer(
             ValueProvider<SOURCE, LocalDateTime> valueProvider,
-            DateTimeFormatter formatter, String nullRepresentation) {
+            SerializableSupplier<DateTimeFormatter> formatter,
+            String nullRepresentation) {
         super(valueProvider);
 
         if (formatter == null) {
@@ -190,13 +237,13 @@ public class LocalDateTimeRenderer<SOURCE>
             throw new IllegalArgumentException("locale may not be null");
         }
 
-        formatter = DateTimeFormatter.ofPattern(formatPattern, locale);
+        formatter = () -> DateTimeFormatter.ofPattern(formatPattern, locale);
         this.nullRepresentation = nullRepresentation;
     }
 
     @Override
     protected String getFormattedValue(LocalDateTime dateTime) {
         return dateTime == null ? nullRepresentation
-                : formatter.format(dateTime);
+                : formatter.get().format(dateTime);
     }
 }

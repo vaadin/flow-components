@@ -2,9 +2,11 @@ package com.vaadin.flow.component.spreadsheet.test;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
+import com.vaadin.flow.testutil.TestPath;
+
+@TestPath("vaadin-spreadsheet")
 public class FormulaColumnsIT extends AbstractSpreadsheetIT {
 
     private final String[] integerColumn = { "1", "2", "3", "4" };
@@ -15,7 +17,7 @@ public class FormulaColumnsIT extends AbstractSpreadsheetIT {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL());
+        open();
 
         createNewSpreadsheet();
     }
@@ -98,7 +100,6 @@ public class FormulaColumnsIT extends AbstractSpreadsheetIT {
     }
 
     @Test
-    @Ignore("Formulas with quotes are not working")
     public void testFloatOperations() {
         for (int i = 0; i < floatColumn.length; i++) {
             getSpreadsheet().getCellAt(i + 1, 1).setValue(floatColumn[i]);

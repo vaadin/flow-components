@@ -1,17 +1,12 @@
-package com.vaadin.flow.component.spreadsheet;
-
-/*
- * #%L
- * Vaadin Spreadsheet
- * %%
- * Copyright (C) 2013 - 2022 Vaadin Ltd
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
+/**
+ * Copyright 2000-2022 Vaadin Ltd.
  *
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
  */
+package com.vaadin.flow.component.spreadsheet;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,10 +16,7 @@ import java.util.Set;
 
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
-import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentEvent;
-import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 
@@ -43,8 +35,7 @@ import com.vaadin.flow.component.html.Div;
  * @author Vaadin Ltd.
  */
 @SuppressWarnings("serial")
-public class SpreadsheetFilterTable extends SpreadsheetTable
-        implements ComponentEventListener {
+public class SpreadsheetFilterTable extends SpreadsheetTable {
     public static final String CLEAR_FILTERS_BUTTON_CLASSNAME = "clear-filters-button";
 
     public static final String FILTER_TABLE_CONTENT_CLASSNAME = "spreadsheet-filter-table-content";
@@ -205,7 +196,7 @@ public class SpreadsheetFilterTable extends SpreadsheetTable
      * @return Button for clearing the filters
      */
     protected Button createClearButton() {
-        final Button button = new Button("Clear filters", this);
+        final Button button = new Button("Clear filters");
         button.setDisableOnClick(true);
         button.setEnabled(false);
         button.addClassName(CLEAR_FILTERS_BUTTON_CLASSNAME);
@@ -299,22 +290,5 @@ public class SpreadsheetFilterTable extends SpreadsheetTable
         if (filters.isEmpty()) {
             popupButtonToFiltersMap.remove(popupButton);
         }
-    }
-
-    @Override
-    public void onComponentEvent(ComponentEvent event) {
-        if (event instanceof ClickEvent)
-            event.getSource().getParent().ifPresent(parent -> {
-                if (parent instanceof PopupButton
-                        && popupButtonToFiltersMap.containsKey(parent)) {
-                    HashSet<SpreadsheetFilter> filters = popupButtonToFiltersMap
-                            .get(parent);
-                    for (SpreadsheetFilter filter : filters) {
-                        filter.clearFilter();
-                    }
-                    ((PopupButton) parent).markActive(false);
-                    onFiltersUpdated();
-                }
-            });
     }
 }

@@ -53,6 +53,17 @@ public class MultiSelectComboBoxClientSideFilteringIT
     }
 
     @Test
+    public void inputMatchingFilter_filtersItems() {
+        comboBox.openPopup();
+        comboBox.sendKeys("Item 10");
+
+        List<String> options = comboBox.getOptions();
+        Assert.assertEquals(1, options.size());
+        Assert.assertTrue("Should display Item 10",
+                options.contains("Item 10"));
+    }
+
+    @Test
     public void setNonMatchingFilter_noItems() {
         comboBox.setFilter("Item XYZ");
 

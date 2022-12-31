@@ -20,22 +20,37 @@ import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.shared.HasClearButton;
-import com.vaadin.flow.component.shared.HasAllowedCharPattern;
-import com.vaadin.flow.component.HasEnabled;
+import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.HasTheme;
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.Synchronize;
+import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.ClientValidationUtil;
+import com.vaadin.flow.component.shared.HasAllowedCharPattern;
+import com.vaadin.flow.component.shared.HasAutoOpen;
+import com.vaadin.flow.component.shared.HasClearButton;
+import com.vaadin.flow.component.shared.HasClientValidation;
+import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.ValidationUtil;
+import com.vaadin.flow.data.binder.HasValidator;
+import com.vaadin.flow.data.binder.ValidationResult;
+import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
+import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
+import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.StateTree;
@@ -49,10 +64,18 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author Vaadin Ltd
  */
+@Tag("vaadin-time-picker")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha7")
+@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@NpmPackage(value = "@vaadin/time-picker", version = "24.0.0-alpha7")
+@JsModule("@vaadin/time-picker/src/vaadin-time-picker.js")
 @JsModule("./vaadin-time-picker/timepickerConnector.js")
-public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
-        implements HasSize, HasValidation, HasEnabled, HasHelper, HasLabel,
-        HasTheme, HasClearButton, HasAllowedCharPattern {
+public class TimePicker
+        extends AbstractSinglePropertyField<TimePicker, LocalTime>
+        implements Focusable<TimePicker>, HasAllowedCharPattern, HasAutoOpen,
+        HasClearButton, HasClientValidation, HasHelper, HasLabel, HasSize,
+        HasStyle, HasThemeVariant<TimePickerVariant>, HasTooltip, HasValidation,
+        HasValidator<LocalTime> {
 
     private static final SerializableFunction<String, LocalTime> PARSER = valueFromClient -> {
         return valueFromClient == null || valueFromClient.isEmpty() ? null
@@ -62,8 +85,6 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     private static final SerializableFunction<LocalTime, String> FORMATTER = valueFromModel -> {
         return valueFromModel == null ? "" : valueFromModel.toString();
     };
-
-    private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
     private Locale locale;
 
@@ -101,13 +122,21 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
      *            ignored and the initial value is set
      */
     private TimePicker(LocalTime time, boolean isInitialValueOptional) {
-        super(time, null, String.class, PARSER, FORMATTER,
-                isInitialValueOptional);
+        super("value", time, String.class, PARSER, FORMATTER);
+
+        // Initialize property value unless it has already been set from a
+        // template
+        if ((getElement().getProperty("value") == null
+                || !isInitialValueOptional)) {
+            setPresentationValue(time);
+        }
 
         // workaround for https://github.com/vaadin/flow/issues/3496
         setInvalid(false);
 
         addValueChangeListener(e -> validate());
+
+        addClientValidatedEventListener(event -> validate());
     }
 
     /**
@@ -192,9 +221,8 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
      * @param label
      *            value for the {@code label} property in the time picker
      */
-    @Override
     public void setLabel(String label) {
-        super.setLabel(label);
+        getElement().setProperty("label", label == null ? "" : label);
     }
 
     /**
@@ -217,7 +245,19 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         if (value != null) {
             value = value.truncatedTo(ChronoUnit.MILLIS);
         }
+
+        LocalTime oldValue = getValue();
+
         super.setValue(value);
+
+        if (Objects.equals(oldValue, getEmptyValue())
+                && Objects.equals(value, getEmptyValue())
+                && isInputValuePresent()) {
+            // Clear the input element from possible bad input.
+            getElement().executeJs("this.inputElement.value = ''");
+            getElement().setProperty("_hasInputValue", false);
+            fireEvent(new ClientValidatedEvent(this, false, true));
+        }
     }
 
     /**
@@ -225,14 +265,20 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
      *
      * @return the {@code label} property of the time picker
      */
-    @Override
     public String getLabel() {
-        return getLabelString();
+        return getElement().getProperty("label");
     }
 
-    @Override
+    /**
+     * Sets the error message that should be displayed when the component
+     * becomes invalid.
+     *
+     * @param errorMessage
+     *            the String value to set
+     */
     public void setErrorMessage(String errorMessage) {
-        super.setErrorMessage(errorMessage);
+        getElement().setProperty("errorMessage",
+                errorMessage == null ? "" : errorMessage);
     }
 
     /**
@@ -240,14 +286,18 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
      *
      * @return the current error message
      */
-    @Override
     public String getErrorMessage() {
-        return getErrorMessageString();
+        return getElement().getProperty("errorMessage");
     }
 
-    @Override
+    /**
+     * Sets whether the component has an invalid value or not.
+     *
+     * @param invalid
+     *            {@code true} for invalid, {@code false} for valid
+     */
     public void setInvalid(boolean invalid) {
-        super.setInvalid(invalid);
+        getElement().setProperty("invalid", invalid);
     }
 
     /**
@@ -255,11 +305,46 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
      * <p>
      * return true, if the value is invalid.
      *
-     * @return the {@code validity} property from the time picker
+     * @return the {@code invalid} property from the time picker
      */
-    @Override
     public boolean isInvalid() {
-        return isInvalidBoolean();
+        return getElement().getProperty("invalid", false);
+    }
+
+    @Override
+    public Validator<LocalTime> getDefaultValidator() {
+        return (value, context) -> checkValidity(value);
+    }
+
+    @Override
+    public Registration addValidationStatusChangeListener(
+            ValidationStatusChangeListener<LocalTime> listener) {
+        return addClientValidatedEventListener(
+                event -> listener.validationStatusChanged(
+                        new ValidationStatusChangeEvent<LocalTime>(this,
+                                !isInvalid())));
+    }
+
+    private ValidationResult checkValidity(LocalTime value) {
+        boolean hasNonParsableValue = Objects.equals(value, getEmptyValue())
+                && isInputValuePresent();
+        if (hasNonParsableValue) {
+            return ValidationResult.error("");
+        }
+
+        ValidationResult greaterThanMaxValidation = ValidationUtil
+                .checkGreaterThanMax(value, max);
+        if (greaterThanMaxValidation.isError()) {
+            return greaterThanMaxValidation;
+        }
+
+        ValidationResult smallThanMinValidation = ValidationUtil
+                .checkSmallerThanMin(value, min);
+        if (smallThanMinValidation.isError()) {
+            return smallThanMinValidation;
+        }
+
+        return ValidationResult.ok();
     }
 
     /**
@@ -268,36 +353,53 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
      * constraints using browser development tools.
      */
     private boolean isInvalid(LocalTime value) {
-        final boolean isRequiredButEmpty = required
-                && Objects.equals(getEmptyValue(), value);
-        final boolean isGreaterThanMax = value != null && max != null
-                && value.isAfter(max);
-        final boolean isSmallerThenMin = value != null && min != null
-                && value.isBefore(min);
-        return isRequiredButEmpty || isGreaterThanMax || isSmallerThenMin;
-    }
+        var requiredValidation = ValidationUtil.checkRequired(required, value,
+                getEmptyValue());
 
-    @Override
-    public void setPlaceholder(String placeholder) {
-        super.setPlaceholder(placeholder);
+        return requiredValidation.isError() || checkValidity(value).isError();
     }
 
     /**
-     * Gets the placeholder of the time picker.
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
-     * </p>
+     * Returns whether the input element has a value or not.
+     *
+     * @return <code>true</code> if the input element's value is populated,
+     *         <code>false</code> otherwise
+     */
+    @Synchronize(property = "_hasInputValue", value = "has-input-value-changed")
+    protected boolean isInputValuePresent() {
+        return getElement().getProperty("_hasInputValue", false);
+    }
+
+    /**
+     * Sets the placeholder text that should be displayed in the input element,
+     * when the user has not entered a value.
+     *
+     * @param placeholder
+     *            the placeholder text
+     */
+    public void setPlaceholder(String placeholder) {
+        getElement().setProperty("placeholder",
+                placeholder == null ? "" : placeholder);
+    }
+
+    /**
+     * The placeholder text that should be displayed in the input element, when
+     * the user has not entered a value.
      *
      * @return the {@code placeholder} property of the time picker
      */
     public String getPlaceholder() {
-        return getPlaceholderString();
+        return getElement().getProperty("placeholder");
     }
 
-    @Override
+    /**
+     * Sets whether the time picker is marked as input required.
+     *
+     * @param required
+     *            the boolean value to set
+     */
     public void setRequired(boolean required) {
-        super.setRequired(required);
+        getElement().setProperty("required", required);
         this.required = required;
     }
 
@@ -316,7 +418,7 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
      * @return {@code true} if the input is required, {@code false} otherwise
      */
     public boolean isRequired() {
-        return isRequiredBoolean();
+        return getElement().getProperty("required", false);
     }
 
     /**
@@ -346,7 +448,8 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     public void setStep(Duration step) {
         Objects.requireNonNull(step, "Step cannot be null");
 
-        super.setStep(StepsUtil.convertDurationToStepsValue(step));
+        getElement().setProperty("step",
+                StepsUtil.convertDurationToStepsValue(step));
     }
 
     /**
@@ -364,37 +467,39 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         if (!getElement().hasProperty("step")) {
             return StepsUtil.DEFAULT_WEB_COMPONENT_STEP;
         }
-        return StepsUtil.convertStepsValueToDuration(getStepDouble());
+        double step = getElement().getProperty("step", 0.0);
+        return StepsUtil.convertStepsValueToDuration(step);
     }
 
-    @Override
+    /**
+     * {@code invalid-changed} event is sent when the invalid state changes.
+     */
+    public static class InvalidChangeEvent extends ComponentEvent<TimePicker> {
+        private final boolean invalid;
+
+        public InvalidChangeEvent(TimePicker source, boolean fromClient) {
+            super(source, fromClient);
+            this.invalid = source.isInvalid();
+        }
+
+        public boolean isInvalid() {
+            return invalid;
+        }
+    }
+
+    /**
+     * Adds a listener for {@code invalid-changed} events fired by the
+     * webcomponent.
+     *
+     * @param listener
+     *            the listener
+     * @return a {@link Registration} for removing the event listener
+     */
     public Registration addInvalidChangeListener(
-            ComponentEventListener<InvalidChangeEvent<TimePicker>> listener) {
-        return super.addInvalidChangeListener(listener);
-    }
-
-    /**
-     * Adds theme variants to the component.
-     *
-     * @param variants
-     *            theme variants to add
-     */
-    public void addThemeVariants(TimePickerVariant... variants) {
-        getThemeNames().addAll(
-                Stream.of(variants).map(TimePickerVariant::getVariantName)
-                        .collect(Collectors.toList()));
-    }
-
-    /**
-     * Removes theme variants from the component.
-     *
-     * @param variants
-     *            theme variants to remove
-     */
-    public void removeThemeVariants(TimePickerVariant... variants) {
-        getThemeNames().removeAll(
-                Stream.of(variants).map(TimePickerVariant::getVariantName)
-                        .collect(Collectors.toList()));
+            ComponentEventListener<InvalidChangeEvent> listener) {
+        return getElement().addPropertyChangeListener("invalid",
+                event -> listener.onComponentEvent(new InvalidChangeEvent(this,
+                        event.isUserOriginated())));
     }
 
     /**
@@ -402,7 +507,6 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
      * because it is possible to circumvent the client-side validation
      * constraints using browser development tools.
      */
-    @Override
     protected void validate() {
         setInvalid(isInvalid(getValue()));
     }
@@ -412,7 +516,7 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         super.onAttach(attachEvent);
         initConnector();
         requestLocaleUpdate();
-        FieldValidationUtil.disableClientValidation(this);
+        ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
     }
 
     private void initConnector() {
@@ -514,22 +618,8 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
      */
     public void setMin(LocalTime min) {
         this.min = min;
-        super.setMin(format(min));
-    }
-
-    /**
-     * Sets the minimum time in the time picker. Times before that will be
-     * disabled in the popup.
-     *
-     * @deprecated Since 22.0, this API is deprecated in favor of
-     *             {@link TimePicker#setMin(LocalTime)}
-     * @param min
-     *            the minimum time that is allowed to be selected, or
-     *            <code>null</code> to remove any minimum constraints
-     */
-    @Deprecated
-    public void setMinTime(LocalTime min) {
-        this.setMin(min);
+        String minString = format(min);
+        getElement().setProperty("min", minString == null ? "" : minString);
     }
 
     /**
@@ -544,21 +634,6 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     }
 
     /**
-     * Gets the minimum time in the time picker. Time before that will be
-     * disabled in the popup.
-     *
-     * @deprecated Since 22.0, this API is deprecated in favor of
-     *             {@link TimePicker#getMin()}
-     *
-     * @return the minimum time that is allowed to be selected, or
-     *         <code>null</code> if there's no minimum
-     */
-    @Deprecated
-    public LocalTime getMinTime() {
-        return this.getMin();
-    }
-
-    /**
      * Sets the maximum time in the time picker. Times after that will be
      * disabled in the popup.
      *
@@ -568,23 +643,8 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
      */
     public void setMax(LocalTime max) {
         this.max = max;
-        super.setMax(format(max));
-    }
-
-    /**
-     * Sets the maximum time in the time picker. Times after that will be
-     * disabled in the popup.
-     *
-     * @deprecated Since 22.0, this API is deprecated in favor of
-     *             {@link TimePicker#setMax(LocalTime)}
-     *
-     * @param max
-     *            the maximum time that is allowed to be selected, or
-     *            <code>null</code> to remove any maximum constraints
-     */
-    @Deprecated
-    public void setMaxTime(LocalTime max) {
-        this.setMax(max);
+        String maxString = format(max);
+        getElement().setProperty("max", maxString == null ? "" : maxString);
     }
 
     /**
@@ -598,46 +658,9 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         return this.max;
     }
 
-    /**
-     * Gets the maximum time in the time picker. Times after that will be
-     * disabled in the popup.
-     *
-     * @deprecated Since 22.0, this API is deprecated in favor of
-     *             {@link TimePicker#getMax()}
-     *
-     * @return the maximum time that is allowed to be selected, or
-     *         <code>null</code> if there's no maximum
-     */
-    @Deprecated
-    public LocalTime getMaxTime() {
-        return this.getMax();
-    }
-
     private void runBeforeClientResponse(SerializableConsumer<UI> command) {
         getElement().getNode().runWhenAttached(ui -> ui
                 .beforeClientResponse(this, context -> command.accept(ui)));
-    }
-
-    /**
-     * Enables or disables the dropdown opening automatically. If {@code false}
-     * the dropdown is only opened when clicking the toggle button or pressing
-     * Up or Down arrow keys.
-     *
-     * @param autoOpen
-     *            {@code false} to prevent the dropdown from opening
-     *            automatically
-     */
-    public void setAutoOpen(boolean autoOpen) {
-        getElement().setProperty(PROP_AUTO_OPEN_DISABLED, !autoOpen);
-    }
-
-    /**
-     * Gets whether dropdown will open automatically or not.
-     *
-     * @return @{code true} if enabled, {@code false} otherwise
-     */
-    public boolean isAutoOpen() {
-        return !getElement().getProperty(PROP_AUTO_OPEN_DISABLED, false);
     }
 
     /**
@@ -662,5 +685,4 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     private static String format(LocalTime time) {
         return time != null ? time.toString() : null;
     }
-
 }

@@ -18,11 +18,9 @@ package com.vaadin.flow.component.grid.it;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.component.polymertemplate.PolymerTemplate;
-import com.vaadin.flow.templatemodel.TemplateModel;
+import com.vaadin.flow.component.littemplate.LitTemplate;
 
 @Tag("grid-on-client-and-slot")
 @JsModule("src/grid-on-client-and-slot.js")
-public class GridOnClientAndSlot extends PolymerTemplate<TemplateModel>
-        implements HasComponents {
+public class GridOnClientAndSlot extends LitTemplate implements HasComponents {
 }

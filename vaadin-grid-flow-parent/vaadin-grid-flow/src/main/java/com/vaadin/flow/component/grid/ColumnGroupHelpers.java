@@ -105,4 +105,20 @@ class ColumnGroupHelpers {
         return group;
     }
 
+    /**
+     * Copy the text align value from each column on the source list to its
+     * correspondent column on the destination list
+     *
+     * @param source
+     *            list of columns the text align values are copied from
+     * @param destination
+     *            list of columns the text align values are copied to
+     */
+    public static void propagateTextAlign(List<AbstractColumn<?>> source,
+            List<AbstractColumn<?>> destination) {
+        for (int i = 0; i < source.size(); i++) {
+            destination.get(i).setTextAlign(source.get(i).getTextAlign());
+        }
+    }
+
 }

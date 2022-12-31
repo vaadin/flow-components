@@ -18,10 +18,14 @@ package com.vaadin.flow.component.grid;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.renderer.LitRenderer;
 
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
@@ -33,7 +37,6 @@ import org.junit.rules.ExpectedException;
 import com.vaadin.flow.component.grid.FooterRow.FooterCell;
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.HeaderRow.HeaderCell;
-import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.dom.Element;
 
 public class HeaderFooterTest {
@@ -41,8 +44,6 @@ public class HeaderFooterTest {
     private static final Predicate<Element> isColumn = element -> "vaadin-grid-column"
             .equals(element.getTag());
     private static final Predicate<Element> isColumnGroup = element -> "vaadin-grid-column-group"
-            .equals(element.getTag());
-    private static final Predicate<Element> isTemplate = element -> "template"
             .equals(element.getTag());
 
     Grid<String> grid;
@@ -57,6 +58,8 @@ public class HeaderFooterTest {
     public void setup() {
         grid = new Grid<>();
         addColumns();
+
+        UI.setCurrent(new UI());
     }
 
     private void addColumns() {
@@ -81,17 +84,6 @@ public class HeaderFooterTest {
     }
 
     @Test
-    public void initGrid_noHeaderFooterTemplates() {
-        List<List<Element>> layers = getColumnLayersAndAssertCount(1);
-        Assert.assertTrue(
-                "Grid columns should not have header or "
-                        + "footer templates initially",
-                layers.get(0).stream().noneMatch(
-                        element -> getHeaderTemplate(element).isPresent()
-                                || getFooterTemplate(element).isPresent()));
-    }
-
-    @Test
     public void setHeader_firstHeaderRowCreated() {
         firstColumn.setHeader("foo");
         Assert.assertEquals(
@@ -102,6 +94,103 @@ public class HeaderFooterTest {
     }
 
     @Test
+    public void setHeaderText() {
+        firstColumn.setHeader("foo");
+
+        Assert.assertEquals("foo", firstColumn.getHeaderText());
+        Assert.assertEquals("foo",
+                grid.getHeaderRows().get(0).getCell(firstColumn).getText());
+    }
+
+    @Test
+    public void setHeaderComponent() {
+        TextField textField = new TextField();
+        firstColumn.setHeader(textField);
+
+        // Getter should return component
+        Assert.assertEquals(textField, firstColumn.getHeaderComponent());
+        Assert.assertEquals(textField, grid.getHeaderRows().get(0)
+                .getCell(firstColumn).getComponent());
+        // Should be added as virtual child
+        assertIsVirtualChild(textField, firstColumn);
+    }
+
+    @Test
+    public void setHeaderText_clearsHeaderComponent() {
+        TextField textField = new TextField();
+
+        firstColumn.setHeader(textField);
+        firstColumn.setHeader("foo");
+        Assert.assertNull(firstColumn.getHeaderComponent());
+
+        firstColumn.setHeader(textField);
+        firstColumn.setHeader((String) null);
+        Assert.assertNull(firstColumn.getHeaderComponent());
+        // Component should be removed
+        assertIsNotVirtualChild(textField);
+    }
+
+    @Test
+    public void setHeaderComponent_clearsHeaderText() {
+        TextField textField = new TextField();
+
+        firstColumn.setHeader("foo");
+        firstColumn.setHeader(textField);
+        Assert.assertNull(firstColumn.getHeaderText());
+
+        firstColumn.setHeader("foo");
+        firstColumn.setHeader((Component) null);
+        Assert.assertNull(firstColumn.getHeaderText());
+    }
+
+    @Test
+    public void replaceHeaderComponent_replacesVirtualChild() {
+        TextField firstField = new TextField();
+        firstColumn.setHeader(firstField);
+
+        TextField secondField = new TextField();
+        firstColumn.setHeader(secondField);
+
+        assertIsNotVirtualChild(firstField);
+        assertIsVirtualChild(secondField, firstColumn);
+    }
+
+    @Test
+    public void moveHeaderContent() {
+        // Move text
+        firstColumn.setHeader("Header");
+        firstColumn.moveHeaderContent(secondColumn);
+
+        Assert.assertNull(firstColumn.getHeaderText());
+        Assert.assertEquals("Header", secondColumn.getHeaderText());
+
+        // Move component
+        TextField firstField = new TextField();
+        firstColumn.setHeader(firstField);
+        firstColumn.moveHeaderContent(secondColumn);
+
+        Assert.assertNull(firstColumn.getHeaderComponent());
+        Assert.assertNull(secondColumn.getHeaderText());
+        Assert.assertEquals(firstField, secondColumn.getHeaderComponent());
+        assertIsVirtualChild(firstField, secondColumn);
+
+        // Replace component
+        TextField secondField = new TextField();
+        firstColumn.setHeader(secondField);
+        firstColumn.moveHeaderContent(secondColumn);
+
+        assertIsNotVirtualChild(firstField);
+        assertIsVirtualChild(secondField, secondColumn);
+
+        // Overwrite component with text
+        firstColumn.setHeader("Header");
+        firstColumn.moveHeaderContent(secondColumn);
+
+        Assert.assertNull(secondColumn.getHeaderComponent());
+        assertIsNotVirtualChild(secondField);
+    }
+
+    @Test
     public void setFooter_firstFooterRowCreated() {
         firstColumn.setFooter("foo");
         Assert.assertEquals(
@@ -109,6 +198,102 @@ public class HeaderFooterTest {
                 1, grid.getFooterRows().size());
         assertRowWrapsLayer(grid.getFooterRows().get(0),
                 getColumnLayersAndAssertCount(1).get(0));
+    }
+
+    @Test
+    public void setFooterText() {
+        firstColumn.setFooter("foo");
+
+        Assert.assertEquals("foo", firstColumn.getFooterText());
+        Assert.assertEquals("foo",
+                grid.getFooterRows().get(0).getCell(firstColumn).getText());
+    }
+
+    @Test
+    public void setFooterComponent() {
+        TextField textField = new TextField();
+        firstColumn.setFooter(textField);
+
+        // Getter should return component
+        Assert.assertEquals(textField, firstColumn.getFooterComponent());
+        Assert.assertEquals(textField, grid.getFooterRows().get(0)
+                .getCell(firstColumn).getComponent());
+        // Should be added as virtual child
+        assertIsVirtualChild(textField, firstColumn);
+    }
+
+    @Test
+    public void setFooterText_clearsFooterComponent() {
+        TextField textField = new TextField();
+
+        firstColumn.setFooter(textField);
+        firstColumn.setFooter("foo");
+        Assert.assertNull(firstColumn.getFooterComponent());
+
+        firstColumn.setFooter(textField);
+        firstColumn.setFooter((String) null);
+        Assert.assertNull(firstColumn.getFooterComponent());
+        assertIsNotVirtualChild(textField);
+    }
+
+    @Test
+    public void setFooterComponent_clearsFooterText() {
+        TextField textField = new TextField();
+
+        firstColumn.setFooter("foo");
+        firstColumn.setFooter(textField);
+        Assert.assertNull(firstColumn.getFooterText());
+
+        firstColumn.setFooter("foo");
+        firstColumn.setFooter((Component) null);
+        Assert.assertNull(firstColumn.getFooterText());
+    }
+
+    @Test
+    public void replaceFooterComponent_replacesVirtualChild() {
+        TextField firstField = new TextField();
+        firstColumn.setFooter(firstField);
+
+        TextField secondField = new TextField();
+        firstColumn.setFooter(secondField);
+
+        assertIsNotVirtualChild(firstField);
+        assertIsVirtualChild(secondField, firstColumn);
+    }
+
+    @Test
+    public void moveFooterContent() {
+        // Move text
+        firstColumn.setFooter("Footer");
+        firstColumn.moveFooterContent(secondColumn);
+
+        Assert.assertNull(firstColumn.getFooterText());
+        Assert.assertEquals("Footer", secondColumn.getFooterText());
+
+        // Move component
+        TextField firstField = new TextField();
+        firstColumn.setFooter(firstField);
+        firstColumn.moveFooterContent(secondColumn);
+
+        Assert.assertNull(firstColumn.getFooterComponent());
+        Assert.assertNull(secondColumn.getFooterText());
+        Assert.assertEquals(firstField, secondColumn.getFooterComponent());
+        assertIsVirtualChild(firstField, secondColumn);
+
+        // Replace component
+        TextField secondField = new TextField();
+        firstColumn.setFooter(secondField);
+        firstColumn.moveFooterContent(secondColumn);
+
+        assertIsNotVirtualChild(firstField);
+        assertIsVirtualChild(secondField, secondColumn);
+
+        // Overwrite component with text
+        firstColumn.setFooter("Header");
+        firstColumn.moveFooterContent(secondColumn);
+
+        Assert.assertNull(secondColumn.getFooterComponent());
+        assertIsNotVirtualChild(secondField);
     }
 
     @Test
@@ -562,7 +747,7 @@ public class HeaderFooterTest {
     public void getCellByColumnNotBelongingToGrid_throws() {
         HeaderRow row = grid.prependHeaderRow();
         Column<?> mockColumn = new Column<>(new Grid<String>(), "",
-                TemplateRenderer.of(""));
+                LitRenderer.of(""));
 
         thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage("Cannot find a cell");
@@ -643,6 +828,182 @@ public class HeaderFooterTest {
         header.join(header.getCells());
     }
 
+    @Test
+    public void gridHasPrependedHeaderRow_columnHasTextAlignment_prependedColumnHasSameTextAlignment() {
+        firstColumn.setHeader("").setTextAlign(ColumnTextAlign.CENTER);
+        var headerRow = grid.prependHeaderRow();
+
+        Assert.assertEquals(ColumnTextAlign.CENTER,
+                headerRow.getCell(firstColumn).getColumn().getTextAlign());
+    }
+
+    @Test
+    public void gridHasAppendedHeaderRow_columnHasTextAlignment_appendedColumnHasSameTextAlignment() {
+        firstColumn.setHeader("").setTextAlign(ColumnTextAlign.CENTER);
+        grid.appendHeaderRow();
+
+        var parentGroup = firstColumn.getParent().map(ColumnGroup.class::cast)
+                .orElse(null);
+
+        Assert.assertNotNull(parentGroup);
+        Assert.assertEquals(ColumnTextAlign.CENTER, parentGroup.getTextAlign());
+    }
+
+    @Test
+    public void columnsWithTextAlign_gridHeaderWithJoinedColumns_textAlignShouldNotPropagate() {
+        firstColumn.setHeader("").setTextAlign(ColumnTextAlign.CENTER);
+        secondColumn.setHeader("").setTextAlign(ColumnTextAlign.END);
+
+        var headerRow = grid.prependHeaderRow();
+        var joinedHeader = headerRow.join(firstColumn, secondColumn);
+
+        Assert.assertNotEquals(ColumnTextAlign.CENTER,
+                joinedHeader.getColumn().getTextAlign());
+    }
+
+    @Test
+    public void columnWithTextAlign_headerRowsAdded_textAlignPropagated() {
+        firstColumn.setHeader("").setTextAlign(ColumnTextAlign.CENTER);
+
+        var firstHeaderRow = grid.prependHeaderRow();
+        var secondHeaderRow = grid.prependHeaderRow();
+
+        Assert.assertEquals(ColumnTextAlign.CENTER,
+                firstHeaderRow.getCell(firstColumn).getColumn().getTextAlign());
+        Assert.assertEquals(ColumnTextAlign.CENTER, secondHeaderRow
+                .getCell(firstColumn).getColumn().getTextAlign());
+    }
+
+    @Test
+    public void gridWithHeaderRows_newTextAlignSetOnColumn_headersUpdated() {
+        firstColumn.setHeader("").setTextAlign(ColumnTextAlign.CENTER);
+
+        var prependHeaderRow = grid.prependHeaderRow();
+        prependHeaderRow.getCell(firstColumn).setText("PREPEND ROW");
+        var appendHeaderRow = grid.appendHeaderRow();
+        appendHeaderRow.getCell(firstColumn).setText("APPEND ROW");
+
+        var prependParentColumnGroup = prependHeaderRow.getCell(firstColumn)
+                .getColumn();
+        var appendParentColumnGroup = firstColumn.getParent()
+                .map(ColumnGroup.class::cast).orElse(null);
+
+        Assert.assertNotNull(appendParentColumnGroup);
+        Assert.assertEquals(ColumnTextAlign.CENTER,
+                prependParentColumnGroup.getTextAlign());
+        Assert.assertEquals(ColumnTextAlign.CENTER,
+                appendParentColumnGroup.getTextAlign());
+
+        firstColumn.setTextAlign(ColumnTextAlign.END);
+        Assert.assertEquals(ColumnTextAlign.END,
+                prependParentColumnGroup.getTextAlign());
+        Assert.assertEquals(ColumnTextAlign.END,
+                appendParentColumnGroup.getTextAlign());
+    }
+
+    @Test
+    public void gridWithJoinedHeaders_textAlignSetToChildColumn_textAlignShouldNotPropagate() {
+        firstColumn.setHeader("");
+        secondColumn.setHeader("");
+        var headerRow = grid.prependHeaderRow();
+
+        var joinedCell = headerRow.join(firstColumn, secondColumn);
+        firstColumn.setTextAlign(ColumnTextAlign.CENTER);
+        Assert.assertNotEquals(ColumnTextAlign.CENTER,
+                joinedCell.getColumn().getTextAlign());
+    }
+
+    @Test
+    public void gridHasPrependFooterRow_columnHasTextAlignment_prependedColumnHasSameTextAlignment() {
+        firstColumn.setFooter("").setTextAlign(ColumnTextAlign.CENTER);
+        var footerRow = grid.prependFooterRow();
+
+        var parentGroup = firstColumn.getParent().map(ColumnGroup.class::cast)
+                .orElse(null);
+        Assert.assertNotNull(parentGroup);
+
+        Assert.assertEquals(ColumnTextAlign.CENTER, parentGroup.getTextAlign());
+    }
+
+    @Test
+    public void gridHasAppendFooterRow_columnHasTextAlignment_appendedColumnHasSameTextAlignment() {
+        firstColumn.setFooter("").setTextAlign(ColumnTextAlign.CENTER);
+        var footerRow = grid.appendFooterRow();
+
+        Assert.assertEquals(ColumnTextAlign.CENTER,
+                footerRow.getCell(firstColumn).getColumn().getTextAlign());
+    }
+
+    @Test
+    public void columnsWithTextAlign_gridFooterWithJoinedColumns_textAlignShouldNotPropagate() {
+        firstColumn.setFooter("").setTextAlign(ColumnTextAlign.CENTER);
+        secondColumn.setFooter("").setTextAlign(ColumnTextAlign.END);
+        var footer = grid.appendFooterRow();
+        var joinedFooter = footer.join(firstColumn, secondColumn);
+
+        Assert.assertNotEquals(ColumnTextAlign.CENTER,
+                joinedFooter.getColumn().getTextAlign());
+    }
+
+    @Test
+    public void columnWithTextAlign_footerRowsAdded_textAlignPropagated() {
+        firstColumn.setFooter("").setTextAlign(ColumnTextAlign.CENTER);
+
+        grid.prependFooterRow();
+        grid.prependFooterRow();
+
+        var firstParentGroup = firstColumn.getParent()
+                .map(ColumnGroup.class::cast).orElse(null);
+        Assert.assertNotNull(firstParentGroup);
+        var secondParentGroup = firstParentGroup.getParent()
+                .map(ColumnGroup.class::cast).orElse(null);
+        Assert.assertNotNull(secondParentGroup);
+
+        Assert.assertEquals(ColumnTextAlign.CENTER,
+                firstParentGroup.getTextAlign());
+        Assert.assertEquals(ColumnTextAlign.CENTER,
+                secondParentGroup.getTextAlign());
+    }
+
+    @Test
+    public void gridWithFooterRows_newTextAlignSetOnColumn_headersUpdated() {
+        firstColumn.setFooter("").setTextAlign(ColumnTextAlign.CENTER);
+
+        var prependFooterRow = grid.prependFooterRow();
+        prependFooterRow.getCell(firstColumn).setText("PREPEND ROW");
+        var appendFooterRow = grid.appendFooterRow();
+        appendFooterRow.getCell(firstColumn).setText("APPEND ROW");
+
+        var appendFooterColumnGroup = appendFooterRow.getCell(firstColumn)
+                .getColumn();
+        var prependFooterColumnGroup = firstColumn.getParent()
+                .map(ColumnGroup.class::cast).orElse(null);
+        Assert.assertNotNull(prependFooterColumnGroup);
+
+        Assert.assertEquals(ColumnTextAlign.CENTER,
+                prependFooterColumnGroup.getTextAlign());
+        Assert.assertEquals(ColumnTextAlign.CENTER,
+                appendFooterColumnGroup.getTextAlign());
+
+        firstColumn.setTextAlign(ColumnTextAlign.END);
+        Assert.assertEquals(ColumnTextAlign.END,
+                prependFooterColumnGroup.getTextAlign());
+        Assert.assertEquals(ColumnTextAlign.END,
+                appendFooterColumnGroup.getTextAlign());
+    }
+
+    @Test
+    public void gridWithJoinedFooters_textAlignSetToChildColumn_textAlignShouldNotPropagate() {
+        firstColumn.setFooter("");
+        secondColumn.setFooter("");
+        var footerRow = grid.appendFooterRow();
+
+        var joinedCell = footerRow.join(firstColumn, secondColumn);
+        firstColumn.setTextAlign(ColumnTextAlign.CENTER);
+        Assert.assertNotEquals(ColumnTextAlign.CENTER,
+                joinedCell.getColumn().getTextAlign());
+    }
+
     private void assertHeaderRowOrder(HeaderRow... rows) {
         Assert.assertEquals("Grid returned unexpected amount of header rows",
                 rows.length, grid.getHeaderRows().size());
@@ -712,8 +1073,6 @@ public class HeaderFooterTest {
         List<Element> children = grid.getElement().getChildren()
                 .collect(Collectors.toList());
         while (children.stream().anyMatch(isColumnGroup)) {
-            children = children.stream().filter(isTemplate.negate())
-                    .collect(Collectors.toList());
             if (!children.stream().allMatch(isColumnGroup)) {
                 throw new IllegalStateException(
                         "All column-children on the same hierarchy level "
@@ -729,8 +1088,6 @@ public class HeaderFooterTest {
                     .collect(Collectors.toList());
         }
         if (children.stream().anyMatch(isColumn)) {
-            children = children.stream().filter(isTemplate.negate())
-                    .collect(Collectors.toList());
             if (!children.stream().allMatch(isColumn)) {
                 throw new IllegalStateException(
                         "All column-children on the same hierarchy level "
@@ -752,27 +1109,15 @@ public class HeaderFooterTest {
         return layers;
     }
 
-    private boolean isHeaderRow(List<Element> layer) {
-        return layer.stream()
-                .allMatch(element -> getHeaderTemplate(element).isPresent());
+    private void assertIsVirtualChild(Component child,
+            Component expectedParent) {
+        Assert.assertTrue(child.getParent().isPresent());
+        Assert.assertSame(child.getParent().get(), expectedParent);
+        Assert.assertTrue(child.getElement().isVirtualChild());
     }
 
-    private boolean isFooterRow(List<Element> layer) {
-        return layer.stream()
-                .allMatch(element -> getFooterTemplate(element).isPresent());
-    }
-
-    private Optional<Element> getHeaderTemplate(Element element) {
-        return getTemplate(element, "header");
-    }
-
-    private Optional<Element> getFooterTemplate(Element element) {
-        return getTemplate(element, "footer");
-    }
-
-    private Optional<Element> getTemplate(Element element, String className) {
-        return element.getChildren().filter(isTemplate)
-                .filter(template -> template.getClassList().contains(className))
-                .findFirst();
+    private void assertIsNotVirtualChild(Component component) {
+        Assert.assertFalse(component.getParent().isPresent());
+        Assert.assertFalse(component.getElement().isVirtualChild());
     }
 }

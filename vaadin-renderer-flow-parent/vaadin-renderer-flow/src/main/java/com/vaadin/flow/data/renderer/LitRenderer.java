@@ -35,6 +35,7 @@ import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.JsonUtils;
+import com.vaadin.flow.internal.UsageStatistics;
 import com.vaadin.flow.internal.nodefeature.ReturnChannelMap;
 import com.vaadin.flow.internal.nodefeature.ReturnChannelRegistration;
 import com.vaadin.flow.shared.Registration;
@@ -61,6 +62,11 @@ import elemental.json.JsonArray;
  */
 @JsModule("./lit-renderer.ts")
 public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
+
+    static {
+        UsageStatistics.markAsUsed("flow-components/LitRenderer", null);
+    }
+
     private final String templateExpression;
 
     private final String DEFAULT_RENDERER_NAME = "renderer";
@@ -75,13 +81,21 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
     private LitRenderer(String templateExpression) {
         this.templateExpression = templateExpression;
 
-        // Generate a unique (in scope of the UI) namespace for the renderer
-        // properties.
-        int litRendererCount = UI.getCurrent().getElement()
-                .getProperty("__litRendererCount", 0);
-        UI.getCurrent().getElement().setProperty("__litRendererCount",
-                litRendererCount + 1);
+        int litRendererCount = 0;
+        if (UI.getCurrent() != null) {
+            // Generate a unique (in scope of the UI) namespace for the renderer
+            // properties.
+            litRendererCount = UI.getCurrent().getElement()
+                    .getProperty("__litRendererCount", 0);
+            UI.getCurrent().getElement().setProperty("__litRendererCount",
+                    litRendererCount + 1);
+
+        }
         propertyNamespace = "lr_" + litRendererCount + "_";
+    }
+
+    LitRenderer() {
+        this("");
     }
 
     /**
@@ -129,7 +143,8 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
     }
 
     /**
-     * @deprecated LitRenderer doesn't support <template> elements. Don't use.
+     * @deprecated LitRenderer doesn't support {@code <template>} elements.
+     *             Don't use.
      */
     @Deprecated
     @Override
@@ -149,10 +164,10 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
     }
 
     /**
-     * Sets up rendering of model objects inside a given {@param container}
-     * element. The model objects are rendered using the Lit template literal
-     * provided when creating this LitRenderer instance, and the Vaadin-default
-     * JS renderer function name.
+     * Sets up rendering of model objects inside a given
+     * {@code Element container} element. The model objects are rendered using
+     * the Lit template literal provided when creating this LitRenderer
+     * instance, and the Vaadin-default JS renderer function name.
      *
      * @param container
      *            the DOM element that supports setting a renderer function
@@ -170,10 +185,10 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
     }
 
     /**
-     * Sets up rendering of model objects inside a given {@param container}
-     * element. The model objects are rendered using the Lit template literal
-     * provided when creating this LitRenderer instance, and a given
-     * {@param rendererName} JS renderer function.
+     * Sets up rendering of model objects inside a given
+     * {@code Element container} element. The model objects are rendered using
+     * the Lit template literal provided when creating this LitRenderer
+     * instance, and a given {@code String rendererName} JS renderer function.
      *
      * @param container
      *            the DOM element that supports setting a renderer function
@@ -219,6 +234,25 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
                 clientCallablesArray, propertyNamespace);
     }
 
+    /**
+     * Returns the Lit template expression used to render items.
+     *
+     * @return the template expression
+     */
+    protected String getTemplateExpression() {
+        return templateExpression;
+    }
+
+    /**
+     * Returns the namespace used to prefix property names when sending them to
+     * the client as part of an item.
+     *
+     * @return the property namespace
+     */
+    String getPropertyNamespace() {
+        return propertyNamespace;
+    }
+
     private Registration createJsRendererFunction(Element container,
             DataKeyMapper<SOURCE> keyMapper, String rendererName) {
         ReturnChannelRegistration returnChannel = container.getNode()
@@ -250,11 +284,11 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
         // is no longer used so the registration is cleared by the renderer
         // registration.
         registrations.add(container.addAttachListener(e -> {
-            setElementRenderer(container, rendererName, templateExpression,
+            setElementRenderer(container, rendererName, getTemplateExpression(),
                     returnChannel, clientCallablesArray, propertyNamespace);
         }));
         // Call once initially
-        setElementRenderer(container, rendererName, templateExpression,
+        setElementRenderer(container, rendererName, getTemplateExpression(),
                 returnChannel, clientCallablesArray, propertyNamespace);
 
         // Get the renderer function cleared when the LitRenderer is

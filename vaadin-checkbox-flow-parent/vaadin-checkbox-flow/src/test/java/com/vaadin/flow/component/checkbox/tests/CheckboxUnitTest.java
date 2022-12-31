@@ -22,6 +22,7 @@ import org.mockito.Mockito;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.VaadinService;
@@ -106,5 +107,11 @@ public class CheckboxUnitTest {
         Checkbox field = Component.from(element, Checkbox.class);
         Assert.assertEquals(Boolean.TRUE,
                 field.getElement().getPropertyRaw("checked"));
+    }
+
+    @Test
+    public void implementsHasTooltip() {
+        Checkbox checkbox = new Checkbox();
+        Assert.assertTrue(checkbox instanceof HasTooltip);
     }
 }

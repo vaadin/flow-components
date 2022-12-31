@@ -2,17 +2,19 @@ package com.vaadin.flow.component.spreadsheet.test;
 
 import com.vaadin.flow.component.spreadsheet.testbench.SpreadsheetElement;
 import com.vaadin.flow.component.spreadsheet.tests.fixtures.TestFixtures;
+import com.vaadin.flow.testutil.TestPath;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.WebElement;
 
+@TestPath("vaadin-spreadsheet")
 public class SheetTabSheetIT extends AbstractSpreadsheetIT {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL());
+        open();
         createNewSpreadsheet();
     }
 
@@ -41,18 +43,17 @@ public class SheetTabSheetIT extends AbstractSpreadsheetIT {
             throws InterruptedException {
         SpreadsheetElement spreadsheet = getSpreadsheet();
 
-        clickCell("C8");
+        clickCell("C5");
         spreadsheet.addSheet();
         spreadsheet.selectSheetAt(1);
-        selectRegion("C3", "G14");
+        selectRegion("C3", "E5");
         spreadsheet.selectSheetAt(0);
-        getCommandExecutor().waitForVaadin();
-        Assert.assertTrue(spreadsheet.getCellAt("C8").isCellSelected());
+        waitUntil(e -> spreadsheet.getCellAt("C5").isCellSelected());
         spreadsheet.selectSheetAt(1);
         getCommandExecutor().waitForVaadin();
-        String[] cols = { "C", "D", "E", "F", "G" };
+        String[] cols = { "C", "D", "E" };
         for (String column : cols) {
-            for (int row = 3; row <= 14; row++) {
+            for (int row = 3; row <= 5; row++) {
                 Assert.assertTrue("Cell " + column + row + " is not selected",
                         spreadsheet.getCellAt(column + "" + row)
                                 .isCellSelected());
@@ -79,7 +80,9 @@ public class SheetTabSheetIT extends AbstractSpreadsheetIT {
      * @return Focused element or null
      */
     protected WebElement getFocusedElement() {
-        Object focusedElement = executeScript("return document.activeElement");
+        Object focusedElement = executeScript(
+                "return arguments[0].shadowRoot.activeElement",
+                getSpreadsheet().getWrappedElement());
         if (null != focusedElement) {
             return (WebElement) focusedElement;
         } else {

@@ -28,7 +28,12 @@ import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasOrderedComponents;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Synchronize;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -54,8 +59,13 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author Vaadin Ltd.
  */
-public class Tabs extends GeneratedVaadinTabs<Tabs>
-        implements HasOrderedComponents, HasSize {
+@Tag("vaadin-tabs")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha7")
+@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@JsModule("@vaadin/tabs/src/vaadin-tabs.js")
+@NpmPackage(value = "@vaadin/tabs", version = "24.0.0-alpha7")
+public class Tabs extends Component implements HasOrderedComponents, HasSize,
+        HasStyle, HasThemeVariant<TabsVariant> {
 
     private static final String SELECTED = "selected";
 
@@ -84,10 +94,9 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
      * Constructs a new object enclosing the given tabs, with
      * {@link Orientation#HORIZONTAL HORIZONTAL} orientation.
      * <p>
-     * The first added {@link Tab} component will be automatically selected,
-     * firing a {@link SelectedChangeEvent}, unless autoselection is explicitly
-     * disabled with {@link #Tabs(boolean, Tab...)}, or
-     * {@link #setAutoselect(boolean)}.
+     * The first added {@link Tab} component will be automatically selected. Any
+     * selection change listener added afterwards will not be notified about the
+     * auto-selected tab.
      *
      * @param tabs
      *            the tabs to enclose
@@ -100,6 +109,10 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
     /**
      * Constructs a new object enclosing the given autoselect option and tabs,
      * with {@link Orientation#HORIZONTAL HORIZONTAL} orientation.
+     * <p>
+     * Unless auto-select is disabled, the first added {@link Tab} component
+     * will be automatically selected. Any selection change listener added
+     * afterwards will not be notified about the auto-selected tab.
      *
      * @param autoselect
      *            {@code true} to automatically select the first added tab,
@@ -117,9 +130,10 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
      * Adds the given tabs to the component.
      * <p>
      * The first added {@link Tab} component will be automatically selected,
-     * firing a {@link SelectedChangeEvent}, unless autoselection is explicitly
-     * disabled with {@link #Tabs(boolean, Tab...)}, or
-     * {@link #setAutoselect(boolean)}.
+     * unless auto-selection is explicitly disabled with
+     * {@link #Tabs(boolean, Tab...)}, or {@link #setAutoselect(boolean)}. If a
+     * selection change listener has been added before adding the tabs, it will
+     * be notified with the auto-selected tab.
      *
      * @param tabs
      *            the tabs to enclose
@@ -233,24 +247,6 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
         private final Tab selectedTab;
         private final Tab previousTab;
         private final boolean initialSelection;
-
-        /**
-         * Creates a new selected change event.
-         *
-         * @param source
-         *            The tabs that fired the event.
-         * @param fromClient
-         *            <code>true</code> for client-side events,
-         *            <code>false</code> otherwise.
-         *
-         * @deprecated use
-         *             {@link #SelectedChangeEvent(Tabs source, Tab previousTab, boolean fromClient)}
-         *             instead.
-         */
-        @Deprecated
-        public SelectedChangeEvent(Tabs source, boolean fromClient) {
-            this(source, null, fromClient);
-        }
 
         /**
          * Creates a new selected change event.

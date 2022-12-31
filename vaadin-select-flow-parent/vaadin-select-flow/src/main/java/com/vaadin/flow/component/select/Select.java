@@ -15,24 +15,37 @@
  */
 package com.vaadin.flow.component.select;
 
+import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.HasTheme;
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.ItemLabelGenerator;
+import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.select.data.SelectDataView;
 import com.vaadin.flow.component.select.data.SelectListDataView;
-import com.vaadin.flow.component.select.generated.GeneratedVaadinSelect;
+import com.vaadin.flow.component.shared.ClientValidationUtil;
+import com.vaadin.flow.component.shared.HasClientValidation;
+import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasItemComponents;
+import com.vaadin.flow.data.binder.HasValidator;
+import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
+import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderWrapper;
@@ -48,19 +61,15 @@ import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.data.selection.SingleSelect;
-import com.vaadin.flow.dom.PropertyChangeEvent;
-import com.vaadin.flow.dom.PropertyChangeListener;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -72,11 +81,19 @@ import java.util.stream.Stream;
  *            the type of the items for the select
  * @author Vaadin Ltd.
  */
+@Tag("vaadin-select")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha7")
+@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@NpmPackage(value = "@vaadin/select", version = "24.0.0-alpha7")
+@JsModule("@vaadin/select/src/vaadin-select.js")
+@JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 @JsModule("./selectConnector.js")
-public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
-        implements HasItemComponents<T>, HasSize, HasValidation,
-        SingleSelect<Select<T>, T>, HasListDataView<T, SelectListDataView<T>>,
-        HasDataView<T, Void, SelectDataView<T>>, HasHelper, HasLabel, HasTheme {
+public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
+        implements Focusable<Select<T>>, HasClientValidation,
+        HasDataView<T, Void, SelectDataView<T>>, HasItemComponents<T>,
+        HasListDataView<T, SelectListDataView<T>>, HasHelper, HasLabel, HasSize,
+        HasStyle, HasThemeVariant<SelectVariant>, HasTooltip, HasValidation,
+        HasValidator<T>, SingleSelect<Select<T>, T> {
 
     public static final String LABEL_ATTRIBUTE = "label";
 
@@ -93,8 +110,6 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
 
     private ItemLabelGenerator<T> itemLabelGenerator = null;
 
-    private final PropertyChangeListener validationListener = this::validateSelectionEnabledState;
-    private Registration validationRegistration;
     private Registration dataProviderListenerRegistration;
 
     private boolean resetPending = true;
@@ -117,11 +132,11 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
      * Constructs a select.
      */
     public Select() {
-        super(null, null, String.class, Select::presentationToModel,
-                Select::modelToPresentation, true);
+        super("value", null, String.class, Select::presentationToModel,
+                Select::modelToPresentation);
 
-        getElement().setProperty("invalid", false);
-        getElement().setProperty("opened", false);
+        setInvalid(false);
+        setOpened(false);
         getElement().setAttribute("suppress-template-warning", true);
         // Trigger model-to-presentation conversion in constructor, so that
         // the client side component has a correct initial value of an empty
@@ -130,23 +145,9 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
 
         getElement().appendChild(listBox.getElement());
 
-        registerValidation();
-    }
+        addValueChangeListener(e -> validate());
 
-    /**
-     * Constructs a select with the given items.
-     *
-     * @param items
-     *            the items for the select
-     * @see #setItems(Object...)
-     * @deprecated as of 23.1. Please use {@link #setItems(Object[])} instead.
-     */
-    @Deprecated
-    @SafeVarargs
-    public Select(T... items) {
-        this();
-
-        setItems(items);
+        addClientValidatedEventListener(e -> validate());
     }
 
     /**
@@ -204,15 +205,18 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
 
     private static <T> T presentationToModel(Select<T> select,
             String presentation) {
-        if (select.keyMapper == null
-                || !select.keyMapper.containsKey(presentation)) {
+        if (select.keyMapper == null) {
+            return null;
+        }
+
+        if (!select.keyMapper.containsKey(presentation)) {
             return null;
         }
         return select.keyMapper.get(presentation);
     }
 
     private static <T> String modelToPresentation(Select<T> select, T model) {
-        if (model == null || select.keyMapper == null) {
+        if (model == null) {
             return "";
         }
         if (!select.keyMapper.has(model)) {
@@ -240,7 +244,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
      * even though that is not visible from the component level.
      */
     @Tag("vaadin-select-list-box")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha3")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha7")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     private class InternalListBox extends Component
             implements HasItemComponents<T> {
@@ -428,7 +432,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
      * @return the placeholder or {@code null} if none set
      */
     public String getPlaceholder() {
-        return super.getPlaceholderString();
+        return getElement().getProperty("placeholder");
     }
 
     /**
@@ -443,9 +447,9 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
      * @param placeholder
      *            the placeholder to set, or {@code null} to remove
      */
-    @Override
     public void setPlaceholder(String placeholder) {
-        super.setPlaceholder(placeholder);
+        getElement().setProperty("placeholder",
+                placeholder == null ? "" : placeholder);
     }
 
     /**
@@ -457,9 +461,8 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
      * @param label
      *            string or {@code null} to clear it
      */
-    @Override
     public void setLabel(String label) {
-        super.setLabel(label);
+        getElement().setProperty("label", label == null ? "" : label);
     }
 
     /**
@@ -467,9 +470,8 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
      *
      * @return the label string, or {@code null} if not set
      */
-    @Override
     public String getLabel() {
-        return super.getLabelString();
+        return getElement().getProperty("label");
     }
 
     /**
@@ -480,9 +482,8 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
      * @param autofocus
      *            the autofocus to set
      */
-    @Override
     public void setAutofocus(boolean autofocus) {
-        super.setAutofocus(autofocus);
+        getElement().setProperty("autofocus", autofocus);
     }
 
     /**
@@ -491,7 +492,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
      * @return {@code true} if set to autofocus, {@code false} if not
      */
     public boolean isAutofocus() {
-        return super.isAutofocusBoolean();
+        return getElement().getProperty("autofocus", false);
     }
 
     /**
@@ -599,7 +600,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
 
     @Override
     public void onEnabledStateChanged(boolean enabled) {
-        setDisabled(!enabled);
+        getElement().setProperty("disabled", !enabled);
         getItems().forEach(this::updateItemEnabled);
     }
 
@@ -624,7 +625,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
      */
     @Override
     public boolean isRequiredIndicatorVisible() {
-        return super.isRequiredBoolean();
+        return getElement().getProperty("required", false);
     }
 
     /**
@@ -635,7 +636,8 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
      */
     @Override
     public void setErrorMessage(String errorMessage) {
-        super.setErrorMessage(errorMessage);
+        getElement().setProperty("errorMessage",
+                errorMessage == null ? "" : errorMessage);
     }
 
     /**
@@ -645,7 +647,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
      */
     @Override
     public String getErrorMessage() {
-        return super.getErrorMessageString();
+        return getElement().getProperty("errorMessage");
     }
 
     /**
@@ -656,7 +658,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
      */
     @Override
     public void setInvalid(boolean invalid) {
-        super.setInvalid(invalid);
+        getElement().setProperty("invalid", invalid);
     }
 
     /**
@@ -666,7 +668,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
      */
     @Override
     public boolean isInvalid() {
-        return super.isInvalidBoolean();
+        return getElement().getProperty("invalid", false);
     }
 
     /**
@@ -732,9 +734,21 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         }
     }
 
-    @Override
+    /**
+     * Adds the given components as children of this component at the slot
+     * 'prefix'.
+     *
+     * @param components
+     *            The components to add.
+     * @see <a href=
+     *      "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
+     *      page about slots</a>
+     * @see <a href=
+     *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
+     *      website about slots</a>
+     */
     public void addToPrefix(Component... components) {
-        super.addToPrefix(components);
+        SlotUtils.addToSlot(this, "prefix", components);
     }
 
     @Override
@@ -759,12 +773,14 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
      * @throws IllegalArgumentException
      *             if any of the components is not a child of this component
      */
-    @Override
     public void remove(Component... components) {
         Objects.requireNonNull(components, "Components should not be null");
         for (Component component : components) {
             if (component.getElement().hasAttribute("slot")) {
-                super.remove(component);
+                if (getElement().equals(component.getElement().getParent())) {
+                    component.getElement().removeAttribute("slot");
+                    getElement().removeChild(component.getElement());
+                }
             } else {
                 listBox.remove(components);
             }
@@ -791,27 +807,23 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
     }
 
     /**
-     * Adds theme variants to the component.
+     * Set true to open the dropdown overlay.
      *
-     * @param variants
-     *            theme variants to add
+     * @param opened
+     *            the boolean value to set
      */
-    public void addThemeVariants(SelectVariant... variants) {
-        getThemeNames()
-                .addAll(Stream.of(variants).map(SelectVariant::getVariantName)
-                        .collect(Collectors.toList()));
+    protected void setOpened(boolean opened) {
+        getElement().setProperty("opened", opened);
     }
 
     /**
-     * Removes theme variants from the component.
+     * Whether the dropdown is opened or not.
      *
-     * @param variants
-     *            theme variants to remove
+     * @return {@code true} if the drop-down is opened, {@code false} otherwise
      */
-    public void removeThemeVariants(SelectVariant... variants) {
-        getThemeNames().removeAll(
-                Stream.of(variants).map(SelectVariant::getVariantName)
-                        .collect(Collectors.toList()));
+    @Synchronize(property = "opened", value = "opened-changed")
+    protected boolean isOpened() {
+        return getElement().getProperty("opened", false);
     }
 
     @Override
@@ -834,7 +846,8 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         initConnector();
-        FieldValidationUtil.disableClientValidation(this);
+
+        ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
     }
 
     /**
@@ -912,7 +925,8 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
 
     private void updateItemEnabled(VaadinItem<T> item) {
         boolean itemEnabled = isItemEnabled(item.getItem());
-        boolean disabled = isDisabledBoolean() || !itemEnabled;
+        boolean isDisabled = getElement().getProperty("disabled", false);
+        boolean disabled = isDisabled || !itemEnabled;
 
         // The disabled attribute should be set when the item is disabled,
         // but not if only the select is disabled, because setting disabled
@@ -994,13 +1008,6 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         }
     }
 
-    private T getValue(Serializable key) {
-        if (key == null || "".equals(key)) {
-            return null;
-        }
-        return keyMapper.get(key.toString());
-    }
-
     private void addEmptySelectionItem() {
         if (emptySelectionItem == null) {
             emptySelectionItem = new VaadinItem<>("", null);
@@ -1018,37 +1025,6 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
             listBox.remove(emptySelectionItem);
         }
         emptySelectionItem = null;
-    }
-
-    private void validateSelectionEnabledState(PropertyChangeEvent event) {
-        if (!event.isUserOriginated()) {
-            return;
-        }
-        if (!hasValidValue() || isReadOnly()) {
-            T oldValue = getValue(event.getOldValue());
-            // return the value back on the client side
-            try {
-                validationRegistration.remove();
-                getElement().setProperty(VALUE_PROPERTY_NAME,
-                        keyMapper.key(oldValue));
-            } finally {
-                registerValidation();
-            }
-            // Now make sure that the item is still in the correct state
-            Optional<VaadinItem<T>> selectedItem = getItems().filter(
-                    item -> item.getItem() == getValue(event.getValue()))
-                    .findFirst();
-
-            selectedItem.ifPresent(this::updateItemEnabled);
-        }
-    }
-
-    private void registerValidation() {
-        if (validationRegistration != null) {
-            validationRegistration.remove();
-        }
-        validationRegistration = getElement().addPropertyChangeListener(
-                VALUE_PROPERTY_NAME, validationListener);
     }
 
     private void runBeforeClientResponse(SerializableConsumer<UI> command) {
@@ -1087,6 +1063,86 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
     private void identifierProviderChanged(
             IdentifierProvider<T> identifierProvider) {
         keyMapper.setIdentifierGetter(identifierProvider);
+    }
+
+    protected void validate() {
+        boolean isRequired = this.isRequiredIndicatorVisible();
+        boolean isInvalid = ValidationUtil
+                .checkRequired(isRequired, getValue(), getEmptyValue())
+                .isError();
+
+        setInvalid(isInvalid);
+    }
+
+    @Override
+    public Registration addValidationStatusChangeListener(
+            ValidationStatusChangeListener<T> listener) {
+        return addClientValidatedEventListener(
+                event -> listener.validationStatusChanged(
+                        new ValidationStatusChangeEvent<>(this, !isInvalid())));
+    }
+
+    /**
+     * {@code opened-changed} event is sent when the overlay opened state
+     * changes.
+     */
+    public static class OpenedChangeEvent extends ComponentEvent<Select> {
+        private final boolean opened;
+
+        public OpenedChangeEvent(Select source, boolean fromClient) {
+            super(source, fromClient);
+            this.opened = source.isOpened();
+        }
+
+        public boolean isOpened() {
+            return opened;
+        }
+    }
+
+    /**
+     * Adds a listener for {@code opened-changed} events fired by the
+     * webcomponent.
+     *
+     * @param listener
+     *            the listener
+     * @return a {@link Registration} for removing the event listener
+     */
+    protected Registration addOpenedChangeListener(
+            ComponentEventListener<OpenedChangeEvent> listener) {
+        return getElement().addPropertyChangeListener("opened",
+                event -> listener.onComponentEvent(
+                        new OpenedChangeEvent(this, event.isUserOriginated())));
+    }
+
+    /**
+     * {@code invalid-changed} event is sent when the invalid state changes.
+     */
+    public static class InvalidChangeEvent extends ComponentEvent<Select> {
+        private final boolean invalid;
+
+        public InvalidChangeEvent(Select source, boolean fromClient) {
+            super(source, fromClient);
+            this.invalid = source.isInvalid();
+        }
+
+        public boolean isInvalid() {
+            return invalid;
+        }
+    }
+
+    /**
+     * Adds a listener for {@code invalid-changed} events fired by the
+     * webcomponent.
+     *
+     * @param listener
+     *            the listener
+     * @return a {@link Registration} for removing the event listener
+     */
+    protected Registration addInvalidChangeListener(
+            ComponentEventListener<InvalidChangeEvent> listener) {
+        return getElement().addPropertyChangeListener("invalid",
+                event -> listener.onComponentEvent(new InvalidChangeEvent(this,
+                        event.isUserOriginated())));
     }
 
 }

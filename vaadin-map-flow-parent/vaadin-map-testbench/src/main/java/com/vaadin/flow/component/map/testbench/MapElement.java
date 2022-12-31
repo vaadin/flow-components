@@ -1,3 +1,11 @@
+/**
+ * Copyright 2000-2022 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
+ */
 package com.vaadin.flow.component.map.testbench;
 
 import com.vaadin.testbench.TestBenchElement;
@@ -38,8 +46,10 @@ public class MapElement extends TestBenchElement {
                 "return arguments[0].configuration.getPixelFromCoordinate([arguments[1], arguments[2]])",
                 this, x, y);
 
-        int clickX = startLeft + pixelCoordinates.get(0).intValue();
-        int clickY = startTop + pixelCoordinates.get(1).intValue();
+        int clickX = startLeft
+                + (int) Math.round(pixelCoordinates.get(0).doubleValue());
+        int clickY = startTop
+                + (int) Math.round(pixelCoordinates.get(1).doubleValue());
         new Actions(getDriver()).moveToElement(this, clickX, clickY).click()
                 .build().perform();
     }
@@ -285,6 +295,10 @@ public class MapElement extends TestBenchElement {
         public Long getZIndex() {
             return getLong("getZIndex()");
         }
+
+        public long getRevision() {
+            return getLong("getRevision()");
+        }
     }
 
     public static class SourceReference extends ConfigurationObjectReference {
@@ -326,6 +340,11 @@ public class MapElement extends TestBenchElement {
         private XyzSourceReference(ExpressionExecutor executor,
                 String expression) {
             super(executor, expression);
+        }
+
+        public boolean isTileLoaded(int z, int x, int y) {
+            String tileKey = String.format("%s/%s/%s", z, x, y);
+            return getBoolean("tileCache.containsKey('%s')", tileKey);
         }
     }
 

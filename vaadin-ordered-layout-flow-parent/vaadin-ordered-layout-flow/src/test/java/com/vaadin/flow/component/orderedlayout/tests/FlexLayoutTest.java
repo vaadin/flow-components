@@ -103,11 +103,11 @@ public class FlexLayoutTest {
         layout.setFlexDirection(direction);
 
         Assert.assertEquals("should set flex-direction",
-                layout.getFlexDirection(layout), direction);
+                layout.getFlexDirection(), direction);
 
         layout.setFlexDirection(null);
         Assert.assertEquals("should return row if no flex-direction set",
-                layout.getFlexDirection(layout), FlexLayout.FlexDirection.ROW);
+                layout.getFlexDirection(), FlexLayout.FlexDirection.ROW);
     }
 
     @Test

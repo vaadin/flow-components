@@ -1,6 +1,8 @@
 package com.vaadin.flow.component.spreadsheet.test;
 
 import com.vaadin.flow.component.spreadsheet.tests.fixtures.TestFixtures;
+import com.vaadin.flow.testutil.TestPath;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -8,11 +10,12 @@ import org.junit.Test;
 
 import java.util.GregorianCalendar;
 
+@TestPath("vaadin-spreadsheet")
 public class ValueHandlerIT extends AbstractSpreadsheetIT {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL());
+        open();
 
         createNewSpreadsheet();
         loadTestFixture(TestFixtures.ValueChangeHandler);

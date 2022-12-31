@@ -18,7 +18,7 @@ package com.vaadin.flow.component.grid.it;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.data.renderer.TemplateRenderer;
+import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-grid/select-during-data-provider-change")
@@ -33,7 +33,7 @@ public class SelectDuringDataProviderChangePage extends VerticalLayout {
 
         btn.addClickListener(ev -> setItems());
 
-        grid.setItemDetailsRenderer(TemplateRenderer.<Item> of("<div></div>")
+        grid.setItemDetailsRenderer(LitRenderer.<Item> of("<div></div>")
                 .withProperty("id", i -> 1));
         add(grid, btn);
     }

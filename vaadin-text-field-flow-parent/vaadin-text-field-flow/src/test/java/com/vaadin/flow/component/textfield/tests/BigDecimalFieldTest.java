@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.textfield.BigDecimalField;
 import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.flow.dom.ThemeList;
@@ -108,6 +109,11 @@ public class BigDecimalFieldTest extends TextFieldTest {
         ThemeList themeNames = field.getThemeNames();
         Assert.assertFalse(themeNames
                 .contains(TextFieldVariant.LUMO_SMALL.getVariantName()));
+    }
+
+    @Test
+    public void implementsHasTooltip() {
+        Assert.assertTrue(field instanceof HasTooltip);
     }
 
     private void assertValueFormatting(BigDecimal bigDecimal,

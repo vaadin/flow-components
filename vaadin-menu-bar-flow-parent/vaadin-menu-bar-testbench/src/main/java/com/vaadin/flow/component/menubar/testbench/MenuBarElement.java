@@ -15,8 +15,12 @@
  */
 package com.vaadin.flow.component.menubar.testbench;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
@@ -27,6 +31,8 @@ import com.vaadin.testbench.elementsbase.Element;
  */
 @Element("vaadin-menu-bar")
 public class MenuBarElement extends TestBenchElement {
+
+    public static final String OVERLAY_TAG = "vaadin-context-menu-overlay";
 
     /**
      * Gets the button elements wrapping the root level items. This does not
@@ -48,7 +54,7 @@ public class MenuBarElement extends TestBenchElement {
      * @return the button which opens the sub menu of overflowing items
      */
     public TestBenchElement getOverflowButton() {
-        TestBenchElement overflowButton = $("[part~=overflow-button]").first();
+        TestBenchElement overflowButton = $("[slot='overflow']").first();
         if (overflowButton == null || overflowButton.hasAttribute("hidden")) {
             return null;
         }
@@ -56,12 +62,63 @@ public class MenuBarElement extends TestBenchElement {
     }
 
     private boolean isOverflowButton(TestBenchElement element) {
-        return element.getAttribute("part").contains("overflow-button");
+        return element.getAttribute("slot").contains("overflow");
     }
 
     private boolean isVisible(TestBenchElement element) {
         return (boolean) executeScript(
                 "return arguments[0].style.visibility !== 'hidden'", element);
+    }
+
+    /**
+     * Get TestBenchElements representing sub menu items under the first sub
+     * menu.
+     *
+     * @return List of TestBenchElements representing sub menu items.
+     */
+    public List<TestBenchElement> getSubMenuItems() {
+        return getSubMenuItems(getSubMenu());
+    }
+
+    /**
+     * Get TestBenchElements representing sub menu items under specific sub
+     * menu.
+     *
+     * @param overlay
+     *            The sub menu overlay from which items are being collected.
+     * @return List of TestBenchElements representing sub menu items.
+     */
+    public List<TestBenchElement> getSubMenuItems(TestBenchElement overlay) {
+        return overlay.$("vaadin-context-menu-item").all();
+    }
+
+    /**
+     * Get the sub menu overlay element.
+     *
+     * @return TestBenchElement for the first open sub menu.
+     */
+    public TestBenchElement getSubMenu() {
+        waitForSubMenu();
+        return (TestBenchElement) getDriver()
+                .findElement(By.tagName(OVERLAY_TAG));
+    }
+
+    /**
+     * Get all the open sub menu overlay elements.
+     *
+     * @return List of TestBenchElements representing currently open sub menus.
+     */
+    public List<TestBenchElement> getAllSubMenus() {
+        waitForSubMenu();
+        List<TestBenchElement> elements = new ArrayList<>();
+        getDriver().findElements(By.tagName(OVERLAY_TAG))
+                .forEach(element -> elements.add((TestBenchElement) element));
+        return elements;
+    }
+
+    private void waitForSubMenu() {
+        waitUntil(ExpectedConditions
+                .presenceOfElementLocated(By.tagName(OVERLAY_TAG)));
     }
 
 }

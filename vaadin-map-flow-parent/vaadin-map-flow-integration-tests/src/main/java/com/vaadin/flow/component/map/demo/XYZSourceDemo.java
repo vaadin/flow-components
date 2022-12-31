@@ -28,8 +28,7 @@ public class XYZSourceDemo extends Div {
         map.setBackgroundLayer(tileLayer);
 
         // Move viewport to Cap Haitien
-        map.getView().setCenter(
-                new Coordinate(-8037267.235274345, 2244621.2004450094));
+        map.getView().setCenter(new Coordinate(-72.2, 19.76));
         map.getView().setZoom(12);
     }
 }

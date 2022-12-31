@@ -42,8 +42,7 @@ public class NonImmediateUploadIT extends AbstractUploadIT {
     private WebElement findButtonInVaadinUploadFile(UploadElement upload,
             String buttonType) {
         final String QUERY = String.format(
-                "return arguments[0]"
-                        + ".shadowRoot.querySelector('vaadin-upload-file')"
+                "return arguments[0]" + ".querySelector('vaadin-upload-file')"
                         + ".shadowRoot.querySelector('[part=\"%s\"]')",
                 buttonType);
         return (WebElement) getCommandExecutor().executeScript(QUERY, upload);

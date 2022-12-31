@@ -66,7 +66,7 @@ public abstract class AbstractItemCountComboBoxIT extends AbstractComboBoxIT {
     protected void setUnknownCount() {
         findElement(
                 By.id(AbstractItemCountComboBoxPage.UNDEFINED_SIZE_BUTTON_ID))
-                        .click();
+                .click();
     }
 
     protected void setCountCallback() {

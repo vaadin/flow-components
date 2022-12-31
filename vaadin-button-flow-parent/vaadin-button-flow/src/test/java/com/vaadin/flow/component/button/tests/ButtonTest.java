@@ -28,6 +28,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.StateNode;
 import com.vaadin.flow.internal.nodefeature.ElementAttributeMap;
@@ -309,6 +310,12 @@ public class ButtonTest {
         button.click();
 
         Assert.assertTrue("Button should be enabled", button.isEnabled());
+    }
+
+    @Test
+    public void implementsHasTooltip() {
+        button = new Button();
+        Assert.assertTrue(button instanceof HasTooltip);
     }
 
     private void assertButtonHasThemeAttribute(String theme) {
