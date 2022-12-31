@@ -5,7 +5,10 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.Feature;
 import com.vaadin.flow.component.map.configuration.feature.MarkerFeature;
+import com.vaadin.flow.component.map.configuration.style.Fill;
 import com.vaadin.flow.component.map.configuration.style.Icon;
+import com.vaadin.flow.component.map.configuration.style.Stroke;
+import com.vaadin.flow.component.map.configuration.style.Text;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-map/marker-feature")
@@ -57,8 +60,15 @@ public class MarkerFeaturePage extends Div {
                     int number = 1;
                     for (Feature f : map.getFeatureLayer().getFeatures()) {
                         String label = String.format("Marker #%d", number++);
-                        System.out.println(label);
                         ((MarkerFeature) f).setLabel(label);
+
+                        // same as the default values - just to show how to change the outline 
+                        Text text = new Text();
+                		text.setOffsetY(10);
+                		text.setScale(1f);
+                		text.setFill(new Fill("#000"));
+                		text.setStroke(new Stroke("#fff", 1));
+                		((MarkerFeature) f).getStyle().setText(text);
                     }
                 });
         updateMarkerLabel.setId("update-marker-label");
