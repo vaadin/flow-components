@@ -37,11 +37,6 @@ import { RangeDataProvider } from '@vaadin/combo-box/src/vaadin-combo-box-range-
           }
         );
 
-        comboBox.$connector.reset = tryCatchWrapper(function () {
-          rangeDataProvider.clearLoadedPages();
-          rangeDataProvider.flushLoadedPages();
-        });
-
         comboBox.$connector.clear = tryCatchWrapper((startIndex, itemsCount) => {
           const startPage = Math.floor(startIndex / comboBox.pageSize);
           const pagesCount = Math.ceil(itemsCount / comboBox.pageSize);
@@ -83,17 +78,6 @@ import { RangeDataProvider } from '@vaadin/combo-box/src/vaadin-combo-box-range-
           rangeDataProvider.addLoadedPages(pagesToAdd);
         });
 
-        comboBox.$connector.confirm = tryCatchWrapper(function (id, filter) {
-          if (filter != lastFilter) {
-            return;
-          }
-
-          rangeDataProvider.flushLoadedPages();
-
-          // Let server know we're done
-          comboBox.$server.confirmUpdate(id);
-        });
-
         comboBox.$connector.updateData = tryCatchWrapper(function (items) {
           const itemsMap = new Map(items.map((item) => [item.key, item]));
 
@@ -112,6 +96,22 @@ import { RangeDataProvider } from '@vaadin/combo-box/src/vaadin-combo-box-range-
           // the popup at only at first user filter to this size, while the
           // filtered items count are less.
           comboBox.size = newSize;
+        });
+
+        comboBox.$connector.reset = tryCatchWrapper(function () {
+          rangeDataProvider.clearLoadedPages();
+          rangeDataProvider.flushLoadedPages();
+        });
+
+        comboBox.$connector.confirm = tryCatchWrapper(function (id, filter) {
+          if (filter != lastFilter) {
+            return;
+          }
+
+          rangeDataProvider.flushLoadedPages();
+
+          // Let server know we're done
+          comboBox.$server.confirmUpdate(id);
         });
 
         // Prevent setting the custom value as the 'value'-prop automatically
