@@ -57,8 +57,8 @@ import java.util.stream.Stream;
 @NpmPackage(value = "@vaadin/button", version = "24.0.0-alpha7")
 @JsModule("@vaadin/button/src/vaadin-button.js")
 public class Button extends Component implements ClickNotifier<Button>,
-        Focusable<Button>, HasEnabled, HasPrefix, HasStyle, HasSuffix, HasText,
-        HasThemeVariant<ButtonVariant>, HasTooltip {
+        Focusable<Button>, HasEnabled, HasPrefix, HasSize, HasStyle, HasSuffix,
+        HasText, HasThemeVariant<ButtonVariant>, HasTooltip {
 
     private Component iconComponent;
     private boolean iconAfterText;
