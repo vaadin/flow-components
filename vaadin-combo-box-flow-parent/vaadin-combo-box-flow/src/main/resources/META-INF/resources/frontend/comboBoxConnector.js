@@ -45,7 +45,7 @@ import { RangeDataProvider } from '@vaadin/combo-box/src/vaadin-combo-box-range-
           for (let i = 0; i < pagesCount; i++) {
             pagesToRemove.push(startPage + i);
           }
-          rangeDataProvider.removeLoadedPages(pagesToRemove);
+          rangeDataProvider.removePages(pagesToRemove);
         });
 
         comboBox.$connector.set = tryCatchWrapper(function (startIndex, items, filter) {
@@ -60,8 +60,8 @@ import { RangeDataProvider } from '@vaadin/combo-box/src/vaadin-combo-box-range-
           if (startIndex === 0 && items.length === 0) {
             // Makes sure that the dataProvider callback is called even when server
             // returns empty data set (no items match the filter).
-            rangeDataProvider.clearLoadedPages();
-            rangeDataProvider.addLoadedPages({ 0: [] });
+            rangeDataProvider.clearPages();
+            rangeDataProvider.addPages({ 0: [] });
             return;
           }
 
@@ -75,7 +75,7 @@ import { RangeDataProvider } from '@vaadin/combo-box/src/vaadin-combo-box-range-
             let pageEndIndex = (i + 1) * comboBox.pageSize;
             pagesToAdd[page] = items.slice(pageStartIndex, pageEndIndex);
           }
-          rangeDataProvider.addLoadedPages(pagesToAdd);
+          rangeDataProvider.addPages(pagesToAdd);
         });
 
         comboBox.$connector.updateData = tryCatchWrapper(function (items) {
@@ -99,8 +99,8 @@ import { RangeDataProvider } from '@vaadin/combo-box/src/vaadin-combo-box-range-
         });
 
         comboBox.$connector.reset = tryCatchWrapper(function () {
-          rangeDataProvider.clearLoadedPages();
-          rangeDataProvider.flushLoadedPages();
+          rangeDataProvider.clearPages();
+          rangeDataProvider.flushPages();
         });
 
         comboBox.$connector.confirm = tryCatchWrapper(function (id, filter) {
@@ -108,7 +108,7 @@ import { RangeDataProvider } from '@vaadin/combo-box/src/vaadin-combo-box-range-
             return;
           }
 
-          rangeDataProvider.flushLoadedPages();
+          rangeDataProvider.flushPages();
 
           // Let server know we're done
           comboBox.$server.confirmUpdate(id);
