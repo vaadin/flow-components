@@ -1359,7 +1359,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     private SelectionMode selectionMode;
 
     private final DetailsManager detailsManager;
-    private Element detailsTemplate;
 
     private Map<String, Column<T>> idToColumnMap = new HashMap<>();
     private Map<String, Column<T>> keyToColumnMap = new HashMap<>();
@@ -2866,40 +2865,22 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             return;
         }
 
-        Rendering<T> rendering;
         if (renderer instanceof LitRenderer) {
-            // LitRenderer
-            if (detailsTemplate != null
-                    && detailsTemplate.getParent() != null) {
-                getElement().removeChild(detailsTemplate);
-            }
-            rendering = ((LitRenderer<T>) renderer).render(getElement(),
+            var rendering = ((LitRenderer<T>) renderer).render(getElement(),
                     dataCommunicator.getKeyMapper(), "rowDetailsRenderer");
-        } else {
-            // TemplateRenderer
-            if (detailsTemplate == null) {
-                rendering = renderer.render(getElement(),
-                        getDataCommunicator().getKeyMapper());
-                detailsTemplate = rendering.getTemplateElement();
-                detailsTemplate.setAttribute("class", "row-details");
-            } else {
-                getElement().appendChild(detailsTemplate);
-                rendering = renderer.render(getElement(),
-                        getDataCommunicator().getKeyMapper(), detailsTemplate);
-            }
+
+            rendering.getDataGenerator().ifPresent(renderingDataGenerator -> {
+                itemDetailsDataGenerator = renderingDataGenerator;
+                Registration detailsRenderingDataGeneratorRegistration = () -> {
+                    detailsManager.destroyAllData();
+                    itemDetailsDataGenerator = null;
+                };
+                detailsRenderingRegistrations
+                        .add(detailsRenderingDataGeneratorRegistration);
+            });
+
+            detailsRenderingRegistrations.add(rendering.getRegistration());
         }
-
-        rendering.getDataGenerator().ifPresent(renderingDataGenerator -> {
-            itemDetailsDataGenerator = renderingDataGenerator;
-            Registration detailsRenderingDataGeneratorRegistration = () -> {
-                detailsManager.destroyAllData();
-                itemDetailsDataGenerator = null;
-            };
-            detailsRenderingRegistrations
-                    .add(detailsRenderingDataGeneratorRegistration);
-        });
-
-        detailsRenderingRegistrations.add(rendering.getRegistration());
     }
 
     /**
