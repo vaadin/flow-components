@@ -122,7 +122,7 @@ public class ConfirmDialog extends Component
     }
 
     private void updateWidth() {
-        this.getElement().executeJs("this._setWidth($0)", this.width);
+        this.getElement().executeJs("this._contentWidth = $0", this.width);
     }
 
     /**
@@ -145,7 +145,7 @@ public class ConfirmDialog extends Component
     }
 
     public void updateHeight() {
-        this.getElement().executeJs("this._setHeight($0)", this.height);
+        this.getElement().executeJs("this._contentHeight = $0", this.height);
     }
 
     /**
