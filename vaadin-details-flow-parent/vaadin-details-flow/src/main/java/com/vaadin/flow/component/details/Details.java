@@ -1,24 +1,19 @@
-package com.vaadin.flow.component.details;
-
 /*
- * #%L
- * Details for Vaadin Flow
- * %%
- * Copyright 2000-2022 Vaadin Ltd.
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Copyright 2000-2023 Vaadin Ltd.
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
+package com.vaadin.flow.component.details;
 
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -31,12 +26,13 @@ import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.shared.Registration;
@@ -59,12 +55,12 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-details")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/details", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/details", version = "24.0.0-alpha7")
 @JsModule("@vaadin/details/src/vaadin-details.js")
-public class Details extends Component
-        implements HasEnabled, HasTheme, HasStyle, HasSize, HasTooltip {
+public class Details extends Component implements HasEnabled, HasSize, HasStyle,
+        HasThemeVariant<DetailsVariant>, HasTooltip {
 
     private Component summary;
     private Component summaryContainer;
@@ -87,8 +83,7 @@ public class Details extends Component
         contentContainer = new Div();
         getElement().appendChild(contentContainer.getElement());
         summaryContainer = createSummaryContainer();
-        summaryContainer.getElement().setAttribute("slot", "summary");
-        getElement().appendChild(summaryContainer.getElement());
+        SlotUtils.addToSlot(this, "summary", summaryContainer);
     }
 
     /**
@@ -297,30 +292,6 @@ public class Details extends Component
      */
     public void setOpened(boolean opened) {
         getElement().setProperty("opened", opened);
-    }
-
-    /**
-     * Adds theme variants to the component.
-     *
-     * @param variants
-     *            theme variants to add
-     */
-    public void addThemeVariants(DetailsVariant... variants) {
-        getThemeNames()
-                .addAll(Stream.of(variants).map(DetailsVariant::getVariantName)
-                        .collect(Collectors.toList()));
-    }
-
-    /**
-     * Removes theme variants from the component.
-     *
-     * @param variants
-     *            theme variants to remove
-     */
-    public void removeThemeVariants(DetailsVariant... variants) {
-        getThemeNames().removeAll(
-                Stream.of(variants).map(DetailsVariant::getVariantName)
-                        .collect(Collectors.toList()));
     }
 
     @DomEvent("opened-changed")

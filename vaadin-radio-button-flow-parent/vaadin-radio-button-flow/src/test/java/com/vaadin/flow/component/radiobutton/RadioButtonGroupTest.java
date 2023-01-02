@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -49,14 +49,6 @@ public class RadioButtonGroupTest {
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
-
-    private class RadioButtonWithInitialValue extends
-            GeneratedVaadinRadioGroup<RadioButtonWithInitialValue, String> {
-        RadioButtonWithInitialValue() {
-            super("", null, String.class, (group, value) -> value,
-                    (group, value) -> value, true);
-        }
-    }
 
     @Test
     public void setReadOnlyRadioGroup_groupIsReadOnly() {
@@ -305,11 +297,10 @@ public class RadioButtonGroupTest {
 
         Mockito.when(service.getInstantiator()).thenReturn(instantiator);
 
-        Mockito.when(
-                instantiator.createComponent(RadioButtonWithInitialValue.class))
-                .thenAnswer(invocation -> new RadioButtonWithInitialValue());
-        RadioButtonWithInitialValue field = Component.from(element,
-                RadioButtonWithInitialValue.class);
+        Mockito.when(instantiator.createComponent(RadioButtonGroup.class))
+                .thenAnswer(invocation -> new RadioButtonGroup());
+        RadioButtonGroup field = Component.from(element,
+                RadioButtonGroup.class);
         Assert.assertEquals("foo", field.getElement().getPropertyRaw("value"));
     }
 

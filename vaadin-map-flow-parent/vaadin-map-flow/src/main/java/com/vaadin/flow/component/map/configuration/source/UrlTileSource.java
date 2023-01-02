@@ -1,14 +1,12 @@
-package com.vaadin.flow.component.map.configuration.source;
-
 /**
- * Copyright (C) 2000-2022 Vaadin Ltd
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
- *
  *
  * See <https://vaadin.com/commercial-license-and-service-terms> for the full
  * license.
  */
+package com.vaadin.flow.component.map.configuration.source;
 
 /**
  * Abstract base class for map sources providing tiled map data from a URL

@@ -1,3 +1,11 @@
+/**
+ * Copyright 2000-2023 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
+ */
 package com.vaadin.flow.component.map.events;
 
 import com.vaadin.flow.component.map.configuration.Configuration;
@@ -40,15 +48,6 @@ class MapEventUtil {
     static Coordinate getCoordinate(JsonArray jsonCoordinates) {
         JsonValue xValue = jsonCoordinates.get(0);
         JsonValue yValue = jsonCoordinates.get(1);
-
-        boolean hasNullValue = xValue.getType() == JsonType.NULL
-                || yValue.getType() == JsonType.NULL;
-
-        if (hasNullValue) {
-            logger.error("Received invalid map coordinates from client. "
-                    + "This can happen when using Coordinate.fromLonLat together with the default coordinate system. "
-                    + "If you have upgraded to Vaadin 23.2, please replace usages of Coordinate.fromLonLat.");
-        }
 
         double x = xValue.getType() == JsonType.NULL ? 0 : xValue.asNumber();
         double y = yValue.getType() == JsonType.NULL ? 0 : yValue.asNumber();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -39,12 +39,7 @@ public interface HasPrefixAndSuffix extends HasElement {
      *            prefix component
      */
     default void setPrefixComponent(Component component) {
-        SlotUtils.clearSlot(this, "prefix");
-
-        if (component != null) {
-            component.getElement().setAttribute("slot", "prefix");
-            getElement().appendChild(component.getElement());
-        }
+        SlotUtils.setSlot(this, "prefix", component);
     }
 
     /**
@@ -70,12 +65,7 @@ public interface HasPrefixAndSuffix extends HasElement {
      *            suffix component
      */
     default void setSuffixComponent(Component component) {
-        SlotUtils.clearSlot(this, "suffix");
-
-        if (component != null) {
-            component.getElement().setAttribute("slot", "suffix");
-            getElement().appendChild(component.getElement());
-        }
+        SlotUtils.setSlot(this, "suffix", component);
     }
 
     /**

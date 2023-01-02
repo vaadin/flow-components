@@ -1,4 +1,14 @@
 /**
+ * @license
+ * Copyright 2000-2023 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
+ */
+
+/**
  * Helper to convert a coordinate object with the shape { x: number, y: number}
  * into a coordinate array used by OpenLayers
  * @param coordinate
@@ -25,9 +35,7 @@ export function synchronizeCollection(collection, updatedIds, options) {
   // Check if we have changes
   const hasChanges =
     updatedIds.length !== collection.getLength() ||
-    collection
-      .getArray()
-      .some((existingItem, index) => existingItem.id !== updatedIds[index]);
+    collection.getArray().some((existingItem, index) => existingItem.id !== updatedIds[index]);
   // Skip if there aren't any changes
   if (!hasChanges) return;
   // Get instance references from ids, these must have been synchronized earlier

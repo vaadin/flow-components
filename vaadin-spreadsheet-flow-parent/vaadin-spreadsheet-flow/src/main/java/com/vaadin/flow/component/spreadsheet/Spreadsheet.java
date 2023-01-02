@@ -1,14 +1,12 @@
-package com.vaadin.flow.component.spreadsheet;
-
 /**
- * Copyright (C) 2000-2022 Vaadin Ltd
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
- *
  *
  * See <https://vaadin.com/commercial-license-and-service-terms> for the full
  * license.
  */
+package com.vaadin.flow.component.spreadsheet;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -93,6 +91,7 @@ import com.vaadin.flow.component.spreadsheet.framework.Action;
 import com.vaadin.flow.component.spreadsheet.framework.ReflectTools;
 import com.vaadin.flow.component.spreadsheet.rpc.SpreadsheetClientRpc;
 import com.vaadin.flow.component.spreadsheet.shared.GroupingData;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.shared.Registration;
@@ -1676,6 +1675,13 @@ public class Spreadsheet extends Component
             // overlays and reload them (with updated node id's).
             overlays.clear();
             loadOrUpdateOverlays();
+        }
+
+        if (componentIDtoCellKeysMap != null || cellKeysToEditorIdMap != null) {
+            // The node id's of custom components may no longer be valid after a
+            // detach/attach. Remove all custom components and reload them (with
+            // updated node id's).
+            loadCustomComponents();
         }
     }
 
@@ -3676,9 +3682,7 @@ public class Spreadsheet extends Component
                     && customComponents != null) {
                 String componentId = cellKeysToEditorIdMap.get(key);
                 for (Component c : customComponents) {
-                    if (c.getId().orElse("").equals(componentId)) {
-                        // todo: ver que hacemos con esto
-                        // if (c.getConnectorId().equals(componentId)) {
+                    if (getComponentNodeId(c).equals(componentId)) {
                         customComponentFactory.onCustomEditorDisplayed(
                                 getCell(row, col), row, col, this,
                                 getActiveSheet(), c);
@@ -4552,11 +4556,8 @@ public class Spreadsheet extends Component
                         if (!customComponents.contains(customComponent)) {
                             registerCustomComponent(customComponent);
                         }
-                        _componentIDtoCellKeysMap.put(
-                                // todo: revisar
-                                customComponent.getId().orElse(""),
-                                // customComponent.getConnectorId(),
-                                key);
+                        _componentIDtoCellKeysMap
+                                .put(getComponentNodeId(customComponent), key);
                         newCustomComponents.add(customComponent);
                         rowsWithComponents.add(r);
                     } else if (!isCellLocked(cell)) {
@@ -4574,10 +4575,7 @@ public class Spreadsheet extends Component
                                 registerCustomComponent(customEditor);
                             }
                             _cellKeysToEditorIdMap.put(key,
-                                    // todo: revisar
-                                    customEditor.getId().orElse("")
-                            // customEditor.getConnectorId()
-                            );
+                                    getComponentNodeId(customEditor));
                             newCustomComponents.add(customEditor);
                             rowsWithComponents.add(r);
                         }
@@ -4590,6 +4588,10 @@ public class Spreadsheet extends Component
         }
         setCellKeysToEditorIdMap(_cellKeysToEditorIdMap);
         setComponentIDtoCellKeysMap(_componentIDtoCellKeysMap);
+    }
+
+    private String getComponentNodeId(Component component) {
+        return Integer.toString(component.getElement().getNode().getId());
     }
 
     private void handleRowSizes(Set<Integer> rowsWithComponents) {
@@ -4685,7 +4687,11 @@ public class Spreadsheet extends Component
     }
 
     private void unRegisterCustomComponent(Component component) {
-        getElement().removeVirtualChild(component.getElement());
+        Element element = component.getElement();
+        if (element.isVirtualChild()
+                && getElement().equals(element.getParent())) {
+            getElement().removeVirtualChild(element);
+        }
     }
 
     /**
@@ -4695,7 +4701,7 @@ public class Spreadsheet extends Component
      * @param customComponentFactory
      *            The new component factory to use.
      */
-    void setSpreadsheetComponentFactory(
+    public void setSpreadsheetComponentFactory(
             SpreadsheetComponentFactory customComponentFactory) {
         this.customComponentFactory = customComponentFactory;
         if (firstRow != -1) {

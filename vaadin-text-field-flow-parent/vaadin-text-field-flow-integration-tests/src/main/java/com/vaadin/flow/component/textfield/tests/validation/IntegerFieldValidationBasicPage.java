@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.textfield.tests.validation;
 
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.router.Route;
 import com.vaadin.tests.validation.AbstractValidationPage;
@@ -28,6 +26,7 @@ public class IntegerFieldValidationBasicPage
     public static final String STEP_INPUT = "step-input";
     public static final String MIN_INPUT = "min-input";
     public static final String MAX_INPUT = "max-input";
+    public static final String CLEAR_VALUE_BUTTON = "clear-value-button";
 
     public IntegerFieldValidationBasicPage() {
         super();
@@ -49,6 +48,10 @@ public class IntegerFieldValidationBasicPage
         add(createInput(MAX_INPUT, "Set max", event -> {
             int value = Integer.parseInt(event.getValue());
             testField.setMax(value);
+        }));
+
+        add(createButton(CLEAR_VALUE_BUTTON, "Clear value", event -> {
+            testField.clear();
         }));
     }
 

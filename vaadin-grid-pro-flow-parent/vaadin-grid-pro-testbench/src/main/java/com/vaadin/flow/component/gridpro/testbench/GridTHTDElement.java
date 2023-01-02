@@ -1,14 +1,12 @@
-package com.vaadin.flow.component.gridpro.testbench;
-
 /**
- * Copyright (C) 2000-2022 Vaadin Ltd
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
- *
  *
  * See <https://vaadin.com/commercial-license-and-service-terms> for the full
  * license.
  */
+package com.vaadin.flow.component.gridpro.testbench;
 
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.SearchContext;

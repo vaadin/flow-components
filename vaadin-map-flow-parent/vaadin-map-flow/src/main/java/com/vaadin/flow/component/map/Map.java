@@ -1,14 +1,12 @@
-package com.vaadin.flow.component.map;
-
 /**
- * Copyright (C) 2000-2022 Vaadin Ltd
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
- *
  *
  * See <https://vaadin.com/commercial-license-and-service-terms> for the full
  * license.
  */
+package com.vaadin.flow.component.map;
 
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
@@ -67,7 +65,7 @@ import java.util.Objects;
  * using {@link #defineProjection(String, String)}.
  */
 @Tag("vaadin-map")
-@NpmPackage(value = "@vaadin/map", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/map", version = "24.0.0-alpha7")
 @NpmPackage(value = "proj4", version = "2.8.0")
 @JsModule("@vaadin/map/src/vaadin-map.js")
 @JsModule("./vaadin-map/mapConnector.js")

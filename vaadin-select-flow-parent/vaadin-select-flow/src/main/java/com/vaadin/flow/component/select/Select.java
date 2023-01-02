@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -40,6 +40,7 @@ import com.vaadin.flow.component.select.data.SelectListDataView;
 import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.binder.HasValidator;
@@ -60,9 +61,7 @@ import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.data.selection.SingleSelect;
-import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableConsumer;
-import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
 
@@ -71,7 +70,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -84,9 +82,9 @@ import java.util.stream.Stream;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-select")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/select", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/select", version = "24.0.0-alpha7")
 @JsModule("@vaadin/select/src/vaadin-select.js")
 @JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 @JsModule("./selectConnector.js")
@@ -150,22 +148,6 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
         addValueChangeListener(e -> validate());
 
         addClientValidatedEventListener(e -> validate());
-    }
-
-    /**
-     * Constructs a select with the given items.
-     *
-     * @param items
-     *            the items for the select
-     * @see #setItems(Object...)
-     * @deprecated as of 23.1. Please use {@link #setItems(Object[])} instead.
-     */
-    @Deprecated
-    @SafeVarargs
-    public Select(T... items) {
-        this();
-
-        setItems(items);
     }
 
     /**
@@ -262,7 +244,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      * even though that is not visible from the component level.
      */
     @Tag("vaadin-select-list-box")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha6")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha7")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     private class InternalListBox extends Component
             implements HasItemComponents<T> {
@@ -766,10 +748,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      *      website about slots</a>
      */
     public void addToPrefix(Component... components) {
-        for (Component component : components) {
-            component.getElement().setAttribute("slot", "prefix");
-            getElement().appendChild(component.getElement());
-        }
+        SlotUtils.addToSlot(this, "prefix", components);
     }
 
     @Override

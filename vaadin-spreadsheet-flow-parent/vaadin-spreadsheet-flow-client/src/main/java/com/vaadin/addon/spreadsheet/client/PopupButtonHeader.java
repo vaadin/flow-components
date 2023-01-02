@@ -1,17 +1,15 @@
-package com.vaadin.addon.spreadsheet.client;
-
-import com.gargoylesoftware.htmlunit.javascript.host.event.EventTarget;
-import com.google.gwt.core.client.JavaScriptObject;
-
 /**
- * Copyright (C) 2000-2022 Vaadin Ltd
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
- *
  *
  * See <https://vaadin.com/commercial-license-and-service-terms> for the full
  * license.
  */
+package com.vaadin.addon.spreadsheet.client;
+
+import com.gargoylesoftware.htmlunit.javascript.host.event.EventTarget;
+import com.google.gwt.core.client.JavaScriptObject;
 
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;

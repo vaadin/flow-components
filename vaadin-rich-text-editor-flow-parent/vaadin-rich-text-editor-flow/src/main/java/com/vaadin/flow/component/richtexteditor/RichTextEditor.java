@@ -1,27 +1,30 @@
+/**
+ * Copyright 2000-2023 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
+ */
 package com.vaadin.flow.component.richtexteditor;
 
 import java.io.Serializable;
 import java.util.Objects;
 
-/**
- * Copyright (C) 2000-2022 Vaadin Ltd
- *
- * This program is available under Vaadin Commercial License and Service Terms.
- *
- *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
- * license.
- */
+import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.CompositionNotifier;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.InputNotifier;
 import com.vaadin.flow.component.KeyNotifier;
+import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
@@ -48,12 +51,14 @@ import elemental.json.JsonObject;
  *
  */
 @Tag("vaadin-rich-text-editor")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@NpmPackage(value = "@vaadin/rich-text-editor", version = "24.0.0-alpha7")
+@JsModule("@vaadin/rich-text-editor/src/vaadin-rich-text-editor.js")
 public class RichTextEditor
-        extends GeneratedVaadinRichTextEditor<RichTextEditor, String>
-        implements HasSize, HasValueChangeMode, InputNotifier, KeyNotifier,
-        CompositionNotifier {
+        extends AbstractSinglePropertyField<RichTextEditor, String>
+        implements CompositionNotifier, InputNotifier, KeyNotifier, HasSize,
+        HasStyle, HasValueChangeMode, HasThemeVariant<RichTextEditorVariant> {
 
     private ValueChangeMode currentMode;
     private RichTextEditorI18n i18n;
@@ -105,7 +110,12 @@ public class RichTextEditor
      * Constructs an empty {@code RichTextEditor}.
      */
     public RichTextEditor() {
-        super("", "", false, true);
+        super("value", "", false);
+
+        if (getElement().getProperty("value") == null) {
+            setPresentationValue("");
+        }
+
         setValueChangeMode(ValueChangeMode.ON_CHANGE);
     }
 
@@ -205,6 +215,16 @@ public class RichTextEditor
 
         // Using basic safe list and adding img tag with data protocol enabled.
         return sanitize(htmlValueString);
+    }
+
+    /**
+     * HTML representation of the rich text editor content.
+     *
+     * @return the {@code htmlValue} property from the webcomponent
+     */
+    @Synchronize(property = "htmlValue", value = "html-value-changed")
+    private String getHtmlValueString() {
+        return getElement().getProperty("htmlValue");
     }
 
     String sanitize(String html) {

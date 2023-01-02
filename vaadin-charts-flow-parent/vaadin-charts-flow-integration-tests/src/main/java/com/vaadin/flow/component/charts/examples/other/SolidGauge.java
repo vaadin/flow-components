@@ -14,7 +14,7 @@ import com.vaadin.flow.component.charts.model.PlotOptionsSolidgauge;
 import com.vaadin.flow.component.charts.model.YAxis;
 import com.vaadin.flow.component.dependency.CssImport;
 
-@CssImport(value = "./styles/SolidGauge.css", themeFor = "vaadin-chart", include = "vaadin-chart-default-theme")
+@CssImport(value = "./styles/SolidGauge.css", themeFor = "vaadin-chart")
 public class SolidGauge extends AbstractChartExample {
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -25,6 +25,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -60,9 +61,9 @@ import elemental.json.JsonObject;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-combo-box")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/combo-box", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/combo-box", version = "24.0.0-alpha7")
 @JsModule("@vaadin/combo-box/src/vaadin-combo-box.js")
 @JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 @JsModule("./flow-component-renderer.js")
@@ -329,20 +330,6 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
         return null;
     }
 
-    // Override is only required to keep binary compatibility with other 23.x
-    // minor versions, can be removed in a future major
-    @Override
-    public void addThemeVariants(ComboBoxVariant... variants) {
-        HasThemeVariant.super.addThemeVariants(variants);
-    }
-
-    // Override is only required to keep binary compatibility with other 23.x
-    // minor versions, can be removed in a future major
-    @Override
-    public void removeThemeVariants(ComboBoxVariant... variants) {
-        HasThemeVariant.super.removeThemeVariants(variants);
-    }
-
     /**
      * Adds the given components as children of this component at the slot
      * 'prefix'.
@@ -359,10 +346,7 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
      */
     @Deprecated
     protected void addToPrefix(Component... components) {
-        for (Component component : components) {
-            component.getElement().setAttribute("slot", "prefix");
-            getElement().appendChild(component.getElement());
-        }
+        SlotUtils.addToSlot(this, "prefix", components);
     }
 
     /**
