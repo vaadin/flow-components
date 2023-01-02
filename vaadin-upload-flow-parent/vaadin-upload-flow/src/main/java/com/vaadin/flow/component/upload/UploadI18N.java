@@ -25,7 +25,6 @@ import java.util.List;
 public class UploadI18N implements Serializable {
     private DropFiles dropFiles;
     private AddFiles addFiles;
-    private String cancel;
     private Error error;
     private Uploading uploading;
     private Units units;
