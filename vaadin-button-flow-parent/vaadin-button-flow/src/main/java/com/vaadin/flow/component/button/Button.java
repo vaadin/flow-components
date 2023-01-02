@@ -29,9 +29,10 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.shared.HasPrefix;
+import com.vaadin.flow.component.shared.HasSuffix;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
-import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.nodefeature.ElementAttributeMap;
 import com.vaadin.flow.internal.nodefeature.NodeFeature;
@@ -56,8 +57,8 @@ import java.util.stream.Stream;
 @NpmPackage(value = "@vaadin/button", version = "24.0.0-alpha7")
 @JsModule("@vaadin/button/src/vaadin-button.js")
 public class Button extends Component implements ClickNotifier<Button>,
-        Focusable<Button>, HasSize, HasEnabled, HasStyle, HasText,
-        HasThemeVariant<ButtonVariant>, HasTooltip {
+        Focusable<Button>, HasEnabled, HasPrefix, HasSize, HasStyle, HasSuffix,
+        HasText, HasThemeVariant<ButtonVariant>, HasTooltip {
 
     private Component iconComponent;
     private boolean iconAfterText;
@@ -365,40 +366,6 @@ public class Button extends Component implements ClickNotifier<Button>,
     private void updateIconSlot() {
         iconComponent.getElement().setAttribute("slot",
                 iconAfterText ? "suffix" : "prefix");
-    }
-
-    /**
-     * Adds the given components as children of this component at the slot
-     * 'prefix'.
-     *
-     * @param components
-     *            The components to add.
-     * @see <a href=
-     *      "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
-     *      page about slots</a>
-     * @see <a href=
-     *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
-     *      website about slots</a>
-     */
-    protected void addToPrefix(Component... components) {
-        SlotUtils.addToSlot(this, "prefix", components);
-    }
-
-    /**
-     * Adds the given components as children of this component at the slot
-     * 'suffix'.
-     *
-     * @param components
-     *            The components to add.
-     * @see <a href=
-     *      "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
-     *      page about slots</a>
-     * @see <a href=
-     *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
-     *      website about slots</a>
-     */
-    protected void addToSuffix(Component... components) {
-        SlotUtils.addToSlot(this, "suffix", components);
     }
 
     /**
