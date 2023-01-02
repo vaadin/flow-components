@@ -76,14 +76,13 @@ import com.vaadin.flow.shared.Registration;
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/dialog", version = "24.0.0-alpha7")
 @JsModule("@vaadin/dialog/src/vaadin-dialog.js")
-@JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 @JsModule("./dialogConnector.js")
 @JsModule("./flow-component-renderer.js")
 public class Dialog extends Component implements HasComponents, HasSize,
         HasStyle, HasThemeVariant<DialogVariant> {
 
     private static final String OVERLAY_LOCATOR_JS = "this.$.overlay";
-    private Element template;
+
     private Element container;
     private boolean autoAddedToTheUi;
     private int onCloseConfigured;
@@ -102,11 +101,6 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * Creates an empty dialog.
      */
     public Dialog() {
-        getElement().setAttribute("suppress-template-warning", true);
-
-        template = new Element("template");
-        getElement().appendChild(template);
-
         container = new Element("div");
         container.getClassList().add("draggable");
         container.getClassList().add("draggable-leaf-only");
@@ -975,7 +969,8 @@ public class Dialog extends Component implements HasComponents, HasSize,
         String renderer = String.format(
                 "<flow-component-renderer appid=\"%s\" nodeid=\"%s\" style=\"display: flex; height: 100%%;\"></flow-component-renderer>",
                 appId, nodeId);
-        template.setProperty("innerHTML", renderer);
+        getElement().executeJs("this.renderer = root => root.innerHTML = $0",
+                renderer);
 
         setDimension(ElementConstants.STYLE_WIDTH, width);
         setDimension(ElementConstants.STYLE_MIN_WIDTH, minWidth);
