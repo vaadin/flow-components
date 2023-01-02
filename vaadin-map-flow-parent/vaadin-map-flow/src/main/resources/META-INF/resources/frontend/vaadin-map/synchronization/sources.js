@@ -1,23 +1,23 @@
 /**
  * @license
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
  * See <https://vaadin.com/commercial-license-and-service-terms> for the full
  * license.
  */
-import Collection from "ol/Collection";
-import ImageWMS from "ol/source/ImageWMS";
-import OSM, { ATTRIBUTION as OSM_ATTRIBUTION } from "ol/source/OSM";
-import TileWMS from "ol/source/TileWMS";
-import VectorSource from "ol/source/Vector";
-import XYZ from "ol/source/XYZ";
-import { createOptions, synchronizeCollection } from "./util.js";
+import Collection from 'ol/Collection';
+import ImageWMS from 'ol/source/ImageWMS';
+import OSM, { ATTRIBUTION as OSM_ATTRIBUTION } from 'ol/source/OSM';
+import TileWMS from 'ol/source/TileWMS';
+import VectorSource from 'ol/source/Vector';
+import XYZ from 'ol/source/XYZ';
+import { createOptions, synchronizeCollection } from './util.js';
 
 function synchronizeSource(target, source, _context) {
   if (!target) {
-    throw new Error("Can not instantiate base class: ol/source/Source");
+    throw new Error('Can not instantiate base class: ol/source/Source');
   }
 
   target.setAttributions(source.attributions);
@@ -27,7 +27,7 @@ function synchronizeSource(target, source, _context) {
 
 function synchronizeTileSource(target, source, context) {
   if (!target) {
-    throw new Error("Can not instantiate base class: ol/source/Tile");
+    throw new Error('Can not instantiate base class: ol/source/Tile');
   }
   synchronizeSource(target, source, context);
 
@@ -36,7 +36,7 @@ function synchronizeTileSource(target, source, context) {
 
 function synchronizeUrlTileSource(target, source, context) {
   if (!target) {
-    throw new Error("Can not instantiate base class: ol/source/UrlTile");
+    throw new Error('Can not instantiate base class: ol/source/UrlTile');
   }
   synchronizeTileSource(target, source, context);
   // Setting null URL is not supported. While not an actual use-case, it is useful to prevent errors here in order
@@ -50,7 +50,7 @@ function synchronizeUrlTileSource(target, source, context) {
 
 function synchronizeTileImageSource(target, source, context) {
   if (!target) {
-    throw new Error("Can not instantiate base class: ol/source/TileImage");
+    throw new Error('Can not instantiate base class: ol/source/TileImage');
   }
   synchronizeUrlTileSource(target, source, context);
 
@@ -91,7 +91,7 @@ export function synchronizeOSMSource(target, source, context) {
 
 function synchronizeImageSource(target, source, context) {
   if (!target) {
-    throw new Error("Can not instantiate base class: ol/source/Image");
+    throw new Error('Can not instantiate base class: ol/source/Image');
   }
   synchronizeSource(target, source, context);
 
@@ -117,16 +117,12 @@ export function synchronizeVectorSource(target, source, context) {
     target = new VectorSource(
       createOptions({
         ...source,
-        features: new Collection(),
+        features: new Collection()
       })
     );
   }
   synchronizeSource(target, source, context);
-  synchronizeCollection(
-    target.getFeaturesCollection(),
-    source.features,
-    context
-  );
+  synchronizeCollection(target.getFeaturesCollection(), source.features, context);
 
   return target;
 }
