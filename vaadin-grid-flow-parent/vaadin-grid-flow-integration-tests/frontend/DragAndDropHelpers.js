@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,26 +13,24 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-window.dragData = {text: 'foo'};
+window.dragData = { text: 'foo' };
 
-window.fireDragStart = draggable => {
+window.fireDragStart = (draggable) => {
   const event = new Event('dragstart', {
     bubbles: true,
     cancelable: true,
     composed: true
   });
   event.dataTransfer = {
-    setDragImage: () => {
-    },
-    setData: (type, data) => dragData[type] = data
+    setDragImage: () => {},
+    setData: (type, data) => (dragData[type] = data)
   };
   if (draggable.getAttribute('draggable') === 'true') {
-	  draggable.dispatchEvent(event);
+    draggable.dispatchEvent(event);
   }
 };
 
-
-window.fireDragEnd = grid => {
+window.fireDragEnd = (grid) => {
   const event = new Event('dragend', {
     bubbles: true,
     cancelable: true,
@@ -42,7 +40,6 @@ window.fireDragEnd = grid => {
 };
 
 window.fireDrop = (draggable, location) => {
-
   // First fire drag-over to get the dropLocation
   fireDragOver(draggable, location);
 
@@ -52,16 +49,15 @@ window.fireDrop = (draggable, location) => {
     composed: true
   });
   event.dataTransfer = {
-    getData: type => dragData[type],
+    getData: (type) => dragData[type],
     types: Object.keys(dragData)
   };
   // Draggable is the vaadin-grid-cell-content element
   const row = draggable.assignedSlot.parentNode.parentNode;
   if (!row.hasAttribute('drop-disabled')) {
-	  draggable.dispatchEvent(event);
+    draggable.dispatchEvent(event);
   }
 };
-
 
 window.fireDragOver = (row, location) => {
   const event = new Event('dragover', {
