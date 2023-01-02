@@ -198,11 +198,6 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
             }
 
             @Override
-            public Element getTemplateElement() {
-                return null;
-            }
-
-            @Override
             public Registration getRegistration() {
                 return rendering.getRegistration();
             }

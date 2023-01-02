@@ -137,9 +137,7 @@ public class EditorRenderer<T> extends Renderer<T> implements DataGenerator<T> {
     }
 
     @Override
-    public Rendering<T> render(Element container, DataKeyMapper<T> keyMapper,
-            Element contentTemplate) {
-
+    public Rendering<T> render(Element container, DataKeyMapper<T> keyMapper) {
         /*
          * The virtual container is needed as the parent of all editor
          * components. Editor components need a parent in order to have a proper
@@ -159,7 +157,7 @@ public class EditorRenderer<T> extends Renderer<T> implements DataGenerator<T> {
                     context -> setupEditorRenderer(container, context));
         });
 
-        return new EditorRendering(contentTemplate);
+        return new EditorRendering();
     }
 
     private void setupEditorRenderer(Element container,
@@ -211,20 +209,9 @@ public class EditorRenderer<T> extends Renderer<T> implements DataGenerator<T> {
 
     private class EditorRendering implements Rendering<T> {
 
-        private final Element contentTemplate;
-
-        public EditorRendering(Element contentTemplate) {
-            this.contentTemplate = contentTemplate;
-        }
-
         @Override
         public Optional<DataGenerator<T>> getDataGenerator() {
             return Optional.of(EditorRenderer.this);
-        }
-
-        @Override
-        public Element getTemplateElement() {
-            return contentTemplate;
         }
     }
 }
