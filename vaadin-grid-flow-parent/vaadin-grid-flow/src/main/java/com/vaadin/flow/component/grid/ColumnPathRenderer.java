@@ -28,9 +28,10 @@ import com.vaadin.flow.internal.JsonSerializer;
 import elemental.json.Json;
 
 /**
- * Renderer for columns that doesn't use any template for rendering its contents
- * (only the value from the object model). In such cases, a {@code template}
- * element is not needed on the client-side, only the {@code path} property.
+ * Renderer for columns that doesn't use a renderer function for rendering its
+ * contents (only the value from the object model). In such cases, a
+ * {@code renderer} function is not needed on the client-side, only the
+ * {@code path} property.
  *
  * @author Vaadin Ltd.
  *
