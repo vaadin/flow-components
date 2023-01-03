@@ -125,17 +125,17 @@ public class Notification extends Component implements HasComponents, HasStyle,
                 "<flow-component-renderer appid=\"%s\" nodeid=\"%s\"></flow-component-renderer>",
                 appId, nodeId);
 
-        getElement().executeJs(
         //@formatter:off
-        "this.renderer = (root, notification) => {" +
-        "  if (notification.text) {" +
-        "    root.textContent = notification.text;" +
-        "  } else if (!root.firstElementChild) {" +
-        "    root.innerHTML = $0;" +
-        "  }" +
-        "}",
+        getElement().executeJs(
+            "this.renderer = (root, notification) => {" +
+            "  if (notification.text) {" +
+            "    root.textContent = notification.text;" +
+            "  } else if (!root.firstElementChild) {" +
+            "    root.innerHTML = $0;" +
+            "  }" +
+            "}",
+            template);
         //@formatter:on
-                template);
     }
 
     /**
