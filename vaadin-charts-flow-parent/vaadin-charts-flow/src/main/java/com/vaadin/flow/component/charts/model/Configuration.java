@@ -48,8 +48,6 @@ public class Configuration extends AbstractConfigurationObject
     private Legend legend;
     private Credits credits;
     private Map<String, AbstractPlotOptions> plotOptions = new HashMap<>();
-    private HTMLLabels labels;
-
     private List<Series> series = new ArrayList<>();
     private Drilldown drilldown;
 
@@ -62,6 +60,7 @@ public class Configuration extends AbstractConfigurationObject
     private NoData noData;
     private Navigator navigator;
     private Time time;
+    private List<AnnotationItem> annotations;
 
     @JsonIgnore
     private final List<ConfigurationChangeListener> changeListeners = new ArrayList<>();
@@ -623,23 +622,6 @@ public class Configuration extends AbstractConfigurationObject
     }
 
     /**
-     * @see #setLabels(HTMLLabels)
-     * @return Labels or null if not defined
-     */
-    public HTMLLabels getLabels() {
-        return labels;
-    }
-
-    /**
-     * Sets HTML labels that can be positioned anywhere in the chart area.
-     *
-     * @param labels
-     */
-    public void setLabels(HTMLLabels labels) {
-        this.labels = labels;
-    }
-
-    /**
      * Sets whether to enable exporting
      *
      * @param exporting
@@ -1163,4 +1145,18 @@ public class Configuration extends AbstractConfigurationObject
         colorAxis.addAxis(axis);
     }
 
+    public List<AnnotationItem> getAnnotations() {
+        if (annotations == null) {
+            setAnnotations(new ArrayList<>());
+        }
+        return annotations;
+    }
+
+    public void setAnnotations(List<AnnotationItem> annotations) {
+        this.annotations = annotations;
+    }
+
+    public void addAnnotation(AnnotationItem annotation) {
+        getAnnotations().add(annotation);
+    }
 }
