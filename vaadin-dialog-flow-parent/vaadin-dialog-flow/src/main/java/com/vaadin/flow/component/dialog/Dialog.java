@@ -969,7 +969,8 @@ public class Dialog extends Component implements HasComponents, HasSize,
         String renderer = String.format(
                 "<flow-component-renderer appid=\"%s\" nodeid=\"%s\" style=\"display: flex; height: 100%%;\"></flow-component-renderer>",
                 appId, nodeId);
-        getElement().executeJs("this.renderer = root => root.innerHTML = $0",
+        getElement().executeJs(
+                "this.renderer = (root) => { if (!root.firstChild) { root.innerHTML = $0 } }",
                 renderer);
 
         setDimension(ElementConstants.STYLE_WIDTH, width);
