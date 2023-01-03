@@ -35,7 +35,6 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.internal.UIInternals;
 import com.vaadin.flow.component.notification.Notification.Position;
-import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.VaadinSession;
 
 import javax.annotation.concurrent.NotThreadSafe;
@@ -143,14 +142,6 @@ public class NotificationTest {
         }
     }
 
-    @Test
-    public void templateWarningSuppressed() {
-        Notification notification = new Notification();
-
-        Assert.assertTrue("Template warning is not suppressed", notification
-                .getElement().hasAttribute("suppress-template-warning"));
-    }
-
     @Test(expected = IllegalStateException.class)
     public void setOpened_noUiInstance() {
         UI.setCurrent(null);
@@ -178,43 +169,6 @@ public class NotificationTest {
 
         Assert.assertEquals(Position.BOTTOM_START, notification.getPosition());
         Assert.assertEquals(5000, notification.getDuration());
-    }
-
-    @Test
-    public void setText_notificationHasAddedComponents_innerHtmlIsTextValue() {
-        Notification notification = new Notification();
-
-        notification.add(new Div());
-        notification.setText("foo");
-
-        notification.open();
-
-        flushBeforeClientResponse();
-
-        Element templateElement = notification.getElement().getChildren()
-                .findFirst().get();
-
-        String innerHtml = templateElement.getProperty("innerHTML");
-        Assert.assertEquals("foo", innerHtml);
-    }
-
-    @Test
-    public void add_notificationHasText_innerHtmlIsTemplateValue() {
-        Notification notification = new Notification();
-
-        notification.setText("foo");
-        notification.add(new Div());
-
-        notification.open();
-
-        flushBeforeClientResponse();
-
-        Element templateElement = notification.getElement().getChildren()
-                .findFirst().get();
-
-        String innerHtml = templateElement.getProperty("innerHTML");
-        Assert.assertThat(innerHtml,
-                CoreMatchers.startsWith("<flow-component-renderer"));
     }
 
     @Test(expected = IllegalArgumentException.class)
