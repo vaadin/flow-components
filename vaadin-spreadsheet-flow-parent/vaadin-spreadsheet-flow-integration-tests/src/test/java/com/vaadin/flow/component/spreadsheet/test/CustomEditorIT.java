@@ -71,12 +71,12 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
 
     @Test
     public void setValueToDatePicker_valueAppliedToDatePicker() {
-        LocalDateTime now = LocalDateTime.now();
-        String sampleLocalDateTime = now
+        LocalDateTime dateTime = LocalDateTime.of(2000, 10, 10, 0, 0);
+        String sampleLocalDateTime = dateTime
                 .format(DateTimeFormatter.ofPattern("MM/dd/yyyy"));
         setEditorValue("D2", sampleLocalDateTime, "input");
         clickCell("D3");
-        Assert.assertEquals(now.format(DateTimeFormatter.ISO_DATE),
+        Assert.assertEquals(dateTime.format(DateTimeFormatter.ISO_DATE),
                 getCellValue("D2"));
         clickCell("D2");
         Assert.assertEquals(sampleLocalDateTime,
@@ -85,12 +85,13 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
 
     @Test
     public void setValueToDatePickerCell_setFormulaInAnotherCell_valueAppliedToToCell() {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime dateTime = LocalDateTime.of(2000, 10, 10, 0, 0);
         setEditorValue("D2",
-                now.format(DateTimeFormatter.ofPattern("MM/dd/yyyy")), "input");
+                dateTime.format(DateTimeFormatter.ofPattern("MM/dd/yyyy")),
+                "input");
         clickCell("D3");
         setCellValue("D3", "=D2");
-        Assert.assertEquals(now.format(DateTimeFormatter.ISO_DATE),
+        Assert.assertEquals(dateTime.format(DateTimeFormatter.ISO_DATE),
                 getCellValue("D3"));
     }
 
