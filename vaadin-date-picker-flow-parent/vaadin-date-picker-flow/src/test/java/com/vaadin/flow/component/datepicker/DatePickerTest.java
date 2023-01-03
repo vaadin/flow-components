@@ -273,4 +273,24 @@ public class DatePickerTest {
         DatePicker picker = new DatePicker();
         Assert.assertTrue(picker instanceof HasTooltip);
     }
+
+    @Test
+    public void setPrefix_hasPrefix() {
+        DatePicker picker = new DatePicker();
+        TestPrefix prefix = new TestPrefix();
+
+        picker.setPrefixComponent(prefix);
+
+        Assert.assertEquals(prefix, picker.getPrefixComponent());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void setTextAsPrefix_throws() {
+        DatePicker picker = new DatePicker();
+        picker.setPrefixComponent(new Text("Prefix"));
+    }
+
+    @Tag("div")
+    private static class TestPrefix extends Component {
+    }
 }
