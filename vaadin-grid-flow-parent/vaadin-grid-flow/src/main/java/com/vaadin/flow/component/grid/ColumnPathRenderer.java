@@ -61,7 +61,7 @@ public class ColumnPathRenderer<SOURCE> extends Renderer<SOURCE> {
 
     @Override
     public Rendering<SOURCE> render(Element container,
-            DataKeyMapper<SOURCE> keyMapper) {
+            DataKeyMapper<SOURCE> keyMapper, String rendererName) {
         container.setProperty("path", property);
 
         // disables the automatic creation of headers when the path is used

@@ -121,7 +121,6 @@ import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.internal.ReflectTools;
-import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.Json;
@@ -2865,22 +2864,20 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             return;
         }
 
-        if (renderer instanceof LitRenderer) {
-            var rendering = ((LitRenderer<T>) renderer).render(getElement(),
-                    dataCommunicator.getKeyMapper(), "rowDetailsRenderer");
+        var rendering = renderer.render(getElement(),
+                dataCommunicator.getKeyMapper(), "rowDetailsRenderer");
 
-            rendering.getDataGenerator().ifPresent(renderingDataGenerator -> {
-                itemDetailsDataGenerator = renderingDataGenerator;
-                Registration detailsRenderingDataGeneratorRegistration = () -> {
-                    detailsManager.destroyAllData();
-                    itemDetailsDataGenerator = null;
-                };
-                detailsRenderingRegistrations
-                        .add(detailsRenderingDataGeneratorRegistration);
-            });
+        rendering.getDataGenerator().ifPresent(renderingDataGenerator -> {
+            itemDetailsDataGenerator = renderingDataGenerator;
+            Registration detailsRenderingDataGeneratorRegistration = () -> {
+                detailsManager.destroyAllData();
+                itemDetailsDataGenerator = null;
+            };
+            detailsRenderingRegistrations
+                    .add(detailsRenderingDataGeneratorRegistration);
+        });
 
-            detailsRenderingRegistrations.add(rendering.getRegistration());
-        }
+        detailsRenderingRegistrations.add(rendering.getRegistration());
     }
 
     /**
