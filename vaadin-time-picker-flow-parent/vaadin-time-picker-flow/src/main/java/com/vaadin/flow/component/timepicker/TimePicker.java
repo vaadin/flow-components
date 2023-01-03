@@ -43,6 +43,7 @@ import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasAutoOpen;
 import com.vaadin.flow.component.shared.HasClearButton;
 import com.vaadin.flow.component.shared.HasClientValidation;
+import com.vaadin.flow.component.shared.HasPrefix;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.ValidationUtil;
@@ -73,9 +74,9 @@ import com.vaadin.flow.shared.Registration;
 public class TimePicker
         extends AbstractSinglePropertyField<TimePicker, LocalTime>
         implements Focusable<TimePicker>, HasAllowedCharPattern, HasAutoOpen,
-        HasClearButton, HasClientValidation, HasHelper, HasLabel, HasSize,
-        HasStyle, HasThemeVariant<TimePickerVariant>, HasTooltip, HasValidation,
-        HasValidator<LocalTime> {
+        HasClearButton, HasClientValidation, HasHelper, HasLabel, HasPrefix,
+        HasSize, HasStyle, HasThemeVariant<TimePickerVariant>, HasTooltip,
+        HasValidation, HasValidator<LocalTime> {
 
     private static final SerializableFunction<String, LocalTime> PARSER = valueFromClient -> {
         return valueFromClient == null || valueFromClient.isEmpty() ? null
