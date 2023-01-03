@@ -28,6 +28,8 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasTooltip;
@@ -252,5 +254,25 @@ public class TimePickerTest {
     public void implementsHasTooltip() {
         TimePicker timePicker = new TimePicker();
         Assert.assertTrue(timePicker instanceof HasTooltip);
+    }
+
+    @Test
+    public void setPrefix_hasPrefix() {
+        TimePicker picker = new TimePicker();
+        TestPrefix prefix = new TestPrefix();
+
+        picker.setPrefixComponent(prefix);
+
+        Assert.assertEquals(prefix, picker.getPrefixComponent());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void setTextAsPrefix_throws() {
+        TimePicker picker = new TimePicker();
+        picker.setPrefixComponent(new Text("Prefix"));
+    }
+
+    @Tag("div")
+    private static class TestPrefix extends Component {
     }
 }
