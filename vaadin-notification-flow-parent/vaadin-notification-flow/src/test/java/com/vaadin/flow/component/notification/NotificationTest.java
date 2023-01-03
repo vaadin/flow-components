@@ -143,14 +143,6 @@ public class NotificationTest {
         }
     }
 
-    @Test
-    public void templateWarningSuppressed() {
-        Notification notification = new Notification();
-
-        Assert.assertTrue("Template warning is not suppressed", notification
-                .getElement().hasAttribute("suppress-template-warning"));
-    }
-
     @Test(expected = IllegalStateException.class)
     public void setOpened_noUiInstance() {
         UI.setCurrent(null);
@@ -181,40 +173,36 @@ public class NotificationTest {
     }
 
     @Test
-    public void setText_notificationHasAddedComponents_innerHtmlIsTextValue() {
+    public void addComponent_setText_notificationHasText() {
         Notification notification = new Notification();
 
         notification.add(new Div());
         notification.setText("foo");
 
-        notification.open();
-
-        flushBeforeClientResponse();
-
-        Element templateElement = notification.getElement().getChildren()
-                .findFirst().get();
-
-        String innerHtml = templateElement.getProperty("innerHTML");
-        Assert.assertEquals("foo", innerHtml);
+        Assert.assertEquals("foo",
+                notification.getElement().getProperty("text"));
     }
 
     @Test
-    public void add_notificationHasText_innerHtmlIsTemplateValue() {
+    public void setText_addComponent_notificationDoesNotHaveText() {
         Notification notification = new Notification();
 
         notification.setText("foo");
         notification.add(new Div());
 
-        notification.open();
+        Assert.assertEquals(null,
+                notification.getElement().getProperty("text"));
+    }
 
-        flushBeforeClientResponse();
+    @Test
+    public void setText_setTextNull_notificationDoesNotHaveText() {
+        Notification notification = new Notification();
 
-        Element templateElement = notification.getElement().getChildren()
-                .findFirst().get();
+        notification.setText("foo");
+        notification.setText(null);
 
-        String innerHtml = templateElement.getProperty("innerHTML");
-        Assert.assertThat(innerHtml,
-                CoreMatchers.startsWith("<flow-component-renderer"));
+        Assert.assertEquals(null,
+                notification.getElement().getProperty("text"));
     }
 
     @Test(expected = IllegalArgumentException.class)
