@@ -144,7 +144,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
             // Clear the input element from possible bad input.
             getElement().executeJs("this.inputElement.value = ''");
             getElement().setProperty("_hasInputValue", false);
-            fireEvent(new ClientValidatedEvent(this, false, true));
+            fireEvent(new ClientValidatedEvent(this, false));
         }
     }
 

@@ -318,7 +318,7 @@ public class DateTimePicker extends
         if (isValueRemainedEmpty && isInputValuePresent) {
             // Clear the input elements from possible bad input.
             synchronizeChildComponentValues(value);
-            fireEvent(new ClientValidatedEvent(this, false, true));
+            fireEvent(new ClientValidatedEvent(this, false));
         } else {
             synchronizeChildComponentValues(value);
         }
