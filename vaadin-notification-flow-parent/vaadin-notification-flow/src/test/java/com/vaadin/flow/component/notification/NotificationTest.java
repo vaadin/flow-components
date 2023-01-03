@@ -35,6 +35,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.internal.UIInternals;
 import com.vaadin.flow.component.notification.Notification.Position;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.VaadinSession;
 
 import javax.annotation.concurrent.NotThreadSafe;
@@ -169,6 +170,39 @@ public class NotificationTest {
 
         Assert.assertEquals(Position.BOTTOM_START, notification.getPosition());
         Assert.assertEquals(5000, notification.getDuration());
+    }
+
+    @Test
+    public void addComponent_setText_notificationHasText() {
+        Notification notification = new Notification();
+
+        notification.add(new Div());
+        notification.setText("foo");
+
+        Assert.assertEquals("foo",
+                notification.getElement().getProperty("text"));
+    }
+
+    @Test
+    public void setText_addComponent_notificationDoesNotHaveText() {
+        Notification notification = new Notification();
+
+        notification.setText("foo");
+        notification.add(new Div());
+
+        Assert.assertEquals(null,
+                notification.getElement().getProperty("text"));
+    }
+
+    @Test
+    public void setText_setTextNull_notificationDoesNotHaveText() {
+        Notification notification = new Notification();
+
+        notification.setText("foo");
+        notification.setText(null);
+
+        Assert.assertEquals(null,
+                notification.getElement().getProperty("text"));
     }
 
     @Test(expected = IllegalArgumentException.class)
