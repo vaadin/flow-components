@@ -677,10 +677,10 @@ public class GridPro<E> extends Grid<E> {
 
         @Override
         public Rendering<SOURCE> render(Element container,
-                DataKeyMapper<SOURCE> keyMapper, Element contentTemplate) {
+                DataKeyMapper<SOURCE> keyMapper) {
 
             Rendering<SOURCE> columnPathRendering = super.render(container,
-                    keyMapper, contentTemplate);
+                    keyMapper);
             Rendering<SOURCE> representationRendering = representationRenderer
                     .render(container, keyMapper);
 
@@ -693,11 +693,6 @@ public class GridPro<E> extends Grid<E> {
                     compositeDataGenerator.addDataGenerator(
                             columnPathRendering.getDataGenerator().get());
                     return Optional.of(compositeDataGenerator);
-                }
-
-                @Override
-                public Element getTemplateElement() {
-                    return representationRendering.getTemplateElement();
                 }
             };
         }

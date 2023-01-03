@@ -46,19 +46,6 @@ public interface Rendering<SOURCE> extends Serializable {
     Optional<DataGenerator<SOURCE>> getDataGenerator();
 
     /**
-     * Gets the {@code <template>} element associated with the rendering. This
-     * can be used to set specific attributes to the template, or change its
-     * contents before it is stamped on the client-side.
-     *
-     * @return the associated template element, or {@code null} if no template
-     *         element is associated with the rendering
-     *
-     * @deprecated since Vaadin 22
-     */
-    @Deprecated
-    Element getTemplateElement();
-
-    /**
      * Gets a {@link Registration} that can be used to clean up resources
      * associated with the renderer when it's no longer used.
      *

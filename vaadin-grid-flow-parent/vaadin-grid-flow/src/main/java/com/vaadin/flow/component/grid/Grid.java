@@ -1127,7 +1127,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                     columnInternalId);
 
             Rendering<T> editorRendering = editorRenderer.render(getElement(),
-                    null, rendering.getTemplateElement());
+                    null);
 
             Optional<DataGenerator<T>> dataGenerator = editorRendering
                     .getDataGenerator();
