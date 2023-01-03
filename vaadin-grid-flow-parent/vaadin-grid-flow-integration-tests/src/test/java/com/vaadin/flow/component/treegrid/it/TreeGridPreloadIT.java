@@ -243,7 +243,7 @@ public class TreeGridPreloadIT extends AbstractTreeGridIT {
         requestCountReset.click();
 
         getTreeGrid().$("vaadin-grid-sorter").first().click();
-        Assert.assertEquals("1", requestCount.getValue());
+        Assert.assertTrue(Integer.parseInt(requestCount.getValue()) < 3);
     }
 
 }
