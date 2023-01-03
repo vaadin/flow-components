@@ -17,6 +17,8 @@ package com.vaadin.flow.component.combobox;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.di.Instantiator;
@@ -181,5 +183,25 @@ public class ComboBoxTest extends ComboBoxBaseTest {
                 .thenAnswer(invocation -> new ComboBox());
         ComboBox field = Component.from(element, ComboBox.class);
         Assert.assertEquals("foo", field.getElement().getPropertyRaw("value"));
+    }
+
+    @Test
+    public void setPrefix_hasPrefix() {
+        ComboBox<String> comboBox = new ComboBox<>();
+        TestPrefix prefix = new TestPrefix();
+
+        comboBox.setPrefixComponent(prefix);
+
+        Assert.assertEquals(prefix, comboBox.getPrefixComponent());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void setTextAsPrefix_throws() {
+        ComboBox<String> comboBox = new ComboBox<>();
+        comboBox.setPrefixComponent(new Text("Prefix"));
+    }
+
+    @Tag("div")
+    private static class TestPrefix extends Component {
     }
 }
