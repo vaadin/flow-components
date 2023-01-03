@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -206,7 +206,7 @@ public class BigDecimalFieldPageIT extends AbstractComponentIT {
         Assert.assertEquals(
                 "BigDecimalField with French locale has unexpected pattern for "
                         + "invalid input prevention (the allowedCharPattern property)",
-                "[\\d-+,]", field.getPropertyString("allowedCharPattern"));
+                "[-+\\d,]", field.getPropertyString("allowedCharPattern"));
     }
 
     // Always checking the count of fired events to make sure it doesn't fire

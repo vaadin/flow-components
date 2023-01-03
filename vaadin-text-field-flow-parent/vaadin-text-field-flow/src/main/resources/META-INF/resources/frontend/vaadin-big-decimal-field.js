@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,19 +13,15 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-(function() {
-
+(function () {
   let memoizedTemplate;
 
   customElements.whenDefined('vaadin-text-field').then(() => {
-
     class BigDecimalFieldElement extends customElements.get('vaadin-text-field') {
-
       static get template() {
         if (!memoizedTemplate) {
           memoizedTemplate = super.template.cloneNode(true);
-          memoizedTemplate.innerHTML +=
-            `<style>
+          memoizedTemplate.innerHTML += `<style>
                   :host {
                     width: 8em;
                   }
@@ -53,7 +49,7 @@
             value: '.',
             observer: '__decimalSeparatorChanged'
           }
-        }
+        };
       }
 
       ready() {
@@ -62,16 +58,14 @@
       }
 
       __decimalSeparatorChanged(separator, oldSeparator) {
-        this.allowedCharPattern = '[\\d-+' + separator + ']';
+        this.allowedCharPattern = '[-+\\d' + separator + ']';
 
         if (this.value && oldSeparator) {
           this.value = this.value.split(oldSeparator).join(separator);
         }
       }
-
     }
 
     customElements.define(BigDecimalFieldElement.is, BigDecimalFieldElement);
-
   });
 })();

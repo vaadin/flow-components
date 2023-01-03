@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -144,7 +144,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
             // Clear the input element from possible bad input.
             getElement().executeJs("this.inputElement.value = ''");
             getElement().setProperty("_hasInputValue", false);
-            fireEvent(new ClientValidatedEvent(this, false, true));
+            fireEvent(new ClientValidatedEvent(this, false));
         }
     }
 
