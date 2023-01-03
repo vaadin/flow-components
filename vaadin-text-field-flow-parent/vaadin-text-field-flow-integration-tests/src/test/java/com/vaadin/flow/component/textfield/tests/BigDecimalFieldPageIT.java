@@ -206,7 +206,7 @@ public class BigDecimalFieldPageIT extends AbstractComponentIT {
         Assert.assertEquals(
                 "BigDecimalField with French locale has unexpected pattern for "
                         + "invalid input prevention (the allowedCharPattern property)",
-                "[\\d-+,]", field.getPropertyString("allowedCharPattern"));
+                "[-+\\d,]", field.getPropertyString("allowedCharPattern"));
     }
 
     // Always checking the count of fired events to make sure it doesn't fire

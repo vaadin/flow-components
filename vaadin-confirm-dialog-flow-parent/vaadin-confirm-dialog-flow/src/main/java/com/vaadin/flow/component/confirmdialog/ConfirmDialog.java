@@ -58,9 +58,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-confirm-dialog")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha7")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/confirm-dialog", version = "24.0.0-alpha7")
+@NpmPackage(value = "@vaadin/confirm-dialog", version = "24.0.0-alpha8")
 @JsModule("@vaadin/confirm-dialog/src/vaadin-confirm-dialog.js")
 @JsModule("./confirmDialogConnector.js")
 public class ConfirmDialog extends Component
@@ -122,7 +122,7 @@ public class ConfirmDialog extends Component
     }
 
     private void updateWidth() {
-        this.getElement().executeJs("this._setWidth($0)", this.width);
+        this.getElement().executeJs("this._contentWidth = $0", this.width);
     }
 
     /**
@@ -145,7 +145,7 @@ public class ConfirmDialog extends Component
     }
 
     public void updateHeight() {
-        this.getElement().executeJs("this._setHeight($0)", this.height);
+        this.getElement().executeJs("this._contentHeight = $0", this.height);
     }
 
     /**

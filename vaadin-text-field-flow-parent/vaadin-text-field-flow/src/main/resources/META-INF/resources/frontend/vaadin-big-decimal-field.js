@@ -58,7 +58,7 @@
       }
 
       __decimalSeparatorChanged(separator, oldSeparator) {
-        this.allowedCharPattern = '[\\d-+' + separator + ']';
+        this.allowedCharPattern = '[-+\\d' + separator + ']';
 
         if (this.value && oldSeparator) {
           this.value = this.value.split(oldSeparator).join(separator);
