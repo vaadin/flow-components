@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.grid;
 
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 
 import com.vaadin.flow.data.provider.DataGenerator;
@@ -30,9 +28,10 @@ import com.vaadin.flow.internal.JsonSerializer;
 import elemental.json.Json;
 
 /**
- * Renderer for columns that doesn't use any template for rendering its contents
- * (only the value from the object model). In such cases, a {@code template}
- * element is not needed on the client-side, only the {@code path} property.
+ * Renderer for columns that doesn't use a renderer function for rendering its
+ * contents (only the value from the object model). In such cases, a
+ * {@code renderer} function is not needed on the client-side, only the
+ * {@code path} property.
  *
  * @author Vaadin Ltd.
  *
@@ -41,6 +40,9 @@ import elemental.json.Json;
  * @see Grid#addColumn(ValueProvider)
  */
 public class ColumnPathRenderer<SOURCE> extends Renderer<SOURCE> {
+
+    private ValueProvider<SOURCE, ?> provider;
+    private String property;
 
     /**
      * Creates a new renderer based on the property and the value provider for
@@ -53,25 +55,13 @@ public class ColumnPathRenderer<SOURCE> extends Renderer<SOURCE> {
      */
     public ColumnPathRenderer(String property,
             ValueProvider<SOURCE, ?> provider) {
-        setProperty(property, provider);
+        this.provider = provider;
+        this.property = property;
     }
 
     @Override
     public Rendering<SOURCE> render(Element container,
             DataKeyMapper<SOURCE> keyMapper) {
-        return render(container, keyMapper, null);
-    }
-
-    @Override
-    public Rendering<SOURCE> render(Element container,
-            DataKeyMapper<SOURCE> keyMapper, Element contentTemplate) {
-
-        Map<String, ValueProvider<SOURCE, ?>> valueProviders = getValueProviders();
-        if (valueProviders.size() != 1) {
-            throw new IllegalStateException(
-                    "There should be only one ValueProvider for the ColumnPathRenderer");
-        }
-        String property = valueProviders.keySet().iterator().next();
         container.setProperty("path", property);
 
         // disables the automatic creation of headers when the path is used
@@ -84,23 +74,8 @@ public class ColumnPathRenderer<SOURCE> extends Renderer<SOURCE> {
 
         @Override
         public Optional<DataGenerator<SOURCE>> getDataGenerator() {
-            Map<String, ValueProvider<SOURCE, ?>> valueProviders = getValueProviders();
-            if (valueProviders.size() != 1) {
-                throw new IllegalStateException(
-                        "There should be only one ValueProvider for the ColumnPathRenderer");
-            }
-            Entry<String, ValueProvider<SOURCE, ?>> entry = valueProviders
-                    .entrySet().iterator().next();
-            String property = entry.getKey();
-            ValueProvider<SOURCE, ?> provider = entry.getValue();
-
             return Optional.of((item, jsonObject) -> jsonObject.put(property,
                     JsonSerializer.toJson(provider.apply(item))));
-        }
-
-        @Override
-        public Element getTemplateElement() {
-            return null;
         }
     }
 

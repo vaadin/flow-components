@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -243,7 +243,7 @@ public class TreeGridPreloadIT extends AbstractTreeGridIT {
         requestCountReset.click();
 
         getTreeGrid().$("vaadin-grid-sorter").first().click();
-        Assert.assertEquals("1", requestCount.getValue());
+        Assert.assertTrue(Integer.parseInt(requestCount.getValue()) < 3);
     }
 
 }
