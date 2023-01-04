@@ -27,6 +27,8 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
@@ -270,5 +272,25 @@ public class DatePickerTest {
     public void implementsHasTooltip() {
         DatePicker picker = new DatePicker();
         Assert.assertTrue(picker instanceof HasTooltip);
+    }
+
+    @Test
+    public void setPrefix_hasPrefix() {
+        DatePicker picker = new DatePicker();
+        TestPrefix prefix = new TestPrefix();
+
+        picker.setPrefixComponent(prefix);
+
+        Assert.assertEquals(prefix, picker.getPrefixComponent());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void setTextAsPrefix_throws() {
+        DatePicker picker = new DatePicker();
+        picker.setPrefixComponent(new Text("Prefix"));
+    }
+
+    @Tag("div")
+    private static class TestPrefix extends Component {
     }
 }
