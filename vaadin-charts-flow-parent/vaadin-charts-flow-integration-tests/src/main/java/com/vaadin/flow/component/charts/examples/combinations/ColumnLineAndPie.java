@@ -11,7 +11,6 @@ import com.vaadin.flow.component.charts.model.PlotOptionsColumn;
 import com.vaadin.flow.component.charts.model.PlotOptionsPie;
 import com.vaadin.flow.component.charts.model.PlotOptionsSpline;
 import com.vaadin.flow.component.charts.model.XAxis;
-import com.vaadin.flow.component.charts.model.style.Style;
 import com.vaadin.flow.component.dependency.CssImport;
 
 @CssImport(value = "./styles/ColumnLineAndPie.css", themeFor = "vaadin-chart")
@@ -32,14 +31,9 @@ public class ColumnLineAndPie extends AbstractChartExample {
                 "Plums" });
         conf.addxAxis(x);
 
-        Style labelStyle = new Style();
-        labelStyle.setTop("8px");
-        labelStyle.setLeft("40px");
-
         AnnotationItemLabel label = new AnnotationItemLabel(
                 "Total fruit consumption");
         label.setPoint(new AnnotationItemLabelMockPointOptions(100, 100));
-        label.setStyle(labelStyle);
         label.setUseHTML(true);
         conf.addLabel(label);
 
