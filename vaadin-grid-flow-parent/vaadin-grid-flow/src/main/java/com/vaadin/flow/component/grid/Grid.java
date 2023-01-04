@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -206,10 +206,10 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha7")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/grid", version = "24.0.0-alpha7")
-@NpmPackage(value = "@vaadin/tooltip", version = "24.0.0-alpha7")
+@NpmPackage(value = "@vaadin/grid", version = "24.0.0-alpha8")
+@NpmPackage(value = "@vaadin/tooltip", version = "24.0.0-alpha8")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -446,7 +446,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-column")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha7")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha8")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class Column<T> extends AbstractColumn<Column<T>> {
 
@@ -1127,7 +1127,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                     columnInternalId);
 
             Rendering<T> editorRendering = editorRenderer.render(getElement(),
-                    null, rendering.getTemplateElement());
+                    null);
 
             Optional<DataGenerator<T>> dataGenerator = editorRendering
                     .getDataGenerator();
@@ -1359,7 +1359,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     private SelectionMode selectionMode;
 
     private final DetailsManager detailsManager;
-    private Element detailsTemplate;
 
     private Map<String, Column<T>> idToColumnMap = new HashMap<>();
     private Map<String, Column<T>> keyToColumnMap = new HashMap<>();
@@ -2866,40 +2865,22 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             return;
         }
 
-        Rendering<T> rendering;
         if (renderer instanceof LitRenderer) {
-            // LitRenderer
-            if (detailsTemplate != null
-                    && detailsTemplate.getParent() != null) {
-                getElement().removeChild(detailsTemplate);
-            }
-            rendering = ((LitRenderer<T>) renderer).render(getElement(),
+            var rendering = ((LitRenderer<T>) renderer).render(getElement(),
                     dataCommunicator.getKeyMapper(), "rowDetailsRenderer");
-        } else {
-            // TemplateRenderer
-            if (detailsTemplate == null) {
-                rendering = renderer.render(getElement(),
-                        getDataCommunicator().getKeyMapper());
-                detailsTemplate = rendering.getTemplateElement();
-                detailsTemplate.setAttribute("class", "row-details");
-            } else {
-                getElement().appendChild(detailsTemplate);
-                rendering = renderer.render(getElement(),
-                        getDataCommunicator().getKeyMapper(), detailsTemplate);
-            }
+
+            rendering.getDataGenerator().ifPresent(renderingDataGenerator -> {
+                itemDetailsDataGenerator = renderingDataGenerator;
+                Registration detailsRenderingDataGeneratorRegistration = () -> {
+                    detailsManager.destroyAllData();
+                    itemDetailsDataGenerator = null;
+                };
+                detailsRenderingRegistrations
+                        .add(detailsRenderingDataGeneratorRegistration);
+            });
+
+            detailsRenderingRegistrations.add(rendering.getRegistration());
         }
-
-        rendering.getDataGenerator().ifPresent(renderingDataGenerator -> {
-            itemDetailsDataGenerator = renderingDataGenerator;
-            Registration detailsRenderingDataGeneratorRegistration = () -> {
-                detailsManager.destroyAllData();
-                itemDetailsDataGenerator = null;
-            };
-            detailsRenderingRegistrations
-                    .add(detailsRenderingDataGeneratorRegistration);
-        });
-
-        detailsRenderingRegistrations.add(rendering.getRegistration());
     }
 
     /**

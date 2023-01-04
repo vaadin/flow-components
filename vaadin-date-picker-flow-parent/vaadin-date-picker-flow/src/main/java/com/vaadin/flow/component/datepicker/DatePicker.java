@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -46,6 +46,7 @@ import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasAutoOpen;
 import com.vaadin.flow.component.shared.HasClearButton;
 import com.vaadin.flow.component.shared.HasClientValidation;
+import com.vaadin.flow.component.shared.HasPrefix;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.ValidationUtil;
@@ -79,18 +80,18 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-date-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha7")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/date-picker", version = "24.0.0-alpha7")
+@NpmPackage(value = "@vaadin/date-picker", version = "24.0.0-alpha8")
 @JsModule("@vaadin/date-picker/src/vaadin-date-picker.js")
 @JsModule("./datepickerConnector.js")
 @NpmPackage(value = "date-fns", version = "2.29.3")
 public class DatePicker
         extends AbstractSinglePropertyField<DatePicker, LocalDate>
         implements Focusable<DatePicker>, HasAllowedCharPattern, HasAutoOpen,
-        HasClearButton, HasClientValidation, HasHelper, HasLabel, HasSize,
-        HasStyle, HasThemeVariant<DatePickerVariant>, HasTooltip, HasValidation,
-        HasValidator<LocalDate> {
+        HasClearButton, HasClientValidation, HasHelper, HasLabel, HasPrefix,
+        HasSize, HasStyle, HasThemeVariant<DatePickerVariant>, HasTooltip,
+        HasValidation, HasValidator<LocalDate> {
 
     private DatePickerI18n i18n;
 
@@ -591,7 +592,7 @@ public class DatePicker
             // Clear the input element from possible bad input.
             getElement().executeJs("this.inputElement.value = ''");
             getElement().setProperty("_hasInputValue", false);
-            fireEvent(new ClientValidatedEvent(this, false, true));
+            fireEvent(new ClientValidatedEvent(this, false));
         }
     }
 

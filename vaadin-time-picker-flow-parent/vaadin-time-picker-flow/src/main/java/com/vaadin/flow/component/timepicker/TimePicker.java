@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -43,6 +43,7 @@ import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasAutoOpen;
 import com.vaadin.flow.component.shared.HasClearButton;
 import com.vaadin.flow.component.shared.HasClientValidation;
+import com.vaadin.flow.component.shared.HasPrefix;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.ValidationUtil;
@@ -65,17 +66,17 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-time-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha7")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/time-picker", version = "24.0.0-alpha7")
+@NpmPackage(value = "@vaadin/time-picker", version = "24.0.0-alpha8")
 @JsModule("@vaadin/time-picker/src/vaadin-time-picker.js")
 @JsModule("./vaadin-time-picker/timepickerConnector.js")
 public class TimePicker
         extends AbstractSinglePropertyField<TimePicker, LocalTime>
         implements Focusable<TimePicker>, HasAllowedCharPattern, HasAutoOpen,
-        HasClearButton, HasClientValidation, HasHelper, HasLabel, HasSize,
-        HasStyle, HasThemeVariant<TimePickerVariant>, HasTooltip, HasValidation,
-        HasValidator<LocalTime> {
+        HasClearButton, HasClientValidation, HasHelper, HasLabel, HasPrefix,
+        HasSize, HasStyle, HasThemeVariant<TimePickerVariant>, HasTooltip,
+        HasValidation, HasValidator<LocalTime> {
 
     private static final SerializableFunction<String, LocalTime> PARSER = valueFromClient -> {
         return valueFromClient == null || valueFromClient.isEmpty() ? null
@@ -256,7 +257,7 @@ public class TimePicker
             // Clear the input element from possible bad input.
             getElement().executeJs("this.inputElement.value = ''");
             getElement().setProperty("_hasInputValue", false);
-            fireEvent(new ClientValidatedEvent(this, false, true));
+            fireEvent(new ClientValidatedEvent(this, false));
         }
     }
 

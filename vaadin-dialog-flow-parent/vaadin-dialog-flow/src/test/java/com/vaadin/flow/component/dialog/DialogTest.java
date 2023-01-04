@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -97,14 +97,6 @@ public class DialogTest {
         Assert.assertEquals(dialog.getHeight(), "100px");
     }
 
-    @Test
-    public void templateWarningSuppressed() {
-        Dialog dialog = new Dialog();
-
-        Assert.assertTrue("Template warning is not suppressed",
-                dialog.getElement().hasAttribute("suppress-template-warning"));
-    }
-
     @Test(expected = IllegalStateException.class)
     public void setOpened_noUi() {
         UI.setCurrent(null);
@@ -123,7 +115,7 @@ public class DialogTest {
 
         dialog.open();
 
-        assertInvocations(8);
+        assertInvocations(9);
     }
 
     @Test
@@ -132,7 +124,7 @@ public class DialogTest {
 
         dialog.open();
 
-        Assert.assertEquals(7, flushInvocations().size());
+        Assert.assertEquals(8, flushInvocations().size());
 
         dialog.addDialogCloseActionListener(event -> {
         });
@@ -156,7 +148,7 @@ public class DialogTest {
 
         dialog.open();
 
-        Assert.assertEquals(7, flushInvocations().size());
+        Assert.assertEquals(8, flushInvocations().size());
     }
 
     @Test
@@ -171,7 +163,7 @@ public class DialogTest {
 
         dialog.open();
 
-        Assert.assertEquals(7, flushInvocations().size());
+        Assert.assertEquals(8, flushInvocations().size());
     }
 
     @Test
@@ -204,7 +196,7 @@ public class DialogTest {
 
         dialog.open();
 
-        assertInvocations(8);
+        assertInvocations(9);
     }
 
     @Test
@@ -222,7 +214,7 @@ public class DialogTest {
 
         registration.remove();
 
-        assertInvocations(8);
+        assertInvocations(9);
     }
 
     @Test

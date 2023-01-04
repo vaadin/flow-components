@@ -9,7 +9,7 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 @TestPath("vaadin-spreadsheet")
@@ -71,12 +71,12 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
 
     @Test
     public void setValueToDatePicker_valueAppliedToDatePicker() {
-        LocalDateTime now = LocalDateTime.now();
-        String sampleLocalDateTime = now
+        LocalDate date = LocalDate.of(2000, 10, 10);
+        String sampleLocalDateTime = date
                 .format(DateTimeFormatter.ofPattern("MM/dd/yyyy"));
         setEditorValue("D2", sampleLocalDateTime, "input");
         clickCell("D3");
-        Assert.assertEquals(now.format(DateTimeFormatter.ISO_DATE),
+        Assert.assertEquals(date.format(DateTimeFormatter.ISO_DATE),
                 getCellValue("D2"));
         clickCell("D2");
         Assert.assertEquals(sampleLocalDateTime,
@@ -85,12 +85,13 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
 
     @Test
     public void setValueToDatePickerCell_setFormulaInAnotherCell_valueAppliedToToCell() {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDate date = LocalDate.of(2000, 10, 10);
         setEditorValue("D2",
-                now.format(DateTimeFormatter.ofPattern("MM/dd/yyyy")), "input");
+                date.format(DateTimeFormatter.ofPattern("MM/dd/yyyy")),
+                "input");
         clickCell("D3");
         setCellValue("D3", "=D2");
-        Assert.assertEquals(now.format(DateTimeFormatter.ISO_DATE),
+        Assert.assertEquals(date.format(DateTimeFormatter.ISO_DATE),
                 getCellValue("D3"));
     }
 
