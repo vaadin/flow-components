@@ -164,9 +164,6 @@ public class EditorRenderer<T> extends Renderer<T> implements DataGenerator<T> {
     private void setupEditorRenderer(Element container,
             ExecutionContext context) {
         String appId = context.getUI().getInternals().getAppId();
-        String editorTemplate = String.format(
-                "<flow-component-renderer appid='%s' nodeid='${model.item._%s_editor}'></flow-component-renderer>",
-                appId, columnInternalId);
 
         //@formatter:off
         container.executeJs("const originalRender = this.renderer;" +
@@ -181,7 +178,7 @@ public class EditorRenderer<T> extends Renderer<T> implements DataGenerator<T> {
                 "}" +
 
                 // If editing, render the editor, otherwise use the original renderer
-                "if (root.__editing) { root.innerHTML = `" + editorTemplate + "` }" +
+                "if (root.__editing) { root.textContent = ''; root.append(window.Vaadin.Flow.clients['"+ appId +"'].getByNodeId(model.item._"+columnInternalId+"_editor)) }" +
                 "else if (!originalRender) { root.textContent = model.item." + columnInternalId + " }" +
                 "else { originalRender(root, container, model); }" +
             "};");

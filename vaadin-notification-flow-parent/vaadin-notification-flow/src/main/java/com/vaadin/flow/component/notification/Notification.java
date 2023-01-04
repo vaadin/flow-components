@@ -121,9 +121,6 @@ public class Notification extends Component implements HasComponents, HasStyle,
                 ? UI.getCurrent().getInternals().getAppId()
                 : "ROOT";
         int nodeId = container.getNode().getId();
-        String template = String.format(
-                "<flow-component-renderer appid=\"%s\" nodeid=\"%s\"></flow-component-renderer>",
-                appId, nodeId);
 
         //@formatter:off
         getElement().executeJs(
@@ -131,10 +128,10 @@ public class Notification extends Component implements HasComponents, HasStyle,
             "  if (notification.text) {" +
             "    root.textContent = notification.text;" +
             "  } else if (!root.firstElementChild) {" +
-            "    root.innerHTML = $0;" +
+            "    root.textContent = '';" +
+            "    root.append(window.Vaadin.Flow.clients['"+ appId +"'].getByNodeId("+ nodeId +"));" +
             "  }" +
-            "}",
-            template);
+            "}");
         //@formatter:on
     }
 

@@ -148,9 +148,7 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
                 ? UI.getCurrent().getInternals().getAppId()
                 : "";
 
-        return String.format(
-                "<%s appid=\"%s\" .nodeid=\"${item.nodeid}\"></%s>",
-                componentRendererTag, appId, componentRendererTag);
+        return "<div>${ window.Vaadin.Flow.clients['"+ appId +"'].getByNodeId(item.nodeid) }</div>";
     }
 
     Element getOwner() {
