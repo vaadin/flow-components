@@ -1145,16 +1145,40 @@ public class Configuration extends AbstractConfigurationObject
         colorAxis.addAxis(axis);
     }
 
+    /**
+     * @see #setLabels(AnnotationItemLabel...)
+     * @return Labels
+     */
     public List<AnnotationItemLabel> getLabels() {
         return getLabelsAnnotation().getLabels();
     }
 
-    public void setLabels(List<AnnotationItemLabel> labels) {
+    /**
+     * Sets labels that can be positioned anywhere in the chart area
+     *
+     * @param labels
+     */
+    public void setLabels(AnnotationItemLabel... labels) {
         getLabelsAnnotation().setLabels(labels);
     }
 
+    /**
+     * Adds a single label
+     *
+     * @see #setLabels(AnnotationItemLabel...)
+     * @param label
+     */
     public void addLabel(AnnotationItemLabel label) {
         getLabels().add(label);
+    }
+
+    /**
+     * Clears all labels
+     *
+     * @see #setLabels(AnnotationItemLabel...)
+     */
+    public void clearLabels() {
+        getLabelsAnnotation().clearLabels();
     }
 
     private AnnotationItem getLabelsAnnotation() {

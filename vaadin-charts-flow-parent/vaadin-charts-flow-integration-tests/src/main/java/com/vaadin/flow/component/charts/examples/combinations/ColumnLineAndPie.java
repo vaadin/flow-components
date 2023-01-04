@@ -2,7 +2,6 @@ package com.vaadin.flow.component.charts.examples.combinations;
 
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.examples.AbstractChartExample;
-import com.vaadin.flow.component.charts.model.AnnotationItem;
 import com.vaadin.flow.component.charts.model.AnnotationItemLabel;
 import com.vaadin.flow.component.charts.model.AnnotationItemLabelMockPointOptions;
 import com.vaadin.flow.component.charts.model.Configuration;
