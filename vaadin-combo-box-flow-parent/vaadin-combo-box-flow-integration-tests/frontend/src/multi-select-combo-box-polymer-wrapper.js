@@ -1,5 +1,5 @@
 /*
-  ~ Copyright 2000-2022 Vaadin Ltd.
+  ~ Copyright 2000-2023 Vaadin Ltd.
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License"); you may not
   ~ use this file except in compliance with the License. You may obtain a copy of
@@ -14,18 +14,16 @@
   ~ the License.
   */
 
-import {PolymerElement} from '@polymer/polymer/polymer-element.js';
-import {html} from '@polymer/polymer/lib/utils/html-tag.js';
+import { PolymerElement } from '@polymer/polymer/polymer-element.js';
+import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 
 class MultiSelectComboBoxPolymerWrapper extends PolymerElement {
   static get template() {
-    return html`
-        <vaadin-multi-select-combo-box id="combo-box"></vaadin-multi-select-combo-box>
-    `;
+    return html` <vaadin-multi-select-combo-box id="combo-box"></vaadin-multi-select-combo-box> `;
   }
 
   static get is() {
-      return 'multi-select-combo-box-polymer-wrapper'
+    return 'multi-select-combo-box-polymer-wrapper';
   }
 }
 customElements.define(MultiSelectComboBoxPolymerWrapper.is, MultiSelectComboBoxPolymerWrapper);

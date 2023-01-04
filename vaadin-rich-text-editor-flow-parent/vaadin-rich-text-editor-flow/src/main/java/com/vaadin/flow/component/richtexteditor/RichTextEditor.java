@@ -1,17 +1,16 @@
+/**
+ * Copyright 2000-2023 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
+ */
 package com.vaadin.flow.component.richtexteditor;
 
 import java.io.Serializable;
 import java.util.Objects;
 
-/**
- * Copyright (C) 2000-2022 Vaadin Ltd
- *
- * This program is available under Vaadin Commercial License and Service Terms.
- *
- *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
- * license.
- */
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.CompositionNotifier;
@@ -52,9 +51,9 @@ import elemental.json.JsonObject;
  *
  */
 @Tag("vaadin-rich-text-editor")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/rich-text-editor", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/rich-text-editor", version = "24.0.0-alpha8")
 @JsModule("@vaadin/rich-text-editor/src/vaadin-rich-text-editor.js")
 public class RichTextEditor
         extends AbstractSinglePropertyField<RichTextEditor, String>

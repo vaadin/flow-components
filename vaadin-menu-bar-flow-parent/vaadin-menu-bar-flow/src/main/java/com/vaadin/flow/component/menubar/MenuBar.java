@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -38,6 +38,7 @@ import com.vaadin.flow.component.contextmenu.MenuManager;
 import com.vaadin.flow.component.contextmenu.SubMenu;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableRunnable;
@@ -53,13 +54,13 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-menu-bar")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("./menubarConnector.js")
 @JsModule("@vaadin/menu-bar/src/vaadin-menu-bar.js")
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
-@NpmPackage(value = "@vaadin/menu-bar", version = "24.0.0-alpha6")
-@NpmPackage(value = "@vaadin/tooltip", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/menu-bar", version = "24.0.0-alpha8")
+@NpmPackage(value = "@vaadin/tooltip", version = "24.0.0-alpha8")
 public class MenuBar extends Component
         implements HasMenuItems, HasSize, HasStyle, HasTheme, HasEnabled {
 
@@ -520,8 +521,7 @@ public class MenuBar extends Component
         if (!getElement().getChildren().anyMatch(
                 child -> "tooltip".equals(child.getAttribute("slot")))) {
             // No <vaadin-tooltip> yet added, add one
-            var tooltipElement = new Element("vaadin-tooltip");
-            tooltipElement.setAttribute("slot", "tooltip");
+            Element tooltipElement = new Element("vaadin-tooltip");
 
             tooltipElement.addAttachListener(e -> {
                 // Assigns a generator that reads the tooltip property of the
@@ -529,7 +529,7 @@ public class MenuBar extends Component
                 tooltipElement.executeJs(
                         "this.generator = ({item}) => { return (item && item.component) ? item.component.tooltip : ''; }");
             });
-            getElement().appendChild(tooltipElement);
+            SlotUtils.addToSlot(this, "tooltip", tooltipElement);
         }
 
         item.getElement().setProperty("tooltip", tooltipText);

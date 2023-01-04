@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -31,7 +31,6 @@ import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.Shortcuts;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
@@ -73,18 +72,17 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-dialog")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/dialog", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/dialog", version = "24.0.0-alpha8")
 @JsModule("@vaadin/dialog/src/vaadin-dialog.js")
-@JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 @JsModule("./dialogConnector.js")
 @JsModule("./flow-component-renderer.js")
 public class Dialog extends Component implements HasComponents, HasSize,
         HasStyle, HasThemeVariant<DialogVariant> {
 
     private static final String OVERLAY_LOCATOR_JS = "this.$.overlay";
-    private Element template;
+
     private Element container;
     private boolean autoAddedToTheUi;
     private int onCloseConfigured;
@@ -103,11 +101,6 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * Creates an empty dialog.
      */
     public Dialog() {
-        getElement().setAttribute("suppress-template-warning", true);
-
-        template = new Element("template");
-        getElement().appendChild(template);
-
         container = new Element("div");
         container.getClassList().add("draggable");
         container.getClassList().add("draggable-leaf-only");
@@ -976,7 +969,9 @@ public class Dialog extends Component implements HasComponents, HasSize,
         String renderer = String.format(
                 "<flow-component-renderer appid=\"%s\" nodeid=\"%s\" style=\"display: flex; height: 100%%;\"></flow-component-renderer>",
                 appId, nodeId);
-        template.setProperty("innerHTML", renderer);
+        getElement().executeJs(
+                "this.renderer = (root) => { if (!root.firstChild) { root.innerHTML = $0 } }",
+                renderer);
 
         setDimension(ElementConstants.STYLE_WIDTH, width);
         setDimension(ElementConstants.STYLE_MIN_WIDTH, minWidth);

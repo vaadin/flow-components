@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -259,23 +259,5 @@ public class RadioButtonGroupIT extends AbstractComponentIT {
 
         $(TestBenchElement.class).id("clear-helper-component-button").click();
         Assert.assertNull(groupWithHelperComponent.getHelperComponent());
-    }
-
-    private void verifyGroupInvalid(TestBenchElement group,
-            TestBenchElement errorMessage) {
-        Assert.assertEquals("Radio button group is invalid.", true,
-                group.getPropertyBoolean("invalid"));
-        Assert.assertEquals("Error message should be shown.",
-                Boolean.FALSE.toString(),
-                errorMessage.getAttribute("aria-hidden"));
-    }
-
-    private void verifyGroupValid(TestBenchElement group,
-            TestBenchElement errorMessage) {
-        Assert.assertEquals("Radio button group is not invalid.", false,
-                group.getPropertyBoolean("invalid"));
-        Assert.assertEquals("Error message should be hidden.",
-                Boolean.TRUE.toString(),
-                errorMessage.getAttribute("aria-hidden"));
     }
 }

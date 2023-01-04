@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -39,7 +39,6 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementFactory;
 import com.vaadin.flow.dom.Style;
-import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.HtmlUtils;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.router.NavigationTrigger;
@@ -52,11 +51,10 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-notification")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/notification", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/notification", version = "24.0.0-alpha8")
 @JsModule("@vaadin/notification/src/vaadin-notification.js")
-@JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./notificationConnector.js")
 public class Notification extends Component implements HasComponents, HasStyle,
@@ -65,32 +63,10 @@ public class Notification extends Component implements HasComponents, HasStyle,
     private static final int DEFAULT_DURATION = 5000;
     private static final Position DEFAULT_POSITION = Position.BOTTOM_START;
 
-    private static final SerializableConsumer<UI> NO_OP = ui -> {
-    };
-
     private final Element container = ElementFactory.createDiv();
-    private final Element templateElement = new Element("template");
     private boolean autoAddedToTheUi = false;
 
     private Registration afterProgrammaticNavigationListenerRegistration;
-
-    private SerializableConsumer<UI> configureTemplate = new ConfigureComponentRenderer();
-
-    private class ConfigureComponentRenderer
-            implements SerializableConsumer<UI> {
-
-        @Override
-        public void accept(UI ui) {
-            if (this == configureTemplate) {
-                String appId = ui.getInternals().getAppId();
-                int nodeId = container.getNode().getId();
-                String template = String.format(
-                        "<flow-component-renderer appid=\"%s\" nodeid=\"%s\"></flow-component-renderer>",
-                        appId, nodeId);
-                templateElement.setProperty("innerHTML", template);
-            }
-        }
-    }
 
     /**
      * Enumeration of all available positions for notification component
@@ -129,6 +105,37 @@ public class Notification extends Component implements HasComponents, HasStyle,
                     : Position.valueOf(clientName.replace('-', '_')
                             .toUpperCase(Locale.ENGLISH));
         }
+    }
+
+    /**
+     * Assigns a renderer function to the notification.
+     *
+     * If the Web Component has {@code text} property defined, it will be used
+     * as the text content of the notification.
+     *
+     * Otherwise, {@code this.container} will be included in the notification
+     * with {@code <flow-component-renderer>}
+     */
+    private void configureRenderer() {
+        String appId = UI.getCurrent() != null
+                ? UI.getCurrent().getInternals().getAppId()
+                : "ROOT";
+        int nodeId = container.getNode().getId();
+        String template = String.format(
+                "<flow-component-renderer appid=\"%s\" nodeid=\"%s\"></flow-component-renderer>",
+                appId, nodeId);
+
+        //@formatter:off
+        getElement().executeJs(
+            "this.renderer = (root, notification) => {" +
+            "  if (notification.text) {" +
+            "    root.textContent = notification.text;" +
+            "  } else if (!root.firstElementChild) {" +
+            "    root.innerHTML = $0;" +
+            "  }" +
+            "}",
+            template);
+        //@formatter:on
     }
 
     /**
@@ -209,9 +216,6 @@ public class Notification extends Component implements HasComponents, HasStyle,
     }
 
     private void initBaseElementsAndListeners() {
-        getElement().setAttribute("suppress-template-warning", true);
-
-        getElement().appendChild(templateElement);
         getElement().appendVirtualChild(container);
 
         getElement().addEventListener("opened-changed",
@@ -277,8 +281,9 @@ public class Notification extends Component implements HasComponents, HasStyle,
      */
     public void setText(String text) {
         removeAll();
-        configureTemplate = NO_OP;
-        templateElement.setProperty("innerHTML", HtmlUtils.escape(text));
+        this.getElement().setProperty("text",
+                text != null ? HtmlUtils.escape(text) : null);
+        this.getElement().callJsFunction("requestContentUpdate");
     }
 
     /**
@@ -572,16 +577,15 @@ public class Notification extends Component implements HasComponents, HasStyle,
     }
 
     private void configureComponentRenderer() {
-        configureTemplate = new ConfigureComponentRenderer();
-        getElement().getNode()
-                .runWhenAttached(ui -> configureTemplate.accept(ui));
+        this.getElement().removeProperty("text");
+        this.getElement().callJsFunction("requestContentUpdate");
     }
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         initConnector();
-        configureTemplate.accept(attachEvent.getUI());
+        configureRenderer();
     }
 
     @Override

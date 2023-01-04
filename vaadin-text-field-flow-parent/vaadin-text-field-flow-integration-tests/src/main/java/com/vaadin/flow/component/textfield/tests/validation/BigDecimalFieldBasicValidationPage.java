@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -23,12 +23,17 @@ import com.vaadin.tests.validation.AbstractValidationPage;
 public class BigDecimalFieldBasicValidationPage
         extends AbstractValidationPage<BigDecimalField> {
     public static final String REQUIRED_BUTTON = "required-button";
+    public static final String CLEAR_VALUE_BUTTON = "clear-value-button";
 
     public BigDecimalFieldBasicValidationPage() {
         super();
 
         add(createButton(REQUIRED_BUTTON, "Enable required", event -> {
             testField.setRequiredIndicatorVisible(true);
+        }));
+
+        add(createButton(CLEAR_VALUE_BUTTON, "Clear value", event -> {
+            testField.clear();
         }));
     }
 

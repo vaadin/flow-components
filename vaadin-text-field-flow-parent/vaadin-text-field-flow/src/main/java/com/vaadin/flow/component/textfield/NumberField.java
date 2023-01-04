@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -21,6 +21,11 @@ import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
 import java.util.Locale;
 
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasAllowedCharPattern;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.function.SerializableFunction;
 
 /**
@@ -30,13 +35,19 @@ import com.vaadin.flow.function.SerializableFunction;
  *
  * @author Vaadin Ltd.
  */
-public class NumberField extends AbstractNumberField<NumberField, Double> {
+@Tag("vaadin-number-field")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha8")
+@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@NpmPackage(value = "@vaadin/number-field", version = "24.0.0-alpha8")
+@JsModule("@vaadin/number-field/src/vaadin-number-field.js")
+public class NumberField extends AbstractNumberField<NumberField, Double>
+        implements HasAllowedCharPattern, HasThemeVariant<TextFieldVariant> {
 
     /**
      * Constructs an empty {@code NumberField}.
      */
     public NumberField() {
-        this(new Formatter(), true);
+        this(new Formatter());
     }
 
     /**
@@ -120,22 +131,13 @@ public class NumberField extends AbstractNumberField<NumberField, Double> {
 
     /**
      * Constructs an empty {@code NumberField}.
-     * <p>
-     * If {@code isInitialValueOptional} is {@code true} then the initial value
-     * is used only if element has no {@code "value"} property value, otherwise
-     * element {@code "value"} property is ignored and the initial value is set.
      *
      * @param formatter
      *            Formatter for the field.
-     * @param isInitialValueOptional
-     *            if {@code isInitialValueOptional} is {@code true} then the
-     *            initial value is used only if element has no {@code "value"}
-     *            property value, otherwise element {@code "value"} property is
-     *            ignored and the initial value is set
      */
-    private NumberField(Formatter formatter, boolean isInitialValueOptional) {
+    private NumberField(Formatter formatter) {
         super(formatter::parse, formatter, Double.NEGATIVE_INFINITY,
-                Double.POSITIVE_INFINITY, isInitialValueOptional);
+                Double.POSITIVE_INFINITY);
     }
 
     @Override

@@ -12,6 +12,7 @@ import static com.vaadin.flow.component.timepicker.tests.validation.BinderValida
 import static com.vaadin.flow.component.timepicker.tests.validation.BinderValidationPage.EXPECTED_VALUE_INPUT;
 import static com.vaadin.flow.component.timepicker.tests.validation.BinderValidationPage.REQUIRED_ERROR_MESSAGE;
 import static com.vaadin.flow.component.timepicker.tests.validation.BinderValidationPage.UNEXPECTED_VALUE_ERROR_MESSAGE;
+import static com.vaadin.flow.component.timepicker.tests.validation.BinderValidationPage.CLEAR_VALUE_BUTTON;
 
 @TestPath("vaadin-time-picker/validation/binder")
 public class BinderValidationIT
@@ -108,6 +109,19 @@ public class BinderValidationIT
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage("");
+    }
+
+    @Test
+    public void badInput_setValue_clearValue_assertValidity() {
+        testField.selectByText("INVALID");
+        assertServerInvalid();
+        assertClientInvalid();
+        assertErrorMessage("");
+
+        $("button").id(CLEAR_VALUE_BUTTON).click();
+        assertServerInvalid();
+        assertClientInvalid();
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
     protected TimePickerElement getTestField() {

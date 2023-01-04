@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -18,6 +18,7 @@ package com.vaadin.flow.component.grid.it;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.shared.TooltipConfiguration;
 import com.vaadin.flow.data.bean.Person;
 import com.vaadin.flow.router.Route;
 
@@ -25,6 +26,11 @@ import com.vaadin.flow.router.Route;
 public class GridTooltipPage extends Div {
 
     public GridTooltipPage() {
+        // Reset default delay values from 500 to 0
+        TooltipConfiguration.setDefaultFocusDelay(0);
+        TooltipConfiguration.setDefaultHoverDelay(0);
+        TooltipConfiguration.setDefaultHideDelay(0);
+
         var grid = new Grid<>(Person.class);
         grid.setItems(new Person("Jack", 32), new Person("Jill", 33));
 

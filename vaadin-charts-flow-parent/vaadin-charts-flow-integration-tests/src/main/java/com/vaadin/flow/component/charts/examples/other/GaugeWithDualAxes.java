@@ -15,7 +15,7 @@ import com.vaadin.flow.component.dependency.CssImport;
 
 import java.util.Random;
 
-@CssImport(value = "./styles/GaugeWithDualAxes.css", themeFor = "vaadin-chart", include = "vaadin-chart-default-theme")
+@CssImport(value = "./styles/GaugeWithDualAxes.css", themeFor = "vaadin-chart")
 public class GaugeWithDualAxes extends AbstractChartExample {
 
     @Override

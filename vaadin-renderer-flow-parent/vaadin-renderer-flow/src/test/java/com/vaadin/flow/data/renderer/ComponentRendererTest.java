@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.vaadin.flow.function.ValueProvider;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -130,6 +131,23 @@ public class ComponentRendererTest {
 
         internals.getStateTree().runExecutionsBeforeClientResponse();
 
+    }
+
+    @Test
+    public void nullValues() {
+        ComponentRenderer<Component, String> renderer = new ComponentRenderer<>(
+                e -> {
+                    return null;
+                });
+
+        ValueProvider<String, String> keyMapper = s -> "foo";
+        ComponentDataGenerator cdg = new ComponentDataGenerator<>(renderer,
+                keyMapper);
+
+        Component c = cdg.createComponent("foo");
+        Assert.assertNotNull(
+                "Placeholder component should be generated for null values", c);
+        Assert.assertEquals(0, c.getElement().getChildCount());
     }
 
     private void attachElement(UI ui, Element contentTemplate) {

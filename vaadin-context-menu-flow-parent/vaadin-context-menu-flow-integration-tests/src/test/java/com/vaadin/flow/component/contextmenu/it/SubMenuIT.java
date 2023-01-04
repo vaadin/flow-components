@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -113,7 +113,7 @@ public class SubMenuIT extends AbstractContextMenuIT {
     public void openAndCloseSubMenu_removeAll_noSubMenu_stylesUpdated() {
         rightClickOn("target");
         TestBenchElement parent = getMenuItems().get(0);
-        assertHasParentItemClass(parent, true);
+        assertHasPopup(parent, true);
 
         openSubMenu(parent);
         verifyNumOfOverlays(2);
@@ -125,7 +125,7 @@ public class SubMenuIT extends AbstractContextMenuIT {
         rightClickOn("target");
 
         parent = getMenuItems().get(0);
-        assertHasParentItemClass(parent, false);
+        assertHasPopup(parent, false);
 
         openSubMenu(parent);
         verifyNumOfOverlays(1);
@@ -195,16 +195,15 @@ public class SubMenuIT extends AbstractContextMenuIT {
         Assert.assertNull(checkableItem.getAttribute("menu-item-checked"));
     }
 
-    private void assertHasParentItemClass(TestBenchElement item,
-            boolean isParent) {
-        boolean hasParentClass = item.getClassNames()
-                .contains("vaadin-context-menu-parent-item");
+    private void assertHasPopup(TestBenchElement item, boolean isParent) {
+        boolean hasPopup = Boolean
+                .parseBoolean(item.getAttribute("aria-haspopup"));
         if (isParent) {
-            Assert.assertTrue("Item should be styled as the parent item",
-                    hasParentClass);
+            Assert.assertTrue("Item should have aria-haspopup set to true",
+                    hasPopup);
         } else {
-            Assert.assertFalse("Item should not be styled as the parent item",
-                    hasParentClass);
+            Assert.assertFalse("Item should have aria-haspopup set to false",
+                    hasPopup);
         }
     }
 

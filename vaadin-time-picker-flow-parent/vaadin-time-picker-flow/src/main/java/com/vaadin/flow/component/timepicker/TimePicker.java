@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -40,8 +40,10 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
+import com.vaadin.flow.component.shared.HasAutoOpen;
 import com.vaadin.flow.component.shared.HasClearButton;
 import com.vaadin.flow.component.shared.HasClientValidation;
+import com.vaadin.flow.component.shared.HasPrefix;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.ValidationUtil;
@@ -64,17 +66,17 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-time-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/time-picker", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/time-picker", version = "24.0.0-alpha8")
 @JsModule("@vaadin/time-picker/src/vaadin-time-picker.js")
 @JsModule("./vaadin-time-picker/timepickerConnector.js")
 public class TimePicker
         extends AbstractSinglePropertyField<TimePicker, LocalTime>
-        implements Focusable<TimePicker>, HasAllowedCharPattern, HasClearButton,
-        HasClientValidation, HasHelper, HasLabel, HasSize, HasStyle,
-        HasThemeVariant<TimePickerVariant>, HasTooltip, HasValidation,
-        HasValidator<LocalTime> {
+        implements Focusable<TimePicker>, HasAllowedCharPattern, HasAutoOpen,
+        HasClearButton, HasClientValidation, HasHelper, HasLabel, HasPrefix,
+        HasSize, HasStyle, HasThemeVariant<TimePickerVariant>, HasTooltip,
+        HasValidation, HasValidator<LocalTime> {
 
     private static final SerializableFunction<String, LocalTime> PARSER = valueFromClient -> {
         return valueFromClient == null || valueFromClient.isEmpty() ? null
@@ -84,8 +86,6 @@ public class TimePicker
     private static final SerializableFunction<LocalTime, String> FORMATTER = valueFromModel -> {
         return valueFromModel == null ? "" : valueFromModel.toString();
     };
-
-    private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
     private Locale locale;
 
@@ -246,7 +246,19 @@ public class TimePicker
         if (value != null) {
             value = value.truncatedTo(ChronoUnit.MILLIS);
         }
+
+        LocalTime oldValue = getValue();
+
         super.setValue(value);
+
+        if (Objects.equals(oldValue, getEmptyValue())
+                && Objects.equals(value, getEmptyValue())
+                && isInputValuePresent()) {
+            // Clear the input element from possible bad input.
+            getElement().executeJs("this.inputElement.value = ''");
+            getElement().setProperty("_hasInputValue", false);
+            fireEvent(new ClientValidatedEvent(this, false));
+        }
     }
 
     /**
@@ -650,28 +662,6 @@ public class TimePicker
     private void runBeforeClientResponse(SerializableConsumer<UI> command) {
         getElement().getNode().runWhenAttached(ui -> ui
                 .beforeClientResponse(this, context -> command.accept(ui)));
-    }
-
-    /**
-     * Enables or disables the dropdown opening automatically. If {@code false}
-     * the dropdown is only opened when clicking the toggle button or pressing
-     * Up or Down arrow keys.
-     *
-     * @param autoOpen
-     *            {@code false} to prevent the dropdown from opening
-     *            automatically
-     */
-    public void setAutoOpen(boolean autoOpen) {
-        getElement().setProperty(PROP_AUTO_OPEN_DISABLED, !autoOpen);
-    }
-
-    /**
-     * Gets whether dropdown will open automatically or not.
-     *
-     * @return {@code true} if enabled, {@code false} otherwise
-     */
-    public boolean isAutoOpen() {
-        return !getElement().getProperty(PROP_AUTO_OPEN_DISABLED, false);
     }
 
     /**

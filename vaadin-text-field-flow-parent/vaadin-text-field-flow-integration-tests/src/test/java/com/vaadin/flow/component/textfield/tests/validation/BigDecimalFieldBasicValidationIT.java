@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -23,6 +23,7 @@ import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.validation.AbstractValidationIT;
 
 import static com.vaadin.flow.component.textfield.tests.validation.BigDecimalFieldBasicValidationPage.REQUIRED_BUTTON;
+import static com.vaadin.flow.component.textfield.tests.validation.BigDecimalFieldBasicValidationPage.CLEAR_VALUE_BUTTON;
 
 @TestPath("vaadin-big-decimal-field/validation/basic")
 public class BigDecimalFieldBasicValidationIT
@@ -75,6 +76,17 @@ public class BigDecimalFieldBasicValidationIT
         testField.sendKeys("--2", Keys.TAB);
         assertServerInvalid();
         assertClientInvalid();
+    }
+
+    @Test
+    public void badInput_setValue_clearValue_assertValidity() {
+        testField.sendKeys("--2", Keys.TAB);
+        assertServerInvalid();
+        assertClientInvalid();
+
+        $("button").id(CLEAR_VALUE_BUTTON).click();
+        assertServerValid();
+        assertClientValid();
     }
 
     @Test

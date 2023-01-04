@@ -1,28 +1,23 @@
+/*
+ * Copyright 2000-2023 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.vaadin.flow.component.applayout;
 
 import java.io.Serializable;
 import java.util.Locale;
 import java.util.Objects;
-
-/*
- * #%L
- * Vaadin App Layout
- * %%
- * Copyright 2000-2022 Vaadin Ltd.
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
@@ -35,6 +30,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.router.RouterLayout;
@@ -56,9 +52,9 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-app-layout")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/app-layout", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/app-layout", version = "24.0.0-alpha8")
 @JsModule("@vaadin/app-layout/src/vaadin-app-layout.js")
 public class AppLayout extends Component implements RouterLayout, HasStyle {
     private static final PropertyDescriptor<String, String> primarySectionProperty = PropertyDescriptors
@@ -246,7 +242,7 @@ public class AppLayout extends Component implements RouterLayout, HasStyle {
      *             is null.
      */
     public void addToDrawer(Component... components) {
-        addToSlot("drawer", components);
+        SlotUtils.addToSlot(this, "drawer", components);
     }
 
     /**
@@ -278,7 +274,7 @@ public class AppLayout extends Component implements RouterLayout, HasStyle {
     public void addToNavbar(boolean touchOptimized, Component... components) {
         final String slot = "navbar"
                 + (touchOptimized ? " touch-optimized" : "");
-        addToSlot(slot, components);
+        SlotUtils.addToSlot(this, slot, components);
     }
 
     /**
@@ -326,19 +322,8 @@ public class AppLayout extends Component implements RouterLayout, HasStyle {
         }
     }
 
-    private void addToSlot(String slot, Component... components) {
-        for (Component component : components) {
-            setSlot(component, slot);
-            add(component);
-        }
-    }
-
     private void add(Component component) {
         getElement().appendChild(component.getElement());
-    }
-
-    private static void setSlot(Component component, String slot) {
-        component.getElement().setAttribute("slot", slot);
     }
 
     /**

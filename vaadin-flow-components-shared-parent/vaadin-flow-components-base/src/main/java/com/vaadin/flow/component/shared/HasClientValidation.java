@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -71,8 +71,29 @@ public interface HasClientValidation extends Serializable {
         }
 
         /**
+         * Creates a new event using the given source.
+         *
+         * This constructor should be used when creating the event on the
+         * server-side.
+         *
+         * @param source
+         *            the source component.
+         * @param fromClient
+         *            <code>true</code> if the event originated from the client
+         *            side, <code>false</code> otherwise
+         */
+        public ClientValidatedEvent(Component source, boolean fromClient) {
+            super(source, fromClient);
+            this.valid = true;
+        }
+
+        /**
          * Returns true if the client-side validation succeeded and false
          * otherwise.
+         *
+         * <p>
+         * Note, this method will always return true if the event originated
+         * from the server-side i.e. {@link #isFromClient()} returns false.
          *
          * @return whether the client-side validation succeeded.
          */

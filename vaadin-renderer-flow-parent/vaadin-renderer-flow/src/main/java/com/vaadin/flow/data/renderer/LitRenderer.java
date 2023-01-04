@@ -1,6 +1,6 @@
 
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -35,6 +35,7 @@ import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.JsonUtils;
+import com.vaadin.flow.internal.UsageStatistics;
 import com.vaadin.flow.internal.nodefeature.ReturnChannelMap;
 import com.vaadin.flow.internal.nodefeature.ReturnChannelRegistration;
 import com.vaadin.flow.shared.Registration;
@@ -61,6 +62,11 @@ import elemental.json.JsonArray;
  */
 @JsModule("./lit-renderer.ts")
 public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
+
+    static {
+        UsageStatistics.markAsUsed("flow-components/LitRenderer", null);
+    }
+
     private final String templateExpression;
 
     private final String DEFAULT_RENDERER_NAME = "renderer";
@@ -137,27 +143,6 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
     }
 
     /**
-     * @deprecated LitRenderer doesn't support {@code <template>} elements.
-     *             Don't use.
-     */
-    @Deprecated
-    @Override
-    public Rendering<SOURCE> render(Element container,
-            DataKeyMapper<SOURCE> keyMapper, Element contentTemplate) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @deprecated LitRenderer doesn't support getting the event handlers. Don't
-     *             use.
-     */
-    @Deprecated
-    @Override
-    public Map<String, SerializableConsumer<SOURCE>> getEventHandlers() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
      * Sets up rendering of model objects inside a given
      * {@code Element container} element. The model objects are rendered using
      * the Lit template literal provided when creating this LitRenderer
@@ -205,11 +190,6 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
             @Override
             public Optional<DataGenerator<SOURCE>> getDataGenerator() {
                 return Optional.of(dataGenerator);
-            }
-
-            @Override
-            public Element getTemplateElement() {
-                return null;
             }
 
             @Override
@@ -483,7 +463,6 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
      *
      * @return the mapped properties, never <code>null</code>
      */
-    @Override
     public Map<String, ValueProvider<SOURCE, ?>> getValueProviders() {
         return Collections.unmodifiableMap(valueProviders);
     }

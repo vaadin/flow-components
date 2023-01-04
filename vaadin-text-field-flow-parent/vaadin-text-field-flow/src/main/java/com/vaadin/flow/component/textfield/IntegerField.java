@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,6 +19,7 @@ package com.vaadin.flow.component.textfield;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.function.SerializableFunction;
 
 /**
@@ -27,11 +28,12 @@ import com.vaadin.flow.function.SerializableFunction;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-integer-field")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/integer-field", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/integer-field", version = "24.0.0-alpha8")
 @JsModule("@vaadin/integer-field/src/vaadin-integer-field.js")
-public class IntegerField extends AbstractNumberField<IntegerField, Integer> {
+public class IntegerField extends AbstractNumberField<IntegerField, Integer>
+        implements HasThemeVariant<TextFieldVariant> {
 
     private static final SerializableFunction<String, Integer> PARSER = valueFormClient -> {
         if (valueFormClient == null || valueFormClient.isEmpty()) {
@@ -52,7 +54,7 @@ public class IntegerField extends AbstractNumberField<IntegerField, Integer> {
      * Constructs an empty {@code IntegerField}.
      */
     public IntegerField() {
-        super(PARSER, FORMATTER, Integer.MIN_VALUE, Integer.MAX_VALUE, true);
+        super(PARSER, FORMATTER, Integer.MIN_VALUE, Integer.MAX_VALUE);
     }
 
     /**

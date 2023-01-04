@@ -1,14 +1,12 @@
-package com.vaadin.flow.component.spreadsheet;
-
 /**
- * Copyright (C) 2000-2022 Vaadin Ltd
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
- *
  *
  * See <https://vaadin.com/commercial-license-and-service-terms> for the full
  * license.
  */
+package com.vaadin.flow.component.spreadsheet;
 
 import java.io.Serializable;
 
@@ -47,7 +45,7 @@ import com.vaadin.flow.component.Component;
  *
  * @author Vaadin Ltd.
  */
-interface SpreadsheetComponentFactory extends Serializable {
+public interface SpreadsheetComponentFactory extends Serializable {
 
     /**
      * Should return a unique component that is displayed inside the cell

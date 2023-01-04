@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -66,6 +66,7 @@ import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.grid.editor.EditorImpl;
 import com.vaadin.flow.component.grid.editor.EditorRenderer;
+import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.data.binder.BeanPropertySet;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.PropertyDefinition;
@@ -99,7 +100,6 @@ import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.Rendering;
-import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
 import com.vaadin.flow.data.selection.SelectionEvent;
@@ -206,10 +206,10 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/grid", version = "24.0.0-alpha6")
-@NpmPackage(value = "@vaadin/tooltip", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/grid", version = "24.0.0-alpha8")
+@NpmPackage(value = "@vaadin/tooltip", version = "24.0.0-alpha8")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -446,7 +446,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-column")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha6")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha8")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class Column<T> extends AbstractColumn<Column<T>> {
 
@@ -1076,16 +1076,15 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             if (!getGrid().getElement().getChildren().anyMatch(
                     child -> "tooltip".equals(child.getAttribute("slot")))) {
                 // No <vaadin-tooltip> yet added to the grid, add one
-                var tooltipElement = new Element("vaadin-tooltip");
-                tooltipElement.setAttribute("slot", "tooltip");
+                Element tooltipElement = new Element("vaadin-tooltip");
 
                 tooltipElement.addAttachListener(e -> {
-                    // Assigns a generator that returns a column-specfic
+                    // Assigns a generator that returns a column-specific
                     // tooltip text from the item
                     tooltipElement.executeJs(
                             "this.generator = ({item, column}) => { return (item && item.gridtooltips && column) ? item.gridtooltips[column._flowId] : ''; }");
                 });
-                getGrid().getElement().appendChild(tooltipElement);
+                SlotUtils.addToSlot(getGrid(), "tooltip", tooltipElement);
             }
 
             this.tooltipGenerator = tooltipGenerator;
@@ -1128,7 +1127,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                     columnInternalId);
 
             Rendering<T> editorRendering = editorRenderer.render(getElement(),
-                    null, rendering.getTemplateElement());
+                    null);
 
             Optional<DataGenerator<T>> dataGenerator = editorRendering
                     .getDataGenerator();
@@ -1360,7 +1359,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     private SelectionMode selectionMode;
 
     private final DetailsManager detailsManager;
-    private Element detailsTemplate;
 
     private Map<String, Column<T>> idToColumnMap = new HashMap<>();
     private Map<String, Column<T>> keyToColumnMap = new HashMap<>();
@@ -1928,88 +1926,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     protected BiFunction<Renderer<T>, String, Column<T>> getDefaultColumnFactory() {
         return this::createColumn;
-    }
-
-    /**
-     * Adds a new column to this {@link Grid} with a renderer, sorting
-     * properties and default column factory. The values inside the renderer are
-     * converted to JSON values by using {@link JsonSerializer#toJson(Object)}.
-     * <p>
-     * <em>NOTE:</em> You can add component columns easily using the
-     * {@link #addComponentColumn(ValueProvider)}, but using
-     * {@link ComponentRenderer} is not as efficient as the built in renderers
-     * or using {@link LitRenderer}.
-     * <p>
-     *
-     * Every added column sends data to the client side regardless of its
-     * visibility state. Don't add a new column at all or use
-     * {@link Grid#removeColumn(Column)} to avoid sending extra data.
-     * </p>
-     *
-     * <p>
-     * <strong>Note:</strong> This method is a shorthand for
-     * {@link ##addColumn(Renderer, BiFunction, String...)}
-     * </p>
-     *
-     * @see #getDefaultColumnFactory()
-     * @see #addColumn(Renderer, BiFunction, String...)
-     * @see #removeColumn(Column)
-     *
-     * @param renderer
-     *            the renderer used to create the grid cell structure
-     * @param sortingProperties
-     *            the sorting properties to use for this column
-     * @return the created column
-     * @deprecated since 23.2 - use
-     *             <code>addColumn(renderer).setSortProperty(sortingProperties)</code>
-     *             instead.
-     */
-    @Deprecated
-    public Column<T> addColumn(Renderer<T> renderer,
-            String... sortingProperties) {
-        BiFunction<Renderer<T>, String, Column<T>> defaultFactory = getDefaultColumnFactory();
-        return addColumn(renderer, defaultFactory, sortingProperties);
-    }
-
-    /**
-     * Adds a new column to this {@link Grid} with a renderer, sorting
-     * properties and column factory provided. The values inside the renderer
-     * are converted to JSON values by using
-     * {@link JsonSerializer#toJson(Object)}.
-     * <p>
-     * <em>NOTE:</em> You can add component columns easily using the
-     * {@link #addComponentColumn(ValueProvider)}, but using
-     * {@link ComponentRenderer} is not as efficient as the built in renderers
-     * or using {@link LitRenderer}.
-     *
-     * <p>
-     * Every added column sends data to the client side regardless of its
-     * visibility state. Don't add a new column at all or use
-     * {@link Grid#removeColumn(Column)} to avoid sending extra data.
-     * </p>
-     *
-     * @see #addColumn(Renderer, String...)
-     * @see #removeColumn(Column)
-     *
-     * @param renderer
-     *            the renderer used to create the grid cell structure
-     * @param columnFactory
-     *            the method that creates a new column instance for this
-     *            {@link Grid} instance.
-     * @param sortingProperties
-     *            the sorting properties to use for this column
-     * @return the created column
-     * @deprecated since 23.2 - use
-     *             <code>addColumn(renderer, columnFactory).setSortProperty(sortingProperties)</code>
-     *             instead.
-     */
-    @Deprecated
-    protected <C extends Column<T>> C addColumn(Renderer<T> renderer,
-            BiFunction<Renderer<T>, String, C> columnFactory,
-            String... sortingProperties) {
-        C column = addColumn(renderer, columnFactory);
-        column.setSortProperty(sortingProperties);
-        return column;
     }
 
     /**
@@ -2949,40 +2865,22 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             return;
         }
 
-        Rendering<T> rendering;
         if (renderer instanceof LitRenderer) {
-            // LitRenderer
-            if (detailsTemplate != null
-                    && detailsTemplate.getParent() != null) {
-                getElement().removeChild(detailsTemplate);
-            }
-            rendering = ((LitRenderer<T>) renderer).render(getElement(),
+            var rendering = ((LitRenderer<T>) renderer).render(getElement(),
                     dataCommunicator.getKeyMapper(), "rowDetailsRenderer");
-        } else {
-            // TemplateRenderer
-            if (detailsTemplate == null) {
-                rendering = renderer.render(getElement(),
-                        getDataCommunicator().getKeyMapper());
-                detailsTemplate = rendering.getTemplateElement();
-                detailsTemplate.setAttribute("class", "row-details");
-            } else {
-                getElement().appendChild(detailsTemplate);
-                rendering = renderer.render(getElement(),
-                        getDataCommunicator().getKeyMapper(), detailsTemplate);
-            }
+
+            rendering.getDataGenerator().ifPresent(renderingDataGenerator -> {
+                itemDetailsDataGenerator = renderingDataGenerator;
+                Registration detailsRenderingDataGeneratorRegistration = () -> {
+                    detailsManager.destroyAllData();
+                    itemDetailsDataGenerator = null;
+                };
+                detailsRenderingRegistrations
+                        .add(detailsRenderingDataGeneratorRegistration);
+            });
+
+            detailsRenderingRegistrations.add(rendering.getRegistration());
         }
-
-        rendering.getDataGenerator().ifPresent(renderingDataGenerator -> {
-            itemDetailsDataGenerator = renderingDataGenerator;
-            Registration detailsRenderingDataGeneratorRegistration = () -> {
-                detailsManager.destroyAllData();
-                itemDetailsDataGenerator = null;
-            };
-            detailsRenderingRegistrations
-                    .add(detailsRenderingDataGeneratorRegistration);
-        });
-
-        detailsRenderingRegistrations.add(rendering.getRegistration());
     }
 
     /**

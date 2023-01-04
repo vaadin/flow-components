@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -38,9 +38,7 @@ import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
-import com.vaadin.flow.data.renderer.Rendering;
 import com.vaadin.flow.dom.DisabledUpdateMode;
-import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.data.renderer.LitRenderer;
@@ -68,10 +66,10 @@ import elemental.json.JsonValue;
  *            the type of the items supported by the list
  */
 @Tag("vaadin-virtual-list")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
-@NpmPackage(value = "@vaadin/virtual-list", version = "24.0.0-alpha6")
+@NpmPackage(value = "@vaadin/virtual-list", version = "24.0.0-alpha8")
 @JsModule("@vaadin/virtual-list/vaadin-virtual-list.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./virtualListConnector.js")
@@ -120,11 +118,7 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
         }
     };
 
-    private final Element template;
     private Renderer<T> renderer;
-    private String originalTemplate;
-    private boolean rendererChanged;
-    private boolean templateUpdateRegistered;
 
     private final CompositeDataGenerator<T> dataGenerator = new CompositeDataGenerator<>();
     private final List<Registration> renderingRegistrations = new ArrayList<>();
@@ -140,7 +134,6 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
      */
     public VirtualList() {
         getElement().setAttribute("suppress-template-warning", true);
-        template = new Element("template");
         setRenderer((ValueProvider<T, String>) String::valueOf);
         addAttachListener((e) -> this.setPlaceholderItem(this.placeholderItem));
     }
@@ -208,22 +201,8 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
         renderingRegistrations.forEach(Registration::remove);
         renderingRegistrations.clear();
 
-        Rendering<T> rendering;
-        if (renderer instanceof LitRenderer) {
-            // LitRenderer
-            if (template.getParent() != null) {
-                getElement().removeChild(template);
-            }
-            rendering = renderer.render(getElement(),
-                    dataCommunicator.getKeyMapper());
-        } else {
-            // TemplateRenderer
-            if (template.getParent() == null) {
-                getElement().appendChild(template);
-            }
-            rendering = renderer.render(getElement(),
-                    dataCommunicator.getKeyMapper(), template);
-        }
+        var rendering = renderer.render(getElement(),
+                dataCommunicator.getKeyMapper());
 
         rendering.getDataGenerator().ifPresent(renderingDataGenerator -> {
             Registration renderingDataGeneratorRegistration = dataGenerator
@@ -234,9 +213,6 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
         renderingRegistrations.add(rendering.getRegistration());
 
         this.renderer = renderer;
-
-        rendererChanged = true;
-        registerTemplateUpdate();
 
         getDataCommunicator().reset();
 
@@ -287,8 +263,6 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
             getElement().callJsFunction("$connector.setPlaceholderItem", json,
                     appId);
         });
-
-        registerTemplateUpdate();
     }
 
     /**
@@ -301,65 +275,11 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
         return placeholderItem;
     }
 
-    private void registerTemplateUpdate() {
-        if (templateUpdateRegistered) {
-            return;
-        }
-        templateUpdateRegistered = true;
-
-        /*
-         * The actual registration is done inside another beforeClientResponse
-         * registration to make sure it runs last, after ComponentRenderer and
-         * BasicRenderer have executed their rendering operations, which also
-         * happen beforeClientResponse and might be registered after this.
-         */
-        runBeforeClientResponse(
-                () -> runBeforeClientResponse(() -> updateTemplateInnerHtml()));
-    }
-
     private void runBeforeClientResponse(Command command) {
         getElement().getNode()
                 .runWhenAttached(ui -> ui.getInternals().getStateTree()
                         .beforeClientResponse(getElement().getNode(),
                                 context -> command.execute()));
-    }
-
-    private void updateTemplateInnerHtml() {
-        templateUpdateRegistered = false;
-        if (rendererChanged) {
-            originalTemplate = template.getProperty("innerHTML");
-            rendererChanged = false;
-        }
-
-        String placeholderTemplate;
-        if (placeholderItem == null) {
-            /*
-             * When a placeholderItem is not set, there should be still a
-             * placeholder element with a non 0 size to avoid issues when
-             * scrolling.
-             */
-            placeholderTemplate = "<div style='width:100px;'></div>";
-        } else if (renderer instanceof ComponentRenderer) {
-            ComponentRenderer<?, T> componentRenderer = (ComponentRenderer<?, T>) renderer;
-            Component component = componentRenderer
-                    .createComponent(placeholderItem);
-            component.getElement().setEnabled(isEnabled());
-            placeholderTemplate = component.getElement().getOuterHTML();
-        } else {
-            placeholderTemplate = originalTemplate;
-        }
-
-        /*
-         * The placeholder is used by the client connector to create temporary
-         * elements that are populated on demand (when the user scrolls to that
-         * item).
-         */
-        template.setProperty("innerHTML", String.format(
-        //@formatter:off
-            "<template is='dom-if' if='[[item.__placeholder]]'>%s</template>"
-            + "<template is='dom-if' if='[[!item.__placeholder]]'>%s</template>",
-        //@formatter:on
-                placeholderTemplate, originalTemplate));
     }
 
     @Override

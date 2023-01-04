@@ -1,4 +1,13 @@
-import VectorSource from "ol/source/Vector";
+/**
+ * @license
+ * Copyright 2000-2023 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
+ */
+import VectorSource from 'ol/source/Vector';
 
 /**
  * Simple lookup for OL instances that are used by Map.
@@ -55,8 +64,7 @@ class WeakReferenceLookup {
   }
 }
 
-const supportsWeakReferenceLookup =
-    window.WeakRef && window.FinalizationRegistry;
+const supportsWeakReferenceLookup = window.WeakRef && window.FinalizationRegistry;
 
 /**
  * Creates a lookup that is supported by the browser
