@@ -159,7 +159,7 @@
         <artifactId>jetty-maven-plugin</artifactId>
         <version>${jetty.version}</version>
         <configuration>
-          <scanIntervalSeconds>-1</scanIntervalSeconds>
+          <scan>-1</scan>
           <stopPort>8081</stopPort>
           <stopWait>5</stopWait>
           <stopKey>foo</stopKey>
