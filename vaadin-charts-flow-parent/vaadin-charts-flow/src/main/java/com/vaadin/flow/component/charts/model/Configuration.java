@@ -1145,18 +1145,22 @@ public class Configuration extends AbstractConfigurationObject
         colorAxis.addAxis(axis);
     }
 
-    public List<AnnotationItem> getAnnotations() {
+    public List<AnnotationItemLabel> getLabels() {
+        return getLabelsAnnotation().getLabels();
+    }
+
+    public void setLabels(List<AnnotationItemLabel> labels) {
+        getLabelsAnnotation().setLabels(labels);
+    }
+
+    public void addLabel(AnnotationItemLabel label) {
+        getLabels().add(label);
+    }
+
+    private AnnotationItem getLabelsAnnotation() {
         if (annotations == null) {
-            setAnnotations(new ArrayList<>());
+            annotations = List.of(new AnnotationItem());
         }
-        return annotations;
-    }
-
-    public void setAnnotations(List<AnnotationItem> annotations) {
-        this.annotations = annotations;
-    }
-
-    public void addAnnotation(AnnotationItem annotation) {
-        getAnnotations().add(annotation);
+        return annotations.get(0);
     }
 }

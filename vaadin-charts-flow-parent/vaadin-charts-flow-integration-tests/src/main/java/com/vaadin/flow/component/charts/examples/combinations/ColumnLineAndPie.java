@@ -37,12 +37,12 @@ public class ColumnLineAndPie extends AbstractChartExample {
         labelStyle.setTop("8px");
         labelStyle.setLeft("40px");
 
-        AnnotationItemLabel label = new AnnotationItemLabel("Total fruit consumption");
+        AnnotationItemLabel label = new AnnotationItemLabel(
+                "Total fruit consumption");
         label.setPoint(new AnnotationItemLabelMockPointOptions(100, 100));
         label.setStyle(labelStyle);
-        AnnotationItem annotation = new AnnotationItem();
-        annotation.addLabel(label);
-        conf.addAnnotation(annotation);
+        label.setUseHTML(true);
+        conf.addLabel(label);
 
         DataSeries series = new DataSeries();
         PlotOptionsColumn plotOptions = new PlotOptionsColumn();
