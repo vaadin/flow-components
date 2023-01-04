@@ -128,10 +128,9 @@ public class Notification extends Component implements HasComponents, HasStyle,
             "  if (notification.text) {" +
             "    root.textContent = notification.text;" +
             "  } else if (!root.firstElementChild) {" +
-            "    root.textContent = '';" +
-            "    root.append(window.Vaadin.Flow.clients['"+ appId +"'].getByNodeId("+ nodeId +"));" +
+            "    window.Vaadin.ComponentRenderer.renderNode($0, $1, root)" +
             "  }" +
-            "}");
+            "}", appId, nodeId);
         //@formatter:on
     }
 

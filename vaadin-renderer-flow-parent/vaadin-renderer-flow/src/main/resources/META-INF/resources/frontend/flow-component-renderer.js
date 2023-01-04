@@ -3,6 +3,26 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
 import { idlePeriod } from '@polymer/polymer/lib/utils/async.js';
 import { PolymerElement } from '@polymer/polymer/polymer-element.js';
+import { until } from 'lit/directives/until.js';
+
+function getNode(appid, nodeid) {
+  return window.Vaadin.Flow.clients[appid].getByNodeId(nodeid);
+}
+
+function getNodeResult(appid, nodeid) {
+  return until(new Promise((resolve) => resolve(getNode(appid, nodeid))));
+}
+
+function renderNode(appid, nodeid, root) {
+  const node = getNode(appid, nodeid);
+  if (node.parentNode !== root) {
+    root.textContent = '';
+    root.appendChild(node);
+  }
+}
+
+window.Vaadin ||= {};
+window.Vaadin.ComponentRenderer ||= { getNodeResult, renderNode };
 
 class FlowComponentRenderer extends PolymerElement {
   static get template() {

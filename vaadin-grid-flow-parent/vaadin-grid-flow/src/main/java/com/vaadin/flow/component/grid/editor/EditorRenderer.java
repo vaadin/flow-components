@@ -178,7 +178,7 @@ public class EditorRenderer<T> extends Renderer<T> implements DataGenerator<T> {
                 "}" +
 
                 // If editing, render the editor, otherwise use the original renderer
-                "if (root.__editing) { root.textContent = ''; root.append(window.Vaadin.Flow.clients['"+ appId +"'].getByNodeId(model.item._"+columnInternalId+"_editor)) }" +
+                "if (root.__editing) { window.Vaadin.ComponentRenderer.renderNode('" + appId + "', model.item._" + columnInternalId + "_editor, root); }" +
                 "else if (!originalRender) { root.textContent = model.item." + columnInternalId + " }" +
                 "else { originalRender(root, container, model); }" +
             "};");

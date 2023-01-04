@@ -148,7 +148,9 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
                 ? UI.getCurrent().getInternals().getAppId()
                 : "";
 
-        return "<div>${ window.Vaadin.Flow.clients['"+ appId +"'].getByNodeId(item.nodeid) }</div>";
+        // TODO: Why does this work with the extra </>? Or with a wrapping div?
+        return "${ window.Vaadin.ComponentRenderer.getNodeResult('" + appId
+                + "', item.nodeid) }</>";
     }
 
     Element getOwner() {
