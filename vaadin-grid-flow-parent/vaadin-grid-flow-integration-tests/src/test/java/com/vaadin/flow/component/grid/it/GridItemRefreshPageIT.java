@@ -107,7 +107,7 @@ public class GridItemRefreshPageIT extends AbstractComponentIT {
             String refreshFirstItemButtonId,
             String refreshMultipleItemsButtonId, String refreshAllButtonId) {
         open();
-        WebElement grid = findElement(By.id(gridId));
+        GridElement grid = $(GridElement.class).id(gridId);
         scrollToElement(grid);
 
         WebElement refreshFirstItem = findElement(
@@ -136,11 +136,11 @@ public class GridItemRefreshPageIT extends AbstractComponentIT {
         }
         waitUntilUpdated(grid, 10, 15);
 
-        getCommandExecutor().executeScript("arguments[0].scrollToIndex(1000);",
-                grid);
-        // rows at the bottom (outside of the initial cache) should also be
-        // updated
-        waitUntilUpdated(grid, 990, 999);
+        // Scroll down
+        grid.scrollToRow(500);
+
+        // rows outside of the initial cache should also be updated
+        waitUntilUpdated(grid, 500, 505);
     }
 
     private void waitUntilUpdated(WebElement grid, int startIndex,
