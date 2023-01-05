@@ -137,7 +137,8 @@ public class EditorRenderer<T> extends Renderer<T> implements DataGenerator<T> {
     }
 
     @Override
-    public Rendering<T> render(Element container, DataKeyMapper<T> keyMapper) {
+    public Rendering<T> render(Element container, DataKeyMapper<T> keyMapper,
+            String rendererName) {
         /*
          * The virtual container is needed as the parent of all editor
          * components. Editor components need a parent in order to have a proper

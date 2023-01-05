@@ -36,6 +36,8 @@ import com.vaadin.flow.function.ValueProvider;
  */
 public abstract class Renderer<SOURCE> implements Serializable {
 
+    private final String DEFAULT_RENDERER_NAME = "renderer";
+
     /**
      * Registers a renderer function to the given container element. Creates the
      * setup to handle rendering of individual data items as requested by the
@@ -46,11 +48,30 @@ public abstract class Renderer<SOURCE> implements Serializable {
      *            the element which accepts the renderer function on the client.
      * @param keyMapper
      *            mapper used internally to fetch items by key and to provide
-     *            keys for given items. It is required when either event
-     *            handlers or {@link DataGenerator} are supported
+     *            keys for given items.
+     * @return the context of the rendering, that can be used by the components
+     *         to provide extra customization
+     */
+    public Rendering<SOURCE> render(Element container,
+            DataKeyMapper<SOURCE> keyMapper) {
+        return render(container, keyMapper, DEFAULT_RENDERER_NAME);
+    }
+
+    /**
+     * Registers a renderer function with the given name to the given container
+     * element. Creates the setup to handle rendering of individual data items
+     * as requested by the renderer function invocation.
+     *
+     * @param container
+     *            the element which accepts the renderer function on the client.
+     * @param keyMapper
+     *            mapper used internally to fetch items by key and to provide
+     *            keys for given items.
+     * @param rendererName
+     *            name of the renderer function the container element accepts
      * @return the context of the rendering, that can be used by the components
      *         to provide extra customization
      */
     public abstract Rendering<SOURCE> render(Element container,
-            DataKeyMapper<SOURCE> keyMapper);
+            DataKeyMapper<SOURCE> keyMapper, String rendererName);
 }
