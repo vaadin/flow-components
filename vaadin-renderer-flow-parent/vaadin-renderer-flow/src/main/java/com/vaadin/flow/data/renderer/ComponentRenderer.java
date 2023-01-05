@@ -147,9 +147,8 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
                 ? UI.getCurrent().getInternals().getAppId()
                 : "";
 
-        // TODO: Why does this work with the extra </>? Or with a wrapping div?
         return "${ window.Vaadin.ComponentRenderer.getNodeResult('" + appId
-                + "', item.nodeid) }</>";
+                + "', item.nodeid) }";
     }
 
     Element getOwner() {
@@ -161,6 +160,13 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
             DataKeyMapper<SOURCE> keyMapper, String rendererName) {
         this.owner = owner;
         this.container = new Element("div");
+        this.container.addAttachListener(event -> {
+            // Override insertBefore function to prevent Flow from
+            // trying to restore the child elements inside the virtual
+            // container element.
+            this.container.executeJs(
+                    "const ib = this.insertBefore; this.insertBefore = (a, b) => { try { ib(a, b); } catch (e) { } }");
+        });
         owner.appendVirtualChild(container);
         var rendering = super.render(owner, keyMapper, rendererName);
 
