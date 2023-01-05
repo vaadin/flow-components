@@ -1,5 +1,5 @@
 import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-placeholder.js';
-import { RangeDataProvider } from '@vaadin/combo-box/src/vaadin-combo-box-range-data-provider.js';
+import { createRangeDataProvider } from '@vaadin/combo-box/src/vaadin-combo-box-range-data-provider.js';
 
 (function () {
   const tryCatchWrapper = function (callback) {
@@ -17,10 +17,11 @@ import { RangeDataProvider } from '@vaadin/combo-box/src/vaadin-combo-box-range-
         comboBox.$connector = {};
 
         let lastFilter = '';
+        let pages = {};
+        let dataProviderCallback;
 
-        const rangeDataProvider = new RangeDataProvider(
-          comboBox,
-          ({ pageRange, pageSize, filter }) => {
+        comboBox.dataProvider = createRangeDataProvider(
+          ({ pageRange, pageSize, filter }, callback) => {
             const startIndex = pageSize * pageRange[0];
             const endIndex = pageSize * (pageRange[1] + 1);
             const itemsCount = endIndex - startIndex;
@@ -31,6 +32,8 @@ import { RangeDataProvider } from '@vaadin/combo-box/src/vaadin-combo-box-range-
               comboBox.$server.resetDataCommunicator();
               lastFilter = filter;
             }
+
+            dataProviderCallback = callback;
           },
           {
             maxRangeSize: 10
@@ -41,11 +44,9 @@ import { RangeDataProvider } from '@vaadin/combo-box/src/vaadin-combo-box-range-
           const startPage = Math.floor(startIndex / comboBox.pageSize);
           const pagesCount = Math.ceil(itemsCount / comboBox.pageSize);
 
-          const pagesToRemove = [];
           for (let i = 0; i < pagesCount; i++) {
-            pagesToRemove.push(startPage + i);
+            delete pages[startPage + i];
           }
-          rangeDataProvider.removePages(pagesToRemove);
         });
 
         comboBox.$connector.set = tryCatchWrapper(function (startIndex, items, filter) {
@@ -54,30 +55,30 @@ import { RangeDataProvider } from '@vaadin/combo-box/src/vaadin-combo-box-range-
           }
 
           if (startIndex % comboBox.pageSize != 0) {
-            throw 'Got new data to index ' + startIndex + ' which is not aligned with the page size of ' + comboBox.pageSize;
+            throw (
+              'Got new data to index ' + startIndex + ' which is not aligned with the page size of ' + comboBox.pageSize
+            );
           }
 
           if (startIndex === 0 && items.length === 0) {
             // Makes sure that the dataProvider callback is called even when server
             // returns empty data set (no items match the filter).
-            rangeDataProvider.clearPages();
-            rangeDataProvider.addPages({ 0: [] });
+            pages = {};
             return;
           }
 
           const startPage = startIndex / comboBox.pageSize;
           const pagesCount = Math.ceil(items.length / comboBox.pageSize);
 
-          const pagesToAdd = {};
           for (let i = 0; i < pagesCount; i++) {
             let page = startPage + i;
             let pageStartIndex = i * comboBox.pageSize;
             let pageEndIndex = (i + 1) * comboBox.pageSize;
-            pagesToAdd[page] = items.slice(pageStartIndex, pageEndIndex);
+            pages[page] = items.slice(pageStartIndex, pageEndIndex);
           }
-          rangeDataProvider.addPages(pagesToAdd);
         });
 
+        // TODO: Decide if it should be implemented in RangeDataProvided.
         comboBox.$connector.updateData = tryCatchWrapper(function (items) {
           const itemsMap = new Map(items.map((item) => [item.key, item]));
 
@@ -99,8 +100,8 @@ import { RangeDataProvider } from '@vaadin/combo-box/src/vaadin-combo-box-range-
         });
 
         comboBox.$connector.reset = tryCatchWrapper(function () {
-          rangeDataProvider.clearPages();
-          rangeDataProvider.flushPages();
+          pages = {};
+          comboBox.dataProvider.clearCache();
         });
 
         comboBox.$connector.confirm = tryCatchWrapper(function (id, filter) {
@@ -108,7 +109,7 @@ import { RangeDataProvider } from '@vaadin/combo-box/src/vaadin-combo-box-range-
             return;
           }
 
-          rangeDataProvider.flushPages();
+          dataProviderCallback(pages);
 
           // Let server know we're done
           comboBox.$server.confirmUpdate(id);
