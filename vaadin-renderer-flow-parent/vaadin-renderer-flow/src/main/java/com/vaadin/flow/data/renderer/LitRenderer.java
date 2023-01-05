@@ -69,8 +69,6 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
 
     private final String templateExpression;
 
-    private final String DEFAULT_RENDERER_NAME = "renderer";
-
     private final String propertyNamespace;
 
     private final Map<String, ValueProvider<SOURCE, ?>> valueProviders = new HashMap<>();
@@ -142,44 +140,7 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
         return new LitRenderer<>(templateExpression);
     }
 
-    /**
-     * Sets up rendering of model objects inside a given
-     * {@code Element container} element. The model objects are rendered using
-     * the Lit template literal provided when creating this LitRenderer
-     * instance, and the Vaadin-default JS renderer function name.
-     *
-     * @param container
-     *            the DOM element that supports setting a renderer function
-     * @param keyMapper
-     *            mapper used internally to fetch items by key and to provide
-     *            keys for given items. It is required when either functions or
-     *            {@link DataGenerator} are supported
-     * @return the context of the rendering, that can be used by the components
-     *         to provide extra customization
-     */
     @Override
-    public Rendering<SOURCE> render(Element container,
-            DataKeyMapper<SOURCE> keyMapper) {
-        return this.render(container, keyMapper, DEFAULT_RENDERER_NAME);
-    }
-
-    /**
-     * Sets up rendering of model objects inside a given
-     * {@code Element container} element. The model objects are rendered using
-     * the Lit template literal provided when creating this LitRenderer
-     * instance, and a given {@code String rendererName} JS renderer function.
-     *
-     * @param container
-     *            the DOM element that supports setting a renderer function
-     * @param keyMapper
-     *            mapper used internally to fetch items by key and to provide
-     *            keys for given items. It is required when either functions or
-     *            {@link DataGenerator} are supported
-     * @param rendererName
-     *            name of the renderer function the container element accepts
-     * @return the context of the rendering, that can be used by the components
-     *         to provide extra customization
-     */
     public Rendering<SOURCE> render(Element container,
             DataKeyMapper<SOURCE> keyMapper, String rendererName) {
         DataGenerator<SOURCE> dataGenerator = createDataGenerator();
