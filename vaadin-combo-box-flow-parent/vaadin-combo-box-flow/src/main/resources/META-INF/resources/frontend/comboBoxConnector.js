@@ -16,9 +16,9 @@ import { createRangeDataProvider } from '@vaadin/combo-box/src/vaadin-combo-box-
 
         comboBox.$connector = {};
 
-        let lastFilter = '';
-        let pages = {};
         let dataProviderCallback;
+        let pages = {};
+        let lastFilter = '';
 
         comboBox.dataProvider = createRangeDataProvider(
           ({ pageRange, pageSize, filter }, callback) => {
