@@ -101,7 +101,7 @@ import { createRangeDataProvider } from '@vaadin/combo-box/src/vaadin-combo-box-
 
         comboBox.$connector.reset = tryCatchWrapper(function () {
           pages = {};
-          comboBox.dataProvider.clearCache();
+          comboBox.clearCache();
         });
 
         comboBox.$connector.confirm = tryCatchWrapper(function (id, filter) {
@@ -109,7 +109,7 @@ import { createRangeDataProvider } from '@vaadin/combo-box/src/vaadin-combo-box-
             return;
           }
 
-          dataProviderCallback(pages);
+          dataProviderCallback(pages, comboBox.size);
 
           // Let server know we're done
           comboBox.$server.confirmUpdate(id);
