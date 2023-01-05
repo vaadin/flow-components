@@ -68,7 +68,8 @@ public class SelectedTabPage extends Div {
         setSelectedTab.setId("set-selected-tab");
 
         NativeButton deleteFirst = new NativeButton("Delete first tab",
-                event -> tabs.remove(tabs.getChildren().findFirst().get()));
+                event -> tabs
+                        .remove((Tab) tabs.getChildren().findFirst().get()));
         deleteFirst.setId("delete-first");
 
         NativeButton addFirstWithElementAPI = new NativeButton(
