@@ -30,6 +30,7 @@ import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Synchronize;
@@ -70,7 +71,7 @@ import org.slf4j.LoggerFactory;
 @JsModule("@vaadin/tabs/src/vaadin-tabs.js")
 @NpmPackage(value = "@vaadin/tabs", version = "24.0.0-alpha8")
 public class Tabs extends Component
-        implements HasSize, HasStyle, HasThemeVariant<TabsVariant> {
+        implements HasEnabled, HasSize, HasStyle, HasThemeVariant<TabsVariant> {
 
     private static final String SELECTED = "selected";
 
