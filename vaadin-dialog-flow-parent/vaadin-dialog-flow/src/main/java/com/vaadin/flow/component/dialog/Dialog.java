@@ -106,6 +106,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
         container.getClassList().add("draggable-leaf-only");
         container.getStyle().set(ElementConstants.STYLE_WIDTH, "100%");
         container.getStyle().set(ElementConstants.STYLE_HEIGHT, "100%");
+        container.getStyle().set("display", "inline-block");
 
         getElement().appendVirtualChild(container);
 
