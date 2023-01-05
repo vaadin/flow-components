@@ -680,7 +680,7 @@ public class GridPro<E> extends Grid<E> {
                 DataKeyMapper<SOURCE> keyMapper, String rendererName) {
 
             Rendering<SOURCE> columnPathRendering = super.render(container,
-                    keyMapper);
+                    keyMapper, rendererName);
             Rendering<SOURCE> representationRendering = representationRenderer
                     .render(container, keyMapper);
 
