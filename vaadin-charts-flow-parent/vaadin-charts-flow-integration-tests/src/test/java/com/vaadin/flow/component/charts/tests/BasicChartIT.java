@@ -16,6 +16,8 @@ import org.openqa.selenium.WebElement;
 import com.vaadin.flow.component.charts.examples.AbstractChartExample;
 import com.vaadin.flow.component.charts.examples.area.AreaChart;
 
+import java.util.List;
+
 import static org.junit.Assert.assertTrue;
 
 public class BasicChartIT extends AbstractTBTest {
@@ -57,4 +59,15 @@ public class BasicChartIT extends AbstractTBTest {
         assertTrue(series.getText().contains("Tokyo"));
     }
 
+    @Test
+    public void Chart_LabelDisplayed() {
+        final TestBenchElement chart = getChartElement();
+        waitUntil(driver -> {
+            List<TestBenchElement> labels = chart.$("*")
+                    .attributeContains("class", "highcharts-label").all();
+            return !labels.isEmpty()
+                    && labels.stream().map(TestBenchElement::getText)
+                            .anyMatch("Sample label"::equals);
+        });
+    }
 }

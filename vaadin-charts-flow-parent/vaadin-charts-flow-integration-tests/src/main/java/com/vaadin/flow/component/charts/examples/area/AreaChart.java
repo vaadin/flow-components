@@ -3,6 +3,8 @@ package com.vaadin.flow.component.charts.examples.area;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.examples.AbstractChartExample;
 import com.vaadin.flow.component.charts.examples.SkipFromDemo;
+import com.vaadin.flow.component.charts.model.AnnotationItemLabel;
+import com.vaadin.flow.component.charts.model.AnnotationItemLabelMockPointOptions;
 import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.ListSeries;
@@ -36,6 +38,10 @@ public class AreaChart extends AbstractChartExample {
         y.setMin(0);
         y.setTitle("Rainfall (mm)");
         configuration.addyAxis(y);
+
+        AnnotationItemLabel label = new AnnotationItemLabel("Sample label");
+        label.setPoint(new AnnotationItemLabelMockPointOptions(100, 100));
+        configuration.addLabel(label);
 
         NativeButton changeTitleButton = new NativeButton();
         changeTitleButton.setId("change_title");
