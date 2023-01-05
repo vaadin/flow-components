@@ -57,8 +57,7 @@ public class EditorRenderer<T> extends Renderer<T> implements DataGenerator<T> {
 
     private Component component;
 
-    // the flow-component-renderer needs something to load when the component is
-    // null
+    // render something when the component is null
     private Component emptyComponent;
 
     /**
@@ -142,8 +141,8 @@ public class EditorRenderer<T> extends Renderer<T> implements DataGenerator<T> {
         /*
          * The virtual container is needed as the parent of all editor
          * components. Editor components need a parent in order to have a proper
-         * nodeId, and the nodeId is needed by the <flow-component-renderer> in
-         * the client-side.
+         * nodeId, and the nodeId is needed to obtain the element in the
+         * client-side.
          */
         editorContainer = createEditorContainer();
         container.appendVirtualChild(editorContainer);

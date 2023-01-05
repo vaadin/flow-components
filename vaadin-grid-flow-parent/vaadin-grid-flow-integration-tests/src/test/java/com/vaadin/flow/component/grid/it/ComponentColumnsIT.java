@@ -57,9 +57,6 @@ public class ComponentColumnsIT extends AbstractComponentIT {
 
     @Test
     public void compThenGridRendered_compButton() {
-        // <flow-component-renderer appid="ROOT" style=""><vaadin-button
-        // tabindex="0" role="button"
-        // focus-target="true">foo</vaadin-button></flow-component-renderer>
         assertCellContains(compThenGrid, 0, 1, "foo");
         assertCellContains(compThenGrid, 0, 1, "vaadin-button");
         assertCellContains(compThenGrid, 1, 1, "bar");
@@ -68,9 +65,6 @@ public class ComponentColumnsIT extends AbstractComponentIT {
 
     @Test
     public void gridThenCompRendered_compButton() {
-        // <flow-component-renderer appid="ROOT" style=""><vaadin-button
-        // tabindex="0" role="button"
-        // focus-target="true">foo</vaadin-button></flow-component-renderer>
         assertCellContains(gridThenComp, 0, 1, "foo");
         assertCellContains(gridThenComp, 0, 1, "vaadin-button");
         assertCellContains(gridThenComp, 1, 1, "bar");

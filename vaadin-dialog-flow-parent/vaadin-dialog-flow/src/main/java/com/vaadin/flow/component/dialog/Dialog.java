@@ -109,7 +109,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
         getElement().appendVirtualChild(container);
 
-        // Attach <flow-component-renderer>. Needs to be updated on each
+        // Needs to be updated on each
         // attach, as element depends on node id which is subject to change if
         // the dialog is transferred to another UI, e.g. due to
         // @PreserveOnRefresh

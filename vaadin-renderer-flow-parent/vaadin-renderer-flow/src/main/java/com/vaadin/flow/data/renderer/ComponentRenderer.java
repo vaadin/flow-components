@@ -54,7 +54,6 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
     private SerializableFunction<SOURCE, COMPONENT> componentFunction;
     private SerializableBiFunction<Component, SOURCE, Component> componentUpdateFunction;
     private SerializableBiConsumer<COMPONENT, SOURCE> itemConsumer;
-    private String componentRendererTag = "flow-component-renderer";
 
     /**
      * Creates a new ComponentRenderer that uses the componentSupplier to
@@ -202,21 +201,6 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
                 return rendering.getRegistration();
             }
         };
-    }
-
-    /**
-     * Sets the tag of the webcomponent used at the client-side to manage
-     * component rendering inside {@code <template>}. By default it uses
-     * {@code <flow-component-renderer>}.
-     *
-     * @param componentRendererTag
-     *            the tag of the client-side webcomponent for component
-     *            rendering, not <code>null</code>
-     */
-    public void setComponentRendererTag(String componentRendererTag) {
-        Objects.requireNonNull(componentRendererTag,
-                "The componentRendererTag should not be null");
-        this.componentRendererTag = componentRendererTag;
     }
 
     /**

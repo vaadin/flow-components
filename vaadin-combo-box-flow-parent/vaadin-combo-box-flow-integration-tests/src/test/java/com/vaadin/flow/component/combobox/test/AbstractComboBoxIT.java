@@ -105,8 +105,7 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
     }
 
     protected void assertComponentRendered(String componentHtml) {
-        assertRendered("<flow-component-renderer appid=\"ROOT\">"
-                + componentHtml + "</flow-component-renderer>");
+        assertRendered(componentHtml);
     }
 
     // Gets the innerHTML of all the actually rendered item elements.
