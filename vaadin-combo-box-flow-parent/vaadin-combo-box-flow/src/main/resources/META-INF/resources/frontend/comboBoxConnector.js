@@ -1,3 +1,5 @@
+import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
+import { timeOut } from '@polymer/polymer/lib/utils/async.js';
 import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-placeholder.js';
 import { createRangeDataProvider } from '@vaadin/combo-box/src/vaadin-combo-box-range-data-provider.js';
 
@@ -17,20 +19,33 @@ import { createRangeDataProvider } from '@vaadin/combo-box/src/vaadin-combo-box-
         comboBox.$connector = {};
 
         let dataProviderCallback;
+        let filterDebouncer;
         let pages = {};
         let lastFilter = '';
 
         comboBox.dataProvider = createRangeDataProvider(
           ({ pageRange, pageSize, filter }, callback) => {
+            if (lastFilter !== filter) {
+              lastFilter = filter;
+              filterDebouncer = Debouncer.debounce(filterDebouncer, timeOut.after(500), () => {
+                // Trigger the web component to reload visible pages with the new filter.
+                comboBox.clearCache();
+              });
+              return;
+            }
+
+            // Request the range from the server.
             const startIndex = pageSize * pageRange[0];
             const endIndex = pageSize * (pageRange[1] + 1);
             const itemsCount = endIndex - startIndex;
-
             comboBox.$server.setRequestedRange(startIndex, itemsCount, filter);
 
-            if (lastFilter !== filter) {
+            // If the user interacted with the filter by any means,
+            // force the data communicator to send the whole range,
+            // even if the filter has remained the same in the end.
+            if (filterDebouncer) {
+              filterDebouncer = null;
               comboBox.$server.resetDataCommunicator();
-              lastFilter = filter;
             }
 
             dataProviderCallback = callback;
@@ -63,7 +78,7 @@ import { createRangeDataProvider } from '@vaadin/combo-box/src/vaadin-combo-box-
           if (startIndex === 0 && items.length === 0) {
             // Makes sure that the dataProvider callback is called even when server
             // returns empty data set (no items match the filter).
-            pages = {};
+            pages = { 0: [] };
             return;
           }
 
