@@ -13,16 +13,34 @@ function getNodeResult(appid, nodeid) {
   return until(new Promise((resolve) => resolve(getNode(appid, nodeid))));
 }
 
-function renderNode(appid, nodeid, root) {
-  const node = getNode(appid, nodeid);
-  if (node.parentNode !== root) {
-    root.textContent = '';
-    root.appendChild(node);
-  }
+function renderNodes(appid, nodeIds, root) {
+  root.textContent = '';
+  root.append(...nodeIds.map(id => getNode(appid, id)));
+}
+
+/**
+ * SimpleElementBindingStrategy::addChildren uses insertBefore to add child
+ * elements to the container. When the children are manually placed under
+ * another element, the call to insertBefore can occasionally fail due to
+ * a non-existing reference node.
+ * 
+ * This method patches the container's native API to not fail when called with
+ * invalid arguments.
+ */
+function patchVirtualContainer(container) {
+  const originalInsertBefore = container.insertBefore;
+  
+  container.insertBefore = function (newNode, referenceNode) {
+    if (referenceNode && referenceNode.parentNode === this) {
+      return originalInsertBefore.call(this, newNode, referenceNode);
+    } else {
+      return originalInsertBefore.call(this, newNode, null);
+    }
+  };
 }
 
 window.Vaadin ||= {};
-window.Vaadin.ComponentRenderer ||= { getNodeResult, renderNode };
+window.Vaadin.ComponentRenderer ||= { patchVirtualContainer, getNodeResult, renderNodes };
 
 class FlowComponentRenderer extends PolymerElement {
   static get template() {

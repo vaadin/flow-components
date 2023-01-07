@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.data.renderer;
 
-import java.util.Objects;
 import java.util.Optional;
 
 import com.vaadin.flow.component.Component;
@@ -147,8 +146,8 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
                 ? UI.getCurrent().getInternals().getAppId()
                 : "";
 
-        return "${ window.Vaadin.ComponentRenderer.getNodeResult('" + appId
-                + "', item.nodeid) }";
+        return "${Vaadin.ComponentRenderer.getNodeResult('" + appId
+                + "', item.nodeid)}";
     }
 
     Element getOwner() {
@@ -161,11 +160,8 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
         this.owner = owner;
         this.container = new Element("div");
         this.container.addAttachListener(event -> {
-            // Override insertBefore function to prevent Flow from
-            // trying to restore the child elements inside the virtual
-            // container element.
             this.container.executeJs(
-                    "const ib = this.insertBefore; this.insertBefore = (a, b) => { try { ib(a, b); } catch (e) { } }");
+                    "Vaadin.ComponentRenderer.patchVirtualContainer(this)");
         });
         owner.appendVirtualChild(container);
         var rendering = super.render(owner, keyMapper, rendererName);
