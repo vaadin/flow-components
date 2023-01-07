@@ -85,7 +85,7 @@ import { createRangeDataProvider } from '@vaadin/combo-box/src/vaadin-combo-box-
           if (startIndex === 0 && items.length === 0) {
             // Makes sure that the dataProvider callback is called even when server
             // returns empty data set (no items match the filter).
-            pages = { 0: [] };
+            pages[0] = [];
             return;
           }
 
