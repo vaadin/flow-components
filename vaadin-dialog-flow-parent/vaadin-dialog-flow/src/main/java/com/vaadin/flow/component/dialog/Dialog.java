@@ -969,7 +969,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
         int nodeId = container.getNode().getId();
 
         getElement().executeJs(
-                "this.renderer = (root) => window.Vaadin.ComponentRenderer.renderNodes($0, [$1], root)",
+                "this.renderer = (root) => Vaadin.FlowComponentRenderer.renderNodes($0, [$1], root)",
                 appId, nodeId);
 
         setDimension(ElementConstants.STYLE_WIDTH, width);

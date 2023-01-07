@@ -146,7 +146,7 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
                 ? UI.getCurrent().getInternals().getAppId()
                 : "";
 
-        return "${Vaadin.ComponentRenderer.getNodeResult('" + appId
+        return "${Vaadin.FlowComponentRenderer.getNode('" + appId
                 + "', item.nodeid)}";
     }
 
@@ -161,7 +161,7 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
         this.container = new Element("div");
         this.container.addAttachListener(event -> {
             this.container.executeJs(
-                    "Vaadin.ComponentRenderer.patchVirtualContainer(this)");
+                    "Vaadin.FlowComponentRenderer.patchVirtualContainer(this)");
         });
         owner.appendVirtualChild(container);
         var rendering = super.render(owner, keyMapper, rendererName);

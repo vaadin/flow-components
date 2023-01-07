@@ -5,27 +5,53 @@ import { idlePeriod } from '@polymer/polymer/lib/utils/async.js';
 import { PolymerElement } from '@polymer/polymer/polymer-element.js';
 import { until } from 'lit/directives/until.js';
 
-function getNode(appid, nodeid) {
+/**
+ * Returns the requested node from the Flow client.
+ * @param {string} appid 
+ * @param {number} nodeid 
+ * @returns {Element | null} The element if found, null otherwise.
+ */
+function getNodeInternal(appid, nodeid) {
   return window.Vaadin.Flow.clients[appid].getByNodeId(nodeid);
 }
 
-function getNodeResult(appid, nodeid) {
-  return until(new Promise((resolve) => resolve(getNode(appid, nodeid))));
+/**
+ * Returns the requested node in a form suitable for Lit template interpolation.
+ * @param {string} appid 
+ * @param {number} nodeid 
+ * @returns {any} The element if found, null otherwise.
+ */
+function getNode(appid, nodeid) {
+  // Theoretically, this method could just return the node as-is.
+  // The `until` directive is used for now to work around sizing issues
+  // with ComponentRenderer. The previously used <flow-component-renderer> was
+  // asynchronous by nature and thus worked out of the box.
+  //
+  // Test in ComponentColumnWithHeightIT::shouldPositionItemsCorrectlyAfterScrollingToEnd
+  // makes sure the sizing works correctly. The sizing issue should eventually
+  // be fixed in the Virtualizer.
+  return until(new Promise((resolve) => resolve(getNodeInternal(appid, nodeid))));
 }
 
+/**
+ * Renders the requested nodes under the given root element.
+ * @param {string} appid 
+ * @param {number[]} nodeIds
+ * @param {Element} root 
+ */
 function renderNodes(appid, nodeIds, root) {
   root.textContent = '';
-  root.append(...nodeIds.map(id => getNode(appid, id)));
+  root.append(...nodeIds.map(id => getNodeInternal(appid, id)));
 }
 
 /**
  * SimpleElementBindingStrategy::addChildren uses insertBefore to add child
  * elements to the container. When the children are manually placed under
  * another element, the call to insertBefore can occasionally fail due to
- * a non-existing reference node.
+ * an invalid reference node.
  * 
- * This method patches the container's native API to not fail when called with
- * invalid arguments.
+ * This is a temporary workaround which patches the container's native API
+ * to not fail when called with invalid arguments.
  */
 function patchVirtualContainer(container) {
   const originalInsertBefore = container.insertBefore;
@@ -40,7 +66,7 @@ function patchVirtualContainer(container) {
 }
 
 window.Vaadin ||= {};
-window.Vaadin.ComponentRenderer ||= { patchVirtualContainer, getNodeResult, renderNodes };
+window.Vaadin.FlowComponentRenderer ||= { patchVirtualContainer, getNode, renderNodes };
 
 class FlowComponentRenderer extends PolymerElement {
   static get template() {
