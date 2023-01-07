@@ -34,6 +34,13 @@ import { createRangeDataProvider } from '@vaadin/combo-box/src/vaadin-combo-box-
               return;
             }
 
+            // Ignore page requests that come while the filter debouncer is active.
+            // Those pages will get a chance to be requested again after
+            // `clearCache()` in the debouncer.
+            if (filterDebouncer && filterDebouncer.isActive()) {
+              return;
+            }
+
             // Request the range from the server.
             const startIndex = pageSize * pageRange[0];
             const endIndex = pageSize * (pageRange[1] + 1);
