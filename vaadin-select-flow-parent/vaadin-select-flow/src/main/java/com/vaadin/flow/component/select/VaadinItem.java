@@ -32,7 +32,7 @@ import com.vaadin.flow.data.binder.HasItemComponents;
  *            the type of the bean
  */
 @Tag("vaadin-item")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.21")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.22")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 class VaadinItem<T> extends Component implements
         HasItemComponents.ItemComponent<T>, HasComponents, HasStyle, HasText {
