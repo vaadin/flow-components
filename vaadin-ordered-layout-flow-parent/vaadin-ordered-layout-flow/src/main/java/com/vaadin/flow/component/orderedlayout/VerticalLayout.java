@@ -28,10 +28,10 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * wide.
  */
 @Tag("vaadin-vertical-layout")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.21")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.22")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/vertical-layout", version = "22.0.21")
-@NpmPackage(value = "@vaadin/vaadin-ordered-layout", version = "22.0.21")
+@NpmPackage(value = "@vaadin/vertical-layout", version = "22.0.22")
+@NpmPackage(value = "@vaadin/vaadin-ordered-layout", version = "22.0.22")
 @JsModule("@vaadin/vertical-layout/src/vaadin-vertical-layout.js")
 public class VerticalLayout extends Component implements ThemableLayout,
         FlexComponent, ClickNotifier<VerticalLayout> {
