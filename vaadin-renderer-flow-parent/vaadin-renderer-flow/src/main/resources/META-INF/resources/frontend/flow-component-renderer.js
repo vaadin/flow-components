@@ -34,12 +34,13 @@ function getNode(appid, nodeid) {
 }
 
 /**
- * Renders the requested nodes under the given root element.
+ * Sets the nodes defined by the given node ids as the child nodes of the
+ * given root element.
  * @param {string} appid 
  * @param {number[]} nodeIds
  * @param {Element} root 
  */
-function renderNodes(appid, nodeIds, root) {
+function setChildNodes(appid, nodeIds, root) {
   root.textContent = '';
   root.append(...nodeIds.map(id => getNodeInternal(appid, id)));
 }
@@ -66,7 +67,7 @@ function patchVirtualContainer(container) {
 }
 
 window.Vaadin ||= {};
-window.Vaadin.FlowComponentRenderer ||= { patchVirtualContainer, getNode, renderNodes };
+window.Vaadin.FlowComponentHost ||= { patchVirtualContainer, getNode, setChildNodes };
 
 class FlowComponentRenderer extends PolymerElement {
   static get template() {

@@ -177,7 +177,7 @@ public class EditorRenderer<T> extends Renderer<T> implements DataGenerator<T> {
                 "}" +
 
                 // If editing, render the editor, otherwise use the original renderer
-                "if (root.__editing) { Vaadin.FlowComponentRenderer.renderNodes('" + appId + "', [model.item._" + columnInternalId + "_editor], root); }" +
+                "if (root.__editing) { Vaadin.FlowComponentHost.setChildNodes('" + appId + "', [model.item._" + columnInternalId + "_editor], root); }" +
                 "else if (!originalRender) { root.textContent = model.item." + columnInternalId + " }" +
                 "else { originalRender(root, container, model); }" +
             "};");
