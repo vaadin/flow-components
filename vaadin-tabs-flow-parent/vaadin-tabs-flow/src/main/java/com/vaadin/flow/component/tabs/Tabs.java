@@ -367,6 +367,41 @@ public class Tabs extends Component
      * are already in the container, their positions are swapped. Tab attach and
      * detach events should be taken care as with add and remove.
      *
+     * @param oldComponent
+     *            the old tab that will be replaced. Can be <code>null</code>,
+     *            which will make the newTab to be added to the layout without
+     *            replacing any other
+     *
+     * @param newComponent
+     *            the new tab to be replaced. Can be <code>null</code>, which
+     *            will make the oldTab to be removed from the layout without
+     *            adding any other
+     *            <p>
+     *            Replacing the currently selected tab will make the new tab
+     *            selected.
+     * @deprecated since 24.0, use {@link #replace(Tab, Tab)} instead.
+     */
+    @Deprecated
+    public void replace(Component oldComponent, Component newComponent) {
+        if (oldComponent != null && !(oldComponent instanceof Tab)) {
+            throw new IllegalArgumentException(
+                    "Removing a component other than a Tab is not supported.");
+        }
+        if (newComponent != null && !(newComponent instanceof Tab)) {
+            throw new IllegalArgumentException(
+                    "Adding a component other than a Tab is not supported.");
+        }
+        replace((Tab) oldComponent, (Tab) newComponent);
+    }
+
+    /**
+     * Replaces the tab in the container with another one without changing
+     * position. This method replaces tab with another one is such way that the
+     * new tab overtakes the position of the old tab. If the old tab is not in
+     * the container, the new tab is added to the container. If the both tabs
+     * are already in the container, their positions are swapped. Tab attach and
+     * detach events should be taken care as with add and remove.
+     *
      * @param oldTab
      *            the old tab that will be replaced. Can be <code>null</code>,
      *            which will make the newTab to be added to the layout without
