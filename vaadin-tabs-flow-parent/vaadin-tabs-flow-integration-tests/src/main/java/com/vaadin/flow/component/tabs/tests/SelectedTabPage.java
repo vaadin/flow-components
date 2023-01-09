@@ -56,7 +56,7 @@ public class SelectedTabPage extends Div {
         delete.setId("delete");
 
         NativeButton addFirst = new NativeButton("Add new tab as the first",
-                event -> tabs.addComponentAsFirst(new Tab("baz")));
+                event -> tabs.addTabAsFirst(new Tab("baz")));
         addFirst.setId("add-first");
 
         NativeButton setSelectedIndex = new NativeButton("setSelectedIndex(1)",

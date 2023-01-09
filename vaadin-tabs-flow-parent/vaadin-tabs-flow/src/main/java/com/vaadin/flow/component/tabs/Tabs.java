@@ -141,6 +141,32 @@ public class Tabs extends Component
      * selection change listener has been added before adding the tabs, it will
      * be notified with the auto-selected tab.
      *
+     * @param components
+     *            the tabs to enclose
+     * @deprecated since 24.0, use {@link #add(Tab...)} instead.
+     */
+    @Deprecated
+    public void add(Component... components) {
+        Objects.requireNonNull(components, "Tabs should not be null");
+        boolean allComponentsAreTabs = Arrays.stream(components).map(
+                tab -> Objects.requireNonNull(tab, "Tab to add cannot be null"))
+                .allMatch(component -> component instanceof Tab);
+        if (!allComponentsAreTabs) {
+            throw new IllegalArgumentException(
+                    "Adding a component other than a Tab is not supported.");
+        }
+        add((Tab[]) components);
+    }
+
+    /**
+     * Adds the given tabs to the component.
+     * <p>
+     * The first added {@link Tab} component will be automatically selected,
+     * unless auto-selection is explicitly disabled with
+     * {@link #Tabs(boolean, Tab...)}, or {@link #setAutoselect(boolean)}. If a
+     * selection change listener has been added before adding the tabs, it will
+     * be notified with the auto-selected tab.
+     *
      * @param tabs
      *            the tabs to enclose
      */
@@ -164,6 +190,36 @@ public class Tabs extends Component
     /**
      * Removes the given child tabs from this component.
      *
+     * @param components
+     *            the tabs to remove
+     * @throws IllegalArgumentException
+     *             if there is a tab whose non {@code null} parent is not this
+     *             component
+     *             <p>
+     *             Removing tabs before the selected tab will decrease the
+     *             {@link #getSelectedIndex() selected index} to avoid changing
+     *             the selected tab. Removing the selected tab will select the
+     *             next available tab if autoselect is true, otherwise no tab
+     *             will be selected.
+     * @deprecated since 24.0, use {@link #remove(Tab...)} instead.
+     */
+    @Deprecated
+    public void remove(Component... components) {
+        Objects.requireNonNull(components, "Tabs should not be null");
+        boolean allComponentsAreTabs = Arrays.stream(components)
+                .map(tab -> Objects.requireNonNull(tab,
+                        "Tab to remove cannot be null"))
+                .allMatch(component -> component instanceof Tab);
+        if (!allComponentsAreTabs) {
+            throw new IllegalArgumentException(
+                    "Adding a component other than a Tab is not supported.");
+        }
+        remove((Tab[]) components);
+    }
+
+    /**
+     * Removes the given child tabs from this component.
+     *
      * @param tabs
      *            the tabs to remove
      * @throws IllegalArgumentException
@@ -181,7 +237,7 @@ public class Tabs extends Component
         int lowerIndices = (int) Stream.of(tabs).map(this::indexOf)
                 .filter(index -> index >= 0 && index < selectedIndex).count();
 
-        Tab selectedTab = getComponentAt(selectedIndex);
+        Tab selectedTab = getTabAt(selectedIndex);
         boolean isSelectedTab = selectedTab == null
                 || Stream.of(tabs).anyMatch(selectedTab::equals);
 
@@ -251,6 +307,33 @@ public class Tabs extends Component
      * @param index
      *            the index, where the tab will be added. The index must be
      *            non-negative and may not exceed the children count
+     * @param component
+     *            the tab to add, value should not be null
+     *            <p>
+     *            Adding a tab before the currently selected tab will increment
+     *            the {@link #getSelectedIndex() selected index} to avoid
+     *            changing the selected tab.
+     * @deprecated since 24.0, use {@link #addTabAtIndex(int, Tab)} instead.
+     */
+    @Deprecated
+    public void addComponentAtIndex(int index, Component component) {
+        Objects.requireNonNull(component, "Tab should not be null");
+        if (!(component instanceof Tab)) {
+            throw new IllegalArgumentException(
+                    "Adding a component other than a Tab is not supported.");
+        }
+        addTabAtIndex(index, (Tab) component);
+    }
+
+    /**
+     * Adds the given tab as child of this tab at the specific index.
+     * <p>
+     * In case the specified tab has already been added to another parent, it
+     * will be removed from there and added to this one.
+     *
+     * @param index
+     *            the index, where the tab will be added. The index must be
+     *            non-negative and may not exceed the children count
      * @param tab
      *            the tab to add, value should not be null
      *            <p>
@@ -258,7 +341,7 @@ public class Tabs extends Component
      *            the {@link #getSelectedIndex() selected index} to avoid
      *            changing the selected tab.
      */
-    public void addComponentAtIndex(int index, Tab tab) {
+    public void addTabAtIndex(int index, Tab tab) {
         Objects.requireNonNull(tab, "Tab should not be null");
         if (index < 0) {
             throw new IllegalArgumentException(
@@ -436,7 +519,7 @@ public class Tabs extends Component
         if (selectedIndex < 0) {
             return null;
         }
-        return getComponentAt(selectedIndex);
+        return getTabAt(selectedIndex);
     }
 
     /**
@@ -586,6 +669,24 @@ public class Tabs extends Component
     /**
      * Returns the index of the given tab.
      *
+     * @param component
+     *            the tab to look up, can not be <code>null</code>
+     * @return the index of the tab or -1 if the tab is not a child
+     * @deprecated since 24.0, use {@link #indexOf(Tab)} instead.
+     */
+    @Deprecated
+    public int indexOf(Component component) {
+        Objects.requireNonNull(component, "Tab should not be null");
+        if (!(component instanceof Tab)) {
+            throw new IllegalArgumentException(
+                    "Adding a component other than a Tab is not supported.");
+        }
+        return indexOf((Tab) component);
+    }
+
+    /**
+     * Returns the index of the given tab.
+     *
      * @param tab
      *            the tab to look up, can not be <code>null</code>
      * @return the index of the tab or -1 if the tab is not a child
@@ -626,8 +727,25 @@ public class Tabs extends Component
      * @throws IllegalArgumentException
      *             if the index is less than 0 or greater than or equals to the
      *             number of children tabs
+     * @deprecated since 24.0, use {@link #getTabAt(int)} instead.
      */
-    public Tab getComponentAt(int index) {
+    @Deprecated
+    public Component getComponentAt(int index) {
+        return getTabAt(index);
+    }
+
+    /**
+     * Returns the tab at the given position.
+     *
+     * @param index
+     *            the position of the tab, must be greater than or equals to 0
+     *            and less than the number of children tabs
+     * @return The tab at the given index
+     * @throws IllegalArgumentException
+     *             if the index is less than 0 or greater than or equals to the
+     *             number of children tabs
+     */
+    public Tab getTabAt(int index) {
         if (index < 0) {
             throw new IllegalArgumentException(
                     "The 'index' argument should be greater than or equal to 0. It was: "
@@ -645,10 +763,30 @@ public class Tabs extends Component
      * In case the specified tab has already been added to another parent, it
      * will be removed from there and added to this one.
      *
+     * @param component
+     *            the tab to add, value should not be null
+     * @deprecated since 24.0, use {@link #addTabAsFirst(Tab)} instead.
+     */
+    @Deprecated
+    public void addComponentAsFirst(Component component) {
+        Objects.requireNonNull(component, "Tab should not be null");
+        if (!(component instanceof Tab)) {
+            throw new IllegalArgumentException(
+                    "Adding a component other than a Tab is not supported.");
+        }
+        addTabAsFirst((Tab) component);
+    }
+
+    /**
+     * Adds the given tab as the first child of this component.
+     * <p>
+     * In case the specified tab has already been added to another parent, it
+     * will be removed from there and added to this one.
+     *
      * @param tab
      *            the tab to add, value should not be null
      */
-    public void addComponentAsFirst(Tab tab) {
-        addComponentAtIndex(0, tab);
+    public void addTabAsFirst(Tab tab) {
+        addTabAtIndex(0, tab);
     }
 }
