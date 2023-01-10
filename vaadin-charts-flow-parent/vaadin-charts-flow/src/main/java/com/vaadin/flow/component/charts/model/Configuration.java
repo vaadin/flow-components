@@ -1169,15 +1169,6 @@ public class Configuration extends AbstractConfigurationObject
         getLabels().add(label);
     }
 
-    /**
-     * Clears all labels
-     *
-     * @see #setLabels(AnnotationItemLabel...)
-     */
-    public void clearLabels() {
-        getLabelsAnnotation().clearLabels();
-    }
-
     private AnnotationItem getLabelsAnnotation() {
         if (annotations == null) {
             annotations = List.of(new AnnotationItem());
