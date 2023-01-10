@@ -25,7 +25,7 @@ public class VirtualListDataProviderRefreshIT extends AbstractComponentIT {
     @Test
     public void refreshItem_itemUpdated() {
         // Wait for initial renderer
-        virtualList.$("flow-component-renderer").waitForFirst();
+        virtualList.$("span").waitForFirst();
         // Check initial render
         assertItemText(4, "Item5");
 
@@ -38,7 +38,7 @@ public class VirtualListDataProviderRefreshIT extends AbstractComponentIT {
     @Test
     public void refreshAll_allItemsUpdated() {
         // Wait for initial renderer
-        virtualList.$("flow-component-renderer").waitForFirst();
+        virtualList.$("span").waitForFirst();
         // Check initial render
         assertItemText(0, "Item1");
         assertItemText(7, "Item8");
@@ -53,8 +53,7 @@ public class VirtualListDataProviderRefreshIT extends AbstractComponentIT {
     }
 
     private void assertItemText(int itemIndex, String expectedText) {
-        TestBenchElement item = virtualList.$("flow-component-renderer")
-                .get(itemIndex);
+        TestBenchElement item = virtualList.$("span").get(itemIndex);
         Assert.assertEquals(expectedText, item.getText());
     }
 }

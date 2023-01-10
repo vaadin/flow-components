@@ -585,6 +585,7 @@ public class GridViewEditorIT extends AbstractComponentIT {
 
         TestBenchElement nameInput = nameField.$("input").first();
         nameInput.click();
+        nameInput.focus();
 
         // Move caret to the end of the text
         new Actions(getDriver()).sendKeys(Keys.END).build().perform();

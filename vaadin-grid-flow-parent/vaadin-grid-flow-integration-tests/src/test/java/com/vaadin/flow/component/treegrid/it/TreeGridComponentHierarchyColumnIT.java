@@ -5,7 +5,6 @@ import java.util.stream.IntStream;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.By;
 
 import com.vaadin.flow.testutil.TestPath;
 
@@ -36,9 +35,8 @@ public class TreeGridComponentHierarchyColumnIT extends AbstractTreeGridIT {
     private void assertAllRowsHasTextField(int expectedRowCount) {
         Assert.assertEquals(expectedRowCount, getTreeGrid().getRowCount());
         IntStream.range(0, getTreeGrid().getRowCount())
-                .forEach(i -> Assert.assertTrue(
+                .forEach(i -> Assert.assertNotNull(
                         "Row with index " + i + " has no component renderer",
-                        getTreeGrid().hasComponentRenderer(i, 0,
-                                By.tagName("vaadin-text-field"))));
+                        getTreeGrid().getCell(i, 0).$("vaadin-text-field")));
     }
 }

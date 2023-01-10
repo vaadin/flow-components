@@ -505,6 +505,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
     public void smallCustomPageSize_filter_selectItem_loadingStateResolved() {
         String item = "2";
 
+        lazyWithSmallCustomPageSize.openPopup();
         lazyWithSmallCustomPageSize.selectByText(item);
         lazyWithSmallCustomPageSize.setFilter(item);
         Assert.assertEquals(item,

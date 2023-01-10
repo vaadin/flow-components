@@ -44,10 +44,10 @@ public class GridViewUsingComponentsIT extends AbstractComponentIT {
         WebElement grid = findElement(By.id("component-renderer"));
         scrollToElement(grid);
 
-        Assert.assertTrue(hasComponentRendereredCell(grid,
-                "<div>Hi, I'm Person 1!</div>"));
-        Assert.assertTrue(hasComponentRendereredCell(grid,
-                "<div>Hi, I'm Person 2!</div>"));
+        Assert.assertTrue(
+                hasComponentRendereredCell(grid, "Hi, I'm Person 1!", "div"));
+        Assert.assertTrue(
+                hasComponentRendereredCell(grid, "Hi, I'm Person 2!", "div"));
 
         WebElement idField = findElement(By.id("component-renderer-id-field"));
         WebElement nameField = findElement(
@@ -62,7 +62,7 @@ public class GridViewUsingComponentsIT extends AbstractComponentIT {
         clickElementWithJs(updateButton);
 
         waitUntil(driver -> hasComponentRendereredCell(grid,
-                "<div>Hi, I'm SomeOtherName!</div>"), 3);
+                "Hi, I'm SomeOtherName!", "div"));
 
         idField.sendKeys(Keys.BACK_SPACE, "2");
         executeScript("arguments[0].blur();", idField);
@@ -71,7 +71,7 @@ public class GridViewUsingComponentsIT extends AbstractComponentIT {
         clickElementWithJs(updateButton);
 
         waitUntil(driver -> hasComponentRendereredCell(grid,
-                "<div>Hi, I'm SomeOtherName2!</div>"));
+                "Hi, I'm SomeOtherName2!", "div"));
     }
 
     @Test
@@ -113,11 +113,6 @@ public class GridViewUsingComponentsIT extends AbstractComponentIT {
     private WebElement getRow(TestBenchElement grid, int row) {
         return grid.$("*").id("items").findElements(By.cssSelector("tr"))
                 .get(row);
-    }
-
-    private boolean hasComponentRendereredCell(WebElement grid, String text) {
-        return hasComponentRendereredCell(grid, text,
-                "flow-component-renderer");
     }
 
     private boolean hasComponentRendereredCell(WebElement grid, String text,

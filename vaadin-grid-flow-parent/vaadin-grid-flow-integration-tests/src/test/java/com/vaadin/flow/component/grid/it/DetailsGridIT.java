@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.grid.it;
 
 import java.util.List;
-import java.util.Locale;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -38,28 +37,22 @@ public class DetailsGridIT extends AbstractComponentIT {
 
         assertAmountOfOpenDetails(grid, 0);
 
-        clickElementWithJs(getRow(grid, 0).findElement(By.tagName("td")));
+        grid.getCell(0, 0).click();
+        waitUntil(e -> getDetailsElements(grid).size() == 1, 1);
 
-        WebElement detailsElement = grid
-                .findElement(By.tagName("flow-component-renderer"));
+        Assert.assertEquals("Jorma", getDetailsElements(grid).get(0).getText());
 
-        List<WebElement> children = detailsElement
-                .findElements(By.tagName("span"));
-        Assert.assertEquals(1, children.size());
-
-        Assert.assertEquals("span",
-                children.get(0).getTagName().toLowerCase(Locale.ENGLISH));
-        Assert.assertEquals("Jorma", children.get(0).getText());
-
-        clickElementWithJs(getRow(grid, 1).findElement(By.tagName("td")));
+        grid.getCell(1, 0).click();
+        waitUntil(e -> getDetailsElements(grid).size() == 1, 1);
 
         Assert.assertEquals("Expected element to be reused in new details view",
-                "Jarmo", children.get(0).getText());
+                "Jarmo", getDetailsElements(grid).get(0).getText());
 
-        clickElementWithJs(getRow(grid, 2).findElement(By.tagName("td")));
+        grid.getCell(2, 0).click();
+        waitUntil(e -> getDetailsElements(grid).size() == 1, 1);
 
         Assert.assertEquals("Expected element to be reused in new details view",
-                "Jethro", children.get(0).getText());
+                "Jethro", getDetailsElements(grid).get(0).getText());
 
         findElement(By.id("next")).click();
 
@@ -76,8 +69,7 @@ public class DetailsGridIT extends AbstractComponentIT {
                 grid.findElements(By.className("custom-details")).size());
     }
 
-    private WebElement getRow(GridElement grid, int row) {
-        return grid.$("*").id("items").findElements(By.cssSelector("tr"))
-                .get(row);
+    private List<WebElement> getDetailsElements(GridElement grid) {
+        return grid.findElements(By.tagName("span"));
     }
 }

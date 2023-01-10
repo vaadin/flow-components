@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.data.renderer;
 
-import java.util.Objects;
 import java.util.Optional;
 
 import com.vaadin.flow.component.Component;
@@ -54,7 +53,6 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
     private SerializableFunction<SOURCE, COMPONENT> componentFunction;
     private SerializableBiFunction<Component, SOURCE, Component> componentUpdateFunction;
     private SerializableBiConsumer<COMPONENT, SOURCE> itemConsumer;
-    private String componentRendererTag = "flow-component-renderer";
 
     /**
      * Creates a new ComponentRenderer that uses the componentSupplier to
@@ -148,9 +146,8 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
                 ? UI.getCurrent().getInternals().getAppId()
                 : "";
 
-        return String.format(
-                "<%s appid=\"%s\" .nodeid=\"${item.nodeid}\"></%s>",
-                componentRendererTag, appId, componentRendererTag);
+        return "${Vaadin.FlowComponentHost.getNode('" + appId
+                + "', item.nodeid)}";
     }
 
     Element getOwner() {
@@ -162,6 +159,10 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
             DataKeyMapper<SOURCE> keyMapper, String rendererName) {
         this.owner = owner;
         this.container = new Element("div");
+        this.container.addAttachListener(event -> {
+            this.container.executeJs(
+                    "Vaadin.FlowComponentHost.patchVirtualContainer(this)");
+        });
         owner.appendVirtualChild(container);
         var rendering = super.render(owner, keyMapper, rendererName);
 
@@ -202,21 +203,6 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
                 return rendering.getRegistration();
             }
         };
-    }
-
-    /**
-     * Sets the tag of the webcomponent used at the client-side to manage
-     * component rendering inside {@code <template>}. By default it uses
-     * {@code <flow-component-renderer>}.
-     *
-     * @param componentRendererTag
-     *            the tag of the client-side webcomponent for component
-     *            rendering, not <code>null</code>
-     */
-    public void setComponentRendererTag(String componentRendererTag) {
-        Objects.requireNonNull(componentRendererTag,
-                "The componentRendererTag should not be null");
-        this.componentRendererTag = componentRendererTag;
     }
 
     /**
