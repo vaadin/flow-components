@@ -131,7 +131,7 @@ public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
         if (position < 0) {
             tabs.add(tab);
         } else {
-            tabs.addComponentAtIndex(position, tab);
+            tabs.addTabAtIndex(position, tab);
         }
 
         // Make sure possible old content related to the same tab gets removed
@@ -242,7 +242,7 @@ public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
     /**
      * Returns the tab at the given position.
      *
-     * @param index
+     * @param position
      *            the position of the tab, must be greater than or equals to 0
      *            and less than the number of tabs
      * @return The tab at the given index
@@ -251,7 +251,7 @@ public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
      *             number of tabs
      */
     public Tab getTabAt(int position) {
-        return (Tab) tabs.getComponentAt(position);
+        return tabs.getTabAt(position);
     }
 
     /**

@@ -17,6 +17,10 @@
 package com.vaadin.flow.component.tabs;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -26,7 +30,7 @@ import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.HasOrderedComponents;
+import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Synchronize;
@@ -34,7 +38,9 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.shared.Registration;
+import org.slf4j.LoggerFactory;
 
 /**
  * Tabs are used to organize and group content into sections that the user can
@@ -64,8 +70,8 @@ import com.vaadin.flow.shared.Registration;
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/tabs/src/vaadin-tabs.js")
 @NpmPackage(value = "@vaadin/tabs", version = "24.0.0-alpha10")
-public class Tabs extends Component implements HasOrderedComponents, HasSize,
-        HasStyle, HasThemeVariant<TabsVariant> {
+public class Tabs extends Component
+        implements HasEnabled, HasSize, HasStyle, HasThemeVariant<TabsVariant> {
 
     private static final String SELECTED = "selected";
 
@@ -135,18 +141,42 @@ public class Tabs extends Component implements HasOrderedComponents, HasSize,
      * selection change listener has been added before adding the tabs, it will
      * be notified with the auto-selected tab.
      *
+     * @param components
+     *            the tabs to enclose
+     * @deprecated since 24.0, use {@link #add(Tab...)} instead.
+     */
+    @Deprecated
+    public void add(Component... components) {
+        Objects.requireNonNull(components, "Tabs should not be null");
+        boolean allComponentsAreTabs = Arrays.stream(components).map(
+                tab -> Objects.requireNonNull(tab, "Tab to add cannot be null"))
+                .allMatch(component -> component instanceof Tab);
+        if (!allComponentsAreTabs) {
+            throw new IllegalArgumentException(
+                    "Adding a component other than a Tab is not supported.");
+        }
+        add((Tab[]) components);
+    }
+
+    /**
+     * Adds the given tabs to the component.
+     * <p>
+     * The first added {@link Tab} component will be automatically selected,
+     * unless auto-selection is explicitly disabled with
+     * {@link #Tabs(boolean, Tab...)}, or {@link #setAutoselect(boolean)}. If a
+     * selection change listener has been added before adding the tabs, it will
+     * be notified with the auto-selected tab.
+     *
      * @param tabs
      *            the tabs to enclose
      */
     public void add(Tab... tabs) {
-        add((Component[]) tabs);
-    }
-
-    @Override
-    public void add(Component... components) {
+        Objects.requireNonNull(tabs, "Tabs should not be null");
         boolean wasEmpty = getComponentCount() == 0;
-        HasOrderedComponents.super.add(components);
-        if (components.length == 0) {
+        Arrays.stream(tabs).map(
+                tab -> Objects.requireNonNull(tab, "Tab to add cannot be null"))
+                .map(Tab::getElement).forEach(getElement()::appendChild);
+        if (tabs.length == 0) {
             return;
         }
         if (wasEmpty && autoselect) {
@@ -158,23 +188,60 @@ public class Tabs extends Component implements HasOrderedComponents, HasSize,
     }
 
     /**
-     * {@inheritDoc}
-     * <p>
-     * Removing components before the selected tab will decrease the
-     * {@link #getSelectedIndex() selected index} to avoid changing the selected
-     * tab. Removing the selected tab will select the next available tab if
-     * autoselect is true, otherwise no tab will be selected.
+     * Removes the given child tabs from this component.
+     *
+     * @param components
+     *            the tabs to remove
+     * @throws IllegalArgumentException
+     *             if there is a tab whose non {@code null} parent is not this
+     *             component
+     *             <p>
+     *             Removing tabs before the selected tab will decrease the
+     *             {@link #getSelectedIndex() selected index} to avoid changing
+     *             the selected tab. Removing the selected tab will select the
+     *             next available tab if autoselect is true, otherwise no tab
+     *             will be selected.
+     * @deprecated since 24.0, use {@link #remove(Tab...)} instead.
      */
-    @Override
+    @Deprecated
     public void remove(Component... components) {
-        int lowerIndices = (int) Stream.of(components).map(this::indexOf)
-                .filter(index -> index >= 0 && index < getSelectedIndex())
-                .count();
+        Objects.requireNonNull(components, "Tabs should not be null");
+        boolean allComponentsAreTabs = Arrays.stream(components)
+                .map(tab -> Objects.requireNonNull(tab,
+                        "Tab to remove cannot be null"))
+                .allMatch(component -> component instanceof Tab);
+        if (!allComponentsAreTabs) {
+            throw new IllegalArgumentException(
+                    "Adding a component other than a Tab is not supported.");
+        }
+        remove((Tab[]) components);
+    }
 
-        boolean isSelectedTab = Stream.of(components)
-                .anyMatch(component -> component.equals(getSelectedTab()));
+    /**
+     * Removes the given child tabs from this component.
+     *
+     * @param tabs
+     *            the tabs to remove
+     * @throws IllegalArgumentException
+     *             if there is a tab whose non {@code null} parent is not this
+     *             component
+     *             <p>
+     *             Removing tabs before the selected tab will decrease the
+     *             {@link #getSelectedIndex() selected index} to avoid changing
+     *             the selected tab. Removing the selected tab will select the
+     *             next available tab if autoselect is true, otherwise no tab
+     *             will be selected.
+     */
+    public void remove(Tab... tabs) {
+        int selectedIndex = getSelectedIndex();
+        int lowerIndices = (int) Stream.of(tabs).map(this::indexOf)
+                .filter(index -> index >= 0 && index < selectedIndex).count();
 
-        HasOrderedComponents.super.remove(components);
+        Tab selectedTab = getTabAt(selectedIndex);
+        boolean isSelectedTab = selectedTab == null
+                || Stream.of(tabs).anyMatch(selectedTab::equals);
+
+        doRemoveTabs(tabs);
 
         // Prevents changing the selected tab
         int newSelectedIndex = getSelectedIndex() - lowerIndices;
@@ -195,14 +262,35 @@ public class Tabs extends Component implements HasOrderedComponents, HasSize,
         }
     }
 
+    private void doRemoveTabs(Tab... tabs) {
+        List<Tab> toRemove = new ArrayList<>(tabs.length);
+        for (Tab tab : tabs) {
+            Objects.requireNonNull(tab, "Tab to remove cannot be null");
+            Element parent = tab.getElement().getParent();
+            if (parent == null) {
+                LoggerFactory.getLogger(getClass())
+                        .debug("Remove of a tab with no parent does nothing.");
+                continue;
+            }
+            if (getElement().equals(parent)) {
+                toRemove.add(tab);
+            } else {
+                throw new IllegalArgumentException("The given tab (" + tab
+                        + ") is not a child of this tab");
+            }
+        }
+        toRemove.stream().map(Tab::getElement)
+                .forEach(getElement()::removeChild);
+    }
+
     /**
-     * {@inheritDoc}
+     * Removes all tabs from this component. It also removes the children that
+     * were added only at the client-side.
      * <p>
      * This will reset the {@link #getSelectedIndex() selected index} to zero.
      */
-    @Override
     public void removeAll() {
-        HasOrderedComponents.super.removeAll();
+        getElement().removeAllChildren();
         if (getSelectedIndex() > -1) {
             setSelectedIndex(-1);
         } else {
@@ -211,15 +299,57 @@ public class Tabs extends Component implements HasOrderedComponents, HasSize,
     }
 
     /**
-     * {@inheritDoc}
+     * Adds the given tab as child of this tab at the specific index.
      * <p>
-     * Adding a component before the currently selected tab will increment the
-     * {@link #getSelectedIndex() selected index} to avoid changing the selected
-     * tab.
+     * In case the specified tab has already been added to another parent, it
+     * will be removed from there and added to this one.
+     *
+     * @param index
+     *            the index, where the tab will be added. The index must be
+     *            non-negative and may not exceed the children count
+     * @param component
+     *            the tab to add, value should not be null
+     *            <p>
+     *            Adding a tab before the currently selected tab will increment
+     *            the {@link #getSelectedIndex() selected index} to avoid
+     *            changing the selected tab.
+     * @deprecated since 24.0, use {@link #addTabAtIndex(int, Tab)} instead.
      */
-    @Override
+    @Deprecated
     public void addComponentAtIndex(int index, Component component) {
-        HasOrderedComponents.super.addComponentAtIndex(index, component);
+        Objects.requireNonNull(component, "Tab should not be null");
+        if (!(component instanceof Tab)) {
+            throw new IllegalArgumentException(
+                    "Adding a component other than a Tab is not supported.");
+        }
+        addTabAtIndex(index, (Tab) component);
+    }
+
+    /**
+     * Adds the given tab as child of this tab at the specific index.
+     * <p>
+     * In case the specified tab has already been added to another parent, it
+     * will be removed from there and added to this one.
+     *
+     * @param index
+     *            the index, where the tab will be added. The index must be
+     *            non-negative and may not exceed the children count
+     * @param tab
+     *            the tab to add, value should not be null
+     *            <p>
+     *            Adding a tab before the currently selected tab will increment
+     *            the {@link #getSelectedIndex() selected index} to avoid
+     *            changing the selected tab.
+     */
+    public void addTabAtIndex(int index, Tab tab) {
+        Objects.requireNonNull(tab, "Tab should not be null");
+        if (index < 0) {
+            throw new IllegalArgumentException(
+                    "Cannot add a tab with a negative index");
+        }
+        // The case when the index is bigger than the children count is handled
+        // inside the method below
+        getElement().insertChild(index, tab.getElement());
 
         if (autoselect && getChildren().count() == 1) {
             setSelectedIndex(0);
@@ -230,14 +360,86 @@ public class Tabs extends Component implements HasOrderedComponents, HasSize,
     }
 
     /**
-     * {@inheritDoc}
-     * <p>
-     * Replacing the currently selected tab will make the new tab selected.
+     * Replaces the tab in the container with another one without changing
+     * position. This method replaces tab with another one is such way that the
+     * new tab overtakes the position of the old tab. If the old tab is not in
+     * the container, the new tab is added to the container. If the both tabs
+     * are already in the container, their positions are swapped. Tab attach and
+     * detach events should be taken care as with add and remove.
+     *
+     * @param oldComponent
+     *            the old tab that will be replaced. Can be <code>null</code>,
+     *            which will make the newTab to be added to the layout without
+     *            replacing any other
+     *
+     * @param newComponent
+     *            the new tab to be replaced. Can be <code>null</code>, which
+     *            will make the oldTab to be removed from the layout without
+     *            adding any other
+     *            <p>
+     *            Replacing the currently selected tab will make the new tab
+     *            selected.
+     * @deprecated since 24.0, use {@link #replace(Tab, Tab)} instead.
      */
-    @Override
+    @Deprecated
     public void replace(Component oldComponent, Component newComponent) {
-        HasOrderedComponents.super.replace(oldComponent, newComponent);
+        if (oldComponent != null && !(oldComponent instanceof Tab)) {
+            throw new IllegalArgumentException(
+                    "Removing a component other than a Tab is not supported.");
+        }
+        if (newComponent != null && !(newComponent instanceof Tab)) {
+            throw new IllegalArgumentException(
+                    "Adding a component other than a Tab is not supported.");
+        }
+        replace((Tab) oldComponent, (Tab) newComponent);
+    }
+
+    /**
+     * Replaces the tab in the container with another one without changing
+     * position. This method replaces tab with another one is such way that the
+     * new tab overtakes the position of the old tab. If the old tab is not in
+     * the container, the new tab is added to the container. If the both tabs
+     * are already in the container, their positions are swapped. Tab attach and
+     * detach events should be taken care as with add and remove.
+     *
+     * @param oldTab
+     *            the old tab that will be replaced. Can be <code>null</code>,
+     *            which will make the newTab to be added to the layout without
+     *            replacing any other
+     *
+     * @param newTab
+     *            the new tab to be replaced. Can be <code>null</code>, which
+     *            will make the oldTab to be removed from the layout without
+     *            adding any other
+     *            <p>
+     *            Replacing the currently selected tab will make the new tab
+     *            selected.
+     */
+    public void replace(Tab oldTab, Tab newTab) {
+        if (oldTab == null && newTab == null) {
+            // NO-OP
+        } else if (oldTab == null) {
+            add(newTab);
+        } else if (newTab == null) {
+            remove(oldTab);
+        } else {
+            doReplace(oldTab, newTab);
+        }
         updateSelectedTab(false);
+    }
+
+    private void doReplace(Tab oldTab, Tab newTab) {
+        Element element = getElement();
+        int oldIndex = element.indexOfChild(oldTab.getElement());
+        int newIndex = element.indexOfChild(newTab.getElement());
+        if (oldIndex >= 0 && newIndex >= 0) {
+            element.insertChild(oldIndex, newTab.getElement());
+            element.insertChild(newIndex, oldTab.getElement());
+        } else if (oldIndex >= 0) {
+            element.setChild(oldIndex, newTab.getElement());
+        } else {
+            add(newTab);
+        }
     }
 
     /**
@@ -352,14 +554,7 @@ public class Tabs extends Component implements HasOrderedComponents, HasSize,
         if (selectedIndex < 0) {
             return null;
         }
-
-        Component selectedComponent = getComponentAt(selectedIndex);
-        if (!(selectedComponent instanceof Tab)) {
-            throw new IllegalStateException(
-                    "Illegal component inside Tabs: " + selectedComponent + "."
-                            + "Component should be an instance of Tab.");
-        }
-        return (Tab) selectedComponent;
+        return getTabAt(selectedIndex);
     }
 
     /**
@@ -506,4 +701,127 @@ public class Tabs extends Component implements HasOrderedComponents, HasSize,
         }
     }
 
+    /**
+     * Returns the index of the given tab.
+     *
+     * @param component
+     *            the tab to look up, can not be <code>null</code>
+     * @return the index of the tab or -1 if the tab is not a child
+     * @deprecated since 24.0, use {@link #indexOf(Tab)} instead.
+     */
+    @Deprecated
+    public int indexOf(Component component) {
+        Objects.requireNonNull(component, "Tab should not be null");
+        if (!(component instanceof Tab)) {
+            throw new IllegalArgumentException(
+                    "Adding a component other than a Tab is not supported.");
+        }
+        return indexOf((Tab) component);
+    }
+
+    /**
+     * Returns the index of the given tab.
+     *
+     * @param tab
+     *            the tab to look up, can not be <code>null</code>
+     * @return the index of the tab or -1 if the tab is not a child
+     */
+    public int indexOf(Tab tab) {
+        if (tab == null) {
+            throw new IllegalArgumentException(
+                    "The 'tab' parameter cannot be null");
+        }
+        Iterator<Component> it = getChildren().sequential().iterator();
+        int index = 0;
+        while (it.hasNext()) {
+            Component next = it.next();
+            if (tab.equals(next)) {
+                return index;
+            }
+            index++;
+        }
+        return -1;
+    }
+
+    /**
+     * Gets the number of children tabs.
+     *
+     * @return the number of tabs
+     */
+    public int getComponentCount() {
+        return (int) getChildren().count();
+    }
+
+    /**
+     * Returns the tab at the given position.
+     *
+     * @param index
+     *            the position of the tab, must be greater than or equals to 0
+     *            and less than the number of children tabs
+     * @return The tab at the given index
+     * @throws IllegalArgumentException
+     *             if the index is less than 0 or greater than or equals to the
+     *             number of children tabs
+     * @deprecated since 24.0, use {@link #getTabAt(int)} instead.
+     */
+    @Deprecated
+    public Component getComponentAt(int index) {
+        return getTabAt(index);
+    }
+
+    /**
+     * Returns the tab at the given position.
+     *
+     * @param index
+     *            the position of the tab, must be greater than or equals to 0
+     *            and less than the number of children tabs
+     * @return The tab at the given index
+     * @throws IllegalArgumentException
+     *             if the index is less than 0 or greater than or equals to the
+     *             number of children tabs
+     */
+    public Tab getTabAt(int index) {
+        if (index < 0) {
+            throw new IllegalArgumentException(
+                    "The 'index' argument should be greater than or equal to 0. It was: "
+                            + index);
+        }
+        return (Tab) getChildren().sequential().skip(index).findFirst()
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "The 'index' argument should not be greater than or equals to the number of children tabs. It was: "
+                                + index));
+    }
+
+    /**
+     * Adds the given tab as the first child of this component.
+     * <p>
+     * In case the specified tab has already been added to another parent, it
+     * will be removed from there and added to this one.
+     *
+     * @param component
+     *            the tab to add, value should not be null
+     * @deprecated since 24.0, use {@link #addTabAsFirst(Tab)} instead.
+     */
+    @Deprecated
+    public void addComponentAsFirst(Component component) {
+        Objects.requireNonNull(component, "Tab should not be null");
+        if (!(component instanceof Tab)) {
+            throw new IllegalArgumentException(
+                    "Adding a component other than a Tab is not supported.");
+        }
+        addTabAsFirst((Tab) component);
+    }
+
+    /**
+     * Adds the given tab as the first child of this component.
+     * <p>
+     * In case the specified tab has already been added to another parent, it
+     * will be removed from there and added to this one.
+     *
+     * @param tab
+     *            the tab to add, value should not be null
+     */
+    public void addTabAsFirst(Tab tab) {
+        addTabAtIndex(0, tab);
+    }
 }
