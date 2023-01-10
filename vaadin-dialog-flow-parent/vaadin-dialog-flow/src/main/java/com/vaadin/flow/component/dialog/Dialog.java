@@ -909,6 +909,14 @@ public class Dialog extends Component implements HasComponents, HasSize,
         return super.addDetachListener(listener);
     }
 
+    /**
+     * Updates the virtualChildNodeIds property of the dialog element.
+     * <p>
+     * This method is called whenever the dialog's child components change.
+     * <p>
+     * Also calls {@code requestContentUpdate} on the dialog element to trigger
+     * the content update.
+     */
     private void updateVirtualChildNodeIds() {
         this.getElement().setPropertyList("virtualChildNodeIds",
                 container.getChildren()

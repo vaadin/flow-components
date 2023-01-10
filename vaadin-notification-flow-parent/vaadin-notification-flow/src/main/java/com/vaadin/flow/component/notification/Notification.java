@@ -582,15 +582,24 @@ public class Notification extends Component implements HasComponents, HasStyle,
     private void configureComponentRenderer() {
         this.getElement().removeProperty("text");
         updateVirtualChildNodeIds();
-
-        this.getElement().callJsFunction("requestContentUpdate");
     }
 
+    /**
+     * Updates the virtualChildNodeIds property of the notification element.
+     * <p>
+     * This method is called whenever the notification's child components
+     * change.
+     * <p>
+     * Also calls {@code requestContentUpdate} on the notification element to
+     * trigger the content update.
+     */
     private void updateVirtualChildNodeIds() {
         this.getElement().setPropertyList("virtualChildNodeIds",
                 container.getChildren()
                         .map(element -> element.getNode().getId())
                         .collect(Collectors.toList()));
+
+        this.getElement().callJsFunction("requestContentUpdate");
     }
 
     @Override
