@@ -50,6 +50,7 @@ import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.dnd.DragSource;
@@ -4416,9 +4417,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * Scrolls to the last data row of the grid.
      */
     public void scrollToEnd() {
-        getUI().ifPresent(
-                ui -> ui.beforeClientResponse(this, ctx -> getElement()
-                        .executeJs("this.scrollToIndex(this._effectiveSize)")));
+        getUI().orElseGet(UI::getCurrent).beforeClientResponse(this,
+                ctx -> getElement().executeJs(
+                        "const el=this; setTimeout(()=>el.scrollToIndex(el._effectiveSize),0);"));
     }
 
     private void onDragStart(GridDragStartEvent<T> event) {
