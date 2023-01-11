@@ -25,6 +25,7 @@ import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
+import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 import com.vaadin.flow.component.Tag;
@@ -265,6 +266,13 @@ public class DatePickerTest {
     public void implementsHasAllowedCharPattern() {
         Assert.assertTrue("DatePicker should support char pattern",
                 HasAllowedCharPattern.class
+                        .isAssignableFrom(new DatePicker().getClass()));
+    }
+
+    @Test
+    public void implementsHasOverlayClassName() {
+        Assert.assertTrue("DatePicker should support overlay class name",
+                HasOverlayClassName.class
                         .isAssignableFrom(new DatePicker().getClass()));
     }
 
