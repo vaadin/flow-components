@@ -54,8 +54,7 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
     public AbstractColumn(Grid<?> grid) {
         this.grid = grid;
 
-        // Needed to update node ids used by <flow-component-renderer> when
-        // refreshing with @PreserveOnRefresh.
+        // Needed to update node ids when refreshing with @PreserveOnRefresh.
         addAttachListener(e -> {
             scheduleHeaderRendering();
             scheduleFooterRendering();

@@ -57,8 +57,7 @@ public class EditorRenderer<T> extends Renderer<T> implements DataGenerator<T> {
 
     private Component component;
 
-    // the flow-component-renderer needs something to load when the component is
-    // null
+    // render something when the component is null
     private Component emptyComponent;
 
     /**
@@ -142,8 +141,8 @@ public class EditorRenderer<T> extends Renderer<T> implements DataGenerator<T> {
         /*
          * The virtual container is needed as the parent of all editor
          * components. Editor components need a parent in order to have a proper
-         * nodeId, and the nodeId is needed by the <flow-component-renderer> in
-         * the client-side.
+         * nodeId, and the nodeId is needed to obtain the element in the
+         * client-side.
          */
         editorContainer = createEditorContainer();
         container.appendVirtualChild(editorContainer);
@@ -164,9 +163,6 @@ public class EditorRenderer<T> extends Renderer<T> implements DataGenerator<T> {
     private void setupEditorRenderer(Element container,
             ExecutionContext context) {
         String appId = context.getUI().getInternals().getAppId();
-        String editorTemplate = String.format(
-                "<flow-component-renderer appid='%s' nodeid='${model.item._%s_editor}'></flow-component-renderer>",
-                appId, columnInternalId);
 
         //@formatter:off
         container.executeJs("const originalRender = this.renderer;" +
@@ -181,7 +177,7 @@ public class EditorRenderer<T> extends Renderer<T> implements DataGenerator<T> {
                 "}" +
 
                 // If editing, render the editor, otherwise use the original renderer
-                "if (root.__editing) { root.innerHTML = `" + editorTemplate + "` }" +
+                "if (root.__editing) { Vaadin.FlowComponentHost.setChildNodes('" + appId + "', [model.item._" + columnInternalId + "_editor], root); }" +
                 "else if (!originalRender) { root.textContent = model.item." + columnInternalId + " }" +
                 "else { originalRender(root, container, model); }" +
             "};");

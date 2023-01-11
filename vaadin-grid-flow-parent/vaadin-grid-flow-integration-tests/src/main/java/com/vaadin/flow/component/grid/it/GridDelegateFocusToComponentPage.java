@@ -45,18 +45,12 @@ public class GridDelegateFocusToComponentPage extends Div {
     }
 
     private Div buildComplexComponent(String item) {
-        TextField hiddenTextField = new TextField();
-        hiddenTextField.setValue("hidden");
-        hiddenTextField.getElement().setAttribute("hidden", true);
-        TextField disabledTextField = new TextField();
-        disabledTextField.setValue("disabled");
-        disabledTextField.setEnabled(false);
         TextField focusableTextField = new TextField();
         focusableTextField.setValue(item);
         focusableTextField.setId(item);
         Button nextFocusableComponent = new Button("OK");
-        VerticalLayout layout = new VerticalLayout(hiddenTextField,
-                disabledTextField, focusableTextField, nextFocusableComponent);
+        VerticalLayout layout = new VerticalLayout(focusableTextField,
+                nextFocusableComponent);
 
         Button anotherFocusableComponent = new Button("NO");
         return new Div(layout, anotherFocusableComponent);
