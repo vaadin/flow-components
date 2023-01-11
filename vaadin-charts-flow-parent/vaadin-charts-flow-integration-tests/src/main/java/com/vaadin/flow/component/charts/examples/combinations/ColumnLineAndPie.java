@@ -3,7 +3,7 @@ package com.vaadin.flow.component.charts.examples.combinations;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.examples.AbstractChartExample;
 import com.vaadin.flow.component.charts.model.AnnotationItemLabel;
-import com.vaadin.flow.component.charts.model.AnnotationItemLabelMockPointOptions;
+import com.vaadin.flow.component.charts.model.AnnotationItemLabelPoint;
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
@@ -33,7 +33,7 @@ public class ColumnLineAndPie extends AbstractChartExample {
 
         AnnotationItemLabel label = new AnnotationItemLabel(
                 "Total fruit consumption");
-        label.setPoint(new AnnotationItemLabelMockPointOptions(100, 100));
+        label.setPoint(new AnnotationItemLabelPoint(100, 100));
         label.setUseHTML(true);
         conf.addLabel(label);
 

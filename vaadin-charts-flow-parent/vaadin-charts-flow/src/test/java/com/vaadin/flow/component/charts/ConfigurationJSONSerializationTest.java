@@ -4,7 +4,7 @@ import static com.vaadin.flow.component.charts.util.ChartSerialization.toJSON;
 import static org.junit.Assert.assertEquals;
 
 import com.vaadin.flow.component.charts.model.AnnotationItemLabel;
-import com.vaadin.flow.component.charts.model.AnnotationItemLabelMockPointOptions;
+import com.vaadin.flow.component.charts.model.AnnotationItemLabelPoint;
 import org.junit.Test;
 
 import com.vaadin.flow.component.charts.events.internal.AxisRescaledEvent;
@@ -144,7 +144,7 @@ public class ConfigurationJSONSerializationTest {
     public void configurationJSONSerialization_addLabel_labelSerialized() {
         Configuration conf = new Configuration();
         AnnotationItemLabel label = new AnnotationItemLabel("Sample");
-        label.setPoint(new AnnotationItemLabelMockPointOptions(100, 100));
+        label.setPoint(new AnnotationItemLabelPoint(100, 100));
         label.setUseHTML(true);
         conf.addLabel(label);
 

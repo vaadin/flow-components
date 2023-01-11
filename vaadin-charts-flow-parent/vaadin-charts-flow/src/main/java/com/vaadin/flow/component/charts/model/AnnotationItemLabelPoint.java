@@ -3,22 +3,20 @@ package com.vaadin.flow.component.charts.model;
 /**
  * Contains coordinates for {@link AnnotationItemLabel}
  */
-public class AnnotationItemLabelMockPointOptions
-        extends AbstractConfigurationObject {
+public class AnnotationItemLabelPoint extends AbstractConfigurationObject {
 
     private Number x;
     private Number y;
 
     /**
-     * Constructs an AnnotationItemLabelMockPointOptions with the given
-     * coordinates
+     * Constructs an AnnotationItemLabelPoint with the given coordinates
      *
      * @param x
      *            Horizontal offset
      * @param y
      *            Vertical offset
      */
-    public AnnotationItemLabelMockPointOptions(Number x, Number y) {
+    public AnnotationItemLabelPoint(Number x, Number y) {
         this.x = x;
         this.y = y;
     }
@@ -32,6 +30,9 @@ public class AnnotationItemLabelMockPointOptions
 
     /**
      * Sets the horizontal offset of the label within chart
+     *
+     * @param x
+     *            Horizontal offset
      */
     public void setX(Number x) {
         this.x = x;
@@ -46,6 +47,9 @@ public class AnnotationItemLabelMockPointOptions
 
     /**
      * Sets the vertical offset of the label within chart
+     *
+     * @param y
+     *            Vertical offset
      */
     public void setY(Number y) {
         this.y = y;

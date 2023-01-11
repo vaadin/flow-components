@@ -1155,6 +1155,9 @@ public class Configuration extends AbstractConfigurationObject
 
     /**
      * Sets labels that can be positioned anywhere in the chart area
+     *
+     * @param labels
+     *            The labels to set
      */
     public void setLabels(AnnotationItemLabel... labels) {
         getLabelsAnnotation().setLabels(labels);
@@ -1163,6 +1166,8 @@ public class Configuration extends AbstractConfigurationObject
     /**
      * Adds a single label
      *
+     * @param label
+     *            The label to add
      * @see #setLabels(AnnotationItemLabel...)
      */
     public void addLabel(AnnotationItemLabel label) {

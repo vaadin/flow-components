@@ -4,7 +4,7 @@ import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.examples.AbstractChartExample;
 import com.vaadin.flow.component.charts.examples.SkipFromDemo;
 import com.vaadin.flow.component.charts.model.AnnotationItemLabel;
-import com.vaadin.flow.component.charts.model.AnnotationItemLabelMockPointOptions;
+import com.vaadin.flow.component.charts.model.AnnotationItemLabelPoint;
 import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.ListSeries;
@@ -40,7 +40,7 @@ public class AreaChart extends AbstractChartExample {
         configuration.addyAxis(y);
 
         AnnotationItemLabel label = new AnnotationItemLabel("Sample label");
-        label.setPoint(new AnnotationItemLabelMockPointOptions(100, 100));
+        label.setPoint(new AnnotationItemLabelPoint(100, 100));
         configuration.addLabel(label);
 
         NativeButton changeTitleButton = new NativeButton();
