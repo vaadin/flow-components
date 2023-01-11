@@ -231,8 +231,7 @@ public class DialogHeaderFooterIT extends AbstractComponentIT {
     }
 
     private void verifyDialogOpened() {
-        waitForElementPresent(
-                By.cssSelector("vaadin-dialog-overlay div button"));
+        waitForElementPresent(By.cssSelector("vaadin-dialog-overlay button"));
     }
 
     private void verifyContentRendered(String content) {
