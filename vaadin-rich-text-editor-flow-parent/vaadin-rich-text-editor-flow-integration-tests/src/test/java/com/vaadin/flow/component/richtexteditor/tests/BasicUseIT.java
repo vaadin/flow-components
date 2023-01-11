@@ -40,11 +40,11 @@ public class BasicUseIT extends AbstractParallelTest {
             new Actions(getDriver()).click(editor).build().perform();
             new Actions(getDriver()).click(getValue).build().perform();
             new Actions(getDriver()).click(getHtmlValue).build().perform();
-            return getLastValue().equals("[{\"insert\":\"Bar\\n\"}]")
+            return getLastValue().equals("<p>Bar</p>")
                     && getLastHtmlValue().equals("<p>Bar</p>");
         });
 
-        Assert.assertEquals("[{\"insert\":\"Bar\\n\"}]", getLastValue());
+        Assert.assertEquals("<p>Bar</p>", getLastValue());
         Assert.assertEquals("<p>Bar</p>", getLastHtmlValue());
     }
 
@@ -53,7 +53,7 @@ public class BasicUseIT extends AbstractParallelTest {
         ButtonElement getValue = getTestButton("getValue");
         getValue.click();
 
-        Assert.assertEquals("[{\"insert\":\"Foo\"}]", getLastValue());
+        Assert.assertEquals("<p>Foo</p>", getLastValue());
     }
 
     @Test
@@ -86,12 +86,12 @@ public class BasicUseIT extends AbstractParallelTest {
         save.click();
 
         // Empty rte validation: there is an error
-        waitUntil(
-                driver -> "There are errors: Delta value should contain something"
-                        .equals(getLastBinderInfoValue()));
+        waitUntil(driver -> "There are errors: Value should contain something"
+                .equals(getLastBinderInfoValue()));
 
-        $(RichTextEditorElement.class).get(1).getEditor()
-                .setProperty("innerHTML", "<p>Foo</p>");
+        RichTextEditorElement editor = $(RichTextEditorElement.class).get(1);
+        editor.getEditor().setProperty("innerHTML", "<p>Foo</p>");
+        editor.getEditor().dispatchEvent("focusout");
 
         // Rte validation
         waitUntil(driver -> {
@@ -99,7 +99,7 @@ public class BasicUseIT extends AbstractParallelTest {
             return info.getText().startsWith("Saved bean values");
         });
 
-        Assert.assertTrue(getLastBinderInfoValue().contains("Foo"));
+        Assert.assertTrue(getLastBinderInfoValue().contains("<p>Foo</p>"));
 
         reset.click();
 
@@ -130,10 +130,10 @@ public class BasicUseIT extends AbstractParallelTest {
                 .id("html-rte");
         TestBenchElement editor = rte.getEditor();
         editor.setProperty("innerHTML", "<p><b>Foo</b></p>");
+        editor.dispatchEvent("focusout");
 
         // Rte validation
         waitUntil(driver -> {
-            rte.dispatchEvent("change");
             save.click();
             return info.getText().startsWith("Saved bean values");
         });
@@ -149,14 +149,14 @@ public class BasicUseIT extends AbstractParallelTest {
         waitUntil(driver -> {
             getValue.click();
             return getLastRteHtmlBinderValue()
-                    .contains("<p><b>Foo</b></p> <p><strong>Foo</strong></p>");
+                    .contains("<p><b>Foo</b></p> <p><b>Foo</b></p>");
         });
 
         reset.click();
         // Wait for everything to update.
         waitUntil(driver -> {
             getValue.click();
-            return getLastRteHtmlBinderValue().equals("null <p><br></p>");
+            return getLastRteHtmlBinderValue().equals("null");
         });
     }
 
@@ -171,8 +171,7 @@ public class BasicUseIT extends AbstractParallelTest {
             new Actions(getDriver()).click(templateRte.getEditor()).build()
                     .perform();
             new Actions(getDriver()).click(getValue).build().perform();
-            return getLastRteTemplateValue()
-                    .equals("[{\"insert\":\"Bar\\n\"}]");
+            return getLastRteTemplateValue().equals("<p>Bar</p>");
         });
     }
 

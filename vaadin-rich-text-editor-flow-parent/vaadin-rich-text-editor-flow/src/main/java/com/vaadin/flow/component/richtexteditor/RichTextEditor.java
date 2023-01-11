@@ -189,6 +189,7 @@ public class RichTextEditor
 
     @Override
     protected void setPresentationValue(String newPresentationValue) {
+        getElement().setProperty("htmlValue", newPresentationValue);
         // htmlValue property is not writeable, HTML value needs to be set using
         // method exposed by web component instead
         getElement().callJsFunction("dangerouslySetHtmlValue", this.getValue());

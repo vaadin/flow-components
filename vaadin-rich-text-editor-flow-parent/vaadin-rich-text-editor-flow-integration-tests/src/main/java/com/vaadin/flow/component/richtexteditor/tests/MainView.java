@@ -14,6 +14,7 @@ import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.router.Route;
 
 import java.io.Serializable;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -36,8 +37,7 @@ public class MainView extends VerticalLayout {
 
         Button setValueButton = new Button("Set value");
         setValueButton.setId("setValue");
-        setValueButton.addClickListener(
-                event -> rte.setValue("[{\"insert\":\"Foo\"}]"));
+        setValueButton.addClickListener(event -> rte.setValue("<p>Foo</p>"));
 
         Button getValueButton = new Button("Get value");
         getValueButton.setId("getValue");
@@ -118,12 +118,10 @@ public class MainView extends VerticalLayout {
         valuePanel.setId("binder-value-panel");
 
         Div infoPanel = new Div();
-        Binder<Entry> binder = new Binder<>();
+        Binder<HtmlEntry> binder = new Binder<>();
 
         // The object that will be edited
-        Entry entryBeingEdited = new Entry();
-
-        rteWithBinder.setValueChangeMode(ValueChangeMode.EAGER);
+        HtmlEntry entryBeingEdited = new HtmlEntry();
 
         // Create the action buttons
         Button save = new Button("Save");
@@ -140,14 +138,12 @@ public class MainView extends VerticalLayout {
         actions.add(save, reset, getValueButton);
         save.getStyle().set("marginRight", "10px");
 
-        SerializablePredicate<String> deltaValuePredicate = value -> !rteWithBinder
+        SerializablePredicate<String> valuePredicate = value -> !rteWithBinder
                 .getValue().trim().isEmpty();
 
-        Binding<Entry, String> deltaValueBinding = binder
-                .forField(rteWithBinder)
-                .withValidator(deltaValuePredicate,
-                        "Delta value should contain something")
-                .bind(Entry::getDeltaValue, Entry::setDeltaValue);
+        binder.forField(rteWithBinder)
+                .withValidator(valuePredicate, "Value should contain something")
+                .bind(HtmlEntry::getHtmlValue, HtmlEntry::setHtmlValue);
 
         // Editor is a required field
         rteWithBinder.setRequiredIndicatorVisible(true);
@@ -157,7 +153,7 @@ public class MainView extends VerticalLayout {
             if (binder.writeBeanIfValid(entryBeingEdited)) {
                 infoPanel.setText("Saved bean values: " + entryBeingEdited);
             } else {
-                BinderValidationStatus<Entry> validate = binder.validate();
+                BinderValidationStatus<HtmlEntry> validate = binder.validate();
                 String errorText = validate.getFieldValidationStatuses()
                         .stream().filter(BindingValidationStatus::isError)
                         .map(BindingValidationStatus::getMessage)
@@ -256,27 +252,6 @@ public class MainView extends VerticalLayout {
         reset.setId("html-binder-reset");
 
         add(actions, infoPanel, valuePanel);
-    }
-
-    /**
-     * Example Bean for the Form with Binder.
-     */
-    private static class Entry implements Serializable {
-
-        private String deltaValue = "";
-
-        public String getDeltaValue() {
-            return deltaValue;
-        }
-
-        public void setDeltaValue(String deltaValue) {
-            this.deltaValue = deltaValue;
-        }
-
-        @Override
-        public String toString() {
-            return "Contact{" + "deltaValue='" + deltaValue + '\'' + '}';
-        }
     }
 
     /**
