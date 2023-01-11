@@ -18,6 +18,7 @@ package com.vaadin.flow.component.contextmenu;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.function.SerializableRunnable;
 
 /**
@@ -48,7 +49,7 @@ import com.vaadin.flow.function.SerializableRunnable;
  */
 @SuppressWarnings("serial")
 public class ContextMenu extends ContextMenuBase<ContextMenu, MenuItem, SubMenu>
-        implements HasMenuItems {
+        implements HasMenuItems, HasOverlayClassName {
 
     /**
      * Creates an empty context menu.

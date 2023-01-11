@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.shared.HasOverlayClassName;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Test;
@@ -199,6 +200,13 @@ public class ContextMenuTest {
         ObjectOutputStream out = new ObjectOutputStream(
                 new ByteArrayOutputStream());
         out.writeObject(menu);
+    }
+
+    @Test
+    public void implementsHasOverlayClassName() {
+        Assert.assertTrue("ContextMenu should support overlay class name",
+                HasOverlayClassName.class
+                        .isAssignableFrom(new ContextMenu().getClass()));
     }
 
     private void addDivAtIndex(int index) {
