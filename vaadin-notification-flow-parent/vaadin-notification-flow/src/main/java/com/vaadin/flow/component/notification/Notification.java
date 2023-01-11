@@ -114,8 +114,8 @@ public class Notification extends Component implements HasComponents, HasStyle,
      * If the Web Component has {@code text} property defined, it will be used
      * as the text content of the notification.
      *
-     * Otherwise, {@code the child nodes of this.container} will be included in
-     * the notification.
+     * Otherwise, the child nodes of this.container will be included in the
+     * notification.
      */
     private void configureRenderer() {
         String appId = UI.getCurrent() != null
