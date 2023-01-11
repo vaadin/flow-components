@@ -15,10 +15,12 @@
  */
 package com.vaadin.flow.component.menubar;
 
+import com.vaadin.flow.component.shared.ThemeVariant;
+
 /**
  * Set of theme variants applicable for {@code vaadin-menu-bar} component.
  */
-public enum MenuBarVariant {
+public enum MenuBarVariant implements ThemeVariant {
     //@formatter:off
     LUMO_SMALL("small"),
     LUMO_LARGE("large"),

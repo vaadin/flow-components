@@ -484,7 +484,7 @@ public class CheckboxGroup<T>
         Objects.requireNonNull(itemLabelGenerator,
                 "The item label generator can not be null");
         this.itemLabelGenerator = itemLabelGenerator;
-        reset();
+        refreshCheckboxes();
     }
 
     /**

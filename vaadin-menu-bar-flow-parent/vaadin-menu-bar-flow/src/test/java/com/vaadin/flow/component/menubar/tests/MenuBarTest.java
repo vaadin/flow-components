@@ -22,6 +22,7 @@ import org.junit.Test;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.shared.HasOverlayClassName;
 
 public class MenuBarTest {
 
@@ -83,6 +84,13 @@ public class MenuBarTest {
     public void setOpenOnHover_isOpenOnHover() {
         menuBar.setOpenOnHover(true);
         Assert.assertTrue(menuBar.isOpenOnHover());
+    }
+
+    @Test
+    public void implementsHasOverlayClassName() {
+        Assert.assertTrue("ContextMenu should support overlay class name",
+                HasOverlayClassName.class
+                        .isAssignableFrom(new MenuBar().getClass()));
     }
 
     private void assertChildrenAndItems(MenuItem... expected) {
