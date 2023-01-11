@@ -86,6 +86,18 @@ public class CheckboxGroupIT extends AbstractComponentIT {
     }
 
     @Test
+    public void updateItemLabelGenerator() {
+        CheckboxGroupElement group = $(CheckboxGroupElement.class)
+                .id("checkbox-group-with-item-generator");
+        Assert.assertEquals("Joe", group.getCheckboxes().get(0).getLabel());
+
+        layout.findElement(By.id("update-label-generator")).click();
+
+        Assert.assertEquals("Joe (Updated)",
+                group.getCheckboxes().get(0).getLabel());
+    }
+
+    @Test
     public void disabledGroup() {
         CheckboxGroupElement group = $(CheckboxGroupElement.class)
                 .id("checkbox-group-disabled");

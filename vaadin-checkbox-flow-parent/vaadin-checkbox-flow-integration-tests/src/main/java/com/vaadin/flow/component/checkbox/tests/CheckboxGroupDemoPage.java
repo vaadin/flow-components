@@ -93,10 +93,16 @@ public class CheckboxGroupDemoPage extends Div {
                 "Checkbox group value changed from '%s' to '%s'",
                 getNames(event.getOldValue()), getNames(event.getValue()))));
 
+        NativeButton updateLabelGeneratorButton = new NativeButton(
+                "Update label generator", event -> group.setItemLabelGenerator(
+                        person -> person.getName() + " (Updated)"));
+        updateLabelGeneratorButton.setId("update-label-generator");
+
         group.setId("checkbox-group-with-item-generator");
         message.setId("checkbox-group-gen-value");
 
-        addCard("Checkbox group with label generator", group, message);
+        addCard("Checkbox group with label generator", group,
+                updateLabelGeneratorButton, message);
     }
 
     private void addDisabled() {
