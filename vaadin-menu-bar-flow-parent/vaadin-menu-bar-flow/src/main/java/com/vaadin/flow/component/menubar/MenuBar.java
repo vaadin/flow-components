@@ -38,6 +38,7 @@ import com.vaadin.flow.component.contextmenu.MenuManager;
 import com.vaadin.flow.component.contextmenu.SubMenu;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableConsumer;
@@ -61,8 +62,8 @@ import elemental.json.JsonType;
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
 @NpmPackage(value = "@vaadin/menu-bar", version = "24.0.0-alpha10")
 @NpmPackage(value = "@vaadin/tooltip", version = "24.0.0-alpha10")
-public class MenuBar extends Component
-        implements HasMenuItems, HasSize, HasStyle, HasTheme, HasEnabled {
+public class MenuBar extends Component implements HasEnabled, HasMenuItems,
+        HasOverlayClassName, HasSize, HasStyle, HasTheme {
 
     private MenuManager<MenuBar, MenuItem, SubMenu> menuManager;
     private MenuItemsArrayGenerator<MenuItem> menuItemsArrayGenerator;
