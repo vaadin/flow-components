@@ -20,6 +20,7 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
@@ -183,6 +184,13 @@ public class ComboBoxTest extends ComboBoxBaseTest {
                 .thenAnswer(invocation -> new ComboBox());
         ComboBox field = Component.from(element, ComboBox.class);
         Assert.assertEquals("foo", field.getElement().getPropertyRaw("value"));
+    }
+
+    @Test
+    public void implementsHasOverlayClassName() {
+        Assert.assertTrue("ComboBox should support overlay class name",
+                HasOverlayClassName.class.isAssignableFrom(
+                        createComboBox(String.class).getClass()));
     }
 
     @Test
