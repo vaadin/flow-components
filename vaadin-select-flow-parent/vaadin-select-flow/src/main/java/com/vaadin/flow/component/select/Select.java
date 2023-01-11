@@ -39,6 +39,7 @@ import com.vaadin.flow.component.select.data.SelectDataView;
 import com.vaadin.flow.component.select.data.SelectListDataView;
 import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasClientValidation;
+import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.component.shared.HasPrefix;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.ValidationUtil;
@@ -92,8 +93,9 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
         implements Focusable<Select<T>>, HasClientValidation,
         HasDataView<T, Void, SelectDataView<T>>, HasItemComponents<T>,
         HasHelper, HasLabel, HasListDataView<T, SelectListDataView<T>>,
-        HasPrefix, HasSize, HasStyle, HasThemeVariant<SelectVariant>,
-        HasTooltip, HasValidation, HasValidator<T>, SingleSelect<Select<T>, T> {
+        HasOverlayClassName, HasPrefix, HasSize, HasStyle,
+        HasThemeVariant<SelectVariant>, HasTooltip, HasValidation,
+        HasValidator<T>, SingleSelect<Select<T>, T> {
 
     public static final String LABEL_ATTRIBUTE = "label";
 
