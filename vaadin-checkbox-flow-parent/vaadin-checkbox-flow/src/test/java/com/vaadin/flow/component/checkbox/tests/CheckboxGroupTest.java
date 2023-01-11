@@ -316,6 +316,19 @@ public class CheckboxGroupTest {
     }
 
     @Test
+    public void selectItem_setItemLabelGenerator_labelIsUpdated() {
+        CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
+        checkboxGroup.setItems("foo", "bar");
+
+        Checkbox cb = (Checkbox) checkboxGroup.getChildren().findFirst().get();
+        Assert.assertEquals("foo", cb.getLabel());
+
+        checkboxGroup.setItemLabelGenerator(item -> item + " (Updated)");
+
+        Assert.assertEquals("foo (Updated)", cb.getLabel());
+    }
+
+    @Test
     public void addSelectionListener_selectionEventIsFired() {
         CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
         checkboxGroup.setItems("foo", "bar");
