@@ -17,6 +17,7 @@ package com.vaadin.flow.component.dialog;
 
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.Stream.Builder;
 
@@ -102,12 +103,10 @@ public class Dialog extends Component implements HasComponents, HasSize,
      */
     public Dialog() {
         container = new Element("div");
-        container.getClassList().add("draggable");
-        container.getClassList().add("draggable-leaf-only");
-        container.getStyle().set(ElementConstants.STYLE_WIDTH, "100%");
-        container.getStyle().set(ElementConstants.STYLE_HEIGHT, "100%");
-        container.getStyle().set("display", "inline-block");
-
+        this.container.addAttachListener(event -> {
+            this.container.executeJs(
+                    "Vaadin.FlowComponentHost.patchVirtualContainer(this)");
+        });
         getElement().appendVirtualChild(container);
 
         // Needs to be updated on each
@@ -359,6 +358,8 @@ public class Dialog extends Component implements HasComponents, HasSize,
                     "Component to add cannot be null");
             container.appendChild(component.getElement());
         }
+
+        updateVirtualChildNodeIds();
     }
 
     @Override
@@ -374,11 +375,15 @@ public class Dialog extends Component implements HasComponents, HasSize,
                         + component + ") is not a child of this component");
             }
         }
+
+        updateVirtualChildNodeIds();
     }
 
     @Override
     public void removeAll() {
         container.removeAllChildren();
+
+        updateVirtualChildNodeIds();
     }
 
     /**
@@ -404,6 +409,8 @@ public class Dialog extends Component implements HasComponents, HasSize,
         // The case when the index is bigger than the children count is handled
         // inside the method below
         container.insertChild(index, component.getElement());
+
+        updateVirtualChildNodeIds();
     }
 
     /**
@@ -902,6 +909,23 @@ public class Dialog extends Component implements HasComponents, HasSize,
         return super.addDetachListener(listener);
     }
 
+    /**
+     * Updates the virtualChildNodeIds property of the dialog element.
+     * <p>
+     * This method is called whenever the dialog's child components change.
+     * <p>
+     * Also calls {@code requestContentUpdate} on the dialog element to trigger
+     * the content update.
+     */
+    private void updateVirtualChildNodeIds() {
+        this.getElement().setPropertyList("virtualChildNodeIds",
+                container.getChildren()
+                        .map(element -> element.getNode().getId())
+                        .collect(Collectors.toList()));
+
+        this.getElement().callJsFunction("requestContentUpdate");
+    }
+
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
@@ -912,6 +936,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
         Shortcuts.setShortcutListenOnElement(OVERLAY_LOCATOR_JS, this);
         initConnector();
         initHeaderFooterRenderer();
+        updateVirtualChildNodeIds();
     }
 
     /**
@@ -966,11 +991,10 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     private void attachComponentRenderer() {
         String appId = UI.getCurrent().getInternals().getAppId();
-        int nodeId = container.getNode().getId();
 
         getElement().executeJs(
-                "this.renderer = (root) => Vaadin.FlowComponentHost.setChildNodes($0, [$1], root)",
-                appId, nodeId);
+                "this.renderer = (root) => Vaadin.FlowComponentHost.setChildNodes($0, this.virtualChildNodeIds, root)",
+                appId);
 
         setDimension(ElementConstants.STYLE_WIDTH, width);
         setDimension(ElementConstants.STYLE_MIN_WIDTH, minWidth);
