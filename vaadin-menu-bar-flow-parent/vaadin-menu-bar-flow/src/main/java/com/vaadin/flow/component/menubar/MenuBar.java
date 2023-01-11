@@ -39,6 +39,7 @@ import com.vaadin.flow.component.contextmenu.SubMenu;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasOverlayClassName;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableConsumer;
@@ -62,8 +63,9 @@ import elemental.json.JsonType;
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
 @NpmPackage(value = "@vaadin/menu-bar", version = "24.0.0-alpha10")
 @NpmPackage(value = "@vaadin/tooltip", version = "24.0.0-alpha10")
-public class MenuBar extends Component implements HasEnabled, HasMenuItems,
-        HasOverlayClassName, HasSize, HasStyle, HasTheme {
+public class MenuBar extends Component
+        implements HasEnabled, HasMenuItems, HasOverlayClassName, HasSize,
+        HasStyle, HasThemeVariant<MenuBarVariant> {
 
     private MenuManager<MenuBar, MenuItem, SubMenu> menuManager;
     private MenuItemsArrayGenerator<MenuItem> menuItemsArrayGenerator;
@@ -362,30 +364,6 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
      */
     public boolean isOpenOnHover() {
         return getElement().getProperty("openOnHover", false);
-    }
-
-    /**
-     * Adds theme variants to the component.
-     *
-     * @param variants
-     *            theme variants to add
-     */
-    public void addThemeVariants(MenuBarVariant... variants) {
-        getThemeNames()
-                .addAll(Stream.of(variants).map(MenuBarVariant::getVariantName)
-                        .collect(Collectors.toList()));
-    }
-
-    /**
-     * Removes theme variants from the component.
-     *
-     * @param variants
-     *            theme variants to remove
-     */
-    public void removeThemeVariants(MenuBarVariant... variants) {
-        getThemeNames().removeAll(
-                Stream.of(variants).map(MenuBarVariant::getVariantName)
-                        .collect(Collectors.toList()));
     }
 
     /**
