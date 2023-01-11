@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -57,8 +57,7 @@ public class EditorRenderer<T> extends Renderer<T> implements DataGenerator<T> {
 
     private Component component;
 
-    // the flow-component-renderer needs something to load when the component is
-    // null
+    // render something when the component is null
     private Component emptyComponent;
 
     /**
@@ -138,13 +137,12 @@ public class EditorRenderer<T> extends Renderer<T> implements DataGenerator<T> {
 
     @Override
     public Rendering<T> render(Element container, DataKeyMapper<T> keyMapper,
-            Element contentTemplate) {
-
+            String rendererName) {
         /*
          * The virtual container is needed as the parent of all editor
          * components. Editor components need a parent in order to have a proper
-         * nodeId, and the nodeId is needed by the <flow-component-renderer> in
-         * the client-side.
+         * nodeId, and the nodeId is needed to obtain the element in the
+         * client-side.
          */
         editorContainer = createEditorContainer();
         container.appendVirtualChild(editorContainer);
@@ -159,15 +157,12 @@ public class EditorRenderer<T> extends Renderer<T> implements DataGenerator<T> {
                     context -> setupEditorRenderer(container, context));
         });
 
-        return new EditorRendering(contentTemplate);
+        return new EditorRendering();
     }
 
     private void setupEditorRenderer(Element container,
             ExecutionContext context) {
         String appId = context.getUI().getInternals().getAppId();
-        String editorTemplate = String.format(
-                "<flow-component-renderer appid='%s' nodeid='${model.item._%s_editor}'></flow-component-renderer>",
-                appId, columnInternalId);
 
         //@formatter:off
         container.executeJs("const originalRender = this.renderer;" +
@@ -182,7 +177,7 @@ public class EditorRenderer<T> extends Renderer<T> implements DataGenerator<T> {
                 "}" +
 
                 // If editing, render the editor, otherwise use the original renderer
-                "if (root.__editing) { root.innerHTML = `" + editorTemplate + "` }" +
+                "if (root.__editing) { Vaadin.FlowComponentHost.setChildNodes('" + appId + "', [model.item._" + columnInternalId + "_editor], root); }" +
                 "else if (!originalRender) { root.textContent = model.item." + columnInternalId + " }" +
                 "else { originalRender(root, container, model); }" +
             "};");
@@ -211,20 +206,9 @@ public class EditorRenderer<T> extends Renderer<T> implements DataGenerator<T> {
 
     private class EditorRendering implements Rendering<T> {
 
-        private final Element contentTemplate;
-
-        public EditorRendering(Element contentTemplate) {
-            this.contentTemplate = contentTemplate;
-        }
-
         @Override
         public Optional<DataGenerator<T>> getDataGenerator() {
             return Optional.of(EditorRenderer.this);
-        }
-
-        @Override
-        public Element getTemplateElement() {
-            return contentTemplate;
         }
     }
 }

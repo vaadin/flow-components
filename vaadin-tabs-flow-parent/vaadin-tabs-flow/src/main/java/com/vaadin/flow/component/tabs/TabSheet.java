@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -30,6 +30,8 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasPrefix;
+import com.vaadin.flow.component.shared.HasSuffix;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.dom.Element;
@@ -42,10 +44,10 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-tabsheet")
-@NpmPackage(value = "@vaadin/tabsheet", version = "24.0.0-alpha7")
+@NpmPackage(value = "@vaadin/tabsheet", version = "24.0.0-alpha10")
 @JsModule("@vaadin/tabsheet/src/vaadin-tabsheet.js")
-public class TabSheet extends Component
-        implements HasStyle, HasSize, HasThemeVariant<TabSheetVariant> {
+public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
+        HasSuffix, HasThemeVariant<TabSheetVariant> {
 
     private Tabs tabs = new Tabs();
 
@@ -129,7 +131,7 @@ public class TabSheet extends Component
         if (position < 0) {
             tabs.add(tab);
         } else {
-            tabs.addComponentAtIndex(position, tab);
+            tabs.addTabAtIndex(position, tab);
         }
 
         // Make sure possible old content related to the same tab gets removed
@@ -240,7 +242,7 @@ public class TabSheet extends Component
     /**
      * Returns the tab at the given position.
      *
-     * @param index
+     * @param position
      *            the position of the tab, must be greater than or equals to 0
      *            and less than the number of tabs
      * @return The tab at the given index
@@ -249,7 +251,7 @@ public class TabSheet extends Component
      *             number of tabs
      */
     public Tab getTabAt(int position) {
-        return (Tab) tabs.getComponentAt(position);
+        return tabs.getTabAt(position);
     }
 
     /**
@@ -279,55 +281,6 @@ public class TabSheet extends Component
                     event.isInitialSelection()));
         });
 
-    }
-
-    /**
-     * Adds the given component as the prefix of this component, replacing any
-     * existing prefix component.
-     *
-     * @param component
-     *            the component to set, can be {@code null} to remove existing
-     *            prefix component
-     */
-    public void setPrefixComponent(Component component) {
-        SlotUtils.setSlot(this, "prefix", component);
-    }
-
-    /**
-     * Gets the component in the prefix slot of this component.
-     *
-     * @return the prefix component of this component, or {@code null} if no
-     *         prefix component has been set
-     * @see #setPrefixComponent(Component)
-     */
-    public Component getPrefixComponent() {
-        return SlotUtils.getChildInSlot(this, "prefix");
-    }
-
-    /**
-     * Adds the given component as the suffix of this component, replacing any
-     * existing suffix component.
-     * <p>
-     * This is most commonly used to add a simple icon or static text into the
-     * component.
-     *
-     * @param component
-     *            the component to set, can be {@code null} to remove existing
-     *            suffix component
-     */
-    public void setSuffixComponent(Component component) {
-        SlotUtils.setSlot(this, "suffix", component);
-    }
-
-    /**
-     * Gets the component in the suffix slot of this component.
-     *
-     * @return the suffix component of this component, or {@code null} if no
-     *         suffix component has been set
-     * @see #setPrefixComponent(Component)
-     */
-    public Component getSuffixComponent() {
-        return SlotUtils.getChildInSlot(this, "suffix");
     }
 
     /**

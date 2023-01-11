@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -39,8 +39,8 @@ import com.vaadin.flow.component.select.data.SelectDataView;
 import com.vaadin.flow.component.select.data.SelectListDataView;
 import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasClientValidation;
+import com.vaadin.flow.component.shared.HasPrefix;
 import com.vaadin.flow.component.shared.HasTooltip;
-import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.binder.HasValidator;
@@ -82,18 +82,18 @@ import java.util.stream.Stream;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-select")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha7")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha10")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/select", version = "24.0.0-alpha7")
+@NpmPackage(value = "@vaadin/select", version = "24.0.0-alpha10")
 @JsModule("@vaadin/select/src/vaadin-select.js")
 @JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 @JsModule("./selectConnector.js")
 public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
         implements Focusable<Select<T>>, HasClientValidation,
         HasDataView<T, Void, SelectDataView<T>>, HasItemComponents<T>,
-        HasListDataView<T, SelectListDataView<T>>, HasHelper, HasLabel, HasSize,
-        HasStyle, HasThemeVariant<SelectVariant>, HasTooltip, HasValidation,
-        HasValidator<T>, SingleSelect<Select<T>, T> {
+        HasHelper, HasLabel, HasListDataView<T, SelectListDataView<T>>,
+        HasPrefix, HasSize, HasStyle, HasThemeVariant<SelectVariant>,
+        HasTooltip, HasValidation, HasValidator<T>, SingleSelect<Select<T>, T> {
 
     public static final String LABEL_ATTRIBUTE = "label";
 
@@ -244,7 +244,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      * even though that is not visible from the component level.
      */
     @Tag("vaadin-select-list-box")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha7")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha10")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     private class InternalListBox extends Component
             implements HasItemComponents<T> {
@@ -676,7 +676,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      * <p>
      * <em>NOTE:</em> If you add a component with the {@code slot} attribute
      * set, it will be placed in the light-dom of the {@code vaadin-select}
-     * instead of the drop down, similar to {@link #addToPrefix(Component...)}
+     * instead of the dropdown.
      */
     @Override
     public void add(Component... components) {
@@ -705,7 +705,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      * <p>
      * <em>NOTE:</em> If you add a component with the {@code slot} attribute
      * set, it will be placed in the light-dom of the {@code vaadin-select}
-     * instead of the drop down, similar to {@link #addToPrefix(Component...)}
+     * instead of the dropdown.
      */
     @Override
     public void addComponentAtIndex(int index, Component component) {
@@ -722,7 +722,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      * <p>
      * <em>NOTE:</em> If you add a component with the {@code slot} attribute
      * set, it will be placed in the light-dom of the {@code vaadin-select}
-     * instead of the drop down, similar to {@link #addToPrefix(Component...)}
+     * instead of the dropdown.
      */
     @Override
     public void addComponentAsFirst(Component component) {
@@ -732,23 +732,6 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
         } else {
             listBox.addComponentAsFirst(component);
         }
-    }
-
-    /**
-     * Adds the given components as children of this component at the slot
-     * 'prefix'.
-     *
-     * @param components
-     *            The components to add.
-     * @see <a href=
-     *      "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
-     *      page about slots</a>
-     * @see <a href=
-     *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
-     *      website about slots</a>
-     */
-    public void addToPrefix(Component... components) {
-        SlotUtils.addToSlot(this, "prefix", components);
     }
 
     @Override

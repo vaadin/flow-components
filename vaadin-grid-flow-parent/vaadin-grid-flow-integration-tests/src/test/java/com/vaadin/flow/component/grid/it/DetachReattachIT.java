@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -21,10 +21,9 @@ import com.vaadin.flow.testutil.TestPath;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 
 @TestPath("vaadin-grid/detach-reattach-page")
-public class DetachReattachIt extends AbstractComponentIT {
+public class DetachReattachIT extends AbstractComponentIT {
 
     @Test
     public void detachAndReattach_setDeselectAllowedPreserved() {
@@ -46,6 +45,8 @@ public class DetachReattachIt extends AbstractComponentIT {
 
         $("button").id("attach-button").click();
 
+        grid = $(GridElement.class).first();
+
         Assert.assertTrue(
                 "Selected row is preserved after detach and re-attach.",
                 grid.getRow(1).isSelected());
@@ -58,41 +59,41 @@ public class DetachReattachIt extends AbstractComponentIT {
     @Test
     public void detachAndReattach_setDetailsVisibleOnClickPreserved() {
         open();
+
         GridElement grid = $(GridElement.class).first();
 
         // Add item details
         $("button").id("add-item-details-button").click();
 
-        clickElementWithJs(getRow(grid, 1).findElement(By.tagName("td")));
-
-        WebElement detailsElement = grid
-                .findElement(By.tagName("flow-component-renderer"));
+        grid.getCell(1, 0).click();
 
         Assert.assertTrue("Item details are visible on cell click by default.",
-                detailsElement.isDisplayed());
+                grid.findElement(By.tagName("span")).isDisplayed());
 
-        clickElementWithJs(getRow(grid, 1).findElement(By.tagName("td")));
-        Assert.assertFalse("Item details are hidden on subsequent cell click.",
-                detailsElement.isDisplayed());
+        grid.getCell(1, 0).click();
+
+        Assert.assertEquals("Item details are hidden on subsequent cell click.",
+                0, grid.findElements(By.tagName("span")).size());
 
         // Do not show details on click
         $("button").id("toggle-details-visible-click-button").click();
 
-        clickElementWithJs(getRow(grid, 1).findElement(By.tagName("td")));
-        Assert.assertFalse(
+        grid.getCell(1, 0).click();
+        Assert.assertEquals(
                 "Item details are hidden with setDetailsVisibleOnClick(false).",
-                detailsElement.isDisplayed());
+                0, grid.findElements(By.tagName("span")).size());
 
         // Detach and re-attach
         $("button").id("detach-button").click();
 
         $("button").id("attach-button").click();
 
-        clickElementWithJs(getRow(grid, 1).findElement(By.tagName("td")));
-        Assert.assertFalse(
-                "Item details are still hidden after detach and re-attach.",
-                detailsElement.isDisplayed());
+        grid = $(GridElement.class).first();
 
+        grid.getCell(1, 0).click();
+        Assert.assertEquals(
+                "Item details are still hidden after detach and re-attach.", 0,
+                grid.findElements(By.tagName("span")).size());
     }
 
     @Test
@@ -112,10 +113,5 @@ public class DetachReattachIt extends AbstractComponentIT {
         // Check that there are no new exceptions/errors thrown
         // after re-attaching the grid when sorting is reset
         checkLogsForErrors();
-    }
-
-    private WebElement getRow(GridElement grid, int row) {
-        return grid.$("*").id("items").findElements(By.cssSelector("tr"))
-                .get(row);
     }
 }

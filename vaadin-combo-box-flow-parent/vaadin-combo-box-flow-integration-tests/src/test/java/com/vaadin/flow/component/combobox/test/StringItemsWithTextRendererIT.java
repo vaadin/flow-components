@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -40,8 +40,6 @@ public class StringItemsWithTextRendererIT extends AbstractComponentIT {
                 By.tagName("vaadin-combo-box-overlay"));
         List<String> items = overlay
                 .findElements(By.tagName("vaadin-combo-box-item")).stream()
-                .map(item -> item
-                        .findElement(By.cssSelector("flow-component-renderer")))
                 .map(WebElement::getText).collect(Collectors.toList());
         Assert.assertEquals(
                 "Unexpected items size. The rendered items size must be 2", 2,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -72,18 +72,17 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-dialog")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha7")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha10")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/dialog", version = "24.0.0-alpha7")
+@NpmPackage(value = "@vaadin/dialog", version = "24.0.0-alpha10")
 @JsModule("@vaadin/dialog/src/vaadin-dialog.js")
-@JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 @JsModule("./dialogConnector.js")
 @JsModule("./flow-component-renderer.js")
 public class Dialog extends Component implements HasComponents, HasSize,
         HasStyle, HasThemeVariant<DialogVariant> {
 
     private static final String OVERLAY_LOCATOR_JS = "this.$.overlay";
-    private Element template;
+
     private Element container;
     private boolean autoAddedToTheUi;
     private int onCloseConfigured;
@@ -102,20 +101,16 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * Creates an empty dialog.
      */
     public Dialog() {
-        getElement().setAttribute("suppress-template-warning", true);
-
-        template = new Element("template");
-        getElement().appendChild(template);
-
         container = new Element("div");
         container.getClassList().add("draggable");
         container.getClassList().add("draggable-leaf-only");
         container.getStyle().set(ElementConstants.STYLE_WIDTH, "100%");
         container.getStyle().set(ElementConstants.STYLE_HEIGHT, "100%");
+        container.getStyle().set("display", "inline-block");
 
         getElement().appendVirtualChild(container);
 
-        // Attach <flow-component-renderer>. Needs to be updated on each
+        // Needs to be updated on each
         // attach, as element depends on node id which is subject to change if
         // the dialog is transferred to another UI, e.g. due to
         // @PreserveOnRefresh
@@ -972,10 +967,10 @@ public class Dialog extends Component implements HasComponents, HasSize,
     private void attachComponentRenderer() {
         String appId = UI.getCurrent().getInternals().getAppId();
         int nodeId = container.getNode().getId();
-        String renderer = String.format(
-                "<flow-component-renderer appid=\"%s\" nodeid=\"%s\" style=\"display: flex; height: 100%%;\"></flow-component-renderer>",
+
+        getElement().executeJs(
+                "this.renderer = (root) => Vaadin.FlowComponentHost.setChildNodes($0, [$1], root)",
                 appId, nodeId);
-        template.setProperty("innerHTML", renderer);
 
         setDimension(ElementConstants.STYLE_WIDTH, width);
         setDimension(ElementConstants.STYLE_MIN_WIDTH, minWidth);

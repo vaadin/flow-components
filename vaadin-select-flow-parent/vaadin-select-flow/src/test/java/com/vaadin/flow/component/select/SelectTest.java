@@ -603,10 +603,10 @@ public class SelectTest {
     }
 
     @Test
-    public void addToPrefix_prefixComponentsGoToSelectChildren() {
+    public void setPrefixComponent_prefixComponentGoesToSelectChildren() {
         select.setItems("foo", "bar");
 
-        select.addToPrefix(new Span("prefix1"));
+        select.setPrefixComponent(new Span("prefix1"));
 
         Assert.assertEquals("Invalid number of items", 2,
                 getListBox().getChildren().count());
