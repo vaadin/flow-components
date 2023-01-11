@@ -18,6 +18,7 @@ package com.vaadin.flow.component.notification;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.Stream.Builder;
 
@@ -51,9 +52,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-notification")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha9")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha10")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/notification", version = "24.0.0-alpha9")
+@NpmPackage(value = "@vaadin/notification", version = "24.0.0-alpha10")
 @JsModule("@vaadin/notification/src/vaadin-notification.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./notificationConnector.js")
@@ -113,28 +114,23 @@ public class Notification extends Component implements HasComponents, HasStyle,
      * If the Web Component has {@code text} property defined, it will be used
      * as the text content of the notification.
      *
-     * Otherwise, {@code this.container} will be included in the notification
-     * with {@code <flow-component-renderer>}
+     * Otherwise, the child nodes of this.container will be included in the
+     * notification.
      */
     private void configureRenderer() {
         String appId = UI.getCurrent() != null
                 ? UI.getCurrent().getInternals().getAppId()
                 : "ROOT";
-        int nodeId = container.getNode().getId();
-        String template = String.format(
-                "<flow-component-renderer appid=\"%s\" nodeid=\"%s\"></flow-component-renderer>",
-                appId, nodeId);
 
         //@formatter:off
         getElement().executeJs(
-            "this.renderer = (root, notification) => {" +
-            "  if (notification.text) {" +
-            "    root.textContent = notification.text;" +
-            "  } else if (!root.firstElementChild) {" +
-            "    root.innerHTML = $0;" +
+            "this.renderer = (root) => {" +
+            "  if (this.text) {" +
+            "    root.textContent = this.text;" +
+            "  } else {" +
+            "    Vaadin.FlowComponentHost.setChildNodes($0, this.virtualChildNodeIds, root)" +
             "  }" +
-            "}",
-            template);
+            "}", appId);
         //@formatter:on
     }
 
@@ -216,6 +212,10 @@ public class Notification extends Component implements HasComponents, HasStyle,
     }
 
     private void initBaseElementsAndListeners() {
+        this.container.addAttachListener(event -> {
+            this.container.executeJs(
+                    "Vaadin.FlowComponentHost.patchVirtualContainer(this)");
+        });
         getElement().appendVirtualChild(container);
 
         getElement().addEventListener("opened-changed",
@@ -384,6 +384,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
                         + component + ") is not a child of this component");
             }
         }
+        configureComponentRenderer();
     }
 
     /**
@@ -423,6 +424,8 @@ public class Notification extends Component implements HasComponents, HasStyle,
     @Override
     public void removeAll() {
         container.removeAllChildren();
+
+        configureComponentRenderer();
     }
 
     @Override
@@ -578,6 +581,24 @@ public class Notification extends Component implements HasComponents, HasStyle,
 
     private void configureComponentRenderer() {
         this.getElement().removeProperty("text");
+        updateVirtualChildNodeIds();
+    }
+
+    /**
+     * Updates the virtualChildNodeIds property of the notification element.
+     * <p>
+     * This method is called whenever the notification's child components
+     * change.
+     * <p>
+     * Also calls {@code requestContentUpdate} on the notification element to
+     * trigger the content update.
+     */
+    private void updateVirtualChildNodeIds() {
+        this.getElement().setPropertyList("virtualChildNodeIds",
+                container.getChildren()
+                        .map(element -> element.getNode().getId())
+                        .collect(Collectors.toList()));
+
         this.getElement().callJsFunction("requestContentUpdate");
     }
 
@@ -586,6 +607,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
         super.onAttach(attachEvent);
         initConnector();
         configureRenderer();
+        updateVirtualChildNodeIds();
     }
 
     @Override
