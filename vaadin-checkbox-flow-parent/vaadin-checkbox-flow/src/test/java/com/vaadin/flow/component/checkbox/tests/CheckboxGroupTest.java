@@ -303,6 +303,19 @@ public class CheckboxGroupTest {
     }
 
     @Test
+    public void selectItem_setItemLabelGenerator_selectionIsRetained() {
+        CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
+        checkboxGroup.setItems("foo", "bar");
+
+        checkboxGroup.setValue(Set.of("foo"));
+        Assert.assertEquals(Set.of("foo"), checkboxGroup.getValue());
+
+        checkboxGroup.setItemLabelGenerator(item -> item + " (Updated)");
+
+        Assert.assertEquals(Set.of("foo"), checkboxGroup.getValue());
+    }
+
+    @Test
     public void addSelectionListener_selectionEventIsFired() {
         CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
         checkboxGroup.setItems("foo", "bar");
