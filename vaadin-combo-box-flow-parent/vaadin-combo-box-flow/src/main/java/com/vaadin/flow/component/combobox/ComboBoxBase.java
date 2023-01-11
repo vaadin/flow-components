@@ -32,7 +32,6 @@ import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasTheme;
-import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.UI;
@@ -42,6 +41,7 @@ import com.vaadin.flow.component.combobox.dataview.ComboBoxListDataView;
 import com.vaadin.flow.component.shared.HasAutoOpen;
 import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
@@ -88,7 +88,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
         HasDataView<TItem, String, ComboBoxDataView<TItem>>, HasHelper,
         HasLabel, HasLazyDataView<TItem, String, ComboBoxLazyDataView<TItem>>,
         HasListDataView<TItem, ComboBoxListDataView<TItem>>, HasSize, HasStyle,
-        HasTheme, HasTooltip, HasValidation, HasValidator<TValue> {
+        HasTheme, HasTooltip, HasValidationProperties, HasValidator<TValue> {
 
     /**
      * Registration for custom value listeners that disallows entering custom
@@ -325,20 +325,6 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     }
 
     /**
-     * Whether the component has an invalid value or not.
-     */
-    public boolean isInvalid() {
-        return getElement().getProperty("invalid", false);
-    }
-
-    /**
-     * Sets whether the component has an invalid value or not.
-     */
-    public void setInvalid(boolean invalid) {
-        getElement().setProperty("invalid", invalid);
-    }
-
-    /**
      * Sets whether the component requires a value to be considered in a valid
      * state.
      *
@@ -356,23 +342,6 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      */
     public void setRequired(boolean required) {
         super.setRequiredIndicatorVisible(required);
-    }
-
-    /**
-     * The error message that should be displayed when the component becomes
-     * invalid
-     */
-    public String getErrorMessage() {
-        return getElement().getProperty("errorMessage");
-    }
-
-    /**
-     * Sets the error message that should be displayed when the component
-     * becomes invalid
-     */
-    public void setErrorMessage(String errorMessage) {
-        getElement().setProperty("errorMessage",
-                errorMessage == null ? "" : errorMessage);
     }
 
     /**
