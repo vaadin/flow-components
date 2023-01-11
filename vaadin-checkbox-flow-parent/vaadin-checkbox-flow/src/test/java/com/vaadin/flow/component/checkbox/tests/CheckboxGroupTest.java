@@ -316,7 +316,7 @@ public class CheckboxGroupTest {
     }
 
     @Test
-    public void selectItem_setItemLabelGenerator_labelIsUpdated() {
+    public void setItemLabelGenerator_labelIsUpdated() {
         CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
         checkboxGroup.setItems("foo", "bar");
 
