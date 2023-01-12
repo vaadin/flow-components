@@ -26,28 +26,7 @@ public class MainView extends VerticalLayout {
 
         createRichTextEditorWithBinder();
 
-        createRichTextEditorInATemplate();
-
         createRichTextEditorWithHtmlBinder();
-    }
-
-    private void createRichTextEditorInATemplate() {
-        RichTextEditorInATemplate richTextEditorInATemplate = new RichTextEditorInATemplate();
-        richTextEditorInATemplate.setId("template");
-        RichTextEditor rteTemplate = richTextEditorInATemplate
-                .getRichTextEditor();
-
-        Div valuePanel = new Div();
-        valuePanel.setId("template-value-panel");
-
-        Button getValueButton = new Button("Get value");
-        getValueButton.setId("get-template-rte-value");
-        getValueButton.addClickListener(event -> {
-            String value = rteTemplate.getValue();
-            valuePanel.setText(value);
-        });
-
-        add(richTextEditorInATemplate, valuePanel, getValueButton);
     }
 
     private void createRichTextEditorWithBinder() {
