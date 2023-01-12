@@ -18,7 +18,7 @@ public class HasValidationPropertiesTest {
 
     @Test
     public void initialErrorMessage() {
-        Assert.assertEquals(component.getErrorMessage(), "");
+        Assert.assertEquals(component.getErrorMessage(), null);
     }
 
     @Test

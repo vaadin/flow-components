@@ -45,7 +45,7 @@ public interface HasValidationProperties extends HasElement, HasValidation {
      */
     @Override
     default String getErrorMessage() {
-        return getElement().getProperty("errorMessage", "");
+        return getElement().getProperty("errorMessage");
     }
 
     /**
