@@ -21,6 +21,7 @@ import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 
 import static java.util.Objects.requireNonNull;
 
@@ -38,7 +39,8 @@ import java.util.Locale;
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/scroller", version = "24.0.0-alpha10")
 @JsModule("@vaadin/scroller/vaadin-scroller.js")
-public class Scroller extends Component implements HasSize, HasStyle {
+public class Scroller extends Component
+        implements HasSize, HasStyle, HasThemeVariant<ScrollerVariant> {
 
     private static final String SCROLL_DIRECTION_PROPERTY = "scrollDirection";
 
