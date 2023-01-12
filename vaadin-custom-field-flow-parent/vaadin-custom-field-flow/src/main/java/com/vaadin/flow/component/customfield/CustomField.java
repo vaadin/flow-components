@@ -25,6 +25,7 @@ import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.HasValidationProperties;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.AbstractField;
@@ -33,7 +34,6 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasTheme;
-import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.dom.Element;
@@ -56,8 +56,8 @@ import com.vaadin.flow.dom.Element;
 @NpmPackage(value = "@vaadin/custom-field", version = "24.0.0-alpha10")
 @JsModule("@vaadin/custom-field/src/vaadin-custom-field.js")
 public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
-        implements Focusable<CustomField<T>>, HasHelper, HasSize, HasValidation,
-        HasLabel, HasTheme, HasStyle, HasTooltip {
+        implements Focusable<CustomField<T>>, HasHelper, HasLabel, HasSize,
+        HasStyle, HasTheme, HasTooltip, HasValidationProperties {
 
     /**
      * Default constructor.
@@ -173,41 +173,6 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
                         + component + ") is not a child of this component");
             }
         }
-    }
-
-    /**
-     * <p>
-     * This property is set to true when the control value is invalid.
-     * </p>
-     *
-     * @return the {@code invalid} property from the webcomponent
-     */
-    @Override
-    public boolean isInvalid() {
-        return getElement().getProperty("invalid", false);
-    }
-
-    /**
-     * <p>
-     * This property is set to true when the control value is invalid.
-     * </p>
-     *
-     * @param invalid
-     *            the boolean value to set
-     */
-    @Override
-    public void setInvalid(boolean invalid) {
-        getElement().setProperty("invalid", invalid);
-    }
-
-    @Override
-    public void setErrorMessage(String errorMessage) {
-        getElement().setProperty("errorMessage", errorMessage);
-    }
-
-    @Override
-    public String getErrorMessage() {
-        return getElement().getProperty("errorMessage");
     }
 
     /**

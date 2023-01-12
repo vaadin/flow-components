@@ -34,7 +34,6 @@ import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
@@ -50,6 +49,7 @@ import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.component.shared.HasPrefix;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
@@ -91,8 +91,8 @@ public class DatePicker
         extends AbstractSinglePropertyField<DatePicker, LocalDate>
         implements Focusable<DatePicker>, HasAllowedCharPattern, HasAutoOpen,
         HasClearButton, HasClientValidation, HasHelper, HasLabel,
-        HasOverlayClassName, HasPrefix, HasSize, HasStyle,
-        HasThemeVariant<DatePickerVariant>, HasTooltip, HasValidation,
+        HasOverlayClassName, HasPrefix, HasSize, HasStyle, HasTooltip,
+        HasThemeVariant<DatePickerVariant>, HasValidationProperties,
         HasValidator<LocalDate> {
 
     private DatePickerI18n i18n;
@@ -481,27 +481,6 @@ public class DatePicker
                 .beforeClientResponse(this, context -> command.accept(ui)));
     }
 
-    /**
-     * Sets the error message that should be displayed when the component
-     * becomes invalid.
-     *
-     * @param errorMessage
-     *            the String value to set
-     */
-    public void setErrorMessage(String errorMessage) {
-        getElement().setProperty("errorMessage",
-                errorMessage == null ? "" : errorMessage);
-    }
-
-    /**
-     * Gets the current error message from the datepicker.
-     *
-     * @return the current error message
-     */
-    public String getErrorMessage() {
-        return getElement().getProperty("errorMessage");
-    }
-
     @Override
     public Validator<LocalDate> getDefaultValidator() {
         return (value, context) -> checkValidity(value);
@@ -514,27 +493,6 @@ public class DatePicker
                 event -> listener.validationStatusChanged(
                         new ValidationStatusChangeEvent<LocalDate>(this,
                                 !isInvalid())));
-    }
-
-    /**
-     * Sets whether the component has an invalid value or not.
-     *
-     * @param invalid
-     *            {@code true} for invalid, {@code false} for valid
-     */
-    public void setInvalid(boolean invalid) {
-        getElement().setProperty("invalid", invalid);
-    }
-
-    /**
-     * Gets the validity of the datepicker output.
-     * <p>
-     * return true, if the value is invalid.
-     *
-     * @return the {@code validity} property from the datepicker
-     */
-    public boolean isInvalid() {
-        return getElement().getProperty("invalid", false);
     }
 
     private ValidationResult checkValidity(LocalDate value) {

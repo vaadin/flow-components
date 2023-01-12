@@ -30,7 +30,6 @@ import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -40,6 +39,7 @@ import com.vaadin.flow.component.shared.HasAutoOpen;
 import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.component.timepicker.StepsUtil;
@@ -123,7 +123,7 @@ public class DateTimePicker extends
         AbstractSinglePropertyField<DateTimePicker, LocalDateTime> implements
         Focusable<DateTimePicker>, HasAutoOpen, HasClientValidation, HasHelper,
         HasLabel, HasSize, HasStyle, HasThemeVariant<DateTimePickerVariant>,
-        HasTooltip, HasValidation, HasValidator<LocalDateTime> {
+        HasTooltip, HasValidationProperties, HasValidator<LocalDateTime> {
 
     private final DateTimePickerDatePicker datePicker = new DateTimePickerDatePicker();
     private final DateTimePickerTimePicker timePicker = new DateTimePickerTimePicker();
@@ -627,43 +627,6 @@ public class DateTimePicker extends
     public void removeThemeNames(String... themeNames) {
         HasThemeVariant.super.removeThemeNames(themeNames);
         synchronizeTheme();
-    }
-
-    /**
-     * Sets the error message to display when the input is invalid.
-     */
-    @Override
-    public void setErrorMessage(String errorMessage) {
-        getElement().setProperty("errorMessage",
-                errorMessage == null ? "" : errorMessage);
-    }
-
-    /**
-     * Gets the error message to display when the input is invalid.
-     *
-     * @return the current error message
-     */
-    @Override
-    public String getErrorMessage() {
-        return getElement().getProperty("errorMessage");
-    }
-
-    /**
-     * Sets the validity indication of the date time picker output.
-     */
-    @Override
-    public void setInvalid(boolean invalid) {
-        getElement().setProperty("invalid", invalid);
-    }
-
-    /**
-     * Gets the validity indication of the date time picker output.
-     *
-     * @return the current validity indication.
-     */
-    @Override
-    public boolean isInvalid() {
-        return getElement().getProperty("invalid", false);
     }
 
     @Override
