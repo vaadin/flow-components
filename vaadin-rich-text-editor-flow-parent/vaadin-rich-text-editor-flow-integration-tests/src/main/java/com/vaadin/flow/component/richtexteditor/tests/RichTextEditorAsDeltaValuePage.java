@@ -20,8 +20,10 @@ public class RichTextEditorAsDeltaValuePage extends Div {
         rteDeltaValue.setId("rteDeltaValue");
         final Div rteValueChangeMode = new Div();
         rteValueChangeMode.setId("rteValueChangeMode");
-        final NativeButton button = new NativeButton("Set value", e -> rte
-                .asDelta().setValue(String.format("[{\"insert\":\"Test %d\"},{\"attributes\":{\"header\":1},\"insert\":\"\\n\"}]", ++i)));
+        final NativeButton button = new NativeButton("Set value",
+                e -> rte.asDelta().setValue(String.format(
+                        "[{\"insert\":\"Test %d\"},{\"attributes\":{\"header\":1},\"insert\":\"\\n\"}]",
+                        ++i)));
         button.setId("setValueButton");
         add(rte, rteValue, rteDeltaValue, rteValueChangeMode, button);
         Stream.of(ValueChangeMode.values())
@@ -32,7 +34,8 @@ public class RichTextEditorAsDeltaValuePage extends Div {
             rteValue.setText(rte.getValue());
             rteDeltaValue.setText(rte.asDelta().getValue());
         });
-        rte.asDelta().setValue("[{\"insert\":\"Test\"},{\"attributes\":{\"header\":1},\"insert\":\"\\n\"}]");
+        rte.asDelta().setValue(
+                "[{\"insert\":\"Test\"},{\"attributes\":{\"header\":1},\"insert\":\"\\n\"}]");
     }
 
     private static NativeButton createValueChangeModeSetterButton(

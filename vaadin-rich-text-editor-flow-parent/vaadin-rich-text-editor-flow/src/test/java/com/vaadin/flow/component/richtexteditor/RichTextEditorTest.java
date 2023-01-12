@@ -40,14 +40,14 @@ public class RichTextEditorTest {
     public void initialValuePropertyValue() {
         RichTextEditor rte = new RichTextEditor();
         Assert.assertEquals(rte.getEmptyValue(),
-                rte.getElement().getProperty("value"));
+                rte.getElement().getProperty("htmlValue"));
     }
 
     @Test
-    public void initialHtmlValueNull() {
+    public void initialDeltaValue() {
         RichTextEditor rte = new RichTextEditor();
-        Assert.assertNull("Initial htmlValue should not through NPE",
-                rte.getHtmlValue());
+        Assert.assertEquals(rte.asDelta().getEmptyValue(),
+                rte.asDelta().getValue());
     }
 
     // Decoration group sanitization

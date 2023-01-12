@@ -156,7 +156,7 @@ public class BasicUseIT extends AbstractParallelTest {
         // Wait for everything to update.
         waitUntil(driver -> {
             getValue.click();
-            return getLastRteHtmlBinderValue().equals("null");
+            return getLastRteHtmlBinderValue().equals("");
         });
     }
 

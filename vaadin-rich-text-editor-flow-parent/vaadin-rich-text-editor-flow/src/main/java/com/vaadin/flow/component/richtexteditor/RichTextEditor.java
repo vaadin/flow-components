@@ -116,6 +116,7 @@ public class RichTextEditor
                 RichTextEditor::presentationToModel,
                 RichTextEditor::modelToPresentation);
 
+        setPresentationValue("");
         setValueChangeMode(ValueChangeMode.ON_CHANGE);
     }
 
@@ -184,6 +185,7 @@ public class RichTextEditor
      */
     @Override
     public void setValue(String value) {
+        Objects.requireNonNull(value, "Null value is not supported");
         super.setValue(value);
     }
 
@@ -871,6 +873,11 @@ public class RichTextEditor
         public boolean isRequiredIndicatorVisible() {
             return RichTextEditor.this.isRequiredIndicatorVisible();
         }
+
+        @Override
+        public String getEmptyValue() {
+            return "";
+        }
     }
 
     private class AsDelta
@@ -917,6 +924,7 @@ public class RichTextEditor
         private String oldValue = "";
 
         public AsDelta() {
+            RichTextEditor.this.getElement().setProperty("value", "");
             // Fire delta value change event when HTML value changes
             RichTextEditor.this.addValueChangeListener(event -> {
                 // When the HTML value is set from server-side by the
