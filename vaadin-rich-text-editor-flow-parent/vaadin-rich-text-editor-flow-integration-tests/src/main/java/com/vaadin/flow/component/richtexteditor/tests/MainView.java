@@ -20,38 +20,13 @@ import java.util.stream.Collectors;
 @Route(value = "vaadin-rich-text-editor")
 public class MainView extends VerticalLayout {
 
-    private Div valuePanel, htmlValuePanel, i18nPanel;
+    private Div i18nPanel;
 
     public MainView() {
-        valuePanel = new Div();
-        valuePanel.setId("valuePanel");
-
-        htmlValuePanel = new Div();
-        htmlValuePanel.setId("htmlValuePanel");
-
         i18nPanel = new Div();
         i18nPanel.setId("i18nPanel");
 
         RichTextEditor rte = new RichTextEditor();
-
-        Button setValueButton = new Button("Set value");
-        setValueButton.setId("setValue");
-        setValueButton.addClickListener(
-                event -> rte.setValue("[{\"insert\":\"Foo\"}]"));
-
-        Button getValueButton = new Button("Get value");
-        getValueButton.setId("getValue");
-        getValueButton.addClickListener(event -> {
-            String value = rte.getValue();
-            valuePanel.setText(value);
-        });
-
-        Button getHtmlValueButton = new Button("Get htmlValue");
-        getHtmlValueButton.setId("getHtmlValue");
-        getHtmlValueButton.addClickListener(event -> {
-            String htmlValue = rte.getHtmlValue();
-            htmlValuePanel.setText(htmlValue);
-        });
 
         Button setI18n = new Button("Set Custom i18n");
         setI18n.setId("setI18n");
@@ -70,8 +45,7 @@ public class MainView extends VerticalLayout {
             }
         });
 
-        add(rte, setValueButton, getValueButton, getHtmlValueButton, setI18n,
-                getI18n, valuePanel, htmlValuePanel, i18nPanel);
+        add(rte, setI18n, getI18n, i18nPanel);
 
         createRichTextEditorWithBinder();
 
