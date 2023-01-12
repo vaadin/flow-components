@@ -8,31 +8,31 @@ import com.vaadin.flow.router.Route;
 
 import java.util.stream.Stream;
 
-@Route(value = "vaadin-rich-text-editor/set-html-value")
-public class RichTextEditorSetHtmlValuePage extends Div {
+@Route(value = "vaadin-rich-text-editor/set-delta-value")
+public class RichTextEditorAsDeltaValuePage extends Div {
     private int i = 0;
 
-    public RichTextEditorSetHtmlValuePage() {
+    public RichTextEditorAsDeltaValuePage() {
         final RichTextEditor rte = new RichTextEditor();
         final Div rteValue = new Div();
         rteValue.setId("rteValue");
-        final Div rteHtmlValue = new Div();
-        rteHtmlValue.setId("rteHtmlValue");
+        final Div rteDeltaValue = new Div();
+        rteDeltaValue.setId("rteDeltaValue");
         final Div rteValueChangeMode = new Div();
         rteValueChangeMode.setId("rteValueChangeMode");
         final NativeButton button = new NativeButton("Set value", e -> rte
-                .asHtml().setValue(String.format("<h1>Test %d</h1>", ++i)));
+                .asDelta().setValue(String.format("[{\"insert\":\"Test %d\"},{\"attributes\":{\"header\":1},\"insert\":\"\\n\"}]", ++i)));
         button.setId("setValueButton");
-        add(rte, rteValue, rteHtmlValue, rteValueChangeMode, button);
+        add(rte, rteValue, rteDeltaValue, rteValueChangeMode, button);
         Stream.of(ValueChangeMode.values())
                 .map(v -> createValueChangeModeSetterButton(v, rte,
                         rteValueChangeMode))
                 .forEach(this::add);
         rte.addValueChangeListener(e -> {
             rteValue.setText(rte.getValue());
-            rteHtmlValue.setText(rte.getHtmlValue());
+            rteDeltaValue.setText(rte.asDelta().getValue());
         });
-        rte.asHtml().setValue("<h1>Test</h1>");
+        rte.asDelta().setValue("[{\"insert\":\"Test\"},{\"attributes\":{\"header\":1},\"insert\":\"\\n\"}]");
     }
 
     private static NativeButton createValueChangeModeSetterButton(
