@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,7 +16,10 @@
 package com.vaadin.flow.component.dialog;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.Stream.Builder;
 
@@ -40,6 +43,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementConstants;
+import com.vaadin.flow.dom.ElementDetachListener;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.router.NavigationTrigger;
@@ -72,18 +76,17 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-dialog")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha7")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha10")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/dialog", version = "24.0.0-alpha7")
+@NpmPackage(value = "@vaadin/dialog", version = "24.0.0-alpha10")
 @JsModule("@vaadin/dialog/src/vaadin-dialog.js")
-@JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 @JsModule("./dialogConnector.js")
 @JsModule("./flow-component-renderer.js")
 public class Dialog extends Component implements HasComponents, HasSize,
         HasStyle, HasThemeVariant<DialogVariant> {
 
     private static final String OVERLAY_LOCATOR_JS = "this.$.overlay";
-    private Element template;
+
     private Element container;
     private boolean autoAddedToTheUi;
     private int onCloseConfigured;
@@ -102,20 +105,14 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * Creates an empty dialog.
      */
     public Dialog() {
-        getElement().setAttribute("suppress-template-warning", true);
-
-        template = new Element("template");
-        getElement().appendChild(template);
-
         container = new Element("div");
-        container.getClassList().add("draggable");
-        container.getClassList().add("draggable-leaf-only");
-        container.getStyle().set(ElementConstants.STYLE_WIDTH, "100%");
-        container.getStyle().set(ElementConstants.STYLE_HEIGHT, "100%");
-
+        this.container.addAttachListener(event -> {
+            this.container.executeJs(
+                    "Vaadin.FlowComponentHost.patchVirtualContainer(this)");
+        });
         getElement().appendVirtualChild(container);
 
-        // Attach <flow-component-renderer>. Needs to be updated on each
+        // Needs to be updated on each
         // attach, as element depends on node id which is subject to change if
         // the dialog is transferred to another UI, e.g. due to
         // @PreserveOnRefresh
@@ -364,6 +361,8 @@ public class Dialog extends Component implements HasComponents, HasSize,
                     "Component to add cannot be null");
             container.appendChild(component.getElement());
         }
+
+        updateVirtualChildNodeIds();
     }
 
     @Override
@@ -409,6 +408,8 @@ public class Dialog extends Component implements HasComponents, HasSize,
         // The case when the index is bigger than the children count is handled
         // inside the method below
         container.insertChild(index, component.getElement());
+
+        updateVirtualChildNodeIds();
     }
 
     /**
@@ -907,6 +908,48 @@ public class Dialog extends Component implements HasComponents, HasSize,
         return super.addDetachListener(listener);
     }
 
+    private Map<Element, Registration> childDetachListenerMap = new HashMap<>();
+    private ElementDetachListener childDetachListener = e -> {
+        var child = e.getSource();
+        var childDetachedFromContainer = !container.getChildren().anyMatch(
+                containerChild -> Objects.equals(child, containerChild));
+
+        if (childDetachedFromContainer) {
+            // The child was removed from the dialog
+
+            // Remove the registration for the child detach listener
+            childDetachListenerMap.get(child).remove();
+            childDetachListenerMap.remove(child);
+
+            this.updateVirtualChildNodeIds();
+        }
+    };
+
+    /**
+     * Updates the virtualChildNodeIds property of the dialog element.
+     * <p>
+     * This method is called whenever the dialog's child components change.
+     * <p>
+     * Also calls {@code requestContentUpdate} on the dialog element to trigger
+     * the content update.
+     */
+    private void updateVirtualChildNodeIds() {
+        // Add detach listeners (child may be removed with removeFromParent())
+        container.getChildren().forEach(child -> {
+            if (!childDetachListenerMap.containsKey(child)) {
+                childDetachListenerMap.put(child,
+                        child.addDetachListener(childDetachListener));
+            }
+        });
+
+        this.getElement().setPropertyList("virtualChildNodeIds",
+                container.getChildren()
+                        .map(element -> element.getNode().getId())
+                        .collect(Collectors.toList()));
+
+        this.getElement().callJsFunction("requestContentUpdate");
+    }
+
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
@@ -917,6 +960,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
         Shortcuts.setShortcutListenOnElement(OVERLAY_LOCATOR_JS, this);
         initConnector();
         initHeaderFooterRenderer();
+        updateVirtualChildNodeIds();
     }
 
     /**
@@ -965,17 +1009,17 @@ public class Dialog extends Component implements HasComponents, HasSize,
     }
 
     private void setDimension(String dimension, String value) {
-        getElement().executeJs(OVERLAY_LOCATOR_JS + ".$.overlay.style[$0]=$1",
-                dimension, value);
+        getElement().executeJs("requestAnimationFrame(e => "
+                + OVERLAY_LOCATOR_JS + ".$.overlay.style[$0]=$1)", dimension,
+                value);
     }
 
     private void attachComponentRenderer() {
         String appId = UI.getCurrent().getInternals().getAppId();
-        int nodeId = container.getNode().getId();
-        String renderer = String.format(
-                "<flow-component-renderer appid=\"%s\" nodeid=\"%s\" style=\"display: flex; height: 100%%;\"></flow-component-renderer>",
-                appId, nodeId);
-        template.setProperty("innerHTML", renderer);
+
+        getElement().executeJs(
+                "this.renderer = (root) => Vaadin.FlowComponentHost.setChildNodes($0, this.virtualChildNodeIds, root)",
+                appId);
 
         setDimension(ElementConstants.STYLE_WIDTH, width);
         setDimension(ElementConstants.STYLE_MIN_WIDTH, minWidth);

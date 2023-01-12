@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -54,8 +54,7 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
     public AbstractColumn(Grid<?> grid) {
         this.grid = grid;
 
-        // Needed to update node ids used by <flow-component-renderer> when
-        // refreshing with @PreserveOnRefresh.
+        // Needed to update node ids when refreshing with @PreserveOnRefresh.
         addAttachListener(e -> {
             scheduleHeaderRendering();
             scheduleFooterRendering();

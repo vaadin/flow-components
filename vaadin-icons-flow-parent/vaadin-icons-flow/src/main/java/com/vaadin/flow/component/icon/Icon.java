@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -33,11 +33,11 @@ import com.vaadin.flow.dom.ElementConstants;
  * @see VaadinIcon
  */
 @Tag("vaadin-icon")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha7")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha10")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/icons", version = "24.0.0-alpha7")
+@NpmPackage(value = "@vaadin/icons", version = "24.0.0-alpha10")
 @JsModule("@vaadin/icons/vaadin-iconset.js")
-@NpmPackage(value = "@vaadin/icon", version = "24.0.0-alpha7")
+@NpmPackage(value = "@vaadin/icon", version = "24.0.0-alpha10")
 @JsModule("@vaadin/icon/vaadin-icon.js")
 public class Icon extends Component
         implements HasStyle, ClickNotifier<Icon>, HasTooltip {

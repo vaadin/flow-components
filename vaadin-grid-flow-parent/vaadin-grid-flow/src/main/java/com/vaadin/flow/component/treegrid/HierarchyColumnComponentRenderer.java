@@ -7,9 +7,7 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.function.ValueProvider;
 
 /**
- * Renders components as hierarchy column for tree grid. Basically puts
- * <code>flow-component-renderer</code> tag inside of
- * <code>vaadin-grid-tree-toggle</code>
+ * Renders components as hierarchy column for tree grid.
  *
  * @param <COMPONENT>
  *            the type of the output component

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -56,7 +56,7 @@ public class SelectedTabPage extends Div {
         delete.setId("delete");
 
         NativeButton addFirst = new NativeButton("Add new tab as the first",
-                event -> tabs.addComponentAsFirst(new Tab("baz")));
+                event -> tabs.addTabAsFirst(new Tab("baz")));
         addFirst.setId("add-first");
 
         NativeButton setSelectedIndex = new NativeButton("setSelectedIndex(1)",
@@ -68,7 +68,8 @@ public class SelectedTabPage extends Div {
         setSelectedTab.setId("set-selected-tab");
 
         NativeButton deleteFirst = new NativeButton("Delete first tab",
-                event -> tabs.remove(tabs.getChildren().findFirst().get()));
+                event -> tabs
+                        .remove((Tab) tabs.getChildren().findFirst().get()));
         deleteFirst.setId("delete-first");
 
         NativeButton addFirstWithElementAPI = new NativeButton(

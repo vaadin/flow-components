@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -25,8 +25,11 @@ import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
+import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
@@ -267,8 +270,35 @@ public class DatePickerTest {
     }
 
     @Test
+    public void implementsHasOverlayClassName() {
+        Assert.assertTrue("DatePicker should support overlay class name",
+                HasOverlayClassName.class
+                        .isAssignableFrom(new DatePicker().getClass()));
+    }
+
+    @Test
     public void implementsHasTooltip() {
         DatePicker picker = new DatePicker();
         Assert.assertTrue(picker instanceof HasTooltip);
+    }
+
+    @Test
+    public void setPrefix_hasPrefix() {
+        DatePicker picker = new DatePicker();
+        TestPrefix prefix = new TestPrefix();
+
+        picker.setPrefixComponent(prefix);
+
+        Assert.assertEquals(prefix, picker.getPrefixComponent());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void setTextAsPrefix_throws() {
+        DatePicker picker = new DatePicker();
+        picker.setPrefixComponent(new Text("Prefix"));
+    }
+
+    @Tag("div")
+    private static class TestPrefix extends Component {
     }
 }

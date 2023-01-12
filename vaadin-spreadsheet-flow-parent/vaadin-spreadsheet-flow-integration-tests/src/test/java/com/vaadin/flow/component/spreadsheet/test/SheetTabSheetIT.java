@@ -46,19 +46,17 @@ public class SheetTabSheetIT extends AbstractSpreadsheetIT {
         clickCell("C5");
         spreadsheet.addSheet();
         spreadsheet.selectSheetAt(1);
-        selectRegion("C3", "E5");
+        selectRegion("C3", "C4");
         spreadsheet.selectSheetAt(0);
         waitUntil(e -> spreadsheet.getCellAt("C5").isCellSelected());
         spreadsheet.selectSheetAt(1);
         getCommandExecutor().waitForVaadin();
-        String[] cols = { "C", "D", "E" };
-        for (String column : cols) {
-            for (int row = 3; row <= 5; row++) {
-                Assert.assertTrue("Cell " + column + row + " is not selected",
-                        spreadsheet.getCellAt(column + "" + row)
-                                .isCellSelected());
-            }
-        }
+        Assert.assertTrue("Cell C3 is not selected",
+                spreadsheet.getCellAt("C3").isCellSelected());
+        Assert.assertTrue("Cell C4 is not selected",
+                spreadsheet.getCellAt("C4").isCellSelected());
+        Assert.assertFalse("Cell C5 is selected while it shouldn't be",
+                spreadsheet.getCellAt("C5").isCellSelected());
     }
 
     @Test

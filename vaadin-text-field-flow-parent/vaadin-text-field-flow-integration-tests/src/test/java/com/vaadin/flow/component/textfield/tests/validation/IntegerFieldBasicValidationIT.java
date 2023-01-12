@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -26,6 +26,7 @@ import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldV
 import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldValidationBasicPage.MAX_INPUT;
 import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldValidationBasicPage.STEP_INPUT;
 import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldValidationBasicPage.REQUIRED_BUTTON;
+import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldValidationBasicPage.CLEAR_VALUE_BUTTON;
 
 @TestPath("vaadin-integer-field/validation/basic")
 public class IntegerFieldBasicValidationIT
@@ -156,6 +157,17 @@ public class IntegerFieldBasicValidationIT
         testField.sendKeys("--2", Keys.TAB);
         assertServerInvalid();
         assertClientInvalid();
+    }
+
+    @Test
+    public void badInput_setValue_clearValue_assertValidity() {
+        testField.sendKeys("--2", Keys.TAB);
+        assertServerInvalid();
+        assertClientInvalid();
+
+        $("button").id(CLEAR_VALUE_BUTTON).click();
+        assertServerValid();
+        assertClientValid();
     }
 
     @Test

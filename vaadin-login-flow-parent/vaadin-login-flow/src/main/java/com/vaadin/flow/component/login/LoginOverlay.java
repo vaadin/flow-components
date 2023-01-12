@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -23,6 +23,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.router.NavigationTrigger;
@@ -41,9 +42,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-login-overlay")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha7")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha10")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/login", version = "24.0.0-alpha7")
+@NpmPackage(value = "@vaadin/login", version = "24.0.0-alpha10")
 @JsModule("@vaadin/login/src/vaadin-login-overlay.js")
 @JsModule("./loginOverlayConnector.js")
 public class LoginOverlay extends AbstractLogin implements HasStyle {
@@ -196,8 +197,7 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
             return;
         }
 
-        title.getElement().setAttribute("slot", "title");
-        getElement().appendChild(title.getElement());
+        SlotUtils.addToSlot(this, "title", title);
     }
 
     /**

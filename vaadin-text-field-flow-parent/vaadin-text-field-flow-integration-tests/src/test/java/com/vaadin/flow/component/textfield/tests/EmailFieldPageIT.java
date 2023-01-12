@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -26,7 +26,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.openqa.selenium.support.ui.ExpectedConditions.attributeToBe;
 
 /**
@@ -124,20 +123,6 @@ public class EmailFieldPageIT extends AbstractComponentIT {
 
         String value = findElement(By.id("clear-message")).getText();
         Assert.assertEquals("Old value: 'foo'. New value: ''.", value);
-    }
-
-    @Test
-    public void assertInvalidValue() {
-        EmailFieldElement field = $(EmailFieldElement.class)
-                .id("clear-email-field");
-
-        field.sendKeys("username");
-        blur();
-        assertTrue(field.hasAttribute("invalid"));
-
-        field.sendKeys("username@domain.com");
-        blur();
-        assertFalse(field.hasAttribute("invalid"));
     }
 
     @Test

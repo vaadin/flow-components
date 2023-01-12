@@ -1,6 +1,6 @@
 
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -68,8 +68,6 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
     }
 
     private final String templateExpression;
-
-    private final String DEFAULT_RENDERER_NAME = "renderer";
 
     private final String propertyNamespace;
 
@@ -142,65 +140,7 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
         return new LitRenderer<>(templateExpression);
     }
 
-    /**
-     * @deprecated LitRenderer doesn't support {@code <template>} elements.
-     *             Don't use.
-     */
-    @Deprecated
     @Override
-    public Rendering<SOURCE> render(Element container,
-            DataKeyMapper<SOURCE> keyMapper, Element contentTemplate) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @deprecated LitRenderer doesn't support getting the event handlers. Don't
-     *             use.
-     */
-    @Deprecated
-    @Override
-    public Map<String, SerializableConsumer<SOURCE>> getEventHandlers() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Sets up rendering of model objects inside a given
-     * {@code Element container} element. The model objects are rendered using
-     * the Lit template literal provided when creating this LitRenderer
-     * instance, and the Vaadin-default JS renderer function name.
-     *
-     * @param container
-     *            the DOM element that supports setting a renderer function
-     * @param keyMapper
-     *            mapper used internally to fetch items by key and to provide
-     *            keys for given items. It is required when either functions or
-     *            {@link DataGenerator} are supported
-     * @return the context of the rendering, that can be used by the components
-     *         to provide extra customization
-     */
-    @Override
-    public Rendering<SOURCE> render(Element container,
-            DataKeyMapper<SOURCE> keyMapper) {
-        return this.render(container, keyMapper, DEFAULT_RENDERER_NAME);
-    }
-
-    /**
-     * Sets up rendering of model objects inside a given
-     * {@code Element container} element. The model objects are rendered using
-     * the Lit template literal provided when creating this LitRenderer
-     * instance, and a given {@code String rendererName} JS renderer function.
-     *
-     * @param container
-     *            the DOM element that supports setting a renderer function
-     * @param keyMapper
-     *            mapper used internally to fetch items by key and to provide
-     *            keys for given items. It is required when either functions or
-     *            {@link DataGenerator} are supported
-     * @param rendererName
-     *            name of the renderer function the container element accepts
-     * @return the context of the rendering, that can be used by the components
-     *         to provide extra customization
-     */
     public Rendering<SOURCE> render(Element container,
             DataKeyMapper<SOURCE> keyMapper, String rendererName) {
         DataGenerator<SOURCE> dataGenerator = createDataGenerator();
@@ -211,11 +151,6 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
             @Override
             public Optional<DataGenerator<SOURCE>> getDataGenerator() {
                 return Optional.of(dataGenerator);
-            }
-
-            @Override
-            public Element getTemplateElement() {
-                return null;
             }
 
             @Override
@@ -489,7 +424,6 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
      *
      * @return the mapped properties, never <code>null</code>
      */
-    @Override
     public Map<String, ValueProvider<SOURCE, ?>> getValueProviders() {
         return Collections.unmodifiableMap(valueProviders);
     }

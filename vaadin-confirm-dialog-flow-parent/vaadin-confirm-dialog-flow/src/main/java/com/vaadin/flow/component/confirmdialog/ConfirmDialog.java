@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -29,6 +29,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.internal.StateTree;
@@ -57,9 +58,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-confirm-dialog")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha7")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha10")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/confirm-dialog", version = "24.0.0-alpha7")
+@NpmPackage(value = "@vaadin/confirm-dialog", version = "24.0.0-alpha10")
 @JsModule("@vaadin/confirm-dialog/src/vaadin-confirm-dialog.js")
 @JsModule("./confirmDialogConnector.js")
 public class ConfirmDialog extends Component
@@ -121,7 +122,7 @@ public class ConfirmDialog extends Component
     }
 
     private void updateWidth() {
-        this.getElement().executeJs("this._setWidth($0)", this.width);
+        this.getElement().executeJs("this._contentWidth = $0", this.width);
     }
 
     /**
@@ -144,7 +145,7 @@ public class ConfirmDialog extends Component
     }
 
     public void updateHeight() {
-        this.getElement().executeJs("this._setHeight($0)", this.height);
+        this.getElement().executeJs("this._contentHeight = $0", this.height);
     }
 
     /**
@@ -337,7 +338,7 @@ public class ConfirmDialog extends Component
      *            the element to display instead of default Reject button
      */
     public void setRejectButton(Element element) {
-        addToSlot("reject-button", element);
+        SlotUtils.setSlot(this, "reject-button", element);
     }
 
     /**
@@ -390,7 +391,7 @@ public class ConfirmDialog extends Component
      *            the element to display instead of default Cancel button
      */
     public void setCancelButton(Element element) {
-        addToSlot("cancel-button", element);
+        SlotUtils.setSlot(this, "cancel-button", element);
     }
 
     /**
@@ -442,17 +443,7 @@ public class ConfirmDialog extends Component
      *            the element to display instead of default Confirm button
      */
     public void setConfirmButton(Element element) {
-        addToSlot("confirm-button", element);
-    }
-
-    private void addToSlot(String slotName, Element element) {
-        // Remove existing elements with the same slot name
-        getElement().getChildren()
-                .filter(child -> slotName.equals(child.getAttribute("slot")))
-                .forEach(Element::removeFromParent);
-
-        element.setAttribute("slot", slotName);
-        getElement().appendChild(element);
+        SlotUtils.setSlot(this, "confirm-button", element);
     }
 
     /**
@@ -575,7 +566,7 @@ public class ConfirmDialog extends Component
      *            the element to display instead of default header text
      */
     public void setHeader(Element element) {
-        addToSlot("header", element);
+        SlotUtils.setSlot(this, "header", element);
     }
 
     /**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -26,6 +26,7 @@ import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldV
 import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldValidationBinderPage.MIN_INPUT;
 import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldValidationBinderPage.MAX_INPUT;
 import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldValidationBinderPage.EXPECTED_VALUE_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldValidationBinderPage.CLEAR_VALUE_BUTTON;
 import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldValidationBinderPage.REQUIRED_ERROR_MESSAGE;
 import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldValidationBinderPage.UNEXPECTED_VALUE_ERROR_MESSAGE;
 
@@ -147,6 +148,19 @@ public class IntegerFieldBinderValidationIT
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage("");
+    }
+
+    @Test
+    public void badInput_setValue_clearValue_assertValidity() {
+        testField.sendKeys("--2", Keys.TAB);
+        assertServerInvalid();
+        assertClientInvalid();
+        assertErrorMessage("");
+
+        $("button").id(CLEAR_VALUE_BUTTON).click();
+        assertServerInvalid();
+        assertClientInvalid();
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
     @Test

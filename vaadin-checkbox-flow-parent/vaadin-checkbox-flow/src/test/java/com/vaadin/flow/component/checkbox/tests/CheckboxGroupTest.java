@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -300,6 +300,32 @@ public class CheckboxGroupTest {
         checkboxGroup.getDataProvider().refreshAll();
         assertCheckboxLabels(checkboxGroup, "etc", "opt");
 
+    }
+
+    @Test
+    public void selectItem_setItemLabelGenerator_selectionIsRetained() {
+        CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
+        checkboxGroup.setItems("foo", "bar");
+
+        checkboxGroup.setValue(Set.of("foo"));
+        Assert.assertEquals(Set.of("foo"), checkboxGroup.getValue());
+
+        checkboxGroup.setItemLabelGenerator(item -> item + " (Updated)");
+
+        Assert.assertEquals(Set.of("foo"), checkboxGroup.getValue());
+    }
+
+    @Test
+    public void setItemLabelGenerator_labelIsUpdated() {
+        CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
+        checkboxGroup.setItems("foo", "bar");
+
+        Checkbox cb = (Checkbox) checkboxGroup.getChildren().findFirst().get();
+        Assert.assertEquals("foo", cb.getLabel());
+
+        checkboxGroup.setItemLabelGenerator(item -> item + " (Updated)");
+
+        Assert.assertEquals("foo (Updated)", cb.getLabel());
     }
 
     @Test

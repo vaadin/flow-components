@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -22,10 +22,16 @@ import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import com.vaadin.flow.component.*;
+import com.vaadin.flow.component.AbstractSinglePropertyField;
+import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.HasHelper;
+import com.vaadin.flow.component.HasLabel;
+import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.HasValidation;
+import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
@@ -35,6 +41,7 @@ import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.ValidationUtil;
+import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.component.timepicker.StepsUtil;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
@@ -45,7 +52,7 @@ import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.shared.Registration;
 
 @Tag("vaadin-date-time-picker-date-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha7")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha10")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 class DateTimePickerDatePicker
         extends com.vaadin.flow.component.datepicker.DatePicker {
@@ -56,6 +63,13 @@ class DateTimePickerDatePicker
 
     void passThroughPresentationValue(LocalDate newPresentationValue) {
         super.setPresentationValue(newPresentationValue);
+
+        if (Objects.equals(newPresentationValue, getEmptyValue())
+                && isInputValuePresent()) {
+            // Clear the input element from possible bad input.
+            getElement().executeJs("this.inputElement.value = ''");
+            getElement().setProperty("_hasInputValue", false);
+        }
     }
 
     @Override
@@ -65,7 +79,7 @@ class DateTimePickerDatePicker
 }
 
 @Tag("vaadin-date-time-picker-time-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha7")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha10")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 class DateTimePickerTimePicker
         extends com.vaadin.flow.component.timepicker.TimePicker {
@@ -76,6 +90,13 @@ class DateTimePickerTimePicker
 
     void passThroughPresentationValue(LocalTime newPresentationValue) {
         super.setPresentationValue(newPresentationValue);
+
+        if (Objects.equals(newPresentationValue, getEmptyValue())
+                && isInputValuePresent()) {
+            // Clear the input element from possible bad input.
+            getElement().executeJs("this.inputElement.value = ''");
+            getElement().setProperty("_hasInputValue", false);
+        }
     }
 
     @Override
@@ -94,9 +115,9 @@ class DateTimePickerTimePicker
  * @author Vaadin Ltd
  */
 @Tag("vaadin-date-time-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha7")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha10")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/date-time-picker", version = "24.0.0-alpha7")
+@NpmPackage(value = "@vaadin/date-time-picker", version = "24.0.0-alpha10")
 @JsModule("@vaadin/date-time-picker/src/vaadin-date-time-picker.js")
 public class DateTimePicker extends
         AbstractSinglePropertyField<DateTimePicker, LocalDateTime> implements
@@ -181,8 +202,8 @@ public class DateTimePicker extends
             setPresentationValue(null);
         }
 
-        addToSlot(datePicker, "date-picker");
-        addToSlot(timePicker, "time-picker");
+        SlotUtils.addToSlot(this, "date-picker", datePicker);
+        SlotUtils.addToSlot(this, "time-picker", timePicker);
 
         // workaround for https://github.com/vaadin/flow/issues/3496
         setInvalid(false);
@@ -293,9 +314,23 @@ public class DateTimePicker extends
      */
     @Override
     public void setValue(LocalDateTime value) {
+        LocalDateTime oldValue = getValue();
+
         value = sanitizeValue(value);
         super.setValue(value);
-        synchronizeChildComponentValues(value);
+
+        boolean isInputValuePresent = timePicker.isInputValuePresent()
+                || datePicker.isInputValuePresent();
+        boolean isValueRemainedEmpty = Objects.equals(oldValue, getEmptyValue())
+                && Objects.equals(value, getEmptyValue());
+        if (isValueRemainedEmpty && isInputValuePresent) {
+            // Clear the input elements from possible bad input.
+            synchronizeChildComponentValues(value);
+            fireEvent(new ClientValidatedEvent(this, false));
+        } else {
+            synchronizeChildComponentValues(value);
+        }
+
     }
 
     /**
@@ -325,15 +360,6 @@ public class DateTimePicker extends
             datePicker.passThroughPresentationValue(null);
             timePicker.passThroughPresentationValue(null);
         }
-    }
-
-    /**
-     * Adds the given Component to the specified slot of this component.
-     */
-    private void addToSlot(Component component, String slot) {
-        Objects.requireNonNull(component, "Component to add cannot be null");
-        component.getElement().setAttribute("slot", slot);
-        getElement().appendChild(component.getElement());
     }
 
     @Override

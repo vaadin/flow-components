@@ -1,21 +1,17 @@
 /**
  * @license
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
  * See <https://vaadin.com/commercial-license-and-service-terms> for the full
  * license.
  */
-import Fill from "ol/style/Fill";
-import Stroke from "ol/style/Stroke";
-import Style from "ol/style/Style";
-import { Icon } from "ol/style";
-import {
-  convertToCoordinateArray,
-  convertToSizeArray,
-  createOptions,
-} from "./util";
+import Fill from 'ol/style/Fill';
+import Stroke from 'ol/style/Stroke';
+import Style from 'ol/style/Style';
+import { Icon } from 'ol/style';
+import { convertToCoordinateArray, convertToSizeArray, createOptions } from './util';
 
 export function synchronizeFill(target, source, context) {
   if (!target) {
@@ -44,7 +40,7 @@ export function synchronizeStroke(target, source, context) {
 
 function synchronizeImageStyle(target, source, _context) {
   if (!target) {
-    throw new Error("Can not instantiate base class: ol/style/Image");
+    throw new Error('Can not instantiate base class: ol/style/Image');
   }
 
   target.setOpacity(source.opacity);
@@ -61,7 +57,7 @@ function synchronizeImageStyle(target, source, _context) {
  * @returns {string}
  */
 function convertAnchorOrigin(anchorOrigin) {
-  return anchorOrigin.toLowerCase().replace(/_/, "-");
+  return anchorOrigin.toLowerCase().replace(/_/, '-');
 }
 
 export function synchronizeIcon(target, source, context) {
@@ -72,15 +68,9 @@ export function synchronizeIcon(target, source, context) {
         ...source,
         img: undefined,
         src,
-        imgSize: source.imgSize
-          ? convertToSizeArray(source.imgSize)
-          : undefined,
-        anchor: source.anchor
-          ? convertToCoordinateArray(source.anchor)
-          : undefined,
-        anchorOrigin: source.anchorOrigin
-          ? convertAnchorOrigin(source.anchorOrigin)
-          : undefined,
+        imgSize: source.imgSize ? convertToSizeArray(source.imgSize) : undefined,
+        anchor: source.anchor ? convertToCoordinateArray(source.anchor) : undefined,
+        anchorOrigin: source.anchorOrigin ? convertAnchorOrigin(source.anchorOrigin) : undefined
       })
     );
   }
@@ -96,21 +86,9 @@ export function synchronizeStyle(target, source, context) {
     target = new Style();
   }
 
-  target.setImage(
-    source.image
-      ? context.lookup.get(source.image)
-      : undefined
-  );
-  target.setFill(
-    source.fill
-      ? context.lookup.get(source.fill)
-      : undefined
-  );
-  target.setStroke(
-    source.stroke
-      ? context.lookup.get(source.stroke)
-      : undefined
-  );
+  target.setImage(source.image ? context.lookup.get(source.image) : undefined);
+  target.setFill(source.fill ? context.lookup.get(source.fill) : undefined);
+  target.setStroke(source.stroke ? context.lookup.get(source.stroke) : undefined);
 
   context.connector.forceRender();
 

@@ -1,38 +1,29 @@
 /**
  * @license
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
  * See <https://vaadin.com/commercial-license-and-service-terms> for the full
  * license.
  */
-import Feature from "ol/Feature";
-import Point from "ol/geom/Point";
-import View from "ol/View";
-import {
-  synchronizeImageLayer,
-  synchronizeTileLayer,
-  synchronizeVectorLayer,
-} from "./layers.js";
+import Feature from 'ol/Feature';
+import Point from 'ol/geom/Point';
+import View from 'ol/View';
+import { synchronizeImageLayer, synchronizeTileLayer, synchronizeVectorLayer } from './layers.js';
 import {
   synchronizeImageWMSSource,
   synchronizeOSMSource,
   synchronizeTileWMSSource,
   synchronizeVectorSource,
-  synchronizeXYZSource,
-} from "./sources.js";
-import {
-  synchronizeIcon,
-  synchronizeFill,
-  synchronizeStroke,
-  synchronizeStyle,
-} from "./styles.js";
-import { convertToCoordinateArray, synchronizeCollection } from "./util.js";
+  synchronizeXYZSource
+} from './sources.js';
+import { synchronizeIcon, synchronizeFill, synchronizeStroke, synchronizeStyle } from './styles.js';
+import { convertToCoordinateArray, synchronizeCollection } from './util.js';
 
 function synchronizeMap(target, source, context) {
   if (!target) {
-    throw new Error("Existing map instance must be provided");
+    throw new Error('Existing map instance must be provided');
   }
 
   synchronizeCollection(target.getLayers(), source.layers, context);
@@ -44,13 +35,11 @@ function synchronizeMap(target, source, context) {
 function synchronizeView(target, source, _context) {
   if (!target) {
     target = new View({
-      projection: source.projection,
+      projection: source.projection
     });
   }
 
-  target.setCenter(
-    source.center ? convertToCoordinateArray(source.center) : [0, 0]
-  );
+  target.setCenter(source.center ? convertToCoordinateArray(source.center) : [0, 0]);
   target.setRotation(source.rotation || 0);
   target.setZoom(source.zoom || 0);
 
@@ -79,26 +68,26 @@ function synchronizeFeature(target, source, context) {
 }
 
 const synchronizerLookup = {
-  "ol/Feature": synchronizeFeature,
-  "ol/Map": synchronizeMap,
-  "ol/View": synchronizeView,
+  'ol/Feature': synchronizeFeature,
+  'ol/Map': synchronizeMap,
+  'ol/View': synchronizeView,
   // Layers
-  "ol/layer/Image": synchronizeImageLayer,
-  "ol/layer/Tile": synchronizeTileLayer,
-  "ol/layer/Vector": synchronizeVectorLayer,
+  'ol/layer/Image': synchronizeImageLayer,
+  'ol/layer/Tile': synchronizeTileLayer,
+  'ol/layer/Vector': synchronizeVectorLayer,
   // Sources
-  "ol/source/ImageWMS": synchronizeImageWMSSource,
-  "ol/source/OSM": synchronizeOSMSource,
-  "ol/source/TileWMS": synchronizeTileWMSSource,
-  "ol/source/Vector": synchronizeVectorSource,
-  "ol/source/XYZ": synchronizeXYZSource,
+  'ol/source/ImageWMS': synchronizeImageWMSSource,
+  'ol/source/OSM': synchronizeOSMSource,
+  'ol/source/TileWMS': synchronizeTileWMSSource,
+  'ol/source/Vector': synchronizeVectorSource,
+  'ol/source/XYZ': synchronizeXYZSource,
   // Geometry
-  "ol/geom/Point": synchronizePoint,
+  'ol/geom/Point': synchronizePoint,
   // Styles
-  "ol/style/Icon": synchronizeIcon,
-  "ol/style/Fill": synchronizeFill,
-  "ol/style/Stroke": synchronizeStroke,
-  "ol/style/Style": synchronizeStyle,
+  'ol/style/Icon': synchronizeIcon,
+  'ol/style/Fill': synchronizeFill,
+  'ol/style/Stroke': synchronizeStroke,
+  'ol/style/Style': synchronizeStyle
 };
 
 /**
@@ -122,10 +111,10 @@ export function synchronize(updatedObject, context) {
   const type = updatedObject.type;
 
   if (!type) {
-    throw new Error("Configuration object must have a type");
+    throw new Error('Configuration object must have a type');
   }
   if (!updatedObject.id) {
-    throw new Error("Configuration object must have an ID");
+    throw new Error('Configuration object must have an ID');
   }
 
   let instance = context.lookup.get(updatedObject.id);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,9 +15,12 @@
  */
 package com.vaadin.flow.component.notification;
 
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.Stream.Builder;
 
@@ -37,9 +40,9 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.dom.ElementDetachListener;
 import com.vaadin.flow.dom.ElementFactory;
 import com.vaadin.flow.dom.Style;
-import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.HtmlUtils;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.router.NavigationTrigger;
@@ -52,11 +55,10 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-notification")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha7")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha10")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/notification", version = "24.0.0-alpha7")
+@NpmPackage(value = "@vaadin/notification", version = "24.0.0-alpha10")
 @JsModule("@vaadin/notification/src/vaadin-notification.js")
-@JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./notificationConnector.js")
 public class Notification extends Component implements HasComponents, HasStyle,
@@ -65,32 +67,10 @@ public class Notification extends Component implements HasComponents, HasStyle,
     private static final int DEFAULT_DURATION = 5000;
     private static final Position DEFAULT_POSITION = Position.BOTTOM_START;
 
-    private static final SerializableConsumer<UI> NO_OP = ui -> {
-    };
-
     private final Element container = ElementFactory.createDiv();
-    private final Element templateElement = new Element("template");
     private boolean autoAddedToTheUi = false;
 
     private Registration afterProgrammaticNavigationListenerRegistration;
-
-    private SerializableConsumer<UI> configureTemplate = new ConfigureComponentRenderer();
-
-    private class ConfigureComponentRenderer
-            implements SerializableConsumer<UI> {
-
-        @Override
-        public void accept(UI ui) {
-            if (this == configureTemplate) {
-                String appId = ui.getInternals().getAppId();
-                int nodeId = container.getNode().getId();
-                String template = String.format(
-                        "<flow-component-renderer appid=\"%s\" nodeid=\"%s\"></flow-component-renderer>",
-                        appId, nodeId);
-                templateElement.setProperty("innerHTML", template);
-            }
-        }
-    }
 
     /**
      * Enumeration of all available positions for notification component
@@ -129,6 +109,32 @@ public class Notification extends Component implements HasComponents, HasStyle,
                     : Position.valueOf(clientName.replace('-', '_')
                             .toUpperCase(Locale.ENGLISH));
         }
+    }
+
+    /**
+     * Assigns a renderer function to the notification.
+     *
+     * If the Web Component has {@code text} property defined, it will be used
+     * as the text content of the notification.
+     *
+     * Otherwise, the child nodes of this.container will be included in the
+     * notification.
+     */
+    private void configureRenderer() {
+        String appId = UI.getCurrent() != null
+                ? UI.getCurrent().getInternals().getAppId()
+                : "ROOT";
+
+        //@formatter:off
+        getElement().executeJs(
+            "this.renderer = (root) => {" +
+            "  if (this.text) {" +
+            "    root.textContent = this.text;" +
+            "  } else {" +
+            "    Vaadin.FlowComponentHost.setChildNodes($0, this.virtualChildNodeIds, root)" +
+            "  }" +
+            "}", appId);
+        //@formatter:on
     }
 
     /**
@@ -209,9 +215,10 @@ public class Notification extends Component implements HasComponents, HasStyle,
     }
 
     private void initBaseElementsAndListeners() {
-        getElement().setAttribute("suppress-template-warning", true);
-
-        getElement().appendChild(templateElement);
+        this.container.addAttachListener(event -> {
+            this.container.executeJs(
+                    "Vaadin.FlowComponentHost.patchVirtualContainer(this)");
+        });
         getElement().appendVirtualChild(container);
 
         getElement().addEventListener("opened-changed",
@@ -277,8 +284,9 @@ public class Notification extends Component implements HasComponents, HasStyle,
      */
     public void setText(String text) {
         removeAll();
-        configureTemplate = NO_OP;
-        templateElement.setProperty("innerHTML", HtmlUtils.escape(text));
+        this.getElement().setProperty("text",
+                text != null ? HtmlUtils.escape(text) : null);
+        this.getElement().callJsFunction("requestContentUpdate");
     }
 
     /**
@@ -572,16 +580,59 @@ public class Notification extends Component implements HasComponents, HasStyle,
     }
 
     private void configureComponentRenderer() {
-        configureTemplate = new ConfigureComponentRenderer();
-        getElement().getNode()
-                .runWhenAttached(ui -> configureTemplate.accept(ui));
+        this.getElement().removeProperty("text");
+        updateVirtualChildNodeIds();
+    }
+
+    private Map<Element, Registration> childDetachListenerMap = new HashMap<>();
+    private ElementDetachListener childDetachListener = e -> {
+        var child = e.getSource();
+        var childDetachedFromContainer = !container.getChildren().anyMatch(
+                containerChild -> Objects.equals(child, containerChild));
+
+        if (childDetachedFromContainer) {
+            // The child was removed from the notification
+
+            // Remove the registration for the child detach listener
+            childDetachListenerMap.get(child).remove();
+            childDetachListenerMap.remove(child);
+
+            this.configureComponentRenderer();
+        }
+    };
+
+    /**
+     * Updates the virtualChildNodeIds property of the notification element.
+     * <p>
+     * This method is called whenever the notification's child components
+     * change.
+     * <p>
+     * Also calls {@code requestContentUpdate} on the notification element to
+     * trigger the content update.
+     */
+    private void updateVirtualChildNodeIds() {
+        // Add detach listeners (child may be removed with removeFromParent())
+        container.getChildren().forEach(child -> {
+            if (!childDetachListenerMap.containsKey(child)) {
+                childDetachListenerMap.put(child,
+                        child.addDetachListener(childDetachListener));
+            }
+        });
+
+        this.getElement().setPropertyList("virtualChildNodeIds",
+                container.getChildren()
+                        .map(element -> element.getNode().getId())
+                        .collect(Collectors.toList()));
+
+        this.getElement().callJsFunction("requestContentUpdate");
     }
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         initConnector();
-        configureTemplate.accept(attachEvent.getUI());
+        configureRenderer();
+        updateVirtualChildNodeIds();
     }
 
     @Override

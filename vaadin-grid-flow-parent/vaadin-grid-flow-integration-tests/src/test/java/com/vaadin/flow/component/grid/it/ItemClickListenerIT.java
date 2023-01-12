@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -21,6 +21,7 @@ import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
@@ -77,6 +78,7 @@ public class ItemClickListenerIT extends AbstractComponentIT {
     }
 
     @Test
+    @Ignore("Ignored until the label click causing active item change issue in Web Component is fixed")
     public void doubleClickCheckboxInCell_noEventsFired() {
         TestBenchElement checkbox = grid.getCell(0, 1).$("vaadin-checkbox")
                 .first();

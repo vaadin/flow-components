@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -105,8 +105,7 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
     }
 
     protected void assertComponentRendered(String componentHtml) {
-        assertRendered("<flow-component-renderer appid=\"ROOT\">"
-                + componentHtml + "</flow-component-renderer>");
+        assertRendered(componentHtml);
     }
 
     // Gets the innerHTML of all the actually rendered item elements.

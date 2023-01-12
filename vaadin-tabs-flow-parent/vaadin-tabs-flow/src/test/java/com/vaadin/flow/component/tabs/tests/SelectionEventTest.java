@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -157,7 +157,7 @@ public class SelectionEventTest {
 
     @Test
     public void addTabs_selectionNotChanged() {
-        tabs.addComponentAsFirst(new Tab());
+        tabs.addTabAsFirst(new Tab());
         tabs.add(new Tab());
 
         Assert.assertEquals(
@@ -310,7 +310,7 @@ public class SelectionEventTest {
         tabs = new Tabs();
         addSelectedChangeListener(tabs);
 
-        tabs.addComponentAtIndex(0, tab1);
+        tabs.addTabAtIndex(0, tab1);
 
         Assert.assertEquals(
                 "Unexpected selected index after adding the first tab.", 0,
@@ -327,8 +327,8 @@ public class SelectionEventTest {
         tabs = new Tabs();
         addSelectedChangeListener(tabs);
 
-        tabs.addComponentAtIndex(0, tab1);
-        tabs.addComponentAtIndex(0, tab2);
+        tabs.addTabAtIndex(0, tab1);
+        tabs.addTabAtIndex(0, tab2);
 
         Assert.assertEquals(
                 "Unexpected selected index after adding the first tab.", 1,
@@ -346,7 +346,7 @@ public class SelectionEventTest {
         tabs = new Tabs(false);
         addSelectedChangeListener(tabs);
 
-        tabs.addComponentAtIndex(0, tab1);
+        tabs.addTabAtIndex(0, tab1);
 
         Assert.assertEquals(
                 "Unexpected selected index after adding the first tab.", -1,

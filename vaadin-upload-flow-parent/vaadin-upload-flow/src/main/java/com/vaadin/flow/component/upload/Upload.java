@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -37,6 +37,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.dom.DomEventListener;
 import com.vaadin.flow.dom.Element;
@@ -62,9 +63,9 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-upload")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha7")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha10")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/upload", version = "24.0.0-alpha7")
+@NpmPackage(value = "@vaadin/upload", version = "24.0.0-alpha10")
 @JsModule("@vaadin/upload/src/vaadin-upload.js")
 public class Upload extends Component implements HasSize, HasStyle {
 
@@ -149,9 +150,13 @@ public class Upload extends Component implements HasSize, HasStyle {
                 .addEventData(elementFiles);
 
         defaultUploadButton = new Button();
+        // Ensure the flag is set before the element is added to the slot
+        defaultUploadButton.getElement().setProperty("_isDefault", true);
         setUploadButton(defaultUploadButton);
 
         defaultDropLabel = new Span();
+        // Ensure the flag is set before the element is added to the slot
+        defaultDropLabel.getElement().setProperty("_isDefault", true);
         setDropLabel(defaultDropLabel);
 
         defaultDropLabelIcon = new UploadIcon();
@@ -322,16 +327,13 @@ public class Upload extends Component implements HasSize, HasStyle {
      *            <code>null</code> to reset to the default button
      */
     public void setUploadButton(Component button) {
-        removeElementsAtSlot("add-button");
-
         if (button != null) {
             uploadButton = button;
         } else {
             uploadButton = defaultUploadButton;
         }
 
-        uploadButton.getElement().setAttribute("slot", "add-button");
-        getElement().appendChild(uploadButton.getElement());
+        SlotUtils.setSlot(this, "add-button", uploadButton);
     }
 
     /**
@@ -352,16 +354,13 @@ public class Upload extends Component implements HasSize, HasStyle {
      *            or <code>null</code> to reset to the default label
      */
     public void setDropLabel(Component label) {
-        removeElementsAtSlot("drop-label");
-
         if (label != null) {
             dropLabel = label;
         } else {
             dropLabel = defaultDropLabel;
         }
 
-        dropLabel.getElement().setAttribute("slot", "drop-label");
-        getElement().appendChild(dropLabel.getElement());
+        SlotUtils.setSlot(this, "drop-label", dropLabel);
     }
 
     /**
@@ -383,16 +382,13 @@ public class Upload extends Component implements HasSize, HasStyle {
      *            drop files, or <code>null</code> to reset to the default icon
      */
     public void setDropLabelIcon(Component icon) {
-        removeElementsAtSlot("drop-label-icon");
-
         if (icon != null) {
             dropLabelIcon = icon;
         } else {
             dropLabelIcon = defaultDropLabelIcon;
         }
 
-        dropLabelIcon.getElement().setAttribute("slot", "drop-label-icon");
-        getElement().appendChild(dropLabelIcon.getElement());
+        SlotUtils.setSlot(this, "drop-label-icon", dropLabelIcon);
     }
 
     /**
@@ -402,13 +398,6 @@ public class Upload extends Component implements HasSize, HasStyle {
      */
     public Component getDropLabelIcon() {
         return dropLabelIcon;
-    }
-
-    private void removeElementsAtSlot(String slot) {
-        getElement().getChildren()
-                .filter(child -> slot.equals(child.getAttribute("slot")))
-                .collect(Collectors.toList())
-                .forEach(Element::removeFromParent);
     }
 
     /**
@@ -652,24 +641,6 @@ public class Upload extends Component implements HasSize, HasStyle {
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-
-        if (uploadButton == defaultUploadButton) {
-            // FIXME: the "_isDefault" flag is being set too late,
-            // so we have to trigger the slot controller manually
-            getElement().executeJs(
-                    "$0._addButton = null; $1._isDefault = true;"
-                            + "$0._addButtonController.initNode($1)",
-                    getElement(), defaultUploadButton.getElement());
-        }
-
-        if (dropLabel == defaultDropLabel) {
-            // FIXME: the "_isDefault" flag is being set too late,
-            // so we have to trigger the slot controller manually
-            getElement().executeJs(
-                    "$0._dropLabel = null; $1._isDefault = true;"
-                            + "$0._dropLabelController.initNode($1)",
-                    getElement(), defaultDropLabel.getElement());
-        }
 
         // Element state is not persisted across attach/detach
         if (this.i18n != null) {
