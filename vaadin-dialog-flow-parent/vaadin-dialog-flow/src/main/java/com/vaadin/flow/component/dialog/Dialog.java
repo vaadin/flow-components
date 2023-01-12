@@ -1009,8 +1009,9 @@ public class Dialog extends Component implements HasComponents, HasSize,
     }
 
     private void setDimension(String dimension, String value) {
-        getElement().executeJs(OVERLAY_LOCATOR_JS + ".$.overlay.style[$0]=$1",
-                dimension, value);
+        getElement().executeJs("requestAnimationFrame(e => "
+                + OVERLAY_LOCATOR_JS + ".$.overlay.style[$0]=$1)", dimension,
+                value);
     }
 
     private void attachComponentRenderer() {
