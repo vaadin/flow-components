@@ -113,6 +113,15 @@ public class CloseListenerReopenDialogIT extends AbstractComponentIT {
                 1, findElements(By.className("sub")).size());
     }
 
+    @Test
+    public void openDialog_shouldNotThrow() {
+        open();
+
+        findElement(By.id("open")).click();
+
+        checkLogsForErrors();
+    }
+
     private void closeDialog() {
         new Actions(getDriver()).sendKeys(Keys.ESCAPE).build().perform();
     }
