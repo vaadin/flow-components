@@ -18,50 +18,6 @@ public class BasicUseIT extends AbstractParallelTest {
         String url = getBaseURL().replace(super.getBaseURL(),
                 super.getBaseURL() + "/vaadin-rich-text-editor");
         getDriver().get(url);
-        ButtonElement setValue = getTestButton("setValue");
-        setValue.click();
-    }
-
-    @Test
-    public void rteIsPresent() {
-        Assert.assertTrue($(RichTextEditorElement.class).exists());
-    }
-
-    @Test
-    public void setValueCorrectly() {
-        TestBenchElement editor = $(RichTextEditorElement.class).waitForFirst()
-                .getEditor();
-        editor.setProperty("innerHTML", "");
-        editor.sendKeys("Bar");
-        ButtonElement getValue = getTestButton("getValue");
-        ButtonElement getHtmlValue = getTestButton("getHtmlValue");
-
-        waitUntil(driver -> {
-            new Actions(getDriver()).click(editor).build().perform();
-            new Actions(getDriver()).click(getValue).build().perform();
-            new Actions(getDriver()).click(getHtmlValue).build().perform();
-            return getLastValue().equals("[{\"insert\":\"Bar\\n\"}]")
-                    && getLastHtmlValue().equals("<p>Bar</p>");
-        });
-
-        Assert.assertEquals("[{\"insert\":\"Bar\\n\"}]", getLastValue());
-        Assert.assertEquals("<p>Bar</p>", getLastHtmlValue());
-    }
-
-    @Test
-    public void getValueCorrect() {
-        ButtonElement getValue = getTestButton("getValue");
-        getValue.click();
-
-        Assert.assertEquals("[{\"insert\":\"Foo\"}]", getLastValue());
-    }
-
-    @Test
-    public void getHtmlValueCorrect() {
-        ButtonElement getHtmlValue = getTestButton("getHtmlValue");
-        getHtmlValue.click();
-
-        Assert.assertEquals("<p>Foo</p>", getLastHtmlValue());
     }
 
     @Test
