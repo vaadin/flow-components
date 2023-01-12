@@ -20,10 +20,6 @@ import java.util.stream.Collectors;
 @Route(value = "vaadin-rich-text-editor")
 public class MainView extends VerticalLayout {
     public MainView() {
-        RichTextEditor rte = new RichTextEditor();
-
-        add(rte);
-
         createRichTextEditorWithBinder();
 
         createRichTextEditorWithHtmlBinder();

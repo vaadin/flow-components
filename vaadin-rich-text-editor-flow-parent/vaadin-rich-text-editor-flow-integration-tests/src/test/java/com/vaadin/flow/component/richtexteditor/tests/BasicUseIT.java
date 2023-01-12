@@ -5,7 +5,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.richtexteditor.testbench.RichTextEditorElement;
@@ -35,7 +34,7 @@ public class BasicUseIT extends AbstractParallelTest {
                 driver -> "There are errors: Delta value should contain something"
                         .equals(getLastBinderInfoValue()));
 
-        $(RichTextEditorElement.class).get(1).getEditor()
+        $(RichTextEditorElement.class).get(0).getEditor()
                 .setProperty("innerHTML", "<p>Foo</p>");
 
         // Rte validation
