@@ -32,7 +32,14 @@
         attributeFilter: ['class']
       });
 
-      copyClassName(dialog);
+      // On connector init, the <vaadin-dialog> may not yet be ready,
+      // so we need to check if it has the $ property which gets accessed
+      // in copyClassName.
+      // Also, the class name does not need to be copied if the dialog
+      // is not initially opened.
+      if (dialog.opened && dialog.$) {
+        copyClassName(dialog);
+      }
     }
   };
 })();

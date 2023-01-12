@@ -128,6 +128,46 @@ public class NotificationChildrenTest {
         Assert.assertNull("foo", notification.getElement().getProperty("text"));
     }
 
+    @Test
+    public void selfRemoveChild_virtualNodeIdsInSync() {
+        var child = new Div();
+        var child2 = new Div();
+        notification.add(child, child2);
+        child.removeFromParent();
+        assertVirtualChildren(child2);
+    }
+
+    @Test
+    public void addSeparately_selfRemoveChild_doesNotThrow() {
+        var child = new Div();
+        var child2 = new Div();
+        notification.add(child);
+        notification.add(child2);
+        child.removeFromParent();
+        assertVirtualChildren(child2);
+    }
+
+    @Test
+    public void relocateChild_detachListenerRemoved() {
+        var child = new Div();
+        notification.add(child);
+
+        // Move the child to a new parent
+        var newParent = new Div();
+        ui.add(newParent);
+        newParent.add(child);
+
+        // Should be empty of virtual children
+        assertVirtualChildren();
+        // Manually modify the virtualChildNodeIds property
+        notification.getElement().setProperty("virtualChildNodeIds", "[-1]");
+
+        newParent.remove(child);
+        Assert.assertEquals(
+                notification.getElement().getProperty("virtualChildNodeIds"),
+                "[-1]");
+    }
+
     private void assertVirtualChildren(Component... components) {
         // Get a List of the node ids
         var childIds = Arrays.stream(components)
