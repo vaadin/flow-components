@@ -16,6 +16,8 @@
 package com.vaadin.flow.component.dialog;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -41,6 +43,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementConstants;
+import com.vaadin.flow.dom.ElementDetachListener;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.router.NavigationTrigger;
@@ -375,15 +378,11 @@ public class Dialog extends Component implements HasComponents, HasSize,
                         + component + ") is not a child of this component");
             }
         }
-
-        updateVirtualChildNodeIds();
     }
 
     @Override
     public void removeAll() {
         container.removeAllChildren();
-
-        updateVirtualChildNodeIds();
     }
 
     /**
@@ -909,6 +908,23 @@ public class Dialog extends Component implements HasComponents, HasSize,
         return super.addDetachListener(listener);
     }
 
+    private Map<Element, Registration> childDetachListenerMap = new HashMap<>();
+    private ElementDetachListener childDetachListener = e -> {
+        var child = e.getSource();
+        var childDetachedFromContainer = !container.getChildren().anyMatch(
+                containerChild -> Objects.equals(child, containerChild));
+
+        if (childDetachedFromContainer) {
+            // The child was removed from the dialog
+
+            // Remove the registration for the child detach listener
+            childDetachListenerMap.get(child).remove();
+            childDetachListenerMap.remove(child);
+
+            this.updateVirtualChildNodeIds();
+        }
+    };
+
     /**
      * Updates the virtualChildNodeIds property of the dialog element.
      * <p>
@@ -918,6 +934,14 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * the content update.
      */
     private void updateVirtualChildNodeIds() {
+        // Add detach listeners (child may be removed with removeFromParent())
+        container.getChildren().forEach(child -> {
+            if (!childDetachListenerMap.containsKey(child)) {
+                childDetachListenerMap.put(child,
+                        child.addDetachListener(childDetachListener));
+            }
+        });
+
         this.getElement().setPropertyList("virtualChildNodeIds",
                 container.getChildren()
                         .map(element -> element.getNode().getId())
