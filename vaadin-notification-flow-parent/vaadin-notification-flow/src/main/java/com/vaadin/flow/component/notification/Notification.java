@@ -15,7 +15,9 @@
  */
 package com.vaadin.flow.component.notification;
 
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -38,6 +40,7 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.dom.ElementDetachListener;
 import com.vaadin.flow.dom.ElementFactory;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.internal.HtmlUtils;
@@ -384,7 +387,6 @@ public class Notification extends Component implements HasComponents, HasStyle,
                         + component + ") is not a child of this component");
             }
         }
-        configureComponentRenderer();
     }
 
     /**
@@ -424,8 +426,6 @@ public class Notification extends Component implements HasComponents, HasStyle,
     @Override
     public void removeAll() {
         container.removeAllChildren();
-
-        configureComponentRenderer();
     }
 
     @Override
@@ -584,6 +584,23 @@ public class Notification extends Component implements HasComponents, HasStyle,
         updateVirtualChildNodeIds();
     }
 
+    private Map<Element, Registration> childDetachListenerMap = new HashMap<>();
+    private ElementDetachListener childDetachListener = e -> {
+        var child = e.getSource();
+        var childDetachedFromContainer = !container.getChildren().anyMatch(
+                containerChild -> Objects.equals(child, containerChild));
+
+        if (childDetachedFromContainer) {
+            // The child was removed from the notification
+
+            // Remove the registration for the child detach listener
+            childDetachListenerMap.get(child).remove();
+            childDetachListenerMap.remove(child);
+
+            this.configureComponentRenderer();
+        }
+    };
+
     /**
      * Updates the virtualChildNodeIds property of the notification element.
      * <p>
@@ -594,6 +611,14 @@ public class Notification extends Component implements HasComponents, HasStyle,
      * trigger the content update.
      */
     private void updateVirtualChildNodeIds() {
+        // Add detach listeners (child may be removed with removeFromParent())
+        container.getChildren().forEach(child -> {
+            if (!childDetachListenerMap.containsKey(child)) {
+                childDetachListenerMap.put(child,
+                        child.addDetachListener(childDetachListener));
+            }
+        });
+
         this.getElement().setPropertyList("virtualChildNodeIds",
                 container.getChildren()
                         .map(element -> element.getNode().getId())

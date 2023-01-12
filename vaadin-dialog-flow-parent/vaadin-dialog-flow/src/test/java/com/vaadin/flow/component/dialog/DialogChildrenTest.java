@@ -118,6 +118,45 @@ public class DialogChildrenTest {
                 dialog.getElement().getProperty("virtualChildNodeIds"));
     }
 
+    @Test
+    public void selfRemoveChild_virtualNodeIdsInSync() {
+        var child = new Div();
+        var child2 = new Div();
+        dialog.add(child, child2);
+        child.removeFromParent();
+        assertVirtualChildren(child2);
+    }
+
+    @Test
+    public void addSeparately_selfRemoveChild_doesNotThrow() {
+        var child = new Div();
+        var child2 = new Div();
+        dialog.add(child);
+        dialog.add(child2);
+        child.removeFromParent();
+        assertVirtualChildren(child2);
+    }
+
+    @Test
+    public void relocateChild_detachListenerRemoved() {
+        var child = new Div();
+        dialog.add(child);
+
+        // Move the child to a new parent
+        var newParent = new Div();
+        ui.add(newParent);
+        newParent.add(child);
+
+        // Should be empty of virtual children
+        assertVirtualChildren();
+        // Manually modify the virtualChildNodeIds property
+        dialog.getElement().setProperty("virtualChildNodeIds", "[-1]");
+
+        newParent.remove(child);
+        Assert.assertEquals(
+                dialog.getElement().getProperty("virtualChildNodeIds"), "[-1]");
+    }
+
     private void assertVirtualChildren(Component... components) {
         // Get a List of the node ids
         var childIds = Arrays.stream(components)
