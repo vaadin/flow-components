@@ -1,6 +1,5 @@
 package com.vaadin.flow.component.richtexteditor.tests;
 
-import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.richtexteditor.testbench.RichTextEditorElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
