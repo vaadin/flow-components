@@ -27,21 +27,21 @@ import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.select.data.SelectDataView;
 import com.vaadin.flow.component.select.data.SelectListDataView;
 import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.component.shared.HasPrefix;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.binder.HasValidator;
@@ -94,7 +94,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
         HasDataView<T, Void, SelectDataView<T>>, HasItemComponents<T>,
         HasHelper, HasLabel, HasListDataView<T, SelectListDataView<T>>,
         HasOverlayClassName, HasPrefix, HasSize, HasStyle,
-        HasThemeVariant<SelectVariant>, HasTooltip, HasValidation,
+        HasThemeVariant<SelectVariant>, HasTooltip, HasValidationProperties,
         HasValidator<T>, SingleSelect<Select<T>, T> {
 
     public static final String LABEL_ATTRIBUTE = "label";
@@ -628,49 +628,6 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
     @Override
     public boolean isRequiredIndicatorVisible() {
         return getElement().getProperty("required", false);
-    }
-
-    /**
-     * Sets the error message to show to the user on invalid selection.
-     *
-     * @param errorMessage
-     *            the error message or {@code null} to clear it
-     */
-    @Override
-    public void setErrorMessage(String errorMessage) {
-        getElement().setProperty("errorMessage",
-                errorMessage == null ? "" : errorMessage);
-    }
-
-    /**
-     * Gets the error message to show to the user on invalid selection
-     *
-     * @return the error message or {@code null} if not set
-     */
-    @Override
-    public String getErrorMessage() {
-        return getElement().getProperty("errorMessage");
-    }
-
-    /**
-     * Sets the select to show as invalid state and display error message.
-     *
-     * @param invalid
-     *            {@code true} for invalid, {@code false} for valid
-     */
-    @Override
-    public void setInvalid(boolean invalid) {
-        getElement().setProperty("invalid", invalid);
-    }
-
-    /**
-     * Gets whether the select is currently in invalid state.
-     *
-     * @return {@code true} for invalid, {@code false} for valid
-     */
-    @Override
-    public boolean isInvalid() {
-        return getElement().getProperty("invalid", false);
     }
 
     /**
