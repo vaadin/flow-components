@@ -18,13 +18,11 @@ import { createRangeDataProvider } from '@vaadin/combo-box/src/vaadin-combo-box-
 
         comboBox.$connector = {};
 
-        let dataProviderCallback;
         let filterDebouncer;
-        let pages = {};
         let lastFilter = '';
 
         comboBox.dataProvider = createRangeDataProvider(
-          ({ pageRange, pageSize, filter }, callback) => {
+          ({ pageRange, pageSize, filter }) => {
             if (lastFilter !== filter) {
               lastFilter = filter;
               filterDebouncer = Debouncer.debounce(filterDebouncer, timeOut.after(500), () => {
@@ -54,22 +52,13 @@ import { createRangeDataProvider } from '@vaadin/combo-box/src/vaadin-combo-box-
               filterDebouncer = null;
               comboBox.$server.resetDataCommunicator();
             }
-
-            dataProviderCallback = callback;
           },
           {
             maxRangeSize: 10
           }
         );
 
-        comboBox.$connector.clear = tryCatchWrapper((startIndex, itemsCount) => {
-          const startPage = Math.floor(startIndex / comboBox.pageSize);
-          const pagesCount = Math.ceil(itemsCount / comboBox.pageSize);
-
-          for (let i = 0; i < pagesCount; i++) {
-            delete pages[startPage + i];
-          }
-        });
+        comboBox.$connector.clear = tryCatchWrapper((_startIndex, _itemsCount) => {});
 
         comboBox.$connector.set = tryCatchWrapper(function (startIndex, items, filter) {
           if (filter != lastFilter) {
@@ -85,19 +74,22 @@ import { createRangeDataProvider } from '@vaadin/combo-box/src/vaadin-combo-box-
           if (startIndex === 0 && items.length === 0) {
             // Makes sure that the dataProvider callback is called even when server
             // returns empty data set (no items match the filter).
-            pages[0] = [];
+            comboBox.dataProvider.onPagesLoaded({ 0: [] }, comboBox.size);
             return;
           }
 
           const startPage = startIndex / comboBox.pageSize;
           const pagesCount = Math.ceil(items.length / comboBox.pageSize);
+          const pages = {};
 
           for (let i = 0; i < pagesCount; i++) {
-            let page = startPage + i;
-            let pageStartIndex = i * comboBox.pageSize;
-            let pageEndIndex = (i + 1) * comboBox.pageSize;
+            const page = startPage + i;
+            const pageStartIndex = i * comboBox.pageSize;
+            const pageEndIndex = (i + 1) * comboBox.pageSize;
             pages[page] = items.slice(pageStartIndex, pageEndIndex);
           }
+
+          comboBox.dataProvider.onPagesLoaded(pages, comboBox.size);
         });
 
         // TODO: Decide if it should be implemented in RangeDataProvided.
@@ -122,7 +114,6 @@ import { createRangeDataProvider } from '@vaadin/combo-box/src/vaadin-combo-box-
         });
 
         comboBox.$connector.reset = tryCatchWrapper(function () {
-          pages = {};
           comboBox.clearCache();
         });
 
@@ -130,8 +121,6 @@ import { createRangeDataProvider } from '@vaadin/combo-box/src/vaadin-combo-box-
           if (filter != lastFilter) {
             return;
           }
-
-          dataProviderCallback(pages, comboBox.size);
 
           // Let server know we're done
           comboBox.$server.confirmUpdate(id);
