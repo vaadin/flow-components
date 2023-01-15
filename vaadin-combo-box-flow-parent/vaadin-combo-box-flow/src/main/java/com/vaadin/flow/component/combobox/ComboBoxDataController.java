@@ -33,6 +33,7 @@ import com.vaadin.flow.data.provider.HasListDataView;
 import com.vaadin.flow.data.provider.InMemoryDataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.PropertyChangeEvent;
 import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializableConsumer;
@@ -41,6 +42,8 @@ import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.shared.Registration;
+
+import elemental.json.JsonArray;
 import elemental.json.JsonValue;
 
 import java.io.Serializable;
@@ -68,10 +71,12 @@ class ComboBoxDataController<TItem>
     }
 
     private final class UpdateQueue implements ArrayUpdater.Update {
-        private final transient List<Runnable> queue = new ArrayList<>();
+        private int size;
+        private int start;
+        private JsonArray items;
 
         private UpdateQueue(int size) {
-            enqueue("$connector.updateSize", size);
+            this.size = size;
 
             // Triggers a size update on the client side.
             // This is exclusively needed for supporting immediate update of the
@@ -86,27 +91,24 @@ class ComboBoxDataController<TItem>
 
         @Override
         public void set(int start, List<JsonValue> items) {
-            enqueue("$connector.set", start,
-                    items.stream().collect(JsonUtils.asArray()),
-                    ComboBoxDataController.this.lastFilter);
+            this.start = start;
+            this.items = items.stream().collect(JsonUtils.asArray());
         }
 
         @Override
         public void clear(int start, int length) {
-            enqueue("$connector.clear", start, length);
+            // RangeDataProvider already takes care of removing out-of-range
+            // pages
+            // from the client-side cache, so do nothing here.
         }
 
         @Override
         public void commit(int updateId) {
-            enqueue("$connector.confirm", updateId,
-                    ComboBoxDataController.this.lastFilter);
-            queue.forEach(Runnable::run);
-            queue.clear();
-        }
-
-        private void enqueue(String name, Serializable... arguments) {
-            queue.add(() -> ComboBoxDataController.this.comboBox.getElement()
-                    .callJsFunction(name, arguments));
+            Element comboBoxElement = ComboBoxDataController.this.comboBox
+                    .getElement();
+            comboBoxElement.callJsFunction("$connector.commit", this.start,
+                    this.items, this.size,
+                    ComboBoxDataController.this.lastFilter, updateId);
         }
     }
 

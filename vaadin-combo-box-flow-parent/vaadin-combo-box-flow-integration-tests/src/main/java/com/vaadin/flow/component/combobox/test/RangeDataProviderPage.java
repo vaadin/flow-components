@@ -32,6 +32,7 @@ public class RangeDataProviderPage extends Div {
     }
 
     private List<String> generateItems(int count) {
-        return IntStream.range(0, count)
-                .mapToObj(i -> "Item " + i).collect(Collectors.toList());
-    }}
+        return IntStream.range(0, count).mapToObj(i -> "Item " + i)
+                .collect(Collectors.toList());
+    }
+}

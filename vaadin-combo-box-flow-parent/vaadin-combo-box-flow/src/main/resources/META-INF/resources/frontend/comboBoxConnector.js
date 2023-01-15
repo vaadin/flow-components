@@ -58,9 +58,19 @@ import { createRangeDataProvider } from '@vaadin/combo-box/src/vaadin-combo-box-
           }
         );
 
-        comboBox.$connector.clear = tryCatchWrapper((_startIndex, _itemsCount) => {});
+        comboBox.$connector.updateData = tryCatchWrapper(function (items) {
+          const itemsMap = new Map(items.map((item) => [item.key, item]));
 
-        comboBox.$connector.set = tryCatchWrapper(function (startIndex, items, filter) {
+          comboBox.filteredItems = comboBox.filteredItems.map((item) => {
+            return itemsMap.get(item.key) || item;
+          });
+        });
+
+        comboBox.$connector.reset = tryCatchWrapper(function () {
+          comboBox.clearCache();
+        });
+
+        comboBox.$connector.commit = tryCatchWrapper(function (startIndex, items, size, filter, updateId) {
           if (filter != lastFilter) {
             return;
           }
@@ -71,16 +81,12 @@ import { createRangeDataProvider } from '@vaadin/combo-box/src/vaadin-combo-box-
             );
           }
 
-          if (startIndex === 0 && items.length === 0) {
-            // Makes sure that the dataProvider callback is called even when server
-            // returns empty data set (no items match the filter).
-            comboBox.dataProvider.onPagesLoaded({ 0: [] }, comboBox.size);
-            return;
-          }
-
           const startPage = startIndex / comboBox.pageSize;
           const pagesCount = Math.ceil(items.length / comboBox.pageSize);
-          const pages = {};
+
+          // Makes sure that the dataProvider callback is called even when server
+          // returns empty data set (no items match the filter).
+          const pages = { 0: [] };
 
           for (let i = 0; i < pagesCount; i++) {
             const page = startPage + i;
@@ -89,41 +95,10 @@ import { createRangeDataProvider } from '@vaadin/combo-box/src/vaadin-combo-box-
             pages[page] = items.slice(pageStartIndex, pageEndIndex);
           }
 
-          comboBox.dataProvider.onPagesLoaded(pages, comboBox.size);
-        });
-
-        // TODO: Decide if it should be implemented in RangeDataProvided.
-        comboBox.$connector.updateData = tryCatchWrapper(function (items) {
-          const itemsMap = new Map(items.map((item) => [item.key, item]));
-
-          comboBox.filteredItems = comboBox.filteredItems.map((item) => {
-            return itemsMap.get(item.key) || item;
-          });
-        });
-
-        comboBox.$connector.updateSize = tryCatchWrapper(function (newSize) {
-          // FIXME: It may be that this size set is unnecessary, since when
-          // providing data to combobox via callback we may use data's size.
-          // However, if this size reflect the whole data size, including
-          // data not fetched yet into client side, and combobox expect it
-          // to be set as such, the at least, we don't need it in case the
-          // filter is clientSide only, since it'll increase the height of
-          // the popup at only at first user filter to this size, while the
-          // filtered items count are less.
-          comboBox.size = newSize;
-        });
-
-        comboBox.$connector.reset = tryCatchWrapper(function () {
-          comboBox.clearCache();
-        });
-
-        comboBox.$connector.confirm = tryCatchWrapper(function (id, filter) {
-          if (filter != lastFilter) {
-            return;
-          }
+          comboBox.dataProvider.onPagesLoaded(pages, size);
 
           // Let server know we're done
-          comboBox.$server.confirmUpdate(id);
+          comboBox.$server.confirmUpdate(updateId);
         });
 
         // Prevent setting the custom value as the 'value'-prop automatically
