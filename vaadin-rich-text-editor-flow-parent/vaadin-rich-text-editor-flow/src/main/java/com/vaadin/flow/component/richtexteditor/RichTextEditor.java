@@ -190,6 +190,7 @@ public class RichTextEditor
 
     @Override
     protected void setPresentationValue(String newPresentationValue) {
+        getElement().setProperty("htmlValue", newPresentationValue);
         // htmlValue property is not writeable, HTML value needs to be set using
         // method exposed by web component instead
         getElement().callJsFunction("dangerouslySetHtmlValue", this.getValue());
@@ -935,6 +936,8 @@ public class RichTextEditor
         private String oldValue = "";
 
         public AsDelta() {
+            // Initialize empty value
+            RichTextEditor.this.getElement().setProperty("value", "");
             // Fire delta value change event when HTML value changes
             RichTextEditor.this.addValueChangeListener(event -> {
                 // When the HTML value is set from server-side by the

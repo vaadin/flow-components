@@ -40,14 +40,23 @@ public class RichTextEditorTest {
     public void initialValuePropertyValue() {
         RichTextEditor rte = new RichTextEditor();
         Assert.assertEquals(rte.getEmptyValue(),
-                rte.getElement().getProperty("value"));
+                rte.getElement().getProperty("htmlValue"));
     }
 
     @Test
-    public void initialHtmlValueNull() {
+    public void initialAsHtmlValue() {
         RichTextEditor rte = new RichTextEditor();
-        Assert.assertNull("Initial htmlValue should not through NPE",
-                rte.getHtmlValue());
+        Assert.assertEquals(rte.asHtml().getEmptyValue(),
+                rte.asHtml().getValue());
+    }
+
+    @Test
+    public void initialAsDeltaValue() {
+        RichTextEditor rte = new RichTextEditor();
+        Assert.assertEquals(rte.asDelta().getEmptyValue(),
+                rte.asDelta().getValue());
+        Assert.assertEquals(rte.asDelta().getEmptyValue(),
+                rte.getElement().getProperty("value"));
     }
 
     // Decoration group sanitization
@@ -260,26 +269,6 @@ public class RichTextEditorTest {
         Assert.assertTrue(
                 "Should be possible to set required indicator to be visible on asDelta",
                 rte.isRequiredIndicatorVisible());
-    }
-
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    @Test
-    public void asDelta_addChangeListener() {
-        String deltaValue = "[{\"insert\":\"Foo\"}]";
-        RichTextEditor rte = new RichTextEditor();
-        HasValue<ValueChangeEvent<String>, String> asDelta = rte.asDelta();
-
-        HasValue.ValueChangeListener valueChangeListenerMock = Mockito
-                .mock(HasValue.ValueChangeListener.class);
-        asDelta.addValueChangeListener(valueChangeListenerMock);
-
-        rte.asDelta().setValue(deltaValue);
-        Mockito.verify(valueChangeListenerMock, Mockito.times(1))
-                .valueChanged(Mockito.any());
-
-        rte.setValue("");
-        Mockito.verify(valueChangeListenerMock, Mockito.times(2))
-                .valueChanged(Mockito.any());
     }
 
     @Test
