@@ -98,8 +98,7 @@ class ComboBoxDataController<TItem>
         @Override
         public void clear(int start, int length) {
             // RangeDataProvider already takes care of removing out-of-range
-            // pages
-            // from the client-side cache, so do nothing here.
+            // pages from the client-side cache, so do nothing here.
         }
 
         @Override
