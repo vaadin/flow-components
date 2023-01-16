@@ -185,10 +185,10 @@ import com.vaadin.flow.shared.Registration;
  * </p>
  */
 @Tag("vaadin-select")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.12")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.13")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/select", version = "23.2.12")
-@NpmPackage(value = "@vaadin/vaadin-select", version = "23.2.12")
+@NpmPackage(value = "@vaadin/select", version = "23.2.13")
+@NpmPackage(value = "@vaadin/vaadin-select", version = "23.2.13")
 @JsModule("@vaadin/select/src/vaadin-select.js")
 @JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T>, T>
