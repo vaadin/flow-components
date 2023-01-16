@@ -145,8 +145,7 @@ public class TreeGridBasicFeaturesPage extends Div {
         options.put("LoggingDataProvider", loggingDataProvider);
 
         options.entrySet().forEach(entry -> {
-            addAction(entry.getKey(),
-                    () -> grid.setDataProvider(entry.getValue()));
+            addAction(entry.getKey(), () -> grid.setItems(entry.getValue()));
         });
     }
 

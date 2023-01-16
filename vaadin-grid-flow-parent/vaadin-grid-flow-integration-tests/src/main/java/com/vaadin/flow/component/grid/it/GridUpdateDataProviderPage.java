@@ -101,7 +101,7 @@ public class GridUpdateDataProviderPage extends Div {
         DataProvider<String, ?> updated = DataProvider.ofItems("foo", "foob",
                 "fooba", "foobar");
 
-        grid.setDataProvider(orig);
+        grid.setItems((DataProvider) orig);
         grid.addColumn(i -> i).setHeader("text");
         grid.addColumn(i -> String.valueOf(i.length())).setHeader("length");
 
@@ -132,9 +132,9 @@ public class GridUpdateDataProviderPage extends Div {
     private <T> void swapDataProviders(Grid<T> grid,
             DataProvider<T, ?> provider1, DataProvider<T, ?> provider2) {
         if (grid.getDataProvider().equals(provider1)) {
-            grid.setDataProvider(provider2);
+            grid.setItems((DataProvider) provider2);
         } else {
-            grid.setDataProvider(provider1);
+            grid.setItems((DataProvider) provider1);
         }
     }
 

@@ -2427,33 +2427,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     /**
      * {@inheritDoc}
      *
-     * @deprecated use instead one of the {@code setItems} methods which provide
-     *             access to either {@link GridListDataView} or
-     *             {@link GridLazyDataView}
-     */
-    @Deprecated
-    public void setDataProvider(DataProvider<T, ?> dataProvider) {
-        Objects.requireNonNull(dataProvider, "data provider cannot be null");
-        handleDataProviderChange(dataProvider);
-
-        deselectAll();
-        filterSlot = getDataCommunicator().setDataProvider(dataProvider, null);
-
-        /*
-         * The visibility of the selectAll checkbox depends on whether the
-         * DataProvider is inMemory or not. When changing the DataProvider, its
-         * visibility needs to be revalidated.
-         */
-        if (getSelectionModel() instanceof GridMultiSelectionModel) {
-            GridMultiSelectionModel<T> model = (GridMultiSelectionModel<T>) getSelectionModel();
-            model.setSelectAllCheckboxVisibility(
-                    model.getSelectAllCheckboxVisibility());
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
      * @deprecated Because the stream is collected to a list anyway, use
      *             {@link HasListDataView#setItems(Collection)} or
      *             {@link #setItems(CallbackDataProvider.FetchCallback)}
@@ -2478,7 +2451,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     @Override
     public GridDataView<T> setItems(DataProvider<T, Void> dataProvider) {
-        setDataProvider(dataProvider);
+        getDataCommunicator().setDataProvider(dataProvider, null);
         return getGenericDataView();
     }
 
@@ -2517,7 +2490,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     @Override
     public GridListDataView<T> setItems(ListDataProvider<T> dataProvider) {
-        setDataProvider(dataProvider);
+        getDataCommunicator().setDataProvider(dataProvider, null);
         return getListDataView();
     }
 
@@ -2544,7 +2517,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     @Override
     public GridLazyDataView<T> setItems(
             BackEndDataProvider<T, Void> dataProvider) {
-        setDataProvider(dataProvider);
+        getDataCommunicator().setDataProvider(dataProvider, null);
         return getLazyDataView();
     }
 
@@ -4001,7 +3974,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *
      * Default implementation closes the editor if it's opened.
      *
-     * @see #setDataProvider(DataProvider)
+     * @see #setItems(DataProvider)
      * @see DataChangeEvent
      * @see DataProviderListener
      *

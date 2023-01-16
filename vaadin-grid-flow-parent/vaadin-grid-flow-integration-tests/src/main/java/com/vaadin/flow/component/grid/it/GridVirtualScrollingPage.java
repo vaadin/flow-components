@@ -39,7 +39,7 @@ public class GridVirtualScrollingPage extends Div {
     public GridVirtualScrollingPage() {
         Grid<String> grid = new Grid<>();
 
-        grid.setDataProvider(dataProvider);
+        grid.setItems((DataProvider) dataProvider);
         grid.addColumn(i -> i).setHeader("text");
         grid.addColumn(i -> String.valueOf(i.length())).setHeader("length");
 

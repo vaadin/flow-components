@@ -523,7 +523,7 @@ public class AbstractGridMultiSelectionModelTest {
             dataProvider = Mockito.spy(dataProvider);
         }
 
-        grid.setDataProvider(dataProvider);
+        grid.setItems((DataProvider) dataProvider);
         grid.getDataCommunicator().setDefinedSize(!unknownItemCount);
         return dataProvider;
     }

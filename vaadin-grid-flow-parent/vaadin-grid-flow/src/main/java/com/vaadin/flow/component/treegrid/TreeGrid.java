@@ -363,7 +363,7 @@ public class TreeGrid<T> extends Grid<T>
     @Override
     public void setDataProvider(
             HierarchicalDataProvider<T, ?> hierarchicalDataProvider) {
-        super.setDataProvider(hierarchicalDataProvider);
+        super.setItems((DataProvider) hierarchicalDataProvider);
     }
 
     /**

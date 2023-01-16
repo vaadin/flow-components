@@ -44,7 +44,7 @@ public class GridPageSizePage extends Div {
     public GridPageSizePage() {
         Grid<String> grid = new Grid<>(10);
 
-        grid.setDataProvider(dataProvider);
+        grid.setItems((DataProvider) dataProvider);
         grid.addColumn(i -> i).setHeader("text");
         grid.addColumn(i -> String.valueOf(i.length())).setHeader("length");
 

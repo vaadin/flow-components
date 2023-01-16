@@ -5,6 +5,7 @@ import com.vaadin.flow.component.crud.Crud;
 import com.vaadin.flow.component.crud.CrudVariant;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.router.Route;
 
 @Route(value = "vaadin-crud/customgrid")
@@ -19,7 +20,7 @@ public class CustomGridView extends VerticalLayout {
 
         PersonCrudDataProvider dataProvider = new PersonCrudDataProvider();
 
-        grid.setDataProvider(dataProvider);
+        grid.setItems((DataProvider) dataProvider);
         crud.addSaveListener(e -> dataProvider.persist(e.getItem()));
         crud.addDeleteListener(e -> dataProvider.delete(e.getItem()));
 
