@@ -40,19 +40,14 @@ import elemental.json.JsonObject;
  * format and style your text using boldface, italics, headings, lists, images,
  * links etc.
  * <p>
- * The value of the rich text editor is in the
- * <a href="https://github.com/quilljs/delta">Quill Delta</a> format. The
+ * The value of the rich text editor is in the HTML format. The
  * {@link #setValue(String) setValue} and {@link #getValue() getValue} methods
- * use the delta format by default.
+ * use the HTML format by default.
  * <p>
- * Note that the default use of the delta format has been deprecated in 23.3,
- * and from 24 onwards, the component will use the HTML format as default. To
- * keep using the delta format, use {@link #asDelta()},
- * {@link AsDelta#getValue()} and {@link AsDelta#setValue(String)}.
- *
- * <p>
- * To get and set the value in HTML format, use {@link #asHtml},
- * {@link AsHtml#getValue()} and {@link AsHtml#setValue(String)}.
+ * To get and set the value in the
+ * <a href="https://github.com/quilljs/delta">Quill Delta</a> format, use
+ * {@link #asDelta()}, {@link AsDelta#getValue()} and
+ * {@link AsDelta#setValue(String)}.
  *
  * @author Vaadin Ltd
  *
@@ -143,8 +138,9 @@ public class RichTextEditor
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         // htmlValue property is not writeable and will not be automatically
-        // initialized on the client element
-        // Set presentation value manually instead
+        // initialized on the client-side element. Instead, call set
+        // presentation value to run the necessary JS for initializing the
+        // client-side element
         setPresentationValue(getValue());
     }
 
@@ -166,23 +162,19 @@ public class RichTextEditor
     }
 
     /**
-     * Sets the value of this editor. Should be in
-     * <a href="https://github.com/quilljs/delta">Delta</a> format. If the new
-     * value is not equal to {@code getValue()}, fires a value change event.
-     * Throws {@code NullPointerException}, if the value is null.
+     * Sets the value of this editor in HTML format. If the new value is not
+     * equal to {@code getValue()}, fires a value change event. Throws
+     * {@code NullPointerException}, if the value is null.
      * <p>
      * Note: {@link Binder} will take care of the {@code null} conversion when
      * integrates with the editor, as long as no new converter is defined.
      *
-     * @see #asHtml()
-     * @see AsHtml#setValue(String)
+     * @see #asDelta()
+     * @see AsDelta#setValue(String)
      * @param value
-     *            the new value in Delta format, not {@code null}
-     * @deprecated since 23.3, from 24 onwards the value will be in HTML format.
-     *             Use {@link #asDelta()} instead.
+     *            the new value in HTML format, not {@code null}
      */
     @Override
-    @Deprecated
     public void setValue(String value) {
         Objects.requireNonNull(value, "Null value is not supported");
         super.setValue(value);
@@ -207,38 +199,26 @@ public class RichTextEditor
     }
 
     /**
-     * Returns the current value of the text editor in
-     * <a href="https://github.com/quilljs/delta">Delta</a> format. By default,
+     * Returns the current value of the text editor in HTML format. By default,
      * the empty editor will return an empty string.
      *
-     * @see #getHtmlValue()
-     * @see #asHtml()
-     * @see AsHtml#getValue()
+     * @see #asDelta()
+     * @see AsDelta#getValue()
      * @return the current value.
-     * @deprecated since 23.3, from 24 onwards the value will be in HTML format.
-     *             Use {@link #asDelta()} instead.
      */
     @Override
-    @Deprecated
     public String getValue() {
         return super.getValue();
     }
 
     /**
-     * The value of the editor presented as an HTML string.
-     * <p>
-     * This represents the value currently set on the client side. If you have
-     * just set the value on the server side using {@link #setValue(String)} or
-     * {@link AsHtml#setValue(String)} then the value returned from this method
-     * will not yet correspond to the newly set value until the next server
-     * round trip.
+     * The value of the editor in HTML format.
      *
      * @see #getValue()
-     * @see #asHtml()
-     * @see AsHtml#getValue()
-     * @return the sanitized {@code htmlValue} property from the web component
-     *         or {@code null} if it is not available.
+     * @return the editor value in HTML format
+     * @deprecated Use {@link #getValue()} instead
      */
+    @Deprecated
     public String getHtmlValue() {
         return getValue();
     }
@@ -782,15 +762,7 @@ public class RichTextEditor
      */
     private class AsHtml implements HasValue<ValueChangeEvent<String>, String> {
         /**
-         * Sets the value of the editor presented as an HTML string. Also
-         * updates the old value which is provided in {@code ValueChangeEvent}.
-         * <p>
-         * On the client side the newly set HTML snippet is interpreted by
-         * <a href=
-         * "https://quilljs.com/docs/modules/clipboard/#matchers">Quill's
-         * Clipboard matchers</a>, which may not produce the exactly same HTML
-         * that was set. The server side value will be updated to reflect the
-         * new state after the round trip.
+         * Sets the value of the editor in HTML format.
          *
          * @see RichTextEditor#setValue(String)
          * @param value
@@ -802,21 +774,10 @@ public class RichTextEditor
         }
 
         /**
-         * Gets the value of the editor presented as an HTML string.
-         * <p>
-         * If you have just set the value on the server side using the
-         * {@link #setValue(String) AsHtml.setValue()} method then his method
-         * will give you back the exact same value until the next server round
-         * trip. On the client side the newly set HTML snippet is interpreted by
-         * <a href=
-         * "https://quilljs.com/docs/modules/clipboard/#matchers">Quill's
-         * Clipboard matchers</a>, which may not produce the exactly same HTML
-         * that was set. The server side value will be updated to reflect the
-         * new state after the round trip.
+         * Gets the value of the editor in HTML format.
          *
          * @see RichTextEditor#getValue()
-         * @see RichTextEditor#getHtmlValue()
-         * @return the sanitized HTML string
+         * @return the current editor value in HTML
          */
         @Override
         public String getValue() {
