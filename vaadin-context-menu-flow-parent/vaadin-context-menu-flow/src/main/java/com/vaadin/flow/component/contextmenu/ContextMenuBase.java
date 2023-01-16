@@ -190,7 +190,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      * Closes this context menu if it is currently open.
      */
     public void close() {
-        getElement().callFunction("close");
+        getElement().callJsFunction("close");
     }
 
     /**

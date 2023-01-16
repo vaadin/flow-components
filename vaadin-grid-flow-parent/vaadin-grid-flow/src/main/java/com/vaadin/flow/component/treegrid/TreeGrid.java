@@ -50,6 +50,7 @@ import com.vaadin.flow.data.provider.hierarchy.HierarchicalQuery;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LitRenderer;
+import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableBiFunction;
@@ -332,32 +333,6 @@ public class TreeGrid<T> extends Grid<T>
             ComponentEventListener<CollapseEvent<T, TreeGrid<T>>> listener) {
         return ComponentUtil.addListener(this, CollapseEvent.class,
                 (ComponentEventListener) listener);
-    }
-
-    /**
-     * Tree grid only supports hierarchical data providers. Use
-     * {@link #setDataProvider(HierarchicalDataProvider)} instead.
-     * <p>
-     * This method is inherited from Grid and has been marked as deprecated to
-     * indicate that it is not supported. This method will throw an
-     * {@link UnsupportedOperationException}.
-     *
-     * @param dataProvider
-     *            the data provider
-     * @deprecated use {@link #setDataProvider(HierarchicalDataProvider)},
-     *             {@link #setItems(Collection, ValueProvider)},
-     *             {@link #setItems(Stream, ValueProvider)} or
-     *             {@link #setTreeData(TreeData)} instead.
-     */
-    @Override
-    public void setDataProvider(DataProvider<T, ?> dataProvider) {
-        if (dataProvider instanceof HierarchicalDataProvider) {
-            this.setDataProvider((HierarchicalDataProvider) dataProvider);
-        } else {
-            throw new IllegalArgumentException(
-                    "TreeGrid only accepts hierarchical data providers. "
-                            + "An example of interface to be used: HierarchicalDataProvider");
-        }
     }
 
     @Override
