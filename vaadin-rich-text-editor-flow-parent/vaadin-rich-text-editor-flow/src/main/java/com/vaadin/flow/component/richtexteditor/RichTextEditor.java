@@ -30,6 +30,7 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.dom.PropertyChangeListener;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
@@ -899,15 +900,23 @@ public class RichTextEditor
         public AsDelta() {
             // Initialize empty value
             RichTextEditor.this.getElement().setProperty("value", "");
+
             // Fire delta value change event when HTML value changes
             RichTextEditor.this.addValueChangeListener(event -> {
-                // When the HTML value is set from server-side by the
-                // application, and not due to an in-component sync,
-                // then do not dispatch the delta value changed event
-                // immediately, as we don't have an updated delta value yet.
+                // If the component's value changes due to syncing the HTML
+                // value back from the client, after setting the delta value on
+                // the server, then we don't need to do anything.
+                // We already have an up-to-date delta value, and have already
+                // dispatched a server-side delta value change event.
+                if (isHtmlValueSync) {
+                    return;
+                }
+                // When the HTML value is set from server-side, then do not
+                // dispatch the delta value changed event immediately, as we
+                // don't have an updated delta value yet.
                 // Instead, wait for delta value to sync back from client and
                 // dispatch delta value change event afterwards
-                if (!event.isFromClient() && !isHtmlValueSync) {
+                if (!event.isFromClient()) {
                     // Clear previous registration in case it is still active
                     if (deltaValueSyncRegistration != null) {
                         deltaValueSyncRegistration.remove();
@@ -915,21 +924,27 @@ public class RichTextEditor
                     // Listen for delta value property to update, then fire
                     // delta value change event as coming from server (as the
                     // original HTML value change event did)
+                    PropertyChangeListener valueChangeListener = syncEvent -> {
+                        // Sanity check: We are expecting a property change
+                        // event from the client here
+                        if (syncEvent.isUserOriginated()) {
+                            deltaValueSyncRegistration.remove();
+                            fireChangeEvent(false);
+                            // Update old value after all change
+                            // listeners have been processed
+                            oldValue = getValue();
+                        }
+                    };
                     deltaValueSyncRegistration = RichTextEditor.this
                             .getElement().addPropertyChangeListener("value",
-                                    "value-changed", syncEvent -> {
-                                        // Sanity check: We are expecting a
-                                        // property change event from the client
-                                        // here
-                                        if (syncEvent.isUserOriginated()) {
-                                            deltaValueSyncRegistration.remove();
-                                            fireChangeEvent(false);
-                                            // Update old value after all change
-                                            // listeners have been processed
-                                            oldValue = getValue();
-                                        }
-                                    });
+                                    "value-changed", valueChangeListener);
                 } else {
+                    // If the HTML value change event comes from the client,
+                    // then we can immediately dispatch the delta value change
+                    // event as well, as both properties have been synced to the
+                    // server in the same roundtrip.
+                    // See the synchronized `getDeltaValue` property on the
+                    // component.
                     fireChangeEvent(event.isFromClient());
                     // Update old value after all change listeners have been
                     // processed
@@ -964,6 +979,8 @@ public class RichTextEditor
                         RichTextEditor.this.setValue(jsonValue.asString());
                         isHtmlValueSync = false;
                     });
+            fireChangeEvent(false);
+            oldValue = value;
         }
 
         /**

@@ -271,6 +271,22 @@ public class RichTextEditorTest {
                 rte.isRequiredIndicatorVisible());
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Test
+    public void asDelta_addChangeListener() {
+        String deltaValue = "[{\"insert\":\"Foo\"}]";
+        RichTextEditor rte = new RichTextEditor();
+        HasValue<ValueChangeEvent<String>, String> asDelta = rte.asDelta();
+
+        HasValue.ValueChangeListener valueChangeListenerMock = Mockito
+                .mock(HasValue.ValueChangeListener.class);
+        asDelta.addValueChangeListener(valueChangeListenerMock);
+
+        rte.asDelta().setValue(deltaValue);
+        Mockito.verify(valueChangeListenerMock, Mockito.times(1))
+                .valueChanged(Mockito.any());
+    }
+
     @Test
     public void elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue() {
         Element element = new Element("vaadin-rich-text-editor");
