@@ -290,6 +290,59 @@ public interface FlexComponent extends HasOrderedComponents, HasStyle, HasSize {
     }
 
     /**
+     * Sets the flex shrink property of the components inside the layout. The
+     * flex shrink property specifies how the item will shrink relative to the
+     * rest of the components inside the same layout.
+     * <p>
+     * Negative values are not allowed.
+     * <p>
+     * The default value is 1.
+     *
+     * @param flexShrink
+     *            how much the component will shrink relative to the rest of the
+     *            components
+     * @param elementContainers
+     *            the containers (components) to apply the flex shrink property
+     */
+    default public void setFlexShrink(double flexShrink,
+            HasElement... elementContainers) {
+        if (flexShrink < 0) {
+            throw new IllegalArgumentException(
+                    "Flex shrink property cannot be negative");
+        }
+
+        for (HasElement container : elementContainers) {
+            container.getElement().getStyle().set(
+                    FlexConstants.FLEX_SHRINK_CSS_PROPERTY,
+                    String.valueOf(flexShrink));
+        }
+    }
+
+    /**
+     * Gets the flex shrink property of a given element container.
+     *
+     * @param elementContainer
+     *            the element container to read the flex shrink property from
+     * @return the flex shrink property, or 1 if none was set
+     */
+    default public double getFlexShrink(HasElement elementContainer) {
+        String ratio = elementContainer.getElement().getStyle()
+                .get(FlexConstants.FLEX_SHRINK_CSS_PROPERTY);
+        if (ratio == null || ratio.isEmpty()) {
+            return 1;
+        }
+
+        try {
+            return Double.parseDouble(ratio);
+        } catch (Exception e) {
+            throw new IllegalStateException(
+                    "The flex shrink property of the element container is not parseable to double: "
+                            + ratio,
+                    e);
+        }
+    }
+
+    /**
      * Sets the {@link JustifyContentMode} used by this layout.
      * <p>
      * The default justify content mode is {@link JustifyContentMode#START}.

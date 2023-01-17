@@ -345,7 +345,7 @@ public class CheckboxGroupTest {
         Assert.assertEquals(Collections.emptySet(),
                 eventCapture.get().getOldValue());
         Assert.assertEquals(Collections.singleton("bar"),
-                eventCapture.get().getNewSelection());
+                eventCapture.get().getValue());
 
         eventCapture.set(null);
 
@@ -353,9 +353,9 @@ public class CheckboxGroupTest {
         Assert.assertNotNull(eventCapture.get());
         Assert.assertEquals(Collections.singleton("bar"),
                 eventCapture.get().getOldSelection());
-        Assert.assertEquals(2, eventCapture.get().getNewSelection().size());
+        Assert.assertEquals(2, eventCapture.get().getValue().size());
 
-        Set<String> newSelection = eventCapture.get().getNewSelection();
+        Set<String> newSelection = eventCapture.get().getValue();
         Assert.assertTrue(newSelection.contains("foo"));
         Assert.assertTrue(newSelection.contains("bar"));
     }

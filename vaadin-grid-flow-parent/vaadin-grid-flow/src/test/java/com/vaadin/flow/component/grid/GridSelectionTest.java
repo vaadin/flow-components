@@ -76,7 +76,7 @@ public class GridSelectionTest {
                 .addMultiSelectionListener(event -> {
                     multiSelectionListenerCalled.incrementAndGet();
                     Assert.assertEquals(oldSelection, event.getOldSelection());
-                    Assert.assertEquals(selection, event.getNewSelection());
+                    Assert.assertEquals(selection, event.getValue());
 
                     Set<String> oldCopy = new LinkedHashSet<>(oldSelection);
                     Set<String> copy = new LinkedHashSet<>(selection);
