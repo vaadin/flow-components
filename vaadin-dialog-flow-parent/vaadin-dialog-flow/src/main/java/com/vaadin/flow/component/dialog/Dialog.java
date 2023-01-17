@@ -78,7 +78,6 @@ import com.vaadin.flow.shared.Registration;
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/dialog", version = "24.0.0-alpha11")
 @JsModule("@vaadin/dialog/src/vaadin-dialog.js")
-@JsModule("./dialogConnector.js")
 @JsModule("./flow-component-renderer.js")
 public class Dialog extends Component implements HasComponents, HasSize,
         HasStyle, HasThemeVariant<DialogVariant> {
@@ -908,7 +907,6 @@ public class Dialog extends Component implements HasComponents, HasSize,
         // as the locator is stored inside component's attributes, no need to
         // remove the data as it should live as long as the component does
         Shortcuts.setShortcutListenOnElement(OVERLAY_LOCATOR_JS, this);
-        initConnector();
         initHeaderFooterRenderer();
         updateVirtualChildNodeIds();
     }
@@ -940,11 +938,6 @@ public class Dialog extends Component implements HasComponents, HasSize,
     protected void setAriaLabel(String ariaLabel) {
         getElement().setProperty("ariaLabel",
                 ariaLabel == null ? "" : ariaLabel);
-    }
-
-    private void initConnector() {
-        getElement()
-                .executeJs("window.Vaadin.Flow.dialogConnector.initLazy(this)");
     }
 
     private void initHeaderFooterRenderer() {
@@ -979,6 +972,104 @@ public class Dialog extends Component implements HasComponents, HasSize,
         setDimension(ElementConstants.STYLE_HEIGHT, height);
         setDimension(ElementConstants.STYLE_MIN_HEIGHT, minHeight);
         setDimension(ElementConstants.STYLE_MAX_HEIGHT, maxHeight);
+    }
+
+    private void updateOverlayClassName() {
+        getElement().setProperty("overlayClass", getClassName());
+    }
+
+    /**
+     * Adds a CSS class name to the dialog overlay element.
+     *
+     * @param className
+     *            the CSS class name to add, not <code>null</code>
+     */
+    @Override
+    public void addClassName(String className) {
+        HasStyle.super.addClassName(className);
+
+        updateOverlayClassName();
+    }
+
+    /**
+     * Removes a CSS class name from the dialog overlay element.
+     *
+     * @param className
+     *            the CSS class name to remove, not <code>null</code>
+     * @return <code>true</code> if the class name was removed,
+     *         <code>false</code> if the class list didn't contain the class
+     *         name
+     */
+    @Override
+    public boolean removeClassName(String className) {
+        boolean result = HasStyle.super.removeClassName(className);
+
+        if (result == true) {
+            updateOverlayClassName();
+        }
+
+        return result;
+    }
+
+    /**
+     * Sets the CSS class names of the dialog overlay element. This method
+     * overwrites any previous set class names.
+     *
+     * @param className
+     *            a space-separated string of class names to set, or
+     *            <code>null</code> to remove all class names
+     */
+    @Override
+    public void setClassName(String className) {
+        HasStyle.super.setClassName(className);
+
+        updateOverlayClassName();
+    }
+
+    /**
+     * Sets or removes the given class name for the dialog overlay element.
+     *
+     * @param className
+     *            the class name to set or remove, not <code>null</code>
+     * @param set
+     *            <code>true</code> to set the class name, <code>false</code> to
+     *            remove it
+     */
+    @Override
+    public void setClassName(String className, boolean set) {
+        HasStyle.super.setClassName(className, set);
+
+        updateOverlayClassName();
+    }
+
+    /**
+     * Adds one or more CSS class names to the dialog overlay element. Multiple
+     * class names can be specified by using spaces or by giving multiple
+     * parameters.
+     *
+     * @param classNames
+     *            the CSS class name or class names to be added
+     */
+    @Override
+    public void addClassNames(String... classNames) {
+        HasStyle.super.addClassNames(classNames);
+
+        updateOverlayClassName();
+    }
+
+    /**
+     * Removes one or more CSS class names from the dialog overlay element.
+     * Multiple class names can be specified by using spaces or by giving
+     * multiple parameters.
+     *
+     * @param classNames
+     *            the CSS class name or class names to be removed
+     */
+    @Override
+    public void removeClassNames(String... classNames) {
+        HasStyle.super.removeClassNames(classNames);
+
+        updateOverlayClassName();
     }
 
     /**
