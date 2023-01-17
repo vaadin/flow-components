@@ -37,6 +37,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasAutoOpen;
 import com.vaadin.flow.component.shared.HasClientValidation;
+import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.HasValidationProperties;
@@ -119,11 +120,12 @@ class DateTimePickerTimePicker
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/date-time-picker", version = "24.0.0-alpha11")
 @JsModule("@vaadin/date-time-picker/src/vaadin-date-time-picker.js")
-public class DateTimePicker extends
-        AbstractSinglePropertyField<DateTimePicker, LocalDateTime> implements
-        Focusable<DateTimePicker>, HasAutoOpen, HasClientValidation, HasHelper,
-        HasLabel, HasSize, HasStyle, HasThemeVariant<DateTimePickerVariant>,
-        HasTooltip, HasValidationProperties, HasValidator<LocalDateTime> {
+public class DateTimePicker
+        extends AbstractSinglePropertyField<DateTimePicker, LocalDateTime>
+        implements Focusable<DateTimePicker>, HasAutoOpen, HasClientValidation,
+        HasHelper, HasLabel, HasOverlayClassName, HasSize, HasStyle,
+        HasThemeVariant<DateTimePickerVariant>, HasTooltip,
+        HasValidationProperties, HasValidator<LocalDateTime> {
 
     private final DateTimePickerDatePicker datePicker = new DateTimePickerDatePicker();
     private final DateTimePickerTimePicker timePicker = new DateTimePickerTimePicker();
