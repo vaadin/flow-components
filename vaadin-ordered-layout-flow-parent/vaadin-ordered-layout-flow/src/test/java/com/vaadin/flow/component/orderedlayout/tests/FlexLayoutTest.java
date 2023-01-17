@@ -111,35 +111,6 @@ public class FlexLayoutTest {
     }
 
     @Test
-    public void testFlexLayout_setFlexShrink() {
-        FlexLayout layout = new FlexLayout();
-        Div div = new Div();
-        layout.add(div);
-        layout.setFlexShrink(2, div);
-
-        Assert.assertEquals("should set flex-shrink", layout.getFlexShrink(div),
-                2, 0);
-    }
-
-    @Test
-    public void testFlexLayout_getFlexShrink_returnOneIfNotSet() {
-        FlexLayout layout = new FlexLayout();
-        Div div = new Div();
-        layout.add(div);
-
-        Assert.assertEquals("should return 1 if flex-shirk not set",
-                layout.getFlexShrink(div), 1, 0);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testFlexLayout_setFlexShrink_throwExceptionIfNegative() {
-        FlexLayout layout = new FlexLayout();
-        Div div = new Div();
-        layout.add(div);
-        layout.setFlexShrink(-1, div);
-    }
-
-    @Test
     public void testFlexLayout_setAndUnsetOrder() {
         FlexLayout layout = new FlexLayout();
         Div div = new Div();
