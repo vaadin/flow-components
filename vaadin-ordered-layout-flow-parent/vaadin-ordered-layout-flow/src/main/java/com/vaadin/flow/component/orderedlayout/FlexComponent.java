@@ -293,9 +293,9 @@ public interface FlexComponent extends HasOrderedComponents, HasStyle, HasSize {
      * Sets the flex shrink property of the components inside the layout. The
      * flex shrink property specifies how the item will shrink relative to the
      * rest of the components inside the same layout.
-     *
+     * <p>
      * Negative values are not allowed.
-     *
+     * <p>
      * The default value is 1.
      *
      * @param flexShrink
