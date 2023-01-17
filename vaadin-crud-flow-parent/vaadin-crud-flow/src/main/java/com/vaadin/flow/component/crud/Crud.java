@@ -285,7 +285,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
      *            true to open or false to close
      */
     public void setOpened(boolean opened) {
-        getElement().callFunction("set", "editorOpened", opened);
+        getElement().callJsFunction("set", "editorOpened", opened);
     }
 
     /**

@@ -481,7 +481,7 @@ public class TimePicker
     }
 
     private void initConnector() {
-        // can't run this with getElement().executeJavaScript(...) since then
+        // can't run this with getElement().executeJs(...) since then
         // setLocale might be called before this causing client side error
         runBeforeClientResponse(ui -> ui.getPage().executeJs(
                 "window.Vaadin.Flow.timepickerConnector.initLazy($0)",
