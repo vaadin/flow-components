@@ -25,7 +25,6 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasPrefix;
-import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
@@ -69,8 +68,8 @@ import elemental.json.JsonObject;
 @JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./comboBoxConnector.js")
-public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T> implements
-        HasOverlayClassName, HasPrefix, HasThemeVariant<ComboBoxVariant> {
+public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
+        implements HasPrefix, HasThemeVariant<ComboBoxVariant> {
 
     private static final String PROP_SELECTED_ITEM = "selectedItem";
     private static final String PROP_VALUE = "value";
