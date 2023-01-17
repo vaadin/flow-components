@@ -1128,7 +1128,11 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           const eventContext = grid.getEventContext(event);
           const section = eventContext.section;
 
-          if (eventContext.item && !isFocusable(target) && section !== 'details') {
+          if (isFocusable(target) || target instanceof HTMLLabelElement) {
+            return;
+          }
+
+          if (eventContext.item && section !== 'details') {
             event.itemKey = eventContext.item.key;
             // if you have a details-renderer, getEventContext().column is undefined
             if (eventContext.column) {
