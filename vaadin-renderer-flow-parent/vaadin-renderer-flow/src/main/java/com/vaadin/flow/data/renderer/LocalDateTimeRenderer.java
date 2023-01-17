@@ -74,56 +74,11 @@ public class LocalDateTimeRenderer<SOURCE>
      *            renderer, not <code>null</code>
      * @param formatter
      *            the formatter to use, not <code>null</code>
-     * @deprecated Via this constructor renderer is not serializable, use
-     *             {@link LocalDateTimeRenderer(ValueProvider,
-     *             SerializableSupplier)} instead.
-     */
-    @Deprecated
-    public LocalDateTimeRenderer(
-            ValueProvider<SOURCE, LocalDateTime> valueProvider,
-            DateTimeFormatter formatter) {
-        this(valueProvider, () -> formatter, "");
-    }
-
-    /**
-     * Creates a new LocalDateTimeRenderer.
-     * <p>
-     * The renderer is configured to render with the given formatter, with the
-     * empty string as its null representation.
-     *
-     * @param valueProvider
-     *            the callback to provide a {@link LocalDateTime} to the
-     *            renderer, not <code>null</code>
-     * @param formatter
-     *            the formatter to use, not <code>null</code>
      */
     public LocalDateTimeRenderer(
             ValueProvider<SOURCE, LocalDateTime> valueProvider,
             SerializableSupplier<DateTimeFormatter> formatter) {
         this(valueProvider, formatter, "");
-    }
-
-    /**
-     * Creates a new LocalDateTimeRenderer.
-     * <p>
-     * The renderer is configured to render with the given formatter.
-     *
-     * @param valueProvider
-     *            the callback to provide a {@link LocalDateTime} to the
-     *            renderer, not <code>null</code>
-     * @param formatter
-     *            the formatter to use, not <code>null</code>
-     * @param nullRepresentation
-     *            the textual representation of the <code>null</code> value
-     * @deprecated Via this constructor renderer is not serializable, use
-     *             {@link LocalDateTimeRenderer(ValueProvider,
-     *             SerializableSupplier, String)} instead.
-     */
-    @Deprecated
-    public LocalDateTimeRenderer(
-            ValueProvider<SOURCE, LocalDateTime> valueProvider,
-            DateTimeFormatter formatter, String nullRepresentation) {
-        this(valueProvider, () -> formatter, nullRepresentation);
     }
 
     /**
