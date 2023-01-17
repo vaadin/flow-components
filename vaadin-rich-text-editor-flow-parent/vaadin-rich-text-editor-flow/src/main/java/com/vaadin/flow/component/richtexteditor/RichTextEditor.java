@@ -217,7 +217,8 @@ public class RichTextEditor
      *
      * @see #getValue()
      * @return the editor value in HTML format
-     * @deprecated Use {@link #getValue()} instead
+     * @deprecated since v24 the RichTextEditor uses the HTML value by default.
+     *             Use {@link #getValue()} instead.
      */
     @Deprecated
     public String getHtmlValue() {
@@ -736,7 +737,13 @@ public class RichTextEditor
      * Can be used for binding the value with {@link Binder}.
      *
      * @return an instance of {@code HasValue}
+     * @deprecated since v24 the RichTextEditor uses the HTML value by default.
+     *             Use {@link RichTextEditor#getValue()} and
+     *             {@link RichTextEditor#setValue(String)} instead. For binding
+     *             the HTML value with Binder, bind the {@link RichTextEditor}
+     *             directly.
      */
+    @Deprecated
     public HasValue<ValueChangeEvent<String>, String> asHtml() {
         if (asHtml == null) {
             asHtml = new AsHtml();
