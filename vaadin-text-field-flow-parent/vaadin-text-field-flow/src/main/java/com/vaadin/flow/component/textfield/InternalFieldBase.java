@@ -23,12 +23,12 @@ import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.InputNotifier;
 import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.component.shared.HasClearButton;
 import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.value.HasValueChangeMode;
@@ -50,7 +50,7 @@ public abstract class InternalFieldBase<TComponent extends InternalFieldBase<TCo
         implements CompositionNotifier, Focusable<TComponent>,
         HasAutocapitalize, HasAutocomplete, HasAutocorrect, HasClearButton,
         HasClientValidation, HasHelper, HasLabel, HasPrefixAndSuffix, HasSize,
-        HasStyle, HasTooltip, HasValidation, HasValidator<TValue>,
+        HasStyle, HasTooltip, HasValidationProperties, HasValidator<TValue>,
         HasValueChangeMode, InputNotifier, KeyNotifier {
 
     private ValueChangeMode currentMode;
@@ -111,27 +111,6 @@ public abstract class InternalFieldBase<TComponent extends InternalFieldBase<TCo
      */
     public String getPlaceholder() {
         return getElement().getProperty("placeholder");
-    }
-
-    /**
-     * Sets the error message that should be displayed when the component
-     * becomes invalid.
-     *
-     * @param errorMessage
-     *            the String value to set
-     */
-    public void setErrorMessage(String errorMessage) {
-        getElement().setProperty("errorMessage",
-                errorMessage == null ? "" : errorMessage);
-    }
-
-    /**
-     * Gets the current error message from the web component.
-     *
-     * @return the current error message
-     */
-    public String getErrorMessage() {
-        return getElement().getProperty("errorMessage");
     }
 
     /**
@@ -196,25 +175,6 @@ public abstract class InternalFieldBase<TComponent extends InternalFieldBase<TCo
      */
     public void setAutoselect(boolean autoselect) {
         getElement().setProperty("autoselect", autoselect);
-    }
-
-    /**
-     * Sets whether the component has an invalid value or not.
-     *
-     * @param invalid
-     *            {@code true} for invalid, {@code false} for valid
-     */
-    public void setInvalid(boolean invalid) {
-        getElement().setProperty("invalid", invalid);
-    }
-
-    /**
-     * Whether the component has an invalid value or not.
-     *
-     * @return the {@code invalid} property from the web component
-     */
-    public boolean isInvalid() {
-        return getElement().getProperty("invalid", false);
     }
 
     /**

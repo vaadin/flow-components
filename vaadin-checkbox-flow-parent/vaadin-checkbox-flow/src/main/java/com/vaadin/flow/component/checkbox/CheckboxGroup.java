@@ -34,7 +34,6 @@ import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
@@ -46,6 +45,7 @@ import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.binder.HasValidator;
@@ -91,9 +91,9 @@ import elemental.json.JsonArray;
 public class CheckboxGroup<T>
         extends AbstractSinglePropertyField<CheckboxGroup<T>, Set<T>> implements
         HasClientValidation, HasDataView<T, Void, CheckboxGroupDataView<T>>,
-        HasHelper, HasItemComponents<T>, HasLabel,
-        HasListDataView<T, CheckboxGroupListDataView<T>>, HasSize, HasStyle,
-        HasThemeVariant<CheckboxGroupVariant>, HasTooltip, HasValidation,
+        HasHelper, HasItemComponents<T>, HasLabel, HasSize, HasStyle,
+        HasListDataView<T, CheckboxGroupListDataView<T>>, HasTooltip,
+        HasThemeVariant<CheckboxGroupVariant>, HasValidationProperties,
         HasValidator<Set<T>>, MultiSelect<CheckboxGroup<T>, T> {
 
     private static final String VALUE = "value";
@@ -517,26 +517,6 @@ public class CheckboxGroup<T>
     }
 
     /**
-     * Sets the error message to display when the value is invalid.
-     *
-     * @param errorMessage
-     *            the String value to set
-     */
-    public void setErrorMessage(String errorMessage) {
-        getElement().setProperty("errorMessage",
-                errorMessage == null ? "" : errorMessage);
-    }
-
-    /**
-     * Gets the current error message from the checkbox group.
-     *
-     * @return the current error message
-     */
-    public String getErrorMessage() {
-        return getElement().getProperty("errorMessage");
-    }
-
-    /**
      * Specifies that the user must fill in a value.
      *
      * @param required
@@ -556,20 +536,6 @@ public class CheckboxGroup<T>
      */
     public boolean isRequired() {
         return getElement().getProperty("required", false);
-    }
-
-    /**
-     * Whether the component has an invalid value or not.
-     */
-    public boolean isInvalid() {
-        return getElement().getProperty("invalid", false);
-    }
-
-    /**
-     * Sets whether the component has an invalid value or not.
-     */
-    public void setInvalid(boolean invalid) {
-        getElement().setProperty("invalid", invalid);
     }
 
     /**

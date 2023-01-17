@@ -31,7 +31,6 @@ import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
@@ -47,6 +46,7 @@ import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.component.shared.HasPrefix;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
@@ -76,8 +76,9 @@ public class TimePicker
         extends AbstractSinglePropertyField<TimePicker, LocalTime>
         implements Focusable<TimePicker>, HasAllowedCharPattern, HasAutoOpen,
         HasClearButton, HasClientValidation, HasHelper, HasLabel, HasPrefix,
-        HasOverlayClassName, HasSize, HasStyle, HasTooltip, HasValidation,
-        HasThemeVariant<TimePickerVariant>, HasValidator<LocalTime> {
+        HasOverlayClassName, HasSize, HasStyle, HasTooltip,
+        HasThemeVariant<TimePickerVariant>, HasValidationProperties,
+        HasValidator<LocalTime> {
 
     private static final SerializableFunction<String, LocalTime> PARSER = valueFromClient -> {
         return valueFromClient == null || valueFromClient.isEmpty() ? null
@@ -269,48 +270,6 @@ public class TimePicker
      */
     public String getLabel() {
         return getElement().getProperty("label");
-    }
-
-    /**
-     * Sets the error message that should be displayed when the component
-     * becomes invalid.
-     *
-     * @param errorMessage
-     *            the String value to set
-     */
-    public void setErrorMessage(String errorMessage) {
-        getElement().setProperty("errorMessage",
-                errorMessage == null ? "" : errorMessage);
-    }
-
-    /**
-     * Gets the current error message from the time picker.
-     *
-     * @return the current error message
-     */
-    public String getErrorMessage() {
-        return getElement().getProperty("errorMessage");
-    }
-
-    /**
-     * Sets whether the component has an invalid value or not.
-     *
-     * @param invalid
-     *            {@code true} for invalid, {@code false} for valid
-     */
-    public void setInvalid(boolean invalid) {
-        getElement().setProperty("invalid", invalid);
-    }
-
-    /**
-     * Gets the validity of the time picker output.
-     * <p>
-     * return true, if the value is invalid.
-     *
-     * @return the {@code invalid} property from the time picker
-     */
-    public boolean isInvalid() {
-        return getElement().getProperty("invalid", false);
     }
 
     @Override
