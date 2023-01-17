@@ -344,8 +344,7 @@ public class DialogTestPageIT extends AbstractComponentIT {
         WebElement message = findElement(
                 By.id("dialog-resizable-draggable-message"));
 
-        Assert.assertEquals(
-                "Initial size with width (200px) and height (200px)",
+        Assert.assertEquals("Initial size with width (200) and height (200)",
                 message.getText());
 
         TestBenchElement overlayContent = getOverlayContent();
@@ -353,7 +352,7 @@ public class DialogTestPageIT extends AbstractComponentIT {
         resizeDialog(overlayContent, 50, 50);
 
         Assert.assertEquals(
-                "Rezise listener called with width (250px) and height (250px)",
+                "Resize listener called with width (250) and height (250)",
                 message.getText());
     }
 
