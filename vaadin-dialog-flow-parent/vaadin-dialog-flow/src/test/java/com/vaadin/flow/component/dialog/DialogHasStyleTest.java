@@ -107,4 +107,15 @@ public class DialogHasStyleTest {
         Assert.assertEquals(dialog.getElement().getProperty("overlayClass"),
                 "baz qux");
     }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void getStyle_unsupported() {
+        dialog.getStyle();
+    }
+
+    @Test
+    public void getClassNames_usesProxy() {
+        Assert.assertTrue(
+                dialog.getClassNames() instanceof Dialog.OverlayClassListProxy);
+    }
 }

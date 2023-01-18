@@ -16,10 +16,13 @@
 package com.vaadin.flow.component.dialog;
 
 import java.io.Serializable;
+import java.util.AbstractSet;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.AttachEvent;
@@ -39,6 +42,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.dom.ClassList;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementConstants;
 import com.vaadin.flow.dom.ElementDetachListener;
@@ -1072,6 +1076,11 @@ public class Dialog extends Component implements HasComponents, HasSize,
         updateOverlayClassName();
     }
 
+    @Override
+    public ClassList getClassNames() {
+        return new OverlayClassListProxy(this);
+    }
+
     /**
      * @throws UnsupportedOperationException
      *             Dialog does not support adding styles to overlay
@@ -1082,4 +1091,77 @@ public class Dialog extends Component implements HasComponents, HasSize,
                 "Dialog does not support adding styles to overlay");
     }
 
+    static class OverlayClassListProxy extends AbstractSet<String>
+            implements ClassList {
+        private final HasStyle hasStyle;
+        private final ClassList classList;
+
+        public OverlayClassListProxy(HasStyle hasStyle) {
+            this.hasStyle = hasStyle;
+            this.classList = hasStyle.getElement().getClassList();
+        }
+
+        private void updateOverlayClass() {
+            hasStyle.getElement().setProperty("overlayClass",
+                    hasStyle.getClassName());
+        }
+
+        @Override
+        public Iterator<String> iterator() {
+            return classList.iterator();
+        }
+
+        @Override
+        public int size() {
+            return classList.size();
+        }
+
+        @Override
+        public boolean add(String s) {
+            boolean result = classList.add(s);
+            updateOverlayClass();
+            return result;
+        }
+
+        @Override
+        public boolean addAll(Collection<? extends String> c) {
+            boolean result = super.addAll(c);
+            updateOverlayClass();
+            return result;
+        }
+
+        @Override
+        public boolean remove(Object o) {
+            boolean result = super.remove(o);
+            updateOverlayClass();
+            return result;
+        }
+
+        @Override
+        public boolean removeAll(Collection<?> c) {
+            boolean result = super.removeAll(c);
+            updateOverlayClass();
+            return result;
+        }
+
+        @Override
+        public boolean removeIf(Predicate<? super String> filter) {
+            boolean result = super.removeIf(filter);
+            updateOverlayClass();
+            return result;
+        }
+
+        @Override
+        public boolean retainAll(Collection<?> c) {
+            boolean result = super.retainAll(c);
+            updateOverlayClass();
+            return result;
+        }
+
+        @Override
+        public void clear() {
+            super.clear();
+            updateOverlayClass();
+        }
+    }
 }
