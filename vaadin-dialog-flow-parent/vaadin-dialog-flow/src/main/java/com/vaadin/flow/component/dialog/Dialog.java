@@ -16,18 +16,16 @@
 package com.vaadin.flow.component.dialog;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.Stream.Builder;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
@@ -346,35 +344,10 @@ public class Dialog extends Component implements HasComponents, HasSize,
      *            the components to add
      */
     @Override
-    public void add(Component... components) {
-        Objects.requireNonNull(components, "Components should not be null");
-        for (Component component : components) {
-            Objects.requireNonNull(component,
-                    "Component to add cannot be null");
-            getElement().appendChild(component.getElement());
-        }
+    public void add(Collection<Component> components) {
+        HasComponents.super.add(components);
 
         updateVirtualChildNodeIds();
-    }
-
-    @Override
-    public void remove(Component... components) {
-        Objects.requireNonNull(components, "Components should not be null");
-        for (Component component : components) {
-            Objects.requireNonNull(component,
-                    "Component to remove cannot be null");
-            if (getElement().equals(component.getElement().getParent())) {
-                getElement().removeChild(component.getElement());
-            } else {
-                throw new IllegalArgumentException("The given component ("
-                        + component + ") is not a child of this component");
-            }
-        }
-    }
-
-    @Override
-    public void removeAll() {
-        getElement().removeAllChildren();
     }
 
     /**
@@ -392,14 +365,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      */
     @Override
     public void addComponentAtIndex(int index, Component component) {
-        Objects.requireNonNull(component, "Component should not be null");
-        if (index < 0) {
-            throw new IllegalArgumentException(
-                    "Cannot add a component with a negative index");
-        }
-        // The case when the index is bigger than the children count is handled
-        // inside the method below
-        getElement().insertChild(index, component.getElement());
+        HasComponents.super.addComponentAtIndex(index, component);
 
         updateVirtualChildNodeIds();
     }
@@ -851,14 +817,6 @@ public class Dialog extends Component implements HasComponents, HasSize,
         if (isAttached()) {
             getUI().ifPresent(ui -> ui.setChildComponentModal(this, modal));
         }
-    }
-
-    @Override
-    public Stream<Component> getChildren() {
-        Builder<Component> childComponents = Stream.builder();
-        getElement().getChildren().forEach(childElement -> ComponentUtil
-                .findComponents(childElement, childComponents::add));
-        return childComponents.build();
     }
 
     /**
