@@ -9,6 +9,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
+import org.w3c.dom.Document;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -256,6 +257,24 @@ public class BasicIT extends AbstractParallelTest {
         TestBenchElement textField = cell.$("vaadin-text-field").first();
         // should have converted integer model value into string editor value
         Assert.assertEquals("2019", textField.getProperty("value"));
+    }
+
+    @Test
+    public void gridWithCustomEditors_navigateToWithTabKey_textIsSelected() {
+        var cell_0_4 = grid.getCell(0, 4);
+        assertCellEnterEditModeOnDoubleClick(0, 4, "vaadin-combo-box");
+
+        waitUntil(e -> cell_0_4.$("vaadin-combo-box").exists());
+        var input = cell_0_4.$("vaadin-combo-box").first();
+        input.sendKeys(Keys.TAB);
+
+        Assert.assertEquals("person1@vaadin.com",
+                getPanelText("selection-panel"));
+
+        var cell_0_5 = grid.getCell(0, 5);
+        input = cell_0_5.$("input").first();
+        input.sendKeys(Keys.TAB);
+        Assert.assertEquals("2019", getPanelText("selection-panel"));
     }
 
     private void assertCellEnterEditModeOnDoubleClick(Integer rowIndex,

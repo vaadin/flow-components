@@ -7,6 +7,7 @@ import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.gridpro.GridPro;
@@ -34,6 +35,13 @@ public class MainView extends VerticalLayout {
 
         Div eventsPanel = new Div();
         eventsPanel.setId("events-panel");
+
+        Div selectionPanel = new Div();
+        selectionPanel.setId("selection-panel");
+
+        UI.getCurrent().getElement().executeJs(
+                "document.addEventListener('selectionchange', () => $0.textContent = document.getSelection().toString())",
+                selectionPanel.getElement());
 
         GridPro<Person> grid = new GridPro<>();
         Button disableGrid = new Button("Disable Grid");
@@ -112,7 +120,7 @@ public class MainView extends VerticalLayout {
         disableGrid.addClickListener(click -> grid.setEnabled(false));
 
         add(grid, itemDisplayPanel, subPropertyDisplayPanel, eventsPanel,
-                disableGrid);
+                selectionPanel, disableGrid);
     }
 
     protected void createBeanGridWithEditColumns() {
