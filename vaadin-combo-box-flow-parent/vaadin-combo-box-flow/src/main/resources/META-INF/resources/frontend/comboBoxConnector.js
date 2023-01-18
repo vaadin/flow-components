@@ -83,16 +83,19 @@ import { createRangeDataProvider } from '@vaadin/combo-box/src/vaadin-combo-box-
 
           const startPage = startIndex / comboBox.pageSize;
           const pagesCount = Math.ceil(items.length / comboBox.pageSize);
+          const pages = {};
 
-          // Makes sure that the dataProvider callback is called even when server
-          // returns empty data set (no items match the filter).
-          const pages = { 0: [] };
-
-          for (let i = 0; i < pagesCount; i++) {
-            const page = startPage + i;
-            const pageStartIndex = i * comboBox.pageSize;
-            const pageEndIndex = (i + 1) * comboBox.pageSize;
-            pages[page] = items.slice(pageStartIndex, pageEndIndex);
+          if (startIndex === 0 && items.length === 0) {
+            // Makes sure that the dataProvider callback is called even when server
+            // returns empty data set (no items match the filter).
+            pages[0] = [];
+          } else {
+            for (let i = 0; i < pagesCount; i++) {
+              const page = startPage + i;
+              const pageStartIndex = i * comboBox.pageSize;
+              const pageEndIndex = (i + 1) * comboBox.pageSize;
+              pages[page] = items.slice(pageStartIndex, pageEndIndex);
+            }
           }
 
           comboBox.dataProvider.onPagesLoaded(pages, size);
