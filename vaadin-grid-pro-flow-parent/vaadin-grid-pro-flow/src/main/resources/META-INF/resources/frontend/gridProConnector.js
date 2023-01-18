@@ -17,6 +17,13 @@
   }
 
   window.Vaadin.Flow.gridProConnector = {
+    focusCustomEditor: (editor) => {
+      if (editor instanceof HTMLInputElement) {
+        editor.select();
+      } else if (editor.focusElement && editor.focusElement instanceof HTMLInputElement) {
+        editor.focusElement.select();
+      }
+    },
     setEditModeRenderer: (column, component) =>
       tryCatchWrapper(function (column, component) {
         column.editModeRenderer = tryCatchWrapper(function editModeRenderer(root, _, rowData) {
