@@ -32,6 +32,6 @@ public class RichTextEditorTemplateIT extends AbstractComponentIT {
 
         getValue.click();
 
-        Assert.assertEquals("[{\"insert\":\"Bar\\n\"}]", valueOutput.getText());
+        Assert.assertEquals("<p>Bar</p>", valueOutput.getText());
     }
 }
