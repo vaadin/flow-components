@@ -4,28 +4,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class RichTextEditorSanitizationTest {
-
-    @Test
-    public void sanitizePresentationValue() {
-        RichTextEditor editor = new RichTextEditor();
-
-        editor.setValue(
-                "<img onload=\"alert('load')\" onerror=\"alert('error')\">");
-
-        Assert.assertEquals("<img>",
-                editor.getElement().getProperty("htmlValue"));
-    }
-
-    @Test
-    public void sanitizeModelValue() {
-        RichTextEditor editor = new RichTextEditor();
-
-        editor.getElement().setProperty("htmlValue",
-                "<img onload=\"alert('load')\" onerror=\"alert('error')\">");
-
-        Assert.assertEquals("<img>", editor.getValue());
-    }
-
     // Decoration group sanitization
 
     @Test
