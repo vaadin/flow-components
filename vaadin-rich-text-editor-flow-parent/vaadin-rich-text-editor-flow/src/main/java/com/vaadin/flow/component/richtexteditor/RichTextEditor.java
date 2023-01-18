@@ -183,7 +183,8 @@ public class RichTextEditor
 
     @Override
     protected void setPresentationValue(String newPresentationValue) {
-        getElement().setProperty("htmlValue", newPresentationValue);
+        getElement().setProperty("htmlValue",
+                modelToPresentation(newPresentationValue));
         // htmlValue property is not writeable, HTML value needs to be set using
         // method exposed by web component instead
         getElement().callJsFunction("dangerouslySetHtmlValue", this.getValue());
@@ -195,8 +196,8 @@ public class RichTextEditor
     }
 
     private static String modelToPresentation(String htmlValue) {
-        // Just pass through server-side HTML value to client
-        return htmlValue;
+        // Sanitize HTML sent to client
+        return sanitize(htmlValue);
     }
 
     /**
