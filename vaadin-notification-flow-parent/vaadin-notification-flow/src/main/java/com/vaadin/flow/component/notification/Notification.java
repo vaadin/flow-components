@@ -15,20 +15,18 @@
  */
 package com.vaadin.flow.component.notification;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.Stream.Builder;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasStyle;
@@ -41,7 +39,6 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementDetachListener;
-import com.vaadin.flow.dom.ElementFactory;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.internal.HtmlUtils;
 import com.vaadin.flow.internal.StateTree;
@@ -67,7 +64,6 @@ public class Notification extends Component implements HasComponents, HasStyle,
     private static final int DEFAULT_DURATION = 5000;
     private static final Position DEFAULT_POSITION = Position.BOTTOM_START;
 
-    private final Element container = ElementFactory.createDiv();
     private boolean autoAddedToTheUi = false;
 
     private Registration afterProgrammaticNavigationListenerRegistration;
@@ -215,12 +211,6 @@ public class Notification extends Component implements HasComponents, HasStyle,
     }
 
     private void initBaseElementsAndListeners() {
-        this.container.addAttachListener(event -> {
-            this.container.executeJs(
-                    "Vaadin.FlowComponentHost.patchVirtualContainer(this)");
-        });
-        getElement().appendVirtualChild(container);
-
         getElement().addEventListener("opened-changed",
                 event -> removeAutoAdded());
     }
@@ -359,34 +349,10 @@ public class Notification extends Component implements HasComponents, HasStyle,
      *            the components to add
      */
     @Override
-    public void add(Component... components) {
-        Objects.requireNonNull(components, "Components should not be null");
-        for (Component component : components) {
-            Objects.requireNonNull(component,
-                    "Component to add cannot be null");
-            container.appendChild(component.getElement());
-        }
-        configureComponentRenderer();
-    }
+    public void add(Collection<Component> components) {
+        HasComponents.super.add(components);
 
-    /**
-     * Remove the given components from this notification.
-     *
-     * @param components
-     *            the components to remove
-     */
-    @Override
-    public void remove(Component... components) {
-        for (Component component : components) {
-            Objects.requireNonNull(component,
-                    "Component to remove cannot be null");
-            if (container.equals(component.getElement().getParent())) {
-                container.removeChild(component.getElement());
-            } else {
-                throw new IllegalArgumentException("The given component ("
-                        + component + ") is not a child of this component");
-            }
-        }
+        configureComponentRenderer();
     }
 
     /**
@@ -408,32 +374,9 @@ public class Notification extends Component implements HasComponents, HasStyle,
      */
     @Override
     public void addComponentAtIndex(int index, Component component) {
-        Objects.requireNonNull(component, "Component should not be null");
-        if (index < 0) {
-            throw new IllegalArgumentException(
-                    "Cannot add a component with a negative index");
-        }
-        // The case when the index is bigger than the children count is handled
-        // inside the method below
-        container.insertChild(index, component.getElement());
+        HasComponents.super.addComponentAtIndex(index, component);
 
         configureComponentRenderer();
-    }
-
-    /**
-     * Remove all the components from this notification.
-     */
-    @Override
-    public void removeAll() {
-        container.removeAllChildren();
-    }
-
-    @Override
-    public Stream<Component> getChildren() {
-        Builder<Component> childComponents = Stream.builder();
-        container.getChildren().forEach(childElement -> ComponentUtil
-                .findComponents(childElement, childComponents::add));
-        return childComponents.build();
     }
 
     /**
@@ -587,7 +530,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
     private Map<Element, Registration> childDetachListenerMap = new HashMap<>();
     private ElementDetachListener childDetachListener = e -> {
         var child = e.getSource();
-        var childDetachedFromContainer = !container.getChildren().anyMatch(
+        var childDetachedFromContainer = !getElement().getChildren().anyMatch(
                 containerChild -> Objects.equals(child, containerChild));
 
         if (childDetachedFromContainer) {
@@ -612,7 +555,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
      */
     private void updateVirtualChildNodeIds() {
         // Add detach listeners (child may be removed with removeFromParent())
-        container.getChildren().forEach(child -> {
+        getElement().getChildren().forEach(child -> {
             if (!childDetachListenerMap.containsKey(child)) {
                 childDetachListenerMap.put(child,
                         child.addDetachListener(childDetachListener));
@@ -620,7 +563,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
         });
 
         this.getElement().setPropertyList("virtualChildNodeIds",
-                container.getChildren()
+                getElement().getChildren()
                         .map(element -> element.getNode().getId())
                         .collect(Collectors.toList()));
 
@@ -630,6 +573,8 @@ public class Notification extends Component implements HasComponents, HasStyle,
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
+        getElement().executeJs(
+                "Vaadin.FlowComponentHost.patchVirtualContainer(this)");
         initConnector();
         configureRenderer();
         updateVirtualChildNodeIds();
