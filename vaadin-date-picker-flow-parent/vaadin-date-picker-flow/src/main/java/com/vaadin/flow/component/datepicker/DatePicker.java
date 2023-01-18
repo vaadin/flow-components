@@ -53,7 +53,6 @@ import elemental.json.JsonType;
  * {@link DatePickerI18n} object.
  *
  */
-@JsModule("./date-picker-datefns.js")
 @JsModule("./datepickerConnector.js")
 @NpmPackage(value = "date-fns", version = "2.29.3")
 public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>

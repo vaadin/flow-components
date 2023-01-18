@@ -240,7 +240,7 @@ import elemental.json.JsonObject;
  * </p>
  * <p>
  * In addition to {@code <vaadin-date-picker>} itself, the following internal
- * components are themable:
+ * components are themeable:
  * </p>
  * <ul>
  * <li>{@code <vaadin-text-field>}</li>
