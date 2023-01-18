@@ -105,6 +105,11 @@ public class RichTextEditorTest {
                 deltaValue, asDelta.getValue());
     }
 
+    @Test(expected = NullPointerException.class)
+    public void asDelta_setNull_throws() {
+        new RichTextEditor().asDelta().setValue(null);
+    }
+
     @Test
     public void asDelta_setReadOnly_rteIsReadonly() {
         RichTextEditor rte = new RichTextEditor();
@@ -136,6 +141,28 @@ public class RichTextEditorTest {
         asDelta.addValueChangeListener(valueChangeListenerMock);
 
         rte.asDelta().setValue(deltaValue);
+        Mockito.verify(valueChangeListenerMock, Mockito.times(1))
+                .valueChanged(Mockito.any());
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Test
+    public void asDelta_noChangeEventForSameValue() {
+        String deltaValue = "[{\"insert\":\"Foo\"}]";
+        RichTextEditor rte = new RichTextEditor();
+        HasValue<ValueChangeEvent<String>, String> asDelta = rte.asDelta();
+
+        HasValue.ValueChangeListener valueChangeListenerMock = Mockito
+                .mock(HasValue.ValueChangeListener.class);
+        asDelta.addValueChangeListener(valueChangeListenerMock);
+
+        // Set a value
+        asDelta.setValue(deltaValue);
+
+        // Set same value again
+        asDelta.setValue(deltaValue);
+
+        // Change listener should only have been called once
         Mockito.verify(valueChangeListenerMock, Mockito.times(1))
                 .valueChanged(Mockito.any());
     }

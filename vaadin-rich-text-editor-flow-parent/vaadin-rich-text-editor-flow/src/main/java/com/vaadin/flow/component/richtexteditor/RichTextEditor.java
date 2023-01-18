@@ -977,18 +977,23 @@ public class RichTextEditor
          */
         @Override
         public void setValue(String value) {
-            RichTextEditor.this.getElement().setProperty("value", value);
-            // After setting delta value, manually sync back the updated HTML
-            // value, which will eventually trigger a server-side value change
-            // event on the component
-            RichTextEditor.this.getElement().executeJs("return this.htmlValue")
-                    .then(jsonValue -> {
-                        isHtmlValueSync = true;
-                        RichTextEditor.this.setValue(jsonValue.asString());
-                        isHtmlValueSync = false;
-                    });
-            fireChangeEvent(false);
-            oldValue = value;
+            Objects.requireNonNull(value, "Delta value must not be null");
+
+            if (!Objects.equals(value, getValue())) {
+                RichTextEditor.this.getElement().setProperty("value", value);
+                // After setting delta value, manually sync back the updated
+                // HTML value, which will eventually trigger a server-side value
+                // change event on the component
+                RichTextEditor.this.getElement()
+                        .executeJs("return this.htmlValue").then(jsonValue -> {
+                            isHtmlValueSync = true;
+                            RichTextEditor.this.setValue(jsonValue.asString());
+                            isHtmlValueSync = false;
+                        });
+
+                fireChangeEvent(false);
+                oldValue = value;
+            }
         }
 
         /**
