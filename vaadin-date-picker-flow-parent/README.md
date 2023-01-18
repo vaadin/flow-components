@@ -6,11 +6,16 @@ for use from the server side with [Vaadin Flow](https://github.com/vaadin/flow).
 `master` branch is the latest version that will at some point be released in the [Vaadin platform](https://github.com/vaadin/platform). See other branches for other framework versions:
  - `1.0` branch is Vaadin 10 LTS (Flow/Flow-component version 1.0)
 
+## Requirements:
+- Java 11 (Java 18 is not good for example)
+- npm v16.14.2 or newer,
+
+
 ## Running the component demo
 Run from the command line:
 - `mvn  -pl vaadin-date-picker-flow-demo -Pwar install jetty:run`
 
-Then navigate to `http://localhost:9998/vaadin-grid`
+Then navigate to `http://localhost:8080/vaadin-date-picker/`
 
 ## Running Integration tests
 
