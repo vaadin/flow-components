@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.datetimepicker;
 
 import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
@@ -208,6 +209,13 @@ public class DateTimePickerTest {
 
         DateTimePicker field = Component.from(element, DateTimePicker.class);
         Assert.assertEquals(value, field.getElement().getProperty("value"));
+    }
+
+    @Test
+    public void implementsHasOverlayClassName() {
+        Assert.assertTrue("DateTimePicker should support overlay class name",
+                HasOverlayClassName.class
+                        .isAssignableFrom(new DateTimePicker().getClass()));
     }
 
     @Test
