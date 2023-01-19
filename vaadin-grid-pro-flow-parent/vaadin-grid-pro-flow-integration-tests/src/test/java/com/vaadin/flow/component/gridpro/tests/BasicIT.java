@@ -9,7 +9,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
-import org.w3c.dom.Document;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -268,13 +267,16 @@ public class BasicIT extends AbstractParallelTest {
         var input = cell_0_4.$("vaadin-combo-box").first();
         input.sendKeys(Keys.TAB);
 
-        Assert.assertEquals("person1@vaadin.com",
-                getPanelText("selection-panel"));
+        var selectedText = (String) getCommandExecutor()
+                .executeScript("return document.getSelection().toString()");
+        Assert.assertEquals("person1@vaadin.com", selectedText);
 
         var cell_0_5 = grid.getCell(0, 5);
         input = cell_0_5.$("input").first();
         input.sendKeys(Keys.TAB);
-        Assert.assertEquals("2019", getPanelText("selection-panel"));
+        selectedText = (String) getCommandExecutor()
+                .executeScript("return document.getSelection().toString()");
+        Assert.assertEquals("2019", selectedText);
     }
 
     private void assertCellEnterEditModeOnDoubleClick(Integer rowIndex,
