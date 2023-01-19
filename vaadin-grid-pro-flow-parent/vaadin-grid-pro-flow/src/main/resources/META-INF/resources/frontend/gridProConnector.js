@@ -17,7 +17,7 @@
   }
 
   window.Vaadin.Flow.gridProConnector = {
-    focusCustomEditor: (editor) => {
+    selectAll: (editor) => {
       if (editor instanceof HTMLInputElement) {
         editor.select();
       } else if (editor.focusElement && editor.focusElement instanceof HTMLInputElement) {

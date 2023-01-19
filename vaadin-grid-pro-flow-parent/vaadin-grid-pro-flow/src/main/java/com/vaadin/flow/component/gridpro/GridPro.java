@@ -143,7 +143,7 @@ public class GridPro<E> extends Grid<E> {
                 column.getEditorField()
                         .setValue(column.getValueProvider().apply(e.getItem()));
                 UI.getCurrent().getPage().executeJs(
-                        "window.Vaadin.Flow.gridProConnector.focusCustomEditor($0)",
+                        "window.Vaadin.Flow.gridProConnector.selectAll($0)",
                         column.getEditorField().getElement());
             }
         });
