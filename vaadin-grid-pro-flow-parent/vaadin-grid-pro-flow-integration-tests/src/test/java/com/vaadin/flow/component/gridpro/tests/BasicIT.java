@@ -258,6 +258,27 @@ public class BasicIT extends AbstractParallelTest {
         Assert.assertEquals("2019", textField.getProperty("value"));
     }
 
+    @Test
+    public void gridWithCustomEditors_navigateToWithTabKey_textIsSelected() {
+        var cell_0_4 = grid.getCell(0, 4);
+        assertCellEnterEditModeOnDoubleClick(0, 4, "vaadin-combo-box");
+
+        waitUntil(e -> cell_0_4.$("vaadin-combo-box").exists());
+        var input = cell_0_4.$("vaadin-combo-box").first();
+        input.sendKeys(Keys.TAB);
+
+        var selectedText = (String) getCommandExecutor()
+                .executeScript("return document.getSelection().toString()");
+        Assert.assertEquals("person1@vaadin.com", selectedText);
+
+        var cell_0_5 = grid.getCell(0, 5);
+        input = cell_0_5.$("input").first();
+        input.sendKeys(Keys.TAB);
+        selectedText = (String) getCommandExecutor()
+                .executeScript("return document.getSelection().toString()");
+        Assert.assertEquals("2019", selectedText);
+    }
+
     private void assertCellEnterEditModeOnDoubleClick(Integer rowIndex,
             Integer colIndex, String editorTag) {
         assertCellEnterEditModeOnDoubleClick(rowIndex, colIndex, editorTag,
