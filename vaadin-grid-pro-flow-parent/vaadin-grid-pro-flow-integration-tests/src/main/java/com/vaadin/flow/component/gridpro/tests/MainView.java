@@ -14,7 +14,6 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Input;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Route;
@@ -100,6 +99,11 @@ public class MainView extends VerticalLayout {
                         (item, newValue) -> item.setEmail(newValue))
                 .setHeader("Email").setWidth("300px");
 
+        TextField customEmploymentYearField = new TextField();
+        grid.addEditColumn(Person::getEmploymentYear).custom(
+                customEmploymentYearField,
+                (item, newValue) -> item.setEmploymentYear(newValue));
+
         disableGrid.addClickListener(click -> grid.setEnabled(false));
 
         add(grid, itemDisplayPanel, subPropertyDisplayPanel, eventsPanel,
@@ -148,6 +152,8 @@ public class MainView extends VerticalLayout {
         } else {
             person.setDepartment(Department.getRandomDepartment());
         }
+
+        person.setEmploymentYear(String.valueOf(2020 - index));
 
         return person;
     }
