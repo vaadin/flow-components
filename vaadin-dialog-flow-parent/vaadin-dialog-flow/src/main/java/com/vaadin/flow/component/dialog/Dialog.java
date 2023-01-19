@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.AttachEvent;
@@ -978,43 +977,6 @@ public class Dialog extends Component implements HasComponents, HasSize,
         setDimension(ElementConstants.STYLE_MAX_HEIGHT, maxHeight);
     }
 
-    private void updateOverlayClassName() {
-        getElement().setProperty("overlayClass", getClassName());
-    }
-
-    /**
-     * Adds a CSS class name to the dialog overlay element.
-     *
-     * @param className
-     *            the CSS class name to add, not <code>null</code>
-     */
-    @Override
-    public void addClassName(String className) {
-        HasStyle.super.addClassName(className);
-
-        updateOverlayClassName();
-    }
-
-    /**
-     * Removes a CSS class name from the dialog overlay element.
-     *
-     * @param className
-     *            the CSS class name to remove, not <code>null</code>
-     * @return <code>true</code> if the class name was removed,
-     *         <code>false</code> if the class list didn't contain the class
-     *         name
-     */
-    @Override
-    public boolean removeClassName(String className) {
-        boolean result = HasStyle.super.removeClassName(className);
-
-        if (result) {
-            updateOverlayClassName();
-        }
-
-        return result;
-    }
-
     /**
      * Sets the CSS class names of the dialog overlay element. This method
      * overwrites any previous set class names.
@@ -1025,55 +987,8 @@ public class Dialog extends Component implements HasComponents, HasSize,
      */
     @Override
     public void setClassName(String className) {
-        HasStyle.super.setClassName(className);
-
-        updateOverlayClassName();
-    }
-
-    /**
-     * Sets or removes the given class name for the dialog overlay element.
-     *
-     * @param className
-     *            the class name to set or remove, not <code>null</code>
-     * @param set
-     *            <code>true</code> to set the class name, <code>false</code> to
-     *            remove it
-     */
-    @Override
-    public void setClassName(String className, boolean set) {
-        HasStyle.super.setClassName(className, set);
-
-        updateOverlayClassName();
-    }
-
-    /**
-     * Adds one or more CSS class names to the dialog overlay element. Multiple
-     * class names can be specified by using spaces or by giving multiple
-     * parameters.
-     *
-     * @param classNames
-     *            the CSS class name or class names to be added
-     */
-    @Override
-    public void addClassNames(String... classNames) {
-        HasStyle.super.addClassNames(classNames);
-
-        updateOverlayClassName();
-    }
-
-    /**
-     * Removes one or more CSS class names from the dialog overlay element.
-     * Multiple class names can be specified by using spaces or by giving
-     * multiple parameters.
-     *
-     * @param classNames
-     *            the CSS class name or class names to be removed
-     */
-    @Override
-    public void removeClassNames(String... classNames) {
-        HasStyle.super.removeClassNames(classNames);
-
-        updateOverlayClassName();
+        getClassNames().clear();
+        getClassNames().add(className);
     }
 
     @Override
@@ -1108,7 +1023,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
         @Override
         public Iterator<String> iterator() {
-            return classList.iterator();
+            return new IteratorProxy(classList.iterator());
         }
 
         @Override
@@ -1123,45 +1038,28 @@ public class Dialog extends Component implements HasComponents, HasSize,
             return result;
         }
 
-        @Override
-        public boolean addAll(Collection<? extends String> c) {
-            boolean result = super.addAll(c);
-            updateOverlayClass();
-            return result;
-        }
+        private class IteratorProxy implements Iterator<String> {
+            private final Iterator<String> iterator;
 
-        @Override
-        public boolean remove(Object o) {
-            boolean result = super.remove(o);
-            updateOverlayClass();
-            return result;
-        }
+            public IteratorProxy(Iterator<String> iterator) {
+                this.iterator = iterator;
+            }
 
-        @Override
-        public boolean removeAll(Collection<?> c) {
-            boolean result = super.removeAll(c);
-            updateOverlayClass();
-            return result;
-        }
+            @Override
+            public boolean hasNext() {
+                return iterator.hasNext();
+            }
 
-        @Override
-        public boolean removeIf(Predicate<? super String> filter) {
-            boolean result = super.removeIf(filter);
-            updateOverlayClass();
-            return result;
-        }
+            @Override
+            public String next() {
+                return iterator.next();
+            }
 
-        @Override
-        public boolean retainAll(Collection<?> c) {
-            boolean result = super.retainAll(c);
-            updateOverlayClass();
-            return result;
-        }
-
-        @Override
-        public void clear() {
-            super.clear();
-            updateOverlayClass();
+            @Override
+            public void remove() {
+                iterator.remove();
+                updateOverlayClass();
+            }
         }
     }
 }
