@@ -17,6 +17,7 @@
 package com.vaadin.flow.component.tabs.tests;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -417,5 +418,23 @@ public class TabSheetTest {
         tabs.setSelectedIndex(1);
         Assert.assertEquals(1,
                 tabSheet.getElement().getProperty("selected", 0));
+    }
+
+    @Test
+    public void unregisterSelectedChangeListenerOnEvent() {
+        tabSheet.add("Tab 0", new Span("Content 0"));
+        tabSheet.add("Tab 1", new Span("Content 1"));
+
+        var listenerInvokedCount = new AtomicInteger(0);
+        tabSheet.addSelectedChangeListener(e -> {
+            listenerInvokedCount.incrementAndGet();
+            e.unregisterListener();
+        });
+
+        tabSheet.setSelectedIndex(1);
+        // The listener should now be unregistered.
+        tabSheet.setSelectedIndex(0);
+
+        Assert.assertEquals(1, listenerInvokedCount.get());
     }
 }
