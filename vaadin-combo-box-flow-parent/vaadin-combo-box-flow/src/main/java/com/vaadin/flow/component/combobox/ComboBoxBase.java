@@ -171,9 +171,6 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
         getElement().setProperty("itemValuePath", "key");
         getElement().setProperty("itemIdPath", "key");
 
-        // Disable template warnings
-        getElement().setAttribute("suppress-template-warning", true);
-
         // Notify data communicator when selection changes, which allows to
         // free up items / keys in the KeyMapper that are not used anymore in
         // the selection

@@ -87,7 +87,6 @@ import java.util.stream.Stream;
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/select", version = "24.0.0-alpha11")
 @JsModule("@vaadin/select/src/vaadin-select.js")
-@JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 @JsModule("./selectConnector.js")
 public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
         implements Focusable<Select<T>>, HasClientValidation,
@@ -139,7 +138,6 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
 
         setInvalid(false);
         setOpened(false);
-        getElement().setAttribute("suppress-template-warning", true);
         // Trigger model-to-presentation conversion in constructor, so that
         // the client side component has a correct initial value of an empty
         // string
