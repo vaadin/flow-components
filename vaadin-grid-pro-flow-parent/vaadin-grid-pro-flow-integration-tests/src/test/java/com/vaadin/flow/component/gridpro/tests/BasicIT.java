@@ -30,7 +30,7 @@ public class BasicIT extends AbstractParallelTest {
     public void editColumnsAdded() {
         List<TestBenchElement> columns = grid.$("vaadin-grid-pro-edit-column")
                 .all();
-        Assert.assertEquals(columns.size(), 5);
+        Assert.assertEquals(columns.size(), 6);
     }
 
     @Test
@@ -137,10 +137,9 @@ public class BasicIT extends AbstractParallelTest {
     @Test
     public void cellEditStartedListenerCalledOnce() {
         assertCellEnterEditModeOnDoubleClick(0, 2, "vaadin-combo-box");
-        Assert.assertEquals(
-                "Person{id=1, age=23, name='Person 1', "
-                        + "isSubscriber=false, email='person1@vaadin.com', "
-                        + "department=sales, city='City 1'}",
+        Assert.assertEquals("Person{id=1, age=23, name='Person 1', "
+                + "isSubscriber=false, email='person1@vaadin.com', "
+                + "department=sales, city='City 1', employmentYear=2019}",
                 getPanelText("events" + "-panel"));
     }
 
