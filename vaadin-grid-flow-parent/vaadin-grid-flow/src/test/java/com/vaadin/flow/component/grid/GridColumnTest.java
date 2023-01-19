@@ -62,12 +62,6 @@ public class GridColumnTest {
     }
 
     @Test
-    public void templateWarningSuppressed() {
-        Assert.assertTrue("Template warning is not suppressed", firstColumn
-                .getElement().hasAttribute("suppress-template-warning"));
-    }
-
-    @Test
     public void setKey_getByKey() {
         firstColumn.setKey("foo");
         secondColumn.setKey("bar");

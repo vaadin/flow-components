@@ -35,13 +35,6 @@ import com.vaadin.flow.component.html.Label;
  * Unit tests for the ContextMenu.
  */
 public class ContextMenuTest {
-    @Test
-    public void templateWarningSuppressed() {
-        ContextMenu contextMenu = new ContextMenu();
-
-        Assert.assertTrue("Template warning is not suppressed", contextMenu
-                .getElement().hasAttribute("suppress-template-warning"));
-    }
 
     @Test
     public void createContextMenuWithTargetAndChildren_getChildrenReturnsChildren() {

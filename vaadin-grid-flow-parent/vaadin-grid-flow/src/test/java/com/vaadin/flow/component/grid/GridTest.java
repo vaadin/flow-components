@@ -37,14 +37,6 @@ public class GridTest {
     public ExpectedException exceptionRule = ExpectedException.none();
 
     @Test
-    public void templateWarningSuppressed() {
-        Grid<String> grid = new Grid<>();
-
-        Assert.assertTrue("Template warning is not suppressed",
-                grid.getElement().hasAttribute("suppress-template-warning"));
-    }
-
-    @Test
     public void dataViewForFaultyDataProvider_throwsException() {
         exceptionRule.expect(IllegalStateException.class);
         exceptionRule.expectMessage(
