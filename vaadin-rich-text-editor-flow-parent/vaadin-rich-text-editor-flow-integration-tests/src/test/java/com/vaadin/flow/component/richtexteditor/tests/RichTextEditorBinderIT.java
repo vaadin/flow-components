@@ -46,7 +46,7 @@ public class RichTextEditorBinderIT extends AbstractComponentIT {
         waitUntil(driver -> !binderError.getText().isEmpty());
 
         Assert.assertEquals("false", binderError.getText());
-        Assert.assertEquals("[{\"insert\":\"foo\\n\"}]", beanValue.getText());
+        Assert.assertEquals("<p>foo</p>", beanValue.getText());
     }
 
     @Test

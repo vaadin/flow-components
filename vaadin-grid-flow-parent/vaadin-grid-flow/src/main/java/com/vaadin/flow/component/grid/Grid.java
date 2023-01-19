@@ -213,7 +213,6 @@ import org.slf4j.LoggerFactory;
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
 @JsModule("@vaadin/checkbox/src/vaadin-checkbox.js")
-@JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./gridConnector.js")
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
@@ -508,8 +507,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 columnDataGeneratorRegistration = grid
                         .addDataGenerator(dataGenerator.get());
             }
-
-            getElement().setAttribute("suppress-template-warning", true);
         }
 
         protected void destroyDataGenerators() {
@@ -1564,7 +1561,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         addDragEndListener(this::onDragEnd);
 
         updateMultiSortPriority(defaultMultiSortPriority);
-        getElement().setAttribute("suppress-template-warning", true);
     }
 
     private void generateUniqueKeyData(T item, JsonObject jsonObject) {

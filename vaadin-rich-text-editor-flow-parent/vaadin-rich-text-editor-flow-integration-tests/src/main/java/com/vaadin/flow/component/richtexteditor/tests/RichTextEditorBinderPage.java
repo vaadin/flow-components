@@ -40,7 +40,7 @@ public class RichTextEditorBinderPage extends Div {
         writeBean.setId("write-bean");
 
         NativeButton readBean = new NativeButton("Read bean", e -> {
-            testBean.setValue("[{\"insert\":\"foo\"}]");
+            testBean.setValue("<p>foo</p>");
             binder.readBean(testBean);
         });
         readBean.setId("read-bean");

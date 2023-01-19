@@ -278,7 +278,12 @@ public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
         return tabs.addSelectedChangeListener(event -> {
             listener.onComponentEvent(new SelectedChangeEvent(TabSheet.this,
                     event.getPreviousTab(), event.isFromClient(),
-                    event.isInitialSelection()));
+                    event.isInitialSelection()) {
+                @Override
+                public void unregisterListener() {
+                    event.unregisterListener();
+                }
+            });
         });
 
     }
