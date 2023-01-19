@@ -163,7 +163,6 @@ public class MultiSelectListBoxTest {
                 selectionEvent.getRemovedSelection());
 
         Assert.assertEquals(createSet(bar), selectionEvent.getValue());
-        Assert.assertEquals(createSet(bar), selectionEvent.getNewSelection());
         Assert.assertEquals(createSet(bar),
                 selectionEvent.getAllSelectedItems());
 

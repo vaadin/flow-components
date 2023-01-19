@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.notification;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.junit.After;
@@ -70,6 +71,23 @@ public class NotificationChildrenTest {
         notification.add(child);
         notification.add(child2);
         assertVirtualChildren(child, child2);
+    }
+
+    @Test
+    public void addCollection_virtualNodeIdsInSync() {
+        var child = new Div();
+        var child2 = new Div();
+        notification.add(List.of(child, child2));
+        assertVirtualChildren(child, child2);
+    }
+
+    @Test
+    public void addComponentAsFirst_virtualNodeIdsInSync() {
+        var child = new Div();
+        var child2 = new Div();
+        notification.add(child);
+        notification.addComponentAsFirst(child2);
+        assertVirtualChildren(child2, child);
     }
 
     @Test

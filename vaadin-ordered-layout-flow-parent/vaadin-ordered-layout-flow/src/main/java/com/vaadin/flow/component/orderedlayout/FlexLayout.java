@@ -271,17 +271,17 @@ public class FlexLayout extends Component
      * @param width
      *            the width for the components. Setting <code>null</code> will
      *            remove the flex basis property
-     * @param elementContainers
-     *            the containers (components) to apply the flex basis property
+     * @param components
+     *            the components to apply the flex basis property
      */
-    public void setFlexBasis(String width, HasElement... elementContainers) {
+    public void setFlexBasis(String width, HasElement... components) {
         if (width == null) {
-            for (HasElement element : elementContainers) {
+            for (HasElement element : components) {
                 element.getElement().getStyle()
                         .remove(FlexConstants.FLEX_BASIS_CSS_PROPERTY);
             }
         } else {
-            for (HasElement element : elementContainers) {
+            for (HasElement element : components) {
                 element.getElement().getStyle()
                         .set(FlexConstants.FLEX_BASIS_CSS_PROPERTY, width);
             }
@@ -289,14 +289,14 @@ public class FlexLayout extends Component
     }
 
     /**
-     * Gets the flex basis property of a given element container.
+     * Gets the flex basis property of a given component.
      *
-     * @param elementContainer
-     *            the element container to read the flex basis property from
+     * @param component
+     *            the component to read the flex basis property from
      * @return the flex grow property
      */
-    public String getFlexBasis(HasElement elementContainer) {
-        return elementContainer.getElement().getStyle()
+    public String getFlexBasis(HasElement component) {
+        return component.getElement().getStyle()
                 .get(FlexConstants.FLEX_BASIS_CSS_PROPERTY);
     }
 
@@ -336,59 +336,6 @@ public class FlexLayout extends Component
     }
 
     /**
-     * Sets the flex shrink property of the components inside the layout. The
-     * flex shrink property specifies how the item will shrink relative to the
-     * rest of the components inside the same layout.
-     *
-     * Negative values are not allowed.
-     *
-     * The default value is 1.
-     *
-     * @param flexShrink
-     *            how much the component will shrink relative to the rest of the
-     *            components
-     * @param elementContainers
-     *            the containers (components) to apply the flex shrink property
-     */
-    public void setFlexShrink(double flexShrink,
-            HasElement... elementContainers) {
-        if (flexShrink < 0) {
-            throw new IllegalArgumentException(
-                    "Flex shrink property cannot be negative");
-        }
-
-        for (HasElement container : elementContainers) {
-            container.getElement().getStyle().set(
-                    FlexConstants.FLEX_SHRINK_CSS_PROPERTY,
-                    String.valueOf(flexShrink));
-        }
-    }
-
-    /**
-     * Gets the flex shrink property of a given element container.
-     *
-     * @param elementContainer
-     *            the element container to read the flex shrink property from
-     * @return the flex shrink property, or 1 if none was set
-     */
-    public double getFlexShrink(HasElement elementContainer) {
-        String ratio = elementContainer.getElement().getStyle()
-                .get(FlexConstants.FLEX_SHRINK_CSS_PROPERTY);
-        if (ratio == null || ratio.isEmpty()) {
-            return 1;
-        }
-
-        try {
-            return Double.parseDouble(ratio);
-        } catch (Exception e) {
-            throw new IllegalStateException(
-                    "The flex shrink property of the element container is not parseable to double: "
-                            + ratio,
-                    e);
-        }
-    }
-
-    /**
      * Sets the order property of the component inside the layout. The order
      * property specifies the order of a component relative to the rest of the
      * components inside the same layout.
@@ -398,27 +345,27 @@ public class FlexLayout extends Component
      *
      * @param order
      *            the order for the component
-     * @param elementContainer
-     *            the container (component) to apply the order property
+     * @param component
+     *            the component to apply the order property
      */
-    public void setOrder(int order, HasElement elementContainer) {
+    public void setOrder(int order, HasElement component) {
         if (order == 0) {
-            elementContainer.getElement().getStyle()
+            component.getElement().getStyle()
                     .remove(FlexConstants.ORDER_CSS_PROPERTY);
         }
-        elementContainer.getElement().getStyle()
-                .set(FlexConstants.ORDER_CSS_PROPERTY, String.valueOf(order));
+        component.getElement().getStyle().set(FlexConstants.ORDER_CSS_PROPERTY,
+                String.valueOf(order));
     }
 
     /**
-     * Gets the order property of a given element container.
+     * Gets the order property of a given component.
      *
-     * @param elementContainer
-     *            the element container to read the order property from
+     * @param component
+     *            the component to read the order property from
      * @return the order property, or 0 if none was set
      */
-    public int getOrder(HasElement elementContainer) {
-        String order = elementContainer.getElement().getStyle()
+    public int getOrder(HasElement component) {
+        String order = component.getElement().getStyle()
                 .get(FlexConstants.ORDER_CSS_PROPERTY);
 
         if (order == null || order.isEmpty()) {
@@ -428,7 +375,7 @@ public class FlexLayout extends Component
             return Integer.parseInt(order);
         } catch (Exception e) {
             throw new IllegalStateException(
-                    "The order property of the element container is not parseable to integer: "
+                    "The order property of the component is not parseable to integer: "
                             + order,
                     e);
         }

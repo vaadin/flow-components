@@ -36,8 +36,7 @@ public class RichTextEditorValuePage extends Div {
                 e -> asDeltaValueOutput.setText(formatEventData(e)));
 
         NativeButton setValue = new NativeButton("Set value", e -> {
-            editor.setValue(
-                    "[{\"insert\":\"value\"},{\"attributes\":{\"header\":1},\"insert\":\"\\n\"}]");
+            editor.setValue("<h1>value</h1>");
         });
         setValue.setId("set-value");
 
@@ -54,17 +53,18 @@ public class RichTextEditorValuePage extends Div {
                 });
         setAsDeltaValue.setId("set-as-delta-value");
 
-        NativeButton setupEditorWithInitialHtmlValue = new NativeButton(
-                "Setup editor with initial HTML value", e -> {
+        NativeButton setupEditorWithInitialDeltaValue = new NativeButton(
+                "Setup editor with initial Delta value", e -> {
                     setupEditor();
-                    editor.asHtml().setValue("<h1>initial-value</h1>");
+                    editor.asDelta().setValue(
+                            "[{\"insert\":\"initial-value\"},{\"attributes\":{\"header\":1},\"insert\":\"\\n\"}]");
                 });
-        setupEditorWithInitialHtmlValue
-                .setId("setup-editor-with-initial-html-value");
+        setupEditorWithInitialDeltaValue
+                .setId("setup-editor-with-initial-delta-value");
 
         add(editor);
         add(new Div(setValue, setAsHtmlValue, setAsDeltaValue,
-                setupEditorWithInitialHtmlValue));
+                setupEditorWithInitialDeltaValue));
         add(new Div(new Span("Value Change Event: "), valueOutput));
         add(new Div(new Span("AsHtml Value Change Event: "),
                 asHtmlValueOutput));

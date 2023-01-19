@@ -67,9 +67,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-time-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha10")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha11")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/time-picker", version = "24.0.0-alpha10")
+@NpmPackage(value = "@vaadin/time-picker", version = "24.0.0-alpha11")
 @JsModule("@vaadin/time-picker/src/vaadin-time-picker.js")
 @JsModule("./vaadin-time-picker/timepickerConnector.js")
 public class TimePicker
@@ -481,7 +481,7 @@ public class TimePicker
     }
 
     private void initConnector() {
-        // can't run this with getElement().executeJavaScript(...) since then
+        // can't run this with getElement().executeJs(...) since then
         // setLocale might be called before this causing client side error
         runBeforeClientResponse(ui -> ui.getPage().executeJs(
                 "window.Vaadin.Flow.timepickerConnector.initLazy($0)",
