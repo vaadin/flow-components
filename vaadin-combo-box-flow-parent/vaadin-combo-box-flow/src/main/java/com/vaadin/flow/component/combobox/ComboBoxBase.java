@@ -150,7 +150,9 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
         super(valuePropertyName, defaultValue, valuePropertyType,
                 presentationToModel, modelToPresentation);
 
-        @SuppressWarnings("serial")
+        // Extracted as implementation to fix serialization issue:
+        // https://github.com/vaadin/flow-components/issues/4420
+        // Do not replace with method reference
         SerializableSupplier<Locale> localeSupplier = new SerializableSupplier<Locale>() {
             @Override
             public Locale get() {
