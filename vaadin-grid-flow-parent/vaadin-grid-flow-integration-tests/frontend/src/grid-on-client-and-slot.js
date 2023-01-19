@@ -1,4 +1,4 @@
-import { css, html, LitElement } from 'lit';
+import { css, html, LitElement, render } from 'lit';
 import '@vaadin/grid/src/vaadin-grid.js';
 import '@vaadin/grid/src/vaadin-grid-column.js';
 import '@vaadin/grid/src/vaadin-grid-tree-toggle.js';
@@ -17,13 +17,23 @@ class GridOnClientAndSlot extends LitElement {
 
   render() {
     return html`
-      <vaadin-grid id="tree">
-        <vaadin-grid-column>
-          <template>
-            <vaadin-grid-tree-toggle leaf="[[item.leaf]]" expanded="{{expanded}}" level="[[level]]">
-              <div class="tree-cell">[[item.name]]</div>
-            </vaadin-grid-tree-toggle>
-          </template>
+      <vaadin-grid id="tree" .expandedItems="${this.expandedItems}">
+        <vaadin-grid-column
+          .renderer=${(root, _, model) => {
+            render(
+              html`<vaadin-grid-tree-toggle
+                .__currentItem="${model.item}"
+                .leaf="${model.item.leaf}"
+                .expanded="${model.expanded}"
+                @expanded-changed="${this.__expandedChanged}"
+                .level="${model.level}"
+              >
+                <div class="tree-cell">${model.item.name}</div>
+              </vaadin-grid-tree-toggle>`,
+              root
+            );
+          }}
+        >
         </vaadin-grid-column>
       </vaadin-grid>
       <button>This is a button</button>
@@ -39,12 +49,19 @@ class GridOnClientAndSlot extends LitElement {
     return {
       items: {
         type: Array
+      },
+      expandedItems: {
+        type: Array
       }
     };
   }
 
   constructor() {
     super();
+
+    this.__expandedChanged = this.__expandedChanged.bind(this);
+
+    this.expandedItems = [];
 
     this.items = [
       {
@@ -75,6 +92,18 @@ class GridOnClientAndSlot extends LitElement {
         ]
       }
     ];
+  }
+
+  __expandedChanged(e) {
+    const item = e.currentTarget.__currentItem;
+    const expanded = e.detail.value;
+    const itemExpanded = this.expandedItems.includes(item);
+  
+    if (expanded && !itemExpanded) {
+      this.expandedItems = [...this.expandedItems, item];
+    } else if (!expanded && itemExpanded) {
+      this.expandedItems = this.expandedItems.filter((i) => i !== item);
+    }
   }
 
   firstUpdated() {

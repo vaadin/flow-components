@@ -4,42 +4,41 @@ class TemplatedColumns extends LitElement {
   render() {
     return html`
       <vaadin-grid id="grid">
-        <vaadin-grid-column width="30px" flex-grow="0">
-          <template class="header">#</template>
-          <template>[[index]]</template>
+        <vaadin-grid-column
+          width="30px"
+          flex-grow="0"
+          header="#"
+          .renderer="${(root, _, { index }) => (root.textContent = index)}"
+        >
         </vaadin-grid-column>
 
-        <vaadin-grid-column-group>
-          <template class="header">Name</template>
+        <vaadin-grid-column-group header="Name">
+          <vaadin-grid-column
+            header="First"
+            .renderer="${(root, _, { item }) => (root.textContent = item.name.first)}"
+          ></vaadin-grid-column>
 
-          <vaadin-grid-column>
-            <template class="header">First</template>
-            <template>[[item.name.first]]</template>
-          </vaadin-grid-column>
-
-          <vaadin-grid-column>
-            <template class="header">Last</template>
-            <template>[[item.name.last]]</template>
-          </vaadin-grid-column>
+          <vaadin-grid-column
+            header="Last"
+            .renderer="${(root, _, { item }) => (root.textContent = item.name.last)}"
+          ></vaadin-grid-column>
         </vaadin-grid-column-group>
 
-        <vaadin-grid-column-group>
-          <template class="header">Location</template>
+        <vaadin-grid-column-group header="Location">
+          <vaadin-grid-column
+            header="City"
+            .renderer="${(root, _, { item }) => (root.textContent = item.location.city)}"
+          ></vaadin-grid-column>
 
-          <vaadin-grid-column>
-            <template class="header">City</template>
-            <template>[[item.location.city]]</template>
-          </vaadin-grid-column>
+          <vaadin-grid-column
+            header="State"
+            .renderer="${(root, _, { item }) => (root.textContent = item.location.state)}"
+          ></vaadin-grid-column>
 
-          <vaadin-grid-column>
-            <template class="header">State</template>
-            <template>[[item.location.state]]</template>
-          </vaadin-grid-column>
-
-          <vaadin-grid-column>
-            <template class="header">Street</template>
-            <template><p style="white-space: normal">[[item.location.street]]</p></template>
-          </vaadin-grid-column>
+          <vaadin-grid-column
+            header="Street"
+            .renderer="${(root, _, { item }) => (root.textContent = item.location.street)}"
+          ></vaadin-grid-column>
         </vaadin-grid-column-group>
       </vaadin-grid>
     `;

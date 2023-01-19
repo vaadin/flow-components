@@ -475,6 +475,8 @@ public class CheckboxGroup<T>
      * Sets the item label generator that is used to produce the strings shown
      * in the checkbox group for each item. By default,
      * {@link String#valueOf(Object)} is used.
+     * <p>
+     * Setting an item label generator removes any previously set item renderer.
      *
      * @param itemLabelGenerator
      *            the item label provider to use, not null
@@ -484,6 +486,7 @@ public class CheckboxGroup<T>
         Objects.requireNonNull(itemLabelGenerator,
                 "The item label generator can not be null");
         this.itemLabelGenerator = itemLabelGenerator;
+        this.itemRenderer = null;
         refreshCheckboxes();
     }
 

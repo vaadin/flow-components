@@ -108,12 +108,6 @@ public class SelectTest {
     }
 
     @Test
-    public void templateWarningSuppressed() {
-        Assert.assertTrue("Template warning is not suppressed",
-                select.getElement().hasAttribute("suppress-template-warning"));
-    }
-
-    @Test
     public void defaultValue_clearSetsToNull() {
         select.setItems("foo", "bar");
         select.setValue("foo");

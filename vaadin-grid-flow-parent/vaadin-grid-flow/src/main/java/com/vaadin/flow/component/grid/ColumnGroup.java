@@ -63,8 +63,6 @@ class ColumnGroup extends AbstractColumn<ColumnGroup> {
         super(grid);
         columns.forEach(
                 column -> getElement().appendChild(column.getElement()));
-
-        getElement().setAttribute("suppress-template-warning", true);
     }
 
     /**

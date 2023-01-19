@@ -84,14 +84,6 @@ public abstract class ComboBoxBaseTest {
     }
 
     @Test
-    public void templateWarningSuppressed() {
-        ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
-
-        Assert.assertTrue("Template warning is not suppressed", comboBox
-                .getElement().hasAttribute("suppress-template-warning"));
-    }
-
-    @Test
     public void setAutoOpenDisabled() {
         ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
         Assert.assertTrue(comboBox.isAutoOpen());
