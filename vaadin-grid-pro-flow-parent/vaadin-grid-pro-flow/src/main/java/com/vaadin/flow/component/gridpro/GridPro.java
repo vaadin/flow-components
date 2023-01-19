@@ -26,6 +26,7 @@ import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasValueAndElement;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.grid.ColumnPathRenderer;
@@ -144,6 +145,9 @@ public class GridPro<E> extends Grid<E> {
             if (column.getEditorType().equals("custom")) {
                 column.getEditorField()
                         .setValue(column.getValueProvider().apply(e.getItem()));
+                UI.getCurrent().getPage().executeJs(
+                        "window.Vaadin.Flow.gridProConnector.selectAll($0)",
+                        column.getEditorField().getElement());
             }
         });
     }
