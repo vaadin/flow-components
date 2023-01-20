@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.shared;
 
+import java.io.Serializable;
 import java.util.AbstractSet;
 import java.util.Iterator;
 import com.vaadin.flow.component.HasStyle;
@@ -57,7 +58,7 @@ public class InternalOverlayClassListProxy extends AbstractSet<String>
         return result;
     }
 
-    private class IteratorProxy implements Iterator<String> {
+    private class IteratorProxy implements Serializable, Iterator<String> {
         private final Iterator<String> iterator;
 
         public IteratorProxy(Iterator<String> iterator) {
