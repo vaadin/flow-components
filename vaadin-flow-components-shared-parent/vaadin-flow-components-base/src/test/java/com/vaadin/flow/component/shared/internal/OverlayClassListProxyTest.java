@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.shared;
+package com.vaadin.flow.component.shared.internal;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,14 +11,14 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 
-public class InternalOverlayClassListProxyTest {
+public class OverlayClassListProxyTest {
     private TestComponent component;
-    private InternalOverlayClassListProxy proxy;
+    private OverlayClassListProxy proxy;
 
     @Before
     public void setup() {
         component = new TestComponent();
-        proxy = new InternalOverlayClassListProxy(component);
+        proxy = new OverlayClassListProxy(component);
     }
 
     @Test

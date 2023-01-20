@@ -39,7 +39,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.flow.component.shared.InternalOverlayClassListProxy;
+import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
 import com.vaadin.flow.dom.ClassList;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementConstants;
@@ -992,7 +992,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     @Override
     public ClassList getClassNames() {
-        return new InternalOverlayClassListProxy(this);
+        return new OverlayClassListProxy(this);
     }
 
     /**

@@ -23,7 +23,7 @@ import org.mockito.Mockito;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.shared.InternalOverlayClassListProxy;
+import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
 import com.vaadin.flow.server.VaadinSession;
 
 public class DialogHasStyleTest {
@@ -116,7 +116,7 @@ public class DialogHasStyleTest {
 
     @Test
     public void getClassNames_usesProxy() {
-        Assert.assertTrue(dialog
-                .getClassNames() instanceof InternalOverlayClassListProxy);
+        Assert.assertTrue(
+                dialog.getClassNames() instanceof OverlayClassListProxy);
     }
 }
