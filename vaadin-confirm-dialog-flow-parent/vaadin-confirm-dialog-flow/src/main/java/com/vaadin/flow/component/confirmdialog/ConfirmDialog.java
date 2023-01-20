@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.confirmdialog;
 
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -29,7 +28,9 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
 import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.dom.ClassList;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.internal.StateTree;
@@ -62,7 +63,6 @@ import com.vaadin.flow.shared.Registration;
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/confirm-dialog", version = "24.0.0-alpha11")
 @JsModule("@vaadin/confirm-dialog/src/vaadin-confirm-dialog.js")
-@JsModule("./confirmDialogConnector.js")
 public class ConfirmDialog extends Component
         implements HasSize, HasStyle, HasOrderedComponents {
 
@@ -149,6 +149,27 @@ public class ConfirmDialog extends Component
     }
 
     /**
+     * Sets the CSS class names of the dialog overlay element. This method
+     * overwrites any previous set class names.
+     *
+     * @param className
+     *            a space-separated string of class names to set, or
+     *            <code>null</code> to remove all class names
+     */
+    @Override
+    public void setClassName(String className) {
+        getClassNames().clear();
+        if (className != null) {
+            addClassNames(className.split(" "));
+        }
+    }
+
+    @Override
+    public ClassList getClassNames() {
+        return new OverlayClassListProxy(this);
+    }
+
+    /**
      * @throws UnsupportedOperationException
      *             ConfirmDialog does not support adding styles to overlay
      */
@@ -156,17 +177,6 @@ public class ConfirmDialog extends Component
     public Style getStyle() {
         throw new UnsupportedOperationException(
                 "ConfirmDialog does not support adding styles to overlay");
-    }
-
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-        initConnector();
-    }
-
-    private void initConnector() {
-        getElement().executeJs(
-                "window.Vaadin.Flow.confirmDialogConnector.initLazy(this)");
     }
 
     private boolean autoAddedToTheUi;
