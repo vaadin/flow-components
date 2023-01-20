@@ -21,8 +21,7 @@ public class StylingPage extends Div {
         addClassNameFoo.setId("add-foo");
 
         Button setClassNameBar = new Button("Set class bar", e -> {
-            dialog.setClassName("foo bar");
-            dialog.getClassNames().set("foo", false);
+            dialog.setClassName("bar");
         });
         setClassNameBar.setId("set-bar");
 
