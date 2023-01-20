@@ -14,17 +14,17 @@ import com.vaadin.flow.component.map.configuration.AbstractConfigurationObject;
  * Abstract base class for all map layers
  */
 public abstract class Layer extends AbstractConfigurationObject {
-    private float opacity = 1;
+    private double opacity = 1;
     private boolean visible = true;
     private Integer zIndex;
-    private Float minZoom;
-    private Float maxZoom;
+    private Double minZoom;
+    private Double maxZoom;
     private String background;
 
     /**
      * @return opacity of the layer
      */
-    public float getOpacity() {
+    public double getOpacity() {
         return opacity;
     }
 
@@ -35,7 +35,7 @@ public abstract class Layer extends AbstractConfigurationObject {
      * @param opacity
      *            new opacity of the layer
      */
-    public void setOpacity(float opacity) {
+    public void setOpacity(double opacity) {
         this.opacity = opacity;
         markAsDirty();
     }
@@ -83,7 +83,7 @@ public abstract class Layer extends AbstractConfigurationObject {
      * @return the minimum zoom level at which this layer will be visible, or
      *         null if not defined
      */
-    public Float getMinZoom() {
+    public Double getMinZoom() {
         return minZoom;
     }
 
@@ -93,7 +93,7 @@ public abstract class Layer extends AbstractConfigurationObject {
      * @param minZoom
      *            the new minimum zoom level, or null to remove it
      */
-    public void setMinZoom(Float minZoom) {
+    public void setMinZoom(Double minZoom) {
         this.minZoom = minZoom;
         markAsDirty();
     }
@@ -102,7 +102,7 @@ public abstract class Layer extends AbstractConfigurationObject {
      * @return the maximum zoom level at which this layer will be visible, or
      *         null if not defined
      */
-    public Float getMaxZoom() {
+    public Double getMaxZoom() {
         return maxZoom;
     }
 
@@ -112,7 +112,7 @@ public abstract class Layer extends AbstractConfigurationObject {
      * @param maxZoom
      *            the new maximum zoom level, or null to remove it
      */
-    public void setMaxZoom(Float maxZoom) {
+    public void setMaxZoom(Double maxZoom) {
         this.maxZoom = maxZoom;
         markAsDirty();
     }

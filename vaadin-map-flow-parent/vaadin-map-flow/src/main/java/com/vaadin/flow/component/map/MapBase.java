@@ -132,8 +132,8 @@ public abstract class MapBase extends Component implements HasSize, HasTheme {
         // move end event to update view state to the latest values received
         // from the client
         addViewMoveEndEventListener(event -> {
-            float rotation = event.getRotation();
-            float zoom = event.getZoom();
+            double rotation = event.getRotation();
+            double zoom = event.getZoom();
             Coordinate center = event.getCenter();
             Extent extent = event.getExtent();
             getView().updateInternalViewState(center, rotation, zoom, extent);
