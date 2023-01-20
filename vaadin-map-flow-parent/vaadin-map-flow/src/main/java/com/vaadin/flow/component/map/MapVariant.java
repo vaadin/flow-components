@@ -8,10 +8,12 @@
  */
 package com.vaadin.flow.component.map;
 
+import com.vaadin.flow.component.shared.ThemeVariant;
+
 /**
  * Set of theme variants applicable for the {@code vaadin-map} component.
  */
-public enum MapVariant {
+public enum MapVariant implements ThemeVariant {
     BORDERLESS("borderless");
 
     private final String variant;
