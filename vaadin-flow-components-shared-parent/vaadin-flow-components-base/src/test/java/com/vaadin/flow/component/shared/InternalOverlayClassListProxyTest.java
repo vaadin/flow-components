@@ -1,23 +1,24 @@
-package com.vaadin.flow.component.dialog;
-
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.Tag;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+package com.vaadin.flow.component.shared;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class OverlayClassListProxyTest {
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.Tag;
+
+public class InternalOverlayClassListProxyTest {
     private TestComponent component;
-    private Dialog.OverlayClassListProxy proxy;
+    private InternalOverlayClassListProxy proxy;
 
     @Before
     public void setup() {
         component = new TestComponent();
-        proxy = new Dialog.OverlayClassListProxy(component);
+        proxy = new InternalOverlayClassListProxy(component);
     }
 
     @Test
