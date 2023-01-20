@@ -159,7 +159,9 @@ public class ConfirmDialog extends Component
     @Override
     public void setClassName(String className) {
         getClassNames().clear();
-        getClassNames().add(className);
+        if (className != null) {
+            addClassNames(className.split(" "));
+        }
     }
 
     @Override
