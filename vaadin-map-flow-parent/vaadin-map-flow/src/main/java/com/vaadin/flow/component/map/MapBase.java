@@ -43,7 +43,8 @@ import java.util.stream.Stream;
  * out-of-the-box conveniences such as a pre-configured background layer, and a
  * feature layer.
  */
-public abstract class MapBase extends Component implements HasSize, HasTheme, HasStyle {
+public abstract class MapBase extends Component
+        implements HasSize, HasTheme, HasStyle {
     private final Configuration configuration;
     private final MapSerializer serializer;
 
