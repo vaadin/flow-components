@@ -90,6 +90,15 @@ public class DialogHasStyleTest {
     }
 
     @Test
+    public void setClassNameMultiple_dialogHasOverlayClass() {
+        dialog.setClassName("foo bar");
+        dialog.getClassNames().set("foo", false);
+
+        Assert.assertEquals(dialog.getElement().getProperty("overlayClass"),
+                "bar");
+    }
+
+    @Test
     public void addClassNames_dialogHasOverlayClass() {
         dialog.addClassNames("foo", "bar");
         Assert.assertEquals(dialog.getElement().getProperty("overlayClass"),

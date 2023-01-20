@@ -987,7 +987,9 @@ public class Dialog extends Component implements HasComponents, HasSize,
     @Override
     public void setClassName(String className) {
         getClassNames().clear();
-        getClassNames().add(className);
+        if (className != null) {
+            addClassNames(className.split(" "));
+        }
     }
 
     @Override

@@ -8,7 +8,7 @@ import org.mockito.Mockito;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.shared.InternalOverlayClassListProxy;
+import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
 import com.vaadin.flow.server.VaadinSession;
 
 public class ConfirmDialogHasStyleTest {
@@ -75,6 +75,15 @@ public class ConfirmDialogHasStyleTest {
     }
 
     @Test
+    public void setClassNameMultiple_dialogHasOverlayClass() {
+        dialog.setClassName("foo bar");
+        dialog.getClassNames().set("foo", false);
+
+        Assert.assertEquals(dialog.getElement().getProperty("overlayClass"),
+                "bar");
+    }
+
+    @Test
     public void addClassNames_dialogHasOverlayClass() {
         dialog.addClassNames("foo", "bar");
         Assert.assertEquals(dialog.getElement().getProperty("overlayClass"),
@@ -101,7 +110,7 @@ public class ConfirmDialogHasStyleTest {
 
     @Test
     public void getClassNames_usesProxy() {
-        Assert.assertTrue(dialog
-                .getClassNames() instanceof InternalOverlayClassListProxy);
+        Assert.assertTrue(
+                dialog.getClassNames() instanceof OverlayClassListProxy);
     }
 }
