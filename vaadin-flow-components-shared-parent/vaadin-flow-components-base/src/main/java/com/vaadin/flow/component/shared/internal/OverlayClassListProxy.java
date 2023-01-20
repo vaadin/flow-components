@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.shared;
+package com.vaadin.flow.component.shared.internal;
 
 import java.io.Serializable;
 import java.util.AbstractSet;
@@ -26,12 +26,12 @@ import com.vaadin.flow.dom.ClassList;
  * to overlay only components that support {@link HasStyle}, such as
  * {@link Dialog}. Not intended to be used publicly.
  */
-public class InternalOverlayClassListProxy extends AbstractSet<String>
+public class OverlayClassListProxy extends AbstractSet<String>
         implements ClassList {
     private final HasStyle hasStyle;
     private final ClassList classList;
 
-    public InternalOverlayClassListProxy(HasStyle hasStyle) {
+    public OverlayClassListProxy(HasStyle hasStyle) {
         this.hasStyle = hasStyle;
         this.classList = hasStyle.getElement().getClassList();
     }
