@@ -8,6 +8,6 @@ public class DialogSerializableTest extends ClassesSerializableTest {
     @Override
     protected Stream<String> getExcludedPatterns() {
         return Stream.concat(super.getExcludedPatterns(), Stream.of(
-                "com\\.vaadin\\.flow\\.component\\.dialog\\.Dialog\\$OverlayClassListProxy\\$IteratorProxy"));
+                "com\\.vaadin\\.flow\\.component\\.shared\\.InternalOverlayClassListProxy\\$IteratorProxy"));
     }
 }
