@@ -13,7 +13,6 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.map.configuration.AbstractConfigurationObject;
 import com.vaadin.flow.component.map.configuration.Configuration;
 import com.vaadin.flow.component.map.configuration.Coordinate;
@@ -25,6 +24,7 @@ import com.vaadin.flow.component.map.events.MapFeatureClickEvent;
 import com.vaadin.flow.component.map.events.MapClickEvent;
 import com.vaadin.flow.component.map.events.MapViewMoveEndEvent;
 import com.vaadin.flow.component.map.serialization.MapSerializer;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
 import elemental.json.JsonValue;
@@ -44,7 +44,7 @@ import java.util.stream.Stream;
  * feature layer.
  */
 public abstract class MapBase extends Component
-        implements HasSize, HasTheme, HasStyle {
+        implements HasSize, HasStyle, HasThemeVariant<MapVariant> {
     private final Configuration configuration;
     private final MapSerializer serializer;
 
@@ -208,27 +208,5 @@ public abstract class MapBase extends Component
     public Registration addFeatureClickListener(
             ComponentEventListener<MapFeatureClickEvent> listener) {
         return addListener(MapFeatureClickEvent.class, listener);
-    }
-
-    /**
-     * Adds theme variants to the component.
-     *
-     * @param variants
-     *            theme variants to add
-     */
-    public void addThemeVariants(MapVariant... variants) {
-        getThemeNames().addAll(Stream.of(variants)
-                .map(MapVariant::getVariantName).collect(Collectors.toList()));
-    }
-
-    /**
-     * Removes theme variants from the component.
-     *
-     * @param variants
-     *            theme variants to remove
-     */
-    public void removeThemeVariants(MapVariant... variants) {
-        getThemeNames().removeAll(Stream.of(variants)
-                .map(MapVariant::getVariantName).collect(Collectors.toList()));
     }
 }
