@@ -16,8 +16,10 @@
 package com.vaadin.flow.component.dialog;
 
 import java.io.Serializable;
+import java.util.AbstractSet;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -39,6 +41,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.dom.ClassList;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementConstants;
 import com.vaadin.flow.dom.ElementDetachListener;
@@ -78,7 +81,6 @@ import com.vaadin.flow.shared.Registration;
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/dialog", version = "24.0.0-alpha11")
 @JsModule("@vaadin/dialog/src/vaadin-dialog.js")
-@JsModule("./dialogConnector.js")
 @JsModule("./flow-component-renderer.js")
 public class Dialog extends Component implements HasComponents, HasSize,
         HasStyle, HasThemeVariant<DialogVariant> {
@@ -908,7 +910,6 @@ public class Dialog extends Component implements HasComponents, HasSize,
         // as the locator is stored inside component's attributes, no need to
         // remove the data as it should live as long as the component does
         Shortcuts.setShortcutListenOnElement(OVERLAY_LOCATOR_JS, this);
-        initConnector();
         initHeaderFooterRenderer();
         updateVirtualChildNodeIds();
     }
@@ -940,11 +941,6 @@ public class Dialog extends Component implements HasComponents, HasSize,
     protected void setAriaLabel(String ariaLabel) {
         getElement().setProperty("ariaLabel",
                 ariaLabel == null ? "" : ariaLabel);
-    }
-
-    private void initConnector() {
-        getElement()
-                .executeJs("window.Vaadin.Flow.dialogConnector.initLazy(this)");
     }
 
     private void initHeaderFooterRenderer() {
@@ -982,6 +978,25 @@ public class Dialog extends Component implements HasComponents, HasSize,
     }
 
     /**
+     * Sets the CSS class names of the dialog overlay element. This method
+     * overwrites any previous set class names.
+     *
+     * @param className
+     *            a space-separated string of class names to set, or
+     *            <code>null</code> to remove all class names
+     */
+    @Override
+    public void setClassName(String className) {
+        getClassNames().clear();
+        getClassNames().add(className);
+    }
+
+    @Override
+    public ClassList getClassNames() {
+        return new OverlayClassListProxy(this);
+    }
+
+    /**
      * @throws UnsupportedOperationException
      *             Dialog does not support adding styles to overlay
      */
@@ -991,4 +1006,60 @@ public class Dialog extends Component implements HasComponents, HasSize,
                 "Dialog does not support adding styles to overlay");
     }
 
+    static class OverlayClassListProxy extends AbstractSet<String>
+            implements ClassList {
+        private final HasStyle hasStyle;
+        private final ClassList classList;
+
+        public OverlayClassListProxy(HasStyle hasStyle) {
+            this.hasStyle = hasStyle;
+            this.classList = hasStyle.getElement().getClassList();
+        }
+
+        private void updateOverlayClass() {
+            hasStyle.getElement().setProperty("overlayClass",
+                    hasStyle.getClassName());
+        }
+
+        @Override
+        public Iterator<String> iterator() {
+            return new IteratorProxy(classList.iterator());
+        }
+
+        @Override
+        public int size() {
+            return classList.size();
+        }
+
+        @Override
+        public boolean add(String s) {
+            boolean result = classList.add(s);
+            updateOverlayClass();
+            return result;
+        }
+
+        private class IteratorProxy implements Iterator<String> {
+            private final Iterator<String> iterator;
+
+            public IteratorProxy(Iterator<String> iterator) {
+                this.iterator = iterator;
+            }
+
+            @Override
+            public boolean hasNext() {
+                return iterator.hasNext();
+            }
+
+            @Override
+            public String next() {
+                return iterator.next();
+            }
+
+            @Override
+            public void remove() {
+                iterator.remove();
+                updateOverlayClass();
+            }
+        }
+    }
 }
