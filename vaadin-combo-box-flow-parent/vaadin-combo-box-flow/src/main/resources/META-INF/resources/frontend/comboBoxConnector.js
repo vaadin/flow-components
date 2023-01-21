@@ -54,7 +54,9 @@ import { createRangeDataProvider } from '@vaadin/combo-box/src/vaadin-combo-box-
             }
           },
           {
-            maxRangeSize: 10
+            maxRangeSize(pageSize) {
+              return Math.max(pageSize * 2, 500) / pageSize;
+            }
           }
         );
 
