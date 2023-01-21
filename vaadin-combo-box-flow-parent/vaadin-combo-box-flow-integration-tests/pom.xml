@@ -153,6 +153,29 @@
                     <skip>true</skip>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>clone-web-components</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>git</executable>
+                            <arguments>
+                                <argument>clone</argument>
+                                <argument>-b</argument>
+                                <argument>feat/range-data-provider</argument>
+                                <argument>git@github.com:vaadin/web-components.git</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
     <profiles>

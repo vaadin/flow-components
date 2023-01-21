@@ -1,9 +1,6 @@
 {
   "name": "no-name",
   "license": "UNLICENSED",
-  "scripts": {
-    "preinstall": "git clone -b feat/range-data-provider --single-branch git@github.com:vaadin/web-components.git"
-  },
   "dependencies": {
     "@polymer/polymer": "3.5.1",
     "@vaadin/button": "24.0.0-alpha11",
