@@ -1,7 +1,7 @@
 import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
 import { timeOut } from '@polymer/polymer/lib/utils/async.js';
 import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-placeholder.js';
-import { createRangeDataProvider } from '@vaadin/combo-box/src/vaadin-combo-box-range-data-provider.js';
+import { createRangeDataProvider } from './vaadin-combo-box-range-data-provider.js';
 
 (function () {
   const tryCatchWrapper = function (callback) {
