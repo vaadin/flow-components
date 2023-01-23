@@ -75,4 +75,11 @@ public class FeatureLayer extends VectorLayer {
     public void removeFeature(Feature feature) {
         this.getSource().removeFeature(feature);
     }
+
+    /**
+     * Removes all features from the layer
+     */
+    public void removeAllFeatures() {
+        this.getSource().removeAllFeatures();
+    }
 }
