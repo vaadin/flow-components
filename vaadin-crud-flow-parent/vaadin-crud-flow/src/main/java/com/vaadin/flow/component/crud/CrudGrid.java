@@ -11,6 +11,7 @@ package com.vaadin.flow.component.crud;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.HeaderRow;
+import com.vaadin.flow.component.grid.dataview.GridDataView;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -135,20 +136,19 @@ public class CrudGrid<E> extends Grid<E> {
      *             CrudFilter&gt;
      */
     @Override
-    public void setDataProvider(DataProvider<E, ?> dataProvider)
-            throws IllegalArgumentException {
+    public GridDataView<E> setItems(DataProvider<E, Void> dataProvider) {
         // Attempt a cast to ensure that the captured ? is actually a CrudFilter
         // Unfortunately this cannot be enforced by the compiler
         try {
-            ConfigurableFilterDataProvider<E, Void, CrudFilter> provider = ((DataProvider<E, CrudFilter>) dataProvider)
+            ConfigurableFilterDataProvider provider = dataProvider
                     .withConfigurableFilter();
 
             provider.setFilter(filter);
 
-            super.setDataProvider(provider);
-
             // Keep a reference to the original data provider being wrapped
             this.dataProvider = dataProvider;
+
+            return super.setItems(provider);
         } catch (ClassCastException ex) {
             throw new IllegalArgumentException("DataProvider<"
                     + beanType.getSimpleName() + ", CrudFilter> expected", ex);

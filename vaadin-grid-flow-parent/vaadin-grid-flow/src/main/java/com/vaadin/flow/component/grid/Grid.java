@@ -2420,15 +2420,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         return -1;
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @deprecated use instead one of the {@code setItems} methods which provide
-     *             access to either {@link GridListDataView} or
-     *             {@link GridLazyDataView}
-     */
-    @Deprecated
-    public void setDataProvider(DataProvider<T, ?> dataProvider) {
+    protected void setDataProvider(DataProvider<T, ?> dataProvider) {
         Objects.requireNonNull(dataProvider, "data provider cannot be null");
         handleDataProviderChange(dataProvider);
 
@@ -3997,7 +3989,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *
      * Default implementation closes the editor if it's opened.
      *
-     * @see #setDataProvider(DataProvider)
      * @see DataChangeEvent
      * @see DataProviderListener
      *

@@ -40,7 +40,7 @@ public class GridEditorRefreshPage extends Div {
 
         ListDataProvider<Person> dataProvider = new ListDataProvider<>(
                 Collections.singletonList(person));
-        grid.setDataProvider(dataProvider);
+        grid.setItems(dataProvider);
 
         Column<Person> nameColumn = grid.addColumn(Person::getFirstName)
                 .setHeader("Name");

@@ -41,7 +41,7 @@ public class CustomSearchView extends VerticalLayout {
         ConfigurableFilterDataProvider<Person, Void, String> filterableDataProvider = dataProvider
                 .withConfigurableFilter();
 
-        grid.setDataProvider(filterableDataProvider);
+        grid.setItems(filterableDataProvider);
         crud.addNewListener(e -> data.add(e.getItem()));
 
         final TextField searchBar = new TextField();

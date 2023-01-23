@@ -51,7 +51,7 @@ public class GridTest {
         DataProvider<String, Void> dataProvider = DataProvider.fromCallbacks(
                 query -> Arrays.asList("one").stream(), query -> 1);
 
-        grid.setDataProvider(dataProvider);
+        grid.setItems(dataProvider);
 
         grid.getListDataView();
     }

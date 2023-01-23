@@ -33,7 +33,7 @@ public class RefreshAndMakeVisibleGridPage extends Div {
     public RefreshAndMakeVisibleGridPage() {
         grid = new Grid<>();
         dataProvider = new ListDataProvider<>(new ArrayList<>());
-        grid.setDataProvider(dataProvider);
+        grid.setItems(dataProvider);
         grid.setVisible(false);
         grid.addColumn(ValueProvider.identity()).setHeader("Name");
 

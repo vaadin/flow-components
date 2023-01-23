@@ -6,6 +6,7 @@ import com.vaadin.flow.component.crud.CrudEditorPosition;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.router.Route;
 
 @Route(value = "vaadin-crud/editorposition")
@@ -18,7 +19,7 @@ public class EditorPositionView extends VerticalLayout {
 
         PersonCrudDataProvider dataProvider = new PersonCrudDataProvider();
 
-        grid.setDataProvider(dataProvider);
+        grid.setItems((DataProvider) dataProvider);
         crud.addSaveListener(e -> dataProvider.persist(e.getItem()));
         crud.addDeleteListener(e -> dataProvider.delete(e.getItem()));
 
