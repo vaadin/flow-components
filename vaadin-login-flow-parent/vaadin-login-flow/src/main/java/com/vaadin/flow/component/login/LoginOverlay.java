@@ -232,7 +232,7 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
     }
 
     /**
-     * Sets the CSS class names of the dialog overlay element. This method
+     * Sets the CSS class names of the login overlay element. This method
      * overwrites any previous set class names.
      *
      * @param className
