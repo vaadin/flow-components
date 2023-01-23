@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.login;
 
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Synchronize;
@@ -23,7 +22,9 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
 import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.dom.ClassList;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.router.NavigationTrigger;
@@ -46,7 +47,6 @@ import com.vaadin.flow.shared.Registration;
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/login", version = "24.0.0-alpha12")
 @JsModule("@vaadin/login/src/vaadin-login-overlay.js")
-@JsModule("./loginOverlayConnector.js")
 public class LoginOverlay extends AbstractLogin implements HasStyle {
 
     private Component title;
@@ -232,6 +232,27 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
     }
 
     /**
+     * Sets the CSS class names of the dialog overlay element. This method
+     * overwrites any previous set class names.
+     *
+     * @param className
+     *            a space-separated string of class names to set, or
+     *            <code>null</code> to remove all class names
+     */
+    @Override
+    public void setClassName(String className) {
+        getClassNames().clear();
+        if (className != null) {
+            addClassNames(className.split(" "));
+        }
+    }
+
+    @Override
+    public ClassList getClassNames() {
+        return new OverlayClassListProxy(this);
+    }
+
+    /**
      * @throws UnsupportedOperationException
      *             LoginOverlay does not support adding styles to overlay
      *             wrapper
@@ -240,16 +261,5 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
     public Style getStyle() {
         throw new UnsupportedOperationException(
                 "LoginOverlay does not support adding styles to overlay wrapper");
-    }
-
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-        initConnector();
-    }
-
-    private void initConnector() {
-        getElement().executeJs(
-                "window.Vaadin.Flow.loginOverlayConnector.initLazy(this)");
     }
 }
