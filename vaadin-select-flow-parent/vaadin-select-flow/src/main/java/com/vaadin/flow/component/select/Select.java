@@ -506,15 +506,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
         setItems(DataProvider.fromStream(streamOfItems));
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @deprecated use instead one of the {@code setItems} methods which provide
-     *             access to either {@link SelectListDataView} or
-     *             {@link SelectDataView}
-     */
-    @Deprecated
-    public void setDataProvider(DataProvider<T, ?> dataProvider) {
+    private void setDataProvider(DataProvider<T, ?> dataProvider) {
         this.dataProvider.set(dataProvider);
         DataViewUtils.removeComponentFilterAndSortComparator(this);
         reset();
