@@ -40,8 +40,8 @@ public class MapEventsIT extends AbstractComponentIT {
         String[] parts = viewStateDiv.getText().split(";");
         double centerX = Double.parseDouble(parts[0]);
         double centerY = Double.parseDouble(parts[1]);
-        float rotation = Float.parseFloat(parts[2]);
-        float zoom = Float.parseFloat(parts[3]);
+        double rotation = Double.parseDouble(parts[2]);
+        double zoom = Double.parseDouble(parts[3]);
 
         Assert.assertEquals(43.5627725, centerX, 0.1);
         Assert.assertEquals(44.1428164, centerY, 0.1);
@@ -63,8 +63,8 @@ public class MapEventsIT extends AbstractComponentIT {
         String[] parts = eventDataDiv.getText().split(";");
         double centerX = Double.parseDouble(parts[0]);
         double centerY = Double.parseDouble(parts[1]);
-        float rotation = Float.parseFloat(parts[2]);
-        float zoom = Float.parseFloat(parts[3]);
+        double rotation = Double.parseDouble(parts[2]);
+        double zoom = Double.parseDouble(parts[3]);
 
         Assert.assertEquals(43.5627725, centerX, 0.1);
         Assert.assertEquals(44.1428164, centerY, 0.1);

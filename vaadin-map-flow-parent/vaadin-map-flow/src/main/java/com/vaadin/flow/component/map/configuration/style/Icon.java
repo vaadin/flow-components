@@ -216,8 +216,8 @@ public class Icon extends ImageStyle {
     }
 
     public static class Anchor implements Serializable {
-        private double x = 0.5f;
-        private double y = 0.5f;
+        private double x = 0.5;
+        private double y = 0.5;
 
         public double getX() {
             return x;
