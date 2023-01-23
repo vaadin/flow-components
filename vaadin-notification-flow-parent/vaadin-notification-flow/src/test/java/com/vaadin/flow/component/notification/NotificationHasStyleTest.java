@@ -22,7 +22,6 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
 import com.vaadin.flow.server.VaadinSession;
 

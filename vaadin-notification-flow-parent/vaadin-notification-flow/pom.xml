@@ -40,11 +40,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>flow-html-components</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
             <scope>test</scope>

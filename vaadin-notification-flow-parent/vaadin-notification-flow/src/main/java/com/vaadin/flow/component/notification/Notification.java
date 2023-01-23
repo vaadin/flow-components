@@ -599,7 +599,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
     }
 
     /**
-     * Sets the CSS class names of the dialog overlay element. This method
+     * Sets the CSS class names of the notification overlay element. This method
      * overwrites any previous set class names.
      *
      * @param className
