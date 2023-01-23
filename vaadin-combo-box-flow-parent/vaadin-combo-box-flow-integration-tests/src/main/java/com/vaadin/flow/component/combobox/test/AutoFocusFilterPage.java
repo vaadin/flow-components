@@ -34,12 +34,14 @@ public class AutoFocusFilterPage extends Div {
         comboBox.setItems((query) -> {
             if (query.getFilter().isEmpty())
                 return Stream.of("");
-            return data.stream().filter(s -> s.contains(query.getFilter().get())).skip(query.getOffset())
-                    .limit(query.getLimit());
+            return data.stream()
+                    .filter(s -> s.contains(query.getFilter().get()))
+                    .skip(query.getOffset()).limit(query.getLimit());
         }, (query) -> {
             if (query.getFilter().isEmpty())
                 return 1;
-            return (int) data.stream().filter(s -> s.contains(query.getFilter().get())).count();
+            return (int) data.stream()
+                    .filter(s -> s.contains(query.getFilter().get())).count();
         });
 
         comboBox.setAutofocus(true);

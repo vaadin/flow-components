@@ -120,8 +120,7 @@ public class LazyLoadingPage extends Div {
         addTitle("ListDataProvider with custom page size 180");
         ComboBox<String> comboBox = new ComboBox<>(180);
         comboBox.setId("pagesize");
-        comboBox.setItems(
-                DataProvider.ofCollection(generateStrings(1000)));
+        comboBox.setItems(DataProvider.ofCollection(generateStrings(1000)));
 
         NativeButton pageSizeButton = new NativeButton("set pagesize 100",
                 e -> comboBox.setPageSize(100));
@@ -201,9 +200,8 @@ public class LazyLoadingPage extends Div {
                     new Label("Born: " + person.getBorn()));
         }));
 
-        comboBox.setItems((person, filter) -> String
-                .valueOf(person.getBorn()).startsWith(filter),
-                personDataProvider);
+        comboBox.setItems((person, filter) -> String.valueOf(person.getBorn())
+                .startsWith(filter), personDataProvider);
         add(comboBox);
     }
 
@@ -238,8 +236,7 @@ public class LazyLoadingPage extends Div {
         comboBoxInATemplate.setId("template");
         ComboBox<String> comboBox = comboBoxInATemplate.getComboBox();
 
-        comboBox.setItems(
-                DataProvider.ofCollection(generateStrings(1000)));
+        comboBox.setItems(DataProvider.ofCollection(generateStrings(1000)));
         comboBox.addValueChangeListener(e -> message.setText(e.getValue()));
 
         add(comboBoxInATemplate);
@@ -254,8 +251,7 @@ public class LazyLoadingPage extends Div {
         CallbackDataProvider.FetchCallback<String, String> fetch = query -> items
                 .stream().limit(query.getLimit()).skip(query.getOffset());
         CallbackDataProvider.CountCallback<String, String> count = query -> 0;
-        comboBox.setItems(
-                DataProvider.fromFilteringCallbacks(fetch, count));
+        comboBox.setItems(DataProvider.fromFilteringCallbacks(fetch, count));
 
         add(comboBox);
     }

@@ -361,8 +361,8 @@ public class ComboBoxDemoPage extends VerticalLayout {
          * should provide the number of items that match the query.
          */
         comboBox.setItems((query) -> IntStream
-                .range(query.getOffset(), query.getOffset() + query.getLimit()).mapToObj(i -> "Item " + i),
-                filter -> 500);
+                .range(query.getOffset(), query.getOffset() + query.getLimit())
+                .mapToObj(i -> "Item " + i), filter -> 500);
 
         comboBox.setId("callback-box");
         add(new Div(new H2("Lazy Loading"),

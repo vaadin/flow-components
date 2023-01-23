@@ -274,7 +274,8 @@ public abstract class ComboBoxBaseTest {
                     }
                 });
 
-        comboBox.setItemsWithFilterConverter(dataProvider::fetch, filter -> null);
+        comboBox.setItemsWithFilterConverter(dataProvider::fetch,
+                filter -> null);
 
         // Verify that the data communicator and data provider have been created
         Assert.assertNotNull(
@@ -295,7 +296,8 @@ public abstract class ComboBoxBaseTest {
         DataProvider<String, Void> dataProvider = Mockito.spy(DataProvider
                 .fromCallbacks(query -> Stream.empty(), query -> 0));
 
-        comboBox.setItemsWithFilterConverter(dataProvider::fetch, filter -> null);
+        comboBox.setItemsWithFilterConverter(dataProvider::fetch,
+                filter -> null);
         // Verify that the data communicator and data provider have been created
         Assert.assertNotNull(
                 "Data Communicator and Data Provider should be created "

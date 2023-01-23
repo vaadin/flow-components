@@ -100,14 +100,14 @@ public class FilteringPage extends Div {
                 }, query -> {
                     return 1;
                 });
-        comboBoxWithFilterableDataProvider
-                .setItems(dataProviderWithFiltering);
+        comboBoxWithFilterableDataProvider.setItems(dataProviderWithFiltering);
         add(new Div(), comboBoxWithFilterableDataProvider);
 
         ComboBox<String> comboBoxWithEmptyFilterReturnsNone = new ComboBox<>();
         comboBoxWithEmptyFilterReturnsNone.setItems(
                 (query) -> IntStream
-                        .range(query.getOffset(), query.getOffset() + query.getLimit())
+                        .range(query.getOffset(),
+                                query.getOffset() + query.getLimit())
                         .mapToObj(i -> "Item " + i),
                 query -> query.getFilter().isEmpty() ? 0 : 1);
         comboBoxWithEmptyFilterReturnsNone.setId("empty-filter-returns-none");
