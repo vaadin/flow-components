@@ -21,8 +21,8 @@ import java.util.Objects;
 public class View extends AbstractConfigurationObject {
 
     private Coordinate center;
-    private float rotation;
-    private float zoom;
+    private double rotation;
+    private double zoom;
     private Extent extent;
     private final String projection;
 
@@ -94,7 +94,7 @@ public class View extends AbstractConfigurationObject {
      *
      * @return current rotation in radians
      */
-    public float getRotation() {
+    public double getRotation() {
         return rotation;
     }
 
@@ -104,7 +104,7 @@ public class View extends AbstractConfigurationObject {
      * @param rotation
      *            the rotation in radians format
      */
-    public void setRotation(float rotation) {
+    public void setRotation(double rotation) {
         this.rotation = rotation;
         markAsDirty();
     }
@@ -114,7 +114,7 @@ public class View extends AbstractConfigurationObject {
      *
      * @return current zoom level
      */
-    public float getZoom() {
+    public double getZoom() {
         return zoom;
     }
 
@@ -129,7 +129,7 @@ public class View extends AbstractConfigurationObject {
      * @param zoom
      *            new zoom level
      */
-    public void setZoom(float zoom) {
+    public void setZoom(double zoom) {
         this.zoom = zoom;
         markAsDirty();
     }
@@ -173,8 +173,8 @@ public class View extends AbstractConfigurationObject {
      * @param extent
      *            the updated extent
      */
-    public void updateInternalViewState(Coordinate center, float rotation,
-            float zoom, Extent extent) {
+    public void updateInternalViewState(Coordinate center, double rotation,
+            double zoom, Extent extent) {
         update(() -> {
             this.center = center;
             this.rotation = rotation;

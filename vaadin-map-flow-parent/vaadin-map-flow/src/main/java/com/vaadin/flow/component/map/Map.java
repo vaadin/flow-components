@@ -299,7 +299,7 @@ public class Map extends MapBase {
      *
      * @return current zoom level
      */
-    public float getZoom() {
+    public double getZoom() {
         return getView().getZoom();
     }
 
@@ -318,7 +318,7 @@ public class Map extends MapBase {
      * @param zoom
      *            new zoom level
      */
-    public void setZoom(float zoom) {
+    public void setZoom(double zoom) {
         getView().setZoom(zoom);
     }
 }

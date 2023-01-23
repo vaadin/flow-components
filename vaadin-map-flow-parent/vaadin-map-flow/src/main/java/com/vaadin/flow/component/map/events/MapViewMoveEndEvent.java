@@ -23,8 +23,8 @@ import elemental.json.JsonArray;
 @DomEvent("map-view-moveend")
 public class MapViewMoveEndEvent extends ComponentEvent<MapBase> {
 
-    private final float rotation;
-    private final float zoom;
+    private final double rotation;
+    private final double zoom;
     private final Coordinate center;
     private final Extent extent;
 
@@ -34,8 +34,8 @@ public class MapViewMoveEndEvent extends ComponentEvent<MapBase> {
             @EventData("event.detail.center") JsonArray center,
             @EventData("event.detail.extent") JsonArray extent) {
         super(source, fromClient);
-        this.rotation = (float) rotation;
-        this.zoom = (float) zoom;
+        this.rotation = (double) rotation;
+        this.zoom = (double) zoom;
         this.center = MapEventUtil.getCoordinate(center);
         this.extent = MapEventUtil.getExtent(extent);
     }
@@ -45,7 +45,7 @@ public class MapViewMoveEndEvent extends ComponentEvent<MapBase> {
      *
      * @return updated rotation in radians
      */
-    public float getRotation() {
+    public double getRotation() {
         return rotation;
     }
 
@@ -54,7 +54,7 @@ public class MapViewMoveEndEvent extends ComponentEvent<MapBase> {
      *
      * @return updated zoom level
      */
-    public float getZoom() {
+    public double getZoom() {
         return zoom;
     }
 

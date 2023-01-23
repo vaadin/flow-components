@@ -14,7 +14,7 @@ import com.vaadin.flow.component.map.configuration.Constants;
 public class Stroke extends AbstractConfigurationObject {
 
     private String color;
-    private float width;
+    private double width;
 
     @Override
     public String getType() {
@@ -30,11 +30,11 @@ public class Stroke extends AbstractConfigurationObject {
         markAsDirty();
     }
 
-    public float getWidth() {
+    public double getWidth() {
         return width;
     }
 
-    public void setWidth(float width) {
+    public void setWidth(double width) {
         this.width = width;
         markAsDirty();
     }
