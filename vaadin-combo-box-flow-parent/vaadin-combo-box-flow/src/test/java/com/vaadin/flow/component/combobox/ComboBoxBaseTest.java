@@ -218,7 +218,7 @@ public abstract class ComboBoxBaseTest {
     public void setNullDataProvider_throws() {
         ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
         DataProvider<String, String> dp = null;
-        comboBox.setDataProvider(dp);
+        comboBox.setItems(dp);
     }
 
     @Test(expected = NullPointerException.class)
@@ -274,7 +274,7 @@ public abstract class ComboBoxBaseTest {
                     }
                 });
 
-        comboBox.setDataProvider(dataProvider, filter -> null);
+        comboBox.setItemsWithFilterConverter(dataProvider::fetch, filter -> null);
 
         // Verify that the data communicator and data provider have been created
         Assert.assertNotNull(
@@ -295,7 +295,7 @@ public abstract class ComboBoxBaseTest {
         DataProvider<String, Void> dataProvider = Mockito.spy(DataProvider
                 .fromCallbacks(query -> Stream.empty(), query -> 0));
 
-        comboBox.setDataProvider(dataProvider, filter -> null);
+        comboBox.setItemsWithFilterConverter(dataProvider::fetch, filter -> null);
         // Verify that the data communicator and data provider have been created
         Assert.assertNotNull(
                 "Data Communicator and Data Provider should be created "

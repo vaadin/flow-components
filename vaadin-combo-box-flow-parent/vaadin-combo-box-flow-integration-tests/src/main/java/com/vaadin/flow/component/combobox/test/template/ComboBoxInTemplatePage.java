@@ -42,7 +42,7 @@ public class ComboBoxInTemplatePage extends Div {
     }
 
     private void initCombo(ComboBox<String> combo) {
-        combo.setDataProvider(
+        combo.setItems(
                 new ListDataProvider<>(Arrays.asList("1", "2", "3")));
         combo.setValue("1");
         combo.addValueChangeListener(e -> {

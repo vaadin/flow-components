@@ -45,7 +45,7 @@ public class FilteringPage extends Div {
 
         List<String> items = LazyLoadingPage.generateStrings(40);
         ListDataProvider<String> dp = DataProvider.ofCollection(items);
-        comboBox.setDataProvider(dp);
+        comboBox.setItems(dp);
 
         comboBox.addValueChangeListener(e -> message.setText(e.getValue()));
 
@@ -75,7 +75,7 @@ public class FilteringPage extends Div {
         add(comboBox, addButton, removeButton, itemFilterButton);
 
         ComboBox<String> pageSizeBox = new ComboBox<>(60);
-        pageSizeBox.setDataProvider(dp);
+        pageSizeBox.setItems(dp);
         pageSizeBox.setLabel("Page size 60");
         pageSizeBox.setId("page-size-60");
         add(new Div(), pageSizeBox);
@@ -101,15 +101,15 @@ public class FilteringPage extends Div {
                     return 1;
                 });
         comboBoxWithFilterableDataProvider
-                .setDataProvider(dataProviderWithFiltering);
+                .setItems(dataProviderWithFiltering);
         add(new Div(), comboBoxWithFilterableDataProvider);
 
         ComboBox<String> comboBoxWithEmptyFilterReturnsNone = new ComboBox<>();
-        comboBoxWithEmptyFilterReturnsNone.setDataProvider(
-                (filter, offset, limit) -> IntStream
-                        .range(offset, offset + limit)
+        comboBoxWithEmptyFilterReturnsNone.setItems(
+                (query) -> IntStream
+                        .range(query.getOffset(), query.getOffset() + query.getLimit())
                         .mapToObj(i -> "Item " + i),
-                filter -> filter.isEmpty() ? 0 : 1);
+                query -> query.getFilter().isEmpty() ? 0 : 1);
         comboBoxWithEmptyFilterReturnsNone.setId("empty-filter-returns-none");
         add(new Div(), comboBoxWithEmptyFilterReturnsNone);
 

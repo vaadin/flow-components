@@ -360,8 +360,8 @@ public class ComboBoxDemoPage extends VerticalLayout {
          * items from the given range with the given filter. The second callback
          * should provide the number of items that match the query.
          */
-        comboBox.setDataProvider((filter, offset, limit) -> IntStream
-                .range(offset, offset + limit).mapToObj(i -> "Item " + i),
+        comboBox.setItems((query) -> IntStream
+                .range(query.getOffset(), query.getOffset() + query.getLimit()).mapToObj(i -> "Item " + i),
                 filter -> 500);
 
         comboBox.setId("callback-box");

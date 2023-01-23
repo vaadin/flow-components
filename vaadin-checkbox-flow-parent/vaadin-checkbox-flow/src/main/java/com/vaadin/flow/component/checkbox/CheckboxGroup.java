@@ -331,15 +331,7 @@ public class CheckboxGroup<T>
         setItems(DataProvider.fromStream(streamOfItems));
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @deprecated use instead one of the {@code setItems} methods which provide
-     *             access to either {@link CheckboxGroupListDataView} or
-     *             {@link CheckboxGroupDataView}
-     */
-    @Deprecated
-    public void setDataProvider(DataProvider<T, ?> dataProvider) {
+    private void setDataProvider(DataProvider<T, ?> dataProvider) {
         this.dataProvider.set(dataProvider);
         DataViewUtils.removeComponentFilterAndSortComparator(this);
         reset();
