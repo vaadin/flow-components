@@ -97,15 +97,7 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
                 presentationToModel, modelToPresentation);
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @deprecated use instead one of the {@code setItems} methods which provide
-     *             access to either {@link ListBoxListDataView} or
-     *             {@link ListBoxDataView}
-     */
-    @Deprecated
-    public void setDataProvider(DataProvider<ITEM, ?> dataProvider) {
+    private void setDataProvider(DataProvider<ITEM, ?> dataProvider) {
         this.dataProvider.set(Objects.requireNonNull(dataProvider));
         DataViewUtils.removeComponentFilterAndSortComparator(this);
         clear();
