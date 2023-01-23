@@ -37,6 +37,8 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
+import com.vaadin.flow.dom.ClassList;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementDetachListener;
 import com.vaadin.flow.dom.Style;
@@ -57,7 +59,6 @@ import com.vaadin.flow.shared.Registration;
 @NpmPackage(value = "@vaadin/notification", version = "24.0.0-alpha12")
 @JsModule("@vaadin/notification/src/vaadin-notification.js")
 @JsModule("./flow-component-renderer.js")
-@JsModule("./notificationConnector.js")
 public class Notification extends Component implements HasComponents, HasStyle,
         HasThemeVariant<NotificationVariant> {
 
@@ -575,7 +576,6 @@ public class Notification extends Component implements HasComponents, HasStyle,
         super.onAttach(attachEvent);
         getElement().executeJs(
                 "Vaadin.FlowComponentHost.patchVirtualContainer(this)");
-        initConnector();
         configureRenderer();
         updateVirtualChildNodeIds();
     }
@@ -598,9 +598,25 @@ public class Notification extends Component implements HasComponents, HasStyle,
         });
     }
 
-    private void initConnector() {
-        getElement().executeJs(
-                "window.Vaadin.Flow.notificationConnector.initLazy(this)");
+    /**
+     * Sets the CSS class names of the notification overlay element. This method
+     * overwrites any previous set class names.
+     *
+     * @param className
+     *            a space-separated string of class names to set, or
+     *            <code>null</code> to remove all class names
+     */
+    @Override
+    public void setClassName(String className) {
+        getClassNames().clear();
+        if (className != null) {
+            addClassNames(className.split(" "));
+        }
+    }
+
+    @Override
+    public ClassList getClassNames() {
+        return new OverlayClassListProxy(this);
     }
 
     /**
