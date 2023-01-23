@@ -52,9 +52,7 @@ import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.shared.Registration;
 
-@Tag("vaadin-date-time-picker-date-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha12")
-@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@Tag("vaadin-date-picker")
 class DateTimePickerDatePicker
         extends com.vaadin.flow.component.datepicker.DatePicker {
     @Override
@@ -79,9 +77,7 @@ class DateTimePickerDatePicker
     }
 }
 
-@Tag("vaadin-date-time-picker-time-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha12")
-@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@Tag("vaadin-time-picker")
 class DateTimePickerTimePicker
         extends com.vaadin.flow.component.timepicker.TimePicker {
     @Override
