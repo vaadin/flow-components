@@ -105,5 +105,6 @@ public abstract class Feature extends AbstractConfigurationObject {
      */
     public void setDraggable(boolean draggable) {
         this.draggable = draggable;
+        markAsDirty();
     }
 }
