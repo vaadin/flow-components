@@ -232,7 +232,7 @@ public abstract class AbstractConfigurationObject implements Serializable {
      * and mark the object as dirty. This can be useful to prevent change events
      * and resulting synchronizations when updating the server-side with state
      * from the client. See
-     * {@link View#updateInternalViewState(Coordinate, float, float, Extent)}
+     * {@link View#updateInternalViewState(Coordinate, double, double, Extent)}
      * for an example.
      *
      * @param updater

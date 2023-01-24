@@ -216,21 +216,21 @@ public class Icon extends ImageStyle {
     }
 
     public static class Anchor implements Serializable {
-        private float x = 0.5f;
-        private float y = 0.5f;
+        private double x = 0.5;
+        private double y = 0.5;
 
-        public float getX() {
+        public double getX() {
             return x;
         }
 
-        public float getY() {
+        public double getY() {
             return y;
         }
 
         public Anchor() {
         }
 
-        public Anchor(float x, float y) {
+        public Anchor(double x, double y) {
             this.x = x;
             this.y = y;
         }
