@@ -149,7 +149,8 @@ public abstract class MapBase extends Component
             double deltaY = event.getCoordinate().getY()
                     - event.getStartCoordinate().getY();
 
-            if (event.getFeature() != null && event.getFeature().getGeometry() != null) {
+            if (event.getFeature() != null
+                    && event.getFeature().getGeometry() != null) {
                 event.getFeature().getGeometry().translate(deltaX, deltaY);
             }
         });

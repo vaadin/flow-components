@@ -43,10 +43,8 @@ public class MapFeatureDragDropEvent extends ComponentEvent<Map> {
         this.layer = featureEventDetails.getLayer();
         this.vectorSource = featureEventDetails.getSource();
         this.feature = featureEventDetails.getFeature();
-        this.coordinate = new Coordinate(coordinate.get(0).asNumber(),
-                coordinate.get(1).asNumber());
-        this.startCoordinate = new Coordinate(startCoordinate.get(0).asNumber(),
-                startCoordinate.get(1).asNumber());
+        this.coordinate = MapEventUtil.getCoordinate(coordinate);
+        this.startCoordinate = MapEventUtil.getCoordinate(startCoordinate);
     }
 
     /**
@@ -70,10 +68,16 @@ public class MapFeatureDragDropEvent extends ComponentEvent<Map> {
         return vectorSource;
     }
 
+    /**
+     * The coordinates that the feature has been dragged to
+     */
     public Coordinate getCoordinate() {
         return coordinate;
     }
 
+    /**
+     * The coordinates that the feature has been dragged from
+     */
     public Coordinate getStartCoordinate() {
         return startCoordinate;
     }
