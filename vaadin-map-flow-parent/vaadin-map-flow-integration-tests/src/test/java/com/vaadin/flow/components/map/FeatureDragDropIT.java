@@ -31,7 +31,7 @@ public class FeatureDragDropIT extends AbstractComponentIT {
     }
 
     @Test
-    public void dragAndDropFeature_correctEventDataReceived() {
+    public void dragMarker_correctEventDataReceived() {
         // Drag and drop Nairobi marker to Cape Town
         MapElement.Coordinate nairobiCoordinates = new MapElement.Coordinate(
                 36.818104, -1.302283);
@@ -39,8 +39,7 @@ public class FeatureDragDropIT extends AbstractComponentIT {
                 18.417396, -33.928992);
 
         dragAndDrop(nairobiCoordinates, capeTownCoordinates);
-
-        waitUntil(driver -> !eventFeatureIdOutput.getText().isEmpty());
+        getCommandExecutor().waitForVaadin();
 
         // Verify correct marker was dragged
         Assert.assertEquals("nairobi-feature", eventFeatureIdOutput.getText());
@@ -68,15 +67,27 @@ public class FeatureDragDropIT extends AbstractComponentIT {
                 1);
 
         // Verify marker instance coordinates have been updated
-        // Using a large delta here to compensate for pixel -> coordinate
-        // conversion. For the most part, we just want to ensure that the
-        // underlying Openlayers drag and drop interaction was triggered.
         MapElement.Coordinate markerCoordinates = parseCoordinates(
                 markerCoordinatesOutput);
         Assert.assertEquals(capeTownCoordinates.getX(),
                 markerCoordinates.getX(), 1);
         Assert.assertEquals(capeTownCoordinates.getY(),
                 markerCoordinates.getY(), 1);
+    }
+
+    @Test
+    public void dragNonDraggableMarker_noDropEvent() {
+        // Drag from (non-draggable) Tunis marker to Cape Town
+        MapElement.Coordinate tunisCoordinates = new MapElement.Coordinate(
+                10.189819, 36.810109);
+        MapElement.Coordinate capeTownCoordinates = new MapElement.Coordinate(
+                18.417396, -33.928992);
+
+        dragAndDrop(tunisCoordinates, capeTownCoordinates);
+        getCommandExecutor().waitForVaadin();
+
+        // Should not have received drag drop event
+        Assert.assertEquals("", eventFeatureIdOutput.getText());
     }
 
     private void dragAndDrop(MapElement.Coordinate from,

@@ -11,12 +11,18 @@ public class FeatureDragDropPage extends Div {
     public FeatureDragDropPage() {
         Map map = new Map();
 
+        // Add draggable marker at Nairobi
         MarkerFeature nairobi = new MarkerFeature(
                 new Coordinate(36.818104, -1.302283));
         nairobi.setDraggable(true);
         nairobi.setId("nairobi-feature");
-
         map.getFeatureLayer().addFeature(nairobi);
+
+        // Add non-draggable marker at Tunis
+        MarkerFeature tunis = new MarkerFeature(
+                new Coordinate(10.189819, 36.810109));
+        tunis.setId("tunis-feature");
+        map.getFeatureLayer().addFeature(tunis);
 
         Span eventFeatureId = new Span();
         eventFeatureId.setId("event-feature-id");
