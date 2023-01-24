@@ -1,6 +1,7 @@
 package com.vaadin.flow.component.map;
 
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.feature.MarkerFeature;
 import com.vaadin.flow.router.Route;
@@ -10,21 +11,42 @@ public class FeatureDragDropPage extends Div {
     public FeatureDragDropPage() {
         Map map = new Map();
 
-        MarkerFeature berlin = new MarkerFeature(
-                new Coordinate(1491592.169957, 6893740.925498));
-        berlin.setDraggable(true);
-        MarkerFeature paris = new MarkerFeature(
-                new Coordinate(261260.284278, 6250950.865879));
+        MarkerFeature nairobi = new MarkerFeature(
+                new Coordinate(36.818104, -1.302283));
+        nairobi.setDraggable(true);
+        nairobi.setId("nairobi-feature");
 
-        map.getFeatureLayer().addFeature(berlin);
-        map.getFeatureLayer().addFeature(paris);
+        map.getFeatureLayer().addFeature(nairobi);
+
+        Span eventFeatureId = new Span();
+        eventFeatureId.setId("event-feature-id");
+        Span eventCoordinates = new Span();
+        eventCoordinates.setId("event-coordinates");
+        Span eventStartCoordinates = new Span();
+        eventStartCoordinates.setId("event-start-coordinates");
+        Span markerCoordinates = new Span();
+        markerCoordinates.setId("marker-coordinates");
 
         map.addFeatureDragDropListener(event -> {
-            System.out.println("Moved feature: " + "featureId="
-                    + event.getFeature().getId() + "; " + "coords="
-                    + ((MarkerFeature) event.getFeature()).getCoordinates());
+            eventFeatureId.setText(event.getFeature().getId());
+            eventCoordinates.setText(formatCoordinates(event.getCoordinate()));
+            eventStartCoordinates
+                    .setText(formatCoordinates(event.getStartCoordinate()));
+            markerCoordinates
+                    .setText(formatCoordinates(nairobi.getCoordinates()));
         });
 
         add(map);
+        add(new Div(new Span("Drag&Drop event - Feature ID: "),
+                eventFeatureId));
+        add(new Div(new Span("Drag&Drop event - Coordinates: "),
+                eventCoordinates));
+        add(new Div(new Span("Drag&Drop event - Start Coordinates: "),
+                eventStartCoordinates));
+        add(new Div(new Span("Marker Coordinates: "), markerCoordinates));
+    }
+
+    private static String formatCoordinates(Coordinate coordinate) {
+        return String.format("%s;%s", coordinate.getX(), coordinate.getY());
     }
 }
