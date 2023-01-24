@@ -97,6 +97,40 @@ public class Icon extends Component
      *            the icon name
      */
     public Icon(String collection, String icon) {
+        setIcon(collection, icon);
+    }
+
+    /**
+     * Sets the icon to the given icon from the vaadin-icons collection.
+     *
+     * @param icon
+     *            the icon name
+     */
+    public void setIcon(String icon) {
+        setIcon(ICON_COLLECTION_NAME, icon);
+    }
+
+    /**
+     * Sets the icon to the given {@code icon} from the given
+     * {@code collection}.
+     *
+     * If you want to use a custom {@code <vaadin-iconset>} -based icon set, you
+     * also need to add a dependency and an import for it, example:
+     *
+     * <pre>
+     * <code>
+     * &#64;NpmPackage(value = "custom-icons", version = "1.0.0")
+     * &#64;JsModule("custom-icons/iconset.js")
+     * public class MyView extends Div {
+     * </code>
+     * </pre>
+     *
+     * @param collection
+     *            the icon collection
+     * @param icon
+     *            the icon name
+     */
+    public void setIcon(String collection, String icon) {
         getElement().setAttribute(ICON_ATTRIBUTE_NAME, collection + ':' + icon);
     }
 
