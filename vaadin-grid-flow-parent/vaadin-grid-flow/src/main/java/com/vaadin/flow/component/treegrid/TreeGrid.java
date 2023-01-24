@@ -334,23 +334,7 @@ public class TreeGrid<T> extends Grid<T>
                 (ComponentEventListener) listener);
     }
 
-    /**
-     * Tree grid only supports hierarchical data providers. Use
-     * {@link #setDataProvider(HierarchicalDataProvider)} instead.
-     * <p>
-     * This method is inherited from Grid and has been marked as deprecated to
-     * indicate that it is not supported. This method will throw an
-     * {@link UnsupportedOperationException}.
-     *
-     * @param dataProvider
-     *            the data provider
-     * @deprecated use {@link #setDataProvider(HierarchicalDataProvider)},
-     *             {@link #setItems(Collection, ValueProvider)},
-     *             {@link #setItems(Stream, ValueProvider)} or
-     *             {@link #setTreeData(TreeData)} instead.
-     */
-    @Override
-    public void setDataProvider(DataProvider<T, ?> dataProvider) {
+    protected void setDataProvider(DataProvider<T, ?> dataProvider) {
         if (dataProvider instanceof HierarchicalDataProvider) {
             this.setDataProvider((HierarchicalDataProvider) dataProvider);
         } else {
