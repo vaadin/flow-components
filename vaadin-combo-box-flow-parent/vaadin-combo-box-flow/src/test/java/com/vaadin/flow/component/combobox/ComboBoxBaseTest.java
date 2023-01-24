@@ -255,8 +255,8 @@ public abstract class ComboBoxBaseTest {
         DataCommunicatorTest.MockUI ui = new DataCommunicatorTest.MockUI();
         ui.add(comboBox);
 
-        DataProvider<String, Void> dataProvider = Mockito
-                .spy(new AbstractDataProvider<String, Void>() {
+        DataProvider<String, String> dataProvider = Mockito
+                .spy(new AbstractDataProvider<String, String>() {
 
                     @Override
                     public boolean isInMemory() {
@@ -274,7 +274,7 @@ public abstract class ComboBoxBaseTest {
                     }
                 });
 
-        comboBox.setItems((DataProvider) dataProvider);
+        comboBox.setItems(dataProvider);
 
         // Verify that the data communicator and data provider have been created
         Assert.assertNotNull(
@@ -292,10 +292,10 @@ public abstract class ComboBoxBaseTest {
         DataCommunicatorTest.MockUI ui = new DataCommunicatorTest.MockUI();
         ui.add(comboBox);
 
-        DataProvider<String, Void> dataProvider = Mockito.spy(DataProvider
-                .fromCallbacks(query -> Stream.empty(), query -> 0));
+        DataProvider<String, String> dataProvider = Mockito.spy(DataProvider
+                .fromFilteringCallbacks(query -> Stream.empty(), query -> 0));
 
-        comboBox.setItems((DataProvider) dataProvider);
+        comboBox.setItems(dataProvider);
         // Verify that the data communicator and data provider have been created
         Assert.assertNotNull(
                 "Data Communicator and Data Provider should be created "
