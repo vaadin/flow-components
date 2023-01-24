@@ -109,7 +109,7 @@ public class FilteringPage extends Div {
                         .range(query.getOffset(),
                                 query.getOffset() + query.getLimit())
                         .mapToObj(i -> "Item " + i),
-                query -> query.getFilter().isEmpty() ? 0 : 1);
+                query -> query.getFilter().get().isEmpty() ? 0 : 1);
         comboBoxWithEmptyFilterReturnsNone.setId("empty-filter-returns-none");
         add(new Div(), comboBoxWithEmptyFilterReturnsNone);
 

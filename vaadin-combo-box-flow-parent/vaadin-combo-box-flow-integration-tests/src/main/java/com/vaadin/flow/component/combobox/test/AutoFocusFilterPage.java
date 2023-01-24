@@ -32,13 +32,13 @@ public class AutoFocusFilterPage extends Div {
 
         ComboBox<String> comboBox = new ComboBox<>("Choose option");
         comboBox.setItems((query) -> {
-            if (query.getFilter().isEmpty())
+            if (query.getFilter().get().isEmpty())
                 return Stream.of("");
             return data.stream()
                     .filter(s -> s.contains(query.getFilter().get()))
                     .skip(query.getOffset()).limit(query.getLimit());
         }, (query) -> {
-            if (query.getFilter().isEmpty())
+            if (query.getFilter().get().isEmpty())
                 return 1;
             return (int) data.stream()
                     .filter(s -> s.contains(query.getFilter().get())).count();
