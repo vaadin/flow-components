@@ -318,9 +318,34 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          *
          * @see GridSingleSelectionModel
          */
-        SINGLE {
-            @Override
-            protected <T> GridSelectionModel<T> createModel(Grid<T> grid) {
+        SINGLE,
+
+        /**
+         * Multiselection mode that maps to built-in
+         * {@link SelectionModel.Multi}.
+         *
+         * @see GridMultiSelectionModel
+         */
+        MULTI,
+
+        /**
+         * Selection model that doesn't allow selection.
+         *
+         * @see GridNoneSelectionModel
+         */
+        NONE;
+
+        /**
+         * Creates the selection model to use with this enum.
+         *
+         * @param <T>
+         *            the type of items in the grid
+         * @param grid
+         *            the grid to create the selection model for
+         * @return the selection model
+         */
+        protected <T> GridSelectionModel<T> createModel(Grid<T> grid) {
+            if (name().equals(SINGLE.name())) {
                 return new AbstractGridSingleSelectionModel<T>(grid) {
 
                     @SuppressWarnings("unchecked")
@@ -337,18 +362,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                                 !deselectAllowed);
                     }
                 };
-            }
-        },
-
-        /**
-         * Multiselection mode that maps to built-in
-         * {@link SelectionModel.Multi}.
-         *
-         * @see GridMultiSelectionModel
-         */
-        MULTI {
-            @Override
-            protected <T> GridSelectionModel<T> createModel(Grid<T> grid) {
+            } else if (name().equals(MULTI.name())) {
                 return new AbstractGridMultiSelectionModel<T>(grid) {
 
                     @SuppressWarnings("unchecked")
@@ -358,31 +372,12 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                         grid.fireEvent((ComponentEvent<Grid<?>>) event);
                     }
                 };
-            }
-        },
-
-        /**
-         * Selection model that doesn't allow selection.
-         *
-         * @see GridNoneSelectionModel
-         */
-        NONE {
-            @Override
-            protected <T> GridSelectionModel<T> createModel(Grid<T> grid) {
+            } else if (name().equals(NONE.name())) {
                 return new GridNoneSelectionModel<>();
+            } else {
+                throw new IllegalStateException("Unknown selection mode");
             }
-        };
-
-        /**
-         * Creates the selection model to use with this enum.
-         *
-         * @param <T>
-         *            the type of items in the grid
-         * @param grid
-         *            the grid to create the selection model for
-         * @return the selection model
-         */
-        protected abstract <T> GridSelectionModel<T> createModel(Grid<T> grid);
+        }
     }
 
     /**
