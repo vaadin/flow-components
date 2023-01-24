@@ -33,6 +33,7 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.function.SerializableConsumer;
@@ -44,6 +45,8 @@ import com.vaadin.flow.shared.Registration;
 import elemental.json.JsonObject;
 import elemental.json.JsonType;
 
+
+
 /**
  * Server-side component that encapsulates the functionality of the
  * {@code vaadin-date-picker} webcomponent.
@@ -53,8 +56,15 @@ import elemental.json.JsonType;
  * {@link DatePickerI18n} object.
  *
  */
-@JsModule("./datepickerConnector.js")
+@JsModule("./date-picker-datefns.js")
+@JavaScript("frontend://date-picker-datefns.js")
 @NpmPackage(value = "date-fns", version = "2.29.3")
+@JsModule("./datepickerConnector.js")
+@JavaScript("frontend://datepickerConnector.js")
+@NpmPackage(value = "@vaadin/vaadin-date-picker", version = "4.5.0")
+@JsModule("@vaadin/vaadin-date-picker/src/vaadin-date-picker.js")
+@JsModule("date-fns/")
+//@HtmlImport("frontend://bower_components/vaadin-date-picker/src/vaadin-accordion.html")
 public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         implements HasSize, HasValidation, HasHelper, HasLabel {
 
@@ -157,7 +167,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      * @see #addValueChangeListener(HasValue.ValueChangeListener)
      */
     public DatePicker(String label,
-            ValueChangeListener<ComponentValueChangeEvent<DatePicker, LocalDate>> listener) {
+                      ValueChangeListener<ComponentValueChangeEvent<DatePicker, LocalDate>> listener) {
         this(label);
         addValueChangeListener(listener);
     }
@@ -174,7 +184,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      * @see #addValueChangeListener(HasValue.ValueChangeListener)
      */
     public DatePicker(LocalDate initialDate,
-            ValueChangeListener<ComponentValueChangeEvent<DatePicker, LocalDate>> listener) {
+                      ValueChangeListener<ComponentValueChangeEvent<DatePicker, LocalDate>> listener) {
         this(initialDate);
         addValueChangeListener(listener);
     }
@@ -194,7 +204,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      * @see #addValueChangeListener(HasValue.ValueChangeListener)
      */
     public DatePicker(String label, LocalDate initialDate,
-            ValueChangeListener<ComponentValueChangeEvent<DatePicker, LocalDate>> listener) {
+                      ValueChangeListener<ComponentValueChangeEvent<DatePicker, LocalDate>> listener) {
         this(initialDate);
         setLabel(label);
         addValueChangeListener(listener);
@@ -862,7 +872,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
          * @return this instance for method chaining
          */
         public DatePickerI18n setDateFormats(String primaryFormat,
-                String... additionalParsingFormats) {
+                                             String... additionalParsingFormats) {
             Objects.requireNonNull(additionalParsingFormats,
                     "Additional parsing formats must not be null");
 

@@ -1,8 +1,3 @@
-import dateFnsFormat from 'date-fns/format';
-import dateFnsParse from 'date-fns/parse';
-import dateFnsIsValid from 'date-fns/isValid';
-// import {extractDateParts, parseDate as _parseDate} from '@vaadin/date-picker/src/vaadin-date-picker-helper.js';
-
 (function () {
     const tryCatchWrapper = function (callback) {
         return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Date Picker');
@@ -26,6 +21,25 @@ import dateFnsIsValid from 'date-fns/isValid';
                         }
                     })
                 );
+
+                /**
+                 * Extracts the basic component parts of a date (day, month and year)
+                 * to the expected format.
+                 * @param {!Date} date
+                 * @return {{day: number, month: number, year: number}}
+                 */
+                const dateFns = window.Vaadin.Flow.datepickerDateFns;
+                if (!dateFns) {
+                    throw new Error("Custom date-fns bundle for date picker is not registered at window.Vaadin.Flow.datepickerDateFns");
+                }
+
+                function extractDateParts(date) {
+                    return {
+                        day: date.getDate(),
+                        month: date.getMonth(),
+                        year: date.getFullYear(),
+                    };
+                }
 
                 const createLocaleBasedDateFormat = function (locale) {
                     try {
@@ -88,7 +102,7 @@ import dateFnsIsValid from 'date-fns/isValid';
                         const format = formats[0];
                         const date = _parseDate(`${dateParts.year}-${dateParts.month + 1}-${dateParts.day}`);
 
-                        return dateFnsFormat(date, format);
+                        return dateFns.format(date, format);
                     }
 
                     function parseDate(dateString) {
@@ -97,8 +111,8 @@ import dateFnsIsValid from 'date-fns/isValid';
                             // We first try to match the date with the shorter version.
                             const shortYearFormat = getShortYearFormat(format);
                             if (shortYearFormat) {
-                                const shortYearFormatDate = dateFnsParse(dateString, shortYearFormat, referenceDate);
-                                if (dateFnsIsValid(shortYearFormatDate)) {
+                                const shortYearFormatDate = dateFns.parse(dateString, shortYearFormat, referenceDate);
+                                if (dateFns.isValid(shortYearFormatDate)) {
                                     let yearValue = shortYearFormatDate.getFullYear();
                                     // The last parsed year check handles the case where a four-digit year is parsed, then formatted
                                     // as a two-digit year, and then parsed again. In this case we want to keep the century of the
@@ -116,9 +130,9 @@ import dateFnsIsValid from 'date-fns/isValid';
                                     };
                                 }
                             }
-                            const date = dateFnsParse(dateString, format, referenceDate);
+                            const date = dateFns.parse(dateString, format, referenceDate);
 
-                            if (dateFnsIsValid(date)) {
+                            if (dateFns.isValid(date)) {
                                 let yearValue = date.getFullYear();
                                 if (
                                     datepicker.$connector._lastParsedYear &&
@@ -149,21 +163,6 @@ import dateFnsIsValid from 'date-fns/isValid';
                 function _getReferenceDate() {
                     const {referenceDate} = datepicker.i18n;
                     return referenceDate ? new Date(referenceDate.year, referenceDate.month - 1, referenceDate.day) : new Date();
-                }
-
-                /**
-                 * Extracts the basic component parts of a date (day, month and year)
-                 * to the expected format.
-                 * @param {!Date} date
-                 * @return {{day: number, month: number, year: number}}
-                 */
-                // TODO have this from properly npm (package.json for vaadin date picker)
-                function extractDateParts(date) {
-                    return {
-                        day: date.getDate(),
-                        month: date.getMonth(),
-                        year: date.getFullYear(),
-                    };
                 }
 
                 /**
