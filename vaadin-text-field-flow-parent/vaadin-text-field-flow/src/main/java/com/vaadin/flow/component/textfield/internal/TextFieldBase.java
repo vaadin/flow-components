@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.textfield;
+package com.vaadin.flow.component.textfield.internal;
 
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.Component;
@@ -30,6 +30,10 @@ import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.component.textfield.HasAutocapitalize;
+import com.vaadin.flow.component.textfield.HasAutocomplete;
+import com.vaadin.flow.component.textfield.HasAutocorrect;
+import com.vaadin.flow.component.textfield.HasPrefixAndSuffix;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;

@@ -23,6 +23,7 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.ValidationUtil;
+import com.vaadin.flow.component.textfield.internal.TextFieldBase;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
 import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
