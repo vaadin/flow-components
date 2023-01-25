@@ -11,7 +11,6 @@ package com.vaadin.flow.component.crud;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.HeaderRow;
-import com.vaadin.flow.component.grid.dataview.GridDataView;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -135,6 +134,7 @@ public class CrudGrid<E> extends Grid<E> {
      *             if the supplied data provider is not a DataProvider&lt;E,
      *             CrudFilter&gt;
      */
+    @Override
     public void setDataProvider(DataProvider<E, ?> dataProvider)
             throws IllegalArgumentException {
         // Attempt a cast to ensure that the DataProvider is actually a
@@ -145,7 +145,7 @@ public class CrudGrid<E> extends Grid<E> {
 
             provider.setFilter(filter);
 
-            super.setItems(provider);
+            super.setDataProvider(provider);
 
             // Keep a reference to the original data provider being wrapped
             this.dataProvider = dataProvider;
