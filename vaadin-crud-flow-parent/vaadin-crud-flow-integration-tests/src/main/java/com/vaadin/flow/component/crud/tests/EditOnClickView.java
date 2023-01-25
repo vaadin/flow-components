@@ -5,7 +5,6 @@ import com.vaadin.flow.component.crud.Crud;
 import com.vaadin.flow.component.crud.CrudEditorPosition;
 import com.vaadin.flow.component.crud.CrudGrid;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.router.Route;
 
 @Route(value = "vaadin-crud/editonclick")
