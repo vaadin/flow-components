@@ -137,8 +137,8 @@ public class CrudGrid<E> extends Grid<E> {
     @Override
     public void setDataProvider(DataProvider<E, ?> dataProvider)
             throws IllegalArgumentException {
-        // Attempt a cast to ensure that the DataProvider is actually a
-        // DataProvider<E, CrudFilter>
+        // Attempt a cast to ensure that the captured ? is actually a CrudFilter
+        // Unfortunately this cannot be enforced by the compiler
         try {
             ConfigurableFilterDataProvider<E, Void, CrudFilter> provider = ((DataProvider<E, CrudFilter>) dataProvider)
                     .withConfigurableFilter();
