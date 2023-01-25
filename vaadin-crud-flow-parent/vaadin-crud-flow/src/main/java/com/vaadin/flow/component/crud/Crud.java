@@ -720,7 +720,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
      *            the data provider for the grid
      */
     public void setDataProvider(DataProvider<E, ?> provider) {
-        grid.setItems((DataProvider) provider);
+        grid.setDataProvider(provider);
     }
 
     /**

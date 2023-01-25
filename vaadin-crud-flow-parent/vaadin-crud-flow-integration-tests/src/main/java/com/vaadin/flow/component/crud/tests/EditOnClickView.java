@@ -19,7 +19,7 @@ public class EditOnClickView extends VerticalLayout {
 
         PersonCrudDataProvider dataProvider = new PersonCrudDataProvider();
 
-        grid.setItems((DataProvider) dataProvider);
+        grid.setDataProvider(dataProvider);
         crud.addSaveListener(e -> dataProvider.persist(e.getItem()));
         crud.addDeleteListener(e -> dataProvider.delete(e.getItem()));
 
