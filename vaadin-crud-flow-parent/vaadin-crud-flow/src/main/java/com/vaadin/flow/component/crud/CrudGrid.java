@@ -138,7 +138,8 @@ public class CrudGrid<E> extends Grid<E> {
      */
     @Override
     public GridDataView<E> setItems(DataProvider dataProvider) {
-        // Attempt a cast to ensure that the DataProvider is actually a DataProvider<E, CrudFilter>
+        // Attempt a cast to ensure that the DataProvider is actually a
+        // DataProvider<E, CrudFilter>
         try {
             ConfigurableFilterDataProvider<E, Void, CrudFilter> provider = ((DataProvider<E, CrudFilter>) dataProvider)
                     .withConfigurableFilter();
