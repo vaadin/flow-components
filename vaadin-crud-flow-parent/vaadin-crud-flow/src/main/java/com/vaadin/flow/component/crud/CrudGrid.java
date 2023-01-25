@@ -130,14 +130,13 @@ public class CrudGrid<E> extends Grid<E> {
      *
      * @param dataProvider
      *            a {@link DataProvider}
-     * @return {@link GridDataView}
      * @see CrudFilter
      * @throws IllegalArgumentException
      *             if the supplied data provider is not a DataProvider&lt;E,
      *             CrudFilter&gt;
      */
-    @Override
-    public GridDataView<E> setItems(DataProvider dataProvider) {
+    public void setDataProvider(DataProvider<E, ?> dataProvider)
+            throws IllegalArgumentException {
         // Attempt a cast to ensure that the DataProvider is actually a
         // DataProvider<E, CrudFilter>
         try {
@@ -146,10 +145,10 @@ public class CrudGrid<E> extends Grid<E> {
 
             provider.setFilter(filter);
 
+            super.setItems(provider);
+
             // Keep a reference to the original data provider being wrapped
             this.dataProvider = dataProvider;
-
-            return super.setItems(provider);
         } catch (ClassCastException ex) {
             throw new IllegalArgumentException("DataProvider<"
                     + beanType.getSimpleName() + ", CrudFilter> expected", ex);
