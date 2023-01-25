@@ -54,7 +54,7 @@ import com.vaadin.flow.shared.Registration;
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("./vaadin-big-decimal-field.js")
 public class BigDecimalField
-        extends InternalFieldBase<BigDecimalField, BigDecimal>
+        extends TextFieldBase<BigDecimalField, BigDecimal>
         implements HasThemeVariant<TextFieldVariant> {
 
     private boolean isConnectorAttached;

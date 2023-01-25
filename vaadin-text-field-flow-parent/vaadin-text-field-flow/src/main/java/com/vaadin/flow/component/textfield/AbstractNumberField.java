@@ -38,7 +38,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T extends Number>
-        extends InternalFieldBase<C, T> {
+        extends TextFieldBase<C, T> {
 
     private boolean required;
 

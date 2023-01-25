@@ -41,7 +41,7 @@ import com.vaadin.flow.shared.Registration;
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/text-area", version = "24.0.0-alpha11")
 @JsModule("@vaadin/text-area/src/vaadin-text-area.js")
-public class TextArea extends InternalFieldBase<TextArea, String>
+public class TextArea extends TextFieldBase<TextArea, String>
         implements HasAllowedCharPattern, HasThemeVariant<TextAreaVariant> {
 
     private boolean isConnectorAttached;
