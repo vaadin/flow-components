@@ -152,6 +152,7 @@ import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/s
           const formatterAndParser = createFormatterAndParser(usedFormats);
 
           // Merge current web component I18N settings with new I18N settings and the formatting and parsing functions
+          // Defer setting I18N property into microtask as a workaround for: https://github.com/vaadin/flow-components/issues/4500
           queueMicrotask(() => {
             datepicker.i18n = Object.assign({}, datepicker.i18n, i18n, formatterAndParser);
           });
