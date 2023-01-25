@@ -20,6 +20,8 @@ import com.vaadin.flow.shared.util.SharedUtil;
 
 import java.util.List;
 
+import org.slf4j.LoggerFactory;
+
 /**
  * A simple grid implementation for Crud that allows searching and sorting
  * backed by a data provider.
@@ -130,17 +132,17 @@ public class CrudGrid<E> extends Grid<E> {
      *
      * @param dataProvider
      *            a {@link DataProvider}
+     * @return {@link GridDataView}
      * @see CrudFilter
      * @throws IllegalArgumentException
      *             if the supplied data provider is not a DataProvider&lt;E,
      *             CrudFilter&gt;
      */
     @Override
-    public GridDataView<E> setItems(DataProvider<E, Void> dataProvider) {
-        // Attempt a cast to ensure that the captured ? is actually a CrudFilter
-        // Unfortunately this cannot be enforced by the compiler
+    public GridDataView<E> setItems(DataProvider dataProvider) {
+        // Attempt a cast to ensure that the DataProvider is actually a DataProvider<E, CrudFilter>
         try {
-            ConfigurableFilterDataProvider provider = dataProvider
+            ConfigurableFilterDataProvider<E, Void, CrudFilter> provider = ((DataProvider<E, CrudFilter>) dataProvider)
                     .withConfigurableFilter();
 
             provider.setFilter(filter);
