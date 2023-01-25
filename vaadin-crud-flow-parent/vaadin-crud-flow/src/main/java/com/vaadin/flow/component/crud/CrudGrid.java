@@ -20,8 +20,6 @@ import com.vaadin.flow.shared.util.SharedUtil;
 
 import java.util.List;
 
-import org.slf4j.LoggerFactory;
-
 /**
  * A simple grid implementation for Crud that allows searching and sorting
  * backed by a data provider.
