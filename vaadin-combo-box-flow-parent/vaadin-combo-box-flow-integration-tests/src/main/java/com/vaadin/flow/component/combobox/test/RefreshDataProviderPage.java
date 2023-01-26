@@ -48,7 +48,7 @@ public class RefreshDataProviderPage extends Div {
 
         ComboBox<String> nameSelection = new ComboBox<>("Name");
         nameSelection.setRenderer(new TextRenderer<>());
-        nameSelection.setDataProvider(provider);
+        nameSelection.setItems(provider);
         add(update, nameSelection);
     }
 

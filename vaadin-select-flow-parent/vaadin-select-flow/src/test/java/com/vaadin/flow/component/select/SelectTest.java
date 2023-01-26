@@ -159,7 +159,7 @@ public class SelectTest {
             }
         };
 
-        select.setDataProvider(dataProvider);
+        select.setItems(dataProvider);
 
         Assert.assertEquals("Invalid number of items", 3,
                 getListBox().getChildren().count());
@@ -658,7 +658,7 @@ public class SelectTest {
         DataProvider<String, Void> dataProvider = DataProvider
                 .fromCallbacks(query -> Stream.of("one"), query -> 1);
 
-        select.setDataProvider(dataProvider);
+        select.setItems(dataProvider);
 
         select.getListDataView();
     }

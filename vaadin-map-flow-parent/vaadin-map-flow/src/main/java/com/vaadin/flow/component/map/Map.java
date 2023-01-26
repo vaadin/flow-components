@@ -65,7 +65,7 @@ import java.util.Objects;
  * using {@link #defineProjection(String, String)}.
  */
 @Tag("vaadin-map")
-@NpmPackage(value = "@vaadin/map", version = "24.0.0-alpha11")
+@NpmPackage(value = "@vaadin/map", version = "24.0.0-alpha12")
 @NpmPackage(value = "proj4", version = "2.8.1")
 @JsModule("@vaadin/map/src/vaadin-map.js")
 @JsModule("./vaadin-map/mapConnector.js")
@@ -299,7 +299,7 @@ public class Map extends MapBase {
      *
      * @return current zoom level
      */
-    public float getZoom() {
+    public double getZoom() {
         return getView().getZoom();
     }
 
@@ -318,7 +318,7 @@ public class Map extends MapBase {
      * @param zoom
      *            new zoom level
      */
-    public void setZoom(float zoom) {
+    public void setZoom(double zoom) {
         getView().setZoom(zoom);
     }
 }

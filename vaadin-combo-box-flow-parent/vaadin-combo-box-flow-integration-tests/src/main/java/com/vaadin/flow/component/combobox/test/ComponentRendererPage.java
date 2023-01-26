@@ -79,7 +79,7 @@ public class ComponentRendererPage extends Div {
     private void dataProviderBeforeRenderer() {
         ComboBox<ComboBoxDemoPage.Song> comboBox = new ComboBox<>();
         List<ComboBoxDemoPage.Song> listOfSongs = createListOfSongs();
-        comboBox.setDataProvider(
+        comboBox.setItems(
                 new ListDataProvider<ComboBoxDemoPage.Song>(listOfSongs));
         comboBox.setItemLabelGenerator(ComboBoxDemoPage.Song::getName);
 
@@ -95,7 +95,7 @@ public class ComponentRendererPage extends Div {
         List<ComboBoxDemoPage.Song> listOfSongs = createListOfSongs();
         comboBox.setRenderer(renderer);
 
-        comboBox.setDataProvider(
+        comboBox.setItems(
                 new ListDataProvider<ComboBoxDemoPage.Song>(listOfSongs));
         comboBox.setItemLabelGenerator(ComboBoxDemoPage.Song::getName);
 

@@ -15,10 +15,10 @@ import com.vaadin.flow.component.map.configuration.AbstractConfigurationObject;
  */
 public abstract class ImageStyle extends AbstractConfigurationObject {
 
-    private float opacity;
+    private double opacity;
     private boolean rotateWithView;
-    private float rotation;
-    private float scale;
+    private double rotation;
+    private double scale;
 
     /**
      * The opacity of the image. Value values range from {@code 0} to {@code 1}.
@@ -26,7 +26,7 @@ public abstract class ImageStyle extends AbstractConfigurationObject {
      *
      * @return the current opacity
      */
-    public float getOpacity() {
+    public double getOpacity() {
         return opacity;
     }
 
@@ -36,7 +36,7 @@ public abstract class ImageStyle extends AbstractConfigurationObject {
      * @param opacity
      *            the new opacity
      */
-    public void setOpacity(float opacity) {
+    public void setOpacity(double opacity) {
         this.opacity = opacity;
         markAsDirty();
     }
@@ -62,7 +62,7 @@ public abstract class ImageStyle extends AbstractConfigurationObject {
      *
      * @return the current rotation
      */
-    public float getRotation() {
+    public double getRotation() {
         return rotation;
     }
 
@@ -72,7 +72,7 @@ public abstract class ImageStyle extends AbstractConfigurationObject {
      * @param rotation
      *            the new rotation
      */
-    public void setRotation(float rotation) {
+    public void setRotation(double rotation) {
         this.rotation = rotation;
         markAsDirty();
     }
@@ -82,7 +82,7 @@ public abstract class ImageStyle extends AbstractConfigurationObject {
      *
      * @return the current scaling
      */
-    public float getScale() {
+    public double getScale() {
         return scale;
     }
 
@@ -92,7 +92,7 @@ public abstract class ImageStyle extends AbstractConfigurationObject {
      * @param scale
      *            the new scaling
      */
-    public void setScale(float scale) {
+    public void setScale(double scale) {
         this.scale = scale;
         markAsDirty();
     }
@@ -105,15 +105,15 @@ public abstract class ImageStyle extends AbstractConfigurationObject {
     }
 
     protected static abstract class Options {
-        private float opacity = 1;
+        private double opacity = 1;
         private boolean rotateWithView = false;
-        private float rotation = 0;
-        private float scale = 1;
+        private double rotation = 0;
+        private double scale = 1;
 
         /**
          * @see ImageStyle#getOpacity()
          */
-        public void setOpacity(float opacity) {
+        public void setOpacity(double opacity) {
             this.opacity = opacity;
         }
 
@@ -127,14 +127,14 @@ public abstract class ImageStyle extends AbstractConfigurationObject {
         /**
          * @see ImageStyle#getRotation()
          */
-        public void setRotation(float rotation) {
+        public void setRotation(double rotation) {
             this.rotation = rotation;
         }
 
         /**
          * @see ImageStyle#getScale()
          */
-        public void setScale(float scale) {
+        public void setScale(double scale) {
             this.scale = scale;
         }
     }

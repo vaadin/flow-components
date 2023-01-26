@@ -205,10 +205,10 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha11")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha12")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/grid", version = "24.0.0-alpha11")
-@NpmPackage(value = "@vaadin/tooltip", version = "24.0.0-alpha11")
+@NpmPackage(value = "@vaadin/grid", version = "24.0.0-alpha12")
+@NpmPackage(value = "@vaadin/tooltip", version = "24.0.0-alpha12")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -444,7 +444,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-column")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha11")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha12")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class Column<T> extends AbstractColumn<Column<T>> {
 
@@ -2423,11 +2423,13 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     /**
      * {@inheritDoc}
      *
+     * Use this method only when having a data provider with filter that cannot
+     * be transformed to {@code DataProvider<T, Void>}.
+     *
      * @deprecated use instead one of the {@code setItems} methods which provide
      *             access to either {@link GridListDataView} or
      *             {@link GridLazyDataView}
      */
-    @Deprecated
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         Objects.requireNonNull(dataProvider, "data provider cannot be null");
         handleDataProviderChange(dataProvider);
@@ -3997,7 +3999,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *
      * Default implementation closes the editor if it's opened.
      *
-     * @see #setDataProvider(DataProvider)
      * @see DataChangeEvent
      * @see DataProviderListener
      *

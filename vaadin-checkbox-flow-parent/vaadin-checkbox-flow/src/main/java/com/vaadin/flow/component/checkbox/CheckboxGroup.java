@@ -84,9 +84,9 @@ import elemental.json.JsonArray;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-checkbox-group")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha11")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha12")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/checkbox-group", version = "24.0.0-alpha11")
+@NpmPackage(value = "@vaadin/checkbox-group", version = "24.0.0-alpha12")
 @JsModule("@vaadin/checkbox-group/src/vaadin-checkbox-group.js")
 public class CheckboxGroup<T>
         extends AbstractSinglePropertyField<CheckboxGroup<T>, Set<T>> implements
@@ -331,15 +331,7 @@ public class CheckboxGroup<T>
         setItems(DataProvider.fromStream(streamOfItems));
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @deprecated use instead one of the {@code setItems} methods which provide
-     *             access to either {@link CheckboxGroupListDataView} or
-     *             {@link CheckboxGroupDataView}
-     */
-    @Deprecated
-    public void setDataProvider(DataProvider<T, ?> dataProvider) {
+    private void setDataProvider(DataProvider<T, ?> dataProvider) {
         this.dataProvider.set(dataProvider);
         DataViewUtils.removeComponentFilterAndSortComparator(this);
         reset();

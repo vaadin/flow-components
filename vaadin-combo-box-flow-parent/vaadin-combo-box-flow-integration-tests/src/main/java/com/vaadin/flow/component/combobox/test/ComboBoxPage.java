@@ -112,8 +112,8 @@ public class ComboBoxPage extends Div {
         comboBox.setId("combo");
 
         NativeButton setProvider = new NativeButton("Update data provider",
-                event -> comboBox.setDataProvider(
-                        DataProvider.ofItems("baz", "foobar")));
+                event -> comboBox
+                        .setItems(DataProvider.ofItems("baz", "foobar")));
         setProvider.setId("update-provider");
 
         NativeButton setItemCaptionGenerator = new NativeButton(
@@ -141,7 +141,7 @@ public class ComboBoxPage extends Div {
                 Arrays.asList("foo", "bar", "baz"),
                 ignore -> sizeRequestCountSpan.setText(
                         String.valueOf(sizeRequestCounter.incrementAndGet())));
-        comboBox.setDataProvider(dataProvider);
+        comboBox.setItems(dataProvider);
 
         NativeButton resetDataProvider = new NativeButton("Set data provider",
                 event -> comboBox.setItems("new item"));

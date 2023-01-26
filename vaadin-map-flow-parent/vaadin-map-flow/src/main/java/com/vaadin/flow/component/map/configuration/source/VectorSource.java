@@ -55,6 +55,12 @@ public class VectorSource extends Source {
         removeChild(feature);
     }
 
+    public void removeAllFeatures() {
+        for (Feature feature : getFeatures().toArray(Feature[]::new)) {
+            removeFeature(feature);
+        }
+    }
+
     public static class Options extends Source.Options {
     }
 }
