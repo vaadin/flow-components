@@ -141,11 +141,8 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
      * Gets the data provider.
      *
      * @return the data provider, not {@code null}
-     * @deprecated use {@link #getListDataView()} or
-     *             {@link #getGenericDataView()} instead
      */
-    @Deprecated
-    public DataProvider<ITEM, ?> getDataProvider() {
+    private DataProvider<ITEM, ?> getDataProvider() {
         return dataProvider.get();
     }
 
@@ -380,17 +377,6 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
             ListDataProvider<ITEM> listDataProvider) {
         setDataProvider(listDataProvider);
         return getListDataView();
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @deprecated Because the stream is collected to a list anyway, use
-     *             {@link HasListDataView#setItems(Collection)} instead.
-     */
-    @Deprecated
-    public void setItems(Stream<ITEM> streamOfItems) {
-        setItems(DataProvider.fromStream(streamOfItems));
     }
 
     /**
