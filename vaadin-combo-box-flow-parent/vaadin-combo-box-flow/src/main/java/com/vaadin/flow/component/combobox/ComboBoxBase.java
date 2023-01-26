@@ -669,19 +669,6 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
         return dataController.setItems(dataProvider);
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @deprecated Because the stream is collected to a list anyway, use
-     *             {@link #setItems(Collection)} or
-     *             {@link #setItems(CallbackDataProvider.FetchCallback)}
-     *             instead.
-     */
-    @Deprecated
-    public void setItems(Stream<TItem> streamOfItems) {
-        setItems(DataProvider.fromStream(streamOfItems));
-    }
-
     // ****************************************************
     // Lazy data view implementation
     // ****************************************************

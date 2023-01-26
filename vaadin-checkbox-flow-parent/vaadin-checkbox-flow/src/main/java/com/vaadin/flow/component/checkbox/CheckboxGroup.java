@@ -320,17 +320,6 @@ public class CheckboxGroup<T>
         }
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @deprecated Because the stream is collected to a list anyway, use
-     *             {@link HasListDataView#setItems(Collection)} instead.
-     */
-    @Deprecated
-    public void setItems(Stream<T> streamOfItems) {
-        setItems(DataProvider.fromStream(streamOfItems));
-    }
-
     private void setDataProvider(DataProvider<T, ?> dataProvider) {
         this.dataProvider.set(dataProvider);
         DataViewUtils.removeComponentFilterAndSortComparator(this);
@@ -402,11 +391,8 @@ public class CheckboxGroup<T>
      * Gets the data provider.
      *
      * @return the data provider, not {@code null}
-     * @deprecated use {@link #getListDataView()} or
-     *             {@link #getGenericDataView()} instead
      */
-    @Deprecated
-    public DataProvider<T, ?> getDataProvider() {
+    private DataProvider<T, ?> getDataProvider() {
         // dataProvider reference won't have been initialized before
         // calling from CheckboxGroup constructor
         return Optional.ofNullable(dataProvider).map(AtomicReference::get)
