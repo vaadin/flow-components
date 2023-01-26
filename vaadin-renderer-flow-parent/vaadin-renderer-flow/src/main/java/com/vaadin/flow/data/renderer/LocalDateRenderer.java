@@ -172,29 +172,6 @@ public class LocalDateRenderer<SOURCE>
      *            the formatter to use, not <code>null</code>
      * @param nullRepresentation
      *            the textual representation of the <code>null</code> value
-     * @deprecated Via this constructor renderer is not serializable, use
-     *             {@link LocalDateRenderer(ValueProvider, SerializableSupplier,
-     *             String)} instead.
-     *
-     */
-    @Deprecated
-    public LocalDateRenderer(ValueProvider<SOURCE, LocalDate> valueProvider,
-            DateTimeFormatter formatter, String nullRepresentation) {
-        this(valueProvider, () -> formatter, nullRepresentation);
-    }
-
-    /**
-     * Creates a new LocalDateRenderer.
-     * <p>
-     * The renderer is configured to render with the given formatter.
-     *
-     * @param valueProvider
-     *            the callback to provide a {@link LocalDate} to the renderer,
-     *            not <code>null</code>
-     * @param formatter
-     *            the formatter to use, not <code>null</code>
-     * @param nullRepresentation
-     *            the textual representation of the <code>null</code> value
      *
      */
     public LocalDateRenderer(ValueProvider<SOURCE, LocalDate> valueProvider,
