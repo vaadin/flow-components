@@ -277,7 +277,7 @@ public abstract class TextFieldBase<TComponent extends TextFieldBase<TComponent,
      * @param <P>
      *            the property type
      */
-    public <P> TextFieldBase(TValue initialValue, TValue defaultValue,
+    <P> TextFieldBase(TValue initialValue, TValue defaultValue,
             Class<P> elementPropertyType,
             SerializableFunction<P, TValue> presentationToModel,
             SerializableFunction<TValue, P> modelToPresentation,
@@ -317,7 +317,7 @@ public abstract class TextFieldBase<TComponent extends TextFieldBase<TComponent,
      * @param <P>
      *            the property type
      */
-    public <P> TextFieldBase(TValue initialValue, TValue defaultValue,
+    <P> TextFieldBase(TValue initialValue, TValue defaultValue,
             Class<P> elementPropertyType,
             SerializableBiFunction<TComponent, P, TValue> presentationToModel,
             SerializableBiFunction<TComponent, TValue, P> modelToPresentation,
@@ -349,7 +349,7 @@ public abstract class TextFieldBase<TComponent extends TextFieldBase<TComponent,
      *            property value, otherwise element {@code "value"} property is
      *            ignored and the initial value is set
      */
-    public TextFieldBase(TValue initialValue, TValue defaultValue,
+    TextFieldBase(TValue initialValue, TValue defaultValue,
             boolean acceptNullValues, boolean isInitialValueOptional) {
         super("value", defaultValue, acceptNullValues);
         if ((getElement().getProperty("value") == null
