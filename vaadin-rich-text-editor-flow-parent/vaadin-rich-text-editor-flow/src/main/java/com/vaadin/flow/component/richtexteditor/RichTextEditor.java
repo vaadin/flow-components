@@ -169,6 +169,18 @@ public class RichTextEditor
      * <p>
      * Note: {@link Binder} will take care of the {@code null} conversion when
      * integrates with the editor, as long as no new converter is defined.
+     * <p>
+     * Since v24, this method only accepts values in the HTML format, whereas in
+     * v23 and earlier this method would accept values in the Delta format. In
+     * order to prevent data corruption, passing a value that starts with either
+     * <code>[</code> or <code>{</code> will now throw an
+     * {@link IllegalArgumentException}, as it might indicate that the value is
+     * in the Delta format. In order to keep using the Delta format, use
+     * {@link #asDelta()}, which allows setting, retrieving, and binding the
+     * value using Binder, in the Delta format. In order to pass an HTML value
+     * starting with either characters, either wrap the value in a valid HTML
+     * tag, such as <code>&lt;p&gt;</code>, or use {@link #asHtml()} which does
+     * not include this check.
      *
      * @see #asDelta()
      * @see AsDelta#setValue(String)
@@ -177,8 +189,25 @@ public class RichTextEditor
      */
     @Override
     public void setValue(String value) {
+        doSetValue(value, true);
+    }
+
+    private void doSetValue(String value, boolean withDeltaCheck) {
         Objects.requireNonNull(value, "Null value is not supported");
+        if (withDeltaCheck) {
+            checkForDeltaValue(value);
+        }
         super.setValue(value);
+    }
+
+    private void checkForDeltaValue(String value) {
+        value = value.trim();
+        if (value.startsWith("[") || value.startsWith("{")) {
+            throw new IllegalArgumentException(
+                    "The value starts with either '[' or '{' which indicates that this might be a value in the Delta format. "
+                            + "Since v24, RichTextEditor.setValue only accepts values in the HTML format. "
+                            + "Please check the JavaDoc for RichTextEditor.setValue for more information.");
+        }
     }
 
     @Override
@@ -737,15 +766,18 @@ public class RichTextEditor
     /**
      * Gets an instance of {@code HasValue} for the editor in the HTML format.
      * Can be used for binding the value with {@link Binder}.
+     * <p>
+     * Note that since v24, the RichTextEditor uses the HTML value by default.
+     * Instead of using this wrapper, {@link #getValue()} and
+     * {@link #setValue(String)} can be used directly, and
+     * {@link RichTextEditor} can be used for binding the HTML value using
+     * Binder. This method is not intended to be deprecated as it keeps the
+     * legacy behavior that allows passing values starting with either
+     * <code>[</code> or <code>{</code>, which is not allowed when using
+     * {@link #setValue(String)}.
      *
      * @return an instance of {@code HasValue}
-     * @deprecated since v24 the RichTextEditor uses the HTML value by default.
-     *             Use {@link RichTextEditor#getValue()} and
-     *             {@link RichTextEditor#setValue(String)} instead. For binding
-     *             the HTML value with Binder, bind the {@link RichTextEditor}
-     *             directly.
      */
-    @Deprecated
     public HasValue<ValueChangeEvent<String>, String> asHtml() {
         if (asHtml == null) {
             asHtml = new AsHtml();
@@ -780,7 +812,7 @@ public class RichTextEditor
          */
         @Override
         public void setValue(String value) {
-            RichTextEditor.this.setValue(value);
+            RichTextEditor.this.doSetValue(value, false);
         }
 
         /**
