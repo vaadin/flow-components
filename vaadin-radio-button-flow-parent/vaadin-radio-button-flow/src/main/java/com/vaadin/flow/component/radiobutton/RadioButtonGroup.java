@@ -268,17 +268,6 @@ public class RadioButtonGroup<T>
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * @deprecated Because the stream is collected to a list anyway, use
-     *             {@link HasListDataView#setItems(Collection)} instead.
-     */
-    @Deprecated
-    public void setItems(Stream<T> streamOfItems) {
-        setItems(DataProvider.fromStream(streamOfItems));
-    }
-
-    /**
      * Gets the list data view for the RadioButtonGroup. This data view should
      * only be used when the items are in-memory and set with:
      * <ul>
@@ -400,11 +389,8 @@ public class RadioButtonGroup<T>
      * Gets the data provider.
      *
      * @return the data provider, not {@code null}
-     * @deprecated use {@link #getListDataView()} or
-     *             {@link #getGenericDataView()} instead
      */
-    @Deprecated
-    public DataProvider<T, ?> getDataProvider() {
+    private DataProvider<T, ?> getDataProvider() {
         return Optional.ofNullable(dataProvider).map(AtomicReference::get)
                 .orElse(null);
     }
