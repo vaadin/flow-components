@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.grid.it;
 
 import java.time.LocalDate;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.grid.Grid;
@@ -46,8 +47,8 @@ public class GridTestScrollingOver100kLines extends Div {
         grid.setWidth("100%");
         grid.setHeight("300px");
 
-        grid.setItems(
-                IntStream.rangeClosed(1, 100500).mapToObj(String::valueOf));
+        grid.setItems(IntStream.rangeClosed(1, 100500).mapToObj(String::valueOf)
+                .collect(Collectors.toList()));
         add(grid);
     }
 
