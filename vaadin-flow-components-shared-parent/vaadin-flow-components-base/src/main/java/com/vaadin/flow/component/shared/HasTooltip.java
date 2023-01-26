@@ -15,10 +15,22 @@
  */
 package com.vaadin.flow.component.shared;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
 
 /**
- * Mixin interface for components that support a tooltip.
+ * Mixin interface for components that have special handling for tooltips on the
+ * Web Component level.
+ * <p>
+ * Components that implement this interface get a
+ * <code>&lt;vaadin-tooltip slot="tooltip"&gt;</code> element added inside the
+ * component's light DOM and are expected to handle it appropriately on the
+ * client-side.
+ * <p>
+ * Use this interface only if you are implementing a new component that also has
+ * a Web Component counterpart with a custom tooltip support. Otherwise, use
+ * {@link Tooltip#forComponent(Component)} instead.
+ *
  *
  * @author Vaadin Ltd
  */
