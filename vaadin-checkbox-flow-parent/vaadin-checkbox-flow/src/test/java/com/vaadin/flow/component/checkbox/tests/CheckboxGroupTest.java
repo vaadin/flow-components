@@ -431,7 +431,7 @@ public class CheckboxGroupTest {
         DataProvider<String, Void> dataProvider = DataProvider
                 .fromCallbacks(query -> Stream.of("one"), query -> 1);
 
-        checkboxGroup.setDataProvider(dataProvider);
+        checkboxGroup.setItems(dataProvider);
 
         checkboxGroup.getListDataView();
     }

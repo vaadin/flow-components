@@ -52,7 +52,7 @@ public class GridViewBasicFeaturesPage extends LegacyTestView {
 
         ListDataProvider<CompanyBudgetHistory> list = CompanyBudgetHistory
                 .getBudgetDataProvider(baseYear, numberOfYears);
-        grid.setDataProvider(list);
+        grid.setItems(list);
 
         grid.setColumnReorderingAllowed(true);
 

@@ -69,7 +69,7 @@ public class GridViewContextMenuPage extends LegacyTestView {
         ListDataProvider<Person> dataProvider = DataProvider
                 .ofCollection(getItems());
 
-        grid.setDataProvider(dataProvider);
+        grid.setItems(dataProvider);
 
         grid.addColumn(Person::getFirstName).setHeader("Name");
         grid.addColumn(Person::getAge).setHeader("Age");
