@@ -2450,19 +2450,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * @deprecated Because the stream is collected to a list anyway, use
-     *             {@link HasListDataView#setItems(Collection)} or
-     *             {@link #setItems(CallbackDataProvider.FetchCallback)}
-     *             instead.
-     */
-    @Deprecated
-    public void setItems(Stream<T> streamOfItems) {
-        setItems(DataProvider.fromStream(streamOfItems));
-    }
-
-    /**
      * Returns the data provider of this grid.
      * <p>
      * To get information and control over the items in the grid, use either

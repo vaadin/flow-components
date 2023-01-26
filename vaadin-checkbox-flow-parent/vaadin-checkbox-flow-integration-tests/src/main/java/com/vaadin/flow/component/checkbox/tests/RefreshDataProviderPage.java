@@ -34,12 +34,12 @@ public class RefreshDataProviderPage extends Div {
         group.setId("group");
 
         List<String> items = new LinkedList<>(Arrays.asList("foo", "bar"));
-        group.setItems(new ListDataProvider<>(items));
+        var listDataView = group.setItems(new ListDataProvider<>(items));
 
         NativeButton button = new NativeButton("Update items", e -> {
             items.add("baz");
             items.remove(0);
-            group.getDataProvider().refreshAll();
+            listDataView.refreshAll();
         });
 
         button.setId("reset");
