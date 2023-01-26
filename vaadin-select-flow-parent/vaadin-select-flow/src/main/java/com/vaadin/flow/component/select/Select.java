@@ -495,17 +495,6 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
         return getElement().getProperty("autofocus", false);
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @deprecated Because the stream is collected to a list anyway, use
-     *             {@link HasListDataView#setItems(Collection)} instead.
-     */
-    @Deprecated
-    public void setItems(Stream<T> streamOfItems) {
-        setItems(DataProvider.fromStream(streamOfItems));
-    }
-
     private void setDataProvider(DataProvider<T, ?> dataProvider) {
         this.dataProvider.set(dataProvider);
         DataViewUtils.removeComponentFilterAndSortComparator(this);

@@ -153,7 +153,7 @@ public class ComboBoxPage extends Div {
     private void createWithValueChangeListener() {
         ComboBox<Title> titles = new ComboBox<>();
 
-        titles.setItems(Stream.of(Title.values()));
+        titles.setItems(Title.values());
 
         titles.setId("titles");
         selectedTitle.setId("selected-titles");
@@ -164,7 +164,7 @@ public class ComboBoxPage extends Div {
     private void createWithPresetValue() {
         ComboBox<Title> titles = new ComboBox<>();
 
-        titles.setItems(Stream.of(Title.values()));
+        titles.setItems(Title.values());
         titles.setValue(Title.MRS);
 
         titles.setId("titles-with-preset-value");
