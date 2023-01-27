@@ -193,4 +193,16 @@ public class TabsTest {
         Assert.assertNull("should not select other tab if current tab removed",
                 tabs.getSelectedTab());
     }
+
+    @Test
+    public void removeTabInTabsWithoutSelection() {
+        Tab tab1 = new Tab("Tab one");
+        Tabs tabs = new Tabs(tab1);
+
+        tabs.setSelectedTab(null);
+        tabs.remove(tab1);
+
+        Assert.assertNull("should not change selected tab",
+                tabs.getSelectedTab());
+    }
 }
