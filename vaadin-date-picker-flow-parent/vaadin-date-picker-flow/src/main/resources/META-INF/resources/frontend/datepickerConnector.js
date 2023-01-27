@@ -1,6 +1,6 @@
 (function () {
     const tryCatchWrapper = function (callback) {
-        return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Date Picker');
+        return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Date Picker', 'vaadin-date-picker-flow');
     };
 
     window.Vaadin.Flow.datepickerConnector = {
@@ -22,17 +22,17 @@
                     })
                 );
 
+                const dateFns = window.Vaadin.Flow.datepickerDateFns;
+                if (!dateFns) {
+                    throw new Error("Custom date-fns bundle for date picker is not registered at window.Vaadin.Flow.datepickerDateFns");
+                }
+
                 /**
                  * Extracts the basic component parts of a date (day, month and year)
                  * to the expected format.
                  * @param {!Date} date
                  * @return {{day: number, month: number, year: number}}
                  */
-                const dateFns = window.Vaadin.Flow.datepickerDateFns;
-                if (!dateFns) {
-                    throw new Error("Custom date-fns bundle for date picker is not registered at window.Vaadin.Flow.datepickerDateFns");
-                }
-
                 function extractDateParts(date) {
                     return {
                         day: date.getDate(),
@@ -64,7 +64,7 @@
                         .replace('5', 'M')
                         // insert year placeholder
                         .replace('1234', 'yyyy');
-                    const isValidPattern = pattern.includes('d') && pattern.includes('M') && pattern.includes('y');
+                    const isValidPattern = pattern.indexOf('d') >= 0 && pattern.indexOf('M') >= 0 && pattern.indexOf('y') >= 0;
                     if (!isValidPattern) {
                         console.warn('The locale is not supported, using default locale setting(en-US).');
                         return 'M/d/yyyy';
@@ -79,21 +79,21 @@
                     }
 
                     function getShortYearFormat(format) {
-                        if (format.includes('yyyy') && !format.includes('yyyyy')) {
+                        if (format.indexOf('yyyy') >= 0 && !format.indexOf('yyyyy') >= 0) {
                             return format.replace('yyyy', 'yy');
                         }
-                        if (format.includes('YYYY') && !format.includes('YYYYY')) {
+                        if (format.indexOf('YYYY') >= 0 && !format.indexOf('YYYYY') >= 0) {
                             return format.replace('YYYY', 'YY');
                         }
                         return undefined;
                     }
 
                     function isShortYearFormat(format) {
-                        if (format.includes('y')) {
-                            return !format.includes('yyy');
+                        if (format.indexOf('y') >= 0) {
+                            return !format.indexOf('yyy') >= 0;
                         }
-                        if (format.includes('Y')) {
-                            return !format.includes('YYY');
+                        if (format.indexOf('Y') >= 0) {
+                            return !format.indexOf('YYY') >= 0;
                         }
                         return false;
                     }
