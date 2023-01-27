@@ -40,7 +40,7 @@ import com.vaadin.flow.shared.Registration;
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/text-field", version = "24.0.0-alpha12")
 @JsModule("@vaadin/text-field/src/vaadin-text-field.js")
-public class TextField extends InternalFieldBase<TextField, String>
+public class TextField extends TextFieldBase<TextField, String>
         implements HasAllowedCharPattern, HasThemeVariant<TextFieldVariant> {
 
     private boolean isConnectorAttached;
