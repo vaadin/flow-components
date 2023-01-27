@@ -17,6 +17,7 @@
 
 package com.vaadin.flow.component.datepicker;
 
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -28,8 +29,8 @@ import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
-@Route("vaadin-date-picker/date-picker-format")
-public class DatePickerFormatPage extends VerticalLayout {
+@Route("vaadin-date-picker/date-picker-custom-format")
+public class DatePickerCustomFormatPage extends VerticalLayout {
     public static final String PRIMARY_FORMAT_DATE_PICKER = "PRIMARY_FORMAT_DATE_PICKER";
     public static final String PRIMARY_FORMAT_OUTPUT = "PRIMARY_FORMAT_OUTPUT";
     public static final String MULTIPLE_FORMAT_DATE_PICKER = "MULTIPLE_FORMAT_DATE_PICKER";
@@ -46,10 +47,12 @@ public class DatePickerFormatPage extends VerticalLayout {
     public static final String SET_DATE_FORMAT_AFTER_LOCALE_OUTPUT = "SET_DATE_FORMAT_AFTER_LOCALE_OUTPUT";
     public static final String SERVER_SIDE_VALUE_CHANGE_DATE_PICKER = "SERVER_SIDE_VALUE_CHANGE_DATE_PICKER";
     public static final String SERVER_SIDE_VALUE_CHANGE_BUTTON = "SERVER_SIDE_VALUE_CHANGE_BUTTON";
+    public static final String CUSTOM_REFERENCE_DATE_AND_FORMAT_OPTIONS_DATE_PICKER = "CUSTOM_REFERENCE_DATE_AND_FORMAT_OPTIONS_DATE_PICKER";
+    public static final String CUSTOM_REFERENCE_DATE_AND_FORMAT_OPTIONS_OUTPUT = "CUSTOM_REFERENCE_DATE_AND_FORMAT_OPTIONS_OUTPUT";
 
     public static final LocalDate may13 = LocalDate.of(2018, Month.MAY, 13);
 
-    public DatePickerFormatPage() {
+    public DatePickerCustomFormatPage() {
         setupPrimaryFormat();
         setupMultipleFormats();
         setupChangeBetweenFormats();
@@ -57,6 +60,7 @@ public class DatePickerFormatPage extends VerticalLayout {
         setupSetLocaleAfterFormat();
         setupSetFormatAfterLocale();
         setupServerSideValueChange();
+        setupCustomReferenceDateAndFormatOptions();
     }
 
     public void setupPrimaryFormat() {
@@ -163,6 +167,42 @@ public class DatePickerFormatPage extends VerticalLayout {
         btn.setId(SERVER_SIDE_VALUE_CHANGE_BUTTON);
         datePicker.setId(SERVER_SIDE_VALUE_CHANGE_DATE_PICKER);
         add(datePicker, btn);
+    }
+
+    private void setupCustomReferenceDateAndFormatOptions() {
+        DatePicker datePicker = new DatePicker(may13);
+
+        DatePickerI18n i18n = new DatePickerI18n();
+        i18n.setReferenceDate(LocalDate.of(1980, 2, 2));
+        datePicker.setI18n(i18n);
+
+        NativeButton setShortFormat = new NativeButton("Set short format",
+                clickEvent -> {
+                    datePicker.setI18n(
+                            datePicker.getI18n().setDateFormat("yy-MM-dd"));
+                });
+        setShortFormat.setId("set-short-format");
+
+        NativeButton setLongFormat = new NativeButton("Set long format",
+                clickEvent -> {
+                    datePicker.setI18n(
+                            datePicker.getI18n().setDateFormat("yyyy-MM-dd"));
+                });
+        setLongFormat.setId("set-long-format");
+
+        NativeButton setMultipleFormats = new NativeButton(
+                "Set multiple formats", clickEvent -> {
+            datePicker.setI18n(datePicker.getI18n()
+                    .setDateFormats("yy-MM-dd", "yyyy-MM-dd"));
+        });
+        setMultipleFormats.setId("set-multiple-formats");
+
+        Span output = createOutputSpan(datePicker);
+        datePicker.setId(CUSTOM_REFERENCE_DATE_AND_FORMAT_OPTIONS_DATE_PICKER);
+        output.setId(CUSTOM_REFERENCE_DATE_AND_FORMAT_OPTIONS_OUTPUT);
+        add(datePicker,
+                new Div(setShortFormat, setLongFormat, setMultipleFormats),
+                output);
     }
 
     private static Span createOutputSpan(DatePicker datePicker) {
