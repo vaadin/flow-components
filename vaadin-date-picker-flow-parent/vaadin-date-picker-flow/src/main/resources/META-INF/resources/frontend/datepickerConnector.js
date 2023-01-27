@@ -3,6 +3,42 @@
         return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Date Picker', 'vaadin-date-picker-flow');
     };
 
+    const vaadinDatePickerHelpers = {
+        /**
+         * Extracts the basic component parts of a date (day, month and year)
+         * to the expected format.
+         * @param {!Date} date
+         * @return {{day: number, month: number, year: number}}
+         */
+        extractDateParts(date) {
+            return {
+                day: date.getDate(),
+                month: date.getMonth(),
+                year: date.getFullYear(),
+            };
+        },
+        /**
+         * Parse date string of one of the following date formats:
+         * - ISO 8601 `"YYYY-MM-DD"`
+         * - 6-digit extended ISO 8601 `"+YYYYYY-MM-DD"`, `"-YYYYYY-MM-DD"`
+         * @param {!string} str Date string to parse
+         * @return {Date} Parsed date
+         */
+        parseDate(str) {
+            // Parsing with RegExp to ensure correct format
+            const parts = /^([-+]\d{1}|\d{2,4}|[-+]\d{6})-(\d{1,2})-(\d{1,2})$/.exec(str);
+            if (!parts) {
+                return undefined;
+            }
+
+            const date = new Date(0, 0); // Wrong date (1900-01-01), but with midnight in local time
+            date.setFullYear(parseInt(parts[1], 10));
+            date.setMonth(parseInt(parts[2], 10) - 1);
+            date.setDate(parseInt(parts[3], 10));
+            return date;
+        }
+    }
+
     window.Vaadin.Flow.datepickerConnector = {
         initLazy: (datepicker) =>
             tryCatchWrapper(function (datepicker) {
@@ -25,20 +61,6 @@
                 const dateFns = window.Vaadin.Flow.datepickerDateFns;
                 if (!dateFns) {
                     throw new Error("Custom date-fns bundle for date picker is not registered at window.Vaadin.Flow.datepickerDateFns");
-                }
-
-                /**
-                 * Extracts the basic component parts of a date (day, month and year)
-                 * to the expected format.
-                 * @param {!Date} date
-                 * @return {{day: number, month: number, year: number}}
-                 */
-                function extractDateParts(date) {
-                    return {
-                        day: date.getDate(),
-                        month: date.getMonth(),
-                        year: date.getFullYear(),
-                    };
                 }
 
                 const createLocaleBasedDateFormat = function (locale) {
@@ -79,10 +101,10 @@
                     }
 
                     function getShortYearFormat(format) {
-                        if (format.indexOf('yyyy') >= 0 && !format.indexOf('yyyyy') >= 0) {
+                        if (format.indexOf('yyyy') >= 0 && format.indexOf('yyyyy') < 0) {
                             return format.replace('yyyy', 'yy');
                         }
-                        if (format.indexOf('YYYY') >= 0 && !format.indexOf('YYYYY') >= 0) {
+                        if (format.indexOf('YYYY') >= 0 && format.indexOf('YYYYY') < 0) {
                             return format.replace('YYYY', 'YY');
                         }
                         return undefined;
@@ -90,17 +112,17 @@
 
                     function isShortYearFormat(format) {
                         if (format.indexOf('y') >= 0) {
-                            return !format.indexOf('yyy') >= 0;
+                            return format.indexOf('yyy') < 0;
                         }
                         if (format.indexOf('Y') >= 0) {
-                            return !format.indexOf('YYY') >= 0;
+                            return format.indexOf('YYY') < 0;
                         }
                         return false;
                     }
 
                     function formatDate(dateParts) {
                         const format = formats[0];
-                        const date = _parseDate(`${dateParts.year}-${dateParts.month + 1}-${dateParts.day}`);
+                        const date = vaadinDatePickerHelpers.parseDate(`${dateParts.year}-${dateParts.month + 1}-${dateParts.day}`);
 
                         return dateFns.format(date, format);
                     }
@@ -165,32 +187,11 @@
                     return referenceDate ? new Date(referenceDate.year, referenceDate.month - 1, referenceDate.day) : new Date();
                 }
 
-                /**
-                 * Parse date string of one of the following date formats:
-                 * - ISO 8601 `"YYYY-MM-DD"`
-                 * - 6-digit extended ISO 8601 `"+YYYYYY-MM-DD"`, `"-YYYYYY-MM-DD"`
-                 * @param {!string} str Date string to parse
-                 * @return {Date} Parsed date
-                 */
-                function _parseDate(str) {
-                    // Parsing with RegExp to ensure correct format
-                    const parts = /^([-+]\d{1}|\d{2,4}|[-+]\d{6})-(\d{1,2})-(\d{1,2})$/.exec(str);
-                    if (!parts) {
-                        return undefined;
-                    }
-
-                    const date = new Date(0, 0); // Wrong date (1900-01-01), but with midnight in local time
-                    date.setFullYear(parseInt(parts[1], 10));
-                    date.setMonth(parseInt(parts[2], 10) - 1);
-                    date.setDate(parseInt(parts[3], 10));
-                    return date;
-                }
-
                 datepicker.$connector.updateI18n = tryCatchWrapper(function (locale, i18n) {
                     // Either use custom formats specified in I18N, or create format from locale
                     const hasCustomFormats = i18n && i18n.dateFormats && i18n.dateFormats.length > 0;
                     if (i18n && i18n.referenceDate) {
-                        i18n.referenceDate = extractDateParts(new Date(i18n.referenceDate));
+                        i18n.referenceDate = vaadinDatePickerHelpers.extractDateParts(new Date(i18n.referenceDate));
                     }
                     const usedFormats = hasCustomFormats ? i18n.dateFormats : [createLocaleBasedDateFormat(locale)];
                     const formatterAndParser = createFormatterAndParser(usedFormats);
