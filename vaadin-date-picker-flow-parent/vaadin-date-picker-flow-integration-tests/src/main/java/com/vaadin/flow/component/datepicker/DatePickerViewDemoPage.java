@@ -251,6 +251,7 @@ public class DatePickerViewDemoPage extends DemoView {
         // end-source-example
         locale1.setId("Locale-US");
         locale2.setId("Locale-UK");
+        locale3.setId("Locale-CHINA");
         datePicker.setId("locale-change-picker");
         addCard("Date picker with customize locales", datePicker, locale1,
                 locale2, locale3, message);
