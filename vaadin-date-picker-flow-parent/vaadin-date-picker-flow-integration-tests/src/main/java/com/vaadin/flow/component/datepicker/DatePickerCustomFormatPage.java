@@ -192,9 +192,9 @@ public class DatePickerCustomFormatPage extends VerticalLayout {
 
         NativeButton setMultipleFormats = new NativeButton(
                 "Set multiple formats", clickEvent -> {
-            datePicker.setI18n(datePicker.getI18n()
-                    .setDateFormats("yy-MM-dd", "yyyy-MM-dd"));
-        });
+                    datePicker.setI18n(datePicker.getI18n()
+                            .setDateFormats("yy-MM-dd", "yyyy-MM-dd"));
+                });
         setMultipleFormats.setId("set-multiple-formats");
 
         Span output = createOutputSpan(datePicker);

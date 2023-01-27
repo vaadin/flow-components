@@ -187,12 +187,12 @@ public class DatePickerIT extends ComponentDemoTest {
         assertTrue((Boolean) executeScript(
                 "return arguments[0].value === '25/03/2018'", displayText));
     }
+
     private void setDateAndAssert(DatePickerElement datePicker, LocalDate date,
-                                  String expectedInputValue) {
+            String expectedInputValue) {
         datePicker.setDate(date);
         Assert.assertEquals(expectedInputValue, datePicker.getInputValue());
     }
-
 
     @Test
     public void selectDatesBeforeYear1000() {
@@ -234,13 +234,12 @@ public class DatePickerIT extends ComponentDemoTest {
         Assert.assertEquals("04/03/0087", localePicker.getInputValue());
     }
 
-
     /**
      * Expects input value to change to expectedInputValue after setting it.
      */
     private void setInputValueAndAssert(DatePickerElement datePicker,
-                                        String inputValue, String expectedInputValue,
-                                        LocalDate expectedDate) {
+            String inputValue, String expectedInputValue,
+            LocalDate expectedDate) {
         datePicker.setInputValue(inputValue);
         Assert.assertEquals(expectedInputValue, datePicker.getInputValue());
         Assert.assertEquals(expectedDate, datePicker.getDate());
@@ -250,7 +249,7 @@ public class DatePickerIT extends ComponentDemoTest {
      * Expects input value to stay the same as it is set to.
      */
     private void setInputValueAndAssert(DatePickerElement datePicker,
-                                        String inputValue, LocalDate expectedDate) {
+            String inputValue, LocalDate expectedDate) {
         setInputValueAndAssert(datePicker, inputValue, inputValue,
                 expectedDate);
     }

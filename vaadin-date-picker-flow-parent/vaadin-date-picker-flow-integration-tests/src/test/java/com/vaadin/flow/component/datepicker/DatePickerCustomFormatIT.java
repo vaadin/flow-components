@@ -37,8 +37,8 @@ public class DatePickerCustomFormatIT extends AbstractComponentIT {
 
     @Test
     public void testWithPrimaryFormatShouldFormatWithPrimaryFormat() {
-        Assert.assertEquals("2018-05-13",
-                getInputValue(DatePickerCustomFormatPage.PRIMARY_FORMAT_DATE_PICKER));
+        Assert.assertEquals("2018-05-13", getInputValue(
+                DatePickerCustomFormatPage.PRIMARY_FORMAT_DATE_PICKER));
     }
 
     @Test
@@ -96,7 +96,8 @@ public class DatePickerCustomFormatIT extends AbstractComponentIT {
         $("button").id(DatePickerCustomFormatPage.CHANGE_BETWEEN_FORMATS_BUTTON)
                 .click();
 
-        submitValue(DatePickerCustomFormatPage.CHANGE_BETWEEN_FORMATS_DATE_PICKER,
+        submitValue(
+                DatePickerCustomFormatPage.CHANGE_BETWEEN_FORMATS_DATE_PICKER,
                 "2/27/21");
 
         TestBenchElement output = $("span")
@@ -110,7 +111,8 @@ public class DatePickerCustomFormatIT extends AbstractComponentIT {
         String id = DatePickerCustomFormatPage.REMOVE_DATE_FORMAT_DATE_PICKER;
 
         Assert.assertEquals("13 2018 05", getInputValue(id));
-        $("button").id(DatePickerCustomFormatPage.REMOVE_DATE_FORMAT_BUTTON).click();
+        $("button").id(DatePickerCustomFormatPage.REMOVE_DATE_FORMAT_BUTTON)
+                .click();
         Assert.assertEquals("13.5.2018", getInputValue(id));
     }
 
@@ -173,7 +175,8 @@ public class DatePickerCustomFormatIT extends AbstractComponentIT {
 
     @Test
     public void testRemovingDateFormatShouldParseWithLocaleFormat() {
-        $("button").id(DatePickerCustomFormatPage.REMOVE_DATE_FORMAT_BUTTON).click();
+        $("button").id(DatePickerCustomFormatPage.REMOVE_DATE_FORMAT_BUTTON)
+                .click();
 
         submitValue(DatePickerCustomFormatPage.REMOVE_DATE_FORMAT_DATE_PICKER,
                 "15.07.1999");
@@ -186,7 +189,8 @@ public class DatePickerCustomFormatIT extends AbstractComponentIT {
 
     @Test
     public void testRemovingDateFormatShouldNotLogBrowserError() {
-        $("button").id(DatePickerCustomFormatPage.REMOVE_DATE_FORMAT_BUTTON).click();
+        $("button").id(DatePickerCustomFormatPage.REMOVE_DATE_FORMAT_BUTTON)
+                .click();
 
         // Verify datePickerConnector.setLocale is not called with null
         // parameter which would throw and log an error
@@ -197,13 +201,14 @@ public class DatePickerCustomFormatIT extends AbstractComponentIT {
     @Test
     public void testSetLocaleAfterFormatShouldFormatWithCustomFormat() {
         Assert.assertEquals(getInputValue(
-                        DatePickerCustomFormatPage.SET_LOCALE_AFTER_FORMAT_DATE_PICKER),
+                DatePickerCustomFormatPage.SET_LOCALE_AFTER_FORMAT_DATE_PICKER),
                 "2018/05/13");
     }
 
     @Test
     public void testSetLocaleAfterFormatShouldParseWithCustomFormat() {
-        submitValue(DatePickerCustomFormatPage.SET_LOCALE_AFTER_FORMAT_DATE_PICKER,
+        submitValue(
+                DatePickerCustomFormatPage.SET_LOCALE_AFTER_FORMAT_DATE_PICKER,
                 "1999/07/15");
 
         TestBenchElement output = $("span")
@@ -215,7 +220,7 @@ public class DatePickerCustomFormatIT extends AbstractComponentIT {
     @Test
     public void testSetFormatAfterSetLocaleShouldFormatWithCustomFormat() {
         Assert.assertEquals(getInputValue(
-                        DatePickerCustomFormatPage.SET_DATE_FORMAT_AFTER_LOCALE_DATE_PICKER),
+                DatePickerCustomFormatPage.SET_DATE_FORMAT_AFTER_LOCALE_DATE_PICKER),
                 "2018/05/13");
     }
 
@@ -225,8 +230,8 @@ public class DatePickerCustomFormatIT extends AbstractComponentIT {
                 DatePickerCustomFormatPage.SET_DATE_FORMAT_AFTER_LOCALE_DATE_PICKER,
                 "1999/07/15");
 
-        TestBenchElement output = $("span")
-                .id(DatePickerCustomFormatPage.SET_DATE_FORMAT_AFTER_LOCALE_OUTPUT);
+        TestBenchElement output = $("span").id(
+                DatePickerCustomFormatPage.SET_DATE_FORMAT_AFTER_LOCALE_OUTPUT);
 
         Assert.assertEquals("1999-07-15", output.getText());
     }
@@ -236,7 +241,8 @@ public class DatePickerCustomFormatIT extends AbstractComponentIT {
         String id = DatePickerCustomFormatPage.SERVER_SIDE_VALUE_CHANGE_DATE_PICKER;
 
         Assert.assertEquals("", getInputValue(id));
-        $("button").id(DatePickerCustomFormatPage.SERVER_SIDE_VALUE_CHANGE_BUTTON)
+        $("button")
+                .id(DatePickerCustomFormatPage.SERVER_SIDE_VALUE_CHANGE_BUTTON)
                 .click();
         Assert.assertEquals("13.5.2018", getInputValue(id));
     }

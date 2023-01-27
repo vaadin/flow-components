@@ -10,7 +10,7 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-date-picker/date-picker-locale")
-public class    DatePickerLocalePage extends Div {
+public class DatePickerLocalePage extends Div {
 
     private final LocalDate may3rd = LocalDate.of(2018, Month.MAY, 3);
     private final LocalDate april23rd = LocalDate.of(2018, Month.APRIL, 23);
@@ -45,7 +45,6 @@ public class    DatePickerLocalePage extends Div {
         korean.setId("korean-locale-date-picker");
         add(korean);
 
-
         DatePicker datePickerRef = new DatePicker();
         datePickerRef.setId("picker");
         Input localeInput = new Input();
@@ -73,10 +72,10 @@ public class    DatePickerLocalePage extends Div {
         add(datePickerRef, localeInput, applyLocale);
         NativeButton applyCustomReferenceDate = new NativeButton(
                 "Apply custom reference date", e -> {
-            DatePicker.DatePickerI18n i18n = new DatePicker.DatePickerI18n();
-            i18n.setReferenceDate(LocalDate.of(1980, 2, 2));
-            datePickerRef.setI18n(i18n);
-        });
+                    DatePicker.DatePickerI18n i18n = new DatePicker.DatePickerI18n();
+                    i18n.setReferenceDate(LocalDate.of(1980, 2, 2));
+                    datePickerRef.setI18n(i18n);
+                });
         applyCustomReferenceDate.setId("apply-custom-reference-date");
 
         add(datePickerRef, localeInput, applyLocale, applyCustomReferenceDate);
