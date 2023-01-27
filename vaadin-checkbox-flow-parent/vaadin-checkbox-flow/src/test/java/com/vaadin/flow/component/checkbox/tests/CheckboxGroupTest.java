@@ -256,7 +256,7 @@ public class CheckboxGroupTest {
 
         item1.setLabel("etc");
         item2.setLabel("opt");
-        checkboxGroup.getDataProvider().refreshItem(item1);
+        checkboxGroup.getListDataView().refreshItem(item1);
         assertCheckboxLabels(checkboxGroup, "etc", "bar");
 
     }
@@ -277,7 +277,7 @@ public class CheckboxGroupTest {
 
         item1.setLabel("etc");
         item2.setLabel("opt");
-        checkboxGroup.getDataProvider().refreshItem(new Wrapper(1));
+        checkboxGroup.getListDataView().refreshItem(new Wrapper(1));
         assertCheckboxLabels(checkboxGroup, "etc", "bar");
 
     }
@@ -298,7 +298,7 @@ public class CheckboxGroupTest {
 
         item1.setLabel("etc");
         item2.setLabel("opt");
-        checkboxGroup.getDataProvider().refreshAll();
+        checkboxGroup.getListDataView().refreshAll();
         assertCheckboxLabels(checkboxGroup, "etc", "opt");
 
     }
