@@ -170,7 +170,7 @@ public class RadioButtonGroupIT extends ComponentDemoTest {
         Assert.assertEquals(Boolean.TRUE.toString(),
                 buttons.get(1).getAttribute("disabled"));
         Assert.assertEquals(Boolean.TRUE.toString(),
-                group.getAttribute("disabled"));
+                group.getAttribute("readonly"));
 
         scrollToElement(group);
         getCommandExecutor().executeScript("window.scrollBy(0,50);");
