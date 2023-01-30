@@ -49,7 +49,7 @@ import com.vaadin.flow.function.SerializableRunnable;
  */
 @SuppressWarnings("serial")
 public class ContextMenu extends ContextMenuBase<ContextMenu, MenuItem, SubMenu>
-        implements HasMenuItems, HasOverlayClassName {
+        implements HasMenuItems<ContextMenu, MenuItem, SubMenu>, HasOverlayClassName {
 
     /**
      * Creates an empty context menu.

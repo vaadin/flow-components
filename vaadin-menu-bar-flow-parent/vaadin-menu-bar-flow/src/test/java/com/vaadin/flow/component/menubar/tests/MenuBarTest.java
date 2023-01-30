@@ -19,15 +19,15 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.menubar.MenuBarItem;
 import com.vaadin.flow.component.shared.HasOverlayClassName;
 
 public class MenuBarTest {
 
     private MenuBar menuBar;
-    private MenuItem item1, item2;
+    private MenuBarItem item1, item2;
 
     @Before
     public void setup() {
@@ -50,9 +50,9 @@ public class MenuBarTest {
 
     @Test
     public void addChildrenWithClickListeners_getChildren_getItems() {
-        MenuItem item3 = menuBar.addItem("foo", e -> {
+        MenuBarItem item3 = menuBar.addItem("foo", e -> {
         });
-        MenuItem item4 = menuBar.addItem(new Span("bar"), e -> {
+        MenuBarItem item4 = menuBar.addItem(new Span("bar"), e -> {
         });
         assertChildrenAndItems(item1, item2, item3, item4);
     }
@@ -71,7 +71,7 @@ public class MenuBarTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void removeNonChildItem_throws() {
-        MenuItem item = new MenuBar().addItem("foo");
+        MenuBarItem item = new MenuBar().addItem("foo");
         menuBar.remove(item);
     }
 
@@ -88,12 +88,12 @@ public class MenuBarTest {
 
     @Test
     public void implementsHasOverlayClassName() {
-        Assert.assertTrue("ContextMenu should support overlay class name",
+        Assert.assertTrue("MenuBar should support overlay class name",
                 HasOverlayClassName.class
                         .isAssignableFrom(new MenuBar().getClass()));
     }
 
-    private void assertChildrenAndItems(MenuItem... expected) {
+    private void assertChildrenAndItems(MenuBarItem... expected) {
         Object[] menuItems = menuBar.getChildren().toArray();
         Assert.assertArrayEquals(expected, menuItems);
 

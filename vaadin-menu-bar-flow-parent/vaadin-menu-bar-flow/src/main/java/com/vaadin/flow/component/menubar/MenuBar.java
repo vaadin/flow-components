@@ -32,10 +32,8 @@ import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.contextmenu.HasMenuItems;
-import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.contextmenu.MenuItemsArrayGenerator;
 import com.vaadin.flow.component.contextmenu.MenuManager;
-import com.vaadin.flow.component.contextmenu.SubMenu;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasOverlayClassName;
@@ -64,11 +62,11 @@ import elemental.json.JsonType;
 @NpmPackage(value = "@vaadin/menu-bar", version = "24.0.0-alpha13")
 @NpmPackage(value = "@vaadin/tooltip", version = "24.0.0-alpha13")
 public class MenuBar extends Component
-        implements HasEnabled, HasMenuItems, HasOverlayClassName, HasSize,
+        implements HasEnabled, HasMenuItems<MenuBarMenu, MenuBarItem, MenuBarSubMenu>, HasOverlayClassName, HasSize,
         HasStyle, HasThemeVariant<MenuBarVariant> {
 
-    private MenuManager<MenuBar, MenuItem, SubMenu> menuManager;
-    private MenuItemsArrayGenerator<MenuItem> menuItemsArrayGenerator;
+    private MenuManager<MenuBar, MenuBarItem, MenuBarSubMenu> menuManager;
+    private MenuItemsArrayGenerator<MenuBarItem> menuItemsArrayGenerator;
 
     private MenuBarI18n i18n;
 
@@ -88,9 +86,9 @@ public class MenuBar extends Component
                 resetContent();
             }
         };
-        menuManager = new MenuManager<>(this, resetContent,
+        menuManager = new MenuManager<MenuBar, MenuBarItem, MenuBarSubMenu>(this, resetContent,
                 (menu, contentReset) -> new MenuBarRootItem(this, contentReset),
-                MenuItem.class, null);
+                MenuBarItem.class, null);
         addAttachListener(event -> {
             String appId = event.getUI().getInternals().getAppId();
             initConnector(appId);
@@ -99,158 +97,158 @@ public class MenuBar extends Component
     }
 
     /**
-     * Creates a new {@link MenuItem} component with the provided text content
+     * Creates a new {@link MenuBarItem} component with the provided text content
      * and adds it to the root level of this menu bar.
      * <p>
-     * The added {@link MenuItem} component is placed inside a button in the
+     * The added {@link MenuBarItem} component is placed inside a button in the
      * menu bar. If this button overflows the menu bar horizontally, the
-     * {@link MenuItem} is moved out of the button, into a context menu openable
+     * {@link MenuBarItem} is moved out of the button, into a context menu openable
      * via an overflow button at the end of the button row.
      * <p>
      * To add content to the sub menu opened by clicking the root level item,
-     * use {@link MenuItem#getSubMenu()}.
+     * use {@link MenuBarItem#getSubMenu()}.
      *
      * @param text
      *            the text content for the new item
-     * @return the added {@link MenuItem} component
+     * @return the added {@link MenuBarItem} component
      */
-    public MenuItem addItem(String text) {
+    public MenuBarItem addItem(String text) {
         return menuManager.addItem(text);
     }
 
     /**
-     * Creates a new {@link MenuItem} component and adds it to the root level of
+     * Creates a new {@link MenuBarItem} component and adds it to the root level of
      * this menu bar. The provided component is added into the created
-     * {@link MenuItem}.
+     * {@link MenuBarItem}.
      * <p>
-     * The added {@link MenuItem} component is placed inside a button in the
+     * The added {@link MenuBarItem} component is placed inside a button in the
      * menu bar. If this button overflows the menu bar horizontally, the
-     * {@link MenuItem} is moved out of the button, into a context menu openable
+     * {@link MenuBarItem} is moved out of the button, into a context menu openable
      * via an overflow button at the end of the button row.
      * <p>
      * To add content to the sub menu opened by clicking the root level item,
-     * use {@link MenuItem#getSubMenu()}.
+     * use {@link MenuBarItem#getSubMenu()}.
      *
      * @param component
      *            the component to add inside new item
-     * @return the added {@link MenuItem} component
+     * @return the added {@link MenuBarItem} component
      */
-    public MenuItem addItem(Component component) {
+    public MenuBarItem addItem(Component component) {
         return menuManager.addItem(component);
     }
 
     /**
-     * Creates a new {@link MenuItem} component with the provided text content
+     * Creates a new {@link MenuBarItem} component with the provided text content
      * and click listener and adds it to the root level of this menu bar.
      * <p>
-     * The added {@link MenuItem} component is placed inside a button in the
+     * The added {@link MenuBarItem} component is placed inside a button in the
      * menu bar. If this button overflows the menu bar horizontally, the
-     * {@link MenuItem} is moved out of the button, into a context menu openable
+     * {@link MenuBarItem} is moved out of the button, into a context menu openable
      * via an overflow button at the end of the button row.
      * <p>
      * To add content to the sub menu opened by clicking the root level item,
-     * use {@link MenuItem#getSubMenu()}.
+     * use {@link MenuBarItem#getSubMenu()}.
      *
      * @param text
      *            the text content for the new item
      * @param clickListener
      *            the handler for clicking the new item, can be {@code null} to
      *            not add listener
-     * @return the added {@link MenuItem} component
+     * @return the added {@link MenuBarItem} component
      */
     @Override
-    public MenuItem addItem(String text,
-            ComponentEventListener<ClickEvent<MenuItem>> clickListener) {
+    public MenuBarItem addItem(String text,
+            ComponentEventListener<ClickEvent<MenuBarItem>> clickListener) {
         return menuManager.addItem(text, clickListener);
     }
 
     /**
-     * Creates a new {@link MenuItem} component with the provided click listener
+     * Creates a new {@link MenuBarItem} component with the provided click listener
      * and adds it to the root level of this menu bar. The provided component is
-     * added into the created {@link MenuItem}.
+     * added into the created {@link MenuBarItem}.
      * <p>
-     * The added {@link MenuItem} component is placed inside a button in the
+     * The added {@link MenuBarItem} component is placed inside a button in the
      * menu bar. If this button overflows the menu bar horizontally, the
-     * {@link MenuItem} is moved out of the button, into a context menu openable
+     * {@link MenuBarItem} is moved out of the button, into a context menu openable
      * via an overflow button at the end of the button row.
      * <p>
      * To add content to the sub menu opened by clicking the root level item,
-     * use {@link MenuItem#getSubMenu()}.
+     * use {@link MenuBarItem#getSubMenu()}.
      *
      * @param component
      *            the component to add inside the added menu item
      * @param clickListener
      *            the handler for clicking the new item, can be {@code null} to
      *            not add listener
-     * @return the added {@link MenuItem} component
+     * @return the added {@link MenuBarItem} component
      */
     @Override
-    public MenuItem addItem(Component component,
-            ComponentEventListener<ClickEvent<MenuItem>> clickListener) {
+    public MenuBarItem addItem(Component component,
+            ComponentEventListener<ClickEvent<MenuBarItem>> clickListener) {
         return menuManager.addItem(component, clickListener);
     }
 
     /**
-     * Creates a new {@link MenuItem} component with the provided text content
+     * Creates a new {@link MenuBarItem} component with the provided text content
      * and the tooltip text and adds it to the root level of this menu bar.
      * <p>
-     * The added {@link MenuItem} component is placed inside a button in the
+     * The added {@link MenuBarItem} component is placed inside a button in the
      * menu bar. If this button overflows the menu bar horizontally, the
-     * {@link MenuItem} is moved out of the button, into a context menu openable
+     * {@link MenuBarItem} is moved out of the button, into a context menu openable
      * via an overflow button at the end of the button row.
      * <p>
      * To add content to the sub menu opened by clicking the root level item,
-     * use {@link MenuItem#getSubMenu()}.
+     * use {@link MenuBarItem#getSubMenu()}.
      *
      * @param text
      *            the text content for the new item
      * @param tooltipText
      *            the tooltip text for the new item
-     * @return the added {@link MenuItem} component
+     * @return the added {@link MenuBarItem} component
      */
-    public MenuItem addItem(String text, String tooltipText) {
+    public MenuBarItem addItem(String text, String tooltipText) {
         var item = addItem(text);
         setTooltip(item, tooltipText);
         return item;
     }
 
     /**
-     * Creates a new {@link MenuItem} component with the provided tooltip text
+     * Creates a new {@link MenuBarItem} component with the provided tooltip text
      * and adds it to the root level of this menu bar. The provided component is
-     * added into the created {@link MenuItem}.
+     * added into the created {@link MenuBarItem}.
      * <p>
-     * The added {@link MenuItem} component is placed inside a button in the
+     * The added {@link MenuBarItem} component is placed inside a button in the
      * menu bar. If this button overflows the menu bar horizontally, the
-     * {@link MenuItem} is moved out of the button, into a context menu openable
+     * {@link MenuBarItem} is moved out of the button, into a context menu openable
      * via an overflow button at the end of the button row.
      * <p>
      * To add content to the sub menu opened by clicking the root level item,
-     * use {@link MenuItem#getSubMenu()}.
+     * use {@link MenuBarItem#getSubMenu()}.
      *
      * @param component
      *            the component to add inside new item
      * @param tooltipText
      *            the tooltip text for the new item
-     * @return the added {@link MenuItem} component
+     * @return the added {@link MenuBarItem} component
      */
-    public MenuItem addItem(Component component, String tooltipText) {
+    public MenuBarItem addItem(Component component, String tooltipText) {
         var item = addItem(component);
         setTooltip(item, tooltipText);
         return item;
     }
 
     /**
-     * Creates a new {@link MenuItem} component with the provided text content
+     * Creates a new {@link MenuBarItem} component with the provided text content
      * and the tooltip text and click listener and adds it to the root level of
      * this menu bar.
      * <p>
-     * The added {@link MenuItem} component is placed inside a button in the
+     * The added {@link MenuBarItem} component is placed inside a button in the
      * menu bar. If this button overflows the menu bar horizontally, the
-     * {@link MenuItem} is moved out of the button, into a context menu openable
+     * {@link MenuBarItem} is moved out of the button, into a context menu openable
      * via an overflow button at the end of the button row.
      * <p>
      * To add content to the sub menu opened by clicking the root level item,
-     * use {@link MenuItem#getSubMenu()}.
+     * use {@link MenuBarItem#getSubMenu()}.
      *
      * @param text
      *            the text content for the new item
@@ -259,27 +257,27 @@ public class MenuBar extends Component
      * @param clickListener
      *            the handler for clicking the new item, can be {@code null} to
      *            not add listener
-     * @return the added {@link MenuItem} component
+     * @return the added {@link MenuBarItem} component
      */
-    public MenuItem addItem(String text, String tooltipText,
-            ComponentEventListener<ClickEvent<MenuItem>> clickListener) {
+    public MenuBarItem addItem(String text, String tooltipText,
+            ComponentEventListener<ClickEvent<MenuBarItem>> clickListener) {
         var item = addItem(text, clickListener);
         setTooltip(item, tooltipText);
         return item;
     }
 
     /**
-     * Creates a new {@link MenuItem} component with the provided click listener
+     * Creates a new {@link MenuBarItem} component with the provided click listener
      * and the tooltip text and adds it to the root level of this menu bar. The
-     * provided component is added into the created {@link MenuItem}.
+     * provided component is added into the created {@link MenuBarItem}.
      * <p>
-     * The added {@link MenuItem} component is placed inside a button in the
+     * The added {@link MenuBarItem} component is placed inside a button in the
      * menu bar. If this button overflows the menu bar horizontally, the
-     * {@link MenuItem} is moved out of the button, into a context menu openable
+     * {@link MenuBarItem} is moved out of the button, into a context menu openable
      * via an overflow button at the end of the button row.
      * <p>
      * To add content to the sub menu opened by clicking the root level item,
-     * use {@link MenuItem#getSubMenu()}.
+     * use {@link MenuBarItem#getSubMenu()}.
      *
      * @param component
      *            the component to add inside the added menu item
@@ -288,25 +286,25 @@ public class MenuBar extends Component
      * @param clickListener
      *            the handler for clicking the new item, can be {@code null} to
      *            not add listener
-     * @return the added {@link MenuItem} component
+     * @return the added {@link MenuBarItem} component
      */
-    public MenuItem addItem(Component component, String tooltipText,
-            ComponentEventListener<ClickEvent<MenuItem>> clickListener) {
+    public MenuBarItem addItem(Component component, String tooltipText,
+            ComponentEventListener<ClickEvent<MenuBarItem>> clickListener) {
         var item = addItem(component, clickListener);
         setTooltip(item, tooltipText);
         return item;
     }
 
     /**
-     * Gets the {@link MenuItem} components added to the root level of the menu
+     * Gets the {@link MenuBarItem} components added to the root level of the menu
      * bar.
      * <p>
      * To manage the contents inside the sub menus, use the
-     * {@link MenuItem#getSubMenu()}.
+     * {@link MenuBarItem#getSubMenu()}.
      *
-     * @return the root level {@link MenuItem} components added to this menu bar
+     * @return the root level {@link MenuBarItem} components added to this menu bar
      */
-    public List<MenuItem> getItems() {
+    public List<MenuBarItem> getItems() {
         return menuManager.getItems();
     }
 
@@ -320,7 +318,7 @@ public class MenuBar extends Component
      *             this menu bar
      *
      */
-    public void remove(MenuItem... items) {
+    public void remove(MenuBarItem... items) {
         menuManager.remove(items);
     }
 
@@ -496,7 +494,7 @@ public class MenuBar extends Component
      * element with a custom generator is created and added inside the menu bar
      * in case it doesn't exist.
      */
-    private void setTooltip(MenuItem item, String tooltipText) {
+    private void setTooltip(MenuBarItem item, String tooltipText) {
         if (!getElement().getChildren().anyMatch(
                 child -> "tooltip".equals(child.getAttribute("slot")))) {
             // No <vaadin-tooltip> yet added, add one

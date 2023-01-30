@@ -30,7 +30,7 @@ import com.vaadin.flow.component.ComponentEventListener;
  *
  * @author Vaadin Ltd.
  */
-public interface HasMenuItems extends Serializable {
+public interface HasMenuItems<C extends ContextMenuBase<C, I, S>, I extends MenuItemBase<C, I, S>, S extends SubMenuBase<C, I, S>> extends Serializable {
 
     /**
      * Adds a new item component with the given text content and click listener
@@ -53,8 +53,8 @@ public interface HasMenuItems extends Serializable {
      * @see ContextMenu#add(Component...)
      * @see SubMenu#add(Component...)
      */
-    MenuItem addItem(String text,
-            ComponentEventListener<ClickEvent<MenuItem>> clickListener);
+    public I addItem(String text,
+            ComponentEventListener<ClickEvent<I>> clickListener);
 
     /**
      * Adds a new item component with the given component and click listener to
@@ -77,7 +77,7 @@ public interface HasMenuItems extends Serializable {
      * @see ContextMenu#add(Component...)
      * @see SubMenu#add(Component...)
      */
-    MenuItem addItem(Component component,
-            ComponentEventListener<ClickEvent<MenuItem>> clickListener);
+    public I addItem(Component component,
+            ComponentEventListener<ClickEvent<I>> clickListener);
 
 }
