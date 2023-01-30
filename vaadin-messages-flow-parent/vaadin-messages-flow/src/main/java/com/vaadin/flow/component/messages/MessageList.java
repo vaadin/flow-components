@@ -43,12 +43,12 @@ import elemental.json.JsonArray;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-message-list")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.14")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.15")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("./messageListConnector.js")
 @JsModule("@vaadin/message-list/src/vaadin-message-list.js")
-@NpmPackage(value = "@vaadin/message-list", version = "23.2.14")
-@NpmPackage(value = "@vaadin/vaadin-messages", version = "23.2.14")
+@NpmPackage(value = "@vaadin/message-list", version = "23.2.15")
+@NpmPackage(value = "@vaadin/vaadin-messages", version = "23.2.15")
 public class MessageList extends Component
         implements HasStyle, HasSize, LocaleChangeObserver {
 
