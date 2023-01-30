@@ -3,6 +3,8 @@
         return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Date Picker', 'vaadin-date-picker-flow');
     };
 
+    // Duplicated from the web component's helpers module as it's
+    // easier than dealing with imports for both NPM and bower mode
     const vaadinDatePickerHelpers = {
         /**
          * Extracts the basic component parts of a date (day, month and year)
