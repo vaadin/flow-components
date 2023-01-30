@@ -345,7 +345,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          * @return the selection model
          */
         protected <T> GridSelectionModel<T> createModel(Grid<T> grid) {
-            if (name().equals(SINGLE.name())) {
+            if (SINGLE.equals(this)) {
                 return new AbstractGridSingleSelectionModel<T>(grid) {
 
                     @SuppressWarnings("unchecked")
@@ -362,7 +362,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                                 !deselectAllowed);
                     }
                 };
-            } else if (name().equals(MULTI.name())) {
+            } else if (MULTI.equals(this)) {
                 return new AbstractGridMultiSelectionModel<T>(grid) {
 
                     @SuppressWarnings("unchecked")
@@ -372,7 +372,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                         grid.fireEvent((ComponentEvent<Grid<?>>) event);
                     }
                 };
-            } else if (name().equals(NONE.name())) {
+            } else if (NONE.equals(this)) {
                 return new GridNoneSelectionModel<>();
             } else {
                 throw new IllegalStateException("Unknown selection mode");
