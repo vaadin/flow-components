@@ -22,7 +22,7 @@ public class ImageWMSSource extends ImageSource {
     private final Map<String, Object> params;
     private final String serverType;
     private final String crossOrigin;
-    private final float ratio;
+    private final double ratio;
 
     public ImageWMSSource(Options options) {
         super(options);
@@ -116,7 +116,7 @@ public class ImageWMSSource extends ImageSource {
      *
      * @return the ratio
      */
-    public float getRatio() {
+    public double getRatio() {
         return ratio;
     }
 
@@ -125,7 +125,7 @@ public class ImageWMSSource extends ImageSource {
         private Map<String, Object> params;
         private String serverType;
         private String crossOrigin;
-        private float ratio = 1.5f;
+        private double ratio = 1.5;
 
         /**
          * @see ImageWMSSource#getUrl()
@@ -158,7 +158,7 @@ public class ImageWMSSource extends ImageSource {
         /**
          * @see ImageWMSSource#getRatio()
          */
-        public void setRatio(float ratio) {
+        public void setRatio(double ratio) {
             this.ratio = ratio;
         }
     }

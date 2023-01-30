@@ -20,17 +20,14 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasPrefix;
-import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableBiPredicate;
 
 import elemental.json.Json;
@@ -62,15 +59,14 @@ import elemental.json.JsonObject;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-combo-box")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha10")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha12")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/combo-box", version = "24.0.0-alpha10")
+@NpmPackage(value = "@vaadin/combo-box", version = "24.0.0-alpha12")
 @JsModule("@vaadin/combo-box/src/vaadin-combo-box.js")
-@JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./comboBoxConnector.js")
-public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T> implements
-        HasOverlayClassName, HasPrefix, HasThemeVariant<ComboBoxVariant> {
+public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
+        implements HasPrefix, HasThemeVariant<ComboBoxVariant> {
 
     private static final String PROP_SELECTED_ITEM = "selectedItem";
     private static final String PROP_VALUE = "value";
@@ -329,41 +325,5 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T> implements
     @Override
     public T getEmptyValue() {
         return null;
-    }
-
-    /**
-     * Removes the given child components from this component.
-     *
-     * @param components
-     *            The components to remove.
-     * @throws IllegalArgumentException
-     *             if any of the components is not a child of this component.
-     * @deprecated since v23.3
-     */
-    @Deprecated
-    protected void remove(Component... components) {
-        for (Component component : components) {
-            if (getElement().equals(component.getElement().getParent())) {
-                component.getElement().removeAttribute("slot");
-                getElement().removeChild(component.getElement());
-            } else {
-                throw new IllegalArgumentException("The given component ("
-                        + component + ") is not a child of this component");
-            }
-        }
-    }
-
-    /**
-     * Removes all contents from this component, this includes child components,
-     * text content as well as child elements that have been added directly to
-     * this component using the {@link Element} API.
-     *
-     * @deprecated since v23.3
-     */
-    @Deprecated
-    protected void removeAll() {
-        getElement().getChildren()
-                .forEach(child -> child.removeAttribute("slot"));
-        getElement().removeAllChildren();
     }
 }

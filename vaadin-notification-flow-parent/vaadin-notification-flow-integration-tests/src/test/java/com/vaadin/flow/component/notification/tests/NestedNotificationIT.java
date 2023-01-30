@@ -13,19 +13,24 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.grid;
+package com.vaadin.flow.component.notification.tests;
 
-import org.junit.Assert;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
+
 import org.junit.Test;
+import org.openqa.selenium.By;
 
-public class GridColumnGroupTest {
+@TestPath("vaadin-notification/nested")
+public class NestedNotificationIT extends AbstractComponentIT {
+
     @Test
-    public void templateWarningSuppressed() {
-        Grid<String> grid = new Grid<>();
+    public void openNotification_shouldNotThrow() {
+        open();
 
-        ColumnGroup columnGroup = new ColumnGroup(grid);
+        findElement(By.id("open")).click();
 
-        Assert.assertTrue("Template warning is not suppressed", columnGroup
-                .getElement().hasAttribute("suppress-template-warning"));
+        checkLogsForErrors();
     }
+
 }

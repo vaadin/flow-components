@@ -26,6 +26,7 @@ import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
+import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.component.shared.HasClearButton;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
@@ -64,9 +65,11 @@ import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.SerializablePredicate;
+import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.shared.Registration;
 
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -84,7 +87,7 @@ import java.util.stream.Stream;
 public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, TItem, TValue>, TItem, TValue>
         extends AbstractSinglePropertyField<TComponent, TValue>
         implements Focusable<TComponent>, HasAllowedCharPattern, HasAutoOpen,
-        HasClearButton, HasClientValidation,
+        HasClearButton, HasClientValidation, HasOverlayClassName,
         HasDataView<TItem, String, ComboBoxDataView<TItem>>, HasHelper,
         HasLabel, HasLazyDataView<TItem, String, ComboBoxLazyDataView<TItem>>,
         HasListDataView<TItem, ComboBoxListDataView<TItem>>, HasSize, HasStyle,
@@ -148,8 +151,18 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
         super(valuePropertyName, defaultValue, valuePropertyType,
                 presentationToModel, modelToPresentation);
 
+        // Extracted as implementation to fix serialization issue:
+        // https://github.com/vaadin/flow-components/issues/4420
+        // Do not replace with method reference
+        SerializableSupplier<Locale> localeSupplier = new SerializableSupplier<Locale>() {
+            @Override
+            public Locale get() {
+                return ComboBoxBase.this.getLocale();
+            }
+        };
+
         renderManager = new ComboBoxRenderManager<>(this);
-        dataController = new ComboBoxDataController<>(this, this::getLocale);
+        dataController = new ComboBoxDataController<>(this, localeSupplier);
         dataController.getDataGenerator().addDataGenerator((item,
                 jsonObject) -> jsonObject.put("label", generateLabel(item)));
 
@@ -157,9 +170,6 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
         // wrapper items for identification
         getElement().setProperty("itemValuePath", "key");
         getElement().setProperty("itemIdPath", "key");
-
-        // Disable template warnings
-        getElement().setAttribute("suppress-template-warning", true);
 
         // Notify data communicator when selection changes, which allows to
         // free up items / keys in the KeyMapper that are not used anymore in
@@ -659,19 +669,6 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
         return dataController.setItems(dataProvider);
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @deprecated Because the stream is collected to a list anyway, use
-     *             {@link #setItems(Collection)} or
-     *             {@link #setItems(CallbackDataProvider.FetchCallback)}
-     *             instead.
-     */
-    @Deprecated
-    public void setItems(Stream<TItem> streamOfItems) {
-        setItems(DataProvider.fromStream(streamOfItems));
-    }
-
     // ****************************************************
     // Lazy data view implementation
     // ****************************************************
@@ -965,139 +962,6 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      */
     public DataProvider<TItem, ?> getDataProvider() {
         return dataController.getDataProvider();
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * The filter-type of the given data provider must be String so that it can
-     * handle the filters typed into the ComboBox by users. If your data
-     * provider uses some other type of filter, you can provide a function which
-     * converts the ComboBox's filter-string into that type via
-     * {@link #setDataProvider(DataProvider, SerializableFunction)}. Another way
-     * to do the same thing is to use this method with your data provider
-     * converted with
-     * {@link DataProvider#withConvertedFilter(SerializableFunction)}.
-     * <p>
-     * Changing the combo box's data provider resets its current value to
-     * {@code null}.
-     *
-     * @deprecated use instead one of the {@code setItems} methods which provide
-     *             access to either {@link ComboBoxListDataView} or
-     *             {@link ComboBoxLazyDataView}
-     */
-    @Deprecated
-    public void setDataProvider(DataProvider<TItem, String> dataProvider) {
-        dataController.setDataProvider(dataProvider);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * ComboBox triggers filtering queries based on the strings users type into
-     * the field. For this reason you need to provide the second parameter, a
-     * function which converts the filter-string typed by the user into
-     * filter-type used by your data provider. If your data provider already
-     * supports String as the filter-type, it can be used without a converter
-     * function via {@link #setDataProvider(DataProvider)}.
-     * <p>
-     * Using this method provides the same result as using a data provider
-     * wrapped with
-     * {@link DataProvider#withConvertedFilter(SerializableFunction)}.
-     * <p>
-     * Changing the combo box's data provider resets its current value to
-     * {@code null}.
-     *
-     * @deprecated use instead one of the {@code setItems} methods which provide
-     *             access to either {@link ComboBoxListDataView} or
-     *             {@link ComboBoxLazyDataView}
-     */
-    @Deprecated
-    public <C> void setDataProvider(DataProvider<TItem, C> dataProvider,
-            SerializableFunction<String, C> filterConverter) {
-        dataController.setDataProvider(dataProvider, filterConverter);
-    }
-
-    /**
-     * Sets a list data provider as the data provider of this combo box.
-     * <p>
-     * Filtering will use a case insensitive match to show all items where the
-     * filter text is a substring of the label displayed for that item, which
-     * you can configure with
-     * {@link #setItemLabelGenerator(ItemLabelGenerator)}.
-     * <p>
-     * Filtering will be handled in the client-side if the size of the data set
-     * is less than the page size. To force client-side filtering with a larger
-     * data set (at the cost of increased network traffic), you can increase the
-     * page size with {@link #setPageSize(int)}.
-     * <p>
-     * Changing the combo box's data provider resets its current value to
-     * {@code null}.
-     *
-     * @param listDataProvider
-     *            the list data provider to use, not <code>null</code>
-     * @deprecated use instead one of the {@code setItems} methods which provide
-     *             access to {@link ComboBoxListDataView}
-     */
-    @Deprecated
-    public void setDataProvider(ListDataProvider<TItem> listDataProvider) {
-        dataController.setDataProvider(listDataProvider);
-    }
-
-    /**
-     * Sets a CallbackDataProvider using the given fetch items callback and a
-     * size callback.
-     * <p>
-     * This method is a shorthand for making a {@link CallbackDataProvider} that
-     * handles a partial {@link com.vaadin.flow.data.provider.Query Query}
-     * object.
-     * <p>
-     * Changing the combo box's data provider resets its current value to
-     * {@code null}.
-     *
-     * @param fetchItems
-     *            a callback for fetching items, not <code>null</code>
-     * @param sizeCallback
-     *            a callback for getting the count of items, not
-     *            <code>null</code>
-     * @see CallbackDataProvider
-     * @see #setDataProvider(DataProvider)
-     * @deprecated use instead
-     *             {@link #setItems(CallbackDataProvider.FetchCallback, CallbackDataProvider.CountCallback)}
-     *             which provide access to {@link ComboBoxLazyDataView}
-     */
-    @Deprecated
-    public void setDataProvider(ComboBox.FetchItemsCallback<TItem> fetchItems,
-            SerializableFunction<String, Integer> sizeCallback) {
-        dataController.setDataProvider(fetchItems, sizeCallback);
-    }
-
-    /**
-     * Sets a list data provider with an item filter as the data provider of
-     * this combo box. The item filter is used to compare each item to the
-     * filter text entered by the user.
-     * <p>
-     * Note that defining a custom filter will force the component to make
-     * server roundtrips to handle the filtering. Otherwise it can handle
-     * filtering in the client-side, if the size of the data set is less than
-     * the {@link #setPageSize(int) pageSize}.
-     * <p>
-     * Changing the combo box's data provider resets its current value to
-     * {@code null}.
-     *
-     * @param itemFilter
-     *            filter to check if an item is shown when user typed some text
-     *            into the ComboBox
-     * @param listDataProvider
-     *            the list data provider to use, not <code>null</code>
-     * @deprecated use instead
-     *             {@link #setItems(ComboBox.ItemFilter, ListDataProvider)}
-     *             which provide access to {@link ComboBoxListDataView}
-     */
-    @Deprecated
-    public void setDataProvider(ComboBox.ItemFilter<TItem> itemFilter,
-            ListDataProvider<TItem> listDataProvider) {
-        dataController.setDataProvider(itemFilter, listDataProvider);
     }
 
     /**

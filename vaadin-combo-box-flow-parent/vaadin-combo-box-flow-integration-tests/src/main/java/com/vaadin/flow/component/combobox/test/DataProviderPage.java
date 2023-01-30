@@ -50,7 +50,7 @@ public class DataProviderPage extends Div {
     private void createDataProviderWithGetId() {
         ComboBox<TestItem> comboBoxWithGetId = new ComboBox<>();
         comboBoxWithGetId.setId(COMBO_BOX_WITH_GET_ID_ID);
-        comboBoxWithGetId.setDataProvider(new ListDataProvider<TestItem>(list) {
+        comboBoxWithGetId.setItems(new ListDataProvider<TestItem>(list) {
             @Override
             public Object getId(TestItem item) {
                 return item.getId();
@@ -99,7 +99,7 @@ public class DataProviderPage extends Div {
         DataProvider<String, String> dp = DataProvider.fromFilteringCallbacks(
                 q -> items.stream().skip(q.getOffset()).limit(q.getLimit()),
                 q -> items.size());
-        cb.setDataProvider(dp);
+        cb.setItems(dp);
 
         NativeButton refreshAllWithSmallerDataSetButton = new NativeButton(
                 "Refresh all with smaller data set", event -> {

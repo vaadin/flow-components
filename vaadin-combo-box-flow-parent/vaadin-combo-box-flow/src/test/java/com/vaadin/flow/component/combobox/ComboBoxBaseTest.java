@@ -17,9 +17,10 @@ package com.vaadin.flow.component.combobox;
 
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasLabel;
-import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxListDataView;
+import com.vaadin.flow.component.shared.HasAllowedCharPattern;
+import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.data.provider.AbstractDataProvider;
 import com.vaadin.flow.data.provider.DataCommunicator;
@@ -69,18 +70,17 @@ public abstract class ComboBoxBaseTest {
     }
 
     @Test
-    public void implementsHasTooltip() {
-        Assert.assertTrue("ComboBox should support setting a tooltip",
-                HasTooltip.class.isAssignableFrom(
+    public void implementsHasOverlayClassName() {
+        Assert.assertTrue("ComboBox should support overlay class name",
+                HasOverlayClassName.class.isAssignableFrom(
                         createComboBox(String.class).getClass()));
     }
 
     @Test
-    public void templateWarningSuppressed() {
-        ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
-
-        Assert.assertTrue("Template warning is not suppressed", comboBox
-                .getElement().hasAttribute("suppress-template-warning"));
+    public void implementsHasTooltip() {
+        Assert.assertTrue("ComboBox should support setting a tooltip",
+                HasTooltip.class.isAssignableFrom(
+                        createComboBox(String.class).getClass()));
     }
 
     @Test
@@ -218,7 +218,7 @@ public abstract class ComboBoxBaseTest {
     public void setNullDataProvider_throws() {
         ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
         DataProvider<String, String> dp = null;
-        comboBox.setDataProvider(dp);
+        comboBox.setItems(dp);
     }
 
     @Test(expected = NullPointerException.class)
@@ -255,8 +255,8 @@ public abstract class ComboBoxBaseTest {
         DataCommunicatorTest.MockUI ui = new DataCommunicatorTest.MockUI();
         ui.add(comboBox);
 
-        DataProvider<String, Void> dataProvider = Mockito
-                .spy(new AbstractDataProvider<String, Void>() {
+        DataProvider<String, String> dataProvider = Mockito
+                .spy(new AbstractDataProvider<String, String>() {
 
                     @Override
                     public boolean isInMemory() {
@@ -274,7 +274,7 @@ public abstract class ComboBoxBaseTest {
                     }
                 });
 
-        comboBox.setDataProvider(dataProvider, filter -> null);
+        comboBox.setItems(dataProvider);
 
         // Verify that the data communicator and data provider have been created
         Assert.assertNotNull(
@@ -292,10 +292,10 @@ public abstract class ComboBoxBaseTest {
         DataCommunicatorTest.MockUI ui = new DataCommunicatorTest.MockUI();
         ui.add(comboBox);
 
-        DataProvider<String, Void> dataProvider = Mockito.spy(DataProvider
-                .fromCallbacks(query -> Stream.empty(), query -> 0));
+        DataProvider<String, String> dataProvider = Mockito.spy(DataProvider
+                .fromFilteringCallbacks(query -> Stream.empty(), query -> 0));
 
-        comboBox.setDataProvider(dataProvider, filter -> null);
+        comboBox.setItems(dataProvider);
         // Verify that the data communicator and data provider have been created
         Assert.assertNotNull(
                 "Data Communicator and Data Provider should be created "

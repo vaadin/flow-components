@@ -16,18 +16,16 @@
 package com.vaadin.flow.component.dialog;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.Stream.Builder;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
@@ -41,6 +39,8 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
+import com.vaadin.flow.dom.ClassList;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementConstants;
 import com.vaadin.flow.dom.ElementDetachListener;
@@ -76,18 +76,16 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-dialog")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha10")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha12")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/dialog", version = "24.0.0-alpha10")
+@NpmPackage(value = "@vaadin/dialog", version = "24.0.0-alpha12")
 @JsModule("@vaadin/dialog/src/vaadin-dialog.js")
-@JsModule("./dialogConnector.js")
 @JsModule("./flow-component-renderer.js")
 public class Dialog extends Component implements HasComponents, HasSize,
         HasStyle, HasThemeVariant<DialogVariant> {
 
     private static final String OVERLAY_LOCATOR_JS = "this.$.overlay";
 
-    private Element container;
     private boolean autoAddedToTheUi;
     private int onCloseConfigured;
     private String width;
@@ -105,13 +103,6 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * Creates an empty dialog.
      */
     public Dialog() {
-        container = new Element("div");
-        this.container.addAttachListener(event -> {
-            this.container.executeJs(
-                    "Vaadin.FlowComponentHost.patchVirtualContainer(this)");
-        });
-        getElement().appendVirtualChild(container);
-
         // Needs to be updated on each
         // attach, as element depends on node id which is subject to change if
         // the dialog is transferred to another UI, e.g. due to
@@ -354,35 +345,10 @@ public class Dialog extends Component implements HasComponents, HasSize,
      *            the components to add
      */
     @Override
-    public void add(Component... components) {
-        Objects.requireNonNull(components, "Components should not be null");
-        for (Component component : components) {
-            Objects.requireNonNull(component,
-                    "Component to add cannot be null");
-            container.appendChild(component.getElement());
-        }
+    public void add(Collection<Component> components) {
+        HasComponents.super.add(components);
 
         updateVirtualChildNodeIds();
-    }
-
-    @Override
-    public void remove(Component... components) {
-        Objects.requireNonNull(components, "Components should not be null");
-        for (Component component : components) {
-            Objects.requireNonNull(component,
-                    "Component to remove cannot be null");
-            if (container.equals(component.getElement().getParent())) {
-                container.removeChild(component.getElement());
-            } else {
-                throw new IllegalArgumentException("The given component ("
-                        + component + ") is not a child of this component");
-            }
-        }
-    }
-
-    @Override
-    public void removeAll() {
-        container.removeAllChildren();
     }
 
     /**
@@ -400,14 +366,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      */
     @Override
     public void addComponentAtIndex(int index, Component component) {
-        Objects.requireNonNull(component, "Component should not be null");
-        if (index < 0) {
-            throw new IllegalArgumentException(
-                    "Cannot add a component with a negative index");
-        }
-        // The case when the index is bigger than the children count is handled
-        // inside the method below
-        container.insertChild(index, component.getElement());
+        HasComponents.super.addComponentAtIndex(index, component);
 
         updateVirtualChildNodeIds();
     }
@@ -861,14 +820,6 @@ public class Dialog extends Component implements HasComponents, HasSize,
         }
     }
 
-    @Override
-    public Stream<Component> getChildren() {
-        Builder<Component> childComponents = Stream.builder();
-        container.getChildren().forEach(childElement -> ComponentUtil
-                .findComponents(childElement, childComponents::add));
-        return childComponents.build();
-    }
-
     /**
      * Add a lister for event fired by the {@code opened-changed} events.
      *
@@ -911,7 +862,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
     private Map<Element, Registration> childDetachListenerMap = new HashMap<>();
     private ElementDetachListener childDetachListener = e -> {
         var child = e.getSource();
-        var childDetachedFromContainer = !container.getChildren().anyMatch(
+        var childDetachedFromContainer = !getElement().getChildren().anyMatch(
                 containerChild -> Objects.equals(child, containerChild));
 
         if (childDetachedFromContainer) {
@@ -935,7 +886,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      */
     private void updateVirtualChildNodeIds() {
         // Add detach listeners (child may be removed with removeFromParent())
-        container.getChildren().forEach(child -> {
+        getElement().getChildren().forEach(child -> {
             if (!childDetachListenerMap.containsKey(child)) {
                 childDetachListenerMap.put(child,
                         child.addDetachListener(childDetachListener));
@@ -943,7 +894,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
         });
 
         this.getElement().setPropertyList("virtualChildNodeIds",
-                container.getChildren()
+                getElement().getChildren()
                         .map(element -> element.getNode().getId())
                         .collect(Collectors.toList()));
 
@@ -958,7 +909,6 @@ public class Dialog extends Component implements HasComponents, HasSize,
         // as the locator is stored inside component's attributes, no need to
         // remove the data as it should live as long as the component does
         Shortcuts.setShortcutListenOnElement(OVERLAY_LOCATOR_JS, this);
-        initConnector();
         initHeaderFooterRenderer();
         updateVirtualChildNodeIds();
     }
@@ -992,11 +942,6 @@ public class Dialog extends Component implements HasComponents, HasSize,
                 ariaLabel == null ? "" : ariaLabel);
     }
 
-    private void initConnector() {
-        getElement()
-                .executeJs("window.Vaadin.Flow.dialogConnector.initLazy(this)");
-    }
-
     private void initHeaderFooterRenderer() {
         if (dialogHeader != null) {
             dialogHeader.setRendererCreated(false);
@@ -1009,12 +954,14 @@ public class Dialog extends Component implements HasComponents, HasSize,
     }
 
     private void setDimension(String dimension, String value) {
-        getElement().executeJs("requestAnimationFrame(e => "
-                + OVERLAY_LOCATOR_JS + ".$.overlay.style[$0]=$1)", dimension,
-                value);
+        getElement().executeJs(OVERLAY_LOCATOR_JS + ".$.overlay.style[$0]=$1",
+                dimension, value);
     }
 
     private void attachComponentRenderer() {
+        this.getElement().executeJs(
+                "Vaadin.FlowComponentHost.patchVirtualContainer(this)");
+
         String appId = UI.getCurrent().getInternals().getAppId();
 
         getElement().executeJs(
@@ -1030,6 +977,27 @@ public class Dialog extends Component implements HasComponents, HasSize,
     }
 
     /**
+     * Sets the CSS class names of the dialog overlay element. This method
+     * overwrites any previous set class names.
+     *
+     * @param className
+     *            a space-separated string of class names to set, or
+     *            <code>null</code> to remove all class names
+     */
+    @Override
+    public void setClassName(String className) {
+        getClassNames().clear();
+        if (className != null) {
+            addClassNames(className.split(" "));
+        }
+    }
+
+    @Override
+    public ClassList getClassNames() {
+        return new OverlayClassListProxy(this);
+    }
+
+    /**
      * @throws UnsupportedOperationException
      *             Dialog does not support adding styles to overlay
      */
@@ -1038,5 +1006,4 @@ public class Dialog extends Component implements HasComponents, HasSize,
         throw new UnsupportedOperationException(
                 "Dialog does not support adding styles to overlay");
     }
-
 }

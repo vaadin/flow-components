@@ -66,9 +66,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-list-box")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha10")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha12")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/list-box", version = "24.0.0-alpha10")
+@NpmPackage(value = "@vaadin/list-box", version = "24.0.0-alpha12")
 @JsModule("@vaadin/list-box/src/vaadin-list-box.js")
 public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, VALUE>
         extends AbstractSinglePropertyField<C, VALUE>
@@ -97,15 +97,7 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
                 presentationToModel, modelToPresentation);
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @deprecated use instead one of the {@code setItems} methods which provide
-     *             access to either {@link ListBoxListDataView} or
-     *             {@link ListBoxDataView}
-     */
-    @Deprecated
-    public void setDataProvider(DataProvider<ITEM, ?> dataProvider) {
+    private void setDataProvider(DataProvider<ITEM, ?> dataProvider) {
         this.dataProvider.set(Objects.requireNonNull(dataProvider));
         DataViewUtils.removeComponentFilterAndSortComparator(this);
         clear();
@@ -149,11 +141,8 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
      * Gets the data provider.
      *
      * @return the data provider, not {@code null}
-     * @deprecated use {@link #getListDataView()} or
-     *             {@link #getGenericDataView()} instead
      */
-    @Deprecated
-    public DataProvider<ITEM, ?> getDataProvider() {
+    private DataProvider<ITEM, ?> getDataProvider() {
         return dataProvider.get();
     }
 
@@ -388,17 +377,6 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
             ListDataProvider<ITEM> listDataProvider) {
         setDataProvider(listDataProvider);
         return getListDataView();
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @deprecated Because the stream is collected to a list anyway, use
-     *             {@link HasListDataView#setItems(Collection)} instead.
-     */
-    @Deprecated
-    public void setItems(Stream<ITEM> streamOfItems) {
-        setItems(DataProvider.fromStream(streamOfItems));
     }
 
     /**

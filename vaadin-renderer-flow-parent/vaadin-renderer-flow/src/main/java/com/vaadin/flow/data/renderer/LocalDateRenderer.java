@@ -154,54 +154,10 @@ public class LocalDateRenderer<SOURCE>
      *            not <code>null</code>
      * @param formatter
      *            the formatter to use, not <code>null</code>
-     * @deprecated Via this constructor renderer is not serializable, use
-     *             {@link LocalDateRenderer(ValueProvider,
-     *             SerializableSupplier)} instead.
-     */
-    @Deprecated
-    public LocalDateRenderer(ValueProvider<SOURCE, LocalDate> valueProvider,
-            DateTimeFormatter formatter) {
-        this(valueProvider, () -> formatter, "");
-    }
-
-    /**
-     * Creates a new LocalDateRenderer.
-     * <p>
-     * The renderer is configured to render with the given formatter, with an
-     * empty string as its null representation.
-     *
-     * @param valueProvider
-     *            the callback to provide a {@link LocalDate} to the renderer,
-     *            not <code>null</code>
-     * @param formatter
-     *            the formatter to use, not <code>null</code>
      */
     public LocalDateRenderer(ValueProvider<SOURCE, LocalDate> valueProvider,
             SerializableSupplier<DateTimeFormatter> formatter) {
         this(valueProvider, formatter, "");
-    }
-
-    /**
-     * Creates a new LocalDateRenderer.
-     * <p>
-     * The renderer is configured to render with the given formatter.
-     *
-     * @param valueProvider
-     *            the callback to provide a {@link LocalDate} to the renderer,
-     *            not <code>null</code>
-     * @param formatter
-     *            the formatter to use, not <code>null</code>
-     * @param nullRepresentation
-     *            the textual representation of the <code>null</code> value
-     * @deprecated Via this constructor renderer is not serializable, use
-     *             {@link LocalDateRenderer(ValueProvider, SerializableSupplier,
-     *             String)} instead.
-     *
-     */
-    @Deprecated
-    public LocalDateRenderer(ValueProvider<SOURCE, LocalDate> valueProvider,
-            DateTimeFormatter formatter, String nullRepresentation) {
-        this(valueProvider, () -> formatter, nullRepresentation);
     }
 
     /**

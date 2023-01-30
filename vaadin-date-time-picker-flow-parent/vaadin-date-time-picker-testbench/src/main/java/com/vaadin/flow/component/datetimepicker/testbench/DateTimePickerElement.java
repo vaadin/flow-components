@@ -247,13 +247,11 @@ public class DateTimePickerElement extends TestBenchElement
     }
 
     private TestBenchElement getDatePicker() {
-        return $("vaadin-date-time-picker-date-picker")
-                .attribute("slot", "date-picker").first();
+        return $("vaadin-date-picker").attribute("slot", "date-picker").first();
     }
 
     private TestBenchElement getTimePicker() {
-        return $("vaadin-date-time-picker-time-picker")
-                .attribute("slot", "time-picker").first();
+        return $("vaadin-time-picker").attribute("slot", "time-picker").first();
     }
 
     /**

@@ -55,7 +55,7 @@ public class ContextMenu extends ContextMenuBase<ContextMenu, MenuItem, SubMenu>
      * Creates an empty context menu.
      */
     public ContextMenu() {
-        getElement().setAttribute("suppress-template-warning", true);
+        super();
     }
 
     /**

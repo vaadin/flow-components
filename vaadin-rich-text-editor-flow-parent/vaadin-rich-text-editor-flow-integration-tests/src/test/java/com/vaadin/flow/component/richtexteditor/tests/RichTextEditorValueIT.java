@@ -6,7 +6,6 @@ import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 @TestPath("vaadin-rich-text-editor/value")
@@ -18,7 +17,7 @@ public class RichTextEditorValueIT extends AbstractComponentIT {
     private TestBenchElement setValue;
     private TestBenchElement setAsHtmlValue;
     private TestBenchElement setAsDeltaValue;
-    private TestBenchElement setupEditorWithInitialHtmlValue;
+    private TestBenchElement setupEditorWithInitialDeltaValue;
 
     @Before
     public void init() {
@@ -30,8 +29,8 @@ public class RichTextEditorValueIT extends AbstractComponentIT {
         setValue = $("button").id("set-value");
         setAsHtmlValue = $("button").id("set-as-html-value");
         setAsDeltaValue = $("button").id("set-as-delta-value");
-        setupEditorWithInitialHtmlValue = $("button")
-                .id("setup-editor-with-initial-html-value");
+        setupEditorWithInitialDeltaValue = $("button")
+                .id("setup-editor-with-initial-delta-value");
     }
 
     @Test
@@ -45,8 +44,7 @@ public class RichTextEditorValueIT extends AbstractComponentIT {
         ValueChangeEventData asDeltaValueChangeEvent = new ValueChangeEventData(
                 asDeltaValueOutput);
 
-        Assert.assertEquals("[{\"insert\":\"Foo\\n\"}]",
-                valueChangeEvent.value);
+        Assert.assertEquals("<p>Foo</p>", valueChangeEvent.value);
         Assert.assertEquals("<p>Foo</p>", asHtmlValueChangeEvent.value);
         Assert.assertEquals("[{\"insert\":\"Foo\\n\"}]",
                 asDeltaValueChangeEvent.value);
@@ -70,11 +68,8 @@ public class RichTextEditorValueIT extends AbstractComponentIT {
         ValueChangeEventData asDeltaValueChangeEvent = new ValueChangeEventData(
                 asDeltaValueOutput);
 
-        Assert.assertEquals(
-                "[{\"insert\":\"value\"},{\"attributes\":{\"header\":1},\"insert\":\"\\n\"}]",
-                valueChangeEvent.value);
-        // Broken: HTML value is not synced back when setting Delta value
-        // Assert.assertEquals("<h1>value</h1>", asHtmlValueChangeEvent.value);
+        Assert.assertEquals("<h1>value</h1>", valueChangeEvent.value);
+        Assert.assertEquals("<h1>value</h1>", asHtmlValueChangeEvent.value);
         Assert.assertEquals(
                 "[{\"insert\":\"value\"},{\"attributes\":{\"header\":1},\"insert\":\"\\n\"}]",
                 asDeltaValueChangeEvent.value);
@@ -98,9 +93,7 @@ public class RichTextEditorValueIT extends AbstractComponentIT {
         ValueChangeEventData asDeltaValueChangeEvent = new ValueChangeEventData(
                 asDeltaValueOutput);
 
-        Assert.assertEquals(
-                "[{\"insert\":\"as-html-value\"},{\"attributes\":{\"header\":1},\"insert\":\"\\n\"}]",
-                valueChangeEvent.value);
+        Assert.assertEquals("<h1>as-html-value</h1>", valueChangeEvent.value);
         Assert.assertEquals("<h1>as-html-value</h1>",
                 asHtmlValueChangeEvent.value);
         Assert.assertEquals(
@@ -126,12 +119,9 @@ public class RichTextEditorValueIT extends AbstractComponentIT {
         ValueChangeEventData asDeltaValueChangeEvent = new ValueChangeEventData(
                 asDeltaValueOutput);
 
-        Assert.assertEquals(
-                "[{\"insert\":\"as-delta-value\"},{\"attributes\":{\"header\":1},\"insert\":\"\\n\"}]",
-                valueChangeEvent.value);
-        // Broken: HTML value is not synced back when setting Delta value
-        // Assert.assertEquals("<h1>as-delta-value</h1>",
-        // asHtmlValueChangeEvent.value);
+        Assert.assertEquals("<h1>as-delta-value</h1>", valueChangeEvent.value);
+        Assert.assertEquals("<h1>as-delta-value</h1>",
+                asHtmlValueChangeEvent.value);
         Assert.assertEquals(
                 "[{\"insert\":\"as-delta-value\"},{\"attributes\":{\"header\":1},\"insert\":\"\\n\"}]",
                 asDeltaValueChangeEvent.value);
@@ -141,43 +131,45 @@ public class RichTextEditorValueIT extends AbstractComponentIT {
         Assert.assertFalse(asDeltaValueChangeEvent.isFromClient);
     }
 
-    @Ignore("Old value is not properly tracked by AsHtml wrapper")
     @Test
-    public void multipleClientUpdates_oldHtmlValueUpdated() {
+    public void multipleClientUpdates_oldDeltaValueUpdated() {
         writeAndBlur("foo");
         writeAndBlur("bar");
 
-        ValueChangeEventData asHtmlValueChangeEvent = new ValueChangeEventData(
-                asHtmlValueOutput);
+        ValueChangeEventData asDeltaValueChangeEvent = new ValueChangeEventData(
+                asDeltaValueOutput);
 
-        Assert.assertEquals("<p>foobar</p>", asHtmlValueChangeEvent.value);
-        Assert.assertEquals("<p>foo</p>", asHtmlValueChangeEvent.oldValue);
+        Assert.assertEquals("[{\"insert\":\"foobar\\n\"}]",
+                asDeltaValueChangeEvent.value);
+        Assert.assertEquals("[{\"insert\":\"foo\\n\"}]",
+                asDeltaValueChangeEvent.oldValue);
     }
 
-    @Ignore("Old value is not properly tracked by AsHtml wrapper")
     @Test
-    public void multipleServerUpdates_oldHtmlValueUpdated() {
+    public void multipleServerUpdates_oldDeltaValueUpdated() {
         // First update
         setValue.click();
         // Wait for delta sync
-        waitUntil(driver -> !asHtmlValueOutput.getText().isEmpty());
+        waitUntil(driver -> !asDeltaValueOutput.getText().isEmpty());
         // Clean output so that we can wait until it is filled again
-        asHtmlValueOutput.setProperty("textContent", "");
+        asDeltaValueOutput.setProperty("textContent", "");
 
         // Second update
-        setAsHtmlValue.click();
+        setAsDeltaValue.click();
         // Wait for delta sync
-        waitUntil(driver -> !asHtmlValueOutput.getText().isEmpty());
+        waitUntil(driver -> !asDeltaValueOutput.getText().isEmpty());
 
-        ValueChangeEventData asHtmlValueChangeEvent = new ValueChangeEventData(
-                asHtmlValueOutput);
+        ValueChangeEventData asDeltaValueChangeEvent = new ValueChangeEventData(
+                asDeltaValueOutput);
 
-        Assert.assertEquals("<h1>value</h1>", asHtmlValueChangeEvent.oldValue);
+        Assert.assertEquals(
+                "[{\"insert\":\"value\"},{\"attributes\":{\"header\":1},\"insert\":\"\\n\"}]",
+                asDeltaValueChangeEvent.oldValue);
     }
 
     @Test
-    public void setInitialHtmlValue_initialValueChangeEvent() {
-        setupEditorWithInitialHtmlValue.click();
+    public void setInitialDeltaValue_initialValueChangeEvent() {
+        setupEditorWithInitialDeltaValue.click();
 
         valueOutput = $("span").id("value-output");
         waitUntil(driver -> !valueOutput.getText().isEmpty());
@@ -185,9 +177,7 @@ public class RichTextEditorValueIT extends AbstractComponentIT {
         ValueChangeEventData valueChangeEvent = new ValueChangeEventData(
                 valueOutput);
 
-        Assert.assertEquals(
-                "[{\"insert\":\"initial-value\"},{\"attributes\":{\"header\":1},\"insert\":\"\\n\"}]",
-                valueChangeEvent.value);
+        Assert.assertEquals("<h1>initial-value</h1>", valueChangeEvent.value);
     }
 
     private void writeAndBlur(CharSequence... keysToSend) {

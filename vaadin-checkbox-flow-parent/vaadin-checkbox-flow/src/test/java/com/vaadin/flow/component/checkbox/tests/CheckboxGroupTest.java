@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.data.renderer.TextRenderer;
 import org.hamcrest.collection.IsEmptyCollection;
 import org.junit.Assert;
 import org.junit.Rule;
@@ -255,7 +256,7 @@ public class CheckboxGroupTest {
 
         item1.setLabel("etc");
         item2.setLabel("opt");
-        checkboxGroup.getDataProvider().refreshItem(item1);
+        checkboxGroup.getListDataView().refreshItem(item1);
         assertCheckboxLabels(checkboxGroup, "etc", "bar");
 
     }
@@ -276,7 +277,7 @@ public class CheckboxGroupTest {
 
         item1.setLabel("etc");
         item2.setLabel("opt");
-        checkboxGroup.getDataProvider().refreshItem(new Wrapper(1));
+        checkboxGroup.getListDataView().refreshItem(new Wrapper(1));
         assertCheckboxLabels(checkboxGroup, "etc", "bar");
 
     }
@@ -297,7 +298,7 @@ public class CheckboxGroupTest {
 
         item1.setLabel("etc");
         item2.setLabel("opt");
-        checkboxGroup.getDataProvider().refreshAll();
+        checkboxGroup.getListDataView().refreshAll();
         assertCheckboxLabels(checkboxGroup, "etc", "opt");
 
     }
@@ -326,6 +327,20 @@ public class CheckboxGroupTest {
         checkboxGroup.setItemLabelGenerator(item -> item + " (Updated)");
 
         Assert.assertEquals("foo (Updated)", cb.getLabel());
+    }
+
+    @Test
+    public void setItemLabelGenerator_removesItemRenderer() {
+        CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
+        checkboxGroup.setItems("foo", "bar");
+        checkboxGroup.setRenderer(new TextRenderer<>());
+
+        Assert.assertTrue(
+                checkboxGroup.getItemRenderer() instanceof TextRenderer);
+
+        checkboxGroup.setItemLabelGenerator(item -> item);
+
+        Assert.assertNull(checkboxGroup.getItemRenderer());
     }
 
     @Test
@@ -416,7 +431,7 @@ public class CheckboxGroupTest {
         DataProvider<String, Void> dataProvider = DataProvider
                 .fromCallbacks(query -> Stream.of("one"), query -> 1);
 
-        checkboxGroup.setDataProvider(dataProvider);
+        checkboxGroup.setItems(dataProvider);
 
         checkboxGroup.getListDataView();
     }

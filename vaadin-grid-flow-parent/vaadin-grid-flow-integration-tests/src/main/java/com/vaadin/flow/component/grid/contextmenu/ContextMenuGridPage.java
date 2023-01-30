@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.grid.contextmenu;
 
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.grid.Grid;
@@ -49,7 +50,8 @@ public class ContextMenuGridPage extends Div {
         grid.addColumn(Person::getFirstName).setHeader("Name").setId("Name-Id");
         grid.addColumn(Person::getAge).setHeader("Born").setId("Born-Id");
         grid.setItems(IntStream.range(0, 77)
-                .mapToObj(i -> new Person("Person " + i, 1900 + i)));
+                .mapToObj(i -> new Person("Person " + i, 1900 + i))
+                .collect(Collectors.toList()));
 
         GridContextMenu<Person> contextMenu = grid.addContextMenu();
         addItems(contextMenu);
@@ -87,8 +89,8 @@ public class ContextMenuGridPage extends Div {
         GridInATemplate template = new GridInATemplate();
         Grid<String> gridInATemplate = template.getGrid();
         gridInATemplate.addColumn(s -> s).setHeader("Item");
-        gridInATemplate
-                .setItems(IntStream.range(0, 26).mapToObj(i -> "Item " + i));
+        gridInATemplate.setItems(IntStream.range(0, 26)
+                .mapToObj(i -> "Item " + i).collect(Collectors.toList()));
 
         GridContextMenu<String> contextMenu = gridInATemplate.addContextMenu();
         contextMenu.addItem("Show name of context menu target item",

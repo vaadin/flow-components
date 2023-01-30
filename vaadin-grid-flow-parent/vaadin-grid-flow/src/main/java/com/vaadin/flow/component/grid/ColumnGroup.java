@@ -33,7 +33,7 @@ import com.vaadin.flow.dom.Element;
  */
 @JsModule("@vaadin/grid/src/vaadin-grid-column-group.js")
 @Tag("vaadin-grid-column-group")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha10")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha12")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 class ColumnGroup extends AbstractColumn<ColumnGroup> {
 
@@ -63,8 +63,6 @@ class ColumnGroup extends AbstractColumn<ColumnGroup> {
         super(grid);
         columns.forEach(
                 column -> getElement().appendChild(column.getElement()));
-
-        getElement().setAttribute("suppress-template-warning", true);
     }
 
     /**
