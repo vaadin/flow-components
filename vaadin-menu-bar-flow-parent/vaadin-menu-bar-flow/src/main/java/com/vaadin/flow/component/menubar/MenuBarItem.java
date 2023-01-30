@@ -13,37 +13,39 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.contextmenu;
+package com.vaadin.flow.component.menubar;
 
 import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.contextmenu.MenuItemBase;
 import com.vaadin.flow.function.SerializableRunnable;
 
 /**
- * Item component used inside {@link ContextMenu} and {@link SubMenu}. This
- * component can be created and added to a menu overlay with
+ * Item component used inside {@link MenuBarSubMenu}. This component can be
+ * created and added to a menu overlay with
  * {@link HasMenuItems#addItem(String, ComponentEventListener)} and similar
  * methods.
  *
  * @author Vaadin Ltd.
  */
 @SuppressWarnings("serial")
-@Tag("vaadin-context-menu-item")
-public class MenuItem extends MenuItemBase<ContextMenu, MenuItem, SubMenu>
-        implements ClickNotifier<MenuItem> {
+@Tag("vaadin-menu-bar-item")
+public class MenuBarItem
+        extends MenuItemBase<MenuBarMenu, MenuBarItem, MenuBarSubMenu>
+        implements ClickNotifier<MenuBarItem> {
 
     private final SerializableRunnable contentReset;
 
-    public MenuItem(ContextMenu contextMenu,
+    public MenuBarItem(MenuBarMenu contextMenu,
             SerializableRunnable contentReset) {
         super(contextMenu);
         this.contentReset = contentReset;
     }
 
     @Override
-    protected SubMenu createSubMenu() {
-        return new SubMenu(this, contentReset);
+    protected MenuBarSubMenu createSubMenu() {
+        return new MenuBarSubMenu(this, contentReset);
     }
 
 }

@@ -15,17 +15,17 @@
  */
 package com.vaadin.flow.component.menubar.tests;
 
-import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.menubar.MenuBarItem;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-menu-bar/menu-bar-visibility")
 public class MenuBarVisibilityPage extends Div {
     public MenuBarVisibilityPage() {
         MenuBar menuBar = new MenuBar();
-        MenuItem menuItem = menuBar.addItem("Item");
+        MenuBarItem menuItem = menuBar.addItem("Item");
 
         NativeButton toggleMenuBarVisibility = new NativeButton(
                 "Toggle menu bar visibility", (event) -> {

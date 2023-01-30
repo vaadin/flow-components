@@ -59,7 +59,8 @@
         checked: child._checked,
         theme: child.__theme
       };
-      if (child.localName == 'vaadin-context-menu-item' && child._containerNodeId) {
+      // Avoid hardcoding tag name to support vaadin-menu-bar-item
+      if (child._hasVaadinItemMixin && child._containerNodeId) {
         item.children = generateItemsTree(appId, child._containerNodeId);
       }
       child._item = item;

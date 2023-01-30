@@ -15,12 +15,12 @@
  */
 package com.vaadin.flow.component.menubar.tests;
 
-import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.menubar.MenuBarItem;
 import com.vaadin.flow.router.PreserveOnRefresh;
 import com.vaadin.flow.router.Route;
 
@@ -40,18 +40,18 @@ public class MenuBarTestPage extends Div {
         message.setId("message");
         add(message);
 
-        MenuItem item1 = menuBar.addItem("item 1");
+        MenuBarItem item1 = menuBar.addItem("item 1");
 
-        MenuItem item2 = menuBar.addItem(new Paragraph("item 2"),
+        MenuBarItem item2 = menuBar.addItem(new Paragraph("item 2"),
                 e -> message.setText(message.getText() + "clicked item 2"));
 
         item1.getSubMenu().addItem("sub item 1",
                 e -> message.setText("clicked sub item 1"));
-        MenuItem subItem2 = item1.getSubMenu()
+        MenuBarItem subItem2 = item1.getSubMenu()
                 .addItem(new Paragraph("sub item 2"));
 
         subItem2.getSubMenu().addItem(new Paragraph("sub sub item 1"));
-        MenuItem checkable = subItem2.getSubMenu().addItem("checkable");
+        MenuBarItem checkable = subItem2.getSubMenu().addItem("checkable");
         checkable.setCheckable(true);
         checkable.addClickListener(
                 e -> message.setText(String.valueOf(checkable.isChecked())));
