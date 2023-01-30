@@ -28,8 +28,8 @@ import org.openqa.selenium.Keys;
 
 import java.util.logging.Level;
 
-@TestPath("vaadin-date-picker/date-picker-format")
-public class DatePickerFormatIT extends AbstractComponentIT {
+@TestPath("vaadin-date-picker/date-picker-custom-format")
+public class DatePickerCustomFormatIT extends AbstractComponentIT {
     @Before
     public void init() {
         open();
@@ -37,99 +37,160 @@ public class DatePickerFormatIT extends AbstractComponentIT {
 
     @Test
     public void testWithPrimaryFormatShouldFormatWithPrimaryFormat() {
-        Assert.assertEquals("2018-05-13",
-                getInputValue(DatePickerFormatPage.PRIMARY_FORMAT_DATE_PICKER));
+        Assert.assertEquals("2018-05-13", getInputValue(
+                DatePickerCustomFormatPage.PRIMARY_FORMAT_DATE_PICKER));
     }
 
     @Test
     public void testWithPrimaryFormatShouldParseWithPrimaryFormat() {
-        submitValue(DatePickerFormatPage.PRIMARY_FORMAT_DATE_PICKER,
+        submitValue(DatePickerCustomFormatPage.PRIMARY_FORMAT_DATE_PICKER,
                 "2020-10-23");
 
         TestBenchElement output = $("span")
-                .id(DatePickerFormatPage.PRIMARY_FORMAT_OUTPUT);
+                .id(DatePickerCustomFormatPage.PRIMARY_FORMAT_OUTPUT);
         Assert.assertEquals("2020-10-23", output.getText());
     }
 
     @Test
     public void testWithMultipleFormatsShouldFormatWithPrimaryFormat() {
         Assert.assertEquals("2018-05-13", getInputValue(
-                DatePickerFormatPage.MULTIPLE_FORMAT_DATE_PICKER));
+                DatePickerCustomFormatPage.MULTIPLE_FORMAT_DATE_PICKER));
     }
 
     @Test
     public void testWithMultipleFormatsShouldParseWithPrimaryFormat() {
-        submitValue(DatePickerFormatPage.MULTIPLE_FORMAT_DATE_PICKER,
+        submitValue(DatePickerCustomFormatPage.MULTIPLE_FORMAT_DATE_PICKER,
                 "2020-10-23");
 
         TestBenchElement output = $("span")
-                .id(DatePickerFormatPage.MULTIPLE_FORMAT_OUTPUT);
+                .id(DatePickerCustomFormatPage.MULTIPLE_FORMAT_OUTPUT);
         Assert.assertEquals("2020-10-23", output.getText());
     }
 
     @Test
     public void testWithMultipleFormatsShouldParseWithAdditionalParsingFormats() {
         TestBenchElement output = $("span")
-                .id(DatePickerFormatPage.MULTIPLE_FORMAT_OUTPUT);
+                .id(DatePickerCustomFormatPage.MULTIPLE_FORMAT_OUTPUT);
 
-        submitValue(DatePickerFormatPage.MULTIPLE_FORMAT_DATE_PICKER,
+        submitValue(DatePickerCustomFormatPage.MULTIPLE_FORMAT_DATE_PICKER,
                 "23.10.2020");
         Assert.assertEquals("2020-10-23", output.getText());
 
-        submitValue(DatePickerFormatPage.MULTIPLE_FORMAT_DATE_PICKER,
+        submitValue(DatePickerCustomFormatPage.MULTIPLE_FORMAT_DATE_PICKER,
                 "02/27/1999");
         Assert.assertEquals("1999-02-27", output.getText());
     }
 
     @Test
     public void testChangeBetweenFormatsShouldFormatWithNewFormat() {
-        String id = DatePickerFormatPage.CHANGE_BETWEEN_FORMATS_DATE_PICKER;
+        String id = DatePickerCustomFormatPage.CHANGE_BETWEEN_FORMATS_DATE_PICKER;
 
         Assert.assertEquals("13.2018.05", getInputValue(id));
-        $("button").id(DatePickerFormatPage.CHANGE_BETWEEN_FORMATS_BUTTON)
+        $("button").id(DatePickerCustomFormatPage.CHANGE_BETWEEN_FORMATS_BUTTON)
                 .click();
         Assert.assertEquals("5/13/18", getInputValue(id));
     }
 
     @Test
     public void testChangeBetweenFormatsShouldParseInNewFormat() {
-        $("button").id(DatePickerFormatPage.CHANGE_BETWEEN_FORMATS_BUTTON)
+        $("button").id(DatePickerCustomFormatPage.CHANGE_BETWEEN_FORMATS_BUTTON)
                 .click();
 
-        submitValue(DatePickerFormatPage.CHANGE_BETWEEN_FORMATS_DATE_PICKER,
+        submitValue(
+                DatePickerCustomFormatPage.CHANGE_BETWEEN_FORMATS_DATE_PICKER,
                 "2/27/21");
 
         TestBenchElement output = $("span")
-                .id(DatePickerFormatPage.CHANGE_BETWEEN_FORMATS_OUTPUT);
+                .id(DatePickerCustomFormatPage.CHANGE_BETWEEN_FORMATS_OUTPUT);
 
         Assert.assertEquals("2021-02-27", output.getText());
     }
 
     @Test
     public void testRemovingDateFormatShouldFormatWithLocaleFormat() {
-        String id = DatePickerFormatPage.REMOVE_DATE_FORMAT_DATE_PICKER;
+        String id = DatePickerCustomFormatPage.REMOVE_DATE_FORMAT_DATE_PICKER;
 
         Assert.assertEquals("13 2018 05", getInputValue(id));
-        $("button").id(DatePickerFormatPage.REMOVE_DATE_FORMAT_BUTTON).click();
+        $("button").id(DatePickerCustomFormatPage.REMOVE_DATE_FORMAT_BUTTON)
+                .click();
         Assert.assertEquals("13.5.2018", getInputValue(id));
     }
 
     @Test
-    public void testRemovingDateFormatShouldParseWithLocaleFormat() {
-        $("button").id(DatePickerFormatPage.REMOVE_DATE_FORMAT_BUTTON).click();
+    public void testTwoDigitsYearFormatBasedParsingShouldUseReferenceDate() {
+        String id = DatePickerCustomFormatPage.CUSTOM_REFERENCE_DATE_AND_FORMAT_OPTIONS_DATE_PICKER;
+        TestBenchElement output = $("span").id(
+                DatePickerCustomFormatPage.CUSTOM_REFERENCE_DATE_AND_FORMAT_OPTIONS_OUTPUT);
 
-        submitValue(DatePickerFormatPage.REMOVE_DATE_FORMAT_DATE_PICKER,
+        $("button").id("set-short-format").click();
+
+        submitValue(id, "31-02-27");
+        Assert.assertEquals("1931-02-27", output.getText());
+
+        submitValue(id, "29-02-27");
+        Assert.assertEquals("2029-02-27", output.getText());
+    }
+
+    @Test
+    public void testFourDigitsYearFormatBasedParsingShouldUseReferenceDate() {
+        String id = DatePickerCustomFormatPage.CUSTOM_REFERENCE_DATE_AND_FORMAT_OPTIONS_DATE_PICKER;
+        TestBenchElement output = $("span").id(
+                DatePickerCustomFormatPage.CUSTOM_REFERENCE_DATE_AND_FORMAT_OPTIONS_OUTPUT);
+
+        $("button").id("set-long-format").click();
+
+        submitValue(id, "2031-02-27");
+        Assert.assertEquals("2031-02-27", output.getText());
+
+        submitValue(id, "31-02-27");
+        Assert.assertEquals("1931-02-27", output.getText());
+
+        submitValue(id, "29-02-27");
+        Assert.assertEquals("2029-02-27", output.getText());
+
+        submitValue(id, "0030-02-27");
+        Assert.assertEquals("0030-02-27", output.getText());
+    }
+
+    @Test
+    public void testMultipleFormatParsingShouldUseReferenceDate() {
+        String id = DatePickerCustomFormatPage.CUSTOM_REFERENCE_DATE_AND_FORMAT_OPTIONS_DATE_PICKER;
+        TestBenchElement output = $("span").id(
+                DatePickerCustomFormatPage.CUSTOM_REFERENCE_DATE_AND_FORMAT_OPTIONS_OUTPUT);
+
+        $("button").id("set-multiple-formats").click();
+
+        submitValue(id, "2031-02-27");
+        Assert.assertEquals("2031-02-27", output.getText());
+
+        submitValue(id, "31-02-27");
+        Assert.assertEquals("1931-02-27", output.getText());
+
+        submitValue(id, "29-02-27");
+        Assert.assertEquals("2029-02-27", output.getText());
+
+        submitValue(id, "0030-02-27");
+        Assert.assertEquals("0030-02-27", output.getText());
+    }
+
+    @Test
+    public void testRemovingDateFormatShouldParseWithLocaleFormat() {
+        $("button").id(DatePickerCustomFormatPage.REMOVE_DATE_FORMAT_BUTTON)
+                .click();
+
+        submitValue(DatePickerCustomFormatPage.REMOVE_DATE_FORMAT_DATE_PICKER,
                 "15.07.1999");
 
         TestBenchElement output = $("span")
-                .id(DatePickerFormatPage.REMOVE_DATE_FORMAT_OUTPUT);
+                .id(DatePickerCustomFormatPage.REMOVE_DATE_FORMAT_OUTPUT);
 
         Assert.assertEquals("1999-07-15", output.getText());
     }
 
     @Test
     public void testRemovingDateFormatShouldNotLogBrowserError() {
-        $("button").id(DatePickerFormatPage.REMOVE_DATE_FORMAT_BUTTON).click();
+        $("button").id(DatePickerCustomFormatPage.REMOVE_DATE_FORMAT_BUTTON)
+                .click();
 
         // Verify datePickerConnector.setLocale is not called with null
         // parameter which would throw and log an error
@@ -140,17 +201,18 @@ public class DatePickerFormatIT extends AbstractComponentIT {
     @Test
     public void testSetLocaleAfterFormatShouldFormatWithCustomFormat() {
         Assert.assertEquals(getInputValue(
-                DatePickerFormatPage.SET_LOCALE_AFTER_FORMAT_DATE_PICKER),
+                DatePickerCustomFormatPage.SET_LOCALE_AFTER_FORMAT_DATE_PICKER),
                 "2018/05/13");
     }
 
     @Test
     public void testSetLocaleAfterFormatShouldParseWithCustomFormat() {
-        submitValue(DatePickerFormatPage.SET_LOCALE_AFTER_FORMAT_DATE_PICKER,
+        submitValue(
+                DatePickerCustomFormatPage.SET_LOCALE_AFTER_FORMAT_DATE_PICKER,
                 "1999/07/15");
 
         TestBenchElement output = $("span")
-                .id(DatePickerFormatPage.SET_LOCALE_AFTER_FORMAT_OUTPUT);
+                .id(DatePickerCustomFormatPage.SET_LOCALE_AFTER_FORMAT_OUTPUT);
 
         Assert.assertEquals("1999-07-15", output.getText());
     }
@@ -158,35 +220,36 @@ public class DatePickerFormatIT extends AbstractComponentIT {
     @Test
     public void testSetFormatAfterSetLocaleShouldFormatWithCustomFormat() {
         Assert.assertEquals(getInputValue(
-                DatePickerFormatPage.SET_DATE_FORMAT_AFTER_LOCALE_DATE_PICKER),
+                DatePickerCustomFormatPage.SET_DATE_FORMAT_AFTER_LOCALE_DATE_PICKER),
                 "2018/05/13");
     }
 
     @Test
     public void testSetFormatAfterSetLocaleShouldParseWithCustomFormat() {
         submitValue(
-                DatePickerFormatPage.SET_DATE_FORMAT_AFTER_LOCALE_DATE_PICKER,
+                DatePickerCustomFormatPage.SET_DATE_FORMAT_AFTER_LOCALE_DATE_PICKER,
                 "1999/07/15");
 
-        TestBenchElement output = $("span")
-                .id(DatePickerFormatPage.SET_DATE_FORMAT_AFTER_LOCALE_OUTPUT);
+        TestBenchElement output = $("span").id(
+                DatePickerCustomFormatPage.SET_DATE_FORMAT_AFTER_LOCALE_OUTPUT);
 
         Assert.assertEquals("1999-07-15", output.getText());
     }
 
     @Test
     public void testServerSideValueChangeShouldFormatWithCustomFormat() {
-        String id = DatePickerFormatPage.SERVER_SIDE_VALUE_CHANGE_DATE_PICKER;
+        String id = DatePickerCustomFormatPage.SERVER_SIDE_VALUE_CHANGE_DATE_PICKER;
 
         Assert.assertEquals("", getInputValue(id));
-        $("button").id(DatePickerFormatPage.SERVER_SIDE_VALUE_CHANGE_BUTTON)
+        $("button")
+                .id(DatePickerCustomFormatPage.SERVER_SIDE_VALUE_CHANGE_BUTTON)
                 .click();
         Assert.assertEquals("13.5.2018", getInputValue(id));
     }
 
     @Test
     public void testEnteringInvalidValueShouldKeepInvalidValue() {
-        String id = DatePickerFormatPage.MULTIPLE_FORMAT_DATE_PICKER;
+        String id = DatePickerCustomFormatPage.MULTIPLE_FORMAT_DATE_PICKER;
 
         Assert.assertEquals("2018-05-13", getInputValue(id));
 
@@ -198,8 +261,8 @@ public class DatePickerFormatIT extends AbstractComponentIT {
     @Test
     public void testEnteringInvalidValueShouldNotSubmitToServer() {
         TestBenchElement output = $("span")
-                .id(DatePickerFormatPage.MULTIPLE_FORMAT_OUTPUT);
-        String id = DatePickerFormatPage.MULTIPLE_FORMAT_DATE_PICKER;
+                .id(DatePickerCustomFormatPage.MULTIPLE_FORMAT_OUTPUT);
+        String id = DatePickerCustomFormatPage.MULTIPLE_FORMAT_DATE_PICKER;
 
         Assert.assertEquals("2018-05-13", getInputValue(id));
 

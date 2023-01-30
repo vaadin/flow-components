@@ -44,6 +44,17 @@ public class DatePickerLocalePage extends Div {
         korean.setId("korean-locale-date-picker");
         add(korean);
 
-    }
+        DatePicker referenceDatePicker = new DatePicker();
+        referenceDatePicker.setId("reference-date-picker");
 
+        NativeButton applyCustomReferenceDate = new NativeButton(
+                "Apply custom reference date", e -> {
+                    DatePicker.DatePickerI18n i18n = new DatePicker.DatePickerI18n();
+                    i18n.setReferenceDate(LocalDate.of(1980, 2, 2));
+                    referenceDatePicker.setI18n(i18n);
+                });
+        applyCustomReferenceDate.setId("apply-custom-reference-date");
+
+        add(referenceDatePicker, applyCustomReferenceDate);
+    }
 }
