@@ -237,7 +237,7 @@ public class Tabs extends Component
         int lowerIndices = (int) Stream.of(tabs).map(this::indexOf)
                 .filter(index -> index >= 0 && index < selectedIndex).count();
 
-        Tab selectedTab = (selectedIndex < 0) ? null : getTabAt(selectedIndex);
+        Tab selectedTab = getSelectedTab();
         boolean isSelectedTab = selectedTab == null
                 || Stream.of(tabs).anyMatch(selectedTab::equals);
 
