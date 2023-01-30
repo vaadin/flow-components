@@ -192,7 +192,7 @@ then
 else
   mode="-Dfailsafe.forkCount=$FORK_COUNT -Dcom.vaadin.testbench.Parameters.testsInParallel=$TESTS_IN_PARALLEL"
   ### Run IT's in merged module
-  cmd="mvn $verify -Drun-it -Drelease -Dvaadin.productionMode -Dfailsafe.rerunFailingTestsCount=2 $mode $args -pl integration-tests -Dtest=none"
+  cmd="mvn $verify -Drun-it -Drelease -Dvaadin.productionMode -Dvaadin.frontend.hotdeploy=true -Dfailsafe.rerunFailingTestsCount=2 $mode $args -pl integration-tests -Dtest=none"
   tcLog "Running merged ITs - mvn $verify -B -Drun-it -Drelease -pl integration-tests ..."
   echo $cmd
   $cmd
