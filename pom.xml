@@ -19,7 +19,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8
                 </project.reporting.outputEncoding>
-        <jetty.version>11.0.8</jetty.version>
+        <jetty.version>11.0.13</jetty.version>
         <jetty.http.port>8080</jetty.http.port>
         <jetty.stop.port>9999</jetty.stop.port>
         <karaf-maven-plugin.version>4.4.3</karaf-maven-plugin.version>
