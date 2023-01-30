@@ -166,7 +166,7 @@ then
    args="$args -P saucelabs -Dtest.use.hub=true -Dsauce.user=$SAUCE_USER -Dsauce.sauceAccessKey=$SAUCE_ACCESS_KEY"
 fi
 
-args="$args -Dfailsafe.rerunFailingTestsCount=2 -Dmaven.test.redirectTestOutputToFile=true"
+args="$args -Dfailsafe.rerunFailingTestsCount=2 -X"
 
 ## Install a selenium hub in local host to run tests against chrome
 if [ "$TBHUB" = "localhost" ]
