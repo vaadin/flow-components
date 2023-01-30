@@ -15,10 +15,9 @@
  */
 package com.vaadin.flow.component.menubar;
 
-import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.function.SerializableRunnable;
 
-class MenuBarRootItem extends MenuItem {
+class MenuBarRootItem extends MenuBarItem {
 
     private MenuBar menuBar;
 
