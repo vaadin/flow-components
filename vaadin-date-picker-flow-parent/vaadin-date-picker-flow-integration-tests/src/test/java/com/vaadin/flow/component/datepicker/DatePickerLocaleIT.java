@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
@@ -24,14 +23,6 @@ import com.vaadin.testbench.TestBenchElement;
 public class DatePickerLocaleIT extends AbstractComponentIT {
 
     private static final String DATEPICKER_OVERLAY = "vaadin-date-picker-overlay";
-
-    private DatePickerElement picker;
-
-    @Before
-    public void init() {
-        open();
-        picker = $(DatePickerElement.class).id("picker");
-    }
 
     @Test
     public void testPickerWithValueAndLocaleFromServerSideDifferentCtor() {
@@ -111,6 +102,8 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
 
     @Test
     public void datePickerWithLocale_setInputValue_blur_defaultReferenceDateIsUsed() {
+        open();
+
         LocalDate now = LocalDate.now();
         int currentYear = now.getYear();
 
@@ -130,6 +123,8 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
 
     @Test
     public void datePickerWithLocale_setCustomReferenceDate_setInputValue_blur_customReferenceDateIsUsed() {
+        open();
+
         $("button").id("apply-custom-reference-date").click();
 
         testParseReformatCycle("31", "1931");
@@ -150,6 +145,9 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
     }
 
     private void testParseReformatCycle(String testYear, String expectedYear) {
+        DatePickerElement picker = $(DatePickerElement.class)
+                .id("reference-date-picker");
+
         int dayOfTheMonth = 27;
         int month = 11;
         String dateStringWithoutYear = month + "/" + dayOfTheMonth + "/";
