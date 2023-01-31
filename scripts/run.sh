@@ -10,8 +10,8 @@
 [ "$HEADLESS" = false ] && args="$args -DdisableHeadless" && quiet="" || quiet="-q"
 
 ## Speedup installation of frontend stuff
-verify="verify -Dvaadin.pnpm.enable"
-jettyrun="jetty:run -Dvaadin.pnpm.enable"
+verify="verify -Dvaadin.pnpm.enable -Dvaadin.frontend.hotdeploy=true"
+jettyrun="jetty:run -Dvaadin.pnpm.enable -Dvaadin.frontend.hotdeploy=true"
 
 ## List all modules and ask for one to the user
 askModule() {
