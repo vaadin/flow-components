@@ -96,9 +96,8 @@ public abstract class Feature extends AbstractConfigurationObject {
      * or not. Enabling this will make the feature draggable on the map,
      * indicated by a pointer cursor when hovering over the feature. The
      * feature's position / geometry is automatically updated after dropping the
-     * feature. Use
-     * {@link Map#addFeatureDragDropListener(ComponentEventListener)} to get
-     * notified when a feature has been moved.
+     * feature. Use {@link Map#addFeatureDropListener(ComponentEventListener)}
+     * to get notified when a feature has been moved.
      *
      * @param draggable
      *            whether the feature can be dragged or not

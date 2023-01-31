@@ -147,7 +147,7 @@ openLayersSetUserProjection('EPSG:4326');
       if (!feature) return;
       const layer = getLayerForFeature(mapElement.configuration.getLayers().getArray(), feature);
 
-      const featureDragDropEvent = new CustomEvent('map-feature-drag-drop', {
+      const featureDropEvent = new CustomEvent('map-feature-drop', {
         detail: {
           feature,
           layer,
@@ -156,7 +156,7 @@ openLayersSetUserProjection('EPSG:4326');
         }
       });
 
-      mapElement.dispatchEvent(featureDragDropEvent);
+      mapElement.dispatchEvent(featureDropEvent);
     });
 
     mapElement.configuration.addInteraction(translate);

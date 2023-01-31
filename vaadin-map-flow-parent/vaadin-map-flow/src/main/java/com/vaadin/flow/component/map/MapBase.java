@@ -22,7 +22,7 @@ import com.vaadin.flow.component.map.configuration.View;
 import com.vaadin.flow.component.map.configuration.layer.VectorLayer;
 import com.vaadin.flow.component.map.events.MapFeatureClickEvent;
 import com.vaadin.flow.component.map.events.MapClickEvent;
-import com.vaadin.flow.component.map.events.MapFeatureDragDropEvent;
+import com.vaadin.flow.component.map.events.MapFeatureDropEvent;
 import com.vaadin.flow.component.map.events.MapViewMoveEndEvent;
 import com.vaadin.flow.component.map.serialization.MapSerializer;
 import com.vaadin.flow.component.shared.HasThemeVariant;
@@ -34,8 +34,6 @@ import java.beans.PropertyChangeEvent;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Base class for the map component. Contains all base functionality for the map
@@ -142,8 +140,8 @@ public abstract class MapBase extends Component
             getView().updateInternalViewState(center, rotation, zoom, extent);
         });
         // Register an event listener before all the other listeners of the
-        // feature drag drop event to update the feature's position
-        addFeatureDragDropListener(event -> {
+        // feature drop event to update the feature's position
+        addFeatureDropListener(event -> {
             double deltaX = event.getCoordinate().getX()
                     - event.getStartCoordinate().getX();
             double deltaY = event.getCoordinate().getY()
@@ -234,8 +232,8 @@ public abstract class MapBase extends Component
      * @return registration for the listener
      * @see Feature
      */
-    public Registration addFeatureDragDropListener(
-            ComponentEventListener<MapFeatureDragDropEvent> listener) {
-        return addListener(MapFeatureDragDropEvent.class, listener);
+    public Registration addFeatureDropListener(
+            ComponentEventListener<MapFeatureDropEvent> listener) {
+        return addListener(MapFeatureDropEvent.class, listener);
     }
 }

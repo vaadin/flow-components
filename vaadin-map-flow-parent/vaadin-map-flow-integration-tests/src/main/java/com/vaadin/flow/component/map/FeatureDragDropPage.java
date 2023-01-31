@@ -33,7 +33,7 @@ public class FeatureDragDropPage extends Div {
         Span markerCoordinates = new Span();
         markerCoordinates.setId("marker-coordinates");
 
-        map.addFeatureDragDropListener(event -> {
+        map.addFeatureDropListener(event -> {
             eventFeatureId.setText(event.getFeature().getId());
             eventCoordinates.setText(formatCoordinates(event.getCoordinate()));
             eventStartCoordinates

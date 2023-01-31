@@ -21,8 +21,8 @@ import elemental.json.JsonArray;
 /**
  * Provides data for when a feature is dropped after a drag operation
  */
-@DomEvent("map-feature-drag-drop")
-public class MapFeatureDragDropEvent extends ComponentEvent<Map> {
+@DomEvent("map-feature-drop")
+public class MapFeatureDropEvent extends ComponentEvent<Map> {
 
     private final Feature feature;
     private final VectorLayer layer;
@@ -30,7 +30,7 @@ public class MapFeatureDragDropEvent extends ComponentEvent<Map> {
     private final Coordinate coordinate;
     private final Coordinate startCoordinate;
 
-    public MapFeatureDragDropEvent(Map source, boolean fromClient,
+    public MapFeatureDropEvent(Map source, boolean fromClient,
             @EventData("event.detail.feature.id") String featureId,
             @EventData("event.detail.layer.id") String layerId,
             @EventData("event.detail.coordinate") JsonArray coordinate,
