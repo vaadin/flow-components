@@ -76,9 +76,9 @@ function synchronizeFeature(target, source, context) {
 
   target.setGeometry(context.lookup.get(source.geometry));
 
-  // Define style function is run before rendering each feature. The function
-  // supports using a fallback text style for rendering labels in case the
-  // feature doesn't define its own text style.
+  // Define style function that is run before rendering each feature. The
+  // function supports using a fallback text style for rendering labels in case
+  // the feature doesn't define its own text style.
   // Acquire reference to style instance outside of style function, otherwise
   // there would be no reference to the instance, and it might get garbage
   // collected.
