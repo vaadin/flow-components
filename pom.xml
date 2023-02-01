@@ -106,9 +106,7 @@
                             <artifactId>jetty-maven-plugin</artifactId>
                             <configuration>
                                 <systemProperties>
-                                    <systemProperty>
-                                        <vaadin.productionMode>true</vaadin.productionMode>
-                                    </systemProperty>
+                                    <vaadin.productionMode>true</vaadin.productionMode>
                                 </systemProperties>
                             </configuration>
                         </plugin>
