@@ -9,6 +9,9 @@
  */
 import Feature from 'ol/Feature';
 import Point from 'ol/geom/Point';
+import Fill from 'ol/style/Fill';
+import Stroke from 'ol/style/Stroke';
+import Text from 'ol/style/Text';
 import View from 'ol/View';
 import { synchronizeImageLayer, synchronizeTileLayer, synchronizeVectorLayer } from './layers.js';
 import {
@@ -20,6 +23,16 @@ import {
 } from './sources.js';
 import { synchronizeIcon, synchronizeFill, synchronizeStroke, synchronizeStyle } from './styles.js';
 import { convertToCoordinateArray, synchronizeCollection } from './util.js';
+
+/**
+ * Fallback text style to use for features that don't have a custom one
+ */
+const fallbackTextStyle = new Text({
+  font: '13px sans-serif',
+  offsetY: 10,
+  fill: new Fill({ color: '#333' }),
+  stroke: new Stroke({ color: '#fff', width: 3 })
+});
 
 function synchronizeMap(target, source, context) {
   if (!target) {
@@ -62,7 +75,31 @@ function synchronizeFeature(target, source, context) {
   }
 
   target.setGeometry(context.lookup.get(source.geometry));
-  target.setStyle(context.lookup.get(source.style));
+
+  // Define style function is run before rendering each feature. The function
+  // supports using a fallback text style for rendering labels in case the
+  // feature doesn't define its own text style.
+  // Acquire reference to style instance outside of style function, otherwise
+  // there would be no reference to the instance, and it might get garbage
+  // collected.
+  const style = context.lookup.get(source.style);
+  target.setStyle(() => {
+    if (!style) {
+      return undefined;
+    }
+    // If feature has a label but no custom text style, then use default text
+    // style
+    if (source.label && !style.getText()) {
+      style.setText(fallbackTextStyle);
+    }
+    // Set the feature's label on the text style. This is safe even when using
+    // the default text style instance, as for each feature using the default
+    // text style, this function will be called again before rendering.
+    if (style.getText()) {
+      style.getText().setText(source.label);
+    }
+    return style;
+  });
   target.draggable = source.draggable;
 
   return target;
