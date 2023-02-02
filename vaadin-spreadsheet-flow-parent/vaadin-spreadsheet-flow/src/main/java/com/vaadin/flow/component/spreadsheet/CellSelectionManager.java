@@ -117,7 +117,9 @@ public class CellSelectionManager implements Serializable {
     }
 
     boolean isCellInsideSelection(int row, int column) {
-        CellReference cellReference = new CellReference(row - 1, column - 1);
+        CellReference cellReference = new CellReference(
+                spreadsheet.getActiveSheet().getSheetName(), row - 1,
+                column - 1, false, false);
         boolean inside = cellReference.equals(selectedCellReference)
                 || individualSelectedCells.contains(cellReference);
         if (!inside) {
@@ -174,7 +176,9 @@ public class CellSelectionManager implements Serializable {
      */
     protected void onCellSelected(int row, int column,
             boolean discardOldRangeSelection) {
-        CellReference cellReference = new CellReference(row - 1, column - 1);
+        CellReference cellReference = new CellReference(
+                spreadsheet.getActiveSheet().getSheetName(), row - 1,
+                column - 1, false, false);
         CellReference previousCellReference = selectedCellReference;
         if (!cellReference.equals(previousCellReference)
                 || discardOldRangeSelection && (!cellRangeAddresses.isEmpty()
@@ -218,8 +222,9 @@ public class CellSelectionManager implements Serializable {
                             region.col1 - 1, region.col2 - 1);
                 }
                 handleCellRangeSelection(cra);
-                selectedCellReference = new CellReference(cra.getFirstRow(),
-                        cra.getFirstColumn());
+                selectedCellReference = new CellReference(
+                        spreadsheet.getActiveSheet().getSheetName(),
+                        cra.getFirstRow(), cra.getFirstColumn(), false, false);
                 paintedCellRange = cra;
                 cellRangeAddresses.clear();
                 cellRangeAddresses.add(cra);
@@ -235,8 +240,10 @@ public class CellSelectionManager implements Serializable {
                             .createCorrectCellRangeAddress(region.row1,
                                     region.col1, region.row2, region.col2);
                     handleCellRangeSelection(cra);
-                    selectedCellReference = new CellReference(cra.getFirstRow(),
-                            cra.getFirstColumn());
+                    selectedCellReference = new CellReference(
+                            spreadsheet.getActiveSheet().getSheetName(),
+                            cra.getFirstRow(), cra.getFirstColumn(), false,
+                            false);
                     paintedCellRange = cra;
                     cellRangeAddresses.clear();
                     cellRangeAddresses.add(cra);
@@ -386,8 +393,9 @@ public class CellSelectionManager implements Serializable {
 
     protected void handleCellRangeSelection(String name, CellRangeAddress cra) {
 
-        final CellReference firstCell = new CellReference(cra.getFirstRow(),
-                cra.getFirstColumn());
+        final CellReference firstCell = new CellReference(
+                spreadsheet.getActiveSheet().getSheetName(), cra.getFirstRow(),
+                cra.getFirstColumn(), false, false);
 
         handleCellRangeSelection(name, firstCell, cra, true);
     }
@@ -467,8 +475,9 @@ public class CellSelectionManager implements Serializable {
         cellRangeAddresses.clear();
         individualSelectedCells.clear();
 
-        selectedCellReference = new CellReference(selectedCellRow - 1,
-                selectedCellColumn - 1);
+        selectedCellReference = new CellReference(
+                spreadsheet.getActiveSheet().getSheetName(),
+                selectedCellRow - 1, selectedCellColumn - 1, false, false);
 
         CellRangeAddress cra = spreadsheet.createCorrectCellRangeAddress(row1,
                 col1, row2, col2);
@@ -511,7 +520,9 @@ public class CellSelectionManager implements Serializable {
             individualSelectedCells.add(selectedCellReference);
         }
         handleCellSelection(row, column);
-        selectedCellReference = new CellReference(row - 1, column - 1);
+        selectedCellReference = new CellReference(
+                spreadsheet.getActiveSheet().getSheetName(), row - 1,
+                column - 1, false, false);
         spreadsheet.loadCustomEditorOnSelectedCell();
         if (individualSelectedCells.contains(selectedCellReference)) {
             individualSelectedCells.remove(
@@ -562,8 +573,9 @@ public class CellSelectionManager implements Serializable {
      */
     protected void onRowSelected(int row, int firstColumnIndex) {
         handleCellSelection(row, firstColumnIndex);
-        selectedCellReference = new CellReference(row - 1,
-                firstColumnIndex - 1);
+        selectedCellReference = new CellReference(
+                spreadsheet.getActiveSheet().getSheetName(), row - 1,
+                firstColumnIndex - 1, false, false);
         spreadsheet.loadCustomEditorOnSelectedCell();
         cellRangeAddresses.clear();
         individualSelectedCells.clear();
@@ -596,8 +608,9 @@ public class CellSelectionManager implements Serializable {
             individualSelectedCells.add(selectedCellReference);
         }
         handleCellSelection(row, firstColumnIndex);
-        selectedCellReference = new CellReference(row - 1,
-                firstColumnIndex - 1);
+        selectedCellReference = new CellReference(
+                spreadsheet.getActiveSheet().getSheetName(), row - 1,
+                firstColumnIndex - 1, false, false);
         spreadsheet.loadCustomEditorOnSelectedCell();
         cellRangeAddresses.add(spreadsheet.createCorrectCellRangeAddress(row, 1,
                 row, spreadsheet.getColumns()));
@@ -616,8 +629,9 @@ public class CellSelectionManager implements Serializable {
      */
     protected void onColumnSelected(int firstRowIndex, int column) {
         handleCellSelection(firstRowIndex, column);
-        selectedCellReference = new CellReference(firstRowIndex - 1,
-                column - 1);
+        selectedCellReference = new CellReference(
+                spreadsheet.getActiveSheet().getSheetName(), firstRowIndex - 1,
+                column - 1, false, false);
         spreadsheet.loadCustomEditorOnSelectedCell();
         cellRangeAddresses.clear();
         individualSelectedCells.clear();
@@ -650,8 +664,9 @@ public class CellSelectionManager implements Serializable {
             individualSelectedCells.add(selectedCellReference);
         }
         handleCellSelection(firstRowIndex, column);
-        selectedCellReference = new CellReference(firstRowIndex - 1,
-                column - 1);
+        selectedCellReference = new CellReference(
+                spreadsheet.getActiveSheet().getSheetName(), firstRowIndex - 1,
+                column - 1, false, false);
         spreadsheet.loadCustomEditorOnSelectedCell();
         cellRangeAddresses.add(spreadsheet.createCorrectCellRangeAddress(1,
                 column, spreadsheet.getRows(), column));
@@ -680,8 +695,10 @@ public class CellSelectionManager implements Serializable {
                 handleCellAddressChange(region.getFirstRow() + 1,
                         region.getFirstColumn() + 1, false);
             }
-            selectedCellReference = new CellReference(region.getFirstRow(),
-                    region.getFirstColumn());
+            selectedCellReference = new CellReference(
+                    spreadsheet.getActiveSheet().getSheetName(),
+                    region.getFirstRow(), region.getFirstColumn(), false,
+                    false);
             fire = true;
         }
         for (Iterator<CellRangeAddress> i = cellRangeAddresses.iterator(); i
