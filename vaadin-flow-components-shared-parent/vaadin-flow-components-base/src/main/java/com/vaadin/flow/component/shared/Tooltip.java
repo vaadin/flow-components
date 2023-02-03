@@ -35,6 +35,8 @@ import com.vaadin.flow.function.SerializableRunnable;
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
 public class Tooltip implements Serializable {
 
+    private static final String TOOLTIP_DATA_KEY = "tooltip";
+
     /**
      * The {@code <vaadin-tooltip>} element controlled by this tooltip instance.
      */
@@ -127,7 +129,7 @@ public class Tooltip implements Serializable {
      */
     static Tooltip getForElement(Element element) {
         var component = ComponentUtil.getInnermostComponent(element);
-        return (Tooltip) ComponentUtil.getData(component, "tooltip");
+        return (Tooltip) ComponentUtil.getData(component, TOOLTIP_DATA_KEY);
     }
 
     /**
@@ -142,7 +144,7 @@ public class Tooltip implements Serializable {
         var tooltip = new Tooltip();
         SlotUtils.setSlot(hasTooltip, "tooltip", tooltip.tooltipElement);
         var component = ComponentUtil.getInnermostComponent(hasTooltip.getElement());
-        ComponentUtil.setData(component, "tooltip", tooltip);
+        ComponentUtil.setData(component, TOOLTIP_DATA_KEY, tooltip);
         return tooltip;
     }
 
