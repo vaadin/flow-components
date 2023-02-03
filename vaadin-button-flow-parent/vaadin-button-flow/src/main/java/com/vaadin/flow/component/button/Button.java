@@ -381,8 +381,11 @@ public class Button extends GeneratedVaadinButton<Button>
         // Add theme attribute "icon" when the button contains only an icon to
         // fully support themes like Lumo. This doesn't override explicitly set
         // theme attribute.
+        long childCount = getElement().getChildren().filter(
+                el -> el.isTextNode() || !"vaadin-tooltip".equals(el.getTag()))
+                .count();
 
-        if (getElement().getChildCount() == 1 && iconComponent != null) {
+        if (childCount == 1 && iconComponent != null) {
             getThemeNames().add("icon");
         } else {
             getThemeNames().remove("icon");
