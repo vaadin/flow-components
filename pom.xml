@@ -571,6 +571,11 @@
                 <version>${testbench.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>vaadin-testbench-shared</artifactId>
+                <version>${testbench.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.poi</groupId>
                 <artifactId>poi</artifactId>
                 <version>${poi.version}</version>
