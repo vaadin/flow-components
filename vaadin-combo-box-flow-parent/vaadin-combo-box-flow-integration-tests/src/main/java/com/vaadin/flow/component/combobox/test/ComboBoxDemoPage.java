@@ -125,6 +125,10 @@ public class ComboBoxDemoPage extends VerticalLayout {
         createComboBoxWithInMemoryLazyLoading();
         createComboBoxWithCallbackLazyLoading();
         createComboBoxWithCustomValues();
+
+        // Apply bottom padding to page as some tests rely on combo box
+        // dropdowns to open with a minimum height
+        getStyle().set("padding-bottom", "200px");
     }
 
     private void createStringComboBox() {
