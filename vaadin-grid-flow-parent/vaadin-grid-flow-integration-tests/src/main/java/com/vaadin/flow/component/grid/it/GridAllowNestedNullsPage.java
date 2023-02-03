@@ -39,7 +39,7 @@ public class GridAllowNestedNullsPage extends Div {
         Grid<Employee> grid = new Grid<>(Employee.class, false);
         grid.setNestedNullBehavior(behavior);
         grid.setColumns("name", "company.companyname");
-        grid.setDataProvider(new ListDataProvider<>(employeeList));
+        grid.setItems(new ListDataProvider<>(employeeList));
         add(grid);
     }
 

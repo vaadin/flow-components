@@ -33,7 +33,7 @@ public class GridLoadsItemsPage extends Div {
                             .mapToObj(Integer::toString);
                 }, query -> 1000);
 
-        grid.setDataProvider(dataProvider);
+        grid.setItems(dataProvider);
 
         grid.addColumn(item -> item).setHeader("Data");
 

@@ -30,7 +30,7 @@ public class GridDetailsRowPage extends Div {
         items.add(person4);
 
         ListDataProvider<Person> ldp = new ListDataProvider<>(items);
-        grid.setDataProvider(ldp);
+        grid.setItems(ldp);
         grid.setSelectionMode(SelectionMode.NONE);
         grid.addColumn(Person::getFirstName).setHeader("name");
         grid.setItemDetailsRenderer(new ComponentRenderer<>(

@@ -59,6 +59,26 @@ public class RichTextEditorTest {
                 rte.getElement().getProperty("value"));
     }
 
+    @Test
+    public void setValueStartingWithJsonArray_throws() {
+        RichTextEditor rte = new RichTextEditor();
+
+        thrown.expect(IllegalArgumentException.class);
+        thrown.expectMessage("The value starts with either '[' or '{'");
+
+        rte.setValue("[{\"insert\":\"Foo\"}]");
+    }
+
+    @Test
+    public void setValueStartingWithJsonObject_throws() {
+        RichTextEditor rte = new RichTextEditor();
+
+        thrown.expect(IllegalArgumentException.class);
+        thrown.expectMessage("The value starts with either '[' or '{'");
+
+        rte.setValue("{\"insert\":\"Foo\"}");
+    }
+
     // asHtml
 
     @Test
@@ -88,6 +108,19 @@ public class RichTextEditorTest {
         Assert.assertTrue(
                 "Should be possible to set required indicator to be visible on asHtml",
                 rte.isRequiredIndicatorVisible());
+    }
+
+    @Test
+    public void asHtml_setValueStartingWithJson_noException() {
+        RichTextEditor rte = new RichTextEditor();
+
+        String value = "[{\"insert\":\"Foo\"}]";
+        rte.asHtml().setValue(value);
+        Assert.assertEquals(value, rte.getValue());
+
+        value = "{\"insert\":\"Foo\"}";
+        rte.asHtml().setValue(value);
+        Assert.assertEquals(value, rte.getValue());
     }
 
     // asDelta

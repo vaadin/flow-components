@@ -45,7 +45,7 @@ import com.vaadin.flow.function.SerializableFunction;
  * @param <TValue>
  *            Type of the value of the extending component
  */
-public abstract class InternalFieldBase<TComponent extends InternalFieldBase<TComponent, TValue>, TValue>
+public abstract class TextFieldBase<TComponent extends TextFieldBase<TComponent, TValue>, TValue>
         extends AbstractSinglePropertyField<TComponent, TValue>
         implements CompositionNotifier, Focusable<TComponent>,
         HasAutocapitalize, HasAutocomplete, HasAutocorrect, HasClearButton,
@@ -273,7 +273,7 @@ public abstract class InternalFieldBase<TComponent extends InternalFieldBase<TCo
      * @param <P>
      *            the property type
      */
-    <P> InternalFieldBase(TValue initialValue, TValue defaultValue,
+    <P> TextFieldBase(TValue initialValue, TValue defaultValue,
             Class<P> elementPropertyType,
             SerializableFunction<P, TValue> presentationToModel,
             SerializableFunction<TValue, P> modelToPresentation,
@@ -313,7 +313,7 @@ public abstract class InternalFieldBase<TComponent extends InternalFieldBase<TCo
      * @param <P>
      *            the property type
      */
-    <P> InternalFieldBase(TValue initialValue, TValue defaultValue,
+    <P> TextFieldBase(TValue initialValue, TValue defaultValue,
             Class<P> elementPropertyType,
             SerializableBiFunction<TComponent, P, TValue> presentationToModel,
             SerializableBiFunction<TComponent, TValue, P> modelToPresentation,
@@ -345,7 +345,7 @@ public abstract class InternalFieldBase<TComponent extends InternalFieldBase<TCo
      *            property value, otherwise element {@code "value"} property is
      *            ignored and the initial value is set
      */
-    InternalFieldBase(TValue initialValue, TValue defaultValue,
+    TextFieldBase(TValue initialValue, TValue defaultValue,
             boolean acceptNullValues, boolean isInitialValueOptional) {
         super("value", defaultValue, acceptNullValues);
         if ((getElement().getProperty("value") == null

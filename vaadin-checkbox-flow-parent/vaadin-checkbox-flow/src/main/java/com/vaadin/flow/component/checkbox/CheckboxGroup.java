@@ -84,9 +84,9 @@ import elemental.json.JsonArray;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-checkbox-group")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha12")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha13")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/checkbox-group", version = "24.0.0-alpha12")
+@NpmPackage(value = "@vaadin/checkbox-group", version = "24.0.0-alpha13")
 @JsModule("@vaadin/checkbox-group/src/vaadin-checkbox-group.js")
 public class CheckboxGroup<T>
         extends AbstractSinglePropertyField<CheckboxGroup<T>, Set<T>> implements
@@ -320,26 +320,7 @@ public class CheckboxGroup<T>
         }
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @deprecated Because the stream is collected to a list anyway, use
-     *             {@link HasListDataView#setItems(Collection)} instead.
-     */
-    @Deprecated
-    public void setItems(Stream<T> streamOfItems) {
-        setItems(DataProvider.fromStream(streamOfItems));
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @deprecated use instead one of the {@code setItems} methods which provide
-     *             access to either {@link CheckboxGroupListDataView} or
-     *             {@link CheckboxGroupDataView}
-     */
-    @Deprecated
-    public void setDataProvider(DataProvider<T, ?> dataProvider) {
+    private void setDataProvider(DataProvider<T, ?> dataProvider) {
         this.dataProvider.set(dataProvider);
         DataViewUtils.removeComponentFilterAndSortComparator(this);
         reset();
@@ -410,11 +391,8 @@ public class CheckboxGroup<T>
      * Gets the data provider.
      *
      * @return the data provider, not {@code null}
-     * @deprecated use {@link #getListDataView()} or
-     *             {@link #getGenericDataView()} instead
      */
-    @Deprecated
-    public DataProvider<T, ?> getDataProvider() {
+    private DataProvider<T, ?> getDataProvider() {
         // dataProvider reference won't have been initialized before
         // calling from CheckboxGroup constructor
         return Optional.ofNullable(dataProvider).map(AtomicReference::get)

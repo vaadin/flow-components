@@ -45,7 +45,7 @@ public class GridOrderColumnsPage extends VerticalLayout {
 
         ListDataProvider<Integer> dataProvider = DataProvider.ofItems(1, 2, 3,
                 4, 5);
-        grid.setDataProvider(dataProvider);
+        grid.setItems(dataProvider);
         add(grid);
 
         Button orderCol123Button = new Button("Col 1 2 3 ",
