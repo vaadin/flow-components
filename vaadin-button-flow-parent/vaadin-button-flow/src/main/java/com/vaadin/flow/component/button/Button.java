@@ -40,6 +40,7 @@ import com.vaadin.flow.shared.Registration;
 
 import java.io.Serializable;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -416,8 +417,12 @@ public class Button extends Component implements ClickNotifier<Button>,
         // Add theme attribute "icon" when the button contains only an icon to
         // fully support themes like Lumo. This doesn't override explicitly set
         // theme attribute.
+        long childCount = getElement().getChildren()
+                .filter(el -> el.isTextNode()
+                        || !Objects.equals("vaadin-tooltip", el.getTag()))
+                .count();
 
-        if (getElement().getChildCount() == 1 && iconComponent != null) {
+        if (childCount == 1 && iconComponent != null) {
             getThemeNames().add("icon");
         } else {
             getThemeNames().remove("icon");
