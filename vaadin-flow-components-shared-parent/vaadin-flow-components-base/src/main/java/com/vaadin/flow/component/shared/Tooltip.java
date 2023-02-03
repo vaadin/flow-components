@@ -17,9 +17,9 @@ package com.vaadin.flow.component.shared;
 
 import java.io.Serializable;
 import java.util.Arrays;
-import java.util.WeakHashMap;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
@@ -119,13 +119,6 @@ public class Tooltip implements Serializable {
     }
 
     /**
-     * Keeps track of elements that have a tooltip. Currently only used for the {@link HasTooltip} APIs.
-     * The other APIs, such as {@link #forElement(Element)} and {@link #forComponent(Component)}, do not use this
-     * because they always return a new {@code Tooltip} instance (support adding multiple tooltips for one target).
-     */
-    private static final WeakHashMap<Element, Tooltip> elementTooltips = new WeakHashMap<>();
-
-    /**
      * Gets the tooltip handle for the given element.
      *
      * @param element
@@ -133,7 +126,8 @@ public class Tooltip implements Serializable {
      * @return the tooltip handle
      */
     static Tooltip getForElement(Element element) {
-        return elementTooltips.get(element);
+        var component = ComponentUtil.getInnermostComponent(element);
+        return (Tooltip) ComponentUtil.getData(component, "tooltip");
     }
 
     /**
@@ -147,7 +141,8 @@ public class Tooltip implements Serializable {
     static Tooltip forHasTooltip(HasTooltip hasTooltip) {
         var tooltip = new Tooltip();
         SlotUtils.setSlot(hasTooltip, "tooltip", tooltip.tooltipElement);
-        elementTooltips.put(hasTooltip.getElement(), tooltip);
+        var component = ComponentUtil.getInnermostComponent(hasTooltip.getElement());
+        ComponentUtil.setData(component, "tooltip", tooltip);
         return tooltip;
     }
 
