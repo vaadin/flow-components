@@ -24,9 +24,8 @@ public class FeatureLabelIT extends AbstractComponentIT {
 
     @Test
     public void defaultLabelStyle() {
-        MapElement.TextReference text = getMarkerTextStyle();
+        MapElement.TextReference text = getMarkerTextStyle("marker1");
 
-        Assert.assertEquals("Marker label", text.getText());
         Assert.assertEquals("13px sans-serif", text.getFont());
         Assert.assertEquals("#333", text.getFill().getColor());
         Assert.assertEquals("#fff", text.getStroke().getColor());
@@ -36,27 +35,42 @@ public class FeatureLabelIT extends AbstractComponentIT {
     }
 
     @Test
-    public void updateLabel() {
-        updateLabelText.click();
-
-        MapElement.TextReference text = getMarkerTextStyle();
-        Assert.assertEquals("Updated label", text.getText());
+    public void initialLabels() {
+        Assert.assertEquals("Marker label 1",
+                getMarkerTextStyle("marker1").getText());
+        Assert.assertEquals("Marker label 2",
+                getMarkerTextStyle("marker2").getText());
+        Assert.assertEquals("Marker label 3",
+                getMarkerTextStyle("marker3").getText());
     }
 
     @Test
-    public void removeLabel() {
-        removeLabelText.click();
+    public void updateLabels() {
+        updateLabelText.click();
 
-        MapElement.TextReference text = getMarkerTextStyle();
-        Assert.assertNull(text.getText());
+        Assert.assertEquals("Updated label 1",
+                getMarkerTextStyle("marker1").getText());
+        Assert.assertEquals("Updated label 2",
+                getMarkerTextStyle("marker2").getText());
+        Assert.assertEquals("Updated label 3",
+                getMarkerTextStyle("marker3").getText());
     }
 
-    private MapElement.TextReference getMarkerTextStyle() {
+    @Test
+    public void removeLabels() {
+        removeLabelText.click();
+
+        Assert.assertNull(getMarkerTextStyle("marker1").getText());
+        Assert.assertNull(getMarkerTextStyle("marker2").getText());
+        Assert.assertNull(getMarkerTextStyle("marker3").getText());
+    }
+
+    private MapElement.TextReference getMarkerTextStyle(String markerId) {
         MapElement.MapReference mapReference = map.getMapReference();
         MapElement.VectorSourceReference vectorSource = mapReference.getLayers()
                 .getLayer("feature-layer").getSource().asVectorSource();
         MapElement.FeatureReference feature = vectorSource.getFeatures()
-                .getFeature(0);
+                .getFeature(markerId);
         return feature.getStyle().getText();
     }
 }

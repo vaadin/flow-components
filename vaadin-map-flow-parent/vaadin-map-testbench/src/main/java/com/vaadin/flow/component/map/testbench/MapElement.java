@@ -480,6 +480,12 @@ public class MapElement extends TestBenchElement {
         public FeatureReference getFeature(int index) {
             return new FeatureReference(executor, path("item(%s)", index));
         }
+
+        public FeatureReference getFeature(String featureId) {
+            return new FeatureReference(executor,
+                    path("getArray().find(feature => feature.id === '%s')",
+                            featureId));
+        }
     }
 
     public static class FeatureReference extends ConfigurationObjectReference {
