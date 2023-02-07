@@ -18,6 +18,7 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
 import java.util.LinkedHashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -161,6 +162,8 @@ public abstract class AbstractConfigurationObject implements Serializable {
      * resolved on the client-side.
      */
     protected void addChild(AbstractConfigurationObject configurationObject) {
+        Objects.requireNonNull(configurationObject,
+                "Child configuration object must not be null");
         children.add(configurationObject);
         configurationObject.addPropertyChangeListener(this::notifyChange);
         markAsDirty();
@@ -170,6 +173,18 @@ public abstract class AbstractConfigurationObject implements Serializable {
         // client-side reference lookup anymore, due to the client removing
         // references from the lookup during garbage collection.
         configurationObject.deepMarkAsDirty();
+    }
+
+    /**
+     * Convenience wrapper for {@link #addChild(AbstractConfigurationObject)}
+     * that allows {@code configurationObject} to be a null reference.
+     */
+    protected void addNullableChild(
+            AbstractConfigurationObject configurationObject) {
+        if (configurationObject == null) {
+            return;
+        }
+        addChild(configurationObject);
     }
 
     /**

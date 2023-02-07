@@ -6,6 +6,8 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.beans.PropertyChangeListener;
+import java.lang.reflect.Field;
+import java.util.Set;
 import java.util.function.Consumer;
 
 public class AbstractConfigurationObjectTest {
@@ -242,6 +244,18 @@ public class AbstractConfigurationObjectTest {
                 .propertyChange(Mockito.any());
     }
 
+    @Test(expected = NullPointerException.class)
+    public void addChild_doesNotAllowNull() {
+        testConfiguration.addChild(null);
+    }
+
+    @Test
+    public void addNullableChild_ignoresNull() throws Exception {
+        testConfiguration = new TestConfiguration();
+        testConfiguration.addNullableChild(null);
+        Assert.assertEquals(0, testConfiguration.getChildren().size());
+    }
+
     private static class TestConfiguration extends AbstractConfigurationObject {
         private String foo;
         private TestConfiguration nestedConfiguration;
@@ -275,6 +289,17 @@ public class AbstractConfigurationObjectTest {
         @Override
         protected void deepMarkAsDirty() {
             super.deepMarkAsDirty();
+        }
+
+        // Expose children for testing
+        @SuppressWarnings("unchecked")
+        public Set<AbstractConfigurationObject> getChildren()
+                throws IllegalArgumentException, IllegalAccessException,
+                NoSuchFieldException, SecurityException {
+            Field f = AbstractConfigurationObject.class
+                    .getDeclaredField("children");
+            f.setAccessible(true);
+            return (Set<AbstractConfigurationObject>) f.get(this);
         }
     }
 }
