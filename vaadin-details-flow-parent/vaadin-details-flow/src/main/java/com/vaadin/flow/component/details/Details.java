@@ -58,10 +58,10 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-details")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.15")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.17")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/details", version = "23.2.15")
-@NpmPackage(value = "@vaadin/vaadin-details", version = "23.2.15")
+@NpmPackage(value = "@vaadin/details", version = "23.2.17")
+@NpmPackage(value = "@vaadin/vaadin-details", version = "23.2.17")
 @JsModule("@vaadin/details/src/vaadin-details.js")
 public class Details extends Component
         implements HasEnabled, HasTheme, HasStyle, HasSize {

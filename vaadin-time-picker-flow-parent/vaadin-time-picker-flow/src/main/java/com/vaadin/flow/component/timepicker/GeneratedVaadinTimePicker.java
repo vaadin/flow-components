@@ -124,10 +124,10 @@ import elemental.json.JsonObject;
  * </p>
  */
 @Tag("vaadin-time-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.15")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.17")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/time-picker", version = "23.2.15")
-@NpmPackage(value = "@vaadin/vaadin-time-picker", version = "23.2.15")
+@NpmPackage(value = "@vaadin/time-picker", version = "23.2.17")
+@NpmPackage(value = "@vaadin/vaadin-time-picker", version = "23.2.17")
 @JsModule("@vaadin/time-picker/src/vaadin-time-picker.js")
 public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePicker<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
