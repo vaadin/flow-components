@@ -187,10 +187,10 @@ import elemental.json.JsonArray;
  * </p>
  */
 @Tag("vaadin-rich-text-editor")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.15")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.17")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/rich-text-editor", version = "23.2.15")
-@NpmPackage(value = "@vaadin/vaadin-rich-text-editor", version = "23.2.15")
+@NpmPackage(value = "@vaadin/rich-text-editor", version = "23.2.17")
+@NpmPackage(value = "@vaadin/vaadin-rich-text-editor", version = "23.2.17")
 @JsModule("@vaadin/rich-text-editor/src/vaadin-rich-text-editor.js")
 public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRichTextEditor<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
