@@ -99,17 +99,21 @@ public class GridViewItemDetailsIT extends AbstractComponentIT {
         // Open details
         clickElementWithJs(getRow(grid, 0).findElement(By.tagName("td")));
 
-        // Check the detailsOpenedItems property (expected to be a list with one item)
-        Assert.assertEquals(1, ((List<?>) grid.getProperty("detailsOpenedItems")).size());
-        
+        // Check the detailsOpenedItems property (expected to be a list with one
+        // item)
+        Assert.assertEquals(1,
+                ((List<?>) grid.getProperty("detailsOpenedItems")).size());
+
         // Scroll to end
         grid.scrollToRow(grid.getRowCount() - 1);
-        
+
         // Scroll to start
         grid.scrollToRow(0);
 
-        // Check the detailsOpenedItems property (expected to be a list with one item)
-        Assert.assertEquals(1, ((List<?>) grid.getProperty("detailsOpenedItems")).size());
+        // Check the detailsOpenedItems property (expected to be a list with one
+        // item)
+        Assert.assertEquals(1,
+                ((List<?>) grid.getProperty("detailsOpenedItems")).size());
     }
 
     private void assertAmountOfOpenDetails(WebElement grid,

@@ -18,7 +18,6 @@ package com.vaadin.flow.component.grid.it;
 import java.util.List;
 
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.data.bean.Person;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.NativeButtonRenderer;
