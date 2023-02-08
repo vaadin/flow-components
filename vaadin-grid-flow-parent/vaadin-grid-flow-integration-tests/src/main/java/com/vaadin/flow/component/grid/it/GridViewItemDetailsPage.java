@@ -40,8 +40,6 @@ public class GridViewItemDetailsPage extends LegacyTestView {
         grid.addColumn(Person::getFirstName).setHeader("Name");
         grid.addColumn(Person::getAge).setHeader("Age");
 
-        grid.setSelectionMode(SelectionMode.NONE);
-
         // You can use any renderer for the item details. By default, the
         // details are opened and closed by clicking the rows.
         grid.setItemDetailsRenderer(LitRenderer.<Person> of(
