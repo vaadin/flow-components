@@ -18,7 +18,6 @@ package com.vaadin.flow.component.grid.it;
 import java.util.List;
 
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.data.bean.Person;
 import com.vaadin.flow.data.renderer.NativeButtonRenderer;
 import com.vaadin.flow.data.renderer.TemplateRenderer;
@@ -39,8 +38,6 @@ public class GridViewItemDetailsPage extends LegacyTestView {
 
         grid.addColumn(Person::getFirstName).setHeader("Name");
         grid.addColumn(Person::getAge).setHeader("Age");
-
-        grid.setSelectionMode(SelectionMode.NONE);
 
         // You can use any renderer for the item details. By default, the
         // details are opened and closed by clicking the rows.
