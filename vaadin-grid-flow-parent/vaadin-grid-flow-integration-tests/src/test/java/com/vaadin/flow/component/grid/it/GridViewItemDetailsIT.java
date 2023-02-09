@@ -93,7 +93,7 @@ public class GridViewItemDetailsIT extends AbstractComponentIT {
     }
 
     @Test
-    public void openDetails_scrollToEnd_scrollToStart_detailsOpenedItems() {
+    public void openDetails_scrollToEnd_scrollToStart_detailsOpenedItemsCountDoesNotIncrease() {
         GridElement grid = $(GridElement.class).id("grid-with-details-row");
 
         // Open details
@@ -110,8 +110,7 @@ public class GridViewItemDetailsIT extends AbstractComponentIT {
         // Scroll to start
         grid.scrollToRow(0);
 
-        // Check the detailsOpenedItems property (expected to be a list with one
-        // item)
+        // Check that the detailsOpenedItems array does not increase / does not contain duplicates
         Assert.assertEquals(1,
                 ((List<?>) grid.getProperty("detailsOpenedItems")).size());
     }
