@@ -110,7 +110,8 @@ public class GridViewItemDetailsIT extends AbstractComponentIT {
         // Scroll to start
         grid.scrollToRow(0);
 
-        // Check that the detailsOpenedItems array does not increase / does not contain duplicates
+        // Check that the detailsOpenedItems array does not increase / does not
+        // contain duplicates
         Assert.assertEquals(1,
                 ((List<?>) grid.getProperty("detailsOpenedItems")).size());
     }
