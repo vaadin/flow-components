@@ -11,7 +11,7 @@ import java.io.Serializable;
 /**
  * Text style that defines how to render texts, such as labels, on the map.
  */
-public class Text extends AbstractConfigurationObject {
+public class TextStyle extends AbstractConfigurationObject {
     private String font;
     private TextOffset offset;
     private double scale;
@@ -25,7 +25,7 @@ public class Text extends AbstractConfigurationObject {
     private Stroke backgroundStroke;
     private double padding;
 
-    public Text() {
+    public TextStyle() {
         font = "13px sans-serif";
         offset = new TextOffset(0, 10);
         scale = 1;
@@ -35,6 +35,11 @@ public class Text extends AbstractConfigurationObject {
         fill = new Fill("#333");
         stroke = new Stroke("#fff", 3);
         padding = 0;
+    }
+
+    @Override
+    public String getType() {
+        return Constants.OL_STYLE_TEXT;
     }
 
     /**
@@ -378,11 +383,6 @@ public class Text extends AbstractConfigurationObject {
     public void setPadding(double padding) {
         this.padding = padding;
         markAsDirty();
-    }
-
-    @Override
-    public String getType() {
-        return Constants.OL_STYLE_TEXT;
     }
 
     public enum TextAlign {

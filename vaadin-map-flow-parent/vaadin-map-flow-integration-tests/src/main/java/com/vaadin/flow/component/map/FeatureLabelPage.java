@@ -4,7 +4,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.feature.MarkerFeature;
-import com.vaadin.flow.component.map.configuration.style.Text;
+import com.vaadin.flow.component.map.configuration.style.TextStyle;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-map/feature-label")
@@ -46,19 +46,20 @@ public class FeatureLabelPage extends Div {
 
         NativeButton setLabelStyle = new NativeButton("Set custom label style",
                 e -> {
-                    marker1.getStyle().setText(createCustomLabelStyle());
+                    marker1.getStyle().setTextStyle(createCustomLabelStyle());
                 });
         setLabelStyle.setId("set-label-style");
 
         NativeButton updateLabelStyle = new NativeButton(
                 "Update custom label style", e -> {
-                    marker1.getStyle().getText().setFont("15px sans-serif");
+                    marker1.getStyle().getTextStyle()
+                            .setFont("15px sans-serif");
                 });
         updateLabelStyle.setId("update-label-style");
 
         NativeButton removeLabelStyle = new NativeButton(
                 "Remove custom label style", e -> {
-                    marker1.getStyle().setText(null);
+                    marker1.getStyle().setTextStyle(null);
                 });
         removeLabelStyle.setId("remove-label-style");
 
@@ -67,12 +68,12 @@ public class FeatureLabelPage extends Div {
                 updateLabelStyle, removeLabelStyle));
     }
 
-    private Text createCustomLabelStyle() {
-        Text textStyle = new Text();
+    private TextStyle createCustomLabelStyle() {
+        TextStyle textStyle = new TextStyle();
         textStyle.setFont("bold 13px monospace");
         textStyle.setOffset(30, 0);
-        textStyle.setTextAlign(Text.TextAlign.LEFT);
-        textStyle.setTextBaseline(Text.TextBaseline.BOTTOM);
+        textStyle.setTextAlign(TextStyle.TextAlign.LEFT);
+        textStyle.setTextBaseline(TextStyle.TextBaseline.BOTTOM);
         textStyle.setFill("#fff");
         textStyle.setStroke("#000", 5);
         textStyle.setBackgroundFill("#1F6B75");

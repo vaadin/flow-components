@@ -8,6 +8,7 @@
  */
 package com.vaadin.flow.component.map.configuration.style;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
@@ -23,7 +24,7 @@ public class Style extends AbstractConfigurationObject {
     private ImageStyle image;
     private Fill fill;
     private Stroke stroke;
-    private Text text;
+    private TextStyle textStyle;
 
     @Override
     public String getType() {
@@ -68,13 +69,14 @@ public class Style extends AbstractConfigurationObject {
 
     @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
     @JsonIdentityReference(alwaysAsId = true)
-    public Text getText() {
-        return text;
+    @JsonGetter("text")
+    public TextStyle getTextStyle() {
+        return textStyle;
     }
 
-    public void setText(Text text) {
-        removeChild(this.text);
-        this.text = text;
-        addNullableChild(text);
+    public void setTextStyle(TextStyle textStyle) {
+        removeChild(this.textStyle);
+        this.textStyle = textStyle;
+        addNullableChild(textStyle);
     }
 }
