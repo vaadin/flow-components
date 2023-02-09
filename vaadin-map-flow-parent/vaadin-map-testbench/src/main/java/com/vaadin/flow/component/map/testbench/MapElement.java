@@ -480,6 +480,12 @@ public class MapElement extends TestBenchElement {
         public FeatureReference getFeature(int index) {
             return new FeatureReference(executor, path("item(%s)", index));
         }
+
+        public FeatureReference getFeature(String featureId) {
+            return new FeatureReference(executor,
+                    path("getArray().find(feature => feature.id === '%s')",
+                            featureId));
+        }
     }
 
     public static class FeatureReference extends ConfigurationObjectReference {
@@ -493,7 +499,7 @@ public class MapElement extends TestBenchElement {
         }
 
         public StyleReference getStyle() {
-            return new StyleReference(executor, path("getStyle()"));
+            return new StyleReference(executor, path("getStyle()()"));
         }
     }
 
@@ -504,6 +510,10 @@ public class MapElement extends TestBenchElement {
 
         public IconReference getImage() {
             return new IconReference(executor, path("getImage()"));
+        }
+
+        public TextReference getText() {
+            return new TextReference(executor, path("getText()"));
         }
     }
 
@@ -552,6 +562,61 @@ public class MapElement extends TestBenchElement {
 
         public String getSrc() {
             return getString("getSrc()");
+        }
+    }
+
+    public static class TextReference extends ConfigurationObjectReference {
+        private TextReference(ExpressionExecutor executor, String expression) {
+            super(executor, expression);
+        }
+
+        public String getText() {
+            return getString("getText()");
+        }
+
+        public String getFont() {
+            return getString("getFont()");
+        }
+
+        public int getOffsetX() {
+            return getInt("getOffsetX()");
+        }
+
+        public int getOffsetY() {
+            return getInt("getOffsetY()");
+        }
+
+        public FillReference getFill() {
+            return new FillReference(executor, path("getFill()"));
+        }
+
+        public StrokeReference getStroke() {
+            return new StrokeReference(executor, path("getStroke()"));
+        }
+    }
+
+    public static class FillReference extends ConfigurationObjectReference {
+        private FillReference(ExpressionExecutor executor, String expression) {
+            super(executor, expression);
+        }
+
+        public String getColor() {
+            return getString("getColor()");
+        }
+    }
+
+    public static class StrokeReference extends ConfigurationObjectReference {
+        private StrokeReference(ExpressionExecutor executor,
+                String expression) {
+            super(executor, expression);
+        }
+
+        public String getColor() {
+            return getString("getColor()");
+        }
+
+        public Number getWidth() {
+            return getInt("getWidth()");
         }
     }
 }
