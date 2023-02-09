@@ -52,8 +52,10 @@ public class FeatureLabelPage extends Div {
 
         NativeButton updateLabelStyle = new NativeButton(
                 "Update custom label style", e -> {
-                    marker1.getStyle().getTextStyle()
-                            .setFont("15px sans-serif");
+                    if (marker1.getStyle().getTextStyle() != null) {
+                        marker1.getStyle().getTextStyle()
+                                .setFont("15px sans-serif");
+                    }
                 });
         updateLabelStyle.setId("update-label-style");
 
