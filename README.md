@@ -2,7 +2,7 @@
 
 This is a maven multi-module project including all vaadin flow components.
 
-`master` branch is the latest version of all the components that will be released in the [Vaadin platform](https://github.com/vaadin/platform).
+`main` branch is the latest version of all the components that will be released in the [Vaadin platform](https://github.com/vaadin/platform).
 
 ## Quick start
 

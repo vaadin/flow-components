@@ -98,7 +98,7 @@ async function getReleases() {
   try {
     json = await getPlatformVersions(platform);
   } catch (error) {
-    json = await getPlatformVersions('master');
+    json = await getPlatformVersions('main');
   }
   flowVersion = json.core.flow.javaVersion;
 
@@ -328,7 +328,7 @@ function logByComponent(commits) {
     });
   }
   commits.forEach(commit => {
-    // Group the WC update commit to one category 
+    // Group the WC update commit to one category
     if (commit.title.includes("Increase Web-Component version")){
       commit.components=["All Components"];
     }
@@ -339,7 +339,7 @@ function logByComponent(commits) {
   });
 
   Object.keys(byComponent).sort().forEach(k => {
-    k.includes("All Components") ? 
+    k.includes("All Components") ?
     console.log(`\n#### Changes in \`All Components\``) : console.log(`\n#### Changes in \`vaadin-${k}-flow\``);
     logCommitsByType(byComponent[k]);
   });
