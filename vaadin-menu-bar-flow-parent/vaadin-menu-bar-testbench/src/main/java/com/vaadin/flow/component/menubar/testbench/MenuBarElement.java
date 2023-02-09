@@ -32,7 +32,7 @@ import com.vaadin.testbench.elementsbase.Element;
 @Element("vaadin-menu-bar")
 public class MenuBarElement extends TestBenchElement {
 
-    public static final String OVERLAY_TAG = "vaadin-context-menu-overlay";
+    public static final String OVERLAY_TAG = "vaadin-menu-bar-overlay";
 
     /**
      * Gets the button elements wrapping the root level items. This does not
@@ -89,7 +89,7 @@ public class MenuBarElement extends TestBenchElement {
      * @return List of TestBenchElements representing sub menu items.
      */
     public List<TestBenchElement> getSubMenuItems(TestBenchElement overlay) {
-        return overlay.$("vaadin-context-menu-item").all();
+        return overlay.$("vaadin-menu-bar-item").all();
     }
 
     /**

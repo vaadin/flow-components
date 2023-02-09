@@ -40,7 +40,7 @@ public class GridViewFilteringPage extends LegacyTestView {
         Grid<Person> grid = new Grid<>();
         ListDataProvider<Person> dataProvider = new ListDataProvider<>(
                 createItems());
-        grid.setDataProvider(dataProvider);
+        grid.setItems(dataProvider);
 
         List<ValueProvider<Person, String>> valueProviders = new ArrayList<>();
         valueProviders.add(Person::getFirstName);

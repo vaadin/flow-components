@@ -66,10 +66,10 @@ import org.slf4j.LoggerFactory;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-tabs")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha12")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-beta1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/tabs/src/vaadin-tabs.js")
-@NpmPackage(value = "@vaadin/tabs", version = "24.0.0-alpha12")
+@NpmPackage(value = "@vaadin/tabs", version = "24.0.0-beta1")
 public class Tabs extends Component
         implements HasEnabled, HasSize, HasStyle, HasThemeVariant<TabsVariant> {
 
@@ -237,7 +237,7 @@ public class Tabs extends Component
         int lowerIndices = (int) Stream.of(tabs).map(this::indexOf)
                 .filter(index -> index >= 0 && index < selectedIndex).count();
 
-        Tab selectedTab = getTabAt(selectedIndex);
+        Tab selectedTab = getSelectedTab();
         boolean isSelectedTab = selectedTab == null
                 || Stream.of(tabs).anyMatch(selectedTab::equals);
 

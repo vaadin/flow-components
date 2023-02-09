@@ -502,7 +502,7 @@ public class GridMultiSelectionModelTest {
             Function<String, T> itemFactory, Function<T, String> labelGetter) {
         Grid<T> g = new Grid<T>();
         g.addColumn(labelGetter::apply).setHeader("Label");
-        g.setDataProvider(new ListDataProvider<T>(
+        g.setItems(new ListDataProvider<T>(
                 Arrays.asList(itemFactory.apply("A"), itemFactory.apply("B"))) {
             @Override
             public Object getId(T item) {

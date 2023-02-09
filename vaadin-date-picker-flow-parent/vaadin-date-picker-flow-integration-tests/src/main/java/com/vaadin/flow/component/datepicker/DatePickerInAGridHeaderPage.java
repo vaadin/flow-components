@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.datepicker;
 
 import java.util.Locale;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.grid.Grid;
@@ -34,7 +35,8 @@ public class DatePickerInAGridHeaderPage extends Div {
         header.setId("date-picker");
 
         grid.addColumn(ValueProvider.identity()).setHeader(header);
-        grid.setItems(IntStream.range(0, 100).mapToObj(i -> "Item " + i));
+        grid.setItems(IntStream.range(0, 100).mapToObj(i -> "Item " + i)
+                .collect(Collectors.toList()));
 
         add(grid);
     }
