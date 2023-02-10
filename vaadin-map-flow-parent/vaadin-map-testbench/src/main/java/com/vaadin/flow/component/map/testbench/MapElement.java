@@ -36,22 +36,68 @@ public class MapElement extends TestBenchElement {
      * @param y
      */
     public void clickAtCoordinates(double x, double y) {
-        // Selenium click event offset starts from center, so we need to shift
-        // the offset to the start of the element first
+        PixelCoordinate pixelCoordinates = getPixelCoordinates(x, y, true);
+
+        new Actions(getDriver())
+                .moveToElement(this, pixelCoordinates.x, pixelCoordinates.y)
+                .click().build().perform();
+    }
+
+    /**
+     * Returns the pixel coordinates of the specified {@code x} and {@code y}
+     * map coordinates.
+     * <p>
+     * The pixel coordinates are based from the top-left corner of the map.
+     *
+     * @param x
+     *            the x map coordinate
+     * @param y
+     *            the y map coordinate
+     * @return the equivalent pixel coordinate on the map element
+     */
+    public PixelCoordinate getPixelCoordinates(double x, double y) {
+        return getPixelCoordinates(x, y, false);
+    }
+
+    /**
+     * Returns the pixel coordinates of the specified {@code x} and {@code y}
+     * map coordinates.
+     * <p>
+     * If {@code relativeToCenter} is {@code true}, then the pixel coordinates
+     * are based from the center of the map. This is useful for Selenium mouse
+     * actions, which are based off of the center of the element. If
+     * {@code relativeToCenter} is {@code false}, then the pixel coordinates are
+     * based from the top-left corner of the map.
+     *
+     * @param x
+     *            the x map coordinate
+     * @param y
+     *            the y map coordinate
+     * @param relativeToCenter
+     *            whether to base the resulting pixel coordinates from the
+     *            center of the map element
+     * @return the equivalent pixel coordinate on the map element
+     */
+    @SuppressWarnings("unchecked")
+    public PixelCoordinate getPixelCoordinates(double x, double y,
+            boolean relativeToCenter) {
+        List<Number> coordinateList = (List<Number>) executeScript(
+                "return arguments[0].configuration.getPixelFromCoordinate([arguments[1], arguments[2]])",
+                this, x, y);
+        PixelCoordinate coordinate = new PixelCoordinate(
+                (int) Math.round(coordinateList.get(0).doubleValue()),
+                (int) Math.round(coordinateList.get(1).doubleValue()));
+
+        if (!relativeToCenter) {
+            return coordinate;
+        }
+
         Rectangle mapRectangle = this.getRect();
         int startLeft = -mapRectangle.width / 2;
         int startTop = -mapRectangle.height / 2;
 
-        List<Number> pixelCoordinates = (List<Number>) executeScript(
-                "return arguments[0].configuration.getPixelFromCoordinate([arguments[1], arguments[2]])",
-                this, x, y);
-
-        int clickX = startLeft
-                + (int) Math.round(pixelCoordinates.get(0).doubleValue());
-        int clickY = startTop
-                + (int) Math.round(pixelCoordinates.get(1).doubleValue());
-        new Actions(getDriver()).moveToElement(this, clickX, clickY).click()
-                .build().perform();
+        return new PixelCoordinate(startLeft + coordinate.x,
+                startTop + coordinate.y);
     }
 
     /**
@@ -204,6 +250,24 @@ public class MapElement extends TestBenchElement {
         }
 
         public double getY() {
+            return y;
+        }
+    }
+
+    public static class PixelCoordinate {
+        private final int x;
+        private final int y;
+
+        public PixelCoordinate(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        public int getX() {
+            return x;
+        }
+
+        public int getY() {
             return y;
         }
     }
@@ -416,6 +480,12 @@ public class MapElement extends TestBenchElement {
         public FeatureReference getFeature(int index) {
             return new FeatureReference(executor, path("item(%s)", index));
         }
+
+        public FeatureReference getFeature(String featureId) {
+            return new FeatureReference(executor,
+                    path("getArray().find(feature => feature.id === '%s')",
+                            featureId));
+        }
     }
 
     public static class FeatureReference extends ConfigurationObjectReference {
@@ -429,7 +499,7 @@ public class MapElement extends TestBenchElement {
         }
 
         public StyleReference getStyle() {
-            return new StyleReference(executor, path("getStyle()"));
+            return new StyleReference(executor, path("getStyle()()"));
         }
     }
 
@@ -440,6 +510,10 @@ public class MapElement extends TestBenchElement {
 
         public IconReference getImage() {
             return new IconReference(executor, path("getImage()"));
+        }
+
+        public TextReference getText() {
+            return new TextReference(executor, path("getText()"));
         }
     }
 
@@ -488,6 +562,61 @@ public class MapElement extends TestBenchElement {
 
         public String getSrc() {
             return getString("getSrc()");
+        }
+    }
+
+    public static class TextReference extends ConfigurationObjectReference {
+        private TextReference(ExpressionExecutor executor, String expression) {
+            super(executor, expression);
+        }
+
+        public String getText() {
+            return getString("getText()");
+        }
+
+        public String getFont() {
+            return getString("getFont()");
+        }
+
+        public int getOffsetX() {
+            return getInt("getOffsetX()");
+        }
+
+        public int getOffsetY() {
+            return getInt("getOffsetY()");
+        }
+
+        public FillReference getFill() {
+            return new FillReference(executor, path("getFill()"));
+        }
+
+        public StrokeReference getStroke() {
+            return new StrokeReference(executor, path("getStroke()"));
+        }
+    }
+
+    public static class FillReference extends ConfigurationObjectReference {
+        private FillReference(ExpressionExecutor executor, String expression) {
+            super(executor, expression);
+        }
+
+        public String getColor() {
+            return getString("getColor()");
+        }
+    }
+
+    public static class StrokeReference extends ConfigurationObjectReference {
+        private StrokeReference(ExpressionExecutor executor,
+                String expression) {
+            super(executor, expression);
+        }
+
+        public String getColor() {
+            return getString("getColor()");
+        }
+
+        public Number getWidth() {
+            return getInt("getWidth()");
         }
     }
 }

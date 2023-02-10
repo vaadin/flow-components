@@ -56,6 +56,17 @@ public class PointTest {
                 () -> point.setCoordinates(null));
     }
 
+    @Test
+    public void translate() {
+        double value = 123.456;
+        double delta = value * 2;
+        Point point = new Point(new Coordinate(value, value * -1));
+        point.translate(-1 * delta, delta);
+
+        Assert.assertEquals(point.getCoordinates().getX(), value * -1, 0.00001);
+        Assert.assertEquals(point.getCoordinates().getY(), value, 0.00001);
+    }
+
     private static class TestPoint extends Point {
         public TestPoint(Coordinate coordinates) {
             super(coordinates);
