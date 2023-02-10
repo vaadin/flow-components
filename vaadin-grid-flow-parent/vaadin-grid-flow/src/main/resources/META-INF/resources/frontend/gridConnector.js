@@ -374,6 +374,9 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             let itemCache =
               parentCache && parentCache.itemkeyCaches ? parentCache.itemkeyCaches[parentUniqueKey] : undefined;
             if (cache[parentUniqueKey] && cache[parentUniqueKey][page] && itemCache) {
+              // workaround: sometimes grid-element gives page index that overflows
+              page = Math.min(page, Math.floor(cache[parentUniqueKey].size / grid.pageSize));
+
               // Ensure grid isn't in loading state when the callback executes
               ensureSubCacheQueue = [];
               callback(cache[parentUniqueKey][page], cache[parentUniqueKey].size);
