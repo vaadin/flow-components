@@ -951,20 +951,6 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           grid.$server.confirmUpdate(id);
         });
 
-        grid.$connector.ensureHierarchy = tryCatchWrapper(function () {
-          for (let parentKey in cache) {
-            if (parentKey !== root) {
-              delete cache[parentKey];
-            }
-          }
-          deleteObjectContents(lastRequestedRanges);
-
-          grid._cache.itemCaches = {};
-          grid._cache.itemkeyCaches = {};
-
-          updateAllGridRowsInDomBasedOnCache();
-        });
-
         grid.$connector.setSelectionMode = tryCatchWrapper(function (mode) {
           if ((typeof mode === 'string' || mode instanceof String) && validSelectionModes.indexOf(mode) >= 0) {
             selectionMode = mode;
