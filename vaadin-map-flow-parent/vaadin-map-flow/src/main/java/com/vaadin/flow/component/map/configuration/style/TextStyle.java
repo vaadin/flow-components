@@ -23,7 +23,7 @@ public class TextStyle extends AbstractConfigurationObject {
     private Stroke stroke;
     private Fill backgroundFill;
     private Stroke backgroundStroke;
-    private double padding;
+    private int padding;
 
     public TextStyle() {
         font = "13px sans-serif";
@@ -96,7 +96,7 @@ public class TextStyle extends AbstractConfigurationObject {
      * @param y
      *            the vertical offset in pixels
      */
-    public void setOffset(double x, double y) {
+    public void setOffset(int x, int y) {
         setOffset(new TextOffset(x, y));
     }
 
@@ -369,7 +369,7 @@ public class TextStyle extends AbstractConfigurationObject {
      *
      * @return the background padding
      */
-    public double getPadding() {
+    public int getPadding() {
         return padding;
     }
 
@@ -380,7 +380,7 @@ public class TextStyle extends AbstractConfigurationObject {
      * @param padding
      *            the new padding
      */
-    public void setPadding(double padding) {
+    public void setPadding(int padding) {
         this.padding = padding;
         markAsDirty();
     }
@@ -394,19 +394,19 @@ public class TextStyle extends AbstractConfigurationObject {
     }
 
     public static class TextOffset implements Serializable {
-        private final double x;
-        private final double y;
+        private final int x;
+        private final int y;
 
-        public TextOffset(double x, double y) {
+        public TextOffset(int x, int y) {
             this.x = x;
             this.y = y;
         }
 
-        public double getX() {
+        public int getX() {
             return x;
         }
 
-        public double getY() {
+        public int getY() {
             return y;
         }
     }
