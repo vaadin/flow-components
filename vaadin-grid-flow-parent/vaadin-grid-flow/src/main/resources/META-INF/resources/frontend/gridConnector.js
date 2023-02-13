@@ -357,6 +357,20 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           }
         });
 
+        grid._adjustRootPage = tryCatchWrapper(function (page) {
+          if (grid.size && grid.pageSize) {
+            return Math.min(page, Math.floor(grid.size / grid.pageSize));
+          }
+          return page;
+        });
+
+        grid._adjustChildPage = tryCatchWrapper(function (page, parentUniqueKey) {
+          if (cache && cache[parentUniqueKey] && cache[parentUniqueKey].size && grid.pageSize) {
+            return Math.min(page, Math.floor(cache[parentUniqueKey].size / grid.pageSize));
+          }
+          return page;
+        });
+
         grid.dataProvider = tryCatchWrapper(function (params, callback) {
           if (params.pageSize != grid.pageSize) {
             throw 'Invalid pageSize';
@@ -375,7 +389,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
               parentCache && parentCache.itemkeyCaches ? parentCache.itemkeyCaches[parentUniqueKey] : undefined;
             if (cache[parentUniqueKey] && cache[parentUniqueKey][page] && itemCache) {
               // workaround: sometimes grid-element gives page index that overflows
-              page = Math.min(page, Math.floor(cache[parentUniqueKey].size / grid.pageSize));
+              page = grid._adjustChildPage(page, parentUniqueKey);
 
               // Ensure grid isn't in loading state when the callback executes
               ensureSubCacheQueue = [];
@@ -399,7 +413,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             }
           } else {
             // workaround: sometimes grid-element gives page index that overflows
-            page = Math.min(page, Math.floor(grid.size / grid.pageSize));
+            page = grid._adjustRootPage(page);
 
             if (cache[root] && cache[root][page]) {
               callback(cache[root][page]);
@@ -420,9 +434,26 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             }
           }
         });
-              }
-            );
+
+        grid._loadPage = tryCatchWrapper(function (page, cache) {
+          // Page numbers and indexes are interpreted differently in
+          // the connector and the web component. In the connector, an
+          // adjustment is made to the requested page number. For example,
+          // a requested page number of 2 can be adjusted into 1, while
+          // a page number of 1 can stay as 1. The request can be valid,
+          // but can lead to duplicated calls and unexpected behavior
+          // in the connector. This block prevents a possible duplication
+          // by blocking those requests if there is a pending request that
+          // is adjusted to the same page number.
+          if (cache.parentItem) {
+            const parentItemId = grid.getItemId(cache.parentItem);
+            if (treePageCallbacks[parentItemId] && treePageCallbacks[parentItemId][grid._adjustChildPage(page, parentItemId)]) {
+              return;
+            }
+          } else if (rootPageCallbacks[grid._adjustRootPage(page)]) {
+            return;
           }
+          Grid.prototype._loadPage.call(grid, page, cache);
         });
 
         const sorterChangeListener = tryCatchWrapper(function (_, oldValue) {
