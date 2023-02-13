@@ -75,6 +75,10 @@ public class Details extends Component
     public Details() {
         contentContainer = new Div();
         getElement().appendChild(contentContainer.getElement());
+
+        if (getElement().getPropertyRaw("opened") == null) {
+            setOpened(false);
+        }
     }
 
     /**
@@ -305,7 +309,6 @@ public class Details extends Component
                         .collect(Collectors.toList()));
     }
 
-    @DomEvent("opened-changed")
     public static class OpenedChangeEvent extends ComponentEvent<Details> {
         private final boolean opened;
 
@@ -320,8 +323,8 @@ public class Details extends Component
     }
 
     /**
-     * Adds a listener for {@code opened-changed} events fired by the
-     * webcomponent.
+     * Adds a listener to get notified when the opened state of the component
+     * changes.
      *
      * @param listener
      *            the listener
@@ -329,7 +332,8 @@ public class Details extends Component
      */
     public Registration addOpenedChangeListener(
             ComponentEventListener<OpenedChangeEvent> listener) {
-        return ComponentUtil.addListener(this, OpenedChangeEvent.class,
-                listener);
+        return getElement().addPropertyChangeListener("opened",
+                event -> listener.onComponentEvent(
+                        new OpenedChangeEvent(this, event.isUserOriginated())));
     }
 }
