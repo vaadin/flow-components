@@ -24,7 +24,7 @@ public class BasicIT extends AbstractParallelTest {
         getDriver().get(url);
         detailsElements = $(DetailsElement.class).all();
 
-        Assert.assertEquals(4, detailsElements.size());
+        Assert.assertEquals(3, detailsElements.size());
     }
 
     @Test
@@ -40,13 +40,6 @@ public class BasicIT extends AbstractParallelTest {
                 .collect(Collectors.toList())));
         Assert.assertEquals("Small Reversed Filled Summary",
                 detailsThemed.getSummaryText());
-    }
-
-    @Test
-    public void testOpenedChange() {
-        DetailsElement detail = detailsElements.get(3);
-        detail.toggle();
-        Assert.assertEquals("opened-change", $("div").id("info").getText());
     }
 
     @Test

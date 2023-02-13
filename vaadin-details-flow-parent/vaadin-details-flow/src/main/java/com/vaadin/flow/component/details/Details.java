@@ -84,6 +84,10 @@ public class Details extends Component implements HasEnabled, HasSize, HasStyle,
         getElement().appendChild(contentContainer.getElement());
         summaryContainer = createSummaryContainer();
         SlotUtils.addToSlot(this, "summary", summaryContainer);
+
+        if (getElement().getPropertyRaw("opened") == null) {
+            setOpened(false);
+        }
     }
 
     /**
@@ -294,7 +298,6 @@ public class Details extends Component implements HasEnabled, HasSize, HasStyle,
         getElement().setProperty("opened", opened);
     }
 
-    @DomEvent("opened-changed")
     public static class OpenedChangeEvent extends ComponentEvent<Details> {
         private final boolean opened;
 
@@ -309,8 +312,8 @@ public class Details extends Component implements HasEnabled, HasSize, HasStyle,
     }
 
     /**
-     * Adds a listener for {@code opened-changed} events fired by the
-     * webcomponent.
+     * Adds a listener to get notified when the opened state of the component
+     * changes.
      *
      * @param listener
      *            the listener
@@ -318,7 +321,8 @@ public class Details extends Component implements HasEnabled, HasSize, HasStyle,
      */
     public Registration addOpenedChangeListener(
             ComponentEventListener<OpenedChangeEvent> listener) {
-        return ComponentUtil.addListener(this, OpenedChangeEvent.class,
-                listener);
+        return getElement().addPropertyChangeListener("opened",
+                event -> listener.onComponentEvent(
+                        new OpenedChangeEvent(this, event.isUserOriginated())));
     }
 }
