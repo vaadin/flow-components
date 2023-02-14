@@ -667,9 +667,6 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           const firstPage = index / grid.pageSize;
           const updatedPageCount = Math.ceil(items.length / grid.pageSize);
 
-          const selections = [];
-          const deselections = [];
-
           for (let i = 0; i < updatedPageCount; i++) {
             let page = firstPage + i;
             let slice = items.slice(i * grid.pageSize, (i + 1) * grid.pageSize);
@@ -678,20 +675,15 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             }
             cache[pkey][page] = slice;
 
-            selections.push(...slice.filter((item) => item.selected));
-            deselections.push(...slice.filter((item) => !item.selected && selectedKeys[item.key]));
+            grid.$connector.doSelection(slice.filter((item) => item.selected));
+            grid.$connector.doDeselection(slice.filter((item) => !item.selected && selectedKeys[item.key]));
 
             const updatedItems = updateGridCache(page, pkey);
             if (updatedItems) {
               itemsUpdated(updatedItems);
+              updateGridItemsInDomBasedOnCache(updatedItems);
             }
           }
-
-          queueMicrotask(() => {
-            grid.$connector.doSelection(selections);
-            grid.$connector.doDeselection(deselections);
-            grid.requestContentUpdate();
-          });
         });
 
         const itemToCacheLocation = function (item) {
