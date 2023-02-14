@@ -586,12 +586,28 @@ public class MapElement extends TestBenchElement {
             return getInt("getOffsetY()");
         }
 
+        public String getTextAlign() {
+            return getString("getTextAlign()");
+        }
+
+        public String getTextBaseline() {
+            return getString("getTextBaseline()");
+        }
+
         public FillReference getFill() {
             return new FillReference(executor, path("getFill()"));
         }
 
         public StrokeReference getStroke() {
             return new StrokeReference(executor, path("getStroke()"));
+        }
+
+        public FillReference getBackgroundFill() {
+            return new FillReference(executor, path("getBackgroundFill()"));
+        }
+
+        public StrokeReference getBackgroundStroke() {
+            return new StrokeReference(executor, path("getBackgroundStroke()"));
         }
     }
 

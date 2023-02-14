@@ -11,15 +11,25 @@ import org.junit.Test;
 @TestPath("vaadin-map/feature-label")
 public class FeatureLabelIT extends AbstractComponentIT {
     private MapElement map;
-    private TestBenchElement updateLabelText;
-    private TestBenchElement removeLabelText;
+    private TestBenchElement updateLabelButton;
+    private TestBenchElement removeLabelButton;
+    private TestBenchElement setLabelStyleButton;
+    private TestBenchElement updateLabelStyleButton;
+    private TestBenchElement removeLabelStyleButton;
 
     @Before
     public void init() {
         open();
         map = $(MapElement.class).waitForFirst();
-        updateLabelText = $(TestBenchElement.class).id("update-label-text");
-        removeLabelText = $(TestBenchElement.class).id("remove-label-text");
+        updateLabelButton = $(TestBenchElement.class).id("update-label-text");
+        removeLabelButton = $(TestBenchElement.class).id("remove-label-text");
+        setLabelStyleButton = $(TestBenchElement.class).id("set-label-style");
+        updateLabelStyleButton = $(TestBenchElement.class)
+                .id("update-label-style");
+        removeLabelStyleButton = $(TestBenchElement.class)
+                .id("remove-label-style");
+
+        trackRenderCount();
     }
 
     @Test
@@ -46,7 +56,7 @@ public class FeatureLabelIT extends AbstractComponentIT {
 
     @Test
     public void updateLabels() {
-        updateLabelText.click();
+        updateLabelButton.click();
 
         Assert.assertEquals("Updated label 1",
                 getMarkerTextStyle("marker1").getText());
@@ -58,11 +68,62 @@ public class FeatureLabelIT extends AbstractComponentIT {
 
     @Test
     public void removeLabels() {
-        removeLabelText.click();
+        removeLabelButton.click();
 
         Assert.assertNull(getMarkerTextStyle("marker1").getText());
         Assert.assertNull(getMarkerTextStyle("marker2").getText());
         Assert.assertNull(getMarkerTextStyle("marker3").getText());
+    }
+
+    @Test
+    public void setSetLabelStyle() {
+        setLabelStyleButton.click();
+
+        MapElement.TextReference text = getMarkerTextStyle("marker1");
+        Assert.assertEquals("Marker label 1", text.getText());
+        Assert.assertEquals("bold 13px monospace", text.getFont());
+        Assert.assertEquals(30, text.getOffsetX());
+        Assert.assertEquals(0, text.getOffsetY());
+        Assert.assertEquals("left", text.getTextAlign());
+        Assert.assertEquals("bottom", text.getTextBaseline());
+        Assert.assertEquals("#fff", text.getFill().getColor());
+        Assert.assertEquals("#000", text.getStroke().getColor());
+        Assert.assertEquals(5, text.getStroke().getWidth());
+        Assert.assertEquals("#1F6B75", text.getBackgroundFill().getColor());
+        Assert.assertEquals("#fff", text.getBackgroundStroke().getColor());
+        Assert.assertEquals(2, text.getBackgroundStroke().getWidth());
+
+        waitUntil(driver -> getRenderCount() == 1);
+    }
+
+    @Test
+    public void updateLabelStyle() {
+        setLabelStyleButton.click();
+
+        waitUntil(driver -> getRenderCount() == 1);
+
+        updateLabelStyleButton.click();
+
+        MapElement.TextReference text = getMarkerTextStyle("marker1");
+        Assert.assertEquals("Marker label 1", text.getText());
+        Assert.assertEquals("15px sans-serif", text.getFont());
+
+        waitUntil(driver -> getRenderCount() == 2);
+    }
+
+    @Test
+    public void removeLabelStyle() {
+        setLabelStyleButton.click();
+
+        waitUntil(driver -> getRenderCount() == 1);
+
+        removeLabelStyleButton.click();
+
+        MapElement.TextReference text = getMarkerTextStyle("marker1");
+        Assert.assertEquals("Marker label 1", text.getText());
+        Assert.assertEquals("13px sans-serif", text.getFont());
+
+        waitUntil(driver -> getRenderCount() == 2);
     }
 
     private MapElement.TextReference getMarkerTextStyle(String markerId) {
@@ -72,5 +133,17 @@ public class FeatureLabelIT extends AbstractComponentIT {
         MapElement.FeatureReference feature = vectorSource.getFeatures()
                 .getFeature(markerId);
         return feature.getStyle().getText();
+    }
+
+    private long getRenderCount() {
+        return (long) getCommandExecutor().executeScript(
+                "const map = arguments[0];" + "return map.__renderCount;", map);
+    }
+
+    private void trackRenderCount() {
+        getCommandExecutor().executeScript("const map = arguments[0];"
+                + "map.__renderCount = 0;"
+                + "map.configuration.on('rendercomplete', () => { map.__renderCount = map.__renderCount + 1 });",
+                map);
     }
 }

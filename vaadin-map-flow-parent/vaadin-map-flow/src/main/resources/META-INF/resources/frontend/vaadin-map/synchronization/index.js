@@ -21,7 +21,7 @@ import {
   synchronizeVectorSource,
   synchronizeXYZSource
 } from './sources.js';
-import { synchronizeIcon, synchronizeFill, synchronizeStroke, synchronizeStyle } from './styles.js';
+import { synchronizeIcon, synchronizeFill, synchronizeStroke, synchronizeText, synchronizeStyle } from './styles.js';
 import { convertToCoordinateArray, synchronizeCollection } from './util.js';
 
 /**
@@ -125,7 +125,8 @@ const synchronizerLookup = {
   'ol/style/Icon': synchronizeIcon,
   'ol/style/Fill': synchronizeFill,
   'ol/style/Stroke': synchronizeStroke,
-  'ol/style/Style': synchronizeStyle
+  'ol/style/Style': synchronizeStyle,
+  'ol/style/Text': synchronizeText
 };
 
 /**
