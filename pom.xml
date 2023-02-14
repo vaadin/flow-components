@@ -444,7 +444,7 @@
                 <artifactId>formatter-maven-plugin</artifactId>
                 <version>2.22.0</version>
                 <configuration>
-                    <configFile>https://raw.githubusercontent.com/vaadin/flow/master/eclipse/VaadinJavaConventions.xml</configFile>
+                    <configFile>https://raw.githubusercontent.com/vaadin/flow/main/eclipse/VaadinJavaConventions.xml</configFile>
                     <skipHtmlFormatting>true</skipHtmlFormatting>
                     <lineEnding>LF</lineEnding>
                     <excludes>
