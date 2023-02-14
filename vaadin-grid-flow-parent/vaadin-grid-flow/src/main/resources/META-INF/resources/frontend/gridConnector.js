@@ -399,7 +399,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             }
           } else {
             // workaround: sometimes grid-element gives page index that overflows
-            Math.min(page, Math.floor(grid.size / grid.pageSize));
+            page = Math.min(page, Math.floor(grid.size / grid.pageSize));
 
             if (cache[root] && cache[root][page]) {
               callback(cache[root][page]);
