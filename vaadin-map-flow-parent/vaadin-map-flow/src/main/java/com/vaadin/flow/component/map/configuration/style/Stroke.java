@@ -16,6 +16,14 @@ public class Stroke extends AbstractConfigurationObject {
     private String color;
     private double width;
 
+    public Stroke() {
+    }
+
+    public Stroke(String color, double width) {
+        this.color = color;
+        this.width = width;
+    }
+
     @Override
     public String getType() {
         return Constants.OL_STYLE_STROKE;

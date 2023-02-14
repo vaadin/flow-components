@@ -4,6 +4,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.feature.MarkerFeature;
+import com.vaadin.flow.component.map.configuration.style.TextStyle;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-map/feature-label")
@@ -43,7 +44,44 @@ public class FeatureLabelPage extends Div {
                 });
         removeLabelText.setId("remove-label-text");
 
+        NativeButton setLabelStyle = new NativeButton("Set custom label style",
+                e -> {
+                    marker1.getStyle().setTextStyle(createCustomLabelStyle());
+                });
+        setLabelStyle.setId("set-label-style");
+
+        NativeButton updateLabelStyle = new NativeButton(
+                "Update custom label style", e -> {
+                    if (marker1.getStyle().getTextStyle() != null) {
+                        marker1.getStyle().getTextStyle()
+                                .setFont("15px sans-serif");
+                    }
+                });
+        updateLabelStyle.setId("update-label-style");
+
+        NativeButton removeLabelStyle = new NativeButton(
+                "Remove custom label style", e -> {
+                    marker1.getStyle().setTextStyle(null);
+                });
+        removeLabelStyle.setId("remove-label-style");
+
         add(map);
-        add(new Div(updateLabelText, removeLabelText));
+        add(new Div(updateLabelText, removeLabelText, setLabelStyle,
+                updateLabelStyle, removeLabelStyle));
+    }
+
+    private TextStyle createCustomLabelStyle() {
+        TextStyle textStyle = new TextStyle();
+        textStyle.setFont("bold 13px monospace");
+        textStyle.setOffset(30, 0);
+        textStyle.setTextAlign(TextStyle.TextAlign.LEFT);
+        textStyle.setTextBaseline(TextStyle.TextBaseline.BOTTOM);
+        textStyle.setFill("#fff");
+        textStyle.setStroke("#000", 5);
+        textStyle.setBackgroundFill("#1F6B75");
+        textStyle.setBackgroundStroke("#fff", 2);
+        textStyle.setPadding(3);
+
+        return textStyle;
     }
 }

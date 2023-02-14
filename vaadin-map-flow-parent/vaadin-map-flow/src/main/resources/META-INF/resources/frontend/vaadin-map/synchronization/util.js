@@ -29,6 +29,16 @@ export function convertToSizeArray(size) {
 }
 
 /**
+ * Convert from snake-case Java enum value like `BOTTOM_LEFT` to kebab-case OL
+ * enum value like `bottom-left`
+ * @param enumValue
+ * @returns {string}
+ */
+export function convertEnumValue(enumValue) {
+  return enumValue.toLowerCase().replace(/_/, '-');
+}
+
+/**
  * Synchronizes an OpenLayers collection with data from a Javascript array
  */
 export function synchronizeCollection(collection, updatedIds, options) {
