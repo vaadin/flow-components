@@ -123,7 +123,7 @@ async function main() {
   const byName = ['core', 'vaadin', 'bundles'].reduce((prev, k) => {
       Object.keys(json[k]).filter(pkg => (json[k][pkg].npmName || json[k][pkg].javaVersion) && pkg !== 'vaadin-core' ).map(pkg => {
       const version = json[k][pkg].javaVersion;
-      const branch = version && version.replace('{{version}}', 'master').replace(/^(\d+\.\d+).*$/, '$1');
+      const branch = version && version.replace('{{version}}', 'main').replace(/^(\d+\.\d+).*$/, '$1');
       prev[pkg] = prev[pkg] || {};
       prev[pkg]['org'] = json[k][pkg];
       prev[pkg].package = pkg;

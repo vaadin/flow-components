@@ -31,8 +31,8 @@ async function currentBranch() {
   const parentJs = await xml2js.parseStringPromise(fs.readFileSync('pom.xml', 'utf8'));
   const version = parentJs.project.version[0];
   const branch = version.replace(/^(\d+\.\d+).*$/, '$1');
-  const isMaster = !await checkBranch(branch);
-  return isMaster ? 'master' : branch;
+  const isMain = !await checkBranch(branch);
+  return isMain ? 'main' : branch;
 }
 
 async function getPlatformVersions(branch) {
@@ -58,7 +58,7 @@ async function getVersions() {
     return ['core', 'vaadin'].reduce((prev, k) => {
       return prev.concat(Object.keys(json[k]).filter(pkg => json[k][pkg].npmName || json[k][pkg].javaVersion).map(pkg => {
         const version = json[k][pkg].javaVersion;
-        const branch = version && version.replace('{{version}}', 'master').replace(/^(\d+\.\d+).*$/, '$1');
+        const branch = version && version.replace('{{version}}', 'main').replace(/^(\d+\.\d+).*$/, '$1');
         json[k][pkg].name = pkg;
         json[k][pkg].branch = branch;
         json[k][pkg].module = pkg;

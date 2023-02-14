@@ -53,7 +53,7 @@ function computeRoute(wcname, clname, prefix, route, suffix) {
     : `${wcname}/${route ? route : rootRoutes[wcname]}`;
   return `${prefix}${route}${suffix}`;
 }
-// Replace @Route values from master to unique routes in the merged module
+// Replace @Route values from main to unique routes in the merged module
 function replaceRoutes(wcname, clname, content) {
   content = content.replace(/\@Route *\n/, (...args) => {
     return `@Route(value = "${/^Main(View)?$/.test(clname) ? '': clname.replace(/View$/, '').toLowerCase()}")\n`
