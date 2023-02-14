@@ -53,7 +53,7 @@ public class CellShiftValuesCommand extends CellValueCommand {
             return selectedCellReference;
         } else {
             return new CellReference(
-                    spreadsheet.getActiveSheet().getSheetName(),
+                    getSheet().getSheetName(),
                     paintedCellRange.getFirstRow(),
                     paintedCellRange.getFirstColumn(), false, false);
         }
