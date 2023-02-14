@@ -44,7 +44,7 @@ public class RowInsertOrDeleteCommand extends SpreadsheetCommand {
 
     @Override
     public CellReference getSelectedCellReference() {
-        return new CellReference(spreadsheet.getActiveSheet().getSheetName(),
+        return new CellReference(getSheet().getSheetName(),
                 row, 0, false, false);
     }
 

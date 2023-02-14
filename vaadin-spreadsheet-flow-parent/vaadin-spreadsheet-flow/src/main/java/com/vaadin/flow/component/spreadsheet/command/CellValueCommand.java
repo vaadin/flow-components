@@ -148,7 +148,7 @@ public class CellValueCommand extends SpreadsheetCommand
 
     @Override
     public CellReference getSelectedCellReference() {
-        return new CellReference(spreadsheet.getActiveSheet().getSheetName(),
+        return new CellReference(getSheet().getSheetName(),
                 selectedCellRow, selectedcellCol, false, false);
     }
 
@@ -341,7 +341,7 @@ public class CellValueCommand extends SpreadsheetCommand
             if (o instanceof CellValue) {
                 CellValue cellValue = (CellValue) o;
                 changedCells.add(new CellReference(
-                        spreadsheet.getActiveSheet().getSheetName(),
+                        getSheet().getSheetName(),
                         cellValue.row, cellValue.col, false, false));
             } else {
                 CellRangeValue cellRangeValue = (CellRangeValue) o;
