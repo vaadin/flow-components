@@ -98,7 +98,7 @@ async function getReleases() {
   try {
     json = await getPlatformVersions(platform);
   } catch (error) {
-    json = await getPlatformVersions('master');
+    json = await getPlatformVersions('main');
   }
   flowVersion = json.core.flow.javaVersion;
 

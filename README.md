@@ -2,7 +2,7 @@
 
 This is a maven multi-module project including all vaadin flow components.
 
-`master` branch is the latest version of all the components that will be released in the [Vaadin platform](https://github.com/vaadin/platform).
+`main` branch is the latest version of all the components that will be released in the [Vaadin platform](https://github.com/vaadin/platform).
 
 ## Quick start
 
@@ -106,10 +106,10 @@ add the following dependency to your `pom.xml`:
 ```
 
 ## Flow documentation
-Documentation for flow can be found in [Flow documentation](https://github.com/vaadin/flow-and-components-documentation/blob/master/documentation/Overview.asciidoc).
+Documentation for flow can be found in [Flow documentation](https://github.com/vaadin/flow-and-components-documentation/blob/main/documentation/Overview.asciidoc).
 
 ## Contributing
-- Use the coding conventions from [Flow coding conventions](https://github.com/vaadin/flow/tree/master/eclipse)
+- Use the coding conventions from [Flow coding conventions](https://github.com/vaadin/flow/tree/main/eclipse)
 - [Submit a pull request](https://www.digitalocean.com/community/tutorials/how-to-create-a-pull-request-on-github) with detailed title and description
 - Wait for response from one of Vaadin Flow team members
 
