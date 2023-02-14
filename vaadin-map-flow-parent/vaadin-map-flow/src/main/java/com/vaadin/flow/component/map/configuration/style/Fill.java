@@ -15,6 +15,13 @@ public class Fill extends AbstractConfigurationObject {
 
     private String color;
 
+    public Fill() {
+    }
+
+    public Fill(String color) {
+        this.color = color;
+    }
+
     @Override
     public String getType() {
         return Constants.OL_STYLE_FILL;

@@ -7,6 +7,7 @@
  * See <https://vaadin.com/commercial-license-and-service-terms> for the full
  * license.
  */
+import Translate from 'ol/interaction/Translate';
 import { setUserProjection as openLayersSetUserProjection } from 'ol/proj';
 import { register as openLayersRegisterProjections } from 'ol/proj/proj4';
 import proj4 from 'proj4';
@@ -134,6 +135,31 @@ openLayersSetUserProjection('EPSG:4326');
         mapElement.dispatchEvent(featureClickEvent);
       }
     });
+
+    // Feature drag&drop
+    const translate = new Translate({
+      filter(feature) {
+        return !!feature.draggable;
+      }
+    });
+    translate.on('translateend', (event) => {
+      const feature = event.features.item(0);
+      if (!feature) return;
+      const layer = getLayerForFeature(mapElement.configuration.getLayers().getArray(), feature);
+
+      const featureDropEvent = new CustomEvent('map-feature-drop', {
+        detail: {
+          feature,
+          layer,
+          coordinate: event.coordinate,
+          startCoordinate: event.startCoordinate
+        }
+      });
+
+      mapElement.dispatchEvent(featureDropEvent);
+    });
+
+    mapElement.configuration.addInteraction(translate);
   }
 
   /**
