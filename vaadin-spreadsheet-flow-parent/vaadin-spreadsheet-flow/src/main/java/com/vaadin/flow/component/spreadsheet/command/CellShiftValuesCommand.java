@@ -52,8 +52,7 @@ public class CellShiftValuesCommand extends CellValueCommand {
                 .isCellInRange(selectedCellReference, paintedCellRange)) {
             return selectedCellReference;
         } else {
-            return new CellReference(
-                    getSheet().getSheetName(),
+            return new CellReference(getSheet().getSheetName(),
                     paintedCellRange.getFirstRow(),
                     paintedCellRange.getFirstColumn(), false, false);
         }
