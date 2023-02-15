@@ -784,7 +784,13 @@ public class CellValueManager implements Serializable {
 
     private void fireCellValueChangeEvent(Cell cell) {
         Set<CellReference> cells = new HashSet<CellReference>();
-        cells.add(new CellReference(cell));
+        CellReference ref = new CellReference(cell);
+        cells.add(ref);
+        if (ref.getSheetName() != null) {
+            CellReference refWithoutSheetName = new CellReference(ref.getRow(),
+                    ref.getCol());
+            cells.add(refWithoutSheetName);
+        }
         spreadsheet.fireEvent(new CellValueChangeEvent(spreadsheet, cells));
     }
 
