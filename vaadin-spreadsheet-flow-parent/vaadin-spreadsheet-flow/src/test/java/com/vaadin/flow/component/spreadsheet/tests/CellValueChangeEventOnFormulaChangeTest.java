@@ -79,7 +79,6 @@ public class CellValueChangeEventOnFormulaChangeTest {
         assertFalse(
                 "The changed cells should not include a cell with correct indexes and a wrong sheet name",
                 changedCells.get().contains(0, 2, "Sheet1"));
-
     }
 
 }
