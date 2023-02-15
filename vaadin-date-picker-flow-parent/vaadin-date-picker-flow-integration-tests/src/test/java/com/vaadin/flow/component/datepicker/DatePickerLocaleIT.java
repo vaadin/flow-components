@@ -3,7 +3,6 @@ package com.vaadin.flow.component.datepicker;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAdjuster;
 import java.time.temporal.TemporalAdjusters;
 import java.util.Collections;
 import java.util.List;
