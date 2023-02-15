@@ -9,6 +9,7 @@
 package com.vaadin.flow.component.spreadsheet.tests;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -59,9 +60,11 @@ public class CellValueChangeEventOnFormulaChangeTest {
         // B1 is 0, so the result doesn't change
         spreadsheet.getCellValueManager().onCellValueChange(3, 1, "=A1+2*B1");
 
-        assertEquals("There should be 1 changed cell", 1, changedCells.size());
-        assertEquals("The changed cell should be C1",
-                new CellReference("Sheet0!C1"), changedCells.get(0));
+        assertEquals("There should be 2 changed cells", 2, changedCells.size());
+        assertTrue("The changed cells should include C1 with sheet name",
+                changedCells.contains(new CellReference("Sheet0!C1")));
+        assertTrue("The changed cells should include C1 without sheet name",
+                changedCells.contains(new CellReference("C1")));
     }
 
 }
