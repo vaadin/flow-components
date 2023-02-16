@@ -2,6 +2,8 @@ package com.vaadin.flow.component.datepicker;
 
 import java.time.LocalDate;
 import java.time.Month;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -187,32 +189,70 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
     }
 
     @Test
-    public void datePickerWithLocale_setInputValue_blur_defaultReferenceDateIsUsed() {
-        LocalDate now = LocalDate.now();
-        int currentYear = now.getYear();
+    public void noReferenceDate_usesCurrentDateAsReferenceDate() {
+        // Due to an issue with date-fns the reference date always refers to the
+        // start of the year, so use that for testing bounds
+        LocalDate startOfThisYear = LocalDate.now()
+                .with(TemporalAdjusters.firstDayOfYear());
+        LocalDate endOfThisYear = LocalDate.now()
+                .with(TemporalAdjusters.lastDayOfYear());
 
-        int testYear1 = (currentYear + 51) % 100;
-        int adjustedYear1 = getAdjustedYear(currentYear, testYear1);
-        testParseReformatCycle(Integer.toString(testYear1),
-                Integer.toString(adjustedYear1));
+        // Test lower boundary
+        LocalDate testDate = startOfThisYear.minusYears(50);
+        enterShortYearDate(testDate);
+        Assert.assertEquals(testDate, picker.getDate());
 
-        int testYear2 = (currentYear + 49) % 100;
-        int adjustedYear2 = getAdjustedYear(currentYear, testYear2);
-        testParseReformatCycle(Integer.toString(testYear2),
-                Integer.toString(adjustedYear2));
+        // Test upper boundary
+        testDate = endOfThisYear.plusYears(49);
+        enterShortYearDate(testDate);
+        Assert.assertEquals(testDate, picker.getDate());
 
-        testParseReformatCycle("2031", "2031");
-        testParseReformatCycle("0030", "0030");
+        // Test full years
+        testDate = LocalDate.of(2031, 1, 1);
+        enterFullYearDate(testDate);
+        Assert.assertEquals(testDate, picker.getDate());
+
+        testDate = LocalDate.of(30, 1, 1);
+        enterFullYearDate(testDate);
+        Assert.assertEquals(testDate, picker.getDate());
     }
 
     @Test
-    public void datePickerWithLocale_setCustomReferenceDate_setInputValue_blur_customReferenceDateIsUsed() {
+    public void setCustomReferenceDate_usesCustomReferenceDate() {
         $("button").id("apply-custom-reference-date").click();
 
-        testParseReformatCycle("31", "1931");
-        testParseReformatCycle("29", "2029");
-        testParseReformatCycle("2031", "2031");
-        testParseReformatCycle("0030", "0030");
+        // Test lower boundary
+        LocalDate testDate = LocalDate.of(1950, 1, 1);
+        enterShortYearDate(testDate);
+        Assert.assertEquals(testDate, picker.getDate());
+
+        // Test upper boundary
+        testDate = LocalDate.of(2049, 12, 31);
+        enterShortYearDate(testDate);
+        Assert.assertEquals(testDate, picker.getDate());
+
+        // Test full years
+        testDate = LocalDate.of(2031, 1, 1);
+        enterFullYearDate(testDate);
+        Assert.assertEquals(testDate, picker.getDate());
+
+        testDate = LocalDate.of(30, 1, 1);
+        enterFullYearDate(testDate);
+        Assert.assertEquals(testDate, picker.getDate());
+    }
+
+    private void enterShortYearDate(LocalDate date) {
+        String formattedDate = date
+                .format(DateTimeFormatter.ofPattern("MM/dd/yy"));
+        picker.setInputValue(formattedDate);
+        picker.sendKeys(Keys.TAB);
+    }
+
+    private void enterFullYearDate(LocalDate date) {
+        String formattedDate = date
+                .format(DateTimeFormatter.ofPattern("MM/dd/yyyy"));
+        picker.setInputValue(formattedDate);
+        picker.sendKeys(Keys.TAB);
     }
 
     private void applyLocale(Locale locale) {
@@ -240,28 +280,5 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
                     "Received a warning in browser log console, message: %s",
                     logEntry));
         }
-    }
-
-    private int getAdjustedYear(int currentYear, int testYear) {
-        int adjustedYear = testYear + (currentYear / 100) * 100;
-        if (currentYear < adjustedYear - 50) {
-            return adjustedYear - 100;
-        }
-        if (currentYear > adjustedYear + 50) {
-            return adjustedYear + 100;
-        }
-        return adjustedYear;
-    }
-
-    private void testParseReformatCycle(String testYear, String expectedYear) {
-        int dayOfTheMonth = 27;
-        int month = 11;
-        String dateStringWithoutYear = month + "/" + dayOfTheMonth + "/";
-        picker.setInputValue(dateStringWithoutYear + testYear);
-        picker.sendKeys(Keys.TAB);
-        Assert.assertEquals(dateStringWithoutYear + expectedYear,
-                picker.getInputValue());
-        Assert.assertEquals(LocalDate.of(Integer.valueOf(expectedYear), month,
-                dayOfTheMonth), picker.getDate());
     }
 }
