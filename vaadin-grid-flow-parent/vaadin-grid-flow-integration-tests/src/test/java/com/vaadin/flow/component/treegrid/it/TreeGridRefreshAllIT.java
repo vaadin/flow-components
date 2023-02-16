@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.treegrid.it;
 
+import com.vaadin.flow.component.button.testbench.ButtonElement;
+import com.vaadin.flow.component.grid.testbench.TreeGridElement;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -89,4 +91,18 @@ public class TreeGridRefreshAllIT extends AbstractTreeGridIT {
                 getTreeGrid().getRowCount());
     }
 
+    @Test
+    public void scrollToEnd_selectRootItem_refreshAll_lastRootItemRendered() {
+        TreeGridElement grid = $(TreeGridElement.class)
+                .id("grid-with-page-size");
+
+        grid.scrollToRow(20);
+
+        grid.select(14);
+
+        $(ButtonElement.class).id("refresh-all-grid-with-page-size").click();
+
+        Assert.assertEquals("Invalid row at index 20", "11",
+                grid.getCell(20, 0).getText());
+    }
 }
