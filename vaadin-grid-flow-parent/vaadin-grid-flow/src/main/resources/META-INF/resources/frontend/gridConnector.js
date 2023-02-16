@@ -807,6 +807,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             }
           }
           grid._cache.updateSize();
+          grid._effectiveSize = grid._cache.effectiveSize;
         });
 
         grid.$connector.reset = tryCatchWrapper(function () {
