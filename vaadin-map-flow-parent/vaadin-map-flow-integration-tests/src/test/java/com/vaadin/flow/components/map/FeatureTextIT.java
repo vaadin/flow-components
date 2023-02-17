@@ -8,32 +8,32 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-@TestPath("vaadin-map/feature-label")
-public class FeatureLabelIT extends AbstractComponentIT {
+@TestPath("vaadin-map/feature-text")
+public class FeatureTextIT extends AbstractComponentIT {
     private MapElement map;
-    private TestBenchElement updateLabelButton;
-    private TestBenchElement removeLabelButton;
-    private TestBenchElement setLabelStyleButton;
-    private TestBenchElement updateLabelStyleButton;
-    private TestBenchElement removeLabelStyleButton;
+    private TestBenchElement updateTextButton;
+    private TestBenchElement removeTextButton;
+    private TestBenchElement setTextStyleButton;
+    private TestBenchElement updateTextStyleButton;
+    private TestBenchElement removeTextStyleButton;
 
     @Before
     public void init() {
         open();
         map = $(MapElement.class).waitForFirst();
-        updateLabelButton = $(TestBenchElement.class).id("update-label-text");
-        removeLabelButton = $(TestBenchElement.class).id("remove-label-text");
-        setLabelStyleButton = $(TestBenchElement.class).id("set-label-style");
-        updateLabelStyleButton = $(TestBenchElement.class)
-                .id("update-label-style");
-        removeLabelStyleButton = $(TestBenchElement.class)
-                .id("remove-label-style");
+        updateTextButton = $(TestBenchElement.class).id("update-marker-text");
+        removeTextButton = $(TestBenchElement.class).id("remove-marker-text");
+        setTextStyleButton = $(TestBenchElement.class).id("set-text-style");
+        updateTextStyleButton = $(TestBenchElement.class)
+                .id("update-text-style");
+        removeTextStyleButton = $(TestBenchElement.class)
+                .id("remove-text-style");
 
         trackRenderCount();
     }
 
     @Test
-    public void defaultLabelStyle() {
+    public void defaultTextStyle() {
         MapElement.TextReference text = getMarkerTextStyle("marker1");
 
         Assert.assertEquals("13px sans-serif", text.getFont());
@@ -45,30 +45,30 @@ public class FeatureLabelIT extends AbstractComponentIT {
     }
 
     @Test
-    public void initialLabels() {
-        Assert.assertEquals("Marker label 1",
+    public void initialTexts() {
+        Assert.assertEquals("Marker text 1",
                 getMarkerTextStyle("marker1").getText());
-        Assert.assertEquals("Marker label 2",
+        Assert.assertEquals("Marker text 2",
                 getMarkerTextStyle("marker2").getText());
-        Assert.assertEquals("Marker label 3",
+        Assert.assertEquals("Marker text 3",
                 getMarkerTextStyle("marker3").getText());
     }
 
     @Test
-    public void updateLabels() {
-        updateLabelButton.click();
+    public void updateTexts() {
+        updateTextButton.click();
 
-        Assert.assertEquals("Updated label 1",
+        Assert.assertEquals("Updated text 1",
                 getMarkerTextStyle("marker1").getText());
-        Assert.assertEquals("Updated label 2",
+        Assert.assertEquals("Updated text 2",
                 getMarkerTextStyle("marker2").getText());
-        Assert.assertEquals("Updated label 3",
+        Assert.assertEquals("Updated text 3",
                 getMarkerTextStyle("marker3").getText());
     }
 
     @Test
-    public void removeLabels() {
-        removeLabelButton.click();
+    public void removeTexts() {
+        removeTextButton.click();
 
         Assert.assertNull(getMarkerTextStyle("marker1").getText());
         Assert.assertNull(getMarkerTextStyle("marker2").getText());
@@ -76,11 +76,11 @@ public class FeatureLabelIT extends AbstractComponentIT {
     }
 
     @Test
-    public void setSetLabelStyle() {
-        setLabelStyleButton.click();
+    public void setCustomTextStyle() {
+        setTextStyleButton.click();
 
         MapElement.TextReference text = getMarkerTextStyle("marker1");
-        Assert.assertEquals("Marker label 1", text.getText());
+        Assert.assertEquals("Marker text 1", text.getText());
         Assert.assertEquals("bold 13px monospace", text.getFont());
         Assert.assertEquals(30, text.getOffsetX());
         Assert.assertEquals(0, text.getOffsetY());
@@ -97,30 +97,30 @@ public class FeatureLabelIT extends AbstractComponentIT {
     }
 
     @Test
-    public void updateLabelStyle() {
-        setLabelStyleButton.click();
+    public void updateCustomTextStyle() {
+        setTextStyleButton.click();
 
         waitUntil(driver -> getRenderCount() == 1);
 
-        updateLabelStyleButton.click();
+        updateTextStyleButton.click();
 
         MapElement.TextReference text = getMarkerTextStyle("marker1");
-        Assert.assertEquals("Marker label 1", text.getText());
+        Assert.assertEquals("Marker text 1", text.getText());
         Assert.assertEquals("15px sans-serif", text.getFont());
 
         waitUntil(driver -> getRenderCount() == 2);
     }
 
     @Test
-    public void removeLabelStyle() {
-        setLabelStyleButton.click();
+    public void removeCustomTextStyle() {
+        setTextStyleButton.click();
 
         waitUntil(driver -> getRenderCount() == 1);
 
-        removeLabelStyleButton.click();
+        removeTextStyleButton.click();
 
         MapElement.TextReference text = getMarkerTextStyle("marker1");
-        Assert.assertEquals("Marker label 1", text.getText());
+        Assert.assertEquals("Marker text 1", text.getText());
         Assert.assertEquals("13px sans-serif", text.getFont());
 
         waitUntil(driver -> getRenderCount() == 2);

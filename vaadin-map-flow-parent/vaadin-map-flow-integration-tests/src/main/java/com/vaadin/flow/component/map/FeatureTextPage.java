@@ -7,70 +7,70 @@ import com.vaadin.flow.component.map.configuration.feature.MarkerFeature;
 import com.vaadin.flow.component.map.configuration.style.TextStyle;
 import com.vaadin.flow.router.Route;
 
-@Route("vaadin-map/feature-label")
-public class FeatureLabelPage extends Div {
-    public FeatureLabelPage() {
+@Route("vaadin-map/feature-text")
+public class FeatureTextPage extends Div {
+    public FeatureTextPage() {
         Map map = new Map();
         map.getFeatureLayer().setId("feature-layer");
 
         MarkerFeature marker1 = new MarkerFeature();
         marker1.setId("marker1");
-        marker1.setLabel("Marker label 1");
+        marker1.setText("Marker text 1");
         map.getFeatureLayer().addFeature(marker1);
 
         MarkerFeature marker2 = new MarkerFeature(new Coordinate(30, 0));
         marker2.setId("marker2");
-        marker2.setLabel("Marker label 2");
+        marker2.setText("Marker text 2");
         map.getFeatureLayer().addFeature(marker2);
 
         MarkerFeature marker3 = new MarkerFeature(new Coordinate(60, 0));
         marker3.setId("marker3");
-        marker3.setLabel("Marker label 3");
+        marker3.setText("Marker text 3");
         map.getFeatureLayer().addFeature(marker3);
 
-        NativeButton updateLabelText = new NativeButton("Update label text",
+        NativeButton updateMarkerText = new NativeButton("Update marker text",
                 e -> {
-                    marker1.setLabel("Updated label 1");
-                    marker2.setLabel("Updated label 2");
-                    marker3.setLabel("Updated label 3");
+                    marker1.setText("Updated text 1");
+                    marker2.setText("Updated text 2");
+                    marker3.setText("Updated text 3");
                 });
-        updateLabelText.setId("update-label-text");
+        updateMarkerText.setId("update-marker-text");
 
-        NativeButton removeLabelText = new NativeButton("Remove label texts",
+        NativeButton removeMarkerText = new NativeButton("Remove marker texts",
                 e -> {
-                    marker1.setLabel(null);
-                    marker2.setLabel(null);
-                    marker3.setLabel(null);
+                    marker1.setText(null);
+                    marker2.setText(null);
+                    marker3.setText(null);
                 });
-        removeLabelText.setId("remove-label-text");
+        removeMarkerText.setId("remove-marker-text");
 
-        NativeButton setLabelStyle = new NativeButton("Set custom label style",
+        NativeButton setTextStyle = new NativeButton("Set custom text style",
                 e -> {
-                    marker1.getStyle().setTextStyle(createCustomLabelStyle());
+                    marker1.getStyle().setTextStyle(createCustomTextStyle());
                 });
-        setLabelStyle.setId("set-label-style");
+        setTextStyle.setId("set-text-style");
 
-        NativeButton updateLabelStyle = new NativeButton(
-                "Update custom label style", e -> {
+        NativeButton updateTextStyle = new NativeButton(
+                "Update custom text style", e -> {
                     if (marker1.getStyle().getTextStyle() != null) {
                         marker1.getStyle().getTextStyle()
                                 .setFont("15px sans-serif");
                     }
                 });
-        updateLabelStyle.setId("update-label-style");
+        updateTextStyle.setId("update-text-style");
 
-        NativeButton removeLabelStyle = new NativeButton(
-                "Remove custom label style", e -> {
+        NativeButton removeTextStyle = new NativeButton(
+                "Remove custom text style", e -> {
                     marker1.getStyle().setTextStyle(null);
                 });
-        removeLabelStyle.setId("remove-label-style");
+        removeTextStyle.setId("remove-text-style");
 
         add(map);
-        add(new Div(updateLabelText, removeLabelText, setLabelStyle,
-                updateLabelStyle, removeLabelStyle));
+        add(new Div(updateMarkerText, removeMarkerText, setTextStyle,
+                updateTextStyle, removeTextStyle));
     }
 
-    private TextStyle createCustomLabelStyle() {
+    private TextStyle createCustomTextStyle() {
         TextStyle textStyle = new TextStyle();
         textStyle.setFont("bold 13px monospace");
         textStyle.setOffset(30, 0);
