@@ -50,7 +50,7 @@ public class DatePickerLocalePage extends Div {
         NativeButton applyCustomReferenceDate = new NativeButton(
                 "Apply custom reference date", e -> {
                     DatePicker.DatePickerI18n i18n = new DatePicker.DatePickerI18n();
-                    i18n.setReferenceDate(LocalDate.of(1980, 2, 2));
+                    i18n.setReferenceDate(LocalDate.of(2000, 1, 1));
                     referenceDatePicker.setI18n(i18n);
                 });
         applyCustomReferenceDate.setId("apply-custom-reference-date");
