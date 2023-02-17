@@ -30,14 +30,6 @@ public class Home extends Div {
                 new Span("Themed Content"));
         detailsThemed.addThemeVariants(DetailsVariant.values());
 
-        Details detailsListener = new Details(
-                "Details with opened change listener", new Span("Content"));
-        detailsListener.addOpenedChangeListener(event -> {
-            if (event.isOpened()) {
-                info.setText("opened-change");
-            }
-        });
-
-        add(details, detailsDisabled, detailsThemed, detailsListener, info);
+        add(details, detailsDisabled, detailsThemed, info);
     }
 }
