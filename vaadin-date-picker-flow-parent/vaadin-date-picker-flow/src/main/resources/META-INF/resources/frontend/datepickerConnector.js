@@ -151,11 +151,26 @@ import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/s
           const usedFormats = hasCustomFormats ? i18n.dateFormats : [createLocaleBasedDateFormat(locale)];
           const formatterAndParser = createFormatterAndParser(usedFormats);
 
+          const updatedI18n = Object.assign({}, datepicker.i18n, i18n, formatterAndParser);
+
           // Merge current web component I18N settings with new I18N settings and the formatting and parsing functions
-          // Defer setting I18N property into microtask as a workaround for: https://github.com/vaadin/flow-components/issues/4500
-          queueMicrotask(() => {
-            datepicker.i18n = Object.assign({}, datepicker.i18n, i18n, formatterAndParser);
-          });
+          if (datepicker.constructor.name === 'DateTimePickerDatePicker') {
+            // If the date picker is a part of a date time picker, defer setting I18N property into microtask as a
+            // workaround for: https://github.com/vaadin/flow-components/issues/4500
+            // An additional layer of deferring with a MutationObserver was added as a workaround for:
+            // https://github.com/vaadin/flow-components/issues/4667
+            // These workarounds are only necessary for v23, and will not be removed in v24.
+            queueMicrotask(() => {
+              datepicker.i18n = updatedI18n;
+              const observer = new MutationObserver(() => {
+                observer.disconnect();
+                datepicker.i18n = updatedI18n;
+              });
+              observer.observe(datepicker.parentNode, { attributes: true, subtree: true });
+            });
+          } else {
+            datepicker.i18n = updatedI18n;
+          }
         });
       })(datepicker)
   };
