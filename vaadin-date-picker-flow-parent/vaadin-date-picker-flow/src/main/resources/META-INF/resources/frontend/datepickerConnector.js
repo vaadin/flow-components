@@ -173,7 +173,11 @@ import { DatePicker } from '@vaadin/date-picker/src/vaadin-date-picker.js';
             // https://github.com/vaadin/flow-components/issues/4667
             // This workaround is only necessary for v23, and will be removed in v24.
             if (_isDateTimePickerDatePicker()) {
-              datepicker.addEventListener("date-time-picker-date-picker-ready", () => datepicker.i18n = updatedI18n);
+              datepicker.addEventListener("date-time-picker-date-picker-ready", () => {
+                queueMicrotask(() => {
+                  datepicker.i18n = updatedI18n;
+                });
+              });
             }
           });
         });
