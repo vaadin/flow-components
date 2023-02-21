@@ -42,7 +42,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-tabsheet")
-@NpmPackage(value = "@vaadin/tabsheet", version = "23.3.2")
+@NpmPackage(value = "@vaadin/tabsheet", version = "23.3.7")
 @JsModule("@vaadin/tabsheet/src/vaadin-tabsheet.js")
 public class TabSheet extends Component
         implements HasStyle, HasSize, HasThemeVariant<TabSheetVariant> {
@@ -277,7 +277,12 @@ public class TabSheet extends Component
         return tabs.addSelectedChangeListener(event -> {
             listener.onComponentEvent(new SelectedChangeEvent(TabSheet.this,
                     event.getPreviousTab(), event.isFromClient(),
-                    event.isInitialSelection()));
+                    event.isInitialSelection()) {
+                @Override
+                public void unregisterListener() {
+                    event.unregisterListener();
+                }
+            });
         });
 
     }

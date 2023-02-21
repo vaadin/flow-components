@@ -139,7 +139,7 @@ import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/s
 
         function _getReferenceDate() {
           const { referenceDate } = datepicker.i18n;
-          return referenceDate ? new Date(referenceDate.year, referenceDate.month - 1, referenceDate.day) : new Date();
+          return referenceDate ? new Date(referenceDate.year, referenceDate.month, referenceDate.day) : new Date();
         }
 
         datepicker.$connector.updateI18n = tryCatchWrapper(function (locale, i18n) {
@@ -152,7 +152,10 @@ import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/s
           const formatterAndParser = createFormatterAndParser(usedFormats);
 
           // Merge current web component I18N settings with new I18N settings and the formatting and parsing functions
-          datepicker.i18n = Object.assign({}, datepicker.i18n, i18n, formatterAndParser);
+          // Defer setting I18N property into microtask as a workaround for: https://github.com/vaadin/flow-components/issues/4500
+          queueMicrotask(() => {
+            datepicker.i18n = Object.assign({}, datepicker.i18n, i18n, formatterAndParser);
+          });
         });
       })(datepicker)
   };

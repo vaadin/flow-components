@@ -139,10 +139,10 @@ import elemental.json.JsonObject;
  */
 @Deprecated
 @Tag("vaadin-form-layout")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/form-layout", version = "23.3.2")
-@NpmPackage(value = "@vaadin/vaadin-form-layout", version = "23.3.2")
+@NpmPackage(value = "@vaadin/form-layout", version = "23.3.7")
+@NpmPackage(value = "@vaadin/vaadin-form-layout", version = "23.3.7")
 @JsModule("@vaadin/form-layout/src/vaadin-form-layout.js")
 public abstract class GeneratedVaadinFormLayout<R extends GeneratedVaadinFormLayout<R>>
         extends Component implements HasStyle {

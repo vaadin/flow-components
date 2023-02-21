@@ -26,6 +26,7 @@ import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasValueAndElement;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.grid.ColumnPathRenderer;
@@ -46,10 +47,10 @@ import elemental.json.JsonObject;
 import org.slf4j.LoggerFactory;
 
 @Tag("vaadin-grid-pro")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/grid-pro", version = "23.3.2")
-@NpmPackage(value = "@vaadin/vaadin-grid-pro", version = "23.3.2")
+@NpmPackage(value = "@vaadin/grid-pro", version = "23.3.7")
+@NpmPackage(value = "@vaadin/vaadin-grid-pro", version = "23.3.7")
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro.js")
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro-edit-column.js")
 @JsModule("./gridProConnector.js")
@@ -144,6 +145,9 @@ public class GridPro<E> extends Grid<E> {
             if (column.getEditorType().equals("custom")) {
                 column.getEditorField()
                         .setValue(column.getValueProvider().apply(e.getItem()));
+                UI.getCurrent().getPage().executeJs(
+                        "window.Vaadin.Flow.gridProConnector.selectAll($0)",
+                        column.getEditorField().getElement());
             }
         });
     }
@@ -183,7 +187,7 @@ public class GridPro<E> extends Grid<E> {
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-pro-edit-column")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.2")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.7")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class EditColumn<T> extends Column<T> {
 

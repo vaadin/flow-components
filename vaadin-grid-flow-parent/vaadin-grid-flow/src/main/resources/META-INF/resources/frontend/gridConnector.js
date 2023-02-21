@@ -785,6 +785,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             let page = firstPage + i;
             let items = cache[pkey][page];
             grid.$connector.doDeselection(items.filter((item) => selectedKeys[item.key]));
+            items.forEach((item) => grid.closeItemDetails(item));
             delete cache[pkey][page];
             const updatedItems = updateGridCache(page, parentKey);
             if (updatedItems) {
@@ -808,6 +809,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             }
           }
           grid._cache.updateSize();
+          grid._effectiveSize = grid._cache.effectiveSize;
         });
 
         grid.$connector.reset = tryCatchWrapper(function () {
@@ -1128,7 +1130,11 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           const eventContext = grid.getEventContext(event);
           const section = eventContext.section;
 
-          if (eventContext.item && !isFocusable(target) && section !== 'details') {
+          if (isFocusable(target) || target instanceof HTMLLabelElement) {
+            return;
+          }
+
+          if (eventContext.item && section !== 'details') {
             event.itemKey = eventContext.item.key;
             // if you have a details-renderer, getEventContext().column is undefined
             if (eventContext.column) {

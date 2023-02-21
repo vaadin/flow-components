@@ -167,6 +167,16 @@ public class ButtonTest {
         button.setText(null);
         assertButtonHasThemeAttribute(THEME_ATTRIBUTE_ICON);
 
+        // should ignore tooltips when determining theme
+        button = new Button();
+        button.setTooltipText("foo");
+        button.setIcon(new Icon());
+        assertButtonHasThemeAttribute(THEME_ATTRIBUTE_ICON);
+
+        button = new Button(new Icon());
+        button.setTooltipText("foo");
+        assertButtonHasThemeAttribute(THEME_ATTRIBUTE_ICON);
+
         // don't override explicitly set theme-attribute
         button = new Button();
         button.getElement().setAttribute(THEME_ATTRIBUTE,

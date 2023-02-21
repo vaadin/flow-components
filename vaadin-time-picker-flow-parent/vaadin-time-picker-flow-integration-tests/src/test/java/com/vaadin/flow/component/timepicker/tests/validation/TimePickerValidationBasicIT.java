@@ -12,6 +12,7 @@ import static com.vaadin.flow.component.timepicker.tests.validation.TimePickerVa
 import static com.vaadin.flow.component.timepicker.tests.validation.TimePickerValidationBasicPage.MIN_INPUT;
 import static com.vaadin.flow.component.timepicker.tests.validation.TimePickerValidationBasicPage.MAX_INPUT;
 import static com.vaadin.flow.component.timepicker.tests.validation.TimePickerValidationBasicPage.REQUIRED_BUTTON;
+import static com.vaadin.flow.component.timepicker.tests.validation.TimePickerValidationBasicPage.CLEAR_VALUE_BUTTON;
 
 @TestPath("vaadin-time-picker/validation/basic")
 public class TimePickerValidationBasicIT
@@ -117,6 +118,17 @@ public class TimePickerValidationBasicIT
         testField.selectByText("INVALID");
         assertServerInvalid();
         assertClientInvalid();
+    }
+
+    @Test
+    public void badInput_setValue_clearValue_assertValidity() {
+        testField.selectByText("INVALID");
+        assertServerInvalid();
+        assertClientInvalid();
+
+        $("button").id(CLEAR_VALUE_BUTTON).click();
+        assertServerValid();
+        assertClientValid();
     }
 
     protected TimePickerElement getTestField() {

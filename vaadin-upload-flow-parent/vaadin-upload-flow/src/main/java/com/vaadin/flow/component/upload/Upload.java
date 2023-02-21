@@ -210,7 +210,7 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
      *         after they are selected, <code>false</code> otherwise.
      */
     public boolean isAutoUpload() {
-        return isNoAutoBoolean();
+        return !isNoAutoBoolean();
     }
 
     /**

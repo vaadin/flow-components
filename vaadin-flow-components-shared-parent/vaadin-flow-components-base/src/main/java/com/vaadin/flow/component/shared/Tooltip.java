@@ -17,9 +17,9 @@ package com.vaadin.flow.component.shared;
 
 import java.io.Serializable;
 import java.util.Arrays;
-import java.util.WeakHashMap;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
@@ -31,9 +31,11 @@ import com.vaadin.flow.function.SerializableRunnable;
  *
  * @author Vaadin Ltd
  */
-@NpmPackage(value = "@vaadin/tooltip", version = "23.3.2")
+@NpmPackage(value = "@vaadin/tooltip", version = "23.3.7")
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
 public class Tooltip implements Serializable {
+
+    private static final String TOOLTIP_DATA_KEY = "tooltip";
 
     /**
      * The {@code <vaadin-tooltip>} element controlled by this tooltip instance.
@@ -119,13 +121,6 @@ public class Tooltip implements Serializable {
     }
 
     /**
-     * Keeps track of elements that have a tooltip. Currently only used for the {@link HasTooltip} APIs.
-     * The other APIs, such as {@link #forElement(Element)} and {@link #forComponent(Component)}, do not use this
-     * because they always return a new {@code Tooltip} instance (support adding multiple tooltips for one target).
-     */
-    private static final WeakHashMap<Element, Tooltip> elementTooltips = new WeakHashMap<>();
-
-    /**
      * Gets the tooltip handle for the given element.
      *
      * @param element
@@ -133,7 +128,8 @@ public class Tooltip implements Serializable {
      * @return the tooltip handle
      */
     static Tooltip getForElement(Element element) {
-        return elementTooltips.get(element);
+        var component = ComponentUtil.getInnermostComponent(element);
+        return (Tooltip) ComponentUtil.getData(component, TOOLTIP_DATA_KEY);
     }
 
     /**
@@ -151,7 +147,8 @@ public class Tooltip implements Serializable {
         var tooltip = new Tooltip();
         tooltip.tooltipElement.setAttribute("slot", "tooltip");
         hasTooltip.getElement().appendChild(tooltip.tooltipElement);
-        elementTooltips.put(hasTooltip.getElement(), tooltip);
+        var component = ComponentUtil.getInnermostComponent(hasTooltip.getElement());
+        ComponentUtil.setData(component, TOOLTIP_DATA_KEY, tooltip);
         return tooltip;
     }
 

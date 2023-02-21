@@ -55,7 +55,7 @@ import com.vaadin.flow.function.SerializableBiFunction;
  */
 @SuppressWarnings("deprecation")
 @Tag("vaadin-big-decimal-field")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("./vaadin-big-decimal-field.js")
 public class BigDecimalField
@@ -365,7 +365,15 @@ public class BigDecimalField
      */
     @Override
     public void setValue(BigDecimal value) {
+        BigDecimal oldValue = getValue();
+
         super.setValue(value);
+
+        if (Objects.equals(oldValue, getEmptyValue())
+                && Objects.equals(value, getEmptyValue())) {
+            // Clear the input element from possible bad input.
+            getElement().executeJs("this.inputElement.value = ''");
+        }
     }
 
     /**
