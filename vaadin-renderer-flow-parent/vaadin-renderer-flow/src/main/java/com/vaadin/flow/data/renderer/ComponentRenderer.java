@@ -19,6 +19,7 @@ import java.util.Optional;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.DataGenerator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
@@ -44,6 +45,7 @@ import com.vaadin.flow.shared.Registration;
  * @param <SOURCE>
  *            the type of the input model object
  */
+@JsModule("./flow-component-renderer.js")
 public class ComponentRenderer<COMPONENT extends Component, SOURCE>
         extends LitRenderer<SOURCE> {
 
