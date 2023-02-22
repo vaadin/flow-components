@@ -205,10 +205,10 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha12")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-rc1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/grid", version = "24.0.0-alpha12")
-@NpmPackage(value = "@vaadin/tooltip", version = "24.0.0-alpha12")
+@NpmPackage(value = "@vaadin/grid", version = "24.0.0-rc1")
+@NpmPackage(value = "@vaadin/tooltip", version = "24.0.0-rc1")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -318,27 +318,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          *
          * @see GridSingleSelectionModel
          */
-        SINGLE {
-            @Override
-            protected <T> GridSelectionModel<T> createModel(Grid<T> grid) {
-                return new AbstractGridSingleSelectionModel<T>(grid) {
-
-                    @SuppressWarnings("unchecked")
-                    @Override
-                    protected void fireSelectionEvent(
-                            SelectionEvent<Grid<T>, T> event) {
-                        grid.fireEvent((ComponentEvent<Grid<T>>) event);
-                    }
-
-                    @Override
-                    public void setDeselectAllowed(boolean deselectAllowed) {
-                        super.setDeselectAllowed(deselectAllowed);
-                        grid.getElement().setProperty("__deselectDisallowed",
-                                !deselectAllowed);
-                    }
-                };
-            }
-        },
+        SINGLE,
 
         /**
          * Multiselection mode that maps to built-in
@@ -346,32 +326,14 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          *
          * @see GridMultiSelectionModel
          */
-        MULTI {
-            @Override
-            protected <T> GridSelectionModel<T> createModel(Grid<T> grid) {
-                return new AbstractGridMultiSelectionModel<T>(grid) {
-
-                    @SuppressWarnings("unchecked")
-                    @Override
-                    protected void fireSelectionEvent(
-                            SelectionEvent<Grid<T>, T> event) {
-                        grid.fireEvent((ComponentEvent<Grid<?>>) event);
-                    }
-                };
-            }
-        },
+        MULTI,
 
         /**
          * Selection model that doesn't allow selection.
          *
          * @see GridNoneSelectionModel
          */
-        NONE {
-            @Override
-            protected <T> GridSelectionModel<T> createModel(Grid<T> grid) {
-                return new GridNoneSelectionModel<>();
-            }
-        };
+        NONE;
 
         /**
          * Creates the selection model to use with this enum.
@@ -382,7 +344,34 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          *            the grid to create the selection model for
          * @return the selection model
          */
-        protected abstract <T> GridSelectionModel<T> createModel(Grid<T> grid);
+        protected <T> GridSelectionModel<T> createModel(Grid<T> grid) {
+            return switch (this) {
+            case SINGLE -> new AbstractGridSingleSelectionModel<T>(grid) {
+                @SuppressWarnings("unchecked")
+                @Override
+                protected void fireSelectionEvent(
+                        SelectionEvent<Grid<T>, T> event) {
+                    grid.fireEvent((ComponentEvent<Grid<T>>) event);
+                }
+
+                @Override
+                public void setDeselectAllowed(boolean deselectAllowed) {
+                    super.setDeselectAllowed(deselectAllowed);
+                    grid.getElement().setProperty("__deselectDisallowed",
+                            !deselectAllowed);
+                }
+            };
+            case MULTI -> new AbstractGridMultiSelectionModel<T>(grid) {
+                @SuppressWarnings("unchecked")
+                @Override
+                protected void fireSelectionEvent(
+                        SelectionEvent<Grid<T>, T> event) {
+                    grid.fireEvent((ComponentEvent<Grid<?>>) event);
+                }
+            };
+            case NONE -> new GridNoneSelectionModel<>();
+            };
+        }
     }
 
     /**
@@ -444,7 +433,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-column")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha12")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-rc1")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class Column<T> extends AbstractColumn<Column<T>> {
 

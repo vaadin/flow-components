@@ -52,9 +52,9 @@ import java.util.stream.Stream;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-button")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-alpha12")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-rc1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/button", version = "24.0.0-alpha12")
+@NpmPackage(value = "@vaadin/button", version = "24.0.0-rc1")
 @JsModule("@vaadin/button/src/vaadin-button.js")
 public class Button extends Component implements ClickNotifier<Button>,
         Focusable<Button>, HasEnabled, HasPrefix, HasSize, HasStyle, HasSuffix,
@@ -416,8 +416,11 @@ public class Button extends Component implements ClickNotifier<Button>,
         // Add theme attribute "icon" when the button contains only an icon to
         // fully support themes like Lumo. This doesn't override explicitly set
         // theme attribute.
+        long childCount = getElement().getChildren().filter(
+                el -> el.isTextNode() || !"vaadin-tooltip".equals(el.getTag()))
+                .count();
 
-        if (getElement().getChildCount() == 1 && iconComponent != null) {
+        if (childCount == 1 && iconComponent != null) {
             getThemeNames().add("icon");
         } else {
             getThemeNames().remove("icon");

@@ -31,6 +31,7 @@ public class Constants {
     public static final String OL_STYLE_FILL = "ol/style/Fill";
     public static final String OL_STYLE_STROKE = "ol/style/Stroke";
     public static final String OL_STYLE_STYLE = "ol/style/Style";
+    public static final String OL_STYLE_TEXT = "ol/style/Text";
 
     public static final String OL_MAP = "ol/Map";
     public static final String OL_VIEW = "ol/View";

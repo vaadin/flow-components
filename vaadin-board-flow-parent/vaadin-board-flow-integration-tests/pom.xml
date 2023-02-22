@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-board-flow-parent</artifactId>
-        <version>24.0-SNAPSHOT</version>
+        <version>24.1-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-board-integration-tests</artifactId>
     <packaging>war</packaging>
@@ -42,12 +42,6 @@
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-board-testbench</artifactId>
             <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.saucelabs</groupId>
-            <artifactId>ci-sauce</artifactId>
-            <version>${ci-sauce.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -149,19 +143,6 @@
                 </plugins>
             </build>
         </profile>
-        <profile>
-            <id>saucelabs</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>com.saucelabs.maven.plugin</groupId>
-                        <artifactId>sauce-connect-plugin</artifactId>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
+
     </profiles>
 </project>
