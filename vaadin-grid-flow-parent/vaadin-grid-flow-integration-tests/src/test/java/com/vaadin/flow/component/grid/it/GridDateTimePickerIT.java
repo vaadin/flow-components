@@ -28,7 +28,7 @@ public class GridDateTimePickerIT extends AbstractComponentIT {
     public void shouldHaveI18nApplied() {
         open();
 
-        waitUntil(driver -> "13.06.2000".equals(
-                $(DateTimePickerElement.class).first().getDatePresentation()));
+        Assert.assertEquals("13.06.2000",
+                $(DateTimePickerElement.class).first().getDatePresentation());
     }
 }

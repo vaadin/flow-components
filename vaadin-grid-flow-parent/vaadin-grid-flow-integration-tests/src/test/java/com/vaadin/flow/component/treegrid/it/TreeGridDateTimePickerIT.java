@@ -32,13 +32,13 @@ public class TreeGridDateTimePickerIT extends AbstractTreeGridIT {
 
     @Test
     public void shouldHaveI18nAppliedToRoot() {
-        waitUntil(driver -> "13.06.2000".equals($(DateTimePickerElement.class)
-                .id("id-Row 1").getDatePresentation()));
+        Assert.assertEquals("13.06.2000", $(DateTimePickerElement.class)
+                .id("id-Row 1").getDatePresentation());
     }
 
     @Test
     public void shouldHaveI18nAppliedToChild() {
-        waitUntil(driver -> "13.06.2000".equals($(DateTimePickerElement.class)
-                .id("id-Child 1").getDatePresentation()));
+        Assert.assertEquals("13.06.2000", $(DateTimePickerElement.class)
+                .id("id-Child 1").getDatePresentation());
     }
 }
