@@ -9,11 +9,25 @@ import com.vaadin.tests.AbstractComponentIT;
 
 public abstract class AbstractUploadIT extends AbstractComponentIT {
     /**
+     * Creates a temp file with ".txt" extension for testing purposes.
+     *
      * @return The generated temp file handle
      * @throws IOException
      */
     File createTempFile() throws IOException {
-        File tempFile = File.createTempFile("TestFileUpload", ".txt");
+        return createTempFile("txt");
+    }
+
+    /**
+     * Creates a temp file with the provided extension for testing purposes.
+     *
+     * @param extension
+     *            the temp file extension without leading dot
+     * @return The generated temp file handle
+     * @throws IOException
+     */
+    File createTempFile(String extension) throws IOException {
+        File tempFile = File.createTempFile("TestFileUpload", "." + extension);
         BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
         writer.write(getTempFileContents());
         writer.close();

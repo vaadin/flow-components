@@ -21,6 +21,7 @@ import java.util.logging.Level;
 
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -37,12 +38,14 @@ import static org.junit.Assert.assertThat;
 @TestPath("vaadin-upload")
 public class UploadIT extends AbstractUploadIT {
 
+    @Before
+    public void init() {
+        open();
+        waitUntil(driver -> getUpload().isDisplayed());
+    }
+
     @Test
     public void testUploadAnyFile() throws Exception {
-        open();
-
-        waitUntil(driver -> getUpload().isDisplayed());
-
         File tempFile = createTempFile();
         getUpload().upload(tempFile);
 
@@ -58,10 +61,6 @@ public class UploadIT extends AbstractUploadIT {
 
     @Test
     public void testClearFileList() throws Exception {
-        open();
-
-        waitUntil(driver -> getUpload().isDisplayed());
-
         File tempFile = createTempFile();
 
         getUpload().upload(tempFile);
@@ -82,10 +81,6 @@ public class UploadIT extends AbstractUploadIT {
 
     @Test
     public void testUploadMultipleEventOrder() throws Exception {
-        open();
-
-        waitUntil(driver -> getUpload().isDisplayed());
-
         File tempFile = createTempFile();
 
         getUpload().uploadMultiple(List.of(tempFile, tempFile, tempFile), 10);
@@ -100,10 +95,6 @@ public class UploadIT extends AbstractUploadIT {
 
     @Test
     public void testUploadEventOrder() throws Exception {
-        open();
-
-        waitUntil(driver -> getUpload().isDisplayed());
-
         File tempFile = createTempFile();
 
         getUpload().upload(tempFile);
@@ -116,10 +107,20 @@ public class UploadIT extends AbstractUploadIT {
     }
 
     @Test
-    public void uploadFileAndNoErrorThrown() throws Exception {
-        open();
-        waitUntil(driver -> getUpload().isDisplayed());
+    public void uploadInvalidFile_fileIsRejected() throws Exception {
+        File invalidFile = createTempFile("pdf");
 
+        getUpload().upload(invalidFile);
+
+        WebElement eventsOutput = getDriver()
+                .findElement(By.id("test-events-output"));
+
+        Assert.assertEquals("Invalid file was not rejected", "-rejected",
+                eventsOutput.getText());
+    }
+
+    @Test
+    public void uploadFileAndNoErrorThrown() throws Exception {
         File tempFile = createTempFile();
         getUpload().upload(tempFile);
 
