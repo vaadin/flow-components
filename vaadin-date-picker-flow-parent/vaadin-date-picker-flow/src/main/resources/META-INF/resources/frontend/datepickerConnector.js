@@ -143,18 +143,9 @@ import { DatePicker } from '@vaadin/date-picker/src/vaadin-date-picker.js';
           return referenceDate ? new Date(referenceDate.year, referenceDate.month, referenceDate.day) : new Date();
         }
 
-        function _isDateTimePickerDatePicker() {
-          return datepicker.constructor.name === 'DateTimePickerDatePicker';
-        }
-
         datepicker.ready = tryCatchWrapper(function () {
-          if (_isDateTimePickerDatePicker()) {
-            datepicker.dispatchEvent(new Event("date-time-picker-date-picker-ready-call"));
-          }
           DatePicker.prototype.ready.call(datepicker);
-          if (_isDateTimePickerDatePicker()) {
-            datepicker.dispatchEvent(new Event("date-time-picker-date-picker-ready"));
-          }
+          datepicker.dispatchEvent(new Event("date-picker-ready"));
         });
 
         datepicker.$connector.updateI18n = tryCatchWrapper(function (locale, i18n) {
@@ -169,28 +160,12 @@ import { DatePicker } from '@vaadin/date-picker/src/vaadin-date-picker.js';
           // Merge current web component I18N settings with new I18N settings and the formatting and parsing functions
           const updatedI18n = Object.assign({}, datepicker.i18n, i18n, formatterAndParser);
           datepicker.i18n = updatedI18n;
-          // If the date picker is a part of a date time picker, defer setting I18N property after the element
-          // is ready as a workaround for both:
+          // Update I18N property again after the element is ready as a workaround for both:
           // https://github.com/vaadin/flow-components/issues/4500
           // https://github.com/vaadin/flow-components/issues/4667
           // This workaround is only necessary for v23, and will be removed in v24.
-          datepicker.addEventListener("date-time-picker-date-picker-ready-call", () => {
-            datepicker.i18n = updatedI18n;
-            queueMicrotask(() => {
-              datepicker.i18n = updatedI18n;
-            });
-          });
-          datepicker.addEventListener("date-time-picker-date-picker-ready", () => {
-            datepicker.i18n = updatedI18n;
-            queueMicrotask(() => {
-              datepicker.i18n = updatedI18n;
-            });
-          });
-          queueMicrotask(() => {
-            datepicker.i18n = updatedI18n;
-            queueMicrotask(() => {
-              datepicker.i18n = updatedI18n;
-            });
+          datepicker.addEventListener("date-picker-ready", () => {
+            requestAnimationFrame(() => datepicker.i18n = updatedI18n);
           });
         });
       })(datepicker)
