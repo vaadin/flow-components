@@ -210,9 +210,12 @@ public class TabsTest {
     @Test
     public void addTabsAsArrayDoesNotCauseClassCastException() {
         Tabs tabs = new Tabs();
-        Component[] tabsArray = {new Tab(), new Tab()};
-        
+        Component[] tabsArray = { new Tab(), new Tab() };
+
         // we test that the following call does not fail with ClassCastException
         tabs.add(tabsArray);
+
+        // assertion here just to make sure tabs were really set
+        Assert.assertNotNull(tabs.getSelectedTab());
     }
 }
