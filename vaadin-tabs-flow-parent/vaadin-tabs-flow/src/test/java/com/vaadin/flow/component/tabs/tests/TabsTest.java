@@ -208,7 +208,7 @@ public class TabsTest {
     }
 
     @Test
-    public void addTabsAsArrayDoesNotCauseClassCastException() {
+    public void addTabsAsComponentArray_noClassCastExceptionIsThrown() {
         Tabs tabs = new Tabs();
         Component[] tabsArray = { new Tab(), new Tab() };
 
