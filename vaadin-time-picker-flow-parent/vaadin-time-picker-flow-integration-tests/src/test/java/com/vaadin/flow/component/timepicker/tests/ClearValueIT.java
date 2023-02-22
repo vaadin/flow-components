@@ -1,7 +1,5 @@
 package com.vaadin.flow.component.timepicker.tests;
 
-import com.vaadin.flow.component.UI;
-import com.vaadin.tests.elements.LabelElement;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,8 +24,6 @@ public class ClearValueIT extends AbstractComponentIT {
     @Test
     public void setInputValue_clearValue_inputValueIsEmpty() {
         timePicker.selectByText("12:00 PM");
-        Assert.assertEquals($(LabelElement.class).id("country").getText(),
-                $(LabelElement.class).id("language").getText());
         Assert.assertEquals("12:00 PM", timePicker.getTimePickerInputValue());
 
         $("button").id(CLEAR_BUTTON).click();
