@@ -155,7 +155,8 @@ public class Tabs extends Component
             throw new IllegalArgumentException(
                     "Adding a component other than a Tab is not supported.");
         }
-        add((Tab[]) components);
+        Tab[] tabs = Arrays.copyOf(components, components.length, Tab[].class);
+        add(tabs);
     }
 
     /**
