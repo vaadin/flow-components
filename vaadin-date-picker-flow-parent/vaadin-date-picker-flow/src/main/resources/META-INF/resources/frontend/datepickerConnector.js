@@ -2,7 +2,6 @@ import dateFnsFormat from 'date-fns/format';
 import dateFnsParse from 'date-fns/parse';
 import dateFnsIsValid from 'date-fns/isValid';
 import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/src/vaadin-date-picker-helper.js';
-import { DatePicker } from '@vaadin/date-picker/src/vaadin-date-picker.js';
 
 (function () {
   const tryCatchWrapper = function (callback) {
@@ -143,11 +142,6 @@ import { DatePicker } from '@vaadin/date-picker/src/vaadin-date-picker.js';
           return referenceDate ? new Date(referenceDate.year, referenceDate.month, referenceDate.day) : new Date();
         }
 
-        datepicker.ready = tryCatchWrapper(function () {
-          DatePicker.prototype.ready.call(datepicker);
-          datepicker.dispatchEvent(new CustomEvent("date-picker-ready"));
-        });
-
         datepicker.$connector.updateI18n = tryCatchWrapper(function (locale, i18n) {
           // Either use custom formats specified in I18N, or create format from locale
           const hasCustomFormats = i18n && i18n.dateFormats && i18n.dateFormats.length > 0;
@@ -160,13 +154,16 @@ import { DatePicker } from '@vaadin/date-picker/src/vaadin-date-picker.js';
           // Merge current web component I18N settings with new I18N settings and the formatting and parsing functions
           const updatedI18n = Object.assign({}, datepicker.i18n, i18n, formatterAndParser);
           datepicker.i18n = updatedI18n;
-          // Update I18N property again after the element is ready as a workaround for both:
-          // https://github.com/vaadin/flow-components/issues/4500
-          // https://github.com/vaadin/flow-components/issues/4667
-          // This workaround is only necessary for v23, and will be removed in v24.
-          datepicker.addEventListener("date-picker-ready", () => {
-            requestAnimationFrame(() => datepicker.i18n = updatedI18n);
-          });
+          datepicker._lastSetI18n = updatedI18n;
+        });
+
+        // Update I18N when it is set to a different value from the last set value.
+        // This is a workaround for https://github.com/vaadin/flow-components/issues/4667
+        // This workaround is only necessary for v23, and will be removed in v24.
+        datepicker._createPropertyObserver('i18n', function () {
+          if (this._lastSetI18n && this.i18n !== this._lastSetI18n) {
+            this.i18n = this._lastSetI18n;
+          }
         });
       })(datepicker)
   };
