@@ -8,15 +8,6 @@ import java.io.IOException;
 import com.vaadin.tests.AbstractComponentIT;
 
 public abstract class AbstractUploadIT extends AbstractComponentIT {
-    /**
-     * Creates a temp file with ".txt" extension for testing purposes.
-     *
-     * @return The generated temp file handle
-     * @throws IOException
-     */
-    File createTempFile() throws IOException {
-        return createTempFile("txt");
-    }
 
     /**
      * Creates a temp file with the provided extension for testing purposes.

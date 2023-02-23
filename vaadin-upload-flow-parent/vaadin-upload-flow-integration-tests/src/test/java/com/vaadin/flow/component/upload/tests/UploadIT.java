@@ -46,7 +46,7 @@ public class UploadIT extends AbstractUploadIT {
 
     @Test
     public void testUploadAnyFile() throws Exception {
-        File tempFile = createTempFile();
+        File tempFile = createTempFile("txt");
         getUpload().upload(tempFile);
 
         WebElement uploadOutput = getDriver().findElement(By.id("test-output"));
@@ -61,7 +61,7 @@ public class UploadIT extends AbstractUploadIT {
 
     @Test
     public void testClearFileList() throws Exception {
-        File tempFile = createTempFile();
+        File tempFile = createTempFile("txt");
 
         getUpload().upload(tempFile);
         getUpload().upload(tempFile);
@@ -81,7 +81,7 @@ public class UploadIT extends AbstractUploadIT {
 
     @Test
     public void testUploadMultipleEventOrder() throws Exception {
-        File tempFile = createTempFile();
+        File tempFile = createTempFile("txt");
 
         getUpload().uploadMultiple(List.of(tempFile, tempFile, tempFile), 10);
 
@@ -95,7 +95,7 @@ public class UploadIT extends AbstractUploadIT {
 
     @Test
     public void testUploadEventOrder() throws Exception {
-        File tempFile = createTempFile();
+        File tempFile = createTempFile("txt");
 
         getUpload().upload(tempFile);
 
@@ -121,7 +121,7 @@ public class UploadIT extends AbstractUploadIT {
 
     @Test
     public void uploadFileAndNoErrorThrown() throws Exception {
-        File tempFile = createTempFile();
+        File tempFile = createTempFile("txt");
         getUpload().upload(tempFile);
 
         List<LogEntry> logList1 = getLogEntries(Level.SEVERE);
