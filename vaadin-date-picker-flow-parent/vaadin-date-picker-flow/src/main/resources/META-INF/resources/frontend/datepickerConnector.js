@@ -153,8 +153,8 @@ import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/s
 
           // Merge current web component I18N settings with new I18N settings and the formatting and parsing functions
           const updatedI18n = Object.assign({}, datepicker.i18n, i18n, formatterAndParser);
-          datepicker.i18n = updatedI18n;
           datepicker._lastSetI18n = updatedI18n;
+          datepicker.i18n = updatedI18n;
         });
 
         // Update I18N when it is set to a different value from the last set value.
