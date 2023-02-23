@@ -145,7 +145,7 @@ import { DatePicker } from '@vaadin/date-picker/src/vaadin-date-picker.js';
 
         datepicker.ready = tryCatchWrapper(function () {
           DatePicker.prototype.ready.call(datepicker);
-          datepicker.dispatchEvent(new Event("date-picker-ready"));
+          datepicker.dispatchEvent(new CustomEvent("date-picker-ready"));
         });
 
         datepicker.$connector.updateI18n = tryCatchWrapper(function (locale, i18n) {
