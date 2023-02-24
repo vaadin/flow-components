@@ -56,6 +56,41 @@ public class HorizontalLayout extends Component implements ThemableLayout,
     }
 
     /**
+     * Convenience constructor to create a layout with the children already
+     * inside it, and the default justifyContentMode.
+     *
+     * @param justifyContentMode
+     *            the default justifyContentMode
+     * @param children
+     *            the items to add to this layout
+     *
+     * @see #add(Component...)
+     * @see #setJustifyContentMode(JustifyContentMode)
+     */
+    public HorizontalLayout(FlexComponent.JustifyContentMode justifyContentMode,
+            Component... children) {
+        this(children);
+        setJustifyContentMode(justifyContentMode);
+    }
+
+    /**
+     * Convenience constructor to create a layout with the children already
+     * inside it, and the default vertical alignment set for the children.
+     *
+     * @param alignment
+     *            the default vertical alignment
+     * @param children
+     *            the items to add to this layout
+     *
+     * @see #add(Component...)
+     * @see #setDefaultVerticalComponentAlignment(Alignment)
+     */
+    public HorizontalLayout(Alignment alignment, Component... children) {
+        this(children);
+        setDefaultVerticalComponentAlignment(alignment);
+    }
+
+    /**
      * {@inheritDoc}
      * <p>
      * Spacing is enabled by default for horizontal layout.

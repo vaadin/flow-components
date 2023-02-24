@@ -2,6 +2,8 @@ package com.vaadin.flow.component.orderedlayout.tests;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -21,6 +23,30 @@ public class LayoutDefaultsTest {
                 new HorizontalLayout().isPadding());
         Assert.assertFalse("Margin shouldn't be on by default",
                 new HorizontalLayout().isMargin());
+    }
+
+    @Test
+    public void testHorizontalLayout_withJustifyContentModeAndChildren_justifyContentModeIsSet() {
+        HorizontalLayout layout = new HorizontalLayout(
+                FlexComponent.JustifyContentMode.END, new Label(),
+                new NativeButton());
+        Assert.assertEquals("JustifyContentMode should be set by constructor",
+                FlexComponent.JustifyContentMode.END,
+                layout.getJustifyContentMode());
+        Assert.assertEquals("Children components must be added by constructor",
+                2, layout.getChildren().count());
+    }
+
+    @Test
+    public void testHorizontalLayout_withAlignmentAndChildren_DefaultVerticalAlignmentIsSet() {
+        HorizontalLayout layout = new HorizontalLayout(Alignment.BASELINE,
+                new Label(), new NativeButton());
+        Assert.assertEquals(
+                "DefaultVerticalAlignment should be set by constructor",
+                Alignment.BASELINE,
+                layout.getDefaultVerticalComponentAlignment());
+        Assert.assertEquals("Children components must be added by constructor",
+                2, layout.getChildren().count());
     }
 
     @Test
