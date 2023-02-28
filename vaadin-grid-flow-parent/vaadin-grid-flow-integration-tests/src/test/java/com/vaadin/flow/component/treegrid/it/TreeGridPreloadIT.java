@@ -30,7 +30,7 @@ import com.vaadin.flow.testutil.TestPath;
 @TestPath("vaadin-grid/treegrid-preload")
 public class TreeGridPreloadIT extends AbstractTreeGridIT {
 
-    private final int EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE = 20;
+    private static final int EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE = 20;
     private TextFieldElement requestCount;
     private TextFieldElement dataProviderFetchCount;
     private ButtonElement requestCountReset;
