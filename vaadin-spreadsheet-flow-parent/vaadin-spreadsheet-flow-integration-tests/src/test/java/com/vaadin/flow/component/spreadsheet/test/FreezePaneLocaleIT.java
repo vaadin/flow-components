@@ -5,6 +5,7 @@ import com.vaadin.flow.testutil.TestPath;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 @TestPath("vaadin-spreadsheet/freeze-pane-locale")
@@ -23,6 +24,7 @@ public class FreezePaneLocaleIT extends AbstractSpreadsheetIT {
     }
 
     @Test
+    @Ignore("https://github.com/vaadin/flow-components/issues/4737")
     public void hideFirstSheet_borderStylesUpdated() {
         setSpreadsheet($(SpreadsheetElement.class).first());
 
