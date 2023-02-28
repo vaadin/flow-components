@@ -21,7 +21,7 @@ public class FileBufferIT extends AbstractUploadIT {
         final UploadElement upload = $(UploadElement.class).id("single-upload");
         waitUntil(driver -> upload.isDisplayed());
 
-        File tempFile = createTempFile();
+        File tempFile = createTempFile("txt");
         upload.upload(tempFile);
 
         WebElement uploadOutput = getDriver()
@@ -42,7 +42,7 @@ public class FileBufferIT extends AbstractUploadIT {
         final UploadElement upload = $(UploadElement.class).id("multi-upload");
         waitUntil(driver -> upload.isDisplayed());
 
-        File tempFile = createTempFile();
+        File tempFile = createTempFile("txt");
 
         upload.uploadMultiple(List.of(tempFile, tempFile, tempFile), 10);
 
