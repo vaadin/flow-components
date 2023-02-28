@@ -133,11 +133,11 @@ public class TreeGrid<T> extends Grid<T>
     }
 
     private class TreeGridArrayUpdaterImpl implements TreeGridArrayUpdater {
-        private UpdateQueueData data;
-        private SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueFactory;
-
         // Approximated size of the viewport. Used for eager fetching.
         private static final int EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE = 20;
+        
+        private UpdateQueueData data;
+        private SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueFactory;
         private int viewportRemaining = 0;
         private final List<JsonValue> queuedParents = new ArrayList<>();
         private VaadinRequest previousRequest;
