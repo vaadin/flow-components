@@ -137,7 +137,7 @@ public class TreeGrid<T> extends Grid<T>
         private SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueFactory;
 
         // Approximated size of the viewport. Used for eager fetching.
-        private final int EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE = 40;
+        private final int EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE = 20;
         private int viewportRemaining = 0;
         private final List<JsonValue> queuedParents = new ArrayList<>();
         private VaadinRequest previousRequest;
