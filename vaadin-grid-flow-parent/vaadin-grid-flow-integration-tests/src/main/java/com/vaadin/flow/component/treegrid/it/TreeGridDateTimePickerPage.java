@@ -48,7 +48,7 @@ public class TreeGridDateTimePickerPage extends Div {
 
     private DateTimePicker getDateTimePicker(String item) {
         DateTimePicker dateTimePicker = new DateTimePicker("Date and time");
-        dateTimePicker.setId("id-" + item.replaceAll(" ", "-"));
+        dateTimePicker.setId("id-" + item.replace(" ", "-"));
         DatePicker.DatePickerI18n i18n = new DatePicker.DatePickerI18n();
         i18n.setDateFormat("dd.MM.yyyy");
         dateTimePicker.setDatePickerI18n(i18n);
