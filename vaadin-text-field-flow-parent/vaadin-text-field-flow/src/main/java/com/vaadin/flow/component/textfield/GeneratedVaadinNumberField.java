@@ -39,10 +39,10 @@ import com.vaadin.flow.function.SerializableFunction;
  */
 @Deprecated
 @Tag("vaadin-number-field")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.7")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/number-field", version = "23.3.7")
-@NpmPackage(value = "@vaadin/vaadin-text-field", version = "23.3.7")
+@NpmPackage(value = "@vaadin/number-field", version = "23.3.8")
+@NpmPackage(value = "@vaadin/vaadin-text-field", version = "23.3.8")
 @JsModule("@vaadin/number-field/src/vaadin-number-field.js")
 public abstract class GeneratedVaadinNumberField<R extends GeneratedVaadinNumberField<R, T>, T>
         extends GeneratedVaadinTextField<R, T> implements HasStyle {
