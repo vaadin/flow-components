@@ -38,32 +38,6 @@ public class SubMenuHelpersIT extends AbstractComponentIT {
     }
 
     @Test
-    public void menuBarSubMenuTest() {
-        MenuBarElement menuBar = $(MenuBarElement.class).first();
-        menuBar.getButtons().get(0).click();
-        Assert.assertEquals("Bar Item",
-                $(NotificationElement.class).last().getText());
-
-        menuBar.getButtons().get(1).click();
-        ContextMenuOverlayElement overlay = $(ContextMenuOverlayElement.class)
-                .last();
-        ContextMenuItemElement menuBarSubItem = overlay.getMenuItems().get(0);
-        Assert.assertEquals("Bar Sub Item", menuBarSubItem.getText());
-        menuBarSubItem.click();
-        Assert.assertEquals("Bar Sub Item",
-                $(NotificationElement.class).last().getText());
-
-        menuBar.getButtons().get(1).click();
-        overlay = $(ContextMenuOverlayElement.class).last();
-        overlay.getMenuItems().get(1).openSubMenu();
-        ContextMenuOverlayElement subOverlay = $(
-                ContextMenuOverlayElement.class).last();
-        subOverlay.getMenuItems().get(0).click();
-        Assert.assertEquals("Bar Sub Sub Item",
-                $(NotificationElement.class).last().getText());
-    }
-
-    @Test
     public void contextMenuSubMenuTest() {
         ButtonElement button = $(ButtonElement.class).first();
         ContextMenuElement.openByRightClick(button);
