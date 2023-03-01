@@ -30,22 +30,6 @@ import com.vaadin.flow.router.Route;
 public class SubMenuHelpersPage extends Div {
 
     public SubMenuHelpersPage() {
-        MenuBar menuBar = new MenuBar();
-        MenuItem menuBarItem = menuBar.addItem("Bar Item", e -> {
-            Notification.show("Bar Item");
-        });
-        MenuItem menuBarSub = menuBar.addItem("Bar Sub Menu");
-        SubMenu menuBarSubMenu = menuBarSub.getSubMenu();
-        MenuItem menuBarSubItem = menuBarSubMenu.addItem("Bar Sub Item", e -> {
-            Notification.show("Bar Sub Item");
-        });
-        MenuItem menuBarSubSub = menuBarSubMenu.addItem("Bar Sub Sub Menu");
-        SubMenu menuBarSubSubMenu = menuBarSubSub.getSubMenu();
-        MenuItem menuBarSubSubItem = menuBarSubSubMenu
-                .addItem("Bar Sub Sub Item", e -> {
-                    Notification.show("Bar Sub Sub Item");
-                });
-
         ContextMenu contextMenu = new ContextMenu();
         MenuItem contextMenuItem = contextMenu.addItem("Context Item", e -> {
             Notification.show("Context Item");
@@ -67,6 +51,6 @@ public class SubMenuHelpersPage extends Div {
         Button button = new Button(VaadinIcon.MENU.create());
         contextMenu.setTarget(button);
 
-        add(menuBar, button);
+        add(button);
     }
 }
