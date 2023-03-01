@@ -39,6 +39,6 @@ public class TreeGridDateTimePickerIT extends AbstractTreeGridIT {
     @Test
     public void shouldHaveI18nAppliedToChild() {
         Assert.assertEquals("13.06.2000", $(DateTimePickerElement.class)
-                .id("id-Child 1").getDatePresentation());
+                .id("id-Child-1").getDatePresentation());
     }
 }
