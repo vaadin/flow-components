@@ -188,10 +188,10 @@ import com.vaadin.flow.shared.Registration;
  */
 @Deprecated
 @Tag("vaadin-select")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.7")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/select", version = "23.3.7")
-@NpmPackage(value = "@vaadin/vaadin-select", version = "23.3.7")
+@NpmPackage(value = "@vaadin/select", version = "23.3.8")
+@NpmPackage(value = "@vaadin/vaadin-select", version = "23.3.8")
 @JsModule("@vaadin/select/src/vaadin-select.js")
 @JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T>, T>
