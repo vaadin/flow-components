@@ -41,28 +41,32 @@ public class SubMenuHelpersPage extends Div {
         });
         MenuItem menuBarSubSub = menuBarSubMenu.addItem("Bar Sub Sub Menu");
         SubMenu menuBarSubSubMenu = menuBarSubSub.getSubMenu();
-        MenuItem menuBarSubSubItem = menuBarSubSubMenu.addItem("Bar Sub Sub Item", e -> {
-            Notification.show("Bar Sub Sub Item");
-        });
-        
-        ContextMenu contextMenu = new ContextMenu(); 
+        MenuItem menuBarSubSubItem = menuBarSubSubMenu
+                .addItem("Bar Sub Sub Item", e -> {
+                    Notification.show("Bar Sub Sub Item");
+                });
+
+        ContextMenu contextMenu = new ContextMenu();
         MenuItem contextMenuItem = contextMenu.addItem("Context Item", e -> {
             Notification.show("Context Item");
         });
         MenuItem contextMenuSub = contextMenu.addItem("Context Sub Menu");
         SubMenu contextBarSubMenu = contextMenuSub.getSubMenu();
-        MenuItem contextMenuSubItem = contextBarSubMenu.addItem("Context Sub Item", e -> {
-            Notification.show("Context Sub Item");
-        });
-        MenuItem contextMenuSubSub = contextBarSubMenu.addItem("Context Sub Sub Menu");
+        MenuItem contextMenuSubItem = contextBarSubMenu
+                .addItem("Context Sub Item", e -> {
+                    Notification.show("Context Sub Item");
+                });
+        MenuItem contextMenuSubSub = contextBarSubMenu
+                .addItem("Context Sub Sub Menu");
         SubMenu contextBarSubSubMenu = contextMenuSubSub.getSubMenu();
-        MenuItem contextMenuSubSubItem = contextBarSubSubMenu.addItem("Context Sub Sub Item", e -> {
-            Notification.show("Context Sub Sub Item");
-        });
-        
+        MenuItem contextMenuSubSubItem = contextBarSubSubMenu
+                .addItem("Context Sub Sub Item", e -> {
+                    Notification.show("Context Sub Sub Item");
+                });
+
         Button button = new Button(VaadinIcon.MENU.create());
         contextMenu.setTarget(button);
-        
+
         add(menuBar, button);
     }
 }
