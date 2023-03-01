@@ -40,11 +40,6 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-menu-bar-flow</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
             <artifactId>vaadin-notification-flow</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -70,12 +65,6 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-context-menu-testbench</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-menu-bar-testbench</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
