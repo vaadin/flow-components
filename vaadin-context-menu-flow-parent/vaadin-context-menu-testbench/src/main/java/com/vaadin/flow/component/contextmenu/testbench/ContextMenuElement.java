@@ -1,10 +1,5 @@
-package com.vaadin.flow.component.contextmenu.testbench;
-
-import com.vaadin.testbench.TestBenchElement;
-import com.vaadin.testbench.elementsbase.Element;
-
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -18,6 +13,13 @@ import com.vaadin.testbench.elementsbase.Element;
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+package com.vaadin.flow.component.contextmenu.testbench;
+
+import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.interactions.Actions;
+
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.testbench.elementsbase.Element;
 
 /**
  * A TestBench element representing a <code>&lt;vaadin-context-menu&gt;</code>
@@ -29,4 +31,29 @@ import com.vaadin.testbench.elementsbase.Element;
 @Element("vaadin-context-menu")
 public class ContextMenuElement extends TestBenchElement {
 
+    /**
+     * This is an utility method, which will produce context click on the target
+     * element. If the target had ContextMenu, after opening the last
+     * ContextMenuOverlayElement can be used to find its menu items.
+     *
+     * @param target
+     *            The element to which the ContextMenu has been hooked to.
+     */
+    public static void openByRightClick(TestBenchElement target) {
+        Actions action = new Actions(target.getDriver());
+        action.contextClick(target).perform();
+    }
+
+    /**
+     * Check if the ContextMenu is open.
+     *
+     * @return boolean True if menu is open.
+     */
+    public boolean isOpen() {
+        try {
+            return getAttribute("opened").equals("true");
+        } catch (StaleElementReferenceException e) {
+            return false;
+        }
+    }
 }
