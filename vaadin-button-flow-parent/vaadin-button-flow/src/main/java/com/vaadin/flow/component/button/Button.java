@@ -21,6 +21,7 @@ import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
@@ -56,9 +57,10 @@ import java.util.stream.Stream;
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/button", version = "24.0.0-rc1")
 @JsModule("@vaadin/button/src/vaadin-button.js")
-public class Button extends Component implements ClickNotifier<Button>,
-        Focusable<Button>, HasEnabled, HasPrefix, HasSize, HasStyle, HasSuffix,
-        HasText, HasThemeVariant<ButtonVariant>, HasTooltip {
+public class Button extends Component
+        implements ClickNotifier<Button>, Focusable<Button>, HasAriaLabel,
+        HasEnabled, HasPrefix, HasSize, HasStyle, HasSuffix, HasText,
+        HasThemeVariant<ButtonVariant>, HasTooltip {
 
     private Component iconComponent;
     private boolean iconAfterText;
