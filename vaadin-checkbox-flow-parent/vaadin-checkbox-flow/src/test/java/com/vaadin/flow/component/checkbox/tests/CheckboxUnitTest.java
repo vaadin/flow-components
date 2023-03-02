@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.checkbox.tests;
 
+import com.vaadin.flow.component.HasAriaLabel;
+import org.checkerframework.checker.units.qual.C;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -113,5 +115,36 @@ public class CheckboxUnitTest {
     public void implementsHasTooltip() {
         Checkbox checkbox = new Checkbox();
         Assert.assertTrue(checkbox instanceof HasTooltip);
+    }
+
+    @Test
+    public void implementHasAriaLabel() {
+        Checkbox checkbox = new Checkbox();
+        Assert.assertTrue(checkbox instanceof HasAriaLabel);
+    }
+
+    @Test
+    public void setAriaLabel() {
+        Checkbox checkbox = new Checkbox();
+        checkbox.setAriaLabel("aria-label");
+
+        Assert.assertTrue(checkbox.getAriaLabel().isPresent());
+        Assert.assertEquals("aria-label", checkbox.getAriaLabel().get());
+
+        checkbox.setAriaLabel(null);
+        Assert.assertTrue(checkbox.getAriaLabel().isEmpty());
+    }
+
+    @Test
+    public void setAriaLabelledBy() {
+        Checkbox checkbox = new Checkbox();
+        checkbox.setAriaLabelledBy("aria-labelledby");
+
+        Assert.assertTrue(checkbox.getAriaLabelledBy().isPresent());
+        Assert.assertEquals("aria-labelledby",
+                checkbox.getAriaLabelledBy().get());
+
+        checkbox.setAriaLabelledBy(null);
+        Assert.assertTrue(checkbox.getAriaLabelledBy().isEmpty());
     }
 }
