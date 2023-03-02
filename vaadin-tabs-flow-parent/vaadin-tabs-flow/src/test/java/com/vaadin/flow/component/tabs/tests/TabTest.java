@@ -16,6 +16,8 @@
 
 package com.vaadin.flow.component.tabs.tests;
 
+import com.vaadin.flow.component.HasAriaLabel;
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.flow.component.shared.HasTooltip;
@@ -58,5 +60,26 @@ public class TabTest {
     @Test
     public void implementsHasTooltip() {
         assertTrue(tab instanceof HasTooltip);
+    }
+
+    @Test
+    public void implementHasAriaLabel() {
+        assertTrue(tab instanceof HasAriaLabel);
+    }
+
+    @Test
+    public void setAriaLabel() {
+        tab.setAriaLabel("aria label");
+
+        Assert.assertTrue(tab.getAriaLabel().isPresent());
+        Assert.assertEquals("aria label", tab.getAriaLabel().get());
+    }
+
+    @Test
+    public void setAriaLabelledBy() {
+        tab.setAriaLabelledBy("aria-labelledby");
+
+        Assert.assertTrue(tab.getAriaLabelledBy().isPresent());
+        Assert.assertEquals("aria-labelledby", tab.getAriaLabelledBy().get());
     }
 }
