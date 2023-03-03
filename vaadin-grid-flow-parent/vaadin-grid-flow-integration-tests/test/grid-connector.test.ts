@@ -7,15 +7,30 @@ import sinon from 'sinon';
 import { getBodyCellContent, getBodyRowCount, getCellText } from './helpers.js';
 import type { Grid } from '../../../node_modules/@vaadin/grid/vaadin-grid.js';
 
+type GridConnector = {
+  initLazy: (grid: Grid) => void;
+  updateSize: (size: number) => void;
+  set: (index: number, items: any[], parentKey: string | null) => void;
+  confirm: (index: number) => void;
+  setSelectionMode: (mode: 'SINGLE' | 'NONE') => void;
+}
+
+type GridServer = {
+  confirmUpdate: (index: number) => void;
+  select: (key: string) => void;
+  deselect: (key: string) => void;
+  setDetailsVisible: (key: string) => void;
+}
+
 type Vaadin = {
   Flow: {
-    gridConnector: any;
+    gridConnector: GridConnector;
   };
 };
 
 type FlowGrid = Grid & {
-  $connector: any;
-  $server: any;
+  $connector: GridConnector;
+  $server: Partial<GridServer>;
   __deselectDisallowed: boolean;
   __disallowDetailsOnClick: boolean;
 };
@@ -39,6 +54,10 @@ describe('grid connector', () => {
 
     gridConnector.initLazy(grid);
     connector = grid.$connector;
+  });
+
+  it('should fail the build', () => {
+    expect(true).to.be.false;
   });
 
   it('should not reinitialize the connector', () => {
