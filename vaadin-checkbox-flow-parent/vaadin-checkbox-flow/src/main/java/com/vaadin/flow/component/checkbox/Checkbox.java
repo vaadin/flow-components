@@ -216,15 +216,7 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
         labelElement.add(component);
     }
 
-    /**
-     * Set the accessibility label of this checkbox.
-     *
-     * @param ariaLabel
-     *            the accessibility label to set
-     * @see <a href=
-     *      "https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Techniques/Using_the_aria-label_attribute"
-     *      >aria-label at MDN</a>
-     */
+    @Override
     public void setAriaLabel(String ariaLabel) {
         toggleInputElementAttribute(ElementConstants.ARIA_LABEL_ATTRIBUTE_NAME,
                 ariaLabel);
