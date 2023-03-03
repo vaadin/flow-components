@@ -82,16 +82,6 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             }
             return undefined;
           });
-
-          ItemCache.prototype.getLevel = tryCatchWrapper(function () {
-            let cache = this;
-            let level = 0;
-            while (cache.parentCache) {
-              cache = cache.parentCache;
-              level++;
-            }
-            return level;
-          });
         }
 
         const rootPageCallbacks = {};
@@ -141,8 +131,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           ensureSubCacheQueue.push({
             cache: targetCache,
             scaledIndex: scaledIndex,
-            itemkey: grid.getItemId(targetCache.items[scaledIndex]),
-            level: targetCache.getLevel()
+            itemkey: grid.getItemId(targetCache.items[scaledIndex])
           });
 
           ensureSubCacheDebouncer = Debouncer.debounce(ensureSubCacheDebouncer, animationFrame, () => {
