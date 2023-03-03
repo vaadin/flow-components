@@ -1,5 +1,5 @@
 import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
-import { timeOut, animationFrame, microTask } from '@polymer/polymer/lib/utils/async.js';
+import { timeOut, microTask } from '@polymer/polymer/lib/utils/async.js';
 import { Grid } from '@vaadin/grid/src/vaadin-grid.js';
 import { ItemCache } from '@vaadin/grid/src/vaadin-grid-data-provider-mixin.js';
 import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
@@ -145,7 +145,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             level: targetCache.getLevel()
           });
 
-          ensureSubCacheDebouncer = Debouncer.debounce(ensureSubCacheDebouncer, animationFrame, () => {
+          ensureSubCacheDebouncer = Debouncer.debounce(ensureSubCacheDebouncer, microTask, () => {
             while (ensureSubCacheQueue.length) {
               grid.$connector.flushEnsureSubCache();
             }
@@ -381,12 +381,13 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
               ensureSubCacheQueue = [];
               callback(cache[parentUniqueKey][page], cache[parentUniqueKey].size);
 
-              // Flush after the callback to have the grid rows up-to-date
-              updateAllGridRowsInDomBasedOnCache();
+              // Update effective size
+              grid._cache.updateSize();
+              grid._effectiveSize = grid._cache.effectiveSize;
               // Prevent sub-caches from being created (& data requests sent) for items
               // that may no longer be visible
               ensureSubCacheQueue = [];
-              // Eliminate flickering on eager fetch mode
+              // Request a content update manually
               grid.requestContentUpdate();
             } else {
               treePageCallbacks[parentUniqueKey][page] = callback;
