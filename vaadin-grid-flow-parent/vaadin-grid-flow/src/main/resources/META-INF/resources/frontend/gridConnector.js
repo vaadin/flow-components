@@ -370,12 +370,12 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
               ensureSubCacheQueue = [];
               callback(cache[parentUniqueKey][page], cache[parentUniqueKey].size);
 
-              // Flush after the callback to have the grid rows up-to-date
-              updateAllGridRowsInDomBasedOnCache();
+              // Update effective size
+              updateGridEffectiveSize();
               // Prevent sub-caches from being created (& data requests sent) for items
               // that may no longer be visible
               ensureSubCacheQueue = [];
-              // Eliminate flickering on eager fetch mode
+              // Request a content update manually
               grid.requestContentUpdate();
             } else {
               treePageCallbacks[parentUniqueKey][page] = callback;
@@ -622,9 +622,16 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
          * Updates all visible grid rows in DOM.
          */
         const updateAllGridRowsInDomBasedOnCache = function () {
+          updateGridEffectiveSize();
+          grid.__updateVisibleRows();
+        };
+
+        /**
+         * Updates the <vaadin-grid>'s internal cache size and effective size.
+         */
+        const updateGridEffectiveSize = function () {
           grid._cache.updateSize();
           grid._effectiveSize = grid._cache.effectiveSize;
-          grid.__updateVisibleRows();
         };
 
         /**
@@ -795,8 +802,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
               delete cacheToClear.itemkeyCaches[itemKeyToRemove];
             }
           }
-          grid._cache.updateSize();
-          grid._effectiveSize = grid._cache.effectiveSize;
+          updateGridEffectiveSize();
         });
 
         grid.$connector.reset = tryCatchWrapper(function () {
