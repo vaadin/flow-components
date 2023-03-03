@@ -13,14 +13,27 @@ type GridConnector = {
   set: (index: number, items: any[], parentKey: string | null) => void;
   confirm: (index: number) => void;
   setSelectionMode: (mode: 'SINGLE' | 'NONE') => void;
-}
+};
 
 type GridServer = {
   confirmUpdate: (index: number) => void;
   select: (key: string) => void;
   deselect: (key: string) => void;
   setDetailsVisible: (key: string) => void;
-}
+};
+
+type Item = {
+  key: string;
+  name: string;
+  selected?: boolean;
+};
+
+type FlowGrid = Grid<Item> & {
+  $connector: GridConnector;
+  $server: Partial<GridServer>;
+  __deselectDisallowed: boolean;
+  __disallowDetailsOnClick: boolean;
+};
 
 type Vaadin = {
   Flow: {
@@ -28,19 +41,12 @@ type Vaadin = {
   };
 };
 
-type FlowGrid = Grid & {
-  $connector: GridConnector;
-  $server: Partial<GridServer>;
-  __deselectDisallowed: boolean;
-  __disallowDetailsOnClick: boolean;
-};
-
 const Vaadin = window.Vaadin as Vaadin;
 const gridConnector = Vaadin.Flow.gridConnector;
 
 describe('grid connector', () => {
   let grid: FlowGrid;
-  let connector: typeof gridConnector;
+  let connector: GridConnector;
 
   beforeEach(() => {
     grid = fixtureSync(`
