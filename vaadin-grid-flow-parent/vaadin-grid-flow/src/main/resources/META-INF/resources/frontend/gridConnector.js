@@ -527,15 +527,15 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
 
         // Patch grid.expandItem and grid.collapseItem to have
         // itemExpandedChanged run when either happens.
-        grid.expandItem = tryCatchWrapper(function (item) {
-          itemExpandedChanged(item, true);
-          Grid.prototype.expandItem.call(grid, item);
-        });
+        // grid.expandItem = tryCatchWrapper(function (item) {
+        //   itemExpandedChanged(item, true);
+        //   Grid.prototype.expandItem.call(grid, item);
+        // });
 
-        grid.collapseItem = tryCatchWrapper(function (item) {
-          itemExpandedChanged(item, false);
-          Grid.prototype.collapseItem.call(grid, item);
-        });
+        // grid.collapseItem = tryCatchWrapper(function (item) {
+        //   itemExpandedChanged(item, false);
+        //   Grid.prototype.collapseItem.call(grid, item);
+        // });
 
         const itemsUpdated = function (items) {
           if (!items || !Array.isArray(items)) {
