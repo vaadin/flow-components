@@ -47,7 +47,8 @@ import java.util.stream.Collectors;
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-rc1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends MenuItemBase<C, I, S>, S extends SubMenuBase<C, I, S>>
-        extends Component implements HasAriaLabel, HasComponents, HasEnabled, HasText {
+        extends Component
+        implements HasAriaLabel, HasComponents, HasEnabled, HasText {
 
     private static final String PRIVATE_THEME_ATTRIBUTE = "__theme";
 
