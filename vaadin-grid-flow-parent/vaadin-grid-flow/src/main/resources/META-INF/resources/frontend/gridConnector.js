@@ -375,6 +375,8 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
               ensureSubCacheQueue = [];
               // Request a content update manually
               grid.requestContentUpdate();
+              // Check if column auto-widths should be recalculated
+              grid.__itemsReceived();
             } else {
               treePageCallbacks[parentUniqueKey][page] = callback;
 
