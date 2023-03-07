@@ -1043,6 +1043,25 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           });
         });
 
+        grid.__applySorters = () => {
+          // Update the _previousSorters in vaadin-grid-sort-mixin so that the __applySorters
+          // method in the mixin will skip calling clearCache().
+          //
+          // In Flow Grid's case, we never want to clear the cache eagerly when the sorter elements
+          // change due to one of the following reasons:
+          //
+          // 1. Sorted by user: The items in the new sort order need to be fetched from the server,
+          // and we want to avoid a heavy re-render before the updated items have actually been fetched.
+          //
+          // 2. Sorted programmatically on the server: The items in the new sort order have already
+          // been fetched and applied to the grid. The sorter element states are updated programmatically
+          // to reflect the new sort order, but there's no need to re-render the grid rows.
+          grid._previousSorters = grid._mapSorters();
+
+          // Call the original __applySorters method in vaadin-grid-sort-mixin
+          Grid.prototype.__applySorters.call(grid);
+        };
+
         grid.$connector.setFooterRenderer = tryCatchWrapper(function (column, options) {
           const { content } = options;
 
