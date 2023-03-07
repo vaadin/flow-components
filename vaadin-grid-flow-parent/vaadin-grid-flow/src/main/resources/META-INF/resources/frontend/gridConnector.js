@@ -141,6 +141,8 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
               grid.$connector.flushEnsureSubCache();
             }
             grid.$connector.flushingEnsureSubCache = false;
+            // Check if column auto-widths should be recalculated
+            grid.__itemsReceived();
           });
         });
 
