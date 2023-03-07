@@ -44,7 +44,6 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             }
 
             return Boolean(
-              this.grid.$connector.flushingEnsureSubCache ||
               this.grid.$connector.hasEnsureSubCacheQueue() ||
                 Object.keys(this.pendingRequests).length ||
                 Object.keys(this.itemCaches).filter((index) => {
@@ -136,13 +135,9 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           });
 
           ensureSubCacheDebouncer = Debouncer.debounce(ensureSubCacheDebouncer, animationFrame, () => {
-            grid.$connector.flushingEnsureSubCache = true;
             while (ensureSubCacheQueue.length) {
               grid.$connector.flushEnsureSubCache();
             }
-            grid.$connector.flushingEnsureSubCache = false;
-            // Check if column auto-widths should be recalculated
-            grid.__itemsReceived();
           });
         });
 
@@ -371,8 +366,6 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
               // workaround: sometimes grid-element gives page index that overflows
               page = Math.min(page, Math.floor(cache[parentUniqueKey].size / grid.pageSize));
 
-              // Ensure grid isn't in loading state when the callback executes
-              ensureSubCacheQueue = [];
               callback(cache[parentUniqueKey][page], cache[parentUniqueKey].size);
 
               // Update effective size
