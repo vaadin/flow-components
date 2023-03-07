@@ -44,6 +44,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             }
 
             return Boolean(
+              this.grid.$connector.flushingEnsureSubCache ||
               this.grid.$connector.hasEnsureSubCacheQueue() ||
                 Object.keys(this.pendingRequests).length ||
                 Object.keys(this.itemCaches).filter((index) => {
@@ -135,9 +136,11 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           });
 
           ensureSubCacheDebouncer = Debouncer.debounce(ensureSubCacheDebouncer, animationFrame, () => {
+            grid.$connector.flushingEnsureSubCache = true;
             while (ensureSubCacheQueue.length) {
               grid.$connector.flushEnsureSubCache();
             }
+            grid.$connector.flushingEnsureSubCache = false;
           });
         });
 
