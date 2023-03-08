@@ -44,6 +44,7 @@ import com.vaadin.flow.dom.ClassList;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementConstants;
 import com.vaadin.flow.dom.ElementDetachListener;
+import com.vaadin.flow.dom.ElementUtil;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.router.NavigationTrigger;
@@ -115,6 +116,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
         getElement().addEventListener("opened-changed", event -> {
             if (!isOpened()) {
                 setModality(false);
+                ElementUtil.setIgnoreParentInert(getElement(), false);
             }
             if (autoAddedToTheUi && !isOpened()) {
                 getElement().removeFromParent();
@@ -801,6 +803,10 @@ public class Dialog extends Component implements HasComponents, HasSize,
             ensureAttached();
         }
         setModality(opened && isModal());
+        // This part makes sure that the dialog gets detached if it gets closed but is set inert before it can get detached.
+        if (!opened) {
+            ElementUtil.setIgnoreParentInert(getElement(), true);
+        }
         getElement().setProperty("opened", opened);
     }
 
