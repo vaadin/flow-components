@@ -57,6 +57,6 @@ public class SubDialogOpenedOnOpenedChangeView extends Div {
         openMainDialogButton.setId("open-main-dialog");
         openMainDialogButton.addClickListener(e -> mainDialog.open());
 
-        add(openMainDialogButton);
+        add(openMainDialogButton, output);
     }
 }
