@@ -46,8 +46,11 @@ public class SubDialogOpenedOnOpenedChangeView extends Div {
         });
         mainDialog.addDetachListener(ev -> output.setText("Detached"));
 
-        Button closeMainDialogAndOpenSubDialogButton = new Button("Close main dialog and open sub-dialog", ev -> mainDialog.close());
-        closeMainDialogAndOpenSubDialogButton.setId("close-main-dialog-and-open-sub-dialog");
+        Button closeMainDialogAndOpenSubDialogButton = new Button(
+                "Close main dialog and open sub-dialog",
+                ev -> mainDialog.close());
+        closeMainDialogAndOpenSubDialogButton
+                .setId("close-main-dialog-and-open-sub-dialog");
         mainDialog.add(closeMainDialogAndOpenSubDialogButton);
 
         Button openMainDialogButton = new Button("Open main dialog");
