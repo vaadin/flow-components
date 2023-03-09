@@ -41,14 +41,14 @@ function runTests() {
       });
 
       // Install dependencies required to run the web-test-runner tests
-      execSync(`npm install @open-wc/testing @web/dev-server-esbuild @web/test-runner sinon --save-dev`, {
+      execSync(`npm install @open-wc/testing @web/dev-server-esbuild @web/test-runner @web/test-runner-playwright sinon --save-dev`, {
         cwd: itFolder,
         stdio: 'inherit'
       });
 
       // Run the tests
       console.log(`Running tests in ${itFolder}`);
-      execSync(`npx web-test-runner ${wtrTestsFolderName}/**/*.test.ts --node-resolve`, {
+      execSync(`npx web-test-runner --playwright ${wtrTestsFolderName}/**/*.test.ts --node-resolve`, {
         cwd: itFolder,
         stdio: 'inherit'
       });
