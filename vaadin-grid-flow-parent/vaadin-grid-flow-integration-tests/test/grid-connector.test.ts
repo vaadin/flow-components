@@ -18,10 +18,6 @@ describe('grid connector', () => {
     connector = grid.$connector;
   });
 
-  it('should fail the build', () => {
-    expect(true).to.be.false;
-  });
-
   it('should not reinitialize the connector', () => {
     gridConnector.initLazy(grid);
     expect(grid.$connector).to.equal(connector);
