@@ -44,6 +44,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             }
 
             return Boolean(
+              this.grid.$connector.confirmingParentItems ||
               this.grid.$connector.hasEnsureSubCacheQueue() ||
                 Object.keys(this.pendingRequests).length ||
                 Object.keys(this.itemCaches).filter((index) => {
@@ -366,17 +367,20 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
               // workaround: sometimes grid-element gives page index that overflows
               page = Math.min(page, Math.floor(cache[parentUniqueKey].size / grid.pageSize));
 
-              // Ensure grid isn't in loading state when the callback executes
-              ensureSubCacheQueue = [];
+              // Resolve the callback from cache
               callback(cache[parentUniqueKey][page], cache[parentUniqueKey].size);
 
-              // Update effective size
-              updateGridEffectiveSize();
-              // Prevent sub-caches from being created (& data requests sent) for items
-              // that may no longer be visible
-              ensureSubCacheQueue = [];
-              // Request a content update manually
-              grid.requestContentUpdate();
+              // Check if there are any pending requests for expanded parents that could be resolved
+              // synchronously from cache
+              const resolvableParentRequest = ensureSubCacheQueue.find(({ itemkey }) => cache[itemkey]);
+              if (resolvableParentRequest) {
+                // Found a resolvable parent request, remove all pending requests as fresh ones will be
+                // created once the callback executes
+                ensureSubCacheQueue = [];
+
+                // Synchronously make a page load request for the resolvable parent request
+                resolvableParentRequest.cache.doEnsureSubCacheForScaledIndex(resolvableParentRequest.scaledIndex);
+              }
             } else {
               treePageCallbacks[parentUniqueKey][page] = callback;
 
@@ -896,6 +900,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
         });
 
         grid.$connector.confirm = tryCatchWrapper(function (id) {
+          grid.$connector.confirmingParentItems = true;
           // We're done applying changes from this batch, resolve outstanding
           // callbacks
           let outstandingRequests = Object.getOwnPropertyNames(rootPageCallbacks);
@@ -932,6 +937,8 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
               callback([]);
             }
           }
+
+          grid.$connector.confirmingParentItems = false;
 
           // Let server know we're done
           grid.$server.confirmUpdate(id);
