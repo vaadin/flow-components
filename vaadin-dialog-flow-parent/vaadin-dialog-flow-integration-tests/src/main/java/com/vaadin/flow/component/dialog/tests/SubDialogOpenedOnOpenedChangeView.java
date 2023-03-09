@@ -34,12 +34,10 @@ public class SubDialogOpenedOnOpenedChangeView extends Div {
         output.setId("output");
 
         Dialog mainDialog = new Dialog();
-        mainDialog.setId("main-dialog");
         mainDialog.setHeaderTitle("Main Dialog");
         mainDialog.addOpenedChangeListener(e -> {
             if (!e.isOpened()) {
                 Dialog subDialog = new Dialog();
-                subDialog.setId("sub-dialog");
                 subDialog.setHeaderTitle("Sub-Dialog");
                 subDialog.open();
             }
