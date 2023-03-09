@@ -1,7 +1,8 @@
 import './env-setup.js';
-import '../../vaadin-grid-flow/src/main/resources/META-INF/resources/frontend/gridConnector.js';
+import '@vaadin/grid/all-imports.js';
+import '../frontend/generated/jar-resources/gridConnector.js';
 import sinon from 'sinon';
-import type { Grid } from '../../../node_modules/@vaadin/grid/vaadin-grid.js';
+import type { Grid } from '@vaadin/grid';
 import type {} from '@web/test-runner-mocha';
 
 export type GridConnector = {
@@ -45,7 +46,7 @@ export const gridConnector = Vaadin.Flow.gridConnector;
 export function init(grid: FlowGrid): void {
   // Stub the necessary server-side methods
   grid.$server = {
-    confirmUpdate: sinon.stub(),
+    confirmUpdate: sinon.spy(),
     select: sinon.spy(),
     deselect: sinon.spy(),
     setDetailsVisible: sinon.spy()
