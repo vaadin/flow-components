@@ -226,7 +226,7 @@
                                 <exec
                                     executable="npm"
                                     failonerror="true">
-                                    <arg value="test -R tap"/>
+                                    <arg value="test"/>
                                 </exec>
                             </target>
                         </configuration>
