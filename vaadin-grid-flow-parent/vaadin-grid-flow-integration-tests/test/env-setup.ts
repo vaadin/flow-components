@@ -1,7 +1,10 @@
 window.Vaadin ||= {};
-window.Vaadin.Flow = {};
-window.Vaadin.Flow.tryCatchWrapper = function (originalFunction) {
-  return function () {
-    return originalFunction.apply(this, arguments);
-  };
+const Flow = {
+  tryCatchWrapper: function (originalFunction) {
+    return function () {
+      return originalFunction.apply(this, arguments);
+    };
+  }
 };
+// @ts-expect-error
+window.Vaadin.Flow = Flow;

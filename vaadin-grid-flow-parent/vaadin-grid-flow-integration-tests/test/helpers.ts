@@ -1,10 +1,10 @@
-import type { Grid } from '../../../node_modules/@vaadin/grid/vaadin-grid.js';
+import type { FlowGrid } from './shared.js';
 
-export function getBodyRowCount(grid: Grid): number {
-  return (grid as any)._effectiveSize;
+export function getBodyRowCount(grid: FlowGrid): number {
+  return grid._effectiveSize;
 }
 
-export function getBodyCellContent(grid: Grid, rowIndex: number, columnIndex: number): HTMLElement | null {
+export function getBodyCellContent(grid: FlowGrid, rowIndex: number, columnIndex: number): HTMLElement | null {
   const items = grid.shadowRoot!.querySelector(`#items`)!;
 
   const row = [...items.children].find((row) => (row as any).index === rowIndex);
@@ -21,6 +21,6 @@ export function getBodyCellContent(grid: Grid, rowIndex: number, columnIndex: nu
   return (cellsInVisualOrder[columnIndex] as any)._content;
 }
 
-export function getCellText(grid: Grid, rowIndex: number, columnIndex: number): string | null {
+export function getCellText(grid: FlowGrid, rowIndex: number, columnIndex: number): string | null {
   return getBodyCellContent(grid, rowIndex, columnIndex)?.textContent || null;
 }
