@@ -182,6 +182,11 @@ then
     set +x
 fi
 
+## Run web-test-runner tests
+cmd="node scripts/wtr.js"
+tcLog "Running web-test-runner tests - $cmd"
+$cmd || exit 1
+
 if [ -n "$modules" ] && [ -z "$USE_MERGED_MODULE" ]
 then
   ### Run IT's in original modules
