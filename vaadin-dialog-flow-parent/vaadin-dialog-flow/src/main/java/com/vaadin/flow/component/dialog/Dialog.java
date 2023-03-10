@@ -113,10 +113,9 @@ public class Dialog extends Component implements HasComponents, HasSize,
         // Workaround for: https://github.com/vaadin/flow/issues/3496
         setOpened(false);
 
-        getElement().addEventListener("opened-changed", event -> {
+        addOpenedChangeListener(event -> {
             if (!isOpened()) {
                 setModality(false);
-                ElementUtil.setIgnoreParentInert(getElement(), false);
             }
             if (autoAddedToTheUi && !isOpened()) {
                 getElement().removeFromParent();
@@ -803,11 +802,6 @@ public class Dialog extends Component implements HasComponents, HasSize,
             ensureAttached();
         }
         setModality(opened && isModal());
-        // This part makes sure that the dialog gets detached if it gets closed
-        // but is set inert before it can get detached.
-        if (!opened) {
-            ElementUtil.setIgnoreParentInert(getElement(), true);
-        }
         getElement().setProperty("opened", opened);
     }
 
