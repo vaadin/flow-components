@@ -1,11 +1,9 @@
 import { expect, fixtureSync, nextFrame } from '@open-wc/testing';
-import { getBodyCellContent, } from './helpers.js';
-import { init } from './shared.js';
-import type { FlowGrid, GridConnector } from './shared.js';
+import { init, getBodyCellContent, setRootItems } from './shared.js';
+import type { FlowGrid } from './shared.js';
 
 describe('grid connector - selection', () => {
   let grid: FlowGrid;
-  let connector: GridConnector;
 
   beforeEach(async () => {
     grid = fixtureSync(`
@@ -15,18 +13,11 @@ describe('grid connector - selection', () => {
     `);
 
     init(grid);
-    connector = grid.$connector;
 
-    connector.updateSize(2);
-    connector.set(
-      0,
-      [
-        { key: '0', name: 'foo' },
-        { key: '1', name: 'bar' }
-      ],
-      null
-    );
-    connector.confirm(0);
+    setRootItems(grid.$connector, [
+      { key: '0', name: 'foo' },
+      { key: '1', name: 'bar' }
+    ]);
     await nextFrame();
   });
 
@@ -92,14 +83,14 @@ describe('grid connector - selection', () => {
     });
 
     it('should apply selection from data', async () => {
-      connector.set(0, [{ key: '0', name: 'foo', selected: true }], null);
+      setRootItems(grid.$connector, [{ key: '0', name: 'foo', selected: true}]);
       expect(grid.selectedItems.length).to.equal(1);
       expect(grid.selectedItems[0].key).to.equal('0');
     });
 
     it('should apply deselection from data', async () => {
       getBodyCellContent(grid, 0, 0)!.click();
-      connector.set(0, [{ key: '0', name: 'foo' }], null);
+      setRootItems(grid.$connector, [{ key: '0', name: 'foo' }]);
       expect(grid.selectedItems).to.be.empty;
     });
   });
@@ -115,7 +106,7 @@ describe('grid connector - selection', () => {
     });
 
     it('should not apply selection from data', async () => {
-      connector.set(0, [{ key: '0', name: 'foo', selected: true }], null);
+      setRootItems(grid.$connector, [{ key: '0', name: 'foo', selected: true }]);
       expect(grid.selectedItems).to.be.empty;
     });
   });
