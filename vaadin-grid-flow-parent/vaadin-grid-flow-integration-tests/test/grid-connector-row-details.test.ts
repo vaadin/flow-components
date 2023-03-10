@@ -1,11 +1,10 @@
 import { expect, fixtureSync, nextFrame } from '@open-wc/testing';
-import { getBodyCellContent } from './helpers.js';
+import { getBodyCellContent, setRootItems } from './shared.js';
 import { init } from './shared.js';
-import type { FlowGrid, GridConnector } from './shared.js';
+import type { FlowGrid } from './shared.js';
 
 describe('grid connector - row details', () => {
   let grid: FlowGrid;
-  let connector: GridConnector;
 
   beforeEach(async () => {
     grid = fixtureSync(`
@@ -15,18 +14,11 @@ describe('grid connector - row details', () => {
     `);
 
     init(grid);
-    connector = grid.$connector;
 
-    connector.updateSize(2);
-    connector.set(
-      0,
-      [
-        { key: '0', name: 'foo' },
-        { key: '1', name: 'bar' }
-      ],
-      null
-    );
-    connector.confirm(0);
+    setRootItems(grid.$connector, [
+      { key: '0', name: 'foo' },
+      { key: '1', name: 'bar' }
+    ]);
     await nextFrame();
   });
 
@@ -61,7 +53,7 @@ describe('grid connector - row details', () => {
   });
 
   it('should set details visible for item selected from data', async () => {
-    connector.set(0, [{ key: '0', name: 'foo', selected: true }], null);
+    setRootItems(grid.$connector, [{ key: '0', name: 'foo', selected: true }]);
     expect(grid.$server.setDetailsVisible).to.be.calledWith('0');
   });
 });

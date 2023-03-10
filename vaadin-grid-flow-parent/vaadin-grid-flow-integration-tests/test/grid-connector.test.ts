@@ -1,11 +1,9 @@
 import { expect, fixtureSync, nextFrame } from '@open-wc/testing';
-import { getBodyRowCount, getCellText } from './helpers.js';
-import { init, gridConnector } from './shared.js';
-import type { FlowGrid, GridConnector } from './shared.js';
+import { init, gridConnector, getBodyRowCount, getBodyCellText, setRootItems } from './shared.js';
+import type { FlowGrid } from './shared.js';
 
 describe('grid connector', () => {
   let grid: FlowGrid;
-  let connector: GridConnector;
 
   beforeEach(() => {
     grid = fixtureSync(`
@@ -15,21 +13,19 @@ describe('grid connector', () => {
     `);
 
     init(grid);
-    connector = grid.$connector;
   });
 
   it('should not reinitialize the connector', () => {
+    const connector = grid.$connector;
     gridConnector.initLazy(grid);
     expect(grid.$connector).to.equal(connector);
   });
 
   it('should add root level items', async () => {
-    connector.updateSize(1);
-    connector.set(0, [{ key: '0', name: 'foo' }], null);
-    connector.confirm(0);
+    setRootItems(grid.$connector, [{ key: '0', name: 'foo' }]);
     await nextFrame();
 
     expect(getBodyRowCount(grid)).to.equal(1);
-    expect(getCellText(grid, 0, 0)).to.equal('foo');
+    expect(getBodyCellText(grid, 0, 0)).to.equal('foo');
   });
 });
