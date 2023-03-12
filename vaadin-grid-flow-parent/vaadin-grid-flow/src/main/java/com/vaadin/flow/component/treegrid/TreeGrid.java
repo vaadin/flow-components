@@ -224,6 +224,20 @@ public class TreeGrid<T> extends Grid<T>
         setUniqueKeyProperty("key");
         getArrayUpdater().getUpdateQueueData()
                 .setHasExpandedItems(getDataCommunicator()::hasExpandedItems);
+
+        addItemHasChildrenPathGenerator();
+    }
+
+    /**
+     * Adds a data generator that produces a value for the <vaadin-grid>'s
+     * itemHasChildrenPath property
+     */
+    private void addItemHasChildrenPathGenerator() {
+        addDataGenerator((T item, JsonObject jsonObject) -> {
+            if (getDataCommunicator().hasChildren(item)) {
+                jsonObject.put("children", true);
+            }
+        });
     }
 
     /**
@@ -243,6 +257,8 @@ public class TreeGrid<T> extends Grid<T>
         setUniqueKeyProperty("key");
         getArrayUpdater().getUpdateQueueData()
                 .setHasExpandedItems(getDataCommunicator()::hasExpandedItems);
+
+        addItemHasChildrenPathGenerator();
     }
 
     @Override
