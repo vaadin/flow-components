@@ -805,7 +805,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
         setModality(opened && isModal());
         // This part makes sure that the dialog gets detached if it gets closed
         // but is set inert before it can get detached.
-        if (!opened) {
+        if (!opened && isOpened()) {
             ElementUtil.setIgnoreParentInert(getElement(), true);
         }
         getElement().setProperty("opened", opened);
