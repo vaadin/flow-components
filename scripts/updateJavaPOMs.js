@@ -16,7 +16,6 @@ const componentName = name.replace('vaadin-', '');
 const desc = name.split('-').map(w => w.replace(/./, m => m.toUpperCase())).join(' ');
 const proComponents = ['board',
                        'charts',
-                       'confirm-dialog',
                        'cookie-consent',
                        'crud',
                        'grid-pro',

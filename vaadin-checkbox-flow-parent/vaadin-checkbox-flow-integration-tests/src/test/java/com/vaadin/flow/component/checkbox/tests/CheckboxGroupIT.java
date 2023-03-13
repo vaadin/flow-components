@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -24,12 +24,10 @@ import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.TestBenchTestCase;
 
-import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -112,23 +110,13 @@ public class CheckboxGroupIT extends AbstractComponentIT {
         WebElement infoLabel = layout
                 .findElement(By.id("checkbox-group-disabled-items-info"));
 
-        Assert.assertEquals("'foo' should be selected", "[foo]",
+        Assert.assertEquals("'foo' should be selected server-side", "[foo]",
                 infoLabel.getText());
 
         group.selectByText("bar");
 
-        try {
-            waitUntil(driver -> !group.getCheckboxes().get(1).isChecked());
-        } catch (WebDriverException wde) {
-            Assert.fail("Server should have disabled the checkbox again.");
-        }
-
-        Assert.assertEquals("Value 'foo' should have been re-selected", "[foo]",
-                infoLabel.getText());
-
-        Assert.assertTrue(
-                "Value 'foo' should have been re-selected on the client side",
-                checkboxes.get(0).isChecked());
+        Assert.assertEquals("Still only 'foo' should be selected server-side",
+                "[foo]", infoLabel.getText());
     }
 
     @Test
@@ -152,16 +140,13 @@ public class CheckboxGroupIT extends AbstractComponentIT {
         Assert.assertEquals("", valueInfo.getText());
 
         // make the group not read-only
-        WebElement switchReadOnly = findElement(By.id("switch-read-only"));
-        new Actions(getDriver()).moveToElement(switchReadOnly).click().build()
-                .perform();
+        findElement(By.id("switch-read-only")).click();
 
         group.selectByText("bar");
         Assert.assertEquals("[bar]", valueInfo.getText());
 
         // make it read-only again
-        new Actions(getDriver()).moveToElement(switchReadOnly).click().build()
-                .perform();
+        findElement(By.id("switch-read-only")).click();
 
         // click to the first item
         group.selectByText("foo");
@@ -180,27 +165,6 @@ public class CheckboxGroupIT extends AbstractComponentIT {
 
         findElement(By.id("remove-theme-variant-button")).click();
         Assert.assertNull(group.getAttribute("theme"));
-    }
-
-    @Test
-    public void groupHasLabelAndErrorMessage_setInvalidShowEM_setValueRemoveEM() {
-        CheckboxGroupElement group = $(CheckboxGroupElement.class)
-                .id("group-with-label-and-error-message");
-
-        Assert.assertEquals("Label Attribute should present with correct text",
-                group.getAttribute("label"), "Group label");
-
-        TestBenchElement errorMessage = group.getErrorMessageComponent();
-
-        verifyGroupValid(group, errorMessage);
-
-        layout.findElement(By.id("group-with-label-button")).click();
-        verifyGroupInvalid(group, errorMessage);
-
-        Assert.assertEquals(
-                "Correct error message should be shown after the button clicks",
-                "Field has been set to invalid from server side",
-                errorMessage.getText());
     }
 
     @Test
@@ -243,23 +207,5 @@ public class CheckboxGroupIT extends AbstractComponentIT {
                 anchor.getAttribute("src"));
 
         Assert.assertEquals("Bill", checkboxes.get(2).getText());
-    }
-
-    private void verifyGroupInvalid(TestBenchElement group,
-            TestBenchElement errorMessage) {
-        Assert.assertEquals("Checkbox group is invalid.", true,
-                group.getPropertyBoolean("invalid"));
-        Assert.assertFalse("Error message should be shown.",
-                errorMessage.getText().isEmpty());
-    }
-
-    private void verifyGroupValid(TestBenchElement group,
-            TestBenchElement errorMessage) {
-        Boolean isInvalid = group.getPropertyBoolean("invalid");
-        Assert.assertThat("Checkbox group is not invalid.", isInvalid,
-                CoreMatchers.anyOf(CoreMatchers.equalTo(isInvalid),
-                        CoreMatchers.equalTo(false)));
-        Assert.assertTrue("Error message should be empty.",
-                errorMessage.getText().isEmpty());
     }
 }

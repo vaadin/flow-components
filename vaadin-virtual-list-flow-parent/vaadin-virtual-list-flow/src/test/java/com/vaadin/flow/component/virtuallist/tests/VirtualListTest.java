@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -25,14 +25,6 @@ public class VirtualListTest {
 
     @Rule
     public ExpectedException exceptionRule = ExpectedException.none();
-
-    @Test
-    public void templateWarningSuppressed() {
-        VirtualList<String> virtualList = new VirtualList<>();
-
-        Assert.assertTrue("Template warning is not suppressed", virtualList
-                .getElement().hasAttribute("suppress-template-warning"));
-    }
 
     @Test
     public void paging_pagingDisabledByDefault() {

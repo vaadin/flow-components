@@ -1,6 +1,6 @@
 # VirtualList component for Vaadin Flow
 
-This project is the Component wrapper implementation of [`<vaadin-virtual-list>`](https://github.com/vaadin/web-components/tree/master/packages/vaadin-virtual-list) element
+This project is the Component wrapper implementation of [`<vaadin-virtual-list>`](https://github.com/vaadin/web-components/tree/main/packages/vaadin-virtual-list) element
 for use from the server side with [Vaadin Flow](https://github.com/vaadin/flow).
 
 ## Using the component in a Flow application

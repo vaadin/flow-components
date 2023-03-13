@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -111,6 +111,15 @@ public class CloseListenerReopenDialogIT extends AbstractComponentIT {
         Assert.assertEquals(
                 "No expected info message from close action listener for the subdialog",
                 1, findElements(By.className("sub")).size());
+    }
+
+    @Test
+    public void openDialog_shouldNotThrow() {
+        open();
+
+        findElement(By.id("open")).click();
+
+        checkLogsForErrors();
     }
 
     private void closeDialog() {

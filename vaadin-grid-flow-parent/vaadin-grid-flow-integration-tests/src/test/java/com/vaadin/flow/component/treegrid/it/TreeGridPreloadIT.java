@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -30,7 +30,7 @@ import com.vaadin.flow.testutil.TestPath;
 @TestPath("vaadin-grid/treegrid-preload")
 public class TreeGridPreloadIT extends AbstractTreeGridIT {
 
-    private final int EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE = 40;
+    private static final int EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE = 40;
     private TextFieldElement requestCount;
     private TextFieldElement dataProviderFetchCount;
     private ButtonElement requestCountReset;
@@ -39,7 +39,7 @@ public class TreeGridPreloadIT extends AbstractTreeGridIT {
     private void open(List<Integer> expandedRootIndexes,
             SortDirection sortDirection, Integer nodesPerLevel, Integer depth,
             Integer pageSize) {
-        String url = getRootURL() + getTestPath() + "/?foo=bar";
+        String url = getRootURL() + getTestPath() + "?foo=bar";
 
         if (expandedRootIndexes.size() > 0) {
             String expandedRootIndexesString = expandedRootIndexes.stream()
@@ -128,15 +128,13 @@ public class TreeGridPreloadIT extends AbstractTreeGridIT {
     }
 
     @Test
-    public void firstExpanded_reExpand_shouldPreLoadDataForExpandedChildren() {
+    public void firstExpanded_reExpand_shouldUseCachedDataForExpandedChildren() {
         open(Arrays.asList(0), null, null, null, null);
         requestCountReset.click();
 
         getTreeGrid().collapseWithClick(0);
         getTreeGrid().expandWithClick(0);
-        // Expanding a recursively expanded parent doesn't yet trigger a preload
-        // so a second request is made from client.
-        Assert.assertEquals("2", requestCount.getValue());
+        Assert.assertEquals("0", requestCount.getValue());
     }
 
     @Test
@@ -149,13 +147,13 @@ public class TreeGridPreloadIT extends AbstractTreeGridIT {
     }
 
     @Test
-    public void firstExpanded_reExpandChild_shouldPreLoadDataForExpandedChildren() {
+    public void firstExpanded_reExpandChild_shouldUseCachedDataForExpandedChildren() {
         open(Arrays.asList(0), null, null, null, null);
         requestCountReset.click();
 
         getTreeGrid().collapseWithClick(2);
         getTreeGrid().expandWithClick(2);
-        Assert.assertEquals("1", requestCount.getValue());
+        Assert.assertEquals("0", requestCount.getValue());
     }
 
     @Test
@@ -245,7 +243,7 @@ public class TreeGridPreloadIT extends AbstractTreeGridIT {
         requestCountReset.click();
 
         getTreeGrid().$("vaadin-grid-sorter").first().click();
-        Assert.assertEquals("1", requestCount.getValue());
+        Assert.assertTrue(Integer.parseInt(requestCount.getValue()) < 3);
     }
 
 }

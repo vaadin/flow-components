@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -50,9 +50,6 @@ public class AvatarI18nIT extends AbstractComponentIT {
         WebElement getI18n = getTestButton("get-i18n");
         setI18n.click();
         getI18n.click();
-
-        Assert.assertEquals(dataTitle.getText(),
-                $(AvatarElement.class).waitForFirst().getTitle());
 
         Assert.assertEquals(dataAriaLabel.getText(),
                 $(AvatarGroupElement.class).waitForFirst().getAriaLabel());

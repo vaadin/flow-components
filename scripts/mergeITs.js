@@ -43,7 +43,11 @@ function addDependency(arr, groupId, artifactId, version, scope, exclusions) {
       artifactId: [artifactId]
     }
     version && (obj.version = [version]);
-    scope && (obj.scope = [scope]);
+    // some components like TP are using this dependency under default scope instead of test scope
+    if (artifactId !== "vaadin-flow-components-test-util"){
+      scope && (obj.scope = [scope]);
+    }
+
     exclusions && (obj.exclusions = exclusions);
     arr.push(obj);
   }
@@ -190,7 +194,7 @@ async function createInitListener() {
   copyFileSync(`${templateDir}/index.html`, `${targetFolder}/index.html`);
 }
 
-// Copy components sources from master to the merged integration-tests module
+// Copy components sources from main to the merged integration-tests module
 // At the same time does some source-code changes to adapt them to the new module
 async function copySources() {
   if (!fs.existsSync(itFolder)) {

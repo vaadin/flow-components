@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -221,7 +221,8 @@ public class DateTimePickerElement extends TestBenchElement
      * @return the presentation value of the inner date picker
      */
     public String getDatePresentation() {
-        return getDatePicker().getPropertyString("_inputValue");
+        return getDatePicker().getPropertyString("inputElement",
+                VALUE_PROPERTY);
     }
 
     /**
@@ -247,13 +248,11 @@ public class DateTimePickerElement extends TestBenchElement
     }
 
     private TestBenchElement getDatePicker() {
-        return $("vaadin-date-time-picker-date-picker")
-                .attribute("slot", "date-picker").first();
+        return $("vaadin-date-picker").attribute("slot", "date-picker").first();
     }
 
     private TestBenchElement getTimePicker() {
-        return $("vaadin-date-time-picker-time-picker")
-                .attribute("slot", "time-picker").first();
+        return $("vaadin-time-picker").attribute("slot", "time-picker").first();
     }
 
     /**

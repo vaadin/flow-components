@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.data.renderer.TextRenderer;
 import org.hamcrest.collection.IsEmptyCollection;
 import org.junit.Assert;
 import org.junit.Rule;
@@ -41,6 +42,7 @@ import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.checkbox.dataview.CheckboxGroupListDataView;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
@@ -254,7 +256,7 @@ public class CheckboxGroupTest {
 
         item1.setLabel("etc");
         item2.setLabel("opt");
-        checkboxGroup.getDataProvider().refreshItem(item1);
+        checkboxGroup.getListDataView().refreshItem(item1);
         assertCheckboxLabels(checkboxGroup, "etc", "bar");
 
     }
@@ -275,7 +277,7 @@ public class CheckboxGroupTest {
 
         item1.setLabel("etc");
         item2.setLabel("opt");
-        checkboxGroup.getDataProvider().refreshItem(new Wrapper(1));
+        checkboxGroup.getListDataView().refreshItem(new Wrapper(1));
         assertCheckboxLabels(checkboxGroup, "etc", "bar");
 
     }
@@ -296,9 +298,49 @@ public class CheckboxGroupTest {
 
         item1.setLabel("etc");
         item2.setLabel("opt");
-        checkboxGroup.getDataProvider().refreshAll();
+        checkboxGroup.getListDataView().refreshAll();
         assertCheckboxLabels(checkboxGroup, "etc", "opt");
 
+    }
+
+    @Test
+    public void selectItem_setItemLabelGenerator_selectionIsRetained() {
+        CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
+        checkboxGroup.setItems("foo", "bar");
+
+        checkboxGroup.setValue(Set.of("foo"));
+        Assert.assertEquals(Set.of("foo"), checkboxGroup.getValue());
+
+        checkboxGroup.setItemLabelGenerator(item -> item + " (Updated)");
+
+        Assert.assertEquals(Set.of("foo"), checkboxGroup.getValue());
+    }
+
+    @Test
+    public void setItemLabelGenerator_labelIsUpdated() {
+        CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
+        checkboxGroup.setItems("foo", "bar");
+
+        Checkbox cb = (Checkbox) checkboxGroup.getChildren().findFirst().get();
+        Assert.assertEquals("foo", cb.getLabel());
+
+        checkboxGroup.setItemLabelGenerator(item -> item + " (Updated)");
+
+        Assert.assertEquals("foo (Updated)", cb.getLabel());
+    }
+
+    @Test
+    public void setItemLabelGenerator_removesItemRenderer() {
+        CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
+        checkboxGroup.setItems("foo", "bar");
+        checkboxGroup.setRenderer(new TextRenderer<>());
+
+        Assert.assertTrue(
+                checkboxGroup.getItemRenderer() instanceof TextRenderer);
+
+        checkboxGroup.setItemLabelGenerator(item -> item);
+
+        Assert.assertNull(checkboxGroup.getItemRenderer());
     }
 
     @Test
@@ -318,7 +360,7 @@ public class CheckboxGroupTest {
         Assert.assertEquals(Collections.emptySet(),
                 eventCapture.get().getOldValue());
         Assert.assertEquals(Collections.singleton("bar"),
-                eventCapture.get().getNewSelection());
+                eventCapture.get().getValue());
 
         eventCapture.set(null);
 
@@ -326,9 +368,9 @@ public class CheckboxGroupTest {
         Assert.assertNotNull(eventCapture.get());
         Assert.assertEquals(Collections.singleton("bar"),
                 eventCapture.get().getOldSelection());
-        Assert.assertEquals(2, eventCapture.get().getNewSelection().size());
+        Assert.assertEquals(2, eventCapture.get().getValue().size());
 
-        Set<String> newSelection = eventCapture.get().getNewSelection();
+        Set<String> newSelection = eventCapture.get().getValue();
         Assert.assertTrue(newSelection.contains("foo"));
         Assert.assertTrue(newSelection.contains("bar"));
     }
@@ -389,7 +431,7 @@ public class CheckboxGroupTest {
         DataProvider<String, Void> dataProvider = DataProvider
                 .fromCallbacks(query -> Stream.of("one"), query -> 1);
 
-        checkboxGroup.setDataProvider(dataProvider);
+        checkboxGroup.setItems(dataProvider);
 
         checkboxGroup.getListDataView();
     }
@@ -536,6 +578,12 @@ public class CheckboxGroupTest {
 
         Assert.assertEquals("Invalid label for checkbox group ", "label",
                 checkboxGroup.getElement().getProperty("label"));
+    }
+
+    @Test
+    public void implementsHasTooltip() {
+        CheckboxGroup<String> group = new CheckboxGroup<>();
+        Assert.assertTrue(group instanceof HasTooltip);
     }
 
     private CheckboxGroup<Wrapper> getRefreshEventCheckboxGroup(

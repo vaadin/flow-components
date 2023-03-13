@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -25,6 +25,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
+
 /**
  * A TestBench element representing a <code>&lt;vaadin-date-picker&gt;</code>
  * element.
@@ -33,6 +36,7 @@ import java.util.stream.Collectors;
 public class DatePickerElement extends TestBenchElement
         implements HasLabel, HasHelper {
 
+    @Element("vaadin-date-picker-overlay-content")
     public static class OverlayContentElement extends TestBenchElement {
         /**
          * Gets all visible month calendars that are currently rendered by the
@@ -52,7 +56,7 @@ public class DatePickerElement extends TestBenchElement
          * @return
          */
         public ButtonElement getTodayButton() {
-            return this.$(ButtonElement.class).attribute("part", "today-button")
+            return this.$(ButtonElement.class).attribute("slot", "today-button")
                     .first();
         }
 
@@ -63,7 +67,7 @@ public class DatePickerElement extends TestBenchElement
          */
         public ButtonElement getCancelButton() {
             return this.$(ButtonElement.class)
-                    .attribute("part", "cancel-button").first();
+                    .attribute("slot", "cancel-button").first();
         }
     }
 
@@ -152,14 +156,17 @@ public class DatePickerElement extends TestBenchElement
     }
 
     /**
-     * Opens the overlay, sets the value to the inner input element as a string
-     * and closes the overlay. This simulates the user typing into the input and
-     * triggering an update of the value property.
+     * Simulates the user selecting a date via the input element. This
+     * effectively clears the input element with a key shortcut, then types the
+     * given date string and finally presses {@code Enter} to commit the new
+     * date.
+     *
+     * @param value
+     *            the date string to enter.
      */
     public void setInputValue(String value) {
-        this.open();
-        setProperty("_inputValue", value);
-        this.close();
+        sendKeys(Keys.chord(Keys.SHIFT, Keys.HOME), Keys.BACK_SPACE);
+        sendKeys(value, Keys.ENTER);
     }
 
     /**
@@ -169,7 +176,8 @@ public class DatePickerElement extends TestBenchElement
      * @return
      */
     public String getInputValue() {
-        return getPropertyString("_inputValue");
+        TestBenchElement input = $("input").first();
+        return input.getPropertyString("value");
     }
 
     /**
@@ -206,7 +214,11 @@ public class DatePickerElement extends TestBenchElement
      */
     public OverlayContentElement getOverlayContent() {
         return this.$("vaadin-date-picker-overlay").onPage().waitForFirst()
-                .$(TestBenchElement.class).id("content")
-                .$(OverlayContentElement.class).id("overlay-content");
+                .$(OverlayContentElement.class).first();
+    }
+
+    @Override
+    public void sendKeys(CharSequence... keysToSend) {
+        findElement(By.tagName("input")).sendKeys(keysToSend);
     }
 }

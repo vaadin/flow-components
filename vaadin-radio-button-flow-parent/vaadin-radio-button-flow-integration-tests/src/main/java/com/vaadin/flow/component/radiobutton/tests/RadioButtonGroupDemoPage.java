@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -21,9 +21,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -68,31 +66,13 @@ public class RadioButtonGroupDemoPage extends Div {
     public RadioButtonGroupDemoPage() {
         addBasicFeatures();
         addHelperText();
-        addComponentWithLabelAndErrorMessage();
         addItemRenderer();
         addItemLabelGenerator();
         addItemIconGenerator();
         addDisabled();
         addDisabledItems();
-        addComponentAfterItems();
         addReadOnlyGroup();
-        insertComponentsBetweenItems();
-        prependAndInsertComponents();
-        dynamicComponents();
         addComponentWithThemeVariant();
-    }
-
-    private void addComponentWithLabelAndErrorMessage() {
-        RadioButtonGroup<String> group = new RadioButtonGroup<>();
-        group.setItems("foo", "bar", "baz");
-        group.setLabel("Group label");
-        group.setErrorMessage("Field has been set to invalid from server side");
-        NativeButton button = new NativeButton("Switch validity state",
-                event -> group.setInvalid(!group.isInvalid()));
-
-        group.setId("group-with-label-and-error-message");
-        button.setId("group-with-label-button");
-        addCard("Group with label and error message", group, button);
     }
 
     private void addHelperText() {
@@ -256,84 +236,6 @@ public class RadioButtonGroupDemoPage extends Div {
             return null;
         }
         return person.getName();
-    }
-
-    private void addComponentAfterItems() {
-        RadioButtonGroup<String> group = new RadioButtonGroup<>();
-        group.setItems("foo", "bar", "baz");
-        group.add(new Label("My Custom text"));
-
-        group.getElement().getStyle().set("display", "flex");
-        group.getElement().getStyle().set("flexDirection", "column");
-
-        group.setId("button-group-with-appended-text");
-
-        addCard("Add component to group", group);
-    }
-
-    private void insertComponentsBetweenItems() {
-        RadioButtonGroup<String> group = new RadioButtonGroup<>();
-
-        // Note that setting items clear any components
-        group.add(new Label("Foo group"), getFullSizeHr());
-
-        group.setItems("foo", "bar", "baz");
-        group.addComponents("foo", new Label("Not foo selections"),
-                getFullSizeHr());
-
-        group.getElement().getStyle().set("display", "flex");
-        group.getElement().getStyle().set("flexDirection", "column");
-
-        group.setId("button-group-with-inserted-component");
-
-        addCard("Insert component after item in group", group);
-    }
-
-    private void prependAndInsertComponents() {
-        RadioButtonGroup<String> group = new RadioButtonGroup<>();
-
-        group.setItems("foo", "foo-bar", "bar", "bar-foo", "baz", "baz-baz");
-
-        group.prependComponents("foo", new Label("Foo group"), getFullSizeHr());
-        group.prependComponents("bar", new Label("Bar group"), getFullSizeHr());
-        group.prependComponents("baz", new Label("Baz group"), getFullSizeHr());
-
-        group.getElement().getStyle().set("display", "flex");
-        group.getElement().getStyle().set("flexDirection", "column");
-
-        group.setId("button-group-with-prepended-component");
-
-        addCard("Insert components before item in group", group);
-    }
-
-    private Label below;
-
-    private void dynamicComponents() {
-        RadioButtonGroup<String> group = new RadioButtonGroup<>();
-
-        group.setItems("foo", "foo-bar", "bar", "bar-foo", "baz", "baz-baz");
-
-        group.addValueChangeListener(event -> {
-            if (below != null && below.getParent().isPresent()) {
-                group.remove(below);
-            }
-            below = new Label("= After Selected =");
-
-            group.addComponents(event.getValue(), below);
-        });
-
-        group.getElement().getStyle().set("display", "flex");
-        group.getElement().getStyle().set("flexDirection", "column");
-
-        group.setId("button-group-with-dynamic-component");
-
-        addCard("Move component in group on selection", group);
-    }
-
-    private Hr getFullSizeHr() {
-        Hr hr = new Hr();
-        hr.setSizeFull();
-        return hr;
     }
 
     private Component addCard(String title, Component... components) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -24,8 +24,6 @@ import org.openqa.selenium.By;
 import com.vaadin.flow.component.datepicker.testbench.DatePickerElement;
 import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebElement;
 
 @TestPath("vaadin-date-picker/detach-attach")
 public class DetachAttachIT extends AbstractComponentIT {
@@ -45,26 +43,6 @@ public class DetachAttachIT extends AbstractComponentIT {
         Assert.assertEquals(
                 "DatePicker displays unexpected value with French locale after detach and reattach.",
                 "13/06/1993", getInputValue());
-    }
-
-    @Test
-    public void clientSideValidationIsOverriddenOnAttach() {
-        open();
-
-        assertDatePickerIsValidOnTab();
-
-        // Detaching and attaching date picker
-        detach();
-        attach();
-
-        assertDatePickerIsValidOnTab();
-    }
-
-    private void assertDatePickerIsValidOnTab() {
-        WebElement datePickerElement = $(DatePickerElement.class).first();
-        datePickerElement.sendKeys(Keys.TAB);
-        Assert.assertFalse("Date picker should be valid after Tab", Boolean
-                .parseBoolean(datePickerElement.getAttribute("invalid")));
     }
 
     @Test

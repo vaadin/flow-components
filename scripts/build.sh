@@ -26,7 +26,7 @@ then
   done
 fi
 
-args="$args -B $quiet"
+args="$args -ntp -B $quiet"
 verify="verify -Dvaadin.pnpm.enable"
 
 ## compute modules that were modified in this PR
@@ -166,7 +166,7 @@ then
    args="$args -P saucelabs -Dtest.use.hub=true -Dsauce.user=$SAUCE_USER -Dsauce.sauceAccessKey=$SAUCE_ACCESS_KEY"
 fi
 
-args="$args -Dfailsafe.rerunFailingTestsCount=2"
+args="$args -Dfailsafe.rerunFailingTestsCount=2 -Dmaven.test.redirectTestOutputToFile=true"
 
 ## Install a selenium hub in local host to run tests against chrome
 if [ "$TBHUB" = "localhost" ]
@@ -181,6 +181,11 @@ then
     docker run --name "$DOCKER_CONTAINER_NAME" --net=host --rm -d -v /dev/shm:/dev/shm "$SELENIUM_DOCKER_IMAGE" || exit 1
     set +x
 fi
+
+## Run web-test-runner tests
+cmd="node scripts/wtr.js"
+tcLog "Running web-test-runner tests - $cmd"
+$cmd || exit 1
 
 if [ -n "$modules" ] && [ -z "$USE_MERGED_MODULE" ]
 then

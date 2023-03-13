@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,10 +19,15 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasComponents;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.Synchronize;
+import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.function.SerializableRunnable;
@@ -46,11 +51,16 @@ import elemental.json.JsonObject;
  * @author Vaadin Ltd.
  */
 @SuppressWarnings("serial")
+@Tag("vaadin-context-menu")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha1")
+@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@NpmPackage(value = "@vaadin/context-menu", version = "24.1.0-alpha1")
+@JsModule("@vaadin/context-menu/src/vaadin-context-menu.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./contextMenuConnector.js")
 @JsModule("./contextMenuTargetConnector.js")
 public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I extends MenuItemBase<C, I, S>, S extends SubMenuBase<C, I, S>>
-        extends GeneratedVaadinContextMenu<C> implements HasComponents {
+        extends Component implements HasComponents, HasStyle {
 
     public static final String EVENT_DETAIL = "event.detail";
 
@@ -74,7 +84,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
 
         // Don't open the overlay immediately with any event, let
         // contextMenuConnector.js make a server round-trip first.
-        setOpenOn("none");
+        getElement().setProperty("openOn", "none");
 
         getElement().addEventListener("opened-changed", event -> {
             if (autoAddedToTheUi && !isOpened()) {
@@ -178,9 +188,8 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
     /**
      * Closes this context menu if it is currently open.
      */
-    @Override
     public void close() {
-        super.close();
+        getElement().callJsFunction("close");
     }
 
     /**
@@ -302,11 +311,33 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
 
     /**
      * Gets the open state from the context menu.
+     * <p>
+     * This property is synchronized automatically from client side when an
+     * {@code opened-changed} event happens.
      *
      * @return the {@code opened} property from the context menu
      */
+    @Synchronize(property = "opened", value = "opened-changed")
     public boolean isOpened() {
-        return super.isOpenedBoolean();
+        return getElement().getProperty("opened", false);
+    }
+
+    /**
+     * {@code opened-changed} event is sent when the overlay opened state
+     * changes.
+     */
+    public static class OpenedChangeEvent<TComponent extends ContextMenuBase<TComponent, ?, ?>>
+            extends ComponentEvent<TComponent> {
+        private final boolean opened;
+
+        public OpenedChangeEvent(TComponent source, boolean fromClient) {
+            super(source, fromClient);
+            this.opened = source.isOpened();
+        }
+
+        public boolean isOpened() {
+            return opened;
+        }
     }
 
     /**
@@ -317,10 +348,13 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      *            the listener to add
      * @return a Registration for removing the event listener
      */
-    @Override
     public Registration addOpenedChangeListener(
             ComponentEventListener<OpenedChangeEvent<C>> listener) {
-        return super.addOpenedChangeListener(listener);
+        return getElement()
+                .addPropertyChangeListener("opened",
+                        event -> listener.onComponentEvent(
+                                new OpenedChangeEvent<C>((C) this,
+                                        event.isUserOriginated())));
     }
 
     /**

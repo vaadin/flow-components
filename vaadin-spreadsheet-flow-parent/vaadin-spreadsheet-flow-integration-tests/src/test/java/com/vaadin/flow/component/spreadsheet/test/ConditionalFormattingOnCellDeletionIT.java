@@ -1,10 +1,12 @@
 package com.vaadin.flow.component.spreadsheet.test;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import com.vaadin.flow.testutil.TestPath;
 
+@TestPath("vaadin-spreadsheet")
 public class ConditionalFormattingOnCellDeletionIT
         extends AbstractSpreadsheetIT {
 
@@ -13,21 +15,21 @@ public class ConditionalFormattingOnCellDeletionIT
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL());
+        open();
 
         loadFile("conditional_formatting_with_formula_on_second_sheet.xlsx");
     }
 
     @Test
     public void conditionalFormatting_deleteCellUsedInFormula_formattingAppliedWithoutException() {
-        assertEquals(FALSE_CONDITION_COLOR, getCellColor("A2"));
+        Assert.assertEquals(FALSE_CONDITION_COLOR, getCellColor("A2"));
 
         deleteCellValue("A2");
 
-        assertEquals(FALSE_CONDITION_COLOR, getCellColor("A2"));
+        Assert.assertEquals(FALSE_CONDITION_COLOR, getCellColor("A2"));
 
         deleteCellValue("A1");
 
-        assertEquals(TRUE_CONDITION_COLOR, getCellColor("A2"));
+        Assert.assertEquals(TRUE_CONDITION_COLOR, getCellColor("A2"));
     }
 }

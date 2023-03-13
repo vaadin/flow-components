@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -47,6 +47,7 @@ public class UploadView extends Div {
 
         MultiFileMemoryBuffer buffer = new MultiFileMemoryBuffer();
         Upload upload = new Upload(buffer);
+        upload.setAcceptedFileTypes(".txt");
 
         upload.addSucceededListener(event -> {
             try {
@@ -59,6 +60,7 @@ public class UploadView extends Div {
             eventsOutput.add("-succeeded");
         });
         upload.addAllFinishedListener(event -> eventsOutput.add("-finished"));
+        upload.addFileRejectedListener(event -> eventsOutput.add("-rejected"));
 
         NativeButton clearFileListBtn = new NativeButton("Clear file list",
                 e -> upload.clearFileList());

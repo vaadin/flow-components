@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -123,8 +123,11 @@ public class GridTestPageIT extends AbstractComponentIT {
         items.forEach((row, map) -> {
             Assert.assertEquals("Item " + row, map.get("col0"));
             if ("0".equals(row)) {
+                var detailsProperty = map.keySet().stream()
+                        .filter(key -> key.startsWith("lr_")).findFirst().get();
+
                 Assert.assertEquals("Details opened! 0",
-                        map.get("detailsProperty"));
+                        map.get(detailsProperty));
             } else {
                 Assert.assertThat(map.keySet(), CoreMatchers
                         .not(CoreMatchers.hasItem("detailsProperty")));
@@ -152,14 +155,15 @@ public class GridTestPageIT extends AbstractComponentIT {
         items.forEach((row, map) -> {
             Assert.assertEquals("Item " + row, map.get("col0"));
             if ("0".equals(row)) {
-                Assert.assertTrue("_renderer_* property not found for item 0",
+                Assert.assertTrue(
+                        "Should have loaded item details data for row 0",
                         map.keySet().stream()
-                                .anyMatch(key -> key.startsWith("_renderer_")));
+                                .anyMatch(key -> key.startsWith("lr_")));
             } else {
                 Assert.assertFalse(
-                        "_renderer_* property should not be present for item 0",
+                        "Should not have loaded item details data for other rows",
                         map.keySet().stream()
-                                .anyMatch(key -> key.startsWith("_renderer_")));
+                                .anyMatch(key -> key.startsWith("lr_")));
             }
         });
     }

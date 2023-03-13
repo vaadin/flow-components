@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -141,7 +141,20 @@ public class VirtualListViewIT extends AbstractComponentIT {
         WebElement list = findElement(By
                 .id("list-of-people-with-dataprovider-and-component-renderer"));
         validateListSize(list, 500);
-        validatePlaceholderObject(list);
+
+        // Get the text content of a placeholder component
+        var obj = (Map<String, Long>) executeScript(
+                "return arguments[0].$connector.placeholderItem;", list);
+        var nodeId = obj.entrySet().stream()
+                .filter(entry -> entry.getKey().endsWith("nodeid")).findFirst()
+                .get().getValue();
+        var text = (String) executeScript(
+                "return Vaadin.Flow.clients.ROOT.getByNodeId(arguments[0]).textContent",
+                nodeId);
+        Assert.assertEquals("The placeholder component of the '"
+                + list.getAttribute("id")
+                + "' virtual-list should have the '-----' as text content",
+                "-----", text);
     }
 
     @Test
@@ -193,10 +206,13 @@ public class VirtualListViewIT extends AbstractComponentIT {
     private void validatePlaceholderObject(WebElement list) {
         Map<String, String> obj = (Map<String, String>) executeScript(
                 "return arguments[0].$connector.placeholderItem;", list);
+        // Find the mapped key for "firstName" property
+        var keyForFirstName = obj.keySet().stream()
+                .filter(key -> key.endsWith("firstName")).findFirst().get();
         Assert.assertEquals("The placeholderItem object of the '"
                 + list.getAttribute("id")
                 + "' virtual-list should have the '-----' as firstName property",
-                "-----", obj.get("firstName"));
+                "-----", obj.get(keyForFirstName));
     }
 
 }

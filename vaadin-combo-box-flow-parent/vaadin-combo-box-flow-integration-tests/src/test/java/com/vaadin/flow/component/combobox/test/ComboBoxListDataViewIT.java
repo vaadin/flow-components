@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -157,7 +157,9 @@ public class ComboBoxListDataViewIT extends AbstractComboBoxIT {
     @Test
     public void addItemCountChangeListener_newItemAdded_itemCountChanged() {
         // Add custom value
-        firstComboBox.sendKeys(NEW_PERSON_NAME, Keys.ENTER);
+        firstComboBox.sendKeys(NEW_PERSON_NAME);
+        waitUntil(driver -> !firstComboBox.getPropertyBoolean("loading"));
+        firstComboBox.sendKeys(Keys.ENTER);
         verifyNotifiedItemCount(
                 "Expected item count = 251 after adding a new item", 251);
         // Erase input field's text, because it can be treated as a filter

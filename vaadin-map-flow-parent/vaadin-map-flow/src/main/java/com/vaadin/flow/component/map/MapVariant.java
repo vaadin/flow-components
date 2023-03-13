@@ -1,9 +1,19 @@
+/**
+ * Copyright 2000-2023 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
+ */
 package com.vaadin.flow.component.map;
+
+import com.vaadin.flow.component.shared.ThemeVariant;
 
 /**
  * Set of theme variants applicable for the {@code vaadin-map} component.
  */
-public enum MapVariant {
+public enum MapVariant implements ThemeVariant {
     BORDERLESS("borderless");
 
     private final String variant;

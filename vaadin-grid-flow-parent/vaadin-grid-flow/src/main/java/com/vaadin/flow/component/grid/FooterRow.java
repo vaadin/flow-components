@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -38,14 +38,25 @@ public class FooterRow extends AbstractRow<FooterCell> {
 
         FooterCell(AbstractColumn<?> column) {
             super(column);
-            if (column.getFooterRenderer() == null) {
+            if (column.getFooterText() == null
+                    && column.getFooterComponent() == null) {
                 column.setFooterText("");
             }
         }
 
         @Override
+        public String getText() {
+            return getColumn().getFooterText();
+        }
+
+        @Override
         public void setText(String text) {
             getColumn().setFooterText(text);
+        }
+
+        @Override
+        public Component getComponent() {
+            return getColumn().getFooterComponent();
         }
 
         @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -305,20 +305,6 @@ public class GridElement extends TestBenchElement {
 
         return findElement(By.cssSelector(
                 "vaadin-grid-cell-content[slot='" + slotName + "']"));
-    }
-
-    /**
-     * Find all {@link WebElement}s using the given {@link By} selector.
-     *
-     * @deprecated this method will not working for Chrome 96+, because of the
-     *             breaking changes in ChromeDriver.
-     * @param by
-     *            the selector used to find elements
-     * @return a list of found elements
-     */
-    @Deprecated
-    public List<WebElement> findInShadowRoot(By by) {
-        return getShadowRoot().findElements(by);
     }
 
     /**

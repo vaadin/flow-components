@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -24,6 +24,7 @@ import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
 import org.junit.Test;
+import org.openqa.selenium.By;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -46,6 +47,7 @@ public class DatePickerI18nIT extends AbstractComponentIT {
         // Open and close to force overlay to render with initial I18N settings
         DatePickerElement datePicker = getDynamicI18nDatePicker();
         datePicker.open();
+        waitForElementVisible(By.tagName("vaadin-date-picker-overlay-content"));
         datePicker.close();
 
         // Then override settings and assert that overlay has updated
@@ -73,7 +75,14 @@ public class DatePickerI18nIT extends AbstractComponentIT {
 
         // Set to date in January and open
         datePicker.setDate(LocalDate.of(2021, 1, 1));
+
+        // Open to force overlay content to render
         datePicker.open();
+        waitForElementVisible(By.tagName("vaadin-date-picker-overlay-content"));
+
+        // Wait for the overlay rendering to complete
+        getCommandExecutor().getDriver()
+                .executeAsyncScript("requestAnimationFrame(arguments[0])");
 
         DatePickerElement.OverlayContentElement overlayContent = datePicker
                 .getOverlayContent();

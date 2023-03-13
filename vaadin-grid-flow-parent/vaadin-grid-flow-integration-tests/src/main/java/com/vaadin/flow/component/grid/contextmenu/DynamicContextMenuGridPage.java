@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.grid.contextmenu;
 
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.grid.Grid;
@@ -35,7 +36,8 @@ public class DynamicContextMenuGridPage extends Div {
         grid.addColumn(Person::getAge).setHeader("Born").setId("Born-Id");
 
         grid.setItems(IntStream.range(0, 50)
-                .mapToObj(i -> new Person("Person " + i, i)));
+                .mapToObj(i -> new Person("Person " + i, i))
+                .collect(Collectors.toList()));
 
         GridContextMenu<Person> contextMenu = grid.addContextMenu();
 

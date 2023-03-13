@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -28,13 +28,11 @@ import java.util.Locale;
  */
 @Route("vaadin-time-picker/time-picker-detach-attach")
 public class TimePickerDetachAttachPage extends Div {
-
     /**
      * Constructs a basic layout with a time picker.
      */
     public TimePickerDetachAttachPage() {
         TimePicker timePicker = new TimePicker();
-        timePicker.setRequiredIndicatorVisible(true);
         timePicker.setId("time-picker");
         add(timePicker);
 

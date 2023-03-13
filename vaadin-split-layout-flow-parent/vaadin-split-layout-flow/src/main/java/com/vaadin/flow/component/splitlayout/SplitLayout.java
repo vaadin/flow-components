@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -18,11 +18,19 @@ package com.vaadin.flow.component.splitlayout;
 import java.util.Locale;
 import java.util.Objects;
 
+import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
@@ -30,111 +38,17 @@ import com.vaadin.flow.shared.Registration;
 /**
  * Split Layout is a component with two content areas and a draggable split
  * handle between them.
- * <h3>Horizontal and Vertical Layouts</h3>
- * <p>
- * By default, the split's orientation is horizontal, meaning that the content
- * elements are positioned side by side in a flex container with a horizontal
- * layout. You can change the split mode to vertical by using the
- * {@link #setOrientation(Orientation)} with {@link Orientation#VERTICAL}.
- * </p>
- * The {@code <vaadin-split-layout>} element itself is a flex container. It does
- * not inherit the parent height by default, but rather sets its height
- * depending on the content.
- * </p>
- * <p>
- * You can use CSS to set the fixed height for the split layout, as usual with
- * any block element. It is possible to define percentage height as well. Note
- * that you have to set the parent height in order to make percentages work
- * correctly.
- * </p>
- * <h3>Initial Splitter Position</h3>
- * <p>
- * The initial splitter position is determined from the sizes of the content
- * elements inside the split layout. Therefore, changing width on the content
- * components affects the initial splitter position for the horizontal layouts,
- * while height affects the vertical ones.
- * </p>
- * <p>
- * Note that when the total size of the content component does not fit the
- * layout, the content elements are scaled proportionally.
- * </p>
- * <p>
- * When setting initial sizes with relative units, such as percentages, it is
- * recommended to assign the size for both content elements:
- * </p>
- * <p>
- * <code>
- * SplitLayout layout = new SplitLayout();
- * <p>
- * Label first = new Label("First is 1/4");<br>
- * first.setWidth("25%");<br>
- * layout.addToPrimary(first);<br>
- * <p>
- * Label second = new Label("Second is 3/4");<br>
- * second.setWidth("75%");<br>
- * layout.addToSecondary(second);
- * </code>
- * </p>
- * <h3>Size Limits</h3>
- * <p>
- * The {@code min-width}/{@code min-height}, and {@code max-width}/
- * {@code max-height} CSS size values for the content elements are respected and
- * used to limit the splitter position when it is dragged.
- * </p>
- * <p>
- * It is preferred to set the limits only for a single content element, in order
- * to avoid size conflicts:
- * </p>
- * <p>
- * <code>
- * SplitLayout layout = new SplitLayout();<br>
- * layout.addToPrimary(new Label("First"));<br>
- * layout.addToPrimary(new Label("Second with min & max size");<br>
- * layout.setSecondaryStyle("min-width", "200px");<br>
- * layout.setSecondaryStyle("max-width", "600px");
- * </code>
- * </p>
- * <h3>Resize Notification</h3>
- * <p>
- * For notification on when the user has resized the split position, use the
- * {@link #addSplitterDragendListener(ComponentEventListener)}.
- * </p>
- * <h3>Styling</h3>
- * <p>
- * The following shadow DOM parts are available for styling:
- * </p>
- * <table>
- * <thead>
- * <tr>
- * <th>Part name</th>
- * <th>Description</th>
- * <th>Theme for Element</th>
- * </tr>
- * </thead> <tbody>
- * <tr>
- * <td>{@code splitter}</td>
- * <td>Split element</td>
- * <td>vaadin-split-layout</td>
- * </tr>
- * <tr>
- * <td>{@code handle}</td>
- * <td>The handle of the splitter</td>
- * <td>vaadin-split-layout</td>
- * </tr>
- * </tbody>
- * </table>
- * <p>
- * See
- * <a href="https://github.com/vaadin/vaadin-themable-mixin/wiki">ThemableMixin
- * – how to apply styles for shadow parts</a>
- * </p>
  *
  * @author Vaadin Ltd
  */
-@NpmPackage(value = "@vaadin/split-layout", version = "23.2.0-alpha5")
-@NpmPackage(value = "@vaadin/vaadin-split-layout", version = "23.2.0-alpha5")
-public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
-        implements HasSize {
+@Tag("vaadin-split-layout")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha1")
+@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@NpmPackage(value = "@vaadin/split-layout", version = "24.1.0-alpha1")
+@JsModule("@vaadin/split-layout/src/vaadin-split-layout.js")
+public class SplitLayout extends Component
+        implements ClickNotifier<SplitLayout>, HasSize, HasStyle,
+        HasThemeVariant<SplitLayoutVariant> {
 
     private Component primaryComponent;
     private Component secondaryComponent;
@@ -214,7 +128,8 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
      */
     public void setOrientation(Orientation orientation) {
         Objects.requireNonNull(orientation, "Orientation cannot be null");
-        this.setOrientation(orientation.toString().toLowerCase(Locale.ENGLISH));
+        getElement().setProperty("orientation",
+                orientation.toString().toLowerCase(Locale.ENGLISH));
     }
 
     /**
@@ -230,7 +145,8 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
      * @return the {@code orientation} property of the SplitLayout.
      */
     public Orientation getOrientation() {
-        return Orientation.valueOf(super.getOrientationString().toUpperCase());
+        String orientation = getElement().getProperty("orientation");
+        return Orientation.valueOf(orientation.toUpperCase());
     }
 
     /**
@@ -246,7 +162,6 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
      *
      * @see #setOrientation(Orientation)
      */
-    @Override
     public void addToPrimary(Component... components) {
         if (components.length == 1) {
             primaryComponent = components[0];
@@ -277,7 +192,6 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
      *
      * @see #setOrientation(Orientation)
      */
-    @Override
     public void addToSecondary(Component... components) {
         if (components.length == 1) {
             secondaryComponent = components[0];
@@ -365,31 +279,52 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
         setInnerComponentStyle(styleName, value, false);
     }
 
-    private void setComponents() {
-        removeAll();
-        if (primaryComponent == null) {
-            super.addToPrimary(new Div());
-        } else {
-            super.addToPrimary(primaryComponent);
-        }
-        if (secondaryComponent == null) {
-            super.addToSecondary(new Div());
-        } else {
-            super.addToSecondary(secondaryComponent);
-        }
+    private void setComponent(Component component, String slot) {
+        Component child = component == null ? new Div() : component;
+        SlotUtils.addToSlot(this, slot, child);
     }
 
-    @Override
+    private void setComponents() {
+        removeAll();
+        setComponent(primaryComponent, "primary");
+        setComponent(secondaryComponent, "secondary");
+    }
+
+    /**
+     * Removes the given child components from this component.
+     *
+     * @param components
+     *            The components to remove.
+     * @throws IllegalArgumentException
+     *             if any of the components is not a child of this component.
+     */
     public void remove(Component... components) {
-        super.remove(components);
+        for (Component component : components) {
+            if (getElement().equals(component.getElement().getParent())) {
+                component.getElement().removeAttribute("slot");
+                getElement().removeChild(component.getElement());
+            } else {
+                throw new IllegalArgumentException("The given component ("
+                        + component + ") is not a child of this component");
+            }
+        }
     }
 
     /**
      * Removes the primary and the secondary components.
      */
-    @Override
     public void removeAll() {
-        super.removeAll();
+        getElement().getChildren()
+                .forEach(child -> child.removeAttribute("slot"));
+        getElement().removeAllChildren();
+    }
+
+    @DomEvent("splitter-dragend")
+    public static class SplitterDragendEvent
+            extends ComponentEvent<SplitLayout> {
+        public SplitterDragendEvent(SplitLayout source, boolean fromClient) {
+            super(source, fromClient);
+        }
     }
 
     /**
@@ -400,10 +335,10 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
      *            the listener to add
      * @return a registration for removing the listener
      */
-    @Override
     public Registration addSplitterDragendListener(
-            ComponentEventListener<SplitterDragendEvent<SplitLayout>> listener) {
-        return super.addSplitterDragendListener(listener);
+            ComponentEventListener<SplitterDragendEvent> listener) {
+        return addListener(SplitterDragendEvent.class,
+                (ComponentEventListener) listener);
     }
 
     private void setInnerComponentStyle(String styleName, String value,

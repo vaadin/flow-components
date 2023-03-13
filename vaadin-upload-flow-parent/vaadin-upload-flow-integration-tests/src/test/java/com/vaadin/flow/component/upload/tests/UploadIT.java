@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -21,6 +21,7 @@ import java.util.logging.Level;
 
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -37,13 +38,15 @@ import static org.junit.Assert.assertThat;
 @TestPath("vaadin-upload")
 public class UploadIT extends AbstractUploadIT {
 
+    @Before
+    public void init() {
+        open();
+        waitUntil(driver -> getUpload().isDisplayed());
+    }
+
     @Test
     public void testUploadAnyFile() throws Exception {
-        open();
-
-        waitUntil(driver -> getUpload().isDisplayed());
-
-        File tempFile = createTempFile();
+        File tempFile = createTempFile("txt");
         getUpload().upload(tempFile);
 
         WebElement uploadOutput = getDriver().findElement(By.id("test-output"));
@@ -58,11 +61,7 @@ public class UploadIT extends AbstractUploadIT {
 
     @Test
     public void testClearFileList() throws Exception {
-        open();
-
-        waitUntil(driver -> getUpload().isDisplayed());
-
-        File tempFile = createTempFile();
+        File tempFile = createTempFile("txt");
 
         getUpload().upload(tempFile);
         getUpload().upload(tempFile);
@@ -82,11 +81,7 @@ public class UploadIT extends AbstractUploadIT {
 
     @Test
     public void testUploadMultipleEventOrder() throws Exception {
-        open();
-
-        waitUntil(driver -> getUpload().isDisplayed());
-
-        File tempFile = createTempFile();
+        File tempFile = createTempFile("txt");
 
         getUpload().uploadMultiple(List.of(tempFile, tempFile, tempFile), 10);
 
@@ -100,11 +95,7 @@ public class UploadIT extends AbstractUploadIT {
 
     @Test
     public void testUploadEventOrder() throws Exception {
-        open();
-
-        waitUntil(driver -> getUpload().isDisplayed());
-
-        File tempFile = createTempFile();
+        File tempFile = createTempFile("txt");
 
         getUpload().upload(tempFile);
 
@@ -116,11 +107,21 @@ public class UploadIT extends AbstractUploadIT {
     }
 
     @Test
-    public void uploadFileAndNoErrorThrown() throws Exception {
-        open();
-        waitUntil(driver -> getUpload().isDisplayed());
+    public void uploadInvalidFile_fileIsRejected() throws Exception {
+        File invalidFile = createTempFile("pdf");
 
-        File tempFile = createTempFile();
+        getUpload().upload(invalidFile);
+
+        WebElement eventsOutput = getDriver()
+                .findElement(By.id("test-events-output"));
+
+        Assert.assertEquals("Invalid file was not rejected", "-rejected",
+                eventsOutput.getText());
+    }
+
+    @Test
+    public void uploadFileAndNoErrorThrown() throws Exception {
+        File tempFile = createTempFile("txt");
         getUpload().upload(tempFile);
 
         List<LogEntry> logList1 = getLogEntries(Level.SEVERE);

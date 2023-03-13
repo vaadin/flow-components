@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  *
  *
@@ -55,7 +55,7 @@ public class GridEditorFocusPage extends Div {
         items.add(person);
 
         ListDataProvider<Person> dataProvider = new ListDataProvider<>(items);
-        grid.setDataProvider(dataProvider);
+        grid.setItems(dataProvider);
 
         Grid.Column<Person> nameColumn = grid.addColumn(Person::getFirstName)
                 .setHeader("Name");

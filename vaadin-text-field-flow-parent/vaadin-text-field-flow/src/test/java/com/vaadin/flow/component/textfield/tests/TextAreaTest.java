@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.textfield.tests;
 
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextAreaVariant;
 import com.vaadin.flow.dom.ThemeList;
@@ -130,5 +131,11 @@ public class TextAreaTest {
         assertTrue("TextArea should support char pattern",
                 HasAllowedCharPattern.class
                         .isAssignableFrom(new TextArea().getClass()));
+    }
+
+    @Test
+    public void implementsHasTooltip() {
+        TextArea textArea = new TextArea();
+        Assert.assertTrue(textArea instanceof HasTooltip);
     }
 }

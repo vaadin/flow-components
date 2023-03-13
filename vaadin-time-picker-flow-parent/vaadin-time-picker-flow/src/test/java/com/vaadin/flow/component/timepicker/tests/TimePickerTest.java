@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -28,8 +28,12 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
+import com.vaadin.flow.component.shared.HasOverlayClassName;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
@@ -173,41 +177,11 @@ public class TimePickerTest {
     }
 
     @Test
-    public void setMinTime_getMin() {
-        TimePicker timePicker = new TimePicker();
-        final String min = "12:00";
-        LocalTime minTime = LocalTime.parse(min);
-        timePicker.setMinTime(minTime);
-        assertEquals(minTime, timePicker.getMin());
-        assertEquals(minTime, timePicker.getMinTime());
-    }
-
-    @Test
     public void setMin_getMin_null() {
         TimePicker timePicker = new TimePicker();
         assertEquals(null, timePicker.getMin());
         timePicker.setMin(null);
         assertEquals(null, timePicker.getMin());
-        assertEquals(null, timePicker.getMinTime());
-    }
-
-    @Test
-    public void setMinTime_getMin_null() {
-        TimePicker timePicker = new TimePicker();
-        assertEquals(null, timePicker.getMinTime());
-        timePicker.setMinTime(null);
-        assertEquals(null, timePicker.getMin());
-        assertEquals(null, timePicker.getMinTime());
-    }
-
-    @Test
-    public void setMaxTime_getMax() {
-        TimePicker timePicker = new TimePicker();
-        final String max = "12:00";
-        LocalTime maxTime = LocalTime.parse(max);
-        timePicker.setMaxTime(maxTime);
-        assertEquals(maxTime, timePicker.getMax());
-        assertEquals(maxTime, timePicker.getMaxTime());
     }
 
     @Test
@@ -216,16 +190,6 @@ public class TimePickerTest {
         assertEquals(null, timePicker.getMax());
         timePicker.setMax(null);
         assertEquals(null, timePicker.getMax());
-        assertEquals(null, timePicker.getMaxTime());
-    }
-
-    @Test
-    public void setMaxTime_getMax_null() {
-        TimePicker timePicker = new TimePicker();
-        assertEquals(null, timePicker.getMaxTime());
-        timePicker.setMaxTime(null);
-        assertEquals(null, timePicker.getMax());
-        assertEquals(null, timePicker.getMaxTime());
     }
 
     @Test
@@ -285,5 +249,38 @@ public class TimePickerTest {
         Assert.assertTrue("TimePicker should support char pattern",
                 HasAllowedCharPattern.class
                         .isAssignableFrom(new TimePicker().getClass()));
+    }
+
+    @Test
+    public void implementsHasOverlayClassName() {
+        Assert.assertTrue("TimePicker should support overlay class name",
+                HasOverlayClassName.class
+                        .isAssignableFrom(new TimePicker().getClass()));
+    }
+
+    @Test
+    public void implementsHasTooltip() {
+        TimePicker timePicker = new TimePicker();
+        Assert.assertTrue(timePicker instanceof HasTooltip);
+    }
+
+    @Test
+    public void setPrefix_hasPrefix() {
+        TimePicker picker = new TimePicker();
+        TestPrefix prefix = new TestPrefix();
+
+        picker.setPrefixComponent(prefix);
+
+        Assert.assertEquals(prefix, picker.getPrefixComponent());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void setTextAsPrefix_throws() {
+        TimePicker picker = new TimePicker();
+        picker.setPrefixComponent(new Text("Prefix"));
+    }
+
+    @Tag("div")
+    private static class TestPrefix extends Component {
     }
 }

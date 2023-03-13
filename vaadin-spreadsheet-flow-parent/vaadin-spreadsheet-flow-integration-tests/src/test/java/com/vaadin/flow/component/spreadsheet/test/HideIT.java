@@ -1,17 +1,19 @@
 package com.vaadin.flow.component.spreadsheet.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import org.junit.Assert;
 
 import com.vaadin.flow.component.spreadsheet.tests.fixtures.TestFixtures;
+import com.vaadin.flow.testutil.TestPath;
+
 import org.junit.Before;
 import org.junit.Test;
 
+@TestPath("vaadin-spreadsheet")
 public class HideIT extends AbstractSpreadsheetIT {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL());
+        open();
         createNewSpreadsheet();
     }
 
@@ -46,14 +48,14 @@ public class HideIT extends AbstractSpreadsheetIT {
     }
 
     private void assertCellIsHidden(String cell) {
-        assertEquals("Cell " + cell + " should be HIDDEN.", "none",
+        Assert.assertEquals("Cell " + cell + " should be HIDDEN.", "none",
                 getCellStyle(cell, "display"));
     }
 
     private void assertCellIsVisible(String cell) {
-        assertNotEquals("Cell " + cell + " should be VISIBLE.", "none",
+        Assert.assertNotEquals("Cell " + cell + " should be VISIBLE.", "none",
                 getCellStyle(cell, "display"));
-        assertNotEquals("Cell " + cell + " should be VISIBLE.", "0px",
+        Assert.assertNotEquals("Cell " + cell + " should be VISIBLE.", "0px",
                 getCellStyle(cell, "height"));
     }
 }

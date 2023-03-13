@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -18,6 +18,7 @@ package com.vaadin.flow.component.contextmenu;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.function.SerializableRunnable;
 
 /**
@@ -48,13 +49,13 @@ import com.vaadin.flow.function.SerializableRunnable;
  */
 @SuppressWarnings("serial")
 public class ContextMenu extends ContextMenuBase<ContextMenu, MenuItem, SubMenu>
-        implements HasMenuItems {
+        implements HasMenuItems, HasOverlayClassName {
 
     /**
      * Creates an empty context menu.
      */
     public ContextMenu() {
-        getElement().setAttribute("suppress-template-warning", true);
+        super();
     }
 
     /**

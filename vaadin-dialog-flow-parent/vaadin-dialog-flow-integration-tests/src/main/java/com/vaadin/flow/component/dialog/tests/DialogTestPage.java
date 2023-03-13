@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -180,6 +180,10 @@ public class DialogTestPage extends Div {
         add(button);
     }
 
+    private int getDimension(String dimension) {
+        return (int) Math.round(Float.parseFloat(dimension.replace("px", "")));
+    }
+
     private void createResizableDraggableDialog() {
         Dialog dialog = new Dialog();
         dialog.setId("dialog-resizable-draggable");
@@ -191,13 +195,14 @@ public class DialogTestPage extends Div {
         Div message = new Div();
         message.setId("dialog-resizable-draggable-message");
 
-        dialog.addResizeListener(e -> message
-                .setText("Rezise listener called with width (" + e.getWidth()
-                        + ") and height (" + e.getHeight() + ")"));
+        dialog.addResizeListener(e -> message.setText(String.format(
+                "Resize listener called with width (%d) and height (%d)",
+                getDimension(e.getWidth()), getDimension(e.getHeight()))));
 
-        dialog.addOpenedChangeListener(e -> message
-                .setText("Initial size with width (" + dialog.getWidth()
-                        + ") and height (" + dialog.getHeight() + ")"));
+        dialog.addOpenedChangeListener(e -> message.setText(
+                String.format("Initial size with width (%d) and height (%d)",
+                        getDimension(dialog.getWidth()),
+                        getDimension(dialog.getHeight()))));
 
         NativeButton closeButton = new NativeButton(CLOSE_CAPTION,
                 e -> dialog.close());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -25,10 +25,10 @@ import java.util.List;
 public class UploadI18N implements Serializable {
     private DropFiles dropFiles;
     private AddFiles addFiles;
-    private String cancel;
     private Error error;
     private Uploading uploading;
     private Units units;
+    private File file;
 
     /**
      * Translations for dropping files.
@@ -461,6 +461,78 @@ public class UploadI18N implements Serializable {
     }
 
     /**
+     * file translations.
+     */
+    public static class File implements Serializable {
+        private String retry;
+        private String start;
+        private String remove;
+
+        /**
+         * Get aria-label of the retry file button.
+         *
+         * @return aria-label translation string
+         */
+        public String getRetry() {
+            return retry;
+        }
+
+        /**
+         * Set aria-label on the retry file button.
+         *
+         * @param retry
+         *            aria-label translation string
+         * @return translation class
+         */
+        public File setRetry(String retry) {
+            this.retry = retry;
+            return this;
+        }
+
+        /**
+         * Get aria-label of the start file button.
+         *
+         * @return aria-label translation string
+         */
+        public String getStart() {
+            return start;
+        }
+
+        /**
+         * Set aria-label on the start file button.
+         *
+         * @param start
+         *            aria-label translation string
+         * @return translation class
+         */
+        public File setStart(String start) {
+            this.start = start;
+            return this;
+        }
+
+        /**
+         * Get aria-label of the remove file button.
+         *
+         * @return aria-label translation string
+         */
+        public String getRemove() {
+            return remove;
+        }
+
+        /**
+         * Set aria-label on the remove file button.
+         *
+         * @param remove
+         *            aria-label translation string
+         * @return translation class
+         */
+        public File setRemove(String remove) {
+            this.remove = remove;
+            return this;
+        }
+    }
+
+    /**
      * Abstract translation class for single and multi mode translations.
      */
     public static abstract class SingleMulti implements Serializable {
@@ -549,31 +621,23 @@ public class UploadI18N implements Serializable {
     }
 
     /**
-     * Get cancel translation.
+     * Get file translations.
      *
-     * @return translation string
-     *
-     * @deprecated since Vaadin 22, {@link #getCancel()} is deprecated as the
-     *             `cancel` translation is not used anywhere.
+     * @return file translations
      */
-    @Deprecated
-    public String getCancel() {
-        return cancel;
+    public File getFile() {
+        return file;
     }
 
     /**
-     * Set cancel translation.
+     * Set file translations.
      *
-     * @param cancel
-     *            translation string
+     * @param file
+     *            file translations
      * @return i18n translations
-     *
-     * @deprecated since Vaadin 22, {@link #setCancel(String)} is deprecated as
-     *             the `cancel` translation is not used anywhere.
      */
-    @Deprecated
-    public UploadI18N setCancel(String cancel) {
-        this.cancel = cancel;
+    public UploadI18N setFile(File file) {
+        this.file = file;
         return this;
     }
 

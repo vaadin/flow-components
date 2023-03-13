@@ -1,17 +1,12 @@
-package com.vaadin.addon.spreadsheet.client;
-
-/*
- * #%L
- * Vaadin Spreadsheet
- * %%
- * Copyright (C) 2013 - 2022 Vaadin Ltd
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
+/**
+ * Copyright 2000-2023 Vaadin Ltd.
  *
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
  */
+package com.vaadin.addon.spreadsheet.client;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,7 +20,9 @@ import java.util.Set;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.dom.client.Node;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.TouchEvent;
 import com.google.gwt.event.logical.shared.AttachEvent;
@@ -2076,5 +2073,9 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
 
     public void setNamedRanges(List<String> namedRanges) {
         formulaBarWidget.setNamedRanges(namedRanges);
+    }
+
+    public void setHost(Element host, Node renderRoot) {
+        sheetWidget.setHost(host, renderRoot);
     }
 }

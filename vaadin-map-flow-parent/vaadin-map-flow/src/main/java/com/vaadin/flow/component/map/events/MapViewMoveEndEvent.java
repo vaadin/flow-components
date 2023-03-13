@@ -1,20 +1,12 @@
-package com.vaadin.flow.component.map.events;
-
-/*
- * #%L
- * Vaadin Map
- * %%
- * Copyright 2000-2022 Vaadin Ltd.
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
+/**
+ * Copyright 2000-2023 Vaadin Ltd.
  *
- * See the file license.html distributed with this software for more
- * information about licensing.
+ * This program is available under Vaadin Commercial License and Service Terms.
  *
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
  */
+package com.vaadin.flow.component.map.events;
 
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DomEvent;
@@ -31,8 +23,8 @@ import elemental.json.JsonArray;
 @DomEvent("map-view-moveend")
 public class MapViewMoveEndEvent extends ComponentEvent<MapBase> {
 
-    private final float rotation;
-    private final float zoom;
+    private final double rotation;
+    private final double zoom;
     private final Coordinate center;
     private final Extent extent;
 
@@ -42,11 +34,10 @@ public class MapViewMoveEndEvent extends ComponentEvent<MapBase> {
             @EventData("event.detail.center") JsonArray center,
             @EventData("event.detail.extent") JsonArray extent) {
         super(source, fromClient);
-        this.rotation = (float) rotation;
-        this.zoom = (float) zoom;
-        this.center = new Coordinate(center.getNumber(0), center.getNumber(1));
-        this.extent = new Extent(extent.getNumber(0), extent.getNumber(1),
-                extent.getNumber(2), extent.getNumber(3));
+        this.rotation = (double) rotation;
+        this.zoom = (double) zoom;
+        this.center = MapEventUtil.getCoordinate(center);
+        this.extent = MapEventUtil.getExtent(extent);
     }
 
     /**
@@ -54,7 +45,7 @@ public class MapViewMoveEndEvent extends ComponentEvent<MapBase> {
      *
      * @return updated rotation in radians
      */
-    public float getRotation() {
+    public double getRotation() {
         return rotation;
     }
 
@@ -63,7 +54,7 @@ public class MapViewMoveEndEvent extends ComponentEvent<MapBase> {
      *
      * @return updated zoom level
      */
-    public float getZoom() {
+    public double getZoom() {
         return zoom;
     }
 

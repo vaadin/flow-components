@@ -1,6 +1,6 @@
 
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -44,6 +44,7 @@ public class DatePickerViewDemoPage extends Div {
         createWithClearButton();
         createStartAndEndDatePickers();
         createLocaleChangeDatePicker();
+        createDatePickerInsideDisabledParent();
         addCard("Additional code used in the demo",
                 new Label("These methods are used in the demo."));
     }
@@ -57,7 +58,12 @@ public class DatePickerViewDemoPage extends Div {
                 event -> updateMessage(message, datePicker));
 
         datePicker.setId("simple-picker");
-        addCard("Simple date picker", datePicker, message);
+
+        NativeButton open = new NativeButton("Open");
+        open.setId("open-simple-picker");
+        open.addClickListener(event -> datePicker.open());
+
+        addCard("Simple date picker", datePicker, open, message);
     }
 
     private void createMinAndMaxDatePicker() {
@@ -110,9 +116,8 @@ public class DatePickerViewDemoPage extends Div {
         datePicker.setPlaceholder("Syntymäpäivä");
         datePicker.setLocale(new Locale("fi"));
 
-        datePicker.setI18n(new DatePicker.DatePickerI18n().setWeek("viikko")
-                .setCalendar("kalenteri").setClear("tyhjennä")
-                .setToday("tänään").setCancel("peruuta").setFirstDayOfWeek(1)
+        datePicker.setI18n(new DatePicker.DatePickerI18n().setToday("tänään")
+                .setCancel("peruuta").setFirstDayOfWeek(1)
                 .setMonthNames(Arrays.asList("tammiku", "helmikuu", "maaliskuu",
                         "huhtikuu", "toukokuu", "kesäkuu", "heinäkuu", "elokuu",
                         "syyskuu", "lokakuu", "marraskuu", "joulukuu"))
@@ -222,12 +227,31 @@ public class DatePickerViewDemoPage extends Div {
 
         datePicker.addValueChangeListener(
                 event -> updateMessage(message, datePicker));
+        DatePicker.DatePickerI18n i18n = new DatePicker.DatePickerI18n();
+        i18n.setReferenceDate(LocalDate.of(1980, 2, 2));
+        datePicker.setI18n(i18n);
         locale1.setId("Locale-US");
         locale2.setId("Locale-UK");
         locale3.setId("Locale-CHINA");
         datePicker.setId("locale-change-picker");
         addCard("Date picker with customize locales", datePicker, locale1,
                 locale2, locale3, message);
+    }
+
+    private void createDatePickerInsideDisabledParent() {
+        Div parent = new Div();
+        DatePicker datePicker = new DatePicker();
+        datePicker.setId("picker-inside-disabled-parent");
+
+        parent.add(datePicker);
+        parent.setEnabled(false);
+
+        NativeButton enableParent = new NativeButton("Enable parent");
+        enableParent.setId("enable-parent");
+        enableParent.addClickListener(event -> parent.setEnabled(true));
+
+        addCard("DatePicker inside a disabled parent div", parent,
+                enableParent);
     }
 
     /**

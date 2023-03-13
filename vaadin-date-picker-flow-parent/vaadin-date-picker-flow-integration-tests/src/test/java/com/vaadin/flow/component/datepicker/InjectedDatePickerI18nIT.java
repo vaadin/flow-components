@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -33,8 +33,7 @@ public class InjectedDatePickerI18nIT extends AbstractComponentIT {
                 .$("input").first().click();
 
         TestBenchElement cancelButton = $("vaadin-date-picker-overlay").first()
-                .$("div").id("content").$("vaadin-date-picker-overlay-content")
-                .first().$("vaadin-button").id("cancelButton");
+                .$("vaadin-button").attribute("slot", "cancel-button").first();
 
         Assert.assertEquals("peruuta", cancelButton.getText());
     }

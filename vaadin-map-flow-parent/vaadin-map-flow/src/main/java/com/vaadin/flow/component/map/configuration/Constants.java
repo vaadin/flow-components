@@ -1,20 +1,12 @@
-package com.vaadin.flow.component.map.configuration;
-
-/*
- * #%L
- * Vaadin Map
- * %%
- * Copyright 2000-2022 Vaadin Ltd.
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
+/**
+ * Copyright 2000-2023 Vaadin Ltd.
  *
- * See the file license.html distributed with this software for more
- * information about licensing.
+ * This program is available under Vaadin Commercial License and Service Terms.
  *
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
  */
+package com.vaadin.flow.component.map.configuration;
 
 /**
  * Defines constants for OpenLayers types, which are uses by the client-side
@@ -39,6 +31,7 @@ public class Constants {
     public static final String OL_STYLE_FILL = "ol/style/Fill";
     public static final String OL_STYLE_STROKE = "ol/style/Stroke";
     public static final String OL_STYLE_STYLE = "ol/style/Style";
+    public static final String OL_STYLE_TEXT = "ol/style/Text";
 
     public static final String OL_MAP = "ol/Map";
     public static final String OL_VIEW = "ol/View";

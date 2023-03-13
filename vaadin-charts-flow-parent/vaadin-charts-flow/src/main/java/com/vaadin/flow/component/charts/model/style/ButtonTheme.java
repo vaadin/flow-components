@@ -1,17 +1,12 @@
-package com.vaadin.flow.component.charts.model.style;
-
-/*-
- * #%L
- * Vaadin Charts for Flow
- * %%
- * Copyright 2000-2022 Vaadin Ltd.
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
+/**
+ * Copyright 2000-2023 Vaadin Ltd.
  *
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
  */
+package com.vaadin.flow.component.charts.model.style;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;

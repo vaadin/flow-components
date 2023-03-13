@@ -1,17 +1,12 @@
-package com.vaadin.flow.component.spreadsheet;
-
-/*
- * #%L
- * Vaadin Spreadsheet
- * %%
- * Copyright (C) 2013 - 2022 Vaadin Ltd
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
+/**
+ * Copyright 2000-2023 Vaadin Ltd.
  *
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
  */
+package com.vaadin.flow.component.spreadsheet;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -294,6 +289,10 @@ public class SpreadsheetFactory implements Serializable {
             }
         }
         final File file = new File(fileName);
+        if (file.exists()) {
+            // If the file exists beforehand, it needs to be deleted first
+            file.delete();
+        }
         FileOutputStream fos = null;
         try {
             fos = new FileOutputStream(file);
@@ -1029,6 +1028,10 @@ public class SpreadsheetFactory implements Serializable {
         // only freeze panes supported
         if (paneInformation != null && paneInformation.isFreezePane()) {
 
+            // With a large sheet, getTopRow could become negative.
+            var topRow = Math.max(0, sheet.getTopRow());
+            var leftCol = Math.max(0, sheet.getLeftCol());
+
             /*
              * In POI, HorizontalSplit means rows and VerticalSplit means
              * columns.
@@ -1036,22 +1039,20 @@ public class SpreadsheetFactory implements Serializable {
              * In Spreadsheet the meaning is the opposite.
              */
             spreadsheet.setHorizontalSplitPosition(
-                    paneInformation.getVerticalSplitPosition()
-                            + sheet.getLeftCol());
+                    paneInformation.getVerticalSplitPosition() + leftCol);
 
             spreadsheet.setVerticalSplitPosition(
-                    paneInformation.getHorizontalSplitPosition()
-                            + sheet.getTopRow());
+                    paneInformation.getHorizontalSplitPosition() + topRow);
 
             /*
              * If the view was scrolled down / right when panes were frozen, the
              * invisible frozen rows/columns are effectively hidden in Excel. We
              * mimic this behavior here.
              */
-            for (int col = 0; col < sheet.getLeftCol(); col++) {
+            for (int col = 0; col < leftCol; col++) {
                 spreadsheet.setColumnHidden(col, true);
             }
-            for (int row = 0; row < sheet.getTopRow(); row++) {
+            for (int row = 0; row < topRow; row++) {
                 spreadsheet.setRowHidden(row, true);
             }
         } else {

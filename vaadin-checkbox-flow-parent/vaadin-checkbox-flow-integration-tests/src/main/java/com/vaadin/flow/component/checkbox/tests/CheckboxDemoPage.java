@@ -23,8 +23,6 @@ public class CheckboxDemoPage extends Div {
         addIndeterminateCheckbox();
         addValueChangeCheckbox();
         addAccessibleCheckbox();
-        addCheckboxHtmlLabel();
-        addCheckboxLazyHtmlLabel();
         addCheckboxImgComponentLabel();
     }
 
@@ -86,36 +84,6 @@ public class CheckboxDemoPage extends Div {
         accessibleCheckbox.setAriaLabel("Click me");
         addCard("Checkbox with Custom Accessible Label", accessibleCheckbox);
         accessibleCheckbox.setId("accessible-checkbox");
-    }
-
-    private void addCheckboxHtmlLabel() {
-        Checkbox checkbox = new Checkbox();
-        checkbox.setLabelAsHtml(
-                "Accept the <a href='https://vaadin.com/privacy-policy'>privacy policy</a>");
-        checkbox.setId("html-label-checkbox");
-
-        NativeButton button = new NativeButton("Change label", event -> {
-            checkbox.setLabelAsHtml(
-                    "Accept the <a href='https://vaadin.com/community-terms'>community terms</a>");
-        });
-        button.setId("change-html-label");
-
-        addCard("Checkbox with the label that contains HTML markup", checkbox,
-                button);
-    }
-
-    private void addCheckboxLazyHtmlLabel() {
-        Checkbox checkbox = new Checkbox();
-        checkbox.setId("lazy-html-label-checkbox");
-
-        NativeButton button = new NativeButton("Set label", event -> {
-            checkbox.setLabelAsHtml(
-                    "Accept the <a href='https://vaadin.com/privacy-policy'>privacy policy</a>");
-        });
-        button.setId("set-html-label");
-
-        addCard("Checkbox with the lazy label that contains HTML markup",
-                checkbox, button);
     }
 
     private void addCheckboxImgComponentLabel() {

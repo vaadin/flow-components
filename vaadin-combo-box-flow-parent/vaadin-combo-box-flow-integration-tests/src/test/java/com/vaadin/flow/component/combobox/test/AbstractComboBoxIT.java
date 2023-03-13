@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -105,8 +105,7 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
     }
 
     protected void assertComponentRendered(String componentHtml) {
-        assertRendered("<flow-component-renderer appid=\"ROOT\">"
-                + componentHtml + "</flow-component-renderer>");
+        assertRendered(componentHtml);
     }
 
     // Gets the innerHTML of all the actually rendered item elements.
@@ -123,7 +122,8 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
     }
 
     protected String getItemLabel(TestBenchElement itemElement) {
-        return itemElement.getPropertyString("innerHTML");
+        String innerHtml = itemElement.getPropertyString("innerHTML");
+        return stripComments(innerHtml);
     }
 
     protected List<TestBenchElement> getItemElements() {
@@ -136,6 +136,9 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
         comboBox.openPopup();
         executeScript("arguments[0]._scroller.scrollIntoView(arguments[1])",
                 comboBox, index);
+        // Wait for the scroller to request missing pages.
+        getCommandExecutor().getDriver()
+                .executeAsyncScript("requestAnimationFrame(arguments[0])");
     }
 
     protected void waitUntilTextInContent(String text) {
@@ -209,5 +212,16 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
 
             return condition.apply(comboItems);
         });
+    }
+
+    /**
+     * Strips comments from the given HTML string.
+     *
+     * @param html
+     *            the html String
+     * @return the stripped html
+     */
+    private static String stripComments(String html) {
+        return html.replaceAll("<!--.*?-->", "");
     }
 }

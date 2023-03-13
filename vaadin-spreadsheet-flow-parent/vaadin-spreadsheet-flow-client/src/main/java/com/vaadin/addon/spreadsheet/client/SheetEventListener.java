@@ -1,17 +1,12 @@
-package com.vaadin.addon.spreadsheet.client;
-
-/*
- * #%L
- * Vaadin Spreadsheet
- * %%
- * Copyright (C) 2013 - 2022 Vaadin Ltd
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
+/**
+ * Copyright 2000-2023 Vaadin Ltd.
  *
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
  */
+package com.vaadin.addon.spreadsheet.client;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
@@ -52,7 +47,7 @@ public class SheetEventListener implements EventListener {
 
     @Override
     public void onBrowserEvent(Event event) {
-        if (((Element) event.getEventTarget().cast()).getAttribute("class")
+        if ((SheetWidget.getEventTarget(event)).getAttribute("class")
                 .contains(PopupButtonWidget.BUTTON_CLASSNAME)) {
             widget.setFocused(true);
             return;
@@ -113,8 +108,13 @@ public class SheetEventListener implements EventListener {
     }
 
     private void onSheetDoubleClick(Event event) {
-        Element target = event.getEventTarget().cast();
+        Element target = SheetWidget.getEventTarget(event);
         String targetClassName = target.getAttribute("class");
+
+        if (target.getParentElement() == null) {
+            // The target's parent element may be a shadow root
+            return;
+        }
 
         if (target.getParentElement().getAttribute("class").contains("sheet")
                 && targetClassName != null

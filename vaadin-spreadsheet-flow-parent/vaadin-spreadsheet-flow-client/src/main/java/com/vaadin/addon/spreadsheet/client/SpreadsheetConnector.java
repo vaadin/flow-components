@@ -1,17 +1,12 @@
-package com.vaadin.addon.spreadsheet.client;
-
-/*
- * #%L
- * Vaadin Spreadsheet
- * %%
- * Copyright (C) 2013 - 2022 Vaadin Ltd
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
+/**
+ * Copyright 2000-2023 Vaadin Ltd.
  *
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
  */
+package com.vaadin.addon.spreadsheet.client;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,16 +15,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.dom.client.Node;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetWidget.SheetContextMenuHandler;
@@ -37,6 +33,7 @@ import com.vaadin.addon.spreadsheet.shared.SpreadsheetState;
 import com.vaadin.client.ApplicationConnection;
 import com.vaadin.client.ComponentConnector;
 import com.vaadin.client.ConnectorHierarchyChangeEvent;
+import com.vaadin.client.WidgetUtil;
 import com.vaadin.client.communication.StateChangeEvent;
 import com.vaadin.client.ui.AbstractHasComponentsConnector;
 import com.vaadin.client.ui.Action;
@@ -54,9 +51,6 @@ import static com.vaadin.addon.spreadsheet.client.OverlayInfo.COMPONENT;
 @SuppressWarnings("serial")
 public class SpreadsheetConnector extends AbstractHasComponentsConnector
         implements PostLayoutListener {
-
-    final static Logger consoleLog = Logger
-            .getLogger("spreadsheet SpreadsheetConnector");
 
     SpreadsheetClientRpc clientRPC = new SpreadsheetClientRpc() {
 
@@ -84,18 +78,17 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
             int left;
             int top;
             if (latestCellContextMenuEvent != null) {
-                left = SpreadsheetWidget
+                left = WidgetUtil
                         .getTouchOrMouseClientX(latestCellContextMenuEvent);
-                top = SpreadsheetWidget
+                top = WidgetUtil
                         .getTouchOrMouseClientY(latestCellContextMenuEvent);
             } else {
-                left = SpreadsheetWidget
+                left = WidgetUtil
                         .getTouchOrMouseClientX(latestHeaderContextMenuEvent);
-                top = SpreadsheetWidget
+                top = WidgetUtil
                         .getTouchOrMouseClientY(latestHeaderContextMenuEvent);
             }
-            top += Window.getScrollTop();
-            left += Window.getScrollLeft();
+
             getConnection().getContextMenu().showAt(new ActionOwner() {
 
                 @Override
@@ -191,6 +184,8 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
     private HandlerRegistration contextMenuHandler;
     private SpreadsheetServerRpcImpl serverRPC;
 
+    private Element host;
+
     // spreadsheet: we need the server side proxy
     public <T extends ServerRpc> T getProtectedRpcProxy(Class<T> rpcInterface) {
         return getRpcProxy(rpcInterface);
@@ -282,7 +277,6 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
 
     @Override
     protected Widget createWidget() {
-        consoleLog.info("createWidget()");
         return GWT.create(SpreadsheetWidget.class);
     }
 
@@ -309,7 +303,6 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
         SpreadsheetState state = getState();
         // in case the component client side is just created, but server side
         // has been existing (like when component has been invisible
-        consoleLog.fine("onStateChanged reload = " + state.reload);
         if (state.reload || stateChangeEvent.isInitialStateChange()) {
             state.reload = false;
             loadInitialStateDataToWidget(stateChangeEvent);
@@ -352,7 +345,6 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
 
     private void loadInitialStateDataToWidget(
             StateChangeEvent stateChangeEvent) {
-        // debugger();
         SpreadsheetState state = getState();
         SpreadsheetWidget widget = getWidget();
         setupCustomEditors();
@@ -373,15 +365,13 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
             HashMap<String, Widget> customWidgetMap = new HashMap<String, Widget>();
             if (cellKeysToComponentIdMap != null
                     && !cellKeysToComponentIdMap.isEmpty()) {
-                List<ComponentConnector> childComponents = getChildComponents();
-                for (ComponentConnector cc : childComponents) {
-                    String connectorId = cc.getConnectorId();
-                    if (cellKeysToComponentIdMap.containsKey(connectorId)) {
-                        customWidgetMap.put(
-                                cellKeysToComponentIdMap.get(connectorId),
-                                cc.getWidget());
-                    }
-                }
+                cellKeysToComponentIdMap.forEach((nodeId, key) -> {
+                    var component = SheetJsniUtil.getVirtualChild(nodeId,
+                            host.getPropertyString("appId"));
+                    var slot = new Slot("custom-component-" + nodeId, component,
+                            host);
+                    customWidgetMap.put(key, slot);
+                });
             }
             widget.showCellCustomComponents(customWidgetMap);
         }
@@ -436,11 +426,10 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
                     overlayInfo);
             break;
         case COMPONENT:
-            for (ComponentConnector c : getChildComponents()) {
-                if (c.getConnectorId().equals(id)) {
-                    getWidget().addOverlay(id, c.getWidget(), overlayInfo);
-                }
-            }
+            var element = SheetJsniUtil.getVirtualChild(id,
+                    host.getPropertyString("appId"));
+            var slot = new Slot("overlay-component-" + id, element, host);
+            getWidget().addOverlay(id, slot, overlayInfo);
             break;
         }
     }
@@ -475,13 +464,10 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
                     public Widget getCustomEditor(String key) {
                         String editorId = getState().cellKeysToEditorIdMap
                                 .get(key);
-                        List<ComponentConnector> childComponents = getChildComponents();
-                        for (ComponentConnector cc : childComponents) {
-                            if (editorId.equals(cc.getConnectorId())) {
-                                return cc.getWidget();
-                            }
-                        }
-                        return null;
+                        var editor = SheetJsniUtil.getVirtualChild(editorId,
+                                host.getPropertyString("appId"));
+                        return new Slot("custom-editor-" + editorId, editor,
+                                host);
                     }
 
                 };
@@ -550,5 +536,10 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
 
     public interface CommsTrigger {
         void sendUpdates();
+    }
+
+    public void setHost(Element host, Node renderRoot) {
+        this.host = host;
+        getWidget().setHost(host, renderRoot);
     }
 }

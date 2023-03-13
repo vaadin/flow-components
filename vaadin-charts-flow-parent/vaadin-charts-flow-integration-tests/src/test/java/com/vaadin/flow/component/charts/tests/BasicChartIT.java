@@ -1,14 +1,10 @@
-/*
- * #%L
- * Vaadin Charts
- * %%
- * Copyright 2000-2022 Vaadin Ltd.
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
+/**
+ * Copyright 2000-2023 Vaadin Ltd.
  *
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
  */
 package com.vaadin.flow.component.charts.tests;
 
@@ -19,6 +15,8 @@ import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.charts.examples.AbstractChartExample;
 import com.vaadin.flow.component.charts.examples.area.AreaChart;
+
+import java.util.List;
 
 import static org.junit.Assert.assertTrue;
 
@@ -38,7 +36,6 @@ public class BasicChartIT extends AbstractTBTest {
     }
 
     @Test
-
     public void Chart_TitleCanBeChanged() {
         final TestBenchElement chart = getChartElement();
         final WebElement title = chart.$("*")
@@ -62,4 +59,15 @@ public class BasicChartIT extends AbstractTBTest {
         assertTrue(series.getText().contains("Tokyo"));
     }
 
+    @Test
+    public void Chart_LabelDisplayed() {
+        final TestBenchElement chart = getChartElement();
+        waitUntil(driver -> {
+            List<TestBenchElement> labels = chart.$("*")
+                    .attributeContains("class", "highcharts-label").all();
+            return !labels.isEmpty()
+                    && labels.stream().map(TestBenchElement::getText)
+                            .anyMatch("Sample label"::equals);
+        });
+    }
 }

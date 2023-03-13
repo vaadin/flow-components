@@ -4,16 +4,15 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-accordion-flow-parent</artifactId>
-        <version>23.2-SNAPSHOT</version>
+        <version>24.1-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-accordion-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Accordion</name>
     <dependencies>
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <scope>provided</scope>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -25,6 +25,7 @@ import org.junit.Test;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageInputI18n;
+import com.vaadin.flow.component.shared.HasTooltip;
 
 public class MessageInputTest {
 
@@ -67,5 +68,10 @@ public class MessageInputTest {
                 messageInput, false, "foo");
         ComponentUtil.fireEvent(messageInput, event);
         Assert.assertSame(event, eventRef.get());
+    }
+
+    @Test
+    public void implementsHasTooltip() {
+        Assert.assertTrue(messageInput instanceof HasTooltip);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -24,6 +24,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.router.Route;
 
 /**
@@ -92,16 +93,16 @@ public class GridUpdateDataProviderPage extends Div {
         Grid<String> grid = new Grid<>();
         grid.setId("basic-grid");
 
-        DataProvider<String, ?> orig = DataProvider
+        DataProvider<String, Void> orig = DataProvider
                 .fromCallbacks(query -> IntStream
                         .range(query.getOffset(),
                                 query.getOffset() + query.getLimit())
                         .mapToObj(Integer::toString), query -> 10000);
 
-        DataProvider<String, ?> updated = DataProvider.ofItems("foo", "foob",
+        ListDataProvider<String> updated = DataProvider.ofItems("foo", "foob",
                 "fooba", "foobar");
 
-        grid.setDataProvider(orig);
+        grid.setItems(orig);
         grid.addColumn(i -> i).setHeader("text");
         grid.addColumn(i -> String.valueOf(i.length())).setHeader("length");
 
@@ -130,11 +131,11 @@ public class GridUpdateDataProviderPage extends Div {
     }
 
     private <T> void swapDataProviders(Grid<T> grid,
-            DataProvider<T, ?> provider1, DataProvider<T, ?> provider2) {
+            DataProvider<T, Void> provider1, ListDataProvider<T> provider2) {
         if (grid.getDataProvider().equals(provider1)) {
-            grid.setDataProvider(provider2);
+            grid.setItems(provider2);
         } else {
-            grid.setDataProvider(provider1);
+            grid.setItems(provider1);
         }
     }
 

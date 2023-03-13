@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -34,14 +33,14 @@ import com.vaadin.flow.testutil.TestPath;
 public class GridItemRefreshPageIT extends AbstractComponentIT {
 
     @Test
-    public void updateAndRefreshItemsOnTheServerUsingDataProvider_withTemplateRenderer() {
+    public void updateAndRefreshItemsOnTheServerUsingDataProvider_withLitRenderer() {
         updateAndRefreshItemsOnTheServer("template-grid",
                 "template-refresh-first", "template-refresh-multiple",
                 "template-refresh-all");
     }
 
     @Test
-    public void updateAndRefreshItemsOnTheServerUsingDataCommunicator_withTemplateRenderer() {
+    public void updateAndRefreshItemsOnTheServerUsingDataCommunicator_withLitRenderer() {
         updateAndRefreshItemsOnTheServer("template-grid",
                 "template-refresh-first-communicator",
                 "template-refresh-multiple-communicator",
@@ -108,7 +107,7 @@ public class GridItemRefreshPageIT extends AbstractComponentIT {
             String refreshFirstItemButtonId,
             String refreshMultipleItemsButtonId, String refreshAllButtonId) {
         open();
-        WebElement grid = findElement(By.id(gridId));
+        GridElement grid = $(GridElement.class).id(gridId);
         scrollToElement(grid);
 
         WebElement refreshFirstItem = findElement(
@@ -137,11 +136,11 @@ public class GridItemRefreshPageIT extends AbstractComponentIT {
         }
         waitUntilUpdated(grid, 10, 15);
 
-        getCommandExecutor().executeScript("arguments[0].scrollToIndex(1000);",
-                grid);
-        // rows at the bottom (outside of the initial cache) should also be
-        // updated
-        waitUntilUpdated(grid, 990, 999);
+        // Scroll down
+        grid.scrollToRow(500);
+
+        // rows outside of the initial cache should also be updated
+        waitUntilUpdated(grid, 500, 505);
     }
 
     private void waitUntilUpdated(WebElement grid, int startIndex,
@@ -151,8 +150,8 @@ public class GridItemRefreshPageIT extends AbstractComponentIT {
                 .collect(Collectors.toSet());
         waitUntil(driver -> grid
                 .findElements(By.tagName("vaadin-grid-cell-content")).stream()
-                .map(this::getContentIfComponentRenderered)
-                .collect(Collectors.toSet()).containsAll(expected));
+                .map(WebElement::getText).collect(Collectors.toSet())
+                .containsAll(expected));
     }
 
     private void assertNotUpdated(WebElement grid, int startIndex,
@@ -162,20 +161,7 @@ public class GridItemRefreshPageIT extends AbstractComponentIT {
                 .collect(Collectors.toSet());
         Assert.assertFalse(
                 grid.findElements(By.tagName("vaadin-grid-cell-content"))
-                        .stream().map(this::getContentIfComponentRenderered)
+                        .stream().map(WebElement::getText)
                         .collect(Collectors.toSet()).removeAll(expected));
     }
-
-    private String getContentIfComponentRenderered(WebElement cell) {
-        List<WebElement> renderer = cell
-                .findElements(By.tagName("flow-component-renderer"));
-        if (renderer.isEmpty()) {
-            return cell.getAttribute("innerHTML");
-        }
-        return getCommandExecutor().executeScript(
-                "var lbl = arguments[0].querySelector('label'); " + "if (lbl) {"
-                        + "return lbl.innerHTML;" + "} else { return ''};",
-                renderer.get(0)).toString();
-    }
-
 }

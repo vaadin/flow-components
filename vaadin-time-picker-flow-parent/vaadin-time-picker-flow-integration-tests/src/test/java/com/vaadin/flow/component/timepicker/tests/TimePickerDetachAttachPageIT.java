@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -22,7 +22,6 @@ import com.vaadin.flow.testutil.TestPath;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.Keys;
 
 /**
  * Integration tests for attaching / detaching time picker.
@@ -43,17 +42,6 @@ public class TimePickerDetachAttachPageIT extends AbstractComponentIT {
     }
 
     @Test
-    public void clientSideValidationIsOverriddenOnAttach() {
-        assertTimePickerIsValidOnTab();
-
-        // Detaching and attaching time picker
-        toggleAttach.click();
-        toggleAttach.click();
-
-        assertTimePickerIsValidOnTab();
-    }
-
-    @Test
     public void formatShouldRespectLocaleAfterDetachAndReattach() {
         setValue.click();
         setLocale.click();
@@ -65,13 +53,5 @@ public class TimePickerDetachAttachPageIT extends AbstractComponentIT {
         toggleAttach.click();
         timePicker = $(TimePickerElement.class).id("time-picker");
         Assert.assertEquals("2:00 a.m.", timePicker.getSelectedText());
-    }
-
-    private void assertTimePickerIsValidOnTab() {
-        TimePickerElement timePicker = $(TimePickerElement.class)
-                .id("time-picker");
-        timePicker.sendKeys(Keys.TAB);
-        Assert.assertFalse("Time picker should be valid after Tab",
-                Boolean.parseBoolean(timePicker.getAttribute("invalid")));
     }
 }

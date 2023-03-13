@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -22,6 +22,7 @@ import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.NodeOwner;
@@ -62,13 +63,12 @@ import java.util.stream.Stream;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-avatar-group")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha5")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/avatar-group/src/vaadin-avatar-group.js")
-@NpmPackage(value = "@vaadin/avatar-group", version = "23.2.0-alpha5")
-@NpmPackage(value = "@vaadin/vaadin-avatar", version = "23.2.0-alpha5")
-public class AvatarGroup extends Component
-        implements HasStyle, HasSize, HasThemeVariant<AvatarGroupVariant> {
+@NpmPackage(value = "@vaadin/avatar-group", version = "24.1.0-alpha1")
+public class AvatarGroup extends Component implements HasOverlayClassName,
+        HasStyle, HasSize, HasThemeVariant<AvatarGroupVariant> {
 
     /**
      * Item to be set as an avatar for the avatar group.
@@ -657,19 +657,5 @@ public class AvatarGroup extends Component
         }
 
         return null;
-    }
-
-    // Override is only required to keep binary compatibility with other 23.x
-    // minor versions, can be removed in a future major
-    @Override
-    public void addThemeVariants(AvatarGroupVariant... variants) {
-        HasThemeVariant.super.addThemeVariants(variants);
-    }
-
-    // Override is only required to keep binary compatibility with other 23.x
-    // minor versions, can be removed in a future major
-    @Override
-    public void removeThemeVariants(AvatarGroupVariant... variants) {
-        HasThemeVariant.super.removeThemeVariants(variants);
     }
 }

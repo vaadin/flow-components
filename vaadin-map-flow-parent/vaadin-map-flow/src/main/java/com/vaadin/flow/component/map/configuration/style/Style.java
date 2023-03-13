@@ -1,21 +1,14 @@
+/**
+ * Copyright 2000-2023 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
+ */
 package com.vaadin.flow.component.map.configuration.style;
 
-/*
- * #%L
- * Vaadin Map
- * %%
- * Copyright 2000-2022 Vaadin Ltd.
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
- *
- * See the file license.html distributed with this software for more
- * information about licensing.
- *
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
- */
-
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
@@ -31,6 +24,7 @@ public class Style extends AbstractConfigurationObject {
     private ImageStyle image;
     private Fill fill;
     private Stroke stroke;
+    private TextStyle textStyle;
 
     @Override
     public String getType() {
@@ -71,5 +65,33 @@ public class Style extends AbstractConfigurationObject {
         removeChild(this.stroke);
         this.stroke = stroke;
         addChild(stroke);
+    }
+
+    /**
+     * The text style used for rendering texts, such as feature labels. This is
+     * {@code null} by default, which means that a default text style will be
+     * used instead.
+     *
+     * @return the text style, or {@code null} if no text style is defined
+     */
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    @JsonIdentityReference(alwaysAsId = true)
+    @JsonGetter("text")
+    public TextStyle getTextStyle() {
+        return textStyle;
+    }
+
+    /**
+     * Sets the text style to use for rendering texts, such as feature labels.
+     * Set this to {@code null} to clear the text style and use a default text
+     * style instead.
+     *
+     * @param textStyle
+     *            the new text style, or {@code null}
+     */
+    public void setTextStyle(TextStyle textStyle) {
+        removeChild(this.textStyle);
+        this.textStyle = textStyle;
+        addNullableChild(textStyle);
     }
 }

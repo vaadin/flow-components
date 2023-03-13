@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import com.vaadin.flow.component.spreadsheet.ColorConverterUtil;
+import com.vaadin.flow.testutil.TestPath;
 
 import org.apache.poi.xssf.model.StylesTable;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -16,6 +17,7 @@ import org.junit.Test;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTColors;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTRgbColor;
 
+@TestPath("vaadin-spreadsheet")
 public class XSSFColorConverterIT extends AbstractSpreadsheetIT {
 
     private static final String BACKGROUND_COLOR = "background-color";
@@ -24,7 +26,7 @@ public class XSSFColorConverterIT extends AbstractSpreadsheetIT {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL());
+        open();
         createNewSpreadsheet();
     }
 

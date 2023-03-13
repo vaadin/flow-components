@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -22,8 +22,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.AbstractRow.AbstractCell;
+import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.HeaderRow.HeaderCell;
 
 /**
@@ -47,14 +47,25 @@ public class HeaderRow extends AbstractRow<HeaderCell> {
          */
         HeaderCell(AbstractColumn<?> column) {
             super(column);
-            if (column.getHeaderRenderer() == null) {
+            if (column.getHeaderText() == null
+                    && column.getHeaderComponent() == null) {
                 column.setHeaderText("");
             }
         }
 
         @Override
+        public String getText() {
+            return getColumn().getHeaderText();
+        }
+
+        @Override
         public void setText(String text) {
             getColumn().setHeaderText(text);
+        }
+
+        @Override
+        public Component getComponent() {
+            return getColumn().getHeaderComponent();
         }
 
         @Override

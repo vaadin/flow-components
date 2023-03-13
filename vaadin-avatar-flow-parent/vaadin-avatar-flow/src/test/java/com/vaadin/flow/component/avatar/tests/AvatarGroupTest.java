@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -20,6 +20,7 @@ import com.vaadin.flow.component.avatar.AvatarGroup;
 import com.vaadin.flow.component.avatar.AvatarGroup.AvatarGroupItem;
 import com.vaadin.flow.component.avatar.AvatarGroupVariant;
 import com.vaadin.flow.component.avatar.AvatarVariant;
+import com.vaadin.flow.component.shared.HasOverlayClassName;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -157,4 +158,10 @@ public class AvatarGroupTest {
         Assert.assertEquals(i18n, avatarGroup.getI18n());
     }
 
+    @Test
+    public void implementsHasOverlayClassName() {
+        Assert.assertTrue("AvatarGroup should support overlay class name",
+                HasOverlayClassName.class
+                        .isAssignableFrom(new AvatarGroup().getClass()));
+    }
 }

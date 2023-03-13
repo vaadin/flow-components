@@ -20,7 +20,7 @@ getLatest() {
 }
 
 getPlatformVersion() {
-  [ "$1" = vaadin-iron-list ] && name="iron-list" || name=$1
+  name=$1
 
   echo "$versions" | jq -r ".core, .vaadin | .[\"$name\"]| .javaVersion" | grep -v null
 }
@@ -50,18 +50,18 @@ pomVersion=`cat pom.xml | grep '<version>' | head -1 | cut -d '>' -f2 | cut -d '
 versionBase=`getBaseVersion $version`
 pomBase=`getBaseVersion $pomVersion`
 
-### Get the master branch version for components
-masterPom=`curl -s "https://raw.githubusercontent.com/vaadin/flow-components/master/pom.xml"`
-masterMajorMinor=`echo "$masterPom" | grep '<version>' | cut -d '>' -f2 |cut -d '<' -f1 | grep "^$base" | head -1 | cut -d '-' -f1`
+### Get the main branch version for components
+mainPom=`curl -s "https://raw.githubusercontent.com/vaadin/flow-components/main/pom.xml"`
+mainMajorMinor=`echo "$mainPom" | grep '<version>' | cut -d '>' -f2 |cut -d '<' -f1 | grep "^$base" | head -1 | cut -d '-' -f1`
 
 ### Load versions file for this platform release
 branch=$versionBase
-[ $branch = $masterMajorMinor ] && branch=master
+[ $branch = $mainMajorMinor ] && branch=main
 versions=`curl -s "https://raw.githubusercontent.com/vaadin/platform/$branch/versions.json"`
-[ $? != 0 ] && branch=master && versions=`curl -s "https://raw.githubusercontent.com/vaadin/platform/$branch/versions.json"`
+[ $? != 0 ] && branch=main && versions=`curl -s "https://raw.githubusercontent.com/vaadin/platform/$branch/versions.json"`
 
 ### Check that current branch is valid for the version to release
-[ $branch != master -a "$versionBase" != "$pomBase" ] && echo "Incorrect pomVersion=$pomVersion for version=$version" && exit 1
+[ $branch != main -a "$versionBase" != "$pomBase" ] && echo "Incorrect pomVersion=$pomVersion for version=$version" && exit 1
 
 ### Compute flow version
 flow=`getPlatformVersion flow`
@@ -73,7 +73,7 @@ mvn -B -q versions:set -DnewVersion=$version || exit 1
 setPomVersion flow $flow || exit 1
 
 ## Compute modules to build and deploy
-### collect the component modules from the root pom, remove the shared parent from the list, as it will be added separately (line 109) 
+### collect the component modules from the root pom, remove the shared parent from the list, as it will be added separately (line 109)
 modules=`grep '<module>' pom.xml | grep parent | grep -v shared-parent | cut -d '>' -f2 | cut -d '<' -f1 | perl -pe 's,-flow-parent,,g'`
 
 if [ "$versionBase" = 14.4 -o "$versionBase" = 17.0 ]

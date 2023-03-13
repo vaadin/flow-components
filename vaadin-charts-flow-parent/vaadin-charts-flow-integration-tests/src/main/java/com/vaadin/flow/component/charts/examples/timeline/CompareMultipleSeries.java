@@ -15,7 +15,7 @@ import com.vaadin.flow.component.charts.model.Tooltip;
 import com.vaadin.flow.component.charts.model.YAxis;
 import com.vaadin.flow.component.dependency.CssImport;
 
-@CssImport(value = "./styles/CompareMultipleSeries.css", themeFor = "vaadin-chart", include = "vaadin-chart-default-theme")
+@CssImport(value = "./styles/CompareMultipleSeries.css", themeFor = "vaadin-chart")
 public class CompareMultipleSeries extends AbstractChartExample {
 
     @Override

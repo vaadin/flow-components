@@ -58,7 +58,6 @@ public class CheckboxGroupDemoPage extends Div {
 
     public CheckboxGroupDemoPage() {
         addBasicFeatures();
-        addComponentWithLabelAndErrorMessage();
         addItemLabelGenerator();
         addDisabled();
         addDisabledItems();
@@ -81,19 +80,6 @@ public class CheckboxGroupDemoPage extends Div {
         message.setId("checkbox-group-value");
 
         addCard("Basic checkbox group", group, message);
-    }
-
-    private void addComponentWithLabelAndErrorMessage() {
-        CheckboxGroup<String> group = new CheckboxGroup<>();
-        group.setItems("foo", "bar", "baz");
-        group.setLabel("Group label");
-        group.setErrorMessage("Field has been set to invalid from server side");
-        NativeButton button = new NativeButton("Switch validity state",
-                event -> group.setInvalid(!group.isInvalid()));
-
-        group.setId("group-with-label-and-error-message");
-        button.setId("group-with-label-button");
-        addCard("Group with label and error message", group, button);
     }
 
     private void addItemLabelGenerator() {

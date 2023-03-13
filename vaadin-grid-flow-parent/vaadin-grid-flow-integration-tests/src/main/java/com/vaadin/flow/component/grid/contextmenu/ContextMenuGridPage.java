@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.grid.contextmenu;
 
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.grid.Grid;
@@ -49,7 +50,8 @@ public class ContextMenuGridPage extends Div {
         grid.addColumn(Person::getFirstName).setHeader("Name").setId("Name-Id");
         grid.addColumn(Person::getAge).setHeader("Born").setId("Born-Id");
         grid.setItems(IntStream.range(0, 77)
-                .mapToObj(i -> new Person("Person " + i, 1900 + i)));
+                .mapToObj(i -> new Person("Person " + i, 1900 + i))
+                .collect(Collectors.toList()));
 
         GridContextMenu<Person> contextMenu = grid.addContextMenu();
         addItems(contextMenu);
@@ -87,8 +89,8 @@ public class ContextMenuGridPage extends Div {
         GridInATemplate template = new GridInATemplate();
         Grid<String> gridInATemplate = template.getGrid();
         gridInATemplate.addColumn(s -> s).setHeader("Item");
-        gridInATemplate
-                .setItems(IntStream.range(0, 26).mapToObj(i -> "Item " + i));
+        gridInATemplate.setItems(IntStream.range(0, 26)
+                .mapToObj(i -> "Item " + i).collect(Collectors.toList()));
 
         GridContextMenu<String> contextMenu = gridInATemplate.addContextMenu();
         contextMenu.addItem("Show name of context menu target item",

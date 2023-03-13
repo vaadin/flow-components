@@ -4,7 +4,7 @@
     <parent>
         <artifactId>vaadin-time-picker-flow-parent</artifactId>
         <groupId>com.vaadin</groupId>
-        <version>23.2-SNAPSHOT</version>
+        <version>24.1-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-time-picker-testbench</artifactId>
     <packaging>jar</packaging>
@@ -12,8 +12,7 @@
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-testbench-core</artifactId>
-            <version>${testbench.version}</version>
+            <artifactId>vaadin-testbench-shared</artifactId>
             <scope>provided</scope>
         </dependency>
     </dependencies>

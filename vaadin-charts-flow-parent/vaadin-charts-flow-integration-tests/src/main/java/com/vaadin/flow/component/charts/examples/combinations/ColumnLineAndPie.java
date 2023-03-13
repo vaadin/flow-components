@@ -2,19 +2,18 @@ package com.vaadin.flow.component.charts.examples.combinations;
 
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.examples.AbstractChartExample;
+import com.vaadin.flow.component.charts.model.AnnotationItemLabel;
+import com.vaadin.flow.component.charts.model.AnnotationItemLabelPoint;
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
-import com.vaadin.flow.component.charts.model.HTMLLabelItem;
-import com.vaadin.flow.component.charts.model.HTMLLabels;
 import com.vaadin.flow.component.charts.model.PlotOptionsColumn;
 import com.vaadin.flow.component.charts.model.PlotOptionsPie;
 import com.vaadin.flow.component.charts.model.PlotOptionsSpline;
 import com.vaadin.flow.component.charts.model.XAxis;
-import com.vaadin.flow.component.charts.model.style.Style;
 import com.vaadin.flow.component.dependency.CssImport;
 
-@CssImport(value = "./styles/ColumnLineAndPie.css", themeFor = "vaadin-chart", include = "vaadin-chart-default-theme")
+@CssImport(value = "./styles/ColumnLineAndPie.css", themeFor = "vaadin-chart")
 public class ColumnLineAndPie extends AbstractChartExample {
 
     @Override
@@ -32,11 +31,11 @@ public class ColumnLineAndPie extends AbstractChartExample {
                 "Plums" });
         conf.addxAxis(x);
 
-        Style labelStyle = new Style();
-        labelStyle.setTop("8px");
-        labelStyle.setLeft("40px");
-        conf.setLabels(new HTMLLabels(labelStyle,
-                new HTMLLabelItem("Total fruit consumption")));
+        AnnotationItemLabel label = new AnnotationItemLabel(
+                "Total fruit consumption");
+        label.setPoint(new AnnotationItemLabelPoint(100, 100));
+        label.setUseHTML(true);
+        conf.addLabel(label);
 
         DataSeries series = new DataSeries();
         PlotOptionsColumn plotOptions = new PlotOptionsColumn();

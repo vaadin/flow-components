@@ -1,28 +1,18 @@
+/**
+ * Copyright 2000-2023 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
+ */
 package com.vaadin.flow.component.map;
 
-/*
- * #%L
- * Vaadin Map
- * %%
- * Copyright 2000-2022 Vaadin Ltd.
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
- *
- * See the file license.html distributed with this software for more
- * information about licensing.
- *
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
- */
-
-import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.HasTheme;
-import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.map.configuration.AbstractConfigurationObject;
 import com.vaadin.flow.component.map.configuration.Configuration;
 import com.vaadin.flow.component.map.configuration.Coordinate;
@@ -32,8 +22,10 @@ import com.vaadin.flow.component.map.configuration.View;
 import com.vaadin.flow.component.map.configuration.layer.VectorLayer;
 import com.vaadin.flow.component.map.events.MapFeatureClickEvent;
 import com.vaadin.flow.component.map.events.MapClickEvent;
+import com.vaadin.flow.component.map.events.MapFeatureDropEvent;
 import com.vaadin.flow.component.map.events.MapViewMoveEndEvent;
 import com.vaadin.flow.component.map.serialization.MapSerializer;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
 import elemental.json.JsonValue;
@@ -42,8 +34,6 @@ import java.beans.PropertyChangeEvent;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Base class for the map component. Contains all base functionality for the map
@@ -52,7 +42,8 @@ import java.util.stream.Stream;
  * out-of-the-box conveniences such as a pre-configured background layer, and a
  * feature layer.
  */
-public abstract class MapBase extends Component implements HasSize, HasTheme {
+public abstract class MapBase extends Component
+        implements HasSize, HasStyle, HasThemeVariant<MapVariant> {
     private final Configuration configuration;
     private final MapSerializer serializer;
 
@@ -95,7 +86,6 @@ public abstract class MapBase extends Component implements HasSize, HasTheme {
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        checkFeatureFlag();
         getElement().executeJs("window.Vaadin.Flow.mapConnector.init(this)");
         // Ensure the full configuration is synced when (re-)attaching the
         // component
@@ -143,11 +133,24 @@ public abstract class MapBase extends Component implements HasSize, HasTheme {
         // move end event to update view state to the latest values received
         // from the client
         addViewMoveEndEventListener(event -> {
-            float rotation = event.getRotation();
-            float zoom = event.getZoom();
+            double rotation = event.getRotation();
+            double zoom = event.getZoom();
             Coordinate center = event.getCenter();
             Extent extent = event.getExtent();
             getView().updateInternalViewState(center, rotation, zoom, extent);
+        });
+        // Register an event listener before all the other listeners of the
+        // feature drop event to update the feature's position
+        addFeatureDropListener(event -> {
+            double deltaX = event.getCoordinate().getX()
+                    - event.getStartCoordinate().getX();
+            double deltaY = event.getCoordinate().getY()
+                    - event.getStartCoordinate().getY();
+
+            if (event.getFeature() != null
+                    && event.getFeature().getGeometry() != null) {
+                event.getFeature().getGeometry().translate(deltaX, deltaY);
+            }
         });
     }
 
@@ -220,53 +223,17 @@ public abstract class MapBase extends Component implements HasSize, HasTheme {
     }
 
     /**
-     * Checks whether the map component feature flag is active. Succeeds if the
-     * flag is enabled, and throws otherwise.
+     * Adds an event listener for when a feature is dropped after a drag
+     * operation. Features can be made draggable by setting
+     * {@link Feature#setDraggable(boolean)}.
      *
-     * @throws ExperimentalFeatureException
-     *             when the {@link FeatureFlags#MAP_COMPONENT} feature is not
-     *             enabled
+     * @param listener
+     *            the listener to trigger
+     * @return registration for the listener
+     * @see Feature
      */
-    private void checkFeatureFlag() {
-        boolean enabled = getFeatureFlags()
-                .isEnabled(FeatureFlags.MAP_COMPONENT);
-
-        if (!enabled) {
-            throw new ExperimentalFeatureException();
-        }
-    }
-
-    /**
-     * Gets the feature flags for the current UI.
-     * <p>
-     * Extracted with protected visibility to support mocking
-     *
-     * @return the current set of feature flags
-     */
-    protected FeatureFlags getFeatureFlags() {
-        return FeatureFlags
-                .get(UI.getCurrent().getSession().getService().getContext());
-    }
-
-    /**
-     * Adds theme variants to the component.
-     *
-     * @param variants
-     *            theme variants to add
-     */
-    public void addThemeVariants(MapVariant... variants) {
-        getThemeNames().addAll(Stream.of(variants)
-                .map(MapVariant::getVariantName).collect(Collectors.toList()));
-    }
-
-    /**
-     * Removes theme variants from the component.
-     *
-     * @param variants
-     *            theme variants to remove
-     */
-    public void removeThemeVariants(MapVariant... variants) {
-        getThemeNames().removeAll(Stream.of(variants)
-                .map(MapVariant::getVariantName).collect(Collectors.toList()));
+    public Registration addFeatureDropListener(
+            ComponentEventListener<MapFeatureDropEvent> listener) {
+        return addListener(MapFeatureDropEvent.class, listener);
     }
 }

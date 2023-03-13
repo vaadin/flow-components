@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.button.Button;
@@ -65,7 +66,8 @@ public class GridSingleSelectionDeselectAllowedPage extends VerticalLayout {
         Grid<String> grid = new Grid<>();
         grid.addColumn(string -> String.valueOf(Math.random())) // NOSONAR
                 .setHeader("column 1");
-        grid.setItems(IntStream.rangeClosed(1, 3).mapToObj(String::valueOf));
+        grid.setItems(IntStream.rangeClosed(1, 3).mapToObj(String::valueOf)
+                .collect(Collectors.toList()));
         grid.setAllRowsVisible(true);
         if (!deselectAllowed) {
             ((GridSingleSelectionModel) grid.getSelectionModel())
@@ -79,7 +81,8 @@ public class GridSingleSelectionDeselectAllowedPage extends VerticalLayout {
     private Grid<String> setItemsGrid(Grid grid, String id) {
         grid.addColumn(string -> String.valueOf(Math.random())) // NOSONAR
                 .setHeader("column 1");
-        grid.setItems(IntStream.rangeClosed(1, 3).mapToObj(String::valueOf));
+        grid.setItems(IntStream.rangeClosed(1, 3).mapToObj(String::valueOf)
+                .collect(Collectors.toList()));
         grid.setAllRowsVisible(true);
         grid.setId(id);
         return grid;

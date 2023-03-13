@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -138,97 +138,6 @@ public class CheckboxIT extends AbstractComponentIT {
         Assert.assertEquals(
                 "Accessible checkbox should have the aria-label attribute",
                 "Click me", checkbox.getAttribute("aria-label"));
-    }
-
-    @Test
-    public void htmlLabelCheckbox_labelLinkIsDisplayed() {
-        CheckboxElement checkbox = $(CheckboxElement.class)
-                .id("html-label-checkbox");
-        WebElement anchor = checkbox.$("label").first()
-                .findElement(By.tagName("a"));
-
-        Assert.assertEquals(
-                "Content should contain a link to vaadin.com/privacy-policy",
-                "https://vaadin.com/privacy-policy",
-                anchor.getAttribute("href"));
-    }
-
-    @Test
-    public void htmlLabelCheckbox_changeLabel_newLabelLinkIsDisplayed() {
-        clickButton("change-html-label");
-
-        CheckboxElement checkbox = $(CheckboxElement.class)
-                .id("html-label-checkbox");
-        WebElement anchor = checkbox.$("label").first()
-                .findElement(By.tagName("a"));
-
-        Assert.assertEquals(
-                "Content should contain a link to vaadin.com/community-terms",
-                "https://vaadin.com/community-terms",
-                anchor.getAttribute("href"));
-    }
-
-    @Test
-    public void htmlLabelCheckbox_changeLabel_clickOnInput_checkboxIsChecked() {
-        clickButton("change-html-label");
-
-        CheckboxElement checkbox = $(CheckboxElement.class)
-                .id("html-label-checkbox");
-        checkbox.$("input").first().click();
-
-        Assert.assertEquals("Checkbox should be checked", true,
-                checkbox.isChecked());
-    }
-
-    @Test
-    public void htmlLabelCheckbox_changeLabel_clickOnLabel_checkboxIsChecked() {
-        clickButton("change-html-label");
-
-        CheckboxElement checkbox = $(CheckboxElement.class)
-                .id("html-label-checkbox");
-        checkbox.$("label").first().click();
-
-        Assert.assertEquals("Checkbox should be checked", true,
-                checkbox.isChecked());
-    }
-
-    @Test
-    public void lazyHtmlLabelCheckbox_setLabel_labelLinkIsDisplayed() {
-        clickButton("set-html-label");
-
-        CheckboxElement checkbox = $(CheckboxElement.class)
-                .id("lazy-html-label-checkbox");
-        WebElement anchor = checkbox.$("label").first()
-                .findElement(By.tagName("a"));
-
-        Assert.assertEquals(
-                "Content should contain a link to vaadin.com/privacy-policy",
-                "https://vaadin.com/privacy-policy",
-                anchor.getAttribute("href"));
-    }
-
-    @Test
-    public void lazyHtmlLabelCheckbox_setLabel_clickOnLabel_checkboxIsChecked() {
-        clickButton("set-html-label");
-
-        CheckboxElement checkbox = $(CheckboxElement.class)
-                .id("lazy-html-label-checkbox");
-        checkbox.$("label").first().click();
-
-        Assert.assertEquals("Checkbox should be checked", true,
-                checkbox.isChecked());
-    }
-
-    @Test
-    public void lazyHtmlLabelCheckbox_setLabel_clickOnInput_checkboxIsChecked() {
-        clickButton("set-html-label");
-
-        CheckboxElement checkbox = $(CheckboxElement.class)
-                .id("lazy-html-label-checkbox");
-        checkbox.$("input").first().click();
-
-        Assert.assertEquals("Checkbox should be checked", true,
-                checkbox.isChecked());
     }
 
     @Test

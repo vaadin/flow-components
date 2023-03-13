@@ -1,3 +1,12 @@
+/**
+ * @license
+ * Copyright 2000-2023 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
+ */
 (function () {
   const tryCatchWrapper = function (callback) {
     return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Grid Pro');
@@ -8,6 +17,13 @@
   }
 
   window.Vaadin.Flow.gridProConnector = {
+    selectAll: (editor) => {
+      if (editor instanceof HTMLInputElement) {
+        editor.select();
+      } else if (editor.focusElement && editor.focusElement instanceof HTMLInputElement) {
+        editor.focusElement.select();
+      }
+    },
     setEditModeRenderer: (column, component) =>
       tryCatchWrapper(function (column, component) {
         column.editModeRenderer = tryCatchWrapper(function editModeRenderer(root, _, rowData) {

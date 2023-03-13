@@ -1,17 +1,12 @@
-package com.vaadin.flow.component.spreadsheet;
-
-/*
- * #%L
- * Vaadin Spreadsheet
- * %%
- * Copyright (C) 2013 - 2022 Vaadin Ltd
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
+/**
+ * Copyright 2000-2023 Vaadin Ltd.
  *
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
  */
+package com.vaadin.flow.component.spreadsheet;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -156,7 +151,7 @@ public class ConditionalFormatter implements Serializable {
         cellToIndex.clear();
         topBorders.clear();
         leftBorders.clear();
-        HashMap<Integer, String> _conditionalFormattingStyles = new HashMap<Integer, String>();
+        HashMap<Integer, String> conditionalFormattingStyles = new HashMap<>();
 
         SheetConditionalFormatting cfs = spreadsheet.getActiveSheet()
                 .getSheetConditionalFormatting();
@@ -245,9 +240,10 @@ public class ConditionalFormatter implements Serializable {
                     }
                 }
 
-                cssIndex = addBorderFormatting(cf, rule, css, cssIndex);
+                cssIndex = addBorderFormatting(cf, rule, css, cssIndex,
+                        conditionalFormattingStyles);
 
-                _conditionalFormattingStyles.put(cssIndex, css.toString());
+                conditionalFormattingStyles.put(cssIndex, css.toString());
 
                 // check actual cells
                 runCellMatcher(cf, rule, cssIndex);
@@ -257,10 +253,9 @@ public class ConditionalFormatter implements Serializable {
                     break;
                 }
             }
-
         }
-        spreadsheet
-                .setConditionalFormattingStyles(_conditionalFormattingStyles);
+
+        spreadsheet.setConditionalFormattingStyles(conditionalFormattingStyles);
     }
 
     /**
@@ -318,7 +313,8 @@ public class ConditionalFormatter implements Serializable {
      * @return the new cssIndex
      */
     private int addBorderFormatting(ConditionalFormatting cf,
-            ConditionalFormattingRule rule, StringBuilder css, int cssIndex) {
+            ConditionalFormattingRule rule, StringBuilder css, int cssIndex,
+            HashMap<Integer, String> conditionalFormattingStyles) {
 
         if (!(rule instanceof XSSFConditionalFormattingRule)) {
             // HSSF not supported
@@ -370,10 +366,6 @@ public class ConditionalFormatter implements Serializable {
                 }
             }
 
-            // top and left borders might be applied to another cell, so store
-            // them with a different index
-            HashMap<Integer, String> _conditionalFormattingStyles = spreadsheet
-                    .getConditionalFormattingStyles();
             if (isTopSet) {
                 // bottom border for cell above
                 final StringBuilder sb2 = new StringBuilder("border-bottom:");
@@ -382,7 +374,7 @@ public class ConditionalFormatter implements Serializable {
                     sb2.append(colorConverter.getBorderColorCSS(BorderSide.TOP,
                             "border-bottom-color", borderFormatting));
 
-                    _conditionalFormattingStyles.put(cssIndex, sb2.toString());
+                    conditionalFormattingStyles.put(cssIndex, sb2.toString());
                     topBorders.put(cf, cssIndex++);
                 } else {
                     css.append(BORDER_STYLE_DEFAULT);
@@ -397,14 +389,12 @@ public class ConditionalFormatter implements Serializable {
                     sb2.append(colorConverter.getBorderColorCSS(BorderSide.LEFT,
                             "border-right-color", borderFormatting));
 
-                    _conditionalFormattingStyles.put(cssIndex, sb2.toString());
+                    conditionalFormattingStyles.put(cssIndex, sb2.toString());
                     leftBorders.put(cf, cssIndex++);
                 } else {
                     css.append(BORDER_STYLE_DEFAULT);
                 }
             }
-            spreadsheet.setConditionalFormattingStyles(
-                    _conditionalFormattingStyles);
         }
 
         return cssIndex;
@@ -465,7 +455,7 @@ public class ConditionalFormatter implements Serializable {
     }
 
     /**
-     * @param i
+     * @param b
      *            0 - left, 1 - top, 2 - right, 3 - bottom
      */
     private boolean isBorderSet(XSSFBorderFormatting borderFormatting,

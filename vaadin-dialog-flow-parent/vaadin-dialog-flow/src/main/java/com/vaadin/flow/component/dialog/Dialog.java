@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,29 +16,37 @@
 package com.vaadin.flow.component.dialog;
 
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.Stream.Builder;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.Shortcuts;
+import com.vaadin.flow.component.Synchronize;
+import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
+import com.vaadin.flow.dom.ClassList;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementConstants;
+import com.vaadin.flow.dom.ElementDetachListener;
 import com.vaadin.flow.dom.Style;
+import com.vaadin.flow.internal.StateTree;
+import com.vaadin.flow.router.NavigationTrigger;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -67,14 +75,17 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author Vaadin Ltd
  */
-@JsModule("./dialogConnector.js")
+@Tag("vaadin-dialog")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha1")
+@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@NpmPackage(value = "@vaadin/dialog", version = "24.1.0-alpha1")
+@JsModule("@vaadin/dialog/src/vaadin-dialog.js")
 @JsModule("./flow-component-renderer.js")
-public class Dialog extends GeneratedVaadinDialog<Dialog>
-        implements HasComponents, HasSize, HasTheme, HasStyle {
+public class Dialog extends Component implements HasComponents, HasSize,
+        HasStyle, HasThemeVariant<DialogVariant> {
 
     private static final String OVERLAY_LOCATOR_JS = "this.$.overlay";
-    private Element template;
-    private Element container;
+
     private boolean autoAddedToTheUi;
     private int onCloseConfigured;
     private String width;
@@ -86,24 +97,13 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
     private DialogHeader dialogHeader;
     private DialogFooter dialogFooter;
 
+    private Registration afterProgrammaticNavigationListenerRegistration;
+
     /**
      * Creates an empty dialog.
      */
     public Dialog() {
-        getElement().setAttribute("suppress-template-warning", true);
-
-        template = new Element("template");
-        getElement().appendChild(template);
-
-        container = new Element("div");
-        container.getClassList().add("draggable");
-        container.getClassList().add("draggable-leaf-only");
-        container.getStyle().set(ElementConstants.STYLE_WIDTH, "100%");
-        container.getStyle().set(ElementConstants.STYLE_HEIGHT, "100%");
-
-        getElement().appendVirtualChild(container);
-
-        // Attach <flow-component-renderer>. Needs to be updated on each
+        // Needs to be updated on each
         // attach, as element depends on node id which is subject to change if
         // the dialog is transferred to another UI, e.g. due to
         // @PreserveOnRefresh
@@ -172,6 +172,23 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
          */
         public String getHeight() {
             return height;
+        }
+    }
+
+    /**
+     * {@code opened-changed} event is sent when the overlay opened state
+     * changes.
+     */
+    public static class OpenedChangeEvent extends ComponentEvent<Dialog> {
+        private final boolean opened;
+
+        public OpenedChangeEvent(Dialog source, boolean fromClient) {
+            super(source, fromClient);
+            this.opened = source.isOpened();
+        }
+
+        public boolean isOpened() {
+            return opened;
         }
     }
 
@@ -328,33 +345,10 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
      *            the components to add
      */
     @Override
-    public void add(Component... components) {
-        Objects.requireNonNull(components, "Components should not be null");
-        for (Component component : components) {
-            Objects.requireNonNull(component,
-                    "Component to add cannot be null");
-            container.appendChild(component.getElement());
-        }
-    }
+    public void add(Collection<Component> components) {
+        HasComponents.super.add(components);
 
-    @Override
-    public void remove(Component... components) {
-        Objects.requireNonNull(components, "Components should not be null");
-        for (Component component : components) {
-            Objects.requireNonNull(component,
-                    "Component to remove cannot be null");
-            if (container.equals(component.getElement().getParent())) {
-                container.removeChild(component.getElement());
-            } else {
-                throw new IllegalArgumentException("The given component ("
-                        + component + ") is not a child of this component");
-            }
-        }
-    }
-
-    @Override
-    public void removeAll() {
-        container.removeAllChildren();
+        updateVirtualChildNodeIds();
     }
 
     /**
@@ -372,14 +366,9 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
      */
     @Override
     public void addComponentAtIndex(int index, Component component) {
-        Objects.requireNonNull(component, "Component should not be null");
-        if (index < 0) {
-            throw new IllegalArgumentException(
-                    "Cannot add a component with a negative index");
-        }
-        // The case when the index is bigger than the children count is handled
-        // inside the method below
-        container.insertChild(index, component.getElement());
+        HasComponents.super.addComponentAtIndex(index, component);
+
+        updateVirtualChildNodeIds();
     }
 
     /**
@@ -744,13 +733,29 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
 
     private void ensureAttached() {
         UI ui = getCurrentUI();
-        ui.beforeClientResponse(ui, context -> {
-            if (getElement().getNode().getParent() == null) {
-                ui.addToModalComponent(this);
-                ui.setChildComponentModal(this, isModal());
-                autoAddedToTheUi = true;
-            }
-        });
+        StateTree.ExecutionRegistration addToUiRegistration = ui
+                .beforeClientResponse(ui, context -> {
+                    if (getElement().getNode().getParent() == null) {
+                        ui.addToModalComponent(this);
+                        ui.setChildComponentModal(this, isModal());
+                        autoAddedToTheUi = true;
+                    }
+                    if (afterProgrammaticNavigationListenerRegistration != null) {
+                        afterProgrammaticNavigationListenerRegistration
+                                .remove();
+                    }
+                });
+        if (ui.getSession() != null) {
+            afterProgrammaticNavigationListenerRegistration = ui
+                    .addAfterNavigationListener(event -> {
+                        if (event.getLocationChangeEvent()
+                                .getTrigger() == NavigationTrigger.PROGRAMMATIC) {
+                            addToUiRegistration.remove();
+                            afterProgrammaticNavigationListenerRegistration
+                                    .remove();
+                        }
+                    });
+        }
     }
 
     private void ensureOnCloseConfigured() {
@@ -791,13 +796,12 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
      * @param opened
      *            {@code true} to open the dialog, {@code false} to close it
      */
-    @Override
     public void setOpened(boolean opened) {
         if (opened) {
             ensureAttached();
         }
         setModality(opened && isModal());
-        super.setOpened(opened);
+        getElement().setProperty("opened", opened);
     }
 
     /**
@@ -805,22 +809,15 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
      *
      * @return the {@code opened} property from the dialog
      */
+    @Synchronize(property = "opened", value = "opened-changed")
     public boolean isOpened() {
-        return super.isOpenedBoolean();
+        return getElement().getProperty("opened", false);
     }
 
     private void setModality(boolean modal) {
         if (isAttached()) {
             getUI().ifPresent(ui -> ui.setChildComponentModal(this, modal));
         }
-    }
-
-    @Override
-    public Stream<Component> getChildren() {
-        Builder<Component> childComponents = Stream.builder();
-        container.getChildren().forEach(childElement -> ComponentUtil
-                .findComponents(childElement, childComponents::add));
-        return childComponents.build();
     }
 
     /**
@@ -830,10 +827,11 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
      *            the listener to add
      * @return a Registration for removing the event listener
      */
-    @Override
     public Registration addOpenedChangeListener(
-            ComponentEventListener<OpenedChangeEvent<Dialog>> listener) {
-        return super.addOpenedChangeListener(listener);
+            ComponentEventListener<OpenedChangeEvent> listener) {
+        return getElement().addPropertyChangeListener("opened",
+                event -> listener.onComponentEvent(
+                        new OpenedChangeEvent(this, event.isUserOriginated())));
     }
 
     /**
@@ -861,28 +859,46 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         return super.addDetachListener(listener);
     }
 
-    /**
-     * Adds theme variants to the component.
-     *
-     * @param variants
-     *            theme variants to add
-     */
-    public void addThemeVariants(DialogVariant... variants) {
-        getThemeNames()
-                .addAll(Stream.of(variants).map(DialogVariant::getVariantName)
-                        .collect(Collectors.toList()));
-    }
+    private Map<Element, Registration> childDetachListenerMap = new HashMap<>();
+    private ElementDetachListener childDetachListener = e -> {
+        var child = e.getSource();
+        var childDetachedFromContainer = !getElement().getChildren().anyMatch(
+                containerChild -> Objects.equals(child, containerChild));
+
+        if (childDetachedFromContainer) {
+            // The child was removed from the dialog
+
+            // Remove the registration for the child detach listener
+            childDetachListenerMap.get(child).remove();
+            childDetachListenerMap.remove(child);
+
+            this.updateVirtualChildNodeIds();
+        }
+    };
 
     /**
-     * Removes theme variants from the component.
-     *
-     * @param variants
-     *            theme variants to remove
+     * Updates the virtualChildNodeIds property of the dialog element.
+     * <p>
+     * This method is called whenever the dialog's child components change.
+     * <p>
+     * Also calls {@code requestContentUpdate} on the dialog element to trigger
+     * the content update.
      */
-    public void removeThemeVariants(DialogVariant... variants) {
-        getThemeNames().removeAll(
-                Stream.of(variants).map(DialogVariant::getVariantName)
+    private void updateVirtualChildNodeIds() {
+        // Add detach listeners (child may be removed with removeFromParent())
+        getElement().getChildren().forEach(child -> {
+            if (!childDetachListenerMap.containsKey(child)) {
+                childDetachListenerMap.put(child,
+                        child.addDetachListener(childDetachListener));
+            }
+        });
+
+        this.getElement().setPropertyList("virtualChildNodeIds",
+                getElement().getChildren()
+                        .map(element -> element.getNode().getId())
                         .collect(Collectors.toList()));
+
+        this.getElement().callJsFunction("requestContentUpdate");
     }
 
     @Override
@@ -893,13 +909,37 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         // as the locator is stored inside component's attributes, no need to
         // remove the data as it should live as long as the component does
         Shortcuts.setShortcutListenOnElement(OVERLAY_LOCATOR_JS, this);
-        initConnector();
         initHeaderFooterRenderer();
+        updateVirtualChildNodeIds();
     }
 
-    private void initConnector() {
-        getElement()
-                .executeJs("window.Vaadin.Flow.dialogConnector.initLazy(this)");
+    /**
+     * Set the {@code aria-label} attribute for assistive technologies like
+     * screen readers. An {@code undefined} value for this property (the
+     * default) means that the {@code aria-label} attribute is not present at
+     * all.
+     * <p>
+     * This property is not synchronized automatically from the client side, so
+     * the returned value may not be the same as in client side.
+     *
+     * @return the {@code ariaLabel} property from the webcomponent
+     */
+    protected String getAriaLabel() {
+        return getElement().getProperty("ariaLabel");
+    }
+
+    /**
+     * Set the {@code aria-label} attribute for assistive technologies like
+     * screen readers. An {@code undefined} value for this property (the
+     * default) means that the {@code aria-label} attribute is not present at
+     * all.
+     *
+     * @param ariaLabel
+     *            the String value to set
+     */
+    protected void setAriaLabel(String ariaLabel) {
+        getElement().setProperty("ariaLabel",
+                ariaLabel == null ? "" : ariaLabel);
     }
 
     private void initHeaderFooterRenderer() {
@@ -919,12 +959,14 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
     }
 
     private void attachComponentRenderer() {
+        this.getElement().executeJs(
+                "Vaadin.FlowComponentHost.patchVirtualContainer(this)");
+
         String appId = UI.getCurrent().getInternals().getAppId();
-        int nodeId = container.getNode().getId();
-        String renderer = String.format(
-                "<flow-component-renderer appid=\"%s\" nodeid=\"%s\" style=\"display: flex; height: 100%%;\"></flow-component-renderer>",
-                appId, nodeId);
-        template.setProperty("innerHTML", renderer);
+
+        getElement().executeJs(
+                "this.renderer = (root) => Vaadin.FlowComponentHost.setChildNodes($0, this.virtualChildNodeIds, root)",
+                appId);
 
         setDimension(ElementConstants.STYLE_WIDTH, width);
         setDimension(ElementConstants.STYLE_MIN_WIDTH, minWidth);
@@ -932,6 +974,27 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         setDimension(ElementConstants.STYLE_HEIGHT, height);
         setDimension(ElementConstants.STYLE_MIN_HEIGHT, minHeight);
         setDimension(ElementConstants.STYLE_MAX_HEIGHT, maxHeight);
+    }
+
+    /**
+     * Sets the CSS class names of the dialog overlay element. This method
+     * overwrites any previous set class names.
+     *
+     * @param className
+     *            a space-separated string of class names to set, or
+     *            <code>null</code> to remove all class names
+     */
+    @Override
+    public void setClassName(String className) {
+        getClassNames().clear();
+        if (className != null) {
+            addClassNames(className.split(" "));
+        }
+    }
+
+    @Override
+    public ClassList getClassNames() {
+        return new OverlayClassListProxy(this);
     }
 
     /**
@@ -943,5 +1006,4 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         throw new UnsupportedOperationException(
                 "Dialog does not support adding styles to overlay");
     }
-
 }

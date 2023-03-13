@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -34,7 +34,7 @@ import com.vaadin.flow.data.event.SortEvent;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.provider.SortOrder;
-import com.vaadin.flow.data.renderer.TemplateRenderer;
+import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.function.SerializableComparator;
 
 import elemental.json.Json;
@@ -163,13 +163,13 @@ public class GridSortingTest {
         nameColumn = grid.addColumn(Person::getName, "name").setHeader("Name");
         ageColumn = grid.addColumn(Person::getAge, "age").setHeader("Age");
 
-        templateColumn = grid.addColumn(TemplateRenderer.<Person> of(
-                "<div>[[item.street]], number [[item.number]]<br><small>[[item.postalCode]]</small></div>")
+        templateColumn = grid.addColumn(LitRenderer.<Person> of(
+                "<div>${item.street}, number ${item.number}<br><small>${item.postalCode}</small></div>")
                 .withProperty("street",
                         person -> person.getAddress().getStreet())
                 .withProperty("number",
-                        person -> person.getAddress().getNumber()),
-                "street", "number").setHeader("Address");
+                        person -> person.getAddress().getNumber()))
+                .setHeader("Address").setSortProperty("street", "number");
     }
 
     @Test
@@ -250,8 +250,9 @@ public class GridSortingTest {
 
     @Test
     public void template_renderer_non_comparable_property() {
-        Column<Person> column = grid.addColumn(TemplateRenderer.<Person> of("")
-                .withProperty("address", Person::getAddress), "address");
+        Column<Person> column = grid.addColumn(LitRenderer.<Person> of("")
+                .withProperty("address", Person::getAddress))
+                .setSortProperty("address");
         JsonArray sortersArray = Json.createArray();
         sortersArray.set(0, createSortObject(getColumnId(column), "asc"));
         callSortersChanged(sortersArray);
@@ -291,6 +292,46 @@ public class GridSortingTest {
     @Test(expected = NullPointerException.class)
     public void setMultiSortWithPriorityNull_throws() {
         grid.setMultiSort(true, null);
+    }
+
+    @Test
+    public void setMultiSortShiftClickOnly() {
+        grid.setMultiSort(true, true);
+
+        Assert.assertTrue(
+                grid.getElement().getProperty("multiSortOnShiftClick", false));
+    }
+
+    @Test
+    public void setMultiSortShiftClickOnly_onlyWhenMultiSortTrue() {
+        grid.setMultiSort(false, true);
+
+        Assert.assertFalse(
+                grid.getElement().getProperty("multiSortOnShiftClick", false));
+    }
+
+    @Test
+    public void setMultiSortShiftClickOnlyFalse_whenUsingMethodWithoutOnShiftClickOnly() {
+        grid.setMultiSort(true, true);
+        grid.setMultiSort(false);
+
+        Assert.assertFalse(
+                grid.getElement().getProperty("multiSortOnShiftClick", false));
+    }
+
+    @Test
+    public void setMultiSortShiftClickOnlyWithPriority() {
+        grid.setMultiSort(true, Grid.MultiSortPriority.APPEND, true);
+
+        Assert.assertEquals("append",
+                grid.getElement().getAttribute("multi-sort-priority"));
+        Assert.assertTrue(
+                grid.getElement().getProperty("multiSortOnShiftClick", false));
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void setMultiSortShiftClickOnlyWithPriorityNull_throws() {
+        grid.setMultiSort(true, null, true);
     }
 
     private void setTestSorting() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -31,15 +31,17 @@ public class AutoFocusFilterPage extends Div {
                 "Option 5", "Another Option 2");
 
         ComboBox<String> comboBox = new ComboBox<>("Choose option");
-        comboBox.setDataProvider((filter, offset, limit) -> {
-            if (filter.isEmpty())
+        comboBox.setItems((query) -> {
+            if (query.getFilter().get().isEmpty())
                 return Stream.of("");
-            return data.stream().filter(s -> s.contains(filter)).skip(offset)
-                    .limit(limit);
-        }, (filter) -> {
-            if (filter.isEmpty())
+            return data.stream()
+                    .filter(s -> s.contains(query.getFilter().get()))
+                    .skip(query.getOffset()).limit(query.getLimit());
+        }, (query) -> {
+            if (query.getFilter().get().isEmpty())
                 return 1;
-            return (int) data.stream().filter(s -> s.contains(filter)).count();
+            return (int) data.stream()
+                    .filter(s -> s.contains(query.getFilter().get())).count();
         });
 
         comboBox.setAutofocus(true);

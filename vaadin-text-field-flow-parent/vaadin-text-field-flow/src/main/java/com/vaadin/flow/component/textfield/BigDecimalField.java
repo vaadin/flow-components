@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -22,24 +22,21 @@ import java.util.Objects;
 import java.util.Optional;
 
 import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.CompositionNotifier;
-import com.vaadin.flow.component.shared.HasClearButton;
-import com.vaadin.flow.component.HasHelper;
-import com.vaadin.flow.component.HasLabel;
-import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.flow.component.HasValidation;
-import com.vaadin.flow.component.InputNotifier;
-import com.vaadin.flow.component.KeyNotifier;
+import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.ClientValidationUtil;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.ValidationUtil;
-import com.vaadin.flow.data.binder.HasValidator;
-import com.vaadin.flow.data.value.HasValueChangeMode;
+import com.vaadin.flow.data.binder.ValidationResult;
+import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
+import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
+import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.SerializableBiFunction;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * BigDecimalField is an input field for handling decimal numbers with high
@@ -53,22 +50,13 @@ import com.vaadin.flow.function.SerializableBiFunction;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-big-decimal-field")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha5")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("./vaadin-big-decimal-field.js")
-public class BigDecimalField
-        extends GeneratedVaadinTextField<BigDecimalField, BigDecimal> implements
-        HasSize, HasValidation, HasValueChangeMode, HasPrefixAndSuffix,
-        InputNotifier, KeyNotifier, CompositionNotifier, HasAutocomplete,
-        HasAutocapitalize, HasAutocorrect, HasHelper, HasLabel, HasClearButton,
-        HasThemeVariant<TextFieldVariant>, HasValidator<BigDecimal> {
-    private ValueChangeMode currentMode;
+public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
+        implements HasThemeVariant<TextFieldVariant> {
 
     private boolean isConnectorAttached;
-
-    private int valueChangeTimeout = DEFAULT_CHANGE_TIMEOUT;
-
-    private boolean required;
 
     private Locale locale;
 
@@ -105,6 +93,8 @@ public class BigDecimalField
         setValueChangeMode(ValueChangeMode.ON_CHANGE);
 
         addValueChangeListener(e -> validate());
+
+        addClientValidatedEventListener(e -> validate());
     }
 
     /**
@@ -203,142 +193,6 @@ public class BigDecimalField
         addValueChangeListener(listener);
     }
 
-    /**
-     * {@inheritDoc}
-     * <p>
-     * The default value is {@link ValueChangeMode#ON_CHANGE}.
-     */
-    @Override
-    public ValueChangeMode getValueChangeMode() {
-        return currentMode;
-    }
-
-    @Override
-    public void setValueChangeMode(ValueChangeMode valueChangeMode) {
-        currentMode = valueChangeMode;
-        setSynchronizedEvent(
-                ValueChangeMode.eventForMode(valueChangeMode, "value-changed"));
-        applyChangeTimeout();
-    }
-
-    @Override
-    public void setValueChangeTimeout(int valueChangeTimeout) {
-        this.valueChangeTimeout = valueChangeTimeout;
-        applyChangeTimeout();
-    }
-
-    @Override
-    public int getValueChangeTimeout() {
-        return valueChangeTimeout;
-    }
-
-    private void applyChangeTimeout() {
-        ValueChangeMode.applyChangeTimeout(getValueChangeMode(),
-                getValueChangeTimeout(), getSynchronizationRegistration());
-    }
-
-    @Override
-    public String getErrorMessage() {
-        return super.getErrorMessageString();
-    }
-
-    @Override
-    public void setErrorMessage(String errorMessage) {
-        super.setErrorMessage(errorMessage);
-    }
-
-    @Override
-    public boolean isInvalid() {
-        return isInvalidBoolean();
-    }
-
-    @Override
-    public void setInvalid(boolean invalid) {
-        super.setInvalid(invalid);
-    }
-
-    @Override
-    public void setLabel(String label) {
-        super.setLabel(label);
-    }
-
-    /**
-     * String used for the label element.
-     *
-     * @return the {@code label} property from the webcomponent
-     */
-    @Override
-    public String getLabel() {
-        return getLabelString();
-    }
-
-    @Override
-    public void setPlaceholder(String placeholder) {
-        super.setPlaceholder(placeholder);
-    }
-
-    /**
-     * A hint to the user of what can be entered in the component.
-     *
-     * @return the {@code placeholder} property from the webcomponent
-     */
-    public String getPlaceholder() {
-        return getPlaceholderString();
-    }
-
-    /**
-     * Specifies if the field value gets automatically selected when the field
-     * gains focus.
-     *
-     * @return <code>true</code> if autoselect is active, <code>false</code>
-     *         otherwise
-     */
-    public boolean isAutoselect() {
-        return super.isAutoselectBoolean();
-    }
-
-    /**
-     * Set to <code>true</code> to always have the field value automatically
-     * selected when the field gains focus, <code>false</code> otherwise.
-     *
-     * @param autoselect
-     *            <code>true</code> to set auto select on, <code>false</code>
-     *            otherwise
-     */
-    @Override
-    public void setAutoselect(boolean autoselect) {
-        super.setAutoselect(autoselect);
-    }
-
-    @Override
-    public void setAutofocus(boolean autofocus) {
-        super.setAutofocus(autofocus);
-    }
-
-    /**
-     * Specify that this control should have input focus when the page loads.
-     *
-     * @return the {@code autofocus} property from the webcomponent
-     */
-    public boolean isAutofocus() {
-        return isAutofocusBoolean();
-    }
-
-    /**
-     * The text usually displayed in a tooltip popup when the mouse is over the
-     * field.
-     *
-     * @return the {@code title} property from the webcomponent
-     */
-    public String getTitle() {
-        return super.getTitleString();
-    }
-
-    @Override
-    public void setTitle(String title) {
-        super.setTitle(title);
-    }
-
     @Override
     public BigDecimal getEmptyValue() {
         return null;
@@ -362,7 +216,18 @@ public class BigDecimalField
      */
     @Override
     public void setValue(BigDecimal value) {
+        BigDecimal oldValue = getValue();
+
         super.setValue(value);
+
+        if (Objects.equals(oldValue, getEmptyValue())
+                && Objects.equals(value, getEmptyValue())
+                && isInputValuePresent()) {
+            // Clear the input element from possible bad input.
+            getElement().executeJs("this.inputElement.value = ''");
+            getElement().setProperty("_hasInputValue", false);
+            fireEvent(new ClientValidatedEvent(this, false));
+        }
     }
 
     /**
@@ -381,17 +246,50 @@ public class BigDecimalField
      * because it is possible to circumvent the client-side validation
      * constraints using browser development tools.
      */
-    @Override
     protected void validate() {
-        var requiredValidation = ValidationUtil.checkRequired(required,
-                getValue(), getEmptyValue());
-        setInvalid(requiredValidation.isError());
+        BigDecimal value = getValue();
+
+        boolean isRequired = isRequiredIndicatorVisible();
+        ValidationResult requiredValidation = ValidationUtil
+                .checkRequired(isRequired, value, getEmptyValue());
+
+        setInvalid(
+                requiredValidation.isError() || checkValidity(value).isError());
+    }
+
+    private ValidationResult checkValidity(BigDecimal value) {
+        boolean hasNonParsableValue = Objects.equals(value, getEmptyValue())
+                && isInputValuePresent();
+        if (hasNonParsableValue) {
+            return ValidationResult.error("");
+        }
+
+        return ValidationResult.ok();
     }
 
     @Override
-    public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
-        super.setRequiredIndicatorVisible(requiredIndicatorVisible);
-        this.required = requiredIndicatorVisible;
+    public Validator<BigDecimal> getDefaultValidator() {
+        return (value, context) -> checkValidity(value);
+    }
+
+    @Override
+    public Registration addValidationStatusChangeListener(
+            ValidationStatusChangeListener<BigDecimal> listener) {
+        return addClientValidatedEventListener(
+                event -> listener.validationStatusChanged(
+                        new ValidationStatusChangeEvent<BigDecimal>(this,
+                                !isInvalid())));
+    }
+
+    /**
+     * Returns whether the input element has a value or not.
+     *
+     * @return <code>true</code> if the input element's value is populated,
+     *         <code>false</code> otherwise
+     */
+    @Synchronize(property = "_hasInputValue", value = "has-input-value-changed")
+    private boolean isInputValuePresent() {
+        return getElement().getProperty("_hasInputValue", false);
     }
 
     /**
@@ -438,20 +336,6 @@ public class BigDecimalField
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        FieldValidationUtil.disableClientValidation(this);
-    }
-
-    // Override is only required to keep binary compatibility with other 23.x
-    // minor versions, can be removed in a future major
-    @Override
-    public void addThemeVariants(TextFieldVariant... variants) {
-        HasThemeVariant.super.addThemeVariants(variants);
-    }
-
-    // Override is only required to keep binary compatibility with other 23.x
-    // minor versions, can be removed in a future major
-    @Override
-    public void removeThemeVariants(TextFieldVariant... variants) {
-        HasThemeVariant.super.removeThemeVariants(variants);
+        ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
     }
 }

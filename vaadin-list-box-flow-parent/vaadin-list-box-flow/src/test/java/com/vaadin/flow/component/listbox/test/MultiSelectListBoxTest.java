@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -35,6 +35,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.listbox.ListBox;
 import com.vaadin.flow.component.listbox.MultiSelectListBox;
 import com.vaadin.flow.component.listbox.dataview.ListBoxListDataView;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
@@ -162,7 +163,6 @@ public class MultiSelectListBoxTest {
                 selectionEvent.getRemovedSelection());
 
         Assert.assertEquals(createSet(bar), selectionEvent.getValue());
-        Assert.assertEquals(createSet(bar), selectionEvent.getNewSelection());
         Assert.assertEquals(createSet(bar),
                 selectionEvent.getAllSelectedItems());
 
@@ -325,6 +325,11 @@ public class MultiSelectListBoxTest {
         listDataView.setIdentifierProvider(CustomItem::getId);
 
         multiSelectListBox.setValue(new CustomItem(null, "First"));
+    }
+
+    @Test
+    public void implementsHasTooltip() {
+        Assert.assertTrue(listBox instanceof HasTooltip);
     }
 
     private void assertValueChangeEvents(Set<Item>... expectedValues) {

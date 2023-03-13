@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.vaadin.flow.function.ValueProvider;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -64,7 +65,7 @@ public class ComponentRendererTest {
     }
 
     @Test
-    public void templateRenderered_parentAttachedBeforeChild() {
+    public void componentRenderer_parentAttachedBeforeChild() {
         UI ui = new TestUI();
         TestUIInternals internals = (TestUIInternals) ui.getInternals();
 
@@ -76,19 +77,15 @@ public class ComponentRendererTest {
 
         KeyMapper<String> keyMapper = new KeyMapper<>();
 
-        ComponentDataGenerator<String> rendering = (ComponentDataGenerator<String>) renderer
-                .render(container, keyMapper);
-
-        // simulate a call from the grid to refresh data - template is not setup
+        Rendering<String> rendering = renderer.render(container, keyMapper);
+        // simulate a call from the grid to refresh data
         containerParent.getNode()
                 .runWhenAttached(ui2 -> ui2.getInternals().getStateTree()
                         .beforeClientResponse(containerParent.getNode(),
                                 context -> {
-                                    Assert.assertNotNull(
-                                            "NodeIdPropertyName should not be null",
-                                            rendering.getNodeIdPropertyName());
                                     JsonObject value = Json.createObject();
-                                    rendering.generateData("item", value);
+                                    rendering.getDataGenerator().get()
+                                            .generateData("item", value);
                                     Assert.assertEquals(
                                             "generateData should add one element in the jsonobject",
                                             1, value.keys().length);
@@ -103,7 +100,7 @@ public class ComponentRendererTest {
     }
 
     @Test
-    public void templateRenderered_childAttachedBeforeParent() {
+    public void componentRenderer_childAttachedBeforeParent() {
         UI ui = new TestUI();
         TestUIInternals internals = (TestUIInternals) ui.getInternals();
 
@@ -114,20 +111,16 @@ public class ComponentRendererTest {
         Element container = new Element("div");
         KeyMapper<String> keyMapper = new KeyMapper<>();
 
-        ComponentDataGenerator<String> rendering = (ComponentDataGenerator<String>) renderer
+        Rendering<String> rendering = (Rendering<String>) renderer
                 .render(container, keyMapper);
 
         containerParent.getNode()
                 .runWhenAttached(ui2 -> ui2.getInternals().getStateTree()
                         .beforeClientResponse(containerParent.getNode(),
                                 context -> {
-                                    // if nodeid is null then the component
-                                    // won't be rendered correctly
-                                    Assert.assertNotNull(
-                                            "NodeIdPropertyName should not be null",
-                                            rendering.getNodeIdPropertyName());
                                     JsonObject value = Json.createObject();
-                                    rendering.generateData("item", value);
+                                    rendering.getDataGenerator().get()
+                                            .generateData("item", value);
                                     Assert.assertEquals(
                                             "generateData should add one element in the jsonobject",
                                             1, value.keys().length);
@@ -138,6 +131,23 @@ public class ComponentRendererTest {
 
         internals.getStateTree().runExecutionsBeforeClientResponse();
 
+    }
+
+    @Test
+    public void nullValues() {
+        ComponentRenderer<Component, String> renderer = new ComponentRenderer<>(
+                e -> {
+                    return null;
+                });
+
+        ValueProvider<String, String> keyMapper = s -> "foo";
+        ComponentDataGenerator cdg = new ComponentDataGenerator<>(renderer,
+                keyMapper);
+
+        Component c = cdg.createComponent("foo");
+        Assert.assertNotNull(
+                "Placeholder component should be generated for null values", c);
+        Assert.assertEquals(0, c.getElement().getChildCount());
     }
 
     private void attachElement(UI ui, Element contentTemplate) {

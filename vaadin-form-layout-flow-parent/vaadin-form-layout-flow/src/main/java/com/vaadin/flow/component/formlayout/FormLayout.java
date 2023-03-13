@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -27,9 +27,13 @@ import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.JsonSerializable;
-
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.shared.SlotUtils;
 
 import elemental.json.Json;
 import elemental.json.JsonArray;
@@ -64,8 +68,13 @@ import elemental.json.JsonValue;
  *
  * @author Vaadin Ltd
  */
-public class FormLayout extends GeneratedVaadinFormLayout<FormLayout>
-        implements HasSize, HasComponents, ClickNotifier<FormLayout> {
+@Tag("vaadin-form-layout")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha1")
+@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@NpmPackage(value = "@vaadin/form-layout", version = "24.1.0-alpha1")
+@JsModule("@vaadin/form-layout/src/vaadin-form-layout.js")
+public class FormLayout extends Component
+        implements HasSize, HasStyle, HasComponents, ClickNotifier<FormLayout> {
 
     /**
      * A class used in describing the responsive layouting behavior of a
@@ -181,8 +190,13 @@ public class FormLayout extends GeneratedVaadinFormLayout<FormLayout>
      *
      * @author Vaadin Ltd
      */
-    public static class FormItem extends GeneratedVaadinFormItem<FormItem>
-            implements HasComponents {
+    @Tag("vaadin-form-item")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha1")
+    @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+    @NpmPackage(value = "@vaadin/form-layout", version = "24.1.0-alpha1")
+    @JsModule("@vaadin/form-layout/src/vaadin-form-item.js")
+    public static class FormItem extends Component
+            implements HasComponents, HasStyle, ClickNotifier<FormItem> {
 
         /**
          * Constructs an empty FormItem. Components to wrap can be added after
@@ -206,14 +220,53 @@ public class FormLayout extends GeneratedVaadinFormLayout<FormLayout>
             add(components);
         }
 
-        @Override
-        public void removeAll() {
-            super.removeAll();
+        /**
+         * Adds the given components as children of this component at the slot
+         * 'label'.
+         *
+         * @param components
+         *            The components to add.
+         * @see <a href=
+         *      "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">MDN
+         *      page about slots</a>
+         * @see <a href=
+         *      "https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element">Spec
+         *      website about slots</a>
+         */
+        protected void addToLabel(Component... components) {
+            SlotUtils.addToSlot(this, "label", components);
         }
 
-        @Override
+        /**
+         * Removes all contents from this component, this includes child
+         * components, text content as well as child elements that have been
+         * added directly to this component using the {@link Element} API.
+         */
+        public void removeAll() {
+            getElement().getChildren()
+                    .forEach(child -> child.removeAttribute("slot"));
+            getElement().removeAllChildren();
+        }
+
+        /**
+         * Removes the given child components from this component.
+         *
+         * @param components
+         *            The components to remove.
+         * @throws IllegalArgumentException
+         *             if any of the components is not a child of this
+         *             component.
+         */
         public void remove(Component... components) {
-            super.remove(components);
+            for (Component component : components) {
+                if (getElement().equals(component.getElement().getParent())) {
+                    component.getElement().removeAttribute("slot");
+                    getElement().removeChild(component.getElement());
+                } else {
+                    throw new IllegalArgumentException("The given component ("
+                            + component + ") is not a child of this component");
+                }
+            }
         }
     }
 

@@ -1,20 +1,12 @@
-package com.vaadin.flow.component.crud.testbench;
-
-/*
- * #%L
- * Vaadin Crud Testbench API
- * %%
- * Copyright 2000-2022 Vaadin Ltd.
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
+/**
+ * Copyright 2000-2023 Vaadin Ltd.
  *
- * See the file license.html distributed with this software for more
- * information about licensing.
+ * This program is available under Vaadin Commercial License and Service Terms.
  *
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
  */
+package com.vaadin.flow.component.crud.testbench;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.confirmdialog.testbench.ConfirmDialogElement;
@@ -52,7 +44,7 @@ public class CrudElement extends TestBenchElement {
      */
     public Optional<TestBenchElement> getNewItemButton() {
         ElementQuery<TestBenchElement> newButtonQuery = this
-                .$(TestBenchElement.class).attribute("new-button", "");
+                .$(TestBenchElement.class).attribute("slot", "new-button");
         return newButtonQuery.exists() ? Optional.of(newButtonQuery.last())
                 : Optional.empty();
     }

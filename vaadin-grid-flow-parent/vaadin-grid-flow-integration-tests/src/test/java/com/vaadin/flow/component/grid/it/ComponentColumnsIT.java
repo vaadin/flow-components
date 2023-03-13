@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -57,9 +57,6 @@ public class ComponentColumnsIT extends AbstractComponentIT {
 
     @Test
     public void compThenGridRendered_compButton() {
-        // <flow-component-renderer appid="ROOT" style=""><vaadin-button
-        // tabindex="0" role="button"
-        // focus-target="true">foo</vaadin-button></flow-component-renderer>
         assertCellContains(compThenGrid, 0, 1, "foo");
         assertCellContains(compThenGrid, 0, 1, "vaadin-button");
         assertCellContains(compThenGrid, 1, 1, "bar");
@@ -68,9 +65,6 @@ public class ComponentColumnsIT extends AbstractComponentIT {
 
     @Test
     public void gridThenCompRendered_compButton() {
-        // <flow-component-renderer appid="ROOT" style=""><vaadin-button
-        // tabindex="0" role="button"
-        // focus-target="true">foo</vaadin-button></flow-component-renderer>
         assertCellContains(gridThenComp, 0, 1, "foo");
         assertCellContains(gridThenComp, 0, 1, "vaadin-button");
         assertCellContains(gridThenComp, 1, 1, "bar");
@@ -79,8 +73,8 @@ public class ComponentColumnsIT extends AbstractComponentIT {
 
     private void assertCellContents(GridElement grid, int rowIndex,
             int colIndex, String expected) {
-        Assert.assertEquals(expected,
-                grid.getCell(rowIndex, colIndex).getInnerHTML());
+        Assert.assertEquals(expected, TestHelper.stripComments(
+                grid.getCell(rowIndex, colIndex).getInnerHTML()));
     }
 
     private void assertCellContains(GridElement grid, int rowIndex,

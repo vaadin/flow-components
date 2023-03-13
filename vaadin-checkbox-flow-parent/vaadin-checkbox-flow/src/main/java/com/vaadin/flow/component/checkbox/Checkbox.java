@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,10 +16,19 @@
 package com.vaadin.flow.component.checkbox;
 
 import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.AbstractSinglePropertyField;
+import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.Synchronize;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.dom.PropertyChangeListener;
 
 /**
@@ -34,8 +43,14 @@ import com.vaadin.flow.dom.PropertyChangeListener;
  *
  * @author Vaadin Ltd
  */
-public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
-        implements HasSize, HasLabel {
+@Tag("vaadin-checkbox")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha1")
+@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@NpmPackage(value = "@vaadin/checkbox", version = "24.1.0-alpha1")
+@JsModule("@vaadin/checkbox/src/vaadin-checkbox.js")
+public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
+        implements ClickNotifier<Checkbox>, Focusable<Checkbox>, HasLabel,
+        HasSize, HasStyle, HasTooltip {
 
     private final Label labelElement;
 
@@ -46,12 +61,16 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
      * Default constructor.
      */
     public Checkbox() {
-        // initial value, default value, accept null value
-        super(false, false, false, true);
+        super("checked", false, false);
         getElement().addPropertyChangeListener("indeterminate",
                 "indeterminate-changed", NO_OP);
         getElement().addPropertyChangeListener("checked", "checked-changed",
                 NO_OP);
+        // Initialize property value unless it has already been set from a
+        // template
+        if (getElement().getProperty("checked") == null) {
+            setPresentationValue(false);
+        }
         // https://github.com/vaadin/vaadin-checkbox/issues/25
         setIndeterminate(false);
 
@@ -177,27 +196,6 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
     }
 
     /**
-     * Set the current label text of this checkbox with HTML formatting.
-     *
-     * <p>
-     * XSS vulnerability warning: the given HTML is rendered in the browser as
-     * is and the developer is responsible for ensuring no harmful HTML is used.
-     * </p>
-     *
-     * @param htmlContent
-     *            the label html to set
-     *
-     * @deprecated Since 23.2, this API is deprecated in favor of
-     *             {@link #setLabelComponent(Component)}
-     */
-    @Deprecated
-    public void setLabelAsHtml(String htmlContent) {
-        setLabel("");
-        labelElement.getElement().setProperty("innerHTML", htmlContent);
-        getElement().appendChild(labelElement.getElement());
-    }
-
-    /**
      * Replaces the label content with the given label component.
      *
      * @param component
@@ -231,9 +229,8 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
      * @param autofocus
      *            the boolean value to set
      */
-    @Override
     public void setAutofocus(boolean autofocus) {
-        super.setAutofocus(autofocus);
+        getElement().setProperty("autofocus", autofocus);
     }
 
     /**
@@ -245,7 +242,7 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
      * @return the {@code autofocus} property from the checkbox
      */
     public boolean isAutofocus() {
-        return isAutofocusBoolean();
+        return getElement().getProperty("autofocus", false);
     }
 
     /**
@@ -258,9 +255,8 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
      *            the boolean value to set
      * @see #isIndeterminate()
      */
-    @Override
     public void setIndeterminate(boolean indeterminate) {
-        super.setIndeterminate(indeterminate);
+        getElement().setProperty("indeterminate", indeterminate);
     }
 
     /**
@@ -277,7 +273,27 @@ public class Checkbox extends GeneratedVaadinCheckbox<Checkbox, Boolean>
      *
      * @return the {@code indeterminate} property from the checkbox
      */
+    @Synchronize(property = "indeterminate", value = "indeterminate-changed")
     public boolean isIndeterminate() {
-        return isIndeterminateBoolean();
+        return getElement().getProperty("indeterminate", false);
+    }
+
+    /**
+     * If true, the user cannot interact with this element.
+     *
+     * @param disabled
+     *            the boolean value to set
+     */
+    void setDisabled(boolean disabled) {
+        getElement().setProperty("disabled", disabled);
+    }
+
+    /**
+     * If true, the user cannot interact with this element.
+     *
+     * @return the {@code disabled} property from the webcomponent
+     */
+    boolean isDisabledBoolean() {
+        return getElement().getProperty("disabled", false);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -76,7 +76,7 @@ public class GridSelectionTest {
                 .addMultiSelectionListener(event -> {
                     multiSelectionListenerCalled.incrementAndGet();
                     Assert.assertEquals(oldSelection, event.getOldSelection());
-                    Assert.assertEquals(selection, event.getNewSelection());
+                    Assert.assertEquals(selection, event.getValue());
 
                     Set<String> oldCopy = new LinkedHashSet<>(oldSelection);
                     Set<String> copy = new LinkedHashSet<>(selection);

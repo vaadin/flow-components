@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -48,7 +48,6 @@ public class TextAreaPage extends Div {
         addBasicFeatures();
         addMaxHeightFeature();
         addMinHeightFeature();
-        addInvalidCheck();
         addHelperText();
         addHelperComponent();
     }
@@ -106,13 +105,6 @@ public class TextAreaPage extends Div {
         textArea.getStyle().set("padding", "0");
         textArea.setId("text-area-with-min-height");
         add(textArea, message);
-    }
-
-    private void addInvalidCheck() {
-        final TextArea field = new TextArea();
-        field.setMaxLength(10);
-        field.setMinLength(5);
-        TextFieldTestPageUtil.addInvalidCheck(this, field);
     }
 
     private void addHelperText() {

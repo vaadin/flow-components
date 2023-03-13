@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -22,20 +22,19 @@ import java.util.stream.Stream;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.polymertemplate.Id;
-import com.vaadin.flow.component.polymertemplate.PolymerTemplate;
+import com.vaadin.flow.component.littemplate.LitTemplate;
+import com.vaadin.flow.component.template.Id;
 import com.vaadin.flow.data.provider.BeanDataGenerator;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.templatemodel.TemplateModel;
 
 @Route("vaadin-grid/templated-columns")
 @Tag("templated-columns")
 // Order matters see https://github.com/vaadin/flow/issues/5591
 @JsModule("src/templated-columns.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column-group.js")
-public class TemplatedColumnsPage extends PolymerTemplate<TemplateModel> {
+public class TemplatedColumnsPage extends LitTemplate {
 
     @Id
     private Grid<Person> grid;

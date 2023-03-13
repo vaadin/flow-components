@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,16 +15,12 @@
  */
 package com.vaadin.flow.component.grid;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.grid.Grid.Column;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
-import com.vaadin.flow.data.renderer.Renderer;
-import com.vaadin.flow.data.renderer.Rendering;
-import com.vaadin.flow.data.renderer.TemplateRenderer;
-import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.HtmlUtils;
 
 /**
@@ -39,16 +35,15 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
         implements ColumnBase<T> {
 
     protected final Grid<?> grid;
-    protected Element headerTemplate;
-    protected Element footerTemplate;
-    private Renderer<?> headerRenderer;
-    private Renderer<?> footerRenderer;
-
     private boolean headerRenderingScheduled;
     private boolean footerRenderingScheduled;
 
-    private String rawHeaderTemplate;
     private boolean sortingIndicators;
+
+    private String headerText;
+    private Component headerComponent;
+    private String footerText;
+    private Component footerComponent;
 
     /**
      * Base constructor with the destination Grid.
@@ -59,8 +54,7 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
     public AbstractColumn(Grid<?> grid) {
         this.grid = grid;
 
-        // Needed to update node ids used by <flow-component-renderer> when
-        // refreshing with @PreserveOnRefresh.
+        // Needed to update node ids when refreshing with @PreserveOnRefresh.
         addAttachListener(e -> {
             scheduleHeaderRendering();
             scheduleFooterRendering();
@@ -91,11 +85,6 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
         super.setVisible(visible);
     }
 
-    protected void setHeaderRenderer(Renderer<?> renderer) {
-        headerRenderer = renderer;
-        scheduleHeaderRendering();
-    }
-
     private void scheduleHeaderRendering() {
         if (headerRenderingScheduled) {
             return;
@@ -111,25 +100,18 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
                 }));
     }
 
-    private Rendering<?> renderHeader() {
-        if (headerTemplate != null) {
-            headerTemplate.removeFromParent();
-            headerTemplate = null;
-        }
-        if (headerRenderer == null) {
-            return null;
-        }
-        Rendering<?> rendering = headerRenderer.render(getElement(), null);
-        headerTemplate = rendering.getTemplateElement();
-        headerTemplate.setAttribute("class", "header");
+    private void renderHeader() {
+        Serializable headerContent = headerComponent != null
+                ? headerComponent.getElement()
+                : headerText;
+        boolean showSorter = hasSortingIndicators();
+        String sorterPath = showSorter
+                ? HtmlUtils.escape(getBottomLevelColumn().getInternalId())
+                : null;
 
-        setBaseHeaderTemplate(headerTemplate.getProperty("innerHTML"));
-        if (hasSortingIndicators()) {
-            headerTemplate.setProperty("innerHTML",
-                    addGridSorter(rawHeaderTemplate));
-        }
-
-        return rendering;
+        grid.getElement().executeJs(
+                "this.$connector.setHeaderRenderer($0, { content: $1, showSorter: $2, sorterPath: $3 })",
+                this.getElement(), headerContent, showSorter, sorterPath);
     }
 
     private void scheduleFooterRendering() {
@@ -147,47 +129,152 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
                 }));
     }
 
-    protected void setFooterRenderer(Renderer<?> renderer) {
-        footerRenderer = renderer;
-        scheduleFooterRendering();
+    private void renderFooter() {
+        Serializable footerContent = footerComponent != null
+                ? footerComponent.getElement()
+                : footerText;
+
+        grid.getElement().executeJs(
+                "this.$connector.setFooterRenderer($0, { content: $1 })",
+                this.getElement(), footerContent);
     }
 
-    private Rendering<?> renderFooter() {
-        if (footerTemplate != null) {
-            footerTemplate.removeFromParent();
-            footerTemplate = null;
-        }
-        if (footerRenderer == null) {
-            return null;
-        }
-        Rendering<?> rendering = footerRenderer.render(getElement(), null);
-        footerTemplate = rendering.getTemplateElement();
-        footerTemplate.setAttribute("class", "footer");
-        return rendering;
+    /**
+     * Returns the header text of the column.
+     *
+     * @return the header text
+     */
+    public String getHeaderText() {
+        return headerText;
     }
 
     protected void setHeaderText(String text) {
-        setHeaderRenderer(TemplateRenderer.of(HtmlUtils.escape(text)));
+        setHeaderContent(text, null);
+    }
+
+    /**
+     * Returns the footer text of the column.
+     *
+     * @return the footer text
+     */
+    public String getFooterText() {
+        return footerText;
     }
 
     protected void setFooterText(String text) {
-        setFooterRenderer(TemplateRenderer.of(HtmlUtils.escape(text)));
+        setFooterContent(text, null);
+    }
+
+    /**
+     * Returns the header component of the column.
+     *
+     * @return the header component
+     */
+    public Component getHeaderComponent() {
+        return headerComponent;
     }
 
     protected void setHeaderComponent(Component component) {
-        setHeaderRenderer(new ComponentRenderer<>(() -> component));
+        setHeaderContent(null, component);
+    }
+
+    /**
+     * Returns the footer component of the column.
+     *
+     * @return the footer component
+     */
+    public Component getFooterComponent() {
+        return footerComponent;
     }
 
     protected void setFooterComponent(Component component) {
-        setFooterRenderer(new ComponentRenderer<>(() -> component));
+        setFooterContent(null, component);
     }
 
-    protected Renderer<?> getHeaderRenderer() {
-        return headerRenderer;
+    /**
+     * Sets the content of the column header to either a text or a component,
+     * and triggers a re-render of the header. If both are null, then the
+     * content of the header is cleared.
+     *
+     * @param text
+     *            the new text content, can be null
+     * @param component
+     *            the new component content, can be null
+     */
+    void setHeaderContent(String text, Component component) {
+        headerText = text;
+        headerComponent = replaceChildComponent(headerComponent, component);
+        scheduleHeaderRendering();
     }
 
-    protected Renderer<?> getFooterRenderer() {
-        return footerRenderer;
+    /**
+     * Sets the content of the column footer to either a text or a component,
+     * and triggers a re-render of the footer. If both are null, then the
+     * content of the footer is cleared.
+     *
+     * @param text
+     *            the new text content, can be null
+     * @param component
+     *            the new component content, can be null
+     */
+    void setFooterContent(String text, Component component) {
+        footerText = text;
+        footerComponent = replaceChildComponent(footerComponent, component);
+        scheduleFooterRendering();
+    }
+
+    /**
+     * Removes the old component as a virtual child, adds the new component as a
+     * virtual child. Both components can be null, in which case the operation
+     * does nothing. Additionally, the old component will only be removed if it
+     * is still a child of this component, and the new component will be removed
+     * from its current parent before adding it to this component.
+     *
+     * @param oldComponent
+     *            the component to remove as a virtual child, can be null
+     * @param newComponent
+     *            the component to add as a virtual child, can be null
+     * @return the newly added component, or null if there was no component to
+     *         add
+     */
+    private Component replaceChildComponent(Component oldComponent,
+            Component newComponent) {
+        if (oldComponent != null && oldComponent.getParent().isPresent()
+                && oldComponent.getParent().get() == this) {
+            getElement().removeVirtualChild(oldComponent.getElement());
+        }
+        if (newComponent != null) {
+            if (newComponent.getElement().getParent() != null) {
+                newComponent.getElement().getParent()
+                        .removeVirtualChild(newComponent.getElement());
+            }
+            getElement().appendVirtualChild(newComponent.getElement());
+        }
+        return newComponent;
+    }
+
+    /**
+     * Moves the current header content, either a text or a component, to a
+     * different column or column group. Also clears the content of this column.
+     *
+     * @param otherColumn
+     *            the column or group to move the content to
+     */
+    protected void moveHeaderContent(AbstractColumn<?> otherColumn) {
+        otherColumn.setHeaderContent(headerText, headerComponent);
+        setHeaderContent(null, null);
+    }
+
+    /**
+     * Moves the current footer content, either a text or a component, to a
+     * different column or column group. Also clears the content of this column.
+     *
+     * @param otherColumn
+     *            the column or group to move the content to
+     */
+    protected void moveFooterContent(AbstractColumn<?> otherColumn) {
+        otherColumn.setFooterContent(footerText, footerComponent);
+        setFooterContent(null, null);
     }
 
     /**
@@ -226,30 +313,6 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
         return sortingIndicators;
     }
 
-    /*
-     * The original header template is needed for when sorting is enabled or
-     * disabled in a column.
-     */
-    protected void setBaseHeaderTemplate(String headerTemplate) {
-        rawHeaderTemplate = headerTemplate;
-    }
-
-    /*
-     * Adds the sorting webcomponent markup to an existing template.
-     */
-    protected String addGridSorter(String templateInnerHtml) {
-        String escapedColumnId = HtmlUtils
-                .escape(getBottomLevelColumn().getInternalId());
-
-        String textContent = org.jsoup.Jsoup.parse(templateInnerHtml).text();
-        String sortBy = textContent.isBlank() ? ""
-                : "aria-label='Sort by " + textContent + "'";
-
-        return String.format(
-                "<vaadin-grid-sorter path='%s' %s>%s</vaadin-grid-sorter>",
-                escapedColumnId, sortBy, templateInnerHtml);
-    }
-
     /**
      * Gets the {@code <vaadin-grid-column>} component that is a child of this
      * component, or this component in case this is a bottom level
@@ -279,5 +342,4 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
                         .collect(Collectors.toList()));
         return columnChildren;
     }
-
 }

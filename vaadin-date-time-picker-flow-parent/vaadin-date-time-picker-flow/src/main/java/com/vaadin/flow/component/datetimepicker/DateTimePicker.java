@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -22,23 +22,37 @@ import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import com.vaadin.flow.component.*;
+import com.vaadin.flow.component.AbstractSinglePropertyField;
+import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.HasHelper;
+import com.vaadin.flow.component.HasLabel;
+import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.ClientValidationUtil;
+import com.vaadin.flow.component.shared.HasAutoOpen;
+import com.vaadin.flow.component.shared.HasClientValidation;
+import com.vaadin.flow.component.shared.HasOverlayClassName;
+import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.ValidationUtil;
+import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.component.timepicker.StepsUtil;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
+import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
+import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.shared.Registration;
 
-@Tag("vaadin-date-time-picker-date-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha5")
-@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@Tag("vaadin-date-picker")
 class DateTimePickerDatePicker
         extends com.vaadin.flow.component.datepicker.DatePicker {
     @Override
@@ -48,12 +62,22 @@ class DateTimePickerDatePicker
 
     void passThroughPresentationValue(LocalDate newPresentationValue) {
         super.setPresentationValue(newPresentationValue);
+
+        if (Objects.equals(newPresentationValue, getEmptyValue())
+                && isInputValuePresent()) {
+            // Clear the input element from possible bad input.
+            getElement().executeJs("this.inputElement.value = ''");
+            getElement().setProperty("_hasInputValue", false);
+        }
+    }
+
+    @Override
+    protected boolean isInputValuePresent() {
+        return super.isInputValuePresent();
     }
 }
 
-@Tag("vaadin-date-time-picker-time-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha5")
-@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@Tag("vaadin-time-picker")
 class DateTimePickerTimePicker
         extends com.vaadin.flow.component.timepicker.TimePicker {
     @Override
@@ -63,6 +87,18 @@ class DateTimePickerTimePicker
 
     void passThroughPresentationValue(LocalTime newPresentationValue) {
         super.setPresentationValue(newPresentationValue);
+
+        if (Objects.equals(newPresentationValue, getEmptyValue())
+                && isInputValuePresent()) {
+            // Clear the input element from possible bad input.
+            getElement().executeJs("this.inputElement.value = ''");
+            getElement().setProperty("_hasInputValue", false);
+        }
+    }
+
+    @Override
+    protected boolean isInputValuePresent() {
+        return super.isInputValuePresent();
     }
 }
 
@@ -76,17 +112,16 @@ class DateTimePickerTimePicker
  * @author Vaadin Ltd
  */
 @Tag("vaadin-date-time-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha5")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/date-time-picker", version = "23.2.0-alpha5")
-@NpmPackage(value = "@vaadin/vaadin-date-time-picker", version = "23.2.0-alpha5")
+@NpmPackage(value = "@vaadin/date-time-picker", version = "24.1.0-alpha1")
 @JsModule("@vaadin/date-time-picker/src/vaadin-date-time-picker.js")
-public class DateTimePicker extends
-        AbstractSinglePropertyField<DateTimePicker, LocalDateTime> implements
-        HasStyle, HasSize, HasTheme, HasValidation, Focusable<DateTimePicker>,
-        HasHelper, HasLabel, HasValidator<LocalDateTime> {
-
-    private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
+public class DateTimePicker
+        extends AbstractSinglePropertyField<DateTimePicker, LocalDateTime>
+        implements Focusable<DateTimePicker>, HasAutoOpen, HasClientValidation,
+        HasHelper, HasLabel, HasOverlayClassName, HasSize, HasStyle,
+        HasThemeVariant<DateTimePickerVariant>, HasTooltip,
+        HasValidationProperties, HasValidator<LocalDateTime> {
 
     private final DateTimePickerDatePicker datePicker = new DateTimePickerDatePicker();
     private final DateTimePickerTimePicker timePicker = new DateTimePickerTimePicker();
@@ -165,13 +200,15 @@ public class DateTimePicker extends
             setPresentationValue(null);
         }
 
-        addToSlot(datePicker, "date-picker");
-        addToSlot(timePicker, "time-picker");
+        SlotUtils.addToSlot(this, "date-picker", datePicker);
+        SlotUtils.addToSlot(this, "time-picker", timePicker);
 
         // workaround for https://github.com/vaadin/flow/issues/3496
         setInvalid(false);
 
         addValueChangeListener(e -> validate());
+
+        addClientValidatedEventListener(e -> validate());
     }
 
     /**
@@ -275,9 +312,23 @@ public class DateTimePicker extends
      */
     @Override
     public void setValue(LocalDateTime value) {
+        LocalDateTime oldValue = getValue();
+
         value = sanitizeValue(value);
         super.setValue(value);
-        synchronizeChildComponentValues(value);
+
+        boolean isInputValuePresent = timePicker.isInputValuePresent()
+                || datePicker.isInputValuePresent();
+        boolean isValueRemainedEmpty = Objects.equals(oldValue, getEmptyValue())
+                && Objects.equals(value, getEmptyValue());
+        if (isValueRemainedEmpty && isInputValuePresent) {
+            // Clear the input elements from possible bad input.
+            synchronizeChildComponentValues(value);
+            fireEvent(new ClientValidatedEvent(this, false));
+        } else {
+            synchronizeChildComponentValues(value);
+        }
+
     }
 
     /**
@@ -307,15 +358,6 @@ public class DateTimePicker extends
             datePicker.passThroughPresentationValue(null);
             timePicker.passThroughPresentationValue(null);
         }
-    }
-
-    /**
-     * Adds the given Component to the specified slot of this component.
-     */
-    private void addToSlot(Component component, String slot) {
-        Objects.requireNonNull(component, "Component to add cannot be null");
-        component.getElement().setAttribute("slot", slot);
-        getElement().appendChild(component.getElement());
     }
 
     @Override
@@ -510,7 +552,7 @@ public class DateTimePicker extends
      */
     @Override
     public void addThemeName(String themeName) {
-        HasTheme.super.addThemeName(themeName);
+        HasThemeVariant.super.addThemeName(themeName);
         synchronizeTheme();
     }
 
@@ -525,7 +567,7 @@ public class DateTimePicker extends
      */
     @Override
     public boolean removeThemeName(String themeName) {
-        boolean result = HasTheme.super.removeThemeName(themeName);
+        boolean result = HasThemeVariant.super.removeThemeName(themeName);
         synchronizeTheme();
         return result;
     }
@@ -540,7 +582,7 @@ public class DateTimePicker extends
      */
     @Override
     public void setThemeName(String themeName) {
-        HasTheme.super.setThemeName(themeName);
+        HasThemeVariant.super.setThemeName(themeName);
         synchronizeTheme();
     }
 
@@ -555,7 +597,7 @@ public class DateTimePicker extends
      */
     @Override
     public void setThemeName(String themeName, boolean set) {
-        HasTheme.super.setThemeName(themeName, set);
+        HasThemeVariant.super.setThemeName(themeName, set);
         synchronizeTheme();
     }
 
@@ -568,7 +610,7 @@ public class DateTimePicker extends
      */
     @Override
     public void addThemeNames(String... themeNames) {
-        HasTheme.super.addThemeNames(themeNames);
+        HasThemeVariant.super.addThemeNames(themeNames);
         synchronizeTheme();
     }
 
@@ -581,45 +623,8 @@ public class DateTimePicker extends
      */
     @Override
     public void removeThemeNames(String... themeNames) {
-        HasTheme.super.removeThemeNames(themeNames);
+        HasThemeVariant.super.removeThemeNames(themeNames);
         synchronizeTheme();
-    }
-
-    /**
-     * Sets the error message to display when the input is invalid.
-     */
-    @Override
-    public void setErrorMessage(String errorMessage) {
-        getElement().setProperty("errorMessage",
-                errorMessage == null ? "" : errorMessage);
-    }
-
-    /**
-     * Gets the error message to display when the input is invalid.
-     *
-     * @return the current error message
-     */
-    @Override
-    public String getErrorMessage() {
-        return getElement().getProperty("errorMessage");
-    }
-
-    /**
-     * Sets the validity indication of the date time picker output.
-     */
-    @Override
-    public void setInvalid(boolean invalid) {
-        getElement().setProperty("invalid", invalid);
-    }
-
-    /**
-     * Gets the validity indication of the date time picker output.
-     *
-     * @return the current validity indication.
-     */
-    @Override
-    public boolean isInvalid() {
-        return getElement().getProperty("invalid", false);
     }
 
     @Override
@@ -627,13 +632,35 @@ public class DateTimePicker extends
         return (value, context) -> checkValidity(value);
     }
 
+    @Override
+    public Registration addValidationStatusChangeListener(
+            ValidationStatusChangeListener<LocalDateTime> listener) {
+        return addClientValidatedEventListener(event -> listener
+                .validationStatusChanged(new ValidationStatusChangeEvent<>(this,
+                        event.isValid())));
+    }
+
     private ValidationResult checkValidity(LocalDateTime value) {
-        var greaterThanMax = ValidationUtil.checkGreaterThanMax(value, max);
+        boolean hasNonParsableDatePickerValue = datePicker
+                .getValue() == datePicker.getEmptyValue()
+                && datePicker.isInputValuePresent();
+
+        boolean hasNonParsableTimePickerValue = timePicker
+                .getValue() == timePicker.getEmptyValue()
+                && timePicker.isInputValuePresent();
+
+        if (hasNonParsableDatePickerValue || hasNonParsableTimePickerValue) {
+            return ValidationResult.error("");
+        }
+
+        ValidationResult greaterThanMax = ValidationUtil
+                .checkGreaterThanMax(value, max);
         if (greaterThanMax.isError()) {
             return greaterThanMax;
         }
 
-        var smallerThanMin = ValidationUtil.checkSmallerThanMin(value, min);
+        ValidationResult smallerThanMin = ValidationUtil
+                .checkSmallerThanMin(value, min);
         if (smallerThanMin.isError()) {
             return smallerThanMin;
         }
@@ -758,50 +785,14 @@ public class DateTimePicker extends
      *            Value for the auto open property,
      */
     public void setAutoOpen(boolean autoOpen) {
-        getElement().setProperty(PROP_AUTO_OPEN_DISABLED, !autoOpen);
+        getElement().setProperty("autoOpenDisabled", !autoOpen);
         datePicker.setAutoOpen(autoOpen);
         timePicker.setAutoOpen(autoOpen);
-    }
-
-    /**
-     * When auto open is enabled, the dropdown will open when the field is
-     * clicked.
-     *
-     * @return {@code true} if auto open is enabled. {@code false} otherwise.
-     *         Default is {@code true}
-     */
-    public boolean isAutoOpen() {
-        return !getElement().getProperty(PROP_AUTO_OPEN_DISABLED, false);
     }
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        FieldValidationUtil.disableClientValidation(this);
-
-    }
-
-    /**
-     * Adds theme variants to the component.
-     *
-     * @param variants
-     *            theme variants to add
-     */
-    public void addThemeVariants(DateTimePickerVariant... variants) {
-        getThemeNames().addAll(
-                Stream.of(variants).map(DateTimePickerVariant::getVariantName)
-                        .collect(Collectors.toList()));
-    }
-
-    /**
-     * Removes theme variants from the component.
-     *
-     * @param variants
-     *            theme variants to remove
-     */
-    public void removeThemeVariants(DateTimePickerVariant... variants) {
-        getThemeNames().removeAll(
-                Stream.of(variants).map(DateTimePickerVariant::getVariantName)
-                        .collect(Collectors.toList()));
+        ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -121,11 +121,8 @@ public class LitRendererIT extends AbstractComponentIT {
 
     private String getClientCallableLogArray() {
         String message = getLogEntries(Level.WARNING).stream()
-                // Discard lit-element warning lines
-                .filter(m -> !m.getMessage().contains(
-                        "The main 'lit-element' module entrypoint is deprecated."))
-                // Discard iron-icon warning lines
-                .filter(m -> !m.getMessage().contains("iron-icon"))
+                // Discard all but event messages
+                .filter(m -> m.getMessage().contains("event:"))
                 // Return first warning message in console
                 .findFirst().get().getMessage();
         return message.split("\"")[1];

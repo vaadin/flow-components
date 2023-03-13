@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,10 +15,7 @@
  */
 package com.vaadin.flow.component.combobox;
 
-import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
-import com.vaadin.flow.data.renderer.Rendering;
-import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.shared.Registration;
 
 import java.io.Serializable;
@@ -39,7 +36,6 @@ class ComboBoxRenderManager<TItem> implements Serializable {
 
     private boolean renderScheduled;
     private final List<Registration> renderingRegistrations = new ArrayList<>();
-    private Element template;
 
     ComboBoxRenderManager(ComboBoxBase<?, TItem, ?> comboBox) {
         this.comboBox = comboBox;
@@ -68,25 +64,11 @@ class ComboBoxRenderManager<TItem> implements Serializable {
         renderingRegistrations.forEach(Registration::remove);
         renderingRegistrations.clear();
 
-        Rendering<TItem> rendering;
-        if (renderer instanceof LitRenderer) {
-            // LitRenderer
-            if (template != null && template.getParent() != null) {
-                comboBox.getElement().removeChild(template);
-            }
-            rendering = renderer.render(comboBox.getElement(),
-                    comboBox.getDataCommunicator().getKeyMapper());
-        } else {
-            // TemplateRenderer or ComponentRenderer
-            if (template == null) {
-                template = new Element("template");
-            }
-            if (template.getParent() == null) {
-                comboBox.getElement().appendChild(template);
-            }
-            rendering = renderer.render(comboBox.getElement(),
-                    comboBox.getDataCommunicator().getKeyMapper(), template);
-        }
+        var dataCommunicator = comboBox.getDataCommunicator();
+
+        var rendering = renderer.render(comboBox.getElement(),
+                dataCommunicator != null ? dataCommunicator.getKeyMapper()
+                        : null);
 
         rendering.getDataGenerator().ifPresent(renderingDataGenerator -> {
             Registration renderingDataGeneratorRegistration = comboBox

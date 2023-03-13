@@ -20,14 +20,14 @@ public class FilterDebouncePage extends VerticalLayout {
         ComboBox<String> combo = new ComboBox<>();
         ListDataProvider<String> dp = new ListDataProvider<>(
                 Arrays.asList("aaa", "bbb", "ccc"));
-        combo.setDataProvider((filter, offset, limit) -> {
+        combo.setItems((query) -> {
             waitABit();
-            return dp.fetch(
-                    new Query<>(offset, limit, null, null, filter(filter)));
-        }, s -> {
+            return dp.fetch(new Query<>(query.getOffset(), query.getLimit(),
+                    null, null, filter(query.getFilter().get())));
+        }, query -> {
             waitABit();
-            return dp.size(
-                    new Query<>(0, Integer.MAX_VALUE, null, null, filter(s)));
+            return dp.size(new Query<>(0, Integer.MAX_VALUE, null, null,
+                    filter(query.getFilter().get())));
         });
         combo.setAutofocus(true);
         Input tf = new Input();

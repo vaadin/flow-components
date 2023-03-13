@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -53,11 +53,10 @@ import java.util.Objects;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-avatar")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha5")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/avatar/src/vaadin-avatar.js")
-@NpmPackage(value = "@vaadin/avatar", version = "23.2.0-alpha5")
-@NpmPackage(value = "@vaadin/vaadin-avatar", version = "23.2.0-alpha5")
+@NpmPackage(value = "@vaadin/avatar", version = "24.1.0-alpha1")
 public class Avatar extends Component
         implements HasStyle, HasSize, HasThemeVariant<AvatarVariant> {
 
@@ -295,17 +294,25 @@ public class Avatar extends Component
         getElement().setProperty("colorIndex", colorIndex);
     }
 
-    // Override is only required to keep binary compatibility with other 23.x
-    // minor versions, can be removed in a future major
-    @Override
-    public void addThemeVariants(AvatarVariant... variants) {
-        HasThemeVariant.super.addThemeVariants(variants);
+    /**
+     * Gets the enabled state of the avatar tooltip, which is {@code false} by
+     * default.
+     *
+     * @return <code>true</code> if the tooltip is shown on hover or focus,
+     *         <code>false</code> otherwise
+     */
+    public boolean isTooltipEnabled() {
+        return getElement().getProperty("withTooltip", false);
     }
 
-    // Override is only required to keep binary compatibility with other 23.x
-    // minor versions, can be removed in a future major
-    @Override
-    public void removeThemeVariants(AvatarVariant... variants) {
-        HasThemeVariant.super.removeThemeVariants(variants);
+    /**
+     * Sets the enabled of the avatar tooltip.
+     *
+     * @param tooltipEnabled
+     *            <code>true</code> to show the tooltip on hover or focus,
+     *            <code>false</code> to not show it
+     */
+    public void setTooltipEnabled(boolean tooltipEnabled) {
+        getElement().setProperty("withTooltip", tooltipEnabled);
     }
 }

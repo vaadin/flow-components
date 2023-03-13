@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -46,10 +46,14 @@ import javax.annotation.concurrent.NotThreadSafe;
 @NotThreadSafe
 public class NotificationTest {
 
-    private final UI ui = new UI();
+    private UI ui;
 
     @Before
     public void setup() {
+        VaadinSession session = Mockito.mock(VaadinSession.class);
+        ui = new UI();
+        ui.getInternals().setSession(session);
+
         UI.setCurrent(ui);
     }
 
@@ -139,14 +143,6 @@ public class NotificationTest {
         }
     }
 
-    @Test
-    public void templateWarningSuppressed() {
-        Notification notification = new Notification();
-
-        Assert.assertTrue("Template warning is not suppressed", notification
-                .getElement().hasAttribute("suppress-template-warning"));
-    }
-
     @Test(expected = IllegalStateException.class)
     public void setOpened_noUiInstance() {
         UI.setCurrent(null);
@@ -177,40 +173,36 @@ public class NotificationTest {
     }
 
     @Test
-    public void setText_notificationHasAddedComponents_innerHtmlIsTextValue() {
+    public void addComponent_setText_notificationHasText() {
         Notification notification = new Notification();
 
         notification.add(new Div());
         notification.setText("foo");
 
-        notification.open();
-
-        flushBeforeClientResponse();
-
-        Element templateElement = notification.getElement().getChildren()
-                .findFirst().get();
-
-        String innerHtml = templateElement.getProperty("innerHTML");
-        Assert.assertEquals("foo", innerHtml);
+        Assert.assertEquals("foo",
+                notification.getElement().getProperty("text"));
     }
 
     @Test
-    public void add_notificationHasText_innerHtmlIsTemplateValue() {
+    public void setText_addComponent_notificationDoesNotHaveText() {
         Notification notification = new Notification();
 
         notification.setText("foo");
         notification.add(new Div());
 
-        notification.open();
+        Assert.assertEquals(null,
+                notification.getElement().getProperty("text"));
+    }
 
-        flushBeforeClientResponse();
+    @Test
+    public void setText_setTextNull_notificationDoesNotHaveText() {
+        Notification notification = new Notification();
 
-        Element templateElement = notification.getElement().getChildren()
-                .findFirst().get();
+        notification.setText("foo");
+        notification.setText(null);
 
-        String innerHtml = templateElement.getProperty("innerHTML");
-        Assert.assertThat(innerHtml,
-                CoreMatchers.startsWith("<flow-component-renderer"));
+        Assert.assertEquals(null,
+                notification.getElement().getProperty("text"));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -237,7 +229,7 @@ public class NotificationTest {
     }
 
     @Test
-    public void createNotificationh_closeOnParentDetach() {
+    public void createNotification_closeOnParentDetach() {
         // Create a Notification manually and add it to a parent container
         Notification notification = new Notification();
         notification.open();
@@ -250,6 +242,8 @@ public class NotificationTest {
 
         // Remove the parent container from the UI
         ui.remove(parent);
+        // Auto-close happens in before client response
+        flushBeforeClientResponse();
 
         // The notification should have been closed on detach, even if it was
         // the parent that was removed
@@ -259,7 +253,7 @@ public class NotificationTest {
     }
 
     @Test
-    public void showNotification_closeAndDetachOnParentDetach() {
+    public void showNotificationInModal_closeAndDetachOnParentDetach() {
         // Create a modal parent container and add it to the UI
         Div parent = new Div();
         ui.add(parent);
@@ -279,6 +273,8 @@ public class NotificationTest {
 
         // Remove the modal parent container from the UI
         ui.remove(parent);
+        // Auto-close happens in before client response
+        flushBeforeClientResponse();
 
         // The notification should have been closed on detach, even if it was
         // the parent that was removed
@@ -305,6 +301,8 @@ public class NotificationTest {
 
         // Remove the modal parent container from the UI
         ui.remove(parent);
+        // Auto-removal happens in before client response
+        flushBeforeClientResponse();
 
         // Even though the notification was created using Notification.show(),
         // it got was manually added to the parent container so it should not
@@ -314,8 +312,6 @@ public class NotificationTest {
 
     private void flushBeforeClientResponse() {
         UIInternals internals = ui.getInternals();
-        VaadinSession session = Mockito.mock(VaadinSession.class);
-        internals.setSession(session);
         internals.getStateTree().runExecutionsBeforeClientResponse();
     }
 }

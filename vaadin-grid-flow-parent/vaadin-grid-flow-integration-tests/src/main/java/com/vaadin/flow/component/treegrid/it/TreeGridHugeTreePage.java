@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -69,8 +69,8 @@ public class TreeGridHugeTreePage extends Div {
         addRootItems("Granddad", 3, data, parentPathMap)
                 .forEach(granddad -> addItems("Dad", dadCount, granddad, data,
                         parentPathMap)
-                                .forEach(dad -> addItems("Son", 300, dad, data,
-                                        parentPathMap)));
+                        .forEach(dad -> addItems("Son", 300, dad, data,
+                                parentPathMap)));
 
         return new TreeDataProvider<>(data);
     }

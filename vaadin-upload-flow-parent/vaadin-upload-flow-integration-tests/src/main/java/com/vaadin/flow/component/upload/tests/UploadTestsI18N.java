@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -27,9 +27,10 @@ class UploadTestsI18N {
             .setDropFiles(
                     new UploadI18N.DropFiles().setOne("Перетащите файл сюда...")
                             .setMany("Перетащите файлы сюда..."))
-            .setAddFiles(new UploadI18N.AddFiles()
-                    .setOne("Выбрать файл").setMany("Добавить файлы"))
-            .setCancel("Отменить")
+            .setAddFiles(new UploadI18N.AddFiles().setOne("Выбрать файл")
+                    .setMany("Добавить файлы"))
+            .setFile(new UploadI18N.File().setStart("Загрузить")
+                    .setRetry("Повторить").setRemove("Удалить"))
             .setError(new UploadI18N.Error()
                     .setTooManyFiles("Слишком много файлов.")
                     .setFileIsTooBig("Слишком большой файл.")

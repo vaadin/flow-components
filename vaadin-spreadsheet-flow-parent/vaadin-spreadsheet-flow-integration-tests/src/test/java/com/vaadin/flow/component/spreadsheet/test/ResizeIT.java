@@ -2,17 +2,19 @@ package com.vaadin.flow.component.spreadsheet.test;
 
 import com.vaadin.flow.component.spreadsheet.testbench.SheetHeaderElement;
 import com.vaadin.flow.component.spreadsheet.testbench.SpreadsheetElement;
+import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.interactions.Actions;
 
+@TestPath("vaadin-spreadsheet")
 public class ResizeIT extends AbstractSpreadsheetIT {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL());
+        open();
         createNewSpreadsheet();
     }
 
@@ -58,14 +60,14 @@ public class ResizeIT extends AbstractSpreadsheetIT {
 
     @Test
     public void testColumnAutoResize() {
-        putCellContent("B2", "text");
+        setCellValue("B2", "text");
 
         $(SpreadsheetElement.class).first().getColumnHeader(2).getResizeHandle()
                 .doubleClick();
         getCommandExecutor().waitForVaadin();
         assertInRange(25, getSize(getCellStyle("B2", "width")), 35);
 
-        putCellContent("D2", "very long text inserted in D2.");
+        setCellValue("D2", "very long text inserted in D2.");
 
         $(SpreadsheetElement.class).first().getColumnHeader(4).getResizeHandle()
                 .doubleClick();

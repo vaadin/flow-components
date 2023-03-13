@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -41,15 +41,15 @@ public class GridDataProviderSize extends Div {
         div.setText("0");
         div.setId("info");
 
-        grid.setDataProvider(new AbstractBackEndDataProvider<String, Object>() {
+        grid.setItems(new AbstractBackEndDataProvider<>() {
             @Override
             protected Stream<String> fetchFromBackEnd(
-                    Query<String, Object> query) {
+                    Query<String, Void> query) {
                 return Stream.of();
             }
 
             @Override
-            protected int sizeInBackEnd(Query<String, Object> query) {
+            protected int sizeInBackEnd(Query<String, Void> query) {
                 Integer count = Integer.parseInt(div.getText()) + 1;
                 div.setText(count.toString());
                 return 0;

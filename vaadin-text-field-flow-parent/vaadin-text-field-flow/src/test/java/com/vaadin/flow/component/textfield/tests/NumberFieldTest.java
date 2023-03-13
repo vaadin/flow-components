@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.textfield.tests;
 
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.flow.dom.ThemeList;
@@ -176,6 +177,11 @@ public class NumberFieldTest extends TextFieldTest {
         ThemeList themeNames = field.getThemeNames();
         Assert.assertFalse(themeNames
                 .contains(TextFieldVariant.LUMO_SMALL.getVariantName()));
+    }
+
+    @Test
+    public void implementsHasTooltip() {
+        Assert.assertTrue(field instanceof HasTooltip);
     }
 
     private void assertValidValues(Double... values) {

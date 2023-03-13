@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -38,7 +38,12 @@ import com.vaadin.flow.component.contextmenu.MenuManager;
 import com.vaadin.flow.component.contextmenu.SubMenu;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasOverlayClassName;
+import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.function.SerializableRunnable;
 import com.vaadin.flow.internal.JsonSerializer;
 
 import elemental.json.JsonObject;
@@ -51,14 +56,16 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-menu-bar")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha5")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("./menubarConnector.js")
 @JsModule("@vaadin/menu-bar/src/vaadin-menu-bar.js")
-@NpmPackage(value = "@vaadin/menu-bar", version = "23.2.0-alpha5")
-@NpmPackage(value = "@vaadin/vaadin-menu-bar", version = "23.2.0-alpha5")
+@JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
+@NpmPackage(value = "@vaadin/menu-bar", version = "24.1.0-alpha1")
+@NpmPackage(value = "@vaadin/tooltip", version = "24.1.0-alpha1")
 public class MenuBar extends Component
-        implements HasMenuItems, HasSize, HasStyle, HasTheme, HasEnabled {
+        implements HasEnabled, HasMenuItems, HasOverlayClassName, HasSize,
+        HasStyle, HasThemeVariant<MenuBarVariant> {
 
     private MenuManager<MenuBar, MenuItem, SubMenu> menuManager;
     private MenuItemsArrayGenerator<MenuItem> menuItemsArrayGenerator;
@@ -74,7 +81,14 @@ public class MenuBar extends Component
      */
     public MenuBar() {
         menuItemsArrayGenerator = new MenuItemsArrayGenerator<>(this);
-        menuManager = new MenuManager<>(this, this::resetContent,
+        // Not a lambda because of UI serialization purposes
+        SerializableRunnable resetContent = new SerializableRunnable() {
+            @Override
+            public void run() {
+                resetContent();
+            }
+        };
+        menuManager = new MenuManager<>(this, resetContent,
                 (menu, contentReset) -> new MenuBarRootItem(this, contentReset),
                 MenuItem.class, null);
         addAttachListener(event -> {
@@ -177,6 +191,113 @@ public class MenuBar extends Component
     }
 
     /**
+     * Creates a new {@link MenuItem} component with the provided text content
+     * and the tooltip text and adds it to the root level of this menu bar.
+     * <p>
+     * The added {@link MenuItem} component is placed inside a button in the
+     * menu bar. If this button overflows the menu bar horizontally, the
+     * {@link MenuItem} is moved out of the button, into a context menu openable
+     * via an overflow button at the end of the button row.
+     * <p>
+     * To add content to the sub menu opened by clicking the root level item,
+     * use {@link MenuItem#getSubMenu()}.
+     *
+     * @param text
+     *            the text content for the new item
+     * @param tooltipText
+     *            the tooltip text for the new item
+     * @return the added {@link MenuItem} component
+     */
+    public MenuItem addItem(String text, String tooltipText) {
+        var item = addItem(text);
+        setTooltip(item, tooltipText);
+        return item;
+    }
+
+    /**
+     * Creates a new {@link MenuItem} component with the provided tooltip text
+     * and adds it to the root level of this menu bar. The provided component is
+     * added into the created {@link MenuItem}.
+     * <p>
+     * The added {@link MenuItem} component is placed inside a button in the
+     * menu bar. If this button overflows the menu bar horizontally, the
+     * {@link MenuItem} is moved out of the button, into a context menu openable
+     * via an overflow button at the end of the button row.
+     * <p>
+     * To add content to the sub menu opened by clicking the root level item,
+     * use {@link MenuItem#getSubMenu()}.
+     *
+     * @param component
+     *            the component to add inside new item
+     * @param tooltipText
+     *            the tooltip text for the new item
+     * @return the added {@link MenuItem} component
+     */
+    public MenuItem addItem(Component component, String tooltipText) {
+        var item = addItem(component);
+        setTooltip(item, tooltipText);
+        return item;
+    }
+
+    /**
+     * Creates a new {@link MenuItem} component with the provided text content
+     * and the tooltip text and click listener and adds it to the root level of
+     * this menu bar.
+     * <p>
+     * The added {@link MenuItem} component is placed inside a button in the
+     * menu bar. If this button overflows the menu bar horizontally, the
+     * {@link MenuItem} is moved out of the button, into a context menu openable
+     * via an overflow button at the end of the button row.
+     * <p>
+     * To add content to the sub menu opened by clicking the root level item,
+     * use {@link MenuItem#getSubMenu()}.
+     *
+     * @param text
+     *            the text content for the new item
+     * @param tooltipText
+     *            the tooltip text for the new item
+     * @param clickListener
+     *            the handler for clicking the new item, can be {@code null} to
+     *            not add listener
+     * @return the added {@link MenuItem} component
+     */
+    public MenuItem addItem(String text, String tooltipText,
+            ComponentEventListener<ClickEvent<MenuItem>> clickListener) {
+        var item = addItem(text, clickListener);
+        setTooltip(item, tooltipText);
+        return item;
+    }
+
+    /**
+     * Creates a new {@link MenuItem} component with the provided click listener
+     * and the tooltip text and adds it to the root level of this menu bar. The
+     * provided component is added into the created {@link MenuItem}.
+     * <p>
+     * The added {@link MenuItem} component is placed inside a button in the
+     * menu bar. If this button overflows the menu bar horizontally, the
+     * {@link MenuItem} is moved out of the button, into a context menu openable
+     * via an overflow button at the end of the button row.
+     * <p>
+     * To add content to the sub menu opened by clicking the root level item,
+     * use {@link MenuItem#getSubMenu()}.
+     *
+     * @param component
+     *            the component to add inside the added menu item
+     * @param tooltipText
+     *            the tooltip text for the new item
+     * @param clickListener
+     *            the handler for clicking the new item, can be {@code null} to
+     *            not add listener
+     * @return the added {@link MenuItem} component
+     */
+    public MenuItem addItem(Component component, String tooltipText,
+            ComponentEventListener<ClickEvent<MenuItem>> clickListener) {
+        var item = addItem(component, clickListener);
+        setTooltip(item, tooltipText);
+        return item;
+    }
+
+    /**
      * Gets the {@link MenuItem} components added to the root level of the menu
      * bar.
      * <p>
@@ -243,30 +364,6 @@ public class MenuBar extends Component
      */
     public boolean isOpenOnHover() {
         return getElement().getProperty("openOnHover", false);
-    }
-
-    /**
-     * Adds theme variants to the component.
-     *
-     * @param variants
-     *            theme variants to add
-     */
-    public void addThemeVariants(MenuBarVariant... variants) {
-        getThemeNames()
-                .addAll(Stream.of(variants).map(MenuBarVariant::getVariantName)
-                        .collect(Collectors.toList()));
-    }
-
-    /**
-     * Removes theme variants from the component.
-     *
-     * @param variants
-     *            theme variants to remove
-     */
-    public void removeThemeVariants(MenuBarVariant... variants) {
-        getThemeNames().removeAll(
-                Stream.of(variants).map(MenuBarVariant::getVariantName)
-                        .collect(Collectors.toList()));
     }
 
     /**
@@ -392,5 +489,28 @@ public class MenuBar extends Component
             this.moreOptions = moreOptions;
             return this;
         }
+    }
+
+    /**
+     * Sets the tooltip property for the given menu item. A vaadin-tooltip
+     * element with a custom generator is created and added inside the menu bar
+     * in case it doesn't exist.
+     */
+    private void setTooltip(MenuItem item, String tooltipText) {
+        if (!getElement().getChildren().anyMatch(
+                child -> "tooltip".equals(child.getAttribute("slot")))) {
+            // No <vaadin-tooltip> yet added, add one
+            Element tooltipElement = new Element("vaadin-tooltip");
+
+            tooltipElement.addAttachListener(e -> {
+                // Assigns a generator that reads the tooltip property of the
+                // item component
+                tooltipElement.executeJs(
+                        "this.generator = ({item}) => { return (item && item.component) ? item.component.tooltip : ''; }");
+            });
+            SlotUtils.addToSlot(this, "tooltip", tooltipElement);
+        }
+
+        item.getElement().setProperty("tooltip", tooltipText);
     }
 }

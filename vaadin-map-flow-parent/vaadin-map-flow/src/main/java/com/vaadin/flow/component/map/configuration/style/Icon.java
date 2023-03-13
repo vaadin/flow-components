@@ -1,24 +1,18 @@
-package com.vaadin.flow.component.map.configuration.style;
-
-/*
- * #%L
- * Vaadin Map
- * %%
- * Copyright 2000-2022 Vaadin Ltd.
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
+/**
+ * Copyright 2000-2023 Vaadin Ltd.
  *
- * See the file license.html distributed with this software for more
- * information about licensing.
+ * This program is available under Vaadin Commercial License and Service Terms.
  *
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
  */
+package com.vaadin.flow.component.map.configuration.style;
 
 import com.vaadin.flow.component.map.configuration.Constants;
 import com.vaadin.flow.component.map.configuration.Feature;
 import com.vaadin.flow.server.StreamResource;
+
+import java.io.Serializable;
 
 /**
  * An icon or image that can be used to visually represent a {@link Feature}, by
@@ -221,22 +215,22 @@ public class Icon extends ImageStyle {
         }
     }
 
-    public static class Anchor {
-        private float x = 0.5f;
-        private float y = 0.5f;
+    public static class Anchor implements Serializable {
+        private double x = 0.5;
+        private double y = 0.5;
 
-        public float getX() {
+        public double getX() {
             return x;
         }
 
-        public float getY() {
+        public double getY() {
             return y;
         }
 
         public Anchor() {
         }
 
-        public Anchor(float x, float y) {
+        public Anchor(double x, double y) {
             this.x = x;
             this.y = y;
         }
@@ -246,7 +240,7 @@ public class Icon extends ImageStyle {
         BOTTOM_LEFT, BOTTOM_RIGHT, TOP_LEFT, TOP_RIGHT,
     }
 
-    public static class ImageSize {
+    public static class ImageSize implements Serializable {
         int width;
         int height;
 

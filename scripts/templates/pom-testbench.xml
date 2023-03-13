@@ -18,8 +18,7 @@
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-testbench-core</artifactId>
-            <version>${testbench.version}</version>
+            <artifactId>vaadin-testbench-shared</artifactId>
             <scope>provided</scope>
         </dependency>        
     </dependencies>

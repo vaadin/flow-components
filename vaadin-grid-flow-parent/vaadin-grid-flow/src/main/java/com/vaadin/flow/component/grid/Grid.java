@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -66,6 +66,7 @@ import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.grid.editor.EditorImpl;
 import com.vaadin.flow.component.grid.editor.EditorRenderer;
+import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.data.binder.BeanPropertySet;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.PropertyDefinition;
@@ -99,7 +100,6 @@ import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.Rendering;
-import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
 import com.vaadin.flow.data.selection.SelectionEvent;
@@ -121,7 +121,6 @@ import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.internal.ReflectTools;
-import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.Json;
@@ -206,17 +205,17 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha5")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/grid", version = "23.2.0-alpha5")
-@NpmPackage(value = "@vaadin/vaadin-grid", version = "23.2.0-alpha5")
+@NpmPackage(value = "@vaadin/grid", version = "24.1.0-alpha1")
+@NpmPackage(value = "@vaadin/tooltip", version = "24.1.0-alpha1")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
 @JsModule("@vaadin/checkbox/src/vaadin-checkbox.js")
-@JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./gridConnector.js")
+@JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
 public class Grid<T> extends Component implements HasStyle, HasSize,
         Focusable<Grid<T>>, SortNotifier<Grid<T>, GridSortOrder<T>>, HasTheme,
         HasDataGenerators<T>, HasListDataView<T, GridListDataView<T>>,
@@ -319,27 +318,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          *
          * @see GridSingleSelectionModel
          */
-        SINGLE {
-            @Override
-            protected <T> GridSelectionModel<T> createModel(Grid<T> grid) {
-                return new AbstractGridSingleSelectionModel<T>(grid) {
-
-                    @SuppressWarnings("unchecked")
-                    @Override
-                    protected void fireSelectionEvent(
-                            SelectionEvent<Grid<T>, T> event) {
-                        grid.fireEvent((ComponentEvent<Grid<T>>) event);
-                    }
-
-                    @Override
-                    public void setDeselectAllowed(boolean deselectAllowed) {
-                        super.setDeselectAllowed(deselectAllowed);
-                        grid.getElement().setProperty("__deselectDisallowed",
-                                !deselectAllowed);
-                    }
-                };
-            }
-        },
+        SINGLE,
 
         /**
          * Multiselection mode that maps to built-in
@@ -347,32 +326,14 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          *
          * @see GridMultiSelectionModel
          */
-        MULTI {
-            @Override
-            protected <T> GridSelectionModel<T> createModel(Grid<T> grid) {
-                return new AbstractGridMultiSelectionModel<T>(grid) {
-
-                    @SuppressWarnings("unchecked")
-                    @Override
-                    protected void fireSelectionEvent(
-                            SelectionEvent<Grid<T>, T> event) {
-                        grid.fireEvent((ComponentEvent<Grid<?>>) event);
-                    }
-                };
-            }
-        },
+        MULTI,
 
         /**
          * Selection model that doesn't allow selection.
          *
          * @see GridNoneSelectionModel
          */
-        NONE {
-            @Override
-            protected <T> GridSelectionModel<T> createModel(Grid<T> grid) {
-                return new GridNoneSelectionModel<>();
-            }
-        };
+        NONE;
 
         /**
          * Creates the selection model to use with this enum.
@@ -383,7 +344,34 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          *            the grid to create the selection model for
          * @return the selection model
          */
-        protected abstract <T> GridSelectionModel<T> createModel(Grid<T> grid);
+        protected <T> GridSelectionModel<T> createModel(Grid<T> grid) {
+            return switch (this) {
+            case SINGLE -> new AbstractGridSingleSelectionModel<T>(grid) {
+                @SuppressWarnings("unchecked")
+                @Override
+                protected void fireSelectionEvent(
+                        SelectionEvent<Grid<T>, T> event) {
+                    grid.fireEvent((ComponentEvent<Grid<T>>) event);
+                }
+
+                @Override
+                public void setDeselectAllowed(boolean deselectAllowed) {
+                    super.setDeselectAllowed(deselectAllowed);
+                    grid.getElement().setProperty("__deselectDisallowed",
+                            !deselectAllowed);
+                }
+            };
+            case MULTI -> new AbstractGridMultiSelectionModel<T>(grid) {
+                @SuppressWarnings("unchecked")
+                @Override
+                protected void fireSelectionEvent(
+                        SelectionEvent<Grid<T>, T> event) {
+                    grid.fireEvent((ComponentEvent<Grid<?>>) event);
+                }
+            };
+            case NONE -> new GridNoneSelectionModel<>();
+            };
+        }
     }
 
     /**
@@ -416,6 +404,23 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
+     * Sets the default multi-sort priority to use for all Grid instances.
+     * <p>
+     * This method should be called before creating any Grid instances. Changing
+     * this setting does not affect the default for existing Grids. Use
+     * {@link Grid#setMultiSort(boolean, MultiSortPriority)} to provide a custom
+     * multi-sort priority overriding the default priority for a single Grid.
+     *
+     * @param priority
+     *            the multi-sort priority to be used by all grid instances
+     */
+    public static void setDefaultMultiSortPriority(MultiSortPriority priority) {
+        defaultMultiSortPriority = priority;
+    }
+
+    private static MultiSortPriority defaultMultiSortPriority = MultiSortPriority.PREPEND;
+
+    /**
      * Server-side component for the {@code <vaadin-grid-column>} element.
      *
      * <p>
@@ -428,7 +433,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-column")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha5")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha1")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class Column<T> extends AbstractColumn<Column<T>> {
 
@@ -458,6 +463,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         private Rendering<T> rendering;
 
         private SerializableFunction<T, String> classNameGenerator = item -> null;
+        private SerializableFunction<T, String> partNameGenerator = item -> null;
+        private SerializableFunction<T, String> tooltipGenerator = item -> null;
 
         /**
          * Constructs a new Column for use inside a Grid.
@@ -489,8 +496,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 columnDataGeneratorRegistration = grid
                         .addDataGenerator(dataGenerator.get());
             }
-
-            getElement().setAttribute("suppress-template-warning", true);
         }
 
         protected void destroyDataGenerators() {
@@ -1012,6 +1017,67 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
 
         /**
+         * Sets the function that is used for generating CSS part names for
+         * cells in this column. Returning {@code null} from the generator
+         * results in no custom part name being set. Multiple part names can be
+         * returned from the generator as space-separated.
+         * <p>
+         * If {@link Grid#setPartNameGenerator(SerializableFunction)} is used
+         * together with this method, resulting part names from both methods
+         * will be effective.
+         *
+         * @param partNameGenerator
+         *            the part name generator to set, not {@code null}
+         * @return this column
+         * @throws NullPointerException
+         *             if {@code partNameGenerator} is {@code null}
+         * @see Grid#setPartNameGenerator(SerializableFunction)
+         */
+        public Column<T> setPartNameGenerator(
+                SerializableFunction<T, String> partNameGenerator) {
+            Objects.requireNonNull(partNameGenerator,
+                    "Part name generator can not be null");
+            this.partNameGenerator = partNameGenerator;
+            getGrid().getDataCommunicator().reset();
+            return this;
+        }
+
+        /**
+         * Sets the function that is used for generating tooltip text for cells
+         * in this column. Returning {@code null} from the generator results in
+         * no tooltip being set.
+         *
+         * @param tooltipGenerator
+         *            the tooltip generator to set, not {@code null}
+         * @return this column
+         * @throws NullPointerException
+         *             if {@code classNameGenerator} is {@code null}
+         */
+        public Column<T> setTooltipGenerator(
+                SerializableFunction<T, String> tooltipGenerator) {
+            Objects.requireNonNull(tooltipGenerator,
+                    "Tooltip generator can not be null");
+
+            if (!getGrid().getElement().getChildren().anyMatch(
+                    child -> "tooltip".equals(child.getAttribute("slot")))) {
+                // No <vaadin-tooltip> yet added to the grid, add one
+                Element tooltipElement = new Element("vaadin-tooltip");
+
+                tooltipElement.addAttachListener(e -> {
+                    // Assigns a generator that returns a column-specific
+                    // tooltip text from the item
+                    tooltipElement.executeJs(
+                            "this.generator = ({item, column}) => { return (item && item.gridtooltips && column) ? item.gridtooltips[column._flowId] : ''; }");
+                });
+                SlotUtils.addToSlot(getGrid(), "tooltip", tooltipElement);
+            }
+
+            this.tooltipGenerator = tooltipGenerator;
+            getGrid().getDataCommunicator().reset();
+            return this;
+        }
+
+        /**
          * Gets the function that is used for generating CSS class names for
          * cells in this column.
          *
@@ -1019,6 +1085,20 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          */
         public SerializableFunction<T, String> getClassNameGenerator() {
             return classNameGenerator;
+        }
+
+        /**
+         * Gets the function that is used for generating CSS part names for
+         * cells in this column.
+         *
+         * @return the part name generator
+         */
+        public SerializableFunction<T, String> getPartNameGenerator() {
+            return partNameGenerator;
+        }
+
+        public SerializableFunction<T, String> getTooltipGenerator() {
+            return tooltipGenerator;
         }
 
         @Override
@@ -1032,7 +1112,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                     columnInternalId);
 
             Rendering<T> editorRendering = editorRenderer.render(getElement(),
-                    null, rendering.getTemplateElement());
+                    null);
 
             Optional<DataGenerator<T>> dataGenerator = editorRendering
                     .getDataGenerator();
@@ -1264,7 +1344,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     private SelectionMode selectionMode;
 
     private final DetailsManager detailsManager;
-    private Element detailsTemplate;
 
     private Map<String, Column<T>> idToColumnMap = new HashMap<>();
     private Map<String, Column<T>> keyToColumnMap = new HashMap<>();
@@ -1296,9 +1375,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     private SerializableSupplier<Editor<T>> editorFactory = this::createEditor;
 
-    private boolean verticalScrollingEnabled = true;
-
     private SerializableFunction<T, String> classNameGenerator = item -> null;
+    private SerializableFunction<T, String> partNameGenerator = item -> null;
     private SerializablePredicate<T> dropFilter = item -> true;
     private SerializablePredicate<T> dragFilter = item -> true;
     private Map<String, SerializableFunction<T, String>> dragDataGenerators = new HashMap<>();
@@ -1452,6 +1530,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         gridDataGenerator = new CompositeDataGenerator<>();
         gridDataGenerator.addDataGenerator(this::generateUniqueKeyData);
         gridDataGenerator.addDataGenerator(this::generateStyleData);
+        gridDataGenerator.addDataGenerator(this::generatePartData);
+        gridDataGenerator.addDataGenerator(this::generateTooltipTextData);
         gridDataGenerator.addDataGenerator(this::generateRowsDragAndDropAccess);
         gridDataGenerator.addDataGenerator(this::generateDragData);
 
@@ -1469,7 +1549,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         addDragStartListener(this::onDragStart);
         addDragEndListener(this::onDragEnd);
 
-        getElement().setAttribute("suppress-template-warning", true);
+        updateMultiSortPriority(defaultMultiSortPriority);
     }
 
     private void generateUniqueKeyData(T item, JsonObject jsonObject) {
@@ -1635,7 +1715,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * {@link ComponentRenderer}.
      * <p>
      * <em>NOTE:</em> Using {@link ComponentRenderer} is not as efficient as the
-     * built in renderers or using {@link TemplateRenderer}.
+     * built in renderers or using {@link LitRenderer}.
      * </p>
      * <p>
      * Every added column sends data to the client side regardless of its
@@ -1697,12 +1777,12 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * <p>
      * See implementations of the {@link Renderer} interface for built-in
      * renderer options with type safe APIs. For a renderer using template
-     * binding, use {@link TemplateRenderer#of(String)}.
+     * binding, use {@link LitRenderer#of(String)}.
      * <p>
      * <em>NOTE:</em> You can add component columns easily using the
      * {@link #addComponentColumn(ValueProvider)}, but using
      * {@link ComponentRenderer} is not as efficient as the built in renderers
-     * or using {@link TemplateRenderer}.
+     * or using {@link LitRenderer}.
      * </p>
      * <p>
      * Every added column sends data to the client side regardless of its
@@ -1719,7 +1799,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @return the created column
      *
      * @see #getDefaultColumnFactory()
-     * @see TemplateRenderer#of(String)
+     * @see LitRenderer#of(String)
      * @see #addComponentColumn(ValueProvider)
      * @see #removeColumn(Column)
      * @see #addColumn(Renderer, BiFunction)
@@ -1735,12 +1815,12 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * <p>
      * See implementations of the {@link Renderer} interface for built-in
      * renderer options with type safe APIs. For a renderer using template
-     * binding, use {@link TemplateRenderer#of(String)}.
+     * binding, use {@link LitRenderer#of(String)}.
      * <p>
      * <em>NOTE:</em> You can add component columns easily using the
      * {@link #addComponentColumn(ValueProvider)}, but using
      * {@link ComponentRenderer} is not as efficient as the built in renderers
-     * or using {@link TemplateRenderer}.
+     * or using {@link LitRenderer}.
      * </p>
      * <p>
      * Every added column sends data to the client side regardless of its
@@ -1756,7 +1836,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @return the created column
      *
      * @see #addColumn(Renderer)
-     * @see TemplateRenderer#of(String)
+     * @see LitRenderer#of(String)
      * @see #addComponentColumn(ValueProvider)
      * @see #removeColumn(Column)
      */
@@ -1830,88 +1910,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     protected BiFunction<Renderer<T>, String, Column<T>> getDefaultColumnFactory() {
         return this::createColumn;
-    }
-
-    /**
-     * Adds a new column to this {@link Grid} with a renderer, sorting
-     * properties and default column factory. The values inside the renderer are
-     * converted to JSON values by using {@link JsonSerializer#toJson(Object)}.
-     * <p>
-     * <em>NOTE:</em> You can add component columns easily using the
-     * {@link #addComponentColumn(ValueProvider)}, but using
-     * {@link ComponentRenderer} is not as efficient as the built in renderers
-     * or using {@link TemplateRenderer}.
-     * <p>
-     *
-     * Every added column sends data to the client side regardless of its
-     * visibility state. Don't add a new column at all or use
-     * {@link Grid#removeColumn(Column)} to avoid sending extra data.
-     * </p>
-     *
-     * <p>
-     * <strong>Note:</strong> This method is a shorthand for
-     * {@link ##addColumn(Renderer, BiFunction, String...)}
-     * </p>
-     *
-     * @see #getDefaultColumnFactory()
-     * @see #addColumn(Renderer, BiFunction, String...)
-     * @see #removeColumn(Column)
-     *
-     * @param renderer
-     *            the renderer used to create the grid cell structure
-     * @param sortingProperties
-     *            the sorting properties to use for this column
-     * @return the created column
-     * @deprecated since 23.2 - use
-     *             <code>addColumn(renderer).setSortProperty(sortingProperties)</code>
-     *             instead.
-     */
-    @Deprecated
-    public Column<T> addColumn(Renderer<T> renderer,
-            String... sortingProperties) {
-        BiFunction<Renderer<T>, String, Column<T>> defaultFactory = getDefaultColumnFactory();
-        return addColumn(renderer, defaultFactory, sortingProperties);
-    }
-
-    /**
-     * Adds a new column to this {@link Grid} with a renderer, sorting
-     * properties and column factory provided. The values inside the renderer
-     * are converted to JSON values by using
-     * {@link JsonSerializer#toJson(Object)}.
-     * <p>
-     * <em>NOTE:</em> You can add component columns easily using the
-     * {@link #addComponentColumn(ValueProvider)}, but using
-     * {@link ComponentRenderer} is not as efficient as the built in renderers
-     * or using {@link TemplateRenderer}.
-     *
-     * <p>
-     * Every added column sends data to the client side regardless of its
-     * visibility state. Don't add a new column at all or use
-     * {@link Grid#removeColumn(Column)} to avoid sending extra data.
-     * </p>
-     *
-     * @see #addColumn(Renderer, String...)
-     * @see #removeColumn(Column)
-     *
-     * @param renderer
-     *            the renderer used to create the grid cell structure
-     * @param columnFactory
-     *            the method that creates a new column instance for this
-     *            {@link Grid} instance.
-     * @param sortingProperties
-     *            the sorting properties to use for this column
-     * @return the created column
-     * @deprecated since 23.2 - use
-     *             <code>addColumn(renderer, columnFactory).setSortProperty(sortingProperties)</code>
-     *             instead.
-     */
-    @Deprecated
-    protected <C extends Column<T>> C addColumn(Renderer<T> renderer,
-            BiFunction<Renderer<T>, String, C> columnFactory,
-            String... sortingProperties) {
-        C column = addColumn(renderer, columnFactory);
-        column.setSortProperty(sortingProperties);
-        return column;
     }
 
     /**
@@ -2289,6 +2287,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         List<AbstractColumn<?>> groups = ColumnGroupHelpers
                 .wrapInSeparateColumnGroups(innerLayer.getColumns(), this);
 
+        ColumnGroupHelpers.propagateTextAlign(innerLayer.getColumns(), groups);
+
         ColumnLayer layer = new ColumnLayer(this, groups);
         columnLayers.add(index, layer);
 
@@ -2347,19 +2347,17 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         List<AbstractColumn<?>> groups = ColumnGroupHelpers
                 .wrapInSeparateColumnGroups(columns, this);
 
+        ColumnGroupHelpers.propagateTextAlign(columns, groups);
+
         ColumnLayer newBottomLayer = new ColumnLayer(this, columns);
 
         IntStream.range(0, groups.size()).forEach(i -> {
-            // Move templates from columns to column-groups
+            // Move content from columns to column-groups
             if (forFooterRow) {
-                groups.get(i)
-                        .setFooterRenderer(columns.get(i).getFooterRenderer());
-                columns.get(i).setFooterRenderer(null);
+                columns.get(i).moveFooterContent(groups.get(i));
             }
             if (forHeaderRow) {
-                groups.get(i)
-                        .setHeaderRenderer(columns.get(i).getHeaderRenderer());
-                columns.get(i).setHeaderRenderer(null);
+                columns.get(i).moveHeaderContent(groups.get(i));
             }
         });
 
@@ -2414,11 +2412,13 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     /**
      * {@inheritDoc}
      *
+     * Use this method only when having a data provider with filter that cannot
+     * be transformed to {@code DataProvider<T, Void>}.
+     *
      * @deprecated use instead one of the {@code setItems} methods which provide
      *             access to either {@link GridListDataView} or
      *             {@link GridLazyDataView}
      */
-    @Deprecated
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         Objects.requireNonNull(dataProvider, "data provider cannot be null");
         handleDataProviderChange(dataProvider);
@@ -2436,19 +2436,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             model.setSelectAllCheckboxVisibility(
                     model.getSelectAllCheckboxVisibility());
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @deprecated Because the stream is collected to a list anyway, use
-     *             {@link HasListDataView#setItems(Collection)} or
-     *             {@link #setItems(CallbackDataProvider.FetchCallback)}
-     *             instead.
-     */
-    @Deprecated
-    public void setItems(Stream<T> streamOfItems) {
-        setItems(DataProvider.fromStream(streamOfItems));
     }
 
     /**
@@ -2851,28 +2838,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             return;
         }
 
-        Rendering<T> rendering;
-        if (renderer instanceof LitRenderer) {
-            // LitRenderer
-            if (detailsTemplate != null
-                    && detailsTemplate.getParent() != null) {
-                getElement().removeChild(detailsTemplate);
-            }
-            rendering = ((LitRenderer<T>) renderer).render(getElement(),
-                    dataCommunicator.getKeyMapper(), "rowDetailsRenderer");
-        } else {
-            // TemplateRenderer or ComponentRenderer
-            if (detailsTemplate == null) {
-                rendering = renderer.render(getElement(),
-                        getDataCommunicator().getKeyMapper());
-                detailsTemplate = rendering.getTemplateElement();
-                detailsTemplate.setAttribute("class", "row-details");
-            } else {
-                getElement().appendChild(detailsTemplate);
-                rendering = renderer.render(getElement(),
-                        getDataCommunicator().getKeyMapper(), detailsTemplate);
-            }
-        }
+        var rendering = renderer.render(getElement(),
+                dataCommunicator.getKeyMapper(), "rowDetailsRenderer");
 
         rendering.getDataGenerator().ifPresent(renderingDataGenerator -> {
             itemDetailsDataGenerator = renderingDataGenerator;
@@ -3134,6 +3101,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public void setMultiSort(boolean multiSort) {
         getElement().setAttribute("multi-sort", multiSort);
+        if (!multiSort) {
+            updateMultiSortOnShiftClick(false);
+        }
     }
 
     /**
@@ -3148,10 +3118,57 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @see MultiSortPriority
      */
     public void setMultiSort(boolean multiSort, MultiSortPriority priority) {
+        setMultiSort(multiSort);
+        updateMultiSortPriority(priority);
+    }
+
+    /**
+     * Sets whether multiple column sorting is enabled on the client-side.
+     *
+     * @param multiSort
+     *            {@code true} to enable sorting of multiple columns on the
+     *            client-side, {@code false} to disable
+     * @param onShiftClickOnly
+     *            {@code true} to enable multi-sort by shift-clicking (when
+     *            {@code multiSort = true}), {@code false} for normal multi-sort
+     *            behavior
+     */
+    public void setMultiSort(boolean multiSort, boolean onShiftClickOnly) {
+        setMultiSort(multiSort);
+        if (multiSort) {
+            updateMultiSortOnShiftClick(onShiftClickOnly);
+        }
+    }
+
+    /**
+     * Sets whether multiple column sorting is enabled on the client-side.
+     *
+     * @param multiSort
+     *            {@code true} to enable sorting of multiple columns on the
+     *            client-side, {@code false} to disable
+     * @param priority
+     *            the multi-sort priority to set, not {@code null}
+     * @param onShiftClickOnly
+     *            {@code true} to enable multi-sort by shift-clicking (when
+     *            {@code multiSort = true}), {@code false} for normal multi-sort
+     *            behavior
+     *
+     * @see MultiSortPriority
+     */
+    public void setMultiSort(boolean multiSort, MultiSortPriority priority,
+            boolean onShiftClickOnly) {
+        setMultiSort(multiSort, onShiftClickOnly);
+        updateMultiSortPriority(priority);
+    }
+
+    private void updateMultiSortOnShiftClick(boolean multiSortOnShiftClick) {
+        getElement().setProperty("multiSortOnShiftClick",
+                multiSortOnShiftClick);
+    }
+
+    private void updateMultiSortPriority(MultiSortPriority priority) {
         Objects.requireNonNull(priority,
                 "Multi-sort priority must not be null");
-        setMultiSort(multiSort);
-
         getElement().setAttribute("multi-sort-priority",
                 priority == MultiSortPriority.APPEND ? "append" : "prepend");
     }
@@ -3235,6 +3252,16 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     @ClientCallable(DisabledUpdateMode.ALWAYS)
     private void setRequestedRange(int start, int length) {
+        if (length > 500 && length / getPageSize() > 10 && isAllRowsVisible()) {
+            throw new IllegalArgumentException(
+                    "Attempted to fetch more items from server than allowed in one go. "
+                            + "Maximum allowed page count is 10. Consider not using setAllRowsVisible(true) "
+                            + "when you have a large amount of items (not only to cover this issue but also "
+                            + "to avoid performance bottlenecks resulting from transferring the full item data "
+                            + "set at once and then rendering an excess amount of DOM elements). If for some "
+                            + "reason this is not an option, increase the page size of the grid so that rendering "
+                            + "every item at once doesn't result in a request for over 10 pages.");
+        }
         getDataCommunicator().setRequestedRange(start, length);
     }
 
@@ -3457,42 +3484,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         return sortOrder.stream().map(
                 order -> order.getSorted().getComparator(order.getDirection()))
                 .reduce(operator).orElse(null);
-    }
-
-    /**
-     * If <code>true</code>, the grid's height is defined by its rows. All items
-     * are fetched from the {@link DataProvider}, and the Grid shows no vertical
-     * scroll bar.
-     * <p>
-     * Note: <code>setHeightByRows</code> disables the grid's virtual scrolling
-     * so that all the rows are rendered in the DOM at once. If the grid has a
-     * large number of items, using the feature is discouraged to avoid
-     * performance issues.
-     *
-     * @deprecated since 14.7 - use {@link #setAllRowsVisible(boolean)}
-     * @see #setAllRowsVisible(boolean)
-     *
-     * @param heightByRows
-     *            <code>true</code> to make Grid compute its height by the
-     *            number of rows, <code>false</code> for the default behavior
-     */
-    @Deprecated
-    public void setHeightByRows(boolean heightByRows) {
-        setAllRowsVisible(heightByRows);
-    }
-
-    /**
-     * Gets whether grid's height is defined by the number of its rows.
-     *
-     * @deprecated since 14.7 - use {@link #isAllRowsVisible()}
-     * @see #isAllRowsVisible()
-     *
-     * @return <code>true</code> if Grid computes its height by the number of
-     *         rows, <code>false</code> otherwise
-     */
-    @Deprecated
-    public boolean isHeightByRows() {
-        return isAllRowsVisible();
     }
 
     /**
@@ -3741,33 +3732,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
-     * Enables or disables the vertical scrolling on the Grid web component. By
-     * default, the scrolling is enabled.
-     *
-     * @param enabled
-     *            <code>true</code> to enable vertical scrolling,
-     *            <code>false</code> to disabled it
-     */
-    public void setVerticalScrollingEnabled(boolean enabled) {
-        if (isVerticalScrollingEnabled() == enabled) {
-            return;
-        }
-        verticalScrollingEnabled = enabled;
-        getElement().callJsFunction("$connector.setVerticalScrollingEnabled",
-                enabled);
-    }
-
-    /**
-     * Gets whether the vertical scrolling on the Grid web component is enabled.
-     *
-     * @return <code>true</code> if the vertical scrolling is enabled,
-     *         <code>false</code> otherwise
-     */
-    public boolean isVerticalScrollingEnabled() {
-        return verticalScrollingEnabled;
-    }
-
-    /**
      * Gets the editor.
      * <p>
      * The editor is created using {@link #createEditor()}.
@@ -3810,6 +3774,30 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
+     * Sets the function that is used for generating CSS part names for all the
+     * cells in the rows in this grid. Returning {@code null} from the generator
+     * results in no custom part name being set. Multiple part names can be
+     * returned from the generator as space-separated.
+     * <p>
+     * If {@link Column#setPartNameGenerator(SerializableFunction)} is used
+     * together with this method, resulting part names from both methods will be
+     * effective.
+     *
+     * @param partNameGenerator
+     *            the part name generator to set, not {@code null}
+     * @throws NullPointerException
+     *             if {@code partNameGenerator} is {@code null}
+     * @see Column#setPartNameGenerator(SerializableFunction)
+     */
+    public void setPartNameGenerator(
+            SerializableFunction<T, String> partNameGenerator) {
+        Objects.requireNonNull(partNameGenerator,
+                "Part name generator can not be null");
+        this.partNameGenerator = partNameGenerator;
+        getDataCommunicator().reset();
+    }
+
+    /**
      * Updates the {@code width} of all columns which have {@code autoWidth} set
      * to {@code true}.
      *
@@ -3836,6 +3824,31 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         return classNameGenerator;
     }
 
+    /**
+     * Gets the function that is used for generating CSS part names for rows in
+     * this grid.
+     *
+     * @return the part name generator
+     */
+    public SerializableFunction<T, String> getPartNameGenerator() {
+        return partNameGenerator;
+    }
+
+    private void generateTooltipTextData(T item, JsonObject jsonObject) {
+        JsonObject tooltips = Json.createObject();
+
+        idToColumnMap.forEach((id, column) -> {
+            String cellTooltip = column.getTooltipGenerator().apply(item);
+            if (cellTooltip != null) {
+                tooltips.put(id, cellTooltip);
+            }
+        });
+
+        if (tooltips.keys().length > 0) {
+            jsonObject.put("gridtooltips", tooltips);
+        }
+    }
+
     private void generateStyleData(T item, JsonObject jsonObject) {
         JsonObject style = Json.createObject();
 
@@ -3853,6 +3866,26 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         if (style.keys().length > 0) {
             jsonObject.put("style", style);
+        }
+    }
+
+    private void generatePartData(T item, JsonObject jsonObject) {
+        JsonObject part = Json.createObject();
+
+        String rowPartName = partNameGenerator.apply(item);
+        if (rowPartName != null) {
+            part.put("row", rowPartName);
+        }
+
+        idToColumnMap.forEach((id, column) -> {
+            String cellPartName = column.getPartNameGenerator().apply(item);
+            if (cellPartName != null) {
+                part.put(id, cellPartName);
+            }
+        });
+
+        if (part.keys().length > 0) {
+            jsonObject.put("part", part);
         }
     }
 
@@ -3942,7 +3975,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *
      * Default implementation closes the editor if it's opened.
      *
-     * @see #setDataProvider(DataProvider)
      * @see DataChangeEvent
      * @see DataProviderListener
      *

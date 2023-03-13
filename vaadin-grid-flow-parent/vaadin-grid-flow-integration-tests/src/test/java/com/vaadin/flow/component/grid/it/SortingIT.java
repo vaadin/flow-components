@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -79,9 +79,8 @@ public class SortingIT extends AbstractComponentIT {
     public void setInitialSortOrder_sorterAriaLabels() {
         findElement(By.id("sort-by-age")).click();
         List<TestBenchElement> sorters = grid.$("vaadin-grid-sorter").all();
-        // The first sorter uses a ComponentRenderer so an aria-label can't be
-        // generated
-        Assert.assertEquals(false, sorters.get(0).hasAttribute("aria-label"));
+        Assert.assertEquals("Sort by Name",
+                sorters.get(0).getAttribute("aria-label"));
         Assert.assertEquals("Sort by Age",
                 sorters.get(1).getAttribute("aria-label"));
     }

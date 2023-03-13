@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -17,15 +17,28 @@ package com.vaadin.flow.component.button;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.HasText;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.shared.HasPrefix;
+import com.vaadin.flow.component.shared.HasSuffix;
+import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.nodefeature.ElementAttributeMap;
 import com.vaadin.flow.internal.nodefeature.NodeFeature;
 import com.vaadin.flow.shared.Registration;
+
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
@@ -39,8 +52,15 @@ import java.util.stream.Stream;
  *
  * @author Vaadin Ltd
  */
-public class Button extends GeneratedVaadinButton<Button>
-        implements HasSize, HasEnabled {
+@Tag("vaadin-button")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha1")
+@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@NpmPackage(value = "@vaadin/button", version = "24.1.0-alpha1")
+@JsModule("@vaadin/button/src/vaadin-button.js")
+public class Button extends Component
+        implements ClickNotifier<Button>, Focusable<Button>, HasAriaLabel,
+        HasEnabled, HasPrefix, HasSize, HasStyle, HasSuffix, HasText,
+        HasThemeVariant<ButtonVariant>, HasTooltip {
 
     private Component iconComponent;
     private boolean iconAfterText;
@@ -292,9 +312,8 @@ public class Button extends GeneratedVaadinButton<Button>
      * @param autofocus
      *            the boolean value to set
      */
-    @Override
     public void setAutofocus(boolean autofocus) {
-        super.setAutofocus(autofocus);
+        getElement().setProperty("autofocus", autofocus);
     }
 
     /**
@@ -306,7 +325,7 @@ public class Button extends GeneratedVaadinButton<Button>
      * @return the {@code autofocus} property from the button
      */
     public boolean isAutofocus() {
-        return isAutofocusBoolean();
+        return getElement().getProperty("autofocus", false);
     }
 
     /**
@@ -352,6 +371,26 @@ public class Button extends GeneratedVaadinButton<Button>
     }
 
     /**
+     * Removes the given child components from this component.
+     *
+     * @param components
+     *            The components to remove.
+     * @throws IllegalArgumentException
+     *             if any of the components is not a child of this component.
+     */
+    protected void remove(Component... components) {
+        for (Component component : components) {
+            if (getElement().equals(component.getElement().getParent())) {
+                component.getElement().removeAttribute("slot");
+                getElement().removeChild(component.getElement());
+            } else {
+                throw new IllegalArgumentException("The given component ("
+                        + component + ") is not a child of this component");
+            }
+        }
+    }
+
+    /**
      * Removes all contents from this component except elements in
      * {@code exclusion} array. This includes child components, text content as
      * well as child elements that have been added directly to this component
@@ -379,8 +418,11 @@ public class Button extends GeneratedVaadinButton<Button>
         // Add theme attribute "icon" when the button contains only an icon to
         // fully support themes like Lumo. This doesn't override explicitly set
         // theme attribute.
+        long childCount = getElement().getChildren().filter(
+                el -> el.isTextNode() || !"vaadin-tooltip".equals(el.getTag()))
+                .count();
 
-        if (getElement().getChildCount() == 1 && iconComponent != null) {
+        if (childCount == 1 && iconComponent != null) {
             getThemeNames().add("icon");
         } else {
             getThemeNames().remove("icon");

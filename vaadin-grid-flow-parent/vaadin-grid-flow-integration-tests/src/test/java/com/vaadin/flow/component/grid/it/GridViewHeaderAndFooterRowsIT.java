@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -42,32 +42,23 @@ public class GridViewHeaderAndFooterRowsIT extends AbstractComponentIT {
                 .id("grid-with-header-and-footer-rows");
         scrollToElement(grid);
 
-        assertRendereredHeaderCell(grid.getHeaderCell(0), "Name", false, true);
-        assertRendereredHeaderCell(grid.getHeaderCell(1), "Age", false, true);
-        assertRendereredHeaderCell(grid.getHeaderCell(2), "Street", false,
-                false);
-        assertRendereredHeaderCell(grid.getHeaderCell(3), "Postal Code", false,
-                false);
-
-        List<WebElement> columnGroups = grid
-                .findElements(By.tagName("vaadin-grid-column-group"));
+        assertRendereredHeaderCell(grid.getHeaderCell(0), "Name", true);
+        assertRendereredHeaderCell(grid.getHeaderCell(1), "Age", true);
+        assertRendereredHeaderCell(grid.getHeaderCell(2), "Street", false);
+        assertRendereredHeaderCell(grid.getHeaderCell(3), "Postal Code", false);
 
         Assert.assertTrue(
                 "The first column group should have 'Basic Information' header text",
-                columnGroups.get(0).getAttribute("innerHTML")
+                grid.getHeaderCellContent(0, 0).getText()
                         .contains("Basic Information"));
 
         Assert.assertTrue(
                 "The second column group should have 'Address Information' header text",
-                columnGroups.get(1).getAttribute("innerHTML")
+                grid.getHeaderCellContent(0, 1).getText()
                         .contains("Address Information"));
 
-        List<WebElement> columns = grid
-                .findElements(By.tagName("vaadin-grid-column"));
-
         Assert.assertTrue("There should be a cell with the renderered footer",
-                columns.get(0).getAttribute("innerHTML")
-                        .contains("Total: 500 people"));
+                grid.getFooterCell(0).getText().contains("Total: 500 people"));
     }
 
     @Test
@@ -77,31 +68,30 @@ public class GridViewHeaderAndFooterRowsIT extends AbstractComponentIT {
         scrollToElement(grid);
 
         GridTHTDElement headerCell = grid.getHeaderCell(0);
-        assertRendereredHeaderCell(headerCell, "<span>Name</span>", true, true);
+        assertRendereredHeaderCell(headerCell, "<span>Name</span>", true);
 
         headerCell = grid.getHeaderCell(1);
-        assertRendereredHeaderCell(headerCell, "<span>Age</span>", true, true);
+        assertRendereredHeaderCell(headerCell, "<span>Age</span>", true);
 
         headerCell = grid.getHeaderCell(2);
-        assertRendereredHeaderCell(headerCell, "<span>Street</span>", true,
-                false);
+        assertRendereredHeaderCell(headerCell, "<span>Street</span>", false);
 
         headerCell = grid.getHeaderCell(3);
-        assertRendereredHeaderCell(headerCell, "<span>Postal Code</span>", true,
+        assertRendereredHeaderCell(headerCell, "<span>Postal Code</span>",
                 false);
 
         Assert.assertTrue(
                 "There should be a cell with the renderered 'Basic Information' header",
-                hasComponentRendereredHeaderCell(grid,
-                        "<span>Basic Information</span>"));
+                hasComponentRendereredHeaderCell(grid, "span",
+                        "Basic Information"));
 
         Assert.assertTrue("There should be a cell with the renderered footer",
-                hasComponentRendereredHeaderCell(grid,
-                        "<span>Total: 500 people</span>"));
+                hasComponentRendereredHeaderCell(grid, "span",
+                        "Total: 500 people"));
     }
 
     private void assertRendereredHeaderCell(GridTHTDElement headerCell,
-            String text, boolean componentRenderer, boolean withSorter) {
+            String text, boolean withSorter) {
 
         String html = headerCell.getInnerHTML();
         if (withSorter) {
@@ -109,16 +99,12 @@ public class GridViewHeaderAndFooterRowsIT extends AbstractComponentIT {
         } else {
             Assert.assertFalse(html.contains("<vaadin-grid-sorter"));
         }
-        if (componentRenderer) {
-            Assert.assertTrue(html.contains("<flow-component-renderer"));
-        }
         Assert.assertTrue(html.contains(text));
     }
 
     private boolean hasComponentRendereredHeaderCell(WebElement grid,
-            String text) {
-        return hasComponentRendereredCell(grid, text,
-                "flow-component-renderer");
+            String tagName, String text) {
+        return hasComponentRendereredCell(grid, text, tagName);
     }
 
     private boolean hasComponentRendereredCell(WebElement grid, String text,

@@ -1,229 +1,186 @@
 /**
  * @license
- * Copyright (c) 2019 The Polymer Project Authors. All rights reserved.
- * This code may only be used under the BSD style license found at
- * http://polymer.github.io/LICENSE.txt
- * The complete set of authors may be found at
- * http://polymer.github.io/AUTHORS.txt
- * The complete set of contributors may be found at
- * http://polymer.github.io/CONTRIBUTORS.txt
- * Code distributed by Google as part of the polymer project is also
- * subject to an additional IP rights grant found at
- * http://polymer.github.io/PATENTS.txt
- */
-
-import {LitElement, html, css, unsafeCSS} from 'lit-element';
-import { Spreadsheet } from './spreadsheet-export.js';
-import css_valo from './spreadsheet-styles-valo.css';
-
-/**
- * An example element.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
- * @slot - This element has a slot
- * @csspart button - The button
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
  */
+import { LitElement, html } from 'lit';
+import { Spreadsheet } from './spreadsheet-export.js';
+import { spreadsheetStyles, spreadsheetOverlayStyles } from './vaadin-spreadsheet-styles.js';
+
+const spreadsheetResizeObserver = new ResizeObserver((entries) => {
+  entries.forEach((entry) => entry.target.api.resize());
+});
+
+const overlayStyles = (() => {
+  const $tpl = document.createElement('template');
+  $tpl.innerHTML = `<style>${spreadsheetOverlayStyles.toString()}</style>`;
+  return $tpl.content;
+})();
+
 export class VaadinSpreadsheet extends LitElement {
+  static get styles() {
+    return spreadsheetStyles;
+  }
 
   static get properties() {
     return {
-      api: {type: Object},
+      api: { type: Object },
 
-      /* SHARED STATE */
-      dirty: {type: Number},
+      dirty: { type: Number },
 
-      width: {type: String},
+      id: { type: String },
 
-      height: {type: String},
+      class: { type: String },
 
-      id: {type: String},
+      resources: { type: String },
 
-      class: {type: String},
+      popupbuttons: { type: String },
 
-      resources: {type: String},
+      rowBufferSize: { type: Number },
 
-      popupbuttons: {type: String},
+      columnBufferSize: { type: Number },
 
-      rowBufferSize: {type: Number},
+      rows: { type: Number },
 
-      columnBufferSize: {type: Number},
+      cols: { type: Number },
 
-      rows: {type: Number},
+      colGroupingData: { type: Object },
 
-      cols: {type: Number},
+      rowGroupingData: { type: Object },
 
-      //public void setColGroupingData(List<GroupingData> colGroupingData) {
-      colGroupingData: {type: Object},
+      colGroupingMax: { type: Number },
 
-      //public void setRowGroupingData(List<GroupingData> rowGroupingData) {
-      rowGroupingData: {type: Object},
+      rowGroupingMax: { type: Number },
 
-      colGroupingMax: {type: Number},
+      colGroupingInversed: { type: Boolean },
 
-      rowGroupingMax: {type: Number},
+      rowGroupingInversed: { type: Boolean },
 
-      colGroupingInversed: {type: Boolean},
+      defRowH: { type: Number },
 
-      rowGroupingInversed: {type: Boolean},
+      defColW: { type: Number },
 
-      defRowH: {type: Number},
+      rowH: { type: Object },
 
-      defColW: {type: Number},
+      colW: { type: Object },
 
-      //public void setRowH(float[] rowH) {
-      rowH: {type: Object},
+      reload: { type: Number },
 
-      //public void setColW(int[] colW) {
-      colW: {type: Object},
+      sheetIndex: { type: Number },
 
-      reload: {type: Number},
+      sheetNames: { type: Object },
 
-      sheetIndex: {type: Number},
+      cellStyleToCSSStyle: { type: Object },
 
-      //public void setSheetNames(String[] sheetNames) {
-      sheetNames: {type: Object},
+      rowIndexToStyleIndex: { type: Object },
 
-      //public void setCellStyleToCSSStyle(HashMap<Integer, String> cellStyleToCSSStyle) {
-      cellStyleToCSSStyle: {type: Object},
+      columnIndexToStyleIndex: { type: Object },
 
-      //public void setRowIndexToStyleIndex(HashMap<Integer, Integer> rowIndexToStyleIndex) {
-      rowIndexToStyleIndex: {type: Object},
+      lockedColumnIndexes: { type: Object },
 
-      //public void setColumnIndexToStyleIndex(HashMap<Integer, Integer> columnIndexToStyleIndex) {
-      columnIndexToStyleIndex: {type: Object},
+      lockedRowIndexes: { type: Object },
 
-      //public void setLockedColumnIndexes(Set<Integer> lockedColumnIndexes) {
-      lockedColumnIndexes: {type: Object},
+      shiftedCellBorderStyles: { type: Object },
 
-      //public void setLockedRowIndexes(Set<Integer> lockedRowIndexes) {
-      lockedRowIndexes: {type: Object},
+      conditionalFormattingStyles: { type: Object },
 
-      //public void setShiftedCellBorderStyles(ArrayList<String> shiftedCellBorderStyles) {
-      shiftedCellBorderStyles: {type: Object},
+      hiddenColumnIndexes: { type: Object },
 
-      //public void setConditionalFormattingStyles(HashMap<Integer, String> conditionalFormattingStyles) {
-      conditionalFormattingStyles: {type: Object},
+      hiddenRowIndexes: { type: Object },
 
-      //public void setHiddenColumnIndexes(ArrayList<Integer> hiddenColumnIndexes) {
-      hiddenColumnIndexes: {type: Object},
+      verticalScrollPositions: { type: Object },
 
-      //public void setHiddenRowIndexes(ArrayList<Integer> hiddenRowIndexes) {
-      hiddenRowIndexes: {type: Object},
+      horizontalScrollPositions: { type: Object },
 
-      //public void setVerticalScrollPositions(int[] verticalScrollPositions) {
-      verticalScrollPositions: {type: Object},
+      sheetProtected: { type: Boolean },
 
-      //public void setHorizontalScrollPositions(int[] horizontalScrollPositions) {
-      horizontalScrollPositions: {type: Object},
+      workbookProtected: { type: Boolean },
 
-      sheetProtected: {type: Boolean},
+      cellKeysToEditorIdMap: { type: Object },
 
-      workbookProtected: {type: Boolean},
+      componentIDtoCellKeysMap: { type: Object },
 
-      //public void setCellKeysToEditorIdMap(HashMap<String, String> cellKeysToEditorIdMap) {
-      cellKeysToEditorIdMap: {type: Object},
+      hyperlinksTooltips: { type: Object },
 
-      //public void setComponentIDtoCellKeysMap(HashMap<String, String> componentIDtoCellKeysMap) {
-      componentIDtoCellKeysMap: {type: Object},
+      cellComments: { type: Object },
 
-      //public void setHyperlinksTooltips(HashMap<String, String> hyperlinksTooltips) {
-      hyperlinksTooltips: {type: Object},
+      cellCommentAuthors: { type: Object },
 
-      //public void setCellComments(HashMap<String, String> cellComments) {
-      cellComments: {type: Object},
+      visibleCellComments: { type: Object },
 
-      //public void setCellCommentAuthors(HashMap<String, String> cellCommentAuthors) {
-      cellCommentAuthors: {type: Object},
+      invalidFormulaCells: { type: Object },
 
-      //public void setVisibleCellComments(ArrayList<String> visibleCellComments) {
-      visibleCellComments: {type: Object},
+      hasActions: { type: Boolean },
 
-      //public void setInvalidFormulaCells(Set<String> invalidFormulaCells) {
-      invalidFormulaCells: {type: Object},
+      overlays: { type: Object },
 
-      hasActions: {type: Boolean},
+      mergedRegions: { type: Object },
 
-      //public void setOverlays(HashMap<String, OverlayInfo> overlays) {
-      overlays: {type: Object},
+      displayGridlines: { type: Boolean },
 
-      //public void setMergedRegions(ArrayList<MergedRegion> mergedRegions) {
-      mergedRegions: {type: Object},
+      displayRowColHeadings: { type: Boolean },
 
-      displayGridlines: {type: Boolean},
+      verticalSplitPosition: { type: Number },
 
-      displayRowColHeadings: {type: Boolean},
+      horizontalSplitPosition: { type: Number },
 
-      verticalSplitPosition: {type: Number},
+      infoLabelValue: { type: String },
 
-      horizontalSplitPosition: {type: Number},
+      workbookChangeToggle: { type: Boolean },
 
-      infoLabelValue: {type: String},
+      invalidFormulaErrorMessage: { type: String },
 
-      workbookChangeToggle: {type: Boolean},
+      lockFormatColumns: { type: Boolean },
 
-      invalidFormulaErrorMessage: {type: String},
+      lockFormatRows: { type: Boolean },
 
-      lockFormatColumns: {type: Boolean},
-
-      lockFormatRows: {type: Boolean},
-
-      //public void setNamedRanges(List<String> namedRanges) {
-      namedRanges: {type: String},
+      namedRanges: { type: String }
     };
   }
 
   constructor() {
     super();
+
+    if (!overlayStyles.parentElement) {
+      // Append spreadsheet overlay styles to the document head
+      document.head.appendChild(overlayStyles);
+    }
   }
 
-  static get styles() {
-    return css`
-      :host {
-        display: block;
-        height: 100%;
-        min-height: 400px;
-        isolation: isolate;
-      }
-    `
-  };
-
   render() {
-    return html`
-      <slot></slot>
-    `;
+    return html``;
   }
 
   connectedCallback() {
-    super.connectedCallback()
-    this.observer && this.observer.observe(this);
-    // Restore styles in the case widget is reattached, it happens e.g in client router
-    this.styles && this.styles.forEach(e => document.head.appendChild(e));
+    super.connectedCallback();
+    spreadsheetResizeObserver.observe(this);
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    this.observer && this.observer.unobserve(this);
-    // Remove styles added to the head by the Widget
-    this.styles = document.head.querySelectorAll(`style[id^="spreadsheet-${this.id}"]`);
-    this.styles.forEach(e => document.head.removeChild(e));
+    spreadsheetResizeObserver.unobserve(this);
   }
 
   updated(_changedProperties) {
     super.updated(_changedProperties);
     let initial = false;
     if (!this.api) {
-      this.injectStyle('css_valo', css_valo);
-
       let overlays = document.getElementById('spreadsheet-overlays');
       if (!overlays) {
         overlays = document.createElement('div');
         overlays.id = 'spreadsheet-overlays';
-        document.body.appendChild(overlays);        
+        document.body.appendChild(overlays);
       }
 
-      this.api = new Spreadsheet(this);
+      this.api = new Spreadsheet(this, this.renderRoot);
+      this.api.setHeight('100%');
+      this.api.setWidth('100%');
       this.createCallbacks();
 
-      this.observer = new ResizeObserver(e => this.api.resize());
       initial = true;
     }
     let propNames = [];
@@ -332,10 +289,6 @@ export class VaadinSpreadsheet extends LitElement {
         this.api.setLockFormatRows(newVal);
       } else if ('namedRanges' == name) {
         this.api.setNamedRanges(newVal);
-      } else if ('width' == name) {
-        this.api.setWidth(newVal);
-      } else if ('height' == name) {
-        this.api.setHeight(newVal);
       } else if ('id' == name) {
         this.api.setId(newVal);
       } else if ('class' == name) {
@@ -355,23 +308,23 @@ export class VaadinSpreadsheet extends LitElement {
   }
 
   /* CLIENT SIDE RPC METHODS */
-  updateBottomRightCellValues(cellData) { //ArrayList<CellData> cellData) {
+  updateBottomRightCellValues(cellData) {
     this.api.updateBottomRightCellValues(cellData);
   }
 
-  updateTopLeftCellValues(cellData) { //ArrayList<CellData> cellData) {
+  updateTopLeftCellValues(cellData) {
     this.api.updateTopLeftCellValues(cellData);
   }
 
-  updateTopRightCellValues(cellData) { //ArrayList<CellData> cellData) {
+  updateTopRightCellValues(cellData) {
     this.api.updateTopRightCellValues(cellData);
   }
 
-  updateBottomLeftCellValues(cellData) { //ArrayList<CellData> cellData) {
+  updateBottomLeftCellValues(cellData) {
     this.api.updateBottomLeftCellValues(cellData);
   }
 
-  updateFormulaBar(possibleName, col, row) { //String possibleName, int col, int row) {
+  updateFormulaBar(possibleName, col, row) {
     this.api.updateFormulaBar(possibleName, col, row);
   }
 
@@ -379,19 +332,19 @@ export class VaadinSpreadsheet extends LitElement {
     this.api.invalidCellAddress();
   }
 
-  showSelectedCell(name, col, row, cellValue, formula, locked, initialSelection) { // String name, int col, int row, String cellValue, boolean function, boolean locked, boolean initialSelection
+  showSelectedCell(name, col, row, cellValue, formula, locked, initialSelection) {
     this.api.showSelectedCell(name, col, row, cellValue, formula, locked, initialSelection);
   }
 
-  showActions(actionDetails) { //ArrayList<SpreadsheetActionDetails> actionDetails) {
+  showActions(actionDetails) {
     this.api.showActions(actionDetails);
   }
 
-  setSelectedCellAndRange(name, col, row, c1, c2, r1, r2, scroll) { //String name, int col, int row, int c1, int c2, int r1, int r2, boolean scroll
+  setSelectedCellAndRange(name, col, row, c1, c2, r1, r2, scroll) {
     this.api.setSelectedCellAndRange(name, col, row, c1, c2, r1, r2, scroll);
   }
 
-  cellsUpdated(updatedCellData) { //ArrayList<CellData> updatedCellData) {
+  cellsUpdated(updatedCellData) {
     if (this.api) this.api.cellsUpdated(updatedCellData);
   }
 
@@ -399,12 +352,12 @@ export class VaadinSpreadsheet extends LitElement {
     if (this.api) this.api.refreshCellStyles();
   }
 
-  editCellComment(col, row) { // int col, int row
+  editCellComment(col, row) {
     this.api.editCellComment(col, row);
   }
 
-  onPopupButtonOpen(row, column, contentId) {
-    this.api.onPopupButtonOpened(row, column, contentId);
+  onPopupButtonOpen(row, column, contentId, appId) {
+    this.api.onPopupButtonOpened(row, column, contentId, appId);
   }
 
   closePopup(row, column) {
@@ -421,167 +374,167 @@ export class VaadinSpreadsheet extends LitElement {
 
   /* SERVER RPC METHOD CALLBACKS */
   createCallbacks() {
-    this.api.setGroupingCollapsedCallback(e => {
+    this.api.setGroupingCollapsedCallback((e) => {
       this.dispatchEvent(this.createEvent('groupingCollapsed', e));
     });
 
-    this.api.setLevelHeaderClickedCallback(e => {
+    this.api.setLevelHeaderClickedCallback((e) => {
       this.dispatchEvent(this.createEvent('levelHeaderClicked', e));
     });
 
-    this.api.setOnSheetScrollCallback(e => {
+    this.api.setOnSheetScrollCallback((e) => {
       this.dispatchEvent(this.createEvent('onSheetScroll', e));
     });
 
-    this.api.setSheetAddressChangedCallback(e => {
+    this.api.setSheetAddressChangedCallback((e) => {
       this.dispatchEvent(this.createEvent('sheetAddressChanged', e));
     });
 
-    this.api.setCellSelectedCallback(e => {
+    this.api.setCellSelectedCallback((e) => {
       this.dispatchEvent(this.createEvent('cellSelected', e));
     });
 
-    this.api.setCellRangeSelectedCallback(e => {
+    this.api.setCellRangeSelectedCallback((e) => {
       this.dispatchEvent(this.createEvent('cellRangeSelected', e));
     });
 
-    this.api.setCellAddedToSelectionAndSelectedCallback(e => {
+    this.api.setCellAddedToSelectionAndSelectedCallback((e) => {
       this.dispatchEvent(this.createEvent('cellAddedToSelectionAndSelected', e));
     });
 
-    this.api.setCellsAddedToRangeSelectionCallback(e => {
+    this.api.setCellsAddedToRangeSelectionCallback((e) => {
       this.dispatchEvent(this.createEvent('cellsAddedToRangeSelection', e));
     });
 
-    this.api.setRowSelectedCallback(e => {
+    this.api.setRowSelectedCallback((e) => {
       this.dispatchEvent(this.createEvent('rowSelected', e));
     });
 
-    this.api.setRowAddedToRangeSelectionCallback(e => {
+    this.api.setRowAddedToRangeSelectionCallback((e) => {
       this.dispatchEvent(this.createEvent('rowAddedToRangeSelection', e));
     });
 
-    this.api.setColumnSelectedCallback(e => {
+    this.api.setColumnSelectedCallback((e) => {
       this.dispatchEvent(this.createEvent('columnSelected', e));
     });
 
-    this.api.setColumnAddedToSelectionCallback(e => {
+    this.api.setColumnAddedToSelectionCallback((e) => {
       this.dispatchEvent(this.createEvent('columnAddedToSelection', e));
     });
 
-    this.api.setSelectionIncreasePaintedCallback(e => {
+    this.api.setSelectionIncreasePaintedCallback((e) => {
       this.dispatchEvent(this.createEvent('selectionIncreasePainted', e));
     });
 
-    this.api.setSelectionDecreasePaintedCallback(e => {
+    this.api.setSelectionDecreasePaintedCallback((e) => {
       this.dispatchEvent(this.createEvent('selectionDecreasePainted', e));
     });
 
-    this.api.setCellValueEditedCallback(e => {
+    this.api.setCellValueEditedCallback((e) => {
       this.dispatchEvent(this.createEvent('cellValueEdited', e));
     });
 
-    this.api.setSheetSelectedCallback(e => {
+    this.api.setSheetSelectedCallback((e) => {
       this.dispatchEvent(this.createEvent('sheetSelected', e));
     });
 
-    this.api.setSheetRenamedCallback(e => {
+    this.api.setSheetRenamedCallback((e) => {
       this.dispatchEvent(this.createEvent('sheetRenamed', e));
     });
 
-    this.api.setSheetCreatedCallback(e => {
+    this.api.setSheetCreatedCallback((e) => {
       this.dispatchEvent(this.createEvent('sheetCreated', e));
     });
 
-    this.api.setCellRangePaintedCallback(e => {
+    this.api.setCellRangePaintedCallback((e) => {
       this.dispatchEvent(this.createEvent('cellRangePainted', e));
     });
 
-    this.api.setDeleteSelectedCellsCallback(e => {
+    this.api.setDeleteSelectedCellsCallback((e) => {
       this.dispatchEvent(this.createEvent('deleteSelectedCells', e));
     });
 
-    this.api.setLinkCellClickedCallback(e => {
+    this.api.setLinkCellClickedCallback((e) => {
       this.dispatchEvent(this.createEvent('linkCellClicked', e));
     });
 
-    this.api.setRowsResizedCallback(e => {
+    this.api.setRowsResizedCallback((e) => {
       this.dispatchEvent(this.createEvent('rowsResized', e));
     });
 
-    this.api.setColumnResizedCallback(e => {
+    this.api.setColumnResizedCallback((e) => {
       this.dispatchEvent(this.createEvent('columnResized', e));
     });
 
-    this.api.setOnRowAutofitCallback(e => {
+    this.api.setOnRowAutofitCallback((e) => {
       this.dispatchEvent(this.createEvent('onRowAutofit', e));
     });
 
-    this.api.setOnColumnAutofitCallback(e => {
+    this.api.setOnColumnAutofitCallback((e) => {
       this.dispatchEvent(this.createEvent('onColumnAutofit', e));
     });
 
-    this.api.setOnUndoCallback(e => {
+    this.api.setOnUndoCallback((e) => {
       this.dispatchEvent(this.createEvent('onUndo', e));
     });
 
-    this.api.setOnRedoCallback(e => {
+    this.api.setOnRedoCallback((e) => {
       this.dispatchEvent(this.createEvent('onRedo', e));
     });
 
-    this.api.setSetCellStyleWidthRatiosCallback(e => {
+    this.api.setSetCellStyleWidthRatiosCallback((e) => {
       this.dispatchEvent(this.createEvent('setCellStyleWidthRatios', e));
     });
 
-    this.api.setProtectedCellWriteAttemptedCallback(e => {
+    this.api.setProtectedCellWriteAttemptedCallback((e) => {
       this.dispatchEvent(this.createEvent('protectedCellWriteAttempted', e));
     });
 
-    this.api.setOnPasteCallback(e => {
+    this.api.setOnPasteCallback((e) => {
       this.dispatchEvent(this.createEvent('onPaste', e));
     });
 
-    this.api.setClearSelectedCellsOnCutCallback(e => {
+    this.api.setClearSelectedCellsOnCutCallback((e) => {
       this.dispatchEvent(this.createEvent('clearSelectedCellsOnCut', e));
     });
 
-    this.api.setUpdateCellCommentCallback(e => {
+    this.api.setUpdateCellCommentCallback((e) => {
       this.dispatchEvent(this.createEvent('updateCellComment', e));
     });
 
-    this.api.setOnConnectorInitCallback(e => {
+    this.api.setOnConnectorInitCallback((e) => {
       this.dispatchEvent(this.createEvent('onConnectorInit', e));
     });
 
-    this.api.setContextMenuOpenOnSelectionCallback(e => {
+    this.api.setContextMenuOpenOnSelectionCallback((e) => {
       this.dispatchEvent(this.createEvent('contextMenuOpenOnSelection', e));
     });
 
-    this.api.setActionOnCurrentSelectionCallback(e => {
+    this.api.setActionOnCurrentSelectionCallback((e) => {
       this.dispatchEvent(this.createEvent('actionOnCurrentSelection', e));
     });
 
-    this.api.setRowHeaderContextMenuOpenCallback(e => {
+    this.api.setRowHeaderContextMenuOpenCallback((e) => {
       this.dispatchEvent(this.createEvent('rowHeaderContextMenuOpen', e));
     });
 
-    this.api.setActionOnRowHeaderCallback(e => {
+    this.api.setActionOnRowHeaderCallback((e) => {
       this.dispatchEvent(this.createEvent('actionOnRowHeader', e));
     });
 
-    this.api.setColumnHeaderContextMenuOpenCallback(e => {
+    this.api.setColumnHeaderContextMenuOpenCallback((e) => {
       this.dispatchEvent(this.createEvent('columnHeaderContextMenuOpen', e));
     });
 
-    this.api.setActionOnColumnHeaderCallback(e => {
+    this.api.setActionOnColumnHeaderCallback((e) => {
       this.dispatchEvent(this.createEvent('actionOnColumnHeader', e));
     });
 
-    this.api.setPopupButtonClickCallback(e => {
+    this.api.setPopupButtonClickCallback((e) => {
       this.dispatchEvent(this.createEvent('popupButtonClick', e));
     });
 
-    this.api.setPopupCloseCallback(e => {
+    this.api.setPopupCloseCallback((e) => {
       this.dispatchEvent(this.createEvent('popupClose', e));
     });
 
@@ -590,18 +543,8 @@ export class VaadinSpreadsheet extends LitElement {
 
   createEvent(type, data) {
     return new CustomEvent('spreadsheet-event', {
-      detail: {type, data}
+      detail: { type, data }
     });
-  }
-
-  injectStyle(id, style) {
-    let elm = document.getElementById(id);
-    if (!elm) {
-      elm = document.createElement('style');
-      elm.id = id;
-      document.head.append(elm);
-    }
-    elm.textContent = style;
   }
 }
 

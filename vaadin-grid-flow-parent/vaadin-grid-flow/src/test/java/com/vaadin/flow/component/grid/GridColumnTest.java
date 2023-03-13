@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,17 +16,18 @@
 package com.vaadin.flow.component.grid;
 
 import com.vaadin.flow.data.renderer.Renderer;
-import com.vaadin.flow.data.renderer.TemplateRenderer;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.IconRenderer;
+import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.function.SerializableComparator;
 
 import java.util.ArrayList;
@@ -56,12 +57,8 @@ public class GridColumnTest {
         thirdColumn = grid.addColumn(str -> str);
         renderer = new IconRenderer<String>(generator -> new Label(":D"));
         fourthColumn = grid.addColumn(renderer);
-    }
 
-    @Test
-    public void templateWarningSuppressed() {
-        Assert.assertTrue("Template warning is not suppressed", firstColumn
-                .getElement().hasAttribute("suppress-template-warning"));
+        UI.setCurrent(new UI());
     }
 
     @Test
@@ -226,8 +223,7 @@ public class GridColumnTest {
 
     @Test
     public void createColumn_returnsNonNullAndBasicType() {
-        Column column = new Grid<Person>().createColumn(TemplateRenderer.of(""),
-                "");
+        Column column = new Grid<Person>().createColumn(LitRenderer.of(""), "");
         assertNotNull(column);
         Assert.assertEquals(Column.class, column.getClass());
     }
@@ -276,10 +272,8 @@ public class GridColumnTest {
 
         columnsList.add(extendedGrid.addColumn(Person::toString,
                 extendedGrid::createCustomColumn));
-        columnsList.add(extendedGrid.addColumn(TemplateRenderer.of(""),
+        columnsList.add(extendedGrid.addColumn(LitRenderer.of(""),
                 extendedGrid::createCustomColumn));
-        columnsList.add(extendedGrid.addColumn(TemplateRenderer.of(""),
-                extendedGrid::createCustomColumn, ""));
 
         columnsList.forEach(column -> {
             assertNotNull(column);
@@ -293,7 +287,7 @@ public class GridColumnTest {
 
         Column regularColumn = extendedGrid.addColumn(Person::toString);
         ExtendedColumn extendedColumn = extendedGrid.addColumn(
-                TemplateRenderer.of(""), extendedGrid::createCustomColumn);
+                LitRenderer.of(""), extendedGrid::createCustomColumn);
 
         assertEqualColumnClasses(regularColumn.getClass(), Column.class);
         assertEqualColumnClasses(extendedColumn.getClass(),

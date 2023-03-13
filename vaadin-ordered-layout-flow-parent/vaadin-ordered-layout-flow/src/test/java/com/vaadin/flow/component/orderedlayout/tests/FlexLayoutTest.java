@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -103,40 +103,11 @@ public class FlexLayoutTest {
         layout.setFlexDirection(direction);
 
         Assert.assertEquals("should set flex-direction",
-                layout.getFlexDirection(layout), direction);
+                layout.getFlexDirection(), direction);
 
         layout.setFlexDirection(null);
         Assert.assertEquals("should return row if no flex-direction set",
-                layout.getFlexDirection(layout), FlexLayout.FlexDirection.ROW);
-    }
-
-    @Test
-    public void testFlexLayout_setFlexShrink() {
-        FlexLayout layout = new FlexLayout();
-        Div div = new Div();
-        layout.add(div);
-        layout.setFlexShrink(2, div);
-
-        Assert.assertEquals("should set flex-shrink", layout.getFlexShrink(div),
-                2, 0);
-    }
-
-    @Test
-    public void testFlexLayout_getFlexShrink_returnOneIfNotSet() {
-        FlexLayout layout = new FlexLayout();
-        Div div = new Div();
-        layout.add(div);
-
-        Assert.assertEquals("should return 1 if flex-shirk not set",
-                layout.getFlexShrink(div), 1, 0);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testFlexLayout_setFlexShrink_throwExceptionIfNegative() {
-        FlexLayout layout = new FlexLayout();
-        Div div = new Div();
-        layout.add(div);
-        layout.setFlexShrink(-1, div);
+                layout.getFlexDirection(), FlexLayout.FlexDirection.ROW);
     }
 
     @Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -22,11 +22,12 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * @author Vaadin Ltd.
@@ -192,5 +193,29 @@ public class TabsTest {
         tabs.remove(tab2);
         Assert.assertNull("should not select other tab if current tab removed",
                 tabs.getSelectedTab());
+    }
+
+    @Test
+    public void removeTabInTabsWithoutSelection() {
+        Tab tab1 = new Tab("Tab one");
+        Tabs tabs = new Tabs(tab1);
+
+        tabs.setSelectedTab(null);
+        tabs.remove(tab1);
+
+        Assert.assertNull("should not change selected tab",
+                tabs.getSelectedTab());
+    }
+
+    @Test
+    public void addTabsAsComponentArray_noClassCastExceptionIsThrown() {
+        Tabs tabs = new Tabs();
+        Component[] tabsArray = { new Tab(), new Tab() };
+
+        // we test that the following call does not fail with ClassCastException
+        tabs.add(tabsArray);
+
+        // assertion here just to make sure tabs were really set
+        Assert.assertNotNull(tabs.getSelectedTab());
     }
 }

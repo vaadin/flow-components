@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -134,14 +134,14 @@ public class ComboBoxIT extends AbstractComboBoxIT {
         items.forEach(item -> {
             Assert.assertNotNull(item.get("key"));
             Assert.assertNotNull(item.get("label"));
-            Assert.assertNotNull(item.get("song"));
-            Assert.assertNotNull(item.get("artist"));
+            Assert.assertNotNull(item.get("lr_0_song"));
+            Assert.assertNotNull(item.get("lr_0_artist"));
         });
 
         Map<String, ?> firstItem = items.get(0);
         Assert.assertEquals("A V Club Disagrees", firstItem.get("label"));
-        Assert.assertEquals("A V Club Disagrees", firstItem.get("song"));
-        Assert.assertEquals("Haircuts for Men", firstItem.get("artist"));
+        Assert.assertEquals("A V Club Disagrees", firstItem.get("lr_0_song"));
+        Assert.assertEquals("Haircuts for Men", firstItem.get("lr_0_artist"));
 
         executeScript(
                 "arguments[0].selectedItem = arguments[0].filteredItems[1]",
@@ -172,8 +172,9 @@ public class ComboBoxIT extends AbstractComboBoxIT {
         List<Map<String, ?>> items = (List<Map<String, ?>>) executeScript(
                 "return arguments[0].filteredItems", comboBox);
 
-        Assert.assertEquals("Haircuts for Men", items.get(0).get("artist"));
-        Assert.assertEquals("Haywyre", items.get(1).get("artist"));
+        Assert.assertEquals("Haircuts for Men",
+                items.get(0).get("lr_0_artist"));
+        Assert.assertEquals("Haywyre", items.get(1).get("lr_0_artist"));
     }
 
     @Test

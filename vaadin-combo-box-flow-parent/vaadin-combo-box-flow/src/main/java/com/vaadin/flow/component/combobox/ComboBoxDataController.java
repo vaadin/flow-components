@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -479,9 +479,10 @@ class ComboBoxDataController<TItem>
         setDataProvider(listDataProvider, filterText -> {
             Optional<SerializablePredicate<TItem>> componentInMemoryFilter = DataViewUtils
                     .getComponentFilter(comboBox);
+            SerializablePredicate<TItem> componentInMemoryFilterOrAlwaysPass = componentInMemoryFilter
+                    .orElse(ignore -> true);
             return item -> itemFilter.test(item, filterText)
-                    && componentInMemoryFilter.orElse(ignore -> true)
-                            .test(item);
+                    && componentInMemoryFilterOrAlwaysPass.test(item);
         });
     }
 

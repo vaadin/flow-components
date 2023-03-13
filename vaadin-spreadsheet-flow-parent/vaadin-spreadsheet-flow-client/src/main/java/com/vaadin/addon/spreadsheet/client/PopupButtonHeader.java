@@ -1,20 +1,15 @@
+/**
+ * Copyright 2000-2023 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
+ */
 package com.vaadin.addon.spreadsheet.client;
 
 import com.gargoylesoftware.htmlunit.javascript.host.event.EventTarget;
 import com.google.gwt.core.client.JavaScriptObject;
-
-/*
- * #%L
- * Vaadin Spreadsheet
- * %%
- * Copyright (C) 2013 - 2022 Vaadin Ltd
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
- *
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
- */
 
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
@@ -62,7 +57,8 @@ public class PopupButtonHeader extends Widget {
 
     @Override
     public void onBrowserEvent(Event event) {
-        if (event.getEventTarget().equals((JavaScriptObject) close)) {
+        if (SheetWidget.getEventTarget(event)
+                .equals((JavaScriptObject) close)) {
             popup.hide();
             sheetWidget.focusSheet();
         } else {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,10 +15,12 @@
  */
 package com.vaadin.flow.component.dialog;
 
+import com.vaadin.flow.component.shared.ThemeVariant;
+
 /**
  * Set of theme variants applicable for {@code vaadin-dialog} component.
  */
-public enum DialogVariant {
+public enum DialogVariant implements ThemeVariant {
     LUMO_NO_PADDING("no-padding"), MATERIAL_NO_PADDING("no-padding");
 
     private final String variant;

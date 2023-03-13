@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -18,7 +18,6 @@ package com.vaadin.flow.component.grid.it;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
@@ -33,21 +32,14 @@ public class GridDetailsRowIT extends AbstractComponentIT {
     public void gridTwoItemsSelectedWhenOpen() {
         open();
         GridElement grid = $(GridElement.class).first();
-        // detail configured
-        assertAmountOfOpenDetails(grid, 1);
-
-        waitUntil(driver -> grid
-                .findElements(By.tagName("flow-component-renderer"))
-                .size() == 2, 1);
 
         // each detail contain a button
-        List<WebElement> detailsElement = grid
-                .findElements(By.tagName("flow-component-renderer"));
+        List<WebElement> detailsElements = getDetailsElements(grid);
 
-        Assert.assertEquals(2, detailsElement.size());
+        Assert.assertEquals(2, detailsElements.size());
 
-        assertElementHasButton(detailsElement.get(0), "Person 1");
-        assertElementHasButton(detailsElement.get(1), "Person 2");
+        Assert.assertEquals("Person 1", detailsElements.get(0).getText());
+        Assert.assertEquals("Person 2", detailsElements.get(1).getText());
     }
 
     @Test
@@ -65,23 +57,13 @@ public class GridDetailsRowIT extends AbstractComponentIT {
     public void gridSelectItem4DisplayDetails() {
         open();
         GridElement grid = $(GridElement.class).first();
-        // select row 3
-        clickElementWithJs(getRow(grid, 3).findElement(By.tagName("td")));
+        // select row 4
+        grid.getCell(3, 0).click();
+        waitUntil(e -> getDetailsElements(grid).size() == 1, 1);
 
-        waitUntil(driver -> grid
-                .findElements(By.tagName("flow-component-renderer"))
-                .size() == 3, 1);
-
-        List<WebElement> detailsElement = grid
-                .findElements(By.tagName("flow-component-renderer"));
-        Assert.assertEquals(3, detailsElement.size());
-
-        // detail on row 0 is not displayed
-        assertElementNotDisplayed(detailsElement.get(0));
-        // detail on row 1 is not displayed
-        assertElementNotDisplayed(detailsElement.get(1));
-        // detail on row 3 contains a button
-        assertElementHasButton(detailsElement.get(2), "Person 4");
+        // detail on row 3 has the correct text
+        Assert.assertEquals("Person 4",
+                getDetailsElements(grid).get(0).getText());
     }
 
     /**
@@ -89,72 +71,28 @@ public class GridDetailsRowIT extends AbstractComponentIT {
      * should be updated
      */
     @Test
-
     public void gridUpdateItemUpdateDetails() {
         open();
         GridElement grid = $(GridElement.class).first();
         // select row 3
-        clickElementWithJs(getRow(grid, 2).findElement(By.tagName("td")));
+        grid.getCell(2, 0).click();
+        waitUntil(e -> getDetailsElements(grid).size() == 1, 1);
 
-        waitUntil(driver -> grid
-                .findElements(By.tagName("flow-component-renderer"))
-                .size() == 3, 1);
-
-        List<WebElement> detailsElement = grid
-                .findElements(By.tagName("flow-component-renderer"));
-        Assert.assertEquals(3, detailsElement.size());
-        // detail on row 0 is not displayed
-        assertElementNotDisplayed(detailsElement.get(0));
-        // detail on row 1 is not displayed
-        assertElementNotDisplayed(detailsElement.get(1));
-        // detail on row 3 contains a button
-        assertElementHasButton(detailsElement.get(2), "Person 3");
+        // detail on row 3 has the correct text
+        Assert.assertEquals("Person 3",
+                getDetailsElements(grid).get(0).getText());
 
         WebElement updateButton = findElement(By.id("update-button"));
         updateButton.click();
+        waitUntil(e -> getDetailsElements(grid).size() == 1, 1);
 
-        waitUntil(driver -> grid
-                .findElements(By.tagName("flow-component-renderer"))
-                .size() == 3, 1);
-
-        detailsElement = grid
-                .findElements(By.tagName("flow-component-renderer"));
-
-        Assert.assertEquals(3, detailsElement.size());
-
-        // detail on row 0 is not displayed
-        assertElementNotDisplayed(detailsElement.get(0));
-        // detail on row 1 is not displayed
-        assertElementNotDisplayed(detailsElement.get(1));
-        // detail on row 3 contains a button
-        assertElementHasButton(detailsElement.get(2), "Person 3 - updates 1");
+        // detail on row 3 has the correct text
+        Assert.assertEquals("Person 3 - updates 1",
+                getDetailsElements(grid).get(0).getText());
 
     }
 
-    private WebElement getRow(TestBenchElement grid, int row) {
-        return grid.$("*").id("items").findElements(By.cssSelector("tr"))
-                .get(row);
-    }
-
-    private void assertAmountOfOpenDetails(WebElement grid,
-            int expectedAmount) {
-        waitUntil(driver -> grid.findElements(By.className("row-details"))
-                .size() == expectedAmount);
-        Assert.assertEquals(expectedAmount,
-                grid.findElements(By.className("row-details")).size());
-    }
-
-    private void assertElementHasButton(WebElement componentRenderer,
-            String content) {
-
-        List<WebElement> children = componentRenderer
-                .findElements(By.tagName("vaadin-button"));
-        Assert.assertEquals(1, children.size());
-        Assert.assertEquals(content, children.get(0).getText());
-    }
-
-    private void assertElementNotDisplayed(WebElement componentRenderer) {
-        Assert.assertFalse(componentRenderer.isDisplayed());
-
+    private List<WebElement> getDetailsElements(GridElement grid) {
+        return grid.findElements(By.tagName("vaadin-button"));
     }
 }

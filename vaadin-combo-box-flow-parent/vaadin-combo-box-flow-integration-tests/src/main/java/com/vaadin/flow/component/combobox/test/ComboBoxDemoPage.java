@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,7 +15,7 @@
  *
  */
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -40,7 +40,7 @@ import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
-import com.vaadin.flow.data.renderer.TemplateRenderer;
+import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.dom.ElementConstants;
 import com.vaadin.flow.router.Route;
 
@@ -120,11 +120,15 @@ public class ComboBoxDemoPage extends VerticalLayout {
         createDisabledComboBox();
         createObjectComboBox();
         createComboBoxWithObjectStringSimpleValue();
-        createComboBoxUsingTemplateRenderer();
+        createComboBoxUsingLitRenderer();
         createComboBoxUsingComponentRenderer();
         createComboBoxWithInMemoryLazyLoading();
         createComboBoxWithCallbackLazyLoading();
         createComboBoxWithCustomValues();
+
+        // Apply bottom padding to page as some tests rely on combo box
+        // dropdowns to open with a minimum height
+        getStyle().set("padding-bottom", "200px");
     }
 
     private void createStringComboBox() {
@@ -234,7 +238,7 @@ public class ComboBoxDemoPage extends VerticalLayout {
         add(new Div(new H2("Disabled ComboBox"), comboBox, message));
     }
 
-    private void createComboBoxUsingTemplateRenderer() {
+    private void createComboBoxUsingLitRenderer() {
         Div message = createMessageDiv("template-selection-message");
 
         ComboBox<Song> comboBox = new ComboBox<>();
@@ -253,8 +257,8 @@ public class ComboBoxDemoPage extends VerticalLayout {
 
         comboBox.setItems(filter, listOfSongs);
         comboBox.setItemLabelGenerator(Song::getName);
-        comboBox.setRenderer(TemplateRenderer.<Song> of(
-                "<div>[[item.song]]<br><small>[[item.artist]]</small></div>")
+        comboBox.setRenderer(LitRenderer.<Song> of(
+                "<div>${item.song}<br><small>${item.artist}</small></div>")
                 .withProperty("song", Song::getName)
                 .withProperty("artist", Song::getArtist));
 
@@ -275,7 +279,7 @@ public class ComboBoxDemoPage extends VerticalLayout {
         comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, WIDTH_STRING);
         comboBox.setId("template-selection-box");
         add(new Div(new H2("Using templates"),
-                new H2("Rendering items using TemplateRenderer"), comboBox,
+                new H2("Rendering items using LitRenderer"), comboBox,
                 message));
     }
 
@@ -330,8 +334,8 @@ public class ComboBoxDemoPage extends VerticalLayout {
         comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, WIDTH_STRING);
         comboBox.setId("component-selection-box");
         add(new Div(new H2("Using components"),
-                new H2("Rendering items using ComponentTemplateRenderer"),
-                comboBox, message));
+                new H2("Rendering items using ComponentRenderer"), comboBox,
+                message));
     }
 
     private void createComboBoxWithInMemoryLazyLoading() {
@@ -360,9 +364,9 @@ public class ComboBoxDemoPage extends VerticalLayout {
          * items from the given range with the given filter. The second callback
          * should provide the number of items that match the query.
          */
-        comboBox.setDataProvider((filter, offset, limit) -> IntStream
-                .range(offset, offset + limit).mapToObj(i -> "Item " + i),
-                filter -> 500);
+        comboBox.setItems((query) -> IntStream
+                .range(query.getOffset(), query.getOffset() + query.getLimit())
+                .mapToObj(i -> "Item " + i), filter -> 500);
 
         comboBox.setId("callback-box");
         add(new Div(new H2("Lazy Loading"),

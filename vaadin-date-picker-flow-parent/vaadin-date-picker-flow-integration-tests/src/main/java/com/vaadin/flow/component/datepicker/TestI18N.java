@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -22,7 +22,6 @@ import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 public class TestI18N {
 
     public static final DatePickerI18n FINNISH = new DatePickerI18n()
-            .setWeek("viikko").setCalendar("kalenteri").setClear("tyhjennä")
             .setToday("tänään").setCancel("peruuta").setFirstDayOfWeek(1)
             .setMonthNames(Arrays.asList("tammikuu", "helmikuu", "maaliskuu",
                     "huhtikuu", "toukokuu", "kesäkuu", "heinäkuu", "elokuu",

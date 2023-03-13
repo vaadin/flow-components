@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -22,6 +22,7 @@ import org.mockito.Mockito;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.VaadinService;
@@ -106,5 +107,11 @@ public class CheckboxUnitTest {
         Checkbox field = Component.from(element, Checkbox.class);
         Assert.assertEquals(Boolean.TRUE,
                 field.getElement().getPropertyRaw("checked"));
+    }
+
+    @Test
+    public void implementsHasTooltip() {
+        Checkbox checkbox = new Checkbox();
+        Assert.assertTrue(checkbox instanceof HasTooltip);
     }
 }

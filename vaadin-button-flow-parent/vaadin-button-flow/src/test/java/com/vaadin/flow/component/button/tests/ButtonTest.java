@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.vaadin.flow.component.HasAriaLabel;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -28,6 +29,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.StateNode;
 import com.vaadin.flow.internal.nodefeature.ElementAttributeMap;
@@ -164,6 +166,16 @@ public class ButtonTest {
 
         button = new Button("foo", new Icon());
         button.setText(null);
+        assertButtonHasThemeAttribute(THEME_ATTRIBUTE_ICON);
+
+        // should ignore tooltips when determining theme
+        button = new Button();
+        button.setTooltipText("foo");
+        button.setIcon(new Icon());
+        assertButtonHasThemeAttribute(THEME_ATTRIBUTE_ICON);
+
+        button = new Button(new Icon());
+        button.setTooltipText("foo");
         assertButtonHasThemeAttribute(THEME_ATTRIBUTE_ICON);
 
         // don't override explicitly set theme-attribute
@@ -309,6 +321,27 @@ public class ButtonTest {
         button.click();
 
         Assert.assertTrue("Button should be enabled", button.isEnabled());
+    }
+
+    @Test
+    public void implementsHasTooltip() {
+        button = new Button();
+        Assert.assertTrue(button instanceof HasTooltip);
+    }
+
+    @Test
+    public void implementHasAriaLabel() {
+        button = new Button();
+        Assert.assertTrue(button instanceof HasAriaLabel);
+    }
+
+    @Test
+    public void setAriaLabel() {
+        button = new Button();
+        button.setAriaLabel("Aria label");
+
+        Assert.assertTrue(button.getAriaLabel().isPresent());
+        Assert.assertEquals("Aria label", button.getAriaLabel().get());
     }
 
     private void assertButtonHasThemeAttribute(String theme) {

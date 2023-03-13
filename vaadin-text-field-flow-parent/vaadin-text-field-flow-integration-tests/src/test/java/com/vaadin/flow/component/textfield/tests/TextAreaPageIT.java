@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -149,12 +149,6 @@ public class TextAreaPageIT extends AbstractComponentIT {
                 .forEach(i -> textArea.sendKeys(Keys.BACK_SPACE));
 
         Assert.assertEquals(125, textArea.getSize().getHeight());
-    }
-
-    @Test
-    public void assertCantMakeInvalidValueValidThroughClientManipulation() {
-        ValidationTestHelper.testValidation(getCommandExecutor(), getContext(),
-                $(TextAreaElement.class).id("invalid-test-field"));
     }
 
     @Test

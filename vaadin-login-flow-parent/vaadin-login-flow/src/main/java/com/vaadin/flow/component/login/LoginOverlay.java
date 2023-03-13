@@ -1,26 +1,20 @@
-package com.vaadin.flow.component.login;
-
 /*
- * #%L
- * Login for Vaadin Flow
- * %%
- * Copyright 2000-2022 Vaadin Ltd.
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Copyright 2000-2023 Vaadin Ltd.
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
+package com.vaadin.flow.component.login;
 
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Synchronize;
@@ -28,7 +22,13 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
+import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.dom.ClassList;
 import com.vaadin.flow.dom.Style;
+import com.vaadin.flow.internal.StateTree;
+import com.vaadin.flow.router.NavigationTrigger;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * Server-side component for the {@code <vaadin-login-overlay>} component.
@@ -43,17 +43,17 @@ import com.vaadin.flow.dom.Style;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-login-overlay")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha5")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/login", version = "23.2.0-alpha5")
-@NpmPackage(value = "@vaadin/vaadin-login", version = "23.2.0-alpha5")
+@NpmPackage(value = "@vaadin/login", version = "24.1.0-alpha1")
 @JsModule("@vaadin/login/src/vaadin-login-overlay.js")
-@JsModule("./loginOverlayConnector.js")
 public class LoginOverlay extends AbstractLogin implements HasStyle {
 
     private Component title;
 
     private boolean autoAddedToTheUi;
+
+    private Registration afterProgrammaticNavigationListenerRegistration;
 
     public LoginOverlay() {
         initEnsureDetachListener();
@@ -122,10 +122,26 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
     private void ensureAttached() {
         if (getElement().getNode().getParent() == null) {
             UI ui = getCurrentUI();
-            ui.beforeClientResponse(ui, context -> {
-                ui.addToModalComponent(this);
-                autoAddedToTheUi = true;
-            });
+            StateTree.ExecutionRegistration addToUiRegistration = ui
+                    .beforeClientResponse(ui, context -> {
+                        ui.addToModalComponent(this);
+                        autoAddedToTheUi = true;
+                        if (afterProgrammaticNavigationListenerRegistration != null) {
+                            afterProgrammaticNavigationListenerRegistration
+                                    .remove();
+                        }
+                    });
+            if (ui.getSession() != null) {
+                afterProgrammaticNavigationListenerRegistration = ui
+                        .addAfterNavigationListener(event -> {
+                            if (event.getLocationChangeEvent()
+                                    .getTrigger() == NavigationTrigger.PROGRAMMATIC) {
+                                addToUiRegistration.remove();
+                                afterProgrammaticNavigationListenerRegistration
+                                        .remove();
+                            }
+                        });
+            }
         }
     }
 
@@ -181,8 +197,7 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
             return;
         }
 
-        title.getElement().setAttribute("slot", "title");
-        getElement().appendChild(title.getElement());
+        SlotUtils.addToSlot(this, "title", title);
     }
 
     /**
@@ -217,6 +232,27 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
     }
 
     /**
+     * Sets the CSS class names of the login overlay element. This method
+     * overwrites any previous set class names.
+     *
+     * @param className
+     *            a space-separated string of class names to set, or
+     *            <code>null</code> to remove all class names
+     */
+    @Override
+    public void setClassName(String className) {
+        getClassNames().clear();
+        if (className != null) {
+            addClassNames(className.split(" "));
+        }
+    }
+
+    @Override
+    public ClassList getClassNames() {
+        return new OverlayClassListProxy(this);
+    }
+
+    /**
      * @throws UnsupportedOperationException
      *             LoginOverlay does not support adding styles to overlay
      *             wrapper
@@ -225,16 +261,5 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
     public Style getStyle() {
         throw new UnsupportedOperationException(
                 "LoginOverlay does not support adding styles to overlay wrapper");
-    }
-
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-        initConnector();
-    }
-
-    private void initConnector() {
-        getElement().executeJs(
-                "window.Vaadin.Flow.loginOverlayConnector.initLazy(this)");
     }
 }

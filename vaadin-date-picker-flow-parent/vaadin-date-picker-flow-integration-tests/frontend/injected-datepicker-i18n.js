@@ -1,15 +1,13 @@
-import {PolymerElement} from '@polymer/polymer/polymer-element.js';
-import {html} from '@polymer/polymer/lib/utils/html-tag.js';
+import { html, LitElement } from 'lit';
 import '@vaadin/date-picker/vaadin-date-picker.js';
 
-class InjectedDatepickerI18n extends PolymerElement {
-    static get template() {
-      return html`
-    <vaadin-date-picker id="date-picker"></vaadin-date-picker>
-    `;
+class InjectedDatepickerI18n extends LitElement {
+  render() {
+    return html`<vaadin-date-picker id="date-picker"></vaadin-date-picker>`;
   }
+
   static get is() {
-      return 'injected-datepicker-i18n'
+    return 'injected-datepicker-i18n';
   }
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,6 +19,12 @@ package com.vaadin.flow.component.tabs;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasLabel;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.HasTooltip;
 
 /**
  * This component provides an accessible and customizable tab to be used inside
@@ -26,8 +32,13 @@ import com.vaadin.flow.component.HasLabel;
  *
  * @author Vaadin Ltd.
  */
-public class Tab extends GeneratedVaadinTab<Tab>
-        implements HasComponents, HasLabel {
+@Tag("vaadin-tab")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha1")
+@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@JsModule("@vaadin/tabs/src/vaadin-tab.js")
+@NpmPackage(value = "@vaadin/tabs", version = "24.1.0-alpha1")
+public class Tab extends Component implements HasComponents, HasLabel, HasStyle,
+        HasThemeVariant<TabVariant>, HasTooltip {
 
     private static final String FLEX_GROW_CSS_PROPERTY = "flexGrow";
 
@@ -128,9 +139,14 @@ public class Tab extends GeneratedVaadinTab<Tab>
         }
     }
 
-    @Override
+    /**
+     * If true, the item is in selected state.
+     *
+     * @param selected
+     *            the boolean value to set
+     */
     public void setSelected(boolean selected) {
-        super.setSelected(selected);
+        getElement().setProperty("selected", selected);
     }
 
     /**
@@ -148,7 +164,7 @@ public class Tab extends GeneratedVaadinTab<Tab>
      * @return the {@code selected} property from the webcomponent
      */
     public boolean isSelected() {
-        return super.isSelectedBoolean();
+        return getElement().getProperty("selected", false);
     }
 
     @Override

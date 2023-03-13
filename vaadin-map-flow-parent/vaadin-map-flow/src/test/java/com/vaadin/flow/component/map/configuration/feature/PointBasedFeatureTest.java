@@ -96,5 +96,10 @@ public class PointBasedFeatureTest {
         public String getType() {
             return "test";
         }
+
+        @Override
+        public void translate(double deltaX, double deltaY) {
+
+        }
     }
 }

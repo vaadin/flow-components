@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -18,7 +18,7 @@ package com.vaadin.flow.component.grid.it;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.data.renderer.TemplateRenderer;
+import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-grid/select-during-data-provider-change")
@@ -33,7 +33,7 @@ public class SelectDuringDataProviderChangePage extends VerticalLayout {
 
         btn.addClickListener(ev -> setItems());
 
-        grid.setItemDetailsRenderer(TemplateRenderer.<Item> of("<div></div>")
+        grid.setItemDetailsRenderer(LitRenderer.<Item> of("<div></div>")
                 .withProperty("id", i -> 1));
         add(grid, btn);
     }

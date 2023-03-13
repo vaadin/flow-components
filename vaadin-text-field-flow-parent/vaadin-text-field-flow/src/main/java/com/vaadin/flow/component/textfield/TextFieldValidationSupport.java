@@ -27,28 +27,28 @@ final class TextFieldValidationSupport implements Serializable {
     }
 
     /**
-     * @see GeneratedVaadinTextField#setRequired
+     * @see TextField#setRequired
      */
     void setRequired(boolean required) {
         this.required = required;
     }
 
     /**
-     * @see GeneratedVaadinTextField#setMinlength(double)
+     * @see TextField#setMinlength(double)
      */
     void setMinLength(Integer minLength) {
         this.minLength = minLength;
     }
 
     /**
-     * @see GeneratedVaadinTextField#setMaxlength(double)
+     * @see TextField#setMaxlength(double)
      */
     void setMaxLength(Integer maxLength) {
         this.maxLength = maxLength;
     }
 
     /**
-     * @see GeneratedVaadinTextField#setPattern(String)
+     * @see TextField#setPattern(String)
      */
     void setPattern(String pattern) {
         this.pattern = pattern == null || pattern.isEmpty() ? null
@@ -77,14 +77,14 @@ final class TextFieldValidationSupport implements Serializable {
             return ValidationResult.error("");
         }
 
-        final boolean isMinLengthNotReached = value != null && minLength != null
-                && value.length() < minLength;
+        final boolean isMinLengthNotReached = value != null && !value.isEmpty()
+                && minLength != null && value.length() < minLength;
         if (isMinLengthNotReached) {
             return ValidationResult.error("");
         }
 
-        final boolean valueViolatePattern = value != null && pattern != null
-                && !pattern.matcher(value).matches();
+        final boolean valueViolatePattern = value != null && !value.isEmpty()
+                && pattern != null && !pattern.matcher(value).matches();
         if (valueViolatePattern) {
             return ValidationResult.error("");
         }

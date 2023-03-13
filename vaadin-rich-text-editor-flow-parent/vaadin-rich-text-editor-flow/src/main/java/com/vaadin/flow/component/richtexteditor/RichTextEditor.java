@@ -1,37 +1,36 @@
+/**
+ * Copyright 2000-2023 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
+ */
 package com.vaadin.flow.component.richtexteditor;
 
 import java.io.Serializable;
 import java.util.Objects;
 
-/*
- * #%L
- * Vaadin Rich Text Editor for Vaadin 10
- * %%
- * Copyright 2000-2022 Vaadin Ltd.
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
- *
- * See the file license.html distributed with this software for more
- * information about licensing.
- *
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
- */
-import com.vaadin.flow.component.ClientCallable;
+import com.vaadin.flow.component.AbstractSinglePropertyField;
+import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.CompositionNotifier;
-import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.InputNotifier;
 import com.vaadin.flow.component.KeyNotifier;
+import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.dom.PropertyChangeListener;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
@@ -42,30 +41,32 @@ import elemental.json.JsonObject;
  * format and style your text using boldface, italics, headings, lists, images,
  * links etc.
  * <p>
- * The value of the rich text editor is in
- * <a href="https://github.com/quilljs/delta">Delta</a> format. The
+ * The value of the rich text editor is in the HTML format. The
  * {@link #setValue(String) setValue} and {@link #getValue() getValue} methods
- * deal with the default Delta format, but it is also possible to get and set
- * the value as an HTML string using
- * <code>rte.{@link #asHtml()}.{@link AsHtml#getValue() getValue()}</code>,
- * <code>rte.{@link #asHtml()}.{@link AsHtml#setValue(String) setValue()}</code>
- * and {@link #getHtmlValue()}.
+ * use the HTML format by default.
+ * <p>
+ * To get and set the value in the
+ * <a href="https://github.com/quilljs/delta">Quill Delta</a> format, use
+ * {@link #asDelta()}, {@link AsDelta#getValue()} and
+ * {@link AsDelta#setValue(String)}.
  *
  * @author Vaadin Ltd
  *
  */
 @Tag("vaadin-rich-text-editor")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha5")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@NpmPackage(value = "@vaadin/rich-text-editor", version = "24.1.0-alpha1")
+@JsModule("@vaadin/rich-text-editor/src/vaadin-rich-text-editor.js")
 public class RichTextEditor
-        extends GeneratedVaadinRichTextEditor<RichTextEditor, String>
-        implements HasSize, HasValueChangeMode, InputNotifier, KeyNotifier,
-        CompositionNotifier, HasLabel {
+        extends AbstractSinglePropertyField<RichTextEditor, String>
+        implements CompositionNotifier, InputNotifier, KeyNotifier, HasSize,
+        HasStyle, HasValueChangeMode, HasThemeVariant<RichTextEditorVariant> {
 
     private ValueChangeMode currentMode;
     private RichTextEditorI18n i18n;
     private AsHtml asHtml;
-    private HtmlSetRequest htmlSetRequest;
+    private AsDelta asDelta;
 
     /**
      * Gets the internationalization object previously set for this component.
@@ -112,21 +113,13 @@ public class RichTextEditor
      * Constructs an empty {@code RichTextEditor}.
      */
     public RichTextEditor() {
-        super("", "", false, true);
-        setValueChangeMode(ValueChangeMode.ON_CHANGE);
-    }
+        super("htmlValue", "", String.class,
+                RichTextEditor::presentationToModel,
+                RichTextEditor::modelToPresentation);
 
-    /**
-     * Constructs a {@code RichTextEditor} with the initial value
-     *
-     * @param initialValue
-     *            the initial value in Delta format, not {@code null}
-     *
-     * @see #setValue(Object)
-     */
-    public RichTextEditor(String initialValue) {
-        this();
-        setValue(initialValue);
+        setPresentationValue("");
+
+        setValueChangeMode(ValueChangeMode.ON_CHANGE);
     }
 
     /**
@@ -143,23 +136,13 @@ public class RichTextEditor
         addValueChangeListener(listener);
     }
 
-    /**
-     * Constructs an empty {@code RichTextEditor} with a value change listener
-     * and an initial value.
-     *
-     * @param initialValue
-     *            the initial value
-     * @param listener
-     *            the value change listener
-     *
-     * @see #setValue(Object)
-     * @see #addValueChangeListener(com.vaadin.flow.component.HasValue.ValueChangeListener)
-     */
-    public RichTextEditor(String initialValue,
-            ValueChangeListener<? super ComponentValueChangeEvent<RichTextEditor, String>> listener) {
-        this();
-        setValue(initialValue);
-        addValueChangeListener(listener);
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        // htmlValue property is not writeable and will not be automatically
+        // initialized on the client-side element. Instead, call set
+        // presentation value to run the necessary JS for initializing the
+        // client-side element
+        setPresentationValue(getValue());
     }
 
     /**
@@ -175,45 +158,84 @@ public class RichTextEditor
     @Override
     public void setValueChangeMode(ValueChangeMode valueChangeMode) {
         currentMode = valueChangeMode;
-        setSynchronizedEvent(
-                ValueChangeMode.eventForMode(valueChangeMode, "value-changed"));
+        setSynchronizedEvent(ValueChangeMode.eventForMode(valueChangeMode,
+                "html-value-changed"));
     }
 
     /**
-     * Sets the value of this editor. Should be in
-     * <a href="https://github.com/quilljs/delta">Delta</a> format. If the new
-     * value is not equal to {@code getValue()}, fires a value change event.
-     * Throws {@code NullPointerException}, if the value is null.
+     * Sets the value of this editor in HTML format. If the new value is not
+     * equal to {@code getValue()}, fires a value change event. Throws
+     * {@code NullPointerException}, if the value is null.
      * <p>
      * Note: {@link Binder} will take care of the {@code null} conversion when
      * integrates with the editor, as long as no new converter is defined.
+     * <p>
+     * Since v24, this method only accepts values in the HTML format, whereas in
+     * v23 and earlier this method would accept values in the Delta format. In
+     * order to prevent data corruption, passing a value that starts with either
+     * <code>[</code> or <code>{</code> will now throw an
+     * {@link IllegalArgumentException}, as it might indicate that the value is
+     * in the Delta format. In order to keep using the Delta format, use
+     * {@link #asDelta()}, which allows setting, retrieving, and binding the
+     * value using Binder, in the Delta format. In order to pass an HTML value
+     * starting with either characters, either wrap the value in a valid HTML
+     * tag, such as <code>&lt;p&gt;</code>, or use {@link #asHtml()} which does
+     * not include this check.
      *
-     * @see #asHtml()
-     * @see AsHtml#setValue(String)
+     * @see #asDelta()
+     * @see AsDelta#setValue(String)
      * @param value
-     *            the new value in Delta format, not {@code null}
+     *            the new value in HTML format, not {@code null}
      */
     @Override
     public void setValue(String value) {
+        doSetValue(value, true);
+    }
+
+    private void doSetValue(String value, boolean withDeltaCheck) {
+        Objects.requireNonNull(value, "Null value is not supported");
+        if (withDeltaCheck) {
+            checkForDeltaValue(value);
+        }
         super.setValue(value);
     }
 
-    @ClientCallable
-    private void updateValue(String value) {
-        setValue(value);
-        if (this.asHtml != null) {
-            this.asHtml.value.clear();
+    private void checkForDeltaValue(String value) {
+        value = value.trim();
+        if (value.startsWith("[") || value.startsWith("{")) {
+            throw new IllegalArgumentException(
+                    "The value starts with either '[' or '{' which indicates that this might be a value in the Delta format. "
+                            + "Since v24, RichTextEditor.setValue only accepts values in the HTML format. "
+                            + "Please check the JavaDoc for RichTextEditor.setValue for more information.");
         }
     }
 
+    @Override
+    protected void setPresentationValue(String newPresentationValue) {
+        String presentationValue = modelToPresentation(newPresentationValue);
+        getElement().setProperty("htmlValue", presentationValue);
+        // htmlValue property is not writeable, HTML value needs to be set using
+        // method exposed by web component instead
+        getElement().callJsFunction("dangerouslySetHtmlValue",
+                presentationValue);
+    }
+
+    private static String presentationToModel(String htmlValue) {
+        // Sanitize HTML coming from client
+        return sanitize(htmlValue);
+    }
+
+    private static String modelToPresentation(String htmlValue) {
+        // Sanitize HTML sent to client
+        return sanitize(htmlValue);
+    }
+
     /**
-     * Returns the current value of the text editor in
-     * <a href="https://github.com/quilljs/delta">Delta</a> format. By default,
+     * Returns the current value of the text editor in HTML format. By default,
      * the empty editor will return an empty string.
      *
-     * @see #getHtmlValue()
-     * @see #asHtml()
-     * @see AsHtml#getValue()
+     * @see #asDelta()
+     * @see AsDelta#getValue()
      * @return the current value.
      */
     @Override
@@ -222,31 +244,32 @@ public class RichTextEditor
     }
 
     /**
-     * The value of the editor presented as an HTML string.
-     * <p>
-     * This represents the value currently set on the client side. If you have
-     * just set the value on the server side using {@link #setValue(String)} or
-     * {@link AsHtml#setValue(String)} then the value returned from this method
-     * will not yet correspond to the newly set value until the next server
-     * round trip.
+     * The value of the editor in HTML format.
      *
      * @see #getValue()
-     * @see #asHtml()
-     * @see AsHtml#getValue()
-     * @return the sanitized {@code htmlValue} property from the web component
-     *         or {@code null} if it is not available.
+     * @return the editor value in HTML format
+     * @deprecated since v24 the RichTextEditor uses the HTML value by default.
+     *             Use {@link #getValue()} instead.
      */
+    @Deprecated
     public String getHtmlValue() {
-        String htmlValueString = getHtmlValueString();
-        if (htmlValueString == null) {
-            return null;
-        }
-
-        // Using basic safe list and adding img tag with data protocol enabled.
-        return sanitize(htmlValueString);
+        return getValue();
     }
 
-    String sanitize(String html) {
+    /**
+     * The value of the editor in Delta format.
+     * <p>
+     * This property only exists to force synchronization of the {@code value}
+     * property.
+     *
+     * @return the value of the editor in Delta format
+     */
+    @Synchronize(property = "value", value = "value-changed")
+    private String getDeltaValue() {
+        return getElement().getProperty("value");
+    }
+
+    static String sanitize(String html) {
         return org.jsoup.Jsoup.clean(html,
                 org.jsoup.safety.Safelist.basic()
                         .addTags("img", "h1", "h2", "h3", "s")
@@ -254,34 +277,6 @@ public class RichTextEditor
                                 "title", "width")
                         .addAttributes(":all", "style")
                         .addProtocols("img", "src", "data"));
-    }
-
-    private class HtmlSetRequest implements Serializable {
-        private String html;
-        private boolean pending;
-
-        void requestUpdate(String htmlValueString) {
-            this.html = htmlValueString != null ? sanitize(htmlValueString)
-                    : null;
-            if (!pending) {
-                runBeforeClientResponse(ui -> this.execute());
-                pending = true;
-            }
-        }
-
-        void execute() {
-            if (getValueChangeMode() != ValueChangeMode.EAGER) {
-                // Add a one-time listener if we are not in eager mode.
-                final String JS = "var listener = e => {"
-                        + "  this.$server.updateValue(e.detail.value);"
-                        + "  this.removeEventListener('value-changed', listener);"
-                        + "  listener = null; };"
-                        + "this.addEventListener('value-changed', listener);";
-                getElement().executeJs(JS);
-            }
-            getElement().callJsFunction("dangerouslySetHtmlValue", this.html);
-            pending = false;
-        }
     }
 
     /**
@@ -769,8 +764,17 @@ public class RichTextEditor
     }
 
     /**
-     * Gets an instance of {@code HasValue} for binding the html value of the
-     * editor with {@code Binder}.
+     * Gets an instance of {@code HasValue} for the editor in the HTML format.
+     * Can be used for binding the value with {@link Binder}.
+     * <p>
+     * Note that since v24, the RichTextEditor uses the HTML value by default.
+     * Instead of using this wrapper, {@link #getValue()} and
+     * {@link #setValue(String)} can be used directly, and
+     * {@link RichTextEditor} can be used for binding the HTML value using
+     * Binder. This method is not intended to be deprecated as it keeps the
+     * legacy behavior that allows passing values starting with either
+     * <code>[</code> or <code>{</code>, which is not allowed when using
+     * {@link #setValue(String)}.
      *
      * @return an instance of {@code HasValue}
      */
@@ -782,28 +786,25 @@ public class RichTextEditor
     }
 
     /**
+     * Gets an instance of {@code HasValue} for the editor in the
+     * <a href="https://github.com/quilljs/delta">Quill Delta</a> format. Can be
+     * used for binding the value with {@link Binder}.
+     *
+     * @return an instance of {@code HasValue}
+     */
+    public HasValue<ValueChangeEvent<String>, String> asDelta() {
+        if (asDelta == null) {
+            asDelta = new AsDelta();
+        }
+        return asDelta;
+    }
+
+    /**
      * Use this rich text editor as an editor with html value in {@link Binder}.
      */
     private class AsHtml implements HasValue<ValueChangeEvent<String>, String> {
-
-        private String oldValue;
-        private final HtmlValue value;
-
-        AsHtml() {
-            this.value = new HtmlValue();
-            RichTextEditor.this.addValueChangeListener(e -> this.value.clear());
-        }
-
         /**
-         * Sets the value of the editor presented as an HTML string. Also
-         * updates the old value which is provided in {@code ValueChangeEvent}.
-         * <p>
-         * On the client side the newly set HTML snippet is interpreted by
-         * <a href=
-         * "https://quilljs.com/docs/modules/clipboard/#matchers">Quill's
-         * Clipboard matchers</a>, which may not produce the exactly same HTML
-         * that was set. The server side value will be updated to reflect the
-         * new state after the round trip.
+         * Sets the value of the editor in HTML format.
          *
          * @see RichTextEditor#setValue(String)
          * @param value
@@ -811,51 +812,18 @@ public class RichTextEditor
          */
         @Override
         public void setValue(String value) {
-            this.oldValue = getValue();
-            this.value.setValue(value);
-            setHtmlValueAsynchronously(value);
+            RichTextEditor.this.doSetValue(value, false);
         }
 
         /**
-         * Sets content represented by sanitized HTML string into the editor.
-         * The HTML string is interpreted by
-         * <a href="http://quilljs.com/docs/modules/clipboard/#matchers">Quill's
-         * Clipboard matchers</a> on the client side, which may not produce the
-         * exactly input HTML.
-         * <p>
-         * Note: The value will be set asynchronously with client-server
-         * roundtrip.
-         *
-         * @param htmlValueString
-         *            the HTML string
-         */
-        private void setHtmlValueAsynchronously(String htmlValueString) {
-            if (htmlSetRequest == null) {
-                htmlSetRequest = new HtmlSetRequest();
-            }
-            htmlSetRequest.requestUpdate(htmlValueString);
-        }
-
-        /**
-         * Gets the value of the editor presented as an HTML string.
-         * <p>
-         * If you have just set the value on the server side using the
-         * {@link #setValue(String) AsHtml.setValue()} method then his method
-         * will give you back the exact same value until the next server round
-         * trip. On the client side the newly set HTML snippet is interpreted by
-         * <a href=
-         * "https://quilljs.com/docs/modules/clipboard/#matchers">Quill's
-         * Clipboard matchers</a>, which may not produce the exactly same HTML
-         * that was set. The server side value will be updated to reflect the
-         * new state after the round trip.
+         * Gets the value of the editor in HTML format.
          *
          * @see RichTextEditor#getValue()
-         * @see RichTextEditor#getHtmlValue()
-         * @return the sanitized HTML string
+         * @return the current editor value in HTML
          */
         @Override
         public String getValue() {
-            return value.getValue();
+            return RichTextEditor.this.getValue();
         }
 
         /**
@@ -870,34 +838,7 @@ public class RichTextEditor
         @Override
         public Registration addValueChangeListener(
                 ValueChangeListener listener) {
-            return RichTextEditor.this
-                    .addValueChangeListener(originalEvent -> listener
-                            .valueChanged(this.createNewEvent(originalEvent)));
-        }
-
-        private ValueChangeEvent createNewEvent(
-                ValueChangeEvent<String> originalEvent) {
-            return new ValueChangeEvent<String>() {
-                @Override
-                public HasValue<ValueChangeEvent<String>, String> getHasValue() {
-                    return AsHtml.this;
-                }
-
-                @Override
-                public boolean isFromClient() {
-                    return originalEvent.isFromClient();
-                }
-
-                @Override
-                public String getOldValue() {
-                    return oldValue;
-                }
-
-                @Override
-                public String getValue() {
-                    return AsHtml.this.getValue();
-                }
-            };
+            return RichTextEditor.this.addValueChangeListener(listener);
         }
 
         /**
@@ -948,36 +889,202 @@ public class RichTextEditor
             return RichTextEditor.this.isRequiredIndicatorVisible();
         }
 
-        private class HtmlValue implements Serializable {
-            private String value;
-            private boolean present;
-
-            private String getValue() {
-                if (!present) {
-                    this.value = generateHtmlValue();
-                    this.present = true;
-                }
-                return value;
-            }
-
-            private void setValue(String value) {
-                this.value = value;
-                this.present = true;
-            }
-
-            private void clear() {
-                this.value = null;
-                this.present = false;
-            }
-
-            private String generateHtmlValue() {
-                if (RichTextEditor.this.isEmpty()) {
-                    return null;
-                } else {
-                    return RichTextEditor.this.getHtmlValue();
-                }
-            }
+        @Override
+        public String getEmptyValue() {
+            return "";
         }
     }
 
+    private class AsDelta
+            implements HasValue<ValueChangeEvent<String>, String> {
+
+        private static class DeltaValueChangeEvent
+                extends ComponentEvent<RichTextEditor>
+                implements ValueChangeEvent<String> {
+
+            private final HasValue<?, String> hasValue;
+            private final String oldValue;
+
+            public DeltaValueChangeEvent(RichTextEditor source,
+                    HasValue<?, String> hasValue, String oldValue,
+                    boolean fromClient) {
+                super(source, fromClient);
+                this.hasValue = hasValue;
+                this.oldValue = oldValue;
+            }
+
+            @Override
+            public HasValue<?, String> getHasValue() {
+                return hasValue;
+            }
+
+            @Override
+            public boolean isFromClient() {
+                return super.isFromClient();
+            }
+
+            @Override
+            public String getOldValue() {
+                return oldValue;
+            }
+
+            @Override
+            public String getValue() {
+                return hasValue.getValue();
+            }
+        }
+
+        private boolean isHtmlValueSync;
+        private Registration deltaValueSyncRegistration;
+        private String oldValue = "";
+
+        public AsDelta() {
+            // Initialize empty value
+            RichTextEditor.this.getElement().setProperty("value", "");
+
+            // Fire delta value change event when HTML value changes
+            RichTextEditor.this.addValueChangeListener(event -> {
+                // If the component's value changes due to syncing the HTML
+                // value back from the client, after setting the delta value on
+                // the server, then we don't need to do anything.
+                // We already have an up-to-date delta value, and have already
+                // dispatched a server-side delta value change event.
+                if (isHtmlValueSync) {
+                    return;
+                }
+                // When the HTML value is set from server-side, then do not
+                // dispatch the delta value changed event immediately, as we
+                // don't have an updated delta value yet.
+                // Instead, wait for delta value to sync back from client and
+                // dispatch delta value change event afterwards
+                if (!event.isFromClient()) {
+                    // Clear previous registration in case it is still active
+                    if (deltaValueSyncRegistration != null) {
+                        deltaValueSyncRegistration.remove();
+                    }
+                    // Listen for delta value property to update, then fire
+                    // delta value change event as coming from server (as the
+                    // original HTML value change event did)
+                    PropertyChangeListener valueChangeListener = syncEvent -> {
+                        // Sanity check: We are expecting a property change
+                        // event from the client here
+                        if (syncEvent.isUserOriginated()) {
+                            deltaValueSyncRegistration.remove();
+                            fireChangeEvent(false);
+                            // Update old value after all change
+                            // listeners have been processed
+                            oldValue = getValue();
+                        }
+                    };
+                    deltaValueSyncRegistration = RichTextEditor.this
+                            .getElement().addPropertyChangeListener("value",
+                                    "value-changed", valueChangeListener);
+                } else {
+                    // If the HTML value change event comes from the client,
+                    // then we can immediately dispatch the delta value change
+                    // event as well, as both properties have been synced to the
+                    // server in the same roundtrip.
+                    // See the synchronized `getDeltaValue` property on the
+                    // component.
+                    fireChangeEvent(event.isFromClient());
+                    // Update old value after all change listeners have been
+                    // processed
+                    oldValue = getValue();
+                }
+            });
+        }
+
+        /**
+         * Sets the value of this editor in the
+         * <a href="https://github.com/quilljs/delta">Quill Delta</a> format. If
+         * the new value is not equal to {@code getValue()}, fires a value
+         * change event. Throws {@code NullPointerException}, if the value is
+         * null.
+         * <p>
+         * Note: {@link Binder} will take care of the {@code null} conversion
+         * when integrates with the editor, as long as no new converter is
+         * defined.
+         *
+         * @param value
+         *            the new value in Delta format, not {@code null}
+         */
+        @Override
+        public void setValue(String value) {
+            Objects.requireNonNull(value, "Delta value must not be null");
+
+            if (!Objects.equals(value, getValue())) {
+                RichTextEditor.this.getElement().setProperty("value", value);
+                // After setting delta value, manually sync back the updated
+                // HTML value, which will eventually trigger a server-side value
+                // change event on the component
+                RichTextEditor.this.getElement()
+                        .executeJs("return this.htmlValue").then(jsonValue -> {
+                            isHtmlValueSync = true;
+                            RichTextEditor.this.setValue(jsonValue.asString());
+                            isHtmlValueSync = false;
+                        });
+
+                fireChangeEvent(false);
+                oldValue = value;
+            }
+        }
+
+        /**
+         * Returns the current value of this editor in the
+         * <a href="https://github.com/quilljs/delta">Quill Delta</a> format. By
+         * default, the empty editor will return an empty string.
+         *
+         * @return the current value.
+         */
+        @Override
+        public String getValue() {
+            return RichTextEditor.this.getElement().getProperty("value");
+        }
+
+        @Override
+        public Registration addValueChangeListener(
+                ValueChangeListener<? super ValueChangeEvent<String>> valueChangeListener) {
+            return ComponentUtil.addListener(RichTextEditor.this,
+                    DeltaValueChangeEvent.class,
+                    valueChangeListener::valueChanged);
+        }
+
+        private void fireChangeEvent(boolean isFromClient) {
+            DeltaValueChangeEvent changeEvent = new DeltaValueChangeEvent(
+                    RichTextEditor.this, this, oldValue, isFromClient);
+            ComponentUtil.fireEvent(RichTextEditor.this, changeEvent);
+        }
+
+        @Override
+        public void setReadOnly(boolean readOnly) {
+            RichTextEditor.this.setReadOnly(readOnly);
+        }
+
+        @Override
+        public boolean isReadOnly() {
+            return RichTextEditor.this.isReadOnly();
+        }
+
+        @Override
+        public void setRequiredIndicatorVisible(
+                boolean requiredIndicatorVisible) {
+            RichTextEditor.this
+                    .setRequiredIndicatorVisible(requiredIndicatorVisible);
+        }
+
+        @Override
+        public boolean isRequiredIndicatorVisible() {
+            return RichTextEditor.this.isRequiredIndicatorVisible();
+        }
+
+        @Override
+        public String getEmptyValue() {
+            return "";
+        }
+
+        @Override
+        public void clear() {
+            RichTextEditor.this.clear();
+        }
+    }
 }

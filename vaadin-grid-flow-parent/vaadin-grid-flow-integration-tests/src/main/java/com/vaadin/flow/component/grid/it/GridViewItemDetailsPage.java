@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -18,10 +18,9 @@ package com.vaadin.flow.component.grid.it;
 import java.util.List;
 
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.data.bean.Person;
+import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.NativeButtonRenderer;
-import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-grid-it-demo/item-details")
@@ -40,17 +39,15 @@ public class GridViewItemDetailsPage extends LegacyTestView {
         grid.addColumn(Person::getFirstName).setHeader("Name");
         grid.addColumn(Person::getAge).setHeader("Age");
 
-        grid.setSelectionMode(SelectionMode.NONE);
-
         // You can use any renderer for the item details. By default, the
         // details are opened and closed by clicking the rows.
-        grid.setItemDetailsRenderer(TemplateRenderer.<Person> of(
+        grid.setItemDetailsRenderer(LitRenderer.<Person> of(
                 "<div class='custom-details' style='border: 1px solid gray; padding: 10px; width: 100%; box-sizing: border-box;'>"
-                        + "<div>Hi! My name is <b>[[item.firstName]]!</b></div>"
-                        + "<div><button on-click='handleClick'>Update Person</button></div>"
+                        + "<div>Hi! My name is <b>${item.firstName}!</b></div>"
+                        + "<div><button @click=${handleClick}>Update Person</button></div>"
                         + "</div>")
                 .withProperty("firstName", Person::getFirstName)
-                .withEventHandler("handleClick", person -> {
+                .withFunction("handleClick", person -> {
                     person.setFirstName(person.getFirstName() + " Updated");
                     grid.getDataProvider().refreshItem(person);
                 }));

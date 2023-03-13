@@ -1,6 +1,7 @@
 package com.vaadin.flow.component.spreadsheet.test;
 
 import com.vaadin.flow.component.spreadsheet.tests.fixtures.TestFixtures;
+import com.vaadin.flow.testutil.TestPath;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -9,6 +10,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
 
+@TestPath("vaadin-spreadsheet")
 public class StyleIT extends AbstractSpreadsheetIT {
 
     @Rule
@@ -16,7 +18,7 @@ public class StyleIT extends AbstractSpreadsheetIT {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL());
+        open();
         createNewSpreadsheet();
     }
 

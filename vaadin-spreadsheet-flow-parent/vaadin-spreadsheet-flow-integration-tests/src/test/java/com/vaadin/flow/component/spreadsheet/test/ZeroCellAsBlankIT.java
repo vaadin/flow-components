@@ -3,13 +3,16 @@ package com.vaadin.flow.component.spreadsheet.test;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import com.vaadin.flow.testutil.TestPath;
 
+import org.junit.Assert;
+
+@TestPath("vaadin-spreadsheet")
 public class ZeroCellAsBlankIT extends AbstractSpreadsheetIT {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL());
+        open();
     }
 
     @Test
@@ -19,10 +22,10 @@ public class ZeroCellAsBlankIT extends AbstractSpreadsheetIT {
 
         selectSheetAt(0);
 
-        assertEquals("2", getSpreadsheet().getCellAt("B2").getValue());
-        assertEquals("0", getSpreadsheet().getCellAt("B3").getValue());
-        assertEquals("0", getSpreadsheet().getCellAt("B4").getValue());
-        assertEquals("0", getSpreadsheet().getCellAt("B5").getValue());
+        Assert.assertEquals("2", getSpreadsheet().getCellAt("B2").getValue());
+        Assert.assertEquals("0", getSpreadsheet().getCellAt("B3").getValue());
+        Assert.assertEquals("0", getSpreadsheet().getCellAt("B4").getValue());
+        Assert.assertEquals("0", getSpreadsheet().getCellAt("B5").getValue());
     }
 
     @Test
@@ -32,9 +35,9 @@ public class ZeroCellAsBlankIT extends AbstractSpreadsheetIT {
 
         selectSheetAt(1);
 
-        assertEquals("2", getSpreadsheet().getCellAt("B2").getValue());
-        assertEquals("", getSpreadsheet().getCellAt("B3").getValue());
-        assertEquals("0", getSpreadsheet().getCellAt("B4").getValue());
-        assertEquals("", getSpreadsheet().getCellAt("B5").getValue());
+        Assert.assertEquals("2", getSpreadsheet().getCellAt("B2").getValue());
+        Assert.assertEquals("", getSpreadsheet().getCellAt("B3").getValue());
+        Assert.assertEquals("0", getSpreadsheet().getCellAt("B4").getValue());
+        Assert.assertEquals("", getSpreadsheet().getCellAt("B5").getValue());
     }
 }

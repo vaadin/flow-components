@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.radiobutton.tests;
 
 import java.util.List;
-import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
 import com.vaadin.flow.testutil.TestPath;
@@ -25,7 +24,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.radiobutton.testbench.RadioButtonElement;
@@ -134,28 +132,16 @@ public class RadioButtonGroupIT extends AbstractComponentIT {
         WebElement infoLabel = findElement(
                 By.id("button-group-disabled-items-info"));
 
-        Assert.assertEquals("'foo' should be selected", "foo",
+        Assert.assertEquals("'foo' should be selected server-side", "foo",
                 infoLabel.getText());
 
+        // Enable 'bar' button on client-side and click it
         executeScript("arguments[0].removeAttribute(\"disabled\");",
                 buttons.get(1));
-
         buttons.get(1).click();
 
-        try {
-            waitUntil(driver -> group
-                    .findElements(By.tagName("vaadin-radio-button")).get(1)
-                    .getAttribute("disabled") != null);
-        } catch (WebDriverException wde) {
-            Assert.fail("Server should have disabled the button again.");
-        }
-
-        Assert.assertEquals("Value 'foo' should have been re-selected", "foo",
-                infoLabel.getText());
-
-        Assert.assertTrue(
-                "Value 'foo' should have been re-selected on the client side",
-                Boolean.valueOf(buttons.get(0).getAttribute("checked")));
+        Assert.assertEquals("Value 'foo' should still be selected server-side",
+                "foo", infoLabel.getText());
     }
 
     @Test
@@ -228,111 +214,6 @@ public class RadioButtonGroupIT extends AbstractComponentIT {
     }
 
     @Test
-    public void addedComponentsAfterItems() {
-        WebElement group = findElement(
-                By.id("button-group-with-appended-text"));
-
-        List<WebElement> elements = group.findElements(By.xpath("./*"));
-
-        Assert.assertEquals(
-                "Unexpected amount of elements in radio-button-group", 6,
-                elements.size());
-        Assert.assertEquals("First element should be a <vaadin-radio-button>",
-                "vaadin-radio-button", elements.get(0).getTagName());
-        Assert.assertEquals("Second element should be a <vaadin-radio-button>",
-                "vaadin-radio-button", elements.get(1).getTagName());
-        Assert.assertEquals("Thirs element should be a <vaadin-radio-button>",
-                "vaadin-radio-button", elements.get(2).getTagName());
-        Assert.assertEquals("Fourth element should be a <label>", "label",
-                elements.get(3).getTagName());
-    }
-
-    @Test
-    public void insertedComponentsBetweenItems() {
-        WebElement group = findElement(
-                By.id("button-group-with-inserted-component"));
-
-        List<WebElement> elements = group.findElements(By.xpath("./*"));
-
-        Assert.assertEquals(
-                "Unexpected amount of elements in radio-button-group", 7,
-                elements.size());
-        Assert.assertEquals("Second element should be a label", "label",
-                elements.get(1).getTagName());
-        Assert.assertEquals("Third element should be a <hr>", "hr",
-                elements.get(2).getTagName());
-        Assert.assertEquals("Fourth element should be a <vaadin-radio-button>",
-                "vaadin-radio-button", elements.get(3).getTagName());
-    }
-
-    @Test
-    public void componentsPrependedBeforeItems() {
-        WebElement group = findElement(
-                By.id("button-group-with-prepended-component"));
-
-        List<WebElement> elements = group.findElements(By.xpath("./*"));
-
-        Assert.assertEquals(
-                "Unexpected amount of elements in radio-button-group", 14,
-                elements.size());
-        // Three groups of (label, hr, vaadin-radio-button, vaadin-radio-button)
-        IntStream.range(0, 2).forEach(i -> {
-            int firstInGroup = i * 4;
-            Assert.assertEquals(
-                    "Expected first in group " + (i + 1) + " to be a label",
-                    "label", elements.get(firstInGroup).getTagName());
-            Assert.assertEquals(
-                    "Expected second in group " + (i + 1) + " to be a <hr>",
-                    "hr", elements.get(firstInGroup + 1).getTagName());
-            Assert.assertEquals(
-                    "Expected third in group " + (i + 1)
-                            + " to be a <vaadin-radio-button>",
-                    "vaadin-radio-button",
-                    elements.get(firstInGroup + 2).getTagName());
-            Assert.assertEquals(
-                    "Expected fourth in group " + (i + 1)
-                            + " to be a <vaadin-radio-button>",
-                    "vaadin-radio-button",
-                    elements.get(firstInGroup + 3).getTagName());
-        });
-    }
-
-    @Test
-    public void dynamicComponentForAfterItem() {
-        WebElement group = findElement(
-                By.id("button-group-with-dynamic-component"));
-
-        List<WebElement> elements = group.findElements(By.xpath("./*"));
-
-        Assert.assertEquals(
-                "Unexpected amount of elements in radio-button-group", 8,
-                elements.size());
-        for (int i = 0; i < 6; i++) {
-            Assert.assertEquals(
-                    "Expected only <vaadin-radio-button> to be available",
-                    "vaadin-radio-button", elements.get(i).getTagName());
-        }
-
-        executeScript("arguments[0].value=1;", group);
-        // It takes a while to update DOM in busy CI
-        waitUntil(e -> {
-            List<WebElement> els = group.findElements(By.xpath("./*"));
-            // Expected one label to have been added to radio-button-group
-            // Second element should be a label as first element was selected",
-            return els.size() == 9 && "label".equals(els.get(1).getTagName());
-        }, 200);
-
-        executeScript("arguments[0].value=5;", group);
-        // It takes a while to update DOM in busy CI
-        waitUntil(e -> {
-            List<WebElement> els = group.findElements(By.xpath("./*"));
-            // Expected label to stay, just change place in radio-button-group
-            // Fifth element should be a label as fourth element was selected
-            return els.size() == 9 && "label".equals(els.get(5).getTagName());
-        }, 200);
-    }
-
-    @Test
     public void assertThemeVariant() {
         WebElement group = findElement(By.id("button-group-theme-variant"));
         scrollToElement(group);
@@ -351,7 +232,7 @@ public class RadioButtonGroupIT extends AbstractComponentIT {
 
         RadioButtonGroupElement groupWithHelperComponent = $(
                 RadioButtonGroupElement.class)
-                        .id("group-with-helper-component");
+                .id("group-with-helper-component");
         WebElement helperComponent = groupWithHelperComponent
                 .getHelperComponent();
         Assert.assertEquals("helperComponent", helperComponent.getText());
@@ -370,7 +251,7 @@ public class RadioButtonGroupIT extends AbstractComponentIT {
 
         RadioButtonGroupElement groupWithHelperComponent = $(
                 RadioButtonGroupElement.class)
-                        .id("group-with-helper-component");
+                .id("group-with-helper-component");
         WebElement helperComponent = groupWithHelperComponent
                 .getHelperComponent();
         Assert.assertEquals("helper-component",
@@ -378,23 +259,5 @@ public class RadioButtonGroupIT extends AbstractComponentIT {
 
         $(TestBenchElement.class).id("clear-helper-component-button").click();
         Assert.assertNull(groupWithHelperComponent.getHelperComponent());
-    }
-
-    private void verifyGroupInvalid(TestBenchElement group,
-            TestBenchElement errorMessage) {
-        Assert.assertEquals("Radio button group is invalid.", true,
-                group.getPropertyBoolean("invalid"));
-        Assert.assertEquals("Error message should be shown.",
-                Boolean.FALSE.toString(),
-                errorMessage.getAttribute("aria-hidden"));
-    }
-
-    private void verifyGroupValid(TestBenchElement group,
-            TestBenchElement errorMessage) {
-        Assert.assertEquals("Radio button group is not invalid.", false,
-                group.getPropertyBoolean("invalid"));
-        Assert.assertEquals("Error message should be hidden.",
-                Boolean.TRUE.toString(),
-                errorMessage.getAttribute("aria-hidden"));
     }
 }

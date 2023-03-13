@@ -1,20 +1,12 @@
-package com.vaadin.flow.component.map.configuration.layer;
-
-/*
- * #%L
- * Vaadin Map
- * %%
- * Copyright 2000-2022 Vaadin Ltd.
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
+/**
+ * Copyright 2000-2023 Vaadin Ltd.
  *
- * See the file license.html distributed with this software for more
- * information about licensing.
+ * This program is available under Vaadin Commercial License and Service Terms.
  *
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
  */
+package com.vaadin.flow.component.map.configuration.layer;
 
 import com.vaadin.flow.component.map.configuration.AbstractConfigurationObject;
 
@@ -22,17 +14,17 @@ import com.vaadin.flow.component.map.configuration.AbstractConfigurationObject;
  * Abstract base class for all map layers
  */
 public abstract class Layer extends AbstractConfigurationObject {
-    private float opacity = 1;
+    private double opacity = 1;
     private boolean visible = true;
     private Integer zIndex;
-    private Float minZoom;
-    private Float maxZoom;
+    private Double minZoom;
+    private Double maxZoom;
     private String background;
 
     /**
      * @return opacity of the layer
      */
-    public float getOpacity() {
+    public double getOpacity() {
         return opacity;
     }
 
@@ -43,7 +35,7 @@ public abstract class Layer extends AbstractConfigurationObject {
      * @param opacity
      *            new opacity of the layer
      */
-    public void setOpacity(float opacity) {
+    public void setOpacity(double opacity) {
         this.opacity = opacity;
         markAsDirty();
     }
@@ -91,7 +83,7 @@ public abstract class Layer extends AbstractConfigurationObject {
      * @return the minimum zoom level at which this layer will be visible, or
      *         null if not defined
      */
-    public Float getMinZoom() {
+    public Double getMinZoom() {
         return minZoom;
     }
 
@@ -101,7 +93,7 @@ public abstract class Layer extends AbstractConfigurationObject {
      * @param minZoom
      *            the new minimum zoom level, or null to remove it
      */
-    public void setMinZoom(Float minZoom) {
+    public void setMinZoom(Double minZoom) {
         this.minZoom = minZoom;
         markAsDirty();
     }
@@ -110,7 +102,7 @@ public abstract class Layer extends AbstractConfigurationObject {
      * @return the maximum zoom level at which this layer will be visible, or
      *         null if not defined
      */
-    public Float getMaxZoom() {
+    public Double getMaxZoom() {
         return maxZoom;
     }
 
@@ -120,7 +112,7 @@ public abstract class Layer extends AbstractConfigurationObject {
      * @param maxZoom
      *            the new maximum zoom level, or null to remove it
      */
-    public void setMaxZoom(Float maxZoom) {
+    public void setMaxZoom(Double maxZoom) {
         this.maxZoom = maxZoom;
         markAsDirty();
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -34,12 +34,12 @@ public class RefreshDataProviderPage extends Div {
         group.setId("group");
 
         List<String> items = new LinkedList<>(Arrays.asList("foo", "bar"));
-        group.setItems(new ListDataProvider<>(items));
+        var listDataView = group.setItems(new ListDataProvider<>(items));
 
         NativeButton button = new NativeButton("Update items", e -> {
             items.add("baz");
             items.remove(0);
-            group.getDataProvider().refreshAll();
+            listDataView.refreshAll();
         });
 
         button.setId("reset");

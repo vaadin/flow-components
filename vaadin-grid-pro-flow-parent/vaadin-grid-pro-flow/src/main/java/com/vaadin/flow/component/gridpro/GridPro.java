@@ -1,24 +1,17 @@
-package com.vaadin.flow.component.gridpro;
-
-/*
- * #%L
- * Vaadin GridPro
- * %%
- * Copyright 2000-2022 Vaadin Ltd.
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
+/**
+ * Copyright 2000-2023 Vaadin Ltd.
  *
- * See the file license.html distributed with this software for more
- * information about licensing.
+ * This program is available under Vaadin Commercial License and Service Terms.
  *
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
  */
+package com.vaadin.flow.component.gridpro;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -31,6 +24,7 @@ import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasValueAndElement;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.grid.ColumnPathRenderer;
@@ -48,12 +42,12 @@ import com.vaadin.flow.shared.Registration;
 
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
+import org.slf4j.LoggerFactory;
 
 @Tag("vaadin-grid-pro")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha5")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/grid-pro", version = "23.2.0-alpha5")
-@NpmPackage(value = "@vaadin/vaadin-grid-pro", version = "23.2.0-alpha5")
+@NpmPackage(value = "@vaadin/grid-pro", version = "24.1.0-alpha1")
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro.js")
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro-edit-column.js")
 @JsModule("./gridProConnector.js")
@@ -115,14 +109,27 @@ public class GridPro<E> extends Grid<E> {
 
     private void setup() {
         addItemPropertyChangedListener(e -> {
+            if (e.getItem() == null) {
+                return;
+            }
             EditColumn<E> column = (EditColumn<E>) this.idToColumnMap
                     .get(e.getPath());
 
+            Object idBeforeUpdate = getItemId(e.getItem());
             if (column.getEditorType().equals("custom")) {
                 column.getItemUpdater().accept(e.getItem(), null);
             } else {
                 column.getItemUpdater().accept(e.getItem(),
                         e.getSourceItem().get(e.getPath()).asString());
+            }
+            Object idAfterUpdate = getItemId(e.getItem());
+
+            if (!Objects.equals(idBeforeUpdate, idAfterUpdate)) {
+                LoggerFactory.getLogger(GridPro.class).warn(
+                        "An item updater modified the data provider ID of the edited item, which is not allowed. "
+                                + "This can happen with classes that implement hashCode using fields that can be edited. "
+                                + "Either change the hashCode implementation so that it does not rely on editable fields, or "
+                                + "override DataProvider.getId() to generate a stable ID that does not change when editing fields.");
             }
 
             getDataProvider().refreshItem(e.getItem());
@@ -135,8 +142,34 @@ public class GridPro<E> extends Grid<E> {
             if (column.getEditorType().equals("custom")) {
                 column.getEditorField()
                         .setValue(column.getValueProvider().apply(e.getItem()));
+                UI.getCurrent().getPage().executeJs(
+                        "window.Vaadin.Flow.gridProConnector.selectAll($0)",
+                        column.getEditorField().getElement());
             }
         });
+    }
+
+    /**
+     * Returns the unique data provider ID of an item, or the item's hash code
+     * when using the default data provider identity implementation.
+     *
+     * @param item
+     *            the item
+     * @return the data provider ID of the item
+     */
+    private Object getItemId(E item) {
+        if (item == null) {
+            return null;
+        }
+        Object itemId = getDataProvider().getId(item);
+        // The default data provider identity implementation returns the item
+        // itself. As this method is used to detect changes to the item that
+        // affect the ID, which is not possible when comparing the item with
+        // itself, return the hash code instead
+        if (Objects.equals(item, itemId)) {
+            itemId = item.hashCode();
+        }
+        return itemId;
     }
 
     /**
@@ -151,7 +184,7 @@ public class GridPro<E> extends Grid<E> {
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-pro-edit-column")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha5")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha1")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class EditColumn<T> extends Column<T> {
 
@@ -648,10 +681,10 @@ public class GridPro<E> extends Grid<E> {
 
         @Override
         public Rendering<SOURCE> render(Element container,
-                DataKeyMapper<SOURCE> keyMapper, Element contentTemplate) {
+                DataKeyMapper<SOURCE> keyMapper, String rendererName) {
 
             Rendering<SOURCE> columnPathRendering = super.render(container,
-                    keyMapper, contentTemplate);
+                    keyMapper, rendererName);
             Rendering<SOURCE> representationRendering = representationRenderer
                     .render(container, keyMapper);
 
@@ -664,11 +697,6 @@ public class GridPro<E> extends Grid<E> {
                     compositeDataGenerator.addDataGenerator(
                             columnPathRendering.getDataGenerator().get());
                     return Optional.of(compositeDataGenerator);
-                }
-
-                @Override
-                public Element getTemplateElement() {
-                    return representationRendering.getTemplateElement();
                 }
             };
         }

@@ -1,17 +1,13 @@
+/**
+ * Copyright 2000-2023 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
+ */
 package com.vaadin.addon.spreadsheet.client;
 
-/*
- * #%L
- * Vaadin Spreadsheet
- * %%
- * Copyright (C) 2013 - 2022 Vaadin Ltd
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
- *
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
- */
 import com.google.gwt.dom.client.Style.Unit;
 
 /**

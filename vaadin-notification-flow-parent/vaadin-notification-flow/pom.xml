@@ -4,22 +4,25 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-notification-flow-parent</artifactId>
-        <version>23.2-SNAPSHOT</version>
+        <version>24.1-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-notification-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Notification</name>
     <dependencies>
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <version>3.1.0</version>
-            <scope>provided</scope>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-server</artifactId>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-flow-components-base</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>

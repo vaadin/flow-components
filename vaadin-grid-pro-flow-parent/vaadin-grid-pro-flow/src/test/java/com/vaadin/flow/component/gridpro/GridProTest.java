@@ -41,7 +41,7 @@ public class GridProTest {
     }
 
     private GridPro<Person> createFakeGridPro() {
-        GridPro<Person> grid = Mockito.spy(new GridPro<>());
+        GridPro<Person> grid = Mockito.spy(GridPro.class);
 
         Mockito.when(grid.getDataProvider())
                 .thenReturn(Mockito.mock(DataProvider.class));
@@ -91,5 +91,23 @@ public class GridProTest {
 
         Assert.assertEquals(2, items.size());
         items.forEach(item -> Assert.assertEquals(testItem, item));
+    }
+
+    @Test
+    public void propertyChangedEvent_itemNotPresentDataProvider_itemUpdaterNotCalled() {
+        var dataProvider = grid.getDataProvider();
+        Mockito.doNothing().when(dataProvider).refreshItem(Mockito.isNull());
+
+        ItemUpdater<Person, String> mock = Mockito.mock(ItemUpdater.class);
+        grid.addEditColumn(Person::getName).text(mock);
+
+        JsonObject item = new JreJsonFactory()
+                .parse("{\"key\": \"2\", \"col1\":\"foo\"}");
+
+        ComponentUtil.fireEvent(grid,
+                new GridPro.ItemPropertyChangedEvent<Person>(grid, false, item,
+                        "col1"));
+        Mockito.verify(mock, Mockito.never()).accept(Mockito.isNull(),
+                Mockito.anyString());
     }
 }

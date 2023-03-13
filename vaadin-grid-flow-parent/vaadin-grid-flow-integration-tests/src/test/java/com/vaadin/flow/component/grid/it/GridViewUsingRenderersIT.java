@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -48,26 +48,24 @@ public class GridViewUsingRenderersIT extends AbstractComponentIT {
         Assert.assertTrue(
                 grid.getCell(0, 2).getText().matches("1/10/18,? 11:43:59 AM"));
         Assert.assertEquals("Jan 11, 2018", grid.getCell(0, 3).getText());
-        assertRendereredContent("$$$", grid.getCell(0, 4).getInnerHTML());
+        assertRendereredContent("<span>$$$</span>",
+                TestHelper.stripComments(grid.getCell(0, 4).getInnerHTML()));
         Assert.assertEquals("<button>Remove</button>",
-                grid.getCell(0, 5).getInnerHTML());
+                TestHelper.stripComments(grid.getCell(0, 5).getInnerHTML()));
 
         Assert.assertEquals("Item 2", grid.getCell(1, 0).getText());
         Assert.assertEquals("$ 24.05", grid.getCell(1, 1).getText());
         Assert.assertTrue(
                 grid.getCell(1, 2).getText().matches("1/10/18,? 11:07:31 AM"));
         Assert.assertEquals("Jan 24, 2018", grid.getCell(1, 3).getText());
-        assertRendereredContent("$", grid.getCell(1, 4).getInnerHTML());
+        assertRendereredContent("<span>$</span>",
+                TestHelper.stripComments(grid.getCell(1, 4).getInnerHTML()));
         Assert.assertEquals("<button>Remove</button>",
-                grid.getCell(1, 5).getInnerHTML());
+                TestHelper.stripComments(grid.getCell(1, 5).getInnerHTML()));
     }
 
     private void assertRendereredContent(String expected, String content) {
-        assertThat(content,
-                CoreMatchers.allOf(
-                        CoreMatchers.startsWith("<flow-component-renderer"),
-                        CoreMatchers.containsString(expected),
-                        CoreMatchers.endsWith("</flow-component-renderer>")));
+        Assert.assertTrue(content.contains(expected));
     }
 
     private void waitUntilCellHasText(WebElement grid, String text) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.shared.HasOverlayClassName;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Test;
@@ -34,13 +35,6 @@ import com.vaadin.flow.component.html.Label;
  * Unit tests for the ContextMenu.
  */
 public class ContextMenuTest {
-    @Test
-    public void templateWarningSuppressed() {
-        ContextMenu contextMenu = new ContextMenu();
-
-        Assert.assertTrue("Template warning is not suppressed", contextMenu
-                .getElement().hasAttribute("suppress-template-warning"));
-    }
 
     @Test
     public void createContextMenuWithTargetAndChildren_getChildrenReturnsChildren() {
@@ -199,6 +193,13 @@ public class ContextMenuTest {
         ObjectOutputStream out = new ObjectOutputStream(
                 new ByteArrayOutputStream());
         out.writeObject(menu);
+    }
+
+    @Test
+    public void implementsHasOverlayClassName() {
+        Assert.assertTrue("ContextMenu should support overlay class name",
+                HasOverlayClassName.class
+                        .isAssignableFrom(new ContextMenu().getClass()));
     }
 
     private void addDivAtIndex(int index) {

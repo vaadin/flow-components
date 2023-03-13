@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -38,6 +38,7 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.listbox.dataview.ListBoxDataView;
 import com.vaadin.flow.component.listbox.dataview.ListBoxListDataView;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
 import com.vaadin.flow.data.provider.DataChangeEvent.DataRefreshEvent;
@@ -65,16 +66,15 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-list-box")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha5")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/list-box", version = "23.2.0-alpha5")
-@NpmPackage(value = "@vaadin/vaadin-list-box", version = "23.2.0-alpha5")
+@NpmPackage(value = "@vaadin/list-box", version = "24.1.0-alpha1")
 @JsModule("@vaadin/list-box/src/vaadin-list-box.js")
 public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, VALUE>
         extends AbstractSinglePropertyField<C, VALUE>
         implements HasItemComponents<ITEM>, HasSize,
         HasListDataView<ITEM, ListBoxListDataView<ITEM>>,
-        HasDataView<ITEM, Void, ListBoxDataView<ITEM>>, HasStyle {
+        HasDataView<ITEM, Void, ListBoxDataView<ITEM>>, HasStyle, HasTooltip {
 
     private final AtomicReference<DataProvider<ITEM, ?>> dataProvider = new AtomicReference<>(
             DataProvider.ofItems());
@@ -97,15 +97,7 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
                 presentationToModel, modelToPresentation);
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @deprecated use instead one of the {@code setItems} methods which provide
-     *             access to either {@link ListBoxListDataView} or
-     *             {@link ListBoxDataView}
-     */
-    @Deprecated
-    public void setDataProvider(DataProvider<ITEM, ?> dataProvider) {
+    private void setDataProvider(DataProvider<ITEM, ?> dataProvider) {
         this.dataProvider.set(Objects.requireNonNull(dataProvider));
         DataViewUtils.removeComponentFilterAndSortComparator(this);
         clear();
@@ -149,11 +141,8 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
      * Gets the data provider.
      *
      * @return the data provider, not {@code null}
-     * @deprecated use {@link #getListDataView()} or
-     *             {@link #getGenericDataView()} instead
      */
-    @Deprecated
-    public DataProvider<ITEM, ?> getDataProvider() {
+    private DataProvider<ITEM, ?> getDataProvider() {
         return dataProvider.get();
     }
 
@@ -388,17 +377,6 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
             ListDataProvider<ITEM> listDataProvider) {
         setDataProvider(listDataProvider);
         return getListDataView();
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @deprecated Because the stream is collected to a list anyway, use
-     *             {@link HasListDataView#setItems(Collection)} instead.
-     */
-    @Deprecated
-    public void setItems(Stream<ITEM> streamOfItems) {
-        setItems(DataProvider.fromStream(streamOfItems));
     }
 
     /**

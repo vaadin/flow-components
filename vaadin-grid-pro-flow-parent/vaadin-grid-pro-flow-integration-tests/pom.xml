@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-grid-pro-flow-parent</artifactId>
-        <version>23.2-SNAPSHOT</version>
+        <version>24.1-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-grid-pro-integration-tests</artifactId>
     <packaging>war</packaging>
@@ -96,13 +96,14 @@
                             <includes>
                                 <include>package*.json</include>
                                 <include>pnpm*</include>
-                                <include>webpack.*</include>
+                                <include>vite.generated.ts</include>
                                 <include>types.d.ts</include>
                                 <include>tsconfig.json</include>
                             </includes>
                         </fileset>
                         <fileset>
                             <directory>${project.basedir}/node_modules</directory>
+                            <directory>${project.basedir}/frontend/generated</directory>
                         </fileset>
                     </filesets>
                 </configuration>
@@ -162,25 +163,12 @@
                         <groupId>org.eclipse.jetty</groupId>
                         <artifactId>jetty-maven-plugin</artifactId>
                         <configuration>
-                            <scanIntervalSeconds>5</scanIntervalSeconds>
+                            <scan>5</scan>
                         </configuration>
                     </plugin>
                 </plugins>
             </build>
         </profile>
-        <profile>
-            <id>saucelabs</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>com.saucelabs.maven.plugin</groupId>
-                        <artifactId>sauce-connect-plugin</artifactId>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
+
     </profiles>
 </project>

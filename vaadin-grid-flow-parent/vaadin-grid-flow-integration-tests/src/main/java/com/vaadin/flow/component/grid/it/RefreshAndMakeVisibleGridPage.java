@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -33,7 +33,7 @@ public class RefreshAndMakeVisibleGridPage extends Div {
     public RefreshAndMakeVisibleGridPage() {
         grid = new Grid<>();
         dataProvider = new ListDataProvider<>(new ArrayList<>());
-        grid.setDataProvider(dataProvider);
+        grid.setItems(dataProvider);
         grid.setVisible(false);
         grid.addColumn(ValueProvider.identity()).setHeader("Name");
 

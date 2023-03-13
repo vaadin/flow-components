@@ -28,8 +28,8 @@ public class NonImmediateUploadIT extends AbstractUploadIT {
     private void uploadMultipleFiles_shouldNotThrowException(String buttonType)
             throws Exception {
         open();
-        File file1 = createTempFile();
-        File file2 = createTempFile();
+        File file1 = createTempFile("txt");
+        File file2 = createTempFile("txt");
         UploadElement upload = $(UploadElement.class).waitForFirst();
         upload.upload(file1);
         upload.upload(file2);
@@ -42,8 +42,7 @@ public class NonImmediateUploadIT extends AbstractUploadIT {
     private WebElement findButtonInVaadinUploadFile(UploadElement upload,
             String buttonType) {
         final String QUERY = String.format(
-                "return arguments[0]"
-                        + ".shadowRoot.querySelector('vaadin-upload-file')"
+                "return arguments[0]" + ".querySelector('vaadin-upload-file')"
                         + ".shadowRoot.querySelector('[part=\"%s\"]')",
                 buttonType);
         return (WebElement) getCommandExecutor().executeScript(QUERY, upload);

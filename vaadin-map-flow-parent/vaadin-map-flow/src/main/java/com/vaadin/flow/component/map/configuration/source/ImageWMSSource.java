@@ -1,20 +1,12 @@
-package com.vaadin.flow.component.map.configuration.source;
-
-/*
- * #%L
- * Vaadin Map
- * %%
- * Copyright 2000-2022 Vaadin Ltd.
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
+/**
+ * Copyright 2000-2023 Vaadin Ltd.
  *
- * See the file license.html distributed with this software for more
- * information about licensing.
+ * This program is available under Vaadin Commercial License and Service Terms.
  *
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
  */
+package com.vaadin.flow.component.map.configuration.source;
 
 import com.vaadin.flow.component.map.configuration.Constants;
 
@@ -30,7 +22,7 @@ public class ImageWMSSource extends ImageSource {
     private final Map<String, Object> params;
     private final String serverType;
     private final String crossOrigin;
-    private final float ratio;
+    private final double ratio;
 
     public ImageWMSSource(Options options) {
         super(options);
@@ -124,7 +116,7 @@ public class ImageWMSSource extends ImageSource {
      *
      * @return the ratio
      */
-    public float getRatio() {
+    public double getRatio() {
         return ratio;
     }
 
@@ -133,7 +125,7 @@ public class ImageWMSSource extends ImageSource {
         private Map<String, Object> params;
         private String serverType;
         private String crossOrigin;
-        private float ratio = 1.5f;
+        private double ratio = 1.5;
 
         /**
          * @see ImageWMSSource#getUrl()
@@ -166,7 +158,7 @@ public class ImageWMSSource extends ImageSource {
         /**
          * @see ImageWMSSource#getRatio()
          */
-        public void setRatio(float ratio) {
+        public void setRatio(double ratio) {
             this.ratio = ratio;
         }
     }

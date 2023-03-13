@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -18,6 +18,7 @@ package com.vaadin.flow.component.grid.it;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.By;
 
 import java.util.List;
 
@@ -40,31 +41,33 @@ public class GridViewUsingTemplatesIT extends AbstractComponentIT {
         scrollToElement(grid);
 
         Assert.assertEquals("0", grid.getCell(0, 0).getText());
-        Assert.assertEquals(
-                "<div title=\"Person 1\">Person 1<br><small>23 years old</small></div>",
-                grid.getCell(0, 1).getInnerHTML());
-        Assert.assertEquals(
-                "<div>Street S, number 49<br><small>10795</small></div>",
-                grid.getCell(0, 2).getInnerHTML());
-        Assert.assertEquals("<button>Update</button><button>Remove</button>",
-                grid.getCell(0, 3).getInnerHTML());
+        var person = grid.getCell(0, 1).getContext()
+                .findElement(By.cssSelector("[title=\"Person 1\"]"));
+
+        Assert.assertEquals("Person 1\n23 years old", person.getText());
+        Assert.assertEquals("Street S, number 4910795",
+                grid.getCell(0, 2).getText());
 
         List<TestBenchElement> buttons = grid.getCell(0, 3).$("button").all();
+        Assert.assertEquals("Update", buttons.get(0).getText());
+        Assert.assertEquals("Remove", buttons.get(1).getText());
         Assert.assertEquals(2, buttons.size());
 
         buttons.get(0).click();
-        Assert.assertEquals(
-                "<div title=\"Person 1 Updated\">Person 1 Updated<br><small>23 years old</small></div>",
-                grid.getCell(0, 1).getInnerHTML());
+
+        var personUpdated = grid.getCell(0, 1).getContext()
+                .findElement(By.cssSelector("[title='Person 1 Updated']"));
+        Assert.assertEquals("Person 1 Updated\n23 years old",
+                personUpdated.getText());
         buttons.get(0).click();
-        Assert.assertEquals(
-                "<div title=\"Person 1 Updated Updated\">Person 1 Updated Updated<br><small>23 years old</small></div>",
-                grid.getCell(0, 1).getInnerHTML());
+        var personUpdated2 = grid.getCell(0, 1).getContext().findElement(
+                By.cssSelector("[title='Person 1 Updated Updated']"));
+        Assert.assertEquals("Person 1 Updated Updated\n23 years old",
+                personUpdated2.getText());
 
         buttons.get(1).click();
-        Assert.assertEquals(
-                "<div title=\"Person 2\">Person 2<br><small>61 years old</small></div>",
-                grid.getCell(0, 1).getInnerHTML());
+        var person2 = grid.getCell(0, 1).getContext()
+                .findElement(By.cssSelector("[title='Person 2']"));
+        Assert.assertEquals("Person 2\n61 years old", person2.getText());
     }
-
 }

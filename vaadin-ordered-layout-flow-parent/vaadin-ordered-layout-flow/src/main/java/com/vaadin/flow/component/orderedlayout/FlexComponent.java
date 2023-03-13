@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -177,9 +177,9 @@ public interface FlexComponent extends HasOrderedComponents, HasStyle, HasSize {
     }
 
     /**
-     * Sets an alignment for individual element container inside the layout.
-     * This individual alignment for the element container overrides any
-     * alignment set at the {@link #setAlignItems(Alignment)}.
+     * Sets an alignment for individual components inside the layout. This
+     * individual alignment for the component overrides any alignment set at the
+     * {@link #setAlignItems(Alignment)}.
      * <p>
      * It effectively sets the {@code "alignSelf"} style value.
      * <p>
@@ -189,20 +189,19 @@ public interface FlexComponent extends HasOrderedComponents, HasStyle, HasSize {
      * @param alignment
      *            the individual alignment for the children components. Setting
      *            <code>null</code> will reset the alignment to its default
-     * @param elementContainers
-     *            The element containers (components) to which the individual
-     *            alignment should be set
+     * @param components
+     *            The components to which the individual alignment should be set
      */
     default public void setAlignSelf(Alignment alignment,
-            HasElement... elementContainers) {
+            HasElement... components) {
         if (alignment == null) {
-            for (HasElement container : elementContainers) {
-                container.getElement().getStyle()
+            for (HasElement component : components) {
+                component.getElement().getStyle()
                         .remove(FlexConstants.ALIGN_SELF_CSS_PROPERTY);
             }
         } else {
-            for (HasElement container : elementContainers) {
-                container.getElement().getStyle().set(
+            for (HasElement component : components) {
+                component.getElement().getStyle().set(
                         FlexConstants.ALIGN_SELF_CSS_PROPERTY,
                         alignment.getFlexValue());
             }
@@ -210,18 +209,17 @@ public interface FlexComponent extends HasOrderedComponents, HasStyle, HasSize {
     }
 
     /**
-     * Gets the individual alignment of a given element container.
+     * Gets the individual alignment of a given component.
      * <p>
-     * The default alignment for individual element containers is
+     * The default alignment for individual components is
      * {@link Alignment#AUTO}.
      *
-     * @param container
-     *            The element container (component) which individual layout
-     *            should be read
-     * @return the alignment of the container, never <code>null</code>
+     * @param component
+     *            The component which individual layout should be read
+     * @return the alignment of the component, never <code>null</code>
      */
-    default public Alignment getAlignSelf(HasElement container) {
-        return Alignment.toAlignment(container.getElement().getStyle()
+    default public Alignment getAlignSelf(HasElement component) {
+        return Alignment.toAlignment(component.getElement().getStyle()
                 .get(FlexConstants.ALIGN_SELF_CSS_PROPERTY), Alignment.AUTO);
     }
 
@@ -238,28 +236,27 @@ public interface FlexComponent extends HasOrderedComponents, HasStyle, HasSize {
      * other components, and so on.
      * <p>
      * Setting to flex grow property value 0 disables the expansion of the
-     * element container. Negative values are not allowed.
+     * component. Negative values are not allowed.
      *
      * @param flexGrow
-     *            the proportion of the available space the element container
-     *            should take up
-     * @param elementContainers
-     *            the containers (components) to apply the flex grow property
+     *            the proportion of the available space the component should
+     *            take up
+     * @param components
+     *            the components to apply the flex grow property
      */
-    default public void setFlexGrow(double flexGrow,
-            HasElement... elementContainers) {
+    default public void setFlexGrow(double flexGrow, HasElement... components) {
         if (flexGrow < 0) {
             throw new IllegalArgumentException(
                     "Flex grow property cannot be negative");
         }
         if (flexGrow == 0) {
-            for (HasElement container : elementContainers) {
-                container.getElement().getStyle()
+            for (HasElement component : components) {
+                component.getElement().getStyle()
                         .remove(FlexConstants.FLEX_GROW_CSS_PROPERTY);
             }
         } else {
-            for (HasElement container : elementContainers) {
-                container.getElement().getStyle().set(
+            for (HasElement component : components) {
+                component.getElement().getStyle().set(
                         FlexConstants.FLEX_GROW_CSS_PROPERTY,
                         String.valueOf(flexGrow));
             }
@@ -267,14 +264,14 @@ public interface FlexComponent extends HasOrderedComponents, HasStyle, HasSize {
     }
 
     /**
-     * Gets the flex grow property of a given element container.
+     * Gets the flex grow property of a given component.
      *
-     * @param elementContainer
-     *            the element container to read the flex grow property from
+     * @param component
+     *            the component to read the flex grow property from
      * @return the flex grow property, or 0 if none was set
      */
-    default public double getFlexGrow(HasElement elementContainer) {
-        String ratio = elementContainer.getElement().getStyle()
+    default public double getFlexGrow(HasElement component) {
+        String ratio = component.getElement().getStyle()
                 .get(FlexConstants.FLEX_GROW_CSS_PROPERTY);
         if (ratio == null || ratio.isEmpty()) {
             return 0;
@@ -283,7 +280,60 @@ public interface FlexComponent extends HasOrderedComponents, HasStyle, HasSize {
             return Double.parseDouble(ratio);
         } catch (Exception e) {
             throw new IllegalStateException(
-                    "The flex grow property of the element container is not parseable to double: "
+                    "The flex grow property of the component is not parseable to double: "
+                            + ratio,
+                    e);
+        }
+    }
+
+    /**
+     * Sets the flex shrink property of the components inside the layout. The
+     * flex shrink property specifies how the item will shrink relative to the
+     * rest of the components inside the same layout.
+     * <p>
+     * Negative values are not allowed.
+     * <p>
+     * The default value is 1.
+     *
+     * @param flexShrink
+     *            how much the component will shrink relative to the rest of the
+     *            components
+     * @param components
+     *            the components to apply the flex shrink property
+     */
+    default public void setFlexShrink(double flexShrink,
+            HasElement... components) {
+        if (flexShrink < 0) {
+            throw new IllegalArgumentException(
+                    "Flex shrink property cannot be negative");
+        }
+
+        for (HasElement component : components) {
+            component.getElement().getStyle().set(
+                    FlexConstants.FLEX_SHRINK_CSS_PROPERTY,
+                    String.valueOf(flexShrink));
+        }
+    }
+
+    /**
+     * Gets the flex shrink property of a given component.
+     *
+     * @param component
+     *            the component to read the flex shrink property from
+     * @return the flex shrink property, or 1 if none was set
+     */
+    default public double getFlexShrink(HasElement component) {
+        String ratio = component.getElement().getStyle()
+                .get(FlexConstants.FLEX_SHRINK_CSS_PROPERTY);
+        if (ratio == null || ratio.isEmpty()) {
+            return 1;
+        }
+
+        try {
+            return Double.parseDouble(ratio);
+        } catch (Exception e) {
+            throw new IllegalStateException(
+                    "The flex shrink property of the component is not parseable to double: "
                             + ratio,
                     e);
         }

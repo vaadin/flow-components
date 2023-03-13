@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -25,12 +25,12 @@ import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.data.bean.Person;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.LocalDateRenderer;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 import com.vaadin.flow.data.renderer.NativeButtonRenderer;
 import com.vaadin.flow.data.renderer.NumberRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
-import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.Command;
 
@@ -51,7 +51,7 @@ public class AddingColumnsPage extends Div {
                 () -> grid.addColumn(Person::getFirstName));
 
         addButton("add-template-column",
-                TemplateRenderer.<Person> of("<div>[[item.age]]</div>")
+                LitRenderer.<Person> of("<div>${item.age}</div>")
                         .withProperty("age", Person::getAge));
 
         addButton("add-component-column", new ComponentRenderer<>(

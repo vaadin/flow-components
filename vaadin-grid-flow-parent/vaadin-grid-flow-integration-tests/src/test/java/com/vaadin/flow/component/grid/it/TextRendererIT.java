@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -35,8 +35,7 @@ public class TextRendererIT extends AbstractComponentIT {
 
         Set<String> initialCells = findElements(
                 By.tagName("vaadin-grid-cell-content")).stream()
-                        .map(cell -> cell.getText())
-                        .collect(Collectors.toSet());
+                .map(cell -> cell.getText()).collect(Collectors.toSet());
 
         $("button").id("refresh").click();
 
@@ -47,8 +46,7 @@ public class TextRendererIT extends AbstractComponentIT {
 
         Set<String> cellsAfterRefresh = findElements(
                 By.tagName("vaadin-grid-cell-content")).stream()
-                        .map(cell -> cell.getText())
-                        .collect(Collectors.toSet());
+                .map(cell -> cell.getText()).collect(Collectors.toSet());
 
         Assert.assertEquals(initialCells, cellsAfterRefresh);
     }

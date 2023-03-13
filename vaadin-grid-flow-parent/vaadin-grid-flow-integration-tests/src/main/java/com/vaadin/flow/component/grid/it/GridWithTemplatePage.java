@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -20,7 +20,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
-import com.vaadin.flow.data.renderer.TemplateRenderer;
+import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.Route;
 
@@ -89,7 +89,7 @@ public class GridWithTemplatePage extends Div {
         setCommonGridFeatures(grid, gridInATemplate.getId().get());
 
         grid.addColumn(value -> value).setFlexGrow(2);
-        grid.addColumn(TemplateRenderer.of("[[index]]")).setFlexGrow(0)
+        grid.addColumn(LitRenderer.of("${index}")).setFlexGrow(0)
                 .setWidth("20px");
         grid.addColumn(new ComponentRenderer<>(
                 value -> getTestTemplate(value, grid.getId().get())))
@@ -136,7 +136,7 @@ public class GridWithTemplatePage extends Div {
         setCommonGridFeatures(grid, "standalone-columns-with-properties");
 
         grid.addColumn(value -> value).setFlexGrow(2);
-        grid.addColumn(TemplateRenderer.of("[[index]]")).setFlexGrow(0)
+        grid.addColumn(LitRenderer.of("${index}")).setFlexGrow(0)
                 .setWidth("20px");
         grid.addColumn(new ComponentRenderer<>(
                 value -> getTestTemplate(value, grid.getId().get())))

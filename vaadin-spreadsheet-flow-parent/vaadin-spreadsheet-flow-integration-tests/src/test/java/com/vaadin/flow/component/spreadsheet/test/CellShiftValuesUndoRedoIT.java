@@ -2,21 +2,23 @@ package com.vaadin.flow.component.spreadsheet.test;
 
 import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
 import com.vaadin.flow.component.spreadsheet.testbench.SpreadsheetElement;
+import com.vaadin.flow.testutil.TestPath;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 
+@TestPath("vaadin-spreadsheet")
 public class CellShiftValuesUndoRedoIT extends AbstractSpreadsheetIT {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL());
+        open();
 
         createNewSpreadsheet();
     }
@@ -29,8 +31,8 @@ public class CellShiftValuesUndoRedoIT extends AbstractSpreadsheetIT {
 
         selectCell("A1");
 
-        WebElement selectionCorner = getSpreadsheet()
-                .findElement(By.className("sheet-selection"))
+        WebElement selectionCorner = findElementInShadowRoot(
+                By.className("sheet-selection"))
                 .findElement(By.className("s-corner"));
         // drag corner element of the selected cell to the target cell
         new Actions(driver).dragAndDrop(selectionCorner, target).perform();
@@ -57,20 +59,6 @@ public class CellShiftValuesUndoRedoIT extends AbstractSpreadsheetIT {
                 return value == null;
             }
         });
-    }
-
-    private void undo() {
-        // TODO: cleanup modifier keys solution (for macOS)
-        new Actions(getDriver()).keyDown(Keys.CONTROL).keyDown(Keys.COMMAND)
-                .sendKeys("z").keyUp(Keys.CONTROL).keyUp(Keys.COMMAND).build()
-                .perform();
-    }
-
-    private void redo() {
-        // TODO: cleanup modifier keys solution (for macOS)
-        new Actions(getDriver()).keyDown(Keys.CONTROL).keyDown(Keys.COMMAND)
-                .sendKeys("y").keyUp(Keys.CONTROL).keyUp(Keys.COMMAND).build()
-                .perform();
     }
 
 }

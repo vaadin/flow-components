@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -20,16 +20,15 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
-import com.vaadin.flow.component.polymertemplate.Id;
-import com.vaadin.flow.component.polymertemplate.PolymerTemplate;
-import com.vaadin.flow.templatemodel.TemplateModel;
+import com.vaadin.flow.component.littemplate.LitTemplate;
+import com.vaadin.flow.component.template.Id;
 
 /**
  * Simple template example.
  */
 @Tag("vaadin-dialog-flow-test-template")
 @JsModule("./src/vaadin-dialog-flow-test-template.js")
-public class TestTemplate extends PolymerTemplate<TemplateModel> {
+public class TestTemplate extends LitTemplate {
 
     @Id("container")
     private Div div;

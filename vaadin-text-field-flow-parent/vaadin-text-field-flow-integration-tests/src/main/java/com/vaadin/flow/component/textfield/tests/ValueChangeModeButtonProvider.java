@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -41,7 +41,7 @@ public class ValueChangeModeButtonProvider {
         field.setTitle("ValueChangeTimeout");
         field.setPattern("[0-9]*");
         field.setMaxLength(4);
-        field.setPreventInvalidInput(true);
+        field.setAllowedCharPattern("[0-9]*");
         field.addThemeVariants(LUMO_ALIGN_RIGHT, LUMO_SMALL);
         field.setValue(elementWithChangeMode.getValueChangeTimeout() + "");
         field.addValueChangeListener(this::onTimeoutChange);

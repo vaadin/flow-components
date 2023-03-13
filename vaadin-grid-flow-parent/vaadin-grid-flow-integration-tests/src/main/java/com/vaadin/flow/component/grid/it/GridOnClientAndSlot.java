@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -18,11 +18,9 @@ package com.vaadin.flow.component.grid.it;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.component.polymertemplate.PolymerTemplate;
-import com.vaadin.flow.templatemodel.TemplateModel;
+import com.vaadin.flow.component.littemplate.LitTemplate;
 
 @Tag("grid-on-client-and-slot")
 @JsModule("src/grid-on-client-and-slot.js")
-public class GridOnClientAndSlot extends PolymerTemplate<TemplateModel>
-        implements HasComponents {
+public class GridOnClientAndSlot extends LitTemplate implements HasComponents {
 }

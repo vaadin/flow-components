@@ -4,17 +4,11 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-flow-components</artifactId>
-        <version>23.2-SNAPSHOT</version>
+        <version>24.1-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-confirm-dialog-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>Vaadin Confirm Dialog Parent</name>
-    <licenses>
-        <license>
-            <name>Commercial Vaadin Developer License version 4.0</name>
-            <url>https://vaadin.com/license/cvdl-4.0</url>
-        </license>
-    </licenses>
     <modules>
         <module>vaadin-confirm-dialog-flow</module>
         <module>vaadin-confirm-dialog-testbench</module>

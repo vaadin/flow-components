@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -40,8 +40,10 @@ public class UploadI18nIT extends AbstractUploadIT {
         open();
 
         UploadElement upload = $(UploadElement.class).id("upload-full-i18n");
-        WebElement addButton = upload.$("*").id("addButton");
-        WebElement dropLabel = upload.$("*").id("dropLabel");
+        WebElement addButton = upload.$("*").attribute("slot", "add-button")
+                .first();
+        WebElement dropLabel = upload.$("*").attribute("slot", "drop-label")
+                .first();
 
         Assert.assertEquals(UploadTestsI18N.RUSSIAN_FULL.getAddFiles().getOne(),
                 addButton.getText());
@@ -77,8 +79,10 @@ public class UploadI18nIT extends AbstractUploadIT {
         open();
 
         UploadElement upload = $(UploadElement.class).id("upload-partial-i18n");
-        WebElement addButton = upload.$("*").id("addButton");
-        WebElement dropLabel = upload.$("*").id("dropLabel");
+        WebElement addButton = upload.$("*").attribute("slot", "add-button")
+                .first();
+        WebElement dropLabel = upload.$("*").attribute("slot", "drop-label")
+                .first();
 
         // This label should still be the default one
         Assert.assertEquals("Upload File...", addButton.getText());
@@ -129,9 +133,12 @@ public class UploadI18nIT extends AbstractUploadIT {
         UploadElement upload = $(UploadElement.class)
                 .id("upload-detach-reattach-i18n");
 
+        WebElement dropLabel = upload.$("*").attribute("slot", "drop-label")
+                .first();
+
         Assert.assertEquals(
                 UploadTestsI18N.RUSSIAN_FULL.getDropFiles().getOne(),
-                upload.$("*").id("dropLabel").getText());
+                dropLabel.getText());
     }
 
     private void assertTranslationMapsAreEqual(Map<String, String> expected,

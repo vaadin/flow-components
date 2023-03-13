@@ -30,7 +30,7 @@ public class BasicIT extends AbstractParallelTest {
     public void editColumnsAdded() {
         List<TestBenchElement> columns = grid.$("vaadin-grid-pro-edit-column")
                 .all();
-        Assert.assertEquals(columns.size(), 5);
+        Assert.assertEquals(columns.size(), 6);
     }
 
     @Test
@@ -101,7 +101,6 @@ public class BasicIT extends AbstractParallelTest {
     }
 
     @Test
-
     public void customComboBox_circularReferencesInData_isEdited() {
         GridTHTDElement cell = grid.getCell(0, 4);
         Assert.assertEquals("City 1", cell.$("span").first().getText());
@@ -137,15 +136,13 @@ public class BasicIT extends AbstractParallelTest {
     @Test
     public void cellEditStartedListenerCalledOnce() {
         assertCellEnterEditModeOnDoubleClick(0, 2, "vaadin-combo-box");
-        Assert.assertEquals(
-                "Person{id=1, age=23, name='Person 1', "
-                        + "isSubscriber=false, email='person1@vaadin.com', "
-                        + "department=sales, city='City 1'}",
+        Assert.assertEquals("Person{id=1, age=23, name='Person 1', "
+                + "isSubscriber=false, email='person1@vaadin.com', "
+                + "department=sales, city='City 1', employmentYear=2019}",
                 getPanelText("events" + "-panel"));
     }
 
     @Test
-
     public void customComboBoxIsUsedForEditColumn() {
         assertCellEnterEditModeOnDoubleClick(0, 2, "vaadin-combo-box");
     }
@@ -160,7 +157,6 @@ public class BasicIT extends AbstractParallelTest {
     }
 
     @Test
-
     public void checkboxEditorIsUsedForCheckboxColumn() {
         assertCellEnterEditModeOnDoubleClick(0, 3,
                 "vaadin-grid-pro-edit-checkbox");
@@ -250,6 +246,37 @@ public class BasicIT extends AbstractParallelTest {
 
         grid.scrollToRow(30);
         Assert.assertFalse(cell.innerHTMLContains("input"));
+    }
+
+    @Test
+    public void customTextFieldWithCustomValueProviderIsGettingConvertedValue() {
+        GridTHTDElement cell = grid.getCell(0, 6);
+        assertCellEnterEditModeOnDoubleClick(0, 6, "vaadin-text-field", grid,
+                true);
+        TestBenchElement textField = cell.$("vaadin-text-field").first();
+        // should have converted integer model value into string editor value
+        Assert.assertEquals("2019", textField.getProperty("value"));
+    }
+
+    @Test
+    public void gridWithCustomEditors_navigateToWithTabKey_textIsSelected() {
+        var cell_0_4 = grid.getCell(0, 4);
+        assertCellEnterEditModeOnDoubleClick(0, 4, "vaadin-combo-box");
+
+        waitUntil(e -> cell_0_4.$("vaadin-combo-box").exists());
+        var input = cell_0_4.$("vaadin-combo-box").first();
+        input.sendKeys(Keys.TAB);
+
+        var selectedText = (String) getCommandExecutor()
+                .executeScript("return document.getSelection().toString()");
+        Assert.assertEquals("person1@vaadin.com", selectedText);
+
+        var cell_0_5 = grid.getCell(0, 5);
+        input = cell_0_5.$("input").first();
+        input.sendKeys(Keys.TAB);
+        selectedText = (String) getCommandExecutor()
+                .executeScript("return document.getSelection().toString()");
+        Assert.assertEquals("2019", selectedText);
     }
 
     private void assertCellEnterEditModeOnDoubleClick(Integer rowIndex,

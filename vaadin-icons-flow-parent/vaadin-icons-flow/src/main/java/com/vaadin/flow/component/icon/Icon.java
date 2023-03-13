@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -22,6 +22,7 @@ import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.dom.ElementConstants;
 
 /**
@@ -32,14 +33,14 @@ import com.vaadin.flow.dom.ElementConstants;
  * @see VaadinIcon
  */
 @Tag("vaadin-icon")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha5")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/icons", version = "23.2.0-alpha5")
+@NpmPackage(value = "@vaadin/icons", version = "24.1.0-alpha1")
 @JsModule("@vaadin/icons/vaadin-iconset.js")
-@NpmPackage(value = "@vaadin/icon", version = "23.2.0-alpha5")
-@NpmPackage(value = "@vaadin/vaadin-icon", version = "23.2.0-alpha5")
+@NpmPackage(value = "@vaadin/icon", version = "24.1.0-alpha1")
 @JsModule("@vaadin/icon/vaadin-icon.js")
-public class Icon extends Component implements HasStyle, ClickNotifier<Icon> {
+public class Icon extends Component
+        implements HasStyle, ClickNotifier<Icon>, HasTooltip {
 
     private static final String ICON_ATTRIBUTE_NAME = "icon";
     private static final String ICON_COLLECTION_NAME = "vaadin";

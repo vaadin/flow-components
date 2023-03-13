@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -43,12 +43,11 @@ import elemental.json.JsonArray;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-message-list")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha5")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("./messageListConnector.js")
 @JsModule("@vaadin/message-list/src/vaadin-message-list.js")
-@NpmPackage(value = "@vaadin/message-list", version = "23.2.0-alpha5")
-@NpmPackage(value = "@vaadin/vaadin-messages", version = "23.2.0-alpha5")
+@NpmPackage(value = "@vaadin/message-list", version = "24.1.0-alpha1")
 public class MessageList extends Component
         implements HasStyle, HasSize, LocaleChangeObserver {
 

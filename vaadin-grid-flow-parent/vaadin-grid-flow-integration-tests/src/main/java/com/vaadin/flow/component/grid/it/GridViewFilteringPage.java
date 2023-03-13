@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -40,7 +40,7 @@ public class GridViewFilteringPage extends LegacyTestView {
         Grid<Person> grid = new Grid<>();
         ListDataProvider<Person> dataProvider = new ListDataProvider<>(
                 createItems());
-        grid.setDataProvider(dataProvider);
+        grid.setItems(dataProvider);
 
         List<ValueProvider<Person, String>> valueProviders = new ArrayList<>();
         valueProviders.add(Person::getFirstName);

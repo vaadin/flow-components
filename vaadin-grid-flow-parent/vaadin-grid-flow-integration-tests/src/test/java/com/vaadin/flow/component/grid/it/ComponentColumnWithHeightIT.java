@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -49,5 +49,19 @@ public class ComponentColumnWithHeightIT extends AbstractComponentIT {
                 grid.getRow(0).getLocation().y
                         + grid.getRow(0).getSize().height,
                 grid.getRow(1).getLocation().y);
+    }
+
+    @Test
+    public void shouldPositionItemsCorrectlyAfterScrollingToEnd() {
+        int initialLastRow = grid.getRowCount() - 1;
+        grid.scrollToRow(initialLastRow);
+
+        add.click();
+        // Expect the y position of the last row to equal the y position + the
+        // height of the previous row
+        Assert.assertEquals(
+                grid.getRow(initialLastRow).getLocation().y
+                        + grid.getRow(initialLastRow).getSize().height,
+                grid.getRow(initialLastRow + 1).getLocation().y);
     }
 }

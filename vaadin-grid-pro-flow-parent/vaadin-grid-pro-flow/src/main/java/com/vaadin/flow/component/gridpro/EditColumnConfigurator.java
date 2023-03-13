@@ -1,20 +1,12 @@
-package com.vaadin.flow.component.gridpro;
-
-/*
- * #%L
- * Vaadin GridPro
- * %%
- * Copyright 2000-2022 Vaadin Ltd.
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
+/**
+ * Copyright 2000-2023 Vaadin Ltd.
  *
- * See the file license.html distributed with this software for more
- * information about licensing.
+ * This program is available under Vaadin Commercial License and Service Terms.
  *
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
  */
+package com.vaadin.flow.component.gridpro;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -66,18 +58,20 @@ public class EditColumnConfigurator<T> implements Serializable {
 
         column.getElement().getNode()
                 .runWhenAttached(ui -> ui.beforeClientResponse(column,
-                        context -> UI.getCurrent().getPage().executeJavaScript(
+                        context -> UI.getCurrent().getPage().executeJs(
                                 "window.Vaadin.Flow.gridProConnector.patchEditModeRenderer($0)",
                                 column.getElement())));
 
         return getColumn();
     }
 
-    private <V> Column<T> configureColumn(ItemUpdater<T, String> itemUpdater,
-            EditorType type, HasValueAndElement<?, V> editorField) {
+    private <V> Column<T> configureColumn(ValueProvider<T, V> valueProvider,
+            ItemUpdater<T, String> itemUpdater, EditorType type,
+            HasValueAndElement<?, V> editorField) {
         column.setEditorType(type);
         column.setItemUpdater(itemUpdater);
         column.setEditorField(editorField);
+        column.setValueProvider(valueProvider);
 
         return getColumn();
     }
@@ -105,8 +99,52 @@ public class EditColumnConfigurator<T> implements Serializable {
                 Collections.emptyList());
     }
 
+    /**
+     * Configures the column to have a custom editor component.
+     * <p>
+     * When editing starts, the editor's value is initialized with the same
+     * presentation value that is used for the column. When committing the
+     * editor value, the item updater is called to update the edited item with
+     * the new value.
+     *
+     * @param component
+     *            the editor component, which must be an implementation of
+     *            {@link HasValueAndElement}
+     * @param itemUpdater
+     *            the callback function that is called when the editor value has
+     *            changed. It receives the edited item, and the new value from
+     *            the editor.
+     * @return the configured column
+     */
     public <V> Column<T> custom(HasValueAndElement<?, V> component,
             ItemUpdater<T, V> itemUpdater) {
+        @SuppressWarnings("unchecked")
+        ValueProvider<T, V> valueProvider = (ValueProvider<T, V>) column
+                .getValueProvider();
+        return custom(component, valueProvider, itemUpdater);
+    }
+
+    /**
+     * Configures the column to have a custom editor component, using a custom
+     * value provider.
+     * <p>
+     * When editing starts, the editor's value is initialized using the custom
+     * value provider. When committing the editor value, the item updater is
+     * called to update the edited item with the new value.
+     *
+     * @param component
+     *            the editor component, which must be an implementation of
+     *            {@link HasValueAndElement}
+     * @param valueProvider
+     *            the value provider that is used to initialize the editor value
+     * @param itemUpdater
+     *            the callback function that is called when the editor value has
+     *            changed. It receives the edited item, and the new value from
+     *            the editor.
+     * @return the configured column
+     */
+    public <V> Column<T> custom(HasValueAndElement<?, V> component,
+            ValueProvider<T, V> valueProvider, ItemUpdater<T, V> itemUpdater) {
         column.getElement().appendVirtualChild(component.getElement());
         if (attachRegistration != null) {
             attachRegistration.remove();
@@ -118,8 +156,9 @@ public class EditColumnConfigurator<T> implements Serializable {
         column.getElement().getNode()
                 .runWhenAttached(ui -> ui.beforeClientResponse(column,
                         context -> setEditModeRenderer(component)));
-        return configureColumn((item, ignore) -> itemUpdater.accept(item,
-                component.getValue()), EditorType.CUSTOM, component);
+        return configureColumn(valueProvider, (item, ignore) -> itemUpdater
+                .accept(item, component.getValue()), EditorType.CUSTOM,
+                component);
     }
 
     private <V> void setEditModeRenderer(HasValueAndElement<?, V> component) {

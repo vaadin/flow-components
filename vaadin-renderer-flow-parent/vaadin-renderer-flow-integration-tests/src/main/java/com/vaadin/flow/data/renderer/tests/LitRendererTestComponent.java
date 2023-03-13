@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -35,7 +35,7 @@ import com.vaadin.flow.shared.Registration;
 import elemental.json.JsonValue;
 
 @Tag("lit-renderer-test-component")
-@JsModule("lit-renderer-test-component.ts")
+@JsModule("lit-renderer-test-component.js")
 public class LitRendererTestComponent extends Div
         implements HasDataProvider<String> {
 

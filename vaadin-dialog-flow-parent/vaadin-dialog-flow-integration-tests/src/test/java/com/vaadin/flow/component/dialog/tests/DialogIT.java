@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -22,7 +22,6 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
-import com.vaadin.flow.dom.ElementConstants;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
@@ -31,46 +30,6 @@ import com.vaadin.flow.testutil.TestPath;
 public class DialogIT extends AbstractComponentIT {
 
     private static final String DIALOG_OVERLAY_TAG = "vaadin-dialog-overlay";
-
-    @Test
-
-    public void openAndCloseBasicDialog_labelRendered() {
-        open();
-
-        findElement(By.id("basic-dialog-button")).click();
-
-        WebElement overlay = getOverlayContent().$("*").id("overlay");
-
-        WebElement div = getOverlayContent().findElement(By.tagName("div"));
-        WebElement content = overlay.findElement(By.id("content"));
-
-        String overLayWidth = overlay.getCssValue(ElementConstants.STYLE_WIDTH);
-        int overlayWidthValue = Integer
-                .valueOf(overLayWidth.substring(0, overLayWidth.length() - 2));
-
-        String paddingWidth = content.getCssValue("padding");
-        int paddingValue = Integer
-                .valueOf(paddingWidth.substring(0, paddingWidth.length() - 2));
-
-        String divWidth = div.getCssValue(ElementConstants.STYLE_WIDTH);
-        int divWidthValue = Integer
-                .valueOf(divWidth.substring(0, divWidth.length() - 2));
-
-        Assert.assertEquals(overlayWidthValue - paddingValue * 2,
-                divWidthValue);
-
-        String overLayHeight = overlay
-                .getCssValue(ElementConstants.STYLE_HEIGHT);
-        int overLayHeightValue = Integer.valueOf(
-                overLayHeight.substring(0, overLayHeight.length() - 2));
-
-        String divHeight = div.getCssValue(ElementConstants.STYLE_HEIGHT);
-        int divHeightValue = Integer
-                .valueOf(divHeight.substring(0, divHeight.length() - 2));
-
-        Assert.assertEquals(overLayHeightValue - paddingValue * 2,
-                divHeightValue);
-    }
 
     @Test
     public void openAndCloseConfirmationDialog_buttonsRenderedWithClickListeners() {

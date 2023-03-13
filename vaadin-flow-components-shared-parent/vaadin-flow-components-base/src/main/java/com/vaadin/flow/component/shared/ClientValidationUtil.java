@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -30,10 +30,10 @@ public final class ClientValidationUtil {
         // utility class should not be instantiated
     }
 
-    public static <C extends Component & HasValidation> void preventWebComponentFromSettingItselfToValid(
+    public static <C extends Component & HasValidation> void preventWebComponentFromModifyingInvalidState(
             C component) {
         StringBuilder expression = new StringBuilder(
-                "this._shouldSetInvalid = function (invalid) { return invalid };");
+                "this._shouldSetInvalid = function (invalid) { return false };");
 
         if (component.isInvalid()) {
             /*

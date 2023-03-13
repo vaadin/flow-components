@@ -3,8 +3,11 @@ package com.vaadin.flow.component.spreadsheet.test;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import com.vaadin.flow.testutil.TestPath;
 
+import org.junit.Assert;
+
+@TestPath("vaadin-spreadsheet")
 public class ConditionalFormattingCellValueIsIT extends AbstractSpreadsheetIT {
 
     private static final String STRING_VALUE = "'Foo";
@@ -17,7 +20,7 @@ public class ConditionalFormattingCellValueIsIT extends AbstractSpreadsheetIT {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL());
+        open();
 
         loadFile("conditional_formatting_cell_is.xlsx");
         selectSheetAt(1);
@@ -38,9 +41,9 @@ public class ConditionalFormattingCellValueIsIT extends AbstractSpreadsheetIT {
         String cellColorNumberCase = getCellColor("D3");
         String cellColorBooleanCase = getCellColor("F3");
 
-        assertEquals(FALSE_CONDITION_COLOR, cellColorStringCase);
-        assertEquals(FALSE_CONDITION_COLOR, cellColorNumberCase);
-        assertEquals(FALSE_CONDITION_COLOR, cellColorBooleanCase);
+        Assert.assertEquals(FALSE_CONDITION_COLOR, cellColorStringCase);
+        Assert.assertEquals(FALSE_CONDITION_COLOR, cellColorNumberCase);
+        Assert.assertEquals(FALSE_CONDITION_COLOR, cellColorBooleanCase);
     }
 
     @Test
@@ -58,15 +61,15 @@ public class ConditionalFormattingCellValueIsIT extends AbstractSpreadsheetIT {
         String cellColorNumberCase = getCellColor("D3");
         String cellColorBooleanCase = getCellColor("F3");
 
-        assertEquals(TRUE_CONDITION_COLOR, cellColorStringCase);
-        assertEquals(TRUE_CONDITION_COLOR, cellColorNumberCase);
-        assertEquals(TRUE_CONDITION_COLOR, cellColorBooleanCase);
+        Assert.assertEquals(TRUE_CONDITION_COLOR, cellColorStringCase);
+        Assert.assertEquals(TRUE_CONDITION_COLOR, cellColorNumberCase);
+        Assert.assertEquals(TRUE_CONDITION_COLOR, cellColorBooleanCase);
     }
 
     @Test
     public void loadSpreadsheetWithNotEqualConditionFormattingInB4_insertIncoherentValue_CellB4FilledRed() {
         setCellValue("B2", STRING_VALUE);
         setCellValue("B4", NUMBER_VALUE);
-        assertEquals(TRUE_CONDITION_COLOR, getCellColor("B4"));
+        Assert.assertEquals(TRUE_CONDITION_COLOR, getCellColor("B4"));
     }
 }

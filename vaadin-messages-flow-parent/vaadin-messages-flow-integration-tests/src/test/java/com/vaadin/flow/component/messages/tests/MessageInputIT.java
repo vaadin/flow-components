@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -64,13 +64,11 @@ public class MessageInputIT extends AbstractComponentIT {
     public void setI18n_textTranslated() {
         clickElementWithJs("set-i18n");
 
-        String inputPlaceholder = messageInput
-                .$("vaadin-message-input-text-area").first()
+        String inputPlaceholder = messageInput.$("vaadin-text-area").first()
                 .getPropertyString("placeholder");
         Assert.assertEquals("Viesti", inputPlaceholder);
 
-        String buttonText = messageInput.$("vaadin-message-input-button")
-                .first().getText();
+        String buttonText = messageInput.$("vaadin-button").first().getText();
         Assert.assertEquals("Lähetä", buttonText);
     }
 }

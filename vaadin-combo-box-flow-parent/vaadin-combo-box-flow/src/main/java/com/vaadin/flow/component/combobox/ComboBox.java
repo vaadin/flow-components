@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -23,6 +23,7 @@ import java.util.stream.Stream;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasPrefix;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
@@ -58,18 +59,15 @@ import elemental.json.JsonObject;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-combo-box")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha5")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/combo-box", version = "23.2.0-alpha5")
-@NpmPackage(value = "@vaadin/vaadin-combo-box", version = "23.2.0-alpha5")
+@NpmPackage(value = "@vaadin/combo-box", version = "24.1.0-alpha1")
 @JsModule("@vaadin/combo-box/src/vaadin-combo-box.js")
-@JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./comboBoxConnector.js")
 public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
-        implements HasThemeVariant<ComboBoxVariant> {
+        implements HasPrefix, HasThemeVariant<ComboBoxVariant> {
 
-    private static final String PROP_INPUT_ELEMENT_VALUE = "_inputElementValue";
     private static final String PROP_SELECTED_ITEM = "selectedItem";
     private static final String PROP_VALUE = "value";
 
@@ -125,6 +123,14 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
                 ComboBox::modelToPresentation);
         setPageSize(pageSize);
         setItems(new DataCommunicator.EmptyDataProvider<>());
+
+        // Sync server-side `selectedItem` property from client, so that the
+        // client's property value can be restored when re-attaching
+        addValueChangeListener(event -> {
+            if (event.isFromClient()) {
+                refreshValue();
+            }
+        });
     }
 
     /**
@@ -254,34 +260,6 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
     }
 
     /**
-     * Whether the component should block user input that does not match the
-     * configured pattern
-     *
-     * @return {@code true} if the component should block user input that does
-     *         not match the configured pattern, {@code false} otherwise
-     * @deprecated Since 23.2, this API is deprecated.
-     */
-    @Deprecated
-    public boolean isPreventInvalidInput() {
-        return getElement().getProperty("preventInvalidInput", false);
-    }
-
-    /**
-     * Sets whether the component should block user input that does not match
-     * the configured pattern
-     *
-     * @param preventInvalidInput
-     *            {@code true} if the component should block user input that
-     *            does not match the configured pattern, {@code false} otherwise
-     * @deprecated Since 23.2, this API is deprecated in favor of
-     *             {@link #setAllowedCharPattern(String)}
-     */
-    @Deprecated
-    public void setPreventInvalidInput(boolean preventInvalidInput) {
-        getElement().setProperty("preventInvalidInput", preventInvalidInput);
-    }
-
-    /**
      * The pattern to validate the input with
      *
      * @return the pattern to validate the input with
@@ -312,7 +290,12 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
         if (value == null) {
             getElement().setProperty(PROP_SELECTED_ITEM, null);
             getElement().setProperty(PROP_VALUE, "");
-            getElement().setProperty(PROP_INPUT_ELEMENT_VALUE, "");
+            // Force _inputElementValue update on the client-side by using
+            // `executeJs` to ensure the input's value will be cleared even
+            // if the component's value hasn't changed. The latter can be
+            // the case when calling `clear()` in a `customValueSet` listener
+            // which is triggered before any value is committed.
+            getElement().executeJs("this._inputElementValue = $0", "");
             return;
         }
 
@@ -323,7 +306,7 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
         getDataGenerator().generateData(value, json);
         getElement().setPropertyJson(PROP_SELECTED_ITEM, json);
         getElement().setProperty(PROP_VALUE, keyMapper.key(value));
-        getElement().setProperty(PROP_INPUT_ELEMENT_VALUE,
+        getElement().executeJs("this._inputElementValue = $0",
                 generateLabel(value));
     }
 
@@ -342,19 +325,5 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
     @Override
     public T getEmptyValue() {
         return null;
-    }
-
-    // Override is only required to keep binary compatibility with other 23.x
-    // minor versions, can be removed in a future major
-    @Override
-    public void addThemeVariants(ComboBoxVariant... variants) {
-        HasThemeVariant.super.addThemeVariants(variants);
-    }
-
-    // Override is only required to keep binary compatibility with other 23.x
-    // minor versions, can be removed in a future major
-    @Override
-    public void removeThemeVariants(ComboBoxVariant... variants) {
-        HasThemeVariant.super.removeThemeVariants(variants);
     }
 }

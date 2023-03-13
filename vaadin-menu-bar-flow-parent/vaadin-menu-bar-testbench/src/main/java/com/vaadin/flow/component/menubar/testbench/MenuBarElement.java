@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -32,7 +32,7 @@ import com.vaadin.testbench.elementsbase.Element;
 @Element("vaadin-menu-bar")
 public class MenuBarElement extends TestBenchElement {
 
-    public static final String OVERLAY_TAG = "vaadin-context-menu-overlay";
+    public static final String OVERLAY_TAG = "vaadin-menu-bar-overlay";
 
     /**
      * Gets the button elements wrapping the root level items. This does not
@@ -54,7 +54,7 @@ public class MenuBarElement extends TestBenchElement {
      * @return the button which opens the sub menu of overflowing items
      */
     public TestBenchElement getOverflowButton() {
-        TestBenchElement overflowButton = $("[part~=overflow-button]").first();
+        TestBenchElement overflowButton = $("[slot='overflow']").first();
         if (overflowButton == null || overflowButton.hasAttribute("hidden")) {
             return null;
         }
@@ -62,7 +62,7 @@ public class MenuBarElement extends TestBenchElement {
     }
 
     private boolean isOverflowButton(TestBenchElement element) {
-        return element.getAttribute("part").contains("overflow-button");
+        return element.getAttribute("slot").contains("overflow");
     }
 
     private boolean isVisible(TestBenchElement element) {
@@ -89,7 +89,7 @@ public class MenuBarElement extends TestBenchElement {
      * @return List of TestBenchElements representing sub menu items.
      */
     public List<TestBenchElement> getSubMenuItems(TestBenchElement overlay) {
-        return overlay.$("vaadin-context-menu-item").all();
+        return overlay.$("vaadin-menu-bar-item").all();
     }
 
     /**

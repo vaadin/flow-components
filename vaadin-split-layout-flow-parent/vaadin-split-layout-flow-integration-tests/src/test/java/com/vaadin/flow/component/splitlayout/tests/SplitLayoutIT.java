@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -71,7 +71,7 @@ public class SplitLayoutIT extends AbstractComponentIT {
 
         WebElement splitter = new TestBenchWrapper(splitLayout,
                 getCommandExecutor()).$("*").id("splitter")
-                        .findElement(By.tagName("div"));
+                .findElement(By.tagName("div"));
 
         new Actions(getDriver()).dragAndDropBy(splitter, 1, 1).clickAndHold()
                 .moveByOffset(200, 0).release().build().perform();
@@ -105,7 +105,7 @@ public class SplitLayoutIT extends AbstractComponentIT {
         WebElement splitLayout = findElement(By.id("split-layout-min-max"));
         WebElement splitter = new TestBenchWrapper(splitLayout,
                 getCommandExecutor()).$("*").id("splitter")
-                        .findElement(By.tagName("div"));
+                .findElement(By.tagName("div"));
         WebElement primaryComponent = findElement(
                 By.id("min-max-first-component"));
 

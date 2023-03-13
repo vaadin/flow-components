@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -67,7 +67,6 @@ public class PasswordFieldPage extends Div {
         addFocusShortcut();
         addBasicField();
         addDisabledField();
-        addInvalidCheck();
     }
 
     private void addFocusShortcut() {
@@ -115,12 +114,4 @@ public class PasswordFieldPage extends Div {
 
         add(passwordField, message);
     }
-
-    private void addInvalidCheck() {
-        final PasswordField field = new PasswordField();
-        field.setMaxLength(10);
-        field.setMinLength(5);
-        TextFieldTestPageUtil.addInvalidCheck(this, field);
-    }
-
 }

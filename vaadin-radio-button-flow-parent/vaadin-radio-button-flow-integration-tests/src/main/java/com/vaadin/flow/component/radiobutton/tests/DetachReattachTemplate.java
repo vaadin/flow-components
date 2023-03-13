@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -17,14 +17,13 @@ package com.vaadin.flow.component.radiobutton.tests;
 
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.component.polymertemplate.Id;
-import com.vaadin.flow.component.polymertemplate.PolymerTemplate;
+import com.vaadin.flow.component.littemplate.LitTemplate;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
-import com.vaadin.flow.templatemodel.TemplateModel;
+import com.vaadin.flow.component.template.Id;
 
 @JsModule("./src/detach-reattach.js")
 @Tag("detach-reattach")
-public class DetachReattachTemplate extends PolymerTemplate<TemplateModel> {
+public class DetachReattachTemplate extends LitTemplate {
     @Id("testGroup")
     RadioButtonGroup<String> testGroup;
 

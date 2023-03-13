@@ -4,12 +4,17 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-messages-flow-parent</artifactId>
-        <version>23.2-SNAPSHOT</version>
+        <version>24.1-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-messages-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Messages</name>
     <dependencies>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-flow-components-base</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-server</artifactId>
@@ -21,10 +26,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <version>3.1.0</version>
-            <scope>provided</scope>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>

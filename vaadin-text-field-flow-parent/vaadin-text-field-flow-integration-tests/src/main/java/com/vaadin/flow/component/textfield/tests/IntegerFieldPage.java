@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -69,7 +69,7 @@ public class IntegerFieldPage extends Div {
         integerFieldStep.setStep(3);
         integerFieldStep.setMin(4);
         integerFieldStep.setMax(10);
-        integerFieldStep.setHasControls(true);
+        integerFieldStep.setStepButtonsVisible(true);
         integerFieldStep.addValueChangeListener(this::logValueChangeEvent);
 
         add(integerFieldStep);

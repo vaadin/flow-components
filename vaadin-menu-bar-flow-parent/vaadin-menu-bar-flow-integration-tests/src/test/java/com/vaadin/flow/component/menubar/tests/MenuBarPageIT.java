@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -31,7 +31,7 @@ import com.vaadin.testbench.TestBenchElement;
 @TestPath("vaadin-menu-bar/menu-bar-test")
 public class MenuBarPageIT extends AbstractComponentIT {
 
-    public static final String OVERLAY_TAG = "vaadin-context-menu-overlay";
+    public static final String OVERLAY_TAG = "vaadin-menu-bar-overlay";
 
     private MenuBarElement menuBar;
 
@@ -61,8 +61,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
 
     @Test
     public void clickRootItem_subMenuRenders() {
-        menuBar.getButtons().get(0).$("vaadin-context-menu-item").first()
-                .click();
+        menuBar.getButtons().get(0).$("vaadin-menu-bar-item").first().click();
         verifyOpened();
         assertOverlayContents("sub item 1", "<p>sub item 2</p>");
     }
@@ -177,8 +176,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
 
     @Test
     public void clickRootItemWithClickListener_listenerCalledOnce() {
-        menuBar.getButtons().get(1).$("vaadin-context-menu-item").first()
-                .click();
+        menuBar.getButtons().get(1).$("vaadin-menu-bar-item").first().click();
         assertMessage("clicked item 2");
     }
 
@@ -192,8 +190,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
     @Test
     public void changeItems_clickRootItemWithClickListener_clickListenerCalledOnce() {
         click("add-root-item");
-        menuBar.getButtons().get(1).$("vaadin-context-menu-item").first()
-                .click();
+        menuBar.getButtons().get(1).$("vaadin-menu-bar-item").first().click();
         assertMessage("clicked item 2");
     }
 
@@ -228,8 +225,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
         clickBody();
         click("reset-width");
         waitForResizeObserver();
-        menuBar.getButtons().get(1).$("vaadin-context-menu-item").first()
-                .click();
+        menuBar.getButtons().get(1).$("vaadin-menu-bar-item").first().click();
         assertMessage("clicked item 2");
     }
 
@@ -247,7 +243,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
         click("toggle-disable");
         TestBenchElement button2 = menuBar.getButtons().get(1);
         executeScript("arguments[0].disabled=false;"
-                + "arguments[0].querySelector('vaadin-context-menu-item').disabled=false;",
+                + "arguments[0].querySelector('vaadin-menu-bar-item').disabled=false;",
                 button2);
         button2 = menuBar.getButtons().get(1);
         button2.click();
@@ -417,8 +413,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
     @Test
     public void addSubItem_clickMenuItem_clickButton_subMenuOpenedAndClosed() {
         click("add-sub-item");
-        menuBar.getButtons().get(1).$("vaadin-context-menu-item").first()
-                .click();
+        menuBar.getButtons().get(1).$("vaadin-menu-bar-item").first().click();
         verifyOpened();
         menuBar.getButtons().get(1).click();
         verifyClosed();
@@ -514,9 +509,8 @@ public class MenuBarPageIT extends AbstractComponentIT {
     }
 
     private void assertButtonContents(String... expectedInnerHTML) {
-        String[] contents = menuBar.getButtons().stream()
-                .map(button -> button.$("vaadin-context-menu-item").first()
-                        .getAttribute("innerHTML"))
+        String[] contents = menuBar.getButtons().stream().map(button -> button
+                .$("vaadin-menu-bar-item").first().getAttribute("innerHTML"))
                 .toArray(String[]::new);
         Assert.assertArrayEquals(expectedInnerHTML, contents);
     }

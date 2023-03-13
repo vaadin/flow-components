@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -101,4 +101,16 @@ public class AvatarTest {
         Assert.assertEquals(i18n, avatar.getI18n());
     }
 
+    @Test
+    public void setTooltipEnabled_isTooltipEnabled() {
+        avatar.setTooltipEnabled(true);
+        Assert.assertEquals(avatar.isTooltipEnabled(), true);
+        Assert.assertTrue(
+                avatar.getElement().getProperty("withTooltip", false));
+
+        avatar.setTooltipEnabled(false);
+        Assert.assertEquals(avatar.isTooltipEnabled(), false);
+        Assert.assertFalse(
+                avatar.getElement().getProperty("withTooltip", false));
+    }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -28,10 +28,9 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * parent component and its height is determined by the components it contains.
  */
 @Tag("vaadin-vertical-layout")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha5")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/vertical-layout", version = "23.2.0-alpha5")
-@NpmPackage(value = "@vaadin/vaadin-ordered-layout", version = "23.2.0-alpha5")
+@NpmPackage(value = "@vaadin/vertical-layout", version = "24.1.0-alpha1")
 @JsModule("@vaadin/vertical-layout/src/vaadin-vertical-layout.js")
 public class VerticalLayout extends Component implements ThemableLayout,
         FlexComponent, ClickNotifier<VerticalLayout> {
@@ -195,33 +194,30 @@ public class VerticalLayout extends Component implements ThemableLayout,
      * @param alignment
      *            the individual alignment for the children components. Setting
      *            <code>null</code> will reset the alignment to its default
-     * @param elementContainers
-     *            The element containers (components) to which the individual
-     *            alignment should be set
+     * @param components
+     *            The components to which the individual alignment should be set
      * @see #setHorizontalComponentAlignment(Alignment, Component...)
      */
     @Override
-    public void setAlignSelf(Alignment alignment,
-            HasElement... elementContainers) {
+    public void setAlignSelf(Alignment alignment, HasElement... components) {
         // this method is overridden to have javadocs that point to the method
         // that should be used and has better javadocs.
-        FlexComponent.super.setAlignSelf(alignment, elementContainers);
+        FlexComponent.super.setAlignSelf(alignment, components);
     }
 
     /**
      * This is the same as {@link #getHorizontalComponentAlignment(Component)}.
      *
-     * @param container
-     *            The element container (component) which individual layout
-     *            should be read
-     * @return the alignment of the container, never <code>null</code>
+     * @param component
+     *            The component which individual layout should be read
+     * @return the alignment of the component, never <code>null</code>
      * @see #getHorizontalComponentAlignment(Component)
      */
     @Override
-    public Alignment getAlignSelf(HasElement container) {
+    public Alignment getAlignSelf(HasElement component) {
         // this method is overridden to have javadocs that point to the method
         // that should be used and has better javadocs.
-        return FlexComponent.super.getAlignSelf(container);
+        return FlexComponent.super.getAlignSelf(component);
     }
 
     /**

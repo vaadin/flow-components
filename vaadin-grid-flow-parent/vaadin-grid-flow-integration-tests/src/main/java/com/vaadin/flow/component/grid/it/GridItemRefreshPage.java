@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -24,7 +24,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
-import com.vaadin.flow.data.renderer.TemplateRenderer;
+import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-grid/grid-item-refresh-page")
@@ -38,9 +38,9 @@ public class GridItemRefreshPage extends Div {
     // updating the previous cell in animation frame so that grid active item
     // handling doesn't reset the changes
     private static final String EDIT_CELL_VALUE = "debugger; this['innerText'] = 'EDITED';window.requestAnimationFrame(() => {this.parentElement.previousElementSibling['textContent']='EDITED';})";
-    private static final TemplateRenderer<Bean> UPDATE_RENDERER = TemplateRenderer
-            .of("<div id=[[item.thirdField]] onclick=\"" + EDIT_CELL_VALUE
-                    + "\">[[item.thirdField]]</div>");
+    private static final LitRenderer<Bean> UPDATE_RENDERER = LitRenderer
+            .of("<div id=${item.thirdField} onclick=\"" + EDIT_CELL_VALUE
+                    + "\">${item.thirdField}</div>");
 
     private static class Bean {
         private String firstField;

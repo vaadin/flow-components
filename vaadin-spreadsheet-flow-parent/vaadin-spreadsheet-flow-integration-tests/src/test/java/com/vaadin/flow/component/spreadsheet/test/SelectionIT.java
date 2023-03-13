@@ -4,13 +4,16 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import com.vaadin.flow.testutil.TestPath;
+
 import static org.junit.Assert.assertTrue;
 
+@TestPath("vaadin-spreadsheet")
 public class SelectionIT extends AbstractSpreadsheetIT {
 
     @Before
     public void init() {
-        getDriver().get(getBaseURL());
+        open();
 
         createNewSpreadsheet();
     }

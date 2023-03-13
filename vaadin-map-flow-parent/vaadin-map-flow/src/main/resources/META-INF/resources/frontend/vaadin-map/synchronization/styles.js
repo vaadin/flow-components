@@ -1,12 +1,18 @@
-import Fill from "ol/style/Fill";
-import Stroke from "ol/style/Stroke";
-import Style from "ol/style/Style";
-import { Icon } from "ol/style";
-import {
-  convertToCoordinateArray,
-  convertToSizeArray,
-  createOptions,
-} from "./util";
+/**
+ * @license
+ * Copyright 2000-2023 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
+ */
+import Fill from 'ol/style/Fill';
+import Stroke from 'ol/style/Stroke';
+import Style from 'ol/style/Style';
+import Text from 'ol/style/Text';
+import { Icon } from 'ol/style';
+import { convertEnumValue, convertToCoordinateArray, convertToSizeArray, createOptions } from './util';
 
 export function synchronizeFill(target, source, context) {
   if (!target) {
@@ -35,7 +41,7 @@ export function synchronizeStroke(target, source, context) {
 
 function synchronizeImageStyle(target, source, _context) {
   if (!target) {
-    throw new Error("Can not instantiate base class: ol/style/Image");
+    throw new Error('Can not instantiate base class: ol/style/Image');
   }
 
   target.setOpacity(source.opacity);
@@ -46,15 +52,6 @@ function synchronizeImageStyle(target, source, _context) {
   return target;
 }
 
-/**
- * Convert from Java enum value like `BOTTOM_LEFT` to OL anchor origin value like `bottom-left`
- * @param anchorOrigin
- * @returns {string}
- */
-function convertAnchorOrigin(anchorOrigin) {
-  return anchorOrigin.toLowerCase().replace(/_/, "-");
-}
-
 export function synchronizeIcon(target, source, context) {
   if (!target) {
     const src = source.img || source.src;
@@ -63,19 +60,36 @@ export function synchronizeIcon(target, source, context) {
         ...source,
         img: undefined,
         src,
-        imgSize: source.imgSize
-          ? convertToSizeArray(source.imgSize)
-          : undefined,
-        anchor: source.anchor
-          ? convertToCoordinateArray(source.anchor)
-          : undefined,
-        anchorOrigin: source.anchorOrigin
-          ? convertAnchorOrigin(source.anchorOrigin)
-          : undefined,
+        imgSize: source.imgSize ? convertToSizeArray(source.imgSize) : undefined,
+        anchor: source.anchor ? convertToCoordinateArray(source.anchor) : undefined,
+        anchorOrigin: source.anchorOrigin ? convertEnumValue(source.anchorOrigin) : undefined
       })
     );
   }
   synchronizeImageStyle(target, source, context);
+
+  context.connector.forceRender();
+
+  return target;
+}
+
+export function synchronizeText(target, source, context) {
+  if (!target) {
+    target = new Text();
+  }
+  target.setFont(source.font);
+  target.setOffsetX((source.offset && source.offset.x) || 0);
+  target.setOffsetY((source.offset && source.offset.y) || 0);
+  target.setScale(source.scale);
+  target.setRotation(source.rotation);
+  target.setRotateWithView(source.rotateWithView);
+  target.setTextAlign(convertEnumValue(source.textAlign));
+  target.setTextBaseline(convertEnumValue(source.textBaseline));
+  target.setFill(source.fill ? context.lookup.get(source.fill) : undefined);
+  target.setStroke(source.stroke ? context.lookup.get(source.stroke) : undefined);
+  target.setBackgroundFill(source.backgroundFill ? context.lookup.get(source.backgroundFill) : undefined);
+  target.setBackgroundStroke(source.backgroundStroke ? context.lookup.get(source.backgroundStroke) : undefined);
+  target.setPadding([source.padding, source.padding, source.padding, source.padding]);
 
   context.connector.forceRender();
 
@@ -87,21 +101,10 @@ export function synchronizeStyle(target, source, context) {
     target = new Style();
   }
 
-  target.setImage(
-    source.image
-      ? context.lookup.get(source.image)
-      : undefined
-  );
-  target.setFill(
-    source.fill
-      ? context.lookup.get(source.fill)
-      : undefined
-  );
-  target.setStroke(
-    source.stroke
-      ? context.lookup.get(source.stroke)
-      : undefined
-  );
+  target.setImage(source.image ? context.lookup.get(source.image) : undefined);
+  target.setFill(source.fill ? context.lookup.get(source.fill) : undefined);
+  target.setStroke(source.stroke ? context.lookup.get(source.stroke) : undefined);
+  target.setText(source.text ? context.lookup.get(source.text) : undefined);
 
   context.connector.forceRender();
 

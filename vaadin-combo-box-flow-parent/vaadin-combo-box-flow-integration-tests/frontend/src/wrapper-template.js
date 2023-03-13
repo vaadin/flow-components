@@ -1,5 +1,5 @@
 /*
-  ~ Copyright 2000-2022 Vaadin Ltd.
+  ~ Copyright 2000-2023 Vaadin Ltd.
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License"); you may not
   ~ use this file except in compliance with the License. You may obtain a copy of
@@ -13,19 +13,19 @@
   ~ License for the specific language governing permissions and limitations under
   ~ the License.
   */
-import {PolymerElement} from '@polymer/polymer/polymer-element.js';
-import {html} from '@polymer/polymer/lib/utils/html-tag.js';
+import { PolymerElement } from '@polymer/polymer/polymer-element.js';
+import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 
 class WrapperTemplate extends PolymerElement {
   static get template() {
     return html`
-        <combo-box-in-a-template id="comboBoxInATemplate"></combo-box-in-a-template>
-        <combo-box-in-a-template2 id="comboBoxInATemplate2"></combo-box-in-a-template2>
-`;
+      <combo-box-in-a-template id="comboBoxInATemplate"></combo-box-in-a-template>
+      <combo-box-in-a-template2 id="comboBoxInATemplate2"></combo-box-in-a-template2>
+    `;
   }
 
   static get is() {
-      return 'wrapper-template'
+    return 'wrapper-template';
   }
 }
 customElements.define(WrapperTemplate.is, WrapperTemplate);

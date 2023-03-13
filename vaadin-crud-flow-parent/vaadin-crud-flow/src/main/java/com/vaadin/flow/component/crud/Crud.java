@@ -1,20 +1,12 @@
-package com.vaadin.flow.component.crud;
-
-/*
- * #%L
- * Vaadin Crud for Vaadin 10
- * %%
- * Copyright 2000-2022 Vaadin Ltd.
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
+/**
+ * Copyright 2000-2023 Vaadin Ltd.
  *
- * See the file license.html distributed with this software for more
- * information about licensing.
+ * This program is available under Vaadin Commercial License and Service Terms.
  *
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
  */
+package com.vaadin.flow.component.crud;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
@@ -31,8 +23,9 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.data.renderer.TemplateRenderer;
+import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
@@ -50,38 +43,20 @@ import java.util.stream.Collectors;
  * "https://en.wikipedia.org/wiki/Create,_read,_update_and_delete">CRUD</a>
  * operations on a data backend (e.g entities from a database).
  *
- * <pre>
- * <u>Basic usage</u>
- *
- * {@code
- *   Crud<Person> crud = new Crud<>(Person.class, personEditor);
- *   crud.setDataProvider(personDataProvider);
- *
- *   // Handle save and delete events.
- *   crud.addSaveListener(e -> save(e.getItem()));
- *   crud.addDeleteListener(e -> delete(e.getItem()));
- * }
- * </pre>
- *
  * @param <E>
  *            the bean type
  * @author Vaadin Ltd
  */
 @Tag("vaadin-crud")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha5")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/crud", version = "23.2.0-alpha5")
-@NpmPackage(value = "@vaadin/vaadin-crud", version = "23.2.0-alpha5")
+@NpmPackage(value = "@vaadin/crud", version = "24.1.0-alpha1")
 @JsModule("@vaadin/crud/src/vaadin-crud.js")
 @JsModule("@vaadin/crud/src/vaadin-crud-edit-column.js")
 public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
 
     private static final String EDIT_COLUMN_KEY = "vaadin-crud-edit-column";
     private static final String EVENT_PREVENT_DEFAULT_JS = "event.preventDefault()";
-    private static final String FORM_SLOT_NAME = "form";
-    private static final String GRID_SLOT_NAME = "grid";
-    private static final String SLOT_KEY = "slot";
-    private static final String TOOLBAR_SLOT_NAME = "toolbar";
 
     private final Set<ComponentEventListener<NewEvent<E>>> newListeners = new LinkedHashSet<>();
     private final Set<ComponentEventListener<EditEvent<E>>> editListeners = new LinkedHashSet<>();
@@ -101,6 +76,8 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
     final private Button cancelButton;
 
     final private Button deleteButton;
+
+    private Component newButton;
 
     /**
      * Instantiates a new Crud using a custom grid.
@@ -147,34 +124,6 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
      * is put into full use therefore this constructor only exists for partial
      * initialization in order to support template binding.
      *
-     * <pre>
-     * Example:
-     * <code>
-     *    &#064;Id
-     *    Crud&lt;Person&gt; crud;
-     *
-     *    &#064;Id
-     *    private TextField firstName;
-     *
-     *    &#064;Id
-     *    private TextField lastName;
-     *
-     *    &#064;Override
-     *    protected void onAttach(AttachEvent attachEvent) {
-     *        super.onAttach(attachEvent);
-     *
-     *        Binder&lt;Person&gt; binder = new Binder&lt;&gt;(Person.class);
-     *        binder.bind(firstName, Person::getFirstName, Person::setFirstName);
-     *        binder.bind(lastName, Person::getLastName, Person::setLastName);
-     *
-     *        crud.setEditor(new BinderCrudEditor&lt;&gt;(binder));
-     *        crud.setBeanType(Person.class);
-     *
-     *        crud.setDataProvider(new PersonCrudDataProvider());
-     *    }
-     * </code>
-     * </pre>
-     *
      * @see #setEditor(CrudEditor)
      * @see #setBeanType(Class)
      */
@@ -182,20 +131,21 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
         setI18n(CrudI18n.createDefault(), false);
         registerHandlers();
 
+        newButton = new Button();
+        newButton.getElement().setAttribute("theme", "primary");
+        SlotUtils.addToSlot(this, "new-button", newButton);
+
         saveButton = new SaveButton();
-        saveButton.getElement().setAttribute("slot", "save-button");
         saveButton.addThemeName("primary");
-        getElement().appendChild(saveButton.getElement());
+        SlotUtils.addToSlot(this, "save-button", saveButton);
 
         cancelButton = new Button();
-        cancelButton.getElement().setAttribute("slot", "cancel-button");
         cancelButton.addThemeName("tertiary");
-        getElement().appendChild(cancelButton.getElement());
+        SlotUtils.addToSlot(this, "cancel-button", cancelButton);
 
         deleteButton = new Button();
-        deleteButton.getElement().setAttribute("slot", "delete-button");
         deleteButton.addThemeNames("tertiary", "error");
-        getElement().appendChild(deleteButton.getElement());
+        SlotUtils.addToSlot(this, "delete-button", deleteButton);
     }
 
     private class SaveButton extends Button {
@@ -335,7 +285,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
      *            true to open or false to close
      */
     public void setOpened(boolean opened) {
-        getElement().callFunction("set", "editorOpened", opened);
+        getElement().callJsFunction("set", "editorOpened", opened);
     }
 
     /**
@@ -420,7 +370,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
         }
 
         this.grid = grid;
-        grid.getElement().setAttribute(SLOT_KEY, GRID_SLOT_NAME);
+        grid.getElement().setAttribute("slot", "grid");
 
         // It might already have a parent e.g when injected from a template
         if (grid.getElement().getParent() == null) {
@@ -462,9 +412,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
         // It might already have a parent e.g when injected from a template
         if (editor.getView() != null
                 && editor.getView().getElement().getParent() == null) {
-            editor.getView().getElement().setAttribute(SLOT_KEY,
-                    FORM_SLOT_NAME);
-            getElement().appendChild(editor.getView().getElement());
+            SlotUtils.addToSlot(this, "form", editor.getView());
         }
     }
 
@@ -548,23 +496,13 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
     }
 
     /**
-     * Sets the content of the toolbar. Any content with the attribute
-     * `new-button` triggers a new item creation.
+     * Sets the content of the toolbar.
      *
      * @param components
      *            the content to be set
      */
     public void setToolbar(Component... components) {
-        final Element[] existingToolbarElements = getElement().getChildren()
-                .filter(e -> TOOLBAR_SLOT_NAME.equals(e.getAttribute(SLOT_KEY)))
-                .toArray(Element[]::new);
-        getElement().removeChild(existingToolbarElements);
-
-        final Element[] newToolbarElements = Arrays.stream(components)
-                .map(Component::getElement)
-                .map(e -> e.setAttribute(SLOT_KEY, TOOLBAR_SLOT_NAME))
-                .toArray(Element[]::new);
-        getElement().appendChild(newToolbarElements);
+        SlotUtils.setSlot(this, "toolbar", components);
     }
 
     /**
@@ -608,6 +546,25 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
      */
     public boolean getToolbarVisible() {
         return toolbarVisible;
+    }
+
+    /**
+     * Gets the Crud new item button
+     *
+     * @return the new item button
+     */
+    public Component getNewButton() {
+        return newButton;
+    }
+
+    /**
+     * Sets the Crud new item button
+     *
+     * @param button
+     */
+    public void setNewButton(Component button) {
+        newButton = button;
+        SlotUtils.setSlot(this, "new-button", button);
     }
 
     /**
@@ -776,7 +733,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
      * @see #removeEditColumn(Grid)
      * @see #hasEditColumn(Grid)
      */
-    public static void addEditColumn(Grid grid) {
+    public static void addEditColumn(Grid<?> grid) {
         addEditColumn(grid, CrudI18n.createDefault());
     }
 
@@ -792,8 +749,8 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
      *            the i18n object for localizing the accessibility of the edit
      *            column
      */
-    public static void addEditColumn(Grid grid, CrudI18n crudI18n) {
-        grid.addColumn(TemplateRenderer.of(createEditColumnTemplate(crudI18n)))
+    public static void addEditColumn(Grid<?> grid, CrudI18n crudI18n) {
+        grid.addColumn(LitRenderer.of(createEditColumnTemplate(crudI18n)))
                 .setKey(EDIT_COLUMN_KEY).setWidth("4em").setFlexGrow(0);
     }
 
@@ -810,7 +767,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
      * @see #addEditColumn(Grid)
      * @see #hasEditColumn(Grid)
      */
-    public static void removeEditColumn(Grid grid) {
+    public static void removeEditColumn(Grid<?> grid) {
         grid.removeColumnByKey(EDIT_COLUMN_KEY);
     }
 
@@ -823,7 +780,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
      * @return true if an edit column is present or false if otherwise
      * @see Crud#addEditColumn(Grid)
      */
-    public static boolean hasEditColumn(Grid grid) {
+    public static boolean hasEditColumn(Grid<?> grid) {
         return grid.getColumnByKey(EDIT_COLUMN_KEY) != null;
     }
 

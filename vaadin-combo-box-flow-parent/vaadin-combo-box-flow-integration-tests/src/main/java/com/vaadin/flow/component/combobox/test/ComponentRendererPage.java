@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -79,7 +79,7 @@ public class ComponentRendererPage extends Div {
     private void dataProviderBeforeRenderer() {
         ComboBox<ComboBoxDemoPage.Song> comboBox = new ComboBox<>();
         List<ComboBoxDemoPage.Song> listOfSongs = createListOfSongs();
-        comboBox.setDataProvider(
+        comboBox.setItems(
                 new ListDataProvider<ComboBoxDemoPage.Song>(listOfSongs));
         comboBox.setItemLabelGenerator(ComboBoxDemoPage.Song::getName);
 
@@ -95,7 +95,7 @@ public class ComponentRendererPage extends Div {
         List<ComboBoxDemoPage.Song> listOfSongs = createListOfSongs();
         comboBox.setRenderer(renderer);
 
-        comboBox.setDataProvider(
+        comboBox.setItems(
                 new ListDataProvider<ComboBoxDemoPage.Song>(listOfSongs));
         comboBox.setItemLabelGenerator(ComboBoxDemoPage.Song::getName);
 

@@ -38,7 +38,7 @@ public class GridFilteringPage extends Div {
         ConfigurableFilterDataProvider<String, Void, String> filteredDataProvider = dataProvider
                 .withConfigurableFilter();
 
-        grid.setDataProvider(filteredDataProvider);
+        grid.setItems(filteredDataProvider);
 
         grid.addColumn(item -> item).setHeader("Data");
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -159,6 +159,23 @@ public abstract class AbstractGridMultiSelectionModel<T>
                 .unmodifiableSet(new LinkedHashSet<>(selected.values()));
     }
 
+    /**
+     * Returns an unmodifiable view of the selected item ids.
+     * <p>
+     * Exposed to be overridden within subclasses.
+     * <p>
+     * The returned Set may be a direct view of the internal data structures of
+     * this class. A defensive copy should be made by callers when iterating
+     * over this Set and modifying the selection during iteration to avoid
+     * ConcurrentModificationExceptions.
+     *
+     * @return An unmodifiable view of the selected item ids. Updates in the
+     *         selection may or may not be directly reflected in the Set.
+     */
+    protected Set<Object> getSelectedItemIds() {
+        return Collections.unmodifiableSet(this.selected.keySet());
+    }
+
     @Override
     public Optional<T> getFirstSelectedItem() {
         return selected.values().stream().findFirst();
@@ -192,8 +209,10 @@ public abstract class AbstractGridMultiSelectionModel<T>
     @Override
     public void selectAll() {
         updateSelection(
-                getGrid().getDataCommunicator().getDataProvider()
-                        .fetch(new Query<>()).collect(Collectors.toSet()),
+                (Set<T>) getGrid().getDataCommunicator().getDataProvider()
+                        .fetch(getGrid().getDataCommunicator().buildQuery(0,
+                                Integer.MAX_VALUE))
+                        .collect(Collectors.toSet()),
                 Collections.emptySet());
         selectionColumn.setSelectAllCheckboxState(true);
         selectionColumn.setSelectAllCheckboxIndeterminateState(false);
@@ -358,7 +377,8 @@ public abstract class AbstractGridMultiSelectionModel<T>
             allItemsStream = fetchAllHierarchical(
                     (HierarchicalDataProvider<T, ?>) dataProvider);
         } else {
-            allItemsStream = dataProvider.fetch(new Query<>());
+            allItemsStream = dataProvider.fetch(getGrid().getDataCommunicator()
+                    .buildQuery(0, Integer.MAX_VALUE));
         }
         doUpdateSelection(allItemsStream.collect(Collectors.toSet()),
                 Collections.emptySet(), true);

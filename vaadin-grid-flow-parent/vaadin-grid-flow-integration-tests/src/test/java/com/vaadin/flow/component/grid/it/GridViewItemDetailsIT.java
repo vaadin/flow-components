@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,14 +15,11 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-
-import static org.junit.Assert.assertThat;
 
 import java.util.List;
 import java.util.Locale;
@@ -81,21 +78,42 @@ public class GridViewItemDetailsIT extends AbstractComponentIT {
 
         getCellContent(grid.getCell(1, 2)).click();
         assertAmountOfOpenDetails(grid, 1);
-        assertThat(
-                grid.findElement(By.className("custom-details"))
-                        .getAttribute("innerHTML"),
-                CoreMatchers.containsString("Hi! My name is <b>Person 2!</b>"));
+        Assert.assertTrue(grid.findElement(By.className("custom-details"))
+                .getText().contains("Hi! My name is Person 2!"));
 
         getCellContent(grid.getCell(3, 2)).click();
         assertAmountOfOpenDetails(grid, 2);
 
         getCellContent(grid.getCell(1, 2)).click();
         getCellContent(grid.getCell(3, 2)).click();
-        assertThat("Details should be closed after clicking the button again",
-                grid.findElement(By.className("custom-details"))
-                        .getAttribute("innerHTML"),
-                CoreMatchers.not(CoreMatchers
-                        .containsString("Hi! My name is <b>Person 2!</b>")));
+        Assert.assertFalse(
+                "Details should be closed after clicking the button again",
+                grid.findElement(By.className("custom-details")).getText()
+                        .contains("Hi! My name is Person 2!"));
+    }
+
+    @Test
+    public void openDetails_scrollToEnd_scrollToStart_detailsOpenedItemsCountDoesNotIncrease() {
+        GridElement grid = $(GridElement.class).id("grid-with-details-row");
+
+        // Open details
+        clickElementWithJs(getRow(grid, 0).findElement(By.tagName("td")));
+
+        // Check the detailsOpenedItems property (expected to be a list with one
+        // item)
+        Assert.assertEquals(1,
+                ((List<?>) grid.getProperty("detailsOpenedItems")).size());
+
+        // Scroll to end
+        grid.scrollToRow(grid.getRowCount() - 1);
+
+        // Scroll to start
+        grid.scrollToRow(0);
+
+        // Check that the detailsOpenedItems array does not increase / does not
+        // contain duplicates
+        Assert.assertEquals(1,
+                ((List<?>) grid.getProperty("detailsOpenedItems")).size());
     }
 
     private void assertAmountOfOpenDetails(WebElement grid,

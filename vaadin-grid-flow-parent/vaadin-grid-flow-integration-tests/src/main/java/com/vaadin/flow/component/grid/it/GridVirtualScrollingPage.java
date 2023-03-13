@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -30,16 +30,17 @@ import com.vaadin.flow.router.Route;
 @Route("vaadin-grid/grid-virtual-scrolling")
 public class GridVirtualScrollingPage extends Div {
 
-    private DataProvider<String, ?> dataProvider = DataProvider.fromCallbacks(
-            query -> getStream(query).mapToObj(Integer::toString),
-            query -> 100 * 1000 * 1000);
+    private DataProvider<String, Void> dataProvider = DataProvider
+            .fromCallbacks(
+                    query -> getStream(query).mapToObj(Integer::toString),
+                    query -> 100 * 1000 * 1000);
 
     private Label info;
 
     public GridVirtualScrollingPage() {
         Grid<String> grid = new Grid<>();
 
-        grid.setDataProvider(dataProvider);
+        grid.setItems(dataProvider);
         grid.addColumn(i -> i).setHeader("text");
         grid.addColumn(i -> String.valueOf(i.length())).setHeader("length");
 

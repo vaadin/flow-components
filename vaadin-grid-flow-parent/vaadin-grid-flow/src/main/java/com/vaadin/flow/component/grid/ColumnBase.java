@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -120,6 +120,16 @@ interface ColumnBase<T extends ColumnBase<T>> extends HasElement {
     default T setTextAlign(ColumnTextAlign textAlign) {
         getElement().setProperty("textAlign",
                 textAlign == null ? null : textAlign.getPropertyValue());
+
+        // Propagate text align to parent columns
+        if (getElement().getParent() != null) {
+            getElement().getParent().getComponent()
+                    .filter(parent -> parent instanceof AbstractColumn<?>
+                            && parent.getChildren().count() == 1)
+                    .map(AbstractColumn.class::cast)
+                    .ifPresent(parent -> parent.setTextAlign(textAlign));
+        }
+
         return (T) this;
     }
 

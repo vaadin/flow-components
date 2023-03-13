@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -26,6 +26,7 @@ import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.virtuallist.paging.PagelessDataCommunicator;
@@ -37,17 +38,14 @@ import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
-import com.vaadin.flow.data.renderer.Rendering;
-import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.dom.DisabledUpdateMode;
-import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.ValueProvider;
-import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.server.Command;
 import com.vaadin.flow.shared.Registration;
 
+import elemental.json.Json;
 import elemental.json.JsonValue;
 
 /**
@@ -68,11 +66,9 @@ import elemental.json.JsonValue;
  *            the type of the items supported by the list
  */
 @Tag("vaadin-virtual-list")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.0-alpha5")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
-@NpmPackage(value = "@vaadin/virtual-list", version = "23.2.0-alpha5")
-@NpmPackage(value = "@vaadin/vaadin-virtual-list", version = "23.2.0-alpha5")
+@NpmPackage(value = "@vaadin/virtual-list", version = "24.1.0-alpha1")
 @JsModule("@vaadin/virtual-list/vaadin-virtual-list.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./virtualListConnector.js")
@@ -121,11 +117,7 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
         }
     };
 
-    private final Element template;
     private Renderer<T> renderer;
-    private String originalTemplate;
-    private boolean rendererChanged;
-    private boolean templateUpdateRegistered;
 
     private final CompositeDataGenerator<T> dataGenerator = new CompositeDataGenerator<>();
     private final List<Registration> renderingRegistrations = new ArrayList<>();
@@ -140,9 +132,8 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
      * Creates an empty list.
      */
     public VirtualList() {
-        getElement().setAttribute("suppress-template-warning", true);
-        template = new Element("template");
         setRenderer((ValueProvider<T, String>) String::valueOf);
+        addAttachListener((e) -> this.setPlaceholderItem(this.placeholderItem));
     }
 
     private void initConnector() {
@@ -189,7 +180,7 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
     public void setRenderer(ValueProvider<T, String> valueProvider) {
         Objects.requireNonNull(valueProvider,
                 "The valueProvider must not be null");
-        this.setRenderer(TemplateRenderer.<T> of("[[item.label]]")
+        this.setRenderer(LitRenderer.<T> of("${item.label}")
                 .withProperty("label", valueProvider));
     }
 
@@ -208,22 +199,8 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
         renderingRegistrations.forEach(Registration::remove);
         renderingRegistrations.clear();
 
-        Rendering<T> rendering;
-        if (renderer instanceof LitRenderer) {
-            // LitRenderer
-            if (template.getParent() != null) {
-                getElement().removeChild(template);
-            }
-            rendering = renderer.render(getElement(),
-                    dataCommunicator.getKeyMapper());
-        } else {
-            // TemplateRenderer or ComponentRenderer
-            if (template.getParent() == null) {
-                getElement().appendChild(template);
-            }
-            rendering = renderer.render(getElement(),
-                    dataCommunicator.getKeyMapper(), template);
-        }
+        var rendering = renderer.render(getElement(),
+                dataCommunicator.getKeyMapper());
 
         rendering.getDataGenerator().ifPresent(renderingDataGenerator -> {
             Registration renderingDataGeneratorRegistration = dataGenerator
@@ -235,10 +212,12 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
 
         this.renderer = renderer;
 
-        rendererChanged = true;
-        registerTemplateUpdate();
-
         getDataCommunicator().reset();
+
+        // Changing the renderer may also affect how the placeholder item is
+        // processed by the data generator. Call setPlaceholderItem to make sure
+        // the sent placeholder item is up to date.
+        this.setPlaceholderItem(this.placeholderItem);
     }
 
     /**
@@ -263,10 +242,25 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
      */
     public void setPlaceholderItem(T placeholderItem) {
         this.placeholderItem = placeholderItem;
-        getElement().callJsFunction("$connector.setPlaceholderItem",
-                JsonSerializer.toJson(placeholderItem));
 
-        registerTemplateUpdate();
+        runBeforeClientResponse(() -> {
+            var json = Json.createObject();
+
+            if (placeholderItem != null) {
+                // Use the renderer's data generator to create the final
+                // placeholder item which should be sent to the client. In the
+                // case of ComponentRenderer, the generator also creates a
+                // placeholder element which is automatically sent to the client
+                // and the resulting json object will include its nodeid.
+                dataGenerator.generateData(placeholderItem, json);
+            }
+
+            var appId = UI.getCurrent() != null
+                    ? UI.getCurrent().getInternals().getAppId()
+                    : "";
+            getElement().callJsFunction("$connector.setPlaceholderItem", json,
+                    appId);
+        });
     }
 
     /**
@@ -279,65 +273,11 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
         return placeholderItem;
     }
 
-    private void registerTemplateUpdate() {
-        if (templateUpdateRegistered) {
-            return;
-        }
-        templateUpdateRegistered = true;
-
-        /*
-         * The actual registration is done inside another beforeClientResponse
-         * registration to make sure it runs last, after ComponentRenderer and
-         * BasicRenderer have executed their rendering operations, which also
-         * happen beforeClientResponse and might be registered after this.
-         */
-        runBeforeClientResponse(
-                () -> runBeforeClientResponse(() -> updateTemplateInnerHtml()));
-    }
-
     private void runBeforeClientResponse(Command command) {
         getElement().getNode()
                 .runWhenAttached(ui -> ui.getInternals().getStateTree()
                         .beforeClientResponse(getElement().getNode(),
                                 context -> command.execute()));
-    }
-
-    private void updateTemplateInnerHtml() {
-        templateUpdateRegistered = false;
-        if (rendererChanged) {
-            originalTemplate = template.getProperty("innerHTML");
-            rendererChanged = false;
-        }
-
-        String placeholderTemplate;
-        if (placeholderItem == null) {
-            /*
-             * When a placeholderItem is not set, there should be still a
-             * placeholder element with a non 0 size to avoid issues when
-             * scrolling.
-             */
-            placeholderTemplate = "<div style='width:100px;'></div>";
-        } else if (renderer instanceof ComponentRenderer) {
-            ComponentRenderer<?, T> componentRenderer = (ComponentRenderer<?, T>) renderer;
-            Component component = componentRenderer
-                    .createComponent(placeholderItem);
-            component.getElement().setEnabled(isEnabled());
-            placeholderTemplate = component.getElement().getOuterHTML();
-        } else {
-            placeholderTemplate = originalTemplate;
-        }
-
-        /*
-         * The placeholder is used by the client connector to create temporary
-         * elements that are populated on demand (when the user scrolls to that
-         * item).
-         */
-        template.setProperty("innerHTML", String.format(
-        //@formatter:off
-            "<template is='dom-if' if='[[item.__placeholder]]'>%s</template>"
-            + "<template is='dom-if' if='[[!item.__placeholder]]'>%s</template>",
-        //@formatter:on
-                placeholderTemplate, originalTemplate));
     }
 
     @Override

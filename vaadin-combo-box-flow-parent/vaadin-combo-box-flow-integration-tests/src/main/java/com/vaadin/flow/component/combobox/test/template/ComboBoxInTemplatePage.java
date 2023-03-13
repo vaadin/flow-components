@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -42,8 +42,7 @@ public class ComboBoxInTemplatePage extends Div {
     }
 
     private void initCombo(ComboBox<String> combo) {
-        combo.setDataProvider(
-                new ListDataProvider<>(Arrays.asList("1", "2", "3")));
+        combo.setItems(new ListDataProvider<>(Arrays.asList("1", "2", "3")));
         combo.setValue("1");
         combo.addValueChangeListener(e -> {
             message.setText(e.getValue() == null ? "null" : e.getValue());

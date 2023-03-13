@@ -17,23 +17,11 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
 
         comboBox.$connector = {};
 
-        /**
-         * Returns the element that implements the data provider mixin.
-         * For <vaadin-combo-box> that is the element itself.
-         * <vaadin-multi-select-combo-box> wraps a regular combo box internally,
-         * which is returned in this case.
-         * @returns {Node|Element|*}
-         */
-        function getDataProviderMixin() {
-          return comboBox.localName === 'vaadin-multi-select-combo-box' ? comboBox.$.comboBox : comboBox;
-        }
-
         // holds pageIndex -> callback pairs of subsequent indexes (current active range)
         const pageCallbacks = {};
         let cache = {};
         let lastFilter = '';
         const placeHolder = new window.Vaadin.ComboBoxPlaceholder();
-        const MAX_RANGE_COUNT = Math.max(comboBox.pageSize * 2, 500); // Max item count in active range
 
         const serverFacade = (() => {
           // Private variables
@@ -63,20 +51,19 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
         })();
 
         const clearPageCallbacks = (pages = Object.keys(pageCallbacks)) => {
-          const dataProviderMixin = getDataProviderMixin();
           // Flush and empty the existing requests
           pages.forEach((page) => {
-            pageCallbacks[page]([], dataProviderMixin.size);
+            pageCallbacks[page]([], comboBox.size);
             delete pageCallbacks[page];
 
             // Empty the comboBox's internal cache without invoking observers by filling
             // the filteredItems array with placeholders (comboBox will request for data when it
             // encounters a placeholder)
-            const pageStart = parseInt(page) * dataProviderMixin.pageSize;
-            const pageEnd = pageStart + dataProviderMixin.pageSize;
-            const end = Math.min(pageEnd, dataProviderMixin.filteredItems.length);
+            const pageStart = parseInt(page) * comboBox.pageSize;
+            const pageEnd = pageStart + comboBox.pageSize;
+            const end = Math.min(pageEnd, comboBox.filteredItems.length);
             for (let i = pageStart; i < end; i++) {
-              dataProviderMixin.filteredItems[i] = placeHolder;
+              comboBox.filteredItems[i] = placeHolder;
             }
           });
         };
@@ -91,7 +78,7 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
             // filter based on comboBox.filter. While later we only filter clientside data.
 
             if (cache[0]) {
-              performClientSideFilter(cache[0], callback);
+              performClientSideFilter(cache[0], params.filter, callback);
               return;
             } else {
               // If client side filter is enabled then we need to first ask all data
@@ -108,7 +95,7 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
           if (filterChanged) {
             cache = {};
             lastFilter = params.filter;
-            this._debouncer = Debouncer.debounce(this._debouncer, timeOut.after(500), () => {
+            this._filterDebouncer = Debouncer.debounce(this._filterDebouncer, timeOut.after(500), () => {
               if (serverFacade.getLastFilterSentToServer() === params.filter) {
                 // Fixes the case when the filter changes
                 // to something else and back to the original value
@@ -119,10 +106,20 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
               if (params.filter !== lastFilter) {
                 throw new Error("Expected params.filter to be '" + lastFilter + "' but was '" + params.filter + "'");
               }
+              // Remove the debouncer before clearing page callbacks.
+              // This makes sure that they are executed.
+              this._filterDebouncer = undefined;
               // Call the method again after debounce.
               clearPageCallbacks();
               comboBox.dataProvider(params, callback);
             });
+            return;
+          }
+
+          // Postpone the execution of new callbacks if there is an active debouncer.
+          // They will be executed when the page callbacks are cleared within the debouncer.
+          if (this._filterDebouncer) {
+            pageCallbacks[params.page] = callback;
             return;
           }
 
@@ -131,11 +128,12 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
             commitPage(params.page, callback);
           } else {
             pageCallbacks[params.page] = callback;
+            const maxRangeCount = Math.max(params.pageSize * 2, 500); // Max item count in active range
             const activePages = Object.keys(pageCallbacks).map((page) => parseInt(page));
             const rangeMin = Math.min(...activePages);
             const rangeMax = Math.max(...activePages);
 
-            if (activePages.length * params.pageSize > MAX_RANGE_COUNT) {
+            if (activePages.length * params.pageSize > maxRangeCount) {
               if (params.page === rangeMin) {
                 clearPageCallbacks([String(rangeMax)]);
               } else {
@@ -150,13 +148,7 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
               const startIndex = params.pageSize * rangeMin;
               const endIndex = params.pageSize * (rangeMax + 1);
 
-              if (!this._debouncer || !this._debouncer.isActive()) {
-                serverFacade.requestData(startIndex, endIndex, params);
-              } else {
-                this._debouncer = Debouncer.debounce(this._debouncer, timeOut.after(200), () =>
-                  serverFacade.requestData(startIndex, endIndex, params)
-                );
-              }
+              serverFacade.requestData(startIndex, endIndex, params);
             }
           }
         };
@@ -203,11 +195,9 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
         });
 
         comboBox.$connector.updateData = tryCatchWrapper(function (items) {
-          const dataProviderMixin = getDataProviderMixin();
-
           const itemsMap = new Map(items.map((item) => [item.key, item]));
 
-          dataProviderMixin.filteredItems = dataProviderMixin.filteredItems.map((item) => {
+          comboBox.filteredItems = comboBox.filteredItems.map((item) => {
             return itemsMap.get(item.key) || item;
           });
         });
@@ -227,10 +217,9 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
         });
 
         comboBox.$connector.reset = tryCatchWrapper(function () {
-          const dataProviderMixin = getDataProviderMixin();
           clearPageCallbacks();
           cache = {};
-          dataProviderMixin.clearCache();
+          comboBox.clearCache();
         });
 
         comboBox.$connector.confirm = tryCatchWrapper(function (id, filter) {
@@ -253,53 +242,11 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
           comboBox.$server.confirmUpdate(id);
         });
 
-        comboBox.$connector.enableClientValidation = tryCatchWrapper(function (enable) {
-          if (comboBox.$) {
-            if (enable) {
-              enableClientValidation(comboBox);
-            } else {
-              disableClientValidation(comboBox);
-            }
-
-            comboBox.validate();
-          } else {
-            setTimeout(function () {
-              comboBox.$connector.enableClientValidation(enable);
-            }, 10);
-          }
-        });
-
-        const disableClientValidation = tryCatchWrapper(function (combo) {
-          if (typeof combo.$checkValidity == 'undefined') {
-            combo.$checkValidity = combo.checkValidity;
-            combo.checkValidity = function () {
-              return !comboBox.invalid;
-            };
-          }
-          if (typeof combo.$validate == 'undefined') {
-            combo.$validate = combo.validate;
-            combo.validate = function () {
-              return !(comboBox.focusElement.invalid = comboBox.invalid);
-            };
-          }
-        });
-
-        const enableClientValidation = tryCatchWrapper(function (combo) {
-          if (combo.$checkValidity) {
-            combo.checkValidity = combo.$checkValidity;
-            delete combo.$checkValidity;
-          }
-          if (combo.$validate) {
-            combo.validate = combo.$validate;
-            delete combo.$validate;
-          }
-        });
-
         const commitPage = tryCatchWrapper(function (page, callback) {
           let data = cache[page];
 
           if (comboBox._clientSideFilter) {
-            performClientSideFilter(data, callback);
+            performClientSideFilter(data, comboBox.filter, callback);
           } else {
             // Remove the data if server-side filtering, but keep it for client-side
             // filtering
@@ -315,12 +262,11 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
         // and submitting the filtered items to specified callback.
         // The filter used is the one from combobox, not the lastFilter stored since
         // that may not reflect user's input.
-        const performClientSideFilter = tryCatchWrapper(function (page, callback) {
-          const dataProviderMixin = getDataProviderMixin();
+        const performClientSideFilter = tryCatchWrapper(function (page, filter, callback) {
           let filteredItems = page;
 
-          if (dataProviderMixin.filter) {
-            filteredItems = page.filter((item) => comboBox.$connector.filter(item, dataProviderMixin.filter));
+          if (filter) {
+            filteredItems = page.filter((item) => comboBox.$connector.filter(item, filter));
           }
 
           callback(filteredItems, filteredItems.length);

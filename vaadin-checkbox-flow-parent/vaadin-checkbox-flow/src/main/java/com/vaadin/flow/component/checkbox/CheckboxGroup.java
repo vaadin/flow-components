@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -26,19 +26,31 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.HasValidation;
+import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.ItemLabelGenerator;
+import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.checkbox.dataview.CheckboxGroupDataView;
 import com.vaadin.flow.component.checkbox.dataview.CheckboxGroupListDataView;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.ClientValidationUtil;
+import com.vaadin.flow.component.shared.HasClientValidation;
+import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.HasValidationProperties;
+import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.binder.HasValidator;
+import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
+import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderWrapper;
@@ -55,8 +67,6 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
-import com.vaadin.flow.dom.PropertyChangeEvent;
-import com.vaadin.flow.dom.PropertyChangeListener;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
@@ -73,13 +83,18 @@ import elemental.json.JsonArray;
  *
  * @author Vaadin Ltd
  */
+@Tag("vaadin-checkbox-group")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha1")
+@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@NpmPackage(value = "@vaadin/checkbox-group", version = "24.1.0-alpha1")
+@JsModule("@vaadin/checkbox-group/src/vaadin-checkbox-group.js")
 public class CheckboxGroup<T>
-        extends GeneratedVaadinCheckboxGroup<CheckboxGroup<T>, Set<T>>
-        implements HasItemComponents<T>, HasSize, HasValidation,
-        MultiSelect<CheckboxGroup<T>, T>,
-        HasListDataView<T, CheckboxGroupListDataView<T>>,
-        HasDataView<T, Void, CheckboxGroupDataView<T>>, HasHelper, HasLabel,
-        HasValidator<T> {
+        extends AbstractSinglePropertyField<CheckboxGroup<T>, Set<T>> implements
+        HasClientValidation, HasDataView<T, Void, CheckboxGroupDataView<T>>,
+        HasHelper, HasItemComponents<T>, HasLabel, HasSize, HasStyle,
+        HasListDataView<T, CheckboxGroupListDataView<T>>, HasTooltip,
+        HasThemeVariant<CheckboxGroupVariant>, HasValidationProperties,
+        HasValidator<Set<T>>, MultiSelect<CheckboxGroup<T>, T> {
 
     private static final String VALUE = "value";
 
@@ -96,8 +111,6 @@ public class CheckboxGroup<T>
 
     private ComponentRenderer<? extends Component, T> itemRenderer;
 
-    private final PropertyChangeListener validationListener = this::validateSelectionEnabledState;
-    private Registration validationRegistration;
     private Registration dataProviderListenerRegistration;
 
     private int lastNotifiedDataSize = -1;
@@ -110,10 +123,13 @@ public class CheckboxGroup<T>
      * Creates an empty checkbox group
      */
     public CheckboxGroup() {
-        super(Collections.emptySet(), Collections.emptySet(), JsonArray.class,
+        super("value", Collections.emptySet(), JsonArray.class,
                 CheckboxGroup::presentationToModel,
-                CheckboxGroup::modelToPresentation, true);
-        registerValidation();
+                CheckboxGroup::modelToPresentation);
+
+        addValueChangeListener(e -> validate());
+
+        addClientValidatedEventListener(e -> validate());
     }
 
     /**
@@ -219,7 +235,7 @@ public class CheckboxGroup<T>
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
 
-        FieldValidationUtil.disableClientValidation(this);
+        ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
     }
 
     @Override
@@ -304,26 +320,7 @@ public class CheckboxGroup<T>
         }
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @deprecated Because the stream is collected to a list anyway, use
-     *             {@link HasListDataView#setItems(Collection)} instead.
-     */
-    @Deprecated
-    public void setItems(Stream<T> streamOfItems) {
-        setItems(DataProvider.fromStream(streamOfItems));
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @deprecated use instead one of the {@code setItems} methods which provide
-     *             access to either {@link CheckboxGroupListDataView} or
-     *             {@link CheckboxGroupDataView}
-     */
-    @Deprecated
-    public void setDataProvider(DataProvider<T, ?> dataProvider) {
+    private void setDataProvider(DataProvider<T, ?> dataProvider) {
         this.dataProvider.set(dataProvider);
         DataViewUtils.removeComponentFilterAndSortComparator(this);
         reset();
@@ -394,11 +391,8 @@ public class CheckboxGroup<T>
      * Gets the data provider.
      *
      * @return the data provider, not {@code null}
-     * @deprecated use {@link #getListDataView()} or
-     *             {@link #getGenericDataView()} instead
      */
-    @Deprecated
-    public DataProvider<T, ?> getDataProvider() {
+    private DataProvider<T, ?> getDataProvider() {
         // dataProvider reference won't have been initialized before
         // calling from CheckboxGroup constructor
         return Optional.ofNullable(dataProvider).map(AtomicReference::get)
@@ -459,6 +453,8 @@ public class CheckboxGroup<T>
      * Sets the item label generator that is used to produce the strings shown
      * in the checkbox group for each item. By default,
      * {@link String#valueOf(Object)} is used.
+     * <p>
+     * Setting an item label generator removes any previously set item renderer.
      *
      * @param itemLabelGenerator
      *            the item label provider to use, not null
@@ -468,7 +464,8 @@ public class CheckboxGroup<T>
         Objects.requireNonNull(itemLabelGenerator,
                 "The item label generator can not be null");
         this.itemLabelGenerator = itemLabelGenerator;
-        reset();
+        this.itemRenderer = null;
+        refreshCheckboxes();
     }
 
     /**
@@ -487,9 +484,8 @@ public class CheckboxGroup<T>
      * @param label
      *            value for the {@code label} property in the checkbox group
      */
-    @Override
     public void setLabel(String label) {
-        super.setLabel(label);
+        getElement().setProperty("label", label == null ? "" : label);
     }
 
     /**
@@ -497,29 +493,18 @@ public class CheckboxGroup<T>
      *
      * @return the {@code label} property of the checkbox group
      */
-    @Override
     public String getLabel() {
-        return super.getLabelString();
-    }
-
-    @Override
-    public void setErrorMessage(String errorMessage) {
-        super.setErrorMessage(errorMessage);
+        return getElement().getProperty("label");
     }
 
     /**
-     * Gets the current error message from the checkbox group.
+     * Specifies that the user must fill in a value.
      *
-     * @return the current error message
+     * @param required
+     *            the boolean value to set
      */
-    @Override
-    public String getErrorMessage() {
-        return getErrorMessageString();
-    }
-
-    @Override
     public void setRequired(boolean required) {
-        super.setRequired(required);
+        getElement().setProperty("required", required);
     }
 
     /**
@@ -531,17 +516,26 @@ public class CheckboxGroup<T>
      * @return {@code true} if the input is required, {@code false} otherwise
      */
     public boolean isRequired() {
-        return isRequiredBoolean();
+        return getElement().getProperty("required", false);
     }
 
-    @Override
-    public boolean isInvalid() {
-        return isInvalidBoolean();
+    /**
+     * If true, the user cannot interact with this element.
+     *
+     * @param disabled
+     *            the boolean value to set
+     */
+    protected void setDisabled(boolean disabled) {
+        getElement().setProperty("disabled", disabled);
     }
 
-    @Override
-    public void setInvalid(boolean invalid) {
-        super.setInvalid(invalid);
+    /**
+     * If true, the user cannot interact with this element.
+     *
+     * @return the {@code disabled} property from the webcomponent
+     */
+    protected boolean isDisabledBoolean() {
+        return getElement().getProperty("disabled", false);
     }
 
     @Override
@@ -695,35 +689,6 @@ public class CheckboxGroup<T>
         checkbox.getElement().executeJs("this.disabled = $0", disabled);
     }
 
-    private void validateSelectionEnabledState(PropertyChangeEvent event) {
-        if (!hasValidValue()) {
-            Set<T> oldValue = presentationToModel(this,
-                    (JsonArray) event.getOldValue());
-            // return the value back on the client side
-            try {
-                validationRegistration.remove();
-                getElement().setPropertyJson(VALUE,
-                        modelToPresentation(this, oldValue));
-            } finally {
-                registerValidation();
-            }
-            // Now make sure that the checkbox is still in the correct state
-            Set<T> value = presentationToModel(this,
-                    (JsonArray) event.getValue());
-            getCheckboxItems()
-                    .filter(checkbox -> value.contains(checkbox.getItem()))
-                    .forEach(this::updateEnabled);
-        }
-    }
-
-    private void registerValidation() {
-        if (validationRegistration != null) {
-            validationRegistration.remove();
-        }
-        validationRegistration = getElement().addPropertyChangeListener(VALUE,
-                validationListener);
-    }
-
     private static <T> Set<T> presentationToModel(CheckboxGroup<T> group,
             JsonArray presentation) {
         if (group.keyMapper == null) {
@@ -787,4 +752,20 @@ public class CheckboxGroup<T>
         keyMapper.setIdentifierGetter(identifierProvider);
     }
 
+    protected void validate() {
+        boolean isRequired = isRequiredIndicatorVisible();
+        boolean isInvalid = ValidationUtil
+                .checkRequired(isRequired, getValue(), getEmptyValue())
+                .isError();
+
+        setInvalid(isInvalid);
+    }
+
+    @Override
+    public Registration addValidationStatusChangeListener(
+            ValidationStatusChangeListener<Set<T>> listener) {
+        return addClientValidatedEventListener(
+                event -> listener.validationStatusChanged(
+                        new ValidationStatusChangeEvent<>(this, !isInvalid())));
+    }
 }
