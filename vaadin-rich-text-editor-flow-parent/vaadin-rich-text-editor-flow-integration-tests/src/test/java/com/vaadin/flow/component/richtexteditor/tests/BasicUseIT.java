@@ -176,6 +176,19 @@ public class BasicUseIT extends AbstractParallelTest {
         });
     }
 
+    @Test
+    public void eagerRichTextEditor_triggerValueChangeTwice_producesCorrectHtml() {
+        RichTextEditorElement eagerRte = $(RichTextEditorElement.class)
+                .id("eager-rte");
+        TestBenchElement valuePanel = $("div").id("eager-rte-value-panel");
+
+        eagerRte.getEditor().sendKeys("a");
+        waitUntil(driver -> "<p>a</p>".equals(valuePanel.getText()));
+
+        eagerRte.getEditor().sendKeys("b");
+        waitUntil(driver -> "<p>ab</p>".equals(valuePanel.getText()));
+    }
+
     private ButtonElement getTestButton(String id) {
         return $(ButtonElement.class).onPage().id(id);
     }
