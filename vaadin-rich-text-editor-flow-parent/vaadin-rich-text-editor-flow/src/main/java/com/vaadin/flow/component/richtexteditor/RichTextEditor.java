@@ -114,6 +114,11 @@ public class RichTextEditor
     public RichTextEditor() {
         super("", "", false, true);
         setValueChangeMode(ValueChangeMode.ON_CHANGE);
+        addValueChangeListener(e -> {
+            if (this.asHtml != null) {
+                this.asHtml.value.clear();
+            }
+        });
     }
 
     /**
@@ -841,7 +846,6 @@ public class RichTextEditor
 
         AsHtml() {
             this.value = new HtmlValue();
-            RichTextEditor.this.addValueChangeListener(e -> this.value.clear());
         }
 
         /**

@@ -78,6 +78,8 @@ public class MainView extends VerticalLayout {
         createRichTextEditorInATemplate();
 
         createRichTextEditorWithHtmlBinder();
+
+        createEagerRichTextEditor();
     }
 
     private RichTextEditor.RichTextEditorI18n createCustomI18n() {
@@ -256,6 +258,20 @@ public class MainView extends VerticalLayout {
         reset.setId("html-binder-reset");
 
         add(actions, infoPanel, valuePanel);
+    }
+
+    private void createEagerRichTextEditor() {
+        Div eagerRteValuePanel = new Div();
+        eagerRteValuePanel.setId("eager-rte-value-panel");
+
+        RichTextEditor eagerRte = new RichTextEditor();
+        eagerRte.setValueChangeMode(ValueChangeMode.EAGER);
+        eagerRte.setId("eager-rte");
+        eagerRte.addValueChangeListener(event -> {
+            eagerRteValuePanel.setText(eagerRte.asHtml().getValue());
+        });
+
+        add(eagerRte, eagerRteValuePanel);
     }
 
     /**
