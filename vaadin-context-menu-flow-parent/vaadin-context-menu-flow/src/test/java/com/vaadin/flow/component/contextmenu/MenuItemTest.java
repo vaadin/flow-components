@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.contextmenu;
 
+import com.vaadin.flow.component.HasAriaLabel;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -53,6 +54,31 @@ public class MenuItemTest {
 
         item.setCheckable(false);
         Assert.assertFalse(item.isCheckable());
+    }
+
+    @Test
+    public void implementsHasAriaLabel() {
+        Assert.assertTrue(item instanceof HasAriaLabel);
+    }
+
+    @Test
+    public void setAriaLabel() {
+        item.setAriaLabel("aria-label");
+        Assert.assertTrue(item.getAriaLabel().isPresent());
+        Assert.assertEquals("aria-label", item.getAriaLabel().get());
+
+        item.setAriaLabel(null);
+        Assert.assertTrue(item.getAriaLabel().isEmpty());
+    }
+
+    @Test
+    public void setAriaLabelledBy() {
+        item.setAriaLabelledBy("aria-labelledby");
+        Assert.assertTrue(item.getAriaLabelledBy().isPresent());
+        Assert.assertEquals("aria-labelledby", item.getAriaLabelledBy().get());
+
+        item.setAriaLabelledBy(null);
+        Assert.assertTrue(item.getAriaLabelledBy().isEmpty());
     }
 
 }
