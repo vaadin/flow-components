@@ -134,7 +134,7 @@ public class TreeGrid<T> extends Grid<T>
 
     private class TreeGridArrayUpdaterImpl implements TreeGridArrayUpdater {
         // Approximated size of the viewport. Used for eager fetching.
-        private static final int EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE = 20;
+        private static final int EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE = 40;
 
         private UpdateQueueData data;
         private SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueFactory;
@@ -224,6 +224,20 @@ public class TreeGrid<T> extends Grid<T>
         setUniqueKeyProperty("key");
         getArrayUpdater().getUpdateQueueData()
                 .setHasExpandedItems(getDataCommunicator()::hasExpandedItems);
+
+        addItemHasChildrenPathGenerator();
+    }
+
+    /**
+     * Adds a data generator that produces a value for the <vaadin-grid>'s
+     * itemHasChildrenPath property
+     */
+    private void addItemHasChildrenPathGenerator() {
+        addDataGenerator((T item, JsonObject jsonObject) -> {
+            if (getDataCommunicator().hasChildren(item)) {
+                jsonObject.put("children", true);
+            }
+        });
     }
 
     /**
@@ -243,6 +257,8 @@ public class TreeGrid<T> extends Grid<T>
         setUniqueKeyProperty("key");
         getArrayUpdater().getUpdateQueueData()
                 .setHasExpandedItems(getDataCommunicator()::hasExpandedItems);
+
+        addItemHasChildrenPathGenerator();
     }
 
     @Override
