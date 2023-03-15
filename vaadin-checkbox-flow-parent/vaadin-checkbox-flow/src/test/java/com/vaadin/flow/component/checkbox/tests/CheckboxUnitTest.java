@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.checkbox.tests;
 
 import com.vaadin.flow.component.HasAriaLabel;
-import org.checkerframework.checker.units.qual.C;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
