@@ -73,6 +73,9 @@ public class TabTest {
 
         Assert.assertTrue(tab.getAriaLabel().isPresent());
         Assert.assertEquals("aria label", tab.getAriaLabel().get());
+
+        tab.setAriaLabel(null);
+        Assert.assertTrue(tab.getAriaLabel().isEmpty());
     }
 
     @Test
@@ -81,5 +84,8 @@ public class TabTest {
 
         Assert.assertTrue(tab.getAriaLabelledBy().isPresent());
         Assert.assertEquals("aria-labelledby", tab.getAriaLabelledBy().get());
+
+        tab.setAriaLabelledBy(null);
+        Assert.assertTrue(tab.getAriaLabelledBy().isEmpty());
     }
 }
