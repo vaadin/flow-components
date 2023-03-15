@@ -62,6 +62,6 @@ describe('grid connector - tree', () => {
     await nextFrame();
     
     // This number may come down from further optimization
-    expect(spy.callCount).to.equal(5);
+    expect(spy.callCount).to.equal(4);
   });
 });
