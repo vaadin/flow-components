@@ -50,6 +50,17 @@ public class GridElement extends TestBenchElement {
      *            the row to scroll to
      */
     public void scrollToRow(int row) {
+        callFunction("scrollToIndex", row);
+        waitUntilLoadingFinished();
+    }
+
+    /**
+     * Scrolls to the row with the given flat row index.
+     *
+     * @param row
+     *            the row to scroll to
+     */
+    private void scrollToFlatRow(int row) {
         callFunction("_scrollToFlatIndex", row);
         waitUntilLoadingFinished();
     }
@@ -114,7 +125,7 @@ public class GridElement extends TestBenchElement {
      */
     public GridTHTDElement getCell(int rowIndex, GridColumnElement column) {
         if (!isRowInView(rowIndex)) {
-            scrollToRow(rowIndex);
+            scrollToFlatRow(rowIndex);
         }
 
         GridTRElement row = getRow(rowIndex);
