@@ -138,11 +138,19 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
 
         super.setValue(value);
 
+        // Clear the input element from possible bad input.
         if (Objects.equals(oldValue, getEmptyValue())
                 && Objects.equals(value, getEmptyValue())
                 && isInputValuePresent()) {
-            // Clear the input element from possible bad input.
-            getElement().executeJs("this.inputElement.value = ''");
+            // The check for value presence before clearing the input element's
+            // value is necessary to ensure the last non-empty value won't get
+            // cleared when clear() and setValue(...) are subsequently called
+            // within one round-trip.
+            // Note, Flow is optimized to only send the last component's value
+            // when changing it several times during a round-trip.
+            // The last set value is sent in place of the first set one.
+            getElement()
+                    .executeJs("if (!this.value) this._inputElementValue = ''");
             getElement().setProperty("_hasInputValue", false);
             fireEvent(new ClientValidatedEvent(this, false));
         }
