@@ -379,6 +379,10 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
 
                 // Synchronously make a page load request for the resolvable parent request
                 resolvableParentRequest.cache.doEnsureSubCacheForScaledIndex(resolvableParentRequest.scaledIndex);
+              } else {
+                // No immediately resolvable parent requests found, request a content update to
+                // make sure expanded nodes that require a server roundtrip get loaded
+                grid.requestContentUpdate();
               }
             } else {
               treePageCallbacks[parentUniqueKey][page] = callback;
