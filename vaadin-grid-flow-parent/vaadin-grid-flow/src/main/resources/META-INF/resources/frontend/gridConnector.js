@@ -82,16 +82,6 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             }
             return undefined;
           });
-
-          ItemCache.prototype.getLevel = tryCatchWrapper(function () {
-            let cache = this;
-            let level = 0;
-            while (cache.parentCache) {
-              cache = cache.parentCache;
-              level++;
-            }
-            return level;
-          });
         }
 
         const rootPageCallbacks = {};
@@ -141,8 +131,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           ensureSubCacheQueue.push({
             cache: targetCache,
             scaledIndex: scaledIndex,
-            itemkey: grid.getItemId(targetCache.items[scaledIndex]),
-            level: targetCache.getLevel()
+            itemkey: grid.getItemId(targetCache.items[scaledIndex])
           });
 
           ensureSubCacheDebouncer = Debouncer.debounce(ensureSubCacheDebouncer, animationFrame, () => {
@@ -381,12 +370,12 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
               ensureSubCacheQueue = [];
               callback(cache[parentUniqueKey][page], cache[parentUniqueKey].size);
 
-              // Flush after the callback to have the grid rows up-to-date
-              updateAllGridRowsInDomBasedOnCache();
+              // Update effective size
+              updateGridEffectiveSize();
               // Prevent sub-caches from being created (& data requests sent) for items
               // that may no longer be visible
               ensureSubCacheQueue = [];
-              // Eliminate flickering on eager fetch mode
+              // Request a content update manually
               grid.requestContentUpdate();
             } else {
               treePageCallbacks[parentUniqueKey][page] = callback;
@@ -520,20 +509,6 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           }
           let parentKey = grid.getItemId(item);
           grid.$server.updateExpandedState(parentKey, expanded);
-
-          if (!expanded) {
-            delete cache[parentKey];
-            let parentCache = grid.$connector.getCacheByKey(parentKey);
-            if (parentCache && parentCache.itemkeyCaches && parentCache.itemkeyCaches[parentKey]) {
-              delete parentCache.itemkeyCaches[parentKey];
-            }
-            if (parentCache && parentCache.itemkeyCaches) {
-              Object.keys(parentCache.itemCaches)
-                .filter((idx) => parentCache.items[idx].key === parentKey)
-                .forEach((idx) => delete parentCache.itemCaches[idx]);
-            }
-            delete lastRequestedRanges[parentKey];
-          }
         });
 
         // Patch grid.expandItem and grid.collapseItem to have
@@ -633,9 +608,16 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
          * Updates all visible grid rows in DOM.
          */
         const updateAllGridRowsInDomBasedOnCache = function () {
+          updateGridEffectiveSize();
+          grid.__updateVisibleRows();
+        };
+
+        /**
+         * Updates the <vaadin-grid>'s internal cache size and effective size.
+         */
+        const updateGridEffectiveSize = function () {
           grid._cache.updateSize();
           grid._effectiveSize = grid._cache.effectiveSize;
-          grid.__updateVisibleRows();
         };
 
         /**
@@ -806,8 +788,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
               delete cacheToClear.itemkeyCaches[itemKeyToRemove];
             }
           }
-          grid._cache.updateSize();
-          grid._effectiveSize = grid._cache.effectiveSize;
+          updateGridEffectiveSize();
         });
 
         grid.$connector.reset = tryCatchWrapper(function () {
@@ -1047,6 +1028,25 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             }
           });
         });
+
+        grid.__applySorters = () => {
+          // Update the _previousSorters in vaadin-grid-sort-mixin so that the __applySorters
+          // method in the mixin will skip calling clearCache().
+          //
+          // In Flow Grid's case, we never want to clear the cache eagerly when the sorter elements
+          // change due to one of the following reasons:
+          //
+          // 1. Sorted by user: The items in the new sort order need to be fetched from the server,
+          // and we want to avoid a heavy re-render before the updated items have actually been fetched.
+          //
+          // 2. Sorted programmatically on the server: The items in the new sort order have already
+          // been fetched and applied to the grid. The sorter element states are updated programmatically
+          // to reflect the new sort order, but there's no need to re-render the grid rows.
+          grid._previousSorters = grid._mapSorters();
+
+          // Call the original __applySorters method in vaadin-grid-sort-mixin
+          Grid.prototype.__applySorters.call(grid);
+        };
 
         grid.$connector.setFooterRenderer = tryCatchWrapper(function (column, options) {
           const { content } = options;

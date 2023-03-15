@@ -14,6 +14,7 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 
 import com.vaadin.testbench.Parameters;
 import com.vaadin.testbench.parallel.BrowserUtil;
+import com.vaadin.testbench.parallel.ParallelTest;
 
 public abstract class AbstractParallelTest extends ParallelTest {
 
