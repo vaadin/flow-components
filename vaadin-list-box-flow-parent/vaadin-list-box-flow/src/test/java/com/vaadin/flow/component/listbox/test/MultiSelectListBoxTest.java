@@ -24,6 +24,7 @@ import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.HasAriaLabel;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
@@ -330,6 +331,36 @@ public class MultiSelectListBoxTest {
     @Test
     public void implementsHasTooltip() {
         Assert.assertTrue(listBox instanceof HasTooltip);
+    }
+
+    @Test
+    public void implementsHasAriaLabel() {
+        Assert.assertTrue(listBox instanceof HasAriaLabel);
+    }
+
+    @Test
+    public void setAriaLabel() {
+        listBox.setAriaLabel("aria-label");
+
+        Assert.assertTrue(listBox.getAriaLabel().isPresent());
+        Assert.assertEquals("aria-label", listBox.getAriaLabel().get());
+
+        listBox.setAriaLabel(null);
+
+        Assert.assertTrue(listBox.getAriaLabel().isEmpty());
+    }
+
+    @Test
+    public void setAriaLabelledBy() {
+        listBox.setAriaLabelledBy("aria-labelledby");
+
+        Assert.assertTrue(listBox.getAriaLabelledBy().isPresent());
+        Assert.assertEquals("aria-labelledby",
+                listBox.getAriaLabelledBy().get());
+
+        listBox.setAriaLabelledBy(null);
+
+        Assert.assertTrue(listBox.getAriaLabelledBy().isEmpty());
     }
 
     private void assertValueChangeEvents(Set<Item>... expectedValues) {
