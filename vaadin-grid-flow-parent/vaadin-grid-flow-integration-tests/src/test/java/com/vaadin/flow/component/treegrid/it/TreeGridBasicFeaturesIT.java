@@ -185,6 +185,24 @@ public class TreeGridBasicFeaturesIT extends AbstractTreeGridIT {
     }
 
     @Test
+    public void keyboard_navigation_row_focus_expand_collapse() {
+        getTreeGrid().getCell(0, 0).focus();
+
+        // Enter row focus mode
+        new Actions(getDriver()).sendKeys(Keys.LEFT).perform();
+
+        // Should expand "0 | 0" on right arrow
+        new Actions(getDriver()).sendKeys(Keys.RIGHT).perform();
+        Assert.assertEquals(6, getTreeGrid().getRowCount());
+        assertCellTexts(1, 0, new String[] { "1 | 0", "1 | 1", "1 | 2" });
+
+        // Should collapse "0 | 0" on left arrow
+        new Actions(getDriver()).sendKeys(Keys.LEFT).perform();
+        Assert.assertEquals(3, getTreeGrid().getRowCount());
+        assertCellTexts(0, 0, new String[] { "0 | 0", "0 | 1", "0 | 2" });
+    }
+
+    @Test
     public void keyboard_selection() {
         getTreeGrid().getCell(0, 0).focus();
 
