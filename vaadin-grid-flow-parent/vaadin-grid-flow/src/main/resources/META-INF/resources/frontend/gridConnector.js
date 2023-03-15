@@ -44,7 +44,6 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             }
 
             return Boolean(
-              this.grid.$connector.confirmingParentItems ||
               this.grid.$connector.hasEnsureSubCacheQueue() ||
                 Object.keys(this.pendingRequests).length ||
                 Object.keys(this.itemCaches).filter((index) => {
@@ -900,7 +899,6 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
         });
 
         grid.$connector.confirm = tryCatchWrapper(function (id) {
-          grid.$connector.confirmingParentItems = true;
           // We're done applying changes from this batch, resolve outstanding
           // callbacks
           let outstandingRequests = Object.getOwnPropertyNames(rootPageCallbacks);
@@ -937,8 +935,6 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
               callback([]);
             }
           }
-
-          grid.$connector.confirmingParentItems = false;
 
           // Let server know we're done
           grid.$server.confirmUpdate(id);
