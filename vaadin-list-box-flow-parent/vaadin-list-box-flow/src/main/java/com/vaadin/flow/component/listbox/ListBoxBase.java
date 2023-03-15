@@ -29,6 +29,7 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.ItemLabelGenerator;
@@ -72,7 +73,7 @@ import com.vaadin.flow.shared.Registration;
 @JsModule("@vaadin/list-box/src/vaadin-list-box.js")
 public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, VALUE>
         extends AbstractSinglePropertyField<C, VALUE>
-        implements HasItemComponents<ITEM>, HasSize,
+        implements HasAriaLabel, HasItemComponents<ITEM>, HasSize,
         HasListDataView<ITEM, ListBoxListDataView<ITEM>>,
         HasDataView<ITEM, Void, ListBoxDataView<ITEM>>, HasStyle, HasTooltip {
 
