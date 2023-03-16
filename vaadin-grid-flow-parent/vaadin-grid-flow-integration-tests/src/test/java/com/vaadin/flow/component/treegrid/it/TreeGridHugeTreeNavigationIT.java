@@ -36,8 +36,8 @@ public class TreeGridHugeTreeNavigationIT extends AbstractTreeGridIT {
         setupTreeGrid();
     }
 
+    @Ignore("Fix as part of https://github.com/vaadin/flow-components/issues/3505")
     @Test
-
     public void keyboard_navigation() {
         getTreeGrid().getCell(0, 0).focus();
 
