@@ -1,4 +1,4 @@
-import { Tooltip } from '@vaadin/tooltip/src/tooltip.js';
+import { Tooltip } from '@vaadin/tooltip/src/vaadin-tooltip.js';
 
 const _window = window as any;
 _window.Vaadin = _window.Vaadin || {};
