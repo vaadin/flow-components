@@ -32,7 +32,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/board", version = "24.0.0")
-@JsModule("@vaadin/board/vaadin-board-row.js")
+@JsModule("@vaadin/board/src/vaadin-board-row.js")
 public class Row extends Component
         implements HasStyle, HasSize, HasOrderedComponents {
 

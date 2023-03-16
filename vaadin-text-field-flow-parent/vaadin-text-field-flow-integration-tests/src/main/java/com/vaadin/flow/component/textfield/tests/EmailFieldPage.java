@@ -37,6 +37,7 @@ public class EmailFieldPage extends Div {
                 .setText(String.format("Old value: '%s'. New value: '%s'.",
                         event.getOldValue(), event.getValue())));
         add(emailField, message);
+        emailField.setTooltipText("This is a tooltip");
 
         NativeButton button = new NativeButton(
                 "Set/unset text field read-only");
