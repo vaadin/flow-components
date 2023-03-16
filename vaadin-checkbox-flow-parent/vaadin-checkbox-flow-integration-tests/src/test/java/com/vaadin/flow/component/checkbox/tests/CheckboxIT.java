@@ -135,9 +135,11 @@ public class CheckboxIT extends AbstractComponentIT {
     @Test
     public void accessibleCheckbox() {
         WebElement checkbox = layout.findElement(By.id("accessible-checkbox"));
+        WebElement inputElement = checkbox
+                .findElement(By.cssSelector("[slot=input]"));
         Assert.assertEquals(
                 "Accessible checkbox should have the aria-label attribute",
-                "Click me", checkbox.getAttribute("aria-label"));
+                "Click me", inputElement.getAttribute("aria-label"));
     }
 
     @Test
