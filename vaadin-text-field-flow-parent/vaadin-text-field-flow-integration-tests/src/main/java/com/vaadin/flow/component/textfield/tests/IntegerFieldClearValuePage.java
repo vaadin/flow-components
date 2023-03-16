@@ -25,6 +25,6 @@ public class IntegerFieldClearValuePage extends Div {
                 });
         clearAndSetValueButton.setId(CLEAR_AND_SET_VALUE_BUTTON);
 
-        add(integerField, clearButton);
+        add(integerField, clearButton, clearAndSetValueButton);
     }
 }
