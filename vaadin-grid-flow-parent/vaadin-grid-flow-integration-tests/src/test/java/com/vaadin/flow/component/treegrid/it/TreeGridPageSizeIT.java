@@ -17,6 +17,7 @@ package com.vaadin.flow.component.treegrid.it;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -33,6 +34,7 @@ public class TreeGridPageSizeIT extends AbstractTreeGridIT {
         setupTreeGrid();
     }
 
+    @Ignore("Fix as part of https://github.com/vaadin/flow-components/issues/3505")
     @Test
     public void treegridWithPageSize10_changeTo80_revertBackTo10() {
         TreeGridElement grid = getTreeGrid();

@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.vaadin.flow.component.HasAriaLabel;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -326,6 +327,21 @@ public class ButtonTest {
     public void implementsHasTooltip() {
         button = new Button();
         Assert.assertTrue(button instanceof HasTooltip);
+    }
+
+    @Test
+    public void implementHasAriaLabel() {
+        button = new Button();
+        Assert.assertTrue(button instanceof HasAriaLabel);
+    }
+
+    @Test
+    public void setAriaLabel() {
+        button = new Button();
+        button.setAriaLabel("Aria label");
+
+        Assert.assertTrue(button.getAriaLabel().isPresent());
+        Assert.assertEquals("Aria label", button.getAriaLabel().get());
     }
 
     private void assertButtonHasThemeAttribute(String theme) {
