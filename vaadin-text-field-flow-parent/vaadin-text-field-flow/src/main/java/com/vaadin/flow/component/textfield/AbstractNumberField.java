@@ -142,13 +142,13 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         if (Objects.equals(oldValue, getEmptyValue())
                 && Objects.equals(value, getEmptyValue())
                 && isInputValuePresent()) {
-            // The check for value presence before clearing the input element's
-            // value is necessary to ensure the last non-empty value won't get
-            // cleared when clear() and setValue(...) are subsequently called
-            // within one round-trip.
-            // Note, Flow is optimized to only send the last component's value
-            // when changing it several times during a round-trip.
-            // The last set value is sent in place of the first set one.
+            // The check for value presence guarantees that a non-empty value
+            // won't get cleared when setValue(null) and setValue(...) are
+            // subsequently called within one round-trip.
+            // That may happen otherwise due to the Flow optimization:
+            // Flow only sends the latest component's value to the client
+            // when you update it multiple times during a round-trip and
+            // the latest value is sent in place of the first one.
             getElement()
                     .executeJs("if (!this.value) this._inputElementValue = ''");
             getElement().setProperty("_hasInputValue", false);
