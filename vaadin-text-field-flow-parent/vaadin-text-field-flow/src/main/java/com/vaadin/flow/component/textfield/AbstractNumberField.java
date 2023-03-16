@@ -146,9 +146,9 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
             // won't get cleared when setValue(null) and setValue(...) are
             // subsequently called within one round-trip.
             // That may happen otherwise due to the Flow optimization:
-            // Flow only sends the final component's value to the client
-            // when you update it multiple times during a round-trip and
-            // the final value is sent in place of the first one.
+            // Flow only sends the final component value to the client
+            // when you update the value multiple times during a round-trip
+            // and the final value is sent in place of the first one.
             getElement()
                     .executeJs("if (!this.value) this._inputElementValue = ''");
             getElement().setProperty("_hasInputValue", false);
