@@ -30,7 +30,11 @@ function getNode(appid, nodeid) {
   // Test in ComponentColumnWithHeightIT::shouldPositionItemsCorrectlyAfterScrollingToEnd
   // makes sure the sizing works correctly. The sizing issue should eventually
   // be fixed in the Virtualizer.
-  return until(new Promise((resolve) => resolve(getNodeInternal(appid, nodeid))));
+  return until(new Promise((resolve) => {
+    const fragment = document.createDocumentFragment();
+    fragment.append(getNodeInternal(appid, nodeid));
+    resolve(fragment);
+  }));
 }
 
 /**
