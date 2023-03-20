@@ -11,6 +11,7 @@ import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
 import static com.vaadin.flow.component.textfield.tests.BigDecimalFieldClearValuePage.CLEAR_BUTTON;
+import static com.vaadin.flow.component.textfield.tests.BigDecimalFieldClearValuePage.CLEAR_AND_SET_VALUE_BUTTON;
 
 @TestPath("vaadin-big-decimal-field/clear-value")
 public class BigDecimalFieldClearValueIT extends AbstractComponentIT {
@@ -41,5 +42,12 @@ public class BigDecimalFieldClearValueIT extends AbstractComponentIT {
 
         $("button").id(CLEAR_BUTTON).click();
         Assert.assertEquals("", input.getPropertyString("value"));
+    }
+
+    @Test
+    public void badInput_setInputValue_clearAndSetValue_inputValueIsPresent() {
+        bigDecimalField.sendKeys("--2", Keys.ENTER);
+        $("button").id(CLEAR_AND_SET_VALUE_BUTTON).click();
+        Assert.assertEquals("1234", input.getPropertyString("value"));
     }
 }
