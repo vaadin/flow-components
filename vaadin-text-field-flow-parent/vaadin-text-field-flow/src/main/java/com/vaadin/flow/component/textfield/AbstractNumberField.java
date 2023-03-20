@@ -145,10 +145,10 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
             // The check for value presence guarantees that a non-empty value
             // won't get cleared when setValue(null) and setValue(...) are
             // subsequently called within one round-trip.
-            // That may happen otherwise due to the Flow optimization:
             // Flow only sends the final component value to the client
             // when you update the value multiple times during a round-trip
-            // and the final value is sent in place of the first one.
+            // and the final value is sent in place of the first one, so
+            // `executeJs` can end up invoked after a non-empty value is set.
             getElement()
                     .executeJs("if (!this.value) this._inputElementValue = ''");
             getElement().setProperty("_hasInputValue", false);
