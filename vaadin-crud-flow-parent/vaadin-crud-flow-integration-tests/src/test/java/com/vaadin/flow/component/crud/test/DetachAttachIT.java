@@ -1,5 +1,4 @@
 
-
 package com.vaadin.flow.component.crud.test;
 
 import com.vaadin.flow.component.crud.testbench.CrudElement;

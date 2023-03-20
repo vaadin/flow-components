@@ -1,5 +1,4 @@
 
-
 package com.vaadin.flow.component.combobox.dataview;
 
 import java.util.ArrayList;

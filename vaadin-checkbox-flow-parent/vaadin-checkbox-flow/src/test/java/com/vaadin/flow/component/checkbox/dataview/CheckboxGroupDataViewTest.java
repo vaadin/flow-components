@@ -1,5 +1,4 @@
 
-
 package com.vaadin.flow.component.checkbox.dataview;
 
 import java.util.ArrayList;

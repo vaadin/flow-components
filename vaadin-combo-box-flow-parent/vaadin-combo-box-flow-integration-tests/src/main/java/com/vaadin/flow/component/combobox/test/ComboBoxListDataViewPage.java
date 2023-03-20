@@ -1,5 +1,4 @@
 
-
 package com.vaadin.flow.component.combobox.test;
 
 import java.util.List;

@@ -15,7 +15,6 @@
  *
  */
 
-
 package com.vaadin.flow.component.combobox.test;
 
 import com.github.javafaker.Faker;

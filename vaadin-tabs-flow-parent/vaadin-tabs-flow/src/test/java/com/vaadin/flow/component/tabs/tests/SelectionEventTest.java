@@ -1,5 +1,4 @@
 
-
 package com.vaadin.flow.component.tabs.tests;
 
 import java.util.concurrent.atomic.AtomicReference;

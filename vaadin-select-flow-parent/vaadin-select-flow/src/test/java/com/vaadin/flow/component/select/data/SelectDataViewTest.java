@@ -1,5 +1,4 @@
 
-
 package com.vaadin.flow.component.select.data;
 
 import java.util.ArrayList;

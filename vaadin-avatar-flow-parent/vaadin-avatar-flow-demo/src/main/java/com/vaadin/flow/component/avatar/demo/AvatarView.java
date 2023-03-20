@@ -1,5 +1,4 @@
 
-
 package com.vaadin.flow.component.avatar.demo;
 
 import com.vaadin.flow.component.Text;

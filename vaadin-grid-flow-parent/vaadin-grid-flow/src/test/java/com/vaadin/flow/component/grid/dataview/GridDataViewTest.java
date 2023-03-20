@@ -1,5 +1,4 @@
 
-
 package com.vaadin.flow.component.grid.dataview;
 
 import java.util.ArrayList;

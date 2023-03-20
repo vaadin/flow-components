@@ -1,5 +1,4 @@
 
-
 package com.vaadin.flow.component.combobox.test.dataview;
 
 import static com.vaadin.flow.component.combobox.test.dataview.AbstractItemCountComboBoxPage.DEFAULT_DATA_PROVIDER_SIZE;

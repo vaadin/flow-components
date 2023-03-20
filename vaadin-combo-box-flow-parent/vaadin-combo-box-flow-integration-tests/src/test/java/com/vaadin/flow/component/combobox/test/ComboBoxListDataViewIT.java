@@ -1,5 +1,4 @@
 
-
 package com.vaadin.flow.component.combobox.test;
 
 import static com.vaadin.flow.component.combobox.test.ComboBoxListDataViewPage.AGE_FILTER;

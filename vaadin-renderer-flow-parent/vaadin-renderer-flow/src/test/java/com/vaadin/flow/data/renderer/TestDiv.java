@@ -1,5 +1,4 @@
 
-
 package com.vaadin.flow.data.renderer;
 
 import java.util.Optional;

@@ -12,8 +12,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
 
-
-
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;

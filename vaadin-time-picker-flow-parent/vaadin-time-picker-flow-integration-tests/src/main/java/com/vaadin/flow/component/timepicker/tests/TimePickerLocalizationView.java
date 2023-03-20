@@ -1,5 +1,4 @@
 
-
 package com.vaadin.flow.component.timepicker.tests;
 
 import com.vaadin.flow.component.UI;

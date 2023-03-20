@@ -1,5 +1,4 @@
 
-
 package com.vaadin.flow.component.listbox.test.dataview;
 
 import com.vaadin.flow.component.listbox.ListBox;

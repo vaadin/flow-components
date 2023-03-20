@@ -1,5 +1,4 @@
 
-
 package com.vaadin.flow.component.grid.it;
 
 import org.junit.Test;

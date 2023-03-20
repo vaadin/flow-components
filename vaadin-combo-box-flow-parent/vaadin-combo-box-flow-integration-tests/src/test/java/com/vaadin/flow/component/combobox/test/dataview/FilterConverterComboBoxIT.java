@@ -1,5 +1,4 @@
 
-
 package com.vaadin.flow.component.combobox.test.dataview;
 
 import static com.vaadin.flow.component.combobox.test.dataview.FilterConverterComboBoxPage.DEFINED_COUNT_COMBO_BOX_ID;

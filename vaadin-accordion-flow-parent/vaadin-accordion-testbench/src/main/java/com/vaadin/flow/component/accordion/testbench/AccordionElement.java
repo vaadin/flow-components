@@ -8,8 +8,6 @@
  */
 package com.vaadin.flow.component.accordion.testbench;
 
-
-
 import com.vaadin.testbench.ElementQuery;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;

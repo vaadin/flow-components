@@ -1,5 +1,4 @@
 
-
 package com.vaadin.flow.component.datepicker;
 
 import org.junit.Assert;

@@ -1,5 +1,4 @@
 
-
 package com.vaadin.flow.component.avatar.tests;
 
 import com.vaadin.flow.component.avatar.testbench.AvatarGroupElement;

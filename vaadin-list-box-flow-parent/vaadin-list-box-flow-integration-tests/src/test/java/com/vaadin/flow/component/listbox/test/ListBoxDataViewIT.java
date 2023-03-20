@@ -1,5 +1,4 @@
 
-
 package com.vaadin.flow.component.listbox.test;
 
 import java.util.List;
