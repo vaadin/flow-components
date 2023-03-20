@@ -229,11 +229,10 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
             fireEvent(new ClientValidatedEvent(this, false));
         } else {
             // Restore the input element's value in case it was cleared
-            // in the previous branch which can happen when setValue(null)
+            // in the above branch. That can happen when setValue(null)
             // and setValue(...) are subsequently called within one round-trip
             // and there was bad input.
-            getElement().executeJs("this._inputElementValue = $0",
-                    FORMATTER.apply(this, value));
+            getElement().executeJs("this._inputElementValue = this.value");
         }
     }
 
