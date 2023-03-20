@@ -22,7 +22,7 @@ public class ClearValuePage extends Div {
         NativeButton clearAndSetValueButton = new NativeButton(
                 "Clear and set value", event -> {
                     timePicker.clear();
-                    timePicker.setValue(LocalTime.of(10, 0));
+                    timePicker.setValue(LocalTime.of(12, 0));
                 });
         clearAndSetValueButton.setId(CLEAR_AND_SET_VALUE_BUTTON);
 
