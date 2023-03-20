@@ -19,6 +19,9 @@
 *.java  text
 *.xml   text
 
+# Files that must keep LF endings, even on Windows
+*.sh text eol=lf
+
 # These files are binary and should be left untouched
 # (binary is a macro for -text -diff)
 *.png   binary
