@@ -10,6 +10,7 @@ import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
 import static com.vaadin.flow.component.timepicker.tests.ClearValuePage.CLEAR_BUTTON;
+import static com.vaadin.flow.component.timepicker.tests.ClearValuePage.CLEAR_AND_SET_VALUE_BUTTON;
 
 @TestPath("vaadin-time-picker/clear-value")
 public class ClearValueIT extends AbstractComponentIT {
@@ -37,5 +38,12 @@ public class ClearValueIT extends AbstractComponentIT {
 
         $("button").id(CLEAR_BUTTON).click();
         Assert.assertEquals("", timePicker.getTimePickerInputValue());
+    }
+
+    @Test
+    public void badInput_setInputValue_clearAndSetValue_inputValueIsPresent() {
+        timePicker.sendKeys("INVALID", Keys.ENTER);
+        $("button").id(CLEAR_AND_SET_VALUE_BUTTON).click();
+        Assert.assertEquals("1234", timePicker.getTimePickerInputValue());
     }
 }
