@@ -136,4 +136,4 @@ Run `mvn formatter:format` before pushing your code.
 - Issues that are not component-specific (e.g. requests for new components) or encompass multiple Flow components should be posted in this repository.
 
 ## LICENSE
-For specific module(s), check the LICENSE file under the parent module.
+Commercial Vaadin Developer License version 4
