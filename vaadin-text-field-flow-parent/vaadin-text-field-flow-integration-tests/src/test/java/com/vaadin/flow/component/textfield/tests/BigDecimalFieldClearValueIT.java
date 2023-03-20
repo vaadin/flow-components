@@ -48,6 +48,6 @@ public class BigDecimalFieldClearValueIT extends AbstractComponentIT {
     public void badInput_setInputValue_clearAndSetValue_inputValueIsPresent() {
         bigDecimalField.sendKeys("--2", Keys.ENTER);
         $("button").id(CLEAR_AND_SET_VALUE_BUTTON).click();
-        Assert.assertEquals("1234", input.getPropertyString("value"));
+        Assert.assertEquals("12.34", input.getPropertyString("value"));
     }
 }

@@ -22,7 +22,7 @@ public class BigDecimalFieldClearValuePage extends Div {
         NativeButton clearAndSetValueButton = new NativeButton(
                 "Clear and set value", event -> {
                     bigDecimalField.clear();
-                    bigDecimalField.setValue(BigDecimal.valueOf(1234));
+                    bigDecimalField.setValue(BigDecimal.valueOf(12.34));
                 });
         clearAndSetValueButton.setId(CLEAR_AND_SET_VALUE_BUTTON);
 
