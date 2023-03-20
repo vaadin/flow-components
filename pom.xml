@@ -435,13 +435,19 @@
                         <excludes>
                             <exclude>**/target/**</exclude>
                             <exclude>**/*.xml</exclude>
+                            <exclude>**/*.css</exclude>
                             <exclude>**/*.properties</exclude>
                             <exclude>src/license/**/*</exclude>
                             <exclude>**/*.txt</exclude>
-                            <exclude>scripts/*</exclude>
+                            <exclude>scripts/**</exclude>
+                            <exclude>**/resources/META-INF/**</exclude>
+                            <exclude>**/demo/**</exclude>
                             <exclude>**/tests/**</exclude>
+                            <exclude>**/test/**</exclude>
                             <exclude>**/LICENSE/</exclude>
                             <exclude>**/README.md/</exclude>
+                            <exclude>**/styles/**</exclude>
+                            <exclude>**/frontend/**</exclude>
                         </excludes>
                     </configuration>
                 </plugin>
