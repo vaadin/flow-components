@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.combobox;
 
 import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxListDataView;
@@ -60,6 +61,13 @@ public abstract class ComboBoxBaseTest {
         Assert.assertTrue("ComboBox should support setting a label",
                 HasLabel.class.isAssignableFrom(
                         createComboBox(String.class).getClass()));
+    }
+
+    @Test
+    public void implementsHasAriaLabel() {
+        Assert.assertTrue("ComboBox should support setting aria-label and aria-labelledby",
+            HasAriaLabel.class.isAssignableFrom(
+                createComboBox(String.class).getClass()));
     }
 
     @Test
@@ -331,6 +339,30 @@ public abstract class ComboBoxBaseTest {
                 .checkOldListenersRemovedOnComponentAttachAndDetach(
                         createComboBox(Object.class), 2, 2, new int[] { 1, 3 },
                         new DataCommunicatorTest.MockUI());
+    }
+
+    @Test
+    public void setAriaLabel() {
+        ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
+
+        comboBox.setAriaLabel("aria-label");
+        Assert.assertTrue(comboBox.getAriaLabel().isPresent());
+        Assert.assertEquals("aria-label", comboBox.getAriaLabel().get());
+
+        comboBox.setAriaLabel(null);
+        Assert.assertTrue(comboBox.getAriaLabel().isEmpty());
+    }
+
+    @Test
+    public void setAriaLabelledBy() {
+        ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
+
+        comboBox.setAriaLabelledBy("aria-labelledby");
+        Assert.assertTrue(comboBox.getAriaLabelledBy().isPresent());
+        Assert.assertEquals("aria-labelledby", comboBox.getAriaLabelledBy().get());
+
+        comboBox.setAriaLabelledBy(null);
+        Assert.assertTrue(comboBox.getAriaLabelledBy().isEmpty());
     }
 
     private void fakeClientCommunication(UI ui) {
