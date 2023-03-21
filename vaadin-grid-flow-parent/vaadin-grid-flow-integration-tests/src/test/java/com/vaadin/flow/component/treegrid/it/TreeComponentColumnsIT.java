@@ -94,6 +94,22 @@ public class TreeComponentColumnsIT extends AbstractComponentIT {
         assertCellContains(compThenGrid, 4, 2, "Granddad 1");
     }
 
+    @Test
+    public void treegridComponentRenderer_expandScrollExpand_expectedRowHeights() {
+        var rowHeight = compThenGrid.getRow(1).getSize().getHeight();
+        compThenGrid.expandWithClick(0);
+        compThenGrid.expandWithClick(1);
+        compThenGrid.scrollToRow(104);
+        for (int i = compThenGrid.getFirstVisibleRowIndex()
+                + 1; i < compThenGrid.getLastVisibleRowIndex(); i++) {
+            Assert.assertEquals(
+                    compThenGrid.getRow(i - 1).getRect().y + rowHeight,
+                    compThenGrid.getRow(i).getRect().y, 1);
+            Assert.assertEquals(rowHeight,
+                    compThenGrid.getRow(i).getSize().getHeight());
+        }
+    }
+
     private void assertCellContains(GridElement grid, int rowIndex,
             int colIndex, String expected) {
         Assert.assertThat(grid.getCell(rowIndex, colIndex).getInnerHTML(),
