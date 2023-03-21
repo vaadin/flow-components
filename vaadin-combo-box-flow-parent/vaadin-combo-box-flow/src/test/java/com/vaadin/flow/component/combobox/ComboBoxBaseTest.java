@@ -65,9 +65,10 @@ public abstract class ComboBoxBaseTest {
 
     @Test
     public void implementsHasAriaLabel() {
-        Assert.assertTrue("ComboBox should support setting aria-label and aria-labelledby",
-            HasAriaLabel.class.isAssignableFrom(
-                createComboBox(String.class).getClass()));
+        Assert.assertTrue(
+                "ComboBox should support setting aria-label and aria-labelledby",
+                HasAriaLabel.class.isAssignableFrom(
+                        createComboBox(String.class).getClass()));
     }
 
     @Test
@@ -359,7 +360,8 @@ public abstract class ComboBoxBaseTest {
 
         comboBox.setAriaLabelledBy("aria-labelledby");
         Assert.assertTrue(comboBox.getAriaLabelledBy().isPresent());
-        Assert.assertEquals("aria-labelledby", comboBox.getAriaLabelledBy().get());
+        Assert.assertEquals("aria-labelledby",
+                comboBox.getAriaLabelledBy().get());
 
         comboBox.setAriaLabelledBy(null);
         Assert.assertTrue(comboBox.getAriaLabelledBy().isEmpty());
