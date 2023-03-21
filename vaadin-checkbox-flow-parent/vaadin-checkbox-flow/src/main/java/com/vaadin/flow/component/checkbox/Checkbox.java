@@ -20,6 +20,7 @@ import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
@@ -29,7 +30,10 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.dom.ElementConstants;
 import com.vaadin.flow.dom.PropertyChangeListener;
+
+import java.util.Optional;
 
 /**
  * Checkbox is an input field representing a binary choice.
@@ -44,18 +48,20 @@ import com.vaadin.flow.dom.PropertyChangeListener;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-checkbox")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha3")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/checkbox", version = "24.1.0-alpha1")
+@NpmPackage(value = "@vaadin/checkbox", version = "24.1.0-alpha3")
 @JsModule("@vaadin/checkbox/src/vaadin-checkbox.js")
 public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
-        implements ClickNotifier<Checkbox>, Focusable<Checkbox>, HasLabel,
-        HasSize, HasStyle, HasTooltip {
+        implements ClickNotifier<Checkbox>, Focusable<Checkbox>, HasAriaLabel,
+        HasLabel, HasSize, HasStyle, HasTooltip {
 
     private final Label labelElement;
 
     private static final PropertyChangeListener NO_OP = event -> {
     };
+    private String ariaLabel;
+    private String ariaLabelledBy;
 
     /**
      * Default constructor.
@@ -210,17 +216,39 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
         labelElement.add(component);
     }
 
-    /**
-     * Set the accessibility label of this checkbox.
-     *
-     * @param ariaLabel
-     *            the accessibility label to set
-     * @see <a href=
-     *      "https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Techniques/Using_the_aria-label_attribute"
-     *      >aria-label at MDN</a>
-     */
+    @Override
     public void setAriaLabel(String ariaLabel) {
-        getElement().setAttribute("aria-label", ariaLabel);
+        toggleInputElementAttribute(ElementConstants.ARIA_LABEL_ATTRIBUTE_NAME,
+                ariaLabel);
+        this.ariaLabel = ariaLabel;
+    }
+
+    @Override
+    public Optional<String> getAriaLabel() {
+        return Optional.ofNullable(ariaLabel);
+    }
+
+    @Override
+    public void setAriaLabelledBy(String ariaLabelledBy) {
+        toggleInputElementAttribute(
+                ElementConstants.ARIA_LABELLEDBY_ATTRIBUTE_NAME,
+                ariaLabelledBy);
+        this.ariaLabelledBy = ariaLabelledBy;
+    }
+
+    @Override
+    public Optional<String> getAriaLabelledBy() {
+        return Optional.ofNullable(ariaLabelledBy);
+    }
+
+    private void toggleInputElementAttribute(String attribute, String value) {
+        if (value != null) {
+            getElement().executeJs("this.inputElement.setAttribute($0, $1)",
+                    attribute, value);
+        } else {
+            getElement().executeJs("this.inputElement.removeAttribute($0)",
+                    attribute);
+        }
     }
 
     /**
@@ -296,4 +324,5 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
     boolean isDisabledBoolean() {
         return getElement().getProperty("disabled", false);
     }
+
 }

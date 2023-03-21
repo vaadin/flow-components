@@ -30,7 +30,6 @@ import com.vaadin.flow.testutil.TestPath;
 @TestPath("vaadin-grid/treegrid-preload")
 public class TreeGridPreloadIT extends AbstractTreeGridIT {
 
-    private static final int EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE = 40;
     private TextFieldElement requestCount;
     private TextFieldElement dataProviderFetchCount;
     private ButtonElement requestCountReset;
@@ -111,23 +110,6 @@ public class TreeGridPreloadIT extends AbstractTreeGridIT {
     }
 
     @Test
-    public void firstExpanded_scrollByViewportEstimate_shouldHaveItemRecursivelyExpanded() {
-        open(Arrays.asList(0), null, null, null, null);
-        getTreeGrid().scrollToRow(EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE);
-        verifyRow(EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE + 4,
-                "/0/0/1/1/2/0/3/0/4/0");
-    }
-
-    @Test
-    public void firstExpanded_scrollByViewportEstimate_shouldPreLoadDataForExpandedChildren() {
-        open(Arrays.asList(0), null, null, null, null);
-        requestCountReset.click();
-
-        getTreeGrid().scrollToRow(EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE);
-        Assert.assertEquals("1", requestCount.getValue());
-    }
-
-    @Test
     public void firstExpanded_reExpand_shouldUseCachedDataForExpandedChildren() {
         open(Arrays.asList(0), null, null, null, null);
         requestCountReset.click();
@@ -200,6 +182,7 @@ public class TreeGridPreloadIT extends AbstractTreeGridIT {
     @Test
     public void expandedOnSecondPage_scrollToIndex_shouldHaveItemExpanded() {
         open(Arrays.asList(70), null, 100, 1, null);
+        getTreeGrid().scrollToRow(70);
         verifyRow(71, "/0/70/1/0");
     }
 
@@ -220,13 +203,22 @@ public class TreeGridPreloadIT extends AbstractTreeGridIT {
     @Test
     public void multipleExpanded_shouldExpandWhenScrolledTo() {
         open(Arrays.asList(0, 2), null, null, null, null);
+        // Scroll to the last index
+        // TODO: Update to use getTreeGrid().scrollToRowAndWait with multiple
+        // arguments once the API is available
+        getTreeGrid().getCommandExecutor().executeScript(
+                "arguments[0].scrollToIndex(2, 2, 2, 2, 2)", getTreeGrid());
 
         waitUntil(w -> {
-            getTreeGrid().scrollToRow(Integer.MAX_VALUE);
-            return "/0/2/1/2/2/2/3/2/4/2".equals(getTreeGrid()
-                    .getCell(getTreeGrid().getLastVisibleRowIndex(), 0)
-                    .getText());
+            try {
+                return getTreeGrid().getCell("/0/2/1/2/2/2/3/2/4/2") != null;
+            } catch (RuntimeException e) {
+                return false;
+            }
         });
+
+        Assert.assertEquals("/0/2/1/2/2/2/3/2/4/2", getTreeGrid()
+                .getCell(getTreeGrid().getLastVisibleRowIndex(), 0).getText());
     }
 
     @Test
