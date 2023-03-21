@@ -79,7 +79,7 @@ export function getBodyRowCount(grid: FlowGrid): number {
 /**
  * Returns the content of a cell in the grid body.
  */
-export function getBodyCellContent(grid: FlowGrid, rowIndex: number, columnIndex: number): HTMLElement | null {
+export function getBodyCellContent(grid: Grid, rowIndex: number, columnIndex: number): HTMLElement | null {
   const items = grid.shadowRoot!.querySelector(`#items`)!;
 
   const row = [...items.children].find((row) => (row as any).index === rowIndex);
@@ -99,7 +99,7 @@ export function getBodyCellContent(grid: FlowGrid, rowIndex: number, columnIndex
 /**
  * Returns the text content of a cell in the grid body.
  */
-export function getBodyCellText(grid: FlowGrid, rowIndex: number, columnIndex: number): string | null {
+export function getBodyCellText(grid: Grid, rowIndex: number, columnIndex: number): string | null {
   return getBodyCellContent(grid, rowIndex, columnIndex)?.textContent || null;
 }
 
@@ -115,9 +115,9 @@ export function setRootItems(gridConnector: GridConnector, items: Item[]): void 
 /**
  * Sets child items for the grid connector.
  */
-export function setChildItems(gridConnector: GridConnector, parentKey: string, items: Item[]): void {
-  gridConnector.set(0, items, parentKey);
-  gridConnector.confirmParent(0, parentKey, items.length);
+export function setChildItems(gridConnector: GridConnector, parent: Item, items: Item[]): void {
+  gridConnector.set(0, items, parent.key);
+  gridConnector.confirmParent(0, parent.key, items.length);
 }
 
 /**
