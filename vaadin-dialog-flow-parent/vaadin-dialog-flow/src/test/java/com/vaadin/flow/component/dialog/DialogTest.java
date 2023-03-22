@@ -105,50 +105,35 @@ public class DialogTest {
     }
 
     @Test
-    public void addDialogCloseActionListenerOnClosedDialog_onCloseNotConfigured() {
+    public void addDialogCloseActionListener_dialogClosed_JavaScriptIsScheduled() {
         Dialog dialog = new Dialog();
 
         dialog.addDialogCloseActionListener(event -> {
         });
 
-        assertOnCloseConfigured(false);
+        Assert.assertTrue(flushInvocations().isEmpty());
+
+        dialog.open();
+
+        assertInvocations(10);
     }
 
     @Test
-    public void openDialog_onCloseNotConfigured() {
+    public void addDialogCloseActionListener_dialogOpened_JavaScriptIsScheduled() {
         Dialog dialog = new Dialog();
 
         dialog.open();
 
-        assertOnCloseConfigured(false);
-    }
-
-    @Test
-    public void addDialogCloseActionListener_openDialog_onCloseConfigured() {
-        Dialog dialog = new Dialog();
+        Assert.assertEquals(9, flushInvocations().size());
 
         dialog.addDialogCloseActionListener(event -> {
         });
 
-        dialog.open();
-
-        assertOnCloseConfigured(true);
+        assertInvocations(1);
     }
 
     @Test
-    public void openDialog_addDialogCloseActionListener_onCloseConfigured() {
-        Dialog dialog = new Dialog();
-
-        dialog.open();
-
-        dialog.addDialogCloseActionListener(event -> {
-        });
-
-        assertOnCloseConfigured(true);
-    }
-
-    @Test
-    public void addDialogCloseActionListener_openDialog_removeListener_onCloseNotConfigured() {
+    public void addDialogCloseActionListener_removeListener_dialogIsOpened_noJSAfterReopen() {
         Dialog dialog = new Dialog();
 
         Registration registration = dialog
@@ -159,11 +144,15 @@ public class DialogTest {
 
         registration.remove();
 
-        assertOnCloseConfigured(false);
+        dialog.close();
+
+        dialog.open();
+
+        Assert.assertEquals(9, flushInvocations().size());
     }
 
     @Test
-    public void addDialogCloseActionListener_removeListener_openDialog_onCloseNotConfigured() {
+    public void addDialogCloseActionListener_removeListener_dialogIsClosed_noJSAfterReopen() {
         Dialog dialog = new Dialog();
 
         Registration registration = dialog
@@ -174,11 +163,11 @@ public class DialogTest {
 
         dialog.open();
 
-        assertOnCloseConfigured(false);
+        Assert.assertEquals(9, flushInvocations().size());
     }
 
     @Test
-    public void addDialogCloseActionListener_openDialog_closeAndReopen_onCloseConfigured() {
+    public void addDialogCloseActionListener_dialogIsClosing_JavaScriptIsRescheduled() {
         Dialog dialog = new Dialog();
 
         dialog.addDialogCloseActionListener(event -> {
@@ -192,11 +181,11 @@ public class DialogTest {
 
         dialog.open();
 
-        assertOnCloseConfigured(true);
+        assertInvocations(1);
     }
 
     @Test
-    public void addTwoDialogCloseActionListeners_openDialog_onCloseConfigured() {
+    public void addDialogCloseActionListener_dialogClosed_severalListenersAreAdded_onlyOneJavaScriptIsScheduled() {
         Dialog dialog = new Dialog();
 
         dialog.addDialogCloseActionListener(event -> {
@@ -207,11 +196,11 @@ public class DialogTest {
 
         dialog.open();
 
-        assertOnCloseConfigured(true);
+        assertInvocations(10);
     }
 
     @Test
-    public void addTwoDialogCloseActionListeners_openDialog_removeOneListener_onCloseConfigured() {
+    public void addDialogCloseActionListener_dialogClosed_twoListenersAreAddedAndOneRemoved_onlyOneJavaScriptIsScheduled() {
         Dialog dialog = new Dialog();
 
         dialog.addDialogCloseActionListener(event -> {
@@ -225,11 +214,35 @@ public class DialogTest {
 
         registration.remove();
 
-        assertOnCloseConfigured(true);
+        assertInvocations(10);
     }
 
     @Test
-    public void addTwoDialogCloseActionListeners_openDialog_closeDialog_removeOneListener_reopenDialog_onCloseConfigured() {
+    public void addDialogCloseActionListener_dialogClosed_twoListenersAreAddedAndOneIsRemoved_oneJavaScriptIsScheduledAfterReopen() {
+        Dialog dialog = new Dialog();
+
+        dialog.addDialogCloseActionListener(event -> {
+        });
+
+        Registration registration = dialog
+                .addDialogCloseActionListener(event -> {
+                });
+
+        dialog.open();
+
+        registration.remove();
+
+        flushInvocations();
+
+        dialog.close();
+
+        dialog.open();
+
+        assertInvocations(1);
+    }
+
+    @Test
+    public void addDialogCloseActionListener_dialogClosed_twoListenersAreAddedAndOneIsRemovedAfterClose_oneJavaScriptIsScheduledAfterReopen() {
         Dialog dialog = new Dialog();
 
         dialog.addDialogCloseActionListener(event -> {
@@ -249,7 +262,7 @@ public class DialogTest {
 
         dialog.open();
 
-        assertOnCloseConfigured(true);
+        assertInvocations(1);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -324,14 +337,17 @@ public class DialogTest {
         dialog.open();
         // there are a 6 invocations pending after opening a dialog (???) clear
         // those first
-        flushInvocations();
+        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
+        ui.getInternals().dumpPendingJavaScriptInvocations();
 
         // adding a shortcut with listenOn(dialog) makes flow pass events from
         // overlay to dialog so that shortcuts inside dialog work
         Shortcuts.addShortcutListener(dialog, event -> {
         }, Key.KEY_A).listenOn(dialog);
+        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
 
-        final List<PendingJavaScriptInvocation> pendingJavaScriptInvocations = flushInvocations();
+        final List<PendingJavaScriptInvocation> pendingJavaScriptInvocations = ui
+                .getInternals().dumpPendingJavaScriptInvocations();
         Assert.assertEquals(
                 "Shortcut transferring invocation should be pending", 1,
                 pendingJavaScriptInvocations.size());
@@ -349,14 +365,10 @@ public class DialogTest {
         return ui.getInternals().dumpPendingJavaScriptInvocations();
     }
 
-    private void assertOnCloseConfigured(boolean configured) {
+    private void assertInvocations(int expectedInvocations) {
         List<PendingJavaScriptInvocation> invocations = flushInvocations();
-        long onCloseConfiguredCount = invocations
-                .stream().filter(invocation -> invocation.getInvocation()
-                        .getExpression().startsWith("var f = function(e)"))
-                .count();
-        int expectedCount = configured ? 1 : 0;
-        Assert.assertEquals(expectedCount, onCloseConfiguredCount);
+
+        Assert.assertEquals(expectedInvocations, invocations.size());
     }
 
     @Test
