@@ -368,15 +368,20 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
 
               // Ensure grid isn't in loading state when the callback executes
               ensureSubCacheQueue = [];
+              // Resolve the callback from cache
               callback(cache[parentUniqueKey][page], cache[parentUniqueKey].size);
 
-              // Update effective size
-              updateGridEffectiveSize();
-              // Prevent sub-caches from being created (& data requests sent) for items
-              // that may no longer be visible
-              ensureSubCacheQueue = [];
-              // Request a content update manually
-              grid.requestContentUpdate();
+              // Check if there are any pending requests for expanded parents that could be resolved
+              // synchronously from cache
+              const resolvableParentRequest = ensureSubCacheQueue.find(({ itemkey }) => cache[itemkey]);
+              if (resolvableParentRequest) {
+                // Found a resolvable parent request, remove all pending requests as fresh ones will be
+                // created once the callback executes
+                ensureSubCacheQueue = [];
+
+                // Synchronously make a page load request for the resolvable parent request
+                resolvableParentRequest.cache.doEnsureSubCacheForScaledIndex(resolvableParentRequest.scaledIndex);
+              }
             } else {
               treePageCallbacks[parentUniqueKey][page] = callback;
 
