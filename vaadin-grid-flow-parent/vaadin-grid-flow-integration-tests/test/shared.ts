@@ -6,6 +6,7 @@ import type { Grid } from '@vaadin/grid';
 import type {} from '@web/test-runner-mocha';
 
 export type GridConnector = {
+  updateFlatData: (updatedItems: Item[]) => void;
   initLazy: (grid: Grid) => void;
   updateSize: (size: number) => void;
   set: (index: number, items: any[], parentKey?: string) => void;
