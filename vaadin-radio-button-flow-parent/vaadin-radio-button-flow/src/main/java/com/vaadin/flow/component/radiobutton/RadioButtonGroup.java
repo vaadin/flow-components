@@ -73,9 +73,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-radio-group")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/radio-group", version = "24.0.0")
+@NpmPackage(value = "@vaadin/radio-group", version = "24.0.1")
 @JsModule("@vaadin/radio-group/src/vaadin-radio-group.js")
 public class RadioButtonGroup<T>
         extends AbstractSinglePropertyField<RadioButtonGroup<T>, T>
