@@ -24,7 +24,6 @@ public class CustomSelectionModelTest {
         }
 
         class CustomMultiSelectionModel<T> extends AbstractGridMultiSelectionModel<T> {
-
             public CustomMultiSelectionModel(CustomGrid<T> grid) {
                 super(grid);
             }
