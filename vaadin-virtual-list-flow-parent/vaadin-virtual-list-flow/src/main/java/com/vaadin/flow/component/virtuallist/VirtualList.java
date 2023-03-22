@@ -73,7 +73,7 @@ import elemental.json.JsonValue;
 @JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 @NpmPackage(value = "@vaadin/virtual-list", version = "23.3.9")
 @NpmPackage(value = "@vaadin/vaadin-virtual-list", version = "23.3.9")
-@JsModule("@vaadin/virtual-list/vaadin-virtual-list.js")
+@JsModule("@vaadin/virtual-list/src/vaadin-virtual-list.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./virtualListConnector.js")
 public class VirtualList<T> extends Component implements HasDataProvider<T>,

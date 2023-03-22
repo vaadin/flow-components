@@ -38,7 +38,7 @@ import java.util.Locale;
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/scroller", version = "23.3.9")
 @NpmPackage(value = "@vaadin/vaadin-ordered-layout", version = "23.3.9")
-@JsModule("@vaadin/scroller/vaadin-scroller.js")
+@JsModule("@vaadin/scroller/src/vaadin-scroller.js")
 public class Scroller extends Component implements HasSize, HasStyle {
 
     private static final String SCROLL_DIRECTION_PROPERTY = "scrollDirection";

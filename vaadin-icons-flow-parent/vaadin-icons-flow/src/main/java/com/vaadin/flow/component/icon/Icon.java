@@ -39,7 +39,7 @@ import com.vaadin.flow.dom.ElementConstants;
 @JsModule("@vaadin/icons/vaadin-iconset.js")
 @NpmPackage(value = "@vaadin/icon", version = "23.3.9")
 @NpmPackage(value = "@vaadin/vaadin-icon", version = "23.3.9")
-@JsModule("@vaadin/icon/vaadin-icon.js")
+@JsModule("@vaadin/icon/src/vaadin-icon.js")
 public class Icon extends Component
         implements HasStyle, ClickNotifier<Icon>, HasTooltip {
 
