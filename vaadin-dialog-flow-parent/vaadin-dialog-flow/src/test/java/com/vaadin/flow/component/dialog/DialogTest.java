@@ -107,107 +107,148 @@ public class DialogTest {
     @Test
     public void addDialogCloseActionListenerOnClosedDialog_onCloseNotConfigured() {
         Dialog dialog = new Dialog();
+
         dialog.addDialogCloseActionListener(event -> {
         });
+
         assertOnCloseConfigured(false);
     }
 
     @Test
     public void openDialog_onCloseNotConfigured() {
         Dialog dialog = new Dialog();
+
         dialog.open();
+
         assertOnCloseConfigured(false);
     }
 
     @Test
     public void addDialogCloseActionListener_openDialog_onCloseConfigured() {
         Dialog dialog = new Dialog();
+
         dialog.addDialogCloseActionListener(event -> {
         });
+
         dialog.open();
+
         assertOnCloseConfigured(true);
     }
 
     @Test
     public void openDialog_addDialogCloseActionListener_onCloseConfigured() {
         Dialog dialog = new Dialog();
+
         dialog.open();
+
         dialog.addDialogCloseActionListener(event -> {
         });
+
         assertOnCloseConfigured(true);
     }
 
     @Test
     public void addDialogCloseActionListener_openDialog_removeListener_onCloseNotConfigured() {
         Dialog dialog = new Dialog();
+
         Registration registration = dialog
                 .addDialogCloseActionListener(event -> {
                 });
+
         dialog.open();
+
         registration.remove();
+
         assertOnCloseConfigured(false);
     }
 
     @Test
     public void addDialogCloseActionListener_removeListener_openDialog_onCloseNotConfigured() {
         Dialog dialog = new Dialog();
+
         Registration registration = dialog
                 .addDialogCloseActionListener(event -> {
                 });
+
         registration.remove();
+
         dialog.open();
+
         assertOnCloseConfigured(false);
     }
 
     @Test
     public void addDialogCloseActionListener_openDialog_closeAndReopen_onCloseConfigured() {
         Dialog dialog = new Dialog();
+
         dialog.addDialogCloseActionListener(event -> {
         });
+
         dialog.open();
+
         flushInvocations();
+
         dialog.close();
+
         dialog.open();
+
         assertOnCloseConfigured(true);
     }
 
     @Test
     public void addTwoDialogCloseActionListeners_openDialog_onCloseConfigured() {
         Dialog dialog = new Dialog();
+
         dialog.addDialogCloseActionListener(event -> {
         });
+
         dialog.addDialogCloseActionListener(event -> {
         });
+
         dialog.open();
+
         assertOnCloseConfigured(true);
     }
 
     @Test
     public void addTwoDialogCloseActionListeners_openDialog_removeOneListener_onCloseConfigured() {
         Dialog dialog = new Dialog();
+
         dialog.addDialogCloseActionListener(event -> {
         });
+
         Registration registration = dialog
                 .addDialogCloseActionListener(event -> {
                 });
+
         dialog.open();
+
         registration.remove();
+
         assertOnCloseConfigured(true);
     }
 
     @Test
     public void addTwoDialogCloseActionListeners_openDialog_closeDialog_removeOneListener_reopenDialog_onCloseConfigured() {
         Dialog dialog = new Dialog();
+
         dialog.addDialogCloseActionListener(event -> {
         });
+
         Registration registration = dialog
                 .addDialogCloseActionListener(event -> {
                 });
+
         dialog.open();
+
         flushInvocations();
+
         dialog.close();
+
         registration.remove();
+
         dialog.open();
+
         assertOnCloseConfigured(true);
     }
 
