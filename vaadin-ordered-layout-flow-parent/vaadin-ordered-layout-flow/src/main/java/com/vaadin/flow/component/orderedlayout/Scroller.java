@@ -38,7 +38,7 @@ import java.util.Locale;
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/scroller", version = "24.0.0")
-@JsModule("@vaadin/scroller/vaadin-scroller.js")
+@JsModule("@vaadin/scroller/src/vaadin-scroller.js")
 public class Scroller extends Component
         implements HasSize, HasStyle, HasThemeVariant<ScrollerVariant> {
 
