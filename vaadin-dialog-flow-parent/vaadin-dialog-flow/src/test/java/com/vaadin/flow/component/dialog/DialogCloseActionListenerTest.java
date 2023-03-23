@@ -46,7 +46,7 @@ public class DialogCloseActionListenerTest {
     }
 
     @Test
-    public void addDialogCloseActionListenerOnClosedDialog_onCloseNotConfigured() {
+    public void addDialogCloseActionListener_onCloseNotConfigured() {
         Dialog dialog = new Dialog();
 
         dialog.addDialogCloseActionListener(event -> {
