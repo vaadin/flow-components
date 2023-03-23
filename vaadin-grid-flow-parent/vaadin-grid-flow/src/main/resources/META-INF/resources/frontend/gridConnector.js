@@ -254,6 +254,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           const pendingFetch = ensureSubCacheQueue.shift();
           if (pendingFetch) {
             pendingFetch.cache.doEnsureSubCacheForScaledIndex(pendingFetch.scaledIndex);
+            return true;
           }
           return false;
         });
