@@ -2414,10 +2414,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *
      * Use this method only when having a data provider with filter that cannot
      * be transformed to {@code DataProvider<T, Void>}.
-     *
-     * @deprecated use instead one of the {@code setItems} methods which provide
-     *             access to either {@link GridListDataView} or
-     *             {@link GridLazyDataView}
      */
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         Objects.requireNonNull(dataProvider, "data provider cannot be null");
@@ -4375,6 +4371,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            zero based index of the item to scroll to in the current view.
      */
     public void scrollToIndex(int rowIndex) {
+        // Preload the items for the given index
+        setRequestedRange(rowIndex, getPageSize());
+
         getElement().callJsFunction("scrollToIndex", rowIndex);
     }
 
