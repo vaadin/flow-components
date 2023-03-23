@@ -1,6 +1,7 @@
 import { expect, fixtureSync, nextFrame } from '@open-wc/testing';
 import { init, getBodyCellContent, setRootItems } from './shared.js';
 import type { FlowGrid } from './shared.js';
+import sinon from 'sinon';
 
 describe('grid connector - selection', () => {
   let grid: FlowGrid;
@@ -92,6 +93,17 @@ describe('grid connector - selection', () => {
       getBodyCellContent(grid, 0, 0)!.click();
       setRootItems(grid.$connector, [{ key: '0', name: 'foo' }]);
       expect(grid.selectedItems).to.be.empty;
+    });
+
+    it('should avoid another re-render on items update', async () => {
+      const items = [{ key: '0', name: 'foo', selected: true}];
+      setRootItems(grid.$connector, items);
+      await nextFrame();
+
+      const spy = sinon.spy(grid, '__updateVisibleRows');
+      grid.$connector.updateFlatData(items);
+      // This number may come down from further optimization
+      expect(spy.callCount).to.equal(1);
     });
   });
 
