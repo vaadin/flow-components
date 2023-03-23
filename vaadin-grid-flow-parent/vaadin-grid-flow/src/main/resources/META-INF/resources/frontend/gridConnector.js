@@ -251,29 +251,10 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
         });
 
         grid.$connector.flushEnsureSubCache = tryCatchWrapper(function () {
-          let pendingFetch = ensureSubCacheQueue.splice(0, 1)[0];
-          let itemkey = pendingFetch.itemkey;
-
-          const visibleRows = grid._getVisibleRows();
-          let start = visibleRows[0].index;
-          let end = visibleRows[visibleRows.length - 1].index;
-
-          let buffer = end - start;
-          let firstNeededIndex = Math.max(0, start - buffer);
-          let lastNeededIndex = Math.min(end + buffer, grid._effectiveSize);
-
-          // only fetch if given item is still in visible range
-          for (let index = firstNeededIndex; index <= lastNeededIndex; index++) {
-            let item = grid._cache.getItemForIndex(index);
-
-            if (grid.getItemId(item) === itemkey) {
-              if (grid._isExpanded(item)) {
-                pendingFetch.cache.doEnsureSubCacheForScaledIndex(pendingFetch.scaledIndex);
-                return true;
-              } else {
-                break;
-              }
-            }
+          const pendingFetch = ensureSubCacheQueue.shift();
+          if (pendingFetch) {
+            pendingFetch.cache.doEnsureSubCacheForScaledIndex(pendingFetch.scaledIndex);
+            return true;
           }
           return false;
         });
@@ -554,10 +535,9 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           }
           grid.detailsOpenedItems = detailsOpenedItems;
           if (updatedSelectedItem) {
-            // IE 11 Object doesn't support method values
-            grid.selectedItems = Object.keys(selectedKeys).map(function (e) {
-              return selectedKeys[e];
-            });
+            // Replace the objects in the grid.selectedItems array without replacing the array
+            // itself in order to avoid an unnecessary re-render of the grid.
+            grid.selectedItems.splice(0, grid.selectedItems.length, ...Object.values(selectedKeys));
           }
         };
 
