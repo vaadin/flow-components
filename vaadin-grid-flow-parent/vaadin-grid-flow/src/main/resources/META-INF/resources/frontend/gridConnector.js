@@ -535,10 +535,9 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           }
           grid.detailsOpenedItems = detailsOpenedItems;
           if (updatedSelectedItem) {
-            // IE 11 Object doesn't support method values
-            grid.selectedItems = Object.keys(selectedKeys).map(function (e) {
-              return selectedKeys[e];
-            });
+            // Replace the objects in the grid.selectedItems array without replacing the array
+            // itself in order to avoid an unnecessary re-render of the grid.
+            grid.selectedItems.splice(0, grid.selectedItems.length, ...Object.values(selectedKeys));
           }
         };
 
