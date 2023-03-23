@@ -590,7 +590,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
             // and the final value is sent in place of the first one, so
             // `executeJs` can end up invoked after a non-empty value is set.
             getElement()
-                    .executeJs("if (!this.value) this._inputElementValue = ''");
+                    .executeJs("if (!this.value) this.inputElement.value = ''");
             getElement().setProperty("_hasInputValue", false);
             fireEvent(new ClientValidatedEvent(this, false, true));
         }
