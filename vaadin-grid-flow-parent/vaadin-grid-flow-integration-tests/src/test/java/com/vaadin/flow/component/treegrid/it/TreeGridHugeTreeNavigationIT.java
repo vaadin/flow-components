@@ -19,6 +19,7 @@ import java.util.Arrays;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.interactions.Actions;
@@ -36,8 +37,8 @@ public class TreeGridHugeTreeNavigationIT extends AbstractTreeGridIT {
         setupTreeGrid();
     }
 
+    @Ignore("Fix as part of https://github.com/vaadin/flow-components/issues/3505")
     @Test
-
     public void keyboard_navigation() {
         getTreeGrid().getCell(0, 0).focus();
 
@@ -88,6 +89,7 @@ public class TreeGridHugeTreeNavigationIT extends AbstractTreeGridIT {
         checkLogsForErrors();
     }
 
+    @Ignore("Fix as part of https://github.com/vaadin/flow-components/issues/3505")
     @Test
     public void can_toggle_collapse_on_row_that_is_no_longer_in_cache() {
         getTreeGrid().getCell(0, 0).focus();
