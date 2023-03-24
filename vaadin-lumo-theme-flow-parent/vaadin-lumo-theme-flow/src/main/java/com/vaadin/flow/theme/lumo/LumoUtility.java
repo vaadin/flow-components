@@ -28,7 +28,6 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  */
 @NpmPackage(value = "@vaadin/vaadin-lumo-styles", version = "24.1.0-alpha4")
 @JsModule("@vaadin/vaadin-lumo-styles/utility-global.js")
-@JsModule("./lumo-utility.ts")
 public final class LumoUtility {
 
     // The values in the inner classes are wrapped with this method in order to
