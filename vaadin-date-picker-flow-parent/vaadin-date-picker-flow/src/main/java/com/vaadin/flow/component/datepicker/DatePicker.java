@@ -81,9 +81,9 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-date-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha3")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha5")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/date-picker", version = "24.1.0-alpha3")
+@NpmPackage(value = "@vaadin/date-picker", version = "24.1.0-alpha5")
 @JsModule("@vaadin/date-picker/src/vaadin-date-picker.js")
 @JsModule("./datepickerConnector.js")
 @NpmPackage(value = "date-fns", version = "2.29.3")
@@ -546,11 +546,19 @@ public class DatePicker
 
         super.setValue(value);
 
+        // Clear the input element from possible bad input.
         if (Objects.equals(oldValue, getEmptyValue())
                 && Objects.equals(value, getEmptyValue())
                 && isInputValuePresent()) {
-            // Clear the input element from possible bad input.
-            getElement().executeJs("this.inputElement.value = ''");
+            // The check for value presence guarantees that a non-empty value
+            // won't get cleared when setValue(null) and setValue(...) are
+            // subsequently called within one round-trip.
+            // Flow only sends the final component value to the client
+            // when you update the value multiple times during a round-trip
+            // and the final value is sent in place of the first one, so
+            // `executeJs` can end up invoked after a non-empty value is set.
+            getElement()
+                    .executeJs("if (!this.value) this._inputElementValue = ''");
             getElement().setProperty("_hasInputValue", false);
             fireEvent(new ClientValidatedEvent(this, false));
         }
