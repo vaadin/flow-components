@@ -50,7 +50,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-big-decimal-field")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("./vaadin-big-decimal-field.js")
 public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
