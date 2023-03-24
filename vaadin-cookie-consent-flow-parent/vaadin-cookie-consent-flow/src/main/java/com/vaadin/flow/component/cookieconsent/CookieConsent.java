@@ -34,9 +34,9 @@ import com.vaadin.flow.dom.Style;
  */
 @SuppressWarnings("serial")
 @Tag("vaadin-cookie-consent")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha3")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha5")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/cookie-consent", version = "24.1.0-alpha3")
+@NpmPackage(value = "@vaadin/cookie-consent", version = "24.1.0-alpha5")
 @JsModule("@vaadin/cookie-consent/src/vaadin-cookie-consent.js")
 @JsModule("./cookieConsentConnector.js")
 public class CookieConsent extends Component implements HasStyle {
