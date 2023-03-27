@@ -362,15 +362,11 @@ public class Button extends Component
      * if server-side handling takes some time.
      */
     private void initDisableOnClick() {
-        if(!disableInited) {
+        if (!disableInited) {
             getElement().executeJs(
                     "window.Vaadin.Flow.button.initDisableOnClick($0)");
             disableInited = true;
         }
-//        var disableEvent = function () {"
-//                + "if($0.getAttribute('disableOnClick')){"
-//                + " $0.setAttribute('disabled', 'true');" + "}" + "};"
-//                + "$0.addEventListener('click', disableEvent)");
     }
 
     private void updateIconSlot() {
