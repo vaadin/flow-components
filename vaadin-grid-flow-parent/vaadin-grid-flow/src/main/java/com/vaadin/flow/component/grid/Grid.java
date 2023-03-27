@@ -205,10 +205,10 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha4")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha5")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/grid", version = "24.1.0-alpha4")
-@NpmPackage(value = "@vaadin/tooltip", version = "24.1.0-alpha4")
+@NpmPackage(value = "@vaadin/grid", version = "24.1.0-alpha5")
+@NpmPackage(value = "@vaadin/tooltip", version = "24.1.0-alpha5")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -433,7 +433,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-column")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha4")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha5")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class Column<T> extends AbstractColumn<Column<T>> {
 
@@ -4424,6 +4424,73 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public NestedNullBehavior getNestedNullBehavior() {
         return nestedNullBehavior;
+    }
+
+    /**
+     * Sets the mode for rendering columns in the grid.
+     *
+     * <p>
+     * <b>eager</b> (default): All columns are rendered upfront, regardless of
+     * their visibility within the viewport. This mode should generally be
+     * preferred, as it avoids the limitations imposed by the "lazy" mode. Use
+     * this mode unless the grid has a large number of columns and performance
+     * outweighs the limitations in priority.
+     * </p>
+     * <p>
+     * <b>lazy</b>: Optimizes the rendering of cells when there are multiple
+     * columns in the grid by virtualizing horizontal scrolling. In this mode,
+     * body cells are rendered only when their corresponding columns are inside
+     * the visible viewport.
+     * </p>
+     * <p>
+     * Using "lazy" rendering should be used only if you're dealing with a large
+     * number of columns and performance is your highest priority. For most use
+     * cases, the default "eager" mode is recommended due to the limitations
+     * imposed by the "lazy" mode.
+     * </p>
+     * <p>
+     * When using the "lazy" mode, keep the following limitations in mind:
+     * </p>
+     * <ul>
+     * <li>Row Height: When only a number of columns are visible at once, the
+     * height of a row can only be that of the highest cell currently visible on
+     * that row. Make sure each cell on a single row has the same height as all
+     * other cells on that row. If row cells have different heights, users may
+     * experience jumpiness when scrolling the grid horizontally as lazily
+     * rendered cells with different heights are scrolled into view.</li>
+     * <li>Auto-width Columns: For the columns that are initially outside the
+     * visible viewport but still use auto-width, only the header content is
+     * taken into account when calculating the column width because the body
+     * cells of the columns outside the viewport are not initially
+     * rendered.</li>
+     * <li>Screen Reader Compatibility: Screen readers may not be able to
+     * associate the focused cells with the correct headers when only a subset
+     * of the body cells on a row is rendered.</li>
+     * <li>Keyboard Navigation: Tabbing through focusable elements inside the
+     * grid body may not work as expected because some of the columns that would
+     * include focusable elements in the body cells may be outside the visible
+     * viewport and thus not rendered.</li>
+     * </ul>
+     *
+     * @param columnRendering
+     *            the column rendering mode to use
+     * @see ColumnRendering
+     */
+    public void setColumnRendering(ColumnRendering columnRendering) {
+        getElement().setProperty("columnRendering",
+                columnRendering == null
+                        ? ColumnRendering.EAGER.getPropertyValue()
+                        : columnRendering.getPropertyValue());
+    }
+
+    /**
+     * Gets the current column rendering mode.
+     *
+     * @return the current column rendering mode
+     */
+    public ColumnRendering getColumnRendering() {
+        return ColumnRendering
+                .fromPropertyValue(getElement().getProperty("columnRendering"));
     }
 
     private void onInMemoryFilterOrSortingChange(
