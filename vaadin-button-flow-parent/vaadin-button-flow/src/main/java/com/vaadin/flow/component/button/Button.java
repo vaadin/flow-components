@@ -20,6 +20,7 @@ import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasEnabled;
@@ -66,7 +67,6 @@ public class Button extends Component
     private Component iconComponent;
     private boolean iconAfterText;
     private boolean disableOnClick = false;
-    private boolean disableInited = false;
 
     // Register immediately as first listener
     private Registration disableListener = addClickListener(
@@ -362,11 +362,8 @@ public class Button extends Component
      * if server-side handling takes some time.
      */
     private void initDisableOnClick() {
-        if (!disableInited) {
-            getElement().executeJs(
-                    "window.Vaadin.Flow.button.initDisableOnClick($0)");
-            disableInited = true;
-        }
+        getElement().executeJs(
+                "window.Vaadin.Flow.button.initDisableOnClick($0)");
     }
 
     private void updateIconSlot() {
@@ -470,5 +467,4 @@ public class Button extends Component
             initDisableOnClick();
         }
     }
-
 }
