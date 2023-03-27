@@ -11,7 +11,7 @@ public abstract class AbstractComponentIT
 
     @Override
     protected void updateHeadlessChromeOptions(ChromeOptions options) {
-        // Force legacy Chrome headless mode for the time being,
+        // Force the legacy Chrome headless mode for the time being,
         // as `--headless=new` has an issue that doesn't allow
         // tests to adjust the browser window size with
         // `getDriver().manage().window().setSize(...)`.
