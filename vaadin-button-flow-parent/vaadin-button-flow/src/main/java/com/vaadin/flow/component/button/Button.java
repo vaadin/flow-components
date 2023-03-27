@@ -57,6 +57,7 @@ import java.util.stream.Stream;
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/button", version = "24.1.0-alpha5")
 @JsModule("@vaadin/button/src/vaadin-button.js")
+@JsModule("./buttonFunctions.js")
 public class Button extends Component
         implements ClickNotifier<Button>, Focusable<Button>, HasAriaLabel,
         HasEnabled, HasPrefix, HasSize, HasStyle, HasSuffix, HasText,
@@ -65,6 +66,7 @@ public class Button extends Component
     private Component iconComponent;
     private boolean iconAfterText;
     private boolean disableOnClick = false;
+    private boolean disableInited = false;
 
     // Register immediately as first listener
     private Registration disableListener = addClickListener(
@@ -340,6 +342,7 @@ public class Button extends Component
         this.disableOnClick = disableOnClick;
         if (disableOnClick) {
             getElement().setAttribute("disableOnClick", "true");
+            initDisableOnClick();
         } else {
             getElement().removeAttribute("disableOnClick");
         }
@@ -359,10 +362,15 @@ public class Button extends Component
      * if server-side handling takes some time.
      */
     private void initDisableOnClick() {
-        getElement().executeJs("var disableEvent = function () {"
-                + "if($0.getAttribute('disableOnClick')){"
-                + " $0.setAttribute('disabled', 'true');" + "}" + "};"
-                + "$0.addEventListener('click', disableEvent)");
+        if(!disableInited) {
+            getElement().executeJs(
+                    "window.Vaadin.Flow.button.initDisableOnClick($0)");
+            disableInited = true;
+        }
+//        var disableEvent = function () {"
+//                + "if($0.getAttribute('disableOnClick')){"
+//                + " $0.setAttribute('disabled', 'true');" + "}" + "};"
+//                + "$0.addEventListener('click', disableEvent)");
     }
 
     private void updateIconSlot() {
@@ -462,7 +470,9 @@ public class Button extends Component
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
-        initDisableOnClick();
+        if (isDisableOnClick()) {
+            initDisableOnClick();
+        }
     }
 
 }
