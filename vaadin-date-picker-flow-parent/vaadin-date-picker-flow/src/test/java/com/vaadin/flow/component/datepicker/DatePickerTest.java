@@ -19,6 +19,7 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
+import com.vaadin.flow.component.HasAriaLabel;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -280,6 +281,38 @@ public class DatePickerTest {
     public void implementsHasTooltip() {
         DatePicker picker = new DatePicker();
         Assert.assertTrue(picker instanceof HasTooltip);
+    }
+
+    @Test
+    public void implementHasAriaLabel() {
+        Assert.assertTrue(
+                "Date picker should support aria-label and aria-labelledby",
+                HasAriaLabel.class.isAssignableFrom(DatePicker.class));
+    }
+
+    @Test
+    public void setAriaLabel() {
+        DatePicker datePicker = new DatePicker();
+
+        datePicker.setAriaLabel("aria-label");
+        Assert.assertTrue(datePicker.getAriaLabel().isPresent());
+        Assert.assertEquals("aria-label", datePicker.getAriaLabel().get());
+
+        datePicker.setAriaLabel(null);
+        Assert.assertTrue(datePicker.getAriaLabel().isEmpty());
+    }
+
+    @Test
+    public void setAriaLabelledBy() {
+        DatePicker datePicker = new DatePicker();
+
+        datePicker.setAriaLabelledBy("aria-labelledby");
+        Assert.assertTrue(datePicker.getAriaLabelledBy().isPresent());
+        Assert.assertEquals("aria-labelledby",
+                datePicker.getAriaLabelledBy().get());
+
+        datePicker.setAriaLabelledBy(null);
+        Assert.assertTrue(datePicker.getAriaLabelledBy().isEmpty());
     }
 
     @Test
