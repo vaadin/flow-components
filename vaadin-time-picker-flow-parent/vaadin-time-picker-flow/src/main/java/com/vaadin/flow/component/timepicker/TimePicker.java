@@ -20,6 +20,7 @@ import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.AbstractSinglePropertyField;
@@ -27,6 +28,7 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
@@ -74,9 +76,9 @@ import com.vaadin.flow.shared.Registration;
 @JsModule("./vaadin-time-picker/timepickerConnector.js")
 public class TimePicker
         extends AbstractSinglePropertyField<TimePicker, LocalTime>
-        implements Focusable<TimePicker>, HasAllowedCharPattern, HasAutoOpen,
-        HasClearButton, HasClientValidation, HasHelper, HasLabel, HasPrefix,
-        HasOverlayClassName, HasSize, HasStyle, HasTooltip,
+        implements Focusable<TimePicker>, HasAllowedCharPattern, HasAriaLabel,
+        HasAutoOpen, HasClearButton, HasClientValidation, HasHelper, HasLabel,
+        HasPrefix, HasOverlayClassName, HasSize, HasStyle, HasTooltip,
         HasThemeVariant<TimePickerVariant>, HasValidationProperties,
         HasValidator<LocalTime> {
 
@@ -278,6 +280,27 @@ public class TimePicker
      */
     public String getLabel() {
         return getElement().getProperty("label");
+    }
+
+    @Override
+    public void setAriaLabel(String ariaLabel) {
+        getElement().setProperty("accessibleName", ariaLabel);
+    }
+
+    @Override
+    public Optional<String> getAriaLabel() {
+        return Optional.ofNullable(getElement().getProperty("accessibleName"));
+    }
+
+    @Override
+    public void setAriaLabelledBy(String labelledBy) {
+        getElement().setProperty("accessibleNameRef", labelledBy);
+    }
+
+    @Override
+    public Optional<String> getAriaLabelledBy() {
+        return Optional
+                .ofNullable(getElement().getProperty("accessibleNameRef"));
     }
 
     @Override
