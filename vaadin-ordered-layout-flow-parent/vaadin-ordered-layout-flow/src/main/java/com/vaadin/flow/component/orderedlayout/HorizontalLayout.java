@@ -56,8 +56,8 @@ public class HorizontalLayout extends Component implements ThemableLayout,
     }
 
     /**
-     * Convenience constructor to create a layout with the children already
-     * inside it, and the default justifyContentMode.
+     * Convenience constructor to create a layout with children and specified
+     * justifyContentMode.
      *
      * @param justifyContentMode
      *            the default justifyContentMode
@@ -67,15 +67,15 @@ public class HorizontalLayout extends Component implements ThemableLayout,
      * @see #add(Component...)
      * @see #setJustifyContentMode(JustifyContentMode)
      */
-    public HorizontalLayout(FlexComponent.JustifyContentMode justifyContentMode,
+    public HorizontalLayout(JustifyContentMode justifyContentMode,
             Component... children) {
         this(children);
         setJustifyContentMode(justifyContentMode);
     }
 
     /**
-     * Convenience constructor to create a layout with the children already
-     * inside it, and the default vertical alignment set for the children.
+     * Convenience constructor to create a layout with the children and
+     * specified vertical alignment.
      *
      * @param alignment
      *            the default vertical alignment
