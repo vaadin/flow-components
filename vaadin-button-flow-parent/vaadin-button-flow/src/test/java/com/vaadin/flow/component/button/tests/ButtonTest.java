@@ -17,18 +17,21 @@ package com.vaadin.flow.component.button.tests;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.vaadin.flow.component.HasAriaLabel;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.StateNode;
@@ -342,6 +345,28 @@ public class ButtonTest {
 
         Assert.assertTrue(button.getAriaLabel().isPresent());
         Assert.assertEquals("Aria label", button.getAriaLabel().get());
+    }
+
+    @Test
+    public void initDisableOnClick_onlyCalledOnceForSeverRoundtrip() {
+        final Element element = Mockito.mock(Element.class);
+        StateNode node = new StateNode();
+        button = Mockito.spy(Button.class);
+
+        Mockito.when(button.getElement()).thenReturn(element);
+
+        Mockito.when(element.executeJs(Mockito.anyString()))
+                .thenReturn(Mockito.mock(PendingJavaScriptInvocation.class));
+        Mockito.when(element.getComponent()).thenReturn(Optional.of(button));
+        Mockito.when(element.getParent()).thenReturn(null);
+        Mockito.when(element.getNode()).thenReturn(node);
+
+        button.setDisableOnClick(true);
+        button.setDisableOnClick(false);
+        button.setDisableOnClick(true);
+
+        Mockito.verify(element, Mockito.times(1))
+                .executeJs("window.Vaadin.Flow.button.initDisableOnClick($0)");
     }
 
     private void assertButtonHasThemeAttribute(String theme) {
