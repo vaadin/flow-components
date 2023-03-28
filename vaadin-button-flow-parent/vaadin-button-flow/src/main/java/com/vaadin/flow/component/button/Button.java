@@ -30,6 +30,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.component.shared.HasPrefix;
 import com.vaadin.flow.component.shared.HasSuffix;
 import com.vaadin.flow.component.shared.HasThemeVariant;
@@ -53,10 +54,11 @@ import java.util.stream.Stream;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-button")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha3")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha5")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/button", version = "24.1.0-alpha3")
+@NpmPackage(value = "@vaadin/button", version = "24.1.0-alpha5")
 @JsModule("@vaadin/button/src/vaadin-button.js")
+@JsModule("./buttonFunctions.js")
 public class Button extends Component
         implements ClickNotifier<Button>, Focusable<Button>, HasAriaLabel,
         HasEnabled, HasPrefix, HasSize, HasStyle, HasSuffix, HasText,
@@ -65,6 +67,7 @@ public class Button extends Component
     private Component iconComponent;
     private boolean iconAfterText;
     private boolean disableOnClick = false;
+    private PendingJavaScriptResult initDisableOnClick;
 
     // Register immediately as first listener
     private Registration disableListener = addClickListener(
@@ -340,6 +343,7 @@ public class Button extends Component
         this.disableOnClick = disableOnClick;
         if (disableOnClick) {
             getElement().setAttribute("disableOnClick", "true");
+            initDisableOnClick();
         } else {
             getElement().removeAttribute("disableOnClick");
         }
@@ -359,10 +363,13 @@ public class Button extends Component
      * if server-side handling takes some time.
      */
     private void initDisableOnClick() {
-        getElement().executeJs("var disableEvent = function () {"
-                + "if($0.getAttribute('disableOnClick')){"
-                + " $0.setAttribute('disabled', 'true');" + "}" + "};"
-                + "$0.addEventListener('click', disableEvent)");
+        if (initDisableOnClick == null) {
+            initDisableOnClick = getElement().executeJs(
+                    "window.Vaadin.Flow.button.initDisableOnClick($0)");
+            getElement().getNode()
+                    .runWhenAttached(ui -> ui.beforeClientResponse(this,
+                            executionContext -> this.initDisableOnClick = null));
+        }
     }
 
     private void updateIconSlot() {
@@ -462,7 +469,8 @@ public class Button extends Component
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
-        initDisableOnClick();
+        if (isDisableOnClick()) {
+            initDisableOnClick();
+        }
     }
-
 }
