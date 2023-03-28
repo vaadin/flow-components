@@ -1,7 +1,6 @@
 package com.vaadin.tests;
 
 import java.util.List;
-import java.util.Map;
 
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.DesiredCapabilities;
