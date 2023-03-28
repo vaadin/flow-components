@@ -30,6 +30,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.component.shared.HasPrefix;
 import com.vaadin.flow.component.shared.HasSuffix;
 import com.vaadin.flow.component.shared.HasThemeVariant;
@@ -66,6 +67,7 @@ public class Button extends Component
     private Component iconComponent;
     private boolean iconAfterText;
     private boolean disableOnClick = false;
+    private PendingJavaScriptResult initDisableOnClick;
 
     // Register immediately as first listener
     private Registration disableListener = addClickListener(
@@ -361,8 +363,13 @@ public class Button extends Component
      * if server-side handling takes some time.
      */
     private void initDisableOnClick() {
-        getElement()
-                .executeJs("window.Vaadin.Flow.button.initDisableOnClick($0)");
+        if (initDisableOnClick == null) {
+            initDisableOnClick = getElement().executeJs(
+                    "window.Vaadin.Flow.button.initDisableOnClick($0)");
+            getElement().getNode()
+                    .runWhenAttached(ui -> ui.beforeClientResponse(this,
+                            executionContext -> this.initDisableOnClick = null));
+        }
     }
 
     private void updateIconSlot() {
