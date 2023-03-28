@@ -31,9 +31,11 @@ function getNode(appid, nodeid) {
   // makes sure the sizing works correctly. The sizing issue should eventually
   // be fixed in the Virtualizer.
   return until(new Promise((resolve) => {
-    const fragment = document.createDocumentFragment();
-    fragment.append(getNodeInternal(appid, nodeid));
-    resolve(fragment);
+    queueMicrotask(() => {
+      const fragment = document.createDocumentFragment();
+      fragment.append(getNodeInternal(appid, nodeid));
+      resolve(fragment);
+    });
   }));
 }
 
