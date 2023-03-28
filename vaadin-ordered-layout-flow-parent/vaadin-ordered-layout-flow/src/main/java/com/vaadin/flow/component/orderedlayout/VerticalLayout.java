@@ -58,6 +58,41 @@ public class VerticalLayout extends Component implements ThemableLayout,
     }
 
     /**
+     * Convenience constructor to create a layout with children and specified
+     * justifyContentMode.
+     *
+     * @param justifyContentMode
+     *            the default justifyContentMode
+     * @param children
+     *            the items to add to this layout
+     *
+     * @see #add(Component...)
+     * @see #setJustifyContentMode(JustifyContentMode)
+     */
+    public VerticalLayout(JustifyContentMode justifyContentMode,
+            Component... children) {
+        this(children);
+        setJustifyContentMode(justifyContentMode);
+    }
+
+    /**
+     * Convenience constructor to create a layout with the children and
+     * specified horizontal alignment.
+     *
+     * @param alignment
+     *            the default horizontal alignment
+     * @param children
+     *            the items to add to this layout
+     *
+     * @see #add(Component...)
+     * @see #setDefaultHorizontalComponentAlignment(Alignment)
+     */
+    public VerticalLayout(Alignment alignment, Component... children) {
+        this(children);
+        setDefaultHorizontalComponentAlignment(alignment);
+    }
+
+    /**
      * {@inheritDoc}
      * <p>
      * Spacing is enabled by default for vertical layout.

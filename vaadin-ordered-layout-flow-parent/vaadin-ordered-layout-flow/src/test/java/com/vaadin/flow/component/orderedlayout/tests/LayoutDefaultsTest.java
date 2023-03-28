@@ -39,12 +39,34 @@ public class LayoutDefaultsTest {
 
     @Test
     public void testHorizontalLayout_withAlignmentAndChildren_DefaultVerticalAlignmentIsSet() {
-        HorizontalLayout layout = new HorizontalLayout(Alignment.BASELINE,
+        HorizontalLayout layout = new HorizontalLayout(Alignment.STRETCH,
                 new Label(), new NativeButton());
         Assert.assertEquals(
                 "DefaultVerticalAlignment should be set by constructor",
-                Alignment.BASELINE,
-                layout.getDefaultVerticalComponentAlignment());
+                Alignment.STRETCH, layout.getAlignItems());
+        Assert.assertEquals("Children components must be added by constructor",
+                2, layout.getChildren().count());
+    }
+
+    @Test
+    public void testVerticalLayout_withJustifyContentModeAndChildren_justifyContentModeIsSet() {
+        VerticalLayout layout = new VerticalLayout(
+                FlexComponent.JustifyContentMode.END, new Label(),
+                new NativeButton());
+        Assert.assertEquals("JustifyContentMode should be set by constructor",
+                FlexComponent.JustifyContentMode.END,
+                layout.getJustifyContentMode());
+        Assert.assertEquals("Children components must be added by constructor",
+                2, layout.getChildren().count());
+    }
+
+    @Test
+    public void testVerticalLayout_withAlignmentAndChildren_DefaultVerticalAlignmentIsSet() {
+        VerticalLayout layout = new VerticalLayout(Alignment.STRETCH,
+                new Label(), new NativeButton());
+        Assert.assertEquals(
+                "DefaultHorizontalAlignment should be set by constructor",
+                Alignment.STRETCH, layout.getAlignItems());
         Assert.assertEquals("Children components must be added by constructor",
                 2, layout.getChildren().count());
     }
