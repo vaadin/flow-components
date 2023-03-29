@@ -496,7 +496,6 @@
                 <configuration>
                     <configFile>https://raw.githubusercontent.com/vaadin/flow/master/eclipse/VaadinJavaConventions.xml</configFile>
                     <skipHtmlFormatting>true</skipHtmlFormatting>
-                    <lineEnding>LF</lineEnding>
                 </configuration>
             </plugin>
         </plugins>
