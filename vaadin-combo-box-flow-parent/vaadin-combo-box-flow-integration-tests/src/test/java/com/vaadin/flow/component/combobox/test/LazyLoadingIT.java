@@ -124,7 +124,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
                 "Item 10", getTextFieldValue(stringBox));
         stringBox.openPopup();
         // Make sure the item is in the viewport / rendered
-        scrollToItem(callbackBox, 10);
+        scrollToItem(stringBox, 10);
         assertItemSelected("Item 10");
     }
 
