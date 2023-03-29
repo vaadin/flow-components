@@ -865,14 +865,6 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           }
           // Let server know we're done
           grid.$server.confirmParentUpdate(id, parentKey);
-
-          if (!grid.loading) {
-            grid.__confirmParentUpdateDebouncer = Debouncer.debounce(
-              grid.__confirmParentUpdateDebouncer,
-              microTask,
-              () => grid.__updateVisibleRows()
-            );
-          }
         });
 
         grid.$connector.confirm = tryCatchWrapper(function (id) {
