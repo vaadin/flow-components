@@ -123,6 +123,8 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
                 "The selected value should be displayed in the ComboBox's TextField",
                 "Item 10", getTextFieldValue(stringBox));
         stringBox.openPopup();
+        // Make sure the item is in the viewport / rendered
+        scrollToItem(callbackBox, 10);
         assertItemSelected("Item 10");
     }
 
@@ -345,7 +347,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         assertLoadedItemsCount(
                 "After opening the ComboBox, the first 50 items should be loaded",
                 50, callbackBox);
-        assertRendered("Item 10");
+        assertRendered("Item 0");
 
         // Now backend request should take place to init the data communicator
         Assert.assertEquals("1", lazySizeRequestCountSpan.getText());
@@ -356,7 +358,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         assertLoadedItemsCount(
                 "There should be 100 items after loading two pages", 100,
                 callbackBox);
-        assertRendered("Item 58");
+        assertRendered("Item 60");
     }
 
     @Test
@@ -377,7 +379,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         assertLoadedItemsCount(
                 "There should be 100 items after loading two pages", 100,
                 templateBox);
-        assertRendered("Item 52");
+        assertRendered("Item 50");
     }
 
     @Test // https://github.com/vaadin/vaadin-combo-box-flow/issues/216
