@@ -137,6 +137,9 @@ public class DialogWithShortcutIT extends AbstractComponentIT {
         dialogInput.focus();
         dialogInput.sendKeys("foo" + DialogWithShortcutPage.SHORTCUT + "bar");
 
+        waitUntil(
+                driver -> !eventLog.findElements(By.tagName("div")).isEmpty());
+
         validateLatestShortcutEventOnDialog(0, 0);
 
         // by default the shortcut does preventDefault
