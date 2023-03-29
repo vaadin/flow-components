@@ -112,7 +112,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
         // Workaround for: https://github.com/vaadin/flow/issues/3496
         setOpened(false);
 
-        getElement().addEventListener("opened-changed", event -> {
+        addOpenedChangeListener(event -> {
             if (!isOpened()) {
                 setModality(false);
             }
@@ -283,14 +283,14 @@ public class Dialog extends Component implements HasComponents, HasSize,
         if (isOpened()) {
             ensureOnCloseConfigured();
         }
-        Registration openedRegistration = getElement()
-                .addPropertyChangeListener("opened", event -> {
-                    if (isOpened()) {
-                        ensureOnCloseConfigured();
-                    } else {
-                        onCloseConfigured = 0;
-                    }
-                });
+
+        Registration openedRegistration = addOpenedChangeListener(event -> {
+            if (event.isOpened()) {
+                ensureOnCloseConfigured();
+            } else {
+                onCloseConfigured = 0;
+            }
+        });
 
         Registration registration = addListener(DialogCloseActionEvent.class,
                 listener);
