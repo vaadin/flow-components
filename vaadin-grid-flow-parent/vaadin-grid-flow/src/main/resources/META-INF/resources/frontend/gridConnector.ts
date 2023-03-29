@@ -799,14 +799,6 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
 
           // Let server know we're done
           grid.$server.confirmParentUpdate(id, parentKey);
-
-          if (!grid.loading) {
-            grid.__confirmParentUpdateDebouncer = Debouncer.debounce(
-              grid.__confirmParentUpdateDebouncer,
-              animationFrame,
-              () => grid.__updateVisibleRows()
-            );
-          }
         });
 
         grid.$connector.confirm = tryCatchWrapper(function (id) {
