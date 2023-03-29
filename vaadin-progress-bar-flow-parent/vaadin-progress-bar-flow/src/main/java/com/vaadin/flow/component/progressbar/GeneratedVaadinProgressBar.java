@@ -100,7 +100,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * </table>
  */
 @Tag("vaadin-progress-bar")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.17")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.2.18")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/progress-bar/src/vaadin-progress-bar.js")
 public abstract class GeneratedVaadinProgressBar<R extends GeneratedVaadinProgressBar<R>>
