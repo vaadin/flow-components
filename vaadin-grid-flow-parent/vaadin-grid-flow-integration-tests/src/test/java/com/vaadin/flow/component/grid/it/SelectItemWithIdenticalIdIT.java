@@ -65,6 +65,6 @@ public class SelectItemWithIdenticalIdIT extends AbstractComponentIT {
         useMultiSelectCheckbox.setChecked(true);
         updateSelectionButton.click();
 
-        Assert.assertEquals("1", grid.getCell(0, 1).getText());
+        Assert.assertEquals("2", grid.getCell(1, 1).getText());
     }
 }
