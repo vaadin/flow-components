@@ -4,11 +4,12 @@ import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
 import { idlePeriod } from '@polymer/polymer/lib/utils/async.js';
 import { PolymerElement } from '@polymer/polymer/polymer-element.js';
 import { until } from 'lit/directives/until.js';
+import { flowComponentDirective } from './flow-component-directive.js';
 
 /**
  * Returns the requested node from the Flow client.
- * @param {string} appid 
- * @param {number} nodeid 
+ * @param {string} appid
+ * @param {number} nodeid
  * @returns {Element | null} The element if found, null otherwise.
  */
 function getNodeInternal(appid, nodeid) {
@@ -17,8 +18,8 @@ function getNodeInternal(appid, nodeid) {
 
 /**
  * Returns the requested node in a form suitable for Lit template interpolation.
- * @param {string} appid 
- * @param {number} nodeid 
+ * @param {string} appid
+ * @param {number} nodeid
  * @returns {any} The element if found, null otherwise.
  */
 function getNode(appid, nodeid) {
@@ -31,20 +32,17 @@ function getNode(appid, nodeid) {
   // makes sure the sizing works correctly. The sizing issue should eventually
   // be fixed in the Virtualizer.
   return until(new Promise((resolve) => {
-    queueMicrotask(() => {
-      const fragment = document.createDocumentFragment();
-      fragment.append(getNodeInternal(appid, nodeid));
-      resolve(fragment);
-    });
+    const node = getNodeInternal(appid, nodeid);
+    resolve(flowComponentDirective(node));
   }));
 }
 
 /**
  * Sets the nodes defined by the given node ids as the child nodes of the
  * given root element.
- * @param {string} appid 
+ * @param {string} appid
  * @param {number[]} nodeIds
- * @param {Element} root 
+ * @param {Element} root
  */
 function setChildNodes(appid, nodeIds, root) {
   root.textContent = '';
@@ -56,13 +54,13 @@ function setChildNodes(appid, nodeIds, root) {
  * elements to the container. When the children are manually placed under
  * another element, the call to insertBefore can occasionally fail due to
  * an invalid reference node.
- * 
+ *
  * This is a temporary workaround which patches the container's native API
  * to not fail when called with invalid arguments.
  */
 function patchVirtualContainer(container) {
   const originalInsertBefore = container.insertBefore;
-  
+
   container.insertBefore = function (newNode, referenceNode) {
     if (referenceNode && referenceNode.parentNode === this) {
       return originalInsertBefore.call(this, newNode, referenceNode);
