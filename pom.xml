@@ -40,7 +40,7 @@
 
         <!-- spreadsheet -->
         <poi.version>5.2.3</poi.version>
-        <javaparser.version>3.24.10</javaparser.version>
+        <javaparser.version>3.25.1</javaparser.version>
     </properties>
     <modules>
         <module>vaadin-renderer-flow-parent</module>
