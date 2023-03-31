@@ -44,8 +44,11 @@ const flowComponentDirectiveInternal = directive(FlowComponentDirective);
 /**
  * Renders the given flow component node asynchronously.
  *
+ * NOTE: The directive is not intended for public use.
+ *
  * @param {string} appid
  * @param {number} nodeid
+ * @private
  */
 export const flowComponentDirective = (appid, nodeid) => {
   // Theoretically, it could return the directive synchronously.

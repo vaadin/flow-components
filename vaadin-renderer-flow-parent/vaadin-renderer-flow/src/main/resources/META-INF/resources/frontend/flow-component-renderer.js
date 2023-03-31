@@ -16,6 +16,16 @@ export function getNodeInternal(appid, nodeid) {
 }
 
 /**
+ * Returns the requested node in a form suitable for Lit template interpolation.
+ * @param {string} appid
+ * @param {number} nodeid
+ * @returns {any} a Lit directive
+ */
+function getNode(appid, nodeid) {
+  return flowComponentDirective(appid, nodeid);
+}
+
+/**
  * Sets the nodes defined by the given node ids as the child nodes of the
  * given root element.
  * @param {string} appid
@@ -49,7 +59,7 @@ function patchVirtualContainer(container) {
 }
 
 window.Vaadin ||= {};
-window.Vaadin.FlowComponentHost ||= { patchVirtualContainer, flowComponentDirective, setChildNodes };
+window.Vaadin.FlowComponentHost ||= { patchVirtualContainer, getNode, setChildNodes };
 
 class FlowComponentRenderer extends PolymerElement {
   static get template() {
