@@ -40,6 +40,7 @@
 
         <!-- spreadsheet -->
         <poi.version>5.2.3</poi.version>
+        <javaparser.version>3.24.10</javaparser.version>
     </properties>
     <modules>
         <module>vaadin-renderer-flow-parent</module>
@@ -446,7 +447,6 @@
                 <configuration>
                     <configFile>https://raw.githubusercontent.com/vaadin/flow/main/eclipse/VaadinJavaConventions.xml</configFile>
                     <skipHtmlFormatting>true</skipHtmlFormatting>
-                    <lineEnding>LF</lineEnding>
                     <excludes>
                         <exclude>**/*.css</exclude>
                     </excludes>
@@ -594,6 +594,11 @@
                 <groupId>org.apache.poi</groupId>
                 <artifactId>poi-ooxml-full</artifactId>
                 <version>${poi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.javaparser</groupId>
+                <artifactId>javaparser-core</artifactId>
+                <version>${javaparser.version}</version>
             </dependency>
             <dependency>
                 <groupId>jakarta.platform</groupId>
