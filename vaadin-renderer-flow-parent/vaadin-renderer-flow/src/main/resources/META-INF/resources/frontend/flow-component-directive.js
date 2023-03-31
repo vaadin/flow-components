@@ -14,8 +14,10 @@ class FlowComponentDirective extends Directive {
   }
 
   update(part, [newNode]) {
-    const { startNode, parentNode } = part;
-    const oldNode = startNode.nextSibling;
+    const { parentNode } = part;
+    const oldNode = [...parentNode.childNodes].find((node) => {
+      return [Node.ELEMENT_NODE, Node.TEXT_NODE].includes(node.nodeType);
+    });
 
     if (oldNode === newNode) {
       return noChange;
