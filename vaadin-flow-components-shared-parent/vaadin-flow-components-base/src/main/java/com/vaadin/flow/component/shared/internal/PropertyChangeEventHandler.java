@@ -22,13 +22,15 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.dom.PropertyChangeEvent;
 import com.vaadin.flow.shared.Registration;
 
+import java.io.Serializable;
 import java.util.function.Consumer;
 
 /**
  * Internal class that provides shared functionality for handling property
  * change listeners. Not intended to be used publicly.
  */
-public class PropertyChangeEventHandler<E extends ComponentEvent<?>> {
+public class PropertyChangeEventHandler<E extends ComponentEvent<?>>
+        implements Serializable {
 
     private Registration propertyChangeListenerRegistration;
 
