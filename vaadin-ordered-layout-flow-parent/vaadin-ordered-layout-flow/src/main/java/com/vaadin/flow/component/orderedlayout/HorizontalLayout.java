@@ -56,11 +56,11 @@ public class HorizontalLayout extends Component implements ThemableLayout,
     }
 
     /**
-     * Convenience constructor to create a layout with children and specified
-     * justifyContentMode.
+     * Convenience constructor to create a layout with the children and
+     * specified justifyContentMode.
      *
      * @param justifyContentMode
-     *            the default justifyContentMode
+     *            the justifyContentMode
      * @param children
      *            the items to add to this layout
      *
@@ -78,7 +78,7 @@ public class HorizontalLayout extends Component implements ThemableLayout,
      * specified vertical alignment.
      *
      * @param alignment
-     *            the default vertical alignment
+     *            the vertical alignment
      * @param children
      *            the items to add to this layout
      *
