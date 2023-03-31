@@ -11,7 +11,7 @@ import { flowComponentDirective } from './flow-component-directive.js';
  * @param {number} nodeid
  * @returns {Element | null} The element if found, null otherwise.
  */
-export function getNodeInternal(appid, nodeid) {
+function getNodeInternal(appid, nodeid) {
   return window.Vaadin.Flow.clients[appid].getByNodeId(nodeid);
 }
 

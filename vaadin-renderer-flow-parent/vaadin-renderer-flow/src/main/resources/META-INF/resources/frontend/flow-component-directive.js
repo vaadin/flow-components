@@ -1,7 +1,6 @@
 import { noChange } from 'lit';
 import { until } from 'lit/directives/until.js';
 import { directive, Directive, PartType } from 'lit/directive.js';
-import { getNodeInternal } from './flow-component-renderer.js';
 
 class FlowComponentDirective extends Directive {
   constructor(partInfo) {
@@ -14,7 +13,7 @@ class FlowComponentDirective extends Directive {
   update(part, [appid, nodeid]) {
     const { parentNode, startNode } = part;
 
-    const newNode = getNodeInternal(appid, nodeid);
+    const newNode = this.getNewNode(appid, nodeid);
     const oldNode = this.getOldNode(part);
 
     if (oldNode === newNode) {
@@ -28,6 +27,10 @@ class FlowComponentDirective extends Directive {
     }
 
     return noChange;
+  }
+
+  getNewNode(appid, nodeid) {
+    return window.Vaadin.Flow.clients[appid].getByNodeId(nodeid);
   }
 
   getOldNode(part) {
@@ -44,7 +47,7 @@ const flowComponentDirectiveInternal = directive(FlowComponentDirective);
 /**
  * Renders the given flow component node asynchronously.
  *
- * NOTE: The directive is not intended for public use.
+ * WARNING: This directive is not intended for public use.
  *
  * @param {string} appid
  * @param {number} nodeid
