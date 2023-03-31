@@ -43,6 +43,7 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.ValidationUtil;
+import com.vaadin.flow.component.shared.internal.PropertyChangeEventHandler;
 import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
@@ -128,6 +129,10 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
     private volatile int lastFetchedDataSize = -1;
 
     private SerializableConsumer<UI> sizeRequest;
+
+    private PropertyChangeEventHandler<OpenedChangeEvent> openedPropertyChangeEventHandler;
+
+    private PropertyChangeEventHandler<InvalidChangeEvent> invalidPropertyChangeEventHandler;
 
     /**
      * Constructs a select.
@@ -1030,9 +1035,13 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      */
     protected Registration addOpenedChangeListener(
             ComponentEventListener<OpenedChangeEvent> listener) {
-        return getElement().addPropertyChangeListener("opened",
-                event -> listener.onComponentEvent(
-                        new OpenedChangeEvent(this, event.isUserOriginated())));
+        if (openedPropertyChangeEventHandler == null) {
+            openedPropertyChangeEventHandler = new PropertyChangeEventHandler<>(
+                    "opened", this, OpenedChangeEvent.class,
+                    event -> fireEvent(new OpenedChangeEvent(this,
+                            event.isUserOriginated())));
+        }
+        return openedPropertyChangeEventHandler.addListener(listener);
     }
 
     /**
@@ -1061,9 +1070,13 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      */
     protected Registration addInvalidChangeListener(
             ComponentEventListener<InvalidChangeEvent> listener) {
-        return getElement().addPropertyChangeListener("invalid",
-                event -> listener.onComponentEvent(new InvalidChangeEvent(this,
-                        event.isUserOriginated())));
+        if (invalidPropertyChangeEventHandler == null) {
+            invalidPropertyChangeEventHandler = new PropertyChangeEventHandler<>(
+                    "invalid", this, InvalidChangeEvent.class,
+                    event -> fireEvent(new InvalidChangeEvent(this,
+                            event.isUserOriginated())));
+        }
+        return invalidPropertyChangeEventHandler.addListener(listener);
     }
 
 }

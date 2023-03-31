@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -815,6 +816,34 @@ public class SelectTest {
     @Test
     public void implementsHasTooltip() {
         Assert.assertTrue(select instanceof HasTooltip);
+    }
+
+    @Test
+    public void unregisterOpenedChangeListenerOnEvent() {
+        var listenerInvokedCount = new AtomicInteger(0);
+        select.addOpenedChangeListener(e -> {
+            listenerInvokedCount.incrementAndGet();
+            e.unregisterListener();
+        });
+
+        select.setOpened(true);
+        select.setOpened(false);
+
+        Assert.assertEquals(1, listenerInvokedCount.get());
+    }
+
+    @Test
+    public void unregisterInvalidChangeListenerOnEvent() {
+        var listenerInvokedCount = new AtomicInteger(0);
+        select.addInvalidChangeListener(e -> {
+            listenerInvokedCount.incrementAndGet();
+            e.unregisterListener();
+        });
+
+        select.setInvalid(true);
+        select.setInvalid(false);
+
+        Assert.assertEquals(1, listenerInvokedCount.get());
     }
 
     private void validateItem(int index, String textContent, String label,

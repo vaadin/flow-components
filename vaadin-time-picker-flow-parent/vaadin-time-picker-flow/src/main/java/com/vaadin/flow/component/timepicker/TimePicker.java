@@ -50,6 +50,7 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.ValidationUtil;
+import com.vaadin.flow.component.shared.internal.PropertyChangeEventHandler;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
@@ -97,6 +98,8 @@ public class TimePicker
     private LocalTime min;
     private boolean required;
     private StateTree.ExecutionRegistration pendingLocaleUpdate;
+
+    private PropertyChangeEventHandler<InvalidChangeEvent> invalidPropertyChangeEventHandler;
 
     /**
      * Default constructor.
@@ -489,9 +492,13 @@ public class TimePicker
      */
     public Registration addInvalidChangeListener(
             ComponentEventListener<InvalidChangeEvent> listener) {
-        return getElement().addPropertyChangeListener("invalid",
-                event -> listener.onComponentEvent(new InvalidChangeEvent(this,
-                        event.isUserOriginated())));
+        if (invalidPropertyChangeEventHandler == null) {
+            invalidPropertyChangeEventHandler = new PropertyChangeEventHandler<>(
+                    "invalid", this, InvalidChangeEvent.class,
+                    event -> fireEvent(new InvalidChangeEvent(this,
+                            event.isUserOriginated())));
+        }
+        return invalidPropertyChangeEventHandler.addListener(listener);
     }
 
     /**

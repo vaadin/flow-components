@@ -53,6 +53,7 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.ValidationUtil;
+import com.vaadin.flow.component.shared.internal.PropertyChangeEventHandler;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
@@ -114,6 +115,10 @@ public class DatePicker
     private boolean required;
 
     private StateTree.ExecutionRegistration pendingI18nUpdate;
+
+    private PropertyChangeEventHandler<OpenedChangeEvent> openedPropertyChangeEventHandler;
+
+    private PropertyChangeEventHandler<InvalidChangeEvent> invalidPropertyChangeEventHandler;
 
     /**
      * Default constructor.
@@ -804,9 +809,13 @@ public class DatePicker
      */
     public Registration addOpenedChangeListener(
             ComponentEventListener<OpenedChangeEvent> listener) {
-        return getElement().addPropertyChangeListener("opened",
-                event -> listener.onComponentEvent(
-                        new OpenedChangeEvent(this, event.isUserOriginated())));
+        if (openedPropertyChangeEventHandler == null) {
+            openedPropertyChangeEventHandler = new PropertyChangeEventHandler<>(
+                    "opened", this, OpenedChangeEvent.class,
+                    event -> fireEvent(new OpenedChangeEvent(this,
+                            event.isUserOriginated())));
+        }
+        return openedPropertyChangeEventHandler.addListener(listener);
     }
 
     /**
@@ -835,9 +844,13 @@ public class DatePicker
      */
     public Registration addInvalidChangeListener(
             ComponentEventListener<InvalidChangeEvent> listener) {
-        return getElement().addPropertyChangeListener("invalid",
-                event -> listener.onComponentEvent(new InvalidChangeEvent(this,
-                        event.isUserOriginated())));
+        if (invalidPropertyChangeEventHandler == null) {
+            invalidPropertyChangeEventHandler = new PropertyChangeEventHandler<>(
+                    "invalid", this, InvalidChangeEvent.class,
+                    event -> fireEvent(new InvalidChangeEvent(this,
+                            event.isUserOriginated())));
+        }
+        return invalidPropertyChangeEventHandler.addListener(listener);
     }
 
     /**

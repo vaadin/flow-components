@@ -38,6 +38,7 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
+import com.vaadin.flow.component.shared.internal.PropertyChangeEventHandler;
 import com.vaadin.flow.dom.ClassList;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementDetachListener;
@@ -68,6 +69,8 @@ public class Notification extends Component implements HasComponents, HasStyle,
     private boolean autoAddedToTheUi = false;
 
     private Registration afterProgrammaticNavigationListenerRegistration;
+
+    private PropertyChangeEventHandler<OpenedChangeEvent> openedPropertyChangeEventHandler;
 
     /**
      * Enumeration of all available positions for notification component
@@ -467,9 +470,13 @@ public class Notification extends Component implements HasComponents, HasStyle,
      */
     public Registration addOpenedChangeListener(
             ComponentEventListener<OpenedChangeEvent> listener) {
-        return getElement().addPropertyChangeListener("opened",
-                event -> listener.onComponentEvent(
-                        new OpenedChangeEvent(this, event.isUserOriginated())));
+        if (openedPropertyChangeEventHandler == null) {
+            openedPropertyChangeEventHandler = new PropertyChangeEventHandler<>(
+                    "opened", this, OpenedChangeEvent.class,
+                    event -> fireEvent(new OpenedChangeEvent(this,
+                            event.isUserOriginated())));
+        }
+        return openedPropertyChangeEventHandler.addListener(listener);
     }
 
     /**

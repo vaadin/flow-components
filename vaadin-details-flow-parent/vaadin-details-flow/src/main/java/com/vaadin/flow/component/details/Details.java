@@ -15,14 +15,11 @@
  */
 package com.vaadin.flow.component.details;
 
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.ComponentUtil;
-import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
@@ -35,6 +32,7 @@ import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.shared.internal.PropertyChangeEventHandler;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -65,6 +63,8 @@ public class Details extends Component implements HasEnabled, HasSize, HasStyle,
     private Component summary;
     private Component summaryContainer;
     private final Div contentContainer;
+
+    private PropertyChangeEventHandler<OpenedChangeEvent> openedPropertyChangeEventHandler;
 
     /**
      * Server-side component for the {@code <vaadin-details-summary>} element.
@@ -321,8 +321,12 @@ public class Details extends Component implements HasEnabled, HasSize, HasStyle,
      */
     public Registration addOpenedChangeListener(
             ComponentEventListener<OpenedChangeEvent> listener) {
-        return getElement().addPropertyChangeListener("opened",
-                event -> listener.onComponentEvent(
-                        new OpenedChangeEvent(this, event.isUserOriginated())));
+        if (openedPropertyChangeEventHandler == null) {
+            openedPropertyChangeEventHandler = new PropertyChangeEventHandler<>(
+                    "opened", this, OpenedChangeEvent.class,
+                    event -> fireEvent(new OpenedChangeEvent(this,
+                            event.isUserOriginated())));
+        }
+        return openedPropertyChangeEventHandler.addListener(listener);
     }
 }
