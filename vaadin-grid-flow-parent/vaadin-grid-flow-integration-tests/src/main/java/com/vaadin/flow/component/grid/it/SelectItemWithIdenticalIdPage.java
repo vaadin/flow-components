@@ -50,7 +50,14 @@ public class SelectItemWithIdenticalIdPage extends Div {
         });
         updateSelectionButton.setId("update-selection-button");
 
-        add(useMultiSelectCheckbox, updateSelectionButton, grid);
+        var addGridButton = new Button("Add grid", e -> {
+            e.getSource().setVisible(false);
+            useMultiSelectCheckbox.setVisible(false);
+            add(updateSelectionButton, grid);
+        });
+        addGridButton.setId("add-grid-button");
+
+        add(useMultiSelectCheckbox, addGridButton);
     }
 
     private record Item(String id, String displayValue) {
