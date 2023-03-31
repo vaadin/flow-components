@@ -3,7 +3,6 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
 import { idlePeriod } from '@polymer/polymer/lib/utils/async.js';
 import { PolymerElement } from '@polymer/polymer/polymer-element.js';
-import { until } from 'lit/directives/until.js';
 import { flowComponentDirective } from './flow-component-directive.js';
 
 /**
@@ -12,29 +11,8 @@ import { flowComponentDirective } from './flow-component-directive.js';
  * @param {number} nodeid
  * @returns {Element | null} The element if found, null otherwise.
  */
-function getNodeInternal(appid, nodeid) {
+export function getNodeInternal(appid, nodeid) {
   return window.Vaadin.Flow.clients[appid].getByNodeId(nodeid);
-}
-
-/**
- * Returns the requested node in a form suitable for Lit template interpolation.
- * @param {string} appid
- * @param {number} nodeid
- * @returns {any} The element if found, null otherwise.
- */
-function getNode(appid, nodeid) {
-  // Theoretically, this method could just return the node as-is.
-  // The `until` directive is used for now to work around sizing issues
-  // with ComponentRenderer. The previously used <flow-component-renderer> was
-  // asynchronous by nature and thus worked out of the box.
-  //
-  // Test in ComponentColumnWithHeightIT::shouldPositionItemsCorrectlyAfterScrollingToEnd
-  // makes sure the sizing works correctly. The sizing issue should eventually
-  // be fixed in the Virtualizer.
-  return until(new Promise((resolve) => {
-    const node = getNodeInternal(appid, nodeid);
-    resolve(flowComponentDirective(node));
-  }));
 }
 
 /**
@@ -71,7 +49,7 @@ function patchVirtualContainer(container) {
 }
 
 window.Vaadin ||= {};
-window.Vaadin.FlowComponentHost ||= { patchVirtualContainer, getNode, setChildNodes };
+window.Vaadin.FlowComponentHost ||= { patchVirtualContainer, flowComponentDirective, setChildNodes };
 
 class FlowComponentRenderer extends PolymerElement {
   static get template() {

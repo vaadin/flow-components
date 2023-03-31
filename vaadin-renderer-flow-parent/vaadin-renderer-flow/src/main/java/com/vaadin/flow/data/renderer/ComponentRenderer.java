@@ -148,7 +148,7 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
                 ? UI.getCurrent().getInternals().getAppId()
                 : "";
 
-        return "${Vaadin.FlowComponentHost.getNode('" + appId
+        return "${Vaadin.FlowComponentHost.flowComponentDirective('" + appId
                 + "', item.nodeid)}";
     }
 
