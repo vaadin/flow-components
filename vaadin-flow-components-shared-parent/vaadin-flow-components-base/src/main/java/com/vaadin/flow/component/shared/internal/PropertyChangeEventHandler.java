@@ -25,7 +25,8 @@ import com.vaadin.flow.shared.Registration;
 import java.util.function.Consumer;
 
 /**
- * Internal class that provides shared functionality for handling property change listeners. Not intended to be used publicly.
+ * Internal class that provides shared functionality for handling property
+ * change listeners. Not intended to be used publicly.
  */
 public class PropertyChangeEventHandler<E extends ComponentEvent<?>> {
 
