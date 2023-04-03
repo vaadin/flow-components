@@ -28,19 +28,26 @@ import org.openqa.selenium.WebElement;
 @TestPath("vaadin-grid/select-item-with-identical-id")
 public class SelectItemWithIdenticalIdIT extends AbstractComponentIT {
 
-    private CheckboxElement useMultiSelectCheckbox;
-
     private WebElement addGridButton;
+
+    private WebElement selectAnotherItemButton;
+
+    private WebElement deselectItemButton;
+
+    private CheckboxElement useMultiSelectCheckbox;
 
     @Before
     public void init() {
         open();
         addGridButton = findElement(By.id("add-grid-button"));
+        selectAnotherItemButton = findElement(
+                By.id("select-another-item-button"));
+        deselectItemButton = findElement(By.id("deselect-item-button"));
         useMultiSelectCheckbox = $(CheckboxElement.class).first();
     }
 
     @Test
-    public void selectUsingItemWithSameIdHash_addGrid_itemIsNotUpdated() {
+    public void addGridWithSelection_itemIsNotUpdated() {
         addGridButton.click();
         GridElement grid = $(GridElement.class).waitForFirst();
 
@@ -48,16 +55,27 @@ public class SelectItemWithIdenticalIdIT extends AbstractComponentIT {
     }
 
     @Test
-    public void addGridWithSelection_updateSelectionUsingItemWithSameIdHash_itemIsNotUpdated() {
+    public void addGridWithSelection_deselectItem_itemIsNotUpdated() {
         addGridButton.click();
         GridElement grid = $(GridElement.class).waitForFirst();
-        findElement(By.id("update-selection-button")).click();
+
+        deselectItemButton.click();
+
+        Assert.assertEquals("1", grid.getCell(0, 0).getText());
+    }
+
+    @Test
+    public void addGridWithSelection_selectAnotherItem_itemIsNotUpdated() {
+        addGridButton.click();
+        GridElement grid = $(GridElement.class).waitForFirst();
+
+        selectAnotherItemButton.click();
 
         Assert.assertEquals("2", grid.getCell(1, 0).getText());
     }
 
     @Test
-    public void setMultiSelect_selectUsingItemWithSameIdHash_addGrid_itemIsNotUpdated() {
+    public void setMultiSelect_addGridWithSelection_itemIsNotUpdated() {
         useMultiSelectCheckbox.setChecked(true);
         addGridButton.click();
         GridElement grid = $(GridElement.class).waitForFirst();
@@ -66,11 +84,23 @@ public class SelectItemWithIdenticalIdIT extends AbstractComponentIT {
     }
 
     @Test
-    public void setMultiSelect_addGridWithSelection_updateSelectionUsingItemWithSameIdHash_itemIsNotUpdated() {
+    public void setMultiSelect_addGridWithSelection_deselectItem_itemIsNotUpdated() {
         useMultiSelectCheckbox.setChecked(true);
         addGridButton.click();
         GridElement grid = $(GridElement.class).waitForFirst();
-        findElement(By.id("update-selection-button")).click();
+
+        deselectItemButton.click();
+
+        Assert.assertEquals("1", grid.getCell(0, 1).getText());
+    }
+
+    @Test
+    public void setMultiSelect_addGridWithSelection_selectAnotherItem_itemIsNotUpdated() {
+        useMultiSelectCheckbox.setChecked(true);
+        addGridButton.click();
+        GridElement grid = $(GridElement.class).waitForFirst();
+
+        selectAnotherItemButton.click();
 
         Assert.assertEquals("2", grid.getCell(1, 1).getText());
     }

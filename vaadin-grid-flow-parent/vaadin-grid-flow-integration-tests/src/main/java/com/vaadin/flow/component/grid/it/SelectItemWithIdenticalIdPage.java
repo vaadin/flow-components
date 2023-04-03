@@ -31,7 +31,6 @@ public class SelectItemWithIdenticalIdPage extends Div {
         var grid = new Grid<Item>();
         grid.addColumn(Item::displayValue).setHeader("Display value");
         grid.setItems(Arrays.asList(new Item("1", "1"), new Item("2", "2")));
-        grid.select(new Item("1", "INVALID"));
 
         var useMultiSelectCheckbox = new Checkbox("Use multi-select",
                 event -> grid
@@ -40,24 +39,25 @@ public class SelectItemWithIdenticalIdPage extends Div {
                                 : Grid.SelectionMode.SINGLE));
         useMultiSelectCheckbox.setId("use-multi-select-checkbox");
 
-        var updateSelectionButton = new Button("Update selection", e -> {
-            if (grid.getSelectedItems().stream().map(Item::id)
-                    .anyMatch("2"::equals)) {
-                grid.deselect(new Item("2", "INVALID"));
-            } else {
-                grid.select(new Item("2", "INVALID"));
-            }
+        var selectAnotherItemButton = new Button("Select another item",
+                e -> grid.select(new Item("2", "INVALID")));
+        selectAnotherItemButton.setId("select-another-item-button");
+
+        var deselectItemButton = new Button("Deselect item", e -> {
+            System.out.println("Page.deselect");
+            grid.deselect(new Item("1", "INVALID"));
         });
-        updateSelectionButton.setId("update-selection-button");
+        deselectItemButton.setId("deselect-item-button");
 
         var addGridButton = new Button("Add grid", e -> {
+            grid.select(new Item("1", "INVALID"));
             e.getSource().setVisible(false);
-            useMultiSelectCheckbox.setVisible(false);
-            add(updateSelectionButton, grid);
+            add(grid);
         });
         addGridButton.setId("add-grid-button");
 
-        add(useMultiSelectCheckbox, addGridButton);
+        add(useMultiSelectCheckbox, addGridButton, selectAnotherItemButton,
+                deselectItemButton);
     }
 
     private record Item(String id, String displayValue) {
