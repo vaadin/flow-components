@@ -45,6 +45,7 @@ import com.vaadin.flow.dom.ClassList;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementConstants;
 import com.vaadin.flow.dom.ElementDetachListener;
+import com.vaadin.flow.dom.PropertyChangeEvent;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.router.NavigationTrigger;
@@ -834,9 +835,14 @@ public class Dialog extends Component implements HasComponents, HasSize,
             ComponentEventListener<OpenedChangeEvent> listener) {
         if (openedPropertyChangeEventHandler == null) {
             openedPropertyChangeEventHandler = new PropertyChangeEventHandler<>(
-                    "opened", this, OpenedChangeEvent.class,
-                    event -> fireEvent(new OpenedChangeEvent(this,
-                            event.isUserOriginated())));
+                    "opened", this, OpenedChangeEvent.class) {
+                @Override
+                protected void fireEvent(
+                        PropertyChangeEvent propertyChangeEvent) {
+                    Dialog.this.fireEvent(new OpenedChangeEvent(Dialog.this,
+                            propertyChangeEvent.isUserOriginated()));
+                }
+            };
         }
         return openedPropertyChangeEventHandler.addListener(listener);
     }

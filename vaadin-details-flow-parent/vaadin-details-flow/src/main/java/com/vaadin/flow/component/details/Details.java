@@ -33,6 +33,7 @@ import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.shared.internal.PropertyChangeEventHandler;
+import com.vaadin.flow.dom.PropertyChangeEvent;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -323,9 +324,14 @@ public class Details extends Component implements HasEnabled, HasSize, HasStyle,
             ComponentEventListener<OpenedChangeEvent> listener) {
         if (openedPropertyChangeEventHandler == null) {
             openedPropertyChangeEventHandler = new PropertyChangeEventHandler<>(
-                    "opened", this, OpenedChangeEvent.class,
-                    event -> fireEvent(new OpenedChangeEvent(this,
-                            event.isUserOriginated())));
+                    "opened", this, OpenedChangeEvent.class) {
+                @Override
+                protected void fireEvent(
+                        PropertyChangeEvent propertyChangeEvent) {
+                    Details.this.fireEvent(new OpenedChangeEvent(Details.this,
+                            propertyChangeEvent.isUserOriginated()));
+                }
+            };
         }
         return openedPropertyChangeEventHandler.addListener(listener);
     }

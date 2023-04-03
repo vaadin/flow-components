@@ -23,13 +23,12 @@ import com.vaadin.flow.dom.PropertyChangeEvent;
 import com.vaadin.flow.shared.Registration;
 
 import java.io.Serializable;
-import java.util.function.Consumer;
 
 /**
  * Internal class that provides shared functionality for handling property
  * change listeners. Not intended to be used publicly.
  */
-public class PropertyChangeEventHandler<E extends ComponentEvent<?>>
+public abstract class PropertyChangeEventHandler<E extends ComponentEvent<?>>
         implements Serializable {
 
     private Registration propertyChangeListenerRegistration;
@@ -38,26 +37,21 @@ public class PropertyChangeEventHandler<E extends ComponentEvent<?>>
 
     private String propertyName;
 
-    private Consumer<PropertyChangeEvent> fireComponentEvent;
-
     private Component component;
 
     private Class<E> eventType;
 
     public PropertyChangeEventHandler(String propertyName, Component component,
-            Class<E> eventType,
-            Consumer<PropertyChangeEvent> fireComponentEvent) {
+            Class<E> eventType) {
         this.propertyName = propertyName;
         this.component = component;
         this.eventType = eventType;
-        this.fireComponentEvent = fireComponentEvent;
     }
 
     public Registration addListener(ComponentEventListener<E> listener) {
         if (listenerCount == 0) {
             propertyChangeListenerRegistration = component.getElement()
-                    .addPropertyChangeListener(propertyName,
-                            fireComponentEvent::accept);
+                    .addPropertyChangeListener(propertyName, this::fireEvent);
         }
         listenerCount++;
         Registration listenerRegistration = ComponentUtil.addListener(component,
@@ -70,4 +64,6 @@ public class PropertyChangeEventHandler<E extends ComponentEvent<?>>
             listenerRegistration.remove();
         };
     }
+
+    protected abstract void fireEvent(PropertyChangeEvent propertyChangeEvent);
 }

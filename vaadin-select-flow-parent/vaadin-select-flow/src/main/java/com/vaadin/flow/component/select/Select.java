@@ -63,6 +63,7 @@ import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.data.selection.SingleSelect;
+import com.vaadin.flow.dom.PropertyChangeEvent;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
@@ -1037,9 +1038,14 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
             ComponentEventListener<OpenedChangeEvent> listener) {
         if (openedPropertyChangeEventHandler == null) {
             openedPropertyChangeEventHandler = new PropertyChangeEventHandler<>(
-                    "opened", this, OpenedChangeEvent.class,
-                    event -> fireEvent(new OpenedChangeEvent(this,
-                            event.isUserOriginated())));
+                    "opened", this, OpenedChangeEvent.class) {
+                @Override
+                protected void fireEvent(
+                        PropertyChangeEvent propertyChangeEvent) {
+                    Select.this.fireEvent(new OpenedChangeEvent(Select.this,
+                            propertyChangeEvent.isUserOriginated()));
+                }
+            };
         }
         return openedPropertyChangeEventHandler.addListener(listener);
     }
@@ -1072,9 +1078,14 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
             ComponentEventListener<InvalidChangeEvent> listener) {
         if (invalidPropertyChangeEventHandler == null) {
             invalidPropertyChangeEventHandler = new PropertyChangeEventHandler<>(
-                    "invalid", this, InvalidChangeEvent.class,
-                    event -> fireEvent(new InvalidChangeEvent(this,
-                            event.isUserOriginated())));
+                    "invalid", this, InvalidChangeEvent.class) {
+                @Override
+                protected void fireEvent(
+                        PropertyChangeEvent propertyChangeEvent) {
+                    Select.this.fireEvent(new InvalidChangeEvent(Select.this,
+                            propertyChangeEvent.isUserOriginated()));
+                }
+            };
         }
         return invalidPropertyChangeEventHandler.addListener(listener);
     }

@@ -56,6 +56,7 @@ import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
 import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.binder.Validator;
+import com.vaadin.flow.dom.PropertyChangeEvent;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.StateTree;
@@ -494,9 +495,15 @@ public class TimePicker
             ComponentEventListener<InvalidChangeEvent> listener) {
         if (invalidPropertyChangeEventHandler == null) {
             invalidPropertyChangeEventHandler = new PropertyChangeEventHandler<>(
-                    "invalid", this, InvalidChangeEvent.class,
-                    event -> fireEvent(new InvalidChangeEvent(this,
-                            event.isUserOriginated())));
+                    "invalid", this, InvalidChangeEvent.class) {
+                @Override
+                protected void fireEvent(
+                        PropertyChangeEvent propertyChangeEvent) {
+                    TimePicker.this
+                            .fireEvent(new InvalidChangeEvent(TimePicker.this,
+                                    propertyChangeEvent.isUserOriginated()));
+                }
+            };
         }
         return invalidPropertyChangeEventHandler.addListener(listener);
     }

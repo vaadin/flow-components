@@ -59,6 +59,7 @@ import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
 import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.binder.Validator;
+import com.vaadin.flow.dom.PropertyChangeEvent;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.JsonSerializer;
@@ -811,9 +812,15 @@ public class DatePicker
             ComponentEventListener<OpenedChangeEvent> listener) {
         if (openedPropertyChangeEventHandler == null) {
             openedPropertyChangeEventHandler = new PropertyChangeEventHandler<>(
-                    "opened", this, OpenedChangeEvent.class,
-                    event -> fireEvent(new OpenedChangeEvent(this,
-                            event.isUserOriginated())));
+                    "opened", this, OpenedChangeEvent.class) {
+                @Override
+                protected void fireEvent(
+                        PropertyChangeEvent propertyChangeEvent) {
+                    DatePicker.this
+                            .fireEvent(new OpenedChangeEvent(DatePicker.this,
+                                    propertyChangeEvent.isUserOriginated()));
+                }
+            };
         }
         return openedPropertyChangeEventHandler.addListener(listener);
     }
@@ -846,9 +853,15 @@ public class DatePicker
             ComponentEventListener<InvalidChangeEvent> listener) {
         if (invalidPropertyChangeEventHandler == null) {
             invalidPropertyChangeEventHandler = new PropertyChangeEventHandler<>(
-                    "invalid", this, InvalidChangeEvent.class,
-                    event -> fireEvent(new InvalidChangeEvent(this,
-                            event.isUserOriginated())));
+                    "invalid", this, InvalidChangeEvent.class) {
+                @Override
+                protected void fireEvent(
+                        PropertyChangeEvent propertyChangeEvent) {
+                    DatePicker.this
+                            .fireEvent(new InvalidChangeEvent(DatePicker.this,
+                                    propertyChangeEvent.isUserOriginated()));
+                }
+            };
         }
         return invalidPropertyChangeEventHandler.addListener(listener);
     }
