@@ -303,4 +303,39 @@ public class DialogTest {
 
         Assert.assertEquals(1, listenerInvokedCount.get());
     }
+
+    @Test
+    public void twoOpenedChangeListeners_bothListenersAreInvokedOnOpenedChange() {
+        var dialog = new Dialog();
+
+        var listenerInvokedCount = new AtomicInteger(0);
+        dialog.addOpenedChangeListener(
+                e -> listenerInvokedCount.incrementAndGet());
+        dialog.addOpenedChangeListener(
+                e -> listenerInvokedCount.incrementAndGet());
+
+        dialog.open();
+
+        Assert.assertEquals(2, listenerInvokedCount.get());
+    }
+
+    @Test
+    public void twoOpenedChangeListeners_unregisterOneOnEvent_listenerIsInvokedOnOpenedChange() {
+        var dialog = new Dialog();
+
+        var listenerInvokedCount = new AtomicInteger(0);
+        dialog.addOpenedChangeListener(e -> {
+            listenerInvokedCount.incrementAndGet();
+            e.unregisterListener();
+        });
+        dialog.addOpenedChangeListener(
+                e -> listenerInvokedCount.incrementAndGet());
+
+        dialog.open();
+        listenerInvokedCount.set(0);
+
+        dialog.close();
+
+        Assert.assertEquals(1, listenerInvokedCount.get());
+    }
 }

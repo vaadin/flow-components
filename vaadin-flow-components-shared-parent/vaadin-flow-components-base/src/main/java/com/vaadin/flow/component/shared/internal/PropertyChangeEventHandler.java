@@ -51,7 +51,8 @@ public abstract class PropertyChangeEventHandler<E extends ComponentEvent<?>>
     public Registration addListener(ComponentEventListener<E> listener) {
         if (listenerCount == 0) {
             propertyChangeListenerRegistration = component.getElement()
-                    .addPropertyChangeListener(propertyName, this::fireComponentEvent);
+                    .addPropertyChangeListener(propertyName,
+                            this::fireComponentEvent);
         }
         listenerCount++;
         Registration listenerRegistration = ComponentUtil.addListener(component,
@@ -65,5 +66,6 @@ public abstract class PropertyChangeEventHandler<E extends ComponentEvent<?>>
         };
     }
 
-    protected abstract void fireComponentEvent(PropertyChangeEvent propertyChangeEvent);
+    protected abstract void fireComponentEvent(
+            PropertyChangeEvent propertyChangeEvent);
 }

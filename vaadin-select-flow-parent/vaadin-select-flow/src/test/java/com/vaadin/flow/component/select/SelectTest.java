@@ -833,6 +833,37 @@ public class SelectTest {
     }
 
     @Test
+    public void twoOpenedChangeListeners_bothListenersAreInvokedOnOpenedChange() {
+        var listenerInvokedCount = new AtomicInteger(0);
+        select.addOpenedChangeListener(
+                e -> listenerInvokedCount.incrementAndGet());
+        select.addOpenedChangeListener(
+                e -> listenerInvokedCount.incrementAndGet());
+
+        select.setOpened(true);
+
+        Assert.assertEquals(2, listenerInvokedCount.get());
+    }
+
+    @Test
+    public void twoOpenedChangeListeners_unregisterOneOnEvent_listenerIsInvokedOnOpenedChange() {
+        var listenerInvokedCount = new AtomicInteger(0);
+        select.addOpenedChangeListener(e -> {
+            listenerInvokedCount.incrementAndGet();
+            e.unregisterListener();
+        });
+        select.addOpenedChangeListener(
+                e -> listenerInvokedCount.incrementAndGet());
+
+        select.setOpened(true);
+        listenerInvokedCount.set(0);
+
+        select.setOpened(false);
+
+        Assert.assertEquals(1, listenerInvokedCount.get());
+    }
+
+    @Test
     public void unregisterInvalidChangeListenerOnEvent() {
         var listenerInvokedCount = new AtomicInteger(0);
         select.addInvalidChangeListener(e -> {
@@ -841,6 +872,37 @@ public class SelectTest {
         });
 
         select.setInvalid(true);
+        select.setInvalid(false);
+
+        Assert.assertEquals(1, listenerInvokedCount.get());
+    }
+
+    @Test
+    public void twoInvalidChangeListeners_bothListenersAreInvokedOnInvalidChange() {
+        var listenerInvokedCount = new AtomicInteger(0);
+        select.addInvalidChangeListener(
+                e -> listenerInvokedCount.incrementAndGet());
+        select.addInvalidChangeListener(
+                e -> listenerInvokedCount.incrementAndGet());
+
+        select.setInvalid(true);
+
+        Assert.assertEquals(2, listenerInvokedCount.get());
+    }
+
+    @Test
+    public void twoInvalidChangeListeners_unregisterOneOnEvent_listenerIsInvokedOnInvalidChange() {
+        var listenerInvokedCount = new AtomicInteger(0);
+        select.addInvalidChangeListener(e -> {
+            listenerInvokedCount.incrementAndGet();
+            e.unregisterListener();
+        });
+        select.addInvalidChangeListener(
+                e -> listenerInvokedCount.incrementAndGet());
+
+        select.setInvalid(true);
+        listenerInvokedCount.set(0);
+
         select.setInvalid(false);
 
         Assert.assertEquals(1, listenerInvokedCount.get());
