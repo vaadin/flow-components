@@ -837,7 +837,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
             openedPropertyChangeEventHandler = new PropertyChangeEventHandler<>(
                     "opened", this, OpenedChangeEvent.class) {
                 @Override
-                protected void fireEvent(
+                protected void fireComponentEvent(
                         PropertyChangeEvent propertyChangeEvent) {
                     Dialog.this.fireEvent(new OpenedChangeEvent(Dialog.this,
                             propertyChangeEvent.isUserOriginated()));

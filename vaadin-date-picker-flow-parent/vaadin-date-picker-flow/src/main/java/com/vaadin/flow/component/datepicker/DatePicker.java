@@ -814,7 +814,7 @@ public class DatePicker
             openedPropertyChangeEventHandler = new PropertyChangeEventHandler<>(
                     "opened", this, OpenedChangeEvent.class) {
                 @Override
-                protected void fireEvent(
+                protected void fireComponentEvent(
                         PropertyChangeEvent propertyChangeEvent) {
                     DatePicker.this
                             .fireEvent(new OpenedChangeEvent(DatePicker.this,
@@ -855,7 +855,7 @@ public class DatePicker
             invalidPropertyChangeEventHandler = new PropertyChangeEventHandler<>(
                     "invalid", this, InvalidChangeEvent.class) {
                 @Override
-                protected void fireEvent(
+                protected void fireComponentEvent(
                         PropertyChangeEvent propertyChangeEvent) {
                     DatePicker.this
                             .fireEvent(new InvalidChangeEvent(DatePicker.this,

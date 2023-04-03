@@ -497,7 +497,7 @@ public class TimePicker
             invalidPropertyChangeEventHandler = new PropertyChangeEventHandler<>(
                     "invalid", this, InvalidChangeEvent.class) {
                 @Override
-                protected void fireEvent(
+                protected void fireComponentEvent(
                         PropertyChangeEvent propertyChangeEvent) {
                     TimePicker.this
                             .fireEvent(new InvalidChangeEvent(TimePicker.this,

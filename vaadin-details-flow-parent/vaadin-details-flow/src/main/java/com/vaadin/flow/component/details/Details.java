@@ -326,7 +326,7 @@ public class Details extends Component implements HasEnabled, HasSize, HasStyle,
             openedPropertyChangeEventHandler = new PropertyChangeEventHandler<>(
                     "opened", this, OpenedChangeEvent.class) {
                 @Override
-                protected void fireEvent(
+                protected void fireComponentEvent(
                         PropertyChangeEvent propertyChangeEvent) {
                     Details.this.fireEvent(new OpenedChangeEvent(Details.this,
                             propertyChangeEvent.isUserOriginated()));

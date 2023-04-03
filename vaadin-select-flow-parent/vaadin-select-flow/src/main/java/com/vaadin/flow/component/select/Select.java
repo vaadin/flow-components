@@ -1040,7 +1040,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
             openedPropertyChangeEventHandler = new PropertyChangeEventHandler<>(
                     "opened", this, OpenedChangeEvent.class) {
                 @Override
-                protected void fireEvent(
+                protected void fireComponentEvent(
                         PropertyChangeEvent propertyChangeEvent) {
                     Select.this.fireEvent(new OpenedChangeEvent(Select.this,
                             propertyChangeEvent.isUserOriginated()));
@@ -1080,7 +1080,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
             invalidPropertyChangeEventHandler = new PropertyChangeEventHandler<>(
                     "invalid", this, InvalidChangeEvent.class) {
                 @Override
-                protected void fireEvent(
+                protected void fireComponentEvent(
                         PropertyChangeEvent propertyChangeEvent) {
                     Select.this.fireEvent(new InvalidChangeEvent(Select.this,
                             propertyChangeEvent.isUserOriginated()));

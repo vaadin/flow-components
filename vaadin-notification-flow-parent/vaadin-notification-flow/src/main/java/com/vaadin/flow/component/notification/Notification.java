@@ -475,7 +475,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
             openedPropertyChangeEventHandler = new PropertyChangeEventHandler<>(
                     "opened", this, OpenedChangeEvent.class) {
                 @Override
-                protected void fireEvent(
+                protected void fireComponentEvent(
                         PropertyChangeEvent propertyChangeEvent) {
                     Notification.this
                             .fireEvent(new OpenedChangeEvent(Notification.this,
