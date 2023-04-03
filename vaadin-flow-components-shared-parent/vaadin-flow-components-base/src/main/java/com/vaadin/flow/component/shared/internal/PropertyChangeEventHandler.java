@@ -41,6 +41,16 @@ public abstract class PropertyChangeEventHandler<E extends ComponentEvent<?>>
 
     private Class<E> eventType;
 
+    /**
+     * Initializes a new PropertyChangeEventHandler.
+     *
+     * @param propertyName
+     *            the property name to listen to.
+     * @param component
+     *            the component to which the listeners are to be added.
+     * @param eventType
+     *            the event type to be subscribed to.
+     */
     public PropertyChangeEventHandler(String propertyName, Component component,
             Class<E> eventType) {
         this.propertyName = propertyName;
@@ -48,6 +58,14 @@ public abstract class PropertyChangeEventHandler<E extends ComponentEvent<?>>
         this.eventType = eventType;
     }
 
+    /**
+     * Adds a listener to get notified when the state of the specified property
+     * of the component changes.
+     *
+     * @param listener
+     *            the listener
+     * @return a {@link Registration} for removing the event listener
+     */
     public Registration addListener(ComponentEventListener<E> listener) {
         if (listenerCount == 0) {
             propertyChangeListenerRegistration = component.getElement()
@@ -66,6 +84,12 @@ public abstract class PropertyChangeEventHandler<E extends ComponentEvent<?>>
         };
     }
 
+    /**
+     * Fires a component event based on property change.
+     *
+     * @param propertyChangeEvent
+     *            the property change event that was subscribed to.
+     */
     protected abstract void fireComponentEvent(
             PropertyChangeEvent propertyChangeEvent);
 }
