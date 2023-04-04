@@ -28,9 +28,9 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * parent component and its height is determined by the components it contains.
  */
 @Tag("vaadin-vertical-layout")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha3")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha6")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/vertical-layout", version = "24.1.0-alpha3")
+@NpmPackage(value = "@vaadin/vertical-layout", version = "24.1.0-alpha6")
 @JsModule("@vaadin/vertical-layout/src/vaadin-vertical-layout.js")
 public class VerticalLayout extends Component implements ThemableLayout,
         FlexComponent, ClickNotifier<VerticalLayout> {
@@ -55,6 +55,41 @@ public class VerticalLayout extends Component implements ThemableLayout,
     public VerticalLayout(Component... children) {
         this();
         add(children);
+    }
+
+    /**
+     * Convenience constructor to create a layout with the children and
+     * specified justifyContentMode.
+     *
+     * @param justifyContentMode
+     *            the justifyContentMode
+     * @param children
+     *            the items to add to this layout
+     *
+     * @see #add(Component...)
+     * @see #setJustifyContentMode(JustifyContentMode)
+     */
+    public VerticalLayout(JustifyContentMode justifyContentMode,
+            Component... children) {
+        this(children);
+        setJustifyContentMode(justifyContentMode);
+    }
+
+    /**
+     * Convenience constructor to create a layout with the children and
+     * specified horizontal alignment.
+     *
+     * @param alignment
+     *            the horizontal alignment
+     * @param children
+     *            the items to add to this layout
+     *
+     * @see #add(Component...)
+     * @see #setDefaultHorizontalComponentAlignment(Alignment)
+     */
+    public VerticalLayout(Alignment alignment, Component... children) {
+        this(children);
+        setDefaultHorizontalComponentAlignment(alignment);
     }
 
     /**
