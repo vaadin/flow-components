@@ -15,27 +15,33 @@ public class CustomSelectionModelTest {
 
     /**
      * Sample class that extends Grid for setting a custom selection model
+     *
      * @param <T>
      */
     public static class CustomGrid<T> extends Grid<T> {
 
         public CustomGrid() {
-            setSelectionModel(new CustomMultiSelectionModel<>(this), SelectionMode.MULTI);
+            setSelectionModel(new CustomMultiSelectionModel<>(this),
+                    SelectionMode.MULTI);
         }
 
-        class CustomMultiSelectionModel<T> extends AbstractGridMultiSelectionModel<T> {
+        class CustomMultiSelectionModel<T>
+                extends AbstractGridMultiSelectionModel<T> {
             public CustomMultiSelectionModel(CustomGrid<T> grid) {
                 super(grid);
             }
 
             @Override
-            protected void fireSelectionEvent(SelectionEvent<Grid<T>, T> event) {
+            protected void fireSelectionEvent(
+                    SelectionEvent<Grid<T>, T> event) {
                 ((CustomGrid) event.getSource()).fireSelectionEvent(event);
             }
+
             @Override
             protected void clientSelectAll() {
                 getSelectionColumn().setSelectAllCheckboxState(true);
-                getSelectionColumn().setSelectAllCheckboxIndeterminateState(false);
+                getSelectionColumn()
+                        .setSelectAllCheckboxIndeterminateState(false);
             }
 
         }
