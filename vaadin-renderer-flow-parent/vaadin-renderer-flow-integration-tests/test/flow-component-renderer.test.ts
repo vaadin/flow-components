@@ -46,6 +46,6 @@ describe('flow-component-renderer', () => {
     elements[0] = document.createElement('div');
     await nextFrame();
 
-    expect(container.firstElementChild).to.be.ok;
+    expect(container.firstElementChild).to.equal(elements[0]);
   });
 });
