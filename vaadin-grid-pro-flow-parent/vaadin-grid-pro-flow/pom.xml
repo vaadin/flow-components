@@ -10,7 +10,7 @@
     <packaging>jar</packaging>
     <name>Vaadin Grid Pro</name>
     <properties>
-        <osgi.bundle.license>https://vaadin.com/license/cvdl-4.0</osgi.bundle.license>
+        <osgi.bundle.license>https://vaadin.com/commercial-license-and-service-terms</osgi.bundle.license>
     </properties>
     <dependencies>
         <dependency>

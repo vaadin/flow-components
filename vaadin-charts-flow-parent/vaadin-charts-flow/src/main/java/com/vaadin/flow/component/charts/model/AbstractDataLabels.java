@@ -11,19 +11,6 @@ package com.vaadin.flow.component.charts.model;
 import com.vaadin.flow.component.charts.model.style.Color;
 import com.vaadin.flow.component.charts.model.style.Style;
 
-/*-
- * #%L
- * Vaadin Charts for Flow
- * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
- * 
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
- */
-
 public abstract class AbstractDataLabels extends AbstractConfigurationObject {
 
     public static final String OVERFLOW_JUSTIFY = "justify";

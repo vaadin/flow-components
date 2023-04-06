@@ -8,19 +8,6 @@
  */
 package com.vaadin.flow.component.charts.model;
 
-/*-
- * #%L
- * Vaadin Charts for Flow
- * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
- * 
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
- */
-
 /**
  * Language object. The language object is global and it can't be set on each
  * chart initiation. Instead, use <code>Highcharts.setOptions</code> to set it

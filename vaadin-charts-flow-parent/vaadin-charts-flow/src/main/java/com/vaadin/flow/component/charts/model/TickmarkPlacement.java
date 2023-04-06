@@ -8,19 +8,6 @@
  */
 package com.vaadin.flow.component.charts.model;
 
-/*-
- * #%L
- * Vaadin Charts for Flow
- * %%
- * Copyright (C) 2014 - 2020 Vaadin Ltd
- * %%
- * This program is available under Commercial Vaadin Developer License
- * 4.0 (CVDLv4).
- * 
- * For the full License, see <https://vaadin.com/license/cvdl-4.0>.
- * #L%
- */
-
 /**
  * For categorized axes only. If ON the tick mark is placed in the center of the
  * category, if BETWEEN the tick mark is placed between categories. Defaults to
