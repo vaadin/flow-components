@@ -43,9 +43,10 @@ describe('flow-component-renderer', () => {
     render(html`${window.Vaadin.FlowComponentHost.getNode('ROOT', 0)}`, container);
     await nextFrame();
 
-    elements[0] = document.createElement('div');
+    const element = document.createElement('div');
+    elements[0] = element;
     await nextFrame();
 
-    expect(container.firstElementChild).to.equal(elements[0]);
+    expect(container.firstElementChild).to.equal(element);
   });
 });
