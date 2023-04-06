@@ -33,7 +33,7 @@
         <sauce-connect.version>2.1.25</sauce-connect.version>
         <ci-sauce.version>1.149</ci-sauce.version>
         <sauce.options>--tunnel-identifier ${maven.build.timestamp}</sauce.options>
-        <osgi.bundle.license>http://www.apache.org/licenses/LICENSE-2.0</osgi.bundle.license>
+        <osgi.bundle.license>https://vaadin.com/commercial-license-and-service-terms</osgi.bundle.license>
         <osgi.export.package>default</osgi.export.package>
         <currentYear>2023</currentYear>
     </properties>
