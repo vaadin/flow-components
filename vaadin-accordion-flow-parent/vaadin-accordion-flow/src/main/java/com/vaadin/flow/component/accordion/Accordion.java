@@ -31,10 +31,10 @@ import com.vaadin.flow.shared.Registration;
  * can be opened at a time.
  */
 @Tag("vaadin-accordion")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.22")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.1.0-alpha1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/accordion", version = "22.0.22")
-@NpmPackage(value = "@vaadin/vaadin-accordion", version = "22.0.22")
+@NpmPackage(value = "@vaadin/accordion", version = "22.1.0-alpha1")
+@NpmPackage(value = "@vaadin/vaadin-accordion", version = "22.1.0-alpha1")
 @JsModule("@vaadin/accordion/src/vaadin-accordion.js")
 public class Accordion extends Component implements HasSize, HasStyle {
 
