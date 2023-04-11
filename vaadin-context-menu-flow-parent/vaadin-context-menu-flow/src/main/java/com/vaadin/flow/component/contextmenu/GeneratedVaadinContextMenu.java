@@ -130,10 +130,10 @@ import elemental.json.JsonObject;
  * </p>
  */
 @Tag("vaadin-context-menu")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.22")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.1.0-alpha1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/context-menu", version = "22.0.22")
-@NpmPackage(value = "@vaadin/vaadin-context-menu", version = "22.0.22")
+@NpmPackage(value = "@vaadin/context-menu", version = "22.1.0-alpha1")
+@NpmPackage(value = "@vaadin/vaadin-context-menu", version = "22.1.0-alpha1")
 @JsModule("@vaadin/context-menu/src/vaadin-context-menu.js")
 @JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 public abstract class GeneratedVaadinContextMenu<R extends GeneratedVaadinContextMenu<R>>

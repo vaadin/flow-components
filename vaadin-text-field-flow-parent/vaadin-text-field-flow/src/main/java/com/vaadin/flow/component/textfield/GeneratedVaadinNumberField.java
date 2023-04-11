@@ -29,10 +29,10 @@ import com.vaadin.flow.function.SerializableFunction;
  * </p>
  */
 @Tag("vaadin-number-field")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.22")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.1.0-alpha1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/number-field", version = "22.0.22")
-@NpmPackage(value = "@vaadin/vaadin-text-field", version = "22.0.22")
+@NpmPackage(value = "@vaadin/number-field", version = "22.1.0-alpha1")
+@NpmPackage(value = "@vaadin/vaadin-text-field", version = "22.1.0-alpha1")
 @JsModule("@vaadin/number-field/src/vaadin-number-field.js")
 public abstract class GeneratedVaadinNumberField<R extends GeneratedVaadinNumberField<R, T>, T>
         extends GeneratedVaadinTextField<R, T> implements HasStyle {
