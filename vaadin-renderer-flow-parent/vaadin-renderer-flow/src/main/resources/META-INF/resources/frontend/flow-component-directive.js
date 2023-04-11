@@ -11,6 +11,11 @@ class FlowComponentDirective extends Directive {
   }
 
   update(part, [appid, nodeid]) {
+    this.updateContent(part, appid, nodeid);
+    return noChange;
+  }
+
+  updateContent(part, appid, nodeid) {
     const { parentNode, startNode } = part;
 
     const newNode = this.getNewNode(appid, nodeid);
@@ -18,9 +23,9 @@ class FlowComponentDirective extends Directive {
 
     if (!newNode) {
       // If the node is not found, try again later.
-      setTimeout(() => this.update(part, [appid, nodeid]));
+      setTimeout(() => this.updateContent(part, appid, nodeid));
     } else if (oldNode === newNode) {
-      return noChange;
+      return;
     } else if (oldNode && newNode) {
       parentNode.replaceChild(newNode, oldNode);
     } else if (oldNode) {
@@ -28,8 +33,6 @@ class FlowComponentDirective extends Directive {
     } else if (newNode) {
       startNode.after(newNode);
     }
-
-    return noChange;
   }
 
   getNewNode(appid, nodeid) {
