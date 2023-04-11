@@ -23,9 +23,9 @@ declare global {
 }
 
 describe('flow-component-renderer', () => {
-  let elements: { [key: number]: HTMLElement } = {};
+  let elements: { [key: number]: HTMLElement };
 
-  beforeEach(() => {
+  before(() => {
     window.Vaadin.Flow = {
       clients: {
         ROOT: {
@@ -37,8 +37,12 @@ describe('flow-component-renderer', () => {
     };
   });
 
+  beforeEach(() => {
+    elements = {};
+  });
+
   it('should get lazily added node', async () => {
-    const container = fixtureSync(`<div></div>`) as HTMLDivElement;
+    const container = fixtureSync<HTMLDivElement>(`<div></div>`);
 
     render(html`${window.Vaadin.FlowComponentHost.getNode('ROOT', 0)}`, container);
     await nextFrame();
