@@ -55,11 +55,6 @@ public class Lumo implements AbstractTheme {
     }
 
     @Override
-    public List<String> getHeaderInlineContents() {
-        return Collections.emptyList();
-    }
-
-    @Override
     public Map<String, String> getHtmlAttributes(String variant) {
         if (variant.isEmpty()) {
             return Collections.emptyMap();
