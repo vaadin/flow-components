@@ -50,11 +50,6 @@ public class Material implements AbstractTheme {
     }
 
     @Override
-    public List<String> getHeaderInlineContents() {
-        return Collections.emptyList();
-    }
-
-    @Override
     public Map<String, String> getHtmlAttributes(String variant) {
         switch (variant) {
         case LIGHT:
