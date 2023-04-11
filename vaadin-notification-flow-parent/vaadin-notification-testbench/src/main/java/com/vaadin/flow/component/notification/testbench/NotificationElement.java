@@ -15,8 +15,10 @@
  */
 package com.vaadin.flow.component.notification.testbench;
 
+import org.openqa.selenium.By;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.TimeoutException;
 
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
@@ -60,6 +62,19 @@ public class NotificationElement extends TestBenchElement {
      * @return the card for the notification
      */
     private TestBenchElement getCard() {
-        return getPropertyElement("_card");
+        var card = getPropertyElement("_card");
+
+        try {
+            // Wait until the content becomes visible
+            waitUntil(driver -> {
+                var hasVisbleText = !card.getText().isEmpty();
+                var hasVisibleChildren = card.findElements(By.cssSelector("*"))
+                        .stream().anyMatch(element -> element.isDisplayed());
+                return hasVisbleText || hasVisibleChildren;
+            }, 100);
+        } catch (TimeoutException e) {
+            // Ignore, the card may be empty on purpose
+        }
+        return card;
     }
 }
