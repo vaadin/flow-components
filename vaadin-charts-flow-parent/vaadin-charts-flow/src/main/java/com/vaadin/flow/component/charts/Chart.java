@@ -86,9 +86,9 @@ import elemental.json.impl.JreJsonFactory;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-chart")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha6")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/charts", version = "24.1.0-alpha6")
+@NpmPackage(value = "@vaadin/charts", version = "24.1.0-alpha7")
 @JsModule("@vaadin/charts/src/vaadin-chart.js")
 public class Chart extends Component implements HasStyle, HasSize, HasTheme {
 

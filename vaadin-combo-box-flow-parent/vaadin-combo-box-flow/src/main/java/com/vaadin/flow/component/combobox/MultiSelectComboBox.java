@@ -70,9 +70,9 @@ import java.util.Set;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-multi-select-combo-box")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha6")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/multi-select-combo-box", version = "24.1.0-alpha6")
+@NpmPackage(value = "@vaadin/multi-select-combo-box", version = "24.1.0-alpha7")
 @JsModule("@vaadin/multi-select-combo-box/src/vaadin-multi-select-combo-box.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./comboBoxConnector.js")
