@@ -1056,4 +1056,13 @@ public class TreeGrid<T> extends Grid<T>
     public void scrollToIndex(int rowIndex) {
         super.scrollToIndex(rowIndex);
     }
+    public void scrollToIndex(int... indexes) {
+        if (indexes.length == 0) {
+            throw new IllegalArgumentException(
+                    "At least one index should be provided.");
+        }
+        getDataCommunicator().setRequestedRange(indexes[0], getPageSize());
+        getUI().ifPresent(
+                ui -> ui.beforeClientResponse(this, ctx -> getElement().callJsFunction("scrollToIndex", Arrays.stream( indexes ).boxed().toArray( Integer[]::new ))));
+    }
 }
