@@ -64,8 +64,9 @@ public class NotificationView extends Div {
     private void createNotificationWithPosition() {
         NativeButton button = new NativeButton(BUTTON_CAPTION);
         Notification notification = new Notification(
-                "This notification is located on Top-Left", 3000,
-                Position.TOP_START);
+                new Span("This notification is located on Top-Left"));
+        notification.setDuration(3000);
+        notification.setPosition(Position.TOP_START);
         button.addClickListener(event -> notification.open());
         button.setId("position-notification-button");
         notification.setId("position-notification");
