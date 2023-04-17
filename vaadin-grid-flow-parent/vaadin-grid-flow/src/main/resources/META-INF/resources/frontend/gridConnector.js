@@ -239,9 +239,9 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
         grid._createPropertyObserver('activeItem', '__activeItemChangedDetails', true);
 
         grid.$connector._getSameLevelPage = tryCatchWrapper(function (parentKey, index, defaultPage) {
-          let cacheAndIndex = grid._cache.getCacheAndIndex(index);
-          let parentItem = cacheAndIndex.cache.parentItem;
-          let parentKeyOfIndex = parentItem ? grid.getItemId(parentItem) : root;
+          const cacheAndIndex = grid._cache.getCacheAndIndex(index);
+          const parentItem = cacheAndIndex.cache.parentItem;
+          const parentKeyOfIndex = parentItem ? grid.getItemId(parentItem) : root;
           if (parentKeyOfIndex === parentKey) {
             return grid._getPageForIndex(cacheAndIndex.scaledIndex);
           }
