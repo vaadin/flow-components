@@ -1056,13 +1056,43 @@ public class TreeGrid<T> extends Grid<T>
     public void scrollToIndex(int rowIndex) {
         super.scrollToIndex(rowIndex);
     }
+
+    @Override
+    public void scrollToEnd() {
+        List<Integer> indexes = new ArrayList<>();
+        int lastRootItemIndex = getDataCommunicator().getItemCount() - 1;
+        indexes.add(lastRootItemIndex);
+        T parentItem = getDataCommunicator()
+                .fetchFromProvider(lastRootItemIndex, 1).findAny().orElse(null);
+        while (parentItem != null && isExpanded(parentItem)) {
+            int lastChildItemIndex = getDataCommunicator()
+                    .getDataProvider().getChildCount(new HierarchicalQuery(0,
+                            Integer.MAX_VALUE, null, null, null, parentItem))
+                    - 1;
+            indexes.add(lastChildItemIndex);
+            parentItem = (T) getDataCommunicator().getDataProvider()
+                    .fetchChildren(new HierarchicalQuery(lastChildItemIndex, 1,
+                            null, null, null, parentItem))
+                    .findAny().orElse(null);
+
+        }
+        String joinedIndexes = indexes.stream().map(String::valueOf)
+                .collect(Collectors.joining(","));
+        getUI().ifPresent(ui -> ui.beforeClientResponse(this,
+                ctx -> getElement().executeJs(
+                        "this.scrollToIndex(" + joinedIndexes + ");")));
+    }
+
     public void scrollToIndex(int... indexes) {
         if (indexes.length == 0) {
             throw new IllegalArgumentException(
                     "At least one index should be provided.");
         }
         getDataCommunicator().setRequestedRange(indexes[0], getPageSize());
-        getUI().ifPresent(
-                ui -> ui.beforeClientResponse(this, ctx -> getElement().callJsFunction("scrollToIndex", Arrays.stream( indexes ).boxed().toArray( Integer[]::new ))));
+        String joinedIndexes = Arrays.stream(indexes).mapToObj(String::valueOf)
+                .collect(Collectors.joining(","));
+        getUI().ifPresent(ui -> ui.beforeClientResponse(this,
+                ctx -> getElement().executeJs(
+                        "this.scrollToIndex(" + joinedIndexes + ");")));
     }
 }
