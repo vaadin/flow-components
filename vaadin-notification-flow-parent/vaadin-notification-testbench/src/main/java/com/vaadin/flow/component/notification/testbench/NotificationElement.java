@@ -71,7 +71,7 @@ public class NotificationElement extends TestBenchElement {
                 var hasVisibleChildren = card.findElements(By.cssSelector("*"))
                         .stream().anyMatch(element -> element.isDisplayed());
                 return hasVisbleText || hasVisibleChildren;
-            }, 100);
+            }, 1);
         } catch (TimeoutException e) {
             // Ignore, the card may be empty on purpose
         }
