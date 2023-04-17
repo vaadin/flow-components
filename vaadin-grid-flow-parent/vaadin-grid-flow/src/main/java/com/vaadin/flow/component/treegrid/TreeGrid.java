@@ -1057,36 +1057,6 @@ public class TreeGrid<T> extends Grid<T>
         super.scrollToIndex(rowIndex);
     }
 
-    @Override
-    public void scrollToEnd() {
-        List<Integer> indexesOfLastItem = getIndexesOfLastItem();
-        String joinedIndexes = indexesOfLastItem.stream().map(String::valueOf)
-                .collect(Collectors.joining(","));
-        getUI().ifPresent(ui -> ui.beforeClientResponse(this,
-                ctx -> getElement().executeJs(
-                        "this.scrollToIndex(" + joinedIndexes + ");")));
-    }
-
-    private List<Integer> getIndexesOfLastItem() {
-        List<Integer> indexes = new ArrayList<>();
-        int lastRootItemIndex = getDataCommunicator().getItemCount() - 1;
-        indexes.add(lastRootItemIndex);
-        T parentItem = getDataCommunicator()
-                .fetchFromProvider(lastRootItemIndex, 1).findAny().orElse(null);
-        while (parentItem != null && isExpanded(parentItem)) {
-            int lastChildItemIndex = getDataCommunicator()
-                    .getDataProvider().getChildCount(new HierarchicalQuery(0,
-                            Integer.MAX_VALUE, null, null, null, parentItem))
-                    - 1;
-            indexes.add(lastChildItemIndex);
-            parentItem = (T) getDataCommunicator().getDataProvider()
-                    .fetchChildren(new HierarchicalQuery(lastChildItemIndex, 1,
-                            null, null, null, parentItem))
-                    .findAny().orElse(null);
-        }
-        return indexes;
-    }
-
     public void scrollToIndex(int... indexes) {
         if (indexes.length == 0) {
             throw new IllegalArgumentException(
@@ -1098,5 +1068,12 @@ public class TreeGrid<T> extends Grid<T>
         getUI().ifPresent(ui -> ui.beforeClientResponse(this,
                 ctx -> getElement().executeJs(
                         "this.scrollToIndex(" + joinedIndexes + ");")));
+    }
+
+    @Override
+    public void scrollToEnd() {
+        getUI().ifPresent(ui -> ui.beforeClientResponse(this,
+                ctx -> getElement().executeJs(
+                        "this.scrollToIndex(...Array(10).fill(Infinity))")));
     }
 }
