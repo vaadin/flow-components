@@ -37,6 +37,19 @@ public class TreeGridElement extends GridElement {
     }
 
     /**
+     * Scrolls to the row with the given indexes. The indexes are hierarchical,
+     * starting with the root index.
+     *
+     * @param indexes
+     *            the indexes of the row to scroll to
+     */
+    public void scrollToRowAndWait(int... indexes) {
+        waitUntilLoadingFinished();
+        callFunction("scrollToIndex", indexes);
+        waitUntilLoadingFinished();
+    }
+
+    /**
      * Gets the grid cell for the given row and column index.
      * <p>
      * For the column index, only visible columns are taken into account.
