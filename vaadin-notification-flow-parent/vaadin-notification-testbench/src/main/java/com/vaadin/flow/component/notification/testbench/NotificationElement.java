@@ -67,10 +67,10 @@ public class NotificationElement extends TestBenchElement {
         try {
             // Wait until the content becomes visible
             waitUntil(driver -> {
-                var hasVisbleText = !card.getText().isEmpty();
+                var hasVisibleText = !card.getText().isEmpty();
                 var hasVisibleChildren = card.findElements(By.cssSelector("*"))
                         .stream().anyMatch(element -> element.isDisplayed());
-                return hasVisbleText || hasVisibleChildren;
+                return hasVisibleText || hasVisibleChildren;
             }, 1);
         } catch (TimeoutException e) {
             // Ignore, the card may be empty on purpose
