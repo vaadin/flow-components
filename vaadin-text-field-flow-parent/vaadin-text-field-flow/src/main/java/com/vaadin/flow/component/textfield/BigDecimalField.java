@@ -55,7 +55,7 @@ import com.vaadin.flow.function.SerializableBiFunction;
  */
 @SuppressWarnings("deprecation")
 @Tag("vaadin-big-decimal-field")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.9")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.10")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("./vaadin-big-decimal-field.js")
 public class BigDecimalField
@@ -373,6 +373,12 @@ public class BigDecimalField
                 && Objects.equals(value, getEmptyValue())) {
             // Clear the input element from possible bad input.
             getElement().executeJs("this.inputElement.value = ''");
+        } else {
+            // Restore the input element's value in case it was cleared
+            // in the above branch. That can happen when setValue(null)
+            // and setValue(...) are subsequently called within one round-trip
+            // and there was bad input.
+            getElement().executeJs("this.inputElement.value = this.value");
         }
     }
 

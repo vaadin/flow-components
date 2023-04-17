@@ -34,11 +34,11 @@ import java.util.Locale;
  * {@link #setScrollDirection(ScrollDirection)}
  */
 @Tag("vaadin-scroller")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.9")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.10")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/scroller", version = "23.3.9")
-@NpmPackage(value = "@vaadin/vaadin-ordered-layout", version = "23.3.9")
-@JsModule("@vaadin/scroller/vaadin-scroller.js")
+@NpmPackage(value = "@vaadin/scroller", version = "23.3.10")
+@NpmPackage(value = "@vaadin/vaadin-ordered-layout", version = "23.3.10")
+@JsModule("@vaadin/scroller/src/vaadin-scroller.js")
 public class Scroller extends Component implements HasSize, HasStyle {
 
     private static final String SCROLL_DIRECTION_PROPERTY = "scrollDirection";
