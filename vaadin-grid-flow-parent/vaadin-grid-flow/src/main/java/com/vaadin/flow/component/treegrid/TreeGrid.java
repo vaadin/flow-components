@@ -1059,6 +1059,15 @@ public class TreeGrid<T> extends Grid<T>
 
     @Override
     public void scrollToEnd() {
+        List<Integer> indexesOfLastItem = getIndexesOfLastItem();
+        String joinedIndexes = indexesOfLastItem.stream().map(String::valueOf)
+                .collect(Collectors.joining(","));
+        getUI().ifPresent(ui -> ui.beforeClientResponse(this,
+                ctx -> getElement().executeJs(
+                        "this.scrollToIndex(" + joinedIndexes + ");")));
+    }
+
+    private List<Integer> getIndexesOfLastItem() {
         List<Integer> indexes = new ArrayList<>();
         int lastRootItemIndex = getDataCommunicator().getItemCount() - 1;
         indexes.add(lastRootItemIndex);
@@ -1074,13 +1083,8 @@ public class TreeGrid<T> extends Grid<T>
                     .fetchChildren(new HierarchicalQuery(lastChildItemIndex, 1,
                             null, null, null, parentItem))
                     .findAny().orElse(null);
-
         }
-        String joinedIndexes = indexes.stream().map(String::valueOf)
-                .collect(Collectors.joining(","));
-        getUI().ifPresent(ui -> ui.beforeClientResponse(this,
-                ctx -> getElement().executeJs(
-                        "this.scrollToIndex(" + joinedIndexes + ");")));
+        return indexes;
     }
 
     public void scrollToIndex(int... indexes) {

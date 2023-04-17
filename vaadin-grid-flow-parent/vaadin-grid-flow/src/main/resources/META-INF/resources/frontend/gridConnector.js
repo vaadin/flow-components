@@ -238,17 +238,17 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
         });
         grid._createPropertyObserver('activeItem', '__activeItemChangedDetails', true);
 
-        grid.$connector._getPageIfSameLevel = function (parentKey, index, defaultPage) {
+        grid.$connector._getSameLevelPage = tryCatchWrapper(function (parentKey, index, defaultPage) {
           let cacheAndIndex = grid._cache.getCacheAndIndex(index);
           let parentItem = cacheAndIndex.cache.parentItem;
           let parentKeyOfIndex = parentItem ? grid.getItemId(parentItem) : root;
           if (parentKeyOfIndex === parentKey) {
             return grid._getPageForIndex(cacheAndIndex.scaledIndex);
           }
-          return this.__getPageIfSameLevel(parentKey, defaultPage, parentKeyOfIndex);
-        };
+          return this._getSameLevelPageByHierarchy(parentKey, defaultPage, parentKeyOfIndex);
+        });
 
-        grid.$connector.__getPageIfSameLevel = tryCatchWrapper(function (parentKey, defaultPage, parentKeyOfIndex) {
+        grid.$connector._getSameLevelPageByHierarchy = tryCatchWrapper(function (parentKey, defaultPage, parentKeyOfIndex) {
           if (!parentKeyOfIndex && parentKeyOfIndex === root) {
             return defaultPage;
           }
@@ -261,7 +261,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           if (updatedParentKeyOfIndex === parentKey) {
             return grid._getPageForIndex(parentCacheAndIndex.scaledIndex);
           }
-          return this.__getPageIfSameLevel(parentKey, defaultPage, updatedParentKeyOfIndex);
+          return this._getSameLevelPageByHierarchy(parentKey, defaultPage, updatedParentKeyOfIndex);
         });
 
         grid.$connector.getCacheByKey = tryCatchWrapper(function (key) {
@@ -326,11 +326,11 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           for (let idx = firstNeededIndex; idx <= lastNeededIndex; idx++) {
             firstNeededPage = Math.min(
               firstNeededPage,
-              grid.$connector._getPageIfSameLevel(parentKey, idx, firstNeededPage)
+              grid.$connector._getSameLevelPage(parentKey, idx, firstNeededPage)
             );
             lastNeededPage = Math.max(
               lastNeededPage,
-              grid.$connector._getPageIfSameLevel(parentKey, idx, lastNeededPage)
+              grid.$connector._getSameLevelPage(parentKey, idx, lastNeededPage)
             );
           }
 
