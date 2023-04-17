@@ -28,8 +28,6 @@ class FlowComponentDirective extends Directive {
       return;
     } else if (oldNode && newNode) {
       parentNode.replaceChild(newNode, oldNode);
-    } else if (oldNode) {
-      parentNode.removeChild(oldNode);
     } else if (newNode) {
       startNode.after(newNode);
     }
