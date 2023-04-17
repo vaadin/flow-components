@@ -238,15 +238,30 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
         });
         grid._createPropertyObserver('activeItem', '__activeItemChangedDetails', true);
 
-        grid.$connector._getPageIfSameLevel = tryCatchWrapper(function (parentKey, index, defaultPage) {
+        grid.$connector._getPageIfSameLevel = function (parentKey, index, defaultPage) {
           let cacheAndIndex = grid._cache.getCacheAndIndex(index);
           let parentItem = cacheAndIndex.cache.parentItem;
           let parentKeyOfIndex = parentItem ? grid.getItemId(parentItem) : root;
-          if (parentKey !== parentKeyOfIndex) {
-            return defaultPage;
-          } else {
+          if (parentKeyOfIndex === parentKey) {
             return grid._getPageForIndex(cacheAndIndex.scaledIndex);
           }
+          return this.__getPageIfSameLevel(parentKey, defaultPage, parentKeyOfIndex);
+        };
+
+        grid.$connector.__getPageIfSameLevel = tryCatchWrapper(function (parentKey, defaultPage, parentKeyOfIndex) {
+          if (!parentKeyOfIndex && parentKeyOfIndex === root) {
+            return defaultPage;
+          }
+          const parentCacheAndIndex = grid._cache.getCacheAndIndexByKey(parentKeyOfIndex);
+          if (!parentCacheAndIndex) {
+            return defaultPage;
+          }
+          const parentItem = parentCacheAndIndex.cache.parentItem;
+          const updatedParentKeyOfIndex = parentItem ? grid.getItemId(parentItem) : root;
+          if (updatedParentKeyOfIndex === parentKey) {
+            return grid._getPageForIndex(parentCacheAndIndex.scaledIndex);
+          }
+          return this.__getPageIfSameLevel(parentKey, defaultPage, updatedParentKeyOfIndex);
         });
 
         grid.$connector.getCacheByKey = tryCatchWrapper(function (key) {
