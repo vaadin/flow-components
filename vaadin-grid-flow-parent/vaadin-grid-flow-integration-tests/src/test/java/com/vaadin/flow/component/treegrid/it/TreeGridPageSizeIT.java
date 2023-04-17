@@ -34,7 +34,6 @@ public class TreeGridPageSizeIT extends AbstractTreeGridIT {
         setupTreeGrid();
     }
 
-    @Ignore("Fix as part of https://github.com/vaadin/flow-components/issues/3505")
     @Test
     public void treegridWithPageSize10_changeTo80_revertBackTo10() {
         TreeGridElement grid = getTreeGrid();
