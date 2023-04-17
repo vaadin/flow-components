@@ -46,14 +46,16 @@ public class TreeGridScrollToPage extends Div {
                 e -> grid.scrollToIndex(150));
         scrollToIndex150.setId("scroll-to-index-150");
 
-        NativeButton scrollToIndex100_30 = new NativeButton("Scroll to index 100-30",
-                e -> grid.scrollToIndex(100, 30));
+        NativeButton scrollToIndex100_30 = new NativeButton(
+                "Scroll to index 100-30", e -> grid.scrollToIndex(100, 0));
         scrollToIndex100_30.setId("scroll-to-index-100-30");
 
-        NativeButton scrollToIndex50_10_15 = new NativeButton("Scroll to index 50-10-15",
+        NativeButton scrollToIndex50_10_15 = new NativeButton(
+                "Scroll to index 50-10-15",
                 e -> grid.scrollToIndex(50, 10, 15));
         scrollToIndex50_10_15.setId("scroll-to-index-50-10-15");
 
-        add(grid, scrollToStart, scrollToEnd, scrollToIndex150, scrollToIndex100_30, scrollToIndex50_10_15);
+        add(grid, scrollToStart, scrollToEnd, scrollToIndex150,
+                scrollToIndex100_30, scrollToIndex50_10_15);
     }
 }
