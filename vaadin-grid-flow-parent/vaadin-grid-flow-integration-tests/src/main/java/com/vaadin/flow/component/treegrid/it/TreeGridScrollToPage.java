@@ -12,11 +12,11 @@ import java.util.Map;
 
 @Route("vaadin-grid/treegrid-scroll-to")
 public class TreeGridScrollToPage extends Div {
+
     public TreeGridScrollToPage() {
         TreeGrid<String> grid = new TreeGrid<>();
-        grid.setId("treegrid");
-        grid.addHierarchyColumn(String::toString).setHeader("String")
-                .setId("string");
+        grid.setPageSize(10);
+        grid.addHierarchyColumn(String::toString).setHeader("Item");
 
         add(grid);
 
@@ -24,15 +24,18 @@ public class TreeGridScrollToPage extends Div {
 
         Map<String, String> parentPathMap = new HashMap<>();
 
-        TreeGridHugeTreePage.addRootItems("Granddad", 200, data, parentPathMap)
+        TreeGridHugeTreePage.addRootItems("Granddad", 40, data, parentPathMap)
                 .forEach(granddad -> TreeGridHugeTreePage
-                        .addItems("Dad", 100, granddad, data, parentPathMap)
-                        .forEach(dad -> TreeGridHugeTreePage.addItems("Son", 50,
+                        .addItems("Dad", 3, granddad, data, parentPathMap)
+                        .forEach(dad -> TreeGridHugeTreePage.addItems("Son", 3,
                                 dad, data, parentPathMap)));
 
-        TreeDataProvider<String> dataprovider = new TreeDataProvider<>(data);
-        grid.setDataProvider(dataprovider);
-        grid.expandRecursively(data.getRootItems(), 3);
+        TreeDataProvider<String> dataProvider = new TreeDataProvider<>(data);
+        grid.setDataProvider(dataProvider);
+
+        NativeButton expandAll = new NativeButton("Expand all",
+                e -> grid.expandRecursively(data.getRootItems(), 3));
+        expandAll.setId("expand-all");
 
         NativeButton scrollToStart = new NativeButton("Scroll to start",
                 e -> grid.scrollToStart());
@@ -42,20 +45,19 @@ public class TreeGridScrollToPage extends Div {
                 e -> grid.scrollToEnd());
         scrollToEnd.setId("scroll-to-end");
 
-        NativeButton scrollToIndex150 = new NativeButton("Scroll to index 150",
-                e -> grid.scrollToIndex(150));
-        scrollToIndex150.setId("scroll-to-index-150");
+        NativeButton scrollToIndex30 = new NativeButton("Scroll to index 30",
+                e -> grid.scrollToIndex(30));
+        scrollToIndex30.setId("scroll-to-index-30");
 
-        NativeButton scrollToIndex100_30 = new NativeButton(
-                "Scroll to index 100-30", e -> grid.scrollToIndex(100, 0));
-        scrollToIndex100_30.setId("scroll-to-index-100-30");
+        NativeButton scrollToIndex30_2 = new NativeButton(
+                "Scroll to index 30-2", e -> grid.scrollToIndex(30, 2));
+        scrollToIndex30_2.setId("scroll-to-index-30-2");
 
-        NativeButton scrollToIndex50_10_15 = new NativeButton(
-                "Scroll to index 50-10-15",
-                e -> grid.scrollToIndex(50, 10, 15));
-        scrollToIndex50_10_15.setId("scroll-to-index-50-10-15");
+        NativeButton scrollToIndex30_2_2 = new NativeButton(
+                "Scroll to index 30-2-2", e -> grid.scrollToIndex(30, 2, 2));
+        scrollToIndex30_2_2.setId("scroll-to-index-30-2-2");
 
-        add(grid, scrollToStart, scrollToEnd, scrollToIndex150,
-                scrollToIndex100_30, scrollToIndex50_10_15);
+        add(grid, expandAll, scrollToStart, scrollToEnd, scrollToIndex30,
+                scrollToIndex30_2, scrollToIndex30_2_2);
     }
 }
