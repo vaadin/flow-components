@@ -26,7 +26,7 @@ class FlowComponentDirective extends Directive {
       setTimeout(() => this.updateContent(part, appid, nodeid));
     } else if (oldNode === newNode) {
       return;
-    } else if (oldNode && newNode) {
+    } else if (oldNode) {
       parentNode.replaceChild(newNode, oldNode);
     } else if (newNode) {
       startNode.after(newNode);
