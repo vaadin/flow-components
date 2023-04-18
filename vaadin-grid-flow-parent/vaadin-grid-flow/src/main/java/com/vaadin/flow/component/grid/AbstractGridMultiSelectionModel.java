@@ -428,7 +428,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
                         fetchAllDescendants(child, dataProvider)));
     }
 
-    void clientDeselectAll() {
+    protected void clientDeselectAll() {
         if (!isSelectAllCheckboxVisible()) {
             // ignore event if the checkBox was meant to be hidden
             return;
