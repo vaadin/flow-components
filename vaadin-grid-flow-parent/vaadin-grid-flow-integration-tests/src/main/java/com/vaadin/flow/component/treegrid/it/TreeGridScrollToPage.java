@@ -24,7 +24,7 @@ public class TreeGridScrollToPage extends Div {
 
         Map<String, String> parentPathMap = new HashMap<>();
 
-        TreeGridHugeTreePage.addRootItems("Granddad", 40, data, parentPathMap)
+        TreeGridHugeTreePage.addRootItems("Granddad", 50, data, parentPathMap)
                 .forEach(granddad -> TreeGridHugeTreePage
                         .addItems("Dad", 3, granddad, data, parentPathMap)
                         .forEach(dad -> TreeGridHugeTreePage.addItems("Son", 3,
@@ -49,15 +49,15 @@ public class TreeGridScrollToPage extends Div {
                 e -> grid.scrollToIndex(30));
         scrollToIndex30.setId("scroll-to-index-30");
 
-        NativeButton scrollToIndex30_2 = new NativeButton(
-                "Scroll to index 30-2", e -> grid.scrollToIndex(30, 2));
-        scrollToIndex30_2.setId("scroll-to-index-30-2");
+        NativeButton scrollToIndex30_1 = new NativeButton(
+                "Scroll to index 30-1", e -> grid.scrollToIndex(30, 1));
+        scrollToIndex30_1.setId("scroll-to-index-30-1");
 
-        NativeButton scrollToIndex30_2_2 = new NativeButton(
-                "Scroll to index 30-2-2", e -> grid.scrollToIndex(30, 2, 2));
-        scrollToIndex30_2_2.setId("scroll-to-index-30-2-2");
+        NativeButton scrollToIndex30_1_1 = new NativeButton(
+                "Scroll to index 30-1-1", e -> grid.scrollToIndex(30, 1, 1));
+        scrollToIndex30_1_1.setId("scroll-to-index-30-1-1");
 
         add(grid, expandAll, scrollToStart, scrollToEnd, scrollToIndex30,
-                scrollToIndex30_2, scrollToIndex30_2_2);
+                scrollToIndex30_1, scrollToIndex30_1_1);
     }
 }
