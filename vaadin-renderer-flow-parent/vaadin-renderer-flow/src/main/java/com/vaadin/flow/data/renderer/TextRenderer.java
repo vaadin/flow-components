@@ -18,7 +18,7 @@ package com.vaadin.flow.data.renderer;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.function.SerializableSupplier;
+import com.vaadin.flow.function.ValueProvider;
 
 /**
  * A renderer that renders each item as a text using provided
@@ -31,7 +31,7 @@ import com.vaadin.flow.function.SerializableSupplier;
  *            component
  *
  */
-public class TextRenderer<ITEM> extends ComponentRenderer<Component, ITEM> {
+public class TextRenderer<ITEM> extends BasicRenderer<ITEM, ITEM> {
 
     private static class TextRendererComponent extends Component {
 
@@ -58,15 +58,13 @@ public class TextRenderer<ITEM> extends ComponentRenderer<Component, ITEM> {
      *            the item label generator
      */
     public TextRenderer(ItemLabelGenerator<ITEM> itemLabelGenerator) {
-        super((SerializableSupplier<Component>) null);
+        super(ValueProvider.identity());
         this.itemLabelGenerator = itemLabelGenerator;
-
-        withProperty("label", item -> itemLabelGenerator.apply(item));
     }
 
     @Override
     public Component createComponent(ITEM item) {
-        String text = itemLabelGenerator.apply(item);
+        String text = getFormattedValue(item);
         if (text == null) {
             throw new IllegalStateException(String.format(
                     "Got 'null' as a label value for the item '%s'. "
@@ -88,5 +86,15 @@ public class TextRenderer<ITEM> extends ComponentRenderer<Component, ITEM> {
      */
     protected Element createElement(String item) {
         return new Element("span").setText(item);
+    }
+
+    @Override
+    protected String getFormattedValue(ITEM item) {
+        return itemLabelGenerator.apply(item);
+    }
+
+    @Override
+    protected String getTemplateExpression() {
+        return "<span>${item.label}</span>";
     }
 }
