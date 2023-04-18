@@ -40,9 +40,9 @@ public class TreeGridScrollToIT extends AbstractComponentIT {
 
     private TestBenchElement scrollToIndex30Button;
 
-    private TestBenchElement scrollToIndex30_2Button;
+    private TestBenchElement scrollToIndex30_1Button;
 
-    private TestBenchElement scrollToIndex30_2_2Button;
+    private TestBenchElement scrollToIndex30_1_1Button;
 
     @Before
     public void init() {
@@ -53,8 +53,8 @@ public class TreeGridScrollToIT extends AbstractComponentIT {
         scrollToStartButton = $("button").id("scroll-to-start");
         scrollToEndButton = $("button").id("scroll-to-end");
         scrollToIndex30Button = $("button").id("scroll-to-index-30");
-        scrollToIndex30_2Button = $("button").id("scroll-to-index-30-2");
-        scrollToIndex30_2_2Button = $("button").id("scroll-to-index-30-2-2");
+        scrollToIndex30_1Button = $("button").id("scroll-to-index-30-1");
+        scrollToIndex30_1_1Button = $("button").id("scroll-to-index-30-1-1");
     }
 
     @Test
@@ -65,7 +65,7 @@ public class TreeGridScrollToIT extends AbstractComponentIT {
         scrollToEndButton.click();
         Thread.sleep(2000);
 
-        Assert.assertEquals("Son 39/2/2",
+        Assert.assertEquals("Son 49/2/2",
                 getCellContent(grid.getLastVisibleRowIndex()));
     }
 
@@ -73,7 +73,7 @@ public class TreeGridScrollToIT extends AbstractComponentIT {
     public void scrollToEnd_correctLastVisibleItem() {
         scrollToEndButton.click();
 
-        Assert.assertEquals("Granddad 39",
+        Assert.assertEquals("Granddad 49",
                 getCellContent(grid.getLastVisibleRowIndex()));
     }
 
@@ -103,39 +103,39 @@ public class TreeGridScrollToIT extends AbstractComponentIT {
     public void scrollToIndex30_correctFirstVisibleItem() {
         scrollToIndex30Button.click();
 
-        Assert.assertEquals("Granddad 29",
+        Assert.assertEquals("Granddad 30",
                 getCellContent(grid.getFirstVisibleRowIndex()));
     }
 
     @Test
-    public void expandAll_scrollToIndex30_2_correctFirstVisibleItem()
+    public void expandAll_scrollToIndex30_1_correctFirstVisibleItem()
             throws InterruptedException {
         expandAllButton.click();
 
-        scrollToIndex30_2Button.click();
+        scrollToIndex30_1Button.click();
         Thread.sleep(2000);
 
-        Assert.assertEquals("Dad 30/2",
+        Assert.assertEquals("Dad 30/1",
                 getCellContent(grid.getFirstVisibleRowIndex()));
     }
 
     @Test
-    public void scrollToIndex30_2_correctFirstVisibleItem() {
-        scrollToIndex30_2Button.click();
+    public void scrollToIndex30_1_correctFirstVisibleItem() {
+        scrollToIndex30_1Button.click();
 
-        Assert.assertEquals("Granddad 29",
+        Assert.assertEquals("Granddad 30",
                 getCellContent(grid.getFirstVisibleRowIndex()));
     }
 
     @Test
-    public void expandAll_scrollToIndex30_2_2_correctFirstVisibleItem()
+    public void expandAll_scrollToIndex30_1_1_correctFirstVisibleItem()
             throws InterruptedException {
         expandAllButton.click();
 
-        scrollToIndex30_2_2Button.click();
+        scrollToIndex30_1_1Button.click();
         Thread.sleep(2000);
 
-        Assert.assertEquals("Son 30/2/2",
+        Assert.assertEquals("Son 30/1/1",
                 getCellContent(grid.getFirstVisibleRowIndex()));
     }
 
