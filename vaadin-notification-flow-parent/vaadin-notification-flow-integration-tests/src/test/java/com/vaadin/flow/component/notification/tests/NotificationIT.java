@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.vaadin.flow.component.notification.testbench.NotificationElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
@@ -54,6 +55,10 @@ public class NotificationIT extends AbstractComponentIT {
     public void notificationWithPosition() {
         findElement(By.id("position-notification-button")).click();
         checkNotificationIsOpen();
+        var notification = $(NotificationElement.class)
+                .id("position-notification");
+        Assert.assertEquals("This notification is located on Top-Left",
+                notification.getText());
         assertNotificationContent("Top-Left");
         Assert.assertEquals(1,
                 findElements(By.id("position-notification")).size());
