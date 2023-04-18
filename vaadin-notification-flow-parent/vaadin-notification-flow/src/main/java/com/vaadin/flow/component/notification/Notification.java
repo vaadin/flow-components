@@ -38,11 +38,9 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
-import com.vaadin.flow.component.shared.internal.PropertyChangeEventHandler;
 import com.vaadin.flow.dom.ClassList;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementDetachListener;
-import com.vaadin.flow.dom.PropertyChangeEvent;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.internal.HtmlUtils;
 import com.vaadin.flow.internal.StateTree;
@@ -70,8 +68,6 @@ public class Notification extends Component implements HasComponents, HasStyle,
     private boolean autoAddedToTheUi = false;
 
     private Registration afterProgrammaticNavigationListenerRegistration;
-
-    private PropertyChangeEventHandler<OpenedChangeEvent> openedPropertyChangeEventHandler;
 
     /**
      * Enumeration of all available positions for notification component
@@ -149,6 +145,8 @@ public class Notification extends Component implements HasComponents, HasStyle,
         initBaseElementsAndListeners();
         setPosition(DEFAULT_POSITION);
         setDuration(0);
+        getElement().addPropertyChangeListener("opened", event -> fireEvent(
+                new OpenedChangeEvent(this, event.isUserOriginated())));
     }
 
     /**
@@ -471,19 +469,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
      */
     public Registration addOpenedChangeListener(
             ComponentEventListener<OpenedChangeEvent> listener) {
-        if (openedPropertyChangeEventHandler == null) {
-            openedPropertyChangeEventHandler = new PropertyChangeEventHandler<>(
-                    "opened", this, OpenedChangeEvent.class) {
-                @Override
-                protected void fireComponentEvent(
-                        PropertyChangeEvent propertyChangeEvent) {
-                    Notification.this
-                            .fireEvent(new OpenedChangeEvent(Notification.this,
-                                    propertyChangeEvent.isUserOriginated()));
-                }
-            };
-        }
-        return openedPropertyChangeEventHandler.addListener(listener);
+        return addListener(OpenedChangeEvent.class, listener);
     }
 
     /**

@@ -50,13 +50,11 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.ValidationUtil;
-import com.vaadin.flow.component.shared.internal.PropertyChangeEventHandler;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
 import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.binder.Validator;
-import com.vaadin.flow.dom.PropertyChangeEvent;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.StateTree;
@@ -99,8 +97,6 @@ public class TimePicker
     private LocalTime min;
     private boolean required;
     private StateTree.ExecutionRegistration pendingLocaleUpdate;
-
-    private PropertyChangeEventHandler<InvalidChangeEvent> invalidPropertyChangeEventHandler;
 
     /**
      * Default constructor.
@@ -146,6 +142,9 @@ public class TimePicker
         addValueChangeListener(e -> validate());
 
         addClientValidatedEventListener(event -> validate());
+
+        getElement().addPropertyChangeListener("invalid", event -> fireEvent(
+                new InvalidChangeEvent(this, event.isUserOriginated())));
     }
 
     /**
@@ -493,19 +492,7 @@ public class TimePicker
      */
     public Registration addInvalidChangeListener(
             ComponentEventListener<InvalidChangeEvent> listener) {
-        if (invalidPropertyChangeEventHandler == null) {
-            invalidPropertyChangeEventHandler = new PropertyChangeEventHandler<>(
-                    "invalid", this, InvalidChangeEvent.class) {
-                @Override
-                protected void fireComponentEvent(
-                        PropertyChangeEvent propertyChangeEvent) {
-                    TimePicker.this
-                            .fireEvent(new InvalidChangeEvent(TimePicker.this,
-                                    propertyChangeEvent.isUserOriginated()));
-                }
-            };
-        }
-        return invalidPropertyChangeEventHandler.addListener(listener);
+        return addListener(InvalidChangeEvent.class, listener);
     }
 
     /**

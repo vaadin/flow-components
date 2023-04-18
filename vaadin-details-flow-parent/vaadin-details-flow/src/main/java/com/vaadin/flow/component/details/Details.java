@@ -32,8 +32,6 @@ import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.shared.internal.PropertyChangeEventHandler;
-import com.vaadin.flow.dom.PropertyChangeEvent;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -65,8 +63,6 @@ public class Details extends Component implements HasEnabled, HasSize, HasStyle,
     private Component summaryContainer;
     private final Div contentContainer;
 
-    private PropertyChangeEventHandler<OpenedChangeEvent> openedPropertyChangeEventHandler;
-
     /**
      * Server-side component for the {@code <vaadin-details-summary>} element.
      */
@@ -89,6 +85,9 @@ public class Details extends Component implements HasEnabled, HasSize, HasStyle,
         if (getElement().getPropertyRaw("opened") == null) {
             setOpened(false);
         }
+
+        getElement().addPropertyChangeListener("opened", event -> fireEvent(
+                new OpenedChangeEvent(this, event.isUserOriginated())));
     }
 
     /**
@@ -322,17 +321,6 @@ public class Details extends Component implements HasEnabled, HasSize, HasStyle,
      */
     public Registration addOpenedChangeListener(
             ComponentEventListener<OpenedChangeEvent> listener) {
-        if (openedPropertyChangeEventHandler == null) {
-            openedPropertyChangeEventHandler = new PropertyChangeEventHandler<>(
-                    "opened", this, OpenedChangeEvent.class) {
-                @Override
-                protected void fireComponentEvent(
-                        PropertyChangeEvent propertyChangeEvent) {
-                    Details.this.fireEvent(new OpenedChangeEvent(Details.this,
-                            propertyChangeEvent.isUserOriginated()));
-                }
-            };
-        }
-        return openedPropertyChangeEventHandler.addListener(listener);
+        return addListener(OpenedChangeEvent.class, listener);
     }
 }

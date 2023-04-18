@@ -40,12 +40,10 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
-import com.vaadin.flow.component.shared.internal.PropertyChangeEventHandler;
 import com.vaadin.flow.dom.ClassList;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementConstants;
 import com.vaadin.flow.dom.ElementDetachListener;
-import com.vaadin.flow.dom.PropertyChangeEvent;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.router.NavigationTrigger;
@@ -101,8 +99,6 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     private Registration afterProgrammaticNavigationListenerRegistration;
 
-    private PropertyChangeEventHandler<OpenedChangeEvent> openedPropertyChangeEventHandler;
-
     /**
      * Creates an empty dialog.
      */
@@ -115,6 +111,9 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
         // Workaround for: https://github.com/vaadin/flow/issues/3496
         setOpened(false);
+
+        getElement().addPropertyChangeListener("opened", event -> fireEvent(
+                new OpenedChangeEvent(this, event.isUserOriginated())));
 
         addOpenedChangeListener(event -> {
             if (!isOpened()) {
@@ -833,18 +832,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      */
     public Registration addOpenedChangeListener(
             ComponentEventListener<OpenedChangeEvent> listener) {
-        if (openedPropertyChangeEventHandler == null) {
-            openedPropertyChangeEventHandler = new PropertyChangeEventHandler<>(
-                    "opened", this, OpenedChangeEvent.class) {
-                @Override
-                protected void fireComponentEvent(
-                        PropertyChangeEvent propertyChangeEvent) {
-                    Dialog.this.fireEvent(new OpenedChangeEvent(Dialog.this,
-                            propertyChangeEvent.isUserOriginated()));
-                }
-            };
-        }
-        return openedPropertyChangeEventHandler.addListener(listener);
+        return addListener(OpenedChangeEvent.class, listener);
     }
 
     /**

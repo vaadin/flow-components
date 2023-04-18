@@ -53,13 +53,11 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.ValidationUtil;
-import com.vaadin.flow.component.shared.internal.PropertyChangeEventHandler;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
 import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.binder.Validator;
-import com.vaadin.flow.dom.PropertyChangeEvent;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.JsonSerializer;
@@ -117,10 +115,6 @@ public class DatePicker
 
     private StateTree.ExecutionRegistration pendingI18nUpdate;
 
-    private PropertyChangeEventHandler<OpenedChangeEvent> openedPropertyChangeEventHandler;
-
-    private PropertyChangeEventHandler<InvalidChangeEvent> invalidPropertyChangeEventHandler;
-
     /**
      * Default constructor.
      */
@@ -173,6 +167,12 @@ public class DatePicker
         addValueChangeListener(e -> validate());
 
         addClientValidatedEventListener(e -> validate());
+
+        getElement().addPropertyChangeListener("opened", event -> fireEvent(
+                new OpenedChangeEvent(this, event.isUserOriginated())));
+
+        getElement().addPropertyChangeListener("invalid", event -> fireEvent(
+                new InvalidChangeEvent(this, event.isUserOriginated())));
     }
 
     /**
@@ -810,19 +810,7 @@ public class DatePicker
      */
     public Registration addOpenedChangeListener(
             ComponentEventListener<OpenedChangeEvent> listener) {
-        if (openedPropertyChangeEventHandler == null) {
-            openedPropertyChangeEventHandler = new PropertyChangeEventHandler<>(
-                    "opened", this, OpenedChangeEvent.class) {
-                @Override
-                protected void fireComponentEvent(
-                        PropertyChangeEvent propertyChangeEvent) {
-                    DatePicker.this
-                            .fireEvent(new OpenedChangeEvent(DatePicker.this,
-                                    propertyChangeEvent.isUserOriginated()));
-                }
-            };
-        }
-        return openedPropertyChangeEventHandler.addListener(listener);
+        return addListener(OpenedChangeEvent.class, listener);
     }
 
     /**
@@ -851,19 +839,7 @@ public class DatePicker
      */
     public Registration addInvalidChangeListener(
             ComponentEventListener<InvalidChangeEvent> listener) {
-        if (invalidPropertyChangeEventHandler == null) {
-            invalidPropertyChangeEventHandler = new PropertyChangeEventHandler<>(
-                    "invalid", this, InvalidChangeEvent.class) {
-                @Override
-                protected void fireComponentEvent(
-                        PropertyChangeEvent propertyChangeEvent) {
-                    DatePicker.this
-                            .fireEvent(new InvalidChangeEvent(DatePicker.this,
-                                    propertyChangeEvent.isUserOriginated()));
-                }
-            };
-        }
-        return invalidPropertyChangeEventHandler.addListener(listener);
+        return addListener(InvalidChangeEvent.class, listener);
     }
 
     /**

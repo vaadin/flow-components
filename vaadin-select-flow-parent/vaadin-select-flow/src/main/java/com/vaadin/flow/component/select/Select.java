@@ -43,7 +43,6 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.ValidationUtil;
-import com.vaadin.flow.component.shared.internal.PropertyChangeEventHandler;
 import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
@@ -63,7 +62,6 @@ import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.data.selection.SingleSelect;
-import com.vaadin.flow.dom.PropertyChangeEvent;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
@@ -131,10 +129,6 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
 
     private SerializableConsumer<UI> sizeRequest;
 
-    private PropertyChangeEventHandler<OpenedChangeEvent> openedPropertyChangeEventHandler;
-
-    private PropertyChangeEventHandler<InvalidChangeEvent> invalidPropertyChangeEventHandler;
-
     /**
      * Constructs a select.
      */
@@ -154,6 +148,12 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
         addValueChangeListener(e -> validate());
 
         addClientValidatedEventListener(e -> validate());
+
+        getElement().addPropertyChangeListener("opened", event -> fireEvent(
+                new OpenedChangeEvent(this, event.isUserOriginated())));
+
+        getElement().addPropertyChangeListener("invalid", event -> fireEvent(
+                new InvalidChangeEvent(this, event.isUserOriginated())));
     }
 
     /**
@@ -1036,18 +1036,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      */
     protected Registration addOpenedChangeListener(
             ComponentEventListener<OpenedChangeEvent> listener) {
-        if (openedPropertyChangeEventHandler == null) {
-            openedPropertyChangeEventHandler = new PropertyChangeEventHandler<>(
-                    "opened", this, OpenedChangeEvent.class) {
-                @Override
-                protected void fireComponentEvent(
-                        PropertyChangeEvent propertyChangeEvent) {
-                    Select.this.fireEvent(new OpenedChangeEvent(Select.this,
-                            propertyChangeEvent.isUserOriginated()));
-                }
-            };
-        }
-        return openedPropertyChangeEventHandler.addListener(listener);
+        return addListener(OpenedChangeEvent.class, listener);
     }
 
     /**
@@ -1076,18 +1065,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      */
     protected Registration addInvalidChangeListener(
             ComponentEventListener<InvalidChangeEvent> listener) {
-        if (invalidPropertyChangeEventHandler == null) {
-            invalidPropertyChangeEventHandler = new PropertyChangeEventHandler<>(
-                    "invalid", this, InvalidChangeEvent.class) {
-                @Override
-                protected void fireComponentEvent(
-                        PropertyChangeEvent propertyChangeEvent) {
-                    Select.this.fireEvent(new InvalidChangeEvent(Select.this,
-                            propertyChangeEvent.isUserOriginated()));
-                }
-            };
-        }
-        return invalidPropertyChangeEventHandler.addListener(listener);
+        return addListener(InvalidChangeEvent.class, listener);
     }
 
 }
