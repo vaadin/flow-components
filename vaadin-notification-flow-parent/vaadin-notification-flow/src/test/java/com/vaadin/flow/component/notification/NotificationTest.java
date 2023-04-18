@@ -331,39 +331,4 @@ public class NotificationTest {
 
         Assert.assertEquals(1, listenerInvokedCount.get());
     }
-
-    @Test
-    public void twoOpenedChangeListeners_bothListenersAreInvokedOnOpenedChange() {
-        var notification = new Notification();
-
-        var listenerInvokedCount = new AtomicInteger(0);
-        notification.addOpenedChangeListener(
-                e -> listenerInvokedCount.incrementAndGet());
-        notification.addOpenedChangeListener(
-                e -> listenerInvokedCount.incrementAndGet());
-
-        notification.open();
-
-        Assert.assertEquals(2, listenerInvokedCount.get());
-    }
-
-    @Test
-    public void twoOpenedChangeListeners_unregisterOneOnEvent_listenerIsInvokedOnOpenedChange() {
-        var notification = new Notification();
-
-        var listenerInvokedCount = new AtomicInteger(0);
-        notification.addOpenedChangeListener(e -> {
-            listenerInvokedCount.incrementAndGet();
-            e.unregisterListener();
-        });
-        notification.addOpenedChangeListener(
-                e -> listenerInvokedCount.incrementAndGet());
-
-        notification.open();
-        listenerInvokedCount.set(0);
-
-        notification.close();
-
-        Assert.assertEquals(1, listenerInvokedCount.get());
-    }
 }

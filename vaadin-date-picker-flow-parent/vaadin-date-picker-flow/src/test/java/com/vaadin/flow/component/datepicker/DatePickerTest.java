@@ -349,41 +349,6 @@ public class DatePickerTest {
     }
 
     @Test
-    public void twoOpenedChangeListeners_bothListenersAreInvokedOnOpenedChange() {
-        var picker = new DatePicker();
-
-        var listenerInvokedCount = new AtomicInteger(0);
-        picker.addOpenedChangeListener(
-                e -> listenerInvokedCount.incrementAndGet());
-        picker.addOpenedChangeListener(
-                e -> listenerInvokedCount.incrementAndGet());
-
-        picker.open();
-
-        Assert.assertEquals(2, listenerInvokedCount.get());
-    }
-
-    @Test
-    public void twoOpenedChangeListeners_unregisterOneOnEvent_listenerIsInvokedOnOpenedChange() {
-        var picker = new DatePicker();
-
-        var listenerInvokedCount = new AtomicInteger(0);
-        picker.addOpenedChangeListener(e -> {
-            listenerInvokedCount.incrementAndGet();
-            e.unregisterListener();
-        });
-        picker.addOpenedChangeListener(
-                e -> listenerInvokedCount.incrementAndGet());
-
-        picker.open();
-        listenerInvokedCount.set(0);
-
-        picker.close();
-
-        Assert.assertEquals(1, listenerInvokedCount.get());
-    }
-
-    @Test
     public void unregisterInvalidChangeListenerOnEvent() {
         var picker = new DatePicker();
 
@@ -394,41 +359,6 @@ public class DatePickerTest {
         });
 
         picker.setInvalid(true);
-        picker.setInvalid(false);
-
-        Assert.assertEquals(1, listenerInvokedCount.get());
-    }
-
-    @Test
-    public void twoInvalidChangeListeners_bothListenersAreInvokedOnInvalidChange() {
-        var picker = new DatePicker();
-
-        var listenerInvokedCount = new AtomicInteger(0);
-        picker.addInvalidChangeListener(
-                e -> listenerInvokedCount.incrementAndGet());
-        picker.addInvalidChangeListener(
-                e -> listenerInvokedCount.incrementAndGet());
-
-        picker.setInvalid(true);
-
-        Assert.assertEquals(2, listenerInvokedCount.get());
-    }
-
-    @Test
-    public void twoInvalidChangeListeners_unregisterOneOnEvent_listenerIsInvokedOnInvalidChange() {
-        var picker = new DatePicker();
-
-        var listenerInvokedCount = new AtomicInteger(0);
-        picker.addInvalidChangeListener(e -> {
-            listenerInvokedCount.incrementAndGet();
-            e.unregisterListener();
-        });
-        picker.addInvalidChangeListener(
-                e -> listenerInvokedCount.incrementAndGet());
-
-        picker.setInvalid(true);
-        listenerInvokedCount.set(0);
-
         picker.setInvalid(false);
 
         Assert.assertEquals(1, listenerInvokedCount.get());

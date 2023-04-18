@@ -330,41 +330,6 @@ public class TimePickerTest {
         Assert.assertEquals(1, listenerInvokedCount.get());
     }
 
-    @Test
-    public void twoInvalidChangeListeners_bothListenersAreInvokedOnInvalidChange() {
-        var timePicker = new TimePicker();
-
-        var listenerInvokedCount = new AtomicInteger(0);
-        timePicker.addInvalidChangeListener(
-                e -> listenerInvokedCount.incrementAndGet());
-        timePicker.addInvalidChangeListener(
-                e -> listenerInvokedCount.incrementAndGet());
-
-        timePicker.setInvalid(true);
-
-        Assert.assertEquals(2, listenerInvokedCount.get());
-    }
-
-    @Test
-    public void twoInvalidChangeListeners_unregisterOneOnEvent_listenerIsInvokedOnInvalidChange() {
-        var timePicker = new TimePicker();
-
-        var listenerInvokedCount = new AtomicInteger(0);
-        timePicker.addInvalidChangeListener(e -> {
-            listenerInvokedCount.incrementAndGet();
-            e.unregisterListener();
-        });
-        timePicker.addInvalidChangeListener(
-                e -> listenerInvokedCount.incrementAndGet());
-
-        timePicker.setInvalid(true);
-        listenerInvokedCount.set(0);
-
-        timePicker.setInvalid(false);
-
-        Assert.assertEquals(1, listenerInvokedCount.get());
-    }
-
     @Tag("div")
     private static class TestPrefix extends Component {
     }

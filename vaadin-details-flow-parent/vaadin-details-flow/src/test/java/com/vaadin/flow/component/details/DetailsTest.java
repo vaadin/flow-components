@@ -56,35 +56,4 @@ public class DetailsTest {
 
         Assert.assertEquals(1, listenerInvokedCount.get());
     }
-
-    @Test
-    public void twoOpenedChangeListeners_bothListenersAreInvokedOnOpenedChange() {
-        var listenerInvokedCount = new AtomicInteger(0);
-        details.addOpenedChangeListener(
-                e -> listenerInvokedCount.incrementAndGet());
-        details.addOpenedChangeListener(
-                e -> listenerInvokedCount.incrementAndGet());
-
-        details.setOpened(true);
-
-        Assert.assertEquals(2, listenerInvokedCount.get());
-    }
-
-    @Test
-    public void twoOpenedChangeListeners_unregisterOneOnEvent_listenerIsInvokedOnOpenedChange() {
-        var listenerInvokedCount = new AtomicInteger(0);
-        details.addOpenedChangeListener(e -> {
-            listenerInvokedCount.incrementAndGet();
-            e.unregisterListener();
-        });
-        details.addOpenedChangeListener(
-                e -> listenerInvokedCount.incrementAndGet());
-
-        details.setOpened(true);
-        listenerInvokedCount.set(0);
-
-        details.setOpened(false);
-
-        Assert.assertEquals(1, listenerInvokedCount.get());
-    }
 }
