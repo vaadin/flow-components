@@ -1057,6 +1057,15 @@ public class TreeGrid<T> extends Grid<T>
         super.scrollToIndex(rowIndex);
     }
 
+    /**
+     * Scrolls to the row with the given indexes. The indexes are hierarchical,
+     * starting with the root index.
+     *
+     * @param indexes
+     *            zero based indexes of the item to scroll to in the current
+     *            view.
+     * @see TreeGrid#scrollToIndex(int)
+     */
     public void scrollToIndex(int... indexes) {
         if (indexes.length == 0) {
             throw new IllegalArgumentException(
