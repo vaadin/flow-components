@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.testutil.TestPath;
@@ -22,33 +23,32 @@ import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 
 @TestPath("vaadin-grid/select-item-with-identical-id")
 public class SelectItemWithIdenticalIdIT extends AbstractComponentIT {
 
-    private WebElement addGridButton;
+    private ButtonElement addGridWithPreselectionButton;
 
-    private WebElement selectAnotherItemButton;
+    private ButtonElement selectItem2Button;
 
-    private WebElement deselectItemButton;
+    private ButtonElement deselectItem1Button;
 
     private CheckboxElement useMultiSelectCheckbox;
 
     @Before
     public void init() {
         open();
-        addGridButton = findElement(By.id("add-grid-button"));
-        selectAnotherItemButton = findElement(
-                By.id("select-another-item-button"));
-        deselectItemButton = findElement(By.id("deselect-item-button"));
+        addGridWithPreselectionButton = $(ButtonElement.class)
+                .id("add-grid-with-preselection-button");
+        selectItem2Button = $(ButtonElement.class).id("select-item-2-button");
+        deselectItem1Button = $(ButtonElement.class)
+                .id("deselect-item-1-button");
         useMultiSelectCheckbox = $(CheckboxElement.class).first();
     }
 
     @Test
     public void addGridWithSelection_itemIsNotUpdated() {
-        addGridButton.click();
+        addGridWithPreselectionButton.click();
         GridElement grid = $(GridElement.class).waitForFirst();
 
         Assert.assertEquals("1", grid.getCell(0, 0).getText());
@@ -56,20 +56,20 @@ public class SelectItemWithIdenticalIdIT extends AbstractComponentIT {
 
     @Test
     public void addGridWithSelection_deselectItem_itemIsNotUpdated() {
-        addGridButton.click();
+        addGridWithPreselectionButton.click();
         GridElement grid = $(GridElement.class).waitForFirst();
 
-        deselectItemButton.click();
+        deselectItem1Button.click();
 
         Assert.assertEquals("1", grid.getCell(0, 0).getText());
     }
 
     @Test
     public void addGridWithSelection_selectAnotherItem_itemIsNotUpdated() {
-        addGridButton.click();
+        addGridWithPreselectionButton.click();
         GridElement grid = $(GridElement.class).waitForFirst();
 
-        selectAnotherItemButton.click();
+        selectItem2Button.click();
 
         Assert.assertEquals("2", grid.getCell(1, 0).getText());
     }
@@ -77,7 +77,7 @@ public class SelectItemWithIdenticalIdIT extends AbstractComponentIT {
     @Test
     public void setMultiSelect_addGridWithSelection_itemIsNotUpdated() {
         useMultiSelectCheckbox.setChecked(true);
-        addGridButton.click();
+        addGridWithPreselectionButton.click();
         GridElement grid = $(GridElement.class).waitForFirst();
 
         Assert.assertEquals("1", grid.getCell(0, 1).getText());
@@ -86,10 +86,10 @@ public class SelectItemWithIdenticalIdIT extends AbstractComponentIT {
     @Test
     public void setMultiSelect_addGridWithSelection_deselectItem_itemIsNotUpdated() {
         useMultiSelectCheckbox.setChecked(true);
-        addGridButton.click();
+        addGridWithPreselectionButton.click();
         GridElement grid = $(GridElement.class).waitForFirst();
 
-        deselectItemButton.click();
+        deselectItem1Button.click();
 
         Assert.assertEquals("1", grid.getCell(0, 1).getText());
     }
@@ -97,10 +97,10 @@ public class SelectItemWithIdenticalIdIT extends AbstractComponentIT {
     @Test
     public void setMultiSelect_addGridWithSelection_selectAnotherItem_itemIsNotUpdated() {
         useMultiSelectCheckbox.setChecked(true);
-        addGridButton.click();
+        addGridWithPreselectionButton.click();
         GridElement grid = $(GridElement.class).waitForFirst();
 
-        selectAnotherItemButton.click();
+        selectItem2Button.click();
 
         Assert.assertEquals("2", grid.getCell(1, 1).getText());
     }

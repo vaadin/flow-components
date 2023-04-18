@@ -28,36 +28,35 @@ import java.util.Objects;
 public class SelectItemWithIdenticalIdPage extends Div {
 
     public SelectItemWithIdenticalIdPage() {
-        var grid = new Grid<Item>();
+        Grid<Item> grid = new Grid<>();
         grid.addColumn(Item::getDisplayValue).setHeader("Display value");
         grid.setItems(Arrays.asList(new Item("1", "1"), new Item("2", "2")));
 
-        var useMultiSelectCheckbox = new Checkbox("Use multi-select",
+        Checkbox useMultiSelectCheckbox = new Checkbox("Use multi-select",
                 event -> grid
                         .setSelectionMode(Boolean.TRUE.equals(event.getValue())
                                 ? Grid.SelectionMode.MULTI
                                 : Grid.SelectionMode.SINGLE));
         useMultiSelectCheckbox.setId("use-multi-select-checkbox");
 
-        var selectAnotherItemButton = new Button("Select another item",
+        Button selectItem2Button = new Button("Select item 2",
                 e -> grid.select(new Item("2", "INVALID")));
-        selectAnotherItemButton.setId("select-another-item-button");
+        selectItem2Button.setId("select-item-2-button");
 
-        var deselectItemButton = new Button("Deselect item", e -> {
-            System.out.println("Page.deselect");
-            grid.deselect(new Item("1", "INVALID"));
-        });
-        deselectItemButton.setId("deselect-item-button");
+        Button deselectItem1Button = new Button("Deselect item 1",
+                e -> grid.deselect(new Item("1", "INVALID")));
+        deselectItem1Button.setId("deselect-item-1-button");
 
-        var addGridButton = new Button("Add grid", e -> {
+        Button addGridWithPreselectionButton = new Button("Add grid", e -> {
             grid.select(new Item("1", "INVALID"));
             e.getSource().setVisible(false);
             add(grid);
         });
-        addGridButton.setId("add-grid-button");
+        addGridWithPreselectionButton
+                .setId("add-grid-with-preselection-button");
 
-        add(useMultiSelectCheckbox, addGridButton, selectAnotherItemButton,
-                deselectItemButton);
+        add(useMultiSelectCheckbox, addGridWithPreselectionButton,
+                selectItem2Button, deselectItem1Button);
     }
 
     private class Item {
@@ -80,20 +79,20 @@ public class SelectItemWithIdenticalIdPage extends Div {
         }
 
         @Override
-            public boolean equals(Object o) {
-                if (this == o) {
-                    return true;
-                }
-                if (o == null || getClass() != o.getClass()) {
-                    return false;
-                }
-                Item item = (Item) o;
-                return id.equals(item.id);
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
             }
-
-            @Override
-            public int hashCode() {
-                return Objects.hash(id);
+            if (o == null || getClass() != o.getClass()) {
+                return false;
             }
+            Item item = (Item) o;
+            return id.equals(item.id);
         }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(id);
+        }
+    }
 }
