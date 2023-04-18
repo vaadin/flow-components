@@ -2,7 +2,7 @@ import './env-setup.js';
 import '@vaadin/grid/all-imports.js';
 import '../frontend/generated/jar-resources/gridConnector.js';
 import sinon from 'sinon';
-import type { Grid } from '@vaadin/grid';
+import type { Grid, GridColumn } from '@vaadin/grid';
 import type {} from '@web/test-runner-mocha';
 
 export type GridConnector = {
@@ -19,12 +19,12 @@ export type GridConnector = {
 };
 
 export type GridServer = {
-  confirmUpdate: (index: number) => void;
-  confirmParentUpdate: (index: number, parentKey: string) => void;
-  select: (key: string) => void;
-  deselect: (key: string) => void;
-  setDetailsVisible: (key: string) => void;
-  setParentRequestedRanges: (ranges: { firstIndex: number; size: number; parentKey: string }[]) => void;
+  confirmUpdate: ((index: number) => void) & sinon.SinonSpy;
+  confirmParentUpdate: ((index: number, parentKey: string) => void) & sinon.SinonSpy;
+  select: ((key: string) => void) & sinon.SinonSpy;
+  deselect: ((key: string) => void) & sinon.SinonSpy;
+  setDetailsVisible: ((key: string) => void) & sinon.SinonSpy;
+  setParentRequestedRanges: ((ranges: { firstIndex: number; size: number; parentKey: string }[]) => void) & sinon.SinonSpy;
 };
 
 export type Item = {
@@ -52,6 +52,8 @@ type Vaadin = {
 const Vaadin = window.Vaadin as Vaadin;
 export const gridConnector = Vaadin.Flow.gridConnector;
 
+export const GRID_CONNECTOR_PARENT_REQUEST_DELAY = 50;
+
 /**
  * Initializes the grid connector and the grid server mock.
  */
@@ -75,6 +77,13 @@ export function init(grid: FlowGrid): void {
  */
 export function getBodyRowCount(grid: FlowGrid): number {
   return grid._effectiveSize;
+}
+
+/**
+ * Returns the content of a header cell.
+ */
+export function getHeaderCellContent(column: GridColumn): HTMLElement {
+  return (column as any)._headerCell._content as HTMLElement;
 }
 
 /**
