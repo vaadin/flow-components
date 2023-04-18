@@ -29,7 +29,7 @@ public class SelectItemWithIdenticalIdPage extends Div {
 
     public SelectItemWithIdenticalIdPage() {
         var grid = new Grid<Item>();
-        grid.addColumn(Item::displayValue).setHeader("Display value");
+        grid.addColumn(Item::getDisplayValue).setHeader("Display value");
         grid.setItems(Arrays.asList(new Item("1", "1"), new Item("2", "2")));
 
         var useMultiSelectCheckbox = new Checkbox("Use multi-select",
@@ -60,7 +60,24 @@ public class SelectItemWithIdenticalIdPage extends Div {
                 deselectItemButton);
     }
 
-    private record Item(String id, String displayValue) {
+    private class Item {
+
+        private String id;
+
+        private String displayValue;
+
+        public Item(String id, String displayValue) {
+            this.id = id;
+            this.displayValue = displayValue;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public String getDisplayValue() {
+            return displayValue;
+        }
 
         @Override
             public boolean equals(Object o) {
