@@ -79,11 +79,19 @@
                     <groupId>org.apache.poi</groupId>
                     <artifactId>poi-ooxml-lite</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>com.github.javaparser</groupId>
+                    <artifactId>javaparser-core</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml-full</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.javaparser</groupId>
+            <artifactId>javaparser-core</artifactId>
         </dependency>
         <dependency>
             <groupId>jakarta.servlet</groupId>
