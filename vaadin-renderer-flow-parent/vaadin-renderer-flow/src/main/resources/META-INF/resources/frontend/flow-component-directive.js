@@ -11,22 +11,26 @@ class FlowComponentDirective extends Directive {
   }
 
   update(part, [appid, nodeid]) {
+    this.updateContent(part, appid, nodeid);
+    return noChange;
+  }
+
+  updateContent(part, appid, nodeid) {
     const { parentNode, startNode } = part;
 
     const newNode = this.getNewNode(appid, nodeid);
     const oldNode = this.getOldNode(part);
 
-    if (oldNode === newNode) {
-      return noChange;
-    } else if (oldNode && newNode) {
-      parentNode.replaceChild(newNode, oldNode);
+    if (!newNode) {
+      // If the node is not found, try again later.
+      setTimeout(() => this.updateContent(part, appid, nodeid));
+    } else if (oldNode === newNode) {
+      return;
     } else if (oldNode) {
-      parentNode.removeChild(oldNode);
+      parentNode.replaceChild(newNode, oldNode);
     } else if (newNode) {
       startNode.after(newNode);
     }
-
-    return noChange;
   }
 
   getNewNode(appid, nodeid) {
@@ -67,4 +71,4 @@ export const flowComponentDirective = (appid, nodeid) => {
       resolve(flowComponentDirectiveInternal(appid, nodeid));
     })
   );
-}
+};
