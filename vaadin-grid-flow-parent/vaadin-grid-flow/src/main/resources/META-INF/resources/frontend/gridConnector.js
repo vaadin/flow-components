@@ -169,8 +169,8 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           items.forEach((item) => {
             if (item) {
               selectedKeys[item.key] = item;
+              item.selected = true;
               if (userOriginated) {
-                item.selected = true;
                 grid.$server.select(item.key);
               }
             }
@@ -198,8 +198,8 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             }
             if (itemToDeselect) {
               delete selectedKeys[itemToDeselect.key];
+              delete itemToDeselect.selected;
               if (userOriginated) {
-                delete itemToDeselect.selected;
                 grid.$server.deselect(itemToDeselect.key);
               }
             }
