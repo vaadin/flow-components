@@ -86,11 +86,14 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
         // contextMenuConnector.js make a server round-trip first.
         getElement().setProperty("openOn", "none");
 
-        getElement().addPropertyChangeListener("opened", event -> {
+        getElement().addEventListener("opened-changed", event -> {
             if (autoAddedToTheUi && !isOpened()) {
                 getElement().removeFromParent();
                 autoAddedToTheUi = false;
             }
+        });
+
+        getElement().addPropertyChangeListener("opened", event -> {
             fireEvent(new OpenedChangeEvent<>((C) this,
                     event.isUserOriginated()));
         });
