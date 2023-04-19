@@ -61,17 +61,5 @@ const flowComponentDirectiveInternal = directive(FlowComponentDirective);
  * @private
  */
 export const flowComponentDirective = (appid, nodeid) => {
-  // Theoretically, it could return the directive synchronously.
-  // The `until` directive is used for now to work around sizing issues
-  // with ComponentRenderer. The previously used <flow-component-renderer> was
-  // asynchronous by nature and thus worked out of the box.
-  //
-  // Test in ComponentColumnWithHeightIT::shouldPositionItemsCorrectlyAfterScrollingToEnd
-  // makes sure the sizing works correctly. The sizing issue should eventually
-  // be fixed in the Virtualizer.
-  return until(
-    new Promise((resolve) => {
-      resolve(flowComponentDirectiveInternal(appid, nodeid));
-    })
-  );
+  return flowComponentDirectiveInternal(appid, nodeid);
 };
