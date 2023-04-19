@@ -32,7 +32,12 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
               return;
             }
 
-            if (!this.itemCaches[scaledIndex]) {
+            const isCached = this.grid.$connector.hasCacheForParentKey(this.grid.getItemId(this.items[scaledIndex]));
+            if (isCached) {
+              // The sub-cache items are already in the connector's cache. Skip the debouncing process.
+              this.doEnsureSubCacheForScaledIndex(scaledIndex);
+            } else if (!this.itemCaches[scaledIndex]) {
+              // The items need to be fetched from the server.
               this.grid.$connector.beforeEnsureSubCacheForScaledIndex(this, scaledIndex);
             }
           });
@@ -118,6 +123,8 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
 
         grid.$connector = {};
 
+        grid.$connector.hasCacheForParentKey = tryCatchWrapper((parentKey) => cache[parentKey] !== undefined);
+
         grid.$connector.hasEnsureSubCacheQueue = tryCatchWrapper(() => ensureSubCacheQueue.length > 0);
 
         grid.$connector.hasParentRequestQueue = tryCatchWrapper(() => parentRequestQueue.length > 0);
@@ -158,8 +165,8 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           items.forEach((item) => {
             if (item) {
               selectedKeys[item.key] = item;
+              item.selected = true;
               if (userOriginated) {
-                item.selected = true;
                 grid.$server.select(item.key);
               }
             }
@@ -187,8 +194,8 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             }
             if (itemToDeselect) {
               delete selectedKeys[itemToDeselect.key];
+              delete itemToDeselect.selected;
               if (userOriginated) {
-                delete itemToDeselect.selected;
                 grid.$server.deselect(itemToDeselect.key);
               }
             }
@@ -251,29 +258,10 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
         });
 
         grid.$connector.flushEnsureSubCache = tryCatchWrapper(function () {
-          let pendingFetch = ensureSubCacheQueue.splice(0, 1)[0];
-          let itemkey = pendingFetch.itemkey;
-
-          const visibleRows = grid._getVisibleRows();
-          let start = visibleRows[0].index;
-          let end = visibleRows[visibleRows.length - 1].index;
-
-          let buffer = end - start;
-          let firstNeededIndex = Math.max(0, start - buffer);
-          let lastNeededIndex = Math.min(end + buffer, grid._effectiveSize);
-
-          // only fetch if given item is still in visible range
-          for (let index = firstNeededIndex; index <= lastNeededIndex; index++) {
-            let item = grid._cache.getItemForIndex(index);
-
-            if (grid.getItemId(item) === itemkey) {
-              if (grid._isExpanded(item)) {
-                pendingFetch.cache.doEnsureSubCacheForScaledIndex(pendingFetch.scaledIndex);
-                return true;
-              } else {
-                break;
-              }
-            }
+          const pendingFetch = ensureSubCacheQueue.shift();
+          if (pendingFetch) {
+            pendingFetch.cache.doEnsureSubCacheForScaledIndex(pendingFetch.scaledIndex);
+            return true;
           }
           return false;
         });
@@ -370,18 +358,6 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
               ensureSubCacheQueue = [];
               // Resolve the callback from cache
               callback(cache[parentUniqueKey][page], cache[parentUniqueKey].size);
-
-              // Check if there are any pending requests for expanded parents that could be resolved
-              // synchronously from cache
-              const resolvableParentRequest = ensureSubCacheQueue.find(({ itemkey }) => cache[itemkey]);
-              if (resolvableParentRequest) {
-                // Found a resolvable parent request, remove all pending requests as fresh ones will be
-                // created once the callback executes
-                ensureSubCacheQueue = [];
-
-                // Synchronously make a page load request for the resolvable parent request
-                resolvableParentRequest.cache.doEnsureSubCacheForScaledIndex(resolvableParentRequest.scaledIndex);
-              }
             } else {
               treePageCallbacks[parentUniqueKey][page] = callback;
 
@@ -554,10 +530,9 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           }
           grid.detailsOpenedItems = detailsOpenedItems;
           if (updatedSelectedItem) {
-            // IE 11 Object doesn't support method values
-            grid.selectedItems = Object.keys(selectedKeys).map(function (e) {
-              return selectedKeys[e];
-            });
+            // Replace the objects in the grid.selectedItems array without replacing the array
+            // itself in order to avoid an unnecessary re-render of the grid.
+            grid.selectedItems.splice(0, grid.selectedItems.length, ...Object.values(selectedKeys));
           }
         };
 
@@ -890,14 +865,6 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           }
           // Let server know we're done
           grid.$server.confirmParentUpdate(id, parentKey);
-
-          if (!grid.loading) {
-            grid.__confirmParentUpdateDebouncer = Debouncer.debounce(
-              grid.__confirmParentUpdateDebouncer,
-              microTask,
-              () => grid.__updateVisibleRows()
-            );
-          }
         });
 
         grid.$connector.confirm = tryCatchWrapper(function (id) {

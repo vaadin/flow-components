@@ -19,6 +19,7 @@ import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.CompositionNotifier;
 import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasSize;
@@ -36,6 +37,8 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableFunction;
 
+import java.util.Optional;
+
 /**
  * Internal class that provides base functionality for input field components,
  * such as {@link TextField}. Not intended to be used publicly.
@@ -47,7 +50,7 @@ import com.vaadin.flow.function.SerializableFunction;
  */
 public abstract class TextFieldBase<TComponent extends TextFieldBase<TComponent, TValue>, TValue>
         extends AbstractSinglePropertyField<TComponent, TValue>
-        implements CompositionNotifier, Focusable<TComponent>,
+        implements CompositionNotifier, Focusable<TComponent>, HasAriaLabel,
         HasAutocapitalize, HasAutocomplete, HasAutocorrect, HasClearButton,
         HasClientValidation, HasHelper, HasLabel, HasPrefixAndSuffix, HasSize,
         HasStyle, HasTooltip, HasValidationProperties, HasValidator<TValue>,
@@ -194,6 +197,32 @@ public abstract class TextFieldBase<TComponent extends TextFieldBase<TComponent,
      */
     public boolean isRequired() {
         return getElement().getProperty("required", false);
+    }
+
+    @Override
+    public void setLabel(String label) {
+        HasLabel.super.setLabel(label);
+    }
+
+    @Override
+    public void setAriaLabel(String ariaLabel) {
+        getElement().setProperty("accessibleName", ariaLabel);
+    }
+
+    @Override
+    public Optional<String> getAriaLabel() {
+        return Optional.ofNullable(getElement().getProperty("accessibleName"));
+    }
+
+    @Override
+    public void setAriaLabelledBy(String labelledBy) {
+        getElement().setProperty("accessibleNameRef", labelledBy);
+    }
+
+    @Override
+    public Optional<String> getAriaLabelledBy() {
+        return Optional
+                .ofNullable(getElement().getProperty("accessibleNameRef"));
     }
 
     /**

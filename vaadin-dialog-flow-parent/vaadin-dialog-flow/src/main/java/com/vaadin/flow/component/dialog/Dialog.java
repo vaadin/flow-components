@@ -76,9 +76,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-dialog")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha4")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/dialog", version = "24.1.0-alpha4")
+@NpmPackage(value = "@vaadin/dialog", version = "24.1.0-alpha8")
 @JsModule("@vaadin/dialog/src/vaadin-dialog.js")
 @JsModule("./flow-component-renderer.js")
 public class Dialog extends Component implements HasComponents, HasSize,
@@ -112,7 +112,10 @@ public class Dialog extends Component implements HasComponents, HasSize,
         // Workaround for: https://github.com/vaadin/flow/issues/3496
         setOpened(false);
 
-        getElement().addEventListener("opened-changed", event -> {
+        getElement().addPropertyChangeListener("opened", event -> fireEvent(
+                new OpenedChangeEvent(this, event.isUserOriginated())));
+
+        addOpenedChangeListener(event -> {
             if (!isOpened()) {
                 setModality(false);
             }
@@ -283,14 +286,14 @@ public class Dialog extends Component implements HasComponents, HasSize,
         if (isOpened()) {
             ensureOnCloseConfigured();
         }
-        Registration openedRegistration = getElement()
-                .addPropertyChangeListener("opened", event -> {
-                    if (isOpened()) {
-                        ensureOnCloseConfigured();
-                    } else {
-                        onCloseConfigured = 0;
-                    }
-                });
+
+        Registration openedRegistration = addOpenedChangeListener(event -> {
+            if (event.isOpened()) {
+                ensureOnCloseConfigured();
+            } else {
+                onCloseConfigured = 0;
+            }
+        });
 
         Registration registration = addListener(DialogCloseActionEvent.class,
                 listener);
@@ -829,9 +832,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      */
     public Registration addOpenedChangeListener(
             ComponentEventListener<OpenedChangeEvent> listener) {
-        return getElement().addPropertyChangeListener("opened",
-                event -> listener.onComponentEvent(
-                        new OpenedChangeEvent(this, event.isUserOriginated())));
+        return addListener(OpenedChangeEvent.class, listener);
     }
 
     /**

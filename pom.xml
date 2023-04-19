@@ -13,7 +13,7 @@
     <url>https://vaadin.com/components</url>
     <properties>
         <flow.version>24.1-SNAPSHOT</flow.version>
-        <testbench.version>9.0.1</testbench.version>
+        <testbench.version>9.0.3</testbench.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -25,7 +25,7 @@
         <karaf-maven-plugin.version>4.4.3</karaf-maven-plugin.version>
         <maven.surefire.plugin.version>3.0.0</maven.surefire.plugin.version>
         <maven.failsafe.plugin.version>2.22.2</maven.failsafe.plugin.version>
-        <maven.resources.plugin.version>3.3.0</maven.resources.plugin.version>
+        <maven.resources.plugin.version>3.3.1</maven.resources.plugin.version>
         <maven.deploy.plugin.version>2.8.2</maven.deploy.plugin.version>
         <failsafe.forkCount>4</failsafe.forkCount>
         <com.vaadin.tests.SharedBrowser.reuseBrowser>true</com.vaadin.tests.SharedBrowser.reuseBrowser>
@@ -40,6 +40,7 @@
 
         <!-- spreadsheet -->
         <poi.version>5.2.3</poi.version>
+        <javaparser.version>3.24.10</javaparser.version>
     </properties>
     <modules>
         <module>vaadin-renderer-flow-parent</module>
@@ -429,12 +430,12 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-install-plugin</artifactId>
-                    <version>3.1.0</version>
+                    <version>3.1.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>3.2.1</version>
+                    <version>3.3.0</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -446,7 +447,6 @@
                 <configuration>
                     <configFile>https://raw.githubusercontent.com/vaadin/flow/main/eclipse/VaadinJavaConventions.xml</configFile>
                     <skipHtmlFormatting>true</skipHtmlFormatting>
-                    <lineEnding>LF</lineEnding>
                     <excludes>
                         <exclude>**/*.css</exclude>
                     </excludes>
@@ -516,7 +516,7 @@
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-simple</artifactId>
-                <version>2.0.6</version>
+                <version>2.0.7</version>
             </dependency>
             <dependency>
                 <groupId>jakarta.servlet</groupId>
@@ -594,6 +594,11 @@
                 <groupId>org.apache.poi</groupId>
                 <artifactId>poi-ooxml-full</artifactId>
                 <version>${poi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.javaparser</groupId>
+                <artifactId>javaparser-core</artifactId>
+                <version>${javaparser.version}</version>
             </dependency>
             <dependency>
                 <groupId>jakarta.platform</groupId>
