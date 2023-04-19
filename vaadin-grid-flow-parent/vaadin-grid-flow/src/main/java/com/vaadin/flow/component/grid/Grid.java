@@ -528,6 +528,29 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
 
         /**
+         * Switch the renderer used for this column.
+         *
+         * @param renderer the new renderer to be used for this column, should never be {@code null}
+         */
+        public void setRenderer(Renderer<T> renderer) {
+            this.renderer = Objects.requireNonNull(renderer);
+
+            destroyDataGenerators();
+
+            rendering = renderer.render(getElement(), (KeyMapper<T>) getGrid()
+                    .getDataCommunicator().getKeyMapper());
+
+            Optional<DataGenerator<T>> dataGenerator = rendering
+                    .getDataGenerator();
+
+            if (dataGenerator.isPresent()) {
+                columnDataGeneratorRegistration = getGrid()
+                        .addDataGenerator((DataGenerator) dataGenerator.get());
+            }
+            getGrid().getDataCommunicator().reset();
+        }
+
+        /**
          * Sets the width of this column as a CSS-string.
          *
          * @see #setFlexGrow(int)
