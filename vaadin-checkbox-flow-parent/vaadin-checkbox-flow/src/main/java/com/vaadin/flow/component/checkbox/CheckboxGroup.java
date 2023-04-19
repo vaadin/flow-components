@@ -31,9 +31,6 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasHelper;
-import com.vaadin.flow.component.HasLabel;
-import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
@@ -41,12 +38,7 @@ import com.vaadin.flow.component.checkbox.dataview.CheckboxGroupDataView;
 import com.vaadin.flow.component.checkbox.dataview.CheckboxGroupListDataView;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.shared.ClientValidationUtil;
-import com.vaadin.flow.component.shared.HasClientValidation;
-import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.flow.component.shared.HasTooltip;
-import com.vaadin.flow.component.shared.HasValidationProperties;
-import com.vaadin.flow.component.shared.ValidationUtil;
+import com.vaadin.flow.component.shared.*;
 import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
@@ -91,8 +83,8 @@ import elemental.json.JsonArray;
 public class CheckboxGroup<T>
         extends AbstractSinglePropertyField<CheckboxGroup<T>, Set<T>> implements
         HasClientValidation, HasDataView<T, Void, CheckboxGroupDataView<T>>,
-        HasHelper, HasItemComponents<T>, HasLabel, HasSize, HasStyle,
-        HasListDataView<T, CheckboxGroupListDataView<T>>, HasTooltip,
+        HasHelper, HasItemComponents<T>, InputField,
+        HasListDataView<T, CheckboxGroupListDataView<T>>,
         HasThemeVariant<CheckboxGroupVariant>, HasValidationProperties,
         HasValidator<Set<T>>, MultiSelect<CheckboxGroup<T>, T> {
 

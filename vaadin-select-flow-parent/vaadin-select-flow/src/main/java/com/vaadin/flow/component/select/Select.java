@@ -24,9 +24,6 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasHelper;
-import com.vaadin.flow.component.HasLabel;
-import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
@@ -35,14 +32,7 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.select.data.SelectDataView;
 import com.vaadin.flow.component.select.data.SelectListDataView;
-import com.vaadin.flow.component.shared.ClientValidationUtil;
-import com.vaadin.flow.component.shared.HasClientValidation;
-import com.vaadin.flow.component.shared.HasOverlayClassName;
-import com.vaadin.flow.component.shared.HasPrefix;
-import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.flow.component.shared.HasTooltip;
-import com.vaadin.flow.component.shared.HasValidationProperties;
-import com.vaadin.flow.component.shared.ValidationUtil;
+import com.vaadin.flow.component.shared.*;
 import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
@@ -91,9 +81,9 @@ import java.util.stream.Stream;
 public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
         implements Focusable<Select<T>>, HasClientValidation,
         HasDataView<T, Void, SelectDataView<T>>, HasItemComponents<T>,
-        HasHelper, HasLabel, HasListDataView<T, SelectListDataView<T>>,
-        HasOverlayClassName, HasPrefix, HasSize, HasStyle,
-        HasThemeVariant<SelectVariant>, HasTooltip, HasValidationProperties,
+        HasHelper, InputField, HasListDataView<T, SelectListDataView<T>>,
+        HasOverlayClassName, HasPrefix,
+        HasThemeVariant<SelectVariant>, HasValidationProperties,
         HasValidator<T>, SingleSelect<Select<T>, T> {
 
     public static final String LABEL_ATTRIBUTE = "label";

@@ -20,11 +20,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.HasHelper;
-import com.vaadin.flow.component.HasLabel;
-import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +30,6 @@ import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Focusable;
-import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Tag;
@@ -56,8 +53,8 @@ import com.vaadin.flow.dom.Element;
 @NpmPackage(value = "@vaadin/custom-field", version = "24.1.0-alpha6")
 @JsModule("@vaadin/custom-field/src/vaadin-custom-field.js")
 public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
-        implements Focusable<CustomField<T>>, HasHelper, HasLabel, HasSize,
-        HasStyle, HasTheme, HasTooltip, HasValidationProperties {
+        implements Focusable<CustomField<T>>, HasHelper, InputField,
+        HasTheme, HasValidationProperties {
 
     /**
      * Default constructor.

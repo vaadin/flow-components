@@ -27,22 +27,11 @@ import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasHelper;
-import com.vaadin.flow.component.HasLabel;
-import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.shared.ClientValidationUtil;
-import com.vaadin.flow.component.shared.HasAutoOpen;
-import com.vaadin.flow.component.shared.HasClientValidation;
-import com.vaadin.flow.component.shared.HasOverlayClassName;
-import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.flow.component.shared.HasTooltip;
-import com.vaadin.flow.component.shared.HasValidationProperties;
-import com.vaadin.flow.component.shared.ValidationUtil;
-import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.component.shared.*;
 import com.vaadin.flow.component.timepicker.StepsUtil;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
@@ -119,8 +108,8 @@ class DateTimePickerTimePicker
 public class DateTimePicker
         extends AbstractSinglePropertyField<DateTimePicker, LocalDateTime>
         implements Focusable<DateTimePicker>, HasAutoOpen, HasClientValidation,
-        HasHelper, HasLabel, HasOverlayClassName, HasSize, HasStyle,
-        HasThemeVariant<DateTimePickerVariant>, HasTooltip,
+        HasHelper, InputField, HasOverlayClassName,
+        HasThemeVariant<DateTimePickerVariant>,
         HasValidationProperties, HasValidator<LocalDateTime> {
 
     private final DateTimePickerDatePicker datePicker = new DateTimePickerDatePicker();

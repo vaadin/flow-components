@@ -30,26 +30,13 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasHelper;
-import com.vaadin.flow.component.HasLabel;
-import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.shared.ClientValidationUtil;
-import com.vaadin.flow.component.shared.HasAllowedCharPattern;
-import com.vaadin.flow.component.shared.HasAutoOpen;
-import com.vaadin.flow.component.shared.HasClearButton;
-import com.vaadin.flow.component.shared.HasClientValidation;
-import com.vaadin.flow.component.shared.HasOverlayClassName;
-import com.vaadin.flow.component.shared.HasPrefix;
-import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.flow.component.shared.HasTooltip;
-import com.vaadin.flow.component.shared.HasValidationProperties;
-import com.vaadin.flow.component.shared.ValidationUtil;
+import com.vaadin.flow.component.shared.*;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
@@ -77,8 +64,8 @@ import com.vaadin.flow.shared.Registration;
 public class TimePicker
         extends AbstractSinglePropertyField<TimePicker, LocalTime>
         implements Focusable<TimePicker>, HasAllowedCharPattern, HasAriaLabel,
-        HasAutoOpen, HasClearButton, HasClientValidation, HasHelper, HasLabel,
-        HasPrefix, HasOverlayClassName, HasSize, HasStyle, HasTooltip,
+        HasAutoOpen, HasClearButton, HasClientValidation, HasHelper, InputField,
+        HasPrefix, HasOverlayClassName,
         HasThemeVariant<TimePickerVariant>, HasValidationProperties,
         HasValidator<LocalTime> {
 

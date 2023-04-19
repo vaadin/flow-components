@@ -28,9 +28,6 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasHelper;
-import com.vaadin.flow.component.HasLabel;
-import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
@@ -38,12 +35,7 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupDataView;
 import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupListDataView;
-import com.vaadin.flow.component.shared.ClientValidationUtil;
-import com.vaadin.flow.component.shared.HasClientValidation;
-import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.flow.component.shared.HasTooltip;
-import com.vaadin.flow.component.shared.HasValidationProperties;
-import com.vaadin.flow.component.shared.ValidationUtil;
+import com.vaadin.flow.component.shared.*;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
 import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
@@ -80,9 +72,9 @@ import com.vaadin.flow.shared.Registration;
 public class RadioButtonGroup<T>
         extends AbstractSinglePropertyField<RadioButtonGroup<T>, T>
         implements HasClientValidation,
-        HasDataView<T, Void, RadioButtonGroupDataView<T>>, HasHelper, HasLabel,
-        HasListDataView<T, RadioButtonGroupListDataView<T>>, HasSize, HasStyle,
-        HasThemeVariant<RadioGroupVariant>, HasTooltip, HasValidationProperties,
+        HasDataView<T, Void, RadioButtonGroupDataView<T>>, HasHelper, InputField,
+        HasListDataView<T, RadioButtonGroupListDataView<T>>,
+        HasThemeVariant<RadioGroupVariant>, HasValidationProperties,
         HasValidator<T>, SingleSelect<RadioButtonGroup<T>, T> {
 
     private final KeyMapper<T> keyMapper = new KeyMapper<>();
