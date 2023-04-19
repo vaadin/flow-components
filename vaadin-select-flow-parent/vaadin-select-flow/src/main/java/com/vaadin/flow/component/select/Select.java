@@ -148,6 +148,12 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
         addValueChangeListener(e -> validate());
 
         addClientValidatedEventListener(e -> validate());
+
+        getElement().addPropertyChangeListener("opened", event -> fireEvent(
+                new OpenedChangeEvent(this, event.isUserOriginated())));
+
+        getElement().addPropertyChangeListener("invalid", event -> fireEvent(
+                new InvalidChangeEvent(this, event.isUserOriginated())));
     }
 
     /**
@@ -1030,9 +1036,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      */
     protected Registration addOpenedChangeListener(
             ComponentEventListener<OpenedChangeEvent> listener) {
-        return getElement().addPropertyChangeListener("opened",
-                event -> listener.onComponentEvent(
-                        new OpenedChangeEvent(this, event.isUserOriginated())));
+        return addListener(OpenedChangeEvent.class, listener);
     }
 
     /**
@@ -1061,9 +1065,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      */
     protected Registration addInvalidChangeListener(
             ComponentEventListener<InvalidChangeEvent> listener) {
-        return getElement().addPropertyChangeListener("invalid",
-                event -> listener.onComponentEvent(new InvalidChangeEvent(this,
-                        event.isUserOriginated())));
+        return addListener(InvalidChangeEvent.class, listener);
     }
 
 }

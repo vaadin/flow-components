@@ -19,6 +19,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.html.NativeButton;
@@ -217,4 +218,18 @@ public class ContextMenuTest {
         Assert.assertEquals(expectedText, ((MenuItem) component).getText());
     }
 
+    @Test
+    public void unregisterOpenedChangeListenerOnEvent() {
+        ContextMenu contextMenu = new ContextMenu();
+        AtomicInteger listenerInvokedCount = new AtomicInteger(0);
+        contextMenu.addOpenedChangeListener(e -> {
+            listenerInvokedCount.incrementAndGet();
+            e.unregisterListener();
+        });
+
+        contextMenu.getElement().setProperty("opened", true);
+        contextMenu.getElement().setProperty("opened", false);
+
+        Assert.assertEquals(1, listenerInvokedCount.get());
+    }
 }

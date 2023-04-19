@@ -22,6 +22,7 @@ import static org.junit.Assert.assertTrue;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.vaadin.flow.component.HasAriaLabel;
 import org.junit.Assert;
@@ -311,6 +312,22 @@ public class TimePickerTest {
 
         timePicker.setAriaLabelledBy(null);
         Assert.assertTrue(timePicker.getAriaLabelledBy().isEmpty());
+    }
+
+    @Test
+    public void unregisterInvalidChangeListenerOnEvent() {
+        var timePicker = new TimePicker();
+
+        var listenerInvokedCount = new AtomicInteger(0);
+        timePicker.addInvalidChangeListener(e -> {
+            listenerInvokedCount.incrementAndGet();
+            e.unregisterListener();
+        });
+
+        timePicker.setInvalid(true);
+        timePicker.setInvalid(false);
+
+        Assert.assertEquals(1, listenerInvokedCount.get());
     }
 
     @Tag("div")
