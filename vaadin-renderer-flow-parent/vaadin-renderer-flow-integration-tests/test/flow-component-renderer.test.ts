@@ -53,4 +53,18 @@ describe('flow-component-renderer', () => {
 
     expect(container.firstElementChild).to.equal(element);
   });
+
+  it('should remove old node', async () => {
+    const container = fixtureSync<HTMLDivElement>(`<div></div>`);
+    const element = document.createElement('div');
+    elements[0] = element;
+
+    render(html`${window.Vaadin.FlowComponentHost.getNode('ROOT', 0)}`, container);
+    await nextFrame();
+    expect(container.firstElementChild).to.equal(element);
+
+    render(html`${window.Vaadin.FlowComponentHost.getNode('ROOT', undefined)}`, container);
+    await nextFrame();
+    expect(container.firstElementChild).to.equal(null);
+  });
 });
