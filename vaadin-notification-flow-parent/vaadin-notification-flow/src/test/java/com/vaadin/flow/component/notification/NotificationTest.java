@@ -18,6 +18,7 @@ package com.vaadin.flow.component.notification;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -313,5 +314,21 @@ public class NotificationTest {
     private void flushBeforeClientResponse() {
         UIInternals internals = ui.getInternals();
         internals.getStateTree().runExecutionsBeforeClientResponse();
+    }
+
+    @Test
+    public void unregisterOpenedChangeListenerOnEvent() {
+        var notification = new Notification();
+
+        var listenerInvokedCount = new AtomicInteger(0);
+        notification.addOpenedChangeListener(e -> {
+            listenerInvokedCount.incrementAndGet();
+            e.unregisterListener();
+        });
+
+        notification.open();
+        notification.close();
+
+        Assert.assertEquals(1, listenerInvokedCount.get());
     }
 }

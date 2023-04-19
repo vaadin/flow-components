@@ -140,6 +140,9 @@ public class TimePicker
         addValueChangeListener(e -> validate());
 
         addClientValidatedEventListener(event -> validate());
+
+        getElement().addPropertyChangeListener("invalid", event -> fireEvent(
+                new InvalidChangeEvent(this, event.isUserOriginated())));
     }
 
     /**
@@ -466,9 +469,7 @@ public class TimePicker
      */
     public Registration addInvalidChangeListener(
             ComponentEventListener<InvalidChangeEvent> listener) {
-        return getElement().addPropertyChangeListener("invalid",
-                event -> listener.onComponentEvent(new InvalidChangeEvent(this,
-                        event.isUserOriginated())));
+        return addListener(InvalidChangeEvent.class, listener);
     }
 
     /**
