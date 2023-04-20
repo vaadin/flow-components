@@ -34,6 +34,8 @@ public class PreMultiSortedIT extends AbstractComponentIT {
     @Test
     public void rowsRendered() {
         GridElement grid = $(GridElement.class).first();
+        // Wait for page with "First 13" to be loaded
+        waitUntil(driver -> grid.getText().contains("First 13"));
         Assert.assertEquals("First 13", grid.getCell(5, 0).getText());
     }
 }
