@@ -1,5 +1,4 @@
 import { noChange } from 'lit';
-import { until } from 'lit/directives/until.js';
 import { directive, Directive, PartType } from 'lit/directive.js';
 
 class FlowComponentDirective extends Directive {
@@ -49,8 +48,6 @@ class FlowComponentDirective extends Directive {
   }
 }
 
-const flowComponentDirectiveInternal = directive(FlowComponentDirective);
-
 /**
  * Renders the given flow component node.
  *
@@ -60,6 +57,4 @@ const flowComponentDirectiveInternal = directive(FlowComponentDirective);
  * @param {number} nodeid
  * @private
  */
-export const flowComponentDirective = (appid, nodeid) => {
-  return flowComponentDirectiveInternal(appid, nodeid);
-};
+export const flowComponentDirective = directive(FlowComponentDirective);
