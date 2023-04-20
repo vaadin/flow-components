@@ -52,7 +52,7 @@ class FlowComponentDirective extends Directive {
 const flowComponentDirectiveInternal = directive(FlowComponentDirective);
 
 /**
- * Renders the given flow component node asynchronously.
+ * Renders the given flow component node.
  *
  * WARNING: This directive is not intended for public use.
  *
