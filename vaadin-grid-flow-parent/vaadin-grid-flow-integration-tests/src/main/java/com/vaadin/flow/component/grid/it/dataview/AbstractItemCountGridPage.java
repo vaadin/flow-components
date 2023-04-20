@@ -125,7 +125,8 @@ public abstract class AbstractItemCountGridPage extends VerticalLayout
     private void initGrid() {
         grid = new Grid<>();
         grid.setItems(this::fakeFetch);
-        grid.setSizeFull();
+        grid.setWidthFull();
+        grid.setHeight("1000px");
 
         grid.addColumn(ValueProvider.identity()).setHeader("Name");
     }
