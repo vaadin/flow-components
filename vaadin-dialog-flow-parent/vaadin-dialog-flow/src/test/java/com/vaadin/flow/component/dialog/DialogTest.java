@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.dialog;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.html.Span;
@@ -285,5 +286,21 @@ public class DialogTest {
     public void callAddToHeaderOrFooter_withAnyNullValue_shouldThrowError() {
         Dialog dialog = new Dialog();
         dialog.getHeader().add(new Span("content"), null);
+    }
+
+    @Test
+    public void unregisterOpenedChangeListenerOnEvent() {
+        var dialog = new Dialog();
+
+        var listenerInvokedCount = new AtomicInteger(0);
+        dialog.addOpenedChangeListener(e -> {
+            listenerInvokedCount.incrementAndGet();
+            e.unregisterListener();
+        });
+
+        dialog.open();
+        dialog.close();
+
+        Assert.assertEquals(1, listenerInvokedCount.get());
     }
 }
