@@ -531,6 +531,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          * Switch the renderer used for this column.
          *
          * @param renderer the new renderer to be used for this column, should never be {@code null}
+         *
+         * @since 24.1
          */
         public void setRenderer(Renderer<T> renderer) {
             this.renderer = Objects.requireNonNull(renderer);
@@ -548,6 +550,22 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                         .addDataGenerator((DataGenerator) dataGenerator.get());
             }
             getGrid().getDataCommunicator().reset();
+        }
+
+        /**
+         * Switch the renderer and the value provider used for this column.
+         *
+         * @param valueProvider the value provider, used for sorting
+         * @param renderer the new renderer to be used for this column, should never be {@code null}
+         *
+         * @since 24.1
+         */
+        public void setRenderer(ValueProvider<T, ?> valueProvider, Renderer<T> renderer) {
+            this.setRenderer(renderer);
+            this.comparator = (a, b) -> compareMaybeComparables(
+                    valueProvider.apply(a),
+                    valueProvider.apply(b)
+            );
         }
 
         /**
