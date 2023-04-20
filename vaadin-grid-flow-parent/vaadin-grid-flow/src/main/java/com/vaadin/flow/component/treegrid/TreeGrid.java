@@ -1058,12 +1058,18 @@ public class TreeGrid<T> extends Grid<T>
     }
 
     /**
-     * Scrolls to the row with the given indexes. The indexes are hierarchical,
-     * starting with the root index.
+     * Scroll to a specific row index in the virtual list. Note that the row index is
+     * not always the same for any particular item. For example, sorting or filtering
+     * items can affect the row index related to an item.
+     *
+     * The `indexes` parameter can be either a single number or multiple numbers.
+     * The grid will first try to scroll to the item at the first index on the top level.
+     * In case the item at the first index is expanded, the grid will then try scroll to the
+     * item at the second index within the children of the expanded first item, and so on.
+     * Each given index points to a child of the item at the previous index.
      *
      * @param indexes
-     *            zero based indexes of the item to scroll to in the current
-     *            view.
+     *            row indexes to scroll to
      * @see TreeGrid#scrollToIndex(int)
      */
     public void scrollToIndex(int... indexes) {
