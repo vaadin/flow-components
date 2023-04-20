@@ -5,6 +5,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class DetailsTest {
 
     private Details details;
@@ -33,5 +35,19 @@ public class DetailsTest {
     public void summaryDefined_getSummaryText_returnsStringDefined() {
         details.setSummaryText("summary");
         Assert.assertEquals("summary", details.getSummaryText());
+    }
+
+    @Test
+    public void unregisterOpenedChangeListenerOnEvent() {
+        AtomicInteger listenerInvokedCount = new AtomicInteger(0);
+        details.addOpenedChangeListener(e -> {
+            listenerInvokedCount.incrementAndGet();
+            e.unregisterListener();
+        });
+
+        details.setOpened(true);
+        details.setOpened(false);
+
+        Assert.assertEquals(1, listenerInvokedCount.get());
     }
 }
