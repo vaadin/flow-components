@@ -15,34 +15,33 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import org.hamcrest.CoreMatchers;
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.WebElement;
 
-import static org.junit.Assert.assertThat;
-
-import java.util.List;
-
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-grid-it-demo/using-renderers")
 public class GridViewUsingRenderersIT extends AbstractComponentIT {
 
+    private GridElement grid;
+
     @Before
     public void init() {
         open();
+        grid = $(GridElement.class).id("grid-basic-renderers");
+        scrollToElement(grid);
+        waitUntilCellHasText(grid, "Item 1");
     }
 
     @Test
     public void basicRenderers_rowsAreRenderedAsExpected() {
-        GridElement grid = $(GridElement.class).id("grid-basic-renderers");
-        scrollToElement(grid);
-        waitUntilCellHasText(grid, "Item 1");
-
         Assert.assertEquals("Item 1", grid.getCell(0, 0).getText());
         Assert.assertEquals("$ 73.10", grid.getCell(0, 1).getText());
         Assert.assertTrue(
@@ -62,6 +61,45 @@ public class GridViewUsingRenderersIT extends AbstractComponentIT {
                 TestHelper.stripComments(grid.getCell(1, 4).getInnerHTML()));
         Assert.assertEquals("<button>Remove</button>",
                 TestHelper.stripComments(grid.getCell(1, 5).getInnerHTML()));
+    }
+
+    @Test
+    public void swapRenderer() {
+        TestBenchElement swapRenderers = $("button").id("btn-swap-renderers");
+        Assert.assertEquals("$ 73.10", grid.getCell(0, 1).getText());
+        Assert.assertEquals("$ 24.05", grid.getCell(1, 1).getText());
+        swapRenderers.click();
+        Assert.assertEquals("US$73.10", grid.getCell(0, 1).getText().trim());
+        Assert.assertEquals("US$24.05", grid.getCell(1, 1).getText().trim());
+        assertRendereredContent("<span style=\"color: red\">US$73.10</span>", TestHelper.stripComments(grid.getCell(0, 1).getInnerHTML()));
+        assertRendereredContent("<span style=\"color: blue\">US$24.05</span>", TestHelper.stripComments(grid.getCell(1, 1).getInnerHTML()));
+    }
+
+    @Test
+    public void swapRendererWithValueProvider() {
+        var priceSorter = grid.getHeaderCell(1).$("vaadin-grid-sorter").first();
+        // content should not get sorted with now value provider
+        priceSorter.click();
+        Assert.assertEquals("Item 1", grid.getCell(0, 0).getText());
+        Assert.assertEquals("Item 2", grid.getCell(1, 0).getText());
+        // reset sorter by clicking twice more
+        priceSorter.click();
+        priceSorter.click();
+        // swap renderer and value provider
+        TestBenchElement swapRendererWithValueProvider = $("button").id("btn-swap-renderer-with-value-provider");
+        swapRendererWithValueProvider.click();
+        // check content is rendered using the new renderer
+        Assert.assertEquals("US$73.10", grid.getCell(0, 1).getText().trim());
+        Assert.assertEquals("US$24.05", grid.getCell(1, 1).getText().trim());
+        assertRendereredContent("<span style=\"color: red\">US$73.10</span>", TestHelper.stripComments(grid.getCell(0, 1).getInnerHTML()));
+        assertRendereredContent("<span style=\"color: blue\">US$24.05</span>", TestHelper.stripComments(grid.getCell(1, 1).getInnerHTML()));
+        // now check content is ordered using the new value provider
+        priceSorter.click();
+        Assert.assertEquals("Item 88", grid.getCell(0, 0).getText());
+        Assert.assertEquals("Item 36", grid.getCell(1, 0).getText());
+        priceSorter.click();
+        Assert.assertEquals("Item 58", grid.getCell(0, 0).getText());
+        Assert.assertEquals("Item 69", grid.getCell(1, 0).getText());
     }
 
     private void assertRendereredContent(String expected, String content) {

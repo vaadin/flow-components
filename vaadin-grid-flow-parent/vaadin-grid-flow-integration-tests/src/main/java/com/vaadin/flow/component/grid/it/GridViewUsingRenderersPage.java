@@ -21,11 +21,13 @@ import java.util.List;
 import java.util.Locale;
 
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.bean.Item;
 import com.vaadin.flow.data.bean.ItemGenerator;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.renderer.IconRenderer;
+import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.LocalDateRenderer;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 import com.vaadin.flow.data.renderer.NativeButtonRenderer;
@@ -46,8 +48,9 @@ public class GridViewUsingRenderersPage extends LegacyTestView {
         grid.addColumn(Item::getName).setHeader("Name");
 
         // NumberRenderer to render numbers in general
-        grid.addColumn(new NumberRenderer<>(Item::getPrice, "$ %(,.2f",
+        Grid.Column<Item> priceColumn = grid.addColumn(new NumberRenderer<>(Item::getPrice, "$ %(,.2f",
                 Locale.US, "$ 0.00")).setHeader("Price");
+        priceColumn.setSortable(true);
 
         // LocalDateTimeRenderer for date and time
         grid.addColumn(new LocalDateTimeRenderer<>(Item::getPurchaseDate,
@@ -75,7 +78,20 @@ public class GridViewUsingRenderersPage extends LegacyTestView {
         })).setWidth("100px").setFlexGrow(0);
 
         grid.setId("grid-basic-renderers");
-        addCard("Using renderers", "Using basic renderers", grid);
+
+        LitRenderer<Item> litRenderer = LitRenderer.<Item>of("""
+                        <span style="color: ${item.price > 50 ? 'red' : 'blue'}">${new Intl.NumberFormat('en-fi',{ style: 'currency', currency: 'USD' }).format(item.price)}</span>
+                        """
+        ).withProperty("price", Item::getPrice);
+        NativeButton swapRenderersButton = new NativeButton("Swap price column renderer", (clickEvent) -> {
+            priceColumn.setRenderer(litRenderer);
+        });
+        swapRenderersButton.setId("btn-swap-renderers");
+
+        NativeButton swapRendererWithValueProviderButton = new NativeButton("Swap price column renderer and value provider", (clickEvent) -> priceColumn.setRenderer(Item::getPrice, litRenderer));
+        swapRendererWithValueProviderButton.setId("btn-swap-renderer-with-value-provider");
+
+        addCard("Using renderers", "Using basic renderers", grid, swapRenderersButton, swapRendererWithValueProviderButton);
     }
 
     private static List<Item> getShoppingCart() {

@@ -560,12 +560,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          *
          * @since 24.1
          */
-        public void setRenderer(ValueProvider<T, ?> valueProvider, Renderer<T> renderer) {
+        public <V extends Comparable<? super V>> void setRenderer(ValueProvider<T, V> valueProvider, Renderer<T> renderer) {
             this.setRenderer(renderer);
-            this.comparator = (a, b) -> compareMaybeComparables(
-                    valueProvider.apply(a),
-                    valueProvider.apply(b)
-            );
+            this.setComparator(valueProvider);
         }
 
         /**
