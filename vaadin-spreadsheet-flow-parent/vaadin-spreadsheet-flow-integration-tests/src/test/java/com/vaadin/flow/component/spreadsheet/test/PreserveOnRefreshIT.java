@@ -24,11 +24,11 @@ public class PreserveOnRefreshIT extends AbstractSpreadsheetIT {
         $("vaadin-button").id("with-charts").click();
 
         String chartSelector = "vaadin-chart";
-        assertComponentVisible(getSpreadsheetElement(), chartSelector);
+        waitUntilComponentVisible(getSpreadsheetElement(), chartSelector);
 
         getDriver().navigate().refresh();
 
-        assertComponentVisible(getSpreadsheetElement(), chartSelector);
+        waitUntilComponentVisible(getSpreadsheetElement(), chartSelector);
     }
 
     @Test
@@ -37,11 +37,11 @@ public class PreserveOnRefreshIT extends AbstractSpreadsheetIT {
 
         SpreadsheetElement spreadsheetElement = getSpreadsheetElement();
         clickCell(spreadsheetElement, "B2");
-        assertComponentVisible(spreadsheetElement, "vaadin-button");
+        waitUntilComponentVisible(spreadsheetElement, "vaadin-button");
 
         getDriver().navigate().refresh();
 
-        assertComponentVisible(getSpreadsheetElement(), "vaadin-button");
+        waitUntilComponentVisible(getSpreadsheetElement(), "vaadin-button");
     }
 
     @Test
@@ -61,7 +61,7 @@ public class PreserveOnRefreshIT extends AbstractSpreadsheetIT {
 
         spreadsheetElement = getSpreadsheetElement();
         input = spreadsheetElement.findElement(By.cssSelector("input"));
-        assertComponentVisible(spreadsheetElement, "vaadin-text-field");
+        waitUntilComponentVisible(spreadsheetElement, "vaadin-text-field");
         Assert.assertEquals(sampleText, input.getAttribute("value"));
     }
 
@@ -84,9 +84,9 @@ public class PreserveOnRefreshIT extends AbstractSpreadsheetIT {
         checkLogsForErrors();
     }
 
-    private void assertComponentVisible(SpreadsheetElement spreadsheetElement,
+    private void waitUntilComponentVisible(SpreadsheetElement spreadsheetElement,
             String cssSelector) {
-        Assert.assertTrue(spreadsheetElement
+        waitUntil(driver -> spreadsheetElement
                 .findElement(By.cssSelector(cssSelector)).isDisplayed());
     }
 
