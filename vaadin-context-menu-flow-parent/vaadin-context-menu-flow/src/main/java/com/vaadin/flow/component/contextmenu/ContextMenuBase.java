@@ -52,9 +52,9 @@ import elemental.json.JsonObject;
  */
 @SuppressWarnings("serial")
 @Tag("vaadin-context-menu")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha6")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/context-menu", version = "24.1.0-alpha6")
+@NpmPackage(value = "@vaadin/context-menu", version = "24.1.0-alpha8")
 @JsModule("@vaadin/context-menu/src/vaadin-context-menu.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./contextMenuConnector.js")
@@ -91,6 +91,11 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
                 getElement().removeFromParent();
                 autoAddedToTheUi = false;
             }
+        });
+
+        getElement().addPropertyChangeListener("opened", event -> {
+            fireEvent(new OpenedChangeEvent<>((C) this,
+                    event.isUserOriginated()));
         });
 
         menuItemsArrayGenerator = new MenuItemsArrayGenerator<>(this);
@@ -350,11 +355,8 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      */
     public Registration addOpenedChangeListener(
             ComponentEventListener<OpenedChangeEvent<C>> listener) {
-        return getElement()
-                .addPropertyChangeListener("opened",
-                        event -> listener.onComponentEvent(
-                                new OpenedChangeEvent<C>((C) this,
-                                        event.isUserOriginated())));
+        return addListener(OpenedChangeEvent.class,
+                (ComponentEventListener) listener);
     }
 
     /**
