@@ -35,10 +35,10 @@ public class SideNavElement extends TestBenchElement {
         // get only the direct vaadin-side-nav-item of this vaadin-side-nav
         return wrapElements(findElements(By.xpath("vaadin-side-nav-item")),
                 getCommandExecutor())
-                        .stream()
-                        .map(testBenchElement -> testBenchElement
-                                .wrap(SideNavItemElement.class))
-                        .collect(Collectors.toList());
+                .stream()
+                .map(testBenchElement -> testBenchElement
+                        .wrap(SideNavItemElement.class))
+                .collect(Collectors.toList());
     }
 
     public String getLabel() {

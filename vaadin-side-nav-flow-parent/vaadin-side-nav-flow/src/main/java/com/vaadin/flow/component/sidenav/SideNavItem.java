@@ -40,7 +40,7 @@ public class SideNavItem extends Component {
     /**
      * Creates a menu item which does not link to any view but only shows the
      * given label.
-     * 
+     *
      * @param label
      *            the label for the item
      */
@@ -51,7 +51,7 @@ public class SideNavItem extends Component {
     /**
      * Creates a new menu item using the given label that links to the given
      * path.
-     * 
+     *
      * @param label
      *            the label for the item
      * @param path
@@ -65,7 +65,7 @@ public class SideNavItem extends Component {
     /**
      * Creates a new menu item using the given label that links to the given
      * view.
-     * 
+     *
      * @param label
      *            the label for the item
      * @param view
@@ -79,7 +79,7 @@ public class SideNavItem extends Component {
     /**
      * Creates a new menu item using the given label and icon that links to the
      * given path.
-     * 
+     *
      * @param label
      *            the label for the item
      * @param path
@@ -96,7 +96,7 @@ public class SideNavItem extends Component {
     /**
      * Creates a new menu item using the given label that links to the given
      * view.
-     * 
+     *
      * @param label
      *            the label for the item
      * @param view
@@ -113,7 +113,7 @@ public class SideNavItem extends Component {
 
     /**
      * Adds menu item(s) inside this item, creating a hierarchy.
-     * 
+     *
      * @param sideNavItems
      *            the menu item(s) to add
      * @return this item for chaining
@@ -131,7 +131,7 @@ public class SideNavItem extends Component {
      * Removes the given menu item from this item.
      * <p>
      * If the given menu item is not a child of this menu item, does nothing.
-     * 
+     *
      * @param sideNavItem
      *            the menu item to remove
      * @return this item for chaining
@@ -147,12 +147,12 @@ public class SideNavItem extends Component {
 
     /**
      * Removes all menu items from this item.
-     * 
+     *
      * @return this item for chaining
      */
     public SideNavItem removeAllItems() {
         final List<Element> allNavItems = getElement().getChildren().filter(
-                        element -> "children".equals(element.getAttribute("slot")))
+                element -> "children".equals(element.getAttribute("slot")))
                 .toList();
         getElement().removeChild(allNavItems);
         return this;
@@ -160,7 +160,7 @@ public class SideNavItem extends Component {
 
     /**
      * Gets the label for the item.
-     * 
+     *
      * @return the label or null if no label has been set
      */
     public String getLabel() {
@@ -171,7 +171,7 @@ public class SideNavItem extends Component {
      * Set a textual label for the item.
      * <p>
      * The label is also available for screen rader users.
-     * 
+     *
      * @param label
      *            the label to set
      * @return this instance for chaining
@@ -196,7 +196,7 @@ public class SideNavItem extends Component {
 
     /**
      * Sets the path this item links to.
-     * 
+     *
      * @param path
      *            the path to link to
      * @return this instance for chaining
@@ -208,7 +208,7 @@ public class SideNavItem extends Component {
 
     /**
      * Sets the view this item links to.
-     * 
+     *
      * @param view
      *            the view to link to
      * @return this instance for chaining
@@ -256,7 +256,7 @@ public class SideNavItem extends Component {
      * <p>
      * Can also be used to set a custom component to be shown in front of the
      * label.
-     * 
+     *
      * @param icon
      *            the icon to show
      * @return this instance for chaining

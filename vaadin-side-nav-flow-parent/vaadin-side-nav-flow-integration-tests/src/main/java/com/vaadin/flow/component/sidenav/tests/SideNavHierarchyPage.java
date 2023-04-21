@@ -99,7 +99,8 @@ public class SideNavHierarchyPage extends Div {
         add(collapseItem);
 
         NativeButton setPath = new NativeButton("Set another path",
-                event -> navigableParent.setPath("vaadin-side-nav/side-nav-test"));
+                event -> navigableParent
+                        .setPath("vaadin-side-nav/side-nav-test"));
         setPath.setId("set-path");
         add(setPath);
 

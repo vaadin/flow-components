@@ -39,10 +39,10 @@ public class SideNavItemElement extends TestBenchElement {
         // get only the direct vaadin-side-nav-item of this vaadin-side-nav
         return wrapElements(findElements(By.xpath("vaadin-side-nav-item")),
                 getCommandExecutor())
-                        .stream()
-                        .map(testBenchElement -> testBenchElement
-                                .wrap(SideNavItemElement.class))
-                        .collect(Collectors.toList());
+                .stream()
+                .map(testBenchElement -> testBenchElement
+                        .wrap(SideNavItemElement.class))
+                .collect(Collectors.toList());
     }
 
     public boolean isExpanded() {
@@ -50,12 +50,16 @@ public class SideNavItemElement extends TestBenchElement {
     }
 
     public String getLabel() {
-        final WebElement unnamedSlot = getWrappedElement().getShadowRoot().findElement(By.cssSelector("slot:not([name])"));
-        return (String)executeScript("return arguments[0].assignedNodes()[0].textContent;", unnamedSlot);
+        final WebElement unnamedSlot = getWrappedElement().getShadowRoot()
+                .findElement(By.cssSelector("slot:not([name])"));
+        return (String) executeScript(
+                "return arguments[0].assignedNodes()[0].textContent;",
+                unnamedSlot);
     }
 
     public void clickExpandButton() {
-        final WebElement element = getWrappedElement().getShadowRoot().findElement(By.cssSelector("button[part='toggle-button']"));
+        final WebElement element = getWrappedElement().getShadowRoot()
+                .findElement(By.cssSelector("button[part='toggle-button']"));
         executeScript("arguments[0].click();", element);
     }
 }
