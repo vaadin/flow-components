@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.sidenav;
 
+import java.util.List;
 import java.util.Optional;
 
 import com.vaadin.flow.component.Component;
@@ -91,7 +92,10 @@ public class SideNav extends Component implements HasSize, HasStyle {
      * @return this item for chaining
      */
     public SideNav removeAllItems() {
-        getElement().removeAllChildren();
+        final List<Element> allNavItems = getElement().getChildren().filter(
+                element -> !"label".equals(element.getAttribute("slot")))
+                .toList();
+        getElement().removeChild(allNavItems);
         return this;
     }
 
