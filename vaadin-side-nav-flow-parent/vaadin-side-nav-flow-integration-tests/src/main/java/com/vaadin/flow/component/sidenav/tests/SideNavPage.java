@@ -37,6 +37,11 @@ public class SideNavPage extends Div {
         labelOnly.setId("label-only");
         sideNav.addItem(labelOnly);
 
+        SideNavItem emptyPath = new SideNavItem("Empty path");
+        emptyPath.setId("empty-path");
+        emptyPath.setPath("");
+        sideNav.addItem(emptyPath);
+
         SideNavItem classTarget = new SideNavItem("Target using class",
                 SideNavTargetView.class);
         classTarget.setId("class-target");

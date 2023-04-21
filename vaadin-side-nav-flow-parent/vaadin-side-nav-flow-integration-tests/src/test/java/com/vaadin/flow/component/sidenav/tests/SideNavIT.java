@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.sidenav.tests;
 
+import java.net.URL;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,7 +46,7 @@ public class SideNavIT extends AbstractComponentIT {
 
     @Test
     public void pageOpened_allItemsVisible() {
-        Assert.assertEquals(5, sideNav.getItems().size());
+        Assert.assertEquals(6, sideNav.getItems().size());
     }
 
     @Test
@@ -63,6 +65,15 @@ public class SideNavIT extends AbstractComponentIT {
         sideNav.$(SideNavItemElement.class).id("label-only").navigate();
 
         Assert.assertEquals(initialUrl, getDriver().getCurrentUrl());
+    }
+
+    @Test
+    public void clickEmptyPathItem_redirectedToBasePath() {
+        String initialUrl = getDriver().getCurrentUrl();
+        sideNav.$(SideNavItemElement.class).id("empty-path").navigate();
+
+        Assert.assertNotEquals(initialUrl, getDriver().getCurrentUrl());
+        Assert.assertTrue(initialUrl.contains(getDriver().getCurrentUrl()));
     }
 
     @Test
@@ -103,7 +114,7 @@ public class SideNavIT extends AbstractComponentIT {
         $(NativeButtonElement.class).id("add-item").click();
         getCommandExecutor().waitForVaadin();
 
-        Assert.assertEquals(6, sideNav.getItems().size());
+        Assert.assertEquals(7, sideNav.getItems().size());
         Assert.assertEquals("Added item",
                 sideNav.$(SideNavItemElement.class).last().getText());
     }
@@ -113,7 +124,7 @@ public class SideNavIT extends AbstractComponentIT {
         $(NativeButtonElement.class).id("remove-item").click();
         getCommandExecutor().waitForVaadin();
 
-        Assert.assertEquals(4, sideNav.getItems().size());
+        Assert.assertEquals(5, sideNav.getItems().size());
     }
 
     @Test
