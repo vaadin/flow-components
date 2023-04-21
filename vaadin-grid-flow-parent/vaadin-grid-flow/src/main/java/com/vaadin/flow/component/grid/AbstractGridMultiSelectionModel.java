@@ -493,7 +493,6 @@ public abstract class AbstractGridMultiSelectionModel<T>
             return;
         }
 
-        activeItems.forEach(getGrid().getDataCommunicator()::refresh);
         clientSideUpdater.accept(activeItems);
     }
 

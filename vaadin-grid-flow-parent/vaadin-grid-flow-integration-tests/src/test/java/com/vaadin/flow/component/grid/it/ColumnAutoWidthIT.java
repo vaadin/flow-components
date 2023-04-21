@@ -20,7 +20,6 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.By;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.tests.AbstractComponentIT;
@@ -34,11 +33,35 @@ public class ColumnAutoWidthIT extends AbstractComponentIT {
     @Before
     public void init() {
         open();
-        waitForElementPresent(By.id(ColumnAutoWidthPage.GRID_ID));
-        grid = $(GridElement.class).id(ColumnAutoWidthPage.GRID_ID);
+        grid = $(GridElement.class).waitForFirst();
         waitUntil(driver -> (Boolean) executeScript(
                 "return arguments[0]._getColumns()[0].width !== '100px'",
                 grid));
+    }
+
+    @Test
+    public void columnWidthsAreSetCorrectly() {
+        List<String> colWidths = getColumnWidths();
+
+        assertCssPixelValueCloseTo(86, colWidths.get(0));
+        assertCssPixelValueCloseTo(421, colWidths.get(2));
+        assertCssPixelValueCloseTo(243, colWidths.get(3));
+    }
+
+    @Test
+    public void updateItems_updatesComponentRendererColumnWidth() {
+        $("button").id("update-items").click();
+
+        List<String> colWidths = getColumnWidths();
+
+        assertCssPixelValueCloseTo(156, colWidths.get(0));
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<String> getColumnWidths() {
+        return (List<String>) executeScript(
+                "return arguments[0]._getColumns().map(col => col.width)",
+                grid);
     }
 
     /**
@@ -55,17 +78,15 @@ public class ColumnAutoWidthIT extends AbstractComponentIT {
 
     /**
      * Assert that the given CSS pixel value is close to the expected value
-     * (with a margin of ±<code>delta</code>)
+     * (with a margin of ±5 pixels)
      *
      * @param expected
      *            expected value
      * @param cssValue
      *            CSS pixel value
-     * @param delta
-     *            allowed margin of deviation from the expected value
      */
-    private void assertCssPixelValueCloseTo(int expected, String cssValue,
-            int delta) {
+    private void assertCssPixelValueCloseTo(int expected, String cssValue) {
+        final int delta = 5;
         int value = cssPixelValueToInteger(cssValue);
         int min = expected - delta;
         int max = expected + delta;
@@ -74,17 +95,5 @@ public class ColumnAutoWidthIT extends AbstractComponentIT {
                 "CSS value '" + cssValue + "' does not match the expected "
                         + expected + " (±" + delta + ") pixels.",
                 valueInAllowedRange);
-    }
-
-    @Test
-    public void columnWidthsAreSetCorrectly() {
-        @SuppressWarnings("unchecked")
-        List<String> colWidths = (List<String>) executeScript(
-                "return arguments[0]._getColumns().map(col => col.width)",
-                grid);
-
-        assertCssPixelValueCloseTo(55, colWidths.get(0), 5);
-        assertCssPixelValueCloseTo(420, colWidths.get(2), 5);
-        assertCssPixelValueCloseTo(243, colWidths.get(3), 5);
     }
 }
