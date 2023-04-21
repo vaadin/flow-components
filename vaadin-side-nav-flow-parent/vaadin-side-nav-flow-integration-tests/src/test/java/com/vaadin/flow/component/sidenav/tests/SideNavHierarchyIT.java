@@ -139,7 +139,7 @@ public class SideNavHierarchyIT extends AbstractComponentIT {
         $(NativeButtonElement.class).id("remove-all-sub-items").click();
         getCommandExecutor().waitForVaadin();
 
-        Assert.assertEquals(navigableParent.getLabel(), "Navigation Test");
+        Assert.assertEquals(navigableParent.getLabel(), "Navigable parent");
     }
 
     @Test
