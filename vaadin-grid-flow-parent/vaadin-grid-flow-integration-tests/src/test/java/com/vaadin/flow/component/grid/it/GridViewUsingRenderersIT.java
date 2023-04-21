@@ -71,8 +71,10 @@ public class GridViewUsingRenderersIT extends AbstractComponentIT {
         swapRenderers.click();
         Assert.assertEquals("US$73.10", grid.getCell(0, 1).getText().trim());
         Assert.assertEquals("US$24.05", grid.getCell(1, 1).getText().trim());
-        assertRendereredContent("<span style=\"color: red\">US$73.10</span>", TestHelper.stripComments(grid.getCell(0, 1).getInnerHTML()));
-        assertRendereredContent("<span style=\"color: blue\">US$24.05</span>", TestHelper.stripComments(grid.getCell(1, 1).getInnerHTML()));
+        assertRendereredContent("<span style=\"color: red\">US$73.10</span>",
+                TestHelper.stripComments(grid.getCell(0, 1).getInnerHTML()));
+        assertRendereredContent("<span style=\"color: blue\">US$24.05</span>",
+                TestHelper.stripComments(grid.getCell(1, 1).getInnerHTML()));
     }
 
     @Test
@@ -86,13 +88,16 @@ public class GridViewUsingRenderersIT extends AbstractComponentIT {
         priceSorter.click();
         priceSorter.click();
         // swap renderer and value provider
-        TestBenchElement swapRendererWithValueProvider = $("button").id("btn-swap-renderer-with-value-provider");
+        TestBenchElement swapRendererWithValueProvider = $("button")
+                .id("btn-swap-renderer-with-value-provider");
         swapRendererWithValueProvider.click();
         // check content is rendered using the new renderer
         Assert.assertEquals("US$73.10", grid.getCell(0, 1).getText().trim());
         Assert.assertEquals("US$24.05", grid.getCell(1, 1).getText().trim());
-        assertRendereredContent("<span style=\"color: red\">US$73.10</span>", TestHelper.stripComments(grid.getCell(0, 1).getInnerHTML()));
-        assertRendereredContent("<span style=\"color: blue\">US$24.05</span>", TestHelper.stripComments(grid.getCell(1, 1).getInnerHTML()));
+        assertRendereredContent("<span style=\"color: red\">US$73.10</span>",
+                TestHelper.stripComments(grid.getCell(0, 1).getInnerHTML()));
+        assertRendereredContent("<span style=\"color: blue\">US$24.05</span>",
+                TestHelper.stripComments(grid.getCell(1, 1).getInnerHTML()));
         // now check content is ordered using the new value provider
         priceSorter.click();
         Assert.assertEquals("Item 88", grid.getCell(0, 0).getText());

@@ -191,7 +191,8 @@ public class GridColumnTest {
 
     @Test
     public void setRenderer() {
-        Renderer<String> newRenderer = LitRenderer.<String>of("<span>${text}</span>")
+        Renderer<String> newRenderer = LitRenderer
+                .<String> of("<span>${text}</span>")
                 .withProperty("text", ValueProvider.identity());
         fourthColumn.setRenderer(newRenderer);
         Assert.assertEquals(newRenderer, fourthColumn.getRenderer());
@@ -199,7 +200,8 @@ public class GridColumnTest {
 
     @Test
     public void setRendererWithValueProvider() {
-        Renderer<String> newRenderer = LitRenderer.<String>of("<span>${text}</span>")
+        Renderer<String> newRenderer = LitRenderer
+                .<String> of("<span>${text}</span>")
                 .withProperty("text", ValueProvider.identity());
         fourthColumn.setRenderer(ValueProvider.identity(), newRenderer);
         Assert.assertEquals(newRenderer, fourthColumn.getRenderer());

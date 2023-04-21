@@ -530,7 +530,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         /**
          * Switch the renderer used for this column.
          *
-         * @param renderer the new renderer to be used for this column, should never be {@code null}
+         * @param renderer
+         *            the new renderer to be used for this column, should never
+         *            be {@code null}
          *
          * @since 24.1
          */
@@ -555,12 +557,16 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         /**
          * Switch the renderer and the value provider used for this column.
          *
-         * @param valueProvider the value provider, used for sorting
-         * @param renderer the new renderer to be used for this column, should never be {@code null}
+         * @param valueProvider
+         *            the value provider, used for sorting
+         * @param renderer
+         *            the new renderer to be used for this column, should never
+         *            be {@code null}
          *
          * @since 24.1
          */
-        public <V extends Comparable<? super V>> void setRenderer(ValueProvider<T, V> valueProvider, Renderer<T> renderer) {
+        public <V extends Comparable<? super V>> void setRenderer(
+                ValueProvider<T, V> valueProvider, Renderer<T> renderer) {
             this.setRenderer(renderer);
             this.setComparator(valueProvider);
         }
