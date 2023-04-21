@@ -19,17 +19,21 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
 /**
- * A TestBench element representing a <code>&lt;vaadin-side-nav&gt;</code>
+ * A TestBench element representing a <code>&lt;vaadin-side-nav-item&gt;</code>
  * element.
  */
+@Element("vaadin-side-nav-item")
+public class SideNavItemElement extends TestBenchElement {
 
-@Element("vaadin-side-nav")
-public class SideNavElement extends TestBenchElement {
+    public void navigate() {
+        click(1, 1);
+    }
 
     public List<SideNavItemElement> getItems() {
         // get only the direct vaadin-side-nav-item of this vaadin-side-nav
@@ -41,11 +45,17 @@ public class SideNavElement extends TestBenchElement {
                         .collect(Collectors.toList());
     }
 
-    public String getLabel() {
-        return $("span").attributeContains("slot", "label").first().getText();
+    public boolean isExpanded() {
+        return hasAttribute("expanded");
     }
 
-    public boolean isCollapsible() {
-        return hasAttribute("collapsible");
+    public String getLabel() {
+        final WebElement unnamedSlot = getWrappedElement().getShadowRoot().findElement(By.cssSelector("slot:not([name])"));
+        return (String)executeScript("return arguments[0].assignedNodes()[0].textContent;", unnamedSlot);
+    }
+
+    public void clickExpandButton() {
+        final WebElement element = getWrappedElement().getShadowRoot().findElement(By.cssSelector("button[part='toggle-button']"));
+        executeScript("arguments[0].click();", element);
     }
 }

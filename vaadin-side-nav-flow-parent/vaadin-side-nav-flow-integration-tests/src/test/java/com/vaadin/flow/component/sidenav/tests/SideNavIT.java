@@ -13,14 +13,17 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.flow.component.sidenav.tests;
 
-import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.vaadin.flow.component.html.testbench.NativeButtonElement;
+import com.vaadin.flow.component.sidenav.testbench.SideNavElement;
+import com.vaadin.flow.component.sidenav.testbench.SideNavItemElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
 /**
  * Integration tests for the {@link SideNavPage}.
@@ -30,13 +33,116 @@ import org.junit.Test;
 @TestPath("vaadin-side-nav/side-nav-test")
 public class SideNavIT extends AbstractComponentIT {
 
+    private SideNavElement sideNav;
+
     @Before
     public void init() {
         open();
+
+        sideNav = $(SideNavElement.class).first();
     }
 
     @Test
-    public void dummy() {
-        Assert.assertTrue(true);
+    public void pageOpened_allItemsVisible() {
+        Assert.assertEquals(5, sideNav.getItems().size());
+    }
+
+    @Test
+    public void pageOpened_sideNavHasLabel() {
+        Assert.assertEquals(sideNav.getLabel(), "Navigation Test");
+    }
+
+    @Test
+    public void pageOpened_sideNavIsCollapsible() {
+        Assert.assertTrue(sideNav.isCollapsible());
+    }
+
+    @Test
+    public void clickLabelOnlyItem_urlNotChanged() {
+        String initialUrl = getDriver().getCurrentUrl();
+        sideNav.$(SideNavItemElement.class).id("label-only").navigate();
+
+        Assert.assertEquals(initialUrl, getDriver().getCurrentUrl());
+    }
+
+    @Test
+    public void clickClassTargetItem_urlChanged() {
+        sideNav.$(SideNavItemElement.class).id("class-target").navigate();
+
+        Assert.assertTrue(getDriver().getCurrentUrl()
+                .contains("side-nav-test-target-view"));
+    }
+
+    @Test
+    public void clickClassTargetComponentItem_urlChanged() {
+        sideNav.$(SideNavItemElement.class).id("class-target-component")
+                .navigate();
+
+        Assert.assertTrue(getDriver().getCurrentUrl()
+                .contains("side-nav-test-target-view"));
+    }
+
+    @Test
+    public void clickPathTargetItem_urlChanged() {
+        sideNav.$(SideNavItemElement.class).id("path-target").navigate();
+
+        Assert.assertTrue(getDriver().getCurrentUrl()
+                .contains("side-nav-test-target-view"));
+    }
+
+    @Test
+    public void clickPathTargetIconItem_urlChanged() {
+        sideNav.$(SideNavItemElement.class).id("path-target-icon").navigate();
+
+        Assert.assertTrue(getDriver().getCurrentUrl()
+                .contains("side-nav-test-target-view"));
+    }
+
+    @Test
+    public void clickAddItem_itemAdded() {
+        $(NativeButtonElement.class).id("add-item").click();
+        getCommandExecutor().waitForVaadin();
+
+        Assert.assertEquals(6, sideNav.getItems().size());
+        Assert.assertEquals("Added item",
+                sideNav.$(SideNavItemElement.class).last().getText());
+    }
+
+    @Test
+    public void clickRemoveItem_itemRemoved() {
+        $(NativeButtonElement.class).id("remove-item").click();
+        getCommandExecutor().waitForVaadin();
+
+        Assert.assertEquals(4, sideNav.getItems().size());
+    }
+
+    @Test
+    public void clickRemoveAllItems_allItemsRemoved() {
+        $(NativeButtonElement.class).id("remove-all-items").click();
+        getCommandExecutor().waitForVaadin();
+
+        Assert.assertEquals(0, sideNav.getItems().size());
+    }
+
+    @Test
+    public void clickRemoveAllItems_sideNavLabelStillVisible() {
+        $(NativeButtonElement.class).id("remove-all-items").click();
+        getCommandExecutor().waitForVaadin();
+
+        Assert.assertEquals(sideNav.getLabel(), "Navigation Test");
+    }
+
+    @Test
+    public void clickChangeLabel_labelChanged() {
+        $(NativeButtonElement.class).id("change-label").click();
+
+        Assert.assertEquals(sideNav.getLabel(), "Label changed");
+    }
+
+    @Test
+    public void clickMakeNotCollapsible_isNotCollapsible() {
+        $(NativeButtonElement.class).id("make-not-collapsible").click();
+
+        Assert.assertFalse(sideNav.isCollapsible());
     }
 }

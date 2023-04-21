@@ -15,7 +15,15 @@
  */
 package com.vaadin.flow.component.sidenav.tests;
 
-import com.vaadin.flow.testutil.ClassesSerializableTest;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.router.Route;
 
-public class SideNavSerializableTest extends ClassesSerializableTest {
+@Route("vaadin-side-nav/side-nav-test-target-view")
+public class SideNavTargetView extends Div {
+
+    public SideNavTargetView() {
+        add(new Span(
+                "View to test routing from the vaadin-side-nav component"));
+    }
 }

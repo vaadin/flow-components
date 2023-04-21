@@ -15,7 +15,26 @@
  */
 package com.vaadin.flow.component.sidenav.tests;
 
-import com.vaadin.flow.testutil.ClassesSerializableTest;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
-public class SideNavSerializableTest extends ClassesSerializableTest {
+import com.vaadin.flow.component.sidenav.SideNavItem;
+
+public class SideNavItemTest {
+
+    private SideNavItem sideNavItem;
+
+    @Before
+    public void setup() {
+        sideNavItem = new SideNavItem("Item", "/path");
+    }
+
+    @Test
+    public void changeLabel_labelChanged() {
+        Assert.assertEquals(sideNavItem.getLabel(), "Item");
+        sideNavItem.setLabel("Item Changed");
+        Assert.assertEquals(sideNavItem.getLabel(), "Item Changed");
+    }
+
 }

@@ -13,13 +13,13 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.flow.component.sidenav.tests;
 
-import com.vaadin.flow.component.sidenav.SideNav;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.vaadin.flow.component.sidenav.SideNav;
 
 public class SideNavTest {
 
@@ -33,13 +33,22 @@ public class SideNavTest {
     @Test
     public void setCollapsible_isCollapsible() {
         sideNav.setCollapsible(true);
+
         Assert.assertTrue(sideNav.isCollapsible());
     }
 
-    // FIXME: failing test - cause the SideNav has a problem in setCollapsible
-    //@Test
+    @Test
     public void setNotCollapsible_isNotCollapsible() {
         sideNav.setCollapsible(false);
+
         Assert.assertFalse(sideNav.isCollapsible());
+    }
+
+    @Test
+    public void changeLabel_labelChanged() {
+        Assert.assertNull(sideNav.getLabel());
+        sideNav.setLabel("Navigation test");
+
+        Assert.assertEquals(sideNav.getLabel(), "Navigation test");
     }
 }
