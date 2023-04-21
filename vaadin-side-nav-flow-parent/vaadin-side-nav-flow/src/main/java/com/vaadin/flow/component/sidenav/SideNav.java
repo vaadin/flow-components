@@ -157,7 +157,11 @@ public class SideNav extends Component implements HasSize, HasStyle {
      * @return this instance for chaining
      */
     public SideNav setCollapsible(boolean collapsible) {
-        getElement().setAttribute("collapsible", "");
+        if (collapsible) {
+            getElement().setAttribute("collapsible", "");
+        } else {
+            getElement().removeAttribute("collapsible");
+        }
         return this;
     }
 
