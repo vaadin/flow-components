@@ -77,7 +77,7 @@ public class InputFieldTest {
         var tooltip = component.setTooltipText("foo");
         var tooltip2 = component.setTooltipText("bar");
         Assert.assertEquals(tooltip, tooltip2);
-        Assert.assertEquals(component.getTooltip().getText(), "bar");
+        Assert.assertEquals("bar", component.getTooltip().getText());
     }
 
     @Test
@@ -85,7 +85,7 @@ public class InputFieldTest {
         var tooltip = component.setTooltipText("foo");
         var tooltip2 = component.setTooltipText(null);
         Assert.assertEquals(tooltip, tooltip2);
-        Assert.assertEquals(component.getTooltip().getText(), null);
+        Assert.assertEquals(null, component.getTooltip().getText());
     }
 
     @Test

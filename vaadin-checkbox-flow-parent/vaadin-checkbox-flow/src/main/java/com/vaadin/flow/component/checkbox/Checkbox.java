@@ -15,7 +15,14 @@
  */
 package com.vaadin.flow.component.checkbox;
 
-import com.vaadin.flow.component.*;
+import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.AbstractSinglePropertyField;
+import com.vaadin.flow.component.ClickNotifier;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.HasAriaLabel;
+import com.vaadin.flow.component.Synchronize;
+import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Label;
