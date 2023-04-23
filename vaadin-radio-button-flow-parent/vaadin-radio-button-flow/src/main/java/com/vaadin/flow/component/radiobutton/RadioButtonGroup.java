@@ -72,8 +72,8 @@ import com.vaadin.flow.shared.Registration;
 public class RadioButtonGroup<T>
         extends AbstractSinglePropertyField<RadioButtonGroup<T>, T>
         implements HasClientValidation,
-        HasDataView<T, Void, RadioButtonGroupDataView<T>>, HasHelper, InputField,
-        HasListDataView<T, RadioButtonGroupListDataView<T>>,
+        HasDataView<T, Void, RadioButtonGroupDataView<T>>, HasHelper,
+        InputField, HasListDataView<T, RadioButtonGroupListDataView<T>>,
         HasThemeVariant<RadioGroupVariant>, HasValidationProperties,
         HasValidator<T>, SingleSelect<RadioButtonGroup<T>, T> {
 

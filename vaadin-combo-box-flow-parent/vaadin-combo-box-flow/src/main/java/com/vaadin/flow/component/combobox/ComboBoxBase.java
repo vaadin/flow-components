@@ -80,8 +80,8 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
         HasAutoOpen, HasClearButton, HasClientValidation, HasOverlayClassName,
         HasDataView<TItem, String, ComboBoxDataView<TItem>>, HasHelper,
         InputField, HasLazyDataView<TItem, String, ComboBoxLazyDataView<TItem>>,
-        HasListDataView<TItem, ComboBoxListDataView<TItem>>,
-        HasTheme, HasValidationProperties, HasValidator<TValue> {
+        HasListDataView<TItem, ComboBoxListDataView<TItem>>, HasTheme,
+        HasValidationProperties, HasValidator<TValue> {
 
     /**
      * Registration for custom value listeners that disallows entering custom

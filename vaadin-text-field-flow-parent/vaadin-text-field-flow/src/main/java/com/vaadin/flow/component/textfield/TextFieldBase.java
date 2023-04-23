@@ -46,8 +46,8 @@ public abstract class TextFieldBase<TComponent extends TextFieldBase<TComponent,
         implements CompositionNotifier, Focusable<TComponent>, HasAriaLabel,
         HasAutocapitalize, HasAutocomplete, HasAutocorrect, HasClearButton,
         HasClientValidation, HasHelper, HasPrefixAndSuffix,
-        HasValidationProperties, HasValidator<TValue>,
-        HasValueChangeMode, InputNotifier, KeyNotifier, InputField {
+        HasValidationProperties, HasValidator<TValue>, HasValueChangeMode,
+        InputNotifier, KeyNotifier, InputField {
 
     private ValueChangeMode currentMode;
 

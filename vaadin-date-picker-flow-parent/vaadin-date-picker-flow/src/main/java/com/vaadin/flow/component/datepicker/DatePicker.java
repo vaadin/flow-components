@@ -80,9 +80,8 @@ public class DatePicker
         extends AbstractSinglePropertyField<DatePicker, LocalDate>
         implements Focusable<DatePicker>, HasAllowedCharPattern, HasAriaLabel,
         HasAutoOpen, HasClearButton, HasClientValidation, HasHelper, InputField,
-        HasOverlayClassName, HasPrefix,
-        HasThemeVariant<DatePickerVariant>, HasValidationProperties,
-        HasValidator<LocalDate> {
+        HasOverlayClassName, HasPrefix, HasThemeVariant<DatePickerVariant>,
+        HasValidationProperties, HasValidator<LocalDate> {
 
     private DatePickerI18n i18n;
 

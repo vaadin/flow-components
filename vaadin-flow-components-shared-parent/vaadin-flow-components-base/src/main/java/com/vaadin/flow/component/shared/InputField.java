@@ -22,14 +22,16 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
- * Represents a common single interface for input fields {@link Component components} based on
- * an {@link HasElement element} that supports {@link HasLabel label}, {@link HasStyle styles},
- * {@link HasTooltip tooltip}, {@link HasEnabled enabled status} and {@link HasSize size} definition.
+ * Represents a common single interface for input fields {@link Component
+ * components} based on an {@link HasElement element} that supports
+ * {@link HasLabel label}, {@link HasStyle styles}, {@link HasTooltip tooltip},
+ * {@link HasEnabled enabled status} and {@link HasSize size} definition.
  *
  * @author Vaadin Ltd
  * @since 24.1
  */
-public interface InputField extends HasElement, HasEnabled, HasLabel, HasSize, HasStyle, HasTooltip {
+public interface InputField extends HasElement, HasEnabled, HasLabel, HasSize,
+        HasStyle, HasTooltip {
 
     /**
      * {@link Component#findAncestor}

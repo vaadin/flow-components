@@ -570,6 +570,7 @@ public class InputFieldTest {
     }
 
     @Tag("test")
-    private static class TestComponent extends Component implements InputField, HasComponents {
+    private static class TestComponent extends Component
+            implements InputField, HasComponents {
     }
 }

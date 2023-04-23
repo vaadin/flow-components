@@ -82,9 +82,8 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
         implements Focusable<Select<T>>, HasClientValidation,
         HasDataView<T, Void, SelectDataView<T>>, HasItemComponents<T>,
         HasHelper, InputField, HasListDataView<T, SelectListDataView<T>>,
-        HasOverlayClassName, HasPrefix,
-        HasThemeVariant<SelectVariant>, HasValidationProperties,
-        HasValidator<T>, SingleSelect<Select<T>, T> {
+        HasOverlayClassName, HasPrefix, HasThemeVariant<SelectVariant>,
+        HasValidationProperties, HasValidator<T>, SingleSelect<Select<T>, T> {
 
     public static final String LABEL_ATTRIBUTE = "label";
 

@@ -65,9 +65,8 @@ public class TimePicker
         extends AbstractSinglePropertyField<TimePicker, LocalTime>
         implements Focusable<TimePicker>, HasAllowedCharPattern, HasAriaLabel,
         HasAutoOpen, HasClearButton, HasClientValidation, HasHelper, InputField,
-        HasPrefix, HasOverlayClassName,
-        HasThemeVariant<TimePickerVariant>, HasValidationProperties,
-        HasValidator<LocalTime> {
+        HasPrefix, HasOverlayClassName, HasThemeVariant<TimePickerVariant>,
+        HasValidationProperties, HasValidator<LocalTime> {
 
     private static final SerializableFunction<String, LocalTime> PARSER = valueFromClient -> {
         return valueFromClient == null || valueFromClient.isEmpty() ? null
