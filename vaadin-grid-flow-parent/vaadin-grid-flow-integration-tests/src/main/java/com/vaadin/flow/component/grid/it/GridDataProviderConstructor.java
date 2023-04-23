@@ -39,25 +39,34 @@ import java.util.stream.Stream;
 @Route("vaadin-grid/grid-data-provider-constructor")
 public class GridDataProviderConstructor extends Div {
 
-    List<Person> people = Arrays.asList(new Person(1, "Mik", "Gir", "mik@gmail.com", LocalDate.now().minusDays(10000), "Dev"),
-            new Person(2, "Mak", "Gar", "mak@gmail.com", LocalDate.now().minusDays(20000), "Dev"),
-            new Person(3, "Muk", "Gur", "muk@gmail.com", LocalDate.now().minusDays(30000), "Dev"),
-            new Person(4, "Mok", "Gor", "mok@gmail.com", LocalDate.now().minusDays(40000), "Dev"));
+    List<Person> people = Arrays.asList(
+            new Person(1, "Mik", "Gir", "mik@gmail.com",
+                    LocalDate.now().minusDays(10000), "Dev"),
+            new Person(2, "Mak", "Gar", "mak@gmail.com",
+                    LocalDate.now().minusDays(20000), "Dev"),
+            new Person(3, "Muk", "Gur", "muk@gmail.com",
+                    LocalDate.now().minusDays(30000), "Dev"),
+            new Person(4, "Mok", "Gor", "mok@gmail.com",
+                    LocalDate.now().minusDays(40000), "Dev"));
 
     public GridDataProviderConstructor() {
-        Grid<Person> gridBackendDataProvider = createGrid(new PersonBackendDataProvider());
+        Grid<Person> gridBackendDataProvider = createGrid(
+                new PersonBackendDataProvider());
         gridBackendDataProvider.setId("gridBackendDataProvider");
         add(gridBackendDataProvider);
 
-        Grid<Person> gridGenericDataProvider = createGrid(new PersonGenericDataProvider());
+        Grid<Person> gridGenericDataProvider = createGrid(
+                new PersonGenericDataProvider());
         gridGenericDataProvider.setId("gridGenericDataProvider");
         add(gridGenericDataProvider);
 
-        Grid<Person> gridInMemoryDataProvider = createGrid(new PersonInMemoryDataProvider());
+        Grid<Person> gridInMemoryDataProvider = createGrid(
+                new PersonInMemoryDataProvider());
         gridInMemoryDataProvider.setId("gridInMemoryDataProvider");
         add(gridInMemoryDataProvider);
 
-        Grid<Person> gridListDataProvider = createGrid(new PersonListDataProvider());
+        Grid<Person> gridListDataProvider = createGrid(
+                new PersonListDataProvider());
         gridListDataProvider.setId("gridListDataProvider");
         add(gridListDataProvider);
 
@@ -68,36 +77,36 @@ public class GridDataProviderConstructor extends Div {
 
     public Grid<Person> createGrid(DataProvider dataProvider) {
         Grid<Person> grid = new Grid<>(dataProvider);
-        grid.addColumn(Person::getFirstName).setHeader("First name").setKey("first");
-        grid.addColumn(Person::getLastName).setHeader("Last name").setKey("last");
+        grid.addColumn(Person::getFirstName).setHeader("First name")
+                .setKey("first");
+        grid.addColumn(Person::getLastName).setHeader("Last name")
+                .setKey("last");
         grid.addColumn(Person::getEmail).setHeader("Email").setKey("email");
-        grid.addColumn(Person::getProfession).setHeader("Profession").setKey("profession");
-        grid.addColumn(new LocalDateRenderer<>(
-                        Person::getBirthday,
-                        () -> DateTimeFormatter.ofLocalizedDate(
-                                FormatStyle.MEDIUM)))
+        grid.addColumn(Person::getProfession).setHeader("Profession")
+                .setKey("profession");
+        grid.addColumn(new LocalDateRenderer<>(Person::getBirthday,
+                () -> DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)))
                 .setHeader("Estimated delivery date").setKey("date");
-        grid.addColumn(new LocalDateRenderer<>(
-                        Person::getBirthday,
-                        "dd/MM/yyyy"))
+        grid.addColumn(
+                new LocalDateRenderer<>(Person::getBirthday, "dd/MM/yyyy"))
                 .setHeader("Estimated delivery date").setKey("renderer");
         return grid;
     }
 
     public Grid<Person> createGrid(Collection items) {
         Grid<Person> grid = new Grid<>(items);
-        grid.addColumn(Person::getFirstName).setHeader("First name").setKey("first");
-        grid.addColumn(Person::getLastName).setHeader("Last name").setKey("last");
+        grid.addColumn(Person::getFirstName).setHeader("First name")
+                .setKey("first");
+        grid.addColumn(Person::getLastName).setHeader("Last name")
+                .setKey("last");
         grid.addColumn(Person::getEmail).setHeader("Email").setKey("email");
-        grid.addColumn(Person::getProfession).setHeader("Profession").setKey("profession");
-        grid.addColumn(new LocalDateRenderer<>(
-                        Person::getBirthday,
-                        () -> DateTimeFormatter.ofLocalizedDate(
-                                FormatStyle.MEDIUM)))
+        grid.addColumn(Person::getProfession).setHeader("Profession")
+                .setKey("profession");
+        grid.addColumn(new LocalDateRenderer<>(Person::getBirthday,
+                () -> DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)))
                 .setHeader("Estimated delivery date").setKey("date");
-        grid.addColumn(new LocalDateRenderer<>(
-                        Person::getBirthday,
-                        "dd/MM/yyyy"))
+        grid.addColumn(
+                new LocalDateRenderer<>(Person::getBirthday, "dd/MM/yyyy"))
                 .setHeader("Estimated delivery date").setKey("renderer");
         return grid;
     }
@@ -116,7 +125,8 @@ public class GridDataProviderConstructor extends Div {
 
         private String profession;
 
-        public Person(Integer id, String firstName, String lastName, String email, LocalDate birthday, String profession) {
+        public Person(Integer id, String firstName, String lastName,
+                String email, LocalDate birthday, String profession) {
             this.firstName = firstName;
             this.lastName = lastName;
             this.email = email;
@@ -174,7 +184,8 @@ public class GridDataProviderConstructor extends Div {
         }
     }
 
-    public class PersonBackendDataProvider implements BackEndDataProvider<Person, Void> {
+    public class PersonBackendDataProvider
+            implements BackEndDataProvider<Person, Void> {
 
         @Override
         public void setSortOrders(List<QuerySortOrder> list) {
@@ -209,7 +220,8 @@ public class GridDataProviderConstructor extends Div {
         }
 
         @Override
-        public Registration addDataProviderListener(DataProviderListener<Person> dataProviderListener) {
+        public Registration addDataProviderListener(
+                DataProviderListener<Person> dataProviderListener) {
             return null;
         }
     }
@@ -220,10 +232,10 @@ public class GridDataProviderConstructor extends Div {
             super(people);
         }
 
-
     }
 
-    public class PersonInMemoryDataProvider implements InMemoryDataProvider<Person> {
+    public class PersonInMemoryDataProvider
+            implements InMemoryDataProvider<Person> {
 
         @Override
         public SerializablePredicate<Person> getFilter() {
@@ -231,7 +243,8 @@ public class GridDataProviderConstructor extends Div {
         }
 
         @Override
-        public void setFilter(SerializablePredicate<Person> serializablePredicate) {
+        public void setFilter(
+                SerializablePredicate<Person> serializablePredicate) {
 
         }
 
@@ -241,7 +254,8 @@ public class GridDataProviderConstructor extends Div {
         }
 
         @Override
-        public void setSortComparator(SerializableComparator<Person> serializableComparator) {
+        public void setSortComparator(
+                SerializableComparator<Person> serializableComparator) {
 
         }
 
@@ -251,7 +265,8 @@ public class GridDataProviderConstructor extends Div {
         }
 
         @Override
-        public Stream<Person> fetch(Query<Person, SerializablePredicate<Person>> query) {
+        public Stream<Person> fetch(
+                Query<Person, SerializablePredicate<Person>> query) {
             query.getPage();
             query.getPageSize();
             return people.stream();
@@ -268,12 +283,14 @@ public class GridDataProviderConstructor extends Div {
         }
 
         @Override
-        public Registration addDataProviderListener(DataProviderListener<Person> dataProviderListener) {
+        public Registration addDataProviderListener(
+                DataProviderListener<Person> dataProviderListener) {
             return null;
         }
     }
 
-    public class PersonGenericDataProvider implements DataProvider<Person, Void> {
+    public class PersonGenericDataProvider
+            implements DataProvider<Person, Void> {
 
         @Override
         public boolean isInMemory() {
@@ -303,7 +320,8 @@ public class GridDataProviderConstructor extends Div {
         }
 
         @Override
-        public Registration addDataProviderListener(DataProviderListener<Person> dataProviderListener) {
+        public Registration addDataProviderListener(
+                DataProviderListener<Person> dataProviderListener) {
             return null;
         }
     }

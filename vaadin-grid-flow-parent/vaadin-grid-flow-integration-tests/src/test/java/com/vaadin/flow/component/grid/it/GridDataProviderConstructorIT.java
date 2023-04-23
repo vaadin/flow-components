@@ -29,20 +29,24 @@ public class GridDataProviderConstructorIT extends AbstractComponentIT {
     public void itemsCount() {
         open();
 
-        GridElement gridBackendDataProvider  = $(GridElement.class).id("gridBackendDataProvider");
-        Assert.assertEquals(4,gridBackendDataProvider.getRowCount());
+        GridElement gridBackendDataProvider = $(GridElement.class)
+                .id("gridBackendDataProvider");
+        Assert.assertEquals(4, gridBackendDataProvider.getRowCount());
 
-        GridElement gridGenericDataProvider  = $(GridElement.class).id("gridGenericDataProvider");
-        Assert.assertEquals(4,gridGenericDataProvider.getRowCount());
+        GridElement gridGenericDataProvider = $(GridElement.class)
+                .id("gridGenericDataProvider");
+        Assert.assertEquals(4, gridGenericDataProvider.getRowCount());
 
-        GridElement gridInMemoryDataProvider  = $(GridElement.class).id("gridInMemoryDataProvider");
-        Assert.assertEquals(4,gridInMemoryDataProvider.getRowCount());
+        GridElement gridInMemoryDataProvider = $(GridElement.class)
+                .id("gridInMemoryDataProvider");
+        Assert.assertEquals(4, gridInMemoryDataProvider.getRowCount());
 
-        GridElement gridListDataProvider  = $(GridElement.class).id("gridListDataProvider");
-        Assert.assertEquals(4,gridListDataProvider.getRowCount());
+        GridElement gridListDataProvider = $(GridElement.class)
+                .id("gridListDataProvider");
+        Assert.assertEquals(4, gridListDataProvider.getRowCount());
 
-        GridElement gridCollection  = $(GridElement.class).id("gridCollection");
-        Assert.assertEquals(4,gridCollection.getRowCount());
+        GridElement gridCollection = $(GridElement.class).id("gridCollection");
+        Assert.assertEquals(4, gridCollection.getRowCount());
 
     }
 }

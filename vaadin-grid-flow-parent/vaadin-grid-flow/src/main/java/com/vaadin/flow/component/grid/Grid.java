@@ -1390,12 +1390,13 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         this(50);
     }
 
-    /* Creates a new grid using the given generic {@code DataProvider}.
+    /*
+     * Creates a new grid using the given generic {@code DataProvider}.
      *
      * @param dataProvider the data provider, not {@code null}
      *
      */
-    public Grid(DataProvider<T,Void> dataProvider) {
+    public Grid(DataProvider<T, Void> dataProvider) {
         this(50);
         setDataProvider(dataProvider);
     }
@@ -1403,7 +1404,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     /**
      * Creates a new grid using the given {@code BackEndDataProvider}.
      *
-     * @param dataProvider the data provider, not {@code null}
+     * @param dataProvider
+     *            the data provider, not {@code null}
      *
      */
     public Grid(BackEndDataProvider<T, Void> dataProvider) {
@@ -1414,7 +1416,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     /**
      * Creates a new grid using the given {@code InMemoryDataProvider}.
      *
-     * @param inMemoryDataProvider the data provider, not {@code null}
+     * @param inMemoryDataProvider
+     *            the data provider, not {@code null}
      *
      */
     public Grid(InMemoryDataProvider<T> inMemoryDataProvider) {
@@ -1438,7 +1441,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     /**
      * Creates a new grid using the given {@code ListDataProvider}.
      *
-     * @param dataProvider the data provider, not {@code null}
+     * @param dataProvider
+     *            the data provider, not {@code null}
      *
      */
     public Grid(ListDataProvider<T> dataProvider) {
@@ -1447,10 +1451,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
-     * Creates a new grid using the given collection of items
-     * using a {@code ListDataProvider}.
+     * Creates a new grid using the given collection of items using a
+     * {@code ListDataProvider}.
      *
-     * @param items the collection of items, not {@code null}
+     * @param items
+     *            the collection of items, not {@code null}
      *
      */
     public Grid(Collection<T> items) {
