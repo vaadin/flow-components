@@ -1,22 +1,5 @@
-/*
- * Copyright 2000-2023 Vaadin Ltd.
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
-package com.vaadin.flow.component.grid.it;
+package com.vaadin.flow.component.grid;
 
-import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderListener;
@@ -27,8 +10,9 @@ import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.renderer.LocalDateRenderer;
 import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializablePredicate;
-import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.Registration;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -40,13 +24,11 @@ import java.util.List;
 import java.util.stream.Stream;
 
 /**
- * Test view for GridDataProviderConstructorIT displaying 5 Grids using each one
- * a different constructor.
+ * Test for Grid constructors with DataProvider and Collection as parameter
  *
  * @author Vaadin Ltd.
  */
-@Route("vaadin-grid/grid-data-provider-constructor")
-public class GridDataProviderConstructor extends Div {
+public class GridDataProviderConstructorTest {
 
     transient List<Person> people = Arrays.asList(
             new Person(1, "Mik", "Gir", "mik@gmail.com",
@@ -62,30 +44,53 @@ public class GridDataProviderConstructor extends Div {
                     LocalDate.now(ZoneId.systemDefault()).minusDays(40000),
                     "Dev"));
 
-    public GridDataProviderConstructor() {
+    @Test
+    public void constructorBackEndDataProvider() {
         Grid<Person> gridBackendDataProvider = createGrid(
                 new PersonBackendDataProvider());
-        gridBackendDataProvider.setId("gridBackendDataProvider");
-        add(gridBackendDataProvider);
+        Assert.assertEquals(people.get(0), gridBackendDataProvider.getLazyDataView().getItem(0));
+        Assert.assertEquals(people.get(1), gridBackendDataProvider.getLazyDataView().getItem(1));
+        Assert.assertEquals(people.get(2), gridBackendDataProvider.getLazyDataView().getItem(2));
+        Assert.assertEquals(people.get(3), gridBackendDataProvider.getLazyDataView().getItem(3));
+    }
 
+    @Test
+    public void constructorGenericDataProvider() {
         Grid<Person> gridGenericDataProvider = createGrid(
                 new PersonGenericDataProvider());
-        gridGenericDataProvider.setId("gridGenericDataProvider");
-        add(gridGenericDataProvider);
+        Assert.assertEquals(people.get(0), gridGenericDataProvider.getGenericDataView().getItem(0));
+        Assert.assertEquals(people.get(1), gridGenericDataProvider.getGenericDataView().getItem(1));
+        Assert.assertEquals(people.get(2), gridGenericDataProvider.getGenericDataView().getItem(2));
+        Assert.assertEquals(people.get(3), gridGenericDataProvider.getGenericDataView().getItem(3));
+    }
 
+    @Test
+    public void constructorInMemoryDataProvider() {
         Grid<Person> gridInMemoryDataProvider = createGrid(
                 new PersonInMemoryDataProvider());
-        gridInMemoryDataProvider.setId("gridInMemoryDataProvider");
-        add(gridInMemoryDataProvider);
+        Assert.assertEquals(people.get(0), gridInMemoryDataProvider.getGenericDataView().getItem(0));
+        Assert.assertEquals(people.get(1), gridInMemoryDataProvider.getGenericDataView().getItem(1));
+        Assert.assertEquals(people.get(2), gridInMemoryDataProvider.getGenericDataView().getItem(2));
+        Assert.assertEquals(people.get(3), gridInMemoryDataProvider.getGenericDataView().getItem(3));
+    }
 
+    @Test
+    public void constructorListDataProvider() {
         Grid<Person> gridListDataProvider = createGrid(
                 new PersonListDataProvider());
-        gridListDataProvider.setId("gridListDataProvider");
-        add(gridListDataProvider);
+        Assert.assertEquals(people.get(0), gridListDataProvider.getListDataView().getItem(0));
+        Assert.assertEquals(people.get(1), gridListDataProvider.getListDataView().getItem(1));
+        Assert.assertEquals(people.get(2), gridListDataProvider.getListDataView().getItem(2));
+        Assert.assertEquals(people.get(3), gridListDataProvider.getListDataView().getItem(3));
+    }
 
+    @Test
+    public void constructorCollection() {
         Grid<Person> gridCollection = createGrid(people);
-        gridCollection.setId("gridCollection");
-        add(gridCollection);
+        Assert.assertEquals(people.get(0), gridCollection.getGenericDataView().getItem(0));
+        Assert.assertEquals(people.get(1), gridCollection.getGenericDataView().getItem(1));
+        Assert.assertEquals(people.get(2), gridCollection.getGenericDataView().getItem(2));
+        Assert.assertEquals(people.get(3), gridCollection.getGenericDataView().getItem(3));
     }
 
     private final Grid<Person> createGrid(DataProvider dataProvider) {
@@ -107,10 +112,10 @@ public class GridDataProviderConstructor extends Div {
         grid.addColumn(Person::getProfession).setHeader("Profession")
                 .setKey("profession");
         grid.addColumn(new LocalDateRenderer<>(Person::getBirthday,
-                () -> DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)))
+                        () -> DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)))
                 .setHeader("Date Renderer").setKey("date");
         grid.addColumn(
-                new LocalDateRenderer<>(Person::getBirthday, "dd/MM/yyyy"))
+                        new LocalDateRenderer<>(Person::getBirthday, "dd/MM/yyyy"))
                 .setHeader("String Renderer").setKey("renderer");
         return grid;
     }
@@ -130,7 +135,7 @@ public class GridDataProviderConstructor extends Div {
         private String profession;
 
         public Person(Integer id, String firstName, String lastName,
-                String email, LocalDate birthday, String profession) {
+                      String email, LocalDate birthday, String profession) {
             this.firstName = firstName;
             this.lastName = lastName;
             this.email = email;
@@ -210,7 +215,7 @@ public class GridDataProviderConstructor extends Div {
         public Stream<Person> fetch(Query<Person, Void> query) {
             query.getPage();
             query.getPageSize();
-            return people.stream();
+            return people.subList(query.getOffset(), query.getOffset() + query.getLimit()).stream();
         }
 
         @Override
@@ -280,7 +285,7 @@ public class GridDataProviderConstructor extends Div {
                 Query<Person, SerializablePredicate<Person>> query) {
             query.getPage();
             query.getPageSize();
-            return people.stream();
+            return people.subList(query.getOffset(), query.getOffset() + query.getLimit()).stream();
         }
 
         @Override
@@ -322,7 +327,7 @@ public class GridDataProviderConstructor extends Div {
         public Stream<Person> fetch(Query<Person, Void> query) {
             query.getPage();
             query.getPageSize();
-            return people.stream();
+            return people.subList(query.getOffset(), query.getOffset() + query.getLimit()).stream();
         }
 
         @Override
