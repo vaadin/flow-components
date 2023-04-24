@@ -1398,8 +1398,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *
      */
     public Grid(DataProvider<T, Void> dataProvider) {
-        this(50);
-        setDataProvider(dataProvider);
+        this();
+        setItems(dataProvider);
     }
 
     /**
@@ -1410,8 +1410,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *
      */
     public Grid(BackEndDataProvider<T, Void> dataProvider) {
-        this(50);
-        setDataProvider(dataProvider);
+        this();
+        setItems(dataProvider);
     }
 
     /**
@@ -1422,21 +1422,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *
      */
     public Grid(InMemoryDataProvider<T> inMemoryDataProvider) {
-        this(50);
-        // We don't use DataProvider.withConvertedFilter() here because it's
-        // implementation does not apply the filter converter if Query has a
-        // null filter
-        DataProvider<T, Void> convertedDataProvider = new DataProviderWrapper<T, Void, SerializablePredicate<T>>(
-                inMemoryDataProvider) {
-            @Override
-            protected SerializablePredicate<T> getFilter(Query<T, Void> query) {
-                // Just ignore the query filter (Void) and apply the
-                // predicate only
-                return Optional.ofNullable(inMemoryDataProvider.getFilter())
-                        .orElse(item -> true);
-            }
-        };
-        setDataProvider(convertedDataProvider);
+        this();
+        setItems(inMemoryDataProvider);
     }
 
     /**
@@ -1447,8 +1434,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *
      */
     public Grid(ListDataProvider<T> dataProvider) {
-        this(50);
-        setDataProvider(dataProvider);
+        this();
+        setItems(dataProvider);
     }
 
     /**
@@ -1460,7 +1447,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *
      */
     public Grid(Collection<T> items) {
-        this(50);
+        this();
         setItems(items);
     }
 
