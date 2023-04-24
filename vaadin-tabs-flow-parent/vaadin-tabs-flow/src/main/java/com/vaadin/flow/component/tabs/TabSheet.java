@@ -277,8 +277,7 @@ public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
                 "The component to look for the tab cannot be null");
 
         return tabToContent.entrySet().stream()
-                .filter(entry -> entry.getValue()
-                        .equals(content.getElement()))
+                .filter(entry -> entry.getValue().equals(content.getElement()))
                 .map(Map.Entry::getKey).findFirst().orElse(null);
     }
 
