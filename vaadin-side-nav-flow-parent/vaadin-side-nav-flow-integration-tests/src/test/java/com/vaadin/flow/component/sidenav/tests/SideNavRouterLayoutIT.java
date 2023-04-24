@@ -44,24 +44,29 @@ public class SideNavRouterLayoutIT extends AbstractComponentIT {
 
     @Test
     public void pageOpened_target1LinkActive() {
-        final SideNavItemElement target1 = sideNav.$(SideNavItemElement.class).id("target-1");
+        final SideNavItemElement target1 = sideNav.$(SideNavItemElement.class)
+                .id("target-1");
 
         Assert.assertTrue(target1.isActive());
     }
 
     @Test
     public void clickTarget2_target2Active() {
-        final SideNavItemElement target2 = sideNav.$(SideNavItemElement.class).id("target-2");
+        final SideNavItemElement target2 = sideNav.$(SideNavItemElement.class)
+                .id("target-2");
         target2.navigate();
 
-        Assert.assertTrue(getDriver().getCurrentUrl().contains("side-nav-test-router-layout-target2"));
+        Assert.assertTrue(getDriver().getCurrentUrl()
+                .contains("side-nav-test-router-layout-target2"));
         Assert.assertTrue(target2.isActive());
     }
 
     @Test
     public void clickTarget2_target1NotActive() {
-        final SideNavItemElement target1 = sideNav.$(SideNavItemElement.class).id("target-1");
-        final SideNavItemElement target2 = sideNav.$(SideNavItemElement.class).id("target-2");
+        final SideNavItemElement target1 = sideNav.$(SideNavItemElement.class)
+                .id("target-1");
+        final SideNavItemElement target2 = sideNav.$(SideNavItemElement.class)
+                .id("target-2");
         target2.navigate();
 
         Assert.assertFalse(target1.isActive());

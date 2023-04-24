@@ -19,8 +19,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import com.vaadin.experimental.FeatureFlags;
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.StateTree;
@@ -289,4 +292,38 @@ public class SideNavItem extends Component {
         return this;
     }
 
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        checkFeatureFlag();
+    }
+
+    /**
+     * Checks whether the SideNavItem component feature flag is active. Succeeds
+     * if the flag is enabled, and throws otherwise.
+     *
+     * @throws ExperimentalFeatureException
+     *             when the {@link FeatureFlags#SIDE_NAV_COMPONENT} feature is
+     *             not enabled
+     */
+    private void checkFeatureFlag() {
+        boolean enabled = getFeatureFlags()
+                .isEnabled(FeatureFlags.SIDE_NAV_COMPONENT);
+
+        if (!enabled) {
+            throw new ExperimentalFeatureException();
+        }
+    }
+
+    /**
+     * Gets the feature flags for the current UI.
+     * <p>
+     * Extracted with protected visibility to support mocking
+     *
+     * @return the current set of feature flags
+     */
+    protected FeatureFlags getFeatureFlags() {
+        return FeatureFlags
+                .get(UI.getCurrent().getSession().getService().getContext());
+    }
 }
