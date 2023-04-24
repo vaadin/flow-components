@@ -179,9 +179,7 @@ public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
                     "Text as content is not supported.");
         }
 
-        var tab = tabToContent.entrySet().stream()
-                .filter(entry -> entry.getValue().equals(content.getElement()))
-                .map(Map.Entry::getKey).findFirst().orElse(null);
+        var tab = getTab(content);
 
         if (tab != null) {
             remove(tab);
@@ -268,19 +266,19 @@ public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
     /**
      * Returns the {@link Tab} associated with the given component.
      *
-     * @param component
+     * @param content
      *            the component to look up, can not be <code>null</code>
      * @return The tab instance associated with the given component, or
      *         <code>null</code> if the {@link TabSheet} does not contain the
      *         component.
      */
-    public Tab getTab(Component component) {
-        Objects.requireNonNull(component,
+    public Tab getTab(Component content) {
+        Objects.requireNonNull(content,
                 "The component to look for the tab cannot be null");
 
         return tabToContent.entrySet().stream()
                 .filter(entry -> entry.getValue()
-                        .equals(component.getElement()))
+                        .equals(content.getElement()))
                 .map(Map.Entry::getKey).findFirst().orElse(null);
     }
 
