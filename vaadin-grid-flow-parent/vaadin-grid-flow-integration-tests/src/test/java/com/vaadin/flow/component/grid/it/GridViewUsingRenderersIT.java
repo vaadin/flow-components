@@ -80,7 +80,7 @@ public class GridViewUsingRenderersIT extends AbstractComponentIT {
     @Test
     public void swapRendererWithValueProvider() {
         var priceSorter = grid.getHeaderCell(1).$("vaadin-grid-sorter").first();
-        // content should not get sorted with now value provider
+        // content should not get sorted as there is no value provider initially
         priceSorter.click();
         Assert.assertEquals("Item 1", grid.getCell(0, 0).getText());
         Assert.assertEquals("Item 2", grid.getCell(1, 0).getText());

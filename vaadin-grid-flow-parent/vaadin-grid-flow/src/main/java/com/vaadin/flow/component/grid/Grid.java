@@ -528,18 +528,21 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
 
         /**
-         * Switch the renderer used for this column.
+         * Set the renderer for this column.
          *
          * @param renderer
-         *            the new renderer to be used for this column, should never
+         *            the new renderer to be used for this column, must not
          *            be {@code null}
          *
          * @since 24.1
          */
         public void setRenderer(Renderer<T> renderer) {
-            this.renderer = Objects.requireNonNull(renderer);
+            this.renderer = Objects.requireNonNull(renderer, "Renderer must not be null.");
 
             destroyDataGenerators();
+            if (rendering != null) {
+                rendering.getRegistration().remove();
+            }
 
             rendering = renderer.render(getElement(), (KeyMapper<T>) getGrid()
                     .getDataCommunicator().getKeyMapper());
@@ -555,12 +558,12 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
 
         /**
-         * Switch the renderer and the value provider used for this column.
+         * Set the renderer and the value provider for this column.
          *
          * @param valueProvider
          *            the value provider, used for sorting
          * @param renderer
-         *            the new renderer to be used for this column, should never
+         *            the new renderer to be used for this column, must not
          *            be {@code null}
          *
          * @since 24.1
