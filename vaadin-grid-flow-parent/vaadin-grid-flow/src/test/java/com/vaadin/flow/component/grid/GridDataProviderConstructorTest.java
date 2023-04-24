@@ -48,49 +48,69 @@ public class GridDataProviderConstructorTest {
     public void constructorBackEndDataProvider() {
         Grid<Person> gridBackendDataProvider = createGrid(
                 new PersonBackendDataProvider());
-        Assert.assertEquals(people.get(0), gridBackendDataProvider.getLazyDataView().getItem(0));
-        Assert.assertEquals(people.get(1), gridBackendDataProvider.getLazyDataView().getItem(1));
-        Assert.assertEquals(people.get(2), gridBackendDataProvider.getLazyDataView().getItem(2));
-        Assert.assertEquals(people.get(3), gridBackendDataProvider.getLazyDataView().getItem(3));
+        Assert.assertEquals(people.get(0),
+                gridBackendDataProvider.getLazyDataView().getItem(0));
+        Assert.assertEquals(people.get(1),
+                gridBackendDataProvider.getLazyDataView().getItem(1));
+        Assert.assertEquals(people.get(2),
+                gridBackendDataProvider.getLazyDataView().getItem(2));
+        Assert.assertEquals(people.get(3),
+                gridBackendDataProvider.getLazyDataView().getItem(3));
     }
 
     @Test
     public void constructorGenericDataProvider() {
         Grid<Person> gridGenericDataProvider = createGrid(
                 new PersonGenericDataProvider());
-        Assert.assertEquals(people.get(0), gridGenericDataProvider.getGenericDataView().getItem(0));
-        Assert.assertEquals(people.get(1), gridGenericDataProvider.getGenericDataView().getItem(1));
-        Assert.assertEquals(people.get(2), gridGenericDataProvider.getGenericDataView().getItem(2));
-        Assert.assertEquals(people.get(3), gridGenericDataProvider.getGenericDataView().getItem(3));
+        Assert.assertEquals(people.get(0),
+                gridGenericDataProvider.getGenericDataView().getItem(0));
+        Assert.assertEquals(people.get(1),
+                gridGenericDataProvider.getGenericDataView().getItem(1));
+        Assert.assertEquals(people.get(2),
+                gridGenericDataProvider.getGenericDataView().getItem(2));
+        Assert.assertEquals(people.get(3),
+                gridGenericDataProvider.getGenericDataView().getItem(3));
     }
 
     @Test
     public void constructorInMemoryDataProvider() {
         Grid<Person> gridInMemoryDataProvider = createGrid(
                 new PersonInMemoryDataProvider());
-        Assert.assertEquals(people.get(0), gridInMemoryDataProvider.getGenericDataView().getItem(0));
-        Assert.assertEquals(people.get(1), gridInMemoryDataProvider.getGenericDataView().getItem(1));
-        Assert.assertEquals(people.get(2), gridInMemoryDataProvider.getGenericDataView().getItem(2));
-        Assert.assertEquals(people.get(3), gridInMemoryDataProvider.getGenericDataView().getItem(3));
+        Assert.assertEquals(people.get(0),
+                gridInMemoryDataProvider.getGenericDataView().getItem(0));
+        Assert.assertEquals(people.get(1),
+                gridInMemoryDataProvider.getGenericDataView().getItem(1));
+        Assert.assertEquals(people.get(2),
+                gridInMemoryDataProvider.getGenericDataView().getItem(2));
+        Assert.assertEquals(people.get(3),
+                gridInMemoryDataProvider.getGenericDataView().getItem(3));
     }
 
     @Test
     public void constructorListDataProvider() {
         Grid<Person> gridListDataProvider = createGrid(
                 new PersonListDataProvider());
-        Assert.assertEquals(people.get(0), gridListDataProvider.getListDataView().getItem(0));
-        Assert.assertEquals(people.get(1), gridListDataProvider.getListDataView().getItem(1));
-        Assert.assertEquals(people.get(2), gridListDataProvider.getListDataView().getItem(2));
-        Assert.assertEquals(people.get(3), gridListDataProvider.getListDataView().getItem(3));
+        Assert.assertEquals(people.get(0),
+                gridListDataProvider.getListDataView().getItem(0));
+        Assert.assertEquals(people.get(1),
+                gridListDataProvider.getListDataView().getItem(1));
+        Assert.assertEquals(people.get(2),
+                gridListDataProvider.getListDataView().getItem(2));
+        Assert.assertEquals(people.get(3),
+                gridListDataProvider.getListDataView().getItem(3));
     }
 
     @Test
     public void constructorCollection() {
         Grid<Person> gridCollection = createGrid(people);
-        Assert.assertEquals(people.get(0), gridCollection.getGenericDataView().getItem(0));
-        Assert.assertEquals(people.get(1), gridCollection.getGenericDataView().getItem(1));
-        Assert.assertEquals(people.get(2), gridCollection.getGenericDataView().getItem(2));
-        Assert.assertEquals(people.get(3), gridCollection.getGenericDataView().getItem(3));
+        Assert.assertEquals(people.get(0),
+                gridCollection.getGenericDataView().getItem(0));
+        Assert.assertEquals(people.get(1),
+                gridCollection.getGenericDataView().getItem(1));
+        Assert.assertEquals(people.get(2),
+                gridCollection.getGenericDataView().getItem(2));
+        Assert.assertEquals(people.get(3),
+                gridCollection.getGenericDataView().getItem(3));
     }
 
     private final Grid<Person> createGrid(DataProvider dataProvider) {
@@ -112,10 +132,10 @@ public class GridDataProviderConstructorTest {
         grid.addColumn(Person::getProfession).setHeader("Profession")
                 .setKey("profession");
         grid.addColumn(new LocalDateRenderer<>(Person::getBirthday,
-                        () -> DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)))
+                () -> DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)))
                 .setHeader("Date Renderer").setKey("date");
         grid.addColumn(
-                        new LocalDateRenderer<>(Person::getBirthday, "dd/MM/yyyy"))
+                new LocalDateRenderer<>(Person::getBirthday, "dd/MM/yyyy"))
                 .setHeader("String Renderer").setKey("renderer");
         return grid;
     }
@@ -135,7 +155,7 @@ public class GridDataProviderConstructorTest {
         private String profession;
 
         public Person(Integer id, String firstName, String lastName,
-                      String email, LocalDate birthday, String profession) {
+                String email, LocalDate birthday, String profession) {
             this.firstName = firstName;
             this.lastName = lastName;
             this.email = email;
@@ -215,7 +235,8 @@ public class GridDataProviderConstructorTest {
         public Stream<Person> fetch(Query<Person, Void> query) {
             query.getPage();
             query.getPageSize();
-            return people.subList(query.getOffset(), query.getOffset() + query.getLimit()).stream();
+            return people.subList(query.getOffset(),
+                    query.getOffset() + query.getLimit()).stream();
         }
 
         @Override
@@ -285,7 +306,8 @@ public class GridDataProviderConstructorTest {
                 Query<Person, SerializablePredicate<Person>> query) {
             query.getPage();
             query.getPageSize();
-            return people.subList(query.getOffset(), query.getOffset() + query.getLimit()).stream();
+            return people.subList(query.getOffset(),
+                    query.getOffset() + query.getLimit()).stream();
         }
 
         @Override
@@ -327,7 +349,8 @@ public class GridDataProviderConstructorTest {
         public Stream<Person> fetch(Query<Person, Void> query) {
             query.getPage();
             query.getPageSize();
-            return people.subList(query.getOffset(), query.getOffset() + query.getLimit()).stream();
+            return people.subList(query.getOffset(),
+                    query.getOffset() + query.getLimit()).stream();
         }
 
         @Override
