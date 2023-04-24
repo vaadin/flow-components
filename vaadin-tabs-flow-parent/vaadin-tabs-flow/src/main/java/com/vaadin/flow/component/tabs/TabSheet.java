@@ -266,6 +266,45 @@ public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
     }
 
     /**
+     * Returns the {@link Tab} associated with the given component.
+     *
+     * @param component
+     *            the component to look up, can not be <code>null</code>
+     * @return The tab instance associated with the given component, or
+     *         <code>null</code> if the {@link TabSheet} does not contain the
+     *         component.
+     */
+    public Tab getTab(Component component) {
+        Objects.requireNonNull(component,
+                "The component to look for the tab cannot be null");
+
+        return tabToContent.entrySet().stream()
+                .filter(entry -> entry.getValue()
+                        .equals(component.getElement()))
+                .map(Map.Entry::getKey).findFirst().orElse(null);
+    }
+
+    /**
+     * Returns the {@link Component} instance associated with the given tab.
+     *
+     * @param tab
+     *            the tab to look up, can not be <code>null</code>
+     * @return The component instance associated with the given tab, or
+     *         <code>null</code> if the {@link TabSheet} does not contain the
+     *         tab.
+     */
+    public Component getComponent(Tab tab) {
+        Objects.requireNonNull(tab,
+                "The tab to look for the component cannot be null");
+
+        var tabContent = tabToContent.get(tab);
+        if (tabContent == null) {
+            return null;
+        }
+        return tabContent.getComponent().orElse(null);
+    }
+
+    /**
      * Adds a listener for {@link SelectedChangeEvent}.
      *
      * @param listener
