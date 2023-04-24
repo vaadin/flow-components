@@ -1,0 +1,280 @@
+Subject: [PATCH] Debug GWT using SDM
+---
+Index: vaadin-spreadsheet-flow-parent/vaadin-spreadsheet-flow/src/main/resources/META-INF/resources/frontend/vaadin-spreadsheet/vaadin-spreadsheet.js
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/vaadin-spreadsheet-flow-parent/vaadin-spreadsheet-flow/src/main/resources/META-INF/resources/frontend/vaadin-spreadsheet/vaadin-spreadsheet.js b/vaadin-spreadsheet-flow-parent/vaadin-spreadsheet-flow/src/main/resources/META-INF/resources/frontend/vaadin-spreadsheet/vaadin-spreadsheet.js
+--- a/vaadin-spreadsheet-flow-parent/vaadin-spreadsheet-flow/src/main/resources/META-INF/resources/frontend/vaadin-spreadsheet/vaadin-spreadsheet.js	(revision 51001c89efeaa53ee79f01a93c78cbd29b9defe8)
++++ b/vaadin-spreadsheet-flow-parent/vaadin-spreadsheet-flow/src/main/resources/META-INF/resources/frontend/vaadin-spreadsheet/vaadin-spreadsheet.js	(date 1682011876843)
+@@ -6,6 +6,7 @@
+ import { LitElement, html } from 'lit';
+ import { Spreadsheet } from './spreadsheet-export.js';
+ import { spreadsheetStyles, spreadsheetOverlayStyles } from './vaadin-spreadsheet-styles.js';
++let ExportedSpreadsheet = Spreadsheet;
+ 
+ const spreadsheetResizeObserver = new ResizeObserver((entries) => {
+   entries.forEach((entry) => entry.target.api.resize());
+@@ -170,7 +171,7 @@
+         document.body.appendChild(overlays);
+       }
+ 
+-      this.api = new Spreadsheet(this.renderRoot);
++      this.api = new ExportedSpreadsheet(this.renderRoot);
+       this.api.setHeight('100%');
+       this.api.setWidth('100%');
+       this.createCallbacks();
+@@ -542,4 +543,38 @@
+   }
+ }
+ 
+-window.customElements.define('vaadin-spreadsheet', VaadinSpreadsheet);
++const defineElement = () => window.customElements.define('vaadin-spreadsheet', VaadinSpreadsheet);
++
++// A workaround for using the GWT SuperDevMode server when running at localhost
++// - First we check that the application is running in localhost
++// - Second we try to contact SDM with a timeout of 200ms
++// - Finally we load the exported spreadsheet from the SDM instead of from local
++if (/localhost|127.0.0.1/.test(location.hostname)) { // Check that app is running in localhost
++  window.Vaadin = window.Vaadin || {};
++  const sdmUrl = `http://${location.hostname}:9876/SpreadsheetApi/SpreadsheetApi.nocache.js`;
++  const controller = new AbortController();
++  setTimeout(() => controller.abort(), 200); // Try to contact SDM in 200ms
++  fetch(sdmUrl, {signal: controller.signal} )
++    .then(response => {
++      if (response.status != 200) {
++        throw(new Error());
++      }
++      delete window.Vaadin.Spreadsheet; // spreadsheet is exported to window.Vaadin.Spreadsheet
++      const s = document.createElement('script');
++      s.src = sdmUrl;
++      document.head.prepend(s);
++      const id = setInterval(() => {
++        if (window.Vaadin.Spreadsheet) { // wait until spreadsheet is exported
++          clearInterval(id);
++          ExportedSpreadsheet = Vaadin.Spreadsheet.Api;
++          defineElement() // use spreadsheet from SDM
++          console.warn(`Spreadsheet is using GWT SDM at ${sdmUrl}`);
++          console.warn(`For recompiling GWT install the bookmark from http://${location.hostname}:9876/`);
++        }
++      }, 200);
++    }).catch(() => {
++      defineElement() // use spreadsheet from local
++    });
++} else {
++  defineElement() // use spreadsheet from local
++}
+Index: vaadin-spreadsheet-flow-parent/vaadin-spreadsheet-flow-client/src/main/resources/com/vaadin/component/spreadsheet/client/SpreadsheetApiXSI.gwt.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/vaadin-spreadsheet-flow-parent/vaadin-spreadsheet-flow-client/src/main/resources/com/vaadin/component/spreadsheet/client/SpreadsheetApiXSI.gwt.xml b/vaadin-spreadsheet-flow-parent/vaadin-spreadsheet-flow-client/src/main/resources/com/vaadin/component/spreadsheet/client/SpreadsheetApiXSI.gwt.xml
+new file mode 100644
+--- /dev/null	(date 1682011876817)
++++ b/vaadin-spreadsheet-flow-parent/vaadin-spreadsheet-flow-client/src/main/resources/com/vaadin/component/spreadsheet/client/SpreadsheetApiXSI.gwt.xml	(date 1682011876817)
+@@ -0,0 +1,43 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<module rename-to='SpreadsheetApi'>
++  <!-- Inherit the core Web Toolkit stuff.                        -->
++  <inherits name='com.google.gwt.user.User' />
++
++  <!-- Inherit the default GWT style sheet.  You can change       -->
++  <!-- the theme of your GWT application by uncommenting          -->
++  <!-- any one of the following lines.                            -->
++<!--   <inherits name='com.google.gwt.user.theme.standard.Standard' /> -->
++  <!-- <inherits name='com.google.gwt.user.theme.chrome.Chrome'/> -->
++  <!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/>     -->
++
++  <!-- Other module inherits                                      -->
++
++  <!-- Inherit DefaultWidgetSet -->
++  <inherits name="com.vaadin.DefaultWidgetSet" />
++
++  <inherits name="com.vaadin.addon.spreadsheet.Widgetset" />
++<!--   <stylesheet src="addons/spreadsheet/spreadsheet.css"/> -->
++
++
++  <!-- Specify the app entry point class.                         -->
++  <entry-point class='com.vaadin.component.spreadsheet.client.js.SpreadsheetEntryPoint' />
++
++  <!-- Specify the paths for translatable code                    -->
++  <source path='js' />
++
++  <!-- Generator for connectors -->
++  <generate-with
++          class="com.vaadin.component.spreadsheet.client.SpreadsheetConnectorBundleLoaderFactory">
++    <when-type-assignable
++            class="com.vaadin.client.metadata.ConnectorBundleLoader" />
++  </generate-with>
++
++  <!--
++    The value gecko1_8 is used for Firefox 3 and later and safari is used
++    for webkit based browsers including Google Chrome.
++  -->
++  <set-property name="user.agent" value="gecko1_8,safari"/>
++  <set-configuration-property name="devModeRedirectEnabled" value="true" />
++
++  <add-linker name="xsiframe" />
++</module>
+Index: vaadin-spreadsheet-flow-parent/vaadin-spreadsheet-flow-client/pom.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/vaadin-spreadsheet-flow-parent/vaadin-spreadsheet-flow-client/pom.xml b/vaadin-spreadsheet-flow-parent/vaadin-spreadsheet-flow-client/pom.xml
+--- a/vaadin-spreadsheet-flow-parent/vaadin-spreadsheet-flow-client/pom.xml	(revision 51001c89efeaa53ee79f01a93c78cbd29b9defe8)
++++ b/vaadin-spreadsheet-flow-parent/vaadin-spreadsheet-flow-client/pom.xml	(date 1682011876808)
+@@ -98,6 +98,24 @@
+     </dependency>
+   </dependencies>
+ 
++  <profiles>
++    <profile>
++      <id>sdm</id>
++      <properties>
++        <gwt.module>com.vaadin.component.spreadsheet.client.SpreadsheetApiXSI</gwt.module>
++      </properties>
++      <build>
++        <defaultGoal>gwt:run-codeserver</defaultGoal>
++      </build>
++      <dependencies>
++        <dependency>
++          <groupId>org.slf4j</groupId>
++          <artifactId>slf4j-simple</artifactId>
++        </dependency>
++      </dependencies>
++    </profile>
++  </profiles>
++
+   <build>
+     <!-- Output classes directly into the webapp, so that IDEs and "mvn process-classes" update them in DevMode -->
+     <outputDirectory>${project.build.directory}/${project.build.finalName}/WEB-INF/classes</outputDirectory>
+Index: scripts/run.sh
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/scripts/run.sh b/scripts/run.sh
+--- a/scripts/run.sh	(revision 51001c89efeaa53ee79f01a93c78cbd29b9defe8)
++++ b/scripts/run.sh	(date 1682011876560)
+@@ -7,7 +7,7 @@
+ ## by default 4 forks are used (set in pom), but it can be changed
+ [ -n "$FORKS" ] && args="-Dfailsafe.forkCount=$FORKS";
+ ## bu default local tests are runn in headless, but can be disabled
+-[ "$HEADLESS" = false ] && args="$args -DdisableHeadless" && quiet="" || quiet="-q"
++[ "$HEADLESS" = false ] && args="$args -DdisableHeadless" && quiet="-ntp" || quiet="-q"
+ 
+ ## Speedup installation of frontend stuff
+ verify="verify -Dvaadin.pnpm.enable"
+@@ -23,7 +23,7 @@
+   then
+     module=`echo "$modules" | head -$module | tail -1 | awk '{print $2}'`
+   else
+-   printf "Incorrect option $module it should be in the range 1 - %s\n" $max && exit 1
++    printf "Incorrect option $module it should be in the range 1 - %s\n" $max && exit 1
+   fi
+ }
+ ## Check whether there are sauce credentials, otherwise ask for them
+@@ -73,6 +73,18 @@
+   modified=`[ -f "$bundle" ] && find $folder/src -mnewer "$bundle"`
+   [ -f "$bundle" -a -z "$modified" ] && frontend="-DskipFrontend"
+ }
++## Run SS SDM
++runSdm() {
++  module=vaadin-spreadsheet
++  cmd="mvn -B -q -pl $module-flow-parent/$module-flow -DskipTests install"
++  printf "\nRunning:\n$cmd"
++  $cmd
++  cmd="mvn -B $quiet -pl $module-flow-parent/$module-flow-client -Psdm"
++  printf "\nRunning:\n$cmd\n\nIf not already you can install SDM bookmark by visiting http://localhost:9876\n\n"
++  $cmd &
++  trap "kill $!" INT
++  sleep 3
++}
+ 
+ ## Ask for run options
+ clear
+@@ -87,6 +99,7 @@
+   all test  IT - Verify merged IT's of all component (takes a while)         - mvn verify -pl integration-tests -Dit.Test=...
+   all jetty IT - Start Jetty Server on merged IT's module                    - mvn jetty:run -pl integration-tests ...
+   all sauce IT - Run Integration-Tests of all component in SauceLabs         - mvn verify -pl integration-tests -Dsauce.user ...
++  sdm          - Run spreadsheet in SDM
+ EOF
+ printf "Your option:  "
+ read option
+@@ -94,13 +107,14 @@
+ case $option in
+    1) askModule; cmd="mvn clean test-compile -amd -B $quiet -DskipFrontend -pl $module-flow-parent";;
+    2) askModule; askITests; askUTests; askJetty; runFrontend; cmd="mvn $verify $quiet -am -B -pl $module-flow-parent/$module-flow-integration-tests $utests $itests $frontend $jetty $args";;
+-   3) askModule; cmd="mvn package $jettyrun -am -B $quiet -DskipTests -pl $module-flow-parent/$module-flow-integration-tests"; browser=true;;
++   3) askModule; cmd="mvn package $jettyrun -B $quiet -DskipTests -pl $module-flow-parent/$module-flow-integration-tests"; browser=true;;
+    4) askSauce; askModule; askITests; askUTests; askJetty; runFrontend; cmd="mvn $verify -am -B $quiet -pl $module-flow-parent/$module-flow-integration-tests $utests $itests $frontend $jetty $args -Dtest.use.hub=true -Psaucelabs -Dsauce.user=$SAUCE_USER -Dsauce.sauceAccessKey=$SAUCE_ACCESS_KEY";;
+    5) cmd="mvn clean test-compile -DskipFrontend -B $quiet -T 1C";;
+    6) cmd="mvn install -B -DskipTests -Drelease -T 1C";;
+    7) mergeITs; askITests; askUTests; askJetty; runFrontend; cmd="mvn $verify $quiet -am -B -Drun-it -pl integration-tests $utests $itests $frontend $jetty $args";;
+    8) mergeITs; cmd="mvn package $jettyrun -am -B $quiet -DskipTests -Drun-it -pl integration-tests"; browser=true;;
+    9) askSauce; mergeITs; askITests; askUTests; askJetty; runFrontend; cmd="mvn $verify -am -B $quiet -pl integration-tests -Drun-it $utests $itests $frontend $jetty $args -Dtest.use.hub=true -Psaucelabs -Dsauce.user=$SAUCE_USER -Dsauce.sauceAccessKey=$SAUCE_ACCESS_KEY";;
++   10) runSdm; cmd="mvn package $jettyrun -B $quiet -DskipTests -pl $module-flow-parent/$module-flow-integration-tests"; browser=true;;
+ esac
+ 
+ ## execute mvn command and check error status
+Index: vaadin-spreadsheet-flow-parent/vaadin-spreadsheet-flow-client/src/main/resources/com/vaadin/component/spreadsheet/client/SpreadsheetApi.gwt.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/vaadin-spreadsheet-flow-parent/vaadin-spreadsheet-flow-client/src/main/resources/com/vaadin/component/spreadsheet/client/SpreadsheetApi.gwt.xml b/vaadin-spreadsheet-flow-parent/vaadin-spreadsheet-flow-client/src/main/resources/com/vaadin/component/spreadsheet/client/SpreadsheetApi.gwt.xml
+--- a/vaadin-spreadsheet-flow-parent/vaadin-spreadsheet-flow-client/src/main/resources/com/vaadin/component/spreadsheet/client/SpreadsheetApi.gwt.xml	(revision 51001c89efeaa53ee79f01a93c78cbd29b9defe8)
++++ b/vaadin-spreadsheet-flow-parent/vaadin-spreadsheet-flow-client/src/main/resources/com/vaadin/component/spreadsheet/client/SpreadsheetApi.gwt.xml	(date 1682011876817)
+@@ -1,47 +1,9 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <module rename-to='SpreadsheetApi'>
+-  <!-- Inherit the core Web Toolkit stuff.                        -->
+-  <inherits name='com.google.gwt.user.User' />
+-
+-  <!-- Inherit the default GWT style sheet.  You can change       -->
+-  <!-- the theme of your GWT application by uncommenting          -->
+-  <!-- any one of the following lines.                            -->
+-<!--   <inherits name='com.google.gwt.user.theme.standard.Standard' /> -->
+-  <!-- <inherits name='com.google.gwt.user.theme.chrome.Chrome'/> -->
+-  <!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/>     -->
+ 
+-  <!-- Other module inherits                                      -->
+-
+-  <!-- Inherit DefaultWidgetSet -->
+-  <inherits name="com.vaadin.DefaultWidgetSet" />
+-
+-  <inherits name="com.vaadin.addon.spreadsheet.Widgetset" />
+-<!--   <stylesheet src="addons/spreadsheet/spreadsheet.css"/> -->
+-
+-
+-  <!-- Specify the app entry point class.                         -->
+-  <entry-point class='com.vaadin.component.spreadsheet.client.js.SpreadsheetEntryPoint' />
+-
+-  <!-- Specify the paths for translatable code                    -->
+-  <source path='js' />
+-
+-  <!-- Generator for connectors -->
+-  <generate-with
+-          class="com.vaadin.component.spreadsheet.client.SpreadsheetConnectorBundleLoaderFactory">
+-    <when-type-assignable
+-            class="com.vaadin.client.metadata.ConnectorBundleLoader" />
+-  </generate-with>
+-
+-
++  <!-- Inherits the SpreadsheetApi module -->
++  <inherits name='com.vaadin.component.spreadsheet.client.SpreadsheetApiXSI' />
+   <!-- Use custom single script linker without document.write, doens't work with SDM and GWT unit tests -->
+   <define-linker name="humlinker" class="com.vaadin.component.spreadsheet.client.SpreadsheetLinker" />
+   <add-linker name="humlinker" />
+-
+-  <!--
+-    The value gecko1_8 is used for Firefox 3 and later and safari is used
+-    for webkit based browsers including Google Chrome.
+-  -->
+-  <set-property name="user.agent" value="gecko1_8,safari"/>
+-  <set-configuration-property name="devModeRedirectEnabled" value="true" />
+-
+ </module>
