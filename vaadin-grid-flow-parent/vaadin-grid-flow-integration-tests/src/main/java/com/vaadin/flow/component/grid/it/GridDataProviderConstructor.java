@@ -16,9 +16,14 @@
 package com.vaadin.flow.component.grid.it;
 
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.data.provider.*;
+import com.vaadin.flow.data.provider.BackEndDataProvider;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.DataProviderListener;
+import com.vaadin.flow.data.provider.InMemoryDataProvider;
+import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.renderer.LocalDateRenderer;
 import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializablePredicate;
@@ -26,6 +31,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.Registration;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.Arrays;
@@ -34,20 +40,22 @@ import java.util.List;
 import java.util.stream.Stream;
 
 /**
+ * Test view for GridDataProviderConstructorIT displaying 5 Grids using each one a different constructor.
+ *
  * @author Vaadin Ltd.
  */
 @Route("vaadin-grid/grid-data-provider-constructor")
 public class GridDataProviderConstructor extends Div {
 
-    List<Person> people = Arrays.asList(
+    transient List<Person> people = Arrays.asList(
             new Person(1, "Mik", "Gir", "mik@gmail.com",
-                    LocalDate.now().minusDays(10000), "Dev"),
+                    LocalDate.now(ZoneId.systemDefault()).minusDays(10000), "Dev"),
             new Person(2, "Mak", "Gar", "mak@gmail.com",
-                    LocalDate.now().minusDays(20000), "Dev"),
+                    LocalDate.now(ZoneId.systemDefault()).minusDays(20000), "Dev"),
             new Person(3, "Muk", "Gur", "muk@gmail.com",
-                    LocalDate.now().minusDays(30000), "Dev"),
+                    LocalDate.now(ZoneId.systemDefault()).minusDays(30000), "Dev"),
             new Person(4, "Mok", "Gor", "mok@gmail.com",
-                    LocalDate.now().minusDays(40000), "Dev"));
+                    LocalDate.now(ZoneId.systemDefault()).minusDays(40000), "Dev"));
 
     public GridDataProviderConstructor() {
         Grid<Person> gridBackendDataProvider = createGrid(
@@ -75,26 +83,17 @@ public class GridDataProviderConstructor extends Div {
         add(gridCollection);
     }
 
-    public Grid<Person> createGrid(DataProvider dataProvider) {
+    private final Grid<Person> createGrid(DataProvider<?, ?> dataProvider) {
         Grid<Person> grid = new Grid<>(dataProvider);
-        grid.addColumn(Person::getFirstName).setHeader("First name")
-                .setKey("first");
-        grid.addColumn(Person::getLastName).setHeader("Last name")
-                .setKey("last");
-        grid.addColumn(Person::getEmail).setHeader("Email").setKey("email");
-        grid.addColumn(Person::getProfession).setHeader("Profession")
-                .setKey("profession");
-        grid.addColumn(new LocalDateRenderer<>(Person::getBirthday,
-                () -> DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)))
-                .setHeader("Estimated delivery date").setKey("date");
-        grid.addColumn(
-                new LocalDateRenderer<>(Person::getBirthday, "dd/MM/yyyy"))
-                .setHeader("Estimated delivery date").setKey("renderer");
-        return grid;
+        return createColumns(grid);
     }
 
-    public Grid<Person> createGrid(Collection items) {
+    private final Grid<Person> createGrid(Collection<Person> items) {
         Grid<Person> grid = new Grid<>(items);
+        return createColumns(grid);
+    }
+
+    private final Grid<Person> createColumns(Grid<Person> grid){
         grid.addColumn(Person::getFirstName).setHeader("First name")
                 .setKey("first");
         grid.addColumn(Person::getLastName).setHeader("Last name")
@@ -103,15 +102,15 @@ public class GridDataProviderConstructor extends Div {
         grid.addColumn(Person::getProfession).setHeader("Profession")
                 .setKey("profession");
         grid.addColumn(new LocalDateRenderer<>(Person::getBirthday,
-                () -> DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)))
-                .setHeader("Estimated delivery date").setKey("date");
+                        () -> DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)))
+                .setHeader("Date Renderer").setKey("date");
         grid.addColumn(
-                new LocalDateRenderer<>(Person::getBirthday, "dd/MM/yyyy"))
-                .setHeader("Estimated delivery date").setKey("renderer");
+                        new LocalDateRenderer<>(Person::getBirthday, "dd/MM/yyyy"))
+                .setHeader("String Renderer").setKey("renderer");
         return grid;
     }
 
-    public class Person {
+    public final static class Person {
 
         private String firstName;
 
@@ -184,7 +183,7 @@ public class GridDataProviderConstructor extends Div {
         }
     }
 
-    public class PersonBackendDataProvider
+    private final class PersonBackendDataProvider
             implements BackEndDataProvider<Person, Void> {
 
         @Override
@@ -226,7 +225,7 @@ public class GridDataProviderConstructor extends Div {
         }
     }
 
-    public class PersonListDataProvider extends ListDataProvider<Person> {
+    private final class PersonListDataProvider extends ListDataProvider<Person> {
 
         public PersonListDataProvider() {
             super(people);
@@ -234,7 +233,7 @@ public class GridDataProviderConstructor extends Div {
 
     }
 
-    public class PersonInMemoryDataProvider
+    private final class PersonInMemoryDataProvider
             implements InMemoryDataProvider<Person> {
 
         @Override
@@ -289,7 +288,7 @@ public class GridDataProviderConstructor extends Div {
         }
     }
 
-    public class PersonGenericDataProvider
+    private final class PersonGenericDataProvider
             implements DataProvider<Person, Void> {
 
         @Override
