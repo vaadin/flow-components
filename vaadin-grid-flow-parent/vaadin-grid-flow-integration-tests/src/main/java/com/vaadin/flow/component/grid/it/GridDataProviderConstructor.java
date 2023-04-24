@@ -40,7 +40,8 @@ import java.util.List;
 import java.util.stream.Stream;
 
 /**
- * Test view for GridDataProviderConstructorIT displaying 5 Grids using each one a different constructor.
+ * Test view for GridDataProviderConstructorIT displaying 5 Grids using each one
+ * a different constructor.
  *
  * @author Vaadin Ltd.
  */
@@ -49,13 +50,17 @@ public class GridDataProviderConstructor extends Div {
 
     transient List<Person> people = Arrays.asList(
             new Person(1, "Mik", "Gir", "mik@gmail.com",
-                    LocalDate.now(ZoneId.systemDefault()).minusDays(10000), "Dev"),
+                    LocalDate.now(ZoneId.systemDefault()).minusDays(10000),
+                    "Dev"),
             new Person(2, "Mak", "Gar", "mak@gmail.com",
-                    LocalDate.now(ZoneId.systemDefault()).minusDays(20000), "Dev"),
+                    LocalDate.now(ZoneId.systemDefault()).minusDays(20000),
+                    "Dev"),
             new Person(3, "Muk", "Gur", "muk@gmail.com",
-                    LocalDate.now(ZoneId.systemDefault()).minusDays(30000), "Dev"),
+                    LocalDate.now(ZoneId.systemDefault()).minusDays(30000),
+                    "Dev"),
             new Person(4, "Mok", "Gor", "mok@gmail.com",
-                    LocalDate.now(ZoneId.systemDefault()).minusDays(40000), "Dev"));
+                    LocalDate.now(ZoneId.systemDefault()).minusDays(40000),
+                    "Dev"));
 
     public GridDataProviderConstructor() {
         Grid<Person> gridBackendDataProvider = createGrid(
@@ -93,7 +98,7 @@ public class GridDataProviderConstructor extends Div {
         return createColumns(grid);
     }
 
-    private final Grid<Person> createColumns(Grid<Person> grid){
+    private final Grid<Person> createColumns(Grid<Person> grid) {
         grid.addColumn(Person::getFirstName).setHeader("First name")
                 .setKey("first");
         grid.addColumn(Person::getLastName).setHeader("Last name")
@@ -102,10 +107,10 @@ public class GridDataProviderConstructor extends Div {
         grid.addColumn(Person::getProfession).setHeader("Profession")
                 .setKey("profession");
         grid.addColumn(new LocalDateRenderer<>(Person::getBirthday,
-                        () -> DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)))
+                () -> DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)))
                 .setHeader("Date Renderer").setKey("date");
         grid.addColumn(
-                        new LocalDateRenderer<>(Person::getBirthday, "dd/MM/yyyy"))
+                new LocalDateRenderer<>(Person::getBirthday, "dd/MM/yyyy"))
                 .setHeader("String Renderer").setKey("renderer");
         return grid;
     }
@@ -225,7 +230,8 @@ public class GridDataProviderConstructor extends Div {
         }
     }
 
-    private final class PersonListDataProvider extends ListDataProvider<Person> {
+    private final class PersonListDataProvider
+            extends ListDataProvider<Person> {
 
         public PersonListDataProvider() {
             super(people);

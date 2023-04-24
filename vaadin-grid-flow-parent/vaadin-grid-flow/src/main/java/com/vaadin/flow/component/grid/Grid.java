@@ -1394,7 +1394,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * Creates a new grid using the given generic {@code DataProvider}.
      *
      * @param dataProvider
-     *              the data provider, not {@code null}
+     *            the data provider, not {@code null}
      *
      */
     public Grid(DataProvider<T, Void> dataProvider) {
