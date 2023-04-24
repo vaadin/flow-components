@@ -49,6 +49,10 @@ public class SideNavItemElement extends TestBenchElement {
         return hasAttribute("expanded");
     }
 
+    public boolean isActive() {
+        return hasAttribute("active");
+    }
+
     public String getLabel() {
         final WebElement unnamedSlot = getWrappedElement().getShadowRoot()
                 .findElement(By.cssSelector("slot:not([name])"));
