@@ -18,6 +18,7 @@ package com.vaadin.flow.component.datepicker;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.vaadin.flow.component.HasAriaLabel;
 import org.junit.Assert;
@@ -329,6 +330,38 @@ public class DatePickerTest {
     public void setTextAsPrefix_throws() {
         DatePicker picker = new DatePicker();
         picker.setPrefixComponent(new Text("Prefix"));
+    }
+
+    @Test
+    public void unregisterOpenedChangeListenerOnEvent() {
+        var picker = new DatePicker();
+
+        var listenerInvokedCount = new AtomicInteger(0);
+        picker.addOpenedChangeListener(e -> {
+            listenerInvokedCount.incrementAndGet();
+            e.unregisterListener();
+        });
+
+        picker.open();
+        picker.close();
+
+        Assert.assertEquals(1, listenerInvokedCount.get());
+    }
+
+    @Test
+    public void unregisterInvalidChangeListenerOnEvent() {
+        var picker = new DatePicker();
+
+        var listenerInvokedCount = new AtomicInteger(0);
+        picker.addInvalidChangeListener(e -> {
+            listenerInvokedCount.incrementAndGet();
+            e.unregisterListener();
+        });
+
+        picker.setInvalid(true);
+        picker.setInvalid(false);
+
+        Assert.assertEquals(1, listenerInvokedCount.get());
     }
 
     @Tag("div")

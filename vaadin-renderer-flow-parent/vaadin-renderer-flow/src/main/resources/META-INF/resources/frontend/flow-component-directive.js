@@ -1,5 +1,4 @@
 import { noChange } from 'lit';
-import { until } from 'lit/directives/until.js';
 import { directive, Directive, PartType } from 'lit/directive.js';
 
 class FlowComponentDirective extends Directive {
@@ -11,13 +10,22 @@ class FlowComponentDirective extends Directive {
   }
 
   update(part, [appid, nodeid]) {
+    this.updateContent(part, appid, nodeid);
+    return noChange;
+  }
+
+  updateContent(part, appid, nodeid) {
     const { parentNode, startNode } = part;
 
-    const newNode = this.getNewNode(appid, nodeid);
+    const hasNewNodeId = nodeid !== undefined && nodeid !== null;
+    const newNode = hasNewNodeId ? this.getNewNode(appid, nodeid) : null;
     const oldNode = this.getOldNode(part);
 
-    if (oldNode === newNode) {
-      return noChange;
+    if (hasNewNodeId && !newNode) {
+      // If the node is not found, try again later.
+      setTimeout(() => this.updateContent(part, appid, nodeid));
+    } else if (oldNode === newNode) {
+      return;
     } else if (oldNode && newNode) {
       parentNode.replaceChild(newNode, oldNode);
     } else if (oldNode) {
@@ -25,8 +33,6 @@ class FlowComponentDirective extends Directive {
     } else if (newNode) {
       startNode.after(newNode);
     }
-
-    return noChange;
   }
 
   getNewNode(appid, nodeid) {
@@ -42,10 +48,8 @@ class FlowComponentDirective extends Directive {
   }
 }
 
-const flowComponentDirectiveInternal = directive(FlowComponentDirective);
-
 /**
- * Renders the given flow component node asynchronously.
+ * Renders the given flow component node.
  *
  * WARNING: This directive is not intended for public use.
  *
@@ -53,18 +57,4 @@ const flowComponentDirectiveInternal = directive(FlowComponentDirective);
  * @param {number} nodeid
  * @private
  */
-export const flowComponentDirective = (appid, nodeid) => {
-  // Theoretically, it could return the directive synchronously.
-  // The `until` directive is used for now to work around sizing issues
-  // with ComponentRenderer. The previously used <flow-component-renderer> was
-  // asynchronous by nature and thus worked out of the box.
-  //
-  // Test in ComponentColumnWithHeightIT::shouldPositionItemsCorrectlyAfterScrollingToEnd
-  // makes sure the sizing works correctly. The sizing issue should eventually
-  // be fixed in the Virtualizer.
-  return until(
-    new Promise((resolve) => {
-      resolve(flowComponentDirectiveInternal(appid, nodeid));
-    })
-  );
-}
+export const flowComponentDirective = directive(FlowComponentDirective);

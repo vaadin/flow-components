@@ -69,9 +69,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-time-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha6")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/time-picker", version = "24.1.0-alpha6")
+@NpmPackage(value = "@vaadin/time-picker", version = "24.1.0-alpha8")
 @JsModule("@vaadin/time-picker/src/vaadin-time-picker.js")
 @JsModule("./vaadin-time-picker/timepickerConnector.js")
 public class TimePicker
@@ -142,6 +142,9 @@ public class TimePicker
         addValueChangeListener(e -> validate());
 
         addClientValidatedEventListener(event -> validate());
+
+        getElement().addPropertyChangeListener("invalid", event -> fireEvent(
+                new InvalidChangeEvent(this, event.isUserOriginated())));
     }
 
     /**
@@ -489,9 +492,7 @@ public class TimePicker
      */
     public Registration addInvalidChangeListener(
             ComponentEventListener<InvalidChangeEvent> listener) {
-        return getElement().addPropertyChangeListener("invalid",
-                event -> listener.onComponentEvent(new InvalidChangeEvent(this,
-                        event.isUserOriginated())));
+        return addListener(InvalidChangeEvent.class, listener);
     }
 
     /**
