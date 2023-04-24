@@ -88,7 +88,7 @@ public class GridDataProviderConstructor extends Div {
         add(gridCollection);
     }
 
-    private final Grid<Person> createGrid(DataProvider<?, ?> dataProvider) {
+    private final Grid<Person> createGrid(DataProvider dataProvider) {
         Grid<Person> grid = new Grid<>(dataProvider);
         return createColumns(grid);
     }
@@ -193,7 +193,7 @@ public class GridDataProviderConstructor extends Div {
 
         @Override
         public void setSortOrders(List<QuerySortOrder> list) {
-
+            return;
         }
 
         @Override
@@ -215,12 +215,17 @@ public class GridDataProviderConstructor extends Div {
 
         @Override
         public void refreshItem(Person person) {
+            return;
+        }
 
+        @Override
+        public void refreshItems(boolean b) {
+            return;
         }
 
         @Override
         public void refreshAll() {
-
+            return;
         }
 
         @Override
@@ -228,6 +233,7 @@ public class GridDataProviderConstructor extends Div {
                 DataProviderListener<Person> dataProviderListener) {
             return null;
         }
+
     }
 
     private final class PersonListDataProvider
@@ -261,7 +267,7 @@ public class GridDataProviderConstructor extends Div {
         @Override
         public void setSortComparator(
                 SerializableComparator<Person> serializableComparator) {
-
+            return;
         }
 
         @Override
@@ -279,18 +285,23 @@ public class GridDataProviderConstructor extends Div {
 
         @Override
         public void refreshItem(Person person) {
-
+            return;
         }
 
         @Override
         public void refreshAll() {
-
+            return;
         }
 
         @Override
         public Registration addDataProviderListener(
                 DataProviderListener<Person> dataProviderListener) {
             return null;
+        }
+
+        @Override
+        public void refreshItems(boolean b) {
+            return;
         }
     }
 
@@ -316,18 +327,23 @@ public class GridDataProviderConstructor extends Div {
 
         @Override
         public void refreshItem(Person person) {
-
+            return;
         }
 
         @Override
         public void refreshAll() {
-
+            return;
         }
 
         @Override
         public Registration addDataProviderListener(
                 DataProviderListener<Person> dataProviderListener) {
             return null;
+        }
+
+        @Override
+        public void refreshItems(boolean b) {
+            return;
         }
     }
 }
