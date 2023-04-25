@@ -62,14 +62,11 @@ public class SideNav extends Component implements HasSize, HasStyle {
      *
      * @param sideNavItems
      *            the menu item(s) to add
-     * @return the menu for chaining
      */
-    public SideNav addItem(SideNavItem... sideNavItems) {
+    public void addItem(SideNavItem... sideNavItems) {
         for (SideNavItem sideNavItem : sideNavItems) {
             getElement().appendChild(sideNavItem.getElement());
         }
-
-        return this;
     }
 
     /**
@@ -79,29 +76,23 @@ public class SideNav extends Component implements HasSize, HasStyle {
      *
      * @param sideNavItem
      *            the menu item to remove
-     * @return the menu for chaining
      */
-    public SideNav removeItem(SideNavItem sideNavItem) {
+    public void removeItem(SideNavItem sideNavItem) {
         Optional<Component> parent = sideNavItem.getParent();
         if (parent.isPresent() && parent.get() == this) {
             getElement().removeChild(sideNavItem.getElement());
         }
-
-        return this;
     }
 
     /**
      * Removes all menu items from this item.
-     *
-     * @return this item for chaining
      */
-    public SideNav removeAllItems() {
+    public void removeAllItems() {
         final List<Element> allNavItems = getElement()
                 .getChildren().filter(element -> !Objects
                         .equals(element.getAttribute("slot"), "label"))
                 .toList();
         getElement().removeChild(allNavItems);
-        return this;
     }
 
     /**
@@ -121,11 +112,9 @@ public class SideNav extends Component implements HasSize, HasStyle {
      *
      * @param label
      *            the label to set
-     * @return this instance for chaining
      */
-    public SideNav setLabel(String label) {
+    public void setLabel(String label) {
         getLabelElement().setText(label);
-        return this;
     }
 
     private Optional<Element> getExistingLabelElement() {
@@ -163,15 +152,13 @@ public class SideNav extends Component implements HasSize, HasStyle {
      * @param collapsible
      *            true to make the whole navigation component collapsible, false
      *            otherwise
-     * @return this instance for chaining
      */
-    public SideNav setCollapsible(boolean collapsible) {
+    public void setCollapsible(boolean collapsible) {
         if (collapsible) {
             getElement().setAttribute("collapsible", "");
         } else {
             getElement().removeAttribute("collapsible");
         }
-        return this;
     }
 
     @Override

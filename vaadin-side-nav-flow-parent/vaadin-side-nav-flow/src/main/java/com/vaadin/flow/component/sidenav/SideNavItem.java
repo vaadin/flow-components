@@ -120,15 +120,12 @@ public class SideNavItem extends Component {
      *
      * @param sideNavItems
      *            the menu item(s) to add
-     * @return this item for chaining
      */
-    public SideNavItem addItem(SideNavItem... sideNavItems) {
+    public void addItem(SideNavItem... sideNavItems) {
         for (SideNavItem sideNavItem : sideNavItems) {
             sideNavItem.getElement().setAttribute("slot", "children");
             getElement().appendChild(sideNavItem.getElement());
         }
-
-        return this;
     }
 
     /**
@@ -138,29 +135,23 @@ public class SideNavItem extends Component {
      *
      * @param sideNavItem
      *            the menu item to remove
-     * @return this item for chaining
      */
-    public SideNavItem removeItem(SideNavItem sideNavItem) {
+    public void removeItem(SideNavItem sideNavItem) {
         Optional<Component> parent = sideNavItem.getParent();
         if (parent.isPresent() && parent.get() == this) {
             getElement().removeChild(sideNavItem.getElement());
         }
-
-        return this;
     }
 
     /**
      * Removes all menu items from this item.
-     *
-     * @return this item for chaining
      */
-    public SideNavItem removeAllItems() {
+    public void removeAllItems() {
         final List<Element> allNavItems = getElement()
                 .getChildren().filter(element -> Objects
                         .equals(element.getAttribute("slot"), "children"))
                 .toList();
         getElement().removeChild(allNavItems);
-        return this;
     }
 
     /**
@@ -179,11 +170,9 @@ public class SideNavItem extends Component {
      *
      * @param label
      *            the label to set
-     * @return this instance for chaining
      */
-    public SideNavItem setLabel(String label) {
+    public void setLabel(String label) {
         getLabelElement().setText(label);
-        return this;
     }
 
     private Optional<Element> getExistingLabelElement() {
@@ -204,11 +193,9 @@ public class SideNavItem extends Component {
      *
      * @param path
      *            the path to link to
-     * @return this instance for chaining
      */
-    public SideNavItem setPath(String path) {
+    public void setPath(String path) {
         getElement().setAttribute("path", path);
-        return this;
     }
 
     /**
@@ -216,13 +203,11 @@ public class SideNavItem extends Component {
      *
      * @param view
      *            the view to link to
-     * @return this instance for chaining
      */
-    public SideNavItem setPath(Class<? extends Component> view) {
+    public void setPath(Class<? extends Component> view) {
         String url = RouteConfiguration.forRegistry(getRouter().getRegistry())
                 .getUrl(view);
         setPath(url);
-        return this;
     }
 
     private Router getRouter() {
@@ -264,9 +249,8 @@ public class SideNavItem extends Component {
      *
      * @param icon
      *            the icon to show
-     * @return this instance for chaining
      */
-    public SideNavItem setIcon(Component icon) {
+    public void setIcon(Component icon) {
         icon.getElement().setAttribute("slot", "prefix");
         int iconElementIndex = getIconElementIndex();
         if (iconElementIndex != -1) {
@@ -274,7 +258,6 @@ public class SideNavItem extends Component {
         } else {
             getElement().appendChild(icon.getElement());
         }
-        return this;
     }
 
     /**
@@ -283,13 +266,12 @@ public class SideNavItem extends Component {
      * @param value
      *            true to expand the item, false to collapse it
      */
-    public SideNavItem setExpanded(boolean value) {
+    public void setExpanded(boolean value) {
         if (value) {
             getElement().setAttribute("expanded", "");
         } else {
             getElement().removeAttribute("expanded");
         }
-        return this;
     }
 
     @Override
