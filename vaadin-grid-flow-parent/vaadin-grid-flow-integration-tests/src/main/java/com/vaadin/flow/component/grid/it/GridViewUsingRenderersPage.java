@@ -35,7 +35,6 @@ import com.vaadin.flow.data.bean.Item;
 import com.vaadin.flow.data.bean.ItemGenerator;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.provider.ListDataProvider;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.IconRenderer;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.LocalDateRenderer;
@@ -55,7 +54,7 @@ public class GridViewUsingRenderersPage extends LegacyTestView {
         Grid<Item> grid = new Grid<>();
         grid.setItems(getShoppingCart());
 
-        Grid.Column nameColumn = grid.addColumn(Item::getName)
+        Grid.Column<Item> nameColumn = grid.addColumn(Item::getName)
                 .setHeader("Name");
 
         Binder<Item> binder = new Binder<>(Item.class);
