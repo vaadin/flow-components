@@ -23,7 +23,8 @@ import java.util.stream.Stream;
  */
 public class GridDataProviderConstructorTest {
 
-    transient List<String> dummyData = Arrays.asList("item1","item2","item3","item4");
+    transient List<String> dummyData = Arrays.asList("item1", "item2", "item3",
+            "item4");
 
     @Test
     public void constructorBackEndDataProvider() {
@@ -94,7 +95,8 @@ public class GridDataProviderConstructorTest {
                 gridCollection.getGenericDataView().getItem(3));
     }
 
-    private final class StringBackendDataProvider extends AbstractDataProvider<String, Void>
+    private final class StringBackendDataProvider
+            extends AbstractDataProvider<String, Void>
             implements BackEndDataProvider<String, Void> {
 
         @Override
@@ -122,7 +124,8 @@ public class GridDataProviderConstructorTest {
 
     }
 
-    private final class StringInMemoryDataProvider extends AbstractDataProvider<String, SerializablePredicate<String>>
+    private final class StringInMemoryDataProvider
+            extends AbstractDataProvider<String, SerializablePredicate<String>>
             implements InMemoryDataProvider<String> {
 
         @Override
@@ -163,7 +166,8 @@ public class GridDataProviderConstructorTest {
 
     }
 
-    private final class StringGenericDataProvider extends AbstractDataProvider<String, Void>
+    private final class StringGenericDataProvider
+            extends AbstractDataProvider<String, Void>
             implements DataProvider<String, Void> {
 
         @Override
