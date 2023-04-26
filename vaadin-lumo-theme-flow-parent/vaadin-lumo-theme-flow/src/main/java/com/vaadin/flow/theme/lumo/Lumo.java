@@ -29,10 +29,10 @@ import com.vaadin.flow.theme.AbstractTheme;
 /**
  * Lumo component theme class implementation.
  */
-@NpmPackage(value = "@vaadin/vaadin-themable-mixin", version = "24.1.0-alpha4")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha4")
+@NpmPackage(value = "@vaadin/vaadin-themable-mixin", version = "24.1.0-alpha8")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/vaadin-lumo-styles", version = "24.1.0-alpha4")
+@NpmPackage(value = "@vaadin/vaadin-lumo-styles", version = "24.1.0-alpha8")
 @JsModule("@vaadin/vaadin-lumo-styles/color-global.js")
 @JsModule("@vaadin/vaadin-lumo-styles/typography-global.js")
 @JsModule("@vaadin/vaadin-lumo-styles/sizing.js")
@@ -52,11 +52,6 @@ public class Lumo implements AbstractTheme {
     @Override
     public String getThemeUrl() {
         return "theme/lumo/";
-    }
-
-    @Override
-    public List<String> getHeaderInlineContents() {
-        return Collections.emptyList();
     }
 
     @Override

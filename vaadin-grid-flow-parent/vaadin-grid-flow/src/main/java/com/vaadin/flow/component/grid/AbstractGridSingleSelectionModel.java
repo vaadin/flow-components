@@ -74,9 +74,6 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
         doSelect(item, false);
 
         getGrid().doClientSideSelection(Collections.singleton(item));
-        if (item != null) {
-            getGrid().getDataCommunicator().refresh(item);
-        }
     }
 
     @Override
