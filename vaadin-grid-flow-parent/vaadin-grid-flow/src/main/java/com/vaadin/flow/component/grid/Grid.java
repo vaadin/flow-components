@@ -539,7 +539,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         public void setRenderer(Renderer<T> renderer) {
             this.renderer = Objects.requireNonNull(renderer, "Renderer must not be null.");
 
-            destroyDataGenerators();
+            if (columnDataGeneratorRegistration != null) {
+                columnDataGeneratorRegistration.remove();
+                columnDataGeneratorRegistration = null;
+            }
             if (rendering != null) {
                 rendering.getRegistration().remove();
             }
@@ -547,13 +550,21 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             rendering = renderer.render(getElement(), (KeyMapper<T>) getGrid()
                     .getDataCommunicator().getKeyMapper());
 
-            Optional<DataGenerator<T>> dataGenerator = rendering
-                    .getDataGenerator();
+            columnDataGeneratorRegistration = rendering.getDataGenerator()
+                    .map(dataGenerator -> grid.addDataGenerator((DataGenerator) dataGenerator))
+                    .orElse(null);
 
-            if (dataGenerator.isPresent()) {
-                columnDataGeneratorRegistration = getGrid()
-                        .addDataGenerator((DataGenerator) dataGenerator.get());
+            // reset editor registration, if any
+            if (editorDataGeneratorRegistration != null) {
+                editorDataGeneratorRegistration.remove();
+                editorDataGeneratorRegistration = null;
+
+                Rendering<T> editorRendering = editorRenderer.render(getElement(), null);
+                editorDataGeneratorRegistration = editorRendering.getDataGenerator()
+                        .map(dataGenerator -> grid.addDataGenerator((DataGenerator) dataGenerator))
+                        .orElse(null);
             }
+
             getGrid().getDataCommunicator().reset();
         }
 

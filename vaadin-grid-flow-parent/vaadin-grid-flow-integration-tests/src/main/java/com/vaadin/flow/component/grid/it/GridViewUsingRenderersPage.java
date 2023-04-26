@@ -17,15 +17,25 @@ package com.vaadin.flow.component.grid.it;
 
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.WeakHashMap;
 
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.editor.Editor;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.textfield.NumberField;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.bean.Item;
 import com.vaadin.flow.data.bean.ItemGenerator;
+import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.IconRenderer;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.LocalDateRenderer;
@@ -45,7 +55,18 @@ public class GridViewUsingRenderersPage extends LegacyTestView {
         Grid<Item> grid = new Grid<>();
         grid.setItems(getShoppingCart());
 
-        grid.addColumn(Item::getName).setHeader("Name");
+        Grid.Column nameColumn = grid.addColumn(Item::getName).setHeader("Name");
+
+        Binder<Item> binder = new Binder<>(Item.class);
+        Editor<Item> editor = grid.getEditor();
+        editor.setBinder(binder);
+        editor.setBuffered(true);
+
+        TextField nameField = new TextField();
+        binder.forField(nameField)
+                .bind("name");
+        nameColumn.setEditorComponent(nameField);
+        nameColumn.setRenderer(LitRenderer.<Item>of("<b>${item.name}</b>").withProperty("name", Item::getName));
 
         // NumberRenderer to render numbers in general
         Grid.Column<Item> priceColumn = grid
@@ -53,6 +74,12 @@ public class GridViewUsingRenderersPage extends LegacyTestView {
                         Locale.US, "$ 0.00"))
                 .setHeader("Price");
         priceColumn.setSortable(true);
+
+        NumberField field = new NumberField();
+        binder.forField(field)
+                .withValidator(price -> price >= 0, "Price cannot be negative")
+                .bind("price");
+        priceColumn.setEditorComponent(field);
 
         // LocalDateTimeRenderer for date and time
         grid.addColumn(new LocalDateTimeRenderer<>(Item::getPurchaseDate,
@@ -78,6 +105,36 @@ public class GridViewUsingRenderersPage extends LegacyTestView {
             dataProvider.getItems().remove(item);
             dataProvider.refreshAll();
         })).setWidth("100px").setFlexGrow(0);
+
+        Collection<Button> editButtons = Collections
+                .newSetFromMap(new WeakHashMap<>());
+
+        Grid.Column<Item> editorColumn = grid.addComponentColumn(item -> {
+            Button edit = new Button("Edit", clickEvent -> {
+                editor.editItem(item);
+                field.focus();
+            });
+            edit.setEnabled(!editor.isOpen());
+            editButtons.add(edit);
+            return edit;
+        });
+
+        editor.addOpenListener(e -> editButtons.stream()
+                .forEach(button -> button.setEnabled(!editor.isOpen())));
+        editor.addCloseListener(e -> editButtons.stream()
+                .forEach(button -> button.setEnabled(!editor.isOpen())));
+
+        Button save = new Button("Save", e -> editor.save());
+
+        Button cancel = new Button("Cancel", e -> editor.cancel());
+
+        // Add a keypress listener that listens for an escape key up event.
+        // Note! some browsers return key as Escape and some as Esc
+        grid.getElement().addEventListener("keyup", event -> editor.cancel())
+                .setFilter("event.key === 'Escape' || event.key === 'Esc'");
+
+        Div buttons = new Div(save, cancel);
+        editorColumn.setEditorComponent(buttons);
 
         grid.setId("grid-basic-renderers");
 

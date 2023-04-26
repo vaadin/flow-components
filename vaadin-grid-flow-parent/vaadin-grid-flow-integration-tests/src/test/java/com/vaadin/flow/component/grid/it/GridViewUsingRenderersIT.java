@@ -22,7 +22,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
+import com.vaadin.flow.component.textfield.testbench.NumberFieldElement;
+import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
@@ -105,6 +108,31 @@ public class GridViewUsingRenderersIT extends AbstractComponentIT {
         priceSorter.click();
         Assert.assertEquals("Item 58", grid.getCell(0, 0).getText());
         Assert.assertEquals("Item 69", grid.getCell(1, 0).getText());
+    }
+
+    @Test
+    public void setRendererAfterSettingEditorComponent() {
+        Assert.assertEquals("<b>Item 1</b>", TestHelper.stripComments(grid.getCell(0, 0).getInnerHTML()));
+        ButtonElement editButton = grid.getCell(0, 6).$(ButtonElement.class).first();
+        editButton.click();
+        TextFieldElement editorComponent = grid.getCell(0, 0).$(TextFieldElement.class).first();
+        Assert.assertEquals("Item 1", editorComponent.getValue());
+    }
+
+    @Test
+    public void editorStillShowsAfterSwappingRendererDynamically() {
+        TestBenchElement swapRenderers = $("button").id("btn-swap-renderers");
+        // open editor
+        grid.getCell(0, 6).$(ButtonElement.class).first().click();
+        NumberFieldElement editorComponent = grid.getCell(0, 1).$(NumberFieldElement.class).first();
+        // close editor
+        grid.getCell(0, 6).$(ButtonElement.class).last().click();
+        swapRenderers.click();
+        Assert.assertEquals("US$73.10", grid.getCell(0, 1).getText().trim());
+        // open editor, again
+        grid.getCell(0, 6).$(ButtonElement.class).first().click();
+        editorComponent = grid.getCell(0, 1).$(NumberFieldElement.class).first();
+        Assert.assertNotNull(editorComponent);
     }
 
     private void assertRendereredContent(String expected, String content) {
