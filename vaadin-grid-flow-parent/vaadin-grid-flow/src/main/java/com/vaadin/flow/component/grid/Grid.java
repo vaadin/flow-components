@@ -531,13 +531,14 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          * Set the renderer for this column.
          *
          * @param renderer
-         *            the new renderer to be used for this column, must not
-         *            be {@code null}
+         *            the new renderer to be used for this column, must not be
+         *            {@code null}
          *
          * @since 24.1
          */
         public void setRenderer(Renderer<T> renderer) {
-            this.renderer = Objects.requireNonNull(renderer, "Renderer must not be null.");
+            this.renderer = Objects.requireNonNull(renderer,
+                    "Renderer must not be null.");
 
             if (columnDataGeneratorRegistration != null) {
                 columnDataGeneratorRegistration.remove();
@@ -551,7 +552,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                     .getDataCommunicator().getKeyMapper());
 
             columnDataGeneratorRegistration = rendering.getDataGenerator()
-                    .map(dataGenerator -> grid.addDataGenerator((DataGenerator) dataGenerator))
+                    .map(dataGenerator -> grid
+                            .addDataGenerator((DataGenerator) dataGenerator))
                     .orElse(null);
 
             // reset editor registration, if any
@@ -559,9 +561,12 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 editorDataGeneratorRegistration.remove();
                 editorDataGeneratorRegistration = null;
 
-                Rendering<T> editorRendering = editorRenderer.render(getElement(), null);
-                editorDataGeneratorRegistration = editorRendering.getDataGenerator()
-                        .map(dataGenerator -> grid.addDataGenerator((DataGenerator) dataGenerator))
+                Rendering<T> editorRendering = editorRenderer
+                        .render(getElement(), null);
+                editorDataGeneratorRegistration = editorRendering
+                        .getDataGenerator()
+                        .map(dataGenerator -> grid.addDataGenerator(
+                                (DataGenerator) dataGenerator))
                         .orElse(null);
             }
 
@@ -574,8 +579,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          * @param valueProvider
          *            the value provider, used for sorting
          * @param renderer
-         *            the new renderer to be used for this column, must not
-         *            be {@code null}
+         *            the new renderer to be used for this column, must not be
+         *            {@code null}
          *
          * @since 24.1
          */

@@ -112,10 +112,13 @@ public class GridViewUsingRenderersIT extends AbstractComponentIT {
 
     @Test
     public void setRendererAfterSettingEditorComponent() {
-        Assert.assertEquals("<b>Item 1</b>", TestHelper.stripComments(grid.getCell(0, 0).getInnerHTML()));
-        ButtonElement editButton = grid.getCell(0, 6).$(ButtonElement.class).first();
+        Assert.assertEquals("<b>Item 1</b>",
+                TestHelper.stripComments(grid.getCell(0, 0).getInnerHTML()));
+        ButtonElement editButton = grid.getCell(0, 6).$(ButtonElement.class)
+                .first();
         editButton.click();
-        TextFieldElement editorComponent = grid.getCell(0, 0).$(TextFieldElement.class).first();
+        TextFieldElement editorComponent = grid.getCell(0, 0)
+                .$(TextFieldElement.class).first();
         Assert.assertEquals("Item 1", editorComponent.getValue());
     }
 
@@ -124,14 +127,16 @@ public class GridViewUsingRenderersIT extends AbstractComponentIT {
         TestBenchElement swapRenderers = $("button").id("btn-swap-renderers");
         // open editor
         grid.getCell(0, 6).$(ButtonElement.class).first().click();
-        NumberFieldElement editorComponent = grid.getCell(0, 1).$(NumberFieldElement.class).first();
+        NumberFieldElement editorComponent = grid.getCell(0, 1)
+                .$(NumberFieldElement.class).first();
         // close editor
         grid.getCell(0, 6).$(ButtonElement.class).last().click();
         swapRenderers.click();
         Assert.assertEquals("US$73.10", grid.getCell(0, 1).getText().trim());
         // open editor, again
         grid.getCell(0, 6).$(ButtonElement.class).first().click();
-        editorComponent = grid.getCell(0, 1).$(NumberFieldElement.class).first();
+        editorComponent = grid.getCell(0, 1).$(NumberFieldElement.class)
+                .first();
         Assert.assertNotNull(editorComponent);
     }
 

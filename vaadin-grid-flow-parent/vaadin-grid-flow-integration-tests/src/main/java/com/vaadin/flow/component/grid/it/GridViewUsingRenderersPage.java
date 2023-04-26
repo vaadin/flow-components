@@ -55,7 +55,8 @@ public class GridViewUsingRenderersPage extends LegacyTestView {
         Grid<Item> grid = new Grid<>();
         grid.setItems(getShoppingCart());
 
-        Grid.Column nameColumn = grid.addColumn(Item::getName).setHeader("Name");
+        Grid.Column nameColumn = grid.addColumn(Item::getName)
+                .setHeader("Name");
 
         Binder<Item> binder = new Binder<>(Item.class);
         Editor<Item> editor = grid.getEditor();
@@ -63,10 +64,10 @@ public class GridViewUsingRenderersPage extends LegacyTestView {
         editor.setBuffered(true);
 
         TextField nameField = new TextField();
-        binder.forField(nameField)
-                .bind("name");
+        binder.forField(nameField).bind("name");
         nameColumn.setEditorComponent(nameField);
-        nameColumn.setRenderer(LitRenderer.<Item>of("<b>${item.name}</b>").withProperty("name", Item::getName));
+        nameColumn.setRenderer(LitRenderer.<Item> of("<b>${item.name}</b>")
+                .withProperty("name", Item::getName));
 
         // NumberRenderer to render numbers in general
         Grid.Column<Item> priceColumn = grid
