@@ -75,12 +75,12 @@ public class SideNavPage extends Div {
         add(addItem);
 
         NativeButton removeItem = new NativeButton("Remove item",
-                event -> sideNav.removeItem(classTarget));
+                event -> sideNav.remove(classTarget));
         removeItem.setId("remove-item");
         add(removeItem);
 
         NativeButton removeAllItems = new NativeButton("Remove all items",
-                event -> sideNav.removeAllItems());
+                event -> sideNav.removeAll());
         removeAllItems.setId("remove-all-items");
         add(removeAllItems);
 

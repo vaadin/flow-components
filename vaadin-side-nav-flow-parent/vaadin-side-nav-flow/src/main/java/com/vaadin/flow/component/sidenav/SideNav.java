@@ -15,13 +15,11 @@
  */
 package com.vaadin.flow.component.sidenav;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
 import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
@@ -39,7 +37,8 @@ import com.vaadin.flow.dom.Element;
 @Tag("vaadin-side-nav")
 @JsModule("@vaadin/side-nav/src/vaadin-side-nav.js")
 // @NpmPackage(value = "@vaadin/side-nav", version = "24.1.0-alpha8")
-public class SideNav extends Component implements HasSize, HasStyle {
+public class SideNav extends SideNavItemContainer
+        implements HasSize, HasStyle {
 
     /**
      * Creates a new menu without any label.
@@ -57,42 +56,8 @@ public class SideNav extends Component implements HasSize, HasStyle {
         setLabel(label);
     }
 
-    /**
-     * Adds menu item(s) to the menu.
-     *
-     * @param sideNavItems
-     *            the menu item(s) to add
-     */
-    public void addItem(SideNavItem... sideNavItems) {
-        for (SideNavItem sideNavItem : sideNavItems) {
-            getElement().appendChild(sideNavItem.getElement());
-        }
-    }
-
-    /**
-     * Removes the menu item from the menu.
-     * <p>
-     * If the given menu item is not a child of this menu, does nothing.
-     *
-     * @param sideNavItem
-     *            the menu item to remove
-     */
-    public void removeItem(SideNavItem sideNavItem) {
-        Optional<Component> parent = sideNavItem.getParent();
-        if (parent.isPresent() && parent.get() == this) {
-            getElement().removeChild(sideNavItem.getElement());
-        }
-    }
-
-    /**
-     * Removes all menu items from this item.
-     */
-    public void removeAllItems() {
-        final List<Element> allNavItems = getElement()
-                .getChildren().filter(element -> !Objects
-                        .equals(element.getAttribute("slot"), "label"))
-                .toList();
-        getElement().removeChild(allNavItems);
+    private boolean isLabelElement(Element element) {
+        return Objects.equals(element.getAttribute("slot"), "label");
     }
 
     /**
@@ -101,7 +66,7 @@ public class SideNav extends Component implements HasSize, HasStyle {
      * @return the label or null if no label has been set
      */
     public String getLabel() {
-        return getExistingLabelElement().map(Element::getText).orElse(null);
+        return searchLabelElement().map(Element::getText).orElse(null);
     }
 
     /**
@@ -117,14 +82,13 @@ public class SideNav extends Component implements HasSize, HasStyle {
         getLabelElement().setText(label);
     }
 
-    private Optional<Element> getExistingLabelElement() {
-        return getElement().getChildren().filter(
-                child -> Objects.equals(child.getAttribute("slot"), "label"))
+    private Optional<Element> searchLabelElement() {
+        return getElement().getChildren().filter(this::isLabelElement)
                 .findFirst();
     }
 
     private Element getLabelElement() {
-        return getExistingLabelElement().orElseGet(() -> {
+        return searchLabelElement().orElseGet(() -> {
             Element element = new Element("span");
             element.setAttribute("slot", "label");
             getElement().appendChild(element);
