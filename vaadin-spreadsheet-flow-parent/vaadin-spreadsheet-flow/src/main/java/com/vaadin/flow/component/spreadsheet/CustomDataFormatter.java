@@ -61,12 +61,14 @@ class CustomDataFormatter extends DataFormatter implements Serializable {
     private final int NEGATIVE_FORMAT_INDEX = 1;
     private final int ZERO_FORMAT_INDEX = 2;
     private final int TEXT_FORMAT_INDEX = 3;
+    private Locale locale;
 
     public CustomDataFormatter() {
     }
 
     public CustomDataFormatter(Locale locale) {
         super(locale);
+        this.locale = locale;
     }
 
     /**
@@ -108,6 +110,12 @@ class CustomDataFormatter extends DataFormatter implements Serializable {
         }
     }
 
+    @Override
+    public void updateLocale(Locale newLocale) {
+        super.updateLocale(newLocale);
+        this.locale = newLocale;
+    }
+
     private CellType getCellType(Cell cell, FormulaEvaluator evaluator) {
 
         CellType cellType = cell.getCellType();
@@ -128,7 +136,7 @@ class CustomDataFormatter extends DataFormatter implements Serializable {
 
         if (isOnlyLiteralFormat(format)) {
             // CellFormat can format literals correctly
-            return CellFormat.getInstance(format).apply(cell).text;
+            return CellFormat.getInstance(locale, format).apply(cell).text;
         } else {
             // possible minus is already taken into account in the format
             final double absValue = Math.abs(value);
@@ -181,6 +189,6 @@ class CustomDataFormatter extends DataFormatter implements Serializable {
             return "";
         }
 
-        return CellFormat.getInstance(formatString).apply(cell).text;
+        return CellFormat.getInstance(locale, formatString).apply(cell).text;
     }
 }
