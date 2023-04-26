@@ -51,7 +51,7 @@ public class SideNavHierarchyPage extends Div {
         SideNavItem classTargetWithComponent = new SideNavItem(
                 "Target using class with component", SideNavTargetView.class,
                 vaadinAvatar);
-        classTargetWithComponent.setId("class-target-component");
+        classTargetWithComponent.setId("class-target-prefix-component");
         nonNavigableParent.addItem(classTargetWithComponent);
 
         SideNavItem navigableParent = new SideNavItem("Navigable parent",

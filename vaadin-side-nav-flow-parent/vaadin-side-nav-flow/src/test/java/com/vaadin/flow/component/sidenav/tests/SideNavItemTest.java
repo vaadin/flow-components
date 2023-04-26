@@ -22,17 +22,19 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.isEmptyString;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.isEmptyString;
 
 public class SideNavItemTest {
 
@@ -139,12 +141,34 @@ public class SideNavItemTest {
 
     @Test
     public void multipleItems_addItemAtIndex_itemHasCorrectSlot() {
-        final List<SideNavItem> items = setupItems();
+        setupItems();
 
         final SideNavItem testItem = new SideNavItem("testItem");
         sideNavItem.addItemAtIndex(2, testItem);
 
         assertThat(testItem.getElement().getAttribute("slot"), equalTo("children"));
+    }
+
+    @Test
+    public void multipleItemsPrefixAndSuffix_addItemAtIndex_addedItemHasCorrectPosition() {
+        final List<SideNavItem> items = setupItemsPrefixAndSuffix();
+
+        final SideNavItem testItem = new SideNavItem("testItem");
+        sideNavItem.addItemAtIndex(2, testItem);
+
+        assertThat(sideNavItem.getItems(), hasSize(items.size() + 1));
+        assertThat(sideNavItem.getItems().get(2), equalTo(testItem));
+    }
+
+    @Test
+    public void multipleItemsPrefixAndSuffix_addItemAtHigherIndex_addedItemHasCorrectPosition() {
+        final List<SideNavItem> items = setupItemsPrefixAndSuffix();
+
+        final SideNavItem testItem = new SideNavItem("testItem");
+        sideNavItem.addItemAtIndex(3, testItem);
+
+        assertThat(sideNavItem.getItems(), hasSize(items.size() + 1));
+        assertThat(sideNavItem.getItems().get(3), equalTo(testItem));
     }
 
     @Test
@@ -179,6 +203,16 @@ public class SideNavItemTest {
     }
 
     @Test
+    public void removeAll_prefixAndSuffixStillSet() {
+        setupItemsPrefixAndSuffix();
+
+        sideNavItem.removeAll();
+
+        assertThat(sideNavItem.getPrefixComponent(), notNullValue());
+        assertThat(sideNavItem.getSuffixComponent(), notNullValue());
+    }
+
+    @Test
     public void removeSingleItem_itemRemoved() {
         final List<SideNavItem> sideNavItems = setupItems();
 
@@ -208,6 +242,15 @@ public class SideNavItemTest {
         assertThat(sideNavItem.getItems(), contains(sideNavItems.toArray()));
     }
 
+    @Test
+    public void createWithPathAndPrefix_pathAndPrefixIsSet() {
+        final Div prefixComponent = new Div();
+        final SideNavItem item = new SideNavItem("Test item", "test-path", prefixComponent);
+
+        assertThat(item.getPath(), equalTo("test-path"));
+        assertThat(item.getPrefixComponent(), equalTo(prefixComponent));
+    }
+
     private List<SideNavItem> setupItems() {
         List<SideNavItem> items = new ArrayList<>();
 
@@ -219,10 +262,24 @@ public class SideNavItemTest {
         return items;
     }
 
+    private List<SideNavItem> setupItemsPrefixAndSuffix() {
+        List<SideNavItem> items = new ArrayList<>();
+
+        addNavItem("Item1", "http://localhost:8080/item1", items);
+        sideNavItem.setPrefixComponent(new Div());
+        addNavItem("Item2", "http://localhost:8080/item2", items);
+        addNavItem("Item3", "http://localhost:8080/item3", items);
+        sideNavItem.setSuffixComponent(new Div());
+        addNavItem("Item4", "http://localhost:8080/item4", items);
+
+        return items;
+    }
+
     private void addNavItem(String Item1, String url, List<SideNavItem> items) {
         SideNavItem item = new SideNavItem(Item1, url);
         items.add(item);
         sideNavItem.addItem(item);
     }
+
 
 }

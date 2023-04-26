@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.sidenav;
 
-import java.util.Objects;
 import java.util.Optional;
 
 import com.vaadin.experimental.FeatureFlags;
@@ -24,6 +23,8 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.shared.HasPrefix;
+import com.vaadin.flow.component.shared.HasSuffix;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.router.RouteConfiguration;
@@ -33,12 +34,13 @@ import com.vaadin.flow.server.VaadinService;
 /**
  * A menu item for the {@link SideNav} component.
  * <p>
- * Can contain a label and/or an icon and links to a given {@code path}.
+ * Can contain a label, prefix and suffix component and links to a given {@code path}.
  */
 @Tag("vaadin-side-nav-item")
 @JsModule("@vaadin/side-nav/src/vaadin-side-nav-item.js")
 // @NpmPackage(value = "@vaadin/side-nav", version = "24.1.0-alpha8")
-public class SideNavItem extends SideNavItemContainer {
+public class SideNavItem extends SideNavItemContainer
+        implements HasPrefix, HasSuffix {
 
     /**
      * Creates a menu item which does not link to any view but only shows the
@@ -80,20 +82,20 @@ public class SideNavItem extends SideNavItemContainer {
     }
 
     /**
-     * Creates a new menu item using the given label and icon that links to the
-     * given path.
+     * Creates a new menu item using the given label and prefix component that
+     * links to the given path.
      *
      * @param label
      *            the label for the item
      * @param path
      *            the path to link to
-     * @param icon
-     *            the icon for the item
+     * @param prefixComponent
+     *            the prefix component for the item (usually an icon)
      */
-    public SideNavItem(String label, String path, Component icon) {
+    public SideNavItem(String label, String path, Component prefixComponent) {
         setPath(path);
         setLabel(label);
-        setIcon(icon);
+        setPrefixComponent(prefixComponent);
     }
 
     /**
@@ -104,14 +106,14 @@ public class SideNavItem extends SideNavItemContainer {
      *            the label for the item
      * @param view
      *            the view to link to
-     * @param icon
-     *            the icon for the item
+     * @param prefixComponent
+     *            the prefixComponent for the item (usually an icon)
      */
     public SideNavItem(String label, Class<? extends Component> view,
-            Component icon) {
+            Component prefixComponent) {
         setPath(view);
         setLabel(label);
-        setIcon(icon);
+        setPrefixComponent(prefixComponent);
     }
 
     @Override
@@ -198,35 +200,6 @@ public class SideNavItem extends SideNavItemContainer {
 
     public String getPath() {
         return getElement().getAttribute("path");
-    }
-
-    private int getIconElementIndex() {
-        for (int i = 0; i < getElement().getChildCount(); i++) {
-            if (Objects.equals(getElement().getChild(i).getAttribute("slot"),
-                    "prefix")) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    /**
-     * Sets the icon for the item.
-     * <p>
-     * Can also be used to set a custom component to be shown in front of the
-     * label.
-     *
-     * @param icon
-     *            the icon to show
-     */
-    public void setIcon(Component icon) {
-        icon.getElement().setAttribute("slot", "prefix");
-        int iconElementIndex = getIconElementIndex();
-        if (iconElementIndex != -1) {
-            getElement().setChild(iconElementIndex, icon.getElement());
-        } else {
-            getElement().appendChild(icon.getElement());
-        }
     }
 
     /**

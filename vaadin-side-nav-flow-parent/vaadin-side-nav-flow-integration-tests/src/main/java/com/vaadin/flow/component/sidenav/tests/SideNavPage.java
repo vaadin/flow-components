@@ -48,11 +48,11 @@ public class SideNavPage extends Div {
         sideNav.addItem(classTarget);
 
         Avatar vaadinAvatar = new Avatar("Vaadin");
-        SideNavItem classTargetWithComponent = new SideNavItem(
+        SideNavItem classTargetWithPrefixComponent = new SideNavItem(
                 "Target using class with component", SideNavTargetView.class,
                 vaadinAvatar);
-        classTargetWithComponent.setId("class-target-component");
-        sideNav.addItem(classTargetWithComponent);
+        classTargetWithPrefixComponent.setId("class-target-prefix-component");
+        sideNav.addItem(classTargetWithPrefixComponent);
 
         SideNavItem pathTarget = new SideNavItem("Target using path",
                 "vaadin-side-nav/side-nav-test-target-view");
@@ -65,6 +65,14 @@ public class SideNavPage extends Div {
                 VaadinIcon.GLOBE.create());
         pathTargetWithIcon.setId("path-target-icon");
         sideNav.addItem(pathTargetWithIcon);
+
+        SideNavItem pathTargetWithPrefixAndSuffix = new SideNavItem(
+                "Item having both prefix and suffix",
+                "vaadin-side-nav/side-nav-test-target-view");
+        pathTargetWithPrefixAndSuffix.setPrefixComponent(VaadinIcon.GLASS.create());
+        pathTargetWithPrefixAndSuffix.setSuffixComponent(vaadinAvatar);
+        pathTargetWithPrefixAndSuffix.setId("path-target-prefix-suffix");
+        sideNav.addItem(pathTargetWithPrefixAndSuffix);
 
         add(sideNav);
 

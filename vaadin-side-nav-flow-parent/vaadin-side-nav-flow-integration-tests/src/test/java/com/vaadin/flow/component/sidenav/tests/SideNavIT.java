@@ -46,7 +46,7 @@ public class SideNavIT extends AbstractComponentIT {
 
     @Test
     public void pageOpened_allItemsVisible() {
-        Assert.assertEquals(6, sideNav.getItems().size());
+        Assert.assertEquals(7, sideNav.getItems().size());
     }
 
     @Test
@@ -86,7 +86,7 @@ public class SideNavIT extends AbstractComponentIT {
 
     @Test
     public void clickClassTargetComponentItem_urlChanged() {
-        sideNav.$(SideNavItemElement.class).id("class-target-component")
+        sideNav.$(SideNavItemElement.class).id("class-target-prefix-component")
                 .navigate();
 
         Assert.assertTrue(getDriver().getCurrentUrl()
@@ -114,7 +114,7 @@ public class SideNavIT extends AbstractComponentIT {
         $(NativeButtonElement.class).id("add-item").click();
         getCommandExecutor().waitForVaadin();
 
-        Assert.assertEquals(7, sideNav.getItems().size());
+        Assert.assertEquals(8, sideNav.getItems().size());
         Assert.assertEquals("Added item",
                 sideNav.$(SideNavItemElement.class).last().getText());
     }
@@ -124,7 +124,7 @@ public class SideNavIT extends AbstractComponentIT {
         $(NativeButtonElement.class).id("remove-item").click();
         getCommandExecutor().waitForVaadin();
 
-        Assert.assertEquals(5, sideNav.getItems().size());
+        Assert.assertEquals(6, sideNav.getItems().size());
     }
 
     @Test

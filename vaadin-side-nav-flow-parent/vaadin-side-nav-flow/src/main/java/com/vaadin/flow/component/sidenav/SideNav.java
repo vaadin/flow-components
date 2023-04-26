@@ -37,8 +37,7 @@ import com.vaadin.flow.dom.Element;
 @Tag("vaadin-side-nav")
 @JsModule("@vaadin/side-nav/src/vaadin-side-nav.js")
 // @NpmPackage(value = "@vaadin/side-nav", version = "24.1.0-alpha8")
-public class SideNav extends SideNavItemContainer
-        implements HasSize, HasStyle {
+public class SideNav extends SideNavItemContainer implements HasSize, HasStyle {
 
     /**
      * Creates a new menu without any label.
