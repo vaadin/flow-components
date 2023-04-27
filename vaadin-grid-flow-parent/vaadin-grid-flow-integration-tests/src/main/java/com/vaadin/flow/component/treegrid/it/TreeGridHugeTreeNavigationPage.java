@@ -15,17 +15,11 @@
  */
 package com.vaadin.flow.component.treegrid.it;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
 import com.vaadin.flow.router.Route;
-
-import static com.vaadin.flow.component.treegrid.it.TreeGridHugeTreePage.addItems;
-import static com.vaadin.flow.component.treegrid.it.TreeGridHugeTreePage.addRootItems;
 
 @Route("vaadin-grid/treegrid-huge-tree-navigation")
 public class TreeGridHugeTreeNavigationPage extends Div {
@@ -46,14 +40,8 @@ public class TreeGridHugeTreeNavigationPage extends Div {
     }
 
     private void initializeDataProvider() {
-        TreeData<String> data = new TreeData<>();
-
-        final Map<String, String> parentPathMap = new HashMap<>();
-
-        addRootItems("Granddad", 3, data, parentPathMap).forEach(
-                granddad -> addItems("Dad", 3, granddad, data, parentPathMap)
-                        .forEach(dad -> addItems("Son", 300, dad, data,
-                                parentPathMap)));
+        TreeData<String> data = new TreeGridStringDataGenerator().generate(3, 3,
+                300);
 
         inMemoryDataProvider = new TreeDataProvider<>(data);
     }

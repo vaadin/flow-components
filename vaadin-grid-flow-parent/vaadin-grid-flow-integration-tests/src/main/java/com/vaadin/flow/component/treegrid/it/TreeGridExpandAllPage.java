@@ -1,11 +1,6 @@
 package com.vaadin.flow.component.treegrid.it;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
@@ -27,15 +22,8 @@ public class TreeGridExpandAllPage extends Div {
 
         add(grid);
 
-        TreeData<String> data = new TreeData<>();
-
-        Map<String, String> parentPathMap = new HashMap<>();
-
-        TreeGridHugeTreePage.addRootItems("Granddad", 1, data, parentPathMap)
-                .forEach(granddad -> TreeGridHugeTreePage
-                        .addItems("Dad", 1, granddad, data, parentPathMap)
-                        .forEach(dad -> TreeGridHugeTreePage.addItems("Son", 3,
-                                dad, data, parentPathMap)));
+        TreeData<String> data = new TreeGridStringDataGenerator().generate(1, 1,
+                3);
 
         TreeDataProvider<String> dataprovider = new TreeDataProvider<>(data);
         grid.setDataProvider(dataprovider);
@@ -76,40 +64,10 @@ public class TreeGridExpandAllPage extends Div {
     }
 
     private void initializeDataProvider() {
-        TreeData<String> data = new TreeData<>();
-
-        final Map<String, String> parentPathMap = new HashMap<>();
-
-        addRootItems("Granddad", 3, data, parentPathMap)
-                .forEach(granddad -> addItems("Dad is very long and large", 3,
-                        granddad, data, parentPathMap)
-                        .forEach(dad -> addItems("Son", 300, dad, data,
-                                parentPathMap)));
+        TreeData<String> data = new TreeGridStringDataGenerator(Map.of(0,
+                "Granddad", 1, "Dad is very long and large", 2, "Son"))
+                .generate(3, 3, 300);
 
         inMemoryDataProvider = new TreeDataProvider<>(data);
-    }
-
-    static List<String> addRootItems(String name, int numberOfItems,
-            TreeData<String> data, Map<String, String> parentPathMap) {
-        return addItems(name, numberOfItems, null, data, parentPathMap);
-    }
-
-    static List<String> addItems(String name, int numberOfItems, String parent,
-            TreeData<String> data, Map<String, String> parentPathMap) {
-        List<String> items = new ArrayList<>();
-        IntStream.range(0, numberOfItems).forEach(index -> {
-            String parentPath = parentPathMap.get(parent);
-            String thisPath = Optional.ofNullable(parentPath)
-                    .map(path -> path + "/" + index).orElse("" + index);
-            String item = addItem(name, thisPath);
-            parentPathMap.put(item, thisPath);
-            data.addItem(parent, item);
-            items.add(item);
-        });
-        return items;
-    }
-
-    private static String addItem(String name, String path) {
-        return (name + " " + path).trim();
     }
 }
