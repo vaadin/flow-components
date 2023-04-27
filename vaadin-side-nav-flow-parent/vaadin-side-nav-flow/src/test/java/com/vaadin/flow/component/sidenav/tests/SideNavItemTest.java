@@ -22,6 +22,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 
@@ -30,6 +31,7 @@ import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
@@ -53,6 +55,43 @@ public class SideNavItemTest {
     }
 
     @Test
+    public void createWithNoPath_pathNotSet() {
+        final SideNavItem item = new SideNavItem("Test");
+
+        assertThat(item.getPath(), is(nullValue()));
+    }
+
+    @Test
+    public void setNullStringPath_pathAttributeRemoved() {
+        sideNavItem.setPath((String) null);
+
+        assertThat(sideNavItem.getElement().hasAttribute("path"), is(false));
+        assertThat(sideNavItem.getPath(), nullValue());
+    }
+
+    @Test
+    public void setNullComponentPath_pathAttributeRemoved() {
+        sideNavItem.setPath((Class<? extends Component>) null);
+
+        assertThat(sideNavItem.getElement().hasAttribute("path"), is(false));
+        assertThat(sideNavItem.getPath(), nullValue());
+    }
+
+    @Test
+    public void setEmptyPath_returnsEmptyPath() {
+        final SideNavItem item = new SideNavItem("Test");
+        item.setPath("");
+
+        assertThat(item.getPath(), equalTo(""));
+        assertThat(sideNavItem.getElement().hasAttribute("path"), is(true));
+    }
+
+    @Test
+    public void returnsExpectedPath() {
+        assertThat(sideNavItem.getPath(), equalTo("/path"));
+    }
+
+    @Test
     public void addSingleItem_itemAdded() {
         // one child for the label element
         assertThat(sideNavItem.getElement().getChildCount(), equalTo(1));
@@ -66,7 +105,8 @@ public class SideNavItemTest {
     public void addSingleItem_itemHasCorrectSlot() {
         sideNavItem.addItem(new SideNavItem("Test"));
 
-        assertThat(sideNavItem.getElement().getChild(1).getAttribute("slot"), equalTo("children"));
+        assertThat(sideNavItem.getElement().getChild(1).getAttribute("slot"),
+                equalTo("children"));
     }
 
     @Test
@@ -146,7 +186,8 @@ public class SideNavItemTest {
         final SideNavItem testItem = new SideNavItem("testItem");
         sideNavItem.addItemAtIndex(2, testItem);
 
-        assertThat(testItem.getElement().getAttribute("slot"), equalTo("children"));
+        assertThat(testItem.getElement().getAttribute("slot"),
+                equalTo("children"));
     }
 
     @Test
@@ -245,10 +286,35 @@ public class SideNavItemTest {
     @Test
     public void createWithPathAndPrefix_pathAndPrefixIsSet() {
         final Div prefixComponent = new Div();
-        final SideNavItem item = new SideNavItem("Test item", "test-path", prefixComponent);
+        final SideNavItem item = new SideNavItem("Test item", "test-path",
+                prefixComponent);
 
         assertThat(item.getPath(), equalTo("test-path"));
         assertThat(item.getPrefixComponent(), equalTo(prefixComponent));
+    }
+
+    @Test
+    public void isCollapsedByDefault() {
+        assertThat(sideNavItem.isExpanded(), equalTo(false));
+    }
+
+    @Test
+    public void setExpanded_isExpanded() {
+        sideNavItem.setExpanded(true);
+
+        assertThat(sideNavItem.isExpanded(), equalTo(true));
+        assertThat(sideNavItem.getElement().hasAttribute("expanded"),
+                equalTo(true));
+    }
+
+    @Test
+    public void expandAndCollapse_isCollapsed() {
+        sideNavItem.setExpanded(true);
+        sideNavItem.setExpanded(false);
+
+        assertThat(sideNavItem.isExpanded(), equalTo(false));
+        assertThat(sideNavItem.getElement().hasAttribute("expanded"),
+                equalTo(false));
     }
 
     private List<SideNavItem> setupItems() {
@@ -280,6 +346,5 @@ public class SideNavItemTest {
         items.add(item);
         sideNavItem.addItem(item);
     }
-
 
 }

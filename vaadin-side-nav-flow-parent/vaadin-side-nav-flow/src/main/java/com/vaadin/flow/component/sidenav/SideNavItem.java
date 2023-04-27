@@ -20,6 +20,8 @@ import java.util.Optional;
 import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.PropertyDescriptor;
+import com.vaadin.flow.component.PropertyDescriptors;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -34,13 +36,17 @@ import com.vaadin.flow.server.VaadinService;
 /**
  * A menu item for the {@link SideNav} component.
  * <p>
- * Can contain a label, prefix and suffix component and links to a given {@code path}.
+ * Can contain a label, prefix and suffix component and links to a given
+ * {@code path}.
  */
 @Tag("vaadin-side-nav-item")
 @JsModule("@vaadin/side-nav/src/vaadin-side-nav-item.js")
 // @NpmPackage(value = "@vaadin/side-nav", version = "24.1.0-alpha8")
 public class SideNavItem extends SideNavItemContainer
         implements HasPrefix, HasSuffix {
+
+    private static final PropertyDescriptor<String, Optional<String>> expandedDescriptor = PropertyDescriptors
+            .optionalAttributeWithDefault("expanded", "false");
 
     /**
      * Creates a menu item which does not link to any view but only shows the
@@ -152,11 +158,14 @@ public class SideNavItem extends SideNavItemContainer
     }
 
     private Element getLabelElement() {
-        return searchLabelElement().orElseGet(() -> {
-            Element element = Element.createText("");
-            getElement().appendChild(element);
-            return element;
-        });
+        return searchLabelElement()
+                .orElseGet(this::createAndAppendLabelElement);
+    }
+
+    private Element createAndAppendLabelElement() {
+        Element element = Element.createText("");
+        getElement().appendChild(element);
+        return element;
     }
 
     /**
@@ -166,7 +175,11 @@ public class SideNavItem extends SideNavItemContainer
      *            the path to link to
      */
     public void setPath(String path) {
-        getElement().setAttribute("path", path);
+        if (path == null) {
+            getElement().removeAttribute("path");
+        } else {
+            getElement().setAttribute("path", path);
+        }
     }
 
     /**
@@ -176,9 +189,13 @@ public class SideNavItem extends SideNavItemContainer
      *            the view to link to
      */
     public void setPath(Class<? extends Component> view) {
-        String url = RouteConfiguration.forRegistry(getRouter().getRegistry())
-                .getUrl(view);
-        setPath(url);
+        if (view != null) {
+            String url = RouteConfiguration
+                    .forRegistry(getRouter().getRegistry()).getUrl(view);
+            setPath(url);
+        } else {
+            setPath((String) null);
+        }
     }
 
     private Router getRouter() {
@@ -209,11 +226,11 @@ public class SideNavItem extends SideNavItemContainer
      *            true to expand the item, false to collapse it
      */
     public void setExpanded(boolean value) {
-        if (value) {
-            getElement().setAttribute("expanded", "");
-        } else {
-            getElement().removeAttribute("expanded");
-        }
+        set(expandedDescriptor, value ? "" : "false");
+    }
+
+    public boolean isExpanded() {
+        return get(expandedDescriptor).isPresent();
     }
 
     @Override

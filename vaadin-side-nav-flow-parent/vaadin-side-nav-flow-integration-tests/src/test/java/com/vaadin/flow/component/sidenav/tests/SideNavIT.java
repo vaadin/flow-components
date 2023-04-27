@@ -152,7 +152,7 @@ public class SideNavIT extends AbstractComponentIT {
 
     @Test
     public void clickMakeNotCollapsible_isNotCollapsible() {
-        $(NativeButtonElement.class).id("make-not-collapsible").click();
+        $(NativeButtonElement.class).id("toggle-collapsible").click();
 
         Assert.assertFalse(sideNav.isCollapsible());
     }

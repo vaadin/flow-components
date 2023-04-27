@@ -69,7 +69,8 @@ public class SideNavPage extends Div {
         SideNavItem pathTargetWithPrefixAndSuffix = new SideNavItem(
                 "Item having both prefix and suffix",
                 "vaadin-side-nav/side-nav-test-target-view");
-        pathTargetWithPrefixAndSuffix.setPrefixComponent(VaadinIcon.GLASS.create());
+        pathTargetWithPrefixAndSuffix
+                .setPrefixComponent(VaadinIcon.GLASS.create());
         pathTargetWithPrefixAndSuffix.setSuffixComponent(vaadinAvatar);
         pathTargetWithPrefixAndSuffix.setId("path-target-prefix-suffix");
         sideNav.addItem(pathTargetWithPrefixAndSuffix);
@@ -98,9 +99,14 @@ public class SideNavPage extends Div {
         changeLabel.setId("change-label");
         add(changeLabel);
 
-        NativeButton makeNotCollapsible = new NativeButton(
-                "Make not collapsible", event -> sideNav.setCollapsible(false));
-        makeNotCollapsible.setId("make-not-collapsible");
-        add(makeNotCollapsible);
+        NativeButton toggleCollapsible = new NativeButton("Toggle collapsible",
+                event -> sideNav.setCollapsible(!sideNav.isCollapsible()));
+        toggleCollapsible.setId("toggle-collapsible");
+        add(toggleCollapsible);
+
+        NativeButton toggleExpanded = new NativeButton("Toggle expanded",
+                event -> sideNav.setExpanded(!sideNav.isExpanded()));
+        toggleExpanded.setId("toggle-expanded");
+        add(toggleExpanded);
     }
 }
