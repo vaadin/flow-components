@@ -41,6 +41,7 @@ public class SheetTabSheetIT extends AbstractSpreadsheetIT {
     @Test
     public void cellFocus_moveFromSheetOneToSheetTwoAndBack_cellSelectionRemains()
             throws InterruptedException {
+        // foo
         SpreadsheetElement spreadsheet = getSpreadsheet();
 
         clickCell("C5");
