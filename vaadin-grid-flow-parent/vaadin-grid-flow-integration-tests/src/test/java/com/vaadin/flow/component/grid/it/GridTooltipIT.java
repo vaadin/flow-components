@@ -74,6 +74,58 @@ public class GridTooltipIT extends AbstractComponentIT {
         Assert.assertEquals("Age of the person is 33", getActiveTooltipText());
     }
 
+    @Test
+    public void addGeneratorForAllGrid() {
+        var grid = $(GridElement.class).id("grid-with-tooltips");
+        scrollToElement(grid);
+        clickElementWithJs("set-grid-tooltip-button");
+        for (int col = 0; col < 13; col++) {
+            for (int row = 0; row < 2; row++) {
+                String firstName = row == 0 ? "Jack" : "Jill";
+                showTooltip(grid.getCell(row, col));
+                // check all columns, except column 5 have grid's tooltip
+                if (col != 5) {
+                    Assert.assertEquals("Grid's tooltip! " + firstName,
+                            getActiveTooltipText());
+                } else {
+                    // check that previously set column (5) tooltip was not
+                    // replaced
+                    Assert.assertEquals(
+                            "First name of the person is " + firstName,
+                            getActiveTooltipText());
+                }
+            }
+        }
+    }
+
+    @Test
+    public void columnTooltipOverridesGridTooltip() {
+        var grid = $(GridElement.class).id("grid-with-tooltips");
+        scrollToElement(grid);
+        // set grid tooltip
+        clickElementWithJs("set-grid-tooltip-button");
+        // check column has grid's tooltip
+        showTooltip(grid.getCell(1, 1));
+        Assert.assertEquals("Grid's tooltip! Jill", getActiveTooltipText());
+        // set column tooltip
+        clickElementWithJs("set-age-tooltip-button");
+        // check column now has column tooltip
+        showTooltip(grid.getCell(1, 1));
+        Assert.assertEquals("Age of the person is 33", getActiveTooltipText());
+    }
+
+    @Test
+    public void newColumnHasGridTooltipGenerator() {
+        var grid = $(GridElement.class).id("grid-with-tooltips");
+        scrollToElement(grid);
+        // set grid tooltip
+        clickElementWithJs("set-grid-tooltip-button");
+        // add new column
+        clickElementWithJs("add-column-button");
+        showTooltip(grid.getCell(0, 13));
+        Assert.assertEquals("Grid's tooltip! Jack", getActiveTooltipText());
+    }
+
     private void showTooltip(GridTHTDElement cell) {
         executeScript(
                 "arguments[0].dispatchEvent(new Event('mouseenter', {bubbles:true}))",
