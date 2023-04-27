@@ -74,8 +74,10 @@ public class TreeGridScrollToIT extends AbstractComponentIT {
     }
 
     @Test
-    public void scrollToEnd_scrollToStart_correctFirstVisibleItem() {
+    public void scrollToEnd_scrollToStart_correctFirstVisibleItem()
+            throws InterruptedException {
         scrollToEndButton.click();
+        Thread.sleep(200);
 
         scrollToStartButton.click();
 
