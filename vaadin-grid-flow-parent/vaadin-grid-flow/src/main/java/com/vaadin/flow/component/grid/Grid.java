@@ -1391,7 +1391,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
-     * Creates a new grid using the given generic {@code DataProvider}.
+     * Creates a new grid using the given generic {@link DataProvider}.
      *
      * @param dataProvider
      *            the data provider, not {@code null}
@@ -1403,7 +1403,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
-     * Creates a new grid using the given {@code BackEndDataProvider}.
+     * Creates a new grid using the given {@link BackEndDataProvider}.
      *
      * @param dataProvider
      *            the data provider, not {@code null}
@@ -1415,7 +1415,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
-     * Creates a new grid using the given {@code InMemoryDataProvider}.
+     * Creates a new grid using the given {@link InMemoryDataProvider}.
      *
      * @param inMemoryDataProvider
      *            the data provider, not {@code null}
@@ -1427,7 +1427,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
-     * Creates a new grid using the given {@code ListDataProvider}.
+     * Creates a new grid using the given {@link ListDataProvider}.
      *
      * @param dataProvider
      *            the data provider, not {@code null}
@@ -1440,7 +1440,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     /**
      * Creates a new grid using the given collection of items using a
-     * {@code ListDataProvider}.
+     * {@link ListDataProvider}.
      *
      * @param items
      *            the collection of items, not {@code null}
