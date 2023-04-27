@@ -23,6 +23,7 @@ import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.Keys;
 
 /**
  * Integration tests for the TreeGridScrollToPage view.
@@ -38,11 +39,7 @@ public class TreeGridScrollToIT extends AbstractComponentIT {
 
     private TestBenchElement scrollToEndButton;
 
-    private TestBenchElement scrollToIndex30Button;
-
-    private TestBenchElement scrollToIndex30_1Button;
-
-    private TestBenchElement scrollToIndex30_1_1Button;
+    private TestBenchElement scrollToIndexInput;
 
     @Before
     public void init() {
@@ -52,9 +49,8 @@ public class TreeGridScrollToIT extends AbstractComponentIT {
         expandAllButton = $("button").id("expand-all");
         scrollToStartButton = $("button").id("scroll-to-start");
         scrollToEndButton = $("button").id("scroll-to-end");
-        scrollToIndex30Button = $("button").id("scroll-to-index-30");
-        scrollToIndex30_1Button = $("button").id("scroll-to-index-30-1");
-        scrollToIndex30_1_1Button = $("button").id("scroll-to-index-30-1-1");
+        scrollToIndexInput = $("input").id("scroll-to-index");
+
     }
 
     @Test
@@ -92,7 +88,7 @@ public class TreeGridScrollToIT extends AbstractComponentIT {
             throws InterruptedException {
         expandAllButton.click();
 
-        scrollToIndex30Button.click();
+        scrollToIndexInput.sendKeys("30", Keys.TAB);
         Thread.sleep(2000);
 
         Assert.assertEquals("Granddad 30",
@@ -101,7 +97,7 @@ public class TreeGridScrollToIT extends AbstractComponentIT {
 
     @Test
     public void scrollToIndex30_correctFirstVisibleItem() {
-        scrollToIndex30Button.click();
+        scrollToIndexInput.sendKeys("30", Keys.TAB);
 
         Assert.assertEquals("Granddad 30",
                 getCellContent(grid.getFirstVisibleRowIndex()));
@@ -112,7 +108,7 @@ public class TreeGridScrollToIT extends AbstractComponentIT {
             throws InterruptedException {
         expandAllButton.click();
 
-        scrollToIndex30_1Button.click();
+        scrollToIndexInput.sendKeys("30-1", Keys.TAB);
         Thread.sleep(2000);
 
         Assert.assertEquals("Dad 30/1",
@@ -121,7 +117,7 @@ public class TreeGridScrollToIT extends AbstractComponentIT {
 
     @Test
     public void scrollToIndex30_1_correctFirstVisibleItem() {
-        scrollToIndex30_1Button.click();
+        scrollToIndexInput.sendKeys("30-1", Keys.TAB);
 
         Assert.assertEquals("Granddad 30",
                 getCellContent(grid.getFirstVisibleRowIndex()));
@@ -132,7 +128,7 @@ public class TreeGridScrollToIT extends AbstractComponentIT {
             throws InterruptedException {
         expandAllButton.click();
 
-        scrollToIndex30_1_1Button.click();
+        scrollToIndexInput.sendKeys("30-1-1", Keys.TAB);
         Thread.sleep(2000);
 
         Assert.assertEquals("Son 30/1/1",

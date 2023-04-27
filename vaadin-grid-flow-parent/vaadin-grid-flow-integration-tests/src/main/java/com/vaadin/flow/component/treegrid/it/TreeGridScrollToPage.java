@@ -1,12 +1,15 @@
 package com.vaadin.flow.component.treegrid.it;
 
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Input;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,19 +48,16 @@ public class TreeGridScrollToPage extends Div {
                 e -> grid.scrollToEnd());
         scrollToEnd.setId("scroll-to-end");
 
-        NativeButton scrollToIndex30 = new NativeButton("Scroll to index 30",
-                e -> grid.scrollToIndex(30));
-        scrollToIndex30.setId("scroll-to-index-30");
+        Input scrollToIndex = new Input(ValueChangeMode.ON_BLUR);
+        scrollToIndex.setPlaceholder("Scroll to index (format: 30-1-1)");
+        scrollToIndex.setWidth("200px");
+        scrollToIndex.addValueChangeListener(event -> {
+            int[] path = Arrays.stream(event.getValue().split("-"))
+                    .mapToInt(Integer::parseInt).toArray();
+            grid.scrollToIndex(path);
+        });
+        scrollToIndex.setId("scroll-to-index");
 
-        NativeButton scrollToIndex30_1 = new NativeButton(
-                "Scroll to index 30-1", e -> grid.scrollToIndex(30, 1));
-        scrollToIndex30_1.setId("scroll-to-index-30-1");
-
-        NativeButton scrollToIndex30_1_1 = new NativeButton(
-                "Scroll to index 30-1-1", e -> grid.scrollToIndex(30, 1, 1));
-        scrollToIndex30_1_1.setId("scroll-to-index-30-1-1");
-
-        add(grid, expandAll, scrollToStart, scrollToEnd, scrollToIndex30,
-                scrollToIndex30_1, scrollToIndex30_1_1);
+        add(grid, expandAll, scrollToStart, scrollToEnd, scrollToIndex);
     }
 }
