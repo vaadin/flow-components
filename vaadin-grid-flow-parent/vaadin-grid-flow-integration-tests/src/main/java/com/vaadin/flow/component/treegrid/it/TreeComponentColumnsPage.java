@@ -15,12 +15,6 @@
  */
 package com.vaadin.flow.component.treegrid.it;
 
-import static com.vaadin.flow.component.treegrid.it.TreeGridHugeTreePage.addItems;
-import static com.vaadin.flow.component.treegrid.it.TreeGridHugeTreePage.addRootItems;
-
-import java.util.HashMap;
-import java.util.Map;
-
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
@@ -76,13 +70,8 @@ public class TreeComponentColumnsPage extends Div {
                 }));
         grid.addColumn(componentRendererBtn).setHeader("Header C");
 
-        TreeData<String> data = new TreeData<>();
-        final Map<String, String> parentPathMap = new HashMap<>();
-
-        addRootItems("Granddad", 3, data, parentPathMap).forEach(
-                granddad -> addItems("Dad", 3, granddad, data, parentPathMap)
-                        .forEach(dad -> addItems("Son", 100, dad, data,
-                                parentPathMap)));
+        TreeData<String> data = new TreeGridStringDataGenerator().generate(3, 3,
+                100);
 
         grid.setDataProvider(new TreeDataProvider<>(data));
         if (!addGridBefore) {

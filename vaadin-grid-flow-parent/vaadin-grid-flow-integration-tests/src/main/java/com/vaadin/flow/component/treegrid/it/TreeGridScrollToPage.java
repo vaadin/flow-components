@@ -10,8 +10,6 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 @Route("vaadin-grid/treegrid-scroll-to")
 public class TreeGridScrollToPage extends Div {
@@ -23,18 +21,10 @@ public class TreeGridScrollToPage extends Div {
 
         add(grid);
 
-        TreeData<String> data = new TreeData<>();
+        TreeData<String> data = new TreeGridStringDataGenerator().generate(50,
+                3, 3);
 
-        Map<String, String> parentPathMap = new HashMap<>();
-
-        TreeGridHugeTreePage.addRootItems("Granddad", 50, data, parentPathMap)
-                .forEach(granddad -> TreeGridHugeTreePage
-                        .addItems("Dad", 3, granddad, data, parentPathMap)
-                        .forEach(dad -> TreeGridHugeTreePage.addItems("Son", 3,
-                                dad, data, parentPathMap)));
-
-        TreeDataProvider<String> dataProvider = new TreeDataProvider<>(data);
-        grid.setDataProvider(dataProvider);
+        grid.setDataProvider(new TreeDataProvider<>(data));
 
         NativeButton expandAll = new NativeButton("Expand all",
                 e -> grid.expandRecursively(data.getRootItems(), 3));
