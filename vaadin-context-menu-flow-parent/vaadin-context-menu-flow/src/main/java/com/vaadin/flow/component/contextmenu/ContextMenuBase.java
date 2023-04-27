@@ -93,6 +93,11 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
             }
         });
 
+        getElement().addPropertyChangeListener("opened", event -> {
+            fireEvent(new OpenedChangeEvent<>((C) this,
+                    event.isUserOriginated()));
+        });
+
         menuItemsArrayGenerator = new MenuItemsArrayGenerator<>(this);
         addAttachListener(event -> {
             String appId = event.getUI().getInternals().getAppId();
@@ -350,11 +355,8 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      */
     public Registration addOpenedChangeListener(
             ComponentEventListener<OpenedChangeEvent<C>> listener) {
-        return getElement()
-                .addPropertyChangeListener("opened",
-                        event -> listener.onComponentEvent(
-                                new OpenedChangeEvent<C>((C) this,
-                                        event.isUserOriginated())));
+        return addListener(OpenedChangeEvent.class,
+                (ComponentEventListener) listener);
     }
 
     /**

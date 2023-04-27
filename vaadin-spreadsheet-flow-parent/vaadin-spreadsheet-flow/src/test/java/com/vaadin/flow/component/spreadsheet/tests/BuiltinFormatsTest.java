@@ -21,8 +21,12 @@ public class BuiltinFormatsTest {
 
     @Before
     public void init() {
+        setupWithLocale(Locale.US);
+    }
+
+    private void setupWithLocale(Locale locale) {
         var ui = new UI();
-        ui.setLocale(Locale.US);
+        ui.setLocale(locale);
         UI.setCurrent(ui);
 
         spreadsheet = new Spreadsheet();
@@ -120,6 +124,40 @@ public class BuiltinFormatsTest {
 
         cellStyle.setDataFormat(dataFormat.getFormat("mmm-yy"));
         Assert.assertEquals("Oct-22", spreadsheet.getCellValue(cell));
+
+        cellStyle.setDataFormat(dataFormat.getFormat("h:mm AM/PM"));
+        Assert.assertEquals("12:00 PM", spreadsheet.getCellValue(cell));
+
+        cellStyle.setDataFormat(dataFormat.getFormat("h:mm:ss AM/PM"));
+        Assert.assertEquals("12:00:00 PM", spreadsheet.getCellValue(cell));
+
+        cellStyle.setDataFormat(dataFormat.getFormat("h:mm"));
+        Assert.assertEquals("12:00", spreadsheet.getCellValue(cell));
+
+        cellStyle.setDataFormat(dataFormat.getFormat("h:mm:ss"));
+        Assert.assertEquals("12:00:00", spreadsheet.getCellValue(cell));
+
+        cellStyle.setDataFormat(dataFormat.getFormat("m/d/yy h:mm"));
+        Assert.assertEquals("10/31/22 12:00", spreadsheet.getCellValue(cell));
+    }
+
+    @Test
+    public void cellWithDateValue_withGermanLocale_testDateFormats() {
+        setupWithLocale(Locale.GERMAN);
+
+        cell.setCellValue(LocalDateTime.of(2022, 10, 31, 12, 0));
+
+        cellStyle.setDataFormat(dataFormat.getFormat("m/d/yy"));
+        Assert.assertEquals("10/31/22", spreadsheet.getCellValue(cell));
+
+        cellStyle.setDataFormat(dataFormat.getFormat("d-mmm-yy"));
+        Assert.assertEquals("31-Okt.-22", spreadsheet.getCellValue(cell));
+
+        cellStyle.setDataFormat(dataFormat.getFormat("d-mmm"));
+        Assert.assertEquals("31-Okt.", spreadsheet.getCellValue(cell));
+
+        cellStyle.setDataFormat(dataFormat.getFormat("mmm-yy"));
+        Assert.assertEquals("Okt.-22", spreadsheet.getCellValue(cell));
 
         cellStyle.setDataFormat(dataFormat.getFormat("h:mm AM/PM"));
         Assert.assertEquals("12:00 PM", spreadsheet.getCellValue(cell));
