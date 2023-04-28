@@ -103,6 +103,7 @@ public class SideNavTest {
         assertThat(sideNav.getItems(), hasSize(1));
         assertThat(sideNav.getItems().get(0), equalTo(testItem));
     }
+
     @Test
     public void noItemsWithLabelSet_addItemAsFirst_itemIsAdded() {
         sideNav.setLabel("Test label");
@@ -175,7 +176,8 @@ public class SideNavTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void addItemAtTooHighIndex_throws() {
-        final List<SideNavItem> items = setupItemsAndLabel(SET_LABEL_BEFORE_ITEMS_CREATION);
+        final List<SideNavItem> items = setupItemsAndLabel(
+                SET_LABEL_BEFORE_ITEMS_CREATION);
 
         final SideNavItem testItem = new SideNavItem("testItem");
         sideNav.addItemAtIndex(items.size() + 1, testItem);
@@ -220,12 +222,14 @@ public class SideNavTest {
         sideNav.addItemAtIndex(sideNav.getItems().size(), testItem);
 
         assertThat(sideNav.getItems(), hasSize(items.size() + 1));
-        assertThat(sideNav.getItems().get(sideNav.getItems().size() - 1), equalTo(testItem));
+        assertThat(sideNav.getItems().get(sideNav.getItems().size() - 1),
+                equalTo(testItem));
     }
 
     @Test
     public void multipleItemsAndLabelBefore_addItemAtIndex_itemIsAdded() {
-        final List<SideNavItem> items = setupItemsAndLabel(SET_LABEL_BEFORE_ITEMS_CREATION);
+        final List<SideNavItem> items = setupItemsAndLabel(
+                SET_LABEL_BEFORE_ITEMS_CREATION);
 
         final SideNavItem testItem = new SideNavItem("testItem");
         sideNav.addItemAtIndex(2, testItem);
@@ -236,18 +240,21 @@ public class SideNavTest {
 
     @Test
     public void multipleItemsAndLabelBefore_addItemAtLastIndex_itemIsAppended() {
-        final List<SideNavItem> items = setupItemsAndLabel(SET_LABEL_BEFORE_ITEMS_CREATION);
+        final List<SideNavItem> items = setupItemsAndLabel(
+                SET_LABEL_BEFORE_ITEMS_CREATION);
 
         final SideNavItem testItem = new SideNavItem("testItem");
         sideNav.addItemAtIndex(sideNav.getItems().size(), testItem);
 
         assertThat(sideNav.getItems(), hasSize(items.size() + 1));
-        assertThat(sideNav.getItems().get(sideNav.getItems().size() - 1), equalTo(testItem));
+        assertThat(sideNav.getItems().get(sideNav.getItems().size() - 1),
+                equalTo(testItem));
     }
 
     @Test
     public void multipleItemsAndLabelAfter_addItemAtIndex_itemIsAdded() {
-        final List<SideNavItem> items = setupItemsAndLabel(SET_LABEL_AFTER_ITEMS_CREATION);
+        final List<SideNavItem> items = setupItemsAndLabel(
+                SET_LABEL_AFTER_ITEMS_CREATION);
 
         final SideNavItem testItem = new SideNavItem("testItem");
         sideNav.addItemAtIndex(2, testItem);
@@ -258,19 +265,21 @@ public class SideNavTest {
 
     @Test
     public void multipleItemsAndLabelAfter_addItemAtLastIndex_itemIsAppended() {
-        final List<SideNavItem> items = setupItemsAndLabel(SET_LABEL_AFTER_ITEMS_CREATION);
+        final List<SideNavItem> items = setupItemsAndLabel(
+                SET_LABEL_AFTER_ITEMS_CREATION);
 
         final SideNavItem testItem = new SideNavItem("testItem");
         sideNav.addItemAtIndex(sideNav.getItems().size(), testItem);
 
         assertThat(sideNav.getItems(), hasSize(items.size() + 1));
-        assertThat(sideNav.getItems().get(sideNav.getItems().size() - 1), equalTo(testItem));
+        assertThat(sideNav.getItems().get(sideNav.getItems().size() - 1),
+                equalTo(testItem));
     }
-
 
     @Test
     public void multipleItemsAndLabelDuring_addItemAtIndexBeforeLabel_itemIsAddedAtCorrectPosition() {
-        final List<SideNavItem> items = setupItemsAndLabel(SET_LABEL_DURING_ITEMS_CREATION);
+        final List<SideNavItem> items = setupItemsAndLabel(
+                SET_LABEL_DURING_ITEMS_CREATION);
 
         final SideNavItem testItem = new SideNavItem("testItem");
         sideNav.addItemAtIndex(1, testItem);
@@ -281,7 +290,8 @@ public class SideNavTest {
 
     @Test
     public void multipleItemsAndLabelAfter_addItemAtIndexAfterLabel_itemIsAddedAtCorrectPosition() {
-        final List<SideNavItem> items = setupItemsAndLabel(SET_LABEL_DURING_ITEMS_CREATION);
+        final List<SideNavItem> items = setupItemsAndLabel(
+                SET_LABEL_DURING_ITEMS_CREATION);
 
         final SideNavItem testItem = new SideNavItem("testItem");
         sideNav.addItemAtIndex(2, testItem);
@@ -310,7 +320,8 @@ public class SideNavTest {
 
     @Test
     public void removeSingleItem_itemRemoved() {
-        final List<SideNavItem> sideNavItems = setupItemsAndLabel(SET_LABEL_BEFORE_ITEMS_CREATION);
+        final List<SideNavItem> sideNavItems = setupItemsAndLabel(
+                SET_LABEL_BEFORE_ITEMS_CREATION);
 
         sideNav.remove(sideNavItems.get(2));
 
@@ -320,7 +331,8 @@ public class SideNavTest {
 
     @Test
     public void removeTwoItems_bothItemsRemoved() {
-        final List<SideNavItem> sideNavItems = setupItemsAndLabel(SET_LABEL_BEFORE_ITEMS_CREATION);
+        final List<SideNavItem> sideNavItems = setupItemsAndLabel(
+                SET_LABEL_BEFORE_ITEMS_CREATION);
 
         sideNav.remove(sideNavItems.get(1), sideNavItems.get(2));
 
@@ -331,7 +343,8 @@ public class SideNavTest {
 
     @Test
     public void removeUnknownItem_nothingHappens() {
-        final List<SideNavItem> sideNavItems = setupItemsAndLabel(SET_LABEL_BEFORE_ITEMS_CREATION);
+        final List<SideNavItem> sideNavItems = setupItemsAndLabel(
+                SET_LABEL_BEFORE_ITEMS_CREATION);
 
         sideNav.remove(new SideNavItem("Foreign item"));
 

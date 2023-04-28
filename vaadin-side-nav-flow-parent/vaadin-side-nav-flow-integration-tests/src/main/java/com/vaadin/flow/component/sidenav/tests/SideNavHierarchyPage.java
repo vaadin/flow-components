@@ -83,8 +83,7 @@ public class SideNavHierarchyPage extends Div {
         add(addItem);
 
         NativeButton removeAllSubItems = new NativeButton(
-                "Remove all sub items",
-                event -> navigableParent.removeAll());
+                "Remove all sub items", event -> navigableParent.removeAll());
         removeAllSubItems.setId("remove-all-sub-items");
         add(removeAllSubItems);
 

@@ -36,8 +36,12 @@ import com.vaadin.flow.server.VaadinService;
 /**
  * A menu item for the {@link SideNav} component.
  * <p>
- * Can contain a label, prefix and suffix component and links to a given
- * {@code path}.
+ * Besides the target {@code path} it can contain a label, prefix and suffix
+ * component, like icons or badges. You can create a hierarchical navigation
+ * structure by adding other {@link SideNavItem} instances to this
+ * {@link SideNavItem} instance via {@link #addItem(SideNavItem...)}.
+ *
+ * @author Vaadin Ltd
  */
 @Tag("vaadin-side-nav-item")
 @JsModule("@vaadin/side-nav/src/vaadin-side-nav-item.js")
@@ -88,8 +92,8 @@ public class SideNavItem extends SideNavItemContainer
     }
 
     /**
-     * Creates a new menu item using the given label and prefix component that
-     * links to the given path.
+     * Creates a new menu item using the given label and prefix component (like
+     * an icon) that links to the given path.
      *
      * @param label
      *            the label for the item
@@ -105,8 +109,8 @@ public class SideNavItem extends SideNavItemContainer
     }
 
     /**
-     * Creates a new menu item using the given label that links to the given
-     * view.
+     * Creates a new menu item using the given label and prefix component (like
+     * an icon) that links to the given view.
      *
      * @param label
      *            the label for the item
@@ -132,7 +136,7 @@ public class SideNavItem extends SideNavItemContainer
     }
 
     /**
-     * Gets the label for the item.
+     * Gets the label of this menu item.
      *
      * @return the label or null if no label has been set
      */
@@ -143,7 +147,7 @@ public class SideNavItem extends SideNavItemContainer
     /**
      * Set a textual label for the item.
      * <p>
-     * The label is also available for screen rader users.
+     * The label is also available for screen reader users.
      *
      * @param label
      *            the label to set
@@ -169,10 +173,15 @@ public class SideNavItem extends SideNavItemContainer
     }
 
     /**
-     * Sets the path this item links to.
+     * Sets the path in a form or a URL string this navigation item links to.
+     * Note that there is also an alternative way of how to set the link path
+     * via {@link SideNavItem#setPath(Class)}.
      *
      * @param path
-     *            the path to link to
+     *            The path to link to. Set to null to disable navigation for
+     *            this item.
+     *
+     * @see SideNavItem#setPath(Class)
      */
     public void setPath(String path) {
         if (path == null) {
@@ -184,9 +193,17 @@ public class SideNavItem extends SideNavItemContainer
 
     /**
      * Sets the view this item links to.
+     * <p>
+     * Note: Vaadin Router will be used to determine the URL path of the view
+     * and this URL will be then set to this navigation item using
+     * {@link SideNavItem#setPath(String)}
      *
      * @param view
-     *            the view to link to
+     *            The view to link to. The view should be annotated with the
+     *            {@link com.vaadin.flow.router.Route} annotation. Set to null
+     *            to disable navigation for this item.
+     *
+     * @see SideNavItem#setPath(String)
      */
     public void setPath(Class<? extends Component> view) {
         if (view != null) {
@@ -215,6 +232,11 @@ public class SideNavItem extends SideNavItemContainer
         return router;
     }
 
+    /**
+     * Gets the path this navigation item links to.
+     *
+     * @return path this navigation item links to
+     */
     public String getPath() {
         return getElement().getAttribute("path");
     }
@@ -229,6 +251,9 @@ public class SideNavItem extends SideNavItemContainer
         set(expandedDescriptor, value ? "" : "false");
     }
 
+    /**
+     * @return Returns if the item is expanded or not
+     */
     public boolean isExpanded() {
         return get(expandedDescriptor).isPresent();
     }

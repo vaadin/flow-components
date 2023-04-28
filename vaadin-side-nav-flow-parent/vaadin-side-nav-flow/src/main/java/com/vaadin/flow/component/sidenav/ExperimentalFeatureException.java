@@ -17,7 +17,10 @@
 package com.vaadin.flow.component.sidenav;
 
 /**
- * @author Bretislav Wajtr
+ * An exception which is thrown when somebody attempts to use SideNav or
+ * SideNavItem components without activating the associated Feature Flag first.
+ *
+ * @author Vaadin Ltd
  */
 public class ExperimentalFeatureException extends RuntimeException {
     public ExperimentalFeatureException() {

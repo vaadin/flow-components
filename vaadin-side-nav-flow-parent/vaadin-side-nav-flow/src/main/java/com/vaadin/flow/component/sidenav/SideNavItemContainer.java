@@ -22,12 +22,17 @@ import java.util.Optional;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.dom.Element;
 
+/**
+ * Base class for components used in the side navigation item hierarchy.
+ *
+ * @author Vaadin Ltd
+ */
 abstract class SideNavItemContainer extends Component {
 
     /**
      * Implement this method to set up/modify the SideNavItem right before it's
      * added to the list of the navigation items.
-     * 
+     *
      * @param item
      *            Item to be set up
      */
@@ -42,17 +47,38 @@ abstract class SideNavItemContainer extends Component {
      *            the navigation menu item(s) to add
      */
     public void addItem(SideNavItem... items) {
+        assert items != null;
+
         for (SideNavItem item : items) {
             setupSideNavItem(item);
             getElement().appendChild(item.getElement());
         }
     }
 
+    /**
+     * Adds the given navigation item as the first child of this navigation
+     * item.
+     *
+     * @param item
+     *            the item to add, value must not be null
+     */
     public void addItemAsFirst(SideNavItem item) {
         addItemAtIndex(0, item);
     }
 
+    /**
+     * Adds the given item as child of this navigation item at the specific
+     * index.
+     *
+     * @param index
+     *            the index, where the item will be added. The index must be
+     *            non-negative and may not exceed the children count
+     * @param item
+     *            the item to add, value must not be null
+     */
     public void addItemAtIndex(int index, SideNavItem item) {
+        assert item != null;
+
         if (index < 0) {
             throw new IllegalArgumentException(
                     "Cannot add a SideNavItem with a negative index");
@@ -76,6 +102,14 @@ abstract class SideNavItemContainer extends Component {
         }
     }
 
+    /**
+     * Gets the items added to this navigation item (the children of this
+     * component that are instances of {@link SideNavItem}). This doesn't
+     * include the items added to the children of this navigation item.
+     *
+     * @return the child {@link SideNavItem} instances in this navigation menu
+     * @see #addItem(SideNavItem...)
+     */
     public List<SideNavItem> getItems() {
         return getElement().getChildren().map(Element::getComponent)
                 .flatMap(Optional::stream)

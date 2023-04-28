@@ -35,6 +35,8 @@ import com.vaadin.flow.dom.Element;
  * Items can be added using {@link #addItem(SideNavItem...)} and hierarchy can
  * be created by adding {@link SideNavItem} instances to other
  * {@link SideNavItem} instances.
+ *
+ * @author Vaadin Ltd
  */
 @Tag("vaadin-side-nav")
 @JsModule("@vaadin/side-nav/src/vaadin-side-nav.js")
@@ -68,7 +70,7 @@ public class SideNav extends SideNavItemContainer implements HasSize, HasStyle {
     }
 
     /**
-     * Gets the textual label for the navigation.
+     * Gets the label of this side navigation menu.
      *
      * @return the label or null if no label has been set
      */
@@ -77,10 +79,10 @@ public class SideNav extends SideNavItemContainer implements HasSize, HasStyle {
     }
 
     /**
-     * Set a textual label for the navigation.
+     * Set a textual label for this side navigation menu.
      * <p>
-     * This can help the end user to distinguish groups of navigation items. The
-     * label is also available for screen reader users.
+     * This label can help the end user to distinguish groups of navigation
+     * items. The label is also available for screen reader users.
      *
      * @param label
      *            the label to set
@@ -131,10 +133,20 @@ public class SideNav extends SideNavItemContainer implements HasSize, HasStyle {
         set(collapsibleDescriptor, collapsible ? "" : "false");
     }
 
+    /**
+     * Returns whether the side navigation menu is expanded or collapsed.
+     *
+     * @return true if the side navigation menu is expanded, false if collapsed
+     */
     public boolean isExpanded() {
         return get(collapsedDescriptor).isEmpty();
     }
 
+    /**
+     * Expands the side navigation menu.
+     * <p>
+     * If the side navigation menu does not have a label, does nothing.
+     */
     public void setExpanded(boolean expanded) {
         set(collapsedDescriptor, expanded ? "false" : "");
     }
