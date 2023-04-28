@@ -338,6 +338,30 @@ public class Dialog extends Component implements HasComponents, HasSize,
     }
 
     /**
+     * Creates a dialog with given title.
+     *
+     * @param title
+     *            the title of the component
+     */
+    public Dialog(String title) {
+        this();
+        setHeaderTitle(title);
+    }
+
+    /**
+     * Creates a dialog with given title and components inside.
+     *
+     * @param title
+     *            the title of the component
+     * @param components
+     *            the components inside the dialog
+     */
+    public Dialog(String title, Component... components) {
+        this(components);
+        setHeaderTitle(title);
+    }
+
+    /**
      * Adds the given components into this dialog.
      * <p>
      * The elements in the DOM will not be children of the

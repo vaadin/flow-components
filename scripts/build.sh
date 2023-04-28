@@ -74,8 +74,8 @@ tcStatus() {
 
 saveFailedTests() {
   try=$1
-  failedMethods=`egrep '<<< ERROR!$|<<< FAILURE!$' integration-tests/target/failsafe-reports/*txt | perl -pe 's,.*:(.*)\((.*)\).*,$2.$1,g' | sort -u`
-  failed=`egrep '<<< ERROR!$|<<< FAILURE!$' integration-tests/target/failsafe-reports/*txt | perl -pe 's,.*:(.*)\((.*)\).*,$2,g' | sort -u`
+  failedMethods=`egrep '<<< ERROR!$|<<< FAILURE!$' integration-tests/target/failsafe-reports/*txt | perl -pe 's,.*(com.vaadin[\.\w\d]+).*,$1,g' | sort -u`
+  failed=$(echo "$failedMethods" | perl -pe 's,.*(com\.vaadin[.\w\d]+)\.[\w\d]+,$1,g')
   nfailed=`echo "$failed" | wc -w`
   ### collect tests numbers for TC status
   ncompleted=`grep 'Tests run: ' vaadin*/*flow/target/surefire-reports/*.txt integration-tests/target/failsafe-reports/*txt | awk '{SUM+=$3} END { print SUM }'`
