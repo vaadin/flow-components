@@ -20,6 +20,7 @@ import java.util.Optional;
 import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -249,6 +250,7 @@ public class SideNavItem extends SideNavItemContainer
     /**
      * @return Returns if the item is expanded or not
      */
+    @Synchronize(property = "expanded", value = "expanded-changed")
     public boolean isExpanded() {
         return getElement().getProperty("expanded", false);
     }

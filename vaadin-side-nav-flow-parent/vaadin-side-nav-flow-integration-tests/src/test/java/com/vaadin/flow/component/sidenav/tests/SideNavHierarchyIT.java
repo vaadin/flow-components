@@ -19,6 +19,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.vaadin.flow.component.html.testbench.DivElement;
 import com.vaadin.flow.component.html.testbench.NativeButtonElement;
 import com.vaadin.flow.component.sidenav.testbench.SideNavElement;
 import com.vaadin.flow.component.sidenav.testbench.SideNavItemElement;
@@ -175,4 +176,21 @@ public class SideNavHierarchyIT extends AbstractComponentIT {
 
         Assert.assertEquals(navigableParent.getLabel(), "Changed label");
     }
+
+    @Test
+    public void expandItem_expandedStateSynchronized() {
+        assertExpandedStateOnServer("false");
+
+        navigableParent.clickExpandButton();
+
+        assertExpandedStateOnServer("true");
+    }
+
+    private void assertExpandedStateOnServer(String expectedState) {
+        $(NativeButtonElement.class).id("print-expanded-state").click();
+        final String expandedState = $(DivElement.class)
+                .id("expanded-state-printout").getText();
+        Assert.assertEquals(expandedState, expectedState);
+    }
+
 }

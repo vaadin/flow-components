@@ -22,6 +22,7 @@ import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -130,6 +131,7 @@ public class SideNav extends SideNavItemContainer implements HasSize, HasStyle {
      *
      * @return true if the side navigation menu is expanded, false if collapsed
      */
+    @Synchronize(property = "collapsed", value = "collapsed-changed")
     public boolean isExpanded() {
         return !getElement().getProperty("collapsed", false);
     }

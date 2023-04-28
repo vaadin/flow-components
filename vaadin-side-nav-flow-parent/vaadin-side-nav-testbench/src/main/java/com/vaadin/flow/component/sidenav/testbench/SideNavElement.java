@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
@@ -35,10 +36,10 @@ public class SideNavElement extends TestBenchElement {
         // get only the direct vaadin-side-nav-item of this vaadin-side-nav
         return wrapElements(findElements(By.xpath("vaadin-side-nav-item")),
                 getCommandExecutor())
-                .stream()
-                .map(testBenchElement -> testBenchElement
-                        .wrap(SideNavItemElement.class))
-                .collect(Collectors.toList());
+                        .stream()
+                        .map(testBenchElement -> testBenchElement
+                                .wrap(SideNavItemElement.class))
+                        .collect(Collectors.toList());
     }
 
     public String getLabel() {
@@ -48,4 +49,11 @@ public class SideNavElement extends TestBenchElement {
     public boolean isCollapsible() {
         return hasAttribute("collapsible");
     }
+
+    public void clickExpandButton() {
+        final WebElement element = getWrappedElement().getShadowRoot()
+                .findElement(By.cssSelector("summary[part='label']"));
+        executeScript("arguments[0].click();", element);
+    }
+
 }
