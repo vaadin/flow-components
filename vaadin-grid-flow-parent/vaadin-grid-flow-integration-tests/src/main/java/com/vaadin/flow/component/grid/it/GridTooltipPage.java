@@ -39,16 +39,13 @@ public class GridTooltipPage extends Div {
                         + person.getFirstName());
 
         var setGridTooltipButton = new NativeButton(
-                "Set tooltip to all columns", clickEvent -> {
-                    grid.setTooltipGenerator(person -> "Grid's tooltip! "
-                            + person.getFirstName());
-                });
+                "Set tooltip to all columns",
+                clickEvent -> grid.setTooltipGenerator(
+                        person -> "Grid's tooltip! " + person.getFirstName()));
         setGridTooltipButton.setId("set-grid-tooltip-button");
 
         var addColumnButton = new NativeButton("Add extra column",
-                clickEvent -> {
-                    grid.addColumn(item -> "Extra column");
-                });
+                clickEvent -> grid.addColumn(item -> "Extra column"));
         addColumnButton.setId("add-column-button");
 
         var setAgeTooltipButton = new NativeButton("Set tooltip to age column",
