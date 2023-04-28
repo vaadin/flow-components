@@ -437,4 +437,52 @@ public class TabSheetTest {
 
         Assert.assertEquals(1, listenerInvokedCount.get());
     }
+
+    @Test
+    public void getTab_returnsTab() {
+        var content0 = new Span("Content 0");
+        var content1 = new Span("Content 1");
+        var tab0 = tabSheet.add("Tab 0", content0);
+        var tab1 = tabSheet.add("Tab 1", content1);
+        Assert.assertEquals(tab0, tabSheet.getTab(content0));
+        Assert.assertEquals(tab1, tabSheet.getTab(content1));
+    }
+
+    @Test
+    public void getTab_unknownComponent_returnsNull() {
+        tabSheet.add("Tab 0", new Span("Content 0"));
+
+        Assert.assertNull(tabSheet.getTab(new Span("Content Unknown")));
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void getTab_nullComponent_throws() {
+        tabSheet.add("Tab 0", new Span("Content 0"));
+
+        tabSheet.getTab(null);
+    }
+
+    @Test
+    public void getComponent_returnsComponent() {
+        var content0 = new Span("Content 0");
+        var content1 = new Span("Content 1");
+        var tab0 = tabSheet.add("Tab 0", content0);
+        var tab1 = tabSheet.add("Tab 1", content1);
+        Assert.assertEquals(content0, tabSheet.getComponent(tab0));
+        Assert.assertEquals(content1, tabSheet.getComponent(tab1));
+    }
+
+    @Test
+    public void getComponent_unknownTab_returnsNull() {
+        tabSheet.add("Tab 0", new Span("Content 0"));
+
+        Assert.assertNull(tabSheet.getComponent(new Tab("Tab 1")));
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void getComponent_nullTab_throws() {
+        tabSheet.add("Tab 0", new Span("Content 0"));
+
+        tabSheet.getComponent(null);
+    }
 }
