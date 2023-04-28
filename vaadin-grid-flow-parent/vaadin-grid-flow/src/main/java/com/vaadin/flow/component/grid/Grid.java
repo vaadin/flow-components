@@ -4336,8 +4336,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     private void addTooltipElementToTooltipSlot() {
-        if (this.getElement().getChildren().anyMatch(
-                child -> Objects.equals(child.getAttribute("slot"), "tooltip"))) {
+        if (this.getElement().getChildren().anyMatch(child -> Objects
+                .equals(child.getAttribute("slot"), "tooltip"))) {
             // the grid's tooltip slot has already been filled
             return;
         }
