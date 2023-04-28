@@ -247,7 +247,9 @@ public class SideNavItem extends SideNavItemContainer
     }
 
     /**
-     * @return Returns if the item is expanded or not
+     * Returns whether the side navigation menu item is expanded or collapsed.
+     *
+     * @return true if the item is expanded, false if collapsed
      */
     public boolean isExpanded() {
         return getElement().getProperty("expanded", false);
