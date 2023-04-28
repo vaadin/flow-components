@@ -245,13 +245,18 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           if (parentKeyOfIndex === parentKey) {
             return grid._getPageForIndex(cacheAndIndex.scaledIndex);
           }
+          // Try to match level by going up in hierarchy. This accounts for the cases where
+          // the parent of an item is not visible, but has the same depth as of the request.
+          // This prevents clearing the cache for those visible items, which can create a loop.
           return this._getSameLevelPageByHierarchy(parentKey, defaultPage, parentKeyOfIndex);
         });
 
         grid.$connector._getSameLevelPageByHierarchy = tryCatchWrapper(function (parentKey, defaultPage, parentKeyOfIndex) {
-          if (!parentKeyOfIndex && parentKeyOfIndex === root) {
+          // Root item was reached
+          if (parentKeyOfIndex === root) {
             return defaultPage;
           }
+          // There is no parent item to match level in cache
           const parentCacheAndIndex = grid._cache.getCacheAndIndexByKey(parentKeyOfIndex);
           if (!parentCacheAndIndex) {
             return defaultPage;
@@ -261,6 +266,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           if (updatedParentKeyOfIndex === parentKey) {
             return grid._getPageForIndex(parentCacheAndIndex.scaledIndex);
           }
+          // Try to match level until reaching root or there is no parent in cache
           return this._getSameLevelPageByHierarchy(parentKey, defaultPage, updatedParentKeyOfIndex);
         });
 
