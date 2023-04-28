@@ -102,7 +102,7 @@ public abstract class AbstractTreeGridIT extends AbstractComponentIT {
             String expectedText) {
         if (!((grid.getFirstVisibleRowIndex() <= rowIndex
                 && rowIndex <= grid.getLastVisibleRowIndex()))) {
-            grid.scrollToRowAndWait(rowIndex);
+            grid.scrollToFlatRowAndWait(rowIndex);
         }
         GridColumnElement column = grid.getVisibleColumns().get(cellIndex);
         try {
