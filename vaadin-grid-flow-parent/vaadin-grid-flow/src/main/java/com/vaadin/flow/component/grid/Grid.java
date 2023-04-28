@@ -4324,6 +4324,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            the tooltip generator to set, not {@code null}
      * @throws NullPointerException
      *             if {@code tooltipGenerator} is {@code null}
+     *
+     * @since 24.1
      */
     public void setTooltipGenerator(
             SerializableFunction<T, String> tooltipGenerator) {
