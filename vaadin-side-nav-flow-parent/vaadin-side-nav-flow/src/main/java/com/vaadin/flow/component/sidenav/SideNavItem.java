@@ -20,8 +20,6 @@ import java.util.Optional;
 import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.PropertyDescriptor;
-import com.vaadin.flow.component.PropertyDescriptors;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -48,9 +46,6 @@ import com.vaadin.flow.server.VaadinService;
 // @NpmPackage(value = "@vaadin/side-nav", version = "24.1.0-alpha8")
 public class SideNavItem extends SideNavItemContainer
         implements HasPrefix, HasSuffix {
-
-    private static final PropertyDescriptor<String, Optional<String>> expandedDescriptor = PropertyDescriptors
-            .optionalAttributeWithDefault("expanded", "false");
 
     /**
      * Creates a menu item which does not link to any view but only shows the
@@ -244,18 +239,18 @@ public class SideNavItem extends SideNavItemContainer
     /**
      * Sets the expanded status of the item.
      *
-     * @param value
+     * @param expanded
      *            true to expand the item, false to collapse it
      */
-    public void setExpanded(boolean value) {
-        set(expandedDescriptor, value ? "" : "false");
+    public void setExpanded(boolean expanded) {
+        getElement().setProperty("expanded", expanded);
     }
 
     /**
      * @return Returns if the item is expanded or not
      */
     public boolean isExpanded() {
-        return get(expandedDescriptor).isPresent();
+        return getElement().getProperty("expanded", false);
     }
 
     @Override

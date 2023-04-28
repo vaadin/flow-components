@@ -22,8 +22,6 @@ import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.PropertyDescriptor;
-import com.vaadin.flow.component.PropertyDescriptors;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -42,12 +40,6 @@ import com.vaadin.flow.dom.Element;
 @JsModule("@vaadin/side-nav/src/vaadin-side-nav.js")
 // @NpmPackage(value = "@vaadin/side-nav", version = "24.1.0-alpha8")
 public class SideNav extends SideNavItemContainer implements HasSize, HasStyle {
-
-    private static final PropertyDescriptor<String, Optional<String>> collapsibleDescriptor = PropertyDescriptors
-            .optionalAttributeWithDefault("collapsible", "false");
-
-    private static final PropertyDescriptor<String, Optional<String>> collapsedDescriptor = PropertyDescriptors
-            .optionalAttributeWithDefault("collapsed", "false");
 
     /**
      * Creates a new menu without any label.
@@ -117,7 +109,7 @@ public class SideNav extends SideNavItemContainer implements HasSize, HasStyle {
      * @return true if the menu is collapsible, false otherwise
      */
     public boolean isCollapsible() {
-        return get(collapsibleDescriptor).isPresent();
+        return getElement().getProperty("collapsible", false);
     }
 
     /**
@@ -130,7 +122,7 @@ public class SideNav extends SideNavItemContainer implements HasSize, HasStyle {
      *            otherwise
      */
     public void setCollapsible(boolean collapsible) {
-        set(collapsibleDescriptor, collapsible ? "" : "false");
+        getElement().setProperty("collapsible", collapsible);
     }
 
     /**
@@ -139,7 +131,7 @@ public class SideNav extends SideNavItemContainer implements HasSize, HasStyle {
      * @return true if the side navigation menu is expanded, false if collapsed
      */
     public boolean isExpanded() {
-        return get(collapsedDescriptor).isEmpty();
+        return !getElement().getProperty("collapsed", false);
     }
 
     /**
@@ -148,7 +140,7 @@ public class SideNav extends SideNavItemContainer implements HasSize, HasStyle {
      * If the side navigation menu does not have a label, does nothing.
      */
     public void setExpanded(boolean expanded) {
-        set(collapsedDescriptor, expanded ? "false" : "");
+        getElement().setProperty("collapsed", !expanded);
     }
 
     @Override

@@ -303,8 +303,6 @@ public class SideNavItemTest {
         sideNavItem.setExpanded(true);
 
         assertThat(sideNavItem.isExpanded(), equalTo(true));
-        assertThat(sideNavItem.getElement().hasAttribute("expanded"),
-                equalTo(true));
     }
 
     @Test
@@ -313,8 +311,6 @@ public class SideNavItemTest {
         sideNavItem.setExpanded(false);
 
         assertThat(sideNavItem.isExpanded(), equalTo(false));
-        assertThat(sideNavItem.getElement().hasAttribute("expanded"),
-                equalTo(false));
     }
 
     private List<SideNavItem> setupItems() {
