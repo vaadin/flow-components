@@ -107,5 +107,15 @@ public class SideNavHierarchyPage extends Div {
                 event -> navigableParent.setLabel("Changed label"));
         setLabel.setId("change-label");
         add(setLabel);
+
+        Div expandedStatePrintout = new Div();
+        expandedStatePrintout.setId("expanded-state-printout");
+        add(expandedStatePrintout);
+
+        NativeButton printExpandedState = new NativeButton(
+                "Print out expanded state", event -> expandedStatePrintout
+                        .setText(String.valueOf(navigableParent.isExpanded())));
+        printExpandedState.setId("print-expanded-state");
+        add(printExpandedState);
     }
 }

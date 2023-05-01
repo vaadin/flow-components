@@ -108,5 +108,15 @@ public class SideNavPage extends Div {
                 event -> sideNav.setExpanded(!sideNav.isExpanded()));
         toggleExpanded.setId("toggle-expanded");
         add(toggleExpanded);
+
+        Div expandedStatePrintout = new Div();
+        expandedStatePrintout.setId("expanded-state-printout");
+        add(expandedStatePrintout);
+
+        NativeButton printExpandedState = new NativeButton(
+                "Print out expanded state", event -> expandedStatePrintout
+                        .setText(String.valueOf(sideNav.isExpanded())));
+        printExpandedState.setId("print-expanded-state");
+        add(printExpandedState);
     }
 }
