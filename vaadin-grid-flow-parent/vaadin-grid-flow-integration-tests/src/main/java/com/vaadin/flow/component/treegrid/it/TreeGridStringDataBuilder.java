@@ -3,33 +3,32 @@ package com.vaadin.flow.component.treegrid.it;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class TreeGridStringDataGenerator {
+public class TreeGridStringDataBuilder {
 
     private final TreeData<String> data = new TreeData<>();
 
     private final Map<String, String> parentPathMap = new HashMap<>();
 
-    private Map<Integer, String> levelToNameMap;
+    private Map<String, Integer> nameToCountMap = new LinkedHashMap<>();
 
-    public TreeGridStringDataGenerator() {
-        this(Map.of(0, "Granddad", 1, "Dad", 2, "Son"));
+    public TreeGridStringDataBuilder addLevel(String name, int numberOfItems) {
+        nameToCountMap.put(name, numberOfItems);
+        return this;
     }
 
-    public TreeGridStringDataGenerator(Map<Integer, String> levelToNameMap) {
-        this.levelToNameMap = levelToNameMap;
-    }
-
-    public TreeData<String> generate(int... countPerLevel) {
+    public TreeData<String> build() {
         List<String> itemsForLevel = null;
-        for (int level = 0; level < countPerLevel.length; level++) {
-            itemsForLevel = addItemsForLevel(levelToNameMap.get(level),
-                    countPerLevel[level], itemsForLevel);
+        for (Map.Entry<String, Integer> nameToCountMap : nameToCountMap
+                .entrySet()) {
+            itemsForLevel = addItemsForLevel(nameToCountMap.getKey(),
+                    nameToCountMap.getValue(), itemsForLevel);
         }
         return data;
     }
