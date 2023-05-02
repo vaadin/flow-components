@@ -1,7 +1,6 @@
 # Spreadsheet component for Vaadin Flow
 
-This project is the Component wrapper implementation of [`<vaadin-spreadsheet>`](https://github.com/vaadin/vaadin-spreadsheet)
-element for use from the server side with [Vaadin Flow](https://github.com/vaadin/flow).
+This project is the Component implementation of [`<vaadin-spreadsheet>`](https://vaadin.com/docs/latest/components/spreadsheet) for use from the server side with [Vaadin Flow](https://github.com/vaadin/flow).
 
 ## Using the component in a Flow application
 

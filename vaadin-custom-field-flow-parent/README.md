@@ -1,6 +1,6 @@
 # CustomField component for Vaadin Flow
 
-This project is the Component wrapper implementation of [`<vaadin-custom-field>`](https://github.com/vaadin/vaadin-custom-field)
+This project is the Component wrapper implementation of [`<vaadin-custom-field>`](https://github.com/vaadin/web-components/tree/main/packages/custom-field)
 element for use from the server side with [Vaadin Flow](https://github.com/vaadin/flow).
 
 ## Using the component in a Flow application

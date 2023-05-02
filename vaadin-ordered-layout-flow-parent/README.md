@@ -1,6 +1,6 @@
 # Layout components for Vaadin Flow
 
-This project is the Component wrapper implementation of [`<vaadin-ordered-layout>`](https://github.com/vaadin/vaadin-ordered-layout) element
+This project is the Component wrapper implementation of [Vaadin ordered layout web components](https://github.com/vaadin/web-components/) (HorizontalLayout, VerticalLayout etc.)
 for use from the server side with [Vaadin Flow](https://github.com/vaadin/flow).
 
 ## Using the component in a Flow application
