@@ -21,8 +21,9 @@ public class TreeGridScrollToPage extends Div {
 
         add(grid);
 
-        TreeData<String> data = new TreeGridStringDataGenerator().generate(50,
-                20, 20);
+        TreeData<String> data = new TreeGridStringDataBuilder()
+                .addLevel("Granddad", 50).addLevel("Dad", 20)
+                .addLevel("Son", 20).build();
 
         grid.setDataProvider(new TreeDataProvider<>(data));
 
