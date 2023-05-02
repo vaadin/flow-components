@@ -40,8 +40,9 @@ public class TreeGridHugeTreeNavigationPage extends Div {
     }
 
     private void initializeDataProvider() {
-        TreeData<String> data = new TreeGridStringDataGenerator().generate(3, 3,
-                300);
+        TreeData<String> data = new TreeGridStringDataBuilder()
+                .addLevel("Granddad", 3).addLevel("Dad", 3).addLevel("Son", 300)
+                .build();
 
         inMemoryDataProvider = new TreeDataProvider<>(data);
     }

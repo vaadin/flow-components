@@ -1,7 +1,5 @@
 package com.vaadin.flow.component.treegrid.it;
 
-import java.util.Map;
-
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.treegrid.TreeGrid;
@@ -22,8 +20,9 @@ public class TreeGridExpandAllPage extends Div {
 
         add(grid);
 
-        TreeData<String> data = new TreeGridStringDataGenerator().generate(1, 1,
-                3);
+        TreeData<String> data = new TreeGridStringDataBuilder()
+                .addLevel("Granddad", 1).addLevel("Dad", 1).addLevel("Son", 3)
+                .build();
 
         TreeDataProvider<String> dataprovider = new TreeDataProvider<>(data);
         grid.setDataProvider(dataprovider);
@@ -64,9 +63,10 @@ public class TreeGridExpandAllPage extends Div {
     }
 
     private void initializeDataProvider() {
-        TreeData<String> data = new TreeGridStringDataGenerator(Map.of(0,
-                "Granddad", 1, "Dad is very long and large", 2, "Son"))
-                .generate(3, 3, 300);
+        TreeData<String> data = new TreeGridStringDataBuilder()
+                .addLevel("Granddad", 3)
+                .addLevel("Dad is very long and large", 3).addLevel("Son", 300)
+                .build();
 
         inMemoryDataProvider = new TreeDataProvider<>(data);
     }

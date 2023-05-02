@@ -23,8 +23,9 @@ public class TreeGridComponentHierarchyColumnPage extends Div {
         grid.addComponentHierarchyColumn(this::createTextField)
                 .setHeader("Header");
 
-        TreeData<String> data = new TreeGridStringDataGenerator().generate(3, 3,
-                100);
+        TreeData<String> data = new TreeGridStringDataBuilder()
+                .addLevel("Granddad", 3).addLevel("Dad", 3).addLevel("Son", 100)
+                .build();
 
         grid.setDataProvider(new TreeDataProvider<>(data));
 

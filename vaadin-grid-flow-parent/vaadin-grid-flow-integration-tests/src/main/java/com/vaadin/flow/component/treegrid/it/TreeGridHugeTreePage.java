@@ -55,8 +55,9 @@ public class TreeGridHugeTreePage extends Div {
     }
 
     private TreeDataProvider<String> initializeDataProvider(int dadCount) {
-        TreeData<String> data = new TreeGridStringDataGenerator().generate(3,
-                dadCount, 300);
+        TreeData<String> data = new TreeGridStringDataBuilder()
+                .addLevel("Granddad", 3).addLevel("Dad", dadCount)
+                .addLevel("Son", 300).build();
         return new TreeDataProvider<>(data);
     }
 }
