@@ -1454,6 +1454,67 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
+     * Creates a new grid using the given generic {@link DataProvider}.
+     *
+     * @param dataProvider
+     *            the data provider, not {@code null}
+     *
+     */
+    public Grid(DataProvider<T, Void> dataProvider) {
+        this();
+        setItems(dataProvider);
+    }
+
+    /**
+     * Creates a new grid using the given {@link BackEndDataProvider}.
+     *
+     * @param dataProvider
+     *            the data provider, not {@code null}
+     *
+     */
+    public Grid(BackEndDataProvider<T, Void> dataProvider) {
+        this();
+        setItems(dataProvider);
+    }
+
+    /**
+     * Creates a new grid using the given {@link InMemoryDataProvider}.
+     *
+     * @param inMemoryDataProvider
+     *            the data provider, not {@code null}
+     *
+     */
+    public Grid(InMemoryDataProvider<T> inMemoryDataProvider) {
+        this();
+        setItems(inMemoryDataProvider);
+    }
+
+    /**
+     * Creates a new grid using the given {@link ListDataProvider}.
+     *
+     * @param dataProvider
+     *            the data provider, not {@code null}
+     *
+     */
+    public Grid(ListDataProvider<T> dataProvider) {
+        this();
+        setItems(dataProvider);
+    }
+
+    /**
+     * Creates a new grid using the given collection of items using a
+     * {@link ListDataProvider}.
+     *
+     * @param items
+     *            the collection of items, not {@code null}
+     *
+     */
+    public Grid(Collection<T> items) {
+        this();
+        setItems(items);
+    }
+
+    /**
      * Creates a new instance, with the specified page size.
      * <p>
      * The page size influences the {@link Query#getLimit()} sent by the client,
