@@ -22,7 +22,7 @@ public class TreeGridScrollToPage extends Div {
         add(grid);
 
         TreeData<String> data = new TreeGridStringDataGenerator().generate(50,
-                3, 3);
+                20, 20);
 
         grid.setDataProvider(new TreeDataProvider<>(data));
 

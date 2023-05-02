@@ -61,7 +61,7 @@ public class TreeGridScrollToIT extends AbstractComponentIT {
         scrollToEndButton.click();
         Thread.sleep(2000);
 
-        Assert.assertEquals("Son 49/2/2",
+        Assert.assertEquals("Son 49/19/19",
                 getCellContent(grid.getLastVisibleRowIndex()));
     }
 
@@ -134,6 +134,20 @@ public class TreeGridScrollToIT extends AbstractComponentIT {
         Thread.sleep(2000);
 
         Assert.assertEquals("Son 30/1/1",
+                getCellContent(grid.getFirstVisibleRowIndex()));
+    }
+
+    @Test
+    public void expandAll_scrollToIndex10_1_1_correctFirstVisibleItem()
+            throws InterruptedException {
+        expandAllButton.click();
+
+        // Manual test on page triggers endless loop.
+        // This number depends on the viewport size.
+        scrollToIndexInput.sendKeys("10-1-1", Keys.TAB);
+        Thread.sleep(2000);
+
+        Assert.assertEquals("Son 10/1/1",
                 getCellContent(grid.getFirstVisibleRowIndex()));
     }
 
