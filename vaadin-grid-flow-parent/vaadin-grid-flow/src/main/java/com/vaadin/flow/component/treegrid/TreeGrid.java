@@ -1072,7 +1072,9 @@ public class TreeGrid<T> extends Grid<T>
             throw new IllegalArgumentException(
                     "At least one index should be provided.");
         }
-        getDataCommunicator().setRequestedRange(indexes[0], getPageSize());
+        int pageSize = getPageSize();
+        int firstRootIndex = indexes[0] - indexes[0] % pageSize;
+        getDataCommunicator().setRequestedRange(firstRootIndex, pageSize);
         String joinedIndexes = Arrays.stream(indexes).mapToObj(String::valueOf)
                 .collect(Collectors.joining(","));
         getUI().ifPresent(ui -> ui.beforeClientResponse(this,
