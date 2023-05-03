@@ -40,7 +40,6 @@ public class TreeGridItemDetailsRendererPage extends Div {
         TreeData<String> data = new TreeGridStringDataBuilder()
                 .addLevel("Granddad", 3).addLevel("Dad", 3).addLevel("Son", 100)
                 .build();
-
         grid.setDataProvider(new TreeDataProvider<>(data));
 
         grid.expand("Granddad 0");
