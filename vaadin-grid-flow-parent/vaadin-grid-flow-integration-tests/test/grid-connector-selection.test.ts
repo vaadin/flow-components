@@ -113,16 +113,21 @@ describe('grid connector - selection', () => {
         expect(grid.selectedItems[0].key).to.equal('0');
       });
 
-      it('should deselect an item', () => {
+      it('should update activeItem when selecting an item', () => {
         grid.$connector.doSelection([{ key: '0' }], false);
-        grid.$connector.doDeselection([{ key: '0' }], false);
-        expect(grid.selectedItems).to.be.empty;
+        expect(grid.activeItem).to.deep.equal({ key: '0', selected: true });
       });
 
-      it('should deselect the selected item when selecting null', () => {
+      it('should deselect the item when selecting null', () => {
         grid.$connector.doSelection([{ key: '0' }], false);
         grid.$connector.doSelection([null], false);
         expect(grid.selectedItems).to.be.empty;
+      });
+
+      it('should reset activeItem when selecting null', () => {
+        grid.$connector.doSelection([{ key: '0' }], false);
+        grid.$connector.doSelection([null], false);
+        expect(grid.activeItem).not.to.exist;
       });
 
       it('should not request server to select already selected items', () => {
