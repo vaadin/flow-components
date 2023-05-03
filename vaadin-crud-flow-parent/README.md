@@ -1,6 +1,6 @@
 # Crud component for Vaadin Flow
 
-This project is the Component wrapper implementation of [`<vaadin-crud>`](https://github.com/vaadin/vaadin-crud)
+This project is the Component wrapper implementation of [`<vaadin-crud>`](https://github.com/vaadin/web-components/tree/main/packages/crud)
 element for use from the server side with [Vaadin Flow](https://github.com/vaadin/flow).
 
 ## Using the component in a Flow application

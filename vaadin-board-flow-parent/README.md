@@ -1,6 +1,6 @@
 # Board component for Vaadin Flow
 
-This project is the Component wrapper implementation of [`<vaadin-board>`](https://github.com/vaadin/vaadin-board)
+This project is the Component wrapper implementation of [`<vaadin-board>`](https://github.com/vaadin/web-components/tree/main/packages/board)
 element for use from the server side with [Vaadin Flow](https://github.com/vaadin/flow).
 
 ## Using the component in a Flow application
