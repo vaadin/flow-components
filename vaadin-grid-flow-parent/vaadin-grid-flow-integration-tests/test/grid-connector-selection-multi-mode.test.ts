@@ -90,6 +90,12 @@ describe('grid connector - selection – multi mode', () => {
       expect(grid.selectedItems[1].key).to.equal('1');
     });
 
+    it('should not have duplicates in selectedItems after same item selection', () => {
+      grid.$connector.doSelection([{ key: '0' }], false);
+      grid.$connector.doSelection([{ key: '0' }], false);
+      expect(grid.selectedItems).to.have.lengthOf(1);
+    });
+
     it('should deselect items', () => {
       grid.$connector.doSelection([{ key: '0' }, { key: '1' }], false);
       grid.$connector.doDeselection([{ key: '1' }], false);
