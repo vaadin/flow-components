@@ -222,8 +222,7 @@ public class SideNavItem extends SideNavItemContainer
         }
         if (router == null) {
             throw new IllegalStateException(
-                    "Implicit router instance is not available. "
-                            + "Use overloaded method with explicit router parameter.");
+                    "Router instance is not available. Router is required for path resolution.");
         }
         return router;
     }
