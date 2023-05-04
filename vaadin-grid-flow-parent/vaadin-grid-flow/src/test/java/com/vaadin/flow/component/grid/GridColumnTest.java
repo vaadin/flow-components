@@ -199,6 +199,15 @@ public class GridColumnTest {
     }
 
     @Test
+    public void setRendererReturnsColumn() {
+        Renderer<String> newRenderer = LitRenderer
+                .<String> of("<span>${text}</span>")
+                .withProperty("text", ValueProvider.identity());
+        Grid.Column<String> result = fourthColumn.setRenderer(newRenderer);
+        Assert.assertEquals(fourthColumn, result);
+    }
+
+    @Test
     public void addColumn_defaultTextAlign() {
         Grid<Person> grid = new Grid<>();
 

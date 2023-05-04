@@ -536,7 +536,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          *
          * @since 24.1
          */
-        public void setRenderer(Renderer<T> renderer) {
+        public Column<T> setRenderer(Renderer<T> renderer) {
             this.renderer = Objects.requireNonNull(renderer,
                     "Renderer must not be null.");
 
@@ -571,6 +571,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             }
 
             getGrid().getDataCommunicator().reset();
+            return this;
         }
 
         /**
