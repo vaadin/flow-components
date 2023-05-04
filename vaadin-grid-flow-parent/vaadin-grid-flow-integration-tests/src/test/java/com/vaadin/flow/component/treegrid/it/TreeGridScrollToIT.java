@@ -44,7 +44,7 @@ public class TreeGridScrollToIT extends AbstractComponentIT {
     @Before
     public void init() {
         open();
-        waitUntil(e -> $(TreeGridElement.class).exists(), 500);
+        waitUntil(e -> $(TreeGridElement.class).exists(), 2);
         grid = $(TreeGridElement.class).first();
         expandAllButton = $("button").id("expand-all");
         scrollToStartButton = $("button").id("scroll-to-start");
@@ -54,15 +54,16 @@ public class TreeGridScrollToIT extends AbstractComponentIT {
     }
 
     @Test
-    public void expandAll_scrollToEnd_correctLastVisibleItem()
-            throws InterruptedException {
+    public void expandAll_scrollToEnd_correctLastVisibleItem() {
         expandAllButton.click();
 
         scrollToEndButton.click();
-        Thread.sleep(2000);
 
-        Assert.assertEquals("Son 49/19/19",
-                getCellContent(grid.getLastVisibleRowIndex()));
+        waitUntil(e -> {
+            int lastVisibleRow = grid.getLastVisibleRowIndex();
+            return grid.hasRow(lastVisibleRow)
+                    && "Son 49/19/19".equals(getCellContent(lastVisibleRow));
+        }, 2);
     }
 
     @Test
@@ -86,15 +87,16 @@ public class TreeGridScrollToIT extends AbstractComponentIT {
     }
 
     @Test
-    public void expandAll_scrollToIndex30_correctFirstVisibleItem()
-            throws InterruptedException {
+    public void expandAll_scrollToIndex30_correctFirstVisibleItem() {
         expandAllButton.click();
 
         scrollToIndexInput.sendKeys("30", Keys.TAB);
-        Thread.sleep(2000);
 
-        Assert.assertEquals("Granddad 30",
-                getCellContent(grid.getFirstVisibleRowIndex()));
+        waitUntil(e -> {
+            int firstVisibleRow = grid.getFirstVisibleRowIndex();
+            return grid.hasRow(firstVisibleRow)
+                    && "Granddad 30".equals(getCellContent(firstVisibleRow));
+        }, 2);
     }
 
     @Test
@@ -106,15 +108,16 @@ public class TreeGridScrollToIT extends AbstractComponentIT {
     }
 
     @Test
-    public void expandAll_scrollToIndex30_1_correctFirstVisibleItem()
-            throws InterruptedException {
+    public void expandAll_scrollToIndex30_1_correctFirstVisibleItem() {
         expandAllButton.click();
 
         scrollToIndexInput.sendKeys("30-1", Keys.TAB);
-        Thread.sleep(2000);
 
-        Assert.assertEquals("Dad 30/1",
-                getCellContent(grid.getFirstVisibleRowIndex()));
+        waitUntil(e -> {
+            int firstVisibleRow = grid.getFirstVisibleRowIndex();
+            return grid.hasRow(firstVisibleRow)
+                    && "Dad 30/1".equals(getCellContent(firstVisibleRow));
+        }, 2);
     }
 
     @Test
@@ -126,29 +129,31 @@ public class TreeGridScrollToIT extends AbstractComponentIT {
     }
 
     @Test
-    public void expandAll_scrollToIndex30_1_1_correctFirstVisibleItem()
-            throws InterruptedException {
+    public void expandAll_scrollToIndex30_1_1_correctFirstVisibleItem() {
         expandAllButton.click();
 
         scrollToIndexInput.sendKeys("30-1-1", Keys.TAB);
-        Thread.sleep(2000);
 
-        Assert.assertEquals("Son 30/1/1",
-                getCellContent(grid.getFirstVisibleRowIndex()));
+        waitUntil(e -> {
+            int firstVisibleRow = grid.getFirstVisibleRowIndex();
+            return grid.hasRow(firstVisibleRow)
+                    && "Son 30/1/1".equals(getCellContent(firstVisibleRow));
+        }, 2);
     }
 
     @Test
-    public void expandAll_scrollToIndex10_1_1_correctFirstVisibleItem()
-            throws InterruptedException {
+    public void expandAll_scrollToIndex10_1_1_correctFirstVisibleItem() {
         expandAllButton.click();
 
         // Manual test on page triggers endless loop.
         // This number depends on the viewport size.
         scrollToIndexInput.sendKeys("10-1-1", Keys.TAB);
-        Thread.sleep(2000);
 
-        Assert.assertEquals("Son 10/1/1",
-                getCellContent(grid.getFirstVisibleRowIndex()));
+        waitUntil(e -> {
+            int firstVisibleRow = grid.getFirstVisibleRowIndex();
+            return grid.hasRow(firstVisibleRow)
+                    && "Son 10/1/1".equals(getCellContent(firstVisibleRow));
+        }, 2);
     }
 
     private String getCellContent(int rowIndex) {
