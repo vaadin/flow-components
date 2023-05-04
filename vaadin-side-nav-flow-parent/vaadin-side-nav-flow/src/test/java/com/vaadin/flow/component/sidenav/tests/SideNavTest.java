@@ -29,15 +29,6 @@ import static com.vaadin.flow.component.sidenav.tests.SideNavTest.SetLabelOption
 import static com.vaadin.flow.component.sidenav.tests.SideNavTest.SetLabelOption.SET_LABEL_BEFORE_ITEMS_CREATION;
 import static com.vaadin.flow.component.sidenav.tests.SideNavTest.SetLabelOption.SET_LABEL_DURING_ITEMS_CREATION;
 import static com.vaadin.flow.component.sidenav.tests.SideNavTest.SetLabelOption.SET_NO_LABEL;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.hasItem;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.isEmptyString;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.empty;
 
 public class SideNavTest {
 
@@ -52,14 +43,14 @@ public class SideNavTest {
     public void setCollapsible_isCollapsible() {
         sideNav.setCollapsible(true);
 
-        assertThat(sideNav.isCollapsible(), is(true));
+        Assert.assertTrue(sideNav.isCollapsible());
     }
 
     @Test
     public void setNotCollapsible_isNotCollapsible() {
         sideNav.setCollapsible(false);
 
-        assertThat(sideNav.isCollapsible(), is(false));
+        Assert.assertFalse(sideNav.isCollapsible());
     }
 
     @Test
@@ -67,32 +58,32 @@ public class SideNavTest {
         Assert.assertNull(sideNav.getLabel());
         sideNav.setLabel("Navigation test");
 
-        assertThat(sideNav.getLabel(), equalTo("Navigation test"));
+        Assert.assertEquals("Navigation test", sideNav.getLabel());
     }
 
     @Test
     public void createdWithLabel_labelIsSet() {
         final SideNav nav = new SideNav("Test label");
 
-        assertThat(nav.getLabel(), equalTo("Test label"));
+        Assert.assertEquals("Test label", nav.getLabel());
     }
 
     @Test
     public void addSingleItem_itemAdded() {
-        assertThat(sideNav.getElement().getChildCount(), equalTo(0));
+        Assert.assertEquals(0, sideNav.getElement().getChildCount());
 
         sideNav.addItem(new SideNavItem("Test"));
 
-        assertThat(sideNav.getElement().getChildCount(), equalTo(1));
+        Assert.assertEquals(1, sideNav.getElement().getChildCount());
     }
 
     @Test
     public void addTwoItemsAtOnce_itemsAdded() {
-        assertThat(sideNav.getElement().getChildCount(), equalTo(0));
+        Assert.assertEquals(0, sideNav.getElement().getChildCount());
 
         sideNav.addItem(new SideNavItem("Test1"), new SideNavItem("Test2"));
 
-        assertThat(sideNav.getElement().getChildCount(), equalTo(2));
+        Assert.assertEquals(2, sideNav.getElement().getChildCount());
     }
 
     @Test
@@ -100,8 +91,8 @@ public class SideNavTest {
         final SideNavItem testItem = new SideNavItem("testItem");
         sideNav.addItemAsFirst(testItem);
 
-        assertThat(sideNav.getItems(), hasSize(1));
-        assertThat(sideNav.getItems().get(0), equalTo(testItem));
+        Assert.assertEquals(1, sideNav.getItems().size());
+        Assert.assertEquals(testItem, sideNav.getItems().get(0));
     }
 
     @Test
@@ -111,8 +102,8 @@ public class SideNavTest {
         final SideNavItem testItem = new SideNavItem("testItem");
         sideNav.addItemAsFirst(testItem);
 
-        assertThat(sideNav.getItems(), hasSize(1));
-        assertThat(sideNav.getItems().get(0), equalTo(testItem));
+        Assert.assertEquals(1, sideNav.getItems().size());
+        Assert.assertEquals(testItem, sideNav.getItems().get(0));
     }
 
     @Test
@@ -122,8 +113,8 @@ public class SideNavTest {
         final SideNavItem testItem = new SideNavItem("testItem");
         sideNav.addItemAsFirst(testItem);
 
-        assertThat(sideNav.getItems(), hasSize(initialItems.size() + 1));
-        assertThat(sideNav.getItems().get(0), equalTo(testItem));
+        Assert.assertEquals(initialItems.size() + 1, sideNav.getItems().size());
+        Assert.assertEquals(testItem, sideNav.getItems().get(0));
     }
 
     @Test
@@ -134,8 +125,8 @@ public class SideNavTest {
         final SideNavItem testItem = new SideNavItem("testItem");
         sideNav.addItemAsFirst(testItem);
 
-        assertThat(sideNav.getItems(), hasSize(initialItems.size() + 1));
-        assertThat(sideNav.getItems().get(0), equalTo(testItem));
+        Assert.assertEquals(initialItems.size() + 1, sideNav.getItems().size());
+        Assert.assertEquals(testItem, sideNav.getItems().get(0));
     }
 
     @Test
@@ -146,8 +137,8 @@ public class SideNavTest {
         final SideNavItem testItem = new SideNavItem("testItem");
         sideNav.addItemAsFirst(testItem);
 
-        assertThat(sideNav.getItems(), hasSize(initialItems.size() + 1));
-        assertThat(sideNav.getItems().get(0), equalTo(testItem));
+        Assert.assertEquals(initialItems.size() + 1, sideNav.getItems().size());
+        Assert.assertEquals(testItem, sideNav.getItems().get(0));
     }
 
     @Test
@@ -158,8 +149,8 @@ public class SideNavTest {
         final SideNavItem testItem = new SideNavItem("testItem");
         sideNav.addItemAsFirst(testItem);
 
-        assertThat(sideNav.getItems(), hasSize(initialItems.size() + 1));
-        assertThat(sideNav.getItems().get(0), equalTo(testItem));
+        Assert.assertEquals(initialItems.size() + 1, sideNav.getItems().size());
+        Assert.assertEquals(testItem, sideNav.getItems().get(0));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -188,8 +179,8 @@ public class SideNavTest {
         final SideNavItem testItem = new SideNavItem("testItem");
         sideNav.addItemAtIndex(0, testItem);
 
-        assertThat(sideNav.getItems(), hasSize(1));
-        assertThat(sideNav.getItems().get(0), equalTo(testItem));
+        Assert.assertEquals(1, sideNav.getItems().size());
+        Assert.assertEquals(testItem, sideNav.getItems().get(0));
     }
 
     @Test
@@ -199,8 +190,8 @@ public class SideNavTest {
         final SideNavItem testItem = new SideNavItem("testItem");
         sideNav.addItemAtIndex(0, testItem);
 
-        assertThat(sideNav.getItems(), hasSize(1));
-        assertThat(sideNav.getItems().get(0), equalTo(testItem));
+        Assert.assertEquals(1, sideNav.getItems().size());
+        Assert.assertEquals(testItem, sideNav.getItems().get(0));
     }
 
     @Test
@@ -210,8 +201,8 @@ public class SideNavTest {
         final SideNavItem testItem = new SideNavItem("testItem");
         sideNav.addItemAtIndex(2, testItem);
 
-        assertThat(sideNav.getItems(), hasSize(items.size() + 1));
-        assertThat(sideNav.getItems().get(2), equalTo(testItem));
+        Assert.assertEquals(items.size() + 1, sideNav.getItems().size());
+        Assert.assertEquals(testItem, sideNav.getItems().get(2));
     }
 
     @Test
@@ -221,9 +212,9 @@ public class SideNavTest {
         final SideNavItem testItem = new SideNavItem("testItem");
         sideNav.addItemAtIndex(sideNav.getItems().size(), testItem);
 
-        assertThat(sideNav.getItems(), hasSize(items.size() + 1));
-        assertThat(sideNav.getItems().get(sideNav.getItems().size() - 1),
-                equalTo(testItem));
+        Assert.assertEquals(items.size() + 1, sideNav.getItems().size());
+        Assert.assertEquals(testItem,
+                sideNav.getItems().get(sideNav.getItems().size() - 1));
     }
 
     @Test
@@ -234,8 +225,8 @@ public class SideNavTest {
         final SideNavItem testItem = new SideNavItem("testItem");
         sideNav.addItemAtIndex(2, testItem);
 
-        assertThat(sideNav.getItems(), hasSize(items.size() + 1));
-        assertThat(sideNav.getItems().get(2), equalTo(testItem));
+        Assert.assertEquals(items.size() + 1, sideNav.getItems().size());
+        Assert.assertEquals(testItem, sideNav.getItems().get(2));
     }
 
     @Test
@@ -246,9 +237,9 @@ public class SideNavTest {
         final SideNavItem testItem = new SideNavItem("testItem");
         sideNav.addItemAtIndex(sideNav.getItems().size(), testItem);
 
-        assertThat(sideNav.getItems(), hasSize(items.size() + 1));
-        assertThat(sideNav.getItems().get(sideNav.getItems().size() - 1),
-                equalTo(testItem));
+        Assert.assertEquals(items.size() + 1, sideNav.getItems().size());
+        Assert.assertEquals(testItem,
+                sideNav.getItems().get(sideNav.getItems().size() - 1));
     }
 
     @Test
@@ -259,8 +250,8 @@ public class SideNavTest {
         final SideNavItem testItem = new SideNavItem("testItem");
         sideNav.addItemAtIndex(2, testItem);
 
-        assertThat(sideNav.getItems(), hasSize(items.size() + 1));
-        assertThat(sideNav.getItems().get(2), equalTo(testItem));
+        Assert.assertEquals(items.size() + 1, sideNav.getItems().size());
+        Assert.assertEquals(testItem, sideNav.getItems().get(2));
     }
 
     @Test
@@ -271,9 +262,9 @@ public class SideNavTest {
         final SideNavItem testItem = new SideNavItem("testItem");
         sideNav.addItemAtIndex(sideNav.getItems().size(), testItem);
 
-        assertThat(sideNav.getItems(), hasSize(items.size() + 1));
-        assertThat(sideNav.getItems().get(sideNav.getItems().size() - 1),
-                equalTo(testItem));
+        Assert.assertEquals(items.size() + 1, sideNav.getItems().size());
+        Assert.assertEquals(testItem,
+                sideNav.getItems().get(sideNav.getItems().size() - 1));
     }
 
     @Test
@@ -284,8 +275,8 @@ public class SideNavTest {
         final SideNavItem testItem = new SideNavItem("testItem");
         sideNav.addItemAtIndex(1, testItem);
 
-        assertThat(sideNav.getItems(), hasSize(items.size() + 1));
-        assertThat(sideNav.getItems().get(1), equalTo(testItem));
+        Assert.assertEquals(items.size() + 1, sideNav.getItems().size());
+        Assert.assertEquals(testItem, sideNav.getItems().get(1));
     }
 
     @Test
@@ -296,8 +287,8 @@ public class SideNavTest {
         final SideNavItem testItem = new SideNavItem("testItem");
         sideNav.addItemAtIndex(2, testItem);
 
-        assertThat(sideNav.getItems(), hasSize(items.size() + 1));
-        assertThat(sideNav.getItems().get(2), equalTo(testItem));
+        Assert.assertEquals(items.size() + 1, sideNav.getItems().size());
+        Assert.assertEquals(testItem, sideNav.getItems().get(2));
     }
 
     @Test
@@ -306,7 +297,7 @@ public class SideNavTest {
 
         sideNav.removeAll();
 
-        assertThat(sideNav.getItems(), is(empty()));
+        Assert.assertTrue(sideNav.getItems().isEmpty());
     }
 
     @Test
@@ -315,7 +306,7 @@ public class SideNavTest {
 
         sideNav.removeAll();
 
-        assertThat(sideNav.getLabel(), not(isEmptyString()));
+        Assert.assertFalse(sideNav.getLabel().isEmpty());
     }
 
     @Test
@@ -325,8 +316,8 @@ public class SideNavTest {
 
         sideNav.remove(sideNavItems.get(2));
 
-        assertThat(sideNav.getItems(), hasSize(sideNavItems.size() - 1));
-        assertThat(sideNav.getItems(), not(hasItem(sideNavItems.get(2))));
+        Assert.assertEquals(sideNavItems.size() - 1, sideNav.getItems().size());
+        Assert.assertFalse(sideNav.getItems().contains(sideNavItems.get(2)));
     }
 
     @Test
@@ -336,9 +327,9 @@ public class SideNavTest {
 
         sideNav.remove(sideNavItems.get(1), sideNavItems.get(2));
 
-        assertThat(sideNav.getItems(), hasSize(sideNavItems.size() - 2));
-        assertThat(sideNav.getItems(), not(hasItem(sideNavItems.get(1))));
-        assertThat(sideNav.getItems(), not(hasItem(sideNavItems.get(2))));
+        Assert.assertEquals(sideNavItems.size() - 2, sideNav.getItems().size());
+        Assert.assertFalse(sideNav.getItems().contains(sideNavItems.get(1)));
+        Assert.assertFalse(sideNav.getItems().contains(sideNavItems.get(2)));
     }
 
     @Test
@@ -348,7 +339,7 @@ public class SideNavTest {
 
         sideNav.remove(new SideNavItem("Foreign item"));
 
-        assertThat(sideNav.getItems(), contains(sideNavItems.toArray()));
+        Assert.assertEquals(sideNav.getItems(), sideNavItems);
     }
 
     enum SetLabelOption {

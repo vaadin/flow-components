@@ -26,18 +26,6 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.hasItem;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.isEmptyString;
-
 public class SideNavItemTest {
 
     private SideNavItem sideNavItem;
@@ -49,32 +37,32 @@ public class SideNavItemTest {
 
     @Test
     public void changeLabel_labelChanged() {
-        Assert.assertEquals(sideNavItem.getLabel(), "Item");
+        Assert.assertEquals("Item", sideNavItem.getLabel());
         sideNavItem.setLabel("Item Changed");
-        Assert.assertEquals(sideNavItem.getLabel(), "Item Changed");
+        Assert.assertEquals("Item Changed", sideNavItem.getLabel());
     }
 
     @Test
     public void createWithNoPath_pathNotSet() {
         final SideNavItem item = new SideNavItem("Test");
 
-        assertThat(item.getPath(), is(nullValue()));
+        Assert.assertNull(item.getPath());
     }
 
     @Test
     public void setNullStringPath_pathAttributeRemoved() {
         sideNavItem.setPath((String) null);
 
-        assertThat(sideNavItem.getElement().hasAttribute("path"), is(false));
-        assertThat(sideNavItem.getPath(), nullValue());
+        Assert.assertFalse(sideNavItem.getElement().hasAttribute("path"));
+        Assert.assertNull(sideNavItem.getPath());
     }
 
     @Test
     public void setNullComponentPath_pathAttributeRemoved() {
         sideNavItem.setPath((Class<? extends Component>) null);
 
-        assertThat(sideNavItem.getElement().hasAttribute("path"), is(false));
-        assertThat(sideNavItem.getPath(), nullValue());
+        Assert.assertFalse(sideNavItem.getElement().hasAttribute("path"));
+        Assert.assertNull(sideNavItem.getPath());
     }
 
     @Test
@@ -82,41 +70,41 @@ public class SideNavItemTest {
         final SideNavItem item = new SideNavItem("Test");
         item.setPath("");
 
-        assertThat(item.getPath(), equalTo(""));
-        assertThat(sideNavItem.getElement().hasAttribute("path"), is(true));
+        Assert.assertEquals("", item.getPath());
+        Assert.assertTrue(sideNavItem.getElement().hasAttribute("path"));
     }
 
     @Test
     public void returnsExpectedPath() {
-        assertThat(sideNavItem.getPath(), equalTo("/path"));
+        Assert.assertEquals("/path", sideNavItem.getPath());
     }
 
     @Test
     public void addSingleItem_itemAdded() {
         // one child for the label element
-        assertThat(sideNavItem.getElement().getChildCount(), equalTo(1));
+        Assert.assertEquals(1, sideNavItem.getElement().getChildCount());
 
         sideNavItem.addItem(new SideNavItem("Test"));
 
-        assertThat(sideNavItem.getElement().getChildCount(), equalTo(2));
+        Assert.assertEquals(2, sideNavItem.getElement().getChildCount());
     }
 
     @Test
     public void addSingleItem_itemHasCorrectSlot() {
         sideNavItem.addItem(new SideNavItem("Test"));
 
-        assertThat(sideNavItem.getElement().getChild(1).getAttribute("slot"),
-                equalTo("children"));
+        Assert.assertEquals("children",
+                sideNavItem.getElement().getChild(1).getAttribute("slot"));
     }
 
     @Test
     public void addTwoItemsAtOnce_itemsAdded() {
         // one child for the label element
-        assertThat(sideNavItem.getElement().getChildCount(), equalTo(1));
+        Assert.assertEquals(1, sideNavItem.getElement().getChildCount());
 
         sideNavItem.addItem(new SideNavItem("Test1"), new SideNavItem("Test2"));
 
-        assertThat(sideNavItem.getElement().getChildCount(), equalTo(3));
+        Assert.assertEquals(3, sideNavItem.getElement().getChildCount());
     }
 
     @Test
@@ -124,8 +112,8 @@ public class SideNavItemTest {
         final SideNavItem testItem = new SideNavItem("testItem");
         sideNavItem.addItemAsFirst(testItem);
 
-        assertThat(sideNavItem.getItems(), hasSize(1));
-        assertThat(sideNavItem.getItems().get(0), equalTo(testItem));
+        Assert.assertEquals(1, sideNavItem.getItems().size());
+        Assert.assertEquals(testItem, sideNavItem.getItems().get(0));
     }
 
     @Test
@@ -135,8 +123,9 @@ public class SideNavItemTest {
         final SideNavItem testItem = new SideNavItem("testItem");
         sideNavItem.addItemAsFirst(testItem);
 
-        assertThat(sideNavItem.getItems(), hasSize(initialItems.size() + 1));
-        assertThat(sideNavItem.getItems().get(0), equalTo(testItem));
+        Assert.assertEquals(initialItems.size() + 1,
+                sideNavItem.getItems().size());
+        Assert.assertEquals(testItem, sideNavItem.getItems().get(0));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -164,8 +153,8 @@ public class SideNavItemTest {
         final SideNavItem testItem = new SideNavItem("testItem");
         sideNavItem.addItemAtIndex(0, testItem);
 
-        assertThat(sideNavItem.getItems(), hasSize(1));
-        assertThat(sideNavItem.getItems().get(0), equalTo(testItem));
+        Assert.assertEquals(1, sideNavItem.getItems().size());
+        Assert.assertEquals(testItem, sideNavItem.getItems().get(0));
     }
 
     @Test
@@ -175,8 +164,8 @@ public class SideNavItemTest {
         final SideNavItem testItem = new SideNavItem("testItem");
         sideNavItem.addItemAtIndex(2, testItem);
 
-        assertThat(sideNavItem.getItems(), hasSize(items.size() + 1));
-        assertThat(sideNavItem.getItems().get(2), equalTo(testItem));
+        Assert.assertEquals(items.size() + 1, sideNavItem.getItems().size());
+        Assert.assertEquals(testItem, sideNavItem.getItems().get(2));
     }
 
     @Test
@@ -186,8 +175,8 @@ public class SideNavItemTest {
         final SideNavItem testItem = new SideNavItem("testItem");
         sideNavItem.addItemAtIndex(2, testItem);
 
-        assertThat(testItem.getElement().getAttribute("slot"),
-                equalTo("children"));
+        Assert.assertEquals("children",
+                testItem.getElement().getAttribute("slot"));
     }
 
     @Test
@@ -197,8 +186,8 @@ public class SideNavItemTest {
         final SideNavItem testItem = new SideNavItem("testItem");
         sideNavItem.addItemAtIndex(2, testItem);
 
-        assertThat(sideNavItem.getItems(), hasSize(items.size() + 1));
-        assertThat(sideNavItem.getItems().get(2), equalTo(testItem));
+        Assert.assertEquals(items.size() + 1, sideNavItem.getItems().size());
+        Assert.assertEquals(testItem, sideNavItem.getItems().get(2));
     }
 
     @Test
@@ -208,8 +197,8 @@ public class SideNavItemTest {
         final SideNavItem testItem = new SideNavItem("testItem");
         sideNavItem.addItemAtIndex(3, testItem);
 
-        assertThat(sideNavItem.getItems(), hasSize(items.size() + 1));
-        assertThat(sideNavItem.getItems().get(3), equalTo(testItem));
+        Assert.assertEquals(items.size() + 1, sideNavItem.getItems().size());
+        Assert.assertEquals(testItem, sideNavItem.getItems().get(3));
     }
 
     @Test
@@ -219,10 +208,9 @@ public class SideNavItemTest {
         final SideNavItem testItem = new SideNavItem("testItem");
         sideNavItem.addItemAtIndex(sideNavItem.getItems().size(), testItem);
 
-        assertThat(sideNavItem.getItems(), hasSize(items.size() + 1));
-        assertThat(
-                sideNavItem.getItems().get(sideNavItem.getItems().size() - 1),
-                equalTo(testItem));
+        Assert.assertEquals(items.size() + 1, sideNavItem.getItems().size());
+        Assert.assertEquals(testItem,
+                sideNavItem.getItems().get(sideNavItem.getItems().size() - 1));
     }
 
     @Test
@@ -231,7 +219,7 @@ public class SideNavItemTest {
 
         sideNavItem.removeAll();
 
-        assertThat(sideNavItem.getItems(), is(empty()));
+        Assert.assertTrue(sideNavItem.getItems().isEmpty());
     }
 
     @Test
@@ -240,7 +228,7 @@ public class SideNavItemTest {
 
         sideNavItem.removeAll();
 
-        assertThat(sideNavItem.getLabel(), not(isEmptyString()));
+        Assert.assertFalse(sideNavItem.getLabel().isEmpty());
     }
 
     @Test
@@ -249,8 +237,8 @@ public class SideNavItemTest {
 
         sideNavItem.removeAll();
 
-        assertThat(sideNavItem.getPrefixComponent(), notNullValue());
-        assertThat(sideNavItem.getSuffixComponent(), notNullValue());
+        Assert.assertNotNull(sideNavItem.getPrefixComponent());
+        Assert.assertNotNull(sideNavItem.getSuffixComponent());
     }
 
     @Test
@@ -259,8 +247,10 @@ public class SideNavItemTest {
 
         sideNavItem.remove(sideNavItems.get(2));
 
-        assertThat(sideNavItem.getItems(), hasSize(sideNavItems.size() - 1));
-        assertThat(sideNavItem.getItems(), not(hasItem(sideNavItems.get(2))));
+        Assert.assertEquals(sideNavItems.size() - 1,
+                sideNavItem.getItems().size());
+        Assert.assertFalse(
+                sideNavItem.getItems().contains(sideNavItems.get(2)));
     }
 
     @Test
@@ -269,9 +259,12 @@ public class SideNavItemTest {
 
         sideNavItem.remove(sideNavItems.get(1), sideNavItems.get(2));
 
-        assertThat(sideNavItem.getItems(), hasSize(sideNavItems.size() - 2));
-        assertThat(sideNavItem.getItems(), not(hasItem(sideNavItems.get(1))));
-        assertThat(sideNavItem.getItems(), not(hasItem(sideNavItems.get(2))));
+        Assert.assertEquals(sideNavItems.size() - 2,
+                sideNavItem.getItems().size());
+        Assert.assertFalse(
+                sideNavItem.getItems().contains(sideNavItems.get(1)));
+        Assert.assertFalse(
+                sideNavItem.getItems().contains(sideNavItems.get(2)));
     }
 
     @Test
@@ -280,7 +273,7 @@ public class SideNavItemTest {
 
         sideNavItem.remove(new SideNavItem("Foreign item"));
 
-        assertThat(sideNavItem.getItems(), contains(sideNavItems.toArray()));
+        Assert.assertEquals(sideNavItem.getItems(), sideNavItems);
     }
 
     @Test
@@ -289,20 +282,20 @@ public class SideNavItemTest {
         final SideNavItem item = new SideNavItem("Test item", "test-path",
                 prefixComponent);
 
-        assertThat(item.getPath(), equalTo("test-path"));
-        assertThat(item.getPrefixComponent(), equalTo(prefixComponent));
+        Assert.assertEquals("test-path", item.getPath());
+        Assert.assertEquals(prefixComponent, item.getPrefixComponent());
     }
 
     @Test
     public void isCollapsedByDefault() {
-        assertThat(sideNavItem.isExpanded(), equalTo(false));
+        Assert.assertFalse(sideNavItem.isExpanded());
     }
 
     @Test
     public void setExpanded_isExpanded() {
         sideNavItem.setExpanded(true);
 
-        assertThat(sideNavItem.isExpanded(), equalTo(true));
+        Assert.assertTrue(sideNavItem.isExpanded());
     }
 
     @Test
@@ -310,7 +303,7 @@ public class SideNavItemTest {
         sideNavItem.setExpanded(true);
         sideNavItem.setExpanded(false);
 
-        assertThat(sideNavItem.isExpanded(), equalTo(false));
+        Assert.assertFalse(sideNavItem.isExpanded());
     }
 
     private List<SideNavItem> setupItems() {
