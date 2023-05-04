@@ -153,14 +153,8 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             return;
           }
           if (selectionMode === 'SINGLE') {
-            grid.selectedItems = [];
             selectedKeys = {};
           }
-
-          // For single selection mode, "deselect all" selects a single item `null`,
-          // which should not end up in the selected items
-          const sanitizedItems = items.filter((item) => item !== null);
-          grid.selectedItems = grid.selectedItems.concat(sanitizedItems);
 
           items.forEach((item) => {
             if (item) {
@@ -170,11 +164,16 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
                 grid.$server.select(item.key);
               }
             }
+
+            // FYI: In single selection mode, the server can send items = [null]
+            // which means a "Deselect All" command.
             const isSelectedItemDifferentOrNull = !grid.activeItem || !item || item.key != grid.activeItem.key;
             if (!userOriginated && selectionMode === 'SINGLE' && isSelectedItemDifferentOrNull) {
               grid.activeItem = item;
             }
           });
+
+          grid.selectedItems = Object.values(selectedKeys);
         });
 
         grid.$connector.doDeselection = tryCatchWrapper(function (items, userOriginated) {
