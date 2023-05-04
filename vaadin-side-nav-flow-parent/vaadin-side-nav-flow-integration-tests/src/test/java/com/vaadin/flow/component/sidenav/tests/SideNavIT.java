@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.sidenav.tests;
 
-import java.net.URL;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

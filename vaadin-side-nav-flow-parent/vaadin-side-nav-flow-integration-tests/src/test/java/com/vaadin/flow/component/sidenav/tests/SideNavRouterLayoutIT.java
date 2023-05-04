@@ -19,7 +19,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.vaadin.flow.component.html.testbench.NativeButtonElement;
 import com.vaadin.flow.component.sidenav.testbench.SideNavElement;
 import com.vaadin.flow.component.sidenav.testbench.SideNavItemElement;
 import com.vaadin.flow.testutil.TestPath;
