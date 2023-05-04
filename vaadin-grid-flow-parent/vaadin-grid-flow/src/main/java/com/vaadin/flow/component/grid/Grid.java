@@ -574,23 +574,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
 
         /**
-         * Set the renderer and the value provider for this column.
-         *
-         * @param valueProvider
-         *            the value provider, used for sorting
-         * @param renderer
-         *            the new renderer to be used for this column, must not be
-         *            {@code null}
-         *
-         * @since 24.1
-         */
-        public <V extends Comparable<? super V>> void setRenderer(
-                ValueProvider<T, V> valueProvider, Renderer<T> renderer) {
-            this.setRenderer(renderer);
-            this.setComparator(valueProvider);
-        }
-
-        /**
          * Sets the width of this column as a CSS-string.
          *
          * @see #setFlexGrow(int)

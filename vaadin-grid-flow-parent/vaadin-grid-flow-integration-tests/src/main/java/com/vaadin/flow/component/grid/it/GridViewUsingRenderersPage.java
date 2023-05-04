@@ -149,15 +149,8 @@ public class GridViewUsingRenderersPage extends LegacyTestView {
                 clickEvent -> priceColumn.setRenderer(litRenderer));
         swapRenderersButton.setId("btn-swap-renderers");
 
-        NativeButton swapRendererWithValueProviderButton = new NativeButton(
-                "Swap price column renderer and value provider",
-                clickEvent -> priceColumn.setRenderer(Item::getPrice,
-                        litRenderer));
-        swapRendererWithValueProviderButton
-                .setId("btn-swap-renderer-with-value-provider");
-
         addCard("Using renderers", "Using basic renderers", grid,
-                swapRenderersButton, swapRendererWithValueProviderButton);
+                swapRenderersButton);
     }
 
     private static List<Item> getShoppingCart() {

@@ -81,36 +81,6 @@ public class GridViewUsingRenderersIT extends AbstractComponentIT {
     }
 
     @Test
-    public void swapRendererWithValueProvider() {
-        var priceSorter = grid.getHeaderCell(1).$("vaadin-grid-sorter").first();
-        // content should not get sorted as there is no value provider initially
-        priceSorter.click();
-        Assert.assertEquals("Item 1", grid.getCell(0, 0).getText());
-        Assert.assertEquals("Item 2", grid.getCell(1, 0).getText());
-        // reset sorter by clicking twice more
-        priceSorter.click();
-        priceSorter.click();
-        // swap renderer and value provider
-        TestBenchElement swapRendererWithValueProvider = $("button")
-                .id("btn-swap-renderer-with-value-provider");
-        swapRendererWithValueProvider.click();
-        // check content is rendered using the new renderer
-        Assert.assertEquals("US$73.10", grid.getCell(0, 1).getText().trim());
-        Assert.assertEquals("US$24.05", grid.getCell(1, 1).getText().trim());
-        assertRendereredContent("<span style=\"color: red\">US$73.10</span>",
-                TestHelper.stripComments(grid.getCell(0, 1).getInnerHTML()));
-        assertRendereredContent("<span style=\"color: blue\">US$24.05</span>",
-                TestHelper.stripComments(grid.getCell(1, 1).getInnerHTML()));
-        // now check content is ordered using the new value provider
-        priceSorter.click();
-        Assert.assertEquals("Item 88", grid.getCell(0, 0).getText());
-        Assert.assertEquals("Item 36", grid.getCell(1, 0).getText());
-        priceSorter.click();
-        Assert.assertEquals("Item 58", grid.getCell(0, 0).getText());
-        Assert.assertEquals("Item 69", grid.getCell(1, 0).getText());
-    }
-
-    @Test
     public void setRendererAfterSettingEditorComponent() {
         Assert.assertEquals("<b>Item 1</b>",
                 TestHelper.stripComments(grid.getCell(0, 0).getInnerHTML()));
@@ -129,6 +99,7 @@ public class GridViewUsingRenderersIT extends AbstractComponentIT {
         grid.getCell(0, 6).$(ButtonElement.class).first().click();
         NumberFieldElement editorComponent = grid.getCell(0, 1)
                 .$(NumberFieldElement.class).first();
+        Assert.assertNotNull(editorComponent);
         // close editor
         grid.getCell(0, 6).$(ButtonElement.class).last().click();
         swapRenderers.click();
