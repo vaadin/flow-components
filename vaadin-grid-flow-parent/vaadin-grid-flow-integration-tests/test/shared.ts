@@ -1,6 +1,9 @@
 import './env-setup.js';
 import '@vaadin/grid/all-imports.js';
 import '../frontend/generated/jar-resources/gridConnector.js';
+import '../frontend/generated/jar-resources/vaadin-grid-flow-selection-column.js';
+// For some reason vaadin-grid-flow-selection-column doesn't import vaadin-checkbox
+import '@vaadin/checkbox';
 import sinon from 'sinon';
 import type { Grid, GridColumn } from '@vaadin/grid';
 import type {} from '@web/test-runner-mocha';
@@ -12,24 +15,29 @@ export type GridConnector = {
   set: (index: number, items: any[], parentKey?: string) => void;
   confirm: (index: number) => void;
   confirmParent: (index: number, parentKey: string, levelSize: number) => void;
-  setSelectionMode: (mode: 'SINGLE' | 'NONE') => void;
+  setSelectionMode: (mode: 'SINGLE' | 'NONE' | 'MULTI') => void;
   expandItems: (items: Item[]) => void;
   ensureHierarchy: () => void;
   reset: () => void;
+  doSelection: (items: Item[] | [null], userOriginated: boolean) => void;
+  doDeselection: (items: Item[], userOriginated: boolean) => void;
 };
 
 export type GridServer = {
   confirmUpdate: ((index: number) => void) & sinon.SinonSpy;
   confirmParentUpdate: ((index: number, parentKey: string) => void) & sinon.SinonSpy;
   select: ((key: string) => void) & sinon.SinonSpy;
+  selectAll: () => void & sinon.SinonSpy;
   deselect: ((key: string) => void) & sinon.SinonSpy;
+  deselectAll: () => void & sinon.SinonSpy;
   setDetailsVisible: ((key: string) => void) & sinon.SinonSpy;
-  setParentRequestedRanges: ((ranges: { firstIndex: number; size: number; parentKey: string }[]) => void) & sinon.SinonSpy;
+  setParentRequestedRanges: ((ranges: { firstIndex: number; size: number; parentKey: string }[]) => void) &
+    sinon.SinonSpy;
 };
 
 export type Item = {
   key: string;
-  name: string;
+  name?: string;
   selected?: boolean;
 };
 
@@ -41,6 +49,11 @@ export type FlowGrid = Grid<Item> & {
   _effectiveSize: number;
   __updateVisibleRows: () => void;
   _updateItem: (index: number, item: Item) => void;
+};
+
+export type FlowGridSelectionColumn = GridColumn & {
+  selectAll: boolean;
+  $server: GridServer;
 };
 
 type Vaadin = {
@@ -62,7 +75,9 @@ export function init(grid: FlowGrid): void {
     confirmUpdate: sinon.spy(),
     confirmParentUpdate: sinon.spy(),
     select: sinon.spy(),
+    selectAll: sinon.spy(),
     deselect: sinon.spy(),
+    deselectAll: sinon.spy(),
     setDetailsVisible: sinon.spy(),
     setParentRequestedRanges: sinon.spy()
   };
@@ -70,6 +85,13 @@ export function init(grid: FlowGrid): void {
   gridConnector.initLazy(grid);
 
   grid.$connector.reset();
+}
+
+/**
+ * Initializes the grid selection column.
+ */
+export function initSelectionColumn(grid: FlowGrid, column: FlowGridSelectionColumn) {
+  column.$server = grid.$server;
 }
 
 /**
