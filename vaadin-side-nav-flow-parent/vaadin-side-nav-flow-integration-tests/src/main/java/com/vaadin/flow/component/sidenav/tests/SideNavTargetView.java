@@ -19,6 +19,9 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.router.Route;
 
+/**
+ * View used as a target route when testing navigation in {@link SideNavPage}.
+ */
 @Route("vaadin-side-nav/side-nav-test-target-view")
 public class SideNavTargetView extends Div {
 

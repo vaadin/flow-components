@@ -23,6 +23,9 @@ import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.router.Route;
 
+/**
+ * Test view for testing {@link SideNav} component
+ */
 @Route("vaadin-side-nav/side-nav-test")
 public class SideNavPage extends Div {
 
@@ -88,5 +91,17 @@ public class SideNavPage extends Div {
                         .setText(String.valueOf(sideNav.isExpanded())));
         printExpandedState.setId("print-side-nav-expanded-state");
         add(printExpandedState);
+
+        NativeButton test = new NativeButton("test",
+                event -> navigableParent.setLabel(null));
+        add(test);
+
+        NativeButton test2 = new NativeButton("test2",
+                event -> navigableParent.setLabel(""));
+        add(test2);
+
+        NativeButton test3 = new NativeButton("test3",
+                event -> navigableParent.setLabel("aaa"));
+        add(test3);
     }
 }
