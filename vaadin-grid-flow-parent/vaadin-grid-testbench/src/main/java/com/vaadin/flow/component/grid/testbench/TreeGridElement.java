@@ -25,14 +25,15 @@ import org.openqa.selenium.WebElement;
 public class TreeGridElement extends GridElement {
 
     /**
-     * Scrolls to the row with the given flat index.
+     * Scrolls to the row with the given index.
      *
      * @param row
      *            the row to scroll to
      */
-    public void scrollToFlatRowAndWait(int row) {
+    public void scrollToRowAndWait(int row) {
         waitUntilLoadingFinished();
-        scrollToFlatRow(row);
+        scrollToRow(row);
+        waitUntilLoadingFinished();
     }
 
     /**
@@ -46,6 +47,17 @@ public class TreeGridElement extends GridElement {
         waitUntilLoadingFinished();
         callFunction("scrollToIndex", indexes);
         waitUntilLoadingFinished();
+    }
+
+    /**
+     * Scrolls to the row with the given flat index.
+     *
+     * @param row
+     *            the row to scroll to
+     */
+    public void scrollToFlatRowAndWait(int row) {
+        waitUntilLoadingFinished();
+        scrollToFlatRow(row);
     }
 
     /**
