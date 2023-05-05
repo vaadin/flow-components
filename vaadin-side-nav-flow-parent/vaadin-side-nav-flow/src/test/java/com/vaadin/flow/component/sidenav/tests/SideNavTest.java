@@ -62,6 +62,21 @@ public class SideNavTest {
     }
 
     @Test
+    public void setCollapsed_isCollapsed() {
+        sideNav.setExpanded(false);
+
+        Assert.assertFalse(sideNav.isExpanded());
+    }
+
+    @Test
+    public void collapseAndExpand_isExpanded() {
+        sideNav.setExpanded(false);
+        sideNav.setExpanded(true);
+
+        Assert.assertTrue(sideNav.isExpanded());
+    }
+
+    @Test
     public void setLabelToNull_labelIsNull() {
         sideNav.setLabel("Navigation test");
         sideNav.setLabel(null);
