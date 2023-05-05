@@ -32,91 +32,61 @@ public class SideNavPage extends Div {
         SideNav sideNav = new SideNav();
         sideNav.setLabel("Navigation Test");
         sideNav.setCollapsible(true);
+        add(sideNav);
+
+        SideNavItem nonNavigableParent = new SideNavItem(
+                "Non-navigable parent");
+        nonNavigableParent.setId("non-navigable-parent");
+        sideNav.addItem(nonNavigableParent);
 
         SideNavItem labelOnly = new SideNavItem("Label only");
         labelOnly.setId("label-only");
-        sideNav.addItem(labelOnly);
-
-        SideNavItem emptyPath = new SideNavItem("Empty path");
-        emptyPath.setId("empty-path");
-        emptyPath.setPath("");
-        sideNav.addItem(emptyPath);
+        nonNavigableParent.addItem(labelOnly);
 
         SideNavItem classTarget = new SideNavItem("Target using class",
                 SideNavTargetView.class);
         classTarget.setId("class-target");
-        sideNav.addItem(classTarget);
+        nonNavigableParent.addItem(classTarget);
 
         Avatar vaadinAvatar = new Avatar("Vaadin");
-        SideNavItem classTargetWithPrefixComponent = new SideNavItem(
+        SideNavItem classTargetWithComponent = new SideNavItem(
                 "Target using class with component", SideNavTargetView.class,
                 vaadinAvatar);
-        classTargetWithPrefixComponent.setId("class-target-prefix-component");
-        sideNav.addItem(classTargetWithPrefixComponent);
+        classTargetWithComponent.setId("class-target-prefix-component");
+        nonNavigableParent.addItem(classTargetWithComponent);
+
+        SideNavItem navigableParent = new SideNavItem("Navigable parent",
+                "vaadin-side-nav/side-nav-test-target-view");
+        navigableParent.setId("navigable-parent");
+        sideNav.addItem(navigableParent);
 
         SideNavItem pathTarget = new SideNavItem("Target using path",
                 "vaadin-side-nav/side-nav-test-target-view");
         pathTarget.setId("path-target");
-        sideNav.addItem(pathTarget);
+        navigableParent.addItem(pathTarget);
 
         SideNavItem pathTargetWithIcon = new SideNavItem(
                 "Target using path with icon",
                 "vaadin-side-nav/side-nav-test-target-view",
                 VaadinIcon.GLOBE.create());
         pathTargetWithIcon.setId("path-target-icon");
-        sideNav.addItem(pathTargetWithIcon);
-
-        SideNavItem pathTargetWithPrefixAndSuffix = new SideNavItem(
-                "Item having both prefix and suffix",
-                "vaadin-side-nav/side-nav-test-target-view");
-        pathTargetWithPrefixAndSuffix
-                .setPrefixComponent(VaadinIcon.GLASS.create());
-        pathTargetWithPrefixAndSuffix.setSuffixComponent(vaadinAvatar);
-        pathTargetWithPrefixAndSuffix.setId("path-target-prefix-suffix");
-        sideNav.addItem(pathTargetWithPrefixAndSuffix);
-
-        add(sideNav);
-
-        NativeButton addItem = new NativeButton("Add item",
-                event -> sideNav.addItem(new SideNavItem("Added item",
-                        "vaadin-side-nav/side-nav-test-target-view")));
-        addItem.setId("add-item");
-        add(addItem);
-
-        NativeButton removeItem = new NativeButton("Remove item",
-                event -> sideNav.remove(classTarget));
-        removeItem.setId("remove-item");
-        add(removeItem);
-
-        NativeButton removeAllItems = new NativeButton("Remove all items",
-                event -> sideNav.removeAll());
-        removeAllItems.setId("remove-all-items");
-        add(removeAllItems);
-
-        NativeButton changeLabel = new NativeButton(
-                "Change vaadin-side-nav label",
-                event -> sideNav.setLabel("Label changed"));
-        changeLabel.setId("change-label");
-        add(changeLabel);
-
-        NativeButton toggleCollapsible = new NativeButton("Toggle collapsible",
-                event -> sideNav.setCollapsible(!sideNav.isCollapsible()));
-        toggleCollapsible.setId("toggle-collapsible");
-        add(toggleCollapsible);
-
-        NativeButton toggleExpanded = new NativeButton("Toggle expanded",
-                event -> sideNav.setExpanded(!sideNav.isExpanded()));
-        toggleExpanded.setId("toggle-expanded");
-        add(toggleExpanded);
+        navigableParent.addItem(pathTargetWithIcon);
 
         Div expandedStatePrintout = new Div();
         expandedStatePrintout.setId("expanded-state-printout");
         add(expandedStatePrintout);
 
+        NativeButton printItemExpandedState = new NativeButton(
+                "Print out item expanded state", event -> expandedStatePrintout
+                        .setText(String.valueOf(navigableParent.isExpanded())));
+        printItemExpandedState.setId("print-item-expanded-state");
+        add(printItemExpandedState);
+
         NativeButton printExpandedState = new NativeButton(
-                "Print out expanded state", event -> expandedStatePrintout
+                "Print out side-nav expanded state",
+                event -> expandedStatePrintout
                         .setText(String.valueOf(sideNav.isExpanded())));
-        printExpandedState.setId("print-expanded-state");
+        printExpandedState.setId("print-side-nav-expanded-state");
         add(printExpandedState);
     }
 }

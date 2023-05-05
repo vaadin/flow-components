@@ -35,138 +35,89 @@ import com.vaadin.tests.AbstractComponentIT;
 public class SideNavIT extends AbstractComponentIT {
 
     private SideNavElement sideNav;
+    private SideNavItemElement nonNavigableParent;
+    private SideNavItemElement navigableParent;
 
     @Before
     public void init() {
         open();
 
         sideNav = $(SideNavElement.class).first();
+        nonNavigableParent = sideNav.$(SideNavItemElement.class)
+                .id("non-navigable-parent");
+        navigableParent = sideNav.$(SideNavItemElement.class)
+                .id("navigable-parent");
     }
 
     @Test
-    public void pageOpened_allItemsVisible() {
-        Assert.assertEquals(7, sideNav.getItems().size());
+    public void pageOpened_itemHierarchyRendered() {
+        Assert.assertEquals(2, sideNav.getItems().size());
+        Assert.assertEquals(3, sideNav.getItems().get(0).getItems().size());
+        Assert.assertEquals(2, sideNav.getItems().get(1).getItems().size());
     }
 
     @Test
-    public void pageOpened_sideNavHasLabel() {
-        Assert.assertEquals(sideNav.getLabel(), "Navigation Test");
+    public void clickNonNavigableParent_childNodesDisplayed() {
+        Assert.assertFalse(nonNavigableParent.isExpanded());
+
+        nonNavigableParent.navigate();
+
+        Assert.assertTrue(nonNavigableParent.isExpanded());
     }
 
     @Test
-    public void pageOpened_sideNavIsCollapsible() {
-        Assert.assertTrue(sideNav.isCollapsible());
-    }
-
-    @Test
-    public void clickLabelOnlyItem_urlNotChanged() {
-        String initialUrl = getDriver().getCurrentUrl();
-        sideNav.$(SideNavItemElement.class).id("label-only").navigate();
-
-        Assert.assertEquals(initialUrl, getDriver().getCurrentUrl());
-    }
-
-    @Test
-    public void clickEmptyPathItem_redirectedToBasePath() {
-        String initialUrl = getDriver().getCurrentUrl();
-        sideNav.$(SideNavItemElement.class).id("empty-path").navigate();
-
-        Assert.assertNotEquals(initialUrl, getDriver().getCurrentUrl());
-        Assert.assertTrue(initialUrl.contains(getDriver().getCurrentUrl()));
-    }
-
-    @Test
-    public void clickClassTargetItem_urlChanged() {
-        sideNav.$(SideNavItemElement.class).id("class-target").navigate();
+    public void clickNavigableParent_urlChanged() {
+        navigableParent.navigate();
 
         Assert.assertTrue(getDriver().getCurrentUrl()
                 .contains("side-nav-test-target-view"));
     }
 
     @Test
-    public void clickClassTargetComponentItem_urlChanged() {
-        sideNav.$(SideNavItemElement.class).id("class-target-prefix-component")
-                .navigate();
+    public void clickChildOfNavigableParent_urlChanged() {
+        navigableParent.clickExpandButton();
+        navigableParent.getItems().get(0).navigate();
 
         Assert.assertTrue(getDriver().getCurrentUrl()
                 .contains("side-nav-test-target-view"));
     }
 
     @Test
-    public void clickPathTargetItem_urlChanged() {
-        sideNav.$(SideNavItemElement.class).id("path-target").navigate();
+    public void clickExpandItem_itemExpanded() {
+        navigableParent.clickExpandButton();
 
-        Assert.assertTrue(getDriver().getCurrentUrl()
-                .contains("side-nav-test-target-view"));
+        Assert.assertTrue(navigableParent.isExpanded());
     }
 
     @Test
-    public void clickPathTargetIconItem_urlChanged() {
-        sideNav.$(SideNavItemElement.class).id("path-target-icon").navigate();
+    public void clickExpandAndCollapse_itemCollapsed() {
+        navigableParent.clickExpandButton();
+        navigableParent.clickExpandButton();
 
-        Assert.assertTrue(getDriver().getCurrentUrl()
-                .contains("side-nav-test-target-view"));
+        Assert.assertFalse(navigableParent.isExpanded());
     }
 
     @Test
-    public void clickAddItem_itemAdded() {
-        $(NativeButtonElement.class).id("add-item").click();
-        getCommandExecutor().waitForVaadin();
+    public void expandItem_expandedStateSynchronized() {
+        assertExpandedStateOnServer("print-item-expanded-state", "false");
 
-        Assert.assertEquals(8, sideNav.getItems().size());
-        Assert.assertEquals("Added item",
-                sideNav.$(SideNavItemElement.class).last().getText());
-    }
+        navigableParent.clickExpandButton();
 
-    @Test
-    public void clickRemoveItem_itemRemoved() {
-        $(NativeButtonElement.class).id("remove-item").click();
-        getCommandExecutor().waitForVaadin();
-
-        Assert.assertEquals(6, sideNav.getItems().size());
-    }
-
-    @Test
-    public void clickRemoveAllItems_allItemsRemoved() {
-        $(NativeButtonElement.class).id("remove-all-items").click();
-        getCommandExecutor().waitForVaadin();
-
-        Assert.assertEquals(0, sideNav.getItems().size());
-    }
-
-    @Test
-    public void clickRemoveAllItems_sideNavLabelStillVisible() {
-        $(NativeButtonElement.class).id("remove-all-items").click();
-        getCommandExecutor().waitForVaadin();
-
-        Assert.assertEquals(sideNav.getLabel(), "Navigation Test");
-    }
-
-    @Test
-    public void clickChangeLabel_labelChanged() {
-        $(NativeButtonElement.class).id("change-label").click();
-
-        Assert.assertEquals(sideNav.getLabel(), "Label changed");
-    }
-
-    @Test
-    public void clickMakeNotCollapsible_isNotCollapsible() {
-        $(NativeButtonElement.class).id("toggle-collapsible").click();
-
-        Assert.assertFalse(sideNav.isCollapsible());
+        assertExpandedStateOnServer("print-item-expanded-state", "true");
     }
 
     @Test
     public void collapseSideNav_expandedStateSynchronized() {
-        assertExpandedStateOnServer("true");
+        assertExpandedStateOnServer("print-side-nav-expanded-state", "true");
 
         sideNav.clickExpandButton();
 
-        assertExpandedStateOnServer("false");
+        assertExpandedStateOnServer("print-side-nav-expanded-state", "false");
     }
 
-    private void assertExpandedStateOnServer(String expectedState) {
-        $(NativeButtonElement.class).id("print-expanded-state").click();
+    private void assertExpandedStateOnServer(String buttonToClick,
+            String expectedState) {
+        $(NativeButtonElement.class).id(buttonToClick).click();
         final String expandedState = $(DivElement.class)
                 .id("expanded-state-printout").getText();
         Assert.assertEquals(expandedState, expectedState);
