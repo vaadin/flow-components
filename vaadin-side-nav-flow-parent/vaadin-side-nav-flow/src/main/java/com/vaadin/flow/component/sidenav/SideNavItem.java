@@ -24,6 +24,7 @@ import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasPrefix;
 import com.vaadin.flow.component.shared.HasSuffix;
 import com.vaadin.flow.dom.Element;
@@ -43,8 +44,8 @@ import com.vaadin.flow.server.VaadinService;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-side-nav-item")
+@NpmPackage(value = "@vaadin/side-nav", version = "24.1.0-alpha9")
 @JsModule("@vaadin/side-nav/src/vaadin-side-nav-item.js")
-// @NpmPackage(value = "@vaadin/side-nav", version = "24.1.0-alpha8")
 public class SideNavItem extends SideNavItemContainer
         implements HasPrefix, HasSuffix {
 
