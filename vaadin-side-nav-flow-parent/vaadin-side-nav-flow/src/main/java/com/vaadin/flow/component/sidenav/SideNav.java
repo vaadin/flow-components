@@ -15,9 +15,6 @@
  */
 package com.vaadin.flow.component.sidenav;
 
-import java.util.Objects;
-import java.util.Optional;
-
 import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.HasSize;
@@ -43,6 +40,8 @@ import com.vaadin.flow.dom.Element;
 @JsModule("@vaadin/side-nav/src/vaadin-side-nav.js")
 public class SideNav extends SideNavItemContainer implements HasSize, HasStyle {
 
+    private Element labelElement;
+
     /**
      * Creates a new menu without any label.
      */
@@ -59,17 +58,13 @@ public class SideNav extends SideNavItemContainer implements HasSize, HasStyle {
         setLabel(label);
     }
 
-    private boolean isLabelElement(Element element) {
-        return Objects.equals(element.getAttribute("slot"), "label");
-    }
-
     /**
      * Gets the label of this side navigation menu.
      *
      * @return the label or null if no label has been set
      */
     public String getLabel() {
-        return searchLabelElement().map(Element::getText).orElse(null);
+        return labelElement == null ? null : labelElement.getText();
     }
 
     /**
@@ -79,20 +74,17 @@ public class SideNav extends SideNavItemContainer implements HasSize, HasStyle {
      * items. The label is also available for screen reader users.
      *
      * @param label
-     *            the label to set
+     *            the label text to set; or null to remove the label
      */
     public void setLabel(String label) {
-        getLabelElement().setText(label);
-    }
-
-    private Optional<Element> searchLabelElement() {
-        return getElement().getChildren().filter(this::isLabelElement)
-                .findFirst();
-    }
-
-    private Element getLabelElement() {
-        return searchLabelElement()
-                .orElseGet(this::createAndAppendLabelElement);
+        if (label == null) {
+            removeLabelElement();
+        } else {
+            if (labelElement == null) {
+                labelElement = createAndAppendLabelElement();
+            }
+            labelElement.setText(label);
+        }
     }
 
     private Element createAndAppendLabelElement() {
@@ -100,6 +92,13 @@ public class SideNav extends SideNavItemContainer implements HasSize, HasStyle {
         element.setAttribute("slot", "label");
         getElement().appendChild(element);
         return element;
+    }
+
+    private void removeLabelElement() {
+        if (labelElement != null) {
+            getElement().removeChild(labelElement);
+            labelElement = null;
+        }
     }
 
     /**

@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.sidenav;
 
-import java.util.Optional;
-
 import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
@@ -48,6 +46,8 @@ import com.vaadin.flow.server.VaadinService;
 @JsModule("@vaadin/side-nav/src/vaadin-side-nav-item.js")
 public class SideNavItem extends SideNavItemContainer
         implements HasPrefix, HasSuffix {
+
+    private Element labelElement;
 
     /**
      * Creates a menu item which does not link to any view but only shows the
@@ -128,17 +128,13 @@ public class SideNavItem extends SideNavItemContainer
         item.getElement().setAttribute("slot", "children");
     }
 
-    private boolean isLabelElement(Element child) {
-        return !child.hasAttribute("slot");
-    }
-
     /**
      * Gets the label of this menu item.
      *
      * @return the label or null if no label has been set
      */
     public String getLabel() {
-        return searchLabelElement().map(Element::getText).orElse(null);
+        return labelElement == null ? null : labelElement.getText();
     }
 
     /**
@@ -147,26 +143,30 @@ public class SideNavItem extends SideNavItemContainer
      * The label is also available for screen reader users.
      *
      * @param label
-     *            the label to set
+     *            the label text to set; or null to remove the label
      */
     public void setLabel(String label) {
-        getLabelElement().setText(label);
-    }
-
-    private Optional<Element> searchLabelElement() {
-        return getElement().getChildren().filter(this::isLabelElement)
-                .findFirst();
-    }
-
-    private Element getLabelElement() {
-        return searchLabelElement()
-                .orElseGet(this::createAndAppendLabelElement);
+        if (label == null) {
+            removeLabelElement();
+        } else {
+            if (labelElement == null) {
+                labelElement = createAndAppendLabelElement();
+            }
+            labelElement.setText(label);
+        }
     }
 
     private Element createAndAppendLabelElement() {
         Element element = Element.createText("");
         getElement().appendChild(element);
         return element;
+    }
+
+    private void removeLabelElement() {
+        if (labelElement != null) {
+            getElement().removeChild(labelElement);
+            labelElement = null;
+        }
     }
 
     /**

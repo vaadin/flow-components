@@ -62,6 +62,21 @@ public class SideNavTest {
     }
 
     @Test
+    public void setLabelToNull_labelIsNull() {
+        sideNav.setLabel("Navigation test");
+        sideNav.setLabel(null);
+
+        Assert.assertNull(sideNav.getLabel());
+    }
+
+    @Test
+    public void setEmptyLabel_labelIsEmpty() {
+        sideNav.setLabel("");
+
+        Assert.assertEquals("", sideNav.getLabel());
+    }
+
+    @Test
     public void createdWithLabel_labelIsSet() {
         final SideNav nav = new SideNav("Test label");
 
