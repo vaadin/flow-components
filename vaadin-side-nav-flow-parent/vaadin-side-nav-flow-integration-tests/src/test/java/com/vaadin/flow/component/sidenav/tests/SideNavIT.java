@@ -1,0 +1,125 @@
+/*
+ * Copyright 2000-2023 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package com.vaadin.flow.component.sidenav.tests;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
+import com.vaadin.flow.component.html.testbench.DivElement;
+import com.vaadin.flow.component.html.testbench.NativeButtonElement;
+import com.vaadin.flow.component.sidenav.testbench.SideNavElement;
+import com.vaadin.flow.component.sidenav.testbench.SideNavItemElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
+
+/**
+ * Integration tests for the {@link SideNavPage}.
+ *
+ * @author Vaadin Ltd.
+ */
+@TestPath("vaadin-side-nav/side-nav-test")
+public class SideNavIT extends AbstractComponentIT {
+
+    private SideNavElement sideNav;
+    private SideNavItemElement nonNavigableParent;
+    private SideNavItemElement navigableParent;
+
+    @Before
+    public void init() {
+        open();
+
+        sideNav = $(SideNavElement.class).first();
+        nonNavigableParent = sideNav.$(SideNavItemElement.class)
+                .id("non-navigable-parent");
+        navigableParent = sideNav.$(SideNavItemElement.class)
+                .id("navigable-parent");
+    }
+
+    @Test
+    public void pageOpened_itemHierarchyRendered() {
+        Assert.assertEquals(2, sideNav.getItems().size());
+        Assert.assertEquals(3, sideNav.getItems().get(0).getItems().size());
+        Assert.assertEquals(2, sideNav.getItems().get(1).getItems().size());
+    }
+
+    @Test
+    public void clickNonNavigableParent_childNodesDisplayed() {
+        Assert.assertFalse(nonNavigableParent.isExpanded());
+
+        nonNavigableParent.navigate();
+
+        Assert.assertTrue(nonNavigableParent.isExpanded());
+    }
+
+    @Test
+    public void clickNavigableParent_urlChanged() {
+        navigableParent.navigate();
+
+        Assert.assertTrue(getDriver().getCurrentUrl()
+                .contains("side-nav-test-target-view"));
+    }
+
+    @Test
+    public void clickChildOfNavigableParent_urlChanged() {
+        navigableParent.clickExpandButton();
+        navigableParent.getItems().get(0).navigate();
+
+        Assert.assertTrue(getDriver().getCurrentUrl()
+                .contains("side-nav-test-target-view"));
+    }
+
+    @Test
+    public void clickExpandItem_itemExpanded() {
+        navigableParent.clickExpandButton();
+
+        Assert.assertTrue(navigableParent.isExpanded());
+    }
+
+    @Test
+    public void clickExpandAndCollapse_itemCollapsed() {
+        navigableParent.clickExpandButton();
+        navigableParent.clickExpandButton();
+
+        Assert.assertFalse(navigableParent.isExpanded());
+    }
+
+    @Test
+    public void expandItem_expandedStateSynchronized() {
+        assertExpandedStateOnServer("print-item-expanded-state", "false");
+
+        navigableParent.clickExpandButton();
+
+        assertExpandedStateOnServer("print-item-expanded-state", "true");
+    }
+
+    @Test
+    public void collapseSideNav_expandedStateSynchronized() {
+        assertExpandedStateOnServer("print-side-nav-expanded-state", "true");
+
+        sideNav.clickExpandButton();
+
+        assertExpandedStateOnServer("print-side-nav-expanded-state", "false");
+    }
+
+    private void assertExpandedStateOnServer(String buttonToClick,
+            String expectedState) {
+        $(NativeButtonElement.class).id(buttonToClick).click();
+        final String expandedState = $(DivElement.class)
+                .id("expanded-state-printout").getText();
+        Assert.assertEquals(expandedState, expectedState);
+    }
+}
