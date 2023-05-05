@@ -84,7 +84,7 @@ async function getVersionsJson() {
 }
 
 async function getAnnotations(){
-  const cmd = 'grep -r @NpmPackage ./vaadin*parent/*/src/*/java';
+  const cmd = 'grep -r @NpmPackage\\( ./vaadin*parent/*/src/*/java';
   const output = await run(cmd);
   const lines = output.split('\n').filter(Boolean);
   return lines.map(line => {
@@ -92,6 +92,7 @@ async function getAnnotations(){
     if (!r){
       const errorPackage = /(.*(vaadin-.*)-parent.*)*/.exec(line);
       console.log(`versions.js::getAnnotations : cannot get the annotation properly for ${errorPackage[2]} in ${errorPackage[1]}`);
+      console.log(`line: ${line}`);
       process.exit(1);
     }
     return {
