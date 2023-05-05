@@ -21,6 +21,7 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
@@ -58,6 +59,29 @@ public class GridMultiSelectionColumnPageIT extends AbstractComponentIT {
         Assert.assertNull(
                 "in-memory grid selectAllCheckbox should be visible by default",
                 selectAllCheckbox.getAttribute("hidden"));
+    }
+
+    @Test
+    public void selectItem_selectAll_deselectAll_itemIsNotSelected() {
+        open();
+        GridElement grid = $(GridElement.class)
+                .id(GridMultiSelectionColumnPage.IN_MEMORY_GRID_ID);
+        CheckboxElement selectAllCheckbox = grid.$(CheckboxElement.class)
+                .id(SELECT_ALL_CHECKBOX_ID);
+        CheckboxElement selectItemCheckbox = grid.$(CheckboxElement.class)
+                .get(1);
+
+        // Select an item
+        selectItemCheckbox.click();
+        Assert.assertTrue(selectItemCheckbox.isChecked());
+
+        // Select all
+        selectAllCheckbox.click();
+        Assert.assertTrue(selectItemCheckbox.isChecked());
+
+        // Deselect all
+        selectAllCheckbox.click();
+        Assert.assertFalse(selectItemCheckbox.isChecked());
     }
 
     @Test
