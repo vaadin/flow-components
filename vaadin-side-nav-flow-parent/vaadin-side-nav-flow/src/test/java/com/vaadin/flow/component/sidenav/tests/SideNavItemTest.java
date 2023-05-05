@@ -25,6 +25,7 @@ import org.junit.Test;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.sidenav.SideNavItem;
+import com.vaadin.flow.dom.Element;
 
 public class SideNavItemTest {
 
@@ -55,6 +56,30 @@ public class SideNavItemTest {
         sideNavItem.setLabel("");
 
         Assert.assertEquals("", sideNavItem.getLabel());
+    }
+
+    @Test
+    public void setLabel_labelElementPresent() {
+        sideNavItem.setLabel("Navigation test");
+
+        Assert.assertTrue(sideNavItemHasLabelElement());
+    }
+
+    @Test
+    public void setLabelAndUnsetLabel_labelElementRemoved() {
+        sideNavItem.setLabel("Navigation test");
+        sideNavItem.setLabel(null);
+
+        Assert.assertFalse(sideNavItemHasLabelElement());
+    }
+
+    private boolean sideNavItemHasLabelElement() {
+        return sideNavItem.getElement().getChildren()
+                .anyMatch(this::isLabelElement);
+    }
+
+    private boolean isLabelElement(Element element) {
+        return !element.hasAttribute("slot");
     }
 
     @Test

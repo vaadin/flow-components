@@ -17,6 +17,7 @@ package com.vaadin.flow.component.sidenav.tests;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -24,6 +25,7 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
+import com.vaadin.flow.dom.Element;
 
 import static com.vaadin.flow.component.sidenav.tests.SideNavTest.SetLabelOption.SET_LABEL_AFTER_ITEMS_CREATION;
 import static com.vaadin.flow.component.sidenav.tests.SideNavTest.SetLabelOption.SET_LABEL_BEFORE_ITEMS_CREATION;
@@ -59,6 +61,31 @@ public class SideNavTest {
         sideNav.setLabel("Navigation test");
 
         Assert.assertEquals("Navigation test", sideNav.getLabel());
+    }
+
+    @Test
+    public void setLabel_labelElementPresent() {
+        Assert.assertFalse(sideNavHasLabelElement());
+        sideNav.setLabel("Navigation test");
+
+        Assert.assertTrue(sideNavHasLabelElement());
+    }
+
+    @Test
+    public void setLabelAndUnsetLabel_labelElementRemoved() {
+        sideNav.setLabel("Navigation test");
+        sideNav.setLabel(null);
+
+        Assert.assertFalse(sideNavHasLabelElement());
+    }
+
+    private boolean sideNavHasLabelElement() {
+        return sideNav.getElement().getChildren()
+                .anyMatch(this::isLabelElement);
+    }
+
+    private boolean isLabelElement(Element element) {
+        return Objects.equals(element.getAttribute("slot"), "label");
     }
 
     @Test
