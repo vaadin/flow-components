@@ -92,7 +92,6 @@ async function getAnnotations(){
     if (!r){
       const errorPackage = /(.*(vaadin-.*)-parent.*)*/.exec(line);
       console.log(`versions.js::getAnnotations : cannot get the annotation properly for ${errorPackage[2]} in ${errorPackage[1]}`);
-      console.log(`line: ${line}`);
       process.exit(1);
     }
     return {
