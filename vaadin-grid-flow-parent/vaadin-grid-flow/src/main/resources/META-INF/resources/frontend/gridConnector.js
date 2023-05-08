@@ -238,36 +238,30 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
         });
         grid._createPropertyObserver('activeItem', '__activeItemChangedDetails', true);
 
-        grid.$connector._getSameLevelPage = tryCatchWrapper(function (parentKey, index, defaultPage) {
-          const cacheAndIndex = grid._cache.getCacheAndIndex(index);
-          const parentItem = cacheAndIndex.cache.parentItem;
-          const parentKeyOfIndex = parentItem ? grid.getItemId(parentItem) : root;
-          if (parentKeyOfIndex === parentKey) {
-            return grid._getPageForIndex(cacheAndIndex.scaledIndex);
+        grid.$connector._getSameLevelPage = tryCatchWrapper(function (
+          parentKey,
+          potentialSameLevelCache,
+          potentialSameLevelItemKey
+        ) {
+          if (!potentialSameLevelCache) {
+            // There is no parent cache to match level
+            return null;
+          }
+          const parentKeyOfPotentialSameLevelCache = potentialSameLevelCache.parentItem
+            ? grid.getItemId(potentialSameLevelCache.parentItem)
+            : root;
+          if (parentKeyOfPotentialSameLevelCache === parentKey) {
+            // Level match found
+            return grid._getPageForIndex(grid._cache.getCacheAndIndexByKey(potentialSameLevelItemKey).scaledIndex);
           }
           // Try to match level by going up in hierarchy. This accounts for the cases where
           // the parent of an item is not visible, but has the same depth as of the request.
           // This prevents clearing the cache for those visible items, which can create a loop.
-          return this._getSameLevelPageByHierarchy(parentKey, defaultPage, parentKeyOfIndex);
-        });
-
-        grid.$connector._getSameLevelPageByHierarchy = tryCatchWrapper(function (parentKey, defaultPage, parentKeyOfIndex) {
-          // Root item was reached
-          if (parentKeyOfIndex === root) {
-            return defaultPage;
-          }
-          // There is no parent item to match level in cache
-          const parentCacheAndIndex = grid._cache.getCacheAndIndexByKey(parentKeyOfIndex);
-          if (!parentCacheAndIndex) {
-            return defaultPage;
-          }
-          const parentItem = parentCacheAndIndex.cache.parentItem;
-          const updatedParentKeyOfIndex = parentItem ? grid.getItemId(parentItem) : root;
-          if (updatedParentKeyOfIndex === parentKey) {
-            return grid._getPageForIndex(parentCacheAndIndex.scaledIndex);
-          }
-          // Try to match level until reaching root or there is no parent in cache
-          return this._getSameLevelPageByHierarchy(parentKey, defaultPage, updatedParentKeyOfIndex);
+          return this._getSameLevelPage(
+            parentKey,
+            potentialSameLevelCache.parentCache,
+            parentKeyOfPotentialSameLevelCache
+          );
         });
 
         grid.$connector.getCacheByKey = tryCatchWrapper(function (key) {
@@ -330,14 +324,22 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           let firstNeededPage = page;
           let lastNeededPage = page;
           for (let idx = firstNeededIndex; idx <= lastNeededIndex; idx++) {
-            firstNeededPage = Math.min(
-              firstNeededPage,
-              grid.$connector._getSameLevelPage(parentKey, idx, firstNeededPage)
+            const potentialSameLevelCacheAndIndex = grid._cache.getCacheAndIndex(idx);
+            const potentialSameLevelItem =
+              potentialSameLevelCacheAndIndex.cache.items[potentialSameLevelCacheAndIndex.scaledIndex];
+            if (!potentialSameLevelItem) {
+              continue;
+            }
+            const sameLevelPage = grid.$connector._getSameLevelPage(
+              parentKey,
+              potentialSameLevelCacheAndIndex.cache,
+              grid.getItemId(potentialSameLevelItem)
             );
-            lastNeededPage = Math.max(
-              lastNeededPage,
-              grid.$connector._getSameLevelPage(parentKey, idx, lastNeededPage)
-            );
+            if (sameLevelPage === null) {
+              continue;
+            }
+            firstNeededPage = Math.min(firstNeededPage, sameLevelPage);
+            lastNeededPage = Math.max(lastNeededPage, sameLevelPage);
           }
 
           let firstPage = Math.max(0, firstNeededPage);
