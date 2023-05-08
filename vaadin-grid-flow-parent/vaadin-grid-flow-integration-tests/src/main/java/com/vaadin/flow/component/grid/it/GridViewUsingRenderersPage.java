@@ -64,6 +64,8 @@ public class GridViewUsingRenderersPage extends LegacyTestView {
 
         TextField nameField = new TextField();
         binder.forField(nameField).bind("name");
+        // Set column renderer AFTER setting editor component.
+        // There are tests to check the editor still shows after switching the renderer.
         nameColumn.setEditorComponent(nameField);
         nameColumn.setRenderer(LitRenderer.<Item> of("<b>${item.name}</b>")
                 .withProperty("name", Item::getName));
@@ -127,11 +129,6 @@ public class GridViewUsingRenderersPage extends LegacyTestView {
         Button save = new Button("Save", e -> editor.save());
 
         Button cancel = new Button("Cancel", e -> editor.cancel());
-
-        // Add a keypress listener that listens for an escape key up event.
-        // Note! some browsers return key as Escape and some as Esc
-        grid.getElement().addEventListener("keyup", event -> editor.cancel())
-                .setFilter("event.key === 'Escape' || event.key === 'Esc'");
 
         Div buttons = new Div(save, cancel);
         editorColumn.setEditorComponent(buttons);
