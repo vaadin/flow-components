@@ -540,10 +540,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             this.renderer = Objects.requireNonNull(renderer,
                     "Renderer must not be null.");
 
-            if (columnDataGeneratorRegistration != null) {
-                columnDataGeneratorRegistration.remove();
-                columnDataGeneratorRegistration = null;
-            }
+            destroyDataGenerators();
             if (rendering != null) {
                 rendering.getRegistration().remove();
             }
@@ -558,10 +555,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
             // The editor renderer is a wrapper around the regular renderer, so
             // we need to apply it again afterwards
-            if (editorDataGeneratorRegistration != null) {
-                editorDataGeneratorRegistration.remove();
-                editorDataGeneratorRegistration = null;
-
+            if (editorRenderer != null) {
                 Rendering<T> editorRendering = editorRenderer
                         .render(getElement(), null);
                 editorDataGeneratorRegistration = editorRendering
