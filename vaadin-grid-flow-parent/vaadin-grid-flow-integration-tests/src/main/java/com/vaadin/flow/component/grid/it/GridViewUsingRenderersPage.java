@@ -65,7 +65,8 @@ public class GridViewUsingRenderersPage extends LegacyTestView {
         TextField nameField = new TextField();
         binder.forField(nameField).bind("name");
         // Set column renderer AFTER setting editor component.
-        // There are tests to check the editor still shows after switching the renderer.
+        // There are tests to check the editor still shows after switching the
+        // renderer.
         nameColumn.setEditorComponent(nameField);
         nameColumn.setRenderer(LitRenderer.<Item> of("<b>${item.name}</b>")
                 .withProperty("name", Item::getName));
