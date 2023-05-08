@@ -556,7 +556,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                             .addDataGenerator((DataGenerator) dataGenerator))
                     .orElse(null);
 
-            // reset editor registration, if any
+            // The editor renderer is a wrapper around the regular renderer, so
+            // we need to apply it again afterwards
             if (editorDataGeneratorRegistration != null) {
                 editorDataGeneratorRegistration.remove();
                 editorDataGeneratorRegistration = null;
