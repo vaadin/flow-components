@@ -18,6 +18,12 @@ package com.vaadin.flow.component.sidenav.tests;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouteConfiguration;
+import com.vaadin.flow.router.Router;
+import com.vaadin.flow.server.VaadinContext;
+import com.vaadin.flow.server.startup.ApplicationRouteRegistry;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,13 +32,25 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.dom.Element;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 
 public class SideNavItemTest {
 
     private SideNavItem sideNavItem;
+    private Router router;
 
     @Before
     public void setup() {
+        VaadinContext mockContext = Mockito.mock(VaadinContext.class);
+        ApplicationRouteRegistry routeRegistry = ApplicationRouteRegistry
+                .getInstance(mockContext);
+        router = new Router(routeRegistry);
+
+        RouteConfiguration routeConfiguration = RouteConfiguration
+                .forRegistry(routeRegistry);
+        routeConfiguration.setAnnotatedRoute(TestRoute.class);
+
         sideNavItem = new SideNavItem("Item", "/path");
     }
 
@@ -112,6 +130,18 @@ public class SideNavItemTest {
 
         Assert.assertEquals("", item.getPath());
         Assert.assertTrue(sideNavItem.getElement().hasAttribute("path"));
+    }
+
+    @Test
+    public void setPathAsComponent_pathUpdated() {
+        try (MockedStatic<ComponentUtil> mockComponentUtil = Mockito
+                .mockStatic(ComponentUtil.class)) {
+            mockComponentUtil.when(() -> ComponentUtil.getRouter(Mockito.any()))
+                    .thenReturn(router);
+
+            sideNavItem.setPath(TestRoute.class);
+            Assert.assertEquals("foo/bar", sideNavItem.getPath());
+        }
     }
 
     @Test
@@ -327,6 +357,18 @@ public class SideNavItemTest {
     }
 
     @Test
+    public void createFromComponent_pathIsSet() {
+        try (MockedStatic<ComponentUtil> mockComponentUtil = Mockito
+                .mockStatic(ComponentUtil.class)) {
+            mockComponentUtil.when(() -> ComponentUtil.getRouter(Mockito.any()))
+                    .thenReturn(router);
+
+            SideNavItem item = new SideNavItem("test", TestRoute.class);
+            Assert.assertEquals("foo/bar", item.getPath());
+        }
+    }
+
+    @Test
     public void isCollapsedByDefault() {
         Assert.assertFalse(sideNavItem.isExpanded());
     }
@@ -376,4 +418,8 @@ public class SideNavItemTest {
         sideNavItem.addItem(item);
     }
 
+    @Route("foo/bar")
+    private static class TestRoute extends Component {
+
+    }
 }
