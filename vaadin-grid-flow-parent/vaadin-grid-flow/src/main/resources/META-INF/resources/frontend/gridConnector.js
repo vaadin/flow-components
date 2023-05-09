@@ -237,30 +237,22 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
         });
         grid._createPropertyObserver('activeItem', '__activeItemChangedDetails', true);
 
-        grid.$connector._getSameLevelPage = tryCatchWrapper(function (
-          parentKey,
-          potentialSameLevelCache,
-          potentialSameLevelItemKey
-        ) {
-          if (!potentialSameLevelCache) {
+        grid.$connector._getSameLevelPage = tryCatchWrapper(function (parentKey, currentCache, currentCacheItemIndex) {
+          const currentParentKey = currentCache.parentItem ? grid.getItemId(currentCache.parentItem) : root;
+          if (currentParentKey === parentKey) {
+            // Level match found
+            return grid._getPageForIndex(currentCacheItemIndex);
+          }
+          const { parentCache } = currentCache;
+          if (!parentCache) {
             // There is no parent cache to match level
             return null;
           }
-          const parentKeyOfPotentialSameLevelCache = potentialSameLevelCache.parentItem
-            ? grid.getItemId(potentialSameLevelCache.parentItem)
-            : root;
-          if (parentKeyOfPotentialSameLevelCache === parentKey) {
-            // Level match found
-            return grid._getPageForIndex(grid._cache.getCacheAndIndexByKey(potentialSameLevelItemKey).scaledIndex);
-          }
-          // Try to match level by going up in hierarchy. This accounts for the cases where
-          // the parent of an item is not visible, but has the same depth as of the request.
-          // This prevents clearing the cache for those visible items, which can create a loop.
-          return this._getSameLevelPage(
-            parentKey,
-            potentialSameLevelCache.parentCache,
-            parentKeyOfPotentialSameLevelCache
-          );
+          const parentCacheItemIndex = Object.entries(parentCache.itemCaches).find(
+            ([index, cache]) => cache === currentCache
+          )[0];
+          // Traverse the tree upwards until a match is found or the end is reached
+          return this._getSameLevelPage(parentKey, parentCache, parentCacheItemIndex);
         });
 
         grid.$connector.getCacheByKey = tryCatchWrapper(function (key) {
@@ -323,17 +315,15 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           let firstNeededPage = page;
           let lastNeededPage = page;
           for (let idx = firstNeededIndex; idx <= lastNeededIndex; idx++) {
-            const potentialSameLevelCacheAndIndex = grid._cache.getCacheAndIndex(idx);
-            const potentialSameLevelItem =
-              potentialSameLevelCacheAndIndex.cache.items[potentialSameLevelCacheAndIndex.scaledIndex];
-            if (!potentialSameLevelItem) {
-              continue;
-            }
-            const sameLevelPage = grid.$connector._getSameLevelPage(
-              parentKey,
-              potentialSameLevelCacheAndIndex.cache,
-              grid.getItemId(potentialSameLevelItem)
-            );
+            const { cache, scaledIndex } = grid._cache.getCacheAndIndex(idx);
+            // Try to match level by going up in hierarchy. The page range should include
+            // pages that contain either of the following:
+            //   - visible items of the current cache
+            //   - same level parents of visible descendant items
+            // If the parent items are not considered, Flow would remove the hidden parent
+            // items from the current level cache. This can lead to an infinite loop when using
+            // scrollToIndex feature.
+            const sameLevelPage = grid.$connector._getSameLevelPage(parentKey, cache, scaledIndex);
             if (sameLevelPage === null) {
               continue;
             }
@@ -1182,7 +1172,6 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           }
           return (style.row || '') + ' ' + ((column && style[column._flowId]) || '');
         });
-
 
         grid.cellPartNameGenerator = tryCatchWrapper(function (column, rowData) {
           const part = rowData.item.part;
