@@ -626,7 +626,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           let pkey = parentKey || root;
 
           const firstPage = index / grid.pageSize;
-          const updatedPageCount = Math.ceil(items.length / grid.pageSize);
+          const updatedPageCount = Math.max(1, Math.ceil(items.length / grid.pageSize));
 
           for (let i = 0; i < updatedPageCount; i++) {
             let page = firstPage + i;
