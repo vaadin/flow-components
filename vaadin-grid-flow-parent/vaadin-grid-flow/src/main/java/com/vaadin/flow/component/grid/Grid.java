@@ -3895,7 +3895,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
-     * Get the content of the tooltip shown by a column for a specific item.
+     * Get the content of the tooltip shown by a column for a specific item. It
+     * first tries generating content using the column's tooltip generator, and
+     * if it generates no content (or the column doesn't have a tooltip
+     * generator), then it falls back to the grid's tooltip generator.
      *
      * @param item
      *            the item of the row where the tooltip would show
@@ -3905,7 +3908,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *         specified item, or {@code null} if no tooltip generator is
      *         available at neither the column nor grid level
      */
-    protected String generateTooltipContent(T item, Column<T> column) {
+    String generateTooltipContent(T item, Column<T> column) {
         String content = column.tooltipGenerator.apply(item);
         if (content == null) {
             content = this.tooltipGenerator.apply(item);
@@ -4316,9 +4319,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     /**
      * Sets the function that is used for generating tooltip text for all cells
-     * in this grid. This method does not replace tooltip generators
-     * individually set to columns. Returning {@code null} from the generator
-     * results in no tooltip being set.
+     * in this grid. Tooltip generators set to individual columns have priority
+     * over the generator set with this method. Returning {@code null} from the
+     * generator results in no tooltip being set.
      *
      * @param tooltipGenerator
      *            the tooltip generator to set, not {@code null}

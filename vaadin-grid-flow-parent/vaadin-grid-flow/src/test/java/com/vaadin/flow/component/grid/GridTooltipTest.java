@@ -46,7 +46,7 @@ public class GridTooltipTest {
     }
 
     @Test
-    public void setTooltipGenerator_hasTooltipElement() {
+    public void setColumnTooltipGenerator_hasTooltipElement() {
         grid.addColumn(item -> item).setTooltipGenerator(item -> item);
         Assert.assertTrue(getTooltipElement(grid).isPresent());
     }
@@ -86,14 +86,14 @@ public class GridTooltipTest {
     }
 
     @Test
-    public void setTooltipGenerator_hasFluidAPI() {
+    public void setColumnTooltipGenerator_hasFluidAPI() {
         var column = grid.addColumn(item -> item)
                 .setTooltipGenerator(item -> item).setAutoWidth(true);
         Assert.assertTrue(column.isAutoWidth());
     }
 
     @Test
-    public void setTooltip_tooltipHasSlot() {
+    public void setColumnTooltip_tooltipHasSlot() {
         grid.addColumn(item -> item).setTooltipGenerator(item -> item);
         Assert.assertEquals("tooltip",
                 getTooltipElement(grid).get().getAttribute("slot"));
@@ -107,14 +107,14 @@ public class GridTooltipTest {
     }
 
     @Test
-    public void setAnotherTooltipGenerator_hasOneTooltipElement() {
+    public void setAnotherColumnTooltipGenerator_hasOneTooltipElement() {
         grid.addColumn(item -> item).setTooltipGenerator(item -> item);
         grid.addColumn(item -> item).setTooltipGenerator(item -> item);
         Assert.assertEquals(1, getTooltipElements(grid).count());
     }
 
     @Test(expected = NullPointerException.class)
-    public void setNullTooltipGenerator_throws() {
+    public void setNullColumnTooltipGenerator_throws() {
         grid.addColumn(item -> item).setTooltipGenerator(null);
     }
 

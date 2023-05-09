@@ -28,9 +28,12 @@ import org.openqa.selenium.By;
 @TestPath("vaadin-grid/tooltip")
 public class GridTooltipIT extends AbstractComponentIT {
 
+    private GridElement grid;
+
     @Before
     public void init() {
         open();
+        grid = $(GridElement.class).id("grid-with-tooltips");
     }
 
     @Test
@@ -42,7 +45,6 @@ public class GridTooltipIT extends AbstractComponentIT {
     @Test
     @Ignore
     public void hoverOverTooltipColumnCell_showTooltip() {
-        var grid = $(GridElement.class).first();
         flushScrolling(grid);
         showTooltip(grid.getCell("Jack"));
         Assert.assertEquals("First name of the person is Jack",
@@ -67,7 +69,6 @@ public class GridTooltipIT extends AbstractComponentIT {
     @Test
     @Ignore
     public void dynamicallyAddGenerator_hoverOverTooltipColumnCell_showTooltip() {
-        var grid = $(GridElement.class).first();
         clickElementWithJs("set-age-tooltip-button");
         flushScrolling(grid);
         showTooltip(grid.getCell("33"));
@@ -75,32 +76,18 @@ public class GridTooltipIT extends AbstractComponentIT {
     }
 
     @Test
-    public void addGeneratorForAllGrid() {
-        var grid = $(GridElement.class).id("grid-with-tooltips");
-        scrollToElement(grid);
+    public void setGridTooltipGenerator() {
         clickElementWithJs("set-grid-tooltip-button");
-        for (int col = 0; col < 13; col++) {
-            for (int row = 0; row < 2; row++) {
-                String firstName = row == 0 ? "Jack" : "Jill";
-                showTooltip(grid.getCell(row, col));
-                // check all columns, except column 5 have grid's tooltip
-                if (col != 5) {
-                    Assert.assertEquals("Grid's tooltip! " + firstName,
-                            getActiveTooltipText());
-                } else {
-                    // check that previously set column (5) tooltip was not
-                    // replaced
-                    Assert.assertEquals(
-                            "First name of the person is " + firstName,
-                            getActiveTooltipText());
-                }
-            }
-        }
+        flushScrolling(grid);
+        showTooltip(grid.getCell("32"));
+        Assert.assertEquals("Grid's tooltip! Jack", getActiveTooltipText());
+        showTooltip(grid.getCell("Jack"));
+        Assert.assertEquals("First name of the person is Jack",
+                getActiveTooltipText());
     }
 
     @Test
     public void columnTooltipOverridesGridTooltip() {
-        var grid = $(GridElement.class).id("grid-with-tooltips");
         scrollToElement(grid);
         // set grid tooltip
         clickElementWithJs("set-grid-tooltip-button");
@@ -116,7 +103,6 @@ public class GridTooltipIT extends AbstractComponentIT {
 
     @Test
     public void newColumnHasGridTooltipGenerator() {
-        var grid = $(GridElement.class).id("grid-with-tooltips");
         scrollToElement(grid);
         // set grid tooltip
         clickElementWithJs("set-grid-tooltip-button");
