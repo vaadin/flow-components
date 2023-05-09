@@ -66,10 +66,8 @@ public class SortingIT extends AbstractComponentIT {
 
         waitUntil(driver -> "false".equals(hiddenGrid.getAttribute("loading")));
 
-        Assert.assertEquals("B",
-                hiddenGrid.getCell(0, 0).getText());
-        Assert.assertEquals("A",
-                hiddenGrid.getCell(1, 0).getText());
+        Assert.assertEquals("B", hiddenGrid.getCell(0, 0).getText());
+        Assert.assertEquals("A", hiddenGrid.getCell(1, 0).getText());
     }
 
     @Test
