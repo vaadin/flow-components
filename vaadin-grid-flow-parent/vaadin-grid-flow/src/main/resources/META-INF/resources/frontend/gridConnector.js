@@ -130,7 +130,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
         grid.$connector.hasParentRequestQueue = tryCatchWrapper(() => parentRequestQueue.length > 0);
 
         grid.$connector.hasRootRequestQueue = tryCatchWrapper(() => {
-          return Object.keys(rootPageCallbacks).length > 0 || (rootRequestDebouncer && rootRequestDebouncer.isActive());
+          return Object.keys(rootPageCallbacks).length > 0 || (!!rootRequestDebouncer && rootRequestDebouncer.isActive());
         });
 
         grid.$connector.beforeEnsureSubCacheForScaledIndex = tryCatchWrapper(function (targetCache, scaledIndex) {
@@ -369,6 +369,11 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           } else {
             // workaround: sometimes grid-element gives page index that overflows
             page = Math.min(page, Math.floor(grid.size / grid.pageSize));
+
+            if (grid.size === 0) {
+              callback([], 0);
+              return;
+            }
 
             if (cache[root] && cache[root][page]) {
               callback(cache[root][page]);
@@ -626,7 +631,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           let pkey = parentKey || root;
 
           const firstPage = index / grid.pageSize;
-          const updatedPageCount = Math.max(1, Math.ceil(items.length / grid.pageSize));
+          const updatedPageCount = Math.ceil(items.length / grid.pageSize);
 
           for (let i = 0; i < updatedPageCount; i++) {
             let page = firstPage + i;
