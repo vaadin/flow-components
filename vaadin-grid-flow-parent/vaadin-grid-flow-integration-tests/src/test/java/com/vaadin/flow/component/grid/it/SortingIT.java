@@ -61,10 +61,13 @@ public class SortingIT extends AbstractComponentIT {
     public void setInitialSortOrderGridHidden_showGrid_dataPresentAndSorted() {
         findElement(By.id("sort-hidden-by-age")).click();
         findElement(By.id("show-hidden-grid")).click();
-        Assert.assertEquals("B",
-                $(GridElement.class).id("hidden-grid").getCell(0, 0).getText());
-        Assert.assertEquals("A",
-                $(GridElement.class).id("hidden-grid").getCell(1, 0).getText());
+
+        GridElement hiddenGrid = $(GridElement.class).id("hidden-grid");
+
+        waitUntil(driver -> "false".equals(hiddenGrid.getAttribute("loading")));
+
+        Assert.assertEquals("B", hiddenGrid.getCell(0, 0).getText());
+        Assert.assertEquals("A", hiddenGrid.getCell(1, 0).getText());
     }
 
     @Test
