@@ -17,11 +17,8 @@ package com.vaadin.flow.component.grid.it;
 
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.WeakHashMap;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
@@ -109,23 +106,11 @@ public class GridViewUsingRenderersPage extends LegacyTestView {
             dataProvider.refreshAll();
         })).setWidth("100px").setFlexGrow(0);
 
-        Collection<Button> editButtons = Collections
-                .newSetFromMap(new WeakHashMap<>());
-
-        Grid.Column<Item> editorColumn = grid.addComponentColumn(item -> {
-            Button edit = new Button("Edit", clickEvent -> {
-                editor.editItem(item);
-                field.focus();
-            });
-            edit.setEnabled(!editor.isOpen());
-            editButtons.add(edit);
-            return edit;
-        });
-
-        editor.addOpenListener(e -> editButtons.stream()
-                .forEach(button -> button.setEnabled(!editor.isOpen())));
-        editor.addCloseListener(e -> editButtons.stream()
-                .forEach(button -> button.setEnabled(!editor.isOpen())));
+        Grid.Column<Item> editorColumn = grid
+                .addComponentColumn(item -> new Button("Edit", clickEvent -> {
+                    editor.editItem(item);
+                    field.focus();
+                }));
 
         Button save = new Button("Save", e -> editor.save());
 
