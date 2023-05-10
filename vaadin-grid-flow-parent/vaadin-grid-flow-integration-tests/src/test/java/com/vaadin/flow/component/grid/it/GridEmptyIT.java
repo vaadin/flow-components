@@ -15,9 +15,8 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import com.vaadin.flow.component.grid.testbench.GridElement;
 import org.junit.Test;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.testutil.TestPath;
@@ -31,11 +30,9 @@ public class GridEmptyIT extends AbstractComponentIT {
         open();
 
         // Force data provider request by clearing the grid's cache
-        ButtonElement clearCache = $(ButtonElement.class)
-                .id("clear-cache-button");
-        clearCache.click();
+        $(ButtonElement.class).id("clear-cache-button").click();
 
-        WebElement grid = findElement(By.id("empty-grid"));
+        GridElement grid = $(GridElement.class).id("empty-grid");
         waitUntil(driver -> "false".equals(grid.getAttribute("loading")));
     }
 
