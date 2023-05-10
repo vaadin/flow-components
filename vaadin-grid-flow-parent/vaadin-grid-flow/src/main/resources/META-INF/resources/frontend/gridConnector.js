@@ -370,6 +370,13 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             // workaround: sometimes grid-element gives page index that overflows
             page = Math.min(page, Math.floor(grid.size / grid.pageSize));
 
+            // size is controlled by the server (data communicator), so if the
+            // size is zero, we know that there is no data to fetch.
+            // This also prevents an empty grid getting stuck in a loading state.
+            // The connector does not cache empty pages, so if the grid requests
+            // data again, there would be no cache entry, causing a request to
+            // the server. However, the data communicator will never respond,
+            // as it assumes that the data is already cached.
             if (grid.size === 0) {
               callback([], 0);
               return;
