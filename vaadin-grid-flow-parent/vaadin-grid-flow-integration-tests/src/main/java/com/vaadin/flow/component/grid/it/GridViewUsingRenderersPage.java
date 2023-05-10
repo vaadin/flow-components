@@ -20,12 +20,20 @@ import java.time.format.FormatStyle;
 import java.util.List;
 import java.util.Locale;
 
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.editor.Editor;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.textfield.NumberField;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.bean.Item;
 import com.vaadin.flow.data.bean.ItemGenerator;
+import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.renderer.IconRenderer;
+import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.LocalDateRenderer;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 import com.vaadin.flow.data.renderer.NativeButtonRenderer;
@@ -43,11 +51,35 @@ public class GridViewUsingRenderersPage extends LegacyTestView {
         Grid<Item> grid = new Grid<>();
         grid.setItems(getShoppingCart());
 
-        grid.addColumn(Item::getName).setHeader("Name");
+        Grid.Column<Item> nameColumn = grid.addColumn(Item::getName)
+                .setHeader("Name");
+
+        Binder<Item> binder = new Binder<>(Item.class);
+        Editor<Item> editor = grid.getEditor();
+        editor.setBinder(binder);
+        editor.setBuffered(true);
+
+        TextField nameField = new TextField();
+        binder.forField(nameField).bind("name");
+        // Set column renderer AFTER setting editor component.
+        // There are tests to check the editor still shows after switching the
+        // renderer.
+        nameColumn.setEditorComponent(nameField);
+        nameColumn.setRenderer(LitRenderer.<Item> of("<b>${item.name}</b>")
+                .withProperty("name", Item::getName));
 
         // NumberRenderer to render numbers in general
-        grid.addColumn(new NumberRenderer<>(Item::getPrice, "$ %(,.2f",
-                Locale.US, "$ 0.00")).setHeader("Price");
+        Grid.Column<Item> priceColumn = grid
+                .addColumn(new NumberRenderer<>(Item::getPrice, "$ %(,.2f",
+                        Locale.US, "$ 0.00"))
+                .setHeader("Price");
+        priceColumn.setSortable(true);
+
+        NumberField field = new NumberField();
+        binder.forField(field)
+                .withValidator(price -> price >= 0, "Price cannot be negative")
+                .bind("price");
+        priceColumn.setEditorComponent(field);
 
         // LocalDateTimeRenderer for date and time
         grid.addColumn(new LocalDateTimeRenderer<>(Item::getPurchaseDate,
@@ -74,8 +106,34 @@ public class GridViewUsingRenderersPage extends LegacyTestView {
             dataProvider.refreshAll();
         })).setWidth("100px").setFlexGrow(0);
 
+        Grid.Column<Item> editorColumn = grid
+                .addComponentColumn(item -> new Button("Edit", clickEvent -> {
+                    editor.editItem(item);
+                    field.focus();
+                }));
+
+        Button save = new Button("Save", e -> editor.save());
+
+        Button cancel = new Button("Cancel", e -> editor.cancel());
+
+        Div buttons = new Div(save, cancel);
+        editorColumn.setEditorComponent(buttons);
+
         grid.setId("grid-basic-renderers");
-        addCard("Using renderers", "Using basic renderers", grid);
+
+        LitRenderer<Item> litRenderer = LitRenderer
+                .<Item> of(
+                        """
+                                <span style="color: ${item.price > 50 ? 'red' : 'blue'}">${new Intl.NumberFormat('en-fi',{ style: 'currency', currency: 'USD' }).format(item.price)}</span>
+                                """)
+                .withProperty("price", Item::getPrice);
+        NativeButton swapRenderersButton = new NativeButton(
+                "Swap price column renderer",
+                clickEvent -> priceColumn.setRenderer(litRenderer));
+        swapRenderersButton.setId("btn-swap-renderers");
+
+        addCard("Using renderers", "Using basic renderers", grid,
+                swapRenderersButton);
     }
 
     private static List<Item> getShoppingCart() {

@@ -37,6 +37,30 @@ public class TreeGridElement extends GridElement {
     }
 
     /**
+     * Scrolls to the row with the given indexes. The indexes are hierarchical,
+     * starting with the root index.
+     *
+     * @param indexes
+     *            the indexes of the row to scroll to
+     */
+    public void scrollToRowAndWait(int... indexes) {
+        waitUntilLoadingFinished();
+        callFunction("scrollToIndex", indexes);
+        waitUntilLoadingFinished();
+    }
+
+    /**
+     * Scrolls to the row with the given flat index.
+     *
+     * @param row
+     *            the row to scroll to
+     */
+    public void scrollToFlatRowAndWait(int row) {
+        waitUntilLoadingFinished();
+        scrollToFlatRow(row);
+    }
+
+    /**
      * Gets the grid cell for the given row and column index.
      * <p>
      * For the column index, only visible columns are taken into account.
@@ -71,7 +95,7 @@ public class TreeGridElement extends GridElement {
             GridColumnElement column) {
         if (!((getFirstVisibleRowIndex() <= rowIndex
                 && rowIndex <= getLastVisibleRowIndex()))) {
-            scrollToRowAndWait(rowIndex);
+            scrollToFlatRowAndWait(rowIndex);
         }
         waitUntil(test -> !isLoadingExpandedRows());
 

@@ -528,6 +528,48 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
 
         /**
+         * Set the renderer for this column.
+         *
+         * @param renderer
+         *            the new renderer to be used for this column, must not be
+         *            {@code null}
+         *
+         * @since 24.1
+         */
+        public Column<T> setRenderer(Renderer<T> renderer) {
+            this.renderer = Objects.requireNonNull(renderer,
+                    "Renderer must not be null.");
+
+            destroyDataGenerators();
+            if (rendering != null) {
+                rendering.getRegistration().remove();
+            }
+
+            rendering = renderer.render(getElement(), (KeyMapper<T>) getGrid()
+                    .getDataCommunicator().getKeyMapper());
+
+            columnDataGeneratorRegistration = rendering.getDataGenerator()
+                    .map(dataGenerator -> grid
+                            .addDataGenerator((DataGenerator) dataGenerator))
+                    .orElse(null);
+
+            // The editor renderer is a wrapper around the regular renderer, so
+            // we need to apply it again afterwards
+            if (editorRenderer != null) {
+                Rendering<T> editorRendering = editorRenderer
+                        .render(getElement(), null);
+                editorDataGeneratorRegistration = editorRendering
+                        .getDataGenerator()
+                        .map(dataGenerator -> grid.addDataGenerator(
+                                (DataGenerator) dataGenerator))
+                        .orElse(null);
+            }
+
+            getGrid().getDataCommunicator().reset();
+            return this;
+        }
+
+        /**
          * Sets the width of this column as a CSS-string.
          *
          * @see #setFlexGrow(int)
