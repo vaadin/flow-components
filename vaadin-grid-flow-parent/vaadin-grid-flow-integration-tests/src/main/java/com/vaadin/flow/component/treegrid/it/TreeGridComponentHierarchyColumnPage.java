@@ -1,11 +1,5 @@
 package com.vaadin.flow.component.treegrid.it;
 
-import static com.vaadin.flow.component.treegrid.it.TreeGridHugeTreePage.addItems;
-import static com.vaadin.flow.component.treegrid.it.TreeGridHugeTreePage.addRootItems;
-
-import java.util.HashMap;
-import java.util.Map;
-
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.treegrid.TreeGrid;
@@ -29,15 +23,11 @@ public class TreeGridComponentHierarchyColumnPage extends Div {
         grid.addComponentHierarchyColumn(this::createTextField)
                 .setHeader("Header");
 
-        TreeData<String> data = new TreeData<>();
-        final Map<String, String> parentPathMap = new HashMap<>();
+        TreeData<String> data = new TreeGridStringDataBuilder()
+                .addLevel("Granddad", 3).addLevel("Dad", 3).addLevel("Son", 100)
+                .build();
 
-        addRootItems("Granddad", 3, data, parentPathMap).forEach(
-                granddad -> addItems("Dad", 3, granddad, data, parentPathMap)
-                        .forEach(dad -> addItems("Son", 100, dad, data,
-                                parentPathMap)));
-
-        grid.setDataProvider(new TreeDataProvider<String>(data));
+        grid.setDataProvider(new TreeDataProvider<>(data));
 
         add(grid);
     }

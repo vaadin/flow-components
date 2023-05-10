@@ -37,9 +37,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-text-area")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-beta2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha9")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/text-area", version = "24.0.0-beta2")
+@NpmPackage(value = "@vaadin/text-area", version = "24.1.0-alpha9")
 @JsModule("@vaadin/text-area/src/vaadin-text-area.js")
 public class TextArea extends TextFieldBase<TextArea, String>
         implements HasAllowedCharPattern, HasThemeVariant<TextAreaVariant> {

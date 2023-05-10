@@ -29,6 +29,7 @@ import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.IconRenderer;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.function.SerializableComparator;
+import com.vaadin.flow.function.ValueProvider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -186,6 +187,24 @@ public class GridColumnTest {
     public void testRenderer() {
         assert renderer != null;
         Assert.assertEquals(renderer, fourthColumn.getRenderer());
+    }
+
+    @Test
+    public void setRenderer() {
+        Renderer<String> newRenderer = LitRenderer
+                .<String> of("<span>${text}</span>")
+                .withProperty("text", ValueProvider.identity());
+        fourthColumn.setRenderer(newRenderer);
+        Assert.assertEquals(newRenderer, fourthColumn.getRenderer());
+    }
+
+    @Test
+    public void setRendererReturnsColumn() {
+        Renderer<String> newRenderer = LitRenderer
+                .<String> of("<span>${text}</span>")
+                .withProperty("text", ValueProvider.identity());
+        Grid.Column<String> result = fourthColumn.setRenderer(newRenderer);
+        Assert.assertEquals(fourthColumn, result);
     }
 
     @Test

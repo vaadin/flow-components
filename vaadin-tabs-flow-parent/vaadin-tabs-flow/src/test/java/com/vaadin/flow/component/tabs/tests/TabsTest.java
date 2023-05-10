@@ -22,11 +22,12 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * @author Vaadin Ltd.
@@ -204,5 +205,17 @@ public class TabsTest {
 
         Assert.assertNull("should not change selected tab",
                 tabs.getSelectedTab());
+    }
+
+    @Test
+    public void addTabsAsComponentArray_noClassCastExceptionIsThrown() {
+        Tabs tabs = new Tabs();
+        Component[] tabsArray = { new Tab(), new Tab() };
+
+        // we test that the following call does not fail with ClassCastException
+        tabs.add(tabsArray);
+
+        // assertion here just to make sure tabs were really set
+        Assert.assertNotNull(tabs.getSelectedTab());
     }
 }

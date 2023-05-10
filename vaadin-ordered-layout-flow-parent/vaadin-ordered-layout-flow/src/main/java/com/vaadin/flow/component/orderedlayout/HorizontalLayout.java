@@ -28,9 +28,9 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * it contains.
  */
 @Tag("vaadin-horizontal-layout")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-beta2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha9")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/horizontal-layout", version = "24.0.0-beta2")
+@NpmPackage(value = "@vaadin/horizontal-layout", version = "24.1.0-alpha9")
 @JsModule("@vaadin/horizontal-layout/src/vaadin-horizontal-layout.js")
 public class HorizontalLayout extends Component implements ThemableLayout,
         FlexComponent, ClickNotifier<HorizontalLayout> {
@@ -53,6 +53,41 @@ public class HorizontalLayout extends Component implements ThemableLayout,
     public HorizontalLayout(Component... children) {
         this();
         add(children);
+    }
+
+    /**
+     * Convenience constructor to create a layout with the children and
+     * specified justifyContentMode.
+     *
+     * @param justifyContentMode
+     *            the justifyContentMode
+     * @param children
+     *            the items to add to this layout
+     *
+     * @see #add(Component...)
+     * @see #setJustifyContentMode(JustifyContentMode)
+     */
+    public HorizontalLayout(JustifyContentMode justifyContentMode,
+            Component... children) {
+        this(children);
+        setJustifyContentMode(justifyContentMode);
+    }
+
+    /**
+     * Convenience constructor to create a layout with the children and
+     * specified vertical alignment.
+     *
+     * @param alignment
+     *            the vertical alignment
+     * @param children
+     *            the items to add to this layout
+     *
+     * @see #add(Component...)
+     * @see #setDefaultVerticalComponentAlignment(Alignment)
+     */
+    public HorizontalLayout(Alignment alignment, Component... children) {
+        this(children);
+        setDefaultVerticalComponentAlignment(alignment);
     }
 
     /**

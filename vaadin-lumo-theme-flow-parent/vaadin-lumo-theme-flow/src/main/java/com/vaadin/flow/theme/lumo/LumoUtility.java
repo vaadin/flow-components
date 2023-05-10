@@ -15,10 +15,28 @@
  */
 package com.vaadin.flow.theme.lumo;
 
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
+
 /**
  * Contains the definition for all the CSS utility classes provided by Lumo.
+ * Importing this class somewhere will import all Lumo CSS utility classes and
+ * define them in the global namespace.
+ * <p>
+ * Note: It is possible that Lumo CSS utilitity classes are conflicting with
+ * user-defined CSS classes
  */
+@NpmPackage(value = "@vaadin/vaadin-lumo-styles", version = "24.1.0-alpha9")
+@JsModule("@vaadin/vaadin-lumo-styles/utility-global.js")
 public final class LumoUtility {
+
+    // The values in the inner classes are wrapped with this method in order to
+    // have implicit back reference to the outer class from them. This will
+    // ensure that @JsModule and @NpmPackage annotations are picked by the byte
+    // code scanner when doing a production mode build.
+    private static String notConstant(String value) {
+        return value;
+    }
 
     private LumoUtility() {
     }
@@ -31,7 +49,7 @@ public final class LumoUtility {
         /**
          * Hides content visually while keeping it available to screen readers.
          */
-        public static final String SCREEN_READER_ONLY = "sr-only";
+        public static final String SCREEN_READER_ONLY = notConstant("sr-only");
 
         private Accessibility() {
         }
@@ -44,13 +62,13 @@ public final class LumoUtility {
      */
     public static final class AlignContent {
 
-        public static final String AROUND = "content-around";
-        public static final String BETWEEN = "content-between";
-        public static final String CENTER = "content-center";
-        public static final String END = "content-end";
-        public static final String EVENLY = "content-evenly";
-        public static final String START = "content-start";
-        public static final String STRETCH = "content-stretch";
+        public static final String AROUND = notConstant("content-around");
+        public static final String BETWEEN = notConstant("content-between");
+        public static final String CENTER = notConstant("content-center");
+        public static final String END = notConstant("content-end");
+        public static final String EVENLY = notConstant("content-evenly");
+        public static final String START = notConstant("content-start");
+        public static final String STRETCH = notConstant("content-stretch");
 
         private AlignContent() {
         }
@@ -63,11 +81,11 @@ public final class LumoUtility {
      */
     public static final class AlignItems {
 
-        public static final String BASELINE = "items-baseline";
-        public static final String CENTER = "items-center";
-        public static final String END = "items-end";
-        public static final String START = "items-start";
-        public static final String STRETCH = "items-stretch";
+        public static final String BASELINE = notConstant("items-baseline");
+        public static final String CENTER = notConstant("items-center");
+        public static final String END = notConstant("items-end");
+        public static final String START = notConstant("items-start");
+        public static final String STRETCH = notConstant("items-stretch");
 
         private AlignItems() {
         }
@@ -80,12 +98,12 @@ public final class LumoUtility {
      */
     public static final class AlignSelf {
 
-        public static final String AUTO = "self-auto";
-        public static final String BASELINE = "self-baseline";
-        public static final String CENTER = "self-center";
-        public static final String END = "self-end";
-        public static final String START = "self-start";
-        public static final String STRETCH = "self-stretch";
+        public static final String AUTO = notConstant("self-auto");
+        public static final String BASELINE = notConstant("self-baseline");
+        public static final String CENTER = notConstant("self-center");
+        public static final String END = notConstant("self-end");
+        public static final String START = notConstant("self-start");
+        public static final String STRETCH = notConstant("self-stretch");
 
         private AlignSelf() {
         }
@@ -97,32 +115,32 @@ public final class LumoUtility {
      */
     public static final class Background {
 
-        public static final String BASE = "bg-base";
-        public static final String TRANSPARENT = "bg-transparent";
+        public static final String BASE = notConstant("bg-base");
+        public static final String TRANSPARENT = notConstant("bg-transparent");
 
-        public static final String CONTRAST = "bg-contrast";
-        public static final String CONTRAST_90 = "bg-contrast-90";
-        public static final String CONTRAST_80 = "bg-contrast-80";
-        public static final String CONTRAST_70 = "bg-contrast-70";
-        public static final String CONTRAST_60 = "bg-contrast-60";
-        public static final String CONTRAST_50 = "bg-contrast-50";
-        public static final String CONTRAST_40 = "bg-contrast-40";
-        public static final String CONTRAST_30 = "bg-contrast-30";
-        public static final String CONTRAST_20 = "bg-contrast-20";
-        public static final String CONTRAST_10 = "bg-contrast-10";
-        public static final String CONTRAST_5 = "bg-contrast-5";
+        public static final String CONTRAST = notConstant("bg-contrast");
+        public static final String CONTRAST_90 = notConstant("bg-contrast-90");
+        public static final String CONTRAST_80 = notConstant("bg-contrast-80");
+        public static final String CONTRAST_70 = notConstant("bg-contrast-70");
+        public static final String CONTRAST_60 = notConstant("bg-contrast-60");
+        public static final String CONTRAST_50 = notConstant("bg-contrast-50");
+        public static final String CONTRAST_40 = notConstant("bg-contrast-40");
+        public static final String CONTRAST_30 = notConstant("bg-contrast-30");
+        public static final String CONTRAST_20 = notConstant("bg-contrast-20");
+        public static final String CONTRAST_10 = notConstant("bg-contrast-10");
+        public static final String CONTRAST_5 = notConstant("bg-contrast-5");
 
-        public static final String PRIMARY = "bg-primary";
-        public static final String PRIMARY_50 = "bg-primary-50";
-        public static final String PRIMARY_10 = "bg-primary-10";
+        public static final String PRIMARY = notConstant("bg-primary");
+        public static final String PRIMARY_50 = notConstant("bg-primary-50");
+        public static final String PRIMARY_10 = notConstant("bg-primary-10");
 
-        public static final String ERROR = "bg-error";
-        public static final String ERROR_50 = "bg-error-50";
-        public static final String ERROR_10 = "bg-error-10";
+        public static final String ERROR = notConstant("bg-error");
+        public static final String ERROR_50 = notConstant("bg-error-50");
+        public static final String ERROR_10 = notConstant("bg-error-10");
 
-        public static final String SUCCESS = "bg-success";
-        public static final String SUCCESS_50 = "bg-success-50";
-        public static final String SUCCESS_10 = "bg-success-10";
+        public static final String SUCCESS = notConstant("bg-success");
+        public static final String SUCCESS_50 = notConstant("bg-success-50");
+        public static final String SUCCESS_10 = notConstant("bg-success-10");
 
         private Background() {
         }
@@ -134,13 +152,13 @@ public final class LumoUtility {
      */
     public static final class Border {
 
-        public static final String NONE = "border-0";
+        public static final String NONE = notConstant("border-0");
 
-        public static final String ALL = "border";
-        public static final String BOTTOM = "border-b";
-        public static final String LEFT = "border-l";
-        public static final String RIGHT = "border-r";
-        public static final String TOP = "border-t";
+        public static final String ALL = notConstant("border");
+        public static final String BOTTOM = notConstant("border-b");
+        public static final String LEFT = notConstant("border-l");
+        public static final String RIGHT = notConstant("border-r");
+        public static final String TOP = notConstant("border-t");
 
         private Border() {
         }
@@ -152,29 +170,43 @@ public final class LumoUtility {
      */
     public static final class BorderColor {
 
-        public static final String CONTRAST = "border-contrast";
-        public static final String CONTRAST_90 = "border-contrast-90";
-        public static final String CONTRAST_80 = "border-contrast-80";
-        public static final String CONTRAST_70 = "border-contrast-70";
-        public static final String CONTRAST_60 = "border-contrast-60";
-        public static final String CONTRAST_50 = "border-contrast-50";
-        public static final String CONTRAST_40 = "border-contrast-40";
-        public static final String CONTRAST_30 = "border-contrast-30";
-        public static final String CONTRAST_20 = "border-contrast-20";
-        public static final String CONTRAST_10 = "border-contrast-10";
-        public static final String CONTRAST_5 = "border-contrast-5";
+        public static final String CONTRAST = notConstant("border-contrast");
+        public static final String CONTRAST_90 = notConstant(
+                "border-contrast-90");
+        public static final String CONTRAST_80 = notConstant(
+                "border-contrast-80");
+        public static final String CONTRAST_70 = notConstant(
+                "border-contrast-70");
+        public static final String CONTRAST_60 = notConstant(
+                "border-contrast-60");
+        public static final String CONTRAST_50 = notConstant(
+                "border-contrast-50");
+        public static final String CONTRAST_40 = notConstant(
+                "border-contrast-40");
+        public static final String CONTRAST_30 = notConstant(
+                "border-contrast-30");
+        public static final String CONTRAST_20 = notConstant(
+                "border-contrast-20");
+        public static final String CONTRAST_10 = notConstant(
+                "border-contrast-10");
+        public static final String CONTRAST_5 = notConstant(
+                "border-contrast-5");
 
-        public static final String PRIMARY = "border-primary";
-        public static final String PRIMARY_50 = "border-primary-50";
-        public static final String PRIMARY_10 = "border-primary-10";
+        public static final String PRIMARY = notConstant("border-primary");
+        public static final String PRIMARY_50 = notConstant(
+                "border-primary-50");
+        public static final String PRIMARY_10 = notConstant(
+                "border-primary-10");
 
-        public static final String ERROR = "border-error";
-        public static final String ERROR_50 = "border-error-50";
-        public static final String ERROR_10 = "border-error-10";
+        public static final String ERROR = notConstant("border-error");
+        public static final String ERROR_50 = notConstant("border-error-50");
+        public static final String ERROR_10 = notConstant("border-error-10");
 
-        public static final String SUCCESS = "border-success";
-        public static final String SUCCESS_50 = "border-success-50";
-        public static final String SUCCESS_10 = "border-success-10";
+        public static final String SUCCESS = notConstant("border-success");
+        public static final String SUCCESS_50 = notConstant(
+                "border-success-50");
+        public static final String SUCCESS_10 = notConstant(
+                "border-success-10");
 
         private BorderColor() {
         }
@@ -186,10 +218,10 @@ public final class LumoUtility {
      */
     public static final class BorderRadius {
 
-        public static final String NONE = "rounded-none";
-        public static final String SMALL = "rounded-s";
-        public static final String MEDIUM = "rounded-m";
-        public static final String LARGE = "rounded-l";
+        public static final String NONE = notConstant("rounded-none");
+        public static final String SMALL = notConstant("rounded-s");
+        public static final String MEDIUM = notConstant("rounded-m");
+        public static final String LARGE = notConstant("rounded-l");
 
         private BorderRadius() {
         }
@@ -201,11 +233,11 @@ public final class LumoUtility {
      */
     public static final class BoxShadow {
 
-        public static final String XSMALL = "shadow-xs";
-        public static final String SMALL = "shadow-s";
-        public static final String MEDIUM = "shadow-m";
-        public static final String LARGE = "shadow-l";
-        public static final String XLARGE = "shadow-xl";
+        public static final String XSMALL = notConstant("shadow-xs");
+        public static final String SMALL = notConstant("shadow-s");
+        public static final String MEDIUM = notConstant("shadow-m");
+        public static final String LARGE = notConstant("shadow-l");
+        public static final String XLARGE = notConstant("shadow-xl");
 
         private BoxShadow() {
         }
@@ -219,8 +251,8 @@ public final class LumoUtility {
      */
     public static final class BoxSizing {
 
-        public static final String BORDER = "box-border";
-        public static final String CONTENT = "box-content";
+        public static final String BORDER = notConstant("box-border");
+        public static final String CONTENT = notConstant("box-content");
 
         private BoxSizing() {
         }
@@ -234,14 +266,14 @@ public final class LumoUtility {
      */
     public static final class Display {
 
-        public static final String BLOCK = "block";
-        public static final String FLEX = "flex";
-        public static final String GRID = "grid";
-        public static final String HIDDEN = "hidden";
-        public static final String INLINE = "inline";
-        public static final String INLINE_BLOCK = "inline-block";
-        public static final String INLINE_FLEX = "inline-flex";
-        public static final String INLINE_GRID = "inline-grid";
+        public static final String BLOCK = notConstant("block");
+        public static final String FLEX = notConstant("flex");
+        public static final String GRID = notConstant("grid");
+        public static final String HIDDEN = notConstant("hidden");
+        public static final String INLINE = notConstant("inline");
+        public static final String INLINE_BLOCK = notConstant("inline-block");
+        public static final String INLINE_FLEX = notConstant("inline-flex");
+        public static final String INLINE_GRID = notConstant("inline-grid");
 
         private Display() {
         }
@@ -260,8 +292,8 @@ public final class LumoUtility {
              */
             public static final class Small {
 
-                public static final String FLEX = "sm:flex";
-                public static final String HIDDEN = "sm:hidden";
+                public static final String FLEX = notConstant("sm:flex");
+                public static final String HIDDEN = notConstant("sm:hidden");
 
                 private Small() {
                 }
@@ -273,8 +305,8 @@ public final class LumoUtility {
              */
             public static final class Medium {
 
-                public static final String FLEX = "md:flex";
-                public static final String HIDDEN = "md:hidden";
+                public static final String FLEX = notConstant("md:flex");
+                public static final String HIDDEN = notConstant("md:hidden");
 
                 private Medium() {
                 }
@@ -286,8 +318,8 @@ public final class LumoUtility {
              */
             public static final class Large {
 
-                public static final String FLEX = "lg:flex";
-                public static final String HIDDEN = "lg:hidden";
+                public static final String FLEX = notConstant("lg:flex");
+                public static final String HIDDEN = notConstant("lg:hidden");
 
                 private Large() {
                 }
@@ -299,8 +331,8 @@ public final class LumoUtility {
              */
             public static final class XLarge {
 
-                public static final String FLEX = "xl:flex";
-                public static final String HIDDEN = "xl:hidden";
+                public static final String FLEX = notConstant("xl:flex");
+                public static final String HIDDEN = notConstant("xl:hidden");
 
                 private XLarge() {
                 }
@@ -312,8 +344,8 @@ public final class LumoUtility {
              */
             public static final class XXLarge {
 
-                public static final String FLEX = "2xl:flex";
-                public static final String HIDDEN = "2xl:hidden";
+                public static final String FLEX = notConstant("2xl:flex");
+                public static final String HIDDEN = notConstant("2xl:hidden");
 
                 private XXLarge() {
                 }
@@ -327,14 +359,14 @@ public final class LumoUtility {
      */
     public static final class Flex {
 
-        public static final String AUTO = "flex-auto";
-        public static final String NONE = "flex-none";
+        public static final String AUTO = notConstant("flex-auto");
+        public static final String NONE = notConstant("flex-none");
 
-        public static final String GROW = "flex-grow";
-        public static final String GROW_NONE = "flex-grow-0";
+        public static final String GROW = notConstant("flex-grow");
+        public static final String GROW_NONE = notConstant("flex-grow-0");
 
-        public static final String SHRINK = "flex-shrink";
-        public static final String SHRINK_NONE = "flex-shrink-0";
+        public static final String SHRINK = notConstant("flex-shrink");
+        public static final String SHRINK_NONE = notConstant("flex-shrink-0");
 
         private Flex() {
         }
@@ -346,10 +378,12 @@ public final class LumoUtility {
      */
     public static final class FlexDirection {
 
-        public static final String COLUMN = "flex-col";
-        public static final String COLUMN_REVERSE = "flex-col-reverse";
-        public static final String ROW = "flex-row";
-        public static final String ROW_REVERSE = "flex-row-reverse";
+        public static final String COLUMN = notConstant("flex-col");
+        public static final String COLUMN_REVERSE = notConstant(
+                "flex-col-reverse");
+        public static final String ROW = notConstant("flex-row");
+        public static final String ROW_REVERSE = notConstant(
+                "flex-row-reverse");
 
         private FlexDirection() {
         }
@@ -369,8 +403,8 @@ public final class LumoUtility {
              */
             public static final class Small {
 
-                public static final String COLUMN = "sm:flex-col";
-                public static final String ROW = "sm:flex-row";
+                public static final String COLUMN = notConstant("sm:flex-col");
+                public static final String ROW = notConstant("sm:flex-row");
 
                 private Small() {
                 }
@@ -382,8 +416,8 @@ public final class LumoUtility {
              */
             public static final class Medium {
 
-                public static final String COLUMN = "md:flex-col";
-                public static final String ROW = "md:flex-row";
+                public static final String COLUMN = notConstant("md:flex-col");
+                public static final String ROW = notConstant("md:flex-row");
 
                 private Medium() {
                 }
@@ -395,8 +429,8 @@ public final class LumoUtility {
              */
             public static final class Large {
 
-                public static final String COLUMN = "lg:flex-col";
-                public static final String ROW = "lg:flex-row";
+                public static final String COLUMN = notConstant("lg:flex-col");
+                public static final String ROW = notConstant("lg:flex-row");
 
                 private Large() {
                 }
@@ -408,8 +442,8 @@ public final class LumoUtility {
              */
             public static final class XLarge {
 
-                public static final String COLUMN = "xl:flex-col";
-                public static final String ROW = "xl:flex-row";
+                public static final String COLUMN = notConstant("xl:flex-col");
+                public static final String ROW = notConstant("xl:flex-row");
 
                 private XLarge() {
                 }
@@ -421,8 +455,8 @@ public final class LumoUtility {
              */
             public static final class XXLarge {
 
-                public static final String COLUMN = "2xl:flex-col";
-                public static final String ROW = "2xl:flex-row";
+                public static final String COLUMN = notConstant("2xl:flex-col");
+                public static final String ROW = notConstant("2xl:flex-row");
 
                 private XXLarge() {
                 }
@@ -438,9 +472,10 @@ public final class LumoUtility {
      */
     public static final class FlexWrap {
 
-        public static final String NOWRAP = "flex-nowrap";
-        public static final String WRAP = "flex-wrap";
-        public static final String WRAP_REVERSE = "flex-wrap-reverse";
+        public static final String NOWRAP = notConstant("flex-nowrap");
+        public static final String WRAP = notConstant("flex-wrap");
+        public static final String WRAP_REVERSE = notConstant(
+                "flex-wrap-reverse");
 
         private FlexWrap() {
         }
@@ -452,14 +487,14 @@ public final class LumoUtility {
      */
     public static final class FontSize {
 
-        public static final String XXSMALL = "text-2xs";
-        public static final String XSMALL = "text-xs";
-        public static final String SMALL = "text-s";
-        public static final String MEDIUM = "text-m";
-        public static final String LARGE = "text-l";
-        public static final String XLARGE = "text-xl";
-        public static final String XXLARGE = "text-2xl";
-        public static final String XXXLARGE = "text-3xl";
+        public static final String XXSMALL = notConstant("text-2xs");
+        public static final String XSMALL = notConstant("text-xs");
+        public static final String SMALL = notConstant("text-s");
+        public static final String MEDIUM = notConstant("text-m");
+        public static final String LARGE = notConstant("text-l");
+        public static final String XLARGE = notConstant("text-xl");
+        public static final String XXLARGE = notConstant("text-2xl");
+        public static final String XXXLARGE = notConstant("text-3xl");
 
         private FontSize() {
         }
@@ -479,14 +514,15 @@ public final class LumoUtility {
              */
             public static final class Small {
 
-                public static final String XXSMALL = "sm:text-2xs";
-                public static final String XSMALL = "sm:text-xs";
-                public static final String SMALL = "sm:text-s";
-                public static final String MEDIUM = "sm:text-m";
-                public static final String LARGE = "sm:text-l";
-                public static final String XLARGE = "sm:text-xl";
-                public static final String XXLARGE = "sm:text-2xl";
-                public static final String XXXLARGE = "sm:text-3xl";
+                public static final String XXSMALL = notConstant("sm:text-2xs");
+                public static final String XSMALL = notConstant("sm:text-xs");
+                public static final String SMALL = notConstant("sm:text-s");
+                public static final String MEDIUM = notConstant("sm:text-m");
+                public static final String LARGE = notConstant("sm:text-l");
+                public static final String XLARGE = notConstant("sm:text-xl");
+                public static final String XXLARGE = notConstant("sm:text-2xl");
+                public static final String XXXLARGE = notConstant(
+                        "sm:text-3xl");
 
                 private Small() {
                 }
@@ -498,14 +534,15 @@ public final class LumoUtility {
              */
             public static final class Medium {
 
-                public static final String XXSMALL = "md:text-2xs";
-                public static final String XSMALL = "md:text-xs";
-                public static final String SMALL = "md:text-s";
-                public static final String MEDIUM = "md:text-m";
-                public static final String LARGE = "md:text-l";
-                public static final String XLARGE = "md:text-xl";
-                public static final String XXLARGE = "md:text-2xl";
-                public static final String XXXLARGE = "md:text-3xl";
+                public static final String XXSMALL = notConstant("md:text-2xs");
+                public static final String XSMALL = notConstant("md:text-xs");
+                public static final String SMALL = notConstant("md:text-s");
+                public static final String MEDIUM = notConstant("md:text-m");
+                public static final String LARGE = notConstant("md:text-l");
+                public static final String XLARGE = notConstant("md:text-xl");
+                public static final String XXLARGE = notConstant("md:text-2xl");
+                public static final String XXXLARGE = notConstant(
+                        "md:text-3xl");
 
                 private Medium() {
                 }
@@ -517,14 +554,15 @@ public final class LumoUtility {
              */
             public static final class Large {
 
-                public static final String XXSMALL = "lg:text-2xs";
-                public static final String XSMALL = "lg:text-xs";
-                public static final String SMALL = "lg:text-s";
-                public static final String MEDIUM = "lg:text-m";
-                public static final String LARGE = "lg:text-l";
-                public static final String XLARGE = "lg:text-xl";
-                public static final String XXLARGE = "lg:text-2xl";
-                public static final String XXXLARGE = "lg:text-3xl";
+                public static final String XXSMALL = notConstant("lg:text-2xs");
+                public static final String XSMALL = notConstant("lg:text-xs");
+                public static final String SMALL = notConstant("lg:text-s");
+                public static final String MEDIUM = notConstant("lg:text-m");
+                public static final String LARGE = notConstant("lg:text-l");
+                public static final String XLARGE = notConstant("lg:text-xl");
+                public static final String XXLARGE = notConstant("lg:text-2xl");
+                public static final String XXXLARGE = notConstant(
+                        "lg:text-3xl");
 
                 private Large() {
                 }
@@ -536,14 +574,15 @@ public final class LumoUtility {
              */
             public static final class XLarge {
 
-                public static final String XXSMALL = "xl:text-2xs";
-                public static final String XSMALL = "xl:text-xs";
-                public static final String SMALL = "xl:text-s";
-                public static final String MEDIUM = "xl:text-m";
-                public static final String LARGE = "xl:text-l";
-                public static final String XLARGE = "xl:text-xl";
-                public static final String XXLARGE = "xl:text-2xl";
-                public static final String XXXLARGE = "xl:text-3xl";
+                public static final String XXSMALL = notConstant("xl:text-2xs");
+                public static final String XSMALL = notConstant("xl:text-xs");
+                public static final String SMALL = notConstant("xl:text-s");
+                public static final String MEDIUM = notConstant("xl:text-m");
+                public static final String LARGE = notConstant("xl:text-l");
+                public static final String XLARGE = notConstant("xl:text-xl");
+                public static final String XXLARGE = notConstant("xl:text-2xl");
+                public static final String XXXLARGE = notConstant(
+                        "xl:text-3xl");
 
                 private XLarge() {
                 }
@@ -555,14 +594,17 @@ public final class LumoUtility {
              */
             public static final class XXLarge {
 
-                public static final String XXSMALL = "2xl:text-2xs";
-                public static final String XSMALL = "2xl:text-xs";
-                public static final String SMALL = "2xl:text-s";
-                public static final String MEDIUM = "2xl:text-m";
-                public static final String LARGE = "2xl:text-l";
-                public static final String XLARGE = "2xl:text-xl";
-                public static final String XXLARGE = "2xl:text-2xl";
-                public static final String XXXLARGE = "2xl:text-3xl";
+                public static final String XXSMALL = notConstant(
+                        "2xl:text-2xs");
+                public static final String XSMALL = notConstant("2xl:text-xs");
+                public static final String SMALL = notConstant("2xl:text-s");
+                public static final String MEDIUM = notConstant("2xl:text-m");
+                public static final String LARGE = notConstant("2xl:text-l");
+                public static final String XLARGE = notConstant("2xl:text-xl");
+                public static final String XXLARGE = notConstant(
+                        "2xl:text-2xl");
+                public static final String XXXLARGE = notConstant(
+                        "2xl:text-3xl");
 
                 private XXLarge() {
                 }
@@ -575,15 +617,15 @@ public final class LumoUtility {
      */
     public static final class FontWeight {
 
-        public static final String THIN = "font-thin";
-        public static final String EXTRALIGHT = "font-extralight";
-        public static final String LIGHT = "font-light";
-        public static final String NORMAL = "font-normal";
-        public static final String MEDIUM = "font-medium";
-        public static final String SEMIBOLD = "font-semibold";
-        public static final String BOLD = "font-bold";
-        public static final String EXTRABOLD = "font-extrabold";
-        public static final String BLACK = "font-black";
+        public static final String THIN = notConstant("font-thin");
+        public static final String EXTRALIGHT = notConstant("font-extralight");
+        public static final String LIGHT = notConstant("font-light");
+        public static final String NORMAL = notConstant("font-normal");
+        public static final String MEDIUM = notConstant("font-medium");
+        public static final String SEMIBOLD = notConstant("font-semibold");
+        public static final String BOLD = notConstant("font-bold");
+        public static final String EXTRABOLD = notConstant("font-extrabold");
+        public static final String BLACK = notConstant("font-black");
 
         private FontWeight() {
         }
@@ -595,11 +637,11 @@ public final class LumoUtility {
      */
     public static final class Gap {
 
-        public static final String XSMALL = "gap-xs";
-        public static final String SMALL = "gap-s";
-        public static final String MEDIUM = "gap-m";
-        public static final String LARGE = "gap-l";
-        public static final String XLARGE = "gap-xl";
+        public static final String XSMALL = notConstant("gap-xs");
+        public static final String SMALL = notConstant("gap-s");
+        public static final String MEDIUM = notConstant("gap-m");
+        public static final String LARGE = notConstant("gap-l");
+        public static final String XLARGE = notConstant("gap-xl");
 
         private Gap() {
         }
@@ -610,11 +652,11 @@ public final class LumoUtility {
          */
         public static final class Column {
 
-            public static final String XSMALL = "gap-x-xs";
-            public static final String SMALL = "gap-x-s";
-            public static final String MEDIUM = "gap-x-m";
-            public static final String LARGE = "gap-x-l";
-            public static final String XLARGE = "gap-x-xl";
+            public static final String XSMALL = notConstant("gap-x-xs");
+            public static final String SMALL = notConstant("gap-x-s");
+            public static final String MEDIUM = notConstant("gap-x-m");
+            public static final String LARGE = notConstant("gap-x-l");
+            public static final String XLARGE = notConstant("gap-x-xl");
 
             private Column() {
             }
@@ -626,11 +668,11 @@ public final class LumoUtility {
          */
         public static final class Row {
 
-            public static final String XSMALL = "gap-y-xs";
-            public static final String SMALL = "gap-y-s";
-            public static final String MEDIUM = "gap-y-m";
-            public static final String LARGE = "gap-y-l";
-            public static final String XLARGE = "gap-y-xl";
+            public static final String XSMALL = notConstant("gap-y-xs");
+            public static final String SMALL = notConstant("gap-y-s");
+            public static final String MEDIUM = notConstant("gap-y-m");
+            public static final String LARGE = notConstant("gap-y-l");
+            public static final String XLARGE = notConstant("gap-y-xl");
 
             private Row() {
             }
@@ -646,12 +688,12 @@ public final class LumoUtility {
          * Items are placed by filling each column in turn, adding new columns
          * as necessary.
          */
-        public static final String FLOW_COLUMN = "grid-flow-col";
+        public static final String FLOW_COLUMN = notConstant("grid-flow-col");
         /**
          * Items are placed by filling each row in turn, adding new rows as
          * necessary.
          */
-        public static final String FLOW_ROW = "grid-flow-row";
+        public static final String FLOW_ROW = notConstant("grid-flow-row");
 
         private Grid() {
         }
@@ -661,31 +703,43 @@ public final class LumoUtility {
          */
         public static final class Column {
 
-            public static final String COLUMNS_1 = "grid-cols-1";
-            public static final String COLUMNS_2 = "grid-cols-2";
-            public static final String COLUMNS_3 = "grid-cols-3";
-            public static final String COLUMNS_4 = "grid-cols-4";
-            public static final String COLUMNS_5 = "grid-cols-5";
-            public static final String COLUMNS_6 = "grid-cols-6";
-            public static final String COLUMNS_7 = "grid-cols-7";
-            public static final String COLUMNS_8 = "grid-cols-8";
-            public static final String COLUMNS_9 = "grid-cols-9";
-            public static final String COLUMNS_10 = "grid-cols-10";
-            public static final String COLUMNS_11 = "grid-cols-11";
-            public static final String COLUMNS_12 = "grid-cols-12";
+            public static final String COLUMNS_1 = notConstant("grid-cols-1");
+            public static final String COLUMNS_2 = notConstant("grid-cols-2");
+            public static final String COLUMNS_3 = notConstant("grid-cols-3");
+            public static final String COLUMNS_4 = notConstant("grid-cols-4");
+            public static final String COLUMNS_5 = notConstant("grid-cols-5");
+            public static final String COLUMNS_6 = notConstant("grid-cols-6");
+            public static final String COLUMNS_7 = notConstant("grid-cols-7");
+            public static final String COLUMNS_8 = notConstant("grid-cols-8");
+            public static final String COLUMNS_9 = notConstant("grid-cols-9");
+            public static final String COLUMNS_10 = notConstant("grid-cols-10");
+            public static final String COLUMNS_11 = notConstant("grid-cols-11");
+            public static final String COLUMNS_12 = notConstant("grid-cols-12");
 
-            public static final String COLUMN_SPAN_1 = "col-span-1";
-            public static final String COLUMN_SPAN_2 = "col-span-2";
-            public static final String COLUMN_SPAN_3 = "col-span-3";
-            public static final String COLUMN_SPAN_4 = "col-span-4";
-            public static final String COLUMN_SPAN_5 = "col-span-5";
-            public static final String COLUMN_SPAN_6 = "col-span-6";
-            public static final String COLUMN_SPAN_7 = "col-span-7";
-            public static final String COLUMN_SPAN_8 = "col-span-8";
-            public static final String COLUMN_SPAN_9 = "col-span-9";
-            public static final String COLUMN_SPAN_10 = "col-span-10";
-            public static final String COLUMN_SPAN_11 = "col-span-11";
-            public static final String COLUMN_SPAN_12 = "col-span-12";
+            public static final String COLUMN_SPAN_1 = notConstant(
+                    "col-span-1");
+            public static final String COLUMN_SPAN_2 = notConstant(
+                    "col-span-2");
+            public static final String COLUMN_SPAN_3 = notConstant(
+                    "col-span-3");
+            public static final String COLUMN_SPAN_4 = notConstant(
+                    "col-span-4");
+            public static final String COLUMN_SPAN_5 = notConstant(
+                    "col-span-5");
+            public static final String COLUMN_SPAN_6 = notConstant(
+                    "col-span-6");
+            public static final String COLUMN_SPAN_7 = notConstant(
+                    "col-span-7");
+            public static final String COLUMN_SPAN_8 = notConstant(
+                    "col-span-8");
+            public static final String COLUMN_SPAN_9 = notConstant(
+                    "col-span-9");
+            public static final String COLUMN_SPAN_10 = notConstant(
+                    "col-span-10");
+            public static final String COLUMN_SPAN_11 = notConstant(
+                    "col-span-11");
+            public static final String COLUMN_SPAN_12 = notConstant(
+                    "col-span-12");
 
             private Column() {
             }
@@ -697,19 +751,19 @@ public final class LumoUtility {
          */
         public static final class Row {
 
-            public static final String ROWS_1 = "grid-rows-1";
-            public static final String ROWS_2 = "grid-rows-2";
-            public static final String ROWS_3 = "grid-rows-3";
-            public static final String ROWS_4 = "grid-rows-4";
-            public static final String ROWS_5 = "grid-rows-5";
-            public static final String ROWS_6 = "grid-rows-6";
+            public static final String ROWS_1 = notConstant("grid-rows-1");
+            public static final String ROWS_2 = notConstant("grid-rows-2");
+            public static final String ROWS_3 = notConstant("grid-rows-3");
+            public static final String ROWS_4 = notConstant("grid-rows-4");
+            public static final String ROWS_5 = notConstant("grid-rows-5");
+            public static final String ROWS_6 = notConstant("grid-rows-6");
 
-            public static final String ROW_SPAN_1 = "row-span-1";
-            public static final String ROW_SPAN_2 = "row-span-2";
-            public static final String ROW_SPAN_3 = "row-span-3";
-            public static final String ROW_SPAN_4 = "row-span-4";
-            public static final String ROW_SPAN_5 = "row-span-5";
-            public static final String ROW_SPAN_6 = "row-span-6";
+            public static final String ROW_SPAN_1 = notConstant("row-span-1");
+            public static final String ROW_SPAN_2 = notConstant("row-span-2");
+            public static final String ROW_SPAN_3 = notConstant("row-span-3");
+            public static final String ROW_SPAN_4 = notConstant("row-span-4");
+            public static final String ROW_SPAN_5 = notConstant("row-span-5");
+            public static final String ROW_SPAN_6 = notConstant("row-span-6");
 
             private Row() {
             }
@@ -731,18 +785,30 @@ public final class LumoUtility {
              */
             public static final class Small {
 
-                public static final String COLUMNS_1 = "sm:grid-cols-1";
-                public static final String COLUMNS_2 = "sm:grid-cols-2";
-                public static final String COLUMNS_3 = "sm:grid-cols-3";
-                public static final String COLUMNS_4 = "sm:grid-cols-4";
-                public static final String COLUMNS_5 = "sm:grid-cols-5";
-                public static final String COLUMNS_6 = "sm:grid-cols-6";
-                public static final String COLUMNS_7 = "sm:grid-cols-7";
-                public static final String COLUMNS_8 = "sm:grid-cols-8";
-                public static final String COLUMNS_9 = "sm:grid-cols-9";
-                public static final String COLUMNS_10 = "sm:grid-cols-10";
-                public static final String COLUMNS_11 = "sm:grid-cols-11";
-                public static final String COLUMNS_12 = "sm:grid-cols-12";
+                public static final String COLUMNS_1 = notConstant(
+                        "sm:grid-cols-1");
+                public static final String COLUMNS_2 = notConstant(
+                        "sm:grid-cols-2");
+                public static final String COLUMNS_3 = notConstant(
+                        "sm:grid-cols-3");
+                public static final String COLUMNS_4 = notConstant(
+                        "sm:grid-cols-4");
+                public static final String COLUMNS_5 = notConstant(
+                        "sm:grid-cols-5");
+                public static final String COLUMNS_6 = notConstant(
+                        "sm:grid-cols-6");
+                public static final String COLUMNS_7 = notConstant(
+                        "sm:grid-cols-7");
+                public static final String COLUMNS_8 = notConstant(
+                        "sm:grid-cols-8");
+                public static final String COLUMNS_9 = notConstant(
+                        "sm:grid-cols-9");
+                public static final String COLUMNS_10 = notConstant(
+                        "sm:grid-cols-10");
+                public static final String COLUMNS_11 = notConstant(
+                        "sm:grid-cols-11");
+                public static final String COLUMNS_12 = notConstant(
+                        "sm:grid-cols-12");
 
                 private Small() {
                 }
@@ -754,18 +820,30 @@ public final class LumoUtility {
              */
             public static final class Medium {
 
-                public static final String COLUMNS_1 = "md:grid-cols-1";
-                public static final String COLUMNS_2 = "md:grid-cols-2";
-                public static final String COLUMNS_3 = "md:grid-cols-3";
-                public static final String COLUMNS_4 = "md:grid-cols-4";
-                public static final String COLUMNS_5 = "md:grid-cols-5";
-                public static final String COLUMNS_6 = "md:grid-cols-6";
-                public static final String COLUMNS_7 = "md:grid-cols-7";
-                public static final String COLUMNS_8 = "md:grid-cols-8";
-                public static final String COLUMNS_9 = "md:grid-cols-9";
-                public static final String COLUMNS_10 = "md:grid-cols-10";
-                public static final String COLUMNS_11 = "md:grid-cols-11";
-                public static final String COLUMNS_12 = "md:grid-cols-12";
+                public static final String COLUMNS_1 = notConstant(
+                        "md:grid-cols-1");
+                public static final String COLUMNS_2 = notConstant(
+                        "md:grid-cols-2");
+                public static final String COLUMNS_3 = notConstant(
+                        "md:grid-cols-3");
+                public static final String COLUMNS_4 = notConstant(
+                        "md:grid-cols-4");
+                public static final String COLUMNS_5 = notConstant(
+                        "md:grid-cols-5");
+                public static final String COLUMNS_6 = notConstant(
+                        "md:grid-cols-6");
+                public static final String COLUMNS_7 = notConstant(
+                        "md:grid-cols-7");
+                public static final String COLUMNS_8 = notConstant(
+                        "md:grid-cols-8");
+                public static final String COLUMNS_9 = notConstant(
+                        "md:grid-cols-9");
+                public static final String COLUMNS_10 = notConstant(
+                        "md:grid-cols-10");
+                public static final String COLUMNS_11 = notConstant(
+                        "md:grid-cols-11");
+                public static final String COLUMNS_12 = notConstant(
+                        "md:grid-cols-12");
 
                 private Medium() {
                 }
@@ -777,18 +855,30 @@ public final class LumoUtility {
              */
             public static final class Large {
 
-                public static final String COLUMNS_1 = "lg:grid-cols-1";
-                public static final String COLUMNS_2 = "lg:grid-cols-2";
-                public static final String COLUMNS_3 = "lg:grid-cols-3";
-                public static final String COLUMNS_4 = "lg:grid-cols-4";
-                public static final String COLUMNS_5 = "lg:grid-cols-5";
-                public static final String COLUMNS_6 = "lg:grid-cols-6";
-                public static final String COLUMNS_7 = "lg:grid-cols-7";
-                public static final String COLUMNS_8 = "lg:grid-cols-8";
-                public static final String COLUMNS_9 = "lg:grid-cols-9";
-                public static final String COLUMNS_10 = "lg:grid-cols-10";
-                public static final String COLUMNS_11 = "lg:grid-cols-11";
-                public static final String COLUMNS_12 = "lg:grid-cols-12";
+                public static final String COLUMNS_1 = notConstant(
+                        "lg:grid-cols-1");
+                public static final String COLUMNS_2 = notConstant(
+                        "lg:grid-cols-2");
+                public static final String COLUMNS_3 = notConstant(
+                        "lg:grid-cols-3");
+                public static final String COLUMNS_4 = notConstant(
+                        "lg:grid-cols-4");
+                public static final String COLUMNS_5 = notConstant(
+                        "lg:grid-cols-5");
+                public static final String COLUMNS_6 = notConstant(
+                        "lg:grid-cols-6");
+                public static final String COLUMNS_7 = notConstant(
+                        "lg:grid-cols-7");
+                public static final String COLUMNS_8 = notConstant(
+                        "lg:grid-cols-8");
+                public static final String COLUMNS_9 = notConstant(
+                        "lg:grid-cols-9");
+                public static final String COLUMNS_10 = notConstant(
+                        "lg:grid-cols-10");
+                public static final String COLUMNS_11 = notConstant(
+                        "lg:grid-cols-11");
+                public static final String COLUMNS_12 = notConstant(
+                        "lg:grid-cols-12");
 
                 private Large() {
                 }
@@ -800,18 +890,30 @@ public final class LumoUtility {
              */
             public static final class XLarge {
 
-                public static final String COLUMNS_1 = "xl:grid-cols-1";
-                public static final String COLUMNS_2 = "xl:grid-cols-2";
-                public static final String COLUMNS_3 = "xl:grid-cols-3";
-                public static final String COLUMNS_4 = "xl:grid-cols-4";
-                public static final String COLUMNS_5 = "xl:grid-cols-5";
-                public static final String COLUMNS_6 = "xl:grid-cols-6";
-                public static final String COLUMNS_7 = "xl:grid-cols-7";
-                public static final String COLUMNS_8 = "xl:grid-cols-8";
-                public static final String COLUMNS_9 = "xl:grid-cols-9";
-                public static final String COLUMNS_10 = "xl:grid-cols-10";
-                public static final String COLUMNS_11 = "xl:grid-cols-11";
-                public static final String COLUMNS_12 = "xl:grid-cols-12";
+                public static final String COLUMNS_1 = notConstant(
+                        "xl:grid-cols-1");
+                public static final String COLUMNS_2 = notConstant(
+                        "xl:grid-cols-2");
+                public static final String COLUMNS_3 = notConstant(
+                        "xl:grid-cols-3");
+                public static final String COLUMNS_4 = notConstant(
+                        "xl:grid-cols-4");
+                public static final String COLUMNS_5 = notConstant(
+                        "xl:grid-cols-5");
+                public static final String COLUMNS_6 = notConstant(
+                        "xl:grid-cols-6");
+                public static final String COLUMNS_7 = notConstant(
+                        "xl:grid-cols-7");
+                public static final String COLUMNS_8 = notConstant(
+                        "xl:grid-cols-8");
+                public static final String COLUMNS_9 = notConstant(
+                        "xl:grid-cols-9");
+                public static final String COLUMNS_10 = notConstant(
+                        "xl:grid-cols-10");
+                public static final String COLUMNS_11 = notConstant(
+                        "xl:grid-cols-11");
+                public static final String COLUMNS_12 = notConstant(
+                        "xl:grid-cols-12");
 
                 private XLarge() {
                 }
@@ -823,18 +925,30 @@ public final class LumoUtility {
              */
             public static final class XXLarge {
 
-                public static final String COLUMNS_1 = "2xl:grid-cols-1";
-                public static final String COLUMNS_2 = "2xl:grid-cols-2";
-                public static final String COLUMNS_3 = "2xl:grid-cols-3";
-                public static final String COLUMNS_4 = "2xl:grid-cols-4";
-                public static final String COLUMNS_5 = "2xl:grid-cols-5";
-                public static final String COLUMNS_6 = "2xl:grid-cols-6";
-                public static final String COLUMNS_7 = "2xl:grid-cols-7";
-                public static final String COLUMNS_8 = "2xl:grid-cols-8";
-                public static final String COLUMNS_9 = "2xl:grid-cols-9";
-                public static final String COLUMNS_10 = "2xl:grid-cols-10";
-                public static final String COLUMNS_11 = "2xl:grid-cols-11";
-                public static final String COLUMNS_12 = "2xl:grid-cols-12";
+                public static final String COLUMNS_1 = notConstant(
+                        "2xl:grid-cols-1");
+                public static final String COLUMNS_2 = notConstant(
+                        "2xl:grid-cols-2");
+                public static final String COLUMNS_3 = notConstant(
+                        "2xl:grid-cols-3");
+                public static final String COLUMNS_4 = notConstant(
+                        "2xl:grid-cols-4");
+                public static final String COLUMNS_5 = notConstant(
+                        "2xl:grid-cols-5");
+                public static final String COLUMNS_6 = notConstant(
+                        "2xl:grid-cols-6");
+                public static final String COLUMNS_7 = notConstant(
+                        "2xl:grid-cols-7");
+                public static final String COLUMNS_8 = notConstant(
+                        "2xl:grid-cols-8");
+                public static final String COLUMNS_9 = notConstant(
+                        "2xl:grid-cols-9");
+                public static final String COLUMNS_10 = notConstant(
+                        "2xl:grid-cols-10");
+                public static final String COLUMNS_11 = notConstant(
+                        "2xl:grid-cols-11");
+                public static final String COLUMNS_12 = notConstant(
+                        "2xl:grid-cols-12");
 
                 private XXLarge() {
                 }
@@ -849,16 +963,16 @@ public final class LumoUtility {
      */
     public static final class Height {
 
-        public static final String AUTO = "h-auto";
-        public static final String FULL = "h-full";
-        public static final String NONE = "h-0";
-        public static final String SCREEN = "h-screen";
+        public static final String AUTO = notConstant("h-auto");
+        public static final String FULL = notConstant("h-full");
+        public static final String NONE = notConstant("h-0");
+        public static final String SCREEN = notConstant("h-screen");
 
-        public static final String XSMALL = "h-xs";
-        public static final String SMALL = "h-s";
-        public static final String MEDIUM = "h-m";
-        public static final String LARGE = "h-l";
-        public static final String XLARGE = "h-xl";
+        public static final String XSMALL = notConstant("h-xs");
+        public static final String SMALL = notConstant("h-s");
+        public static final String MEDIUM = notConstant("h-m");
+        public static final String LARGE = notConstant("h-l");
+        public static final String XLARGE = notConstant("h-xl");
 
         private Height() {
         }
@@ -870,9 +984,9 @@ public final class LumoUtility {
      */
     public static final class IconSize {
 
-        public static final String SMALL = "icon-s";
-        public static final String MEDIUM = "icon-m";
-        public static final String LARGE = "icon-l";
+        public static final String SMALL = notConstant("icon-s");
+        public static final String MEDIUM = notConstant("icon-m");
+        public static final String LARGE = notConstant("icon-l");
 
         private IconSize() {
         }
@@ -885,12 +999,12 @@ public final class LumoUtility {
      */
     public static final class JustifyContent {
 
-        public static final String AROUND = "justify-around";
-        public static final String BETWEEN = "justify-between";
-        public static final String CENTER = "justify-center";
-        public static final String END = "justify-end";
-        public static final String EVENLY = "justify-evenly";
-        public static final String START = "justify-start";
+        public static final String AROUND = notConstant("justify-around");
+        public static final String BETWEEN = notConstant("justify-between");
+        public static final String CENTER = notConstant("justify-center");
+        public static final String END = notConstant("justify-end");
+        public static final String EVENLY = notConstant("justify-evenly");
+        public static final String START = notConstant("justify-start");
 
         private JustifyContent() {
         }
@@ -902,10 +1016,10 @@ public final class LumoUtility {
      */
     public static final class LineHeight {
 
-        public static final String NONE = "leading-none";
-        public static final String XSMALL = "leading-xs";
-        public static final String SMALL = "leading-s";
-        public static final String MEDIUM = "leading-m";
+        public static final String NONE = notConstant("leading-none");
+        public static final String XSMALL = notConstant("leading-xs");
+        public static final String SMALL = notConstant("leading-s");
+        public static final String MEDIUM = notConstant("leading-m");
 
         private LineHeight() {
         }
@@ -917,7 +1031,7 @@ public final class LumoUtility {
      */
     public static final class ListStyleType {
 
-        public static final String NONE = "list-none";
+        public static final String NONE = notConstant("list-none");
 
         private ListStyleType() {
         }
@@ -929,13 +1043,13 @@ public final class LumoUtility {
      */
     public static final class Margin {
 
-        public static final String AUTO = "m-auto";
-        public static final String NONE = "m-0";
-        public static final String XSMALL = "m-xs";
-        public static final String SMALL = "m-s";
-        public static final String MEDIUM = "m-m";
-        public static final String LARGE = "m-l";
-        public static final String XLARGE = "m-xl";
+        public static final String AUTO = notConstant("m-auto");
+        public static final String NONE = notConstant("m-0");
+        public static final String XSMALL = notConstant("m-xs");
+        public static final String SMALL = notConstant("m-s");
+        public static final String MEDIUM = notConstant("m-m");
+        public static final String LARGE = notConstant("m-l");
+        public static final String XLARGE = notConstant("m-xl");
 
         private Margin() {
         }
@@ -945,13 +1059,13 @@ public final class LumoUtility {
          */
         public static final class Bottom {
 
-            public static final String AUTO = "mb-auto";
-            public static final String NONE = "mb-0";
-            public static final String XSMALL = "mb-xs";
-            public static final String SMALL = "mb-s";
-            public static final String MEDIUM = "mb-m";
-            public static final String LARGE = "mb-l";
-            public static final String XLARGE = "mb-xl";
+            public static final String AUTO = notConstant("mb-auto");
+            public static final String NONE = notConstant("mb-0");
+            public static final String XSMALL = notConstant("mb-xs");
+            public static final String SMALL = notConstant("mb-s");
+            public static final String MEDIUM = notConstant("mb-m");
+            public static final String LARGE = notConstant("mb-l");
+            public static final String XLARGE = notConstant("mb-xl");
 
             private Bottom() {
             }
@@ -964,13 +1078,13 @@ public final class LumoUtility {
          */
         public static final class End {
 
-            public static final String AUTO = "me-auto";
-            public static final String NONE = "me-0";
-            public static final String XSMALL = "me-xs";
-            public static final String SMALL = "me-s";
-            public static final String MEDIUM = "me-m";
-            public static final String LARGE = "me-l";
-            public static final String XLARGE = "me-xl";
+            public static final String AUTO = notConstant("me-auto");
+            public static final String NONE = notConstant("me-0");
+            public static final String XSMALL = notConstant("me-xs");
+            public static final String SMALL = notConstant("me-s");
+            public static final String MEDIUM = notConstant("me-m");
+            public static final String LARGE = notConstant("me-l");
+            public static final String XLARGE = notConstant("me-xl");
 
             private End() {
             }
@@ -981,13 +1095,13 @@ public final class LumoUtility {
          */
         public static final class Horizontal {
 
-            public static final String AUTO = "mx-auto";
-            public static final String NONE = "mx-0";
-            public static final String XSMALL = "mx-xs";
-            public static final String SMALL = "mx-s";
-            public static final String MEDIUM = "mx-m";
-            public static final String LARGE = "mx-l";
-            public static final String XLARGE = "mx-xl";
+            public static final String AUTO = notConstant("mx-auto");
+            public static final String NONE = notConstant("mx-0");
+            public static final String XSMALL = notConstant("mx-xs");
+            public static final String SMALL = notConstant("mx-s");
+            public static final String MEDIUM = notConstant("mx-m");
+            public static final String LARGE = notConstant("mx-l");
+            public static final String XLARGE = notConstant("mx-xl");
 
             private Horizontal() {
             }
@@ -998,13 +1112,13 @@ public final class LumoUtility {
          */
         public static final class Left {
 
-            public static final String AUTO = "ml-auto";
-            public static final String NONE = "ml-0";
-            public static final String XSMALL = "ml-xs";
-            public static final String SMALL = "ml-s";
-            public static final String MEDIUM = "ml-m";
-            public static final String LARGE = "ml-l";
-            public static final String XLARGE = "ml-xl";
+            public static final String AUTO = notConstant("ml-auto");
+            public static final String NONE = notConstant("ml-0");
+            public static final String XSMALL = notConstant("ml-xs");
+            public static final String SMALL = notConstant("ml-s");
+            public static final String MEDIUM = notConstant("ml-m");
+            public static final String LARGE = notConstant("ml-l");
+            public static final String XLARGE = notConstant("ml-xl");
 
             private Left() {
             }
@@ -1015,13 +1129,13 @@ public final class LumoUtility {
          */
         public static final class Right {
 
-            public static final String AUTO = "mr-auto";
-            public static final String NONE = "mr-0";
-            public static final String XSMALL = "mr-xs";
-            public static final String SMALL = "mr-s";
-            public static final String MEDIUM = "mr-m";
-            public static final String LARGE = "mr-l";
-            public static final String XLARGE = "mr-xl";
+            public static final String AUTO = notConstant("mr-auto");
+            public static final String NONE = notConstant("mr-0");
+            public static final String XSMALL = notConstant("mr-xs");
+            public static final String SMALL = notConstant("mr-s");
+            public static final String MEDIUM = notConstant("mr-m");
+            public static final String LARGE = notConstant("mr-l");
+            public static final String XLARGE = notConstant("mr-xl");
 
             private Right() {
             }
@@ -1034,13 +1148,13 @@ public final class LumoUtility {
          */
         public static final class Start {
 
-            public static final String AUTO = "ms-auto";
-            public static final String NONE = "ms-0";
-            public static final String XSMALL = "ms-xs";
-            public static final String SMALL = "ms-s";
-            public static final String MEDIUM = "ms-m";
-            public static final String LARGE = "ms-l";
-            public static final String XLARGE = "ms-xl";
+            public static final String AUTO = notConstant("ms-auto");
+            public static final String NONE = notConstant("ms-0");
+            public static final String XSMALL = notConstant("ms-xs");
+            public static final String SMALL = notConstant("ms-s");
+            public static final String MEDIUM = notConstant("ms-m");
+            public static final String LARGE = notConstant("ms-l");
+            public static final String XLARGE = notConstant("ms-xl");
 
             private Start() {
             }
@@ -1051,13 +1165,13 @@ public final class LumoUtility {
          */
         public static final class Top {
 
-            public static final String AUTO = "mt-auto";
-            public static final String NONE = "mt-0";
-            public static final String XSMALL = "mt-xs";
-            public static final String SMALL = "mt-s";
-            public static final String MEDIUM = "mt-m";
-            public static final String LARGE = "mt-l";
-            public static final String XLARGE = "mt-xl";
+            public static final String AUTO = notConstant("mt-auto");
+            public static final String NONE = notConstant("mt-0");
+            public static final String XSMALL = notConstant("mt-xs");
+            public static final String SMALL = notConstant("mt-s");
+            public static final String MEDIUM = notConstant("mt-m");
+            public static final String LARGE = notConstant("mt-l");
+            public static final String XLARGE = notConstant("mt-xl");
 
             private Top() {
             }
@@ -1069,13 +1183,13 @@ public final class LumoUtility {
          */
         public static final class Vertical {
 
-            public static final String AUTO = "my-auto";
-            public static final String NONE = "my-0";
-            public static final String XSMALL = "my-xs";
-            public static final String SMALL = "my-s";
-            public static final String MEDIUM = "my-m";
-            public static final String LARGE = "my-l";
-            public static final String XLARGE = "my-xl";
+            public static final String AUTO = notConstant("my-auto");
+            public static final String NONE = notConstant("my-0");
+            public static final String XSMALL = notConstant("my-xs");
+            public static final String SMALL = notConstant("my-s");
+            public static final String MEDIUM = notConstant("my-m");
+            public static final String LARGE = notConstant("my-l");
+            public static final String XLARGE = notConstant("my-xl");
 
             private Vertical() {
             }
@@ -1088,8 +1202,8 @@ public final class LumoUtility {
      */
     public static final class MaxHeight {
 
-        public static final String FULL = "max-h-full";
-        public static final String SCREEN = "max-h-screen";
+        public static final String FULL = notConstant("max-h-full");
+        public static final String SCREEN = notConstant("max-h-screen");
 
         private MaxHeight() {
         }
@@ -1101,12 +1215,17 @@ public final class LumoUtility {
      */
     public static final class MaxWidth {
 
-        public static final String FULL = "max-w-full";
-        public static final String SCREEN_SMALL = "max-w-screen-sm";
-        public static final String SCREEN_MEDIUM = "max-w-screen-md";
-        public static final String SCREEN_LARGE = "max-w-screen-lg";
-        public static final String SCREEN_XLARGE = "max-w-screen-xl";
-        public static final String SCREEN_XXLARGE = "max-w-screen-2xl";
+        public static final String FULL = notConstant("max-w-full");
+        public static final String SCREEN_SMALL = notConstant(
+                "max-w-screen-sm");
+        public static final String SCREEN_MEDIUM = notConstant(
+                "max-w-screen-md");
+        public static final String SCREEN_LARGE = notConstant(
+                "max-w-screen-lg");
+        public static final String SCREEN_XLARGE = notConstant(
+                "max-w-screen-xl");
+        public static final String SCREEN_XXLARGE = notConstant(
+                "max-w-screen-2xl");
 
         private MaxWidth() {
         }
@@ -1118,9 +1237,9 @@ public final class LumoUtility {
      */
     public static final class MinHeight {
 
-        public static final String FULL = "min-h-full";
-        public static final String NONE = "min-h-0";
-        public static final String SCREEN = "min-h-screen";
+        public static final String FULL = notConstant("min-h-full");
+        public static final String NONE = notConstant("min-h-0");
+        public static final String SCREEN = notConstant("min-h-screen");
 
         private MinHeight() {
         }
@@ -1132,8 +1251,8 @@ public final class LumoUtility {
      */
     public static final class MinWidth {
 
-        public static final String FULL = "min-w-full";
-        public static final String NONE = "min-w-0";
+        public static final String FULL = notConstant("min-w-full");
+        public static final String NONE = notConstant("min-w-0");
 
         private MinWidth() {
         }
@@ -1145,9 +1264,9 @@ public final class LumoUtility {
      */
     public static final class Overflow {
 
-        public static final String AUTO = "overflow-auto";
-        public static final String HIDDEN = "overflow-hidden";
-        public static final String SCROLL = "overflow-scroll";
+        public static final String AUTO = notConstant("overflow-auto");
+        public static final String HIDDEN = notConstant("overflow-hidden");
+        public static final String SCROLL = notConstant("overflow-scroll");
 
         private Overflow() {
         }
@@ -1159,12 +1278,12 @@ public final class LumoUtility {
      */
     public static final class Padding {
 
-        public static final String NONE = "p-0";
-        public static final String XSMALL = "p-xs";
-        public static final String SMALL = "p-s";
-        public static final String MEDIUM = "p-m";
-        public static final String LARGE = "p-l";
-        public static final String XLARGE = "p-xl";
+        public static final String NONE = notConstant("p-0");
+        public static final String XSMALL = notConstant("p-xs");
+        public static final String SMALL = notConstant("p-s");
+        public static final String MEDIUM = notConstant("p-m");
+        public static final String LARGE = notConstant("p-l");
+        public static final String XLARGE = notConstant("p-xl");
 
         private Padding() {
         }
@@ -1174,12 +1293,12 @@ public final class LumoUtility {
          */
         public static final class Bottom {
 
-            public static final String NONE = "pb-0";
-            public static final String XSMALL = "pb-xs";
-            public static final String SMALL = "pb-s";
-            public static final String MEDIUM = "pb-m";
-            public static final String LARGE = "pb-l";
-            public static final String XLARGE = "pb-xl";
+            public static final String NONE = notConstant("pb-0");
+            public static final String XSMALL = notConstant("pb-xs");
+            public static final String SMALL = notConstant("pb-s");
+            public static final String MEDIUM = notConstant("pb-m");
+            public static final String LARGE = notConstant("pb-l");
+            public static final String XLARGE = notConstant("pb-xl");
 
             private Bottom() {
             }
@@ -1192,12 +1311,12 @@ public final class LumoUtility {
          */
         public static final class End {
 
-            public static final String NONE = "pe-0";
-            public static final String XSMALL = "pe-xs";
-            public static final String SMALL = "pe-s";
-            public static final String MEDIUM = "pe-m";
-            public static final String LARGE = "pe-l";
-            public static final String XLARGE = "pe-xl";
+            public static final String NONE = notConstant("pe-0");
+            public static final String XSMALL = notConstant("pe-xs");
+            public static final String SMALL = notConstant("pe-s");
+            public static final String MEDIUM = notConstant("pe-m");
+            public static final String LARGE = notConstant("pe-l");
+            public static final String XLARGE = notConstant("pe-xl");
 
             private End() {
             }
@@ -1208,12 +1327,12 @@ public final class LumoUtility {
          */
         public static final class Horizontal {
 
-            public static final String NONE = "px-0";
-            public static final String XSMALL = "px-xs";
-            public static final String SMALL = "px-s";
-            public static final String MEDIUM = "px-m";
-            public static final String LARGE = "px-l";
-            public static final String XLARGE = "px-xl";
+            public static final String NONE = notConstant("px-0");
+            public static final String XSMALL = notConstant("px-xs");
+            public static final String SMALL = notConstant("px-s");
+            public static final String MEDIUM = notConstant("px-m");
+            public static final String LARGE = notConstant("px-l");
+            public static final String XLARGE = notConstant("px-xl");
 
             private Horizontal() {
             }
@@ -1224,12 +1343,12 @@ public final class LumoUtility {
          */
         public static final class Left {
 
-            public static final String NONE = "pl-0";
-            public static final String XSMALL = "pl-xs";
-            public static final String SMALL = "pl-s";
-            public static final String MEDIUM = "pl-m";
-            public static final String LARGE = "pl-l";
-            public static final String XLARGE = "pl-xl";
+            public static final String NONE = notConstant("pl-0");
+            public static final String XSMALL = notConstant("pl-xs");
+            public static final String SMALL = notConstant("pl-s");
+            public static final String MEDIUM = notConstant("pl-m");
+            public static final String LARGE = notConstant("pl-l");
+            public static final String XLARGE = notConstant("pl-xl");
 
             private Left() {
             }
@@ -1240,12 +1359,12 @@ public final class LumoUtility {
          */
         public static final class Right {
 
-            public static final String NONE = "pr-0";
-            public static final String XSMALL = "pr-xs";
-            public static final String SMALL = "pr-s";
-            public static final String MEDIUM = "pr-m";
-            public static final String LARGE = "pr-l";
-            public static final String XLARGE = "pr-xl";
+            public static final String NONE = notConstant("pr-0");
+            public static final String XSMALL = notConstant("pr-xs");
+            public static final String SMALL = notConstant("pr-s");
+            public static final String MEDIUM = notConstant("pr-m");
+            public static final String LARGE = notConstant("pr-l");
+            public static final String XLARGE = notConstant("pr-xl");
 
             private Right() {
             }
@@ -1258,12 +1377,12 @@ public final class LumoUtility {
          */
         public static final class Start {
 
-            public static final String NONE = "ps-0";
-            public static final String XSMALL = "ps-xs";
-            public static final String SMALL = "ps-s";
-            public static final String MEDIUM = "ps-m";
-            public static final String LARGE = "ps-l";
-            public static final String XLARGE = "ps-xl";
+            public static final String NONE = notConstant("ps-0");
+            public static final String XSMALL = notConstant("ps-xs");
+            public static final String SMALL = notConstant("ps-s");
+            public static final String MEDIUM = notConstant("ps-m");
+            public static final String LARGE = notConstant("ps-l");
+            public static final String XLARGE = notConstant("ps-xl");
 
             private Start() {
             }
@@ -1274,12 +1393,12 @@ public final class LumoUtility {
          */
         public static final class Top {
 
-            public static final String NONE = "pt-0";
-            public static final String XSMALL = "pt-xs";
-            public static final String SMALL = "pt-s";
-            public static final String MEDIUM = "pt-m";
-            public static final String LARGE = "pt-l";
-            public static final String XLARGE = "pt-xl";
+            public static final String NONE = notConstant("pt-0");
+            public static final String XSMALL = notConstant("pt-xs");
+            public static final String SMALL = notConstant("pt-s");
+            public static final String MEDIUM = notConstant("pt-m");
+            public static final String LARGE = notConstant("pt-l");
+            public static final String XLARGE = notConstant("pt-xl");
 
             private Top() {
             }
@@ -1291,12 +1410,12 @@ public final class LumoUtility {
          */
         public static final class Vertical {
 
-            public static final String NONE = "py-0";
-            public static final String XSMALL = "py-xs";
-            public static final String SMALL = "py-s";
-            public static final String MEDIUM = "py-m";
-            public static final String LARGE = "py-l";
-            public static final String XLARGE = "py-xl";
+            public static final String NONE = notConstant("py-0");
+            public static final String XSMALL = notConstant("py-xs");
+            public static final String SMALL = notConstant("py-s");
+            public static final String MEDIUM = notConstant("py-m");
+            public static final String LARGE = notConstant("py-l");
+            public static final String XLARGE = notConstant("py-xl");
 
             private Vertical() {
             }
@@ -1309,11 +1428,11 @@ public final class LumoUtility {
      */
     public static final class Position {
 
-        public static final String ABSOLUTE = "absolute";
-        public static final String FIXED = "fixed";
-        public static final String RELATIVE = "relative";
-        public static final String STATIC = "static";
-        public static final String STICKY = "sticky";
+        public static final String ABSOLUTE = notConstant("absolute");
+        public static final String FIXED = notConstant("fixed");
+        public static final String RELATIVE = notConstant("relative");
+        public static final String STATIC = notConstant("static");
+        public static final String STICKY = notConstant("sticky");
 
         private Position() {
         }
@@ -1325,10 +1444,10 @@ public final class LumoUtility {
      */
     public static final class TextAlignment {
 
-        public static final String LEFT = "text-left";
-        public static final String CENTER = "text-center";
-        public static final String RIGHT = "text-right";
-        public static final String JUSTIFY = "text-justify";
+        public static final String LEFT = notConstant("text-left");
+        public static final String CENTER = notConstant("text-center");
+        public static final String RIGHT = notConstant("text-right");
+        public static final String JUSTIFY = notConstant("text-justify");
 
         private TextAlignment() {
         }
@@ -1340,20 +1459,23 @@ public final class LumoUtility {
      */
     public static final class TextColor {
 
-        public static final String HEADER = "text-header";
-        public static final String BODY = "text-body";
-        public static final String SECONDARY = "text-secondary";
-        public static final String TERTIARY = "text-tertiary";
-        public static final String DISABLED = "text-disabled";
+        public static final String HEADER = notConstant("text-header");
+        public static final String BODY = notConstant("text-body");
+        public static final String SECONDARY = notConstant("text-secondary");
+        public static final String TERTIARY = notConstant("text-tertiary");
+        public static final String DISABLED = notConstant("text-disabled");
 
-        public static final String PRIMARY = "text-primary";
-        public static final String PRIMARY_CONTRAST = "text-primary-contrast";
+        public static final String PRIMARY = notConstant("text-primary");
+        public static final String PRIMARY_CONTRAST = notConstant(
+                "text-primary-contrast");
 
-        public static final String ERROR = "text-error";
-        public static final String ERROR_CONTRAST = "text-error-contrast";
+        public static final String ERROR = notConstant("text-error");
+        public static final String ERROR_CONTRAST = notConstant(
+                "text-error-contrast");
 
-        public static final String SUCCESS = "text-success";
-        public static final String SUCCESS_CONTRAST = "text-success-contrast";
+        public static final String SUCCESS = notConstant("text-success");
+        public static final String SUCCESS_CONTRAST = notConstant(
+                "text-success-contrast");
 
         private TextColor() {
         }
@@ -1365,8 +1487,8 @@ public final class LumoUtility {
      */
     public static final class TextOverflow {
 
-        public static final String CLIP = "overflow-clip";
-        public static final String ELLIPSIS = "overflow-ellipsis";
+        public static final String CLIP = notConstant("overflow-clip");
+        public static final String ELLIPSIS = notConstant("overflow-ellipsis");
 
         private TextOverflow() {
         }
@@ -1378,9 +1500,9 @@ public final class LumoUtility {
      */
     public static final class TextTransform {
 
-        public static final String CAPITALIZE = "capitalize";
-        public static final String LOWERCASE = "lowercase";
-        public static final String UPPERCASE = "uppercase";
+        public static final String CAPITALIZE = notConstant("capitalize");
+        public static final String LOWERCASE = notConstant("lowercase");
+        public static final String UPPERCASE = notConstant("uppercase");
 
         private TextTransform() {
         }
@@ -1392,11 +1514,13 @@ public final class LumoUtility {
      */
     public static final class Whitespace {
 
-        public static final String NORMAL = "whitespace-normal";
-        public static final String NOWRAP = "whitespace-nowrap";
-        public static final String PRE = "whitespace-pre";
-        public static final String PRE_LINE = "whitespace-pre-line";
-        public static final String PRE_WRAP = "whitespace-pre-wrap";
+        public static final String NORMAL = notConstant("whitespace-normal");
+        public static final String NOWRAP = notConstant("whitespace-nowrap");
+        public static final String PRE = notConstant("whitespace-pre");
+        public static final String PRE_LINE = notConstant(
+                "whitespace-pre-line");
+        public static final String PRE_WRAP = notConstant(
+                "whitespace-pre-wrap");
 
         private Whitespace() {
         }
@@ -1408,14 +1532,14 @@ public final class LumoUtility {
      */
     public static final class Width {
 
-        public static final String AUTO = "w-auto";
-        public static final String FULL = "w-full";
+        public static final String AUTO = notConstant("w-auto");
+        public static final String FULL = notConstant("w-full");
 
-        public static final String XSMALL = "w-xs";
-        public static final String SMALL = "w-s";
-        public static final String MEDIUM = "w-m";
-        public static final String LARGE = "w-l";
-        public static final String XLARGE = "w-xl";
+        public static final String XSMALL = notConstant("w-xs");
+        public static final String SMALL = notConstant("w-s");
+        public static final String MEDIUM = notConstant("w-m");
+        public static final String LARGE = notConstant("w-l");
+        public static final String XLARGE = notConstant("w-xl");
 
         private Width() {
         }

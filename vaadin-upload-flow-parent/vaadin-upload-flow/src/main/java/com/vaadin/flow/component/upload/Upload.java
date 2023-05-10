@@ -63,9 +63,9 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-upload")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-beta2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha9")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/upload", version = "24.0.0-beta2")
+@NpmPackage(value = "@vaadin/upload", version = "24.1.0-alpha9")
 @JsModule("@vaadin/upload/src/vaadin-upload.js")
 public class Upload extends Component implements HasSize, HasStyle {
 
@@ -108,7 +108,7 @@ public class Upload extends Component implements HasSize, HasStyle {
      */
     public Upload() {
         final String eventDetailError = "event.detail.error";
-        getElement().addEventListener("file-rejected", event -> {
+        getElement().addEventListener("file-reject", event -> {
             String detailError = event.getEventData()
                     .getString(eventDetailError);
             fireEvent(new FileRejectedEvent(this, detailError));

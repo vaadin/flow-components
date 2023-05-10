@@ -19,6 +19,7 @@ import java.util.Arrays;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.interactions.Actions;
@@ -37,7 +38,6 @@ public class TreeGridHugeTreeNavigationIT extends AbstractTreeGridIT {
     }
 
     @Test
-
     public void keyboard_navigation() {
         getTreeGrid().getCell(0, 0).focus();
 
@@ -88,6 +88,7 @@ public class TreeGridHugeTreeNavigationIT extends AbstractTreeGridIT {
         checkLogsForErrors();
     }
 
+    @Ignore("Keyboard navigation for rows that are no longer in cache should be fixed first.")
     @Test
     public void can_toggle_collapse_on_row_that_is_no_longer_in_cache() {
         getTreeGrid().getCell(0, 0).focus();

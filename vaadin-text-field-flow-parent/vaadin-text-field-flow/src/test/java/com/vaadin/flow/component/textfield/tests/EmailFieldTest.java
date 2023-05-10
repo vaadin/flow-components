@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
+import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.textfield.EmailField;
@@ -94,5 +95,35 @@ public class EmailFieldTest {
     public void implementsHasTooltip() {
         EmailField field = new EmailField();
         Assert.assertTrue(field instanceof HasTooltip);
+    }
+
+    @Test
+    public void implementHasAriaLabel() {
+        EmailField field = new EmailField();
+        Assert.assertTrue(field instanceof HasAriaLabel);
+    }
+
+    @Test
+    public void setAriaLabel() {
+        EmailField field = new EmailField();
+
+        field.setAriaLabel("aria-label");
+        Assert.assertTrue(field.getAriaLabel().isPresent());
+        Assert.assertEquals("aria-label", field.getAriaLabel().get());
+
+        field.setAriaLabel(null);
+        Assert.assertTrue(field.getAriaLabel().isEmpty());
+    }
+
+    @Test
+    public void setAriaLabelledBy() {
+        EmailField field = new EmailField();
+
+        field.setAriaLabelledBy("aria-labelledby");
+        Assert.assertTrue(field.getAriaLabelledBy().isPresent());
+        Assert.assertEquals("aria-labelledby", field.getAriaLabelledBy().get());
+
+        field.setAriaLabelledBy(null);
+        Assert.assertTrue(field.getAriaLabelledBy().isEmpty());
     }
 }

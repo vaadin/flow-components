@@ -17,6 +17,7 @@
 package com.vaadin.flow.component.tabs;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasStyle;
@@ -33,12 +34,12 @@ import com.vaadin.flow.component.shared.HasTooltip;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-tab")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-beta2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha9")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/tabs/src/vaadin-tab.js")
-@NpmPackage(value = "@vaadin/tabs", version = "24.0.0-beta2")
-public class Tab extends Component implements HasComponents, HasLabel, HasStyle,
-        HasThemeVariant<TabVariant>, HasTooltip {
+@NpmPackage(value = "@vaadin/tabs", version = "24.1.0-alpha9")
+public class Tab extends Component implements HasAriaLabel, HasComponents,
+        HasLabel, HasStyle, HasThemeVariant<TabVariant>, HasTooltip {
 
     private static final String FLEX_GROW_CSS_PROPERTY = "flexGrow";
 

@@ -18,7 +18,9 @@ package com.vaadin.flow.component.datepicker;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import com.vaadin.flow.component.HasAriaLabel;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -283,6 +285,38 @@ public class DatePickerTest {
     }
 
     @Test
+    public void implementHasAriaLabel() {
+        Assert.assertTrue(
+                "Date picker should support aria-label and aria-labelledby",
+                HasAriaLabel.class.isAssignableFrom(DatePicker.class));
+    }
+
+    @Test
+    public void setAriaLabel() {
+        DatePicker datePicker = new DatePicker();
+
+        datePicker.setAriaLabel("aria-label");
+        Assert.assertTrue(datePicker.getAriaLabel().isPresent());
+        Assert.assertEquals("aria-label", datePicker.getAriaLabel().get());
+
+        datePicker.setAriaLabel(null);
+        Assert.assertTrue(datePicker.getAriaLabel().isEmpty());
+    }
+
+    @Test
+    public void setAriaLabelledBy() {
+        DatePicker datePicker = new DatePicker();
+
+        datePicker.setAriaLabelledBy("aria-labelledby");
+        Assert.assertTrue(datePicker.getAriaLabelledBy().isPresent());
+        Assert.assertEquals("aria-labelledby",
+                datePicker.getAriaLabelledBy().get());
+
+        datePicker.setAriaLabelledBy(null);
+        Assert.assertTrue(datePicker.getAriaLabelledBy().isEmpty());
+    }
+
+    @Test
     public void setPrefix_hasPrefix() {
         DatePicker picker = new DatePicker();
         TestPrefix prefix = new TestPrefix();
@@ -296,6 +330,38 @@ public class DatePickerTest {
     public void setTextAsPrefix_throws() {
         DatePicker picker = new DatePicker();
         picker.setPrefixComponent(new Text("Prefix"));
+    }
+
+    @Test
+    public void unregisterOpenedChangeListenerOnEvent() {
+        var picker = new DatePicker();
+
+        var listenerInvokedCount = new AtomicInteger(0);
+        picker.addOpenedChangeListener(e -> {
+            listenerInvokedCount.incrementAndGet();
+            e.unregisterListener();
+        });
+
+        picker.open();
+        picker.close();
+
+        Assert.assertEquals(1, listenerInvokedCount.get());
+    }
+
+    @Test
+    public void unregisterInvalidChangeListenerOnEvent() {
+        var picker = new DatePicker();
+
+        var listenerInvokedCount = new AtomicInteger(0);
+        picker.addInvalidChangeListener(e -> {
+            listenerInvokedCount.incrementAndGet();
+            e.unregisterListener();
+        });
+
+        picker.setInvalid(true);
+        picker.setInvalid(false);
+
+        Assert.assertEquals(1, listenerInvokedCount.get());
     }
 
     @Tag("div")

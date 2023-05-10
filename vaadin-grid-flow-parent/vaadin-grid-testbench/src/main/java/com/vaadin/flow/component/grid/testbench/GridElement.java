@@ -55,6 +55,17 @@ public class GridElement extends TestBenchElement {
     }
 
     /**
+     * Scrolls to the row with the given flat row index.
+     *
+     * @param row
+     *            the row to scroll to
+     */
+    protected void scrollToFlatRow(int row) {
+        callFunction("_scrollToFlatIndex", row);
+        waitUntilLoadingFinished();
+    }
+
+    /**
      * Gets the page size used when fetching data.
      *
      * @return the page size
@@ -114,7 +125,7 @@ public class GridElement extends TestBenchElement {
      */
     public GridTHTDElement getCell(int rowIndex, GridColumnElement column) {
         if (!isRowInView(rowIndex)) {
-            scrollToRow(rowIndex);
+            scrollToFlatRow(rowIndex);
         }
 
         GridTRElement row = getRow(rowIndex);

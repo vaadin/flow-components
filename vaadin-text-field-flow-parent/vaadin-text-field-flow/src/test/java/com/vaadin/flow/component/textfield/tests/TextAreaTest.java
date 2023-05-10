@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
+import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.textfield.TextArea;
@@ -137,5 +138,35 @@ public class TextAreaTest {
     public void implementsHasTooltip() {
         TextArea textArea = new TextArea();
         Assert.assertTrue(textArea instanceof HasTooltip);
+    }
+
+    @Test
+    public void implementHasAriaLabel() {
+        TextArea field = new TextArea();
+        Assert.assertTrue(field instanceof HasAriaLabel);
+    }
+
+    @Test
+    public void setAriaLabel() {
+        TextArea field = new TextArea();
+
+        field.setAriaLabel("aria-label");
+        Assert.assertTrue(field.getAriaLabel().isPresent());
+        Assert.assertEquals("aria-label", field.getAriaLabel().get());
+
+        field.setAriaLabel(null);
+        Assert.assertTrue(field.getAriaLabel().isEmpty());
+    }
+
+    @Test
+    public void setAriaLabelledBy() {
+        TextArea field = new TextArea();
+
+        field.setAriaLabelledBy("aria-labelledby");
+        Assert.assertTrue(field.getAriaLabelledBy().isPresent());
+        Assert.assertEquals("aria-labelledby", field.getAriaLabelledBy().get());
+
+        field.setAriaLabelledBy(null);
+        Assert.assertTrue(field.getAriaLabelledBy().isEmpty());
     }
 }
