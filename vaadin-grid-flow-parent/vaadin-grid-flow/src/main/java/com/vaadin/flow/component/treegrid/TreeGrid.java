@@ -1042,18 +1042,50 @@ public class TreeGrid<T> extends Grid<T>
     }
 
     /**
-     * The effective index of an item depends on the complete hierarchy of the
-     * tree. {@link TreeGrid} uses lazy loading for performance reasons and does
-     * not know about the complete hierarchy. Without the knowledge of the
-     * complete hierarchy, {@link TreeGrid} can’t reliably calculate an exact
-     * scroll position. <b>This uncertainty makes this method unreliable and so
-     * should be avoided.</b>
+     * {@inheritDoc}
      *
-     * @param rowIndex
-     *            zero based index of the item to scroll to in the current view.
+     * @see TreeGrid#scrollToIndex(int...)
      */
     @Override
     public void scrollToIndex(int rowIndex) {
         super.scrollToIndex(rowIndex);
+    }
+
+    /**
+     * Scroll to a specific row index in the virtual list. Note that the row
+     * index is not always the same for any particular item. For example,
+     * sorting or filtering items can affect the row index related to an item.
+     *
+     * The `indexes` parameter can be either a single number or multiple
+     * numbers. The grid will first try to scroll to the item at the first index
+     * on the top level. In case the item at the first index is expanded, the
+     * grid will then try scroll to the item at the second index within the
+     * children of the expanded first item, and so on. Each given index points
+     * to a child of the item at the previous index.
+     *
+     * @param indexes
+     *            row indexes to scroll to
+     * @see TreeGrid#scrollToIndex(int)
+     */
+    public void scrollToIndex(int... indexes) {
+        if (indexes.length == 0) {
+            throw new IllegalArgumentException(
+                    "At least one index should be provided.");
+        }
+        int pageSize = getPageSize();
+        int firstRootIndex = indexes[0] - indexes[0] % pageSize;
+        getDataCommunicator().setRequestedRange(firstRootIndex, pageSize);
+        String joinedIndexes = Arrays.stream(indexes).mapToObj(String::valueOf)
+                .collect(Collectors.joining(","));
+        getUI().ifPresent(ui -> ui.beforeClientResponse(this,
+                ctx -> getElement().executeJs(
+                        "this.scrollToIndex(" + joinedIndexes + ");")));
+    }
+
+    @Override
+    public void scrollToEnd() {
+        getUI().ifPresent(ui -> ui.beforeClientResponse(this,
+                ctx -> getElement().executeJs(
+                        "this.scrollToIndex(...Array(10).fill(Infinity))")));
     }
 }
