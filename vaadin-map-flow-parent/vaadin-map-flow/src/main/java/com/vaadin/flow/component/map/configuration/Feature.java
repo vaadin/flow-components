@@ -27,7 +27,7 @@ public abstract class Feature extends AbstractConfigurationObject {
 
     private SimpleGeometry geometry;
     private Style style;
-    private String label;
+    private String text;
     private boolean draggable;
 
     @Override
@@ -85,23 +85,23 @@ public abstract class Feature extends AbstractConfigurationObject {
     }
 
     /**
-     * The label that should be displayed next to the feature.
+     * The text that should be displayed next to the feature.
      *
-     * @return the label string
+     * @return the text string
      */
-    public String getLabel() {
-        return label;
+    public String getText() {
+        return text;
     }
 
     /**
-     * Sets the label that should be displayed next to the feature. Set to
-     * {@code null} to remove the label.
+     * Sets the text that should be displayed next to the feature. Set to
+     * {@code null} to remove the text.
      *
-     * @param label
-     *            the new label string, or {@code null} to remove the label
+     * @param text
+     *            the new text string, or {@code null} to remove the text
      */
-    public void setLabel(String label) {
-        this.label = label;
+    public void setText(String text) {
+        this.text = text;
         markAsDirty();
     }
 
