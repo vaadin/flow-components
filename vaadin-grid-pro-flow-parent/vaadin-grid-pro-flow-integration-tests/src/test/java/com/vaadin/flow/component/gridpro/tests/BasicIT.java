@@ -241,7 +241,6 @@ public class BasicIT extends AbstractParallelTest {
         // with the editor opened
         // https://github.com/vaadin/flow-components/issues/2253
         grid.scrollToRow(10);
-        Assert.assertTrue(cell.innerHTMLContains("input"));
         Assert.assertEquals(10, grid.getFirstVisibleRowIndex());
 
         grid.scrollToRow(30);

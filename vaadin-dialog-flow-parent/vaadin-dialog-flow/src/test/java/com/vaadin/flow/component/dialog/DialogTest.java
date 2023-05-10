@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.dialog;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.html.Span;
@@ -35,7 +36,6 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.server.VaadinSession;
-import com.vaadin.flow.shared.Registration;
 
 /**
  * Unit tests for the Dialog.
@@ -102,167 +102,6 @@ public class DialogTest {
         UI.setCurrent(null);
         Dialog dialog = new Dialog();
         dialog.setOpened(true);
-    }
-
-    @Test
-    public void addDialogCloseActionListener_dialogClosed_JavaScriptIsScheduled() {
-        Dialog dialog = new Dialog();
-
-        dialog.addDialogCloseActionListener(event -> {
-        });
-
-        Assert.assertTrue(flushInvocations().isEmpty());
-
-        dialog.open();
-
-        assertInvocations(10);
-    }
-
-    @Test
-    public void addDialogCloseActionListener_dialogOpened_JavaScriptIsScheduled() {
-        Dialog dialog = new Dialog();
-
-        dialog.open();
-
-        Assert.assertEquals(9, flushInvocations().size());
-
-        dialog.addDialogCloseActionListener(event -> {
-        });
-
-        assertInvocations(1);
-    }
-
-    @Test
-    public void addDialogCloseActionListener_removeListener_dialogIsOpened_noJSAfterReopen() {
-        Dialog dialog = new Dialog();
-
-        Registration registration = dialog
-                .addDialogCloseActionListener(event -> {
-                });
-
-        dialog.open();
-
-        registration.remove();
-
-        dialog.close();
-
-        dialog.open();
-
-        Assert.assertEquals(9, flushInvocations().size());
-    }
-
-    @Test
-    public void addDialogCloseActionListener_removeListener_dialogIsClosed_noJSAfterReopen() {
-        Dialog dialog = new Dialog();
-
-        Registration registration = dialog
-                .addDialogCloseActionListener(event -> {
-                });
-
-        registration.remove();
-
-        dialog.open();
-
-        Assert.assertEquals(9, flushInvocations().size());
-    }
-
-    @Test
-    public void addDialogCloseActionListener_dialogIsClosing_JavaScriptIsRescheduled() {
-        Dialog dialog = new Dialog();
-
-        dialog.addDialogCloseActionListener(event -> {
-        });
-
-        dialog.open();
-
-        flushInvocations();
-
-        dialog.close();
-
-        dialog.open();
-
-        assertInvocations(1);
-    }
-
-    @Test
-    public void addDialogCloseActionListener_dialogClosed_severalListenersAreAdded_onlyOneJavaScriptIsScheduled() {
-        Dialog dialog = new Dialog();
-
-        dialog.addDialogCloseActionListener(event -> {
-        });
-
-        dialog.addDialogCloseActionListener(event -> {
-        });
-
-        dialog.open();
-
-        assertInvocations(10);
-    }
-
-    @Test
-    public void addDialogCloseActionListener_dialogClosed_twoListenersAreAddedAndOneRemoved_onlyOneJavaScriptIsScheduled() {
-        Dialog dialog = new Dialog();
-
-        dialog.addDialogCloseActionListener(event -> {
-        });
-
-        Registration registration = dialog
-                .addDialogCloseActionListener(event -> {
-                });
-
-        dialog.open();
-
-        registration.remove();
-
-        assertInvocations(10);
-    }
-
-    @Test
-    public void addDialogCloseActionListener_dialogClosed_twoListenersAreAddedAndOneIsRemoved_oneJavaScriptIsScheduledAfterReopen() {
-        Dialog dialog = new Dialog();
-
-        dialog.addDialogCloseActionListener(event -> {
-        });
-
-        Registration registration = dialog
-                .addDialogCloseActionListener(event -> {
-                });
-
-        dialog.open();
-
-        registration.remove();
-
-        flushInvocations();
-
-        dialog.close();
-
-        dialog.open();
-
-        assertInvocations(1);
-    }
-
-    @Test
-    public void addDialogCloseActionListener_dialogClosed_twoListenersAreAddedAndOneIsRemovedAfterClose_oneJavaScriptIsScheduledAfterReopen() {
-        Dialog dialog = new Dialog();
-
-        dialog.addDialogCloseActionListener(event -> {
-        });
-
-        Registration registration = dialog
-                .addDialogCloseActionListener(event -> {
-                });
-
-        dialog.open();
-
-        flushInvocations();
-
-        dialog.close();
-
-        registration.remove();
-
-        dialog.open();
-
-        assertInvocations(1);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -360,17 +199,6 @@ public class DialogTest {
         dialog.addComponentAtIndex(index, div);
     }
 
-    private List<PendingJavaScriptInvocation> flushInvocations() {
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        return ui.getInternals().dumpPendingJavaScriptInvocations();
-    }
-
-    private void assertInvocations(int expectedInvocations) {
-        List<PendingJavaScriptInvocation> invocations = flushInvocations();
-
-        Assert.assertEquals(expectedInvocations, invocations.size());
-    }
-
     @Test
     public void dialogHasStyle() {
         Dialog dialog = new Dialog();
@@ -458,5 +286,43 @@ public class DialogTest {
     public void callAddToHeaderOrFooter_withAnyNullValue_shouldThrowError() {
         Dialog dialog = new Dialog();
         dialog.getHeader().add(new Span("content"), null);
+    }
+
+    @Test
+    public void unregisterOpenedChangeListenerOnEvent() {
+        var dialog = new Dialog();
+
+        var listenerInvokedCount = new AtomicInteger(0);
+        dialog.addOpenedChangeListener(e -> {
+            listenerInvokedCount.incrementAndGet();
+            e.unregisterListener();
+        });
+
+        dialog.open();
+        dialog.close();
+
+        Assert.assertEquals(1, listenerInvokedCount.get());
+    }
+
+    @Test
+    public void createDialogWithTitle() {
+        String title = "Title";
+
+        var dialog = new Dialog(title);
+        Assert.assertEquals(title, dialog.getHeaderTitle());
+
+        Span content = new Span("content");
+        Span secondContent = new Span("second_content");
+        Span thirdContent = new Span("third_content");
+
+        var dialogWithComponents = new Dialog(title, content, secondContent,
+                thirdContent);
+        Assert.assertEquals(title, dialogWithComponents.getHeaderTitle());
+        Assert.assertEquals(content,
+                dialogWithComponents.getChildren().toList().get(0));
+        Assert.assertEquals(secondContent,
+                dialogWithComponents.getChildren().toList().get(1));
+        Assert.assertEquals(thirdContent,
+                dialogWithComponents.getChildren().toList().get(2));
     }
 }

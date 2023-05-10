@@ -24,6 +24,7 @@ import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasOverlayClassName;
@@ -71,6 +72,7 @@ import com.vaadin.flow.shared.Registration;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
@@ -86,8 +88,8 @@ import java.util.stream.Stream;
  */
 public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, TItem, TValue>, TItem, TValue>
         extends AbstractSinglePropertyField<TComponent, TValue>
-        implements Focusable<TComponent>, HasAllowedCharPattern, HasAutoOpen,
-        HasClearButton, HasClientValidation, HasOverlayClassName,
+        implements Focusable<TComponent>, HasAllowedCharPattern, HasAriaLabel,
+        HasAutoOpen, HasClearButton, HasClientValidation, HasOverlayClassName,
         HasDataView<TItem, String, ComboBoxDataView<TItem>>, HasHelper,
         HasLabel, HasLazyDataView<TItem, String, ComboBoxLazyDataView<TItem>>,
         HasListDataView<TItem, ComboBoxListDataView<TItem>>, HasSize, HasStyle,
@@ -374,6 +376,27 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     public void setPlaceholder(String placeholder) {
         getElement().setProperty("placeholder",
                 placeholder == null ? "" : placeholder);
+    }
+
+    @Override
+    public void setAriaLabel(String ariaLabel) {
+        getElement().setProperty("accessibleName", ariaLabel);
+    }
+
+    @Override
+    public Optional<String> getAriaLabel() {
+        return Optional.ofNullable(getElement().getProperty("accessibleName"));
+    }
+
+    @Override
+    public void setAriaLabelledBy(String labelledBy) {
+        getElement().setProperty("accessibleNameRef", labelledBy);
+    }
+
+    @Override
+    public Optional<String> getAriaLabelledBy() {
+        return Optional
+                .ofNullable(getElement().getProperty("accessibleNameRef"));
     }
 
     /**

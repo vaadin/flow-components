@@ -29,17 +29,16 @@ import com.vaadin.flow.theme.AbstractTheme;
 /**
  * Lumo component theme class implementation.
  */
-@NpmPackage(value = "@vaadin/vaadin-themable-mixin", version = "24.0.0-beta2")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-beta2")
+@NpmPackage(value = "@vaadin/vaadin-themable-mixin", version = "24.1.0-alpha9")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha9")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/vaadin-lumo-styles", version = "24.0.0-beta2")
-@JsModule("@vaadin/vaadin-lumo-styles/color.js")
-@JsModule("@vaadin/vaadin-lumo-styles/typography.js")
+@NpmPackage(value = "@vaadin/vaadin-lumo-styles", version = "24.1.0-alpha9")
+@JsModule("@vaadin/vaadin-lumo-styles/color-global.js")
+@JsModule("@vaadin/vaadin-lumo-styles/typography-global.js")
 @JsModule("@vaadin/vaadin-lumo-styles/sizing.js")
 @JsModule("@vaadin/vaadin-lumo-styles/spacing.js")
 @JsModule("@vaadin/vaadin-lumo-styles/style.js")
 @JsModule("@vaadin/vaadin-lumo-styles/vaadin-iconset.js")
-@JsModule("./lumo-includes.ts")
 public class Lumo implements AbstractTheme {
 
     public static final String LIGHT = "light";
@@ -53,11 +52,6 @@ public class Lumo implements AbstractTheme {
     @Override
     public String getThemeUrl() {
         return "theme/lumo/";
-    }
-
-    @Override
-    public List<String> getHeaderInlineContents() {
-        return Collections.emptyList();
     }
 
     @Override
@@ -80,4 +74,5 @@ public class Lumo implements AbstractTheme {
         }
         return attributes;
     }
+
 }
