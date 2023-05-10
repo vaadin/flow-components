@@ -3882,8 +3882,13 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     private void generateTooltipTextData(T item, JsonObject jsonObject) {
         JsonObject tooltips = Json.createObject();
 
+        String rowTooltip = tooltipGenerator.apply(item);
+        if (rowTooltip != null) {
+            tooltips.put("row", rowTooltip);
+        }
+
         idToColumnMap.forEach((id, column) -> {
-            String cellTooltip = generateTooltipContent(item, column);
+            String cellTooltip = column.tooltipGenerator.apply(item);
             if (cellTooltip != null) {
                 tooltips.put(id, cellTooltip);
             }
@@ -4351,7 +4356,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         // Assigns a generator that returns a column-specific
         // tooltip text from the item
         tooltipElement.executeJs(
-                "this.generator = ({item, column}) => { return (item && item.gridtooltips && column) ? item.gridtooltips[column._flowId] : ''; }"));
+                "this.generator = ({item, column}) => { return (item && item.gridtooltips && column) ? item.gridtooltips[column._flowId] ?? item.gridtooltips['row'] : ''; }"));
         SlotUtils.addToSlot(this, "tooltip", tooltipElement);
     }
 
