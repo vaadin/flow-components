@@ -147,8 +147,8 @@ public class TreeGridScrollToIT extends AbstractComponentIT {
     public void expandAll_scrollToIndex10_1_1_correctFirstVisibleItem() {
         expandAllButton.click();
 
-        // Manual test on page triggers endless loop.
-        // This number depends on the viewport size.
+        // Manual test triggers an infinite loop.
+        // The indexes to reproduce this loop depends on the grid height.
         scrollToIndexInput.sendKeys("10-1-1", Keys.TAB);
 
         waitUntil(e -> {
