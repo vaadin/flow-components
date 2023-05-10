@@ -27,9 +27,10 @@ import com.vaadin.tests.AbstractComponentIT;
 public class GridEmptyIT extends AbstractComponentIT {
 
     @Test
-    public void clearCacheOnClient_loadingStateNotSet() {
+    public void emptyGrid_clearCache_loadingStateCleared() {
         open();
 
+        // Force data provider request by clearing the grid's cache
         ButtonElement clearCache = $(ButtonElement.class)
                 .id("clear-cache-button");
         clearCache.click();
