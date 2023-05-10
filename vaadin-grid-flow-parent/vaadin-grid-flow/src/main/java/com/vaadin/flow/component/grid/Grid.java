@@ -3899,28 +3899,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
     }
 
-    /**
-     * Get the content of the tooltip shown by a column for a specific item. It
-     * first tries generating content using the column's tooltip generator, and
-     * if it generates no content (or the column doesn't have a tooltip
-     * generator), then it falls back to the grid's tooltip generator.
-     *
-     * @param item
-     *            the item of the row where the tooltip would show
-     * @param column
-     *            the column where the tooltip should show
-     * @return the content of the tooltip this column would show with the
-     *         specified item, or {@code null} if no tooltip generator is
-     *         available at neither the column nor grid level
-     */
-    String generateTooltipContent(T item, Column<T> column) {
-        String content = column.tooltipGenerator.apply(item);
-        if (content == null) {
-            content = this.tooltipGenerator.apply(item);
-        }
-        return content;
-    }
-
     private void generateStyleData(T item, JsonObject jsonObject) {
         JsonObject style = Json.createObject();
 

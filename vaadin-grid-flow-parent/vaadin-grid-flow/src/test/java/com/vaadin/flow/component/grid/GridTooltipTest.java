@@ -58,34 +58,6 @@ public class GridTooltipTest {
     }
 
     @Test
-    public void setGridTooltipGenerator_allColumnsExceptCustom_HaveTooltipGenerator() {
-        final String expectedContent = "expected content";
-        SerializableFunction<String, String> generator = item -> expectedContent;
-        grid.addColumn(item -> item);
-        final String customContent = "custom content 1";
-        grid.addColumn(item -> item).setTooltipGenerator(item -> customContent);
-        grid.setTooltipGenerator(generator);
-        final String item = "Test item";
-        grid.getColumns().stream().limit(2)
-                .forEach(column -> Assert.assertEquals(expectedContent,
-                        grid.generateTooltipContent(item, column)));
-        // custom column tooltip generators should take precedence over grid's
-        // tooltip generator
-        String customTooltip = grid.generateTooltipContent(item,
-                grid.getColumns().get(2));
-        Assert.assertEquals(customContent, customTooltip);
-    }
-
-    @Test
-    public void useGridTooltipGeneratorWithNewColumns() {
-        SerializableFunction<String, String> generator = item -> "grid's generator";
-        grid.setTooltipGenerator(generator);
-        Grid.Column<String> column = grid.addColumn(item -> item);
-        Assert.assertEquals("grid's generator",
-                grid.generateTooltipContent("Test item", column));
-    }
-
-    @Test
     public void setColumnTooltipGenerator_hasFluidAPI() {
         var column = grid.addColumn(item -> item)
                 .setTooltipGenerator(item -> item).setAutoWidth(true);
