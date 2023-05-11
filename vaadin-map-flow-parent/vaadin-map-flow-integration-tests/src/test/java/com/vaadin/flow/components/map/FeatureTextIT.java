@@ -14,6 +14,7 @@ public class FeatureTextIT extends AbstractComponentIT {
     private TestBenchElement updateTextButton;
     private TestBenchElement removeTextButton;
     private TestBenchElement setTextStyleButton;
+    private TestBenchElement setDefaultTextStyle;
     private TestBenchElement updateTextStyleButton;
     private TestBenchElement removeTextStyleButton;
 
@@ -24,6 +25,8 @@ public class FeatureTextIT extends AbstractComponentIT {
         updateTextButton = $(TestBenchElement.class).id("update-marker-text");
         removeTextButton = $(TestBenchElement.class).id("remove-marker-text");
         setTextStyleButton = $(TestBenchElement.class).id("set-text-style");
+        setDefaultTextStyle = $(TestBenchElement.class)
+                .id("set-default-text-style");
         updateTextStyleButton = $(TestBenchElement.class)
                 .id("update-text-style");
         removeTextStyleButton = $(TestBenchElement.class)
@@ -109,6 +112,15 @@ public class FeatureTextIT extends AbstractComponentIT {
         Assert.assertEquals("15px sans-serif", text.getFont());
 
         waitUntil(driver -> getRenderCount() == 2);
+    }
+
+    @Test
+    public void setDefaultTextStyle_noErrors() {
+        setDefaultTextStyle.click();
+
+        waitUntil(driver -> getRenderCount() == 1);
+
+        checkLogsForErrors();
     }
 
     @Test
