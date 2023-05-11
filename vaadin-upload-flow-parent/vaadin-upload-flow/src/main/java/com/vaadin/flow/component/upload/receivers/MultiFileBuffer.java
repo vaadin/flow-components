@@ -41,7 +41,7 @@ import com.vaadin.flow.component.upload.MultiFileReceiver;
 public class MultiFileBuffer extends AbstractFileBuffer
         implements MultiFileReceiver {
 
-    private Map<String, FileData> files = new HashMap<>();
+    private transient Map<String, FileData> files = new HashMap<>();
 
     /**
      * Creates a file buffer with a default file factory.
