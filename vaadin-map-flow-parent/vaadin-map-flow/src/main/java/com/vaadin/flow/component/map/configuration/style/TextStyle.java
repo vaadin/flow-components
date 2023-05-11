@@ -9,7 +9,7 @@ import com.vaadin.flow.component.map.configuration.Constants;
 import java.io.Serializable;
 
 /**
- * Text style that defines how to render texts, such as labels, on the map.
+ * Text style that defines how to render texts on the map.
  */
 public class TextStyle extends AbstractConfigurationObject {
     private String font;
@@ -75,8 +75,8 @@ public class TextStyle extends AbstractConfigurationObject {
 
     /**
      * Sets the offset of the text from whatever it is anchored to, in pixels.
-     * For example, a marker label is anchored to the marker's position, and
-     * then shifted by the specified offset. Default is {@code {x: 0, y: 10}}
+     * For example, a marker text is anchored to the marker's position, and then
+     * shifted by the specified offset. Default is {@code {x: 0, y: 10}}
      *
      * @param offset
      *            the new offset
@@ -88,8 +88,8 @@ public class TextStyle extends AbstractConfigurationObject {
 
     /**
      * Sets the offset of the text from whatever it is anchored to, in pixels.
-     * For example, a marker label is anchored to the marker's position, and
-     * then shifted by the specified offset. Default is {@code {x: 0, y: 10}}
+     * For example, a marker text is anchored to the marker's position, and then
+     * shifted by the specified offset. Default is {@code {x: 0, y: 10}}
      *
      * @param x
      *            the horizontal offset in pixels

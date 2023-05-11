@@ -130,7 +130,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
         grid.$connector.hasParentRequestQueue = tryCatchWrapper(() => parentRequestQueue.length > 0);
 
         grid.$connector.hasRootRequestQueue = tryCatchWrapper(() => {
-          return Object.keys(rootPageCallbacks).length > 0 || (rootRequestDebouncer && rootRequestDebouncer.isActive());
+          return Object.keys(rootPageCallbacks).length > 0 || (!!rootRequestDebouncer && rootRequestDebouncer.isActive());
         });
 
         grid.$connector.beforeEnsureSubCacheForScaledIndex = tryCatchWrapper(function (targetCache, scaledIndex) {
@@ -237,15 +237,22 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
         });
         grid._createPropertyObserver('activeItem', '__activeItemChangedDetails', true);
 
-        grid.$connector._getPageIfSameLevel = tryCatchWrapper(function (parentKey, index, defaultPage) {
-          let cacheAndIndex = grid._cache.getCacheAndIndex(index);
-          let parentItem = cacheAndIndex.cache.parentItem;
-          let parentKeyOfIndex = parentItem ? grid.getItemId(parentItem) : root;
-          if (parentKey !== parentKeyOfIndex) {
-            return defaultPage;
-          } else {
-            return grid._getPageForIndex(cacheAndIndex.scaledIndex);
+        grid.$connector._getSameLevelPage = tryCatchWrapper(function (parentKey, currentCache, currentCacheItemIndex) {
+          const currentParentKey = currentCache.parentItem ? grid.getItemId(currentCache.parentItem) : root;
+          if (currentParentKey === parentKey) {
+            // Level match found
+            return grid._getPageForIndex(currentCacheItemIndex);
           }
+          const { parentCache } = currentCache;
+          if (!parentCache) {
+            // There is no parent cache to match level
+            return null;
+          }
+          const parentCacheItemIndex = Object.entries(parentCache.itemCaches).find(
+            ([index, cache]) => cache === currentCache
+          )[0];
+          // Traverse the tree upwards until a match is found or the end is reached
+          return this._getSameLevelPage(parentKey, parentCache, parentCacheItemIndex);
         });
 
         grid.$connector.getCacheByKey = tryCatchWrapper(function (key) {
@@ -308,14 +315,20 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           let firstNeededPage = page;
           let lastNeededPage = page;
           for (let idx = firstNeededIndex; idx <= lastNeededIndex; idx++) {
-            firstNeededPage = Math.min(
-              firstNeededPage,
-              grid.$connector._getPageIfSameLevel(parentKey, idx, firstNeededPage)
-            );
-            lastNeededPage = Math.max(
-              lastNeededPage,
-              grid.$connector._getPageIfSameLevel(parentKey, idx, lastNeededPage)
-            );
+            const { cache, scaledIndex } = grid._cache.getCacheAndIndex(idx);
+            // Try to match level by going up in hierarchy. The page range should include
+            // pages that contain either of the following:
+            //   - visible items of the current cache
+            //   - same level parents of visible descendant items
+            // If the parent items are not considered, Flow would remove the hidden parent
+            // items from the current level cache. This can lead to an infinite loop when using
+            // scrollToIndex feature.
+            const sameLevelPage = grid.$connector._getSameLevelPage(parentKey, cache, scaledIndex);
+            if (sameLevelPage === null) {
+              continue;
+            }
+            firstNeededPage = Math.min(firstNeededPage, sameLevelPage);
+            lastNeededPage = Math.max(lastNeededPage, sameLevelPage);
           }
 
           let firstPage = Math.max(0, firstNeededPage);
@@ -369,6 +382,18 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           } else {
             // workaround: sometimes grid-element gives page index that overflows
             page = Math.min(page, Math.floor(grid.size / grid.pageSize));
+
+            // size is controlled by the server (data communicator), so if the
+            // size is zero, we know that there is no data to fetch.
+            // This also prevents an empty grid getting stuck in a loading state.
+            // The connector does not cache empty pages, so if the grid requests
+            // data again, there would be no cache entry, causing a request to
+            // the server. However, the data communicator will never respond,
+            // as it assumes that the data is already cached.
+            if (grid.size === 0) {
+              callback([], 0);
+              return;
+            }
 
             if (cache[root] && cache[root][page]) {
               callback(cache[root][page]);
@@ -1159,7 +1184,6 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           }
           return (style.row || '') + ' ' + ((column && style[column._flowId]) || '');
         });
-
 
         grid.cellPartNameGenerator = tryCatchWrapper(function (column, rowData) {
           const part = rowData.item.part;
