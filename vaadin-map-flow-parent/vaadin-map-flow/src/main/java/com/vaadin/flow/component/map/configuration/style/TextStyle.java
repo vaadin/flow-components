@@ -33,9 +33,9 @@ public class TextStyle extends AbstractConfigurationObject {
         rotateWithView = false;
         textAlign = TextAlign.CENTER;
         textBaseline = TextBaseline.MIDDLE;
-        fill = new Fill("#333");
-        stroke = new Stroke("#fff", 3);
         padding = 0;
+        setFill(new Fill("#333"));
+        setStroke(new Stroke("#fff", 3));
     }
 
     @Override
