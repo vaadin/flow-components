@@ -50,6 +50,12 @@ public class FeatureTextPage extends Div {
                 });
         setTextStyle.setId("set-text-style");
 
+        NativeButton setDefaultTextStyle = new NativeButton(
+                "Set default custom text style", e -> {
+                    marker1.getStyle().setTextStyle(new TextStyle());
+                });
+        setDefaultTextStyle.setId("set-default-text-style");
+
         NativeButton updateTextStyle = new NativeButton(
                 "Update custom text style", e -> {
                     if (marker1.getStyle().getTextStyle() != null) {
@@ -67,7 +73,7 @@ public class FeatureTextPage extends Div {
 
         add(map);
         add(new Div(updateMarkerText, removeMarkerText, setTextStyle,
-                updateTextStyle, removeTextStyle));
+                setDefaultTextStyle, updateTextStyle, removeTextStyle));
     }
 
     private TextStyle createCustomTextStyle() {
