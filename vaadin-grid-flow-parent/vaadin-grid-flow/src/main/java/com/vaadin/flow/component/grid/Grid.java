@@ -1097,24 +1097,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          */
         public Column<T> setTooltipGenerator(
                 SerializableFunction<T, String> tooltipGenerator) {
-            Objects.requireNonNull(tooltipGenerator,
+            this.tooltipGenerator = Objects.requireNonNull(tooltipGenerator,
                     "Tooltip generator can not be null");
 
-            if (!getGrid().getElement().getChildren().anyMatch(
-                    child -> "tooltip".equals(child.getAttribute("slot")))) {
-                // No <vaadin-tooltip> yet added to the grid, add one
-                Element tooltipElement = new Element("vaadin-tooltip");
-
-                tooltipElement.addAttachListener(e -> {
-                    // Assigns a generator that returns a column-specific
-                    // tooltip text from the item
-                    tooltipElement.executeJs(
-                            "this.generator = ({item, column}) => { return (item && item.gridtooltips && column) ? item.gridtooltips[column._flowId] : ''; }");
-                });
-                SlotUtils.addToSlot(getGrid(), "tooltip", tooltipElement);
-            }
-
-            this.tooltipGenerator = tooltipGenerator;
+            grid.addTooltipElementToTooltipSlot();
             getGrid().getDataCommunicator().reset();
             return this;
         }
@@ -1424,6 +1410,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     private Map<String, SerializableFunction<T, String>> dragDataGenerators = new HashMap<>();
 
     private Registration dataProviderChangeRegistration;
+
+    private SerializableFunction<T, String> tooltipGenerator = item -> null;
 
     /**
      * Creates a new instance, with page size of 50.
@@ -3936,8 +3924,13 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     private void generateTooltipTextData(T item, JsonObject jsonObject) {
         JsonObject tooltips = Json.createObject();
 
+        String rowTooltip = tooltipGenerator.apply(item);
+        if (rowTooltip != null) {
+            tooltips.put("row", rowTooltip);
+        }
+
         idToColumnMap.forEach((id, column) -> {
-            String cellTooltip = column.getTooltipGenerator().apply(item);
+            String cellTooltip = column.tooltipGenerator.apply(item);
             if (cellTooltip != null) {
                 tooltips.put(id, cellTooltip);
             }
@@ -4347,6 +4340,44 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 .forEach(t -> types.set(types.length(), t));
         this.getElement().setPropertyJson("__dragDataTypes", types);
         getDataCommunicator().reset();
+    }
+
+    /**
+     * Sets the function that is used for generating tooltip text for all cells
+     * in this grid. Tooltip generators set to individual columns have priority
+     * over the generator set with this method. Returning {@code null} from the
+     * generator results in no tooltip being set.
+     *
+     * @param tooltipGenerator
+     *            the tooltip generator to set, not {@code null}
+     * @throws NullPointerException
+     *             if {@code tooltipGenerator} is {@code null}
+     *
+     * @since 24.1
+     */
+    public void setTooltipGenerator(
+            SerializableFunction<T, String> tooltipGenerator) {
+        this.tooltipGenerator = Objects.requireNonNull(tooltipGenerator,
+                "Tooltip generator cannot be null");
+        addTooltipElementToTooltipSlot();
+        this.dataCommunicator.reset();
+    }
+
+    private void addTooltipElementToTooltipSlot() {
+        if (this.getElement().getChildren().anyMatch(child -> Objects
+                .equals(child.getAttribute("slot"), "tooltip"))) {
+            // the grid's tooltip slot has already been filled
+            return;
+        }
+        // No <vaadin-tooltip> yet added to the grid, add one
+        Element tooltipElement = new Element("vaadin-tooltip");
+
+        tooltipElement.addAttachListener(e ->
+        // Assigns a generator that returns a column-specific
+        // tooltip text from the item
+        tooltipElement.executeJs(
+                "this.generator = ({item, column}) => { return (item && item.gridtooltips && column) ? item.gridtooltips[column._flowId] ?? item.gridtooltips['row'] : ''; }"));
+        SlotUtils.addToSlot(this, "tooltip", tooltipElement);
     }
 
     /**
