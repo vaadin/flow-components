@@ -37,10 +37,10 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-login-form")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.22")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.23")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/login", version = "22.0.22")
-@NpmPackage(value = "@vaadin/vaadin-login", version = "22.0.22")
+@NpmPackage(value = "@vaadin/login", version = "22.0.23")
+@NpmPackage(value = "@vaadin/vaadin-login", version = "22.0.23")
 @JsModule("@vaadin/login/src/vaadin-login-form.js")
 public class LoginForm extends AbstractLogin {
 

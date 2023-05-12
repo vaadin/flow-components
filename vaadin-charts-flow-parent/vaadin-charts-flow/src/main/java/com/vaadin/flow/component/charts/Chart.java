@@ -74,10 +74,10 @@ import elemental.json.JsonValue;
 import elemental.json.impl.JreJsonFactory;
 
 @Tag("vaadin-chart")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.22")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.23")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/charts", version = "22.0.22")
-@NpmPackage(value = "@vaadin/vaadin-charts", version = "22.0.22")
+@NpmPackage(value = "@vaadin/charts", version = "22.0.23")
+@NpmPackage(value = "@vaadin/vaadin-charts", version = "22.0.23")
 @JsModule("@vaadin/charts/src/vaadin-chart.js")
 public class Chart extends Component implements HasStyle, HasSize {
 

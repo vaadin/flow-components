@@ -81,10 +81,10 @@ import com.vaadin.flow.function.SerializableFunction;
  * </p>
  */
 @Tag("vaadin-password-field")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.22")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.0.23")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/password-field", version = "22.0.22")
-@NpmPackage(value = "@vaadin/vaadin-text-field", version = "22.0.22")
+@NpmPackage(value = "@vaadin/password-field", version = "22.0.23")
+@NpmPackage(value = "@vaadin/vaadin-text-field", version = "22.0.23")
 @JsModule("@vaadin/password-field/src/vaadin-password-field.js")
 public abstract class GeneratedVaadinPasswordField<R extends GeneratedVaadinPasswordField<R, T>, T>
         extends GeneratedVaadinTextField<R, T> implements HasStyle {
