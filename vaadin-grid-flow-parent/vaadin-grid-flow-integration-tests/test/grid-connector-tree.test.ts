@@ -184,13 +184,13 @@ describe('grid connector - tree', () => {
   });
 
   it('should not request items for expanded parent outside the DOM', async () => {
-    // Add an expanded root items
+    // Add expanded root items
     const rootItem = { key: '0', name: 'foo', children: true };
     const rootItem2 = { key: '1', name: 'bat', children: true };
     setRootItems(grid.$connector, [rootItem, rootItem2]);
     expandItems(grid.$connector, [rootItem, rootItem2]);
 
-    // Add 100 child for the first root item
+    // Add 100 child items for the first root item
     const childItems = [...Array(100).keys()].map((i) => ({ key: `0-${i}`, name: `foo-${i}` }));
     setChildItems(grid.$connector, rootItem, childItems);
     await nextFrame();
