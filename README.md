@@ -82,13 +82,17 @@ For running all merged components execute:
 
 ## Debugging web-test-runner tests of a component
 
-Run the tests once to have the necessary dependencies installed
+Make sure the root level dependencies are installed
 
-- `node ./scripts/wtr.js`
+- `npm install`
 
 Serve the IT pages of the component whose tests you want to debug
 
 - See "Serving the IT pages of a component" above
+
+Run the tests once to have the necessary dependencies installed
+
+- `node ./scripts/wtr.js`
 
 Move to the integration tests module of the component
 
