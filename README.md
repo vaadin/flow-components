@@ -90,9 +90,9 @@ Serve the IT pages of the component whose tests you want to debug
 
 - See "Serving the IT pages of a component" above
 
-Run the tests once to have the necessary dependencies installed
+Run the tests for the component once to have the necessary dependencies installed
 
-- `node ./scripts/wtr.js`
+- `node ./scripts/wtr.js grid`
 
 Move to the integration tests module of the component
 
