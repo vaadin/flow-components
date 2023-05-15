@@ -40,6 +40,9 @@ export type Item = {
   key: string;
   name?: string;
   selected?: boolean;
+  detailsOpened?: boolean;
+  style?: Record<string, string>;
+  part?: Record<string, string>;
 };
 
 export type FlowGrid = Grid<Item> & {
@@ -111,9 +114,9 @@ export function getHeaderCellContent(column: GridColumn): HTMLElement {
 }
 
 /**
- * Returns the content of a cell in the grid body.
+ * Returns a cell in the grid body.
  */
-export function getBodyCellContent(grid: Grid, rowIndex: number, columnIndex: number): HTMLElement | null {
+export function getBodyCell(grid: Grid, rowIndex: number, columnIndex: number): HTMLElement | null {
   const items = grid.shadowRoot!.querySelector(`#items`)!;
 
   const row = [...items.children].find((row) => (row as any).index === rowIndex);
@@ -125,9 +128,16 @@ export function getBodyCellContent(grid: Grid, rowIndex: number, columnIndex: nu
     const aOrder = parseInt(getComputedStyle(a).order) || 0;
     const bOrder = parseInt(getComputedStyle(b).order) || 0;
     return aOrder - bOrder;
-  });
+  }).map(cell => cell as HTMLElement);
 
-  return (cellsInVisualOrder[columnIndex] as any)._content;
+  return cellsInVisualOrder[columnIndex];
+}
+
+/**
+ * Returns the content of a cell in the grid body.
+ */
+export function getBodyCellContent(grid: Grid, rowIndex: number, columnIndex: number): HTMLElement | null {
+  return (getBodyCell(grid, rowIndex, columnIndex) as any)._content;
 }
 
 /**
