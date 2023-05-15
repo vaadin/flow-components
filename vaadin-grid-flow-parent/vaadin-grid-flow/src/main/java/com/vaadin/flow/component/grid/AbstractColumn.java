@@ -37,9 +37,7 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
     protected final Grid<?> grid;
     private boolean headerRenderingScheduled;
     private boolean footerRenderingScheduled;
-
     private boolean sortingIndicators;
-
     private String headerText;
     private Component headerComponent;
     private String footerText;
@@ -339,7 +337,11 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
                 getChildren().filter(child -> child instanceof ColumnGroup)
                         .flatMap(child -> ((ColumnGroup) child)
                                 .getBottomChildColumns().stream())
-                        .collect(Collectors.toList()));
+                        .toList());
         return columnChildren;
+    }
+
+    protected void setRowHeader(boolean isRowHeader) {
+        getElement().getNode()
     }
 }
