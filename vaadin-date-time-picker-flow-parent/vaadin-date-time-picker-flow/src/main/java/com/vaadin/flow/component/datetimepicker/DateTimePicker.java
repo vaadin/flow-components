@@ -397,10 +397,10 @@ public class DateTimePicker
     }
 
     /**
-     * Set the aria-label of the component to the given text.
+     * Sets the aria-label for the component.
      *
      * @param ariaLabel
-     *            the aria-label text to set or {@code null} to clear
+     *            the value to set as aria-label
      */
     public void setAriaLabel(String ariaLabel) {
         getElement().setProperty("accessibleName", ariaLabel);
@@ -409,7 +409,7 @@ public class DateTimePicker
     /**
      * Gets the aria-label of the component.
      *
-     * @return an optional aria-label of the component or an empty optional if
+     * @return an optional aria-label or an empty optional if
      *         no aria-label has been set
      */
     public Optional<String> getAriaLabel() {
@@ -441,11 +441,11 @@ public class DateTimePicker
     }
 
     /**
-     * Sets the accessible name for the date picker.
+     * Sets the accessible label for the date picker.
      * <p>
-     * The final value is a concatenation of the accessible name from
+     * The final value is a concatenation of the accessible label from
      * DateTimePicker's {@link #getAriaLabel()} or {@link #getLabel()} and the
-     * given accessible name.
+     * given accessible label.
      *
      * @param dateLabel
      *            the value to be used as part of date picker aria-label.
@@ -460,13 +460,13 @@ public class DateTimePicker
     }
 
     /**
-     * Gets the accessible name defined on the date picker.
+     * Gets the accessible label of the date picker.
      * <p>
      * Note that this method will return the last value passed to
      * {@link #setDateAriaLabel(String)}, not the value currently set on the
      * `aria-label` attribute of the date picker input element.
      *
-     * @return an optional dateLabel or an empty optional if no dateLabel has
+     * @return an optional label or an empty optional if no label has
      *         been set
      */
     public Optional<String> getDateAriaLabel() {
