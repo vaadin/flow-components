@@ -108,11 +108,6 @@ public class ComboBoxDataViewTest extends AbstractComponentDataViewTest {
             }
 
             @Override
-            public void refreshItems(boolean b) {
-
-            }
-
-            @Override
             public Registration addDataProviderListener(
                     DataProviderListener<Item> listener) {
                 return null;
@@ -186,11 +181,6 @@ public class ComboBoxDataViewTest extends AbstractComponentDataViewTest {
 
             @Override
             public void refreshAll() {
-
-            }
-
-            @Override
-            public void refreshItems(boolean b) {
 
             }
 

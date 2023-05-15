@@ -68,7 +68,7 @@ public class Style extends AbstractConfigurationObject {
     }
 
     /**
-     * The text style used for rendering texts, such as feature labels. This is
+     * The text style used for rendering texts, such as feature texts. This is
      * {@code null} by default, which means that a default text style will be
      * used instead.
      *
@@ -82,7 +82,7 @@ public class Style extends AbstractConfigurationObject {
     }
 
     /**
-     * Sets the text style to use for rendering texts, such as feature labels.
+     * Sets the text style to use for rendering texts, such as feature texts.
      * Set this to {@code null} to clear the text style and use a default text
      * style instead.
      *

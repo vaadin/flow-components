@@ -253,7 +253,8 @@ public class AbstractConfigurationObjectTest {
     public void addNullableChild_ignoresNull() throws Exception {
         testConfiguration = new TestConfiguration();
         testConfiguration.addNullableChild(null);
-        Assert.assertEquals(0, testConfiguration.getChildren().size());
+        Assert.assertEquals(0,
+                ConfigurationTestUtil.getChildren(testConfiguration).size());
     }
 
     private static class TestConfiguration extends AbstractConfigurationObject {
@@ -289,17 +290,6 @@ public class AbstractConfigurationObjectTest {
         @Override
         protected void deepMarkAsDirty() {
             super.deepMarkAsDirty();
-        }
-
-        // Expose children for testing
-        @SuppressWarnings("unchecked")
-        public Set<AbstractConfigurationObject> getChildren()
-                throws IllegalArgumentException, IllegalAccessException,
-                NoSuchFieldException, SecurityException {
-            Field f = AbstractConfigurationObject.class
-                    .getDeclaredField("children");
-            f.setAccessible(true);
-            return (Set<AbstractConfigurationObject>) f.get(this);
         }
     }
 }

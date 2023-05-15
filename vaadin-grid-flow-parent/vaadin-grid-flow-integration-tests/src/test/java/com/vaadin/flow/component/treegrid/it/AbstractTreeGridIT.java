@@ -13,7 +13,7 @@ public abstract class AbstractTreeGridIT extends AbstractComponentIT {
     private TreeGridElement grid;
 
     public void setupTreeGrid() {
-        waitUntil(e -> $(TreeGridElement.class).exists(), 500);
+        waitUntil(e -> $(TreeGridElement.class).exists(), 2);
         grid = $(TreeGridElement.class).first();
     }
 
@@ -102,14 +102,14 @@ public abstract class AbstractTreeGridIT extends AbstractComponentIT {
             String expectedText) {
         if (!((grid.getFirstVisibleRowIndex() <= rowIndex
                 && rowIndex <= grid.getLastVisibleRowIndex()))) {
-            grid.scrollToRowAndWait(rowIndex);
+            grid.scrollToFlatRowAndWait(rowIndex);
         }
         GridColumnElement column = grid.getVisibleColumns().get(cellIndex);
         try {
             waitUntil(
                     test -> grid.hasRow(rowIndex) && expectedText.equals(
                             grid.getRow(rowIndex).getCell(column).getText()),
-                    500);
+                    2);
         } catch (Exception e) {
             Assert.fail(String.format(
                     "Expected cell text [%s] but got %s in row %s cell %s",
