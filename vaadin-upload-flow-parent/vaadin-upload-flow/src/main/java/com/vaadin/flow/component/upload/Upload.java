@@ -63,9 +63,9 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-upload")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha9")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha10")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/upload", version = "24.1.0-alpha9")
+@NpmPackage(value = "@vaadin/upload", version = "24.1.0-alpha10")
 @JsModule("@vaadin/upload/src/vaadin-upload.js")
 public class Upload extends Component implements HasSize, HasStyle {
 
