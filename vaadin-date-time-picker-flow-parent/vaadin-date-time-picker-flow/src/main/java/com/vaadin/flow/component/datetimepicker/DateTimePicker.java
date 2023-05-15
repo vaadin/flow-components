@@ -409,8 +409,8 @@ public class DateTimePicker
     /**
      * Gets the aria-label of the component.
      *
-     * @return an optional aria-label of the component if no aria-label has been
-     *         set
+     * @return an optional aria-label of the component or an empty optional if
+     *         no aria-label has been set
      */
     public Optional<String> getAriaLabel() {
         return Optional.ofNullable(getElement().getProperty("accessibleName"));
@@ -466,7 +466,8 @@ public class DateTimePicker
      * {@link #setDateAriaLabel(String)}, not the value currently set on the
      * `aria-label` attribute of the date picker input element.
      *
-     * @return an optional of the dateLabel.
+     * @return an optional dateLabel or an empty optional if no dateLabel has
+     *         been set
      */
     public Optional<String> getDateAriaLabel() {
         if (dateTimePickerI18n == null) {
@@ -502,7 +503,8 @@ public class DateTimePicker
      * {@link #setTimeAriaLabel(String)}, not the value currently set on the
      * aria-label attribute of the time picker input element.
      *
-     * @return an optional of the timeLabel.
+     * @return an optional timeLabel or an empty optional if no timeLabel has
+     *         been set
      */
     public Optional<String> getTimeAriaLabel() {
         if (dateTimePickerI18n == null) {
