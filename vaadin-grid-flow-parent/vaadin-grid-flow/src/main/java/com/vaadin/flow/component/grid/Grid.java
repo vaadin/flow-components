@@ -492,10 +492,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             Optional<DataGenerator<T>> dataGenerator = rendering
                     .getDataGenerator();
 
-            if (dataGenerator.isPresent()) {
-                columnDataGeneratorRegistration = grid
-                        .addDataGenerator(dataGenerator.get());
-            }
+            dataGenerator.ifPresent(tDataGenerator -> columnDataGeneratorRegistration = grid
+                    .addDataGenerator(tDataGenerator));
         }
 
         protected void destroyDataGenerators() {
@@ -507,6 +505,25 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 editorDataGeneratorRegistration.remove();
                 editorDataGeneratorRegistration = null;
             }
+        }
+
+        /**
+         * Gets the rowHeader property of this column.
+         *
+         * @return {@code true} if this column is a row header column,
+         */
+        public boolean isRowHeader() {
+            return getElement().getProperty("rowHeader", false);
+        }
+
+        /**
+         * Sets the rowHeader property of this column.
+         *
+         * @param rowHeader
+         *            {@code true} if this column is a row header column,
+         */
+        public void setRowHeader(boolean rowHeader) {
+            getElement().setProperty("rowHeader", rowHeader);
         }
 
         protected String getInternalId() {
