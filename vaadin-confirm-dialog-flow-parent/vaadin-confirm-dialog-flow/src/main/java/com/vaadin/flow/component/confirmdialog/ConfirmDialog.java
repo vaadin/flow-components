@@ -182,7 +182,7 @@ public class ConfirmDialog extends Component
     }
 
     /**
-     * Sets the "aria-describedby" attribute of the dialog overlay.
+     * Sets the `aria-describedby` attribute of the dialog overlay.
      * <p>
      * By default, all elements inside the message area are linked through the
      * `aria-describedby` attribute. However, there are cases where this can
@@ -201,7 +201,7 @@ public class ConfirmDialog extends Component
     }
 
     /**
-     * Gets the aria-describedby of the component
+     * Gets the `aria-describedby` attribute of the dialog overlay
      * <p>
      * Note that this will only return a value if
      * {@link #setAriaDescribedBy(String)} was called before.
