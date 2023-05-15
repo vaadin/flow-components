@@ -409,8 +409,8 @@ public class DateTimePicker
     /**
      * Gets the aria-label of the component.
      *
-     * @return an optional aria-label or an empty optional if
-     *         no aria-label has been set
+     * @return an optional aria-label or an empty optional if no aria-label has
+     *         been set
      */
     public Optional<String> getAriaLabel() {
         return Optional.ofNullable(getElement().getProperty("accessibleName"));
@@ -466,8 +466,7 @@ public class DateTimePicker
      * {@link #setDateAriaLabel(String)}, not the value currently set on the
      * `aria-label` attribute of the date picker input element.
      *
-     * @return an optional label or an empty optional if no label has
-     *         been set
+     * @return an optional label or an empty optional if no label has been set
      */
     public Optional<String> getDateAriaLabel() {
         if (dateTimePickerI18n == null) {
