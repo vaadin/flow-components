@@ -441,10 +441,11 @@ public class DateTimePicker
     }
 
     /**
-     * Sets the accessible label to the date picker. The property works in
-     * conjunction with label and aria-label defined on the field. If both
-     * properties are defined, then aria-label takes precedence. Then, the
-     * dateLabel value is concatenated with it.
+     * Sets the accessible name for the date picker.
+     * <p>
+     * The final value is a concatenation of the accessible name from
+     * DateTimePicker's {@link #getAriaLabel()} or {@link #getLabel()} and the
+     * given accessible name.
      *
      * @param dateLabel
      *            the value to be used as part of date picker aria-label.
@@ -459,11 +460,11 @@ public class DateTimePicker
     }
 
     /**
-     * Gets the accessible name define for the date picker.
+     * Gets the accessible name defined on the date picker.
      * <p>
      * Note that this method will return the last value passed to
      * {@link #setDateAriaLabel(String)}, not the value currently set on the
-     * aria-label attribute of the date picker input element.
+     * `aria-label` attribute of the date picker input element.
      *
      * @return an optional of the dateLabel.
      */
@@ -475,10 +476,12 @@ public class DateTimePicker
     }
 
     /**
-     * Sets the accessible label to the time picker. The property works in
-     * conjunction with label and aria-label defined on the field. If both
-     * properties are defined, then aria-label takes precedence. Then, the
-     * dateLabel value is concatenated with it.
+     *
+     * Sets the accessible name for the time picker.
+     * <p>
+     * The final value is a concatenation of the accessible name from
+     * DateTimePicker's {@link #getAriaLabel()} or {@link #getLabel()} and the
+     * given accessible name.
      *
      * @param timeLabel
      *            the value to be used as part of time picker aria-label.
@@ -493,7 +496,7 @@ public class DateTimePicker
     }
 
     /**
-     * Gets the accessible name define for the time picker.
+     * Gets the accessible name defined on the time picker.
      * <p>
      * Note that this method will return the last value passed to
      * {@link #setTimeAriaLabel(String)}, not the value currently set on the
