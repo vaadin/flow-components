@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.HasAriaLabel;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -454,5 +455,35 @@ public class RadioButtonGroupTest {
     public void implementsHasTooltip() {
         RadioButtonGroup<String> group = new RadioButtonGroup<>();
         Assert.assertTrue(group instanceof HasTooltip);
+    }
+
+    @Test
+    public void implementHasAriaLabel() {
+        Assert.assertTrue(
+                HasAriaLabel.class.isAssignableFrom(RadioButtonGroup.class));
+    }
+
+    @Test
+    public void setAriaLabel() {
+        RadioButtonGroup<String> group = new RadioButtonGroup<>();
+        group.setAriaLabel("aria-label");
+
+        Assert.assertTrue(group.getAriaLabel().isPresent());
+        Assert.assertEquals("aria-label", group.getAriaLabel().get());
+
+        group.setAriaLabel(null);
+        Assert.assertTrue(group.getAriaLabel().isEmpty());
+    }
+
+    @Test
+    public void setAriaLabelledBy() {
+        RadioButtonGroup<String> group = new RadioButtonGroup<>();
+        group.setAriaLabelledBy("aria-labelledby");
+
+        Assert.assertTrue(group.getAriaLabelledBy().isPresent());
+        Assert.assertEquals("aria-labelledby", group.getAriaLabelledBy().get());
+
+        group.setAriaLabelledBy(null);
+        Assert.assertTrue(group.getAriaLabelledBy().isEmpty());
     }
 }

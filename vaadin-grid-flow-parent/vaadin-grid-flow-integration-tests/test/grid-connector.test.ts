@@ -28,4 +28,28 @@ describe('grid connector', () => {
     expect(getBodyRowCount(grid)).to.equal(1);
     expect(getBodyCellText(grid, 0, 0)).to.equal('foo');
   });
+
+  describe('empty grid', () => {
+    it('should not have loading state when refreshing grid', async () => {
+      setRootItems(grid.$connector, []);
+      await nextFrame();
+
+      // Force grid to refresh data
+      grid.clearCache();
+      await nextFrame();
+
+      expect(grid.hasAttribute('loading')).to.be.false;
+    });
+
+    it('should not request items when refreshing grid', async () => {
+      setRootItems(grid.$connector, []);
+      await nextFrame();
+
+      // Force grid to refresh data
+      grid.clearCache();
+      await nextFrame();
+
+      expect(grid.$server.setRequestedRange.called).to.be.false;
+    });
+  });
 });

@@ -38,6 +38,16 @@ public class GridTooltipPage extends Div {
                 .setTooltipGenerator(person -> "First name of the person is "
                         + person.getFirstName());
 
+        var setGridTooltipButton = new NativeButton(
+                "Set tooltip to all columns",
+                clickEvent -> grid.setTooltipGenerator(
+                        person -> "Grid's tooltip! " + person.getFirstName()));
+        setGridTooltipButton.setId("set-grid-tooltip-button");
+
+        var addColumnButton = new NativeButton("Add extra column",
+                clickEvent -> grid.addColumn(item -> "Extra column"));
+        addColumnButton.setId("add-column-button");
+
         var setAgeTooltipButton = new NativeButton("Set tooltip to age column",
                 event -> {
                     grid.getColumnByKey("age").setTooltipGenerator(
@@ -47,6 +57,7 @@ public class GridTooltipPage extends Div {
         setAgeTooltipButton.setId("set-age-tooltip-button");
 
         var toggleGridButton = new NativeButton("Toggle grid", event -> {
+
             if (grid.getParent().isPresent()) {
                 remove(grid);
             } else {
@@ -55,7 +66,9 @@ public class GridTooltipPage extends Div {
         });
         toggleGridButton.setId("toggle-grid-button");
 
-        add(setAgeTooltipButton, toggleGridButton, grid);
+        grid.setId("grid-with-tooltips");
+        add(setGridTooltipButton, addColumnButton, setAgeTooltipButton,
+                toggleGridButton, grid);
     }
 
 }
