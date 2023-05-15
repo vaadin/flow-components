@@ -30,6 +30,7 @@ import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
@@ -89,9 +90,10 @@ import elemental.json.JsonArray;
 @NpmPackage(value = "@vaadin/checkbox-group", version = "24.1.0-alpha10")
 @JsModule("@vaadin/checkbox-group/src/vaadin-checkbox-group.js")
 public class CheckboxGroup<T>
-        extends AbstractSinglePropertyField<CheckboxGroup<T>, Set<T>> implements
-        HasClientValidation, HasDataView<T, Void, CheckboxGroupDataView<T>>,
-        HasHelper, HasItemComponents<T>, HasLabel, HasSize, HasStyle,
+        extends AbstractSinglePropertyField<CheckboxGroup<T>, Set<T>>
+        implements HasAriaLabel, HasClientValidation,
+        HasDataView<T, Void, CheckboxGroupDataView<T>>, HasHelper,
+        HasItemComponents<T>, HasLabel, HasSize, HasStyle,
         HasListDataView<T, CheckboxGroupListDataView<T>>, HasTooltip,
         HasThemeVariant<CheckboxGroupVariant>, HasValidationProperties,
         HasValidator<Set<T>>, MultiSelect<CheckboxGroup<T>, T> {
@@ -495,6 +497,27 @@ public class CheckboxGroup<T>
      */
     public String getLabel() {
         return getElement().getProperty("label");
+    }
+
+    @Override
+    public void setAriaLabel(String ariaLabel) {
+        getElement().setProperty("accessibleName", ariaLabel);
+    }
+
+    @Override
+    public Optional<String> getAriaLabel() {
+        return Optional.ofNullable(getElement().getProperty("accessibleName"));
+    }
+
+    @Override
+    public void setAriaLabelledBy(String labelledBy) {
+        getElement().setProperty("accessibleNameRef", labelledBy);
+    }
+
+    @Override
+    public Optional<String> getAriaLabelledBy() {
+        return Optional
+                .ofNullable(getElement().getProperty("accessibleNameRef"));
     }
 
     /**
