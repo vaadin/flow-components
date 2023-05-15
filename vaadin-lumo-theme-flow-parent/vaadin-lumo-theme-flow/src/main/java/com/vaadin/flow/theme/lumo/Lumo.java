@@ -74,4 +74,5 @@ public class Lumo implements AbstractTheme {
         }
         return attributes;
     }
+
 }

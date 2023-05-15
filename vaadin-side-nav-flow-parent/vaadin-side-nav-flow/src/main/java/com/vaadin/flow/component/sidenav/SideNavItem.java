@@ -18,6 +18,7 @@ package com.vaadin.flow.component.sidenav;
 import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
@@ -26,10 +27,8 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasPrefix;
 import com.vaadin.flow.component.shared.HasSuffix;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.router.Router;
-import com.vaadin.flow.server.VaadinService;
 
 /**
  * A menu item for the {@link SideNav} component.
@@ -204,28 +203,13 @@ public class SideNavItem extends SideNavItemContainer
      */
     public void setPath(Class<? extends Component> view) {
         if (view != null) {
-            String url = RouteConfiguration
-                    .forRegistry(getRouter().getRegistry()).getUrl(view);
+            Router router = ComponentUtil.getRouter(this);
+            String url = RouteConfiguration.forRegistry(router.getRegistry())
+                    .getUrl(view);
             setPath(url);
         } else {
             setPath((String) null);
         }
-    }
-
-    private Router getRouter() {
-        Router router = null;
-        if (getElement().getNode().isAttached()) {
-            StateTree tree = (StateTree) getElement().getNode().getOwner();
-            router = tree.getUI().getInternals().getRouter();
-        }
-        if (router == null) {
-            router = VaadinService.getCurrent().getRouter();
-        }
-        if (router == null) {
-            throw new IllegalStateException(
-                    "Router instance is not available. Router is required for path resolution.");
-        }
-        return router;
     }
 
     /**
