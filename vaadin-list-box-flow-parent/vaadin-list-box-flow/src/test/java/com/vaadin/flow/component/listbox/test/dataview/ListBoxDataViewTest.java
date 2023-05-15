@@ -152,11 +152,6 @@ public class ListBoxDataViewTest extends AbstractComponentDataViewTest {
             }
 
             @Override
-            public void refreshItems(boolean b) {
-
-            }
-
-            @Override
             public Registration addDataProviderListener(
                     DataProviderListener<String> listener) {
                 return null;
