@@ -26,7 +26,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * Note: It is possible that Lumo CSS utilitity classes are conflicting with
  * user-defined CSS classes
  */
-@NpmPackage(value = "@vaadin/vaadin-lumo-styles", version = "24.1.0-alpha9")
+@NpmPackage(value = "@vaadin/vaadin-lumo-styles", version = "24.1.0-alpha10")
 @JsModule("@vaadin/vaadin-lumo-styles/utility-global.js")
 public final class LumoUtility {
 
