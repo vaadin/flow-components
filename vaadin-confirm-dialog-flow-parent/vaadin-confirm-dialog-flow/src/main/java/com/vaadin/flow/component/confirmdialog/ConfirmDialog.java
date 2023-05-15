@@ -206,7 +206,7 @@ public class ConfirmDialog extends Component
      * Note that this will only return a value if
      * {@link #setAriaDescribedBy(String)} was called before.
      *
-     * @return an optional aria-describedby of the component, or an empty
+     * @return an optional aria-describedby of the dialog overlay, or an empty
      *         optional if no aria-describedby has been set
      */
     public Optional<String> getAriaDescribedBy() {
