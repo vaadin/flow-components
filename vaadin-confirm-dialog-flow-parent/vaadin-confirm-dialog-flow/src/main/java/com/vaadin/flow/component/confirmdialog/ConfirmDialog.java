@@ -201,7 +201,7 @@ public class ConfirmDialog extends Component
     }
 
     /**
-     * Gets the `aria-describedby` attribute of the dialog overlay
+     * Gets the `aria-describedby` attribute of the dialog overlay.
      * <p>
      * Note that this will only return a value if
      * {@link #setAriaDescribedBy(String)} was called before.
