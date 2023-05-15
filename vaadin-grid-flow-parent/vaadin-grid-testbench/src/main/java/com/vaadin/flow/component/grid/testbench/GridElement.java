@@ -60,7 +60,7 @@ public class GridElement extends TestBenchElement {
      * @param row
      *            the row to scroll to
      */
-    private void scrollToFlatRow(int row) {
+    protected void scrollToFlatRow(int row) {
         callFunction("_scrollToFlatIndex", row);
         waitUntilLoadingFinished();
     }

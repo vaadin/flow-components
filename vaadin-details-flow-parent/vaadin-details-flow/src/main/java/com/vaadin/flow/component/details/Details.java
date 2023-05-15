@@ -15,14 +15,11 @@
  */
 package com.vaadin.flow.component.details;
 
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.ComponentUtil;
-import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
@@ -55,9 +52,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-details")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha6")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha9")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/details", version = "24.1.0-alpha6")
+@NpmPackage(value = "@vaadin/details", version = "24.1.0-alpha9")
 @JsModule("@vaadin/details/src/vaadin-details.js")
 public class Details extends Component implements HasEnabled, HasSize, HasStyle,
         HasThemeVariant<DetailsVariant>, HasTooltip {
@@ -88,6 +85,9 @@ public class Details extends Component implements HasEnabled, HasSize, HasStyle,
         if (getElement().getPropertyRaw("opened") == null) {
             setOpened(false);
         }
+
+        getElement().addPropertyChangeListener("opened", event -> fireEvent(
+                new OpenedChangeEvent(this, event.isUserOriginated())));
     }
 
     /**
@@ -321,8 +321,6 @@ public class Details extends Component implements HasEnabled, HasSize, HasStyle,
      */
     public Registration addOpenedChangeListener(
             ComponentEventListener<OpenedChangeEvent> listener) {
-        return getElement().addPropertyChangeListener("opened",
-                event -> listener.onComponentEvent(
-                        new OpenedChangeEvent(this, event.isUserOriginated())));
+        return addListener(OpenedChangeEvent.class, listener);
     }
 }

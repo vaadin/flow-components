@@ -44,7 +44,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-tabsheet")
-@NpmPackage(value = "@vaadin/tabsheet", version = "24.1.0-alpha6")
+@NpmPackage(value = "@vaadin/tabsheet", version = "24.1.0-alpha9")
 @JsModule("@vaadin/tabsheet/src/vaadin-tabsheet.js")
 public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
         HasSuffix, HasThemeVariant<TabSheetVariant> {
@@ -179,9 +179,7 @@ public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
                     "Text as content is not supported.");
         }
 
-        var tab = tabToContent.entrySet().stream()
-                .filter(entry -> entry.getValue().equals(content.getElement()))
-                .map(Map.Entry::getKey).findFirst().orElse(null);
+        var tab = getTab(content);
 
         if (tab != null) {
             remove(tab);
@@ -263,6 +261,44 @@ public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
      */
     public int getIndexOf(Tab tab) {
         return tabs.indexOf(tab);
+    }
+
+    /**
+     * Returns the {@link Tab} associated with the given component.
+     *
+     * @param content
+     *            the component to look up, can not be <code>null</code>
+     * @return The tab instance associated with the given component, or
+     *         <code>null</code> if the {@link TabSheet} does not contain the
+     *         component.
+     */
+    public Tab getTab(Component content) {
+        Objects.requireNonNull(content,
+                "The component to look for the tab cannot be null");
+
+        return tabToContent.entrySet().stream()
+                .filter(entry -> entry.getValue().equals(content.getElement()))
+                .map(Map.Entry::getKey).findFirst().orElse(null);
+    }
+
+    /**
+     * Returns the {@link Component} instance associated with the given tab.
+     *
+     * @param tab
+     *            the tab to look up, can not be <code>null</code>
+     * @return The component instance associated with the given tab, or
+     *         <code>null</code> if the {@link TabSheet} does not contain the
+     *         tab.
+     */
+    public Component getComponent(Tab tab) {
+        Objects.requireNonNull(tab,
+                "The tab to look for the component cannot be null");
+
+        var tabContent = tabToContent.get(tab);
+        if (tabContent == null) {
+            return null;
+        }
+        return tabContent.getComponent().orElse(null);
     }
 
     /**

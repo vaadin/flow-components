@@ -80,6 +80,31 @@ For running all merged components execute:
 
 - `mvn verify -Dsauce.user=*** -Dsauce.sauceAccessKey=*** -Drun-it -pl integration-tests`
 
+## Debugging web-test-runner tests of a component
+
+Make sure the root level dependencies are installed
+
+- `npm install`
+
+Serve the IT pages of the component whose tests you want to debug
+
+- See "Serving the IT pages of a component" above
+
+Run the tests for the component once to have the necessary dependencies installed
+
+- `node ./scripts/wtr.js grid`
+
+Move to the integration tests module of the component
+
+- `cd vaadin-grid-flow-parent/vaadin-grid-flow-integration-tests`
+
+Start the test runner in watch mode
+
+- `npx web-test-runner test/**/*.test.ts --node-resolve --watch`
+
+NOTE: The tests actually import the client module under test from `..integration-tests/frontend/generated/jar-resources`.
+For faster feedback loop you can work on the generated file directly. Just be careful not to lose your changes to it since it's not under version control.
+
 ## Bumping version for all Maven modules
 
 To update the version for all modules for a new major or minor, run the following command:

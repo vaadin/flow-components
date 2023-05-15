@@ -365,7 +365,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
     protected abstract void fireSelectionEvent(
             SelectionEvent<Grid<T>, T> event);
 
-    void clientSelectAll() {
+    protected void clientSelectAll() {
         if (!isSelectAllCheckboxVisible()) {
             // ignore event if the checkBox was meant to be hidden
             return;
@@ -384,6 +384,10 @@ public abstract class AbstractGridMultiSelectionModel<T>
                 Collections.emptySet(), true);
         selectionColumn.setSelectAllCheckboxState(true);
         selectionColumn.setSelectAllCheckboxIndeterminateState(false);
+    }
+
+    protected GridSelectionColumn getSelectionColumn() {
+        return selectionColumn;
     }
 
     /**
@@ -424,7 +428,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
                         fetchAllDescendants(child, dataProvider)));
     }
 
-    void clientDeselectAll() {
+    protected void clientDeselectAll() {
         if (!isSelectAllCheckboxVisible()) {
             // ignore event if the checkBox was meant to be hidden
             return;
@@ -489,7 +493,6 @@ public abstract class AbstractGridMultiSelectionModel<T>
             return;
         }
 
-        activeItems.forEach(getGrid().getDataCommunicator()::refresh);
         clientSideUpdater.accept(activeItems);
     }
 
