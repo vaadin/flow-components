@@ -115,11 +115,13 @@ describe('grid connector - tree', () => {
     // Wait for the request for child items to be sent
     await aTimeout(GRID_CONNECTOR_PARENT_REQUEST_DELAY);
     expect(grid.$server.setParentRequestedRanges).to.be.calledOnce;
-    expect(grid.$server.setParentRequestedRanges.firstCall.firstArg).to.deep.equal([{
-      parentKey: rootItem.key,
-      firstIndex: 0,
-      size: grid.pageSize
-    }]);
+    expect(grid.$server.setParentRequestedRanges.firstCall.firstArg).to.deep.equal([
+      {
+        parentKey: rootItem.key,
+        firstIndex: 0,
+        size: grid.pageSize
+      }
+    ]);
   });
 
   it('should render child nodes lazily', async () => {
@@ -148,12 +150,12 @@ describe('grid connector - tree', () => {
     // Get the initial width of the column before any items are added
     const headerCellContent = getHeaderCellContent(column);
     const initialWidth = headerCellContent.offsetWidth;
-    
+
     // Add an expanded root item with long content
     const rootItem = { key: '0', name: 'foo bar baz qux', children: true };
     expandItems(grid.$connector, [rootItem]);
     setRootItems(grid.$connector, [rootItem]);
-    
+
     await nextFrame();
 
     // Wait for the request for child items to be sent
@@ -173,11 +175,29 @@ describe('grid connector - tree', () => {
 
     // Add a child item
     const childItem = { key: '1', name: 'foo bar', children: false };
-    setChildItems(grid.$connector, rootItem, [childItem]);    
+    setChildItems(grid.$connector, rootItem, [childItem]);
 
     // Add the expanded root item
     setRootItems(grid.$connector, [rootItem]);
 
     expect(getBodyCellText(grid, 1, 0)).to.equal('foo bar');
+  });
+
+  it('should not request items for expanded parent outside the DOM', async () => {
+    // Add expanded root items
+    const rootItem = { key: '0', name: 'foo', children: true };
+    const rootItem2 = { key: '1', name: 'bat', children: true };
+    setRootItems(grid.$connector, [rootItem, rootItem2]);
+    expandItems(grid.$connector, [rootItem, rootItem2]);
+
+    // Add 100 child items for the first root item
+    const childItems = [...Array(100).keys()].map((i) => ({ key: `0-${i}`, name: `foo-${i}` }));
+    setChildItems(grid.$connector, rootItem, childItems);
+    await nextFrame();
+
+    await aTimeout(GRID_CONNECTOR_PARENT_REQUEST_DELAY);
+    // The children of the first root item were preloaded and the second (expanded)
+    // root item is outside the DOM so no requests should have been sent
+    expect(grid.$server.setParentRequestedRanges).to.not.be.called;
   });
 });
