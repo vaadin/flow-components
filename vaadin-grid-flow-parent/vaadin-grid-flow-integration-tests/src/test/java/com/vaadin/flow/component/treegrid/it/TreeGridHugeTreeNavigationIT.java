@@ -37,7 +37,6 @@ public class TreeGridHugeTreeNavigationIT extends AbstractTreeGridIT {
         setupTreeGrid();
     }
 
-    @Ignore("Fix as part of https://github.com/vaadin/flow-components/issues/3505")
     @Test
     public void keyboard_navigation() {
         getTreeGrid().getCell(0, 0).focus();
@@ -89,7 +88,7 @@ public class TreeGridHugeTreeNavigationIT extends AbstractTreeGridIT {
         checkLogsForErrors();
     }
 
-    @Ignore("Fix as part of https://github.com/vaadin/flow-components/issues/3505")
+    @Ignore("Keyboard navigation for rows that are no longer in cache should be fixed first.")
     @Test
     public void can_toggle_collapse_on_row_that_is_no_longer_in_cache() {
         getTreeGrid().getCell(0, 0).focus();
