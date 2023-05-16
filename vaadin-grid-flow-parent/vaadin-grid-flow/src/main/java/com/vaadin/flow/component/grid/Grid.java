@@ -2503,8 +2503,12 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     /**
      * {@inheritDoc}
      *
-     * Use this method only when having a data provider with filter that cannot
-     * be transformed to {@code DataProvider<T, Void>}.
+     * Use instead one of the {@code setItems} methods which provide access to
+     * either {@link GridListDataView} or {@link GridLazyDataView}.
+     *
+     * Use this method when none of the {@code setItems} methods are applicable,
+     * e.g. when having a data provider with filter that cannot be transformed
+     * to {@code DataProvider<T, Void>}.
      */
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         Objects.requireNonNull(dataProvider, "data provider cannot be null");

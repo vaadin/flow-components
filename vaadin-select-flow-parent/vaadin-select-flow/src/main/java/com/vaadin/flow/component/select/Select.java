@@ -523,7 +523,17 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
         return getElement().getProperty("autofocus", false);
     }
 
-    private void setDataProvider(DataProvider<T, ?> dataProvider) {
+    /**
+     * {@inheritDoc}
+     *
+     * Use instead one of the {@code setItems} methods which provide access to
+     * either {@link SelectDataView} or {@link SelectListDataView}.
+     *
+     * Use this method when none of the {@code setItems} methods are applicable,
+     * e.g. when having a data provider with filter that cannot be transformed
+     * to {@code DataProvider<T, Void>}.
+     */
+    public void setDataProvider(DataProvider<T, ?> dataProvider) {
         this.dataProvider.set(dataProvider);
         DataViewUtils.removeComponentFilterAndSortComparator(this);
         reset();
@@ -536,9 +546,13 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
     }
 
     /**
-     * Gets the data provider.
+     * Gets the data provider used by this Select.
      *
-     * @return the data provider, not {@code null}
+     * <p>
+     * To get information and control over the items in the Select, use either
+     * {@link #getListDataView()} or {@link #getGenericDataView()} instead.
+     *
+     * @return the data provider used by this Select
      */
     public DataProvider<T, ?> getDataProvider() {
         return dataProvider.get();

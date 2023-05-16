@@ -98,7 +98,17 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
                 presentationToModel, modelToPresentation);
     }
 
-    private void setDataProvider(DataProvider<ITEM, ?> dataProvider) {
+    /**
+     * {@inheritDoc}
+     *
+     * Use instead one of the {@code setItems} methods which provide access to
+     * either {@link ListBoxDataView} or {@link ListBoxListDataView}.
+     *
+     * Use this method when none of the {@code setItems} methods are applicable,
+     * e.g. when having a data provider with filter that cannot be transformed
+     * to {@code DataProvider<T, Void>}.
+     */
+    public void setDataProvider(DataProvider<ITEM, ?> dataProvider) {
         this.dataProvider.set(Objects.requireNonNull(dataProvider));
         DataViewUtils.removeComponentFilterAndSortComparator(this);
         clear();
@@ -139,11 +149,15 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
     }
 
     /**
-     * Gets the data provider.
+     * Gets the data provider used by this ListBox.
      *
-     * @return the data provider, not {@code null}
+     * <p>
+     * To get information and control over the items in the ListBox, use either
+     * {@link #getListDataView()} or {@link #getGenericDataView()} instead.
+     *
+     * @return the data provider used by this ListBox
      */
-    private DataProvider<ITEM, ?> getDataProvider() {
+    public DataProvider<ITEM, ?> getDataProvider() {
         return dataProvider.get();
     }
 

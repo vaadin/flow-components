@@ -980,6 +980,9 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
 
     /**
      * Gets the data provider used by this ComboBox.
+     * <p>
+     * To get information and control over the items in the ComboBox, use either
+     * {@link #getListDataView()} or {@link #getLazyDataView()} instead.
      *
      * @return the data provider used by this ComboBox
      */
