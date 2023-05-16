@@ -212,6 +212,42 @@ public class DateTimePickerTest {
     }
 
     @Test
+    public void setAriaLabel() {
+        final DateTimePicker picker = new DateTimePicker();
+        Assert.assertTrue(picker.getAriaLabel().isEmpty());
+        picker.setAriaLabel("aria-label");
+        Assert.assertTrue(picker.getAriaLabel().isPresent());
+        Assert.assertEquals("aria-label", picker.getAriaLabel().get());
+
+        picker.setAriaLabel(null);
+        Assert.assertTrue(picker.getAriaLabel().isEmpty());
+    }
+
+    @Test
+    public void setDateAriaLabel() {
+        final DateTimePicker picker = new DateTimePicker();
+        Assert.assertTrue(picker.getDateAriaLabel().isEmpty());
+        picker.setDateAriaLabel("date-aria-label");
+        Assert.assertTrue(picker.getDateAriaLabel().isPresent());
+        Assert.assertEquals("date-aria-label", picker.getDateAriaLabel().get());
+
+        picker.setDateAriaLabel(null);
+        Assert.assertTrue(picker.getDateAriaLabel().isEmpty());
+    }
+
+    @Test
+    public void setTimeAriaLabel() {
+        final DateTimePicker picker = new DateTimePicker();
+        Assert.assertTrue(picker.getTimeAriaLabel().isEmpty());
+        picker.setTimeAriaLabel("time-aria-label");
+        Assert.assertTrue(picker.getTimeAriaLabel().isPresent());
+        Assert.assertEquals("time-aria-label", picker.getTimeAriaLabel().get());
+
+        picker.setTimeAriaLabel(null);
+        Assert.assertTrue(picker.getTimeAriaLabel().isEmpty());
+    }
+
+    @Test
     public void implementsHasOverlayClassName() {
         Assert.assertTrue("DateTimePicker should support overlay class name",
                 HasOverlayClassName.class
