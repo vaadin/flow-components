@@ -476,12 +476,11 @@ public class DateTimePicker
     }
 
     /**
-     *
-     * Sets the accessible name for the time picker.
+     * Sets the accessible label for the time picker.
      * <p>
-     * The final value is a concatenation of the accessible name from
+     * The final value is a concatenation of the accessible label from
      * DateTimePicker's {@link #getAriaLabel()} or {@link #getLabel()} and the
-     * given accessible name.
+     * given accessible label.
      *
      * @param timeLabel
      *            the value to be used as part of time picker aria-label.
@@ -496,14 +495,13 @@ public class DateTimePicker
     }
 
     /**
-     * Gets the accessible name defined on the time picker.
+     * Gets the accessible label of the time picker.
      * <p>
      * Note that this method will return the last value passed to
      * {@link #setTimeAriaLabel(String)}, not the value currently set on the
-     * aria-label attribute of the time picker input element.
+     * `aria-label` attribute of the time picker input element.
      *
-     * @return an optional timeLabel or an empty optional if no timeLabel has
-     *         been set
+     * @return an optional label or an empty optional if no label has been set
      */
     public Optional<String> getTimeAriaLabel() {
         if (dateTimePickerI18n == null) {
