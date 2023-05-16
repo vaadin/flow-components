@@ -134,6 +134,7 @@ public class NotificationView extends Div {
         createContrast();
         createSuccess();
         createError();
+        createWarning();
     }
 
     private void createDefault() {
@@ -250,6 +251,29 @@ public class NotificationView extends Div {
         label.getStyle().set("margin-right", "0.5rem");
         thisIsFineButton.getStyle().set("margin-right", "0.5rem");
         addCard("Theme Variants", "Error", openButton);
+    }
+
+    private void createWarning() {
+        Notification notification = new Notification();
+        notification.addThemeVariants(NotificationVariant.LUMO_WARNING);
+
+        Span label = new Span("Warning about something!");
+
+        Button thisIsFineButton = new Button("This is fine",
+                e -> notification.close());
+
+        Button investigateButton = new Button("Investigate",
+                e -> notification.close());
+        investigateButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+
+        notification.add(label, thisIsFineButton, investigateButton);
+
+        Button openButton = new Button("Warning notification",
+                e -> notification.open());
+
+        label.getStyle().set("margin-right", "0.5rem");
+        thisIsFineButton.getStyle().set("margin-right", "0.5rem");
+        addCard("Theme Variants", "Warning", openButton);
     }
 
     private void addCard(String title, Component... components) {
