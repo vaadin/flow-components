@@ -37,7 +37,7 @@ import com.vaadin.flow.component.upload.Receiver;
  */
 public class FileBuffer extends AbstractFileBuffer implements Receiver {
 
-    private FileData file;
+    private transient FileData file;
 
     /**
      * Creates a file buffer with a default file factory.

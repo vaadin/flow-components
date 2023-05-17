@@ -19,6 +19,7 @@ import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Span;
@@ -816,6 +817,38 @@ public class SelectTest {
     @Test
     public void implementsHasTooltip() {
         Assert.assertTrue(select instanceof HasTooltip);
+    }
+
+    @Test
+    public void implementHasAriaLabel() {
+        Assert.assertTrue(
+                "Select should support aria-label and aria-labelledby",
+                HasAriaLabel.class.isAssignableFrom(Select.class));
+    }
+
+    @Test
+    public void setAriaLabel() {
+        Select<String> select = new Select<>();
+
+        select.setAriaLabel("aria-label");
+        Assert.assertTrue(select.getAriaLabel().isPresent());
+        Assert.assertEquals("aria-label", select.getAriaLabel().get());
+
+        select.setAriaLabel(null);
+        Assert.assertTrue(select.getAriaLabel().isEmpty());
+    }
+
+    @Test
+    public void setAriaLabelledBy() {
+        Select<String> select = new Select<>();
+
+        select.setAriaLabelledBy("aria-labelledby");
+        Assert.assertTrue(select.getAriaLabelledBy().isPresent());
+        Assert.assertEquals("aria-labelledby",
+                select.getAriaLabelledBy().get());
+
+        select.setAriaLabelledBy(null);
+        Assert.assertTrue(select.getAriaLabelledBy().isEmpty());
     }
 
     @Test

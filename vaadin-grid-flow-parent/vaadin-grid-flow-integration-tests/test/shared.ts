@@ -1,6 +1,9 @@
 import './env-setup.js';
 import '@vaadin/grid/all-imports.js';
 import '../frontend/generated/jar-resources/gridConnector.js';
+import '../frontend/generated/jar-resources/vaadin-grid-flow-selection-column.js';
+// For some reason vaadin-grid-flow-selection-column doesn't import vaadin-checkbox
+import '@vaadin/checkbox';
 import sinon from 'sinon';
 import type { Grid, GridColumn } from '@vaadin/grid';
 import type {} from '@web/test-runner-mocha';
@@ -12,25 +15,34 @@ export type GridConnector = {
   set: (index: number, items: any[], parentKey?: string) => void;
   confirm: (index: number) => void;
   confirmParent: (index: number, parentKey: string, levelSize: number) => void;
-  setSelectionMode: (mode: 'SINGLE' | 'NONE') => void;
+  setSelectionMode: (mode: 'SINGLE' | 'NONE' | 'MULTI') => void;
   expandItems: (items: Item[]) => void;
   ensureHierarchy: () => void;
   reset: () => void;
+  doSelection: (items: Item[] | [null], userOriginated: boolean) => void;
+  doDeselection: (items: Item[], userOriginated: boolean) => void;
 };
 
 export type GridServer = {
   confirmUpdate: ((index: number) => void) & sinon.SinonSpy;
   confirmParentUpdate: ((index: number, parentKey: string) => void) & sinon.SinonSpy;
   select: ((key: string) => void) & sinon.SinonSpy;
+  selectAll: () => void & sinon.SinonSpy;
   deselect: ((key: string) => void) & sinon.SinonSpy;
+  deselectAll: () => void & sinon.SinonSpy;
   setDetailsVisible: ((key: string) => void) & sinon.SinonSpy;
-  setParentRequestedRanges: ((ranges: { firstIndex: number; size: number; parentKey: string }[]) => void) & sinon.SinonSpy;
+  setRequestedRange: ((firstIndex: number, size: number) => void) & sinon.SinonSpy;
+  setParentRequestedRanges: ((ranges: { firstIndex: number; size: number; parentKey: string }[]) => void) &
+    sinon.SinonSpy;
 };
 
 export type Item = {
   key: string;
-  name: string;
+  name?: string;
   selected?: boolean;
+  detailsOpened?: boolean;
+  style?: Record<string, string>;
+  part?: Record<string, string>;
 };
 
 export type FlowGrid = Grid<Item> & {
@@ -41,6 +53,11 @@ export type FlowGrid = Grid<Item> & {
   _effectiveSize: number;
   __updateVisibleRows: () => void;
   _updateItem: (index: number, item: Item) => void;
+};
+
+export type FlowGridSelectionColumn = GridColumn & {
+  selectAll: boolean;
+  $server: GridServer;
 };
 
 type Vaadin = {
@@ -62,14 +79,24 @@ export function init(grid: FlowGrid): void {
     confirmUpdate: sinon.spy(),
     confirmParentUpdate: sinon.spy(),
     select: sinon.spy(),
+    selectAll: sinon.spy(),
     deselect: sinon.spy(),
+    deselectAll: sinon.spy(),
     setDetailsVisible: sinon.spy(),
+    setRequestedRange: sinon.spy(),
     setParentRequestedRanges: sinon.spy()
   };
 
   gridConnector.initLazy(grid);
 
   grid.$connector.reset();
+}
+
+/**
+ * Initializes the grid selection column.
+ */
+export function initSelectionColumn(grid: FlowGrid, column: FlowGridSelectionColumn) {
+  column.$server = grid.$server;
 }
 
 /**
@@ -87,9 +114,9 @@ export function getHeaderCellContent(column: GridColumn): HTMLElement {
 }
 
 /**
- * Returns the content of a cell in the grid body.
+ * Returns a cell in the grid body.
  */
-export function getBodyCellContent(grid: Grid, rowIndex: number, columnIndex: number): HTMLElement | null {
+export function getBodyCell(grid: Grid, rowIndex: number, columnIndex: number): HTMLElement | null {
   const items = grid.shadowRoot!.querySelector(`#items`)!;
 
   const row = [...items.children].find((row) => (row as any).index === rowIndex);
@@ -101,9 +128,16 @@ export function getBodyCellContent(grid: Grid, rowIndex: number, columnIndex: nu
     const aOrder = parseInt(getComputedStyle(a).order) || 0;
     const bOrder = parseInt(getComputedStyle(b).order) || 0;
     return aOrder - bOrder;
-  });
+  }).map(cell => cell as HTMLElement);
 
-  return (cellsInVisualOrder[columnIndex] as any)._content;
+  return cellsInVisualOrder[columnIndex];
+}
+
+/**
+ * Returns the content of a cell in the grid body.
+ */
+export function getBodyCellContent(grid: Grid, rowIndex: number, columnIndex: number): HTMLElement | null {
+  return (getBodyCell(grid, rowIndex, columnIndex) as any)._content;
 }
 
 /**

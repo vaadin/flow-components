@@ -1,8 +1,12 @@
 package com.vaadin.flow.component.map.configuration.style;
 
+import com.vaadin.flow.component.map.configuration.AbstractConfigurationObject;
+import com.vaadin.flow.component.map.configuration.ConfigurationTestUtil;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Set;
 
 public class TextStyleTest {
     private TextStyle textStyle;
@@ -10,6 +14,15 @@ public class TextStyleTest {
     @Before
     public void setup() {
         textStyle = new TextStyle();
+    }
+
+    @Test
+    public void defaults() throws NoSuchFieldException, IllegalAccessException {
+        // Verify initial fill and stroke are added as children
+        Set<AbstractConfigurationObject> children = ConfigurationTestUtil
+                .getChildren(textStyle);
+        Assert.assertTrue(children.contains(textStyle.getFill()));
+        Assert.assertTrue(children.contains(textStyle.getStroke()));
     }
 
     @Test

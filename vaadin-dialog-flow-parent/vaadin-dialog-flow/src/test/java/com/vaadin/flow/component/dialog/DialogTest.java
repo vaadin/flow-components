@@ -303,4 +303,26 @@ public class DialogTest {
 
         Assert.assertEquals(1, listenerInvokedCount.get());
     }
+
+    @Test
+    public void createDialogWithTitle() {
+        String title = "Title";
+
+        var dialog = new Dialog(title);
+        Assert.assertEquals(title, dialog.getHeaderTitle());
+
+        Span content = new Span("content");
+        Span secondContent = new Span("second_content");
+        Span thirdContent = new Span("third_content");
+
+        var dialogWithComponents = new Dialog(title, content, secondContent,
+                thirdContent);
+        Assert.assertEquals(title, dialogWithComponents.getHeaderTitle());
+        Assert.assertEquals(content,
+                dialogWithComponents.getChildren().toList().get(0));
+        Assert.assertEquals(secondContent,
+                dialogWithComponents.getChildren().toList().get(1));
+        Assert.assertEquals(thirdContent,
+                dialogWithComponents.getChildren().toList().get(2));
+    }
 }

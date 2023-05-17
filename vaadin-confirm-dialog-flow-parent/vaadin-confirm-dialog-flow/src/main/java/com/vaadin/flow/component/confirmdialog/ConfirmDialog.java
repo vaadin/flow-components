@@ -37,6 +37,8 @@ import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.router.NavigationTrigger;
 import com.vaadin.flow.shared.Registration;
 
+import java.util.Optional;
+
 /**
  * Confirm Dialog is a modal Dialog used to confirm user actions.
  * <p>
@@ -59,9 +61,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-confirm-dialog")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha8")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha10")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/confirm-dialog", version = "24.1.0-alpha8")
+@NpmPackage(value = "@vaadin/confirm-dialog", version = "24.1.0-alpha10")
 @JsModule("@vaadin/confirm-dialog/src/vaadin-confirm-dialog.js")
 public class ConfirmDialog extends Component
         implements HasSize, HasStyle, HasOrderedComponents {
@@ -177,6 +179,39 @@ public class ConfirmDialog extends Component
     public Style getStyle() {
         throw new UnsupportedOperationException(
                 "ConfirmDialog does not support adding styles to overlay");
+    }
+
+    /**
+     * Sets the `aria-describedby` attribute of the dialog overlay.
+     * <p>
+     * By default, all elements inside the message area are linked through the
+     * `aria-describedby` attribute. However, there are cases where this can
+     * confuse screen reader users (e.g. the dialog may present a password
+     * confirmation form). For these cases, it's better to associate only the
+     * elements that will help describe the confirmation dialog through this
+     * API.
+     * <p>
+     * To restore the generated value, pass `null` as argument
+     *
+     * @param describedBy
+     *            the attribute value
+     */
+    public void setAriaDescribedBy(String describedBy) {
+        getElement().setProperty("accessibleDescriptionRef", describedBy);
+    }
+
+    /**
+     * Gets the `aria-describedby` attribute of the dialog overlay.
+     * <p>
+     * Note that this will only return a value if
+     * {@link #setAriaDescribedBy(String)} was called before.
+     *
+     * @return an optional aria-describedby of the dialog overlay, or an empty
+     *         optional if no aria-describedby has been set
+     */
+    public Optional<String> getAriaDescribedBy() {
+        return Optional.ofNullable(
+                getElement().getProperty("accessibleDescriptionRef"));
     }
 
     private boolean autoAddedToTheUi;

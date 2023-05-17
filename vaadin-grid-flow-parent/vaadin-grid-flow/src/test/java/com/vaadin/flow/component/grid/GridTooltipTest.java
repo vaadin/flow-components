@@ -23,6 +23,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.function.SerializableFunction;
 
 /**
  * Unit tests for Grid tooltip.
@@ -45,35 +46,53 @@ public class GridTooltipTest {
     }
 
     @Test
-    public void setTooltipGenerator_hasTooltipElement() {
+    public void setColumnTooltipGenerator_hasTooltipElement() {
         grid.addColumn(item -> item).setTooltipGenerator(item -> item);
         Assert.assertTrue(getTooltipElement(grid).isPresent());
     }
 
     @Test
-    public void setTooltipGenerator_hasFluidAPI() {
+    public void setGridTooltipGenerator_hasTooltipElement() {
+        grid.setTooltipGenerator(item -> item);
+        Assert.assertTrue(getTooltipElement(grid).isPresent());
+    }
+
+    @Test
+    public void setColumnTooltipGenerator_hasFluidAPI() {
         var column = grid.addColumn(item -> item)
                 .setTooltipGenerator(item -> item).setAutoWidth(true);
         Assert.assertTrue(column.isAutoWidth());
     }
 
     @Test
-    public void setTooltip_tooltipHasSlot() {
+    public void setColumnTooltip_tooltipHasSlot() {
         grid.addColumn(item -> item).setTooltipGenerator(item -> item);
         Assert.assertEquals("tooltip",
                 getTooltipElement(grid).get().getAttribute("slot"));
     }
 
     @Test
-    public void setAnotherTooltipGenerator_hasOneTooltipElement() {
+    public void setGridTooltip_tooltipHasSlot() {
+        grid.setTooltipGenerator(item -> item);
+        Assert.assertEquals("tooltip",
+                getTooltipElement(grid).get().getAttribute("slot"));
+    }
+
+    @Test
+    public void setAnotherColumnTooltipGenerator_hasOneTooltipElement() {
         grid.addColumn(item -> item).setTooltipGenerator(item -> item);
         grid.addColumn(item -> item).setTooltipGenerator(item -> item);
         Assert.assertEquals(1, getTooltipElements(grid).count());
     }
 
     @Test(expected = NullPointerException.class)
-    public void setNullTooltipGenerator_throws() {
+    public void setNullColumnTooltipGenerator_throws() {
         grid.addColumn(item -> item).setTooltipGenerator(null);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void setNullGridTooltipGenerator_throws() {
+        grid.setTooltipGenerator(null);
     }
 
     private Optional<Element> getTooltipElement(Grid<?> grid) {

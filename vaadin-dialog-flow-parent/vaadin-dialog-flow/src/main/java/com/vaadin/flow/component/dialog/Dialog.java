@@ -76,9 +76,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-dialog")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha8")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha10")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/dialog", version = "24.1.0-alpha8")
+@NpmPackage(value = "@vaadin/dialog", version = "24.1.0-alpha10")
 @JsModule("@vaadin/dialog/src/vaadin-dialog.js")
 @JsModule("./flow-component-renderer.js")
 public class Dialog extends Component implements HasComponents, HasSize,
@@ -335,6 +335,30 @@ public class Dialog extends Component implements HasComponents, HasSize,
     public Dialog(Component... components) {
         this();
         add(components);
+    }
+
+    /**
+     * Creates a dialog with given title.
+     *
+     * @param title
+     *            the title of the component
+     */
+    public Dialog(String title) {
+        this();
+        setHeaderTitle(title);
+    }
+
+    /**
+     * Creates a dialog with given title and components inside.
+     *
+     * @param title
+     *            the title of the component
+     * @param components
+     *            the components inside the dialog
+     */
+    public Dialog(String title, Component... components) {
+        this(components);
+        setHeaderTitle(title);
     }
 
     /**
