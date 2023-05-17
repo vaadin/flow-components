@@ -91,7 +91,8 @@ public class CheckboxGroup<T>
         extends AbstractSinglePropertyField<CheckboxGroup<T>, Set<T>>
         implements HasAriaLabel, HasClientValidation,
         HasDataView<T, Void, CheckboxGroupDataView<T>>, HasHelper,
-        HasItemComponents<T>, InputField<AbstractField.ComponentValueChangeEvent<CheckboxGroup<T>, Set<T>>, Set<T>>,
+        HasItemComponents<T>,
+        InputField<AbstractField.ComponentValueChangeEvent<CheckboxGroup<T>, Set<T>>, Set<T>>,
         HasListDataView<T, CheckboxGroupListDataView<T>>,
         HasThemeVariant<CheckboxGroupVariant>, HasValidationProperties,
         HasValidator<Set<T>>, MultiSelect<CheckboxGroup<T>, T> {

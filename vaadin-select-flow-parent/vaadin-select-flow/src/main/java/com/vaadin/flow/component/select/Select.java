@@ -91,9 +91,11 @@ import java.util.stream.Stream;
 public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
         implements Focusable<Select<T>>, HasAriaLabel, HasClientValidation,
         HasDataView<T, Void, SelectDataView<T>>, HasItemComponents<T>,
-        HasHelper, InputField<AbstractField.ComponentValueChangeEvent<Select<T>, T>, T>, HasListDataView<T, SelectListDataView<T>>,
-        HasOverlayClassName, HasPrefix, HasThemeVariant<SelectVariant>,
-        HasValidationProperties, HasValidator<T>, SingleSelect<Select<T>, T> {
+        HasHelper,
+        InputField<AbstractField.ComponentValueChangeEvent<Select<T>, T>, T>,
+        HasListDataView<T, SelectListDataView<T>>, HasOverlayClassName,
+        HasPrefix, HasThemeVariant<SelectVariant>, HasValidationProperties,
+        HasValidator<T>, SingleSelect<Select<T>, T> {
 
     public static final String LABEL_ATTRIBUTE = "label";
 

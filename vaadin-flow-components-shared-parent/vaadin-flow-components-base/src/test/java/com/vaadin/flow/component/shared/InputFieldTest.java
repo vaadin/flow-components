@@ -584,7 +584,8 @@ public class InputFieldTest {
         }
 
         @Override
-        public Registration addValueChangeListener(ValueChangeListener listener) {
+        public Registration addValueChangeListener(
+                ValueChangeListener listener) {
             return null;
         }
 
@@ -599,7 +600,8 @@ public class InputFieldTest {
         }
 
         @Override
-        public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
+        public void setRequiredIndicatorVisible(
+                boolean requiredIndicatorVisible) {
 
         }
 

@@ -120,7 +120,8 @@ class DateTimePickerTimePicker
 public class DateTimePicker extends
         AbstractSinglePropertyField<DateTimePicker, LocalDateTime> implements
         Focusable<DateTimePicker>, HasAutoOpen, HasClientValidation, HasHelper,
-        InputField<AbstractField.ComponentValueChangeEvent<DateTimePicker, LocalDateTime>, LocalDateTime>, HasOverlayClassName, HasThemeVariant<DateTimePickerVariant>,
+        InputField<AbstractField.ComponentValueChangeEvent<DateTimePicker, LocalDateTime>, LocalDateTime>,
+        HasOverlayClassName, HasThemeVariant<DateTimePickerVariant>,
         HasValidationProperties, HasValidator<LocalDateTime> {
 
     private final DateTimePickerDatePicker datePicker = new DateTimePickerDatePicker();

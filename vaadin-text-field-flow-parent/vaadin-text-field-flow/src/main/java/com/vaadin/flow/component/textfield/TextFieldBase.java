@@ -52,7 +52,8 @@ public abstract class TextFieldBase<TComponent extends TextFieldBase<TComponent,
         HasAutocapitalize, HasAutocomplete, HasAutocorrect, HasClearButton,
         HasClientValidation, HasHelper, HasPrefixAndSuffix,
         HasValidationProperties, HasValidator<TValue>, HasValueChangeMode,
-        InputNotifier, KeyNotifier, InputField<AbstractField.ComponentValueChangeEvent<TComponent, TValue>, TValue> {
+        InputNotifier, KeyNotifier,
+        InputField<AbstractField.ComponentValueChangeEvent<TComponent, TValue>, TValue> {
 
     private ValueChangeMode currentMode;
 
