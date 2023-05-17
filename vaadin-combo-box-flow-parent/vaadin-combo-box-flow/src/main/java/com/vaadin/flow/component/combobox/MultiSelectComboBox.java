@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.combobox;
 
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
@@ -22,6 +23,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.IdentifierProviderChangeEvent;
@@ -79,7 +81,8 @@ import java.util.Set;
 public class MultiSelectComboBox<TItem>
         extends ComboBoxBase<MultiSelectComboBox<TItem>, TItem, Set<TItem>>
         implements MultiSelect<MultiSelectComboBox<TItem>, TItem>,
-        HasThemeVariant<MultiSelectComboBoxVariant> {
+        HasThemeVariant<MultiSelectComboBoxVariant>,
+        InputField<AbstractField.ComponentValueChangeEvent<MultiSelectComboBox<TItem>, Set<TItem>>, Set<TItem>> {
 
     private final MultiSelectComboBoxSelectionModel<TItem> selectionModel;
     private MultiSelectComboBoxI18n i18n;

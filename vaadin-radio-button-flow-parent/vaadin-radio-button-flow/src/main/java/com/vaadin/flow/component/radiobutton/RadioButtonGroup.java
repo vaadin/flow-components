@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.radiobutton;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
@@ -22,6 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
@@ -79,7 +81,8 @@ public class RadioButtonGroup<T>
         extends AbstractSinglePropertyField<RadioButtonGroup<T>, T>
         implements HasAriaLabel, HasClientValidation,
         HasDataView<T, Void, RadioButtonGroupDataView<T>>, HasHelper,
-        HasListDataView<T, RadioButtonGroupListDataView<T>>, InputField,
+        HasListDataView<T, RadioButtonGroupListDataView<T>>,
+        InputField<AbstractField.ComponentValueChangeEvent<RadioButtonGroup<T>, T>, T>,
         HasThemeVariant<RadioGroupVariant>, HasValidationProperties,
         HasValidator<T>, SingleSelect<RadioButtonGroup<T>, T> {
 

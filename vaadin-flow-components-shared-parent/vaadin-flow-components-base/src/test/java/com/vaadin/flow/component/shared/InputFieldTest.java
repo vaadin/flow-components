@@ -17,6 +17,7 @@ package com.vaadin.flow.component.shared;
 
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.shared.Registration;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -572,5 +573,39 @@ public class InputFieldTest {
     @Tag("test")
     private static class TestComponent extends Component
             implements InputField, HasComponents {
+        @Override
+        public void setValue(Object value) {
+
+        }
+
+        @Override
+        public Object getValue() {
+            return null;
+        }
+
+        @Override
+        public Registration addValueChangeListener(ValueChangeListener listener) {
+            return null;
+        }
+
+        @Override
+        public void setReadOnly(boolean readOnly) {
+
+        }
+
+        @Override
+        public boolean isReadOnly() {
+            return false;
+        }
+
+        @Override
+        public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
+
+        }
+
+        @Override
+        public boolean isRequiredIndicatorVisible() {
+            return false;
+        }
     }
 }

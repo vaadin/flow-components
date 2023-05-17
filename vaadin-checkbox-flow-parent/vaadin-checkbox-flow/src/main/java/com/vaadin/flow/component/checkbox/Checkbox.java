@@ -51,7 +51,7 @@ import java.util.Optional;
 @JsModule("@vaadin/checkbox/src/vaadin-checkbox.js")
 public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
         implements ClickNotifier<Checkbox>, Focusable<Checkbox>, HasAriaLabel,
-        InputField {
+        InputField<AbstractField.ComponentValueChangeEvent<Checkbox, Boolean>, Boolean> {
 
     private final Label labelElement;
 

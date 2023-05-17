@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.combobox;
 
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClientCallable;
@@ -66,6 +67,7 @@ import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.shared.Registration;
 
+import java.time.LocalTime;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Objects;
@@ -87,7 +89,8 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
         implements Focusable<TComponent>, HasAllowedCharPattern, HasAriaLabel,
         HasAutoOpen, HasClearButton, HasClientValidation, HasOverlayClassName,
         HasDataView<TItem, String, ComboBoxDataView<TItem>>, HasHelper,
-        InputField, HasLazyDataView<TItem, String, ComboBoxLazyDataView<TItem>>,
+        InputField<AbstractField.ComponentValueChangeEvent<TComponent, TValue>, TValue>,
+        HasLazyDataView<TItem, String, ComboBoxLazyDataView<TItem>>,
         HasListDataView<TItem, ComboBoxListDataView<TItem>>, HasTheme,
         HasValidationProperties, HasValidator<TValue> {
 

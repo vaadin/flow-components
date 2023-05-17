@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.textfield;
 
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.CompositionNotifier;
@@ -51,7 +52,7 @@ public abstract class TextFieldBase<TComponent extends TextFieldBase<TComponent,
         HasAutocapitalize, HasAutocomplete, HasAutocorrect, HasClearButton,
         HasClientValidation, HasHelper, HasPrefixAndSuffix,
         HasValidationProperties, HasValidator<TValue>, HasValueChangeMode,
-        InputNotifier, KeyNotifier, InputField {
+        InputNotifier, KeyNotifier, InputField<AbstractField.ComponentValueChangeEvent<TComponent, TValue>, TValue> {
 
     private ValueChangeMode currentMode;
 

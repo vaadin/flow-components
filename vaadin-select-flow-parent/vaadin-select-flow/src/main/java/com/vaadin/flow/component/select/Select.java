@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.select;
 
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
@@ -64,6 +65,7 @@ import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
@@ -89,7 +91,7 @@ import java.util.stream.Stream;
 public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
         implements Focusable<Select<T>>, HasAriaLabel, HasClientValidation,
         HasDataView<T, Void, SelectDataView<T>>, HasItemComponents<T>,
-        HasHelper, InputField, HasListDataView<T, SelectListDataView<T>>,
+        HasHelper, InputField<AbstractField.ComponentValueChangeEvent<Select<T>, T>, T>, HasListDataView<T, SelectListDataView<T>>,
         HasOverlayClassName, HasPrefix, HasThemeVariant<SelectVariant>,
         HasValidationProperties, HasValidator<T>, SingleSelect<Select<T>, T> {
 

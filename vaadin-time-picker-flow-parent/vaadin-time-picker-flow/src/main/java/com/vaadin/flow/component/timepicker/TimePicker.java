@@ -23,6 +23,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEvent;
@@ -74,7 +75,8 @@ import com.vaadin.flow.shared.Registration;
 public class TimePicker
         extends AbstractSinglePropertyField<TimePicker, LocalTime>
         implements Focusable<TimePicker>, HasAllowedCharPattern, HasAriaLabel,
-        HasAutoOpen, HasClearButton, HasClientValidation, HasHelper, InputField,
+        HasAutoOpen, HasClearButton, HasClientValidation, HasHelper,
+        InputField<AbstractField.ComponentValueChangeEvent<TimePicker, LocalTime>, LocalTime>,
         HasPrefix, HasOverlayClassName, HasThemeVariant<TimePickerVariant>,
         HasValidationProperties, HasValidator<LocalTime> {
 
