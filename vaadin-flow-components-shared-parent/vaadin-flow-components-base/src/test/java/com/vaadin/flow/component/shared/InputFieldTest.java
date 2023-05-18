@@ -583,21 +583,23 @@ public class InputFieldTest {
         TestComponent component = new TestComponent();
         component.setValue("TestValue");
         component.clear();
-        Assert.assertEquals(component.getValue(),"");
+        Assert.assertEquals(component.getValue(), "");
     }
 
     @Test
     public void setReadOnly() {
         TestComponent component = new TestComponent();
         component.setReadOnly(true);
-        Assert.assertEquals(component.getElement().getProperty("readonly"), "true");
+        Assert.assertEquals(component.getElement().getProperty("readonly"),
+                "true");
     }
 
     @Test
     public void setRequiredIndicatorVisible() {
         TestComponent component = new TestComponent();
         component.setRequiredIndicatorVisible(true);
-        Assert.assertEquals(component.getElement().getProperty("required"), "true");
+        Assert.assertEquals(component.getElement().getProperty("required"),
+                "true");
     }
 
     @Test
@@ -610,8 +612,10 @@ public class InputFieldTest {
     }
 
     @Tag("test")
-    private static class TestComponent extends AbstractSinglePropertyField<TestComponent, String>
-            implements InputField<AbstractField.ComponentValueChangeEvent<TestComponent, String>, String>, HasComponents {
+    private static class TestComponent extends
+            AbstractSinglePropertyField<TestComponent, String> implements
+            InputField<AbstractField.ComponentValueChangeEvent<TestComponent, String>, String>,
+            HasComponents {
 
         private static final SerializableFunction<String, String> PARSER = valueFromClient -> {
             return valueFromClient;
