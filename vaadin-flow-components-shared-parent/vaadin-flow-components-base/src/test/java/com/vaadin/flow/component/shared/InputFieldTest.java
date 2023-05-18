@@ -17,7 +17,7 @@ package com.vaadin.flow.component.shared;
 
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.function.SerializableFunction;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
@@ -570,44 +571,60 @@ public class InputFieldTest {
         Assert.assertEquals(expected, actual);
     }
 
+    @Test
+    public void setValue_getValue() {
+        TestComponent component = new TestComponent();
+        component.setValue("TestValue");
+        Assert.assertEquals(component.getValue(), "TestValue");
+    }
+
+    @Test
+    public void clear() {
+        TestComponent component = new TestComponent();
+        component.setValue("TestValue");
+        component.clear();
+        Assert.assertEquals(component.getValue(),"");
+    }
+
+    @Test
+    public void setReadOnly() {
+        TestComponent component = new TestComponent();
+        component.setReadOnly(true);
+        Assert.assertEquals(component.getElement().getProperty("readonly"), "true");
+    }
+
+    @Test
+    public void setRequiredIndicatorVisible() {
+        TestComponent component = new TestComponent();
+        component.setRequiredIndicatorVisible(true);
+        Assert.assertEquals(component.getElement().getProperty("required"), "true");
+    }
+
+    @Test
+    public void addValueChangeListener() {
+        TestComponent component = new TestComponent();
+        AtomicReference<String> eventReceived = new AtomicReference<>("");
+        component.addValueChangeListener(event -> eventReceived.set("OK"));
+        component.setValue("New Value");
+        Assert.assertEquals(eventReceived.get(), "OK");
+    }
+
     @Tag("test")
-    private static class TestComponent extends Component
-            implements InputField, HasComponents {
-        @Override
-        public void setValue(Object value) {
+    private static class TestComponent extends AbstractSinglePropertyField<TestComponent, String>
+            implements InputField<AbstractField.ComponentValueChangeEvent<TestComponent, String>, String>, HasComponents {
+
+        private static final SerializableFunction<String, String> PARSER = valueFromClient -> {
+            return valueFromClient;
+        };
+
+        private static final SerializableFunction<String, String> FORMATTER = valueFromModel -> {
+            return valueFromModel;
+        };
+
+        public TestComponent() {
+            super("value", "", String.class, PARSER, FORMATTER);
 
         }
 
-        @Override
-        public Object getValue() {
-            return null;
-        }
-
-        @Override
-        public Registration addValueChangeListener(
-                ValueChangeListener listener) {
-            return null;
-        }
-
-        @Override
-        public void setReadOnly(boolean readOnly) {
-
-        }
-
-        @Override
-        public boolean isReadOnly() {
-            return false;
-        }
-
-        @Override
-        public void setRequiredIndicatorVisible(
-                boolean requiredIndicatorVisible) {
-
-        }
-
-        @Override
-        public boolean isRequiredIndicatorVisible() {
-            return false;
-        }
     }
 }
