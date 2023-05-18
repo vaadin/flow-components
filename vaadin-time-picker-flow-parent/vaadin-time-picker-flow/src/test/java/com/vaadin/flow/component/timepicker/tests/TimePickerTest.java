@@ -25,6 +25,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.vaadin.flow.component.HasAriaLabel;
+import com.vaadin.flow.component.shared.InputField;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -328,6 +329,12 @@ public class TimePickerTest {
         timePicker.setInvalid(false);
 
         Assert.assertEquals(1, listenerInvokedCount.get());
+    }
+
+    @Test
+    public void implementsInputField() {
+        TimePicker field = new TimePicker();
+        Assert.assertTrue(field instanceof InputField);
     }
 
     @Tag("div")

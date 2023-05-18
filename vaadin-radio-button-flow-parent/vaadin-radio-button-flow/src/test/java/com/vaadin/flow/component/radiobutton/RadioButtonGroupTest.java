@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.HasAriaLabel;
+import com.vaadin.flow.component.shared.InputField;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -485,5 +486,11 @@ public class RadioButtonGroupTest {
 
         group.setAriaLabelledBy(null);
         Assert.assertTrue(group.getAriaLabelledBy().isEmpty());
+    }
+
+    @Test
+    public void implementsInputField() {
+        RadioButtonGroup<String> field = new RadioButtonGroup<String>();
+        Assert.assertTrue(field instanceof InputField);
     }
 }

@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.vaadin.flow.component.HasAriaLabel;
+import com.vaadin.flow.component.shared.InputField;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -362,6 +363,12 @@ public class DatePickerTest {
         picker.setInvalid(false);
 
         Assert.assertEquals(1, listenerInvokedCount.get());
+    }
+
+    @Test
+    public void implementsInputField() {
+        var field = new DatePicker();
+        Assert.assertTrue(field instanceof InputField);
     }
 
     @Tag("div")

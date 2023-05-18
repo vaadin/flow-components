@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.HasAriaLabel;
+import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import org.hamcrest.collection.IsEmptyCollection;
 import org.junit.Assert;
@@ -644,6 +645,12 @@ public class CheckboxGroupTest {
 
         group.setAriaLabelledBy(null);
         Assert.assertTrue(group.getAriaLabelledBy().isEmpty());
+    }
+
+    @Test
+    public void implementsInputField() {
+        CheckboxGroup<String> field = new CheckboxGroup<String>();
+        Assert.assertTrue(field instanceof InputField);
     }
 
     /**

@@ -18,8 +18,10 @@ package com.vaadin.flow.component.textfield.tests;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextAreaVariant;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.dom.ThemeList;
 import org.junit.Assert;
 import org.junit.Rule;
@@ -168,5 +170,11 @@ public class TextAreaTest {
 
         field.setAriaLabelledBy(null);
         Assert.assertTrue(field.getAriaLabelledBy().isEmpty());
+    }
+
+    @Test
+    public void implementsInputField() {
+        TextArea field = new TextArea();
+        Assert.assertTrue(field instanceof InputField);
     }
 }

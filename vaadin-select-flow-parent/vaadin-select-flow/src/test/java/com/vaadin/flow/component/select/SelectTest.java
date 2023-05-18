@@ -11,6 +11,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.shared.InputField;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -877,6 +878,11 @@ public class SelectTest {
         select.setInvalid(false);
 
         Assert.assertEquals(1, listenerInvokedCount.get());
+    }
+
+    @Test
+    public void implementsInputField() {
+        Assert.assertTrue(select instanceof InputField);
     }
 
     private void validateItem(int index, String textContent, String label,

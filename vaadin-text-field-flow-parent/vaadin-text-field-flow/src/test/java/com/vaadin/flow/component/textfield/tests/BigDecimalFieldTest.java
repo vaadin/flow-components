@@ -17,7 +17,9 @@ package com.vaadin.flow.component.textfield.tests;
 
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.textfield.BigDecimalField;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.flow.dom.ThemeList;
 import org.junit.Assert;
@@ -152,5 +154,11 @@ public class BigDecimalFieldTest extends TextFieldTest {
 
         field.setAriaLabelledBy(null);
         Assert.assertTrue(field.getAriaLabelledBy().isEmpty());
+    }
+
+    @Test
+    public void implementsInputField() {
+        BigDecimalField field = new BigDecimalField();
+        Assert.assertTrue(field instanceof InputField);
     }
 }
