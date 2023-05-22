@@ -322,7 +322,7 @@ public class AppLayout extends Component implements RouterLayout, HasStyle {
         }
     }
 
-    private void add(Component component) {
+    public void add(Component component) {
         getElement().appendChild(component.getElement());
     }
 
