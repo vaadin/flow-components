@@ -152,6 +152,7 @@ public class CheckboxUnitTest {
     @Test
     public void implementsInputField() {
         Checkbox field = new Checkbox();
-        Assert.assertTrue(field instanceof InputField<AbstractField.ComponentValueChangeEvent<Checkbox, Boolean>, Boolean>);
+        Assert.assertTrue(
+                field instanceof InputField<AbstractField.ComponentValueChangeEvent<Checkbox, Boolean>, Boolean>);
     }
 }

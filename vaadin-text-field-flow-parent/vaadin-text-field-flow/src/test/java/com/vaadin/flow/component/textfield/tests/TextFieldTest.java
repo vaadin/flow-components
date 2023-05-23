@@ -164,6 +164,7 @@ public class TextFieldTest {
     @Test
     public void implementsInputField() {
         TextField field = new TextField();
-        Assert.assertTrue(field instanceof InputField<AbstractField.ComponentValueChangeEvent<TextField, String>, String>);
+        Assert.assertTrue(
+                field instanceof InputField<AbstractField.ComponentValueChangeEvent<TextField, String>, String>);
     }
 }

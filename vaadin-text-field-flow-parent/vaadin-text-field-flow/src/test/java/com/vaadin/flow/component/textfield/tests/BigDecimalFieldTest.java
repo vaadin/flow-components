@@ -160,6 +160,7 @@ public class BigDecimalFieldTest extends TextFieldTest {
     @Override
     public void implementsInputField() {
         BigDecimalField field = new BigDecimalField();
-        Assert.assertTrue(field instanceof InputField<AbstractField.ComponentValueChangeEvent<BigDecimalField, BigDecimal>, BigDecimal>);
+        Assert.assertTrue(
+                field instanceof InputField<AbstractField.ComponentValueChangeEvent<BigDecimalField, BigDecimal>, BigDecimal>);
     }
 }

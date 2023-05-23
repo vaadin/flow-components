@@ -220,6 +220,7 @@ public class IntegerFieldTest extends TextFieldTest {
     @Override
     public void implementsInputField() {
         IntegerField field = new IntegerField();
-        Assert.assertTrue(field instanceof InputField<AbstractField.ComponentValueChangeEvent<IntegerField, Integer>, Integer>);
+        Assert.assertTrue(
+                field instanceof InputField<AbstractField.ComponentValueChangeEvent<IntegerField, Integer>, Integer>);
     }
 }

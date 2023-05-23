@@ -175,6 +175,7 @@ public class TextAreaTest {
     @Test
     public void implementsInputField() {
         TextArea field = new TextArea();
-        Assert.assertTrue(field instanceof InputField<AbstractField.ComponentValueChangeEvent<TextArea, String>, String>);
+        Assert.assertTrue(
+                field instanceof InputField<AbstractField.ComponentValueChangeEvent<TextArea, String>, String>);
     }
 }

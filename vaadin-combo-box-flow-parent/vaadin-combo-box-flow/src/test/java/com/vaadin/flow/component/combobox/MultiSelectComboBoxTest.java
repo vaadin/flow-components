@@ -266,6 +266,7 @@ public class MultiSelectComboBoxTest extends ComboBoxBaseTest {
     @Test
     public void implementsInputField() {
         MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
-        Assert.assertTrue(comboBox instanceof InputField<AbstractField.ComponentValueChangeEvent<MultiSelectComboBox<String>, Set<String>>, Set<String>>);
+        Assert.assertTrue(
+                comboBox instanceof InputField<AbstractField.ComponentValueChangeEvent<MultiSelectComboBox<String>, Set<String>>, Set<String>>);
     }
 }

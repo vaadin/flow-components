@@ -369,7 +369,8 @@ public class DatePickerTest {
     @Test
     public void implementsInputField() {
         var field = new DatePicker();
-        Assert.assertTrue(field instanceof InputField<AbstractField.ComponentValueChangeEvent<DatePicker, LocalDate>, LocalDate>);
+        Assert.assertTrue(
+                field instanceof InputField<AbstractField.ComponentValueChangeEvent<DatePicker, LocalDate>, LocalDate>);
     }
 
     @Tag("div")

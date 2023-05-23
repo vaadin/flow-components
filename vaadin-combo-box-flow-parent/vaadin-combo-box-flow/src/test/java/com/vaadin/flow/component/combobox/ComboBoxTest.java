@@ -206,7 +206,8 @@ public class ComboBoxTest extends ComboBoxBaseTest {
     @Test
     public void implementsInputField() {
         ComboBox<String> comboBox = new ComboBox<>();
-        Assert.assertTrue(comboBox instanceof InputField<AbstractField.ComponentValueChangeEvent<ComboBox<String>, String>, String>);
+        Assert.assertTrue(
+                comboBox instanceof InputField<AbstractField.ComponentValueChangeEvent<ComboBox<String>, String>, String>);
     }
 
     @Tag("div")

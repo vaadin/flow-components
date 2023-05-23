@@ -54,6 +54,7 @@ public class CustomFieldTest {
 
     @Test
     public void implementsInputField() {
-        Assert.assertTrue(systemUnderTest instanceof InputField<AbstractField.ComponentValueChangeEvent<CustomField<Object>, Object>, Object>);
+        Assert.assertTrue(
+                systemUnderTest instanceof InputField<AbstractField.ComponentValueChangeEvent<CustomField<Object>, Object>, Object>);
     }
 }

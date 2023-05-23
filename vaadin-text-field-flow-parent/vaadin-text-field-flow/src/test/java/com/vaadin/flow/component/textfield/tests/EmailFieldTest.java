@@ -132,6 +132,7 @@ public class EmailFieldTest {
     @Test
     public void implementsInputField() {
         EmailField field = new EmailField();
-        Assert.assertTrue(field instanceof InputField<AbstractField.ComponentValueChangeEvent<EmailField, String>, String>);
+        Assert.assertTrue(
+                field instanceof InputField<AbstractField.ComponentValueChangeEvent<EmailField, String>, String>);
     }
 }

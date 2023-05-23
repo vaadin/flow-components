@@ -265,6 +265,7 @@ public class DateTimePickerTest {
     @Test
     public void implementsInputField() {
         DateTimePicker field = new DateTimePicker();
-        Assert.assertTrue(field instanceof InputField<AbstractField.ComponentValueChangeEvent<DateTimePicker, LocalDateTime>, LocalDateTime>);
+        Assert.assertTrue(
+                field instanceof InputField<AbstractField.ComponentValueChangeEvent<DateTimePicker, LocalDateTime>, LocalDateTime>);
     }
 }

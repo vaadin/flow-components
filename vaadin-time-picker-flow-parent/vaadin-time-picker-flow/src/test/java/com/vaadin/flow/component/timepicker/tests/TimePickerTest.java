@@ -335,7 +335,8 @@ public class TimePickerTest {
     @Test
     public void implementsInputField() {
         TimePicker field = new TimePicker();
-        Assert.assertTrue(field instanceof InputField<AbstractField.ComponentValueChangeEvent<TimePicker, LocalTime>, LocalTime>);
+        Assert.assertTrue(
+                field instanceof InputField<AbstractField.ComponentValueChangeEvent<TimePicker, LocalTime>, LocalTime>);
     }
 
     @Tag("div")

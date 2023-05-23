@@ -883,7 +883,8 @@ public class SelectTest {
 
     @Test
     public void implementsInputField() {
-        Assert.assertTrue(select instanceof InputField<AbstractField.ComponentValueChangeEvent<Select<String>, String>, String>);
+        Assert.assertTrue(
+                select instanceof InputField<AbstractField.ComponentValueChangeEvent<Select<String>, String>, String>);
     }
 
     private void validateItem(int index, String textContent, String label,

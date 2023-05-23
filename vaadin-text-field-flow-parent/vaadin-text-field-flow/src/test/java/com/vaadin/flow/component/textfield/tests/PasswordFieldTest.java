@@ -157,6 +157,7 @@ public class PasswordFieldTest {
     @Test
     public void implementsInputField() {
         PasswordField field = new PasswordField();
-        Assert.assertTrue(field instanceof InputField<AbstractField.ComponentValueChangeEvent<PasswordField, String>, String>);
+        Assert.assertTrue(
+                field instanceof InputField<AbstractField.ComponentValueChangeEvent<PasswordField, String>, String>);
     }
 }

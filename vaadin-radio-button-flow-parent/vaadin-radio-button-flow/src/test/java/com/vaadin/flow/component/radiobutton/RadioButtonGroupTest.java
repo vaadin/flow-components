@@ -492,6 +492,7 @@ public class RadioButtonGroupTest {
     @Test
     public void implementsInputField() {
         RadioButtonGroup<String> field = new RadioButtonGroup<String>();
-        Assert.assertTrue(field instanceof InputField<AbstractField.ComponentValueChangeEvent<RadioButtonGroup<String>, String>, String>);
+        Assert.assertTrue(
+                field instanceof InputField<AbstractField.ComponentValueChangeEvent<RadioButtonGroup<String>, String>, String>);
     }
 }

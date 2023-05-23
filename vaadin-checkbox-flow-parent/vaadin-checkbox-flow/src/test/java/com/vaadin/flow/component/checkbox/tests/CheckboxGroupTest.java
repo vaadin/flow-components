@@ -651,7 +651,8 @@ public class CheckboxGroupTest {
     @Test
     public void implementsInputField() {
         CheckboxGroup<String> field = new CheckboxGroup<String>();
-        Assert.assertTrue(field instanceof InputField<AbstractField.ComponentValueChangeEvent<CheckboxGroup<String>, Set<String>>, Set<String>>);
+        Assert.assertTrue(
+                field instanceof InputField<AbstractField.ComponentValueChangeEvent<CheckboxGroup<String>, Set<String>>, Set<String>>);
     }
 
     /**
