@@ -19,7 +19,6 @@ import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.textfield.PasswordField;
-import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.flow.dom.ThemeList;
 import org.junit.Assert;

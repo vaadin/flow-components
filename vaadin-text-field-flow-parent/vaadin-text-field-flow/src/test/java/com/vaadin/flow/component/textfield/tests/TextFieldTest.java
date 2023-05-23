@@ -16,11 +16,6 @@
 package com.vaadin.flow.component.textfield.tests;
 
 import com.vaadin.flow.component.HasAriaLabel;
-import com.vaadin.flow.component.HasEnabled;
-import com.vaadin.flow.component.HasLabel;
-import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.HasValueAndElement;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.InputField;
