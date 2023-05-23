@@ -51,23 +51,25 @@ public class SideNavIT extends AbstractComponentIT {
 
     @Test
     public void pageOpened_itemHierarchyRendered() {
-        Assert.assertEquals(2, sideNav.getItems().size());
-        Assert.assertEquals(3, sideNav.getItems().get(0).getItems().size());
-        Assert.assertEquals(2, sideNav.getItems().get(1).getItems().size());
+        Assert.assertEquals(2, sideNav.getItems(false).size());
+        Assert.assertEquals(3,
+                sideNav.getItems(false).get(0).getItems(false).size());
+        Assert.assertEquals(2,
+                sideNav.getItems(false).get(1).getItems(false).size());
     }
 
     @Test
     public void clickNonNavigableParent_childNodesDisplayed() {
         Assert.assertFalse(nonNavigableParent.isExpanded());
 
-        nonNavigableParent.navigate();
+        nonNavigableParent.click();
 
         Assert.assertTrue(nonNavigableParent.isExpanded());
     }
 
     @Test
     public void clickNavigableParent_urlChanged() {
-        navigableParent.navigate();
+        navigableParent.click();
 
         Assert.assertTrue(getDriver().getCurrentUrl()
                 .contains("side-nav-test-target-view"));
@@ -76,7 +78,7 @@ public class SideNavIT extends AbstractComponentIT {
     @Test
     public void clickChildOfNavigableParent_urlChanged() {
         navigableParent.clickExpandButton();
-        navigableParent.getItems().get(0).navigate();
+        navigableParent.getItems(false).get(0).click();
 
         Assert.assertTrue(getDriver().getCurrentUrl()
                 .contains("side-nav-test-target-view"));
