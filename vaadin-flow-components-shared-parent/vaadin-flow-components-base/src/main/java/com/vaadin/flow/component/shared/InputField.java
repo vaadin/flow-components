@@ -25,17 +25,29 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
- * Represents a common single interface for input fields {@link Component
- * components} based on an {@link HasElement element} that supports
- * {@link HasLabel label}, {@link HasStyle styles}, {@link HasTooltip tooltip},
- * {@link HasEnabled enabled status}, {@link HasSize size} and {@link HasValue
- * value} definition.
+ * A common interface for input fields that can be used to iterate over a
+ * collection of fields and set common properties.
+ * <p>
+ * The following interfaces are included:
+ * <ul>
+ * <li>{@link HasEnabled}</li>
+ * <li>{@link HasLabel}</li>
+ * <li>{@link HasStyle}</li>
+ * <li>{@link HasTooltip}</li>
+ * <li>{@link HasSize}</li>
+ * <li>{@link HasValue}</li>
+ * </ul>
+ *
+ * @param <E>
+ *            the type of the value change event fired by this instance
+ * @param <V>
+ *            the value type
  *
  * @author Vaadin Ltd
  * @since 24.1
  */
 public interface InputField<E extends HasValue.ValueChangeEvent<V>, V>
         extends HasEnabled, HasLabel, HasSize, HasStyle, HasTooltip,
-        HasValueAndElement<E, V> {
+        HasValue<E, V> {
 
 }

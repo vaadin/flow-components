@@ -81,8 +81,7 @@ import java.util.Set;
 public class MultiSelectComboBox<TItem>
         extends ComboBoxBase<MultiSelectComboBox<TItem>, TItem, Set<TItem>>
         implements MultiSelect<MultiSelectComboBox<TItem>, TItem>,
-        HasThemeVariant<MultiSelectComboBoxVariant>,
-        InputField<AbstractField.ComponentValueChangeEvent<MultiSelectComboBox<TItem>, Set<TItem>>, Set<TItem>> {
+        HasThemeVariant<MultiSelectComboBoxVariant> {
 
     private final MultiSelectComboBoxSelectionModel<TItem> selectionModel;
     private MultiSelectComboBoxI18n i18n;
