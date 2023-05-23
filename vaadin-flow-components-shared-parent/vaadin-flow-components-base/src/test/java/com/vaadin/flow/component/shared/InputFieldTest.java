@@ -53,7 +53,7 @@ public class InputFieldTest {
     }
 
     @Tag("test")
-    private static class TestComponent  extends
+    private static class TestComponent extends
             AbstractSinglePropertyField<TestComponent, String> implements
             InputField<AbstractField.ComponentValueChangeEvent<TestComponent, String>, String>,
             HasComponents {

@@ -46,8 +46,7 @@ import java.util.stream.Stream;
  * @author Vaadin Ltd
  * @since 24.1
  */
-public interface InputField<E extends HasValue.ValueChangeEvent<V>, V>
-        extends HasEnabled, HasLabel, HasSize, HasStyle, HasTooltip,
-        HasValue<E, V> {
+public interface InputField<E extends HasValue.ValueChangeEvent<V>, V> extends
+        HasEnabled, HasLabel, HasSize, HasStyle, HasTooltip, HasValue<E, V> {
 
 }
