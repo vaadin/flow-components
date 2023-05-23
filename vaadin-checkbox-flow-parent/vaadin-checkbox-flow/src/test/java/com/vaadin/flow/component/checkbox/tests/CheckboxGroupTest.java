@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.data.renderer.TextRenderer;
@@ -650,7 +651,7 @@ public class CheckboxGroupTest {
     @Test
     public void implementsInputField() {
         CheckboxGroup<String> field = new CheckboxGroup<String>();
-        Assert.assertTrue(field instanceof InputField);
+        Assert.assertTrue(field instanceof InputField<AbstractField.ComponentValueChangeEvent<CheckboxGroup<String>, Set<String>>, Set<String>>);
     }
 
     /**

@@ -1,5 +1,6 @@
 package com.vaadin.flow.component.customfield;
 
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.shared.InputField;
 import org.junit.Assert;
 import org.junit.Before;
@@ -53,6 +54,6 @@ public class CustomFieldTest {
 
     @Test
     public void implementsInputField() {
-        Assert.assertTrue(systemUnderTest instanceof InputField);
+        Assert.assertTrue(systemUnderTest instanceof InputField<AbstractField.ComponentValueChangeEvent<CustomField<Object>, Object>, Object>);
     }
 }

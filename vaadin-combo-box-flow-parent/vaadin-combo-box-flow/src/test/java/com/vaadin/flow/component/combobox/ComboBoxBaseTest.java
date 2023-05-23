@@ -23,7 +23,6 @@ import com.vaadin.flow.component.combobox.dataview.ComboBoxListDataView;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.component.shared.HasTooltip;
-import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.data.provider.AbstractDataProvider;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataCommunicatorTest;
@@ -366,12 +365,6 @@ public abstract class ComboBoxBaseTest {
 
         comboBox.setAriaLabelledBy(null);
         Assert.assertTrue(comboBox.getAriaLabelledBy().isEmpty());
-    }
-
-    @Test
-    public void implementsInputField() {
-        ComboBoxBase<?, String, ?> field = createComboBox(String.class);
-        Assert.assertTrue(field instanceof InputField);
     }
 
     private void fakeClientCommunication(UI ui) {

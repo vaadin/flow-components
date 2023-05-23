@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.InputField;
@@ -156,6 +157,6 @@ public class PasswordFieldTest {
     @Test
     public void implementsInputField() {
         PasswordField field = new PasswordField();
-        Assert.assertTrue(field instanceof InputField);
+        Assert.assertTrue(field instanceof InputField<AbstractField.ComponentValueChangeEvent<PasswordField, String>, String>);
     }
 }

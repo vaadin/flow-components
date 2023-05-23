@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasTooltip;
@@ -163,6 +164,6 @@ public class TextFieldTest {
     @Test
     public void implementsInputField() {
         TextField field = new TextField();
-        Assert.assertTrue(field instanceof InputField);
+        Assert.assertTrue(field instanceof InputField<AbstractField.ComponentValueChangeEvent<TextField, String>, String>);
     }
 }

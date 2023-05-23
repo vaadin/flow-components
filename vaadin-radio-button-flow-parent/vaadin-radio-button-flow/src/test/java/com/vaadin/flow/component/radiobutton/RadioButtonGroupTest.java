@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.shared.InputField;
 import org.junit.Assert;
@@ -491,6 +492,6 @@ public class RadioButtonGroupTest {
     @Test
     public void implementsInputField() {
         RadioButtonGroup<String> field = new RadioButtonGroup<String>();
-        Assert.assertTrue(field instanceof InputField);
+        Assert.assertTrue(field instanceof InputField<AbstractField.ComponentValueChangeEvent<RadioButtonGroup<String>, String>, String>);
     }
 }

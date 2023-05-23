@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.shared.InputField;
 import org.junit.Assert;
@@ -368,7 +369,7 @@ public class DatePickerTest {
     @Test
     public void implementsInputField() {
         var field = new DatePicker();
-        Assert.assertTrue(field instanceof InputField);
+        Assert.assertTrue(field instanceof InputField<AbstractField.ComponentValueChangeEvent<DatePicker, LocalDate>, LocalDate>);
     }
 
     @Tag("div")

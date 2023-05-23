@@ -15,11 +15,13 @@
  */
 package com.vaadin.flow.component.combobox;
 
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
@@ -199,6 +201,12 @@ public class ComboBoxTest extends ComboBoxBaseTest {
     public void setTextAsPrefix_throws() {
         ComboBox<String> comboBox = new ComboBox<>();
         comboBox.setPrefixComponent(new Text("Prefix"));
+    }
+
+    @Test
+    public void implementsInputField() {
+        ComboBox<String> comboBox = new ComboBox<>();
+        Assert.assertTrue(comboBox instanceof InputField<AbstractField.ComponentValueChangeEvent<ComboBox<String>, String>, String>);
     }
 
     @Tag("div")
