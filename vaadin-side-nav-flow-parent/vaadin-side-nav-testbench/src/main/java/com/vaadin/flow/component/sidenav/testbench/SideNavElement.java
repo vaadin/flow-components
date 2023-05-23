@@ -17,6 +17,7 @@ package com.vaadin.flow.component.sidenav.testbench;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -32,16 +33,6 @@ import com.vaadin.testbench.elementsbase.Element;
 @Element("vaadin-side-nav")
 public class SideNavElement extends TestBenchElement {
 
-    public List<SideNavItemElement> getItems() {
-        // get only the direct vaadin-side-nav-item of this vaadin-side-nav
-        return wrapElements(findElements(By.xpath("vaadin-side-nav-item")),
-                getCommandExecutor())
-                .stream()
-                .map(testBenchElement -> testBenchElement
-                        .wrap(SideNavItemElement.class))
-                .collect(Collectors.toList());
-    }
-
     public String getLabel() {
         return $("span").attributeContains("slot", "label").first().getText();
     }
@@ -56,4 +47,32 @@ public class SideNavElement extends TestBenchElement {
         executeScript("arguments[0].click();", element);
     }
 
+    public List<SideNavItemElement> getItems(boolean includeChildren) {
+        return getItemsStream(includeChildren).collect(Collectors.toList());
+    }
+
+    public SideNavItemElement getSelectedItem() {
+        return getItemsStream(true).filter(SideNavItemElement::isActive)
+                .findAny().orElse(null);
+    }
+
+    public SideNavItemElement getItemByLabel(String label) {
+        return getItemsStream(true)
+                .filter(item -> label.equals(item.getLabel())).findAny()
+                .orElse(null);
+    }
+
+    public SideNavItemElement getItemByPath(String path) {
+        return getItemsStream(true).filter(item -> path.equals(item.getPath()))
+                .findAny().orElse(null);
+    }
+
+    private Stream<SideNavItemElement> getItemsStream(boolean includeChildren) {
+        String xpathExp = includeChildren ? ".//vaadin-side-nav-item"
+                : "vaadin-side-nav-item";
+        return wrapElements(findElements(By.xpath(xpathExp)),
+                getCommandExecutor()).stream()
+                .map(testBenchElement -> testBenchElement
+                        .wrap(SideNavItemElement.class));
+    }
 }
