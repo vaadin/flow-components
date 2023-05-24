@@ -41,7 +41,7 @@ public class SideNavElement extends TestBenchElement {
         return hasAttribute("collapsible");
     }
 
-    public void clickExpandButton() {
+    public void toggle() {
         final WebElement element = getWrappedElement().getShadowRoot()
                 .findElement(By.cssSelector("summary[part='label']"));
         executeScript("arguments[0].click();", element);
