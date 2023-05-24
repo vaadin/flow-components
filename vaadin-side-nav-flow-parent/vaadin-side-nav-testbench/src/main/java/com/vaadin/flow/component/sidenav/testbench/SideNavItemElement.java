@@ -65,12 +65,12 @@ public class SideNavItemElement extends TestBenchElement {
         click(1, 1);
     }
 
-    public void clickAnchor() {
+    public void navigate() {
         executeScript("arguments[0].click();", getWrappedElement()
                 .getShadowRoot().findElement((By.cssSelector("a"))));
     }
 
-    public void clickExpandButton() {
+    public void toggle() {
         executeScript("arguments[0].click();",
                 getWrappedElement().getShadowRoot().findElement(
                         By.cssSelector("button[part='toggle-button']")));

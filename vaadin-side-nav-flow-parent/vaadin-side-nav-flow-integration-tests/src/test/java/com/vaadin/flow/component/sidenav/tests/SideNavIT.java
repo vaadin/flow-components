@@ -75,7 +75,7 @@ public class SideNavIT extends AbstractComponentIT {
 
     @Test
     public void clickChildOfNavigableParent_urlChanged() {
-        navigableParent.clickExpandButton();
+        navigableParent.toggle();
         navigableParent.getItems().get(0).click();
 
         Assert.assertTrue(getDriver().getCurrentUrl()
@@ -84,15 +84,15 @@ public class SideNavIT extends AbstractComponentIT {
 
     @Test
     public void clickExpandItem_itemExpanded() {
-        navigableParent.clickExpandButton();
+        navigableParent.toggle();
 
         Assert.assertTrue(navigableParent.isExpanded());
     }
 
     @Test
     public void clickExpandAndCollapse_itemCollapsed() {
-        navigableParent.clickExpandButton();
-        navigableParent.clickExpandButton();
+        navigableParent.toggle();
+        navigableParent.toggle();
 
         Assert.assertFalse(navigableParent.isExpanded());
     }
@@ -101,7 +101,7 @@ public class SideNavIT extends AbstractComponentIT {
     public void expandItem_expandedStateSynchronized() {
         assertExpandedStateOnServer("print-item-expanded-state", "false");
 
-        navigableParent.clickExpandButton();
+        navigableParent.toggle();
 
         assertExpandedStateOnServer("print-item-expanded-state", "true");
     }
@@ -110,7 +110,7 @@ public class SideNavIT extends AbstractComponentIT {
     public void collapseSideNav_expandedStateSynchronized() {
         assertExpandedStateOnServer("print-side-nav-expanded-state", "true");
 
-        sideNav.clickExpandButton();
+        sideNav.toggle();
 
         assertExpandedStateOnServer("print-side-nav-expanded-state", "false");
     }
