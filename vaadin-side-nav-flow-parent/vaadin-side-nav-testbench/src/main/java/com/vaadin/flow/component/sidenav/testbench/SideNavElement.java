@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.testbench.TestBenchElement;
@@ -42,8 +43,14 @@ public class SideNavElement extends TestBenchElement {
     }
 
     public void toggle() {
-        final WebElement element = getWrappedElement().getShadowRoot()
-                .findElement(By.cssSelector("summary[part='label']"));
+        final WebElement element;
+        try {
+            element = getWrappedElement().getShadowRoot()
+                    .findElement(By.cssSelector("summary[part='label']"));
+        } catch (NoSuchElementException e) {
+            throw new NoSuchElementException(
+                    "Nav does not contain a toggle button", e);
+        }
         executeScript("arguments[0].click();", element);
     }
 
