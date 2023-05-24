@@ -57,7 +57,7 @@ mainMajorMinor=`echo "$mainPom" | grep '<version>' | cut -d '>' -f2 |cut -d '<' 
 ### Load versions file for this platform release
 branch=$versionBase
 [ $branch = $mainMajorMinor ] && branch=main
-versions=`curl -s "https://raw.githubusercontent.com/vaadin/platform/$branch/versions.json"`
+versions=`curl -f -s "https://raw.githubusercontent.com/vaadin/platform/$branch/versions.json"`
 [ $? != 0 ] && branch=main && versions=`curl -s "https://raw.githubusercontent.com/vaadin/platform/$branch/versions.json"`
 
 ### Check that current branch is valid for the version to release
@@ -69,7 +69,7 @@ flow=`getLatest flow $flow`
 
 ## Modify poms with the versions to release
 echo "Setting version=$version to vaadin-flow-components"
-mvn -B -q versions:set -DnewVersion=$version || exit 1
+mvn -B -q versions:set -DnewVersion=$version || exit 1
 setPomVersion flow $flow || exit 1
 
 ## Compute modules to build and deploy
