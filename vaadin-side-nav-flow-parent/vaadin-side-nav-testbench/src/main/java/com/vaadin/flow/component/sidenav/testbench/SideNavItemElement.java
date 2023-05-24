@@ -75,6 +75,7 @@ public class SideNavItemElement extends TestBenchElement {
             throw new NoSuchElementException("Item does not contain an anchor",
                     e);
         }
+        // click() on elements in shadow DOM does not work with Chrome driver
         executeScript("arguments[0].click();", anchorElement);
     }
 
@@ -88,6 +89,7 @@ public class SideNavItemElement extends TestBenchElement {
             throw new NoSuchElementException(
                     "Item does not contain a toggle button", e);
         }
+        // click() on elements in shadow DOM does not work with Chrome driver
         executeScript("arguments[0].click();", toggleButtonElement);
     }
 

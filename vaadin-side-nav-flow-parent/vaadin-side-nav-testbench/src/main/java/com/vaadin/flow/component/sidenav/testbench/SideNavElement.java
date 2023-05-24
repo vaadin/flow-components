@@ -51,6 +51,7 @@ public class SideNavElement extends TestBenchElement {
             throw new NoSuchElementException(
                     "Nav does not contain a toggle button", e);
         }
+        // click() on elements in shadow DOM does not work with Chrome driver
         executeScript("arguments[0].click();", element);
     }
 
