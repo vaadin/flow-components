@@ -15,14 +15,11 @@
  */
 package com.vaadin.flow.component.shared;
 
-import com.vaadin.flow.component.*;
-import com.vaadin.flow.component.template.Id;
-import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.i18n.I18NProvider;
-
-import java.util.Locale;
-import java.util.Optional;
-import java.util.stream.Stream;
+import com.vaadin.flow.component.HasEnabled;
+import com.vaadin.flow.component.HasLabel;
+import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.HasValue;
 
 /**
  * A common interface for input fields that can be used to iterate over a

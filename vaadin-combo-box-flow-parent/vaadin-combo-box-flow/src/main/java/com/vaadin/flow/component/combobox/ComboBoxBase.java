@@ -67,7 +67,6 @@ import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.shared.Registration;
 
-import java.time.LocalTime;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Objects;

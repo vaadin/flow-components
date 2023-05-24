@@ -15,22 +15,19 @@
  */
 package com.vaadin.flow.component.shared;
 
-import com.vaadin.flow.component.*;
-import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.AbstractSinglePropertyField;
+import com.vaadin.flow.component.HasComponents;
+import com.vaadin.flow.component.HasEnabled;
+import com.vaadin.flow.component.HasLabel;
+import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.function.SerializableFunction;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Stream;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
 public class InputFieldTest {
 
@@ -43,7 +40,6 @@ public class InputFieldTest {
 
     @Test
     public void checkExtendedInterfaces() {
-        TestComponent component = new TestComponent();
         Assert.assertTrue(component instanceof HasEnabled);
         Assert.assertTrue(component instanceof HasLabel);
         Assert.assertTrue(component instanceof HasSize);
