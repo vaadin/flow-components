@@ -23,6 +23,7 @@ import org.openqa.selenium.By;
 
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
 /**
@@ -66,14 +67,28 @@ public class SideNavItemElement extends TestBenchElement {
     }
 
     public void navigate() {
-        executeScript("arguments[0].click();", getWrappedElement()
-                .getShadowRoot().findElement((By.cssSelector("a"))));
+        WebElement anchorElement;
+        try {
+            anchorElement = getWrappedElement().getShadowRoot()
+                    .findElement((By.cssSelector("a")));
+        } catch (NoSuchElementException e) {
+            throw new NoSuchElementException("Item does not contain an anchor",
+                    e);
+        }
+        executeScript("arguments[0].click();", anchorElement);
     }
 
     public void toggle() {
-        executeScript("arguments[0].click();",
-                getWrappedElement().getShadowRoot().findElement(
-                        By.cssSelector("button[part='toggle-button']")));
+        WebElement toggleButtonElement;
+        try {
+            toggleButtonElement = getWrappedElement().getShadowRoot()
+                    .findElement(
+                            By.cssSelector("button[part='toggle-button']"));
+        } catch (NoSuchElementException e) {
+            throw new NoSuchElementException(
+                    "Item does not contain a toggle button", e);
+        }
+        executeScript("arguments[0].click();", toggleButtonElement);
     }
 
     private Stream<SideNavItemElement> getItemsStream(boolean includeChildren) {
