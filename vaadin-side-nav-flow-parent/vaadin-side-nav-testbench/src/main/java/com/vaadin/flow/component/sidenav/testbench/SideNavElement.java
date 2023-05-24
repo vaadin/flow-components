@@ -47,8 +47,12 @@ public class SideNavElement extends TestBenchElement {
         executeScript("arguments[0].click();", element);
     }
 
-    public List<SideNavItemElement> getItems(boolean includeChildren) {
-        return getItemsStream(includeChildren).collect(Collectors.toList());
+    public List<SideNavItemElement> getItems() {
+        return getItems(false);
+    }
+
+    public List<SideNavItemElement> getItems(boolean includeNestedItems) {
+        return getItemsStream(includeNestedItems).collect(Collectors.toList());
     }
 
     public SideNavItemElement getSelectedItem() {
