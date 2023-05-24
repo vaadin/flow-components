@@ -32,8 +32,12 @@ import org.openqa.selenium.WebElement;
 @Element("vaadin-side-nav-item")
 public class SideNavItemElement extends TestBenchElement {
 
-    public List<SideNavItemElement> getItems(boolean includeChildren) {
-        return getItemsStream(includeChildren).collect(Collectors.toList());
+    public List<SideNavItemElement> getItems() {
+        return getItems(false);
+    }
+
+    public List<SideNavItemElement> getItems(boolean includeNestedItems) {
+        return getItemsStream(includeNestedItems).collect(Collectors.toList());
     }
 
     public String getLabel() {
