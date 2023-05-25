@@ -61,9 +61,9 @@ import java.util.Optional;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-confirm-dialog")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-beta1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-beta2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/confirm-dialog", version = "24.1.0-beta1")
+@NpmPackage(value = "@vaadin/confirm-dialog", version = "24.1.0-beta2")
 @JsModule("@vaadin/confirm-dialog/src/vaadin-confirm-dialog.js")
 public class ConfirmDialog extends Component
         implements HasSize, HasStyle, HasOrderedComponents {
