@@ -138,6 +138,9 @@ public final class LumoUtility {
         public static final String ERROR_50 = notConstant("bg-error-50");
         public static final String ERROR_10 = notConstant("bg-error-10");
 
+        public static final String WARNING = notConstant("bg-warning");
+        public static final String WARNING_10 = notConstant("bg-warning-10");
+
         public static final String SUCCESS = notConstant("bg-success");
         public static final String SUCCESS_50 = notConstant("bg-success-50");
         public static final String SUCCESS_10 = notConstant("bg-success-10");
@@ -201,6 +204,10 @@ public final class LumoUtility {
         public static final String ERROR = notConstant("border-error");
         public static final String ERROR_50 = notConstant("border-error-50");
         public static final String ERROR_10 = notConstant("border-error-10");
+
+        public static final String WARNING = notConstant("border-warning");
+        public static final String WARNING_10 = notConstant("border-warning-10");
+        public static final String WARNING_STRONG = notConstant("border-warning-strong");
 
         public static final String SUCCESS = notConstant("border-success");
         public static final String SUCCESS_50 = notConstant(
@@ -1472,6 +1479,10 @@ public final class LumoUtility {
         public static final String ERROR = notConstant("text-error");
         public static final String ERROR_CONTRAST = notConstant(
                 "text-error-contrast");
+
+        public static final String WARNING = notConstant("text-warning");
+        public static final String WARNING_CONTRAST = notConstant(
+                "text-warning-contrast");
 
         public static final String SUCCESS = notConstant("text-success");
         public static final String SUCCESS_CONTRAST = notConstant(
