@@ -76,9 +76,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-dialog")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-beta1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-beta2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/dialog", version = "24.1.0-beta1")
+@NpmPackage(value = "@vaadin/dialog", version = "24.1.0-beta2")
 @JsModule("@vaadin/dialog/src/vaadin-dialog.js")
 @JsModule("./flow-component-renderer.js")
 public class Dialog extends Component implements HasComponents, HasSize,
