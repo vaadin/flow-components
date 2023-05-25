@@ -206,8 +206,10 @@ public final class LumoUtility {
         public static final String ERROR_10 = notConstant("border-error-10");
 
         public static final String WARNING = notConstant("border-warning");
-        public static final String WARNING_10 = notConstant("border-warning-10");
-        public static final String WARNING_STRONG = notConstant("border-warning-strong");
+        public static final String WARNING_10 = notConstant(
+                "border-warning-10");
+        public static final String WARNING_STRONG = notConstant(
+                "border-warning-strong");
 
         public static final String SUCCESS = notConstant("border-success");
         public static final String SUCCESS_50 = notConstant(
