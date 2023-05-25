@@ -17,12 +17,14 @@ package com.vaadin.flow.component.sidenav.testbench;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebElement;
 
 /**
  * A TestBench element representing a <code>&lt;vaadin-side-nav-item&gt;</code>
@@ -31,18 +33,24 @@ import com.vaadin.testbench.elementsbase.Element;
 @Element("vaadin-side-nav-item")
 public class SideNavItemElement extends TestBenchElement {
 
-    public void navigate() {
-        click(1, 1);
+    public List<SideNavItemElement> getItems() {
+        return getItems(false);
     }
 
-    public List<SideNavItemElement> getItems() {
-        // get only the direct vaadin-side-nav-item of this vaadin-side-nav
-        return wrapElements(findElements(By.xpath("vaadin-side-nav-item")),
-                getCommandExecutor())
-                .stream()
-                .map(testBenchElement -> testBenchElement
-                        .wrap(SideNavItemElement.class))
-                .collect(Collectors.toList());
+    public List<SideNavItemElement> getItems(boolean includeNestedItems) {
+        return getItemsStream(includeNestedItems).collect(Collectors.toList());
+    }
+
+    public String getLabel() {
+        final WebElement unnamedSlot = getWrappedElement().getShadowRoot()
+                .findElement(By.cssSelector("slot:not([name])"));
+        return (String) executeScript(
+                "return arguments[0].assignedNodes().filter(node => node.nodeType === Node.TEXT_NODE)[0].textContent;",
+                unnamedSlot);
+    }
+
+    public String getPath() {
+        return getAttribute("path");
     }
 
     public boolean isExpanded() {
@@ -53,17 +61,44 @@ public class SideNavItemElement extends TestBenchElement {
         return hasAttribute("active");
     }
 
-    public String getLabel() {
-        final WebElement unnamedSlot = getWrappedElement().getShadowRoot()
-                .findElement(By.cssSelector("slot:not([name])"));
-        return (String) executeScript(
-                "return arguments[0].assignedNodes()[0].textContent;",
-                unnamedSlot);
+    @Override
+    public void click() {
+        click(1, 1);
     }
 
-    public void clickExpandButton() {
-        final WebElement element = getWrappedElement().getShadowRoot()
-                .findElement(By.cssSelector("button[part='toggle-button']"));
-        executeScript("arguments[0].click();", element);
+    public void navigate() {
+        WebElement anchorElement;
+        try {
+            anchorElement = getWrappedElement().getShadowRoot()
+                    .findElement((By.cssSelector("a")));
+        } catch (NoSuchElementException e) {
+            throw new NoSuchElementException("Item does not contain an anchor",
+                    e);
+        }
+        // click() on elements in shadow DOM does not work with Chrome driver
+        executeScript("arguments[0].click();", anchorElement);
+    }
+
+    public void toggle() {
+        WebElement toggleButtonElement;
+        try {
+            toggleButtonElement = getWrappedElement().getShadowRoot()
+                    .findElement(
+                            By.cssSelector("button[part='toggle-button']"));
+        } catch (NoSuchElementException e) {
+            throw new NoSuchElementException(
+                    "Item does not contain a toggle button", e);
+        }
+        // click() on elements in shadow DOM does not work with Chrome driver
+        executeScript("arguments[0].click();", toggleButtonElement);
+    }
+
+    private Stream<SideNavItemElement> getItemsStream(boolean includeChildren) {
+        String xpathExp = includeChildren ? ".//vaadin-side-nav-item"
+                : "vaadin-side-nav-item";
+        return wrapElements(findElements(By.xpath(xpathExp)),
+                getCommandExecutor()).stream()
+                .map(testBenchElement -> testBenchElement
+                        .wrap(SideNavItemElement.class));
     }
 }
