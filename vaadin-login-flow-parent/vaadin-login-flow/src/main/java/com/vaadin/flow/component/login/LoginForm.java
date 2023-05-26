@@ -46,10 +46,10 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-login-form")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.13")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.14")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/login", version = "23.3.13")
-@NpmPackage(value = "@vaadin/vaadin-login", version = "23.3.13")
+@NpmPackage(value = "@vaadin/login", version = "23.3.14")
+@NpmPackage(value = "@vaadin/vaadin-login", version = "23.3.14")
 @JsModule("@vaadin/login/src/vaadin-login-form.js")
 public class LoginForm extends AbstractLogin implements HasStyle {
 
