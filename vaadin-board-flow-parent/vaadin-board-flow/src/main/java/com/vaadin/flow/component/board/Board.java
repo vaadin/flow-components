@@ -47,7 +47,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * </pre>
  */
 @Tag("vaadin-board")
-@NpmPackage(value = "@vaadin/vaadin-board", version = "2.2.1")
+@NpmPackage(value = "@vaadin/vaadin-board", version = "2.2.2")
 @JsModule("@vaadin/vaadin-board/vaadin-board.js")
 @HtmlImport("frontend://bower_components/vaadin-board/vaadin-board.html")
 public class Board extends Component
