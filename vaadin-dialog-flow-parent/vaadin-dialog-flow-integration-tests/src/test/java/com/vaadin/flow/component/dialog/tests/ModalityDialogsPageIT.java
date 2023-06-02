@@ -35,7 +35,9 @@ public class ModalityDialogsPageIT extends AbstractComponentIT {
     public void init() {
         open();
         Assert.assertEquals("No log messages should exist on open", 0,
-                $(DivElement.class).id(LOG_ID).$("div").all().size());
+                $(DivElement.class).id(LOG_ID).$("div").all().stream()
+                        .map(TestBenchElement::getText)
+                        .filter(text -> text.contains("Clicked")).count());
     }
 
     @Test
@@ -51,7 +53,9 @@ public class ModalityDialogsPageIT extends AbstractComponentIT {
         Assert.assertTrue("Dialog should not have closed",
                 $(DialogElement.class).exists());
         Assert.assertEquals("Click should have resulted in a log message", 1,
-                $(DivElement.class).id(LOG_ID).$("div").all().size());
+                $(DivElement.class).id(LOG_ID).$("div").all().stream()
+                        .map(TestBenchElement::getText)
+                        .filter(text -> text.contains("Clicked")).count());
 
         $(DialogElement.class).first().$(NativeButtonElement.class).first()
                 .click();
@@ -77,7 +81,10 @@ public class ModalityDialogsPageIT extends AbstractComponentIT {
         Assert.assertTrue("Dialog should not have closed",
                 $(DialogElement.class).exists());
         Assert.assertEquals("Click on button should not generate a log message",
-                0, $(DivElement.class).id(LOG_ID).$("div").all().size());
+                0,
+                $(DivElement.class).id(LOG_ID).$("div").all().stream()
+                        .map(TestBenchElement::getText)
+                        .filter(text -> text.contains("Clicked")).count());
 
         $(DialogElement.class).first().$(NativeButtonElement.class).id("close")
                 .click();
@@ -88,7 +95,9 @@ public class ModalityDialogsPageIT extends AbstractComponentIT {
         $(NativeButtonElement.class).id("log").click();
 
         Assert.assertEquals("Click should have resulted in a log message", 1,
-                $(DivElement.class).id(LOG_ID).$("div").all().size());
+                $(DivElement.class).id(LOG_ID).$("div").all().stream()
+                        .map(TestBenchElement::getText)
+                        .filter(text -> text.contains("Clicked")).count());
     }
 
     @Test
@@ -106,7 +115,9 @@ public class ModalityDialogsPageIT extends AbstractComponentIT {
         // Now that dialog is closed, verify that click events work
         $(NativeButtonElement.class).id("log").click();
         Assert.assertEquals("Click should have resulted in a log message", 1,
-                $(DivElement.class).id(LOG_ID).$("div").all().size());
+                $(DivElement.class).id(LOG_ID).$("div").all().stream()
+                        .map(TestBenchElement::getText)
+                        .filter(text -> text.contains("Clicked")).count());
     }
 
     @Test
@@ -123,7 +134,9 @@ public class ModalityDialogsPageIT extends AbstractComponentIT {
         subDialog.$(NativeButtonElement.class).id("log-sub").click();
 
         Assert.assertEquals("Click should have resulted in a log message", 1,
-                $(DivElement.class).id(LOG_ID).$("div").all().size());
+                $(DivElement.class).id(LOG_ID).$("div").all().stream()
+                        .map(TestBenchElement::getText)
+                        .filter(text -> text.contains("sub-click")).count());
 
         subDialog.$(NativeButtonElement.class).id("close-sub").click();
 
@@ -145,7 +158,9 @@ public class ModalityDialogsPageIT extends AbstractComponentIT {
         $(NativeButtonElement.class).id("log").click();
 
         Assert.assertEquals("Click should have resulted in a log message", 1,
-                $(DivElement.class).id(LOG_ID).$("div").all().size());
+                $(DivElement.class).id(LOG_ID).$("div").all().stream()
+                        .map(TestBenchElement::getText)
+                        .filter(text -> text.contains("Clicked")).count());
 
         $(NativeButtonElement.class).id("show").click();
 
@@ -154,5 +169,29 @@ public class ModalityDialogsPageIT extends AbstractComponentIT {
 
         Assert.assertFalse("Dialog should have closed",
                 $(DialogElement.class).exists());
+    }
+
+    @Test
+    public void openModalDialog_openNonModalOnTop_oneOpenedChangeEventIsFired() {
+        $(NativeButtonElement.class).id("open-modal-dialog").click();
+
+        Assert.assertEquals(
+                "There should have been no opened-change event logs", 0,
+                $(DivElement.class).id(LOG_ID).$("div").all().stream()
+                        .map(TestBenchElement::getText)
+                        .filter(text -> text.contains("opened-change"))
+                        .count());
+
+        final DialogElement first = $(DialogElement.class).first();
+        first.$(NativeButtonElement.class).id("open-sub").click();
+
+        waitUntil(driver -> $(DialogElement.class).all().size() == 2);
+
+        Assert.assertEquals(
+                "There should have been a single opened-change event log", 1,
+                $(DivElement.class).id(LOG_ID).$("div").all().stream()
+                        .map(TestBenchElement::getText)
+                        .filter(text -> text.contains("opened-change"))
+                        .count());
     }
 }

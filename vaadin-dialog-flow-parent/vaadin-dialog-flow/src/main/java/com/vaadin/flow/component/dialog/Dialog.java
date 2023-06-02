@@ -96,6 +96,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
     private String maxHeight;
     private DialogHeader dialogHeader;
     private DialogFooter dialogFooter;
+    private boolean previousOpenedState;
 
     private Registration afterProgrammaticNavigationListenerRegistration;
 
@@ -111,9 +112,16 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
         // Workaround for: https://github.com/vaadin/flow/issues/3496
         setOpened(false);
+        previousOpenedState = false;
 
-        getElement().addPropertyChangeListener("opened", event -> fireEvent(
-                new OpenedChangeEvent(this, event.isUserOriginated())));
+        getElement().addPropertyChangeListener("opened", event -> {
+            boolean newOpenedState = isOpened();
+            if (newOpenedState != previousOpenedState) {
+                fireEvent(
+                        new OpenedChangeEvent(this, event.isUserOriginated()));
+            }
+            previousOpenedState = newOpenedState;
+        });
 
         addOpenedChangeListener(event -> {
             if (!isOpened()) {

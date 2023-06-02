@@ -108,6 +108,9 @@ public class ModalityDialogsPage extends Div {
         nonModalDialog.setCloseOnOutsideClick(false);
         nonModalDialog.setModal(false);
 
+        nonModalDialog.addOpenedChangeListener(
+                openedChangeEvent -> log.log("opened-change"));
+
         return nonModalDialog;
     }
 
