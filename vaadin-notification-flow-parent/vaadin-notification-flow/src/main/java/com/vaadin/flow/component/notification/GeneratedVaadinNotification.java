@@ -90,10 +90,10 @@ Your work has been saved
  */
 @Deprecated
 @Tag("vaadin-notification")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.14")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.15")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/notification", version = "23.3.14")
-@NpmPackage(value = "@vaadin/vaadin-notification", version = "23.3.14")
+@NpmPackage(value = "@vaadin/notification", version = "23.3.15")
+@NpmPackage(value = "@vaadin/vaadin-notification", version = "23.3.15")
 @JsModule("@vaadin/notification/src/vaadin-notification.js")
 @JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 public abstract class GeneratedVaadinNotification<R extends GeneratedVaadinNotification<R>>

@@ -56,10 +56,10 @@ import com.vaadin.flow.dom.Element;
  *            field value type
  */
 @Tag("vaadin-custom-field")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.14")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.15")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/custom-field", version = "23.3.14")
-@NpmPackage(value = "@vaadin/vaadin-custom-field", version = "23.3.14")
+@NpmPackage(value = "@vaadin/custom-field", version = "23.3.15")
+@NpmPackage(value = "@vaadin/vaadin-custom-field", version = "23.3.15")
 @JsModule("@vaadin/custom-field/src/vaadin-custom-field.js")
 public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
         implements HasSize, HasValidation, Focusable<CustomField>, HasHelper,
