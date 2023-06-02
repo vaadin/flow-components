@@ -28,10 +28,10 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * parent component and its height is determined by the components it contains.
  */
 @Tag("vaadin-vertical-layout")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.14")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.15")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/vertical-layout", version = "23.3.14")
-@NpmPackage(value = "@vaadin/vaadin-ordered-layout", version = "23.3.14")
+@NpmPackage(value = "@vaadin/vertical-layout", version = "23.3.15")
+@NpmPackage(value = "@vaadin/vaadin-ordered-layout", version = "23.3.15")
 @JsModule("@vaadin/vertical-layout/src/vaadin-vertical-layout.js")
 public class VerticalLayout extends Component implements ThemableLayout,
         FlexComponent, ClickNotifier<VerticalLayout> {
