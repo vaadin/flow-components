@@ -27,6 +27,7 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
@@ -73,13 +74,13 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-radio-group")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha9")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-rc1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/radio-group", version = "24.1.0-alpha9")
+@NpmPackage(value = "@vaadin/radio-group", version = "24.1.0-rc1")
 @JsModule("@vaadin/radio-group/src/vaadin-radio-group.js")
 public class RadioButtonGroup<T>
         extends AbstractSinglePropertyField<RadioButtonGroup<T>, T>
-        implements HasClientValidation,
+        implements HasAriaLabel, HasClientValidation,
         HasDataView<T, Void, RadioButtonGroupDataView<T>>, HasHelper, HasLabel,
         HasListDataView<T, RadioButtonGroupListDataView<T>>, HasSize, HasStyle,
         HasThemeVariant<RadioGroupVariant>, HasTooltip, HasValidationProperties,
@@ -522,6 +523,27 @@ public class RadioButtonGroup<T>
      */
     public String getLabel() {
         return getElement().getProperty("label");
+    }
+
+    @Override
+    public void setAriaLabel(String ariaLabel) {
+        getElement().setProperty("accessibleName", ariaLabel);
+    }
+
+    @Override
+    public Optional<String> getAriaLabel() {
+        return Optional.ofNullable(getElement().getProperty("accessibleName"));
+    }
+
+    @Override
+    public void setAriaLabelledBy(String labelledBy) {
+        getElement().setProperty("accessibleNameRef", labelledBy);
+    }
+
+    @Override
+    public Optional<String> getAriaLabelledBy() {
+        return Optional
+                .ofNullable(getElement().getProperty("accessibleNameRef"));
     }
 
     @SuppressWarnings("unchecked")

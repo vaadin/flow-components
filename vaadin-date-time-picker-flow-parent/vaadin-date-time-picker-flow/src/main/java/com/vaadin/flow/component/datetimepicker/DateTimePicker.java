@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.datetimepicker;
 
+import java.io.Serializable;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -22,6 +23,7 @@ import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Optional;
 
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
@@ -50,6 +52,7 @@ import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
 import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
 
 @Tag("vaadin-date-picker")
@@ -112,9 +115,9 @@ class DateTimePickerTimePicker
  * @author Vaadin Ltd
  */
 @Tag("vaadin-date-time-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha9")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-rc1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/date-time-picker", version = "24.1.0-alpha9")
+@NpmPackage(value = "@vaadin/date-time-picker", version = "24.1.0-rc1")
 @JsModule("@vaadin/date-time-picker/src/vaadin-date-time-picker.js")
 public class DateTimePicker
         extends AbstractSinglePropertyField<DateTimePicker, LocalDateTime>
@@ -126,6 +129,8 @@ public class DateTimePicker
     private final DateTimePickerDatePicker datePicker = new DateTimePickerDatePicker();
     private final DateTimePickerTimePicker timePicker = new DateTimePickerTimePicker();
     private DatePickerI18n i18n;
+
+    private DateTimePickerI18n dateTimePickerI18n;
     private Locale locale;
 
     private final static SerializableFunction<String, LocalDateTime> PARSER = s -> {
@@ -389,6 +394,120 @@ public class DateTimePicker
     @Override
     public String getLabel() {
         return getElement().getProperty("label");
+    }
+
+    /**
+     * Sets the aria-label for the component.
+     *
+     * @param ariaLabel
+     *            the value to set as aria-label
+     */
+    public void setAriaLabel(String ariaLabel) {
+        getElement().setProperty("accessibleName", ariaLabel);
+    }
+
+    /**
+     * Gets the aria-label of the component.
+     *
+     * @return an optional aria-label or an empty optional if no aria-label has
+     *         been set
+     */
+    public Optional<String> getAriaLabel() {
+        return Optional.ofNullable(getElement().getProperty("accessibleName"));
+    }
+
+    /**
+     * Contains DateTimePicker internalization properties
+     */
+    public static class DateTimePickerI18n implements Serializable {
+        private String dateLabel;
+        private String timeLabel;
+
+        public String getDateLabel() {
+            return dateLabel;
+        }
+
+        public void setDateLabel(String dateLabel) {
+            this.dateLabel = dateLabel;
+        }
+
+        public String getTimeLabel() {
+            return timeLabel;
+        }
+
+        public void setTimeLabel(String timeLabel) {
+            this.timeLabel = timeLabel;
+        }
+    }
+
+    /**
+     * Sets the accessible label for the date picker.
+     * <p>
+     * The final value is a concatenation of the accessible label from
+     * DateTimePicker's {@link #getAriaLabel()} or {@link #getLabel()} and the
+     * given accessible label.
+     *
+     * @param dateLabel
+     *            the value to be used as part of date picker aria-label.
+     */
+    public void setDateAriaLabel(String dateLabel) {
+        if (dateTimePickerI18n == null) {
+            dateTimePickerI18n = new DateTimePickerI18n();
+        }
+        dateTimePickerI18n.setDateLabel(dateLabel);
+        getElement().setPropertyJson("i18n",
+                JsonSerializer.toJson(dateTimePickerI18n));
+    }
+
+    /**
+     * Gets the accessible label of the date picker.
+     * <p>
+     * Note that this method will return the last value passed to
+     * {@link #setDateAriaLabel(String)}, not the value currently set on the
+     * `aria-label` attribute of the date picker input element.
+     *
+     * @return an optional label or an empty optional if no label has been set
+     */
+    public Optional<String> getDateAriaLabel() {
+        if (dateTimePickerI18n == null) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(dateTimePickerI18n.getDateLabel());
+    }
+
+    /**
+     * Sets the accessible label for the time picker.
+     * <p>
+     * The final value is a concatenation of the accessible label from
+     * DateTimePicker's {@link #getAriaLabel()} or {@link #getLabel()} and the
+     * given accessible label.
+     *
+     * @param timeLabel
+     *            the value to be used as part of time picker aria-label.
+     */
+    public void setTimeAriaLabel(String timeLabel) {
+        if (dateTimePickerI18n == null) {
+            dateTimePickerI18n = new DateTimePickerI18n();
+        }
+        dateTimePickerI18n.setTimeLabel(timeLabel);
+        getElement().setPropertyJson("i18n",
+                JsonSerializer.toJson(dateTimePickerI18n));
+    }
+
+    /**
+     * Gets the accessible label of the time picker.
+     * <p>
+     * Note that this method will return the last value passed to
+     * {@link #setTimeAriaLabel(String)}, not the value currently set on the
+     * `aria-label` attribute of the time picker input element.
+     *
+     * @return an optional label or an empty optional if no label has been set
+     */
+    public Optional<String> getTimeAriaLabel() {
+        if (dateTimePickerI18n == null) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(dateTimePickerI18n.getTimeLabel());
     }
 
     /**
