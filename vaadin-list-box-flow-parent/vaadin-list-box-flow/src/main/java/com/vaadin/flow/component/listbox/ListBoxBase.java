@@ -99,14 +99,14 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * Use instead one of the {@code setItems} methods which provide access to
-     * either {@link ListBoxDataView} or {@link ListBoxListDataView}.
-     *
+     * Sets a generic data provider for the ListBox to use.
+     * <p>
      * Use this method when none of the {@code setItems} methods are applicable,
      * e.g. when having a data provider with filter that cannot be transformed
      * to {@code DataProvider<T, Void>}.
+     *
+     * @param dataProvider
+     *            DataProvider instance to use, not <code>null</code>
      */
     public void setDataProvider(DataProvider<ITEM, ?> dataProvider) {
         this.dataProvider.set(Objects.requireNonNull(dataProvider));
