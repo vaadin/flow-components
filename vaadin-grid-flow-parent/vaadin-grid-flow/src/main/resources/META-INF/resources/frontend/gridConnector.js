@@ -1,5 +1,5 @@
 import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
-import { timeOut, animationFrame, microTask } from '@polymer/polymer/lib/utils/async.js';
+import { timeOut, animationFrame } from '@polymer/polymer/lib/utils/async.js';
 import { Grid } from '@vaadin/grid/src/vaadin-grid.js';
 import { ItemCache } from '@vaadin/grid/src/vaadin-grid-data-provider-mixin.js';
 import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
@@ -889,6 +889,14 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           }
           // Let server know we're done
           grid.$server.confirmParentUpdate(id, parentKey);
+
+          if (!grid.loading) {
+            grid.__confirmParentUpdateDebouncer = Debouncer.debounce(
+              grid.__confirmParentUpdateDebouncer,
+              animationFrame,
+              () => grid.__updateVisibleRows()
+            );
+          }
         });
 
         grid.$connector.confirm = tryCatchWrapper(function (id) {
