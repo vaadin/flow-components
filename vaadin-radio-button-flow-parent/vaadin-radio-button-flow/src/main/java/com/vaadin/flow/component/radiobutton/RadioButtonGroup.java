@@ -307,7 +307,17 @@ public class RadioButtonGroup<T>
         return itemEnabledProvider.test(keyMapper.get(selectedKey));
     }
 
-    private void setDataProvider(DataProvider<T, ?> dataProvider) {
+    /**
+     * Sets a generic data provider for the RadioButtonGroup to use.
+     * <p>
+     * Use this method when none of the {@code setItems} methods are applicable,
+     * e.g. when having a data provider with filter that cannot be transformed
+     * to {@code DataProvider<T, Void>}.
+     *
+     * @param dataProvider
+     *            DataProvider instance to use, not <code>null</code>
+     */
+    public void setDataProvider(DataProvider<T, ?> dataProvider) {
         this.dataProvider.set(dataProvider);
         DataViewUtils.removeComponentFilterAndSortComparator(this);
         reset();
@@ -387,11 +397,16 @@ public class RadioButtonGroup<T>
     }
 
     /**
-     * Gets the data provider.
+     * Gets the data provider used by this RadioButtonGroup.
      *
-     * @return the data provider, not {@code null}
+     * <p>
+     * To get information and control over the items in the RadioButtonGroup,
+     * use either {@link #getListDataView()} or {@link #getGenericDataView()}
+     * instead.
+     *
+     * @return the data provider used by this RadioButtonGroup
      */
-    private DataProvider<T, ?> getDataProvider() {
+    public DataProvider<T, ?> getDataProvider() {
         return Optional.ofNullable(dataProvider).map(AtomicReference::get)
                 .orElse(null);
     }

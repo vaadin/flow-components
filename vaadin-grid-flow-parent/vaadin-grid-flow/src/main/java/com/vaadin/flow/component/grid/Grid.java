@@ -2501,10 +2501,14 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
-     * {@inheritDoc}
+     * Sets a generic data provider for the Grid to use.
+     * <p>
+     * Use this method when none of the {@code setItems} methods are applicable,
+     * e.g. when having a data provider with filter that cannot be transformed
+     * to {@code DataProvider<T, Void>}.
      *
-     * Use this method only when having a data provider with filter that cannot
-     * be transformed to {@code DataProvider<T, Void>}.
+     * @param dataProvider
+     *            DataProvider instance to use, not <code>null</code>
      */
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         Objects.requireNonNull(dataProvider, "data provider cannot be null");
