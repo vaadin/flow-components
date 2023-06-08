@@ -19,11 +19,12 @@ public class DetailsTest {
 
     @Test
     public void initContent() {
-        details.setContent(new Span());
-        details.addContent(new Span());
+        details.add(new Span());
+        details.add(new Span());
         Assert.assertEquals(2, details.getContent().count());
 
-        details.setContent(new Span());
+        details.removeAll();
+        details.add(new Span());
         Assert.assertEquals(1, details.getContent().count());
     }
 
