@@ -22,9 +22,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasComponents;
-import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -58,11 +56,11 @@ import com.vaadin.flow.shared.Registration;
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/details", version = "24.1.0")
 @JsModule("@vaadin/details/src/vaadin-details.js")
-public class Details extends Component implements HasComponents, HasEnabled,
-        HasSize, HasStyle, HasThemeVariant<DetailsVariant>, HasTooltip {
+public class Details extends Component implements HasComponents, HasSize,
+        HasThemeVariant<DetailsVariant>, HasTooltip {
 
     private Component summary;
-    private Component summaryContainer;
+    private final Component summaryContainer;
     private final Div contentContainer;
 
     /**
@@ -247,8 +245,8 @@ public class Details extends Component implements HasComponents, HasEnabled,
      * @param content
      *            the content of the component to set, or <code>null</code> to
      *            remove any previously set content
-     * @deprecated use {@link #removeAll()} and {@link #add(Component...)}
-     *             instead.
+     * @deprecated since v24.2, use {@link #removeAll()} and
+     *             {@link #add(Component...)} instead.
      */
     @Deprecated
     public void setContent(Component content) {
@@ -262,7 +260,7 @@ public class Details extends Component implements HasComponents, HasEnabled,
      * @see #getContent()
      * @param components
      *            the components to add
-     * @deprecated use {@link #add(Component...)} instead.
+     * @deprecated since v24.2, use {@link #add(Component...)} instead.
      */
     @Deprecated
     public void addContent(Component... components) {
