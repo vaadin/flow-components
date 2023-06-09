@@ -275,18 +275,6 @@ public class Details extends Component implements HasComponents, HasSize,
      *            the components to add
      */
     @Override
-    public void add(Component... components) {
-        HasComponents.super.add(components);
-    }
-
-    /**
-     * Adds components to the content section
-     *
-     * @see #getContent()
-     * @param components
-     *            the components to add
-     */
-    @Override
     public void add(Collection<Component> components) {
         contentContainer.add(components);
     }
@@ -301,17 +289,6 @@ public class Details extends Component implements HasComponents, HasSize,
     @Override
     public void add(String text) {
         contentContainer.add(text);
-    }
-
-    /**
-     * Removes specified components from the content section
-     *
-     * @param components
-     *            the components to remove
-     */
-    @Override
-    public void remove(Component... components) {
-        HasComponents.super.remove(components);
     }
 
     /**
@@ -349,21 +326,6 @@ public class Details extends Component implements HasComponents, HasSize,
     @Override
     public void addComponentAtIndex(int index, Component component) {
         contentContainer.addComponentAtIndex(index, component);
-    }
-
-    /**
-     * Adds the given component as the first child of the content section.
-     * <p>
-     * In case the specified component has already been added to another parent,
-     * it will be removed from there and added to the content section of this
-     * one.
-     *
-     * @param component
-     *            the component to add, value should not be null
-     */
-    @Override
-    public void addComponentAsFirst(Component component) {
-        HasComponents.super.addComponentAsFirst(component);
     }
 
     /**
