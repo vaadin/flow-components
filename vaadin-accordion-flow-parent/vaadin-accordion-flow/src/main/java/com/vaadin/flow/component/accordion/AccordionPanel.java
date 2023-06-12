@@ -102,14 +102,14 @@ public class AccordionPanel extends Details {
      * @param summary
      *            the summary text to set.
      * @param components
-     *            the content components to set.
+     *            the content components to add.
      *
      * @see #setSummaryText(String)
-     * @see #addContent(Component...)
+     * @see #add(Component...)
      */
     public AccordionPanel(String summary, Component... components) {
         this(summary);
-        addContent(components);
+        add(components);
     }
 
     /**
@@ -119,14 +119,14 @@ public class AccordionPanel extends Details {
      * @param summary
      *            the summary component to set.
      * @param components
-     *            the content components to set.
+     *            the content components to add.
      *
      * @see #setSummary(Component)
-     * @see #addContent(Component...)
+     * @see #add(Component...)
      */
     public AccordionPanel(Component summary, Component... components) {
         this(summary);
-        addContent(components);
+        add(components);
     }
 
     /**

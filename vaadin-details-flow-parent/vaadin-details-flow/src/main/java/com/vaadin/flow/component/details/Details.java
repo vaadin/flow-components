@@ -15,14 +15,14 @@
  */
 package com.vaadin.flow.component.details;
 
+import java.util.Collection;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.HasEnabled;
+import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -56,11 +56,11 @@ import com.vaadin.flow.shared.Registration;
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/details", version = "24.1.0")
 @JsModule("@vaadin/details/src/vaadin-details.js")
-public class Details extends Component implements HasEnabled, HasSize, HasStyle,
+public class Details extends Component implements HasComponents, HasSize,
         HasThemeVariant<DetailsVariant>, HasTooltip {
 
     private Component summary;
-    private Component summaryContainer;
+    private final Component summaryContainer;
     private final Div contentContainer;
 
     /**
@@ -120,15 +120,15 @@ public class Details extends Component implements HasEnabled, HasSize, HasStyle,
      * @param summary
      *            the summary text to set.
      * @param content
-     *            the content component to set.
+     *            the content component to add.
      *
      * @see #setSummaryText(String)
-     * @see #setContent(Component)
+     * @see #add(Component...)
      */
     public Details(String summary, Component content) {
         this();
         setSummaryText(summary);
-        setContent(content);
+        add(content);
     }
 
     /**
@@ -137,15 +137,15 @@ public class Details extends Component implements HasEnabled, HasSize, HasStyle,
      * @param summary
      *            the summary component to set.
      * @param content
-     *            the content component to set.
+     *            the content component to add.
      *
      * @see #setSummary(Component)
-     * @see #setContent(Component)
+     * @see #add(Component...)
      */
     public Details(Component summary, Component content) {
         this();
         setSummary(summary);
-        setContent(content);
+        add(content);
     }
 
     /**
@@ -155,14 +155,14 @@ public class Details extends Component implements HasEnabled, HasSize, HasStyle,
      * @param summary
      *            the summary text to set.
      * @param components
-     *            the content components to set.
+     *            the content components to add.
      *
      * @see #setSummaryText(String)
-     * @see #addContent(Component...)
+     * @see #add(Component...)
      */
     public Details(String summary, Component... components) {
         this(summary);
-        addContent(components);
+        add(components);
     }
 
     /**
@@ -172,14 +172,14 @@ public class Details extends Component implements HasEnabled, HasSize, HasStyle,
      * @param summary
      *            the summary component to set.
      * @param components
-     *            the content components to set.
+     *            the content components to add.
      *
      * @see #setSummary(Component)
-     * @see #addContent(Component...)
+     * @see #add(Component...)
      */
     public Details(Component summary, Component... components) {
         this(summary);
-        addContent(components);
+        add(components);
     }
 
     /**
@@ -245,14 +245,26 @@ public class Details extends Component implements HasEnabled, HasSize, HasStyle,
      * @param content
      *            the content of the component to set, or <code>null</code> to
      *            remove any previously set content
+     * @deprecated since v24.2, use {@link #removeAll()} and
+     *             {@link #add(Component...)} instead.
      */
+    @Deprecated
     public void setContent(Component content) {
-        contentContainer.getElement().removeAllChildren();
-        if (content == null) {
-            return;
-        }
+        removeAll();
+        add(content);
+    }
 
-        contentContainer.add(content);
+    /**
+     * Adds components to the content section
+     *
+     * @see #getContent()
+     * @param components
+     *            the components to add
+     * @deprecated since v24.2, use {@link #add(Component...)} instead.
+     */
+    @Deprecated
+    public void addContent(Component... components) {
+        add(components);
     }
 
     /**
@@ -262,13 +274,63 @@ public class Details extends Component implements HasEnabled, HasSize, HasStyle,
      * @param components
      *            the components to add
      */
-    public void addContent(Component... components) {
+    @Override
+    public void add(Collection<Component> components) {
         contentContainer.add(components);
     }
 
     /**
+     * Adds the given text to the content section
+     *
+     * @see #getContent()
+     * @param text
+     *            the text to add, not null
+     */
+    @Override
+    public void add(String text) {
+        contentContainer.add(text);
+    }
+
+    /**
+     * Removes specified components from the content section
+     *
+     * @param components
+     *            the components to remove
+     */
+    @Override
+    public void remove(Collection<Component> components) {
+        contentContainer.remove(components);
+    }
+
+    /**
+     * Removes all components from the content section
+     */
+    @Override
+    public void removeAll() {
+        contentContainer.removeAll();
+    }
+
+    /**
+     * Adds the given component to the content section at the specific index.
+     * <p>
+     * In case the specified component has already been added to another parent,
+     * it will be removed from there and added to the content section of this
+     * one.
+     *
+     * @param index
+     *            the index, where the component will be added. The index must
+     *            be non-negative and may not exceed the children count
+     * @param component
+     *            the component to add, value should not be null
+     */
+    @Override
+    public void addComponentAtIndex(int index, Component component) {
+        contentContainer.addComponentAtIndex(index, component);
+    }
+
+    /**
      * Returns the content components which were added via
-     * {@link #setContent(Component)} or via {@link #addContent(Component...)}
+     * {@link #add(Component...)}
      *
      * @return the child components of the content section
      */
