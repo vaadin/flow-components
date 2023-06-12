@@ -83,11 +83,11 @@ Tab 1
  * </p>
  */
 @Tag("vaadin-tab")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.1.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.1.0")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/tabs/src/vaadin-tab.js")
-@NpmPackage(value = "@vaadin/tabs", version = "22.1.0-alpha1")
-@NpmPackage(value = "@vaadin/vaadin-tabs", version = "22.1.0-alpha1")
+@NpmPackage(value = "@vaadin/tabs", version = "22.1.0")
+@NpmPackage(value = "@vaadin/vaadin-tabs", version = "22.1.0")
 public abstract class GeneratedVaadinTab<R extends GeneratedVaadinTab<R>>
         extends Component implements HasStyle, HasTheme {
 

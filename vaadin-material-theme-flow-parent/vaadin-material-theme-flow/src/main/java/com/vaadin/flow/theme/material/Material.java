@@ -21,10 +21,10 @@ import com.vaadin.flow.theme.AbstractTheme;
 /**
  * Material component theme class implementation.
  */
-@NpmPackage(value = "@vaadin/vaadin-themable-mixin", version = "22.1.0-alpha1")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.1.0-alpha1")
+@NpmPackage(value = "@vaadin/vaadin-themable-mixin", version = "22.1.0")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.1.0")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/vaadin-material-styles", version = "22.1.0-alpha1")
+@NpmPackage(value = "@vaadin/vaadin-material-styles", version = "22.1.0")
 @JsModule("@vaadin/vaadin-material-styles/color.js")
 @JsModule("@vaadin/vaadin-material-styles/typography.js")
 @JsModule("./material-includes.ts")

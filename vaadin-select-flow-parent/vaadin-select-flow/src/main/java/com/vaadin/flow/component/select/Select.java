@@ -178,7 +178,7 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
      * even though that is not visible from the component level.
      */
     @Tag("vaadin-list-box")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.1.0-alpha1")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.1.0")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     private class InternalListBox<T> extends Component
             implements HasItemComponents<T> {

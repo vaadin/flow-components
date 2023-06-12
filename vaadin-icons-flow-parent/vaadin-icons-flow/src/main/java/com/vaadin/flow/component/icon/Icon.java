@@ -25,13 +25,13 @@ import com.vaadin.flow.dom.ElementConstants;
  * @see VaadinIcon
  */
 @Tag("vaadin-icon")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.1.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.1.0")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/icons", version = "22.1.0-alpha1")
-@NpmPackage(value = "@vaadin/vaadin-icons", version = "22.1.0-alpha1")
+@NpmPackage(value = "@vaadin/icons", version = "22.1.0")
+@NpmPackage(value = "@vaadin/vaadin-icons", version = "22.1.0")
 @JsModule("@vaadin/icons/vaadin-iconset.js")
-@NpmPackage(value = "@vaadin/icon", version = "22.1.0-alpha1")
-@NpmPackage(value = "@vaadin/vaadin-icon", version = "22.1.0-alpha1")
+@NpmPackage(value = "@vaadin/icon", version = "22.1.0")
+@NpmPackage(value = "@vaadin/vaadin-icon", version = "22.1.0")
 @JsModule("@vaadin/icon/vaadin-icon.js")
 public class Icon extends Component implements HasStyle, ClickNotifier<Icon> {
 

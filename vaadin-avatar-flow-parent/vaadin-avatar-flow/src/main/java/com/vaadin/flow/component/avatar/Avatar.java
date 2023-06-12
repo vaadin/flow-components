@@ -30,11 +30,11 @@ import java.util.stream.Stream;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-avatar")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.1.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.1.0")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/avatar/src/vaadin-avatar.js")
-@NpmPackage(value = "@vaadin/avatar", version = "22.1.0-alpha1")
-@NpmPackage(value = "@vaadin/vaadin-avatar", version = "22.1.0-alpha1")
+@NpmPackage(value = "@vaadin/avatar", version = "22.1.0")
+@NpmPackage(value = "@vaadin/vaadin-avatar", version = "22.1.0")
 public class Avatar extends Component implements HasStyle, HasSize, HasTheme {
 
     /**
