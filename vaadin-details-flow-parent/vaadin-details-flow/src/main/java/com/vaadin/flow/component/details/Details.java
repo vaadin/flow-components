@@ -28,10 +28,10 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.shared.Registration;
 
 @Tag("vaadin-details")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.1.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.1.0")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/details", version = "22.1.0-alpha1")
-@NpmPackage(value = "@vaadin/vaadin-details", version = "22.1.0-alpha1")
+@NpmPackage(value = "@vaadin/details", version = "22.1.0")
+@NpmPackage(value = "@vaadin/vaadin-details", version = "22.1.0")
 @JsModule("@vaadin/details/src/vaadin-details.js")
 public class Details extends Component
         implements HasEnabled, HasTheme, HasStyle, HasSize {

@@ -28,10 +28,10 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-login-overlay")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.1.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.1.0")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/login", version = "22.1.0-alpha1")
-@NpmPackage(value = "@vaadin/vaadin-login", version = "22.1.0-alpha1")
+@NpmPackage(value = "@vaadin/login", version = "22.1.0")
+@NpmPackage(value = "@vaadin/vaadin-login", version = "22.1.0")
 @JsModule("@vaadin/login/src/vaadin-login-overlay.js")
 public class LoginOverlay extends AbstractLogin {
 
