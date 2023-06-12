@@ -97,10 +97,10 @@ import com.vaadin.flow.dom.Element;
  * </p>
  */
 @Tag("vaadin-button")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.1.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.1.0")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/button", version = "22.1.0-alpha1")
-@NpmPackage(value = "@vaadin/vaadin-button", version = "22.1.0-alpha1")
+@NpmPackage(value = "@vaadin/button", version = "22.1.0")
+@NpmPackage(value = "@vaadin/vaadin-button", version = "22.1.0")
 @JsModule("@vaadin/button/src/vaadin-button.js")
 public abstract class GeneratedVaadinButton<R extends GeneratedVaadinButton<R>>
         extends Component

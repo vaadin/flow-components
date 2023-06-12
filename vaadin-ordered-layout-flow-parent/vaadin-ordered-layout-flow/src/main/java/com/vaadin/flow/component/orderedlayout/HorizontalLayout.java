@@ -21,10 +21,10 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * have a predefined size - its size is defined by the components inside it.
  */
 @Tag("vaadin-horizontal-layout")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.1.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "22.1.0")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/horizontal-layout", version = "22.1.0-alpha1")
-@NpmPackage(value = "@vaadin/vaadin-ordered-layout", version = "22.1.0-alpha1")
+@NpmPackage(value = "@vaadin/horizontal-layout", version = "22.1.0")
+@NpmPackage(value = "@vaadin/vaadin-ordered-layout", version = "22.1.0")
 @JsModule("@vaadin/horizontal-layout/src/vaadin-horizontal-layout.js")
 public class HorizontalLayout extends Component implements ThemableLayout,
         FlexComponent, ClickNotifier<HorizontalLayout> {
