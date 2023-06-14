@@ -25,6 +25,8 @@ import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.InputNotifier;
 import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.HasValidator;
+import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
 
@@ -37,7 +39,7 @@ public class PasswordField
         extends GeneratedVaadinPasswordField<PasswordField, String> implements
         HasSize, HasValidation, HasValueChangeMode, HasPrefixAndSuffix,
         InputNotifier, KeyNotifier, CompositionNotifier, HasAutocomplete,
-        HasAutocapitalize, HasAutocorrect, HasHelper, HasLabel {
+        HasAutocapitalize, HasAutocorrect, HasHelper, HasLabel, HasValidator<String> {
     private ValueChangeMode currentMode;
 
     private boolean isConnectorAttached;
@@ -460,6 +462,11 @@ public class PasswordField
     public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
         super.setRequiredIndicatorVisible(requiredIndicatorVisible);
         getValidationSupport().setRequired(requiredIndicatorVisible);
+    }
+    
+    @Override
+    public Validator<String> getDefaultValidator() {
+        return (value, context) -> getValidationSupport().checkValidity(value);
     }
 
     /**

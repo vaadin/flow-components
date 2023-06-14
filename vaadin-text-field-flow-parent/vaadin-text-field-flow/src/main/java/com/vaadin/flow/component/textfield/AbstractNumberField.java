@@ -27,6 +27,9 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.InputNotifier;
 import com.vaadin.flow.component.KeyNotifier;
+import com.vaadin.flow.data.binder.HasValidator;
+import com.vaadin.flow.data.binder.ValidationResult;
+import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.SerializableFunction;
@@ -41,7 +44,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         extends GeneratedVaadinNumberField<C, T> implements HasSize,
         HasValidation, HasValueChangeMode, HasPrefixAndSuffix, InputNotifier,
         KeyNotifier, CompositionNotifier, HasAutocomplete, HasAutocapitalize,
-        HasAutocorrect, HasHelper, HasLabel {
+        HasAutocorrect, HasHelper, HasLabel, HasValidator<T> {
 
     private ValueChangeMode currentMode;
 
@@ -357,6 +360,31 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         return isInvalidBoolean();
     }
 
+    @Override
+    public Validator<T> getDefaultValidator() {
+        return (value, context) -> checkValidity(value);
+    }
+
+    private ValidationResult checkValidity(T value) {
+        final boolean isGreaterThanMax = value != null
+                && value.doubleValue() > max;
+        if (isGreaterThanMax) {
+            return ValidationResult.error("");
+        }
+
+        final boolean isSmallerThanMin = value != null
+                && value.doubleValue() < min;
+        if (isSmallerThanMin) {
+            return ValidationResult.error("");
+        }
+
+        if (!isValidByStep(value)) {
+            return ValidationResult.error("");
+        }
+
+        return ValidationResult.ok();
+    }
+    
     /**
      * Performs server-side validation of the current value. This is needed
      * because it is possible to circumvent the client-side validation
@@ -365,16 +393,12 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     @Override
     protected void validate() {
         T value = getValue();
+        
+        final ValidationResult requiredValidation = TextFieldValidationSupport.checkRequired(required,
+                value, getEmptyValue());
 
-        final boolean isRequiredButEmpty = required
-                && Objects.equals(getEmptyValue(), value);
-        final boolean isGreaterThanMax = value != null
-                && value.doubleValue() > max;
-        final boolean isSmallerThanMin = value != null
-                && value.doubleValue() < min;
-
-        setInvalid(isRequiredButEmpty || isGreaterThanMax || isSmallerThanMin
-                || !isValidByStep(value));
+        setInvalid(
+                requiredValidation.isError() || checkValidity(value).isError());
     }
 
     private boolean isValidByStep(T value) {

@@ -35,6 +35,9 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.data.binder.HasValidator;
+import com.vaadin.flow.data.binder.ValidationResult;
+import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.JsonSerializer;
@@ -58,7 +61,7 @@ import elemental.json.JsonType;
 @JavaScript("frontend://date-picker-datefns.js")
 @JavaScript("frontend://datepickerConnector.js")
 public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
-        implements HasSize, HasValidation, HasHelper, HasLabel {
+        implements HasSize, HasValidation, HasHelper, HasLabel, HasValidator<LocalDate> {
 
     private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
@@ -434,6 +437,11 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     public String getErrorMessage() {
         return getErrorMessageString();
     }
+    
+    @Override
+    public Validator<LocalDate> getDefaultValidator() {
+        return (value, context) -> checkValidity(value);
+    }
 
     @Override
     public void setInvalid(boolean invalid) {
@@ -451,6 +459,51 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     public boolean isInvalid() {
         return isInvalidBoolean();
     }
+    
+    private ValidationResult checkValidity(LocalDate value) {
+        ValidationResult greaterThanMax = checkGreaterThanMax(value, max);
+        if (greaterThanMax.isError()) {
+            return greaterThanMax;
+        }
+
+        ValidationResult smallerThanMin = checkSmallerThanMin(value, min);
+        if (smallerThanMin.isError()) {
+            return smallerThanMin;
+        }
+
+        return ValidationResult.ok();
+    }
+    
+    public static <V extends Comparable<V>> ValidationResult checkGreaterThanMax(
+            V value, V maxValue) {
+        final boolean isGreaterThanMax = value != null && maxValue != null
+                && value.compareTo(maxValue) > 0;
+        if (isGreaterThanMax) {
+            return ValidationResult.error("");
+        }
+        return ValidationResult.ok();
+    }
+    
+    public static <V extends Comparable<V>> ValidationResult checkSmallerThanMin(
+            V value, V minValue) {
+        final boolean isSmallerThanMin = value != null && minValue != null
+                && value.compareTo(minValue) < 0;
+        if (isSmallerThanMin) {
+            return ValidationResult.error("");
+        }
+        return ValidationResult.ok();
+    }
+    
+    public static <V> ValidationResult checkRequired(boolean required, V value,
+            V emptyValue) {
+        final boolean isRequiredButEmpty = required
+                && Objects.equals(emptyValue, value);
+        if (isRequiredButEmpty) {
+            return ValidationResult.error("");
+        }
+        return ValidationResult.ok();
+    }
+
 
     /**
      * Performs a server-side validation of the given value. This is needed
@@ -458,13 +511,10 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
      * constraints using browser development tools.
      */
     private boolean isInvalid(LocalDate value) {
-        final boolean isRequiredButEmpty = required
-                && Objects.equals(getEmptyValue(), value);
-        final boolean isGreaterThanMax = value != null && max != null
-                && value.isAfter(max);
-        final boolean isSmallerThenMin = value != null && min != null
-                && value.isBefore(min);
-        return isRequiredButEmpty || isGreaterThanMax || isSmallerThenMin;
+        ValidationResult requiredValidation = checkRequired(required, value,
+                getEmptyValue());
+
+        return requiredValidation.isError() || checkValidity(value).isError();
     }
 
     /**

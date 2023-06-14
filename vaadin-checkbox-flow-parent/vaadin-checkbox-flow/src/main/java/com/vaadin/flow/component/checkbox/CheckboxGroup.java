@@ -31,6 +31,7 @@ import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.data.binder.HasDataProvider;
 import com.vaadin.flow.data.binder.HasItemsAndComponents;
+import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.KeyMapper;
@@ -58,7 +59,7 @@ public class CheckboxGroup<T>
         extends GeneratedVaadinCheckboxGroup<CheckboxGroup<T>, Set<T>>
         implements HasItemsAndComponents<T>, HasSize, HasValidation,
         MultiSelect<CheckboxGroup<T>, T>, HasDataProvider<T>, HasHelper,
-        HasLabel {
+        HasLabel, HasValidator<T> {
 
     private static final String VALUE = "value";
 

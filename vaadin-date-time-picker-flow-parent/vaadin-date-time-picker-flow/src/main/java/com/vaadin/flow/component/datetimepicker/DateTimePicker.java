@@ -40,6 +40,9 @@ import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.timepicker.StepsUtil;
+import com.vaadin.flow.data.binder.HasValidator;
+import com.vaadin.flow.data.binder.ValidationResult;
+import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.function.SerializableFunction;
 
 @Tag("vaadin-date-time-picker-date-picker")
@@ -80,7 +83,7 @@ class DateTimePickerTimePicker
 public class DateTimePicker
         extends AbstractSinglePropertyField<DateTimePicker, LocalDateTime>
         implements HasStyle, HasSize, HasTheme, HasValidation,
-        Focusable<DateTimePicker>, HasHelper, HasLabel {
+        Focusable<DateTimePicker>, HasHelper, HasLabel, HasValidator<LocalDateTime> {
 
     private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
@@ -603,6 +606,56 @@ public class DateTimePicker
     public boolean isInvalid() {
         return getElement().getProperty("invalid", false);
     }
+    
+    @Override
+    public Validator<LocalDateTime> getDefaultValidator() {
+        return (value, context) -> checkValidity(value);
+    }
+
+    private ValidationResult checkValidity(LocalDateTime value) {
+        ValidationResult greaterThanMax = checkGreaterThanMax(value, max);
+        if (greaterThanMax.isError()) {
+            return greaterThanMax;
+        }
+
+        ValidationResult smallerThanMin = checkSmallerThanMin(value, min);
+        if (smallerThanMin.isError()) {
+            return smallerThanMin;
+        }
+
+        return ValidationResult.ok();
+    }
+    
+    
+    public static <V extends Comparable<V>> ValidationResult checkGreaterThanMax(
+            V value, V maxValue) {
+        final boolean isGreaterThanMax = value != null && maxValue != null
+                && value.compareTo(maxValue) > 0;
+        if (isGreaterThanMax) {
+            return ValidationResult.error("");
+        }
+        return ValidationResult.ok();
+    }
+    
+    public static <V extends Comparable<V>> ValidationResult checkSmallerThanMin(
+            V value, V minValue) {
+        final boolean isSmallerThanMin = value != null && minValue != null
+                && value.compareTo(minValue) < 0;
+        if (isSmallerThanMin) {
+            return ValidationResult.error("");
+        }
+        return ValidationResult.ok();
+    }
+    
+    public static <V> ValidationResult checkRequired(boolean required, V value,
+            V emptyValue) {
+        final boolean isRequiredButEmpty = required
+                && Objects.equals(emptyValue, value);
+        if (isRequiredButEmpty) {
+            return ValidationResult.error("");
+        }
+        return ValidationResult.ok();
+    }
 
     /**
      * Gets the validity of the date time picker value.
@@ -610,13 +663,10 @@ public class DateTimePicker
      * @return the current validity of the value.
      */
     private boolean isInvalid(LocalDateTime value) {
-        final boolean isRequiredButEmpty = required
-                && Objects.equals(getEmptyValue(), value);
-        final boolean isGreaterThanMax = value != null && max != null
-                && value.isAfter(max);
-        final boolean isSmallerThanMin = value != null && min != null
-                && value.isBefore(min);
-        return isRequiredButEmpty || isGreaterThanMax || isSmallerThanMin;
+        ValidationResult requiredValidation = checkRequired(required, value,
+                getEmptyValue());
+
+        return requiredValidation.isError() || checkValidity(value).isError();
     }
 
     /**

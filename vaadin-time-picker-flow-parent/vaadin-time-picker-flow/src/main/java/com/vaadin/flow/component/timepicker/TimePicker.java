@@ -34,6 +34,9 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.data.binder.HasValidator;
+import com.vaadin.flow.data.binder.ValidationResult;
+import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.StateTree;
@@ -48,7 +51,7 @@ import com.vaadin.flow.shared.Registration;
 @JavaScript("frontend://timepickerConnector.js")
 @JsModule("./timepickerConnector.js")
 public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
-        implements HasSize, HasValidation, HasEnabled, HasHelper, HasLabel {
+        implements HasSize, HasValidation, HasEnabled, HasHelper, HasLabel, HasValidator<LocalTime> {
 
     private static final SerializableFunction<String, LocalTime> PARSER = valueFromClient -> {
         return valueFromClient == null || valueFromClient.isEmpty() ? null
@@ -206,6 +209,57 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     public boolean isInvalid() {
         return isInvalidBoolean();
     }
+    
+    @Override
+    public Validator<LocalTime> getDefaultValidator() {
+        return (value, context) -> checkValidity(value);
+    }
+
+    private ValidationResult checkValidity(LocalTime value) {
+        ValidationResult greaterThanMaxValidation = checkGreaterThanMax(value,
+                max);
+        if (greaterThanMaxValidation.isError()) {
+            return greaterThanMaxValidation;
+        }
+
+        ValidationResult smallThanMinValidation = checkSmallerThanMin(value,
+                min);
+        if (smallThanMinValidation.isError()) {
+            return smallThanMinValidation;
+        }
+
+        return ValidationResult.ok();
+    }
+    
+    public static <V extends Comparable<V>> ValidationResult checkGreaterThanMax(
+            V value, V maxValue) {
+        final boolean isGreaterThanMax = value != null && maxValue != null
+                && value.compareTo(maxValue) > 0;
+        if (isGreaterThanMax) {
+            return ValidationResult.error("");
+        }
+        return ValidationResult.ok();
+    }
+    
+    public static <V extends Comparable<V>> ValidationResult checkSmallerThanMin(
+            V value, V minValue) {
+        final boolean isSmallerThanMin = value != null && minValue != null
+                && value.compareTo(minValue) < 0;
+        if (isSmallerThanMin) {
+            return ValidationResult.error("");
+        }
+        return ValidationResult.ok();
+    }
+    
+    public static <V> ValidationResult checkRequired(boolean required, V value,
+            V emptyValue) {
+        final boolean isRequiredButEmpty = required
+                && Objects.equals(emptyValue, value);
+        if (isRequiredButEmpty) {
+            return ValidationResult.error("");
+        }
+        return ValidationResult.ok();
+    }
 
     /**
      * Performs a server-side validation of the given value. This is needed
@@ -213,13 +267,10 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
      * constraints using browser development tools.
      */
     private boolean isInvalid(LocalTime value) {
-        final boolean isRequiredButEmpty = required
-                && Objects.equals(getEmptyValue(), value);
-        final boolean isGreaterThanMax = value != null && max != null
-                && value.isAfter(max);
-        final boolean isSmallerThenMin = value != null && min != null
-                && value.isBefore(min);
-        return isRequiredButEmpty || isGreaterThanMax || isSmallerThenMin;
+    	 ValidationResult requiredValidation = checkRequired(required, value,
+                 getEmptyValue());
+
+         return requiredValidation.isError() || checkValidity(value).isError();
     }
 
     @Override
