@@ -56,9 +56,10 @@ import com.vaadin.flow.shared.Registration;
  */
 @NpmPackage(value = "@vaadin/vaadin-radio-button", version = "1.5.4")
 public class RadioButtonGroup<T>
-        extends GeneratedVaadinRadioGroup<RadioButtonGroup<T>, T> implements
-        HasItemsAndComponents<T>, SingleSelect<RadioButtonGroup<T>, T>,
-        HasDataProvider<T>, HasValidation, HasHelper, HasLabel,  HasValidator<T>{
+        extends GeneratedVaadinRadioGroup<RadioButtonGroup<T>, T>
+        implements HasItemsAndComponents<T>,
+        SingleSelect<RadioButtonGroup<T>, T>, HasDataProvider<T>, HasValidation,
+        HasHelper, HasLabel, HasValidator<T> {
 
     private final KeyMapper<T> keyMapper = new KeyMapper<>();
 

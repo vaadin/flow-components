@@ -63,12 +63,13 @@ final class TextFieldValidationSupport implements Serializable {
      * @return <code>true</code> if the value is invalid.
      */
     boolean isInvalid(String value) {
-		ValidationResult requiredValidation = checkRequired(required, value, field.getEmptyValue());
+        ValidationResult requiredValidation = checkRequired(required, value,
+                field.getEmptyValue());
 
-		return requiredValidation.isError() || checkValidity(value).isError();
-	}
+        return requiredValidation.isError() || checkValidity(value).isError();
+    }
 
-	ValidationResult checkValidity(String value) {
+    ValidationResult checkValidity(String value) {
 
         final boolean isMaxLengthExceeded = value != null && maxLength != null
                 && value.length() > maxLength;
@@ -91,12 +92,14 @@ final class TextFieldValidationSupport implements Serializable {
         return ValidationResult.ok();
     }
 
-	public static <V> ValidationResult checkRequired(boolean required, V value, V emptyValue) {
-		final boolean isRequiredButEmpty = required && Objects.equals(emptyValue, value);
-		if (isRequiredButEmpty) {
-			return ValidationResult.error("");
-		}
-		return ValidationResult.ok();
-	}
+    public static <V> ValidationResult checkRequired(boolean required, V value,
+            V emptyValue) {
+        final boolean isRequiredButEmpty = required
+                && Objects.equals(emptyValue, value);
+        if (isRequiredButEmpty) {
+            return ValidationResult.error("");
+        }
+        return ValidationResult.ok();
+    }
 
 }

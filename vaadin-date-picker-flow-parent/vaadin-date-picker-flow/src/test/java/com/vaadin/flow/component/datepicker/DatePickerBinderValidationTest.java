@@ -107,7 +107,7 @@ public class DatePickerBinderValidationTest {
     }
 
     private Binder<Bean> attachBinderToField(boolean isRequired) {
-    	Binder<Bean> binder = new Binder<>(Bean.class);
+        Binder<Bean> binder = new Binder<>(Bean.class);
         Binder.BindingBuilder<Bean, LocalDate> binding = binder.forField(field)
                 .withValidator(
                         date -> date == null

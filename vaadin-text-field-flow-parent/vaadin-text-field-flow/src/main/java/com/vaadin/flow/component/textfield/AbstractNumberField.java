@@ -384,7 +384,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
 
         return ValidationResult.ok();
     }
-    
+
     /**
      * Performs server-side validation of the current value. This is needed
      * because it is possible to circumvent the client-side validation
@@ -393,9 +393,9 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     @Override
     protected void validate() {
         T value = getValue();
-        
-        final ValidationResult requiredValidation = TextFieldValidationSupport.checkRequired(required,
-                value, getEmptyValue());
+
+        final ValidationResult requiredValidation = TextFieldValidationSupport
+                .checkRequired(required, value, getEmptyValue());
 
         setInvalid(
                 requiredValidation.isError() || checkValidity(value).isError());

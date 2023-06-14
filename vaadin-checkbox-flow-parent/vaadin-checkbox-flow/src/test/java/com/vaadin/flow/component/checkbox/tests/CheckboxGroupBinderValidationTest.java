@@ -98,7 +98,7 @@ public class CheckboxGroupBinderValidationTest {
     }
 
     private Binder<Bean> attachBinderToField(boolean isRequired) {
-    	Binder<Bean> binder = new Binder<>(Bean.class);
+        Binder<Bean> binder = new Binder<>(Bean.class);
         BindingBuilder<Bean, Set<String>> binding = binder.forField(field)
                 .withValidator(
                         value -> value == null || value.isEmpty()

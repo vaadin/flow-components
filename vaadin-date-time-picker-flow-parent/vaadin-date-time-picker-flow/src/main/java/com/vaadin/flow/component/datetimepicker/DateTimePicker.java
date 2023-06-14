@@ -80,10 +80,10 @@ class DateTimePickerTimePicker
 @HtmlImport("frontend://bower_components/vaadin-date-time-picker/src/vaadin-date-time-picker.html")
 @NpmPackage(value = "@vaadin/vaadin-date-time-picker", version = "1.4.0")
 @JsModule("@vaadin/vaadin-date-time-picker/src/vaadin-date-time-picker.js")
-public class DateTimePicker
-        extends AbstractSinglePropertyField<DateTimePicker, LocalDateTime>
-        implements HasStyle, HasSize, HasTheme, HasValidation,
-        Focusable<DateTimePicker>, HasHelper, HasLabel, HasValidator<LocalDateTime> {
+public class DateTimePicker extends
+        AbstractSinglePropertyField<DateTimePicker, LocalDateTime> implements
+        HasStyle, HasSize, HasTheme, HasValidation, Focusable<DateTimePicker>,
+        HasHelper, HasLabel, HasValidator<LocalDateTime> {
 
     private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
@@ -606,7 +606,7 @@ public class DateTimePicker
     public boolean isInvalid() {
         return getElement().getProperty("invalid", false);
     }
-    
+
     @Override
     public Validator<LocalDateTime> getDefaultValidator() {
         return (value, context) -> checkValidity(value);
@@ -625,8 +625,7 @@ public class DateTimePicker
 
         return ValidationResult.ok();
     }
-    
-    
+
     public static <V extends Comparable<V>> ValidationResult checkGreaterThanMax(
             V value, V maxValue) {
         final boolean isGreaterThanMax = value != null && maxValue != null
@@ -636,7 +635,7 @@ public class DateTimePicker
         }
         return ValidationResult.ok();
     }
-    
+
     public static <V extends Comparable<V>> ValidationResult checkSmallerThanMin(
             V value, V minValue) {
         final boolean isSmallerThanMin = value != null && minValue != null
@@ -646,7 +645,7 @@ public class DateTimePicker
         }
         return ValidationResult.ok();
     }
-    
+
     public static <V> ValidationResult checkRequired(boolean required, V value,
             V emptyValue) {
         final boolean isRequiredButEmpty = required

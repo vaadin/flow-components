@@ -56,10 +56,11 @@ import com.vaadin.flow.function.SerializableBiFunction;
 @JavaScript("frontend://vaadin-big-decimal-field.js")
 @JsModule("./vaadin-big-decimal-field.js")
 public class BigDecimalField
-        extends GeneratedVaadinTextField<BigDecimalField, BigDecimal> implements
-        HasSize, HasValidation, HasValueChangeMode, HasPrefixAndSuffix,
-        InputNotifier, KeyNotifier, CompositionNotifier, HasAutocomplete,
-        HasAutocapitalize, HasAutocorrect, HasHelper, HasLabel, HasValidator<BigDecimal> {
+        extends GeneratedVaadinTextField<BigDecimalField, BigDecimal>
+        implements HasSize, HasValidation, HasValueChangeMode,
+        HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
+        HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper, HasLabel,
+        HasValidator<BigDecimal> {
     private ValueChangeMode currentMode;
 
     private boolean isConnectorAttached;
@@ -410,8 +411,8 @@ public class BigDecimalField
      */
     @Override
     protected void validate() {
-    	ValidationResult requiredValidation = TextFieldValidationSupport.checkRequired(required,
-                getValue(), getEmptyValue());
+        ValidationResult requiredValidation = TextFieldValidationSupport
+                .checkRequired(required, getValue(), getEmptyValue());
         setInvalid(requiredValidation.isError());
     }
 

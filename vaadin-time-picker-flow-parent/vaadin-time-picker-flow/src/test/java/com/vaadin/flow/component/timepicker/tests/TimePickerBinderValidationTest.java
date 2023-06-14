@@ -106,7 +106,7 @@ public class TimePickerBinderValidationTest {
     }
 
     private Binder<Bean> attachBinderToField(boolean isRequired) {
-    	Binder<Bean> binder = new Binder<>(Bean.class);
+        Binder<Bean> binder = new Binder<>(Bean.class);
         Binder.BindingBuilder<Bean, LocalTime> binding = binder.forField(field)
                 .withValidator(
                         value -> value == null

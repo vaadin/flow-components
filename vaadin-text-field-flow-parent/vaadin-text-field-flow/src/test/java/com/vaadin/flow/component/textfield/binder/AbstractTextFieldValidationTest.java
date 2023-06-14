@@ -116,7 +116,7 @@ public abstract class AbstractTextFieldValidationTest<T, K extends Component & H
     }
 
     private Binder<?> attachBinderToField(boolean isRequired) {
-    	Binder<?> binder = new Binder<>(Bean.class);
+        Binder<?> binder = new Binder<>(Bean.class);
         BindingBuilder<?, T> binding = binder.forField(field)
                 .withValidator(getValidator(), BINDER_FAIL_MESSAGE)
                 .withValidationStatusHandler(statusMock);

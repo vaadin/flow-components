@@ -61,7 +61,8 @@ import elemental.json.JsonType;
 @JavaScript("frontend://date-picker-datefns.js")
 @JavaScript("frontend://datepickerConnector.js")
 public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
-        implements HasSize, HasValidation, HasHelper, HasLabel, HasValidator<LocalDate> {
+        implements HasSize, HasValidation, HasHelper, HasLabel,
+        HasValidator<LocalDate> {
 
     private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
@@ -437,7 +438,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     public String getErrorMessage() {
         return getErrorMessageString();
     }
-    
+
     @Override
     public Validator<LocalDate> getDefaultValidator() {
         return (value, context) -> checkValidity(value);
@@ -459,7 +460,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     public boolean isInvalid() {
         return isInvalidBoolean();
     }
-    
+
     private ValidationResult checkValidity(LocalDate value) {
         ValidationResult greaterThanMax = checkGreaterThanMax(value, max);
         if (greaterThanMax.isError()) {
@@ -473,7 +474,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
 
         return ValidationResult.ok();
     }
-    
+
     public static <V extends Comparable<V>> ValidationResult checkGreaterThanMax(
             V value, V maxValue) {
         final boolean isGreaterThanMax = value != null && maxValue != null
@@ -483,7 +484,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         }
         return ValidationResult.ok();
     }
-    
+
     public static <V extends Comparable<V>> ValidationResult checkSmallerThanMin(
             V value, V minValue) {
         final boolean isSmallerThanMin = value != null && minValue != null
@@ -493,7 +494,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         }
         return ValidationResult.ok();
     }
-    
+
     public static <V> ValidationResult checkRequired(boolean required, V value,
             V emptyValue) {
         final boolean isRequiredButEmpty = required
@@ -503,7 +504,6 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         }
         return ValidationResult.ok();
     }
-
 
     /**
      * Performs a server-side validation of the given value. This is needed

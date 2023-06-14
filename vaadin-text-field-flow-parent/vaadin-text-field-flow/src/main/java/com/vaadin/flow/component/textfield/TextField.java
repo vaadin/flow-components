@@ -37,8 +37,8 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 public class TextField extends GeneratedVaadinTextField<TextField, String>
         implements HasSize, HasValidation, HasValueChangeMode,
         HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
-        HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper,
-        HasLabel, HasValidator<String> {
+        HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper, HasLabel,
+        HasValidator<String> {
     private ValueChangeMode currentMode;
 
     private boolean isConnectorAttached;
@@ -468,7 +468,7 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
         super.setRequiredIndicatorVisible(requiredIndicatorVisible);
         getValidationSupport().setRequired(requiredIndicatorVisible);
     }
-    
+
     @Override
     public Validator<String> getDefaultValidator() {
         return (value, context) -> getValidationSupport().checkValidity(value);

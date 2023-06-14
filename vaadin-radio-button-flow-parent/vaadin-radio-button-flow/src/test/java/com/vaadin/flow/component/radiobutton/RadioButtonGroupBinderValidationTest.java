@@ -96,7 +96,7 @@ public class RadioButtonGroupBinderValidationTest {
     }
 
     private Binder<Bean> attachBinderToField(boolean isRequired) {
-    	Binder<Bean> binder = new Binder<>(Bean.class);
+        Binder<Bean> binder = new Binder<>(Bean.class);
         BindingBuilder<Bean, String> binding = binder.forField(field)
                 .withValidator(
                         value -> value == null || Objects.equals(value, "foo"),

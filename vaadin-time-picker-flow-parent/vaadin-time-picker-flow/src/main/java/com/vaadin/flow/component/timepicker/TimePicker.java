@@ -51,7 +51,8 @@ import com.vaadin.flow.shared.Registration;
 @JavaScript("frontend://timepickerConnector.js")
 @JsModule("./timepickerConnector.js")
 public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
-        implements HasSize, HasValidation, HasEnabled, HasHelper, HasLabel, HasValidator<LocalTime> {
+        implements HasSize, HasValidation, HasEnabled, HasHelper, HasLabel,
+        HasValidator<LocalTime> {
 
     private static final SerializableFunction<String, LocalTime> PARSER = valueFromClient -> {
         return valueFromClient == null || valueFromClient.isEmpty() ? null
@@ -209,7 +210,7 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     public boolean isInvalid() {
         return isInvalidBoolean();
     }
-    
+
     @Override
     public Validator<LocalTime> getDefaultValidator() {
         return (value, context) -> checkValidity(value);
@@ -230,7 +231,7 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
 
         return ValidationResult.ok();
     }
-    
+
     public static <V extends Comparable<V>> ValidationResult checkGreaterThanMax(
             V value, V maxValue) {
         final boolean isGreaterThanMax = value != null && maxValue != null
@@ -240,7 +241,7 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         }
         return ValidationResult.ok();
     }
-    
+
     public static <V extends Comparable<V>> ValidationResult checkSmallerThanMin(
             V value, V minValue) {
         final boolean isSmallerThanMin = value != null && minValue != null
@@ -250,7 +251,7 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
         }
         return ValidationResult.ok();
     }
-    
+
     public static <V> ValidationResult checkRequired(boolean required, V value,
             V emptyValue) {
         final boolean isRequiredButEmpty = required
@@ -267,10 +268,10 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
      * constraints using browser development tools.
      */
     private boolean isInvalid(LocalTime value) {
-    	 ValidationResult requiredValidation = checkRequired(required, value,
-                 getEmptyValue());
+        ValidationResult requiredValidation = checkRequired(required, value,
+                getEmptyValue());
 
-         return requiredValidation.isError() || checkValidity(value).isError();
+        return requiredValidation.isError() || checkValidity(value).isError();
     }
 
     @Override
