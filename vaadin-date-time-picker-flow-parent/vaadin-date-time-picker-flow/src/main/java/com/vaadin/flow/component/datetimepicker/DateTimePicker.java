@@ -626,7 +626,7 @@ public class DateTimePicker extends
         return ValidationResult.ok();
     }
 
-    public static <V extends Comparable<V>> ValidationResult checkGreaterThanMax(
+    private static <V extends Comparable<V>> ValidationResult checkGreaterThanMax(
             V value, V maxValue) {
         final boolean isGreaterThanMax = value != null && maxValue != null
                 && value.compareTo(maxValue) > 0;
@@ -636,7 +636,7 @@ public class DateTimePicker extends
         return ValidationResult.ok();
     }
 
-    public static <V extends Comparable<V>> ValidationResult checkSmallerThanMin(
+    private static <V extends Comparable<V>> ValidationResult checkSmallerThanMin(
             V value, V minValue) {
         final boolean isSmallerThanMin = value != null && minValue != null
                 && value.compareTo(minValue) < 0;
@@ -646,7 +646,7 @@ public class DateTimePicker extends
         return ValidationResult.ok();
     }
 
-    public static <V> ValidationResult checkRequired(boolean required, V value,
+    private static <V> ValidationResult checkRequired(boolean required, V value,
             V emptyValue) {
         final boolean isRequiredButEmpty = required
                 && Objects.equals(emptyValue, value);
