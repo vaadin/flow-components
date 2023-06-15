@@ -19,14 +19,17 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasValidation;
+import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
+import com.vaadin.flow.component.shared.HasClientValidation.ClientValidatedEvent;
 
 /**
  * An abstract class that provides tests verifying that a component correctly
  * implements the {@link HasValidation} interface.
  */
-public abstract class AbstractBasicValidationTest<T extends Component & HasValidation> {
+public abstract class AbstractBasicValidationTest<T extends AbstractField<T, V> & HasValidation, V> {
     protected T testField;
 
     @Before
@@ -41,6 +44,24 @@ public abstract class AbstractBasicValidationTest<T extends Component & HasValid
         testField.setInternalValidationDisabled(true);
 
         Assert.assertTrue(testField.isInternalValidationDisabled());
+    }
+
+    @Test
+    public void setRequired_setInternalValidationDisabled_fireValueChangeEvent_noValidation() {
+        testField.setRequiredIndicatorVisible(true);
+        testField.setInternalValidationDisabled(true);
+
+        ComponentUtil.fireEvent(testField, new ComponentValueChangeEvent<>(testField, testField, testField.getEmptyValue(), false));
+        Assert.assertFalse(testField.isInvalid());
+    }
+
+    @Test
+    public void setRequired_setInternalValidationDisabled_fireClientValidatedEvent_noValidation() {
+        testField.setRequiredIndicatorVisible(true);
+        testField.setInternalValidationDisabled(true);
+
+        ComponentUtil.fireEvent(testField, new ClientValidatedEvent(testField, false));
+        Assert.assertFalse(testField.isInvalid());
     }
 
     @Test

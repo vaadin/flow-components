@@ -17,38 +17,12 @@ package com.vaadin.flow.component.datepicker.validation;
 
 import java.time.LocalDate;
 
-import org.junit.Assert;
-import org.junit.Test;
-
-import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.datepicker.DatePicker;
-import com.vaadin.flow.component.shared.HasClientValidation.ClientValidatedEvent;
 import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
 public class BasicValidationTest
-        extends AbstractBasicValidationTest<DatePicker> {
+        extends AbstractBasicValidationTest<DatePicker, LocalDate> {
     protected DatePicker createTestField() {
         return new DatePicker();
-    }
-
-    @Test
-    public void setInternalValidationDisabled_changeValue_noValidation() {
-        testField.setRequired(true);
-        testField.setInternalValidationDisabled(true);
-
-        testField.setValue(LocalDate.now());
-        Assert.assertFalse(testField.isInvalid());
-
-        testField.setValue(null);
-        Assert.assertFalse(testField.isInvalid());
-    }
-
-    @Test
-    public void setInternalValidationDisabled_fireClientValidatedEvent_noValidation() {
-        testField.setRequired(true);
-        testField.setInternalValidationDisabled(true);
-
-        ComponentUtil.fireEvent(testField, new ClientValidatedEvent(testField, false));
-        Assert.assertFalse(testField.isInvalid());
     }
 }
