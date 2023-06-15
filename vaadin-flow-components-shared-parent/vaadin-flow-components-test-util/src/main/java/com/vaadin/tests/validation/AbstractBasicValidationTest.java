@@ -35,6 +35,15 @@ public abstract class AbstractBasicValidationTest<T extends Component & HasValid
     }
 
     @Test
+    public void setInternalValidationDisabled_isInternalValidationDisabled() {
+        Assert.assertFalse(testField.isInternalValidationDisabled());
+
+        testField.setInternalValidationDisabled(true);
+
+        Assert.assertTrue(testField.isInternalValidationDisabled());
+    }
+
+    @Test
     public void setErrorMessage_getErrorMessage() {
         Assert.assertNull(testField.getErrorMessage());
         Assert.assertNull(testField.getElement().getProperty("errorMessage"));

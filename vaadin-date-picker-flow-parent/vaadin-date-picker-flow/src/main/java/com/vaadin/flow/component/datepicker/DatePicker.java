@@ -115,6 +115,8 @@ public class DatePicker
 
     private StateTree.ExecutionRegistration pendingI18nUpdate;
 
+    private boolean internalValidationDisabled = false;
+
     /**
      * Default constructor.
      */
@@ -780,7 +782,9 @@ public class DatePicker
      * constraints using browser development tools.
      */
     protected void validate() {
-        setInvalid(isInvalid(getValue()));
+        if (!isInternalValidationDisabled()) {
+            setInvalid(isInvalid(getValue()));
+        }
     }
 
     /**
@@ -840,6 +844,16 @@ public class DatePicker
     public Registration addInvalidChangeListener(
             ComponentEventListener<InvalidChangeEvent> listener) {
         return addListener(InvalidChangeEvent.class, listener);
+    }
+
+    @Override
+    public void setInternalValidationDisabled(boolean disabled) {
+        this.internalValidationDisabled = disabled;
+    }
+
+    @Override
+    public boolean isInternalValidationDisabled() {
+        return this.internalValidationDisabled;
     }
 
     /**
