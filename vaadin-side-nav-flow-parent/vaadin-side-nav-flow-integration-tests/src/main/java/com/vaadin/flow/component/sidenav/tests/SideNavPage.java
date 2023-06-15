@@ -15,10 +15,8 @@
  */
 package com.vaadin.flow.component.sidenav.tests;
 
-import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.router.Route;
@@ -40,40 +38,18 @@ public class SideNavPage extends Div {
         SideNavItem nonNavigableParent = new SideNavItem(
                 "Non-navigable parent");
         nonNavigableParent.setId("non-navigable-parent");
+        nonNavigableParent.addItem(new SideNavItem("Item 1"));
+        nonNavigableParent.addItem(new SideNavItem("Item 2"));
+        nonNavigableParent.addItem(new SideNavItem("Item 3"));
         sideNav.addItem(nonNavigableParent);
-
-        SideNavItem labelOnly = new SideNavItem("Label only");
-        labelOnly.setId("label-only");
-        nonNavigableParent.addItem(labelOnly);
-
-        SideNavItem classTarget = new SideNavItem("Target using class",
-                SideNavTargetView.class);
-        classTarget.setId("class-target");
-        nonNavigableParent.addItem(classTarget);
-
-        Avatar vaadinAvatar = new Avatar("Vaadin");
-        SideNavItem classTargetWithComponent = new SideNavItem(
-                "Target using class with component", SideNavTargetView.class,
-                vaadinAvatar);
-        classTargetWithComponent.setId("class-target-prefix-component");
-        nonNavigableParent.addItem(classTargetWithComponent);
 
         SideNavItem navigableParent = new SideNavItem("Navigable parent",
                 "vaadin-side-nav/side-nav-test-target-view");
         navigableParent.setId("navigable-parent");
+        navigableParent.addItem(new SideNavItem("Item 1",
+                "vaadin-side-nav/side-nav-test-target-view"));
+        navigableParent.addItem(new SideNavItem("Item 2"));
         sideNav.addItem(navigableParent);
-
-        SideNavItem pathTarget = new SideNavItem("Target using path",
-                "vaadin-side-nav/side-nav-test-target-view");
-        pathTarget.setId("path-target");
-        navigableParent.addItem(pathTarget);
-
-        SideNavItem pathTargetWithIcon = new SideNavItem(
-                "Target using path with icon",
-                "vaadin-side-nav/side-nav-test-target-view",
-                VaadinIcon.GLOBE.create());
-        pathTargetWithIcon.setId("path-target-icon");
-        navigableParent.addItem(pathTargetWithIcon);
 
         Div expandedStatePrintout = new Div();
         expandedStatePrintout.setId("expanded-state-printout");
@@ -91,18 +67,6 @@ public class SideNavPage extends Div {
                         .setText(String.valueOf(sideNav.isExpanded())));
         printExpandedState.setId("print-side-nav-expanded-state");
         add(printExpandedState);
-
-        NativeButton test = new NativeButton("test",
-                event -> navigableParent.setLabel(null));
-        add(test);
-
-        NativeButton test2 = new NativeButton("test2",
-                event -> navigableParent.setLabel(""));
-        add(test2);
-
-        NativeButton test3 = new NativeButton("test3",
-                event -> navigableParent.setLabel("aaa"));
-        add(test3);
 
         NativeButton addMatchingPathAliasToNonNavigableParent = new NativeButton(
                 "Add matching path alias to non-navigable parent",
