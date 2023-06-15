@@ -29,8 +29,8 @@ import com.vaadin.flow.component.shared.HasClientValidation.ClientValidatedEvent
  * An abstract class that provides tests verifying that a component correctly
  * implements the {@link HasValidation} interface.
  */
-public abstract class AbstractBasicValidationTest<T extends AbstractField<T, V> & HasValidation, V> {
-    protected T testField;
+public abstract class AbstractBasicValidationTest<C extends AbstractField<C, V> & HasValidation, V> {
+    protected C testField;
 
     @Before
     public void setup() {
@@ -88,5 +88,5 @@ public abstract class AbstractBasicValidationTest<T extends AbstractField<T, V> 
         Assert.assertTrue(testField.getElement().getProperty("invalid", false));
     }
 
-    protected abstract T createTestField();
+    protected abstract C createTestField();
 }
