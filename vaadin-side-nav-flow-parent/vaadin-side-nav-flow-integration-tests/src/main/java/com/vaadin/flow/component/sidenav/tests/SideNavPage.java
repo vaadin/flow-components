@@ -38,9 +38,9 @@ public class SideNavPage extends Div {
         SideNavItem nonNavigableParent = new SideNavItem(
                 "Non-navigable parent");
         nonNavigableParent.setId("non-navigable-parent");
-        nonNavigableParent.addItem(new SideNavItem("Dummy child item NN1"));
-        nonNavigableParent.addItem(new SideNavItem("Dummy child item NN2"));
-        nonNavigableParent.addItem(new SideNavItem("Dummy child item NN3"));
+        nonNavigableParent.addItem(new SideNavItem("Item 1"));
+        nonNavigableParent.addItem(new SideNavItem("Item 2"));
+        nonNavigableParent.addItem(new SideNavItem("Item 3"));
         sideNav.addItem(nonNavigableParent);
 
         SideNavItem navigableParent = new SideNavItem("Navigable parent",
