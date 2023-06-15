@@ -35,13 +35,6 @@ public class SideNavPage extends Div {
         sideNav.setCollapsible(true);
         add(sideNav);
 
-        SideNavItem navigableParent = new SideNavItem("Navigable parent",
-                "vaadin-side-nav/side-nav-test-target-view");
-        navigableParent.setId("navigable-parent");
-        navigableParent.addItem(new SideNavItem("Dummy child item N1"));
-        navigableParent.addItem(new SideNavItem("Dummy child item N2"));
-        sideNav.addItem(navigableParent);
-
         SideNavItem nonNavigableParent = new SideNavItem(
                 "Non-navigable parent");
         nonNavigableParent.setId("non-navigable-parent");
@@ -49,6 +42,14 @@ public class SideNavPage extends Div {
         nonNavigableParent.addItem(new SideNavItem("Dummy child item NN2"));
         nonNavigableParent.addItem(new SideNavItem("Dummy child item NN3"));
         sideNav.addItem(nonNavigableParent);
+
+        SideNavItem navigableParent = new SideNavItem("Navigable parent",
+                "vaadin-side-nav/side-nav-test-target-view");
+        navigableParent.setId("navigable-parent");
+        navigableParent.addItem(new SideNavItem("Dummy child item N1",
+                "vaadin-side-nav/side-nav-test-target-view"));
+        navigableParent.addItem(new SideNavItem("Dummy child item N2"));
+        sideNav.addItem(navigableParent);
 
         Div expandedStatePrintout = new Div();
         expandedStatePrintout.setId("expanded-state-printout");
