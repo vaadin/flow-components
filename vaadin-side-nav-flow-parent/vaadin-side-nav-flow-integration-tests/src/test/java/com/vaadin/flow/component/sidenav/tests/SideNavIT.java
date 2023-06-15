@@ -115,6 +115,24 @@ public class SideNavIT extends AbstractComponentIT {
         assertExpandedStateOnServer("print-side-nav-expanded-state", "false");
     }
 
+    @Test
+    public void addMatchingPathAliasToNonNavigableParent_itemActive() {
+        $(NativeButtonElement.class)
+                .id("add-matching-path-alias-to-non-navigable-parent").click();
+
+        Assert.assertFalse(nonNavigableParent.isActive());
+    }
+
+    @Test
+    public void setDummyPathToNonNavigableParent_addMatchingPathAlias_itemActive() {
+        $(NativeButtonElement.class)
+                .id("set-dummy-path-to-non-navigable-parent").click();
+        $(NativeButtonElement.class)
+                .id("add-matching-path-alias-to-non-navigable-parent").click();
+
+        Assert.assertTrue(nonNavigableParent.isActive());
+    }
+
     private void assertExpandedStateOnServer(String buttonToClick,
             String expectedState) {
         $(NativeButtonElement.class).id(buttonToClick).click();

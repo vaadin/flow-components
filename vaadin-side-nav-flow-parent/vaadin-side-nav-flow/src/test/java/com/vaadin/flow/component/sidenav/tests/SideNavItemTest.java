@@ -20,6 +20,7 @@ import java.util.List;
 
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.router.Router;
 import com.vaadin.flow.server.VaadinContext;
@@ -388,6 +389,88 @@ public class SideNavItemTest {
         Assert.assertFalse(sideNavItem.isExpanded());
     }
 
+    @Test
+    public void createWithNoPathAlias_pathAliasesEmpty() {
+        final SideNavItem item = new SideNavItem("Test");
+
+        Assert.assertEquals(0, item.getPathAliases().size());
+    }
+
+    @Test
+    public void addEmptyPathAlias_pathAliasAdded() {
+        final SideNavItem item = new SideNavItem("Test");
+        item.addPathAlias("");
+
+        Assert.assertEquals(1, item.getPathAliases().size());
+    }
+
+    @Test
+    public void addMultiplePathAliases_pathAliasesAdded() {
+        final SideNavItem item = new SideNavItem("Test");
+        item.addPathAlias("alias1", "alias2");
+
+        Assert.assertEquals(2, item.getPathAliases().size());
+    }
+
+    @Test
+    public void addPathAlias_removePathAlias_pathAliasesEmpty() {
+        final SideNavItem item = new SideNavItem("Test");
+        item.addPathAlias("alias");
+        item.removePathAlias("alias");
+
+        Assert.assertEquals(0, item.getPathAliases().size());
+    }
+
+    @Test
+    public void addMultiplePathAliases_clearPathAliases_pathAliasesEmpty() {
+        final SideNavItem item = new SideNavItem("Test");
+        item.addPathAlias("alias1", "alias2");
+        item.clearPathAliases();
+
+        Assert.assertEquals(0, item.getPathAliases().size());
+    }
+
+    @Test
+    public void setPathAsComponent_pathAliasesAdded() {
+        try (MockedStatic<ComponentUtil> mockComponentUtil = Mockito
+                .mockStatic(ComponentUtil.class)) {
+            mockComponentUtil.when(() -> ComponentUtil.getRouter(Mockito.any()))
+                    .thenReturn(router);
+
+            sideNavItem.setPath(TestRoute.class);
+
+            Assert.assertEquals(2, sideNavItem.getPathAliases().size());
+        }
+    }
+
+    @Test
+    public void setPathAsComponent_removePathAliasViaComponent_pathAliasesEmpty() {
+        try (MockedStatic<ComponentUtil> mockComponentUtil = Mockito
+                .mockStatic(ComponentUtil.class)) {
+            mockComponentUtil.when(() -> ComponentUtil.getRouter(Mockito.any()))
+                    .thenReturn(router);
+
+            sideNavItem.setPath(TestRoute.class);
+            sideNavItem.removePathAlias(TestRoute.class);
+
+            Assert.assertEquals(0, sideNavItem.getPathAliases().size());
+        }
+    }
+
+    @Test
+    public void setPathAsComponent_removePathAlias_pathAliasRemoved() {
+        try (MockedStatic<ComponentUtil> mockComponentUtil = Mockito
+                .mockStatic(ComponentUtil.class)) {
+            mockComponentUtil.when(() -> ComponentUtil.getRouter(Mockito.any()))
+                    .thenReturn(router);
+
+            sideNavItem.setPath(TestRoute.class);
+            sideNavItem.removePathAlias("foo/baz");
+
+            Assert.assertEquals(1, sideNavItem.getPathAliases().size());
+        }
+    }
+
     private List<SideNavItem> setupItems() {
         List<SideNavItem> items = new ArrayList<>();
 
@@ -419,6 +502,8 @@ public class SideNavItemTest {
     }
 
     @Route("foo/bar")
+    @RouteAlias("foo/baz")
+    @RouteAlias("foo/qux")
     private static class TestRoute extends Component {
 
     }

@@ -15,7 +15,10 @@
  */
 package com.vaadin.flow.component.sidenav.testbench;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -51,6 +54,15 @@ public class SideNavItemElement extends TestBenchElement {
 
     public String getPath() {
         return getAttribute("path");
+    }
+
+    public Set<String> getPathAliases() {
+        String aliases = getAttribute("pathAliases");
+        if (aliases == null) {
+            return Collections.emptySet();
+        }
+        return Arrays.stream(aliases.split(",")).map(String::trim)
+                .collect(Collectors.toSet());
     }
 
     public boolean isExpanded() {

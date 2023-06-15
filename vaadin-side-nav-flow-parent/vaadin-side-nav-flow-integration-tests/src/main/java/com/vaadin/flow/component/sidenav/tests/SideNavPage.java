@@ -103,5 +103,20 @@ public class SideNavPage extends Div {
         NativeButton test3 = new NativeButton("test3",
                 event -> navigableParent.setLabel("aaa"));
         add(test3);
+
+        NativeButton addMatchingPathAliasToNonNavigableParent = new NativeButton(
+                "Add matching path alias to non-navigable parent",
+                event -> nonNavigableParent
+                        .addPathAlias("vaadin-side-nav/side-nav-test"));
+        addMatchingPathAliasToNonNavigableParent
+                .setId("add-matching-path-alias-to-non-navigable-parent");
+        add(addMatchingPathAliasToNonNavigableParent);
+
+        NativeButton setDummyPathToNonNavigableParent = new NativeButton(
+                "Set dummy path to non-navigable parent",
+                event -> nonNavigableParent.setPath("dummy-path"));
+        setDummyPathToNonNavigableParent
+                .setId("set-dummy-path-to-non-navigable-parent");
+        add(setDummyPathToNonNavigableParent);
     }
 }
