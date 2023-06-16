@@ -23,6 +23,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.DomEvent;
+import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
@@ -322,9 +323,79 @@ public class SplitLayout extends Component
     @DomEvent("splitter-dragend")
     public static class SplitterDragendEvent
             extends ComponentEvent<SplitLayout> {
-        public SplitterDragendEvent(SplitLayout source, boolean fromClient) {
+
+        // these may change in future
+        private static final String PRIMARY_FLEX_BASIS = "element._primaryChild.style.flexBasis";
+        private static final String SECONDARY_FLEX_BASIS = "element._secondaryChild.style.flexBasis";
+
+        // the relative position of the splitter, in percentages
+        private final double newSplitterPosition;
+        private final String primaryComponentWidth;
+        private final String secondaryComponentWidth;
+
+        public SplitterDragendEvent(SplitLayout source, boolean fromClient,
+                @EventData(PRIMARY_FLEX_BASIS) String primaryComponentWidth,
+                @EventData(SECONDARY_FLEX_BASIS) String secondaryComponentWidth) {
             super(source, fromClient);
+            this.primaryComponentWidth = primaryComponentWidth;
+            this.secondaryComponentWidth = secondaryComponentWidth;
+            this.newSplitterPosition = calcNewSplitterPosition(
+                    primaryComponentWidth, secondaryComponentWidth);
         }
+
+        public double getNewSplitterPosition() {
+            return newSplitterPosition;
+        }
+
+        public String getPrimaryComponentWidth() {
+            return primaryComponentWidth;
+        }
+
+        public String getSecondaryComponentWidth() {
+            return secondaryComponentWidth;
+        }
+
+        @Override
+        public String toString() {
+            return getClass().getSimpleName() + "[source=" + source
+                    + ", newSplitterPosition = " + newSplitterPosition + "%]";
+        }
+
+        private double calcNewSplitterPosition(String primaryWidth,
+                String secondaryWidth) {
+            // set current splitter position value
+            double splitterPositionValue = getSource().splitterPosition;
+            
+            if (primaryWidth == null || "".equals(primaryWidth.trim())) {
+                return splitterPositionValue;
+            }
+
+            if (primaryWidth.endsWith("px")) {
+                // When moving the splitter, the client side sets pixel values.
+                double pWidth = Double
+                        .parseDouble(primaryWidth.replace("px", ""));
+                double sWidth = Double
+                        .parseDouble(secondaryWidth.replace("px", ""));
+
+                splitterPositionValue = (pWidth * 100) / (pWidth + sWidth);
+                splitterPositionValue = round(splitterPositionValue);
+            } else if (primaryWidth.endsWith("%")) {
+                splitterPositionValue = Double
+                        .parseDouble(primaryWidth.replace("%", ""));
+                splitterPositionValue = round(splitterPositionValue);
+            } else {
+                throw new IllegalArgumentException(
+                        "Given width values are not supported: " + primaryWidth
+                                + " / " + secondaryWidth);
+            }
+
+            return splitterPositionValue;
+        }
+
+        private double round(double value) {
+            return Math.round(value * 100.0) / 100.0;
+        }
+
     }
 
     /**

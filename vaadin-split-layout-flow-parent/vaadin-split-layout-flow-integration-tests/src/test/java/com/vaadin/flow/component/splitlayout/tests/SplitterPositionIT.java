@@ -93,6 +93,11 @@ public class SplitterPositionIT extends AbstractComponentIT {
                     .getPropertyString("style", "flex"));
             Assert.assertNotEquals("", getSecondaryElement(layout, testId)
                     .getPropertyString("style", "flex"));
+            Assert.assertNotEquals("", getShowSplitterPositionElement(testId).getText());
+            Assert.assertNotEquals("",
+                    getShowPrimaryComponentWidthElement(testId).getText());
+            Assert.assertNotEquals("",
+                    getShowSecondaryComponentWidthElement(testId).getText());
         });
     }
 
@@ -107,6 +112,12 @@ public class SplitterPositionIT extends AbstractComponentIT {
                 primaryElement, SplitterPositionView.INITIAL_POSITION);
         SplitLayoutAssertions.assertChildWidthInPercentage(layout,
                 secondaryElement, SplitterPositionView.FINAL_POSITION);
+
+        Assert.assertEquals("", getShowSplitterPositionElement(testId).getText());
+        Assert.assertEquals("",
+                getShowPrimaryComponentWidthElement(testId).getText());
+        Assert.assertEquals("",
+                getShowSecondaryComponentWidthElement(testId).getText());
 
         modifyState.accept(layout);
         $(NativeButtonElement.class).id("setSplitPosition" + testId).click();
@@ -125,5 +136,17 @@ public class SplitterPositionIT extends AbstractComponentIT {
     private TestBenchElement getSecondaryElement(SplitLayoutElement layout,
             String testId) {
         return layout.$(SpanElement.class).id("secondary" + testId);
+    }
+
+    private SpanElement getShowSplitterPositionElement(String testId) {
+        return $(SpanElement.class).id("showSplitterPosition" + testId);
+    }
+
+    private SpanElement getShowPrimaryComponentWidthElement(String testId) {
+        return $(SpanElement.class).id("showPrimaryComponentWidth" + testId);
+    }
+
+    private SpanElement getShowSecondaryComponentWidthElement(String testId) {
+        return $(SpanElement.class).id("showSecondaryComponentWidth" + testId);
     }
 }

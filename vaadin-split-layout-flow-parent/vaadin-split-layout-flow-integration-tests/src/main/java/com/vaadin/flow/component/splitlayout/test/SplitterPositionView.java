@@ -53,7 +53,21 @@ public class SplitterPositionView extends Div {
                 "set splitter position",
                 event -> layout.setSplitterPosition(FINAL_POSITION));
         setSplitterPosition.setId("setSplitPositionJavaApi");
-        add(setSplitterPosition, layout);
+
+        Span showSplitterPosition = new Span();
+        showSplitterPosition.setId("showSplitterPositionJavaApi");
+        Span showPrimaryComponentWidth = new Span();
+        showPrimaryComponentWidth.setId("showPrimaryComponentWidthJavaApi");
+        Span showSecondaryComponentWidth = new Span();
+        showSecondaryComponentWidth.setId("showSecondaryComponentWidthJavaApi");
+        layout.addSplitterDragendListener(e -> {
+            showSplitterPosition
+                    .setText(String.valueOf(e.getNewSplitterPosition()));
+            showPrimaryComponentWidth.setText(e.getPrimaryComponentWidth());
+            showSecondaryComponentWidth.setText(e.getSecondaryComponentWidth());
+        });
+        add(setSplitterPosition, layout, showSplitterPosition,
+                showPrimaryComponentWidth, showSecondaryComponentWidth);
     }
 
     private void createLayoutElementApi() {
@@ -71,6 +85,21 @@ public class SplitterPositionView extends Div {
                 "set splitter position",
                 event -> layout.setSplitterPosition(FINAL_POSITION));
         setSplitterPosition.setId("setSplitPositionElementApi");
-        add(setSplitterPosition, layout);
+
+        Span showSplitterPosition = new Span();
+        showSplitterPosition.setId("showSplitterPositionElementApi");
+        Span showPrimaryComponentWidth = new Span();
+        showPrimaryComponentWidth.setId("showPrimaryComponentWidthElementApi");
+        Span showSecondaryComponentWidth = new Span();
+        showSecondaryComponentWidth
+                .setId("showSecondaryComponentWidthElementApi");
+        layout.addSplitterDragendListener(e -> {
+            showSplitterPosition
+                    .setText(String.valueOf(e.getNewSplitterPosition()));
+            showPrimaryComponentWidth.setText(e.getPrimaryComponentWidth());
+            showSecondaryComponentWidth.setText(e.getSecondaryComponentWidth());
+        });
+        add(setSplitterPosition, layout, showSplitterPosition,
+                showPrimaryComponentWidth, showSecondaryComponentWidth);
     }
 }
