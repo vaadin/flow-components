@@ -190,7 +190,7 @@ public class GridElement extends TestBenchElement {
      * @return <code>true</code> if the row is at least partially in view,
      *         <code>false</code> otherwise
      */
-    public boolean isRowInView(int rowIndex) {
+    private boolean isRowInView(int rowIndex) {
         return (getFirstVisibleRowIndex() <= rowIndex
                 && rowIndex <= getLastVisibleRowIndex());
     }
