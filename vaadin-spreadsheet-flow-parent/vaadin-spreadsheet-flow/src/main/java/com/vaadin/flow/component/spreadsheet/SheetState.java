@@ -20,12 +20,9 @@ import org.apache.poi.ss.usermodel.Sheet;
  * last selected cell is considered depends on which one happens later.
  */
 class SheetState implements Serializable {
-    private static Spreadsheet spreadSheet;
-    private static WeakHashMap<Sheet, String> selectedCells = new WeakHashMap<Sheet, String>();
+    private final WeakHashMap<Sheet, String> selectedCells = new WeakHashMap<Sheet, String>();
 
     SheetState(final Spreadsheet spreadSheet) {
-        this.spreadSheet = spreadSheet;
-
         spreadSheet.addSelectionChangeListener(
                 new Spreadsheet.SelectionChangeListener() {
                     @Override
