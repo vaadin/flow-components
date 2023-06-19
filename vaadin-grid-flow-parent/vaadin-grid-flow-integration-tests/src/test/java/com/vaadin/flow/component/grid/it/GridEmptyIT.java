@@ -20,7 +20,11 @@ public class GridEmptyIT extends AbstractComponentIT {
 
     @Test
     public void getFirstAndLastVisibleRowIndex_doesNotThrow() {
-        Assert.assertEquals("Should return -1 when getting the first visible row index", -1, grid.getFirstVisibleRowIndex());
-        Assert.assertEquals("Should return -1 when getting the last visible row index", -1, grid.getLastVisibleRowIndex());
+        Assert.assertEquals(
+                "Should return -1 when getting the first visible row index", -1,
+                grid.getFirstVisibleRowIndex());
+        Assert.assertEquals(
+                "Should return -1 when getting the last visible row index", -1,
+                grid.getLastVisibleRowIndex());
     }
 }
