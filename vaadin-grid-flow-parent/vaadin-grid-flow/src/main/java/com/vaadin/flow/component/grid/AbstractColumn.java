@@ -340,8 +340,4 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
                         .toList());
         return columnChildren;
     }
-
-    protected void setRowHeader(boolean isRowHeader) {
-        getElement().getNode();
-    }
 }
