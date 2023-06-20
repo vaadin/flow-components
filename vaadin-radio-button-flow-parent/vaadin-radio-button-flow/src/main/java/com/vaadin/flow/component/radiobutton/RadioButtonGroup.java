@@ -15,13 +15,7 @@
  */
 package com.vaadin.flow.component.radiobutton;
 
-import java.util.Collection;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Stream;
-
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
@@ -29,9 +23,6 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasHelper;
-import com.vaadin.flow.component.HasLabel;
-import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
@@ -42,8 +33,8 @@ import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupListDataVi
 import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.HasValidationProperties;
+import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
@@ -67,6 +58,13 @@ import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
 
+import java.util.Collection;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Stream;
+
 /**
  * Radio Button Group allows the user to select exactly one value from a list of
  * related but mutually exclusive options.
@@ -81,9 +79,10 @@ import com.vaadin.flow.shared.Registration;
 public class RadioButtonGroup<T>
         extends AbstractSinglePropertyField<RadioButtonGroup<T>, T>
         implements HasAriaLabel, HasClientValidation,
-        HasDataView<T, Void, RadioButtonGroupDataView<T>>, HasHelper, HasLabel,
-        HasListDataView<T, RadioButtonGroupListDataView<T>>, HasSize, HasStyle,
-        HasThemeVariant<RadioGroupVariant>, HasTooltip, HasValidationProperties,
+        HasDataView<T, Void, RadioButtonGroupDataView<T>>, HasHelper,
+        HasListDataView<T, RadioButtonGroupListDataView<T>>,
+        InputField<AbstractField.ComponentValueChangeEvent<RadioButtonGroup<T>, T>, T>,
+        HasThemeVariant<RadioGroupVariant>, HasValidationProperties,
         HasValidator<T>, SingleSelect<RadioButtonGroup<T>, T> {
 
     private final KeyMapper<T> keyMapper = new KeyMapper<>();

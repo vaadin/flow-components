@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.combobox;
 
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClientCallable;
@@ -30,9 +31,6 @@ import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.component.shared.HasClearButton;
 import com.vaadin.flow.component.HasHelper;
-import com.vaadin.flow.component.HasLabel;
-import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.Synchronize;
@@ -42,8 +40,8 @@ import com.vaadin.flow.component.combobox.dataview.ComboBoxLazyDataView;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxListDataView;
 import com.vaadin.flow.component.shared.HasAutoOpen;
 import com.vaadin.flow.component.shared.HasClientValidation;
-import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.HasValidationProperties;
+import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
@@ -73,7 +71,6 @@ import java.util.Collection;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 /**
  * Provides base functionality for combo box related components, such as
@@ -91,9 +88,10 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
         implements Focusable<TComponent>, HasAllowedCharPattern, HasAriaLabel,
         HasAutoOpen, HasClearButton, HasClientValidation, HasOverlayClassName,
         HasDataView<TItem, String, ComboBoxDataView<TItem>>, HasHelper,
-        HasLabel, HasLazyDataView<TItem, String, ComboBoxLazyDataView<TItem>>,
-        HasListDataView<TItem, ComboBoxListDataView<TItem>>, HasSize, HasStyle,
-        HasTheme, HasTooltip, HasValidationProperties, HasValidator<TValue> {
+        InputField<AbstractField.ComponentValueChangeEvent<TComponent, TValue>, TValue>,
+        HasLazyDataView<TItem, String, ComboBoxLazyDataView<TItem>>,
+        HasListDataView<TItem, ComboBoxListDataView<TItem>>, HasTheme,
+        HasValidationProperties, HasValidator<TValue> {
 
     /**
      * Registration for custom value listeners that disallows entering custom
