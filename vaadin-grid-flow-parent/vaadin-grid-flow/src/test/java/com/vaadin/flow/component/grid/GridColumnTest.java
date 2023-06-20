@@ -248,6 +248,15 @@ public class GridColumnTest {
     }
 
     @Test
+    public void setColumnRowHeader_updatedPropertyValue() {
+        Grid<Person> grid = new Grid<>();
+
+        Column<Person> rowHeaderColumn = grid.addColumn(Person::getName);
+        rowHeaderColumn.setRowHeader(true);
+        Assert.assertTrue(rowHeaderColumn.isRowHeader());
+    }
+
+    @Test
     public void addColumn_extendedColumnTypeByOverridingCreateMethod() {
         Grid<Person> extendedGrid = new Grid<Person>() {
             @Override

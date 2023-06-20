@@ -523,8 +523,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          * @param rowHeader
          *            {@code true} if this column is a row header column,
          */
-        public void setRowHeader(boolean rowHeader) {
+        public Column<T> setRowHeader(boolean rowHeader) {
             getElement().setProperty("rowHeader", rowHeader);
+            return this;
         }
 
         protected String getInternalId() {
