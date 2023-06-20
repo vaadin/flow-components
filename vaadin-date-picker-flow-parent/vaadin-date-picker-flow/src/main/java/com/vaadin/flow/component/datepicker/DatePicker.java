@@ -26,6 +26,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEvent;
@@ -33,9 +34,6 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasHelper;
-import com.vaadin.flow.component.HasLabel;
-import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
@@ -50,8 +48,8 @@ import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.component.shared.HasPrefix;
 import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.HasValidationProperties;
+import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
@@ -92,10 +90,10 @@ import elemental.json.JsonType;
 public class DatePicker
         extends AbstractSinglePropertyField<DatePicker, LocalDate>
         implements Focusable<DatePicker>, HasAllowedCharPattern, HasAriaLabel,
-        HasAutoOpen, HasClearButton, HasClientValidation, HasHelper, HasLabel,
-        HasOverlayClassName, HasPrefix, HasSize, HasStyle, HasTooltip,
-        HasThemeVariant<DatePickerVariant>, HasValidationProperties,
-        HasValidator<LocalDate> {
+        HasAutoOpen, HasClearButton, HasClientValidation, HasHelper,
+        InputField<AbstractField.ComponentValueChangeEvent<DatePicker, LocalDate>, LocalDate>,
+        HasOverlayClassName, HasPrefix, HasThemeVariant<DatePickerVariant>,
+        HasValidationProperties, HasValidator<LocalDate> {
 
     private DatePickerI18n i18n;
 

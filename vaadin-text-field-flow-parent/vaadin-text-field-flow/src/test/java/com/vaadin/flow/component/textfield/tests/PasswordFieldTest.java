@@ -15,8 +15,10 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
+import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.flow.dom.ThemeList;
@@ -150,5 +152,12 @@ public class PasswordFieldTest {
 
         field.setAriaLabelledBy(null);
         Assert.assertTrue(field.getAriaLabelledBy().isEmpty());
+    }
+
+    @Test
+    public void implementsInputField() {
+        PasswordField field = new PasswordField();
+        Assert.assertTrue(
+                field instanceof InputField<AbstractField.ComponentValueChangeEvent<PasswordField, String>, String>);
     }
 }
