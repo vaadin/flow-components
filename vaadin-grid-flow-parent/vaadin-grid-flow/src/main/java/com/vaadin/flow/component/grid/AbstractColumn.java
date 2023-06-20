@@ -342,6 +342,6 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
     }
 
     protected void setRowHeader(boolean isRowHeader) {
-        getElement().getNode()
+        getElement().getNode();
     }
 }
