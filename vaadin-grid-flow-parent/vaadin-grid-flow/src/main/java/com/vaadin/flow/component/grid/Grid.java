@@ -205,10 +205,10 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-beta2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/grid", version = "24.1.0-beta2")
-@NpmPackage(value = "@vaadin/tooltip", version = "24.1.0-beta2")
+@NpmPackage(value = "@vaadin/grid", version = "24.1.1")
+@NpmPackage(value = "@vaadin/tooltip", version = "24.1.1")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -433,7 +433,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-column")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-beta2")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.1")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class Column<T> extends AbstractColumn<Column<T>> {
 
@@ -2501,10 +2501,14 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
-     * {@inheritDoc}
+     * Sets a generic data provider for the Grid to use.
+     * <p>
+     * Use this method when none of the {@code setItems} methods are applicable,
+     * e.g. when having a data provider with filter that cannot be transformed
+     * to {@code DataProvider<T, Void>}.
      *
-     * Use this method only when having a data provider with filter that cannot
-     * be transformed to {@code DataProvider<T, Void>}.
+     * @param dataProvider
+     *            DataProvider instance to use, not <code>null</code>
      */
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         Objects.requireNonNull(dataProvider, "data provider cannot be null");

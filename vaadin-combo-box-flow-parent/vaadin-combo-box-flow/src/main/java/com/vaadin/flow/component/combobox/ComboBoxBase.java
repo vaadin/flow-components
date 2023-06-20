@@ -977,7 +977,59 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     // ****************************************************
 
     /**
+     * Sets a generic data provider for the ComboBox to use.
+     * <p>
+     * ComboBox triggers filtering queries based on the strings users type into
+     * the field. For this reason you need to provide the second parameter, a
+     * function which converts the filter-string typed by the user into
+     * filter-type used by your data provider. If your data provider already
+     * supports String as the filter-type, it can be used without a converter
+     * function via {@link #setItems(DataProvider)}.
+     * <p>
+     * Using this method provides the same result as using a data provider
+     * wrapped with
+     * {@link DataProvider#withConvertedFilter(SerializableFunction)}.
+     * <p>
+     * Changing the combo box's data provider resets its current value to
+     * {@code null}.
+     * <p>
+     * Use this method when none of the {@code setItems} methods are applicable,
+     * e.g. when having a data provider with filter that cannot be transformed
+     * to {@code DataProvider<T, Void>}.
+     */
+    public <C> void setDataProvider(DataProvider<TItem, C> dataProvider,
+            SerializableFunction<String, C> filterConverter) {
+        dataController.setDataProvider(dataProvider, filterConverter);
+    }
+
+    /**
+     * Sets a CallbackDataProvider using the given fetch items callback and a
+     * size callback.
+     * <p>
+     * This method is a shorthand for making a {@link CallbackDataProvider} that
+     * handles a partial {@link com.vaadin.flow.data.provider.Query Query}
+     * object.
+     * <p>
+     * Changing the combo box's data provider resets its current value to
+     * {@code null}.
+     *
+     * @param fetchItems
+     *            a callback for fetching items, not <code>null</code>
+     * @param sizeCallback
+     *            a callback for getting the count of items, not
+     *            <code>null</code>
+     * @see CallbackDataProvider
+     */
+    public void setDataProvider(ComboBox.FetchItemsCallback<TItem> fetchItems,
+            SerializableFunction<String, Integer> sizeCallback) {
+        dataController.setDataProvider(fetchItems, sizeCallback);
+    }
+
+    /**
      * Gets the data provider used by this ComboBox.
+     * <p>
+     * To get information and control over the items in the ComboBox, use either
+     * {@link #getListDataView()} or {@link #getLazyDataView()} instead.
      *
      * @return the data provider used by this ComboBox
      */

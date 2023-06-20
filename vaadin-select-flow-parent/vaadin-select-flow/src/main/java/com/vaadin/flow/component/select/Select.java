@@ -82,9 +82,9 @@ import java.util.stream.Stream;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-select")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-beta2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/select", version = "24.1.0-beta2")
+@NpmPackage(value = "@vaadin/select", version = "24.1.1")
 @JsModule("@vaadin/select/src/vaadin-select.js")
 @JsModule("./selectConnector.js")
 public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
@@ -250,7 +250,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      * even though that is not visible from the component level.
      */
     @Tag("vaadin-select-list-box")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-beta2")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.1")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     private class InternalListBox extends Component
             implements HasItemComponents<T> {
@@ -522,7 +522,17 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
         return getElement().getProperty("autofocus", false);
     }
 
-    private void setDataProvider(DataProvider<T, ?> dataProvider) {
+    /**
+     * Sets a generic data provider for the Select to use.
+     * <p>
+     * Use this method when none of the {@code setItems} methods are applicable,
+     * e.g. when having a data provider with filter that cannot be transformed
+     * to {@code DataProvider<T, Void>}.
+     *
+     * @param dataProvider
+     *            DataProvider instance to use, not <code>null</code>
+     */
+    public void setDataProvider(DataProvider<T, ?> dataProvider) {
         this.dataProvider.set(dataProvider);
         DataViewUtils.removeComponentFilterAndSortComparator(this);
         reset();
@@ -535,9 +545,13 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
     }
 
     /**
-     * Gets the data provider.
+     * Gets the data provider used by this Select.
      *
-     * @return the data provider, not {@code null}
+     * <p>
+     * To get information and control over the items in the Select, use either
+     * {@link #getListDataView()} or {@link #getGenericDataView()} instead.
+     *
+     * @return the data provider used by this Select
      */
     public DataProvider<T, ?> getDataProvider() {
         return dataProvider.get();
