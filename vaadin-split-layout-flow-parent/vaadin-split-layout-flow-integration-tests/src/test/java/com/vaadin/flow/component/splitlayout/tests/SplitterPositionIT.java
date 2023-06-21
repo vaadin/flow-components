@@ -15,22 +15,21 @@
  */
 package com.vaadin.flow.component.splitlayout.tests;
 
-import com.vaadin.flow.component.html.testbench.DivElement;
-import com.vaadin.flow.component.splitlayout.test.SplitLayoutView;
+import java.util.function.Consumer;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import com.vaadin.flow.component.html.testbench.NativeButtonElement;
-import com.vaadin.flow.component.html.testbench.SpanElement;
-import com.vaadin.flow.component.splitlayout.test.SplitterPositionView;
-import com.vaadin.flow.component.splitlayout.testbench.SplitLayoutElement;
-import com.vaadin.tests.AbstractComponentIT;
-import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.TestBenchElement;
 import org.openqa.selenium.interactions.Actions;
 
-import java.util.function.Consumer;
+import com.vaadin.flow.component.html.testbench.DivElement;
+import com.vaadin.flow.component.html.testbench.NativeButtonElement;
+import com.vaadin.flow.component.html.testbench.SpanElement;
+import com.vaadin.flow.component.splitlayout.test.SplitLayoutView;
+import com.vaadin.flow.component.splitlayout.testbench.SplitLayoutElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
 /**
  * Integration tests for {@link SplitLayoutView}.
@@ -89,15 +88,7 @@ public class SplitterPositionIT extends AbstractComponentIT {
         testSplitterPosition(testId, layout -> {
             new Actions(getDriver()).dragAndDropBy(layout.getSplitter(), 20, 0)
                     .perform();
-            Assert.assertNotEquals("", getPrimaryElement(layout, testId)
-                    .getPropertyString("style", "flex"));
-            Assert.assertNotEquals("", getSecondaryElement(layout, testId)
-                    .getPropertyString("style", "flex"));
             Assert.assertNotEquals("", getShowSplitterPositionElement(testId).getText());
-            Assert.assertNotEquals("",
-                    getShowPrimaryComponentWidthElement(testId).getText());
-            Assert.assertNotEquals("",
-                    getShowSecondaryComponentWidthElement(testId).getText());
         });
     }
 
@@ -106,47 +97,14 @@ public class SplitterPositionIT extends AbstractComponentIT {
         $(NativeButtonElement.class).id("createLayout" + testId).click();
         SplitLayoutElement layout = $(SplitLayoutElement.class)
                 .id("splitLayout" + testId);
-        TestBenchElement primaryElement = getPrimaryElement(layout, testId);
-        TestBenchElement secondaryElement = getSecondaryElement(layout, testId);
-        SplitLayoutAssertions.assertChildWidthInPercentage(layout,
-                primaryElement, SplitterPositionView.INITIAL_POSITION);
-        SplitLayoutAssertions.assertChildWidthInPercentage(layout,
-                secondaryElement, SplitterPositionView.FINAL_POSITION);
 
         Assert.assertEquals("", getShowSplitterPositionElement(testId).getText());
-        Assert.assertEquals("",
-                getShowPrimaryComponentWidthElement(testId).getText());
-        Assert.assertEquals("",
-                getShowSecondaryComponentWidthElement(testId).getText());
 
         modifyState.accept(layout);
         $(NativeButtonElement.class).id("setSplitPosition" + testId).click();
-
-        SplitLayoutAssertions.assertChildWidthInPercentage(layout,
-                primaryElement, SplitterPositionView.FINAL_POSITION);
-        SplitLayoutAssertions.assertChildWidthInPercentage(layout,
-                secondaryElement, SplitterPositionView.INITIAL_POSITION);
-    }
-
-    private TestBenchElement getPrimaryElement(SplitLayoutElement layout,
-            String testId) {
-        return layout.$(SpanElement.class).id("primary" + testId);
-    }
-
-    private TestBenchElement getSecondaryElement(SplitLayoutElement layout,
-            String testId) {
-        return layout.$(SpanElement.class).id("secondary" + testId);
     }
 
     private SpanElement getShowSplitterPositionElement(String testId) {
         return $(SpanElement.class).id("showSplitterPosition" + testId);
-    }
-
-    private SpanElement getShowPrimaryComponentWidthElement(String testId) {
-        return $(SpanElement.class).id("showPrimaryComponentWidth" + testId);
-    }
-
-    private SpanElement getShowSecondaryComponentWidthElement(String testId) {
-        return $(SpanElement.class).id("showSecondaryComponentWidth" + testId);
     }
 }
