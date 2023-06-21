@@ -17,6 +17,7 @@ package com.vaadin.flow.component.sidenav.tests;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.router.Route;
@@ -401,7 +402,7 @@ public class SideNavItemTest {
         final SideNavItem item = new SideNavItem("Test");
         item.addPathAlias("");
 
-        Assert.assertEquals(1, item.getPathAliases().size());
+        Assert.assertEquals(Set.of(""), item.getPathAliases());
     }
 
     @Test
@@ -409,7 +410,7 @@ public class SideNavItemTest {
         final SideNavItem item = new SideNavItem("Test");
         item.addPathAlias("alias1", "alias2");
 
-        Assert.assertEquals(2, item.getPathAliases().size());
+        Assert.assertEquals(Set.of("alias1", "alias2"), item.getPathAliases());
     }
 
     @Test
@@ -439,7 +440,8 @@ public class SideNavItemTest {
 
             sideNavItem.setPath(TestRoute.class);
 
-            Assert.assertEquals(2, sideNavItem.getPathAliases().size());
+            Assert.assertEquals(Set.of("foo/baz", "foo/qux"),
+                    sideNavItem.getPathAliases());
         }
     }
 
@@ -467,7 +469,8 @@ public class SideNavItemTest {
             sideNavItem.setPath(TestRoute.class);
             sideNavItem.removePathAlias("foo/baz");
 
-            Assert.assertEquals(1, sideNavItem.getPathAliases().size());
+            Assert.assertEquals(Set.of("foo/qux"),
+                    sideNavItem.getPathAliases());
         }
     }
 
