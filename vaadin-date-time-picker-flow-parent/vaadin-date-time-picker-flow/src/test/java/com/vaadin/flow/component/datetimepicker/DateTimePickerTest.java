@@ -15,9 +15,11 @@
  */
 package com.vaadin.flow.component.datetimepicker;
 
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.VaadinService;
@@ -258,5 +260,12 @@ public class DateTimePickerTest {
     public void implementsHasTooltip() {
         DateTimePicker picker = new DateTimePicker();
         Assert.assertTrue(picker instanceof HasTooltip);
+    }
+
+    @Test
+    public void implementsInputField() {
+        DateTimePicker field = new DateTimePicker();
+        Assert.assertTrue(
+                field instanceof InputField<AbstractField.ComponentValueChangeEvent<DateTimePicker, LocalDateTime>, LocalDateTime>);
     }
 }

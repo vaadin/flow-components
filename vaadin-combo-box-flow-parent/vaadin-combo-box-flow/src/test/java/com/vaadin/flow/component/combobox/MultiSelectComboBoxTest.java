@@ -15,7 +15,9 @@
  */
 package com.vaadin.flow.component.combobox;
 
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.shared.InputField;
 import elemental.json.JsonArray;
 import org.junit.Assert;
 import org.junit.Test;
@@ -261,4 +263,10 @@ public class MultiSelectComboBoxTest extends ComboBoxBaseTest {
         Assert.assertEquals("Four", valueAsList.get(2));
     }
 
+    @Test
+    public void implementsInputField() {
+        MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
+        Assert.assertTrue(
+                comboBox instanceof InputField<AbstractField.ComponentValueChangeEvent<MultiSelectComboBox<String>, Set<String>>, Set<String>>);
+    }
 }

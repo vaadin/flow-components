@@ -77,11 +77,16 @@ public class GridElement extends TestBenchElement {
     /**
      * Gets the index of the first row which is at least partially visible.
      *
-     * @return the index of the first visible row
+     * @return the index of the first visible row, -1 if Grid is empty
      */
     public int getFirstVisibleRowIndex() {
-        return ((Long) executeScript("return arguments[0]._firstVisibleIndex",
-                this)).intValue();
+        Object index = executeScript("return arguments[0]._firstVisibleIndex",
+                this);
+        if (index != null) {
+            return ((Long) index).intValue();
+        } else {
+            return -1;
+        }
     }
 
     /**
@@ -165,12 +170,16 @@ public class GridElement extends TestBenchElement {
     /**
      * Gets the index of the last row which is at least partially visible.
      *
-     * @return the index of the last visible row
+     * @return the index of the last visible row, -1 if Grid is empty
      */
     public int getLastVisibleRowIndex() {
-        // Private for now because this seems to be slightly incorrect
-        return ((Long) executeScript("return arguments[0]._lastVisibleIndex",
-                this)).intValue();
+        Object index = executeScript("return arguments[0]._lastVisibleIndex",
+                this);
+        if (index != null) {
+            return ((Long) index).intValue();
+        } else {
+            return -1;
+        }
     }
 
     /**
@@ -182,7 +191,6 @@ public class GridElement extends TestBenchElement {
      *         <code>false</code> otherwise
      */
     private boolean isRowInView(int rowIndex) {
-        // Private for now because this seems to be slightly incorrect
         return (getFirstVisibleRowIndex() <= rowIndex
                 && rowIndex <= getLastVisibleRowIndex());
     }
