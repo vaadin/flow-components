@@ -1,5 +1,7 @@
 package com.vaadin.flow.component.customfield;
 
+import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.shared.InputField;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,5 +50,11 @@ public class CustomFieldTest {
     @Test
     public void implementsHasTooltip() {
         Assert.assertTrue(systemUnderTest instanceof HasTooltip);
+    }
+
+    @Test
+    public void implementsInputField() {
+        Assert.assertTrue(
+                systemUnderTest instanceof InputField<AbstractField.ComponentValueChangeEvent<CustomField<Object>, Object>, Object>);
     }
 }

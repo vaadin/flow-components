@@ -15,21 +15,19 @@
  */
 package com.vaadin.flow.component.textfield;
 
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.CompositionNotifier;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasAriaLabel;
-import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasHelper;
-import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.InputNotifier;
 import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.component.shared.HasClearButton;
 import com.vaadin.flow.component.shared.HasClientValidation;
-import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.HasValidationProperties;
+import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.value.HasValueChangeMode;
@@ -52,9 +50,10 @@ public abstract class TextFieldBase<TComponent extends TextFieldBase<TComponent,
         extends AbstractSinglePropertyField<TComponent, TValue>
         implements CompositionNotifier, Focusable<TComponent>, HasAriaLabel,
         HasAutocapitalize, HasAutocomplete, HasAutocorrect, HasClearButton,
-        HasClientValidation, HasHelper, HasLabel, HasPrefixAndSuffix, HasSize,
-        HasStyle, HasTooltip, HasValidationProperties, HasValidator<TValue>,
-        HasValueChangeMode, InputNotifier, KeyNotifier {
+        HasClientValidation, HasHelper, HasPrefixAndSuffix,
+        HasValidationProperties, HasValidator<TValue>, HasValueChangeMode,
+        InputNotifier, KeyNotifier,
+        InputField<AbstractField.ComponentValueChangeEvent<TComponent, TValue>, TValue> {
 
     private ValueChangeMode currentMode;
 
@@ -201,7 +200,7 @@ public abstract class TextFieldBase<TComponent extends TextFieldBase<TComponent,
 
     @Override
     public void setLabel(String label) {
-        HasLabel.super.setLabel(label);
+        InputField.super.setLabel(label);
     }
 
     @Override
