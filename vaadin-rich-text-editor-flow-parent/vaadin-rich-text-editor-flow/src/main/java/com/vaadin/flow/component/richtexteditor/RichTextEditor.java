@@ -54,7 +54,7 @@ import elemental.json.JsonObject;
  */
 @SuppressWarnings("deprecation")
 @Tag("vaadin-rich-text-editor")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.15")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.16")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 public class RichTextEditor
         extends GeneratedVaadinRichTextEditor<RichTextEditor, String>
