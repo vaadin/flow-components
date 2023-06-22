@@ -65,8 +65,7 @@ public class SplitLayoutUnitTest {
         ComponentUtil.fireEvent(splitLayout, new SplitterDragendEvent(
                 splitLayout, true, "432.68px", "267.32px"));
 
-        Assert.assertEquals(61.81, splitLayout.getSplitterPosition(),
-                0.01);
+        Assert.assertEquals(61.81, splitLayout.getSplitterPosition(), 0.01);
     }
 
     @Test
@@ -104,6 +103,5 @@ public class SplitLayoutUnitTest {
 
         Assert.assertEquals(45.66, splitLayout.getSplitterPosition(), 0);
     }
-
 
 }

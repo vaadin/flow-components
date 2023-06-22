@@ -88,7 +88,8 @@ public class SplitterPositionIT extends AbstractComponentIT {
         testSplitterPosition(testId, layout -> {
             new Actions(getDriver()).dragAndDropBy(layout.getSplitter(), 20, 0)
                     .perform();
-            Assert.assertNotEquals("", getShowSplitterPositionElement(testId).getText());
+            Assert.assertNotEquals("",
+                    getShowSplitterPositionElement(testId).getText());
         });
     }
 
@@ -98,7 +99,8 @@ public class SplitterPositionIT extends AbstractComponentIT {
         SplitLayoutElement layout = $(SplitLayoutElement.class)
                 .id("splitLayout" + testId);
 
-        Assert.assertEquals("", getShowSplitterPositionElement(testId).getText());
+        Assert.assertEquals("",
+                getShowSplitterPositionElement(testId).getText());
 
         modifyState.accept(layout);
         $(NativeButtonElement.class).id("setSplitPosition" + testId).click();
