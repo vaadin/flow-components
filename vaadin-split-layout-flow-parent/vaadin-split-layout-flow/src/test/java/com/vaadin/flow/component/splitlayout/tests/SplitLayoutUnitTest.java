@@ -46,7 +46,7 @@ public class SplitLayoutUnitTest {
     }
 
     @Test
-    public void testGtetSplitterPosition() {
+    public void testGetSplitterPosition() {
         SplitLayout splitLayout = new SplitLayout();
         double splitterPosition = 45.66;
 
