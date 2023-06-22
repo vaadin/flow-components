@@ -67,7 +67,7 @@ public class TreeGridScrollToIT extends AbstractComponentIT {
     }
 
     @Test
-    public void expandAll_correctLastVisibleItem() {
+    public void smallPageSize_expandAll_correctLastVisibleItem() {
         $("button").id("change-page-size").click();
         expandAllButton.click();
 
