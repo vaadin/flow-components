@@ -49,7 +49,7 @@ import java.util.stream.Stream;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-side-nav-item")
-@NpmPackage(value = "@vaadin/side-nav", version = "24.1.1")
+@NpmPackage(value = "@vaadin/side-nav", version = "24.2.0-alpha1")
 @JsModule("@vaadin/side-nav/src/vaadin-side-nav-item.js")
 public class SideNavItem extends SideNavItemContainer
         implements HasPrefix, HasSuffix {

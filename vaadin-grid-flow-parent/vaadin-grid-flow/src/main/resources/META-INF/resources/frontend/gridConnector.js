@@ -304,7 +304,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           // The buffer size could be multiplied by some constant defined by the user,
           // if he needs to reduce the number of items sent to the Grid to improve performance
           // or to increase it to make Grid smoother when scrolling
-          const visibleRows = grid._getVisibleRows();
+          const visibleRows = grid._getRenderedRows();
           let start = visibleRows.length > 0 ? visibleRows[0].index : 0;
           let end = visibleRows.length > 0 ? visibleRows[visibleRows.length - 1].index : 0;
           let buffer = end - start;
@@ -636,7 +636,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
 
           const itemKeys = items.map((item) => item.key);
           const indexes = grid
-            ._getVisibleRows()
+            ._getRenderedRows()
             .filter((row) => row._item && itemKeys.includes(row._item.key))
             .map((row) => row.index);
           if (indexes.length > 0) {
