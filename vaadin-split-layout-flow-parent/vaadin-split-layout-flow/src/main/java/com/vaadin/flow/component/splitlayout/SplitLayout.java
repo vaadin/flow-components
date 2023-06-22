@@ -217,8 +217,12 @@ public class SplitLayout extends Component
     }
 
     /**
-     * Gets splitter position
-     * 
+     * Gets the relative position of the splitter as a percentage value between
+     * 0 and 100. The value will be null unless the splitter position has been
+     * explicitly set on the server-side, or the splitter has been moved on the
+     * client side. The splitter position is automatically updated when as part
+     * of the {@link SplitterDragendEvent}.
+     *
      * @return the splitter position, may be null
      */
     public Double getSplitterPosition() {
