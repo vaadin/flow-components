@@ -246,7 +246,7 @@ public class SideNavItem extends SideNavItemContainer
                 .map(alias -> Objects.requireNonNull(alias,
                         "Alias to add cannot be null"))
                 .map(String::trim).distinct().collect(Collectors.joining(","));
-        getElement().setAttribute("path-aliases", updatedAliases);
+        getElement().setProperty("pathAliases", updatedAliases);
     }
 
     /**
@@ -290,7 +290,7 @@ public class SideNavItem extends SideNavItemContainer
         if (updatedAliases.isEmpty()) {
             clearPathAliases();
         } else {
-            getElement().setAttribute("path-aliases",
+            getElement().setProperty("pathAliases",
                     String.join(",", updatedAliases));
         }
     }
@@ -323,7 +323,7 @@ public class SideNavItem extends SideNavItemContainer
      * Clears any previously set path aliases.
      */
     public void clearPathAliases() {
-        getElement().removeAttribute("path-aliases");
+        getElement().removeProperty("pathAliases");
     }
 
     /**
@@ -332,7 +332,7 @@ public class SideNavItem extends SideNavItemContainer
      * @return the path aliases for this item, empty if none
      */
     public Set<String> getPathAliases() {
-        String aliases = getElement().getAttribute("path-aliases");
+        String aliases = getElement().getProperty("pathAliases");
         if (aliases == null) {
             return Collections.emptySet();
         }
