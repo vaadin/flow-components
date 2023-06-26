@@ -217,7 +217,7 @@ public class SideNavItem extends SideNavItemContainer
             String url = RouteConfiguration.forRegistry(router.getRegistry())
                     .getUrl(view);
             setPath(url);
-            addPathAlias(view);
+            addPathAliases(view);
         } else {
             setPath((String) null);
         }
@@ -239,7 +239,7 @@ public class SideNavItem extends SideNavItemContainer
      * @param aliases
      *            the path aliases to add to this item
      */
-    public void addPathAlias(String... aliases) {
+    public void addPathAliases(String... aliases) {
         Objects.requireNonNull(aliases, "Aliases to add should not be null");
         String updatedAliases = Stream
                 .concat(getPathAliases().stream(), Arrays.stream(aliases))
@@ -261,15 +261,15 @@ public class SideNavItem extends SideNavItemContainer
      *            The views containing the path aliases to add to this item.
      */
     @SafeVarargs
-    public final void addPathAlias(Class<? extends Component>... views) {
+    public final void addPathAliases(Class<? extends Component>... views) {
         Objects.requireNonNull(views,
                 "Views containing the path aliases to add should not be null");
         String[] aliases = Arrays.stream(views).map(view -> Objects.requireNonNull(
                 view, "View containing the path aliases to add cannot be null"))
                 .map(view -> view.getAnnotationsByType(RouteAlias.class))
                 .flatMap(Arrays::stream).map(RouteAlias::value)
-                .toArray(String[]::new));
-        addPathAlias(aliases);
+                .toArray(String[]::new);
+        addPathAliases(aliases);
     }
 
     /**
@@ -278,9 +278,9 @@ public class SideNavItem extends SideNavItemContainer
      * @param aliases
      *            the path aliases to remove from this item
      *
-     * @see SideNavItem#addPathAlias(String...)
+     * @see SideNavItem#addPathAliases(String...)
      */
-    public void removePathAlias(String... aliases) {
+    public void removePathAliases(String... aliases) {
         Objects.requireNonNull(aliases, "Aliases to remove cannot be null");
         Set<String> aliasesToRemove = Arrays.stream(aliases)
                 .map(alias -> Objects.requireNonNull(alias,
@@ -306,10 +306,10 @@ public class SideNavItem extends SideNavItemContainer
      * @param views
      *            the views containing the path aliases to remove from this item
      *
-     * @see SideNavItem#addPathAlias(Class...)
+     * @see SideNavItem#addPathAliases(Class...)
      */
     @SafeVarargs
-    public final void removePathAlias(Class<? extends Component>... views) {
+    public final void removePathAliases(Class<? extends Component>... views) {
         Objects.requireNonNull(views,
                 "Views containing the path aliases to remove should not be null");
         removePathAlias(Arrays.stream(views).map(view -> Objects.requireNonNull(

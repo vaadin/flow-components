@@ -400,7 +400,7 @@ public class SideNavItemTest {
     @Test
     public void addEmptyPathAlias_pathAliasAdded() {
         final SideNavItem item = new SideNavItem("Test");
-        item.addPathAlias("");
+        item.addPathAliases("");
 
         Assert.assertEquals(Set.of(""), item.getPathAliases());
     }
@@ -408,7 +408,7 @@ public class SideNavItemTest {
     @Test
     public void addMultiplePathAliases_pathAliasesAdded() {
         final SideNavItem item = new SideNavItem("Test");
-        item.addPathAlias("alias1", "alias2");
+        item.addPathAliases("alias1", "alias2");
 
         Assert.assertEquals(Set.of("alias1", "alias2"), item.getPathAliases());
     }
@@ -416,8 +416,8 @@ public class SideNavItemTest {
     @Test
     public void addPathAlias_removePathAlias_pathAliasesEmpty() {
         final SideNavItem item = new SideNavItem("Test");
-        item.addPathAlias("alias");
-        item.removePathAlias("alias");
+        item.addPathAliases("alias");
+        item.removePathAliases("alias");
 
         Assert.assertEquals(0, item.getPathAliases().size());
     }
@@ -425,7 +425,7 @@ public class SideNavItemTest {
     @Test
     public void addMultiplePathAliases_clearPathAliases_pathAliasesEmpty() {
         final SideNavItem item = new SideNavItem("Test");
-        item.addPathAlias("alias1", "alias2");
+        item.addPathAliases("alias1", "alias2");
         item.clearPathAliases();
 
         Assert.assertEquals(0, item.getPathAliases().size());
@@ -453,7 +453,7 @@ public class SideNavItemTest {
                     .thenReturn(router);
 
             sideNavItem.setPath(TestRoute.class);
-            sideNavItem.removePathAlias(TestRoute.class);
+            sideNavItem.removePathAliases(TestRoute.class);
 
             Assert.assertEquals(0, sideNavItem.getPathAliases().size());
         }
@@ -467,7 +467,7 @@ public class SideNavItemTest {
                     .thenReturn(router);
 
             sideNavItem.setPath(TestRoute.class);
-            sideNavItem.removePathAlias("foo/baz");
+            sideNavItem.removePathAliases("foo/baz");
 
             Assert.assertEquals(Set.of("foo/qux"),
                     sideNavItem.getPathAliases());
