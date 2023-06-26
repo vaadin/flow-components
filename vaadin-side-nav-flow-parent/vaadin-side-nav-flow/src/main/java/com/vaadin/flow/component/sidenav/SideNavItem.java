@@ -264,11 +264,12 @@ public class SideNavItem extends SideNavItemContainer
     public final void addPathAlias(Class<? extends Component>... views) {
         Objects.requireNonNull(views,
                 "Views containing the path aliases to add should not be null");
-        addPathAlias(Arrays.stream(views).map(view -> Objects.requireNonNull(
+        String[] aliases = Arrays.stream(views).map(view -> Objects.requireNonNull(
                 view, "View containing the path aliases to add cannot be null"))
                 .map(view -> view.getAnnotationsByType(RouteAlias.class))
                 .flatMap(Arrays::stream).map(RouteAlias::value)
                 .toArray(String[]::new));
+        addPathAlias(aliases);
     }
 
     /**
