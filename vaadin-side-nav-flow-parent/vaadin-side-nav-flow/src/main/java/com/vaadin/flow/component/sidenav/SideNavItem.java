@@ -245,7 +245,7 @@ public class SideNavItem extends SideNavItemContainer
                 .concat(getPathAliases().stream(), Arrays.stream(aliases))
                 .map(alias -> Objects.requireNonNull(alias,
                         "Alias to add cannot be null"))
-                .map(String::trim).distinct().collect(Collectors.joining(","));
+                .distinct().collect(Collectors.joining(","));
         getElement().setProperty("pathAliases", updatedAliases);
     }
 
@@ -286,7 +286,7 @@ public class SideNavItem extends SideNavItemContainer
         Set<String> aliasesToRemove = Arrays.stream(aliases)
                 .map(alias -> Objects.requireNonNull(alias,
                         "Alias to remove cannot be null"))
-                .map(String::trim).collect(Collectors.toSet());
+                .collect(Collectors.toSet());
         Set<String> updatedAliases = getPathAliases();
         updatedAliases.removeAll(aliasesToRemove);
         if (updatedAliases.isEmpty()) {
@@ -338,8 +338,7 @@ public class SideNavItem extends SideNavItemContainer
         if (aliases == null) {
             return Collections.emptySet();
         }
-        return Arrays.stream(aliases.split(",")).map(String::trim)
-                .collect(Collectors.toSet());
+        return Arrays.stream(aliases.split(",")).collect(Collectors.toSet());
     }
 
     /**
