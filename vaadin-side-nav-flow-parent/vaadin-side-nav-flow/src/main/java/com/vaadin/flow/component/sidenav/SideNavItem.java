@@ -280,7 +280,7 @@ public class SideNavItem extends SideNavItemContainer
      * @see SideNavItem#addPathAlias(String...)
      */
     public void removePathAlias(String... aliases) {
-        Objects.requireNonNull(aliases, "Aliases to remove should not be null");
+        Objects.requireNonNull(aliases, "Aliases to remove cannot be null");
         Set<String> aliasesToRemove = Arrays.stream(aliases)
                 .map(alias -> Objects.requireNonNull(alias,
                         "Alias to remove cannot be null"))
