@@ -49,6 +49,11 @@ public class TreeGridScrollToPage extends Div {
         });
         scrollToIndex.setId("scroll-to-index");
 
-        add(grid, expandAll, scrollToStart, scrollToEnd, scrollToIndex);
+        NativeButton changePageSize = new NativeButton("Change page size (2)",
+                e -> grid.setPageSize(2));
+        changePageSize.setId("change-page-size");
+
+        add(grid, expandAll, scrollToStart, scrollToEnd, scrollToIndex,
+                changePageSize);
     }
 }
