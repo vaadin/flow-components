@@ -57,7 +57,7 @@ public class SideNavItemElement extends TestBenchElement {
     }
 
     public Set<String> getPathAliases() {
-        String aliases = getAttribute("pathAliases");
+        String aliases = getPropertyString("pathAliases");
         if (aliases == null) {
             return Collections.emptySet();
         }
