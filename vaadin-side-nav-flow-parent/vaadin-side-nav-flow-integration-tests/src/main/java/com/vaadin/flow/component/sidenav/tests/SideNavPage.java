@@ -67,5 +67,6 @@ public class SideNavPage extends Div {
                         .setText(String.valueOf(sideNav.isExpanded())));
         printExpandedState.setId("print-side-nav-expanded-state");
         add(printExpandedState);
+
     }
 }
