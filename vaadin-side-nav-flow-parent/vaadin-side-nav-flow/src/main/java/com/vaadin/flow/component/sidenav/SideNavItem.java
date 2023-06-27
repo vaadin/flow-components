@@ -250,12 +250,9 @@ public class SideNavItem extends SideNavItemContainer
     }
 
     /**
-     * Adds the path aliases registered to the specified views to this item. The
-     * aliases act as secondary paths when determining the active state of the
-     * item.
-     * <p>
-     * Note: The views should be annotated with the
-     * {@link com.vaadin.flow.router.RouteAlias} annotation.
+     * Retrieves {@link com.vaadin.flow.router.RouteAlias} annotations from the specified views,
+     * and then adds them as path aliases to this item. Aliases act as secondary paths
+     * when determining the active state of an item.
      *
      * @param views
      *            The views containing the path aliases to add to this item.
