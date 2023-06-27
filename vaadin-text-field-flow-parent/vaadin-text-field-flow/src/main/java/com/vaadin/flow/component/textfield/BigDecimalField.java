@@ -80,6 +80,8 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
                     : valueFromModel.toPlainString().replace('.',
                             field.getDecimalSeparator());
 
+                            private boolean manualValidationEnabled = false;
+
     /**
      * Constructs an empty {@code BigDecimalField}.
      */
@@ -249,20 +251,31 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
         return super.getValue();
     }
 
+    @Override
+    public void setManualValidation(boolean enabled) {
+        this.manualValidationEnabled = enabled;
+    }
+
+    private boolean isManualValidationEnabled() {
+        return this.manualValidationEnabled;
+    }
+
     /**
      * Performs server-side validation of the current value. This is needed
      * because it is possible to circumvent the client-side validation
      * constraints using browser development tools.
      */
     protected void validate() {
-        BigDecimal value = getValue();
+        if (!isManualValidationEnabled()) {
+            BigDecimal value = getValue();
 
-        boolean isRequired = isRequiredIndicatorVisible();
-        ValidationResult requiredValidation = ValidationUtil
-                .checkRequired(isRequired, value, getEmptyValue());
+            boolean isRequired = isRequiredIndicatorVisible();
+            ValidationResult requiredValidation = ValidationUtil
+                    .checkRequired(isRequired, value, getEmptyValue());
 
-        setInvalid(
-                requiredValidation.isError() || checkValidity(value).isError());
+            setInvalid(
+                    requiredValidation.isError() || checkValidity(value).isError());
+        }
     }
 
     private ValidationResult checkValidity(BigDecimal value) {

@@ -47,6 +47,8 @@ public class TextField extends TextFieldBase<TextField, String>
 
     private TextFieldValidationSupport validationSupport;
 
+    private boolean manualValidationEnabled = false;
+
     /**
      * Constructs an empty {@code TextField}.
      */
@@ -327,6 +329,15 @@ public class TextField extends TextFieldBase<TextField, String>
                                 !isInvalid())));
     }
 
+    @Override
+    public void setManualValidation(boolean enabled) {
+        this.manualValidationEnabled = enabled;
+    }
+
+    private boolean isManualValidationEnabled() {
+        return this.manualValidationEnabled;
+    }
+
     /**
      * Performs server-side validation of the current value and the validation
      * constraints of the field, such as {@link #setPattern(String)}. This is
@@ -334,7 +345,9 @@ public class TextField extends TextFieldBase<TextField, String>
      * constraints using browser development tools.
      */
     protected void validate() {
-        setInvalid(getValidationSupport().isInvalid(getValue()));
+        if (!isManualValidationEnabled()) {
+            setInvalid(getValidationSupport().isInvalid(getValue()));
+        }
     }
 
     @Override

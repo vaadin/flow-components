@@ -106,6 +106,8 @@ public class RadioButtonGroup<T>
 
     private SerializableConsumer<UI> sizeRequest;
 
+    private boolean manualValidationEnabled = false;
+
     private static <T> T presentationToModel(
             RadioButtonGroup<T> radioButtonGroup, String presentation) {
         if (radioButtonGroup.keyMapper == null) {
@@ -718,13 +720,24 @@ public class RadioButtonGroup<T>
         keyMapper.setIdentifierGetter(identifierProvider);
     }
 
-    protected void validate() {
-        boolean isRequired = isRequiredIndicatorVisible();
-        boolean isInvalid = ValidationUtil
-                .checkRequired(isRequired, getValue(), getEmptyValue())
-                .isError();
+    @Override
+    public void setManualValidation(boolean enabled) {
+        this.manualValidationEnabled = enabled;
+    }
 
-        setInvalid(isInvalid);
+    private boolean isManualValidationEnabled() {
+        return this.manualValidationEnabled;
+    }
+
+    protected void validate() {
+        if (!isManualValidationEnabled()) {
+            boolean isRequired = isRequiredIndicatorVisible();
+            boolean isInvalid = ValidationUtil
+                    .checkRequired(isRequired, getValue(), getEmptyValue())
+                    .isError();
+
+            setInvalid(isInvalid);
+        }
     }
 
     @Override

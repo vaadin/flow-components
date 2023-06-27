@@ -126,6 +126,8 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     private final ComboBoxDataController<TItem> dataController;
     private int customValueListenersCount;
 
+    private boolean manualValidationEnabled = false;
+
     /**
      * Constructs a new ComboBoxBase instance
      *
@@ -1157,13 +1159,24 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
                 "window.Vaadin.Flow.comboBoxConnector.initLazy(this)");
     }
 
-    protected void validate() {
-        boolean isRequired = isRequiredIndicatorVisible();
-        boolean isInvalid = ValidationUtil
-                .checkRequired(isRequired, getValue(), getEmptyValue())
-                .isError();
+    @Override
+    public void setManualValidation(boolean enabled) {
+        this.manualValidationEnabled = enabled;
+    }
 
-        setInvalid(isInvalid);
+    private boolean isManualValidationEnabled() {
+        return this.manualValidationEnabled;
+    }
+
+    protected void validate() {
+        if (!isManualValidationEnabled()) {
+            boolean isRequired = isRequiredIndicatorVisible();
+            boolean isInvalid = ValidationUtil
+                    .checkRequired(isRequired, getValue(), getEmptyValue())
+                    .isError();
+
+            setInvalid(isInvalid);
+        }
     }
 
     @Override

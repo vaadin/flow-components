@@ -115,7 +115,7 @@ public class DatePicker
 
     private StateTree.ExecutionRegistration pendingI18nUpdate;
 
-    private boolean internalValidationDisabled = false;
+    private boolean manualValidationEnabled = false;
 
     /**
      * Default constructor.
@@ -776,13 +776,22 @@ public class DatePicker
         return getElement().getProperty("name");
     }
 
+    @Override
+    public void setManualValidation(boolean enabled) {
+        this.manualValidationEnabled = enabled;
+    }
+
+    private boolean isManualValidationEnabled() {
+        return this.manualValidationEnabled;
+    }
+
     /**
      * Performs server-side validation of the current value. This is needed
      * because it is possible to circumvent the client-side validation
      * constraints using browser development tools.
      */
     protected void validate() {
-        if (!isInternalValidationDisabled()) {
+        if (!isManualValidationEnabled()) {
             setInvalid(isInvalid(getValue()));
         }
     }
@@ -844,16 +853,6 @@ public class DatePicker
     public Registration addInvalidChangeListener(
             ComponentEventListener<InvalidChangeEvent> listener) {
         return addListener(InvalidChangeEvent.class, listener);
-    }
-
-    @Override
-    public void setInternalValidationDisabled(boolean disabled) {
-        this.internalValidationDisabled = disabled;
-    }
-
-    @Override
-    public boolean isInternalValidationDisabled() {
-        return this.internalValidationDisabled;
     }
 
     /**
