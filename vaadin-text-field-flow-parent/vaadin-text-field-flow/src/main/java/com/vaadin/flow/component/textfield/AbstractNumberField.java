@@ -296,11 +296,11 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         if (!isManualValidationEnabled()) {
             T value = getValue();
 
-            final var requiredValidation = ValidationUtil.checkRequired(required,
-                    value, getEmptyValue());
+            final var requiredValidation = ValidationUtil
+                    .checkRequired(required, value, getEmptyValue());
 
-            setInvalid(
-                    requiredValidation.isError() || checkValidity(value).isError());
+            setInvalid(requiredValidation.isError()
+                    || checkValidity(value).isError());
         }
     }
 

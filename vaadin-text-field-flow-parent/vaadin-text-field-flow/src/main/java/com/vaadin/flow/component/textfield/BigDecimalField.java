@@ -80,7 +80,7 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
                     : valueFromModel.toPlainString().replace('.',
                             field.getDecimalSeparator());
 
-                            private boolean manualValidationEnabled = false;
+    private boolean manualValidationEnabled = false;
 
     /**
      * Constructs an empty {@code BigDecimalField}.
@@ -273,8 +273,8 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
             ValidationResult requiredValidation = ValidationUtil
                     .checkRequired(isRequired, value, getEmptyValue());
 
-            setInvalid(
-                    requiredValidation.isError() || checkValidity(value).isError());
+            setInvalid(requiredValidation.isError()
+                    || checkValidity(value).isError());
         }
     }
 

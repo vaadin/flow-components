@@ -20,8 +20,8 @@ import java.util.Set;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
-public class CheckboxGroupBasicValidationTest
-        extends AbstractBasicValidationTest<CheckboxGroup<String>, Set<String>> {
+public class CheckboxGroupBasicValidationTest extends
+        AbstractBasicValidationTest<CheckboxGroup<String>, Set<String>> {
     protected CheckboxGroup<String> createTestField() {
         return new CheckboxGroup<String>();
     }
