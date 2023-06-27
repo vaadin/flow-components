@@ -66,10 +66,10 @@ import org.slf4j.LoggerFactory;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-tabs")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/tabs/src/vaadin-tabs.js")
-@NpmPackage(value = "@vaadin/tabs", version = "24.1.0")
+@NpmPackage(value = "@vaadin/tabs", version = "24.2.0-alpha1")
 public class Tabs extends Component
         implements HasEnabled, HasSize, HasStyle, HasThemeVariant<TabsVariant> {
 

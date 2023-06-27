@@ -48,9 +48,9 @@ import java.util.stream.Collectors;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-crud")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/crud", version = "24.1.0")
+@NpmPackage(value = "@vaadin/crud", version = "24.2.0-alpha1")
 @JsModule("@vaadin/crud/src/vaadin-crud.js")
 @JsModule("@vaadin/crud/src/vaadin-crud-edit-column.js")
 public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
@@ -133,18 +133,26 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
 
         newButton = new Button();
         newButton.getElement().setAttribute("theme", "primary");
+        // Ensure the flag is set before the element is added to the slot
+        newButton.getElement().setProperty("_isDefault", true);
         SlotUtils.addToSlot(this, "new-button", newButton);
 
         saveButton = new SaveButton();
         saveButton.addThemeName("primary");
+        // Ensure the flag is set before the element is added to the slot
+        saveButton.getElement().setProperty("_isDefault", true);
         SlotUtils.addToSlot(this, "save-button", saveButton);
 
         cancelButton = new Button();
         cancelButton.addThemeName("tertiary");
+        // Ensure the flag is set before the element is added to the slot
+        cancelButton.getElement().setProperty("_isDefault", true);
         SlotUtils.addToSlot(this, "cancel-button", cancelButton);
 
         deleteButton = new Button();
         deleteButton.addThemeNames("tertiary", "error");
+        // Ensure the flag is set before the element is added to the slot
+        deleteButton.getElement().setProperty("_isDefault", true);
         SlotUtils.addToSlot(this, "delete-button", deleteButton);
     }
 

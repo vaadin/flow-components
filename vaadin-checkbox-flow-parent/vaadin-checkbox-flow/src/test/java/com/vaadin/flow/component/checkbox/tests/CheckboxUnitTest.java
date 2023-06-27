@@ -15,7 +15,9 @@
  */
 package com.vaadin.flow.component.checkbox.tests;
 
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.HasAriaLabel;
+import com.vaadin.flow.component.shared.InputField;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -145,5 +147,12 @@ public class CheckboxUnitTest {
 
         checkbox.setAriaLabelledBy(null);
         Assert.assertTrue(checkbox.getAriaLabelledBy().isEmpty());
+    }
+
+    @Test
+    public void implementsInputField() {
+        Checkbox field = new Checkbox();
+        Assert.assertTrue(
+                field instanceof InputField<AbstractField.ComponentValueChangeEvent<Checkbox, Boolean>, Boolean>);
     }
 }

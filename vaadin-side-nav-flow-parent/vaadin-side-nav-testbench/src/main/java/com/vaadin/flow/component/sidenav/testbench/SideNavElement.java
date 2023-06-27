@@ -45,8 +45,8 @@ public class SideNavElement extends TestBenchElement {
     public void toggle() {
         final WebElement element;
         try {
-            element = getWrappedElement().getShadowRoot()
-                    .findElement(By.cssSelector("summary[part='label']"));
+            element = getWrappedElement()
+                    .findElement(By.cssSelector("[slot=label]"));
         } catch (NoSuchElementException e) {
             throw new NoSuchElementException(
                     "Nav does not contain a toggle button", e);

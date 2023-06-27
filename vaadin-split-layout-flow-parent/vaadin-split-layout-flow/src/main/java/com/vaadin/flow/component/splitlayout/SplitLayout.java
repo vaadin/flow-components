@@ -23,15 +23,16 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.DomEvent;
+import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.SlotUtils;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
 
@@ -42,9 +43,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-split-layout")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/split-layout", version = "24.1.0")
+@NpmPackage(value = "@vaadin/split-layout", version = "24.2.0-alpha1")
 @JsModule("@vaadin/split-layout/src/vaadin-split-layout.js")
 public class SplitLayout extends Component
         implements ClickNotifier<SplitLayout>, HasSize, HasStyle,
@@ -69,6 +70,9 @@ public class SplitLayout extends Component
         setOrientation(Orientation.HORIZONTAL);
         addAttachListener(
                 e -> this.requestStylesUpdatesForSplitterPosition(e.getUI()));
+        addSplitterDragendListener(
+                e -> this.splitterPosition = calcNewSplitterPosition(
+                        e.primaryComponentWidth, e.secondaryComponentWidth));
     }
 
     /**
@@ -213,6 +217,19 @@ public class SplitLayout extends Component
     }
 
     /**
+     * Gets the relative position of the splitter as a percentage value between
+     * 0 and 100. The value will be null unless the splitter position has been
+     * explicitly set on the server-side, or the splitter has been moved on the
+     * client side. The splitter position is automatically updated when as part
+     * of the {@link SplitterDragendEvent}.
+     *
+     * @return the splitter position, may be null
+     */
+    public Double getSplitterPosition() {
+        return splitterPosition;
+    }
+
+    /**
      * Sets the relative position of the splitter in percentages. The given
      * value is used to set how much space is given to the primary component
      * relative to the secondary component. In horizontal mode this is the width
@@ -322,9 +339,21 @@ public class SplitLayout extends Component
     @DomEvent("splitter-dragend")
     public static class SplitterDragendEvent
             extends ComponentEvent<SplitLayout> {
-        public SplitterDragendEvent(SplitLayout source, boolean fromClient) {
+
+        private static final String PRIMARY_FLEX_BASIS = "element.querySelector('[slot=\"primary\"]').style.flexBasis";
+        private static final String SECONDARY_FLEX_BASIS = "element.querySelector('[slot=\"secondary\"]').style.flexBasis";
+
+        String primaryComponentWidth;
+        String secondaryComponentWidth;
+
+        public SplitterDragendEvent(SplitLayout source, boolean fromClient,
+                @EventData(PRIMARY_FLEX_BASIS) String primaryComponentWidth,
+                @EventData(SECONDARY_FLEX_BASIS) String secondaryComponentWidth) {
             super(source, fromClient);
+            this.primaryComponentWidth = primaryComponentWidth;
+            this.secondaryComponentWidth = secondaryComponentWidth;
         }
+
     }
 
     /**
@@ -352,5 +381,39 @@ public class SplitLayout extends Component
                     "var element = this.children[$0]; if (element) { element.style[$1]=$2; }",
                     primary ? 0 : 1, styleName, value);
         }
+    }
+
+    private double calcNewSplitterPosition(String primaryWidth,
+            String secondaryWidth) {
+        // set current splitter position value
+        double splitterPositionValue = this.splitterPosition;
+
+        if (primaryWidth == null || secondaryWidth == null) {
+            return splitterPositionValue;
+        }
+
+        if (primaryWidth.endsWith("px")) {
+            // When moving the splitter, the client side sets pixel values.
+            double pWidth = Double.parseDouble(primaryWidth.replace("px", ""));
+            double sWidth = Double
+                    .parseDouble(secondaryWidth.replace("px", ""));
+
+            splitterPositionValue = (pWidth * 100) / (pWidth + sWidth);
+            splitterPositionValue = round(splitterPositionValue);
+        } else if (primaryWidth.endsWith("%")) {
+            splitterPositionValue = Double
+                    .parseDouble(primaryWidth.replace("%", ""));
+            splitterPositionValue = round(splitterPositionValue);
+        } else {
+            throw new IllegalArgumentException(
+                    "Given width values are not supported: " + primaryWidth
+                            + " / " + secondaryWidth);
+        }
+
+        return splitterPositionValue;
+    }
+
+    private double round(double value) {
+        return Math.round(value * 100.0) / 100.0;
     }
 }

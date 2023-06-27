@@ -53,7 +53,12 @@ public class SplitterPositionView extends Div {
                 "set splitter position",
                 event -> layout.setSplitterPosition(FINAL_POSITION));
         setSplitterPosition.setId("setSplitPositionJavaApi");
-        add(setSplitterPosition, layout);
+
+        Span showSplitterPosition = new Span();
+        showSplitterPosition.setId("showSplitterPositionJavaApi");
+        layout.addSplitterDragendListener(e -> showSplitterPosition
+                .setText(String.valueOf(e.getSource().getSplitterPosition())));
+        add(setSplitterPosition, layout, showSplitterPosition);
     }
 
     private void createLayoutElementApi() {
@@ -71,6 +76,11 @@ public class SplitterPositionView extends Div {
                 "set splitter position",
                 event -> layout.setSplitterPosition(FINAL_POSITION));
         setSplitterPosition.setId("setSplitPositionElementApi");
-        add(setSplitterPosition, layout);
+
+        Span showSplitterPosition = new Span();
+        showSplitterPosition.setId("showSplitterPositionElementApi");
+        layout.addSplitterDragendListener(e -> showSplitterPosition
+                .setText(String.valueOf(e.getSource().getSplitterPosition())));
+        add(setSplitterPosition, layout, showSplitterPosition);
     }
 }

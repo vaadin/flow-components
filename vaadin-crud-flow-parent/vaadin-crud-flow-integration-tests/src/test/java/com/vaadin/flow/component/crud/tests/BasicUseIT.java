@@ -112,6 +112,21 @@ public class BasicUseIT extends AbstractParallelTest {
     }
 
     @Test
+    public void defaultButtonTexts() {
+        CrudElement crud = $(CrudElement.class).waitForFirst();
+        Assert.assertEquals("New item",
+                crud.getNewItemButton().get().getText().trim());
+
+        crud.openRowForEditing(0);
+        Assert.assertEquals("Save",
+                crud.getEditorSaveButton().getText().trim());
+        Assert.assertEquals("Cancel",
+                crud.getEditorCancelButton().getText().trim());
+        Assert.assertEquals("Delete...",
+                crud.getEditorDeleteButton().getText().trim());
+    }
+
+    @Test
     public void i18n() {
         CrudElement crud = $(CrudElement.class).waitForFirst();
         Assert.assertEquals("New item",
