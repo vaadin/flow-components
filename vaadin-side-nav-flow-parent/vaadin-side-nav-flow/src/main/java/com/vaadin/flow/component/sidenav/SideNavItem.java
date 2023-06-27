@@ -298,11 +298,8 @@ public class SideNavItem extends SideNavItemContainer
     }
 
     /**
-     * Removes the path aliases registered to the specified views from this
-     * item.
-     * <p>
-     * Note: The views should be annotated with the
-     * {@link com.vaadin.flow.router.RouteAlias} annotation.
+     * Retrieves {@link com.vaadin.flow.router.RouteAlias} annotations from the specified views,
+     * and then removes the corresponding path aliases from this item. 
      *
      * @param views
      *            the views containing the path aliases to remove from this item
