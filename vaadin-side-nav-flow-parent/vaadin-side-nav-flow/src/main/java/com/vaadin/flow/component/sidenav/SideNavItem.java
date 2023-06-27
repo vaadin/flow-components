@@ -198,8 +198,8 @@ public class SideNavItem extends SideNavItemContainer
     /**
      * Sets the view this item links to. Also, retrieves
      * {@link com.vaadin.flow.router.RouteAlias} annotations from the specified
-     * views, and then adds them as path aliases to this item. Aliases act as
-     * secondary paths when determining the active state of an item.
+     * views, and then adds the corresponding path aliases to this item. Aliases
+     * act as secondary paths when determining the active state of an item.
      * <p>
      * Note: Vaadin Router will be used to determine the URL path of the view
      * and this URL will be then set to this navigation item using
@@ -254,8 +254,9 @@ public class SideNavItem extends SideNavItemContainer
 
     /**
      * Retrieves {@link com.vaadin.flow.router.RouteAlias} annotations from the
-     * specified views, and then adds them as path aliases to this item. Aliases
-     * act as secondary paths when determining the active state of an item.
+     * specified views, and then adds the corresponding path aliases to this
+     * item. Aliases act as secondary paths when determining the active state of
+     * an item.
      *
      * @param views
      *            The views containing the path aliases to add to this item.
@@ -298,8 +299,9 @@ public class SideNavItem extends SideNavItemContainer
     }
 
     /**
-     * Retrieves {@link com.vaadin.flow.router.RouteAlias} annotations from the specified views,
-     * and then removes the corresponding path aliases from this item. 
+     * Retrieves {@link com.vaadin.flow.router.RouteAlias} annotations from the
+     * specified views, and then removes the corresponding path aliases from
+     * this item.
      *
      * @param views
      *            the views containing the path aliases to remove from this item
