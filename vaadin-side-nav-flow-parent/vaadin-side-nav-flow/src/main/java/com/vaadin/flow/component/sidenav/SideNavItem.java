@@ -222,6 +222,7 @@ public class SideNavItem extends SideNavItemContainer
             addPathAliases(view);
         } else {
             setPath((String) null);
+            clearPathAliases();
         }
     }
 

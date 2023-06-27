@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.sidenav.tests;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -470,6 +471,22 @@ public class SideNavItemTest {
             sideNavItem.removePathAliases("foo/baz");
 
             Assert.assertEquals(Set.of("foo/qux"),
+                    sideNavItem.getPathAliases());
+        }
+    }
+
+    @Test
+    public void itemWithPathAndAliases_setNullAsComponent_pathAndAliasesRemoved() {
+        try (MockedStatic<ComponentUtil> mockComponentUtil = Mockito
+                .mockStatic(ComponentUtil.class)) {
+            mockComponentUtil.when(() -> ComponentUtil.getRouter(Mockito.any()))
+                    .thenReturn(router);
+
+            sideNavItem.setPath(TestRoute.class);
+            sideNavItem.setPath((Class<Component>) null);
+
+            Assert.assertNull(sideNavItem.getPath());
+            Assert.assertEquals(Collections.emptySet(),
                     sideNavItem.getPathAliases());
         }
     }
