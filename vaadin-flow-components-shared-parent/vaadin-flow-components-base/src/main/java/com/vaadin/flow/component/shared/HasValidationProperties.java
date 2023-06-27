@@ -51,6 +51,11 @@ public interface HasValidationProperties extends HasElement, HasValidation {
     /**
      * Sets the invalid state of the component.
      *
+     * NOTE: If you need to manually control the invalid state, consider
+     * enabling manual validation mode with
+     * {@link #setManualValidation(boolean)} to avoid potential conflicts
+     * between your custom validation and the component's built-in validation.
+     *
      * @param invalid
      *            {@code true} for invalid, {@code false} for valid
      */
