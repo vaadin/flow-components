@@ -67,20 +67,5 @@ public class SideNavPage extends Div {
                         .setText(String.valueOf(sideNav.isExpanded())));
         printExpandedState.setId("print-side-nav-expanded-state");
         add(printExpandedState);
-
-        NativeButton addMatchingPathAliasToNonNavigableParent = new NativeButton(
-                "Add matching path alias to non-navigable parent",
-                event -> nonNavigableParent
-                        .addPathAliases("vaadin-side-nav/side-nav-test"));
-        addMatchingPathAliasToNonNavigableParent
-                .setId("add-matching-path-alias-to-non-navigable-parent");
-        add(addMatchingPathAliasToNonNavigableParent);
-
-        NativeButton setDummyPathToNonNavigableParent = new NativeButton(
-                "Set dummy path to non-navigable parent",
-                event -> nonNavigableParent.setPath("dummy-path"));
-        setDummyPathToNonNavigableParent
-                .setId("set-dummy-path-to-non-navigable-parent");
-        add(setDummyPathToNonNavigableParent);
     }
 }
