@@ -19,7 +19,7 @@ import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
 public class MultiSelectComboBoxBasicValidationTest
-        extends AbstractBasicValidationTest<MultiSelectComboBox<String>> {
+        extends AbstractBasicValidationTest<MultiSelectComboBox<String>, String> {
     protected MultiSelectComboBox<String> createTestField() {
         return new MultiSelectComboBox<String>();
     }

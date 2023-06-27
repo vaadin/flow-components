@@ -19,7 +19,7 @@ import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
 public class IntegerFieldBasicValidationTest
-        extends AbstractBasicValidationTest<IntegerField> {
+        extends AbstractBasicValidationTest<IntegerField, Integer> {
     protected IntegerField createTestField() {
         return new IntegerField();
     }

@@ -38,18 +38,9 @@ public abstract class AbstractBasicValidationTest<C extends AbstractField<C, V> 
     }
 
     @Test
-    public void setInternalValidationDisabled_isInternalValidationDisabled() {
-        Assert.assertFalse(testField.isInternalValidationDisabled());
-
-        testField.setInternalValidationDisabled(true);
-
-        Assert.assertTrue(testField.isInternalValidationDisabled());
-    }
-
-    @Test
-    public void setRequired_setInternalValidationDisabled_fireValueChangeEvent_noValidation() {
+    public void setRequired_setManualValidation_fireValueChangeEvent_noValidation() {
         testField.setRequiredIndicatorVisible(true);
-        testField.setInternalValidationDisabled(true);
+        testField.setManualValidation(true);
 
         ComponentUtil.fireEvent(testField, new ComponentValueChangeEvent<>(
                 testField, testField, testField.getEmptyValue(), false));
@@ -57,9 +48,9 @@ public abstract class AbstractBasicValidationTest<C extends AbstractField<C, V> 
     }
 
     @Test
-    public void setRequired_setInternalValidationDisabled_fireClientValidatedEvent_noValidation() {
+    public void setRequired_setManualValidation_fireClientValidatedEvent_noValidation() {
         testField.setRequiredIndicatorVisible(true);
-        testField.setInternalValidationDisabled(true);
+        testField.setManualValidation(true);
 
         ComponentUtil.fireEvent(testField,
                 new ClientValidatedEvent(testField, false));

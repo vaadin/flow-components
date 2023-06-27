@@ -19,7 +19,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
 public class TextFieldBasicValidationTest
-        extends AbstractBasicValidationTest<TextField> {
+        extends AbstractBasicValidationTest<TextField, String> {
     protected TextField createTestField() {
         return new TextField();
     }

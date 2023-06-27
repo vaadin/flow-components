@@ -19,7 +19,7 @@ import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
 public class PasswordFieldBasicValidationTest
-        extends AbstractBasicValidationTest<PasswordField> {
+        extends AbstractBasicValidationTest<PasswordField, String> {
     protected PasswordField createTestField() {
         return new PasswordField();
     }

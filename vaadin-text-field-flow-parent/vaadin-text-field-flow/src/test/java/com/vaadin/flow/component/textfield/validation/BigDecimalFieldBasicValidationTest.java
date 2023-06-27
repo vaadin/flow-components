@@ -15,11 +15,13 @@
  */
 package com.vaadin.flow.component.textfield.validation;
 
+import java.math.BigDecimal;
+
 import com.vaadin.flow.component.textfield.BigDecimalField;
 import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
 public class BigDecimalFieldBasicValidationTest
-        extends AbstractBasicValidationTest<BigDecimalField> {
+        extends AbstractBasicValidationTest<BigDecimalField, BigDecimal> {
     protected BigDecimalField createTestField() {
         return new BigDecimalField();
     }
