@@ -243,7 +243,7 @@ public class SideNavItem extends SideNavItemContainer
      *            the path aliases to add to this item
      */
     public void addPathAliases(String... aliases) {
-        Objects.requireNonNull(aliases, "Aliases to add should not be null");
+        Objects.requireNonNull(aliases, "Aliases to add cannot be null");
         String updatedAliases = Stream
                 .concat(getPathAliases().stream(), Arrays.stream(aliases))
                 .map(alias -> Objects.requireNonNull(alias,
