@@ -804,17 +804,13 @@ public class DateTimePicker extends
         this.manualValidationEnabled = enabled;
     }
 
-    private boolean isManualValidationEnabled() {
-        return this.manualValidationEnabled;
-    }
-
     /**
      * Performs server-side validation of the current value. This is needed
      * because it is possible to circumvent the client-side validation
      * constraints using browser development tools.
      */
     protected void validate() {
-        if (!isManualValidationEnabled()) {
+        if (!this.manualValidationEnabled) {
             setInvalid(isInvalid(getValue()));
         }
     }

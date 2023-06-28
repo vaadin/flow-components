@@ -334,10 +334,6 @@ public class TextField extends TextFieldBase<TextField, String>
         this.manualValidationEnabled = enabled;
     }
 
-    private boolean isManualValidationEnabled() {
-        return this.manualValidationEnabled;
-    }
-
     /**
      * Performs server-side validation of the current value and the validation
      * constraints of the field, such as {@link #setPattern(String)}. This is
@@ -345,7 +341,7 @@ public class TextField extends TextFieldBase<TextField, String>
      * constraints using browser development tools.
      */
     protected void validate() {
-        if (!isManualValidationEnabled()) {
+        if (!this.manualValidationEnabled) {
             setInvalid(getValidationSupport().isInvalid(getValue()));
         }
     }
