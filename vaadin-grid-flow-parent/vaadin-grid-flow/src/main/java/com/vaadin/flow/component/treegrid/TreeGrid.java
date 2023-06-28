@@ -1042,8 +1042,17 @@ public class TreeGrid<T> extends Grid<T>
     }
 
     /**
-     * {@inheritDoc}
+     * Scrolls to the index of an item in the root level of the tree. To scroll
+     * to a nested item, use {@link #scrollToIndex(int...)}.
+     * <p>
+     * Scrolls so that the row is shown at the start of the visible area
+     * whenever possible.
+     * <p>
+     * If the index parameter exceeds current item set size the grid will scroll
+     * to the end.
      *
+     * @param rowIndex
+     *            zero based index of the item in the root level of the tree
      * @see TreeGrid#scrollToIndex(int...)
      */
     @Override
@@ -1052,19 +1061,17 @@ public class TreeGrid<T> extends Grid<T>
     }
 
     /**
-     * Scroll to a specific row index in the virtual list. Note that the row
-     * index is not always the same for any particular item. For example,
-     * sorting or filtering items can affect the row index related to an item.
-     *
+     * Scrolls to a nested item within the tree.
+     * <p>
      * The `indexes` parameter can be either a single number or multiple
      * numbers. The grid will first try to scroll to the item at the first index
-     * on the top level. In case the item at the first index is expanded, the
-     * grid will then try scroll to the item at the second index within the
-     * children of the expanded first item, and so on. Each given index points
-     * to a child of the item at the previous index.
+     * in the root level of the tree. In case the item at the first index is
+     * expanded, the grid will then try scroll to the item at the second index
+     * within the children of the expanded first item, and so on. Each given
+     * index points to a child of the item at the previous index.
      *
      * @param indexes
-     *            row indexes to scroll to
+     *            zero based row indexes to scroll to
      * @see TreeGrid#scrollToIndex(int)
      */
     public void scrollToIndex(int... indexes) {
