@@ -16,9 +16,11 @@
 package com.vaadin.flow.component.sidenav.tests;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.router.Route;
@@ -396,6 +398,7 @@ public class SideNavItemTest {
         final SideNavItem item = new SideNavItem("Test");
 
         Assert.assertEquals(0, item.getPathAliases().size());
+        Assert.assertNull(item.getElement().getProperty("pathAliases"));
     }
 
     @Test
@@ -404,6 +407,7 @@ public class SideNavItemTest {
         item.addPathAliases("");
 
         Assert.assertEquals(Set.of(""), item.getPathAliases());
+        Assert.assertEquals("", item.getElement().getProperty("pathAliases"));
     }
 
     @Test
@@ -412,6 +416,11 @@ public class SideNavItemTest {
         item.addPathAliases("alias1", "alias2");
 
         Assert.assertEquals(Set.of("alias1", "alias2"), item.getPathAliases());
+        Assert.assertEquals(Set.of("alias1", "alias2"),
+                Arrays.stream(
+                        item.getElement().getProperty("pathAliases").split(","))
+                        .collect(Collectors.toSet()));
+
     }
 
     @Test
@@ -421,6 +430,7 @@ public class SideNavItemTest {
         item.removePathAliases("alias");
 
         Assert.assertEquals(0, item.getPathAliases().size());
+        Assert.assertNull(item.getElement().getProperty("pathAliases"));
     }
 
     @Test
@@ -430,6 +440,7 @@ public class SideNavItemTest {
         item.clearPathAliases();
 
         Assert.assertEquals(0, item.getPathAliases().size());
+        Assert.assertNull(item.getElement().getProperty("pathAliases"));
     }
 
     @Test
@@ -443,6 +454,10 @@ public class SideNavItemTest {
 
             Assert.assertEquals(Set.of("foo/baz", "foo/qux"),
                     sideNavItem.getPathAliases());
+            Assert.assertEquals(Set.of("foo/baz", "foo/qux"),
+                    Arrays.stream(sideNavItem.getElement()
+                            .getProperty("pathAliases").split(","))
+                            .collect(Collectors.toSet()));
         }
     }
 
@@ -457,6 +472,8 @@ public class SideNavItemTest {
             sideNavItem.removePathAliases(TestRoute.class);
 
             Assert.assertEquals(0, sideNavItem.getPathAliases().size());
+            Assert.assertNull(
+                    sideNavItem.getElement().getProperty("pathAliases"));
         }
     }
 
@@ -472,6 +489,8 @@ public class SideNavItemTest {
 
             Assert.assertEquals(Set.of("foo/qux"),
                     sideNavItem.getPathAliases());
+            Assert.assertEquals("foo/qux",
+                    sideNavItem.getElement().getProperty("pathAliases"));
         }
     }
 
@@ -486,8 +505,10 @@ public class SideNavItemTest {
             sideNavItem.setPath((Class<Component>) null);
 
             Assert.assertNull(sideNavItem.getPath());
-            Assert.assertEquals(Collections.emptySet(),
-                    sideNavItem.getPathAliases());
+            Assert.assertEquals(0, sideNavItem.getPathAliases().size());
+            Assert.assertNull(
+                    sideNavItem.getElement().getProperty("pathAliases"));
+
         }
     }
 
