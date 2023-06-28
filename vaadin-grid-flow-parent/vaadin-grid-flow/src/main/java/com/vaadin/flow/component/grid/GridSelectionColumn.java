@@ -104,6 +104,29 @@ public class GridSelectionColumn extends Component {
         return getElement().getProperty("frozen", false);
     }
 
+    /**
+     * If <code>true</code>, grid rows can be selected or deselected by dragging
+     * the mouse cursor over grid's selection column.
+     *
+     * @param dragSelect
+     *            <code>true</code> to enable drag select feature,
+     *            <code>false</code> for disabling it
+     */
+    public void setDragSelect(boolean dragSelect) {
+        getElement().setProperty("dragSelect", dragSelect);
+    }
+
+    /**
+     * Gets whether grid drag select is enabled or not.
+     *
+     * @return <code>true</code> if drag select feature is enabled,
+     *         <code>false</code> otherwise
+     */
+    @Synchronize("drag-select-changed")
+    public boolean isDragSelect() {
+        return getElement().getProperty("dragSelect", false);
+    }
+
     @ClientCallable
     private void selectAll() {
         selectAllCallback.run();
