@@ -196,10 +196,9 @@ public class SideNavItem extends SideNavItemContainer
     }
 
     /**
-     * Sets the view this item links to. Also, retrieves
-     * {@link com.vaadin.flow.router.RouteAlias} annotations from the specified
-     * views, and then adds the corresponding path aliases to this item. Aliases
-     * act as secondary paths when determining the active state of an item.
+     * Retrieves {@link com.vaadin.flow.router.Route} and {@link com.vaadin.flow.router.RouteAlias} annotations
+     * from the specified view, and then sets the corresponding path and path aliases for this item. Aliases act
+     * as secondary paths when determining the active state of an item.
      * <p>
      * Note: Vaadin Router will be used to determine the URL path of the view
      * and this URL will be then set to this navigation item using
