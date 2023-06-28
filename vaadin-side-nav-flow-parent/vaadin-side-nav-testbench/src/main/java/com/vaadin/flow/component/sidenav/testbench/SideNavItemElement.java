@@ -61,8 +61,7 @@ public class SideNavItemElement extends TestBenchElement {
         if (aliases == null) {
             return Collections.emptySet();
         }
-        return Arrays.stream(aliases.split(",")).map(String::trim)
-                .collect(Collectors.toSet());
+        return Arrays.stream(aliases.split(",")).collect(Collectors.toSet());
     }
 
     public boolean isExpanded() {
