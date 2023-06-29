@@ -45,7 +45,9 @@ public class SideNavItemElement extends TestBenchElement {
         final WebElement unnamedSlot = getWrappedElement().getShadowRoot()
                 .findElement(By.cssSelector("slot:not([name])"));
         return (String) executeScript(
-                "return arguments[0].assignedNodes().filter(node => node.nodeType === Node.TEXT_NODE)[0].textContent;",
+                "return arguments[0].assignedNodes().map(node => {"
+                        + "  return (node.nodeType === Node.TEXT_NODE) ? node.textContent.trim() : ''"
+                        + "}).filter(Boolean).join(' ')",
                 unnamedSlot);
     }
 
