@@ -25,6 +25,13 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.internal.JsonSerializer;
+import com.vaadin.flow.internal.StateTree;
+import elemental.json.JsonObject;
+import elemental.json.JsonType;
+
+import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * A side navigation menu with support for hierarchical and flat menus.
@@ -41,6 +48,10 @@ import com.vaadin.flow.dom.Element;
 public class SideNav extends SideNavItemContainer implements HasSize, HasStyle {
 
     private Element labelElement;
+
+    private SideNavI18n i18n;
+
+    private StateTree.ExecutionRegistration pendingI18nUpdate;
 
     /**
      * Creates a new menu without any label.
@@ -152,6 +163,65 @@ public class SideNav extends SideNavItemContainer implements HasSize, HasStyle {
     }
 
     /**
+     * Gets the internationalization object previously set for this component.
+     * <p>
+     * Note: updating the object content that is gotten from this method will
+     * not update the lang on the component if not set back using
+     * {@link SideNav#setI18n(SideNavI18n)}
+     *
+     * @return the i18n object. It will be <code>null</code>, If the i18n
+     *         properties weren't set.
+     */
+    public SideNavI18n getI18n() {
+        return i18n;
+    }
+
+    /**
+     * Updates the i18n settings in the web component. Merges the
+     * {@link SideNavI18n} settings with the current / default settings of the
+     * web component.
+     *
+     * @param i18n
+     *            the internationalized properties, not <code>null</code>
+     */
+    public void setI18n(SideNavI18n i18n) {
+        Objects.requireNonNull(i18n,
+                "The i18N properties object should not be null");
+        this.i18n = i18n;
+        requestI18nUpdate();
+    }
+
+    private void requestI18nUpdate() {
+        getUI().ifPresent(ui -> {
+            if (pendingI18nUpdate != null) {
+                pendingI18nUpdate.remove();
+            }
+            pendingI18nUpdate = ui.beforeClientResponse(this, context -> {
+                pendingI18nUpdate = null;
+                executeI18nUpdate();
+            });
+        });
+    }
+
+    private void executeI18nUpdate() {
+        JsonObject i18nObject = (JsonObject) JsonSerializer.toJson(i18n);
+
+        // Remove null values so that we don't overwrite existing WC
+        // translations with empty ones
+        for (String key : i18nObject.keys()) {
+            if (i18nObject.get(key).getType() == JsonType.NULL) {
+                i18nObject.remove(key);
+            }
+        }
+
+        // Assign new I18N object to WC, by merging the existing
+        // WC I18N, and the values from the new I18n instance,
+        // into an empty object
+        getElement().executeJs("this.i18n = Object.assign({}, this.i18n, $0);",
+                i18nObject);
+    }
+
+    /**
      * Checks whether the SideNav component feature flag is active. Succeeds if
      * the flag is enabled, and throws otherwise.
      *
@@ -180,4 +250,31 @@ public class SideNav extends SideNavItemContainer implements HasSize, HasStyle {
                 .get(UI.getCurrent().getSession().getService().getContext());
     }
 
+    /**
+     * The internationalization properties for {@link SideNav}.
+     */
+    public static class SideNavI18n implements Serializable {
+        private String toggle;
+
+        /**
+         * Gets the translated expression for toggling child items.
+         *
+         * @return the translated expression for toggling child items
+         */
+        public String getToggle() {
+            return toggle;
+        }
+
+        /**
+         * Sets the translated expression for toggling child items.
+         *
+         * @param toggle
+         *            the translated expression for toggling child items
+         * @return this instance for method chaining
+         */
+        public SideNavI18n setToggle(String toggle) {
+            this.toggle = toggle;
+            return this;
+        }
+    }
 }
