@@ -2,15 +2,23 @@ package com.vaadin.flow.component.textfield.binder;
 
 import java.util.Objects;
 
+import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.function.SerializablePredicate;
 
 public class TextFieldValidationTest
         extends AbstractTextFieldValidationTest<String, TextField> {
 
+    @Tag("test-text-field")
+    private class TestTextField extends TextField {
+        protected boolean isEnforcedFieldValidationEnabled() {
+            return true;
+        }
+    }
+
     @Override
     protected void initField() {
-        field = new TextField();
+        field = new TestTextField();
         field.setMaxLength(8);
     }
 
