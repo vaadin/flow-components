@@ -57,6 +57,10 @@
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-lit-template</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
