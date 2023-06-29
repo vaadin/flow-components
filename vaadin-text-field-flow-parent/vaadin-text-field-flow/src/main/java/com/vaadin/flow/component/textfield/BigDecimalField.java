@@ -372,13 +372,13 @@ public class BigDecimalField
         if (Objects.equals(oldValue, getEmptyValue())
                 && Objects.equals(value, getEmptyValue())) {
             // Clear the input element from possible bad input.
-            getElement().executeJs("this.inputElement.value = ''");
+            getElement().executeJs("if (this.inputElement) this.inputElement.value = ''");
         } else {
             // Restore the input element's value in case it was cleared
             // in the above branch. That can happen when setValue(null)
             // and setValue(...) are subsequently called within one round-trip
             // and there was bad input.
-            getElement().executeJs("this.inputElement.value = this.value");
+            getElement().executeJs("if (this.inputElement) this.inputElement.value = this.value");
         }
     }
 
