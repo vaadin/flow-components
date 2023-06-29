@@ -113,8 +113,7 @@ public class TreeGridRefreshAllIT extends AbstractTreeGridIT {
         grid.select(1);
         refreshAllButton.click();
 
-        assertCellTexts(0, 0,
-                "0 | 0", "1 | 0", "1 | 1", "1 | 2");
+        assertCellTexts(0, 0, "0 | 0", "1 | 0", "1 | 1", "1 | 2");
 
     }
 }
