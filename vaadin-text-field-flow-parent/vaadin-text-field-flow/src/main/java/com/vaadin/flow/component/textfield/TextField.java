@@ -28,6 +28,7 @@ import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.server.VaadinSession;
 
 /**
@@ -513,6 +514,10 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
         if (session == null) {
             return false;
         }
-        return session.getConfiguration().isEnforcedFieldValidationEnabled();
+        DeploymentConfiguration configuration = session.getConfiguration();
+        if (configuration == null) {
+            return false;
+        }
+        return configuration.isEnforcedFieldValidationEnabled();
     }
 }
