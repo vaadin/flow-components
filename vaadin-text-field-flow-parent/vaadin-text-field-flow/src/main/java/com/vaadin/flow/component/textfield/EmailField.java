@@ -58,6 +58,8 @@ public class EmailField extends TextFieldBase<EmailField, String>
 
     private TextFieldValidationSupport validationSupport;
 
+    private boolean manualValidationEnabled = false;
+
     /**
      * Constructs an empty {@code EmailField}.
      */
@@ -303,13 +305,20 @@ public class EmailField extends TextFieldBase<EmailField, String>
                                 !isInvalid())));
     }
 
+    @Override
+    public void setManualValidation(boolean enabled) {
+        this.manualValidationEnabled = enabled;
+    }
+
     /**
      * Performs server-side validation of the current value. This is needed
      * because it is possible to circumvent the client-side validation
      * constraints using browser development tools.
      */
     protected void validate() {
-        setInvalid(getValidationSupport().isInvalid(getValue()));
+        if (!this.manualValidationEnabled) {
+            setInvalid(getValidationSupport().isInvalid(getValue()));
+        }
     }
 
     @Override

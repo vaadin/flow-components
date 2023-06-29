@@ -143,6 +143,8 @@ public class DateTimePicker extends
     private LocalDateTime min;
     private boolean required;
 
+    private boolean manualValidationEnabled = false;
+
     /**
      * Default constructor.
      */
@@ -797,13 +799,20 @@ public class DateTimePicker extends
         return requiredValidation.isError() || checkValidity(value).isError();
     }
 
+    @Override
+    public void setManualValidation(boolean enabled) {
+        this.manualValidationEnabled = enabled;
+    }
+
     /**
      * Performs server-side validation of the current value. This is needed
      * because it is possible to circumvent the client-side validation
      * constraints using browser development tools.
      */
     protected void validate() {
-        setInvalid(isInvalid(getValue()));
+        if (!this.manualValidationEnabled) {
+            setInvalid(isInvalid(getValue()));
+        }
     }
 
     /**

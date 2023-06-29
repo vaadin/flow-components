@@ -120,6 +120,8 @@ public class CheckboxGroup<T>
 
     private SerializableConsumer<UI> sizeRequest;
 
+    private boolean manualValidationEnabled = false;
+
     /**
      * Creates an empty checkbox group
      */
@@ -789,13 +791,20 @@ public class CheckboxGroup<T>
         keyMapper.setIdentifierGetter(identifierProvider);
     }
 
-    protected void validate() {
-        boolean isRequired = isRequiredIndicatorVisible();
-        boolean isInvalid = ValidationUtil
-                .checkRequired(isRequired, getValue(), getEmptyValue())
-                .isError();
+    @Override
+    public void setManualValidation(boolean enabled) {
+        this.manualValidationEnabled = enabled;
+    }
 
-        setInvalid(isInvalid);
+    protected void validate() {
+        if (!this.manualValidationEnabled) {
+            boolean isRequired = isRequiredIndicatorVisible();
+            boolean isInvalid = ValidationUtil
+                    .checkRequired(isRequired, getValue(), getEmptyValue())
+                    .isError();
+
+            setInvalid(isInvalid);
+        }
     }
 
     @Override

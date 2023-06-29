@@ -55,6 +55,8 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     private boolean stepSetByUser;
     private boolean minSetByUser;
 
+    private boolean manualValidationEnabled = false;
+
     /**
      * Sets up the common logic for number fields.
      *
@@ -276,19 +278,26 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         return ValidationResult.ok();
     }
 
+    @Override
+    public void setManualValidation(boolean enabled) {
+        this.manualValidationEnabled = enabled;
+    }
+
     /**
      * Performs server-side validation of the current value. This is needed
      * because it is possible to circumvent the client-side validation
      * constraints using browser development tools.
      */
     protected void validate() {
-        T value = getValue();
+        if (!this.manualValidationEnabled) {
+            T value = getValue();
 
-        final var requiredValidation = ValidationUtil.checkRequired(required,
-                value, getEmptyValue());
+            final var requiredValidation = ValidationUtil
+                    .checkRequired(required, value, getEmptyValue());
 
-        setInvalid(
-                requiredValidation.isError() || checkValidity(value).isError());
+            setInvalid(requiredValidation.isError()
+                    || checkValidity(value).isError());
+        }
     }
 
     private boolean isValidByStep(T value) {

@@ -129,6 +129,8 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
 
     private SerializableConsumer<UI> sizeRequest;
 
+    private boolean manualValidationEnabled = false;
+
     /**
      * Constructs a select.
      */
@@ -1027,13 +1029,20 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
         keyMapper.setIdentifierGetter(identifierProvider);
     }
 
-    protected void validate() {
-        boolean isRequired = this.isRequiredIndicatorVisible();
-        boolean isInvalid = ValidationUtil
-                .checkRequired(isRequired, getValue(), getEmptyValue())
-                .isError();
+    @Override
+    public void setManualValidation(boolean enabled) {
+        this.manualValidationEnabled = enabled;
+    }
 
-        setInvalid(isInvalid);
+    protected void validate() {
+        if (!this.manualValidationEnabled) {
+            boolean isRequired = this.isRequiredIndicatorVisible();
+            boolean isInvalid = ValidationUtil
+                    .checkRequired(isRequired, getValue(), getEmptyValue())
+                    .isError();
+
+            setInvalid(isInvalid);
+        }
     }
 
     @Override

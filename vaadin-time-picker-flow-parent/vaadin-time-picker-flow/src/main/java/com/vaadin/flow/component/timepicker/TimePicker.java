@@ -96,6 +96,8 @@ public class TimePicker
     private boolean required;
     private StateTree.ExecutionRegistration pendingLocaleUpdate;
 
+    private boolean manualValidationEnabled = false;
+
     /**
      * Default constructor.
      */
@@ -493,13 +495,20 @@ public class TimePicker
         return addListener(InvalidChangeEvent.class, listener);
     }
 
+    @Override
+    public void setManualValidation(boolean enabled) {
+        this.manualValidationEnabled = enabled;
+    }
+
     /**
      * Performs server-side validation of the current value. This is needed
      * because it is possible to circumvent the client-side validation
      * constraints using browser development tools.
      */
     protected void validate() {
-        setInvalid(isInvalid(getValue()));
+        if (!this.manualValidationEnabled) {
+            setInvalid(isInvalid(getValue()));
+        }
     }
 
     @Override
