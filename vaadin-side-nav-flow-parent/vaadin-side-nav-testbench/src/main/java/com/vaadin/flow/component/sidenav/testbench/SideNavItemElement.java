@@ -59,8 +59,8 @@ public class SideNavItemElement extends TestBenchElement {
         return hasAttribute("expanded");
     }
 
-    public boolean isActive() {
-        return hasAttribute("active");
+    public boolean isCurrent() {
+        return hasAttribute("current");
     }
 
     @Override

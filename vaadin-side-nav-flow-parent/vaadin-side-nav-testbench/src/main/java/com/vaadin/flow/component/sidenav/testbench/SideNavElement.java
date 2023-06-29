@@ -64,7 +64,7 @@ public class SideNavElement extends TestBenchElement {
     }
 
     public SideNavItemElement getSelectedItem() {
-        return getItemsStream(true).filter(SideNavItemElement::isActive)
+        return getItemsStream(true).filter(SideNavItemElement::isCurrent)
                 .findAny().orElse(null);
     }
 
