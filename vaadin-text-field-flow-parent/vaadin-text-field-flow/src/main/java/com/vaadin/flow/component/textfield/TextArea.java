@@ -462,12 +462,12 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
 
     @Override
     public Validator<String> getDefaultValidator() {
-    	 if (isEnforcedFieldValidationEnabled()) {
-             return (value, context) -> getValidationSupport()
-                     .checkValidity(value);
-         }
+        if (isEnforcedFieldValidationEnabled()) {
+            return (value, context) -> getValidationSupport()
+                    .checkValidity(value);
+        }
 
-         return Validator.alwaysPass();
+        return Validator.alwaysPass();
     }
 
     /**
@@ -485,7 +485,7 @@ public class TextArea extends GeneratedVaadinTextArea<TextArea, String>
         super.onAttach(attachEvent);
         FieldValidationUtil.disableClientValidation(this);
     }
-    
+
     /**
      * Whether the full experience validation is enforced for the component.
      * <p>

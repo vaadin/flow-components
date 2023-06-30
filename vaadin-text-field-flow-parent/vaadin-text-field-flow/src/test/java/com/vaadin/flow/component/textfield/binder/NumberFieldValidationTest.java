@@ -7,13 +7,13 @@ import com.vaadin.flow.function.SerializablePredicate;
 public class NumberFieldValidationTest
         extends AbstractTextFieldValidationTest<Double, NumberField> {
 
-	@Tag("test-number-field")
+    @Tag("test-number-field")
     private class TestNumberField extends NumberField {
         protected boolean isEnforcedFieldValidationEnabled() {
             return true;
         }
     }
-	
+
     @Override
     protected void initField() {
         field = new TestNumberField();

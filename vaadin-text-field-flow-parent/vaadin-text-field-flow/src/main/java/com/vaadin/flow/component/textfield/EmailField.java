@@ -459,7 +459,7 @@ public class EmailField extends GeneratedVaadinEmailField<EmailField, String>
         super.onAttach(attachEvent);
         FieldValidationUtil.disableClientValidation(this);
     }
-    
+
     /**
      * Whether the full experience validation is enforced for the component.
      * <p>

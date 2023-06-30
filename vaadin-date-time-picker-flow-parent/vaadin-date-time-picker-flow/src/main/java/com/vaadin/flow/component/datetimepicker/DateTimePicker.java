@@ -612,7 +612,7 @@ public class DateTimePicker extends
     @Override
     public Validator<LocalDateTime> getDefaultValidator() {
         if (isEnforcedFieldValidationEnabled()) {
-        	return (value, context) -> checkValidity(value);
+            return (value, context) -> checkValidity(value);
         }
 
         return Validator.alwaysPass();
@@ -801,7 +801,7 @@ public class DateTimePicker extends
         FieldValidationUtil.disableClientValidation(this);
 
     }
-    
+
     /**
      * Whether the full experience validation is enforced for the component.
      * <p>

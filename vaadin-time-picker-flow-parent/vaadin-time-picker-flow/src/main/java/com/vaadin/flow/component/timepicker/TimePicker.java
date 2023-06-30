@@ -216,7 +216,7 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     @Override
     public Validator<LocalTime> getDefaultValidator() {
         if (isEnforcedFieldValidationEnabled()) {
-        	return (value, context) -> checkValidity(value);
+            return (value, context) -> checkValidity(value);
         }
 
         return Validator.alwaysPass();
@@ -681,7 +681,7 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     private static LocalTime parse(String time, DateTimeFormatter formatter) {
         return time != null ? LocalTime.parse(time, formatter) : null;
     }
-    
+
     /**
      * Whether the full experience validation is enforced for the component.
      * <p>

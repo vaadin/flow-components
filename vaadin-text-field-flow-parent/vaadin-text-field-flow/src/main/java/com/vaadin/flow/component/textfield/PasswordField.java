@@ -491,7 +491,7 @@ public class PasswordField extends
         super.onAttach(attachEvent);
         FieldValidationUtil.disableClientValidation(this);
     }
-    
+
     /**
      * Whether the full experience validation is enforced for the component.
      * <p>

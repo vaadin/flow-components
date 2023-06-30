@@ -18,14 +18,14 @@ import com.vaadin.flow.data.binder.BindingValidationStatus;
 import com.vaadin.flow.data.binder.BindingValidationStatusHandler;
 
 public class TimePickerBinderValidationTest {
-	
-	@Tag("test-time-picker")
+
+    @Tag("test-time-picker")
     private class TestTimePicker extends TimePicker {
         protected boolean isEnforcedFieldValidationEnabled() {
             return true;
         }
     }
-	
+
     private static final String BINDER_FAIL_MESSAGE = "BINDER_VALIDATION_FAILED";
     private static final String BINDER_REQUIRED_MESSAGE = "REQUIRED";
 

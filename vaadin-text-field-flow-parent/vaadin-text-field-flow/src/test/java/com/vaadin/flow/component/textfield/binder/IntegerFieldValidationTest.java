@@ -6,13 +6,13 @@ import com.vaadin.flow.function.SerializablePredicate;
 
 public class IntegerFieldValidationTest
         extends AbstractTextFieldValidationTest<Integer, IntegerField> {
-	
-	@Tag("test-integer-field")
-	private class TestIntegerField extends IntegerField {
-		protected boolean isEnforcedFieldValidationEnabled() {
-			return true;
-		}
-	}
+
+    @Tag("test-integer-field")
+    private class TestIntegerField extends IntegerField {
+        protected boolean isEnforcedFieldValidationEnabled() {
+            return true;
+        }
+    }
 
     @Override
     protected void initField() {

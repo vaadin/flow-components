@@ -9,13 +9,13 @@ import com.vaadin.flow.function.SerializablePredicate;
 public class EmailFieldValidationTest
         extends AbstractTextFieldValidationTest<String, EmailField> {
 
-	@Tag("test-email-field")
-	private class TestEmailField extends EmailField {
-		protected boolean isEnforcedFieldValidationEnabled() {
-			return true;
-		}
-	}
-	
+    @Tag("test-email-field")
+    private class TestEmailField extends EmailField {
+        protected boolean isEnforcedFieldValidationEnabled() {
+            return true;
+        }
+    }
+
     @Override
     protected void initField() {
         field = new TestEmailField();

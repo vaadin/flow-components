@@ -9,13 +9,13 @@ import com.vaadin.flow.function.SerializablePredicate;
 public class PasswordFieldValidationTest
         extends AbstractTextFieldValidationTest<String, PasswordField> {
 
-	@Tag("test-password-field")
+    @Tag("test-password-field")
     private class TestPasswordField extends PasswordField {
         protected boolean isEnforcedFieldValidationEnabled() {
             return true;
         }
     }
-	
+
     @Override
     protected void initField() {
         field = new TestPasswordField();

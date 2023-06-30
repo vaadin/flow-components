@@ -444,7 +444,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     @Override
     public Validator<LocalDate> getDefaultValidator() {
         if (isEnforcedFieldValidationEnabled()) {
-        	return (value, context) -> checkValidity(value);
+            return (value, context) -> checkValidity(value);
         }
 
         return Validator.alwaysPass();
@@ -1102,7 +1102,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
             return this;
         }
     }
-    
+
     /**
      * Whether the full experience validation is enforced for the component.
      * <p>

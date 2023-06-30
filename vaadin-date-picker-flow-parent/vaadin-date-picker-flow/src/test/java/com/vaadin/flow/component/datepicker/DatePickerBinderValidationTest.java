@@ -17,8 +17,8 @@ import com.vaadin.flow.data.binder.BindingValidationStatus;
 import com.vaadin.flow.data.binder.BindingValidationStatusHandler;
 
 public class DatePickerBinderValidationTest {
-	
-	@Tag("test-date-picker")
+
+    @Tag("test-date-picker")
     private class TestDatePicker extends DatePicker {
         protected boolean isEnforcedFieldValidationEnabled() {
             return true;
