@@ -27,8 +27,6 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.StateTree;
-import elemental.json.JsonObject;
-import elemental.json.JsonType;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -188,37 +186,7 @@ public class SideNav extends SideNavItemContainer implements HasSize, HasStyle {
         Objects.requireNonNull(i18n,
                 "The i18N properties object should not be null");
         this.i18n = i18n;
-        requestI18nUpdate();
-    }
-
-    private void requestI18nUpdate() {
-        getUI().ifPresent(ui -> {
-            if (pendingI18nUpdate != null) {
-                pendingI18nUpdate.remove();
-            }
-            pendingI18nUpdate = ui.beforeClientResponse(this, context -> {
-                pendingI18nUpdate = null;
-                executeI18nUpdate();
-            });
-        });
-    }
-
-    private void executeI18nUpdate() {
-        JsonObject i18nObject = (JsonObject) JsonSerializer.toJson(i18n);
-
-        // Remove null values so that we don't overwrite existing WC
-        // translations with empty ones
-        for (String key : i18nObject.keys()) {
-            if (i18nObject.get(key).getType() == JsonType.NULL) {
-                i18nObject.remove(key);
-            }
-        }
-
-        // Assign new I18N object to WC, by merging the existing
-        // WC I18N, and the values from the new I18n instance,
-        // into an empty object
-        getElement().executeJs("this.i18n = Object.assign({}, this.i18n, $0);",
-                i18nObject);
+        getElement().setPropertyJson("i18n", JsonSerializer.toJson(i18n));
     }
 
     /**

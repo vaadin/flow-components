@@ -33,10 +33,6 @@ public class SideNavI18NPage extends Div {
                 .setI18n(new SideNav.SideNavI18n().setToggle("Updated")));
         setI18n.setId("set-i18n");
 
-        NativeButton setEmptyI18n = new NativeButton("Set empty i18n",
-                e -> sideNav.setI18n(new SideNav.SideNavI18n()));
-        setEmptyI18n.setId("set-empty-i18n");
-
-        add(sideNav, setI18n, setEmptyI18n);
+        add(sideNav, setI18n);
     }
 }

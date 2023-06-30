@@ -55,15 +55,6 @@ public class SideNavI18NIT extends AbstractComponentIT {
                 getI18nText(element)));
     }
 
-    @Test
-    public void setEmptyI18n_defaultI18nIsNotOverridden() {
-        $("button").id("set-empty-i18n").click();
-
-        List<SideNavItemElement> elements = $(SideNavItemElement.class).all();
-        elements.forEach(element -> Assert.assertEquals("Toggle child items",
-                getI18nText(element)));
-    }
-
     private String getI18nText(SideNavItemElement element) {
         return element.getWrappedElement().getShadowRoot()
                 .findElement(By.id("i18n")).getText();
