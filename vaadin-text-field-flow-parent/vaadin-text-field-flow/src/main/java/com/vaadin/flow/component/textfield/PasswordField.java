@@ -29,6 +29,8 @@ import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.function.DeploymentConfiguration;
+import com.vaadin.flow.server.VaadinSession;
 
 /**
  * Server-side component for the {@code vaadin-password-field} element.
@@ -466,7 +468,12 @@ public class PasswordField extends
 
     @Override
     public Validator<String> getDefaultValidator() {
-        return (value, context) -> getValidationSupport().checkValidity(value);
+        if (isEnforcedFieldValidationEnabled()) {
+            return (value, context) -> getValidationSupport()
+                    .checkValidity(value);
+        }
+
+        return Validator.alwaysPass();
     }
 
     /**
@@ -483,5 +490,28 @@ public class PasswordField extends
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         FieldValidationUtil.disableClientValidation(this);
+    }
+    
+    /**
+     * Whether the full experience validation is enforced for the component.
+     * <p>
+     * Exposed with protected visibility to support mocking
+     * <p>
+     * The method requires the {@code VaadinSession} instance to obtain the
+     * application configuration properties, otherwise, the feature is
+     * considered disabled.
+     *
+     * @return {@code true} if enabled, {@code false} otherwise.
+     */
+    protected boolean isEnforcedFieldValidationEnabled() {
+        VaadinSession session = VaadinSession.getCurrent();
+        if (session == null) {
+            return false;
+        }
+        DeploymentConfiguration configuration = session.getConfiguration();
+        if (configuration == null) {
+            return false;
+        }
+        return configuration.isEnforcedFieldValidationEnabled();
     }
 }

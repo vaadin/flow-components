@@ -17,7 +17,6 @@
 package com.vaadin.flow.component.textfield;
 
 import java.math.BigDecimal;
-import java.util.Objects;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.CompositionNotifier;
@@ -32,7 +31,9 @@ import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.server.VaadinSession;
 
 /**
  * Abstract base class for components based on {@code vaadin-number-field}
@@ -362,7 +363,11 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
 
     @Override
     public Validator<T> getDefaultValidator() {
-        return (value, context) -> checkValidity(value);
+        if (isEnforcedFieldValidationEnabled()) {
+            return (value, context) -> checkValidity(value);
+        }
+
+        return Validator.alwaysPass();
     }
 
     private ValidationResult checkValidity(T value) {
@@ -431,5 +436,28 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         FieldValidationUtil.disableClientValidation(this);
+    }
+    
+    /**
+     * Whether the full experience validation is enforced for the component.
+     * <p>
+     * Exposed with protected visibility to support mocking
+     * <p>
+     * The method requires the {@code VaadinSession} instance to obtain the
+     * application configuration properties, otherwise, the feature is
+     * considered disabled.
+     *
+     * @return {@code true} if enabled, {@code false} otherwise.
+     */
+    protected boolean isEnforcedFieldValidationEnabled() {
+        VaadinSession session = VaadinSession.getCurrent();
+        if (session == null) {
+            return false;
+        }
+        DeploymentConfiguration configuration = session.getConfiguration();
+        if (configuration == null) {
+            return false;
+        }
+        return configuration.isEnforcedFieldValidationEnabled();
     }
 }

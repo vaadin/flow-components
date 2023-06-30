@@ -43,7 +43,9 @@ import com.vaadin.flow.component.timepicker.StepsUtil;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.Validator;
+import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.server.VaadinSession;
 
 @Tag("vaadin-date-time-picker-date-picker")
 class DateTimePickerDatePicker
@@ -609,7 +611,11 @@ public class DateTimePicker extends
 
     @Override
     public Validator<LocalDateTime> getDefaultValidator() {
-        return (value, context) -> checkValidity(value);
+        if (isEnforcedFieldValidationEnabled()) {
+        	return (value, context) -> checkValidity(value);
+        }
+
+        return Validator.alwaysPass();
     }
 
     private ValidationResult checkValidity(LocalDateTime value) {
@@ -794,5 +800,28 @@ public class DateTimePicker extends
         super.onAttach(attachEvent);
         FieldValidationUtil.disableClientValidation(this);
 
+    }
+    
+    /**
+     * Whether the full experience validation is enforced for the component.
+     * <p>
+     * Exposed with protected visibility to support mocking
+     * <p>
+     * The method requires the {@code VaadinSession} instance to obtain the
+     * application configuration properties, otherwise, the feature is
+     * considered disabled.
+     *
+     * @return {@code true} if enabled, {@code false} otherwise.
+     */
+    protected boolean isEnforcedFieldValidationEnabled() {
+        VaadinSession session = VaadinSession.getCurrent();
+        if (session == null) {
+            return false;
+        }
+        DeploymentConfiguration configuration = session.getConfiguration();
+        if (configuration == null) {
+            return false;
+        }
+        return configuration.isEnforcedFieldValidationEnabled();
     }
 }

@@ -37,9 +37,11 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.Validator;
+import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.StateTree;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -213,7 +215,11 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
 
     @Override
     public Validator<LocalTime> getDefaultValidator() {
-        return (value, context) -> checkValidity(value);
+        if (isEnforcedFieldValidationEnabled()) {
+        	return (value, context) -> checkValidity(value);
+        }
+
+        return Validator.alwaysPass();
     }
 
     private ValidationResult checkValidity(LocalTime value) {
@@ -674,6 +680,29 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
 
     private static LocalTime parse(String time, DateTimeFormatter formatter) {
         return time != null ? LocalTime.parse(time, formatter) : null;
+    }
+    
+    /**
+     * Whether the full experience validation is enforced for the component.
+     * <p>
+     * Exposed with protected visibility to support mocking
+     * <p>
+     * The method requires the {@code VaadinSession} instance to obtain the
+     * application configuration properties, otherwise, the feature is
+     * considered disabled.
+     *
+     * @return {@code true} if enabled, {@code false} otherwise.
+     */
+    protected boolean isEnforcedFieldValidationEnabled() {
+        VaadinSession session = VaadinSession.getCurrent();
+        if (session == null) {
+            return false;
+        }
+        DeploymentConfiguration configuration = session.getConfiguration();
+        if (configuration == null) {
+            return false;
+        }
+        return configuration.isEnforcedFieldValidationEnabled();
     }
 
 }

@@ -1,8 +1,7 @@
 package com.vaadin.flow.component.datepicker;
 
-import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.data.binder.BindingValidationStatus;
-import com.vaadin.flow.data.binder.BindingValidationStatusHandler;
+import java.time.LocalDate;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,14 +11,24 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import java.time.LocalDate;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.BindingValidationStatus;
+import com.vaadin.flow.data.binder.BindingValidationStatusHandler;
 
 public class DatePickerBinderValidationTest {
+	
+	@Tag("test-date-picker")
+    private class TestDatePicker extends DatePicker {
+        protected boolean isEnforcedFieldValidationEnabled() {
+            return true;
+        }
+    }
 
     private static final String BINDER_FAIL_MESSAGE = "BINDER_FAIL_MESSAGE";
     private static final String BINDER_REQUIRED_MESSAGE = "REQUIRED";
 
-    private DatePicker field;
+    private TestDatePicker field;
 
     @Captor
     private ArgumentCaptor<BindingValidationStatus<?>> statusCaptor;
@@ -42,7 +51,7 @@ public class DatePickerBinderValidationTest {
     @Before
     public void init() {
         MockitoAnnotations.openMocks(this);
-        field = new DatePicker();
+        field = new TestDatePicker();
         field.setMax(LocalDate.now().plusDays(1));
     }
 

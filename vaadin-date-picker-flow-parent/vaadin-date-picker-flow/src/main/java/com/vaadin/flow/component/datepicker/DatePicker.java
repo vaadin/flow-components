@@ -38,10 +38,12 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.Validator;
+import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.StateTree;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.JsonObject;
@@ -441,7 +443,11 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
 
     @Override
     public Validator<LocalDate> getDefaultValidator() {
-        return (value, context) -> checkValidity(value);
+        if (isEnforcedFieldValidationEnabled()) {
+        	return (value, context) -> checkValidity(value);
+        }
+
+        return Validator.alwaysPass();
     }
 
     @Override
@@ -1095,5 +1101,28 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
             this.referenceDate = referenceDate;
             return this;
         }
+    }
+    
+    /**
+     * Whether the full experience validation is enforced for the component.
+     * <p>
+     * Exposed with protected visibility to support mocking
+     * <p>
+     * The method requires the {@code VaadinSession} instance to obtain the
+     * application configuration properties, otherwise, the feature is
+     * considered disabled.
+     *
+     * @return {@code true} if enabled, {@code false} otherwise.
+     */
+    protected boolean isEnforcedFieldValidationEnabled() {
+        VaadinSession session = VaadinSession.getCurrent();
+        if (session == null) {
+            return false;
+        }
+        DeploymentConfiguration configuration = session.getConfiguration();
+        if (configuration == null) {
+            return false;
+        }
+        return configuration.isEnforcedFieldValidationEnabled();
     }
 }

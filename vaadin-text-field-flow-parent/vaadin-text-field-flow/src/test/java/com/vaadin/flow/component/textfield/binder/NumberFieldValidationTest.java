@@ -1,14 +1,22 @@
 package com.vaadin.flow.component.textfield.binder;
 
+import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.function.SerializablePredicate;
 
 public class NumberFieldValidationTest
         extends AbstractTextFieldValidationTest<Double, NumberField> {
 
+	@Tag("test-number-field")
+    private class TestNumberField extends NumberField {
+        protected boolean isEnforcedFieldValidationEnabled() {
+            return true;
+        }
+    }
+	
     @Override
     protected void initField() {
-        field = new NumberField();
+        field = new TestNumberField();
         field.setMax(10);
     }
 

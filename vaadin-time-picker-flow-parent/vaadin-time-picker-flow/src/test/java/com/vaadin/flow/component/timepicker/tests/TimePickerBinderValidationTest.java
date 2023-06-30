@@ -1,9 +1,7 @@
 package com.vaadin.flow.component.timepicker.tests;
 
-import com.vaadin.flow.component.timepicker.TimePicker;
-import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.data.binder.BindingValidationStatus;
-import com.vaadin.flow.data.binder.BindingValidationStatusHandler;
+import java.time.LocalTime;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,13 +11,25 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import java.time.LocalTime;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.timepicker.TimePicker;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.BindingValidationStatus;
+import com.vaadin.flow.data.binder.BindingValidationStatusHandler;
 
 public class TimePickerBinderValidationTest {
+	
+	@Tag("test-time-picker")
+    private class TestTimePicker extends TimePicker {
+        protected boolean isEnforcedFieldValidationEnabled() {
+            return true;
+        }
+    }
+	
     private static final String BINDER_FAIL_MESSAGE = "BINDER_VALIDATION_FAILED";
     private static final String BINDER_REQUIRED_MESSAGE = "REQUIRED";
 
-    private TimePicker field;
+    private TestTimePicker field;
 
     @Captor
     private ArgumentCaptor<BindingValidationStatus<?>> statusCaptor;
@@ -42,7 +52,7 @@ public class TimePickerBinderValidationTest {
     @Before
     public void init() {
         MockitoAnnotations.openMocks(this);
-        field = new TimePicker();
+        field = new TestTimePicker();
         field.setMaxTime(LocalTime.now().plusHours(1));
     }
 
