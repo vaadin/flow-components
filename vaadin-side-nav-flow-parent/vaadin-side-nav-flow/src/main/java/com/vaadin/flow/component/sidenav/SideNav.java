@@ -222,7 +222,7 @@ public class SideNav extends SideNavItemContainer implements HasSize, HasStyle {
         private String toggle;
 
         /**
-         * Gets the translated expression for toggling child items.
+         * The text announced by screen readers when focusing the button for toggling child items.
          *
          * @return the translated expression for toggling child items
          */
@@ -231,7 +231,7 @@ public class SideNav extends SideNavItemContainer implements HasSize, HasStyle {
         }
 
         /**
-         * Sets the translated expression for toggling child items.
+         * Sets the text announced by screen readers when focusing the button for toggling child items.
          *
          * @param toggle
          *            the translated expression for toggling child items
