@@ -234,7 +234,7 @@ public class SideNav extends SideNavItemContainer implements HasSize, HasStyle {
         }
 
         /**
-         * Sets the translated expression for toggling child items.
+         * Sets the text announced by screen readers when focusing the button for toggling child items.
          *
          * @param toggle
          *            the translated expression for toggling child items
