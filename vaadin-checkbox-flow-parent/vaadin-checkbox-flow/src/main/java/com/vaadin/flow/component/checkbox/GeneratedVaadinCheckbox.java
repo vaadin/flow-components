@@ -120,10 +120,10 @@ import com.vaadin.flow.shared.Registration;
  */
 @Deprecated
 @Tag("vaadin-checkbox")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.16")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.17")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/checkbox", version = "23.3.16")
-@NpmPackage(value = "@vaadin/vaadin-checkbox", version = "23.3.16")
+@NpmPackage(value = "@vaadin/checkbox", version = "23.3.17")
+@NpmPackage(value = "@vaadin/vaadin-checkbox", version = "23.3.17")
 @JsModule("@vaadin/checkbox/src/vaadin-checkbox.js")
 public abstract class GeneratedVaadinCheckbox<R extends GeneratedVaadinCheckbox<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
