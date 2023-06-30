@@ -26,7 +26,6 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JsonSerializer;
-import com.vaadin.flow.internal.StateTree;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -48,8 +47,6 @@ public class SideNav extends SideNavItemContainer implements HasSize, HasStyle {
     private Element labelElement;
 
     private SideNavI18n i18n;
-
-    private StateTree.ExecutionRegistration pendingI18nUpdate;
 
     /**
      * Creates a new menu without any label.
