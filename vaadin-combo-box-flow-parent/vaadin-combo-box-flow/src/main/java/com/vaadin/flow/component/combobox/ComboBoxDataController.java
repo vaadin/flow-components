@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.combobox;
 
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxDataView;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxLazyDataView;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxListDataView;
@@ -31,6 +33,7 @@ import com.vaadin.flow.data.provider.HasDataView;
 import com.vaadin.flow.data.provider.HasLazyDataView;
 import com.vaadin.flow.data.provider.HasListDataView;
 import com.vaadin.flow.data.provider.InMemoryDataProvider;
+import com.vaadin.flow.data.provider.ItemCountChangeEvent;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.dom.PropertyChangeEvent;
@@ -161,6 +164,11 @@ class ComboBoxDataController<TItem>
             SerializableSupplier<Locale> localeSupplier) {
         this.comboBox = comboBox;
         this.localeSupplier = localeSupplier;
+
+        ComponentUtil.addListener(comboBox, ItemCountChangeEvent.class,
+                (ComponentEventListener) (e -> {
+                    updateClientSideFiltering();
+                }));
     }
 
     /**
@@ -195,7 +203,8 @@ class ComboBoxDataController<TItem>
         if (dataCommunicator != null) {
             dataCommunicator.setPageSize(pageSize);
         }
-        refreshAllData(shouldForceServerSideFiltering);
+        reset();
+        updateClientSideFiltering();
     }
 
     /**
@@ -546,8 +555,8 @@ class ComboBoxDataController<TItem>
 
         shouldForceServerSideFiltering = userProvidedFilter == UserProvidedFilter.YES;
         setupDataProviderListener(dataProvider);
-
-        refreshAllData(shouldForceServerSideFiltering);
+        reset();
+        updateClientSideFiltering();
 
         userProvidedFilter = UserProvidedFilter.UNDECIDED;
 
@@ -560,13 +569,12 @@ class ComboBoxDataController<TItem>
         }
     }
 
-    private void refreshAllData(boolean forceServerSideFiltering) {
+    private void updateClientSideFiltering() {
         if (dataCommunicator != null) {
-            setClientSideFilter(!forceServerSideFiltering && dataCommunicator
-                    .getItemCount() <= comboBox.getPageSize());
+            setClientSideFilter(
+                    !this.shouldForceServerSideFiltering && dataCommunicator
+                            .getItemCount() <= comboBox.getPageSize());
         }
-
-        reset();
     }
 
     private void setClientSideFilter(boolean clientSideFilter) {
@@ -632,7 +640,7 @@ class ComboBoxDataController<TItem>
                         .refresh(((DataChangeEvent.DataRefreshEvent<TItem>) e)
                                 .getItem());
             } else {
-                refreshAllData(shouldForceServerSideFiltering);
+                reset();
             }
         });
     }
