@@ -114,4 +114,8 @@ public class CellSet {
         Objects.requireNonNull(sheetName, "The sheet name cannot be null");
         return contains(new CellReference(sheetName, row, col, false, false));
     }
+
+    public int getCellCount() {
+        return cells.size();
+    }
 }

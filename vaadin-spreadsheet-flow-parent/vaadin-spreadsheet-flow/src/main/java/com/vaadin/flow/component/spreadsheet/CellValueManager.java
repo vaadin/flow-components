@@ -786,11 +786,6 @@ public class CellValueManager implements Serializable {
         Set<CellReference> cells = new HashSet<>();
         CellReference ref = new CellReference(cell);
         cells.add(ref);
-        if (ref.getSheetName() != null) {
-            CellReference refWithoutSheetName = new CellReference(ref.getRow(),
-                    ref.getCol());
-            cells.add(refWithoutSheetName);
-        }
         spreadsheet.fireEvent(new CellValueChangeEvent(spreadsheet, cells));
     }
 
@@ -800,13 +795,6 @@ public class CellValueManager implements Serializable {
     }
 
     private void fireCellValueChangeEvent(Set<CellReference> changedCells) {
-        List<CellReference> cellRefsWithSheetName = changedCells.stream()
-                .filter(ref -> ref.getSheetName() != null).toList();
-        cellRefsWithSheetName.forEach(ref -> {
-            CellReference refWithoutSheetName = new CellReference(ref.getRow(),
-                    ref.getCol());
-            changedCells.add(refWithoutSheetName);
-        });
         spreadsheet
                 .fireEvent(new CellValueChangeEvent(spreadsheet, changedCells));
     }
