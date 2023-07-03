@@ -19,7 +19,6 @@ import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -64,7 +63,6 @@ public class ComboBoxPageIT extends AbstractComboBoxIT {
     }
 
     @Test
-    @Ignore
     public void sizeRequestCount_setListDataProvider_sizeRequestedImmediately() {
         ComboBoxElement combo = $(ComboBoxElement.class)
                 .id("combobox-list-size-request-count");
