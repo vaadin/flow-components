@@ -160,15 +160,15 @@ class ComboBoxDataController<TItem>
      * @param localeSupplier
      *            supplier for the current locale of the combo box
      */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     ComboBoxDataController(ComboBoxBase<?, TItem, ?> comboBox,
             SerializableSupplier<Locale> localeSupplier) {
         this.comboBox = comboBox;
         this.localeSupplier = localeSupplier;
 
+        // Update client side filtering when data provider size changes
         ComponentUtil.addListener(comboBox, ItemCountChangeEvent.class,
-                (ComponentEventListener) (e -> {
-                    updateClientSideFiltering();
-                }));
+                (ComponentEventListener) (e -> updateClientSideFiltering()));
     }
 
     /**
