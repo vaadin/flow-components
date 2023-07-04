@@ -126,7 +126,7 @@ import elemental.json.JsonObject;
  * </p>
  */
 @Tag("vaadin-time-picker")
-@NpmPackage(value = "@vaadin/vaadin-time-picker", version = "2.4.0")
+@NpmPackage(value = "@vaadin/vaadin-time-picker", version = "3.1.0")
 @JsModule("@vaadin/vaadin-time-picker/src/vaadin-time-picker.js")
 @HtmlImport("frontend://bower_components/vaadin-time-picker/src/vaadin-time-picker.html")
 public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePicker<R, T>, T>

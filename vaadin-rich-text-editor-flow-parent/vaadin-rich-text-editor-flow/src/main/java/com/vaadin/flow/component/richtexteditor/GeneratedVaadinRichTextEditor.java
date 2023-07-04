@@ -204,7 +204,7 @@ import elemental.json.JsonArray;
  * </p>
  */
 @Tag("vaadin-rich-text-editor")
-@NpmPackage(value = "@vaadin/vaadin-rich-text-editor", version = "1.3.2")
+@NpmPackage(value = "@vaadin/vaadin-rich-text-editor", version = "1.4.0")
 @JsModule("@vaadin/vaadin-rich-text-editor/src/vaadin-rich-text-editor.js")
 @HtmlImport("frontend://bower_components/vaadin-rich-text-editor/src/vaadin-rich-text-editor.html")
 public abstract class GeneratedVaadinRichTextEditor<R extends GeneratedVaadinRichTextEditor<R, T>, T>

@@ -83,7 +83,7 @@ import com.vaadin.flow.function.SerializableFunction;
  */
 @Tag("vaadin-password-field")
 @HtmlImport("frontend://bower_components/vaadin-text-field/src/vaadin-password-field.html")
-@NpmPackage(value = "@vaadin/vaadin-text-field", version = "2.9.2")
+@NpmPackage(value = "@vaadin/vaadin-text-field", version = "2.10.0")
 @JsModule("@vaadin/vaadin-text-field/src/vaadin-password-field.js")
 public abstract class GeneratedVaadinPasswordField<R extends GeneratedVaadinPasswordField<R, T>, T>
         extends GeneratedVaadinTextField<R, T> implements HasStyle {
