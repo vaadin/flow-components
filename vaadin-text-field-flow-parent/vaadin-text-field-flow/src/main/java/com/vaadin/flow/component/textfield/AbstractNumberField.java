@@ -17,7 +17,6 @@
 package com.vaadin.flow.component.textfield;
 
 import java.math.BigDecimal;
-import java.util.Objects;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.CompositionNotifier;
@@ -27,9 +26,14 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.InputNotifier;
 import com.vaadin.flow.component.KeyNotifier;
+import com.vaadin.flow.data.binder.HasValidator;
+import com.vaadin.flow.data.binder.ValidationResult;
+import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.server.VaadinSession;
 
 /**
  * Abstract base class for components based on {@code vaadin-number-field}
@@ -41,7 +45,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         extends GeneratedVaadinNumberField<C, T> implements HasSize,
         HasValidation, HasValueChangeMode, HasPrefixAndSuffix, InputNotifier,
         KeyNotifier, CompositionNotifier, HasAutocomplete, HasAutocapitalize,
-        HasAutocorrect, HasHelper, HasLabel {
+        HasAutocorrect, HasHelper, HasLabel, HasValidator<T> {
 
     private ValueChangeMode currentMode;
 
@@ -357,6 +361,35 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         return isInvalidBoolean();
     }
 
+    @Override
+    public Validator<T> getDefaultValidator() {
+        if (isEnforcedFieldValidationEnabled()) {
+            return (value, context) -> checkValidity(value);
+        }
+
+        return Validator.alwaysPass();
+    }
+
+    private ValidationResult checkValidity(T value) {
+        final boolean isGreaterThanMax = value != null
+                && value.doubleValue() > max;
+        if (isGreaterThanMax) {
+            return ValidationResult.error("");
+        }
+
+        final boolean isSmallerThanMin = value != null
+                && value.doubleValue() < min;
+        if (isSmallerThanMin) {
+            return ValidationResult.error("");
+        }
+
+        if (!isValidByStep(value)) {
+            return ValidationResult.error("");
+        }
+
+        return ValidationResult.ok();
+    }
+
     /**
      * Performs server-side validation of the current value. This is needed
      * because it is possible to circumvent the client-side validation
@@ -366,15 +399,11 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     protected void validate() {
         T value = getValue();
 
-        final boolean isRequiredButEmpty = required
-                && Objects.equals(getEmptyValue(), value);
-        final boolean isGreaterThanMax = value != null
-                && value.doubleValue() > max;
-        final boolean isSmallerThanMin = value != null
-                && value.doubleValue() < min;
+        final ValidationResult requiredValidation = TextFieldValidationSupport
+                .checkRequired(required, value, getEmptyValue());
 
-        setInvalid(isRequiredButEmpty || isGreaterThanMax || isSmallerThanMin
-                || !isValidByStep(value));
+        setInvalid(
+                requiredValidation.isError() || checkValidity(value).isError());
     }
 
     private boolean isValidByStep(T value) {
@@ -407,5 +436,28 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         FieldValidationUtil.disableClientValidation(this);
+    }
+
+    /**
+     * Whether the full experience validation is enforced for the component.
+     * <p>
+     * Exposed with protected visibility to support mocking
+     * <p>
+     * The method requires the {@code VaadinSession} instance to obtain the
+     * application configuration properties, otherwise, the feature is
+     * considered disabled.
+     *
+     * @return {@code true} if enabled, {@code false} otherwise.
+     */
+    protected boolean isEnforcedFieldValidationEnabled() {
+        VaadinSession session = VaadinSession.getCurrent();
+        if (session == null) {
+            return false;
+        }
+        DeploymentConfiguration configuration = session.getConfiguration();
+        if (configuration == null) {
+            return false;
+        }
+        return configuration.isEnforcedFieldValidationEnabled();
     }
 }

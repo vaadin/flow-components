@@ -40,7 +40,12 @@ import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.timepicker.StepsUtil;
+import com.vaadin.flow.data.binder.HasValidator;
+import com.vaadin.flow.data.binder.ValidationResult;
+import com.vaadin.flow.data.binder.Validator;
+import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.server.VaadinSession;
 
 @Tag("vaadin-date-time-picker-date-picker")
 class DateTimePickerDatePicker
@@ -77,10 +82,10 @@ class DateTimePickerTimePicker
 @HtmlImport("frontend://bower_components/vaadin-date-time-picker/src/vaadin-date-time-picker.html")
 @NpmPackage(value = "@vaadin/vaadin-date-time-picker", version = "1.4.0")
 @JsModule("@vaadin/vaadin-date-time-picker/src/vaadin-date-time-picker.js")
-public class DateTimePicker
-        extends AbstractSinglePropertyField<DateTimePicker, LocalDateTime>
-        implements HasStyle, HasSize, HasTheme, HasValidation,
-        Focusable<DateTimePicker>, HasHelper, HasLabel {
+public class DateTimePicker extends
+        AbstractSinglePropertyField<DateTimePicker, LocalDateTime> implements
+        HasStyle, HasSize, HasTheme, HasValidation, Focusable<DateTimePicker>,
+        HasHelper, HasLabel, HasValidator<LocalDateTime> {
 
     private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
@@ -604,19 +609,69 @@ public class DateTimePicker
         return getElement().getProperty("invalid", false);
     }
 
+    @Override
+    public Validator<LocalDateTime> getDefaultValidator() {
+        if (isEnforcedFieldValidationEnabled()) {
+            return (value, context) -> checkValidity(value);
+        }
+
+        return Validator.alwaysPass();
+    }
+
+    private ValidationResult checkValidity(LocalDateTime value) {
+        ValidationResult greaterThanMax = checkGreaterThanMax(value, max);
+        if (greaterThanMax.isError()) {
+            return greaterThanMax;
+        }
+
+        ValidationResult smallerThanMin = checkSmallerThanMin(value, min);
+        if (smallerThanMin.isError()) {
+            return smallerThanMin;
+        }
+
+        return ValidationResult.ok();
+    }
+
+    private static <V extends Comparable<V>> ValidationResult checkGreaterThanMax(
+            V value, V maxValue) {
+        final boolean isGreaterThanMax = value != null && maxValue != null
+                && value.compareTo(maxValue) > 0;
+        if (isGreaterThanMax) {
+            return ValidationResult.error("");
+        }
+        return ValidationResult.ok();
+    }
+
+    private static <V extends Comparable<V>> ValidationResult checkSmallerThanMin(
+            V value, V minValue) {
+        final boolean isSmallerThanMin = value != null && minValue != null
+                && value.compareTo(minValue) < 0;
+        if (isSmallerThanMin) {
+            return ValidationResult.error("");
+        }
+        return ValidationResult.ok();
+    }
+
+    private static <V> ValidationResult checkRequired(boolean required, V value,
+            V emptyValue) {
+        final boolean isRequiredButEmpty = required
+                && Objects.equals(emptyValue, value);
+        if (isRequiredButEmpty) {
+            return ValidationResult.error("");
+        }
+        return ValidationResult.ok();
+    }
+
     /**
      * Gets the validity of the date time picker value.
      *
      * @return the current validity of the value.
      */
     private boolean isInvalid(LocalDateTime value) {
-        final boolean isRequiredButEmpty = required
-                && Objects.equals(getEmptyValue(), value);
-        final boolean isGreaterThanMax = value != null && max != null
-                && value.isAfter(max);
-        final boolean isSmallerThanMin = value != null && min != null
-                && value.isBefore(min);
-        return isRequiredButEmpty || isGreaterThanMax || isSmallerThanMin;
+        ValidationResult requiredValidation = checkRequired(required, value,
+                getEmptyValue());
+
+        return requiredValidation.isError() || checkValidity(value).isError();
     }
 
     /**
@@ -745,5 +800,28 @@ public class DateTimePicker
         super.onAttach(attachEvent);
         FieldValidationUtil.disableClientValidation(this);
 
+    }
+
+    /**
+     * Whether the full experience validation is enforced for the component.
+     * <p>
+     * Exposed with protected visibility to support mocking
+     * <p>
+     * The method requires the {@code VaadinSession} instance to obtain the
+     * application configuration properties, otherwise, the feature is
+     * considered disabled.
+     *
+     * @return {@code true} if enabled, {@code false} otherwise.
+     */
+    protected boolean isEnforcedFieldValidationEnabled() {
+        VaadinSession session = VaadinSession.getCurrent();
+        if (session == null) {
+            return false;
+        }
+        DeploymentConfiguration configuration = session.getConfiguration();
+        if (configuration == null) {
+            return false;
+        }
+        return configuration.isEnforcedFieldValidationEnabled();
     }
 }
