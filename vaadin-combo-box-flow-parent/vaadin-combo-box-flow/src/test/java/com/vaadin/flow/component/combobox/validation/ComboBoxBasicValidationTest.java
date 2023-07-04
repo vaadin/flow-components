@@ -19,7 +19,7 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
 public class ComboBoxBasicValidationTest
-        extends AbstractBasicValidationTest<ComboBox<String>> {
+        extends AbstractBasicValidationTest<ComboBox<String>, String> {
     protected ComboBox<String> createTestField() {
         return new ComboBox<String>();
     }

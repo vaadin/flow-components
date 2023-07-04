@@ -36,9 +36,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-text-field")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/text-field", version = "24.2.0-alpha1")
+@NpmPackage(value = "@vaadin/text-field", version = "24.2.0-alpha2")
 @JsModule("@vaadin/text-field/src/vaadin-text-field.js")
 public class TextField extends TextFieldBase<TextField, String>
         implements HasAllowedCharPattern, HasThemeVariant<TextFieldVariant> {
@@ -46,6 +46,8 @@ public class TextField extends TextFieldBase<TextField, String>
     private boolean isConnectorAttached;
 
     private TextFieldValidationSupport validationSupport;
+
+    private boolean manualValidationEnabled = false;
 
     /**
      * Constructs an empty {@code TextField}.
@@ -327,6 +329,11 @@ public class TextField extends TextFieldBase<TextField, String>
                                 !isInvalid())));
     }
 
+    @Override
+    public void setManualValidation(boolean enabled) {
+        this.manualValidationEnabled = enabled;
+    }
+
     /**
      * Performs server-side validation of the current value and the validation
      * constraints of the field, such as {@link #setPattern(String)}. This is
@@ -334,7 +341,9 @@ public class TextField extends TextFieldBase<TextField, String>
      * constraints using browser development tools.
      */
     protected void validate() {
-        setInvalid(getValidationSupport().isInvalid(getValue()));
+        if (!this.manualValidationEnabled) {
+            setInvalid(getValidationSupport().isInvalid(getValue()));
+        }
     }
 
     @Override

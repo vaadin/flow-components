@@ -15,11 +15,13 @@
  */
 package com.vaadin.flow.component.timepicker.tests.validation;
 
+import java.time.LocalTime;
+
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
 public class BasicValidationTest
-        extends AbstractBasicValidationTest<TimePicker> {
+        extends AbstractBasicValidationTest<TimePicker, LocalTime> {
     protected TimePicker createTestField() {
         return new TimePicker();
     }

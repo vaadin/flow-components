@@ -38,9 +38,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-password-field")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/password-field", version = "24.2.0-alpha1")
+@NpmPackage(value = "@vaadin/password-field", version = "24.2.0-alpha2")
 @JsModule("@vaadin/password-field/src/vaadin-password-field.js")
 public class PasswordField extends TextFieldBase<PasswordField, String>
         implements HasAllowedCharPattern, HasThemeVariant<TextFieldVariant> {
@@ -48,6 +48,8 @@ public class PasswordField extends TextFieldBase<PasswordField, String>
     private boolean isConnectorAttached;
 
     private TextFieldValidationSupport validationSupport;
+
+    private boolean manualValidationEnabled = false;
 
     /**
      * Constructs an empty {@code PasswordField}.
@@ -323,13 +325,20 @@ public class PasswordField extends TextFieldBase<PasswordField, String>
                                 !isInvalid())));
     }
 
+    @Override
+    public void setManualValidation(boolean enabled) {
+        this.manualValidationEnabled = enabled;
+    }
+
     /**
      * Performs server-side validation of the current value. This is needed
      * because it is possible to circumvent the client-side validation
      * constraints using browser development tools.
      */
     protected void validate() {
-        setInvalid(getValidationSupport().isInvalid(getValue()));
+        if (!this.manualValidationEnabled) {
+            setInvalid(getValidationSupport().isInvalid(getValue()));
+        }
     }
 
     @Override

@@ -105,4 +105,15 @@ public class TreeGridRefreshAllIT extends AbstractTreeGridIT {
         Assert.assertEquals("Invalid row at index 20", "11",
                 grid.getCell(20, 0).getText());
     }
+
+    @Test
+    public void expandItem_selectChildNode_refreshAll_childNodesRendered() {
+        TreeGridElement grid = getTreeGrid();
+        grid.expandWithClick(0);
+        grid.select(1);
+        refreshAllButton.click();
+
+        assertCellTexts(0, 0, "0 | 0", "1 | 0", "1 | 1", "1 | 2");
+
+    }
 }

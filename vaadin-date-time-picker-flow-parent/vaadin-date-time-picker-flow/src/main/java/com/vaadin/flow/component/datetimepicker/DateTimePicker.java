@@ -113,9 +113,9 @@ class DateTimePickerTimePicker
  * @author Vaadin Ltd
  */
 @Tag("vaadin-date-time-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/date-time-picker", version = "24.2.0-alpha1")
+@NpmPackage(value = "@vaadin/date-time-picker", version = "24.2.0-alpha2")
 @JsModule("@vaadin/date-time-picker/src/vaadin-date-time-picker.js")
 public class DateTimePicker extends
         AbstractSinglePropertyField<DateTimePicker, LocalDateTime> implements
@@ -142,6 +142,8 @@ public class DateTimePicker extends
     private LocalDateTime max;
     private LocalDateTime min;
     private boolean required;
+
+    private boolean manualValidationEnabled = false;
 
     /**
      * Default constructor.
@@ -797,13 +799,20 @@ public class DateTimePicker extends
         return requiredValidation.isError() || checkValidity(value).isError();
     }
 
+    @Override
+    public void setManualValidation(boolean enabled) {
+        this.manualValidationEnabled = enabled;
+    }
+
     /**
      * Performs server-side validation of the current value. This is needed
      * because it is possible to circumvent the client-side validation
      * constraints using browser development tools.
      */
     protected void validate() {
-        setInvalid(isInvalid(getValue()));
+        if (!this.manualValidationEnabled) {
+            setInvalid(isInvalid(getValue()));
+        }
     }
 
     /**

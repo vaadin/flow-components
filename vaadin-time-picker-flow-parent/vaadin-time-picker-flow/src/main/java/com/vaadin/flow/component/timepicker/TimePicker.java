@@ -67,9 +67,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-time-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/time-picker", version = "24.2.0-alpha1")
+@NpmPackage(value = "@vaadin/time-picker", version = "24.2.0-alpha2")
 @JsModule("@vaadin/time-picker/src/vaadin-time-picker.js")
 @JsModule("./vaadin-time-picker/timepickerConnector.js")
 public class TimePicker
@@ -95,6 +95,8 @@ public class TimePicker
     private LocalTime min;
     private boolean required;
     private StateTree.ExecutionRegistration pendingLocaleUpdate;
+
+    private boolean manualValidationEnabled = false;
 
     /**
      * Default constructor.
@@ -493,13 +495,20 @@ public class TimePicker
         return addListener(InvalidChangeEvent.class, listener);
     }
 
+    @Override
+    public void setManualValidation(boolean enabled) {
+        this.manualValidationEnabled = enabled;
+    }
+
     /**
      * Performs server-side validation of the current value. This is needed
      * because it is possible to circumvent the client-side validation
      * constraints using browser development tools.
      */
     protected void validate() {
-        setInvalid(isInvalid(getValue()));
+        if (!this.manualValidationEnabled) {
+            setInvalid(isInvalid(getValue()));
+        }
     }
 
     @Override

@@ -51,7 +51,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-big-decimal-field")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("./vaadin-big-decimal-field.js")
 @Uses(TextField.class)
@@ -79,6 +79,8 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
             field, valueFromModel) -> valueFromModel == null ? ""
                     : valueFromModel.toPlainString().replace('.',
                             field.getDecimalSeparator());
+
+    private boolean manualValidationEnabled = false;
 
     /**
      * Constructs an empty {@code BigDecimalField}.
@@ -249,20 +251,27 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
         return super.getValue();
     }
 
+    @Override
+    public void setManualValidation(boolean enabled) {
+        this.manualValidationEnabled = enabled;
+    }
+
     /**
      * Performs server-side validation of the current value. This is needed
      * because it is possible to circumvent the client-side validation
      * constraints using browser development tools.
      */
     protected void validate() {
-        BigDecimal value = getValue();
+        if (!this.manualValidationEnabled) {
+            BigDecimal value = getValue();
 
-        boolean isRequired = isRequiredIndicatorVisible();
-        ValidationResult requiredValidation = ValidationUtil
-                .checkRequired(isRequired, value, getEmptyValue());
+            boolean isRequired = isRequiredIndicatorVisible();
+            ValidationResult requiredValidation = ValidationUtil
+                    .checkRequired(isRequired, value, getEmptyValue());
 
-        setInvalid(
-                requiredValidation.isError() || checkValidity(value).isError());
+            setInvalid(requiredValidation.isError()
+                    || checkValidity(value).isError());
+        }
     }
 
     private ValidationResult checkValidity(BigDecimal value) {

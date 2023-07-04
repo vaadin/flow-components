@@ -19,7 +19,7 @@ import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
 public class EmailFieldBasicValidationTest
-        extends AbstractBasicValidationTest<EmailField> {
+        extends AbstractBasicValidationTest<EmailField, String> {
     protected EmailField createTestField() {
         return new EmailField();
     }

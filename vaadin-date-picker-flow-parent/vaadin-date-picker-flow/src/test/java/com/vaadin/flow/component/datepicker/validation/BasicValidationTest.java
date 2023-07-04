@@ -15,11 +15,13 @@
  */
 package com.vaadin.flow.component.datepicker.validation;
 
+import java.time.LocalDate;
+
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
 public class BasicValidationTest
-        extends AbstractBasicValidationTest<DatePicker> {
+        extends AbstractBasicValidationTest<DatePicker, LocalDate> {
     protected DatePicker createTestField() {
         return new DatePicker();
     }
