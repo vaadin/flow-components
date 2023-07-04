@@ -16,13 +16,12 @@
 package com.vaadin.flow.component.sidenav.tests;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.router.RouteConfiguration;
@@ -151,7 +150,7 @@ public class SideNavItemTest {
 
     @Test
     public void returnsExpectedPath() {
-        Assert.assertEquals("/path", sideNavItem.getPath());
+        Assert.assertEquals("path", sideNavItem.getPath());
     }
 
     @Test
@@ -407,7 +406,8 @@ public class SideNavItemTest {
         item.addPathAliases("");
 
         Assert.assertEquals(Set.of(""), item.getPathAliases());
-        Assert.assertEquals("", item.getElement().getProperty("pathAliases"));
+        Assert.assertEquals("[\"\"]",
+                item.getElement().getProperty("pathAliases"));
     }
 
     @Test
@@ -416,11 +416,9 @@ public class SideNavItemTest {
         item.addPathAliases("alias1", "alias2");
 
         Assert.assertEquals(Set.of("alias1", "alias2"), item.getPathAliases());
-        Assert.assertEquals(Set.of("alias1", "alias2"),
-                Arrays.stream(
-                        item.getElement().getProperty("pathAliases").split(","))
-                        .collect(Collectors.toSet()));
-
+        Assert.assertTrue(Set
+                .of("[\"alias1\",\"alias2\"]", "[\"alias2\",\"alias1\"]")
+                .contains(item.getElement().getProperty("pathAliases")));
     }
 
     @Test
@@ -454,10 +452,11 @@ public class SideNavItemTest {
 
             Assert.assertEquals(Set.of("foo/baz", "foo/qux"),
                     sideNavItem.getPathAliases());
-            Assert.assertEquals(Set.of("foo/baz", "foo/qux"),
-                    Arrays.stream(sideNavItem.getElement()
-                            .getProperty("pathAliases").split(","))
-                            .collect(Collectors.toSet()));
+            Assert.assertTrue(Set
+                    .of("[\"foo/baz\",\"foo/qux\"]",
+                            "[\"foo/qux\",\"foo/baz\"]")
+                    .contains(sideNavItem.getElement()
+                            .getProperty("pathAliases")));
         }
     }
 
@@ -489,7 +488,7 @@ public class SideNavItemTest {
 
             Assert.assertEquals(Set.of("foo/qux"),
                     sideNavItem.getPathAliases());
-            Assert.assertEquals("foo/qux",
+            Assert.assertEquals("[\"foo/qux\"]",
                     sideNavItem.getElement().getProperty("pathAliases"));
         }
     }
@@ -509,6 +508,50 @@ public class SideNavItemTest {
             Assert.assertNull(
                     sideNavItem.getElement().getProperty("pathAliases"));
 
+        }
+    }
+
+    @Test
+    public void withPath_setQueryParameters_pathContainsParameters() {
+        sideNavItem.setPath("path");
+
+        QueryParameters queryParameters = new QueryParameters(Map.of("k1",
+                List.of("v11", "v12"), "k2", List.of("v21", "v22")));
+        sideNavItem.setQueryParameters(queryParameters);
+
+        Assert.assertEquals("path?" + queryParameters.getQueryString(),
+                sideNavItem.getPath());
+    }
+
+    @Test
+    public void withPathAlias_setQueryParameters_pathAliasDoesNotContainParameters() {
+        sideNavItem.addPathAliases("pathAlias");
+
+        QueryParameters queryParameters = new QueryParameters(Map.of("k1",
+                List.of("v11", "v12"), "k2", List.of("v21", "v22")));
+        sideNavItem.setQueryParameters(queryParameters);
+
+        Assert.assertEquals(1, sideNavItem.getPathAliases().size());
+        Assert.assertTrue(sideNavItem.getPathAliases().contains("pathAlias"));
+        Assert.assertEquals("[\"pathAlias\"]",
+                sideNavItem.getElement().getProperty("pathAliases"));
+    }
+
+    @Test
+    public void setPathAsComponent_setQueryParameters_parameterAppliedToAliasTemplate() {
+        try (MockedStatic<ComponentUtil> mockComponentUtil = Mockito
+                .mockStatic(ComponentUtil.class)) {
+            mockComponentUtil.when(() -> ComponentUtil.getRouter(Mockito.any()))
+                    .thenReturn(router);
+
+            sideNavItem.setPath(TestRoute.class);
+
+            QueryParameters queryParameters = new QueryParameters(
+                    Map.of("foo", List.of("value")));
+            sideNavItem.setQueryParameters(queryParameters);
+
+            Assert.assertTrue(
+                    sideNavItem.getPathAliases().contains("foo/value"));
         }
     }
 
@@ -545,6 +588,7 @@ public class SideNavItemTest {
     @Route("foo/bar")
     @RouteAlias("foo/baz")
     @RouteAlias("foo/qux")
+    @RouteAlias("foo/:foo")
     private static class TestRoute extends Component {
 
     }
