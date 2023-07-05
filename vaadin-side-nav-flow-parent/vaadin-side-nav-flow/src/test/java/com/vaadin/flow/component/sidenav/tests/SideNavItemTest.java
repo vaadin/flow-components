@@ -402,6 +402,31 @@ public class SideNavItemTest {
                 sideNavItem.getPath());
     }
 
+    @Test
+    public void itemWithParameters_setNewQueryParameters_pathIsUpdated() {
+        sideNavItem.setPath("path");
+        sideNavItem.setQueryParameters(
+                new QueryParameters(Map.of("k1", List.of("v1"))));
+
+        QueryParameters queryParameters = new QueryParameters(
+                Map.of("k2", List.of("v2")));
+        sideNavItem.setQueryParameters(queryParameters);
+
+        Assert.assertEquals("path?" + queryParameters.getQueryString(),
+                sideNavItem.getPath());
+    }
+
+    @Test
+    public void itemWithParameters_setQueryParametersNull_parametersRemovedFromPath() {
+        sideNavItem.setPath("path");
+        sideNavItem.setQueryParameters(
+                new QueryParameters(Map.of("k1", List.of("v1"))));
+
+        sideNavItem.setQueryParameters(null);
+
+        Assert.assertEquals("path", sideNavItem.getPath());
+    }
+
     private List<SideNavItem> setupItems() {
         List<SideNavItem> items = new ArrayList<>();
 
