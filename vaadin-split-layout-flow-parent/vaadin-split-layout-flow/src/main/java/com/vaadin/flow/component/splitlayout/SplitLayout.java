@@ -383,10 +383,10 @@ public class SplitLayout extends Component
         }
     }
 
-    private double calcNewSplitterPosition(String primaryWidth,
+    private Double calcNewSplitterPosition(String primaryWidth,
             String secondaryWidth) {
         // set current splitter position value
-        double splitterPositionValue = this.splitterPosition;
+        Double splitterPositionValue = this.splitterPosition;
 
         if (primaryWidth == null || secondaryWidth == null) {
             return splitterPositionValue;
