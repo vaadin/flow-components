@@ -291,7 +291,7 @@ import elemental.json.JsonObject;
  * </p>
  */
 @Tag("vaadin-combo-box")
-@NpmPackage(value = "@vaadin/vaadin-combo-box", version = "5.4.12")
+@NpmPackage(value = "@vaadin/vaadin-combo-box", version = "5.5.2")
 @HtmlImport("frontend://bower_components/vaadin-combo-box/src/vaadin-combo-box.html")
 @JsModule("@vaadin/vaadin-combo-box/src/vaadin-combo-box.js")
 public abstract class GeneratedVaadinComboBox<R extends GeneratedVaadinComboBox<R, T>, T>

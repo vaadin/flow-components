@@ -168,7 +168,7 @@ import com.vaadin.flow.shared.Registration;
  */
 @Tag("vaadin-text-field")
 @HtmlImport("frontend://bower_components/vaadin-text-field/src/vaadin-text-field.html")
-@NpmPackage(value = "@vaadin/vaadin-text-field", version = "2.9.2")
+@NpmPackage(value = "@vaadin/vaadin-text-field", version = "2.10.0")
 @JsModule("@vaadin/vaadin-text-field/src/vaadin-text-field.js")
 public abstract class GeneratedVaadinTextField<R extends GeneratedVaadinTextField<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
