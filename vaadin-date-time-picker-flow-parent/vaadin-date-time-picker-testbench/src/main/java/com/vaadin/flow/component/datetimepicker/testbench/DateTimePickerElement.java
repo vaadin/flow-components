@@ -221,7 +221,7 @@ public class DateTimePickerElement extends TestBenchElement
      * @return the presentation value of the inner date picker
      */
     public String getDatePresentation() {
-        return getDatePicker().getPropertyString("_inputValue");
+        return getDatePicker().getPropertyString("_inputElementValue");
     }
 
     /**

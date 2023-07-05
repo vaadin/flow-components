@@ -158,7 +158,7 @@ public class DatePickerElement extends TestBenchElement
      */
     public void setInputValue(String value) {
         this.open();
-        setProperty("_inputValue", value);
+        setProperty("_inputElementValue", value);
         this.close();
     }
 
@@ -169,7 +169,7 @@ public class DatePickerElement extends TestBenchElement
      * @return
      */
     public String getInputValue() {
-        return getPropertyString("_inputValue");
+        return getPropertyString("_inputElementValue");
     }
 
     /**
