@@ -384,7 +384,7 @@ public class SideNavItemTest {
     }
 
     @Test
-    public void withPath_setQueryParameters_pathContainsParameters() {
+    public void setPath_setQueryParameters_pathContainsParameters() {
         sideNavItem.setPath("path");
 
         QueryParameters queryParameters = new QueryParameters(Map.of("k1",
