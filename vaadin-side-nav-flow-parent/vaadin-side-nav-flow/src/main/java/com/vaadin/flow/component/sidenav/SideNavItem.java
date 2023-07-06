@@ -31,7 +31,6 @@ import com.vaadin.flow.internal.UrlUtil;
 import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.router.RouteParameters;
-import com.vaadin.flow.router.internal.ConfigureRoutes;
 
 import java.util.Optional;
 
@@ -53,13 +52,7 @@ public class SideNavItem extends SideNavItemContainer
 
     private Element labelElement;
 
-    private RouteParameters routeParameters;
-
     private QueryParameters queryParameters;
-
-    private Class<? extends Component> view;
-
-    private String customPath;
 
     /**
      * Creates a menu item which does not link to any view but only shows the
@@ -212,9 +205,12 @@ public class SideNavItem extends SideNavItemContainer
      * @see SideNavItem#setPath(Class)
      */
     public void setPath(String path) {
-        this.view = null;
-        this.customPath = path;
-        doSetPath(path);
+        if (path == null) {
+            getElement().removeAttribute("path");
+        } else {
+            getElement().setAttribute("path",
+                    sanitizePath(updateQueryParameters(path)));
+        }
     }
 
     /**
@@ -255,15 +251,12 @@ public class SideNavItem extends SideNavItemContainer
      */
     public void setPath(Class<? extends Component> view,
             RouteParameters routeParameters) {
-        this.view = view;
-        this.customPath = null;
-        this.routeParameters = routeParameters;
         if (view == null) {
-            doSetPath(null);
+            setPath((String) null);
         } else {
             RouteConfiguration routeConfiguration = RouteConfiguration
                     .forRegistry(ComponentUtil.getRouter(this).getRegistry());
-            doSetPath(routeConfiguration.getUrl(view, routeParameters));
+            setPath(routeConfiguration.getUrl(view, routeParameters));
         }
     }
 
@@ -274,15 +267,6 @@ public class SideNavItem extends SideNavItemContainer
      */
     public String getPath() {
         return getElement().getAttribute("path");
-    }
-
-    private void doSetPath(String path) {
-        if (path == null) {
-            getElement().removeAttribute("path");
-        } else {
-            getElement().setAttribute("path",
-                    sanitizePath(updateQueryParameters(path)));
-        }
     }
 
     /**
@@ -313,11 +297,7 @@ public class SideNavItem extends SideNavItemContainer
     }
 
     private void refresh() {
-        if (view != null) {
-            setPath(view, routeParameters);
-        } else {
-            setPath(customPath);
-        }
+        setPath(getPath());
     }
 
     private String updateQueryParameters(String path) {
