@@ -267,12 +267,6 @@ public class SideNavItem extends SideNavItemContainer
         }
     }
 
-    private String applyRouteParameters(String path) {
-        ConfigureRoutes configurationHelper = new ConfigureRoutes();
-        configurationHelper.setRoute(path, getClass());
-        return configurationHelper.getTargetUrl(getClass(), routeParameters);
-    }
-
     /**
      * Gets the path this navigation item links to.
      *
