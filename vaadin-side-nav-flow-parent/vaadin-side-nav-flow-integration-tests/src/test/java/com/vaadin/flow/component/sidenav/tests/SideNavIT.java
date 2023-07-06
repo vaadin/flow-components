@@ -124,9 +124,22 @@ public class SideNavIT extends AbstractComponentIT {
     }
 
     @Test
+    public void navigateToPage_correctItemIsCurrent() {
+        // First navigate away from the page
+        navigableParent.click();
+        waitUntil(driver -> $(NativeButtonElement.class)
+                .id("navigate-to-main-page") != null, 1);
+
+        $(NativeButtonElement.class).id("navigate-to-main-page").click();
+        waitUntil(driver -> $(SideNavElement.class).exists(), 1);
+
+        Assert.assertTrue(
+                $(SideNavItemElement.class).id("current-item").isCurrent());
+    }
+
+    @Test
     public void navigateWithParametersInUrl_itemWithMatchingPathIsCurrent() {
         getDriver().navigate().to(getDriver().getCurrentUrl() + "?key=value");
-        waitUntil(driver -> $(SideNavElement.class).exists(), 1);
 
         Assert.assertTrue(
                 $(SideNavItemElement.class).id("current-item").isCurrent());
