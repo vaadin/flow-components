@@ -32,8 +32,6 @@ import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.router.RouteParameters;
 
-import java.util.Optional;
-
 /**
  * A menu item for the {@link SideNav} component.
  * <p>
@@ -267,17 +265,6 @@ public class SideNavItem extends SideNavItemContainer
      */
     public String getPath() {
         return getElement().getAttribute("path");
-    }
-
-    /**
-     * Gets the {@link QueryParameters} of this item.
-     *
-     * @return an optional of {@link QueryParameters}, or an empty optional if
-     *         there are no query parameters set
-     * @see #setQueryParameters(QueryParameters)
-     */
-    public Optional<QueryParameters> getQueryParameters() {
-        return Optional.ofNullable(queryParameters);
     }
 
     /**
