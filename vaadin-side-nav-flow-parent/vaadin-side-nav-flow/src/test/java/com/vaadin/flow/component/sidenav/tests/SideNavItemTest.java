@@ -410,7 +410,7 @@ public class SideNavItemTest {
     }
 
     @Test
-    public void itemWithParameters_setQueryParametersNull_parametersRemovedFromPath() {
+    public void setPath_setQueryParameters_setQueryParametersNull_parametersRemovedFromPath() {
         sideNavItem.setPath("path");
         sideNavItem.setQueryParameters(
                 new QueryParameters(Map.of("k1", List.of("v11", "v12"))));
