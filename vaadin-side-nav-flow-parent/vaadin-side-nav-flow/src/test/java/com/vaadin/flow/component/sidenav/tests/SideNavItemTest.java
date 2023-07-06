@@ -477,13 +477,14 @@ public class SideNavItemTest {
 
     @Test
     public void createFromComponent_setRouteParameters_pathContainsParameters() {
-        Router router = mockRouter(TestRouteTemplate.class);
+        Router router = mockRouter(TestRouteWithRouteParams.class);
         try (MockedStatic<ComponentUtil> mockComponentUtil = Mockito
                 .mockStatic(ComponentUtil.class)) {
             mockComponentUtil.when(() -> ComponentUtil.getRouter(Mockito.any()))
                     .thenReturn(router);
 
-            SideNavItem item = new SideNavItem("test", TestRouteTemplate.class,
+            SideNavItem item = new SideNavItem("test",
+                    TestRouteWithRouteParams.class,
                     new RouteParameters(Map.of("k1", "v1", "k2", "v2")));
 
             Assert.assertEquals("foo/v1/v2/bar", item.getPath());
