@@ -396,7 +396,7 @@ public class SideNavItemTest {
     }
 
     @Test
-    public void itemWithParameters_setNewQueryParameters_pathIsUpdated() {
+    public void setPath_setQueryParameters_updateQueryParameters_pathIsUpdated() {
         sideNavItem.setPath("path");
         sideNavItem.setQueryParameters(
                 new QueryParameters(Map.of("k1", List.of("v11", "v12"))));
