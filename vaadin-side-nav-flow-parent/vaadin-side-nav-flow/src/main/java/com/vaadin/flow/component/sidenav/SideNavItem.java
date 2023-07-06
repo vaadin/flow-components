@@ -212,31 +212,9 @@ public class SideNavItem extends SideNavItemContainer
      * @see SideNavItem#setPath(Class)
      */
     public void setPath(String path) {
-        setPath(path, RouteParameters.empty());
-    }
-
-    /**
-     * Sets the path in a form or a URL string this navigation item links to.
-     * Note that there is also an alternative way of how to set the link path
-     * via {@link SideNavItem#setPath(Class)}.
-     *
-     * @param path
-     *            The path to link to. Set to null to disable navigation for
-     *            this item.
-     * @param routeParameters
-     *            the route parameters
-     *
-     * @see SideNavItem#setPath(Class)
-     */
-    public void setPath(String path, RouteParameters routeParameters) {
         this.view = null;
         this.customPath = path;
-        this.routeParameters = routeParameters;
-        if (path == null) {
-            doSetPath(null);
-        } else {
-            doSetPath(applyRouteParameters(path));
-        }
+        doSetPath(path);
     }
 
     /**
@@ -314,31 +292,6 @@ public class SideNavItem extends SideNavItemContainer
     }
 
     /**
-     * Gets the {@link RouteParameters} of this item.
-     *
-     * @return {@link RouteParameters} of this item
-     * @see #setRouteParameters(RouteParameters)
-     */
-    public RouteParameters getRouteParameters() {
-        return routeParameters;
-    }
-
-    /**
-     * Sets the {@link RouteParameters} of this item.
-     *
-     * @param routeParameters
-     *            the route parameters
-     */
-    public void setRouteParameters(RouteParameters routeParameters) {
-        if (routeParameters == null) {
-            this.routeParameters = RouteParameters.empty();
-        } else {
-            this.routeParameters = routeParameters;
-        }
-        refresh();
-    }
-
-    /**
      * Gets the {@link QueryParameters} of this item.
      *
      * @return an optional of {@link QueryParameters}, or an empty optional if
@@ -369,7 +322,7 @@ public class SideNavItem extends SideNavItemContainer
         if (view != null) {
             setPath(view, routeParameters);
         } else {
-            setPath(customPath, routeParameters);
+            setPath(customPath);
         }
     }
 
