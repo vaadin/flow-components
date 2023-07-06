@@ -19,11 +19,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
-import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * Test view for testing {@link SideNav} component
@@ -59,20 +55,6 @@ public class SideNavPage extends Div {
                 "vaadin-side-nav/side-nav-test");
         currentItem.setId("current-item");
         sideNav.addItem(currentItem);
-
-        NativeButton addParametersToCurrentItem = new NativeButton(
-                "Add parameters to current item",
-                event -> currentItem.setQueryParameters(
-                        new QueryParameters(Map.of("key", List.of("value")))));
-        addParametersToCurrentItem.setId("add-parameters-to-current-item");
-        add(addParametersToCurrentItem);
-
-        NativeButton removeParametersFromCurrentItem = new NativeButton(
-                "Remove parameters from current item",
-                event -> currentItem.setQueryParameters(null));
-        removeParametersFromCurrentItem
-                .setId("remove-parameters-from-current-item");
-        add(removeParametersFromCurrentItem);
 
         Div expandedStatePrintout = new Div();
         expandedStatePrintout.setId("expanded-state-printout");

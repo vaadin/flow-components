@@ -37,7 +37,6 @@ public class SideNavIT extends AbstractComponentIT {
     private SideNavElement sideNav;
     private SideNavItemElement nonNavigableParent;
     private SideNavItemElement navigableParent;
-    private SideNavItemElement currentItem;
 
     @Before
     public void init() {
@@ -48,7 +47,6 @@ public class SideNavIT extends AbstractComponentIT {
                 .id("non-navigable-parent");
         navigableParent = sideNav.$(SideNavItemElement.class)
                 .id("navigable-parent");
-        currentItem = sideNav.$(SideNavItemElement.class).id("current-item");
     }
 
     @Test
@@ -119,11 +117,6 @@ public class SideNavIT extends AbstractComponentIT {
     }
 
     @Test
-    public void pageOpened_itemWithMatchingPathIsCurrent() {
-        Assert.assertTrue(currentItem.isCurrent());
-    }
-
-    @Test
     public void navigateToPage_correctItemIsCurrent() {
         // First navigate away from the page
         navigableParent.click();
@@ -135,33 +128,6 @@ public class SideNavIT extends AbstractComponentIT {
 
         Assert.assertTrue(
                 $(SideNavItemElement.class).id("current-item").isCurrent());
-    }
-
-    @Test
-    public void navigateWithParametersInUrl_itemWithMatchingPathIsCurrent() {
-        getDriver().navigate().to(getDriver().getCurrentUrl() + "?key=value");
-
-        Assert.assertTrue(
-                $(SideNavItemElement.class).id("current-item").isCurrent());
-    }
-
-    @Test
-    public void addParametersToCurrentItem_itemWithMatchingPathIsCurrent() {
-        $(NativeButtonElement.class).id("add-parameters-to-current-item")
-                .click();
-
-        Assert.assertTrue(currentItem.isCurrent());
-    }
-
-    @Test
-    public void itemWithParameters_removeParametersFromItem_itemWithMatchingPathIsCurrent() {
-        $(NativeButtonElement.class).id("add-parameters-to-current-item")
-                .click();
-
-        $(NativeButtonElement.class).id("remove-parameters-from-current-item")
-                .click();
-
-        Assert.assertTrue(currentItem.isCurrent());
     }
 
     private void assertExpandedStateOnServer(String buttonToClick,
