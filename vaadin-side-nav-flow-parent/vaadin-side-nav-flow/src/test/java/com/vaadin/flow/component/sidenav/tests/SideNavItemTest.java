@@ -476,7 +476,7 @@ public class SideNavItemTest {
     }
 
     @Test
-    public void createFromComponent_setRouteParameters_pathContainsParameters() {
+    public void createFromComponentAndRouteParameters_pathContainsParameters() {
         Router router = mockRouter(TestRouteWithRouteParams.class);
         try (MockedStatic<ComponentUtil> mockComponentUtil = Mockito
                 .mockStatic(ComponentUtil.class)) {
