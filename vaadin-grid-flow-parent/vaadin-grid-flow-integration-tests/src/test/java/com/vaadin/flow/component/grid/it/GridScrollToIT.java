@@ -36,8 +36,7 @@ public class GridScrollToIT extends AbstractComponentIT {
     @Before
     public void init() {
         open();
-        waitForElementPresent(By.tagName("vaadin-grid"));
-        grid = $(GridElement.class).first();
+        grid = $(GridElement.class).waitForFirst();
     }
 
     @Test
@@ -74,14 +73,20 @@ public class GridScrollToIT extends AbstractComponentIT {
         WebElement button = $("button").id("add-row-and-scroll-to-end");
         button.click();
 
-        GridElement grid = $(GridElement.class).id("scroll-to-end-grid");
-
-        Assert.assertEquals(0, grid.getFirstVisibleRowIndex());
-        Assert.assertEquals(1, grid.getLastVisibleRowIndex());
+        Assert.assertEquals(1002, grid.getLastVisibleRowIndex());
 
         button.click();
-        Assert.assertEquals(0, grid.getFirstVisibleRowIndex());
-        Assert.assertEquals(3, grid.getLastVisibleRowIndex());
+        Assert.assertEquals(1004, grid.getLastVisibleRowIndex());
+    }
+
+    @Test
+    public void grid_addItem_scrollToIndex() {
+        $("button").id("add-row-and-scroll-to-index").click();
+
+        checkLogsForErrors();
+        Assert.assertEquals(1001, grid.getLastVisibleRowIndex());
+        Assert.assertEquals("1001",
+                grid.getCell(grid.getLastVisibleRowIndex(), 0).getText());
     }
 
 }
