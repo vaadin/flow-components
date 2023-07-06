@@ -538,7 +538,7 @@ public class SideNavItemTest {
     }
 
     @Route("foo/:k1/:k2/bar")
-    private static class TestRouteTemplate extends Component {
+    private static class TestRouteWithRouteParams extends Component {
 
     }
 }
