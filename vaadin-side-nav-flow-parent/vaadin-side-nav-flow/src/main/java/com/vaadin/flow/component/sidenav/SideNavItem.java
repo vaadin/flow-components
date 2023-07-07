@@ -119,7 +119,7 @@ public class SideNavItem extends SideNavItemContainer
      *            the view to link to
      */
     public SideNavItem(String label, Class<? extends Component> view,
-                       RouteParameters routeParameters) {
+            RouteParameters routeParameters) {
         setPath(view, routeParameters);
         setLabel(label);
     }
@@ -155,7 +155,7 @@ public class SideNavItem extends SideNavItemContainer
      *            the prefixComponent for the item (usually an icon)
      */
     public SideNavItem(String label, Class<? extends Component> view,
-                       RouteParameters routeParameters, Component prefixComponent) {
+            RouteParameters routeParameters, Component prefixComponent) {
         setPath(view, routeParameters);
         setLabel(label);
         setPrefixComponent(prefixComponent);
@@ -269,7 +269,7 @@ public class SideNavItem extends SideNavItemContainer
      * @see SideNavItem#addPathAliases(String...)
      */
     public void setPath(Class<? extends Component> view,
-                        RouteParameters routeParameters) {
+            RouteParameters routeParameters) {
         if (view == null) {
             setPath((String) null);
             clearPathAliases();
@@ -354,7 +354,7 @@ public class SideNavItem extends SideNavItemContainer
     }
 
     private String processPathAlias(Class<? extends Component> view,
-                                    RouteParameters routeParameters, String alias) {
+            RouteParameters routeParameters, String alias) {
         configuredAliases.clear();
         configuredAliases.setRoute(alias, getClass());
         return routeParameters == null
@@ -527,4 +527,3 @@ public class SideNavItem extends SideNavItemContainer
                 .get(UI.getCurrent().getSession().getService().getContext());
     }
 }
-

@@ -478,7 +478,7 @@ public class SideNavItemTest {
     }
 
     private void runWithMockRouter(Class<? extends Component> route,
-                                   Runnable test) {
+            Runnable test) {
         Router router = mockRouter(route);
         try (MockedStatic<ComponentUtil> mockComponentUtil = Mockito
                 .mockStatic(ComponentUtil.class)) {
@@ -680,4 +680,3 @@ public class SideNavItemTest {
 
     }
 }
-

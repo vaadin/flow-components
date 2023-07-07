@@ -15,25 +15,27 @@
  */
 package com.vaadin.flow.component.sidenav.tests;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.Route;
 
 /**
- * View used as a target route when testing navigation in {@link SideNavPage}.
+ * View used as a forwarding source when testing navigation in
+ * {@link SideNavPage}.
  */
-@Route("vaadin-side-nav/side-nav-test-target-view")
-public class SideNavTargetView extends Div {
+@Route("vaadin-side-nav/side-nav-forwarding-source-view")
+public class SideNavForwardingSourceView extends Div
+        implements BeforeEnterObserver {
 
-    public SideNavTargetView() {
-        NativeButton navigateToMainPage = new NativeButton(
-                "Navigate to main page",
-                event -> UI.getCurrent().navigate(SideNavPage.class));
-        navigateToMainPage.setId("navigate-to-main-page");
+    public SideNavForwardingSourceView() {
+        add(new Span(
+                "View to test forwarding to a page that contains vaadin-side-nav component"));
+    }
 
-        add(new Span("View to test routing from the vaadin-side-nav component"),
-                navigateToMainPage);
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        event.forwardTo(SideNavPage.class);
     }
 }
