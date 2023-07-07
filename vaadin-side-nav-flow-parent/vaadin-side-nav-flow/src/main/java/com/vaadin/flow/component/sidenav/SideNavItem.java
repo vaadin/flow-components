@@ -32,7 +32,6 @@ import com.vaadin.flow.internal.UrlUtil;
 import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.router.RouteConfiguration;
-import com.vaadin.flow.router.RouteParam;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.internal.ConfigureRoutes;
 import elemental.json.JsonArray;
@@ -266,7 +265,7 @@ public class SideNavItem extends SideNavItemContainer
      *            the route parameters
      *
      * @see SideNavItem#setPath(String)
-     * @see SideNavItem#addPathAliases(String...)
+     * @see SideNavItem#setPathAliases(String...)
      */
     public void setPath(Class<? extends Component> view,
             RouteParameters routeParameters) {
@@ -276,8 +275,10 @@ public class SideNavItem extends SideNavItemContainer
         } else {
             RouteConfiguration routeConfiguration = RouteConfiguration
                     .forRegistry(ComponentUtil.getRouter(this).getRegistry());
+            routeConfiguration.getUrl(view, routeParameters);
+
             setPath(routeConfiguration.getUrl(view, routeParameters));
-            addPathAliases(view);
+            setPathAliases(getPathAliasesFromView(view, routeParameters));
         }
     }
 
@@ -303,75 +304,25 @@ public class SideNavItem extends SideNavItemContainer
      */
     public void setQueryParameters(QueryParameters queryParameters) {
         this.queryParameters = queryParameters;
-        refresh();
+        // Apply new query parameters to the path
+        setPath(getPath());
     }
 
     /**
-     * Adds the specified path aliases to this item. The aliases act as
+     * Sets the specified path aliases to this item. The aliases act as
      * secondary paths when determining the active state of the item.
      *
      * @param aliases
-     *            the path aliases to add to this item
+     *            the path aliases to set to this item
      */
-    public void addPathAliases(String... aliases) {
-        Objects.requireNonNull(aliases, "Aliases to add cannot be null");
+    public void setPathAliases(String... aliases) {
+        Objects.requireNonNull(aliases, "Aliases to set cannot be null");
         setPathAliases(Stream
                 .concat(getPathAliases().stream(),
                         Arrays.stream(aliases)
                                 .map(alias -> Objects.requireNonNull(alias,
-                                        "Alias to add cannot be null")))
+                                        "Alias to set cannot be null")))
                 .collect(Collectors.toSet()));
-    }
-
-    /**
-     * Retrieves {@link com.vaadin.flow.router.RouteAlias} annotations from the
-     * specified views, and then adds the corresponding path aliases to this
-     * item. Aliases act as secondary paths when determining the active state of
-     * an item.
-     *
-     * @param views
-     *            The views containing the path aliases to add to this item.
-     */
-    @SafeVarargs
-    public final void addPathAliases(Class<? extends Component>... views) {
-        Objects.requireNonNull(views,
-                "Views containing the path aliases to add cannot be null");
-        Stream<String> aliases = Arrays.stream(views)
-                .map(view -> Objects.requireNonNull(view,
-                        "View containing the path aliases to add cannot be null"))
-                .map(this::getPathAliasesFromView).flatMap(Set::stream);
-        setPathAliases(Stream.concat(getPathAliases().stream(), aliases)
-                .collect(Collectors.toSet()));
-    }
-
-    private Set<String> getPathAliasesFromView(
-            Class<? extends Component> view) {
-        RouteParameters routeParameters = getRouteParameters();
-        RouteAlias[] routeAliases = view.getAnnotationsByType(RouteAlias.class);
-        return Arrays.stream(routeAliases).map(RouteAlias::value)
-                .map(alias -> processPathAlias(view, routeParameters, alias))
-                .filter(Objects::nonNull).collect(Collectors.toSet());
-    }
-
-    private String processPathAlias(Class<? extends Component> view,
-            RouteParameters routeParameters, String alias) {
-        configuredAliases.clear();
-        configuredAliases.setRoute(alias, getClass());
-        return routeParameters == null
-                ? configuredAliases.getTargetUrl(getClass())
-                : configuredAliases.getTargetUrl(getClass(), routeParameters);
-    }
-
-    private RouteParameters getRouteParameters() {
-        if (this.queryParameters == null) {
-            return null;
-        }
-        RouteParam[] routeParams = this.queryParameters.getParameters()
-                .entrySet().stream()
-                .flatMap(entry -> entry.getValue().stream()
-                        .map(value -> new RouteParam(entry.getKey(), value)))
-                .toArray(RouteParam[]::new);
-        return new RouteParameters(routeParams);
     }
 
     /**
@@ -380,7 +331,7 @@ public class SideNavItem extends SideNavItemContainer
      * @param aliases
      *            the path aliases to remove from this item
      *
-     * @see SideNavItem#addPathAliases(String...)
+     * @see SideNavItem#setPathAliases(String...)
      */
     public void removePathAliases(String... aliases) {
         Objects.requireNonNull(aliases, "Aliases to remove cannot be null");
@@ -391,40 +342,6 @@ public class SideNavItem extends SideNavItemContainer
         Set<String> updatedAliases = getPathAliases();
         updatedAliases.removeAll(aliasesToRemove);
         setPathAliases(updatedAliases);
-    }
-
-    private void setPathAliases(Set<String> pathAliases) {
-        if (pathAliases.isEmpty()) {
-            clearPathAliases();
-        } else {
-            getElement().setPropertyJson("pathAliases",
-                    JsonSerializer.toJson(pathAliases.stream()
-                            .map(this::updateQueryParameters)
-                            .map(this::sanitizePath)
-                            .collect(Collectors.toSet())));
-        }
-    }
-
-    /**
-     * Retrieves {@link com.vaadin.flow.router.RouteAlias} annotations from the
-     * specified views, and then removes the corresponding path aliases from
-     * this item.
-     *
-     * @param views
-     *            the views containing the path aliases to remove from this item
-     *
-     * @see SideNavItem#addPathAliases(Class...)
-     */
-    @SafeVarargs
-    public final void removePathAliases(Class<? extends Component>... views) {
-        Objects.requireNonNull(views,
-                "Views containing the path aliases to remove cannot be null");
-        removePathAliases(Arrays.stream(views)
-                .map(view -> Objects.requireNonNull(view,
-                        "View containing the path aliases to remove cannot be null"))
-                .map(view -> view.getAnnotationsByType(RouteAlias.class))
-                .flatMap(Arrays::stream).map(RouteAlias::value)
-                .toArray(String[]::new));
     }
 
     /**
@@ -449,9 +366,31 @@ public class SideNavItem extends SideNavItemContainer
                 (JsonArray) pathAliasesRaw));
     }
 
-    private void refresh() {
-        setPath(getPath());
-        setPathAliases(getPathAliases());
+    private Set<String> getPathAliasesFromView(Class<? extends Component> view,
+            RouteParameters routeParameters) {
+        RouteAlias[] routeAliases = view.getAnnotationsByType(RouteAlias.class);
+        return Arrays.stream(routeAliases).map(RouteAlias::value).map(
+                alias -> updateAliasWithRouteParameters(alias, routeParameters))
+                .filter(Objects::nonNull).collect(Collectors.toSet());
+    }
+
+    private String updateAliasWithRouteParameters(String alias,
+            RouteParameters routeParameters) {
+        configuredAliases.clear();
+        configuredAliases.setRoute(alias, getClass());
+        return configuredAliases.getTargetUrl(getClass(), routeParameters);
+    }
+
+    private void setPathAliases(Set<String> pathAliases) {
+        if (pathAliases.isEmpty()) {
+            clearPathAliases();
+        } else {
+            getElement().setPropertyJson("pathAliases",
+                    JsonSerializer.toJson(pathAliases.stream()
+                            .map(this::updateQueryParameters)
+                            .map(this::sanitizePath)
+                            .collect(Collectors.toSet())));
+        }
     }
 
     private String updateQueryParameters(String path) {
