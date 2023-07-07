@@ -464,6 +464,17 @@ public class SideNavItemTest {
         });
     }
 
+    @Test
+    public void setPathFromComponentAndRouteParameters_pathContainsParameters() {
+        runWithMockRouter(TestRouteWithRouteParams.class, () -> {
+            SideNavItem item = new SideNavItem("test");
+            item.setPath(TestRouteWithRouteParams.class,
+                    new RouteParameters(Map.of("k1", "v1", "k2", "v2")));
+
+            Assert.assertEquals("foo/v1/v2/bar", item.getPath());
+        });
+    }
+
     private void runWithMockRouter(Class<? extends Component> route,
             Runnable test) {
         Router router = mockRouter(route);
