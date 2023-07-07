@@ -48,13 +48,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
               return this.isLoadingOriginal();
             }
 
-            return Boolean(
-              this.grid.$connector.hasEnsureSubCacheQueue() ||
-                Object.keys(this.pendingRequests).length ||
-                Object.keys(this.itemCaches).filter((index) => {
-                  return this.itemCaches[index].isLoading();
-                })[0]
-            );
+            return this.grid.$connector.hasEnsureSubCacheQueue() || this.isLoadingOriginal();
           });
 
           ItemCache.prototype.doEnsureSubCacheForScaledIndex = tryCatchWrapper(function (scaledIndex) {
