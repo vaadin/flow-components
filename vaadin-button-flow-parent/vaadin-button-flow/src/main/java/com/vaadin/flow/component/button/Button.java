@@ -52,9 +52,9 @@ import java.util.stream.Stream;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-button")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.10")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.11")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/button", version = "24.0.10")
+@NpmPackage(value = "@vaadin/button", version = "24.0.11")
 @JsModule("@vaadin/button/src/vaadin-button.js")
 public class Button extends Component implements ClickNotifier<Button>,
         Focusable<Button>, HasEnabled, HasPrefix, HasSize, HasStyle, HasSuffix,
