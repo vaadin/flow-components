@@ -29,10 +29,10 @@ import com.vaadin.flow.theme.AbstractTheme;
 /**
  * Lumo component theme class implementation.
  */
-@NpmPackage(value = "@vaadin/vaadin-themable-mixin", version = "24.0.10")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.10")
+@NpmPackage(value = "@vaadin/vaadin-themable-mixin", version = "24.0.11")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.11")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/vaadin-lumo-styles", version = "24.0.10")
+@NpmPackage(value = "@vaadin/vaadin-lumo-styles", version = "24.0.11")
 @JsModule("@vaadin/vaadin-lumo-styles/color.js")
 @JsModule("@vaadin/vaadin-lumo-styles/typography.js")
 @JsModule("@vaadin/vaadin-lumo-styles/sizing.js")
