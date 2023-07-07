@@ -51,9 +51,10 @@ public class SideNavIT extends AbstractComponentIT {
 
     @Test
     public void pageOpened_itemHierarchyRendered() {
-        Assert.assertEquals(2, sideNav.getItems().size());
+        Assert.assertEquals(3, sideNav.getItems().size());
         Assert.assertEquals(3, sideNav.getItems().get(0).getItems().size());
         Assert.assertEquals(2, sideNav.getItems().get(1).getItems().size());
+        Assert.assertEquals(0, sideNav.getItems().get(2).getItems().size());
     }
 
     @Test
@@ -113,6 +114,20 @@ public class SideNavIT extends AbstractComponentIT {
         sideNav.toggle();
 
         assertExpandedStateOnServer("print-side-nav-expanded-state", "false");
+    }
+
+    @Test
+    public void navigateToPage_correctItemIsCurrent() {
+        // First navigate away from the page
+        navigableParent.click();
+        waitUntil(driver -> $(NativeButtonElement.class)
+                .id("navigate-to-main-page") != null, 1);
+
+        $(NativeButtonElement.class).id("navigate-to-main-page").click();
+        waitUntil(driver -> $(SideNavElement.class).exists(), 1);
+
+        Assert.assertTrue(
+                $(SideNavItemElement.class).id("current-item").isCurrent());
     }
 
     private void assertExpandedStateOnServer(String buttonToClick,

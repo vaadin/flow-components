@@ -27,8 +27,10 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasPrefix;
 import com.vaadin.flow.component.shared.HasSuffix;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.internal.UrlUtil;
+import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.RouteConfiguration;
-import com.vaadin.flow.router.Router;
+import com.vaadin.flow.router.RouteParameters;
 
 /**
  * A menu item for the {@link SideNav} component.
@@ -47,6 +49,8 @@ public class SideNavItem extends SideNavItemContainer
         implements HasPrefix, HasSuffix {
 
     private Element labelElement;
+
+    private QueryParameters queryParameters;
 
     /**
      * Creates a menu item which does not link to any view but only shows the
@@ -88,6 +92,23 @@ public class SideNavItem extends SideNavItemContainer
     }
 
     /**
+     * Creates a new menu item using the given label that links to the given
+     * view.
+     *
+     * @param label
+     *            the label for the item
+     * @param routeParameters
+     *            the route parameters
+     * @param view
+     *            the view to link to
+     */
+    public SideNavItem(String label, Class<? extends Component> view,
+            RouteParameters routeParameters) {
+        setPath(view, routeParameters);
+        setLabel(label);
+    }
+
+    /**
      * Creates a new menu item using the given label and prefix component (like
      * an icon) that links to the given path.
      *
@@ -112,12 +133,14 @@ public class SideNavItem extends SideNavItemContainer
      *            the label for the item
      * @param view
      *            the view to link to
+     * @param routeParameters
+     *            the route parameters
      * @param prefixComponent
      *            the prefixComponent for the item (usually an icon)
      */
     public SideNavItem(String label, Class<? extends Component> view,
-            Component prefixComponent) {
-        setPath(view);
+            RouteParameters routeParameters, Component prefixComponent) {
+        setPath(view, routeParameters);
         setLabel(label);
         setPrefixComponent(prefixComponent);
     }
@@ -183,16 +206,18 @@ public class SideNavItem extends SideNavItemContainer
         if (path == null) {
             getElement().removeAttribute("path");
         } else {
-            getElement().setAttribute("path", path);
+            getElement().setAttribute("path",
+                    sanitizePath(updateQueryParameters(path)));
         }
     }
 
     /**
-     * Sets the view this item links to.
+     * Retrieves {@link com.vaadin.flow.router.Route} annotations from the
+     * specified view, and then sets the corresponding path for this item.
      * <p>
      * Note: Vaadin Router will be used to determine the URL path of the view
      * and this URL will be then set to this navigation item using
-     * {@link SideNavItem#setPath(String)}
+     * {@link SideNavItem#setPath(String)}.
      *
      * @param view
      *            The view to link to. The view should be annotated with the
@@ -202,13 +227,34 @@ public class SideNavItem extends SideNavItemContainer
      * @see SideNavItem#setPath(String)
      */
     public void setPath(Class<? extends Component> view) {
-        if (view != null) {
-            Router router = ComponentUtil.getRouter(this);
-            String url = RouteConfiguration.forRegistry(router.getRegistry())
-                    .getUrl(view);
-            setPath(url);
-        } else {
+        setPath(view, RouteParameters.empty());
+    }
+
+    /**
+     * Retrieves {@link com.vaadin.flow.router.Route} annotations from the
+     * specified view, and then sets the corresponding path for this item.
+     * <p>
+     * Note: Vaadin Router will be used to determine the URL path of the view
+     * and this URL will be then set to this navigation item using
+     * {@link SideNavItem#setPath(String)}.
+     *
+     * @param view
+     *            The view to link to. The view should be annotated with the
+     *            {@link com.vaadin.flow.router.Route} annotation. Set to null
+     *            to disable navigation for this item.
+     * @param routeParameters
+     *            the route parameters
+     *
+     * @see SideNavItem#setPath(String)
+     */
+    public void setPath(Class<? extends Component> view,
+            RouteParameters routeParameters) {
+        if (view == null) {
             setPath((String) null);
+        } else {
+            RouteConfiguration routeConfiguration = RouteConfiguration
+                    .forRegistry(ComponentUtil.getRouter(this).getRegistry());
+            setPath(routeConfiguration.getUrl(view, routeParameters));
         }
     }
 
@@ -219,6 +265,44 @@ public class SideNavItem extends SideNavItemContainer
      */
     public String getPath() {
         return getElement().getAttribute("path");
+    }
+
+    /**
+     * Sets the {@link QueryParameters} of this item.
+     * <p>
+     * The query string will be generated from
+     * {@link QueryParameters#getQueryString()} and will be appended to the
+     * {@code path} attribute of this item.
+     *
+     * @param queryParameters
+     *            the query parameters object, or {@code null} to remove
+     *            existing query parameters
+     */
+    public void setQueryParameters(QueryParameters queryParameters) {
+        this.queryParameters = queryParameters;
+        refresh();
+    }
+
+    private void refresh() {
+        setPath(getPath());
+    }
+
+    private String updateQueryParameters(String path) {
+        int startOfQuery = path.indexOf('?');
+        if (startOfQuery != -1) {
+            path = path.substring(0, startOfQuery);
+        }
+        if (queryParameters != null) {
+            path += '?' + queryParameters.getQueryString();
+        }
+        return path;
+    }
+
+    private String sanitizePath(String path) {
+        if (path.startsWith("/")) {
+            path = path.substring(1);
+        }
+        return UrlUtil.encodeURI(path);
     }
 
     /**

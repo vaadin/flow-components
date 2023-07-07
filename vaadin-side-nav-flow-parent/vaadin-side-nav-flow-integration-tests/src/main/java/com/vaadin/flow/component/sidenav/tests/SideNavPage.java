@@ -51,6 +51,11 @@ public class SideNavPage extends Div {
         navigableParent.addItem(new SideNavItem("Item 2"));
         sideNav.addItem(navigableParent);
 
+        SideNavItem currentItem = new SideNavItem("Current item",
+                "vaadin-side-nav/side-nav-test");
+        currentItem.setId("current-item");
+        sideNav.addItem(currentItem);
+
         Div expandedStatePrintout = new Div();
         expandedStatePrintout.setId("expanded-state-printout");
         add(expandedStatePrintout);
