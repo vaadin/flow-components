@@ -39,7 +39,7 @@ public class GridElement extends TestBenchElement {
 
     protected boolean isLoading() {
         return (Boolean) executeScript(
-                "return arguments[0]._cache.isLoading() || (!!arguments[0].$connector && arguments[0].$connector.hasRootRequestQueue())",
+                "return arguments[0]._dataProviderController.isLoading() || (!!arguments[0].$connector && arguments[0].$connector.hasRootRequestQueue())",
                 this);
     }
 
