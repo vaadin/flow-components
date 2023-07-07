@@ -275,8 +275,6 @@ public class SideNavItem extends SideNavItemContainer
         } else {
             RouteConfiguration routeConfiguration = RouteConfiguration
                     .forRegistry(ComponentUtil.getRouter(this).getRegistry());
-            routeConfiguration.getUrl(view, routeParameters);
-
             setPath(routeConfiguration.getUrl(view, routeParameters));
             setPathAliases(getPathAliasesFromView(view, routeParameters));
         }
