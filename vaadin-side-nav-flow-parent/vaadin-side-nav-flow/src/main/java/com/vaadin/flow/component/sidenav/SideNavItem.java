@@ -42,7 +42,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -66,12 +65,6 @@ public class SideNavItem extends SideNavItemContainer
     private Element labelElement;
 
     private QueryParameters queryParameters;
-
-    private Class<? extends Component> view;
-
-    private String customPath;
-
-    private final Set<String> customPathAliases = new HashSet<>();
 
     private final ConfigureRoutes configuredAliases = new ConfigureRoutes();
 
@@ -115,6 +108,23 @@ public class SideNavItem extends SideNavItemContainer
     }
 
     /**
+     * Creates a new menu item using the given label that links to the given
+     * view.
+     *
+     * @param label
+     *            the label for the item
+     * @param routeParameters
+     *            the route parameters
+     * @param view
+     *            the view to link to
+     */
+    public SideNavItem(String label, Class<? extends Component> view,
+                       RouteParameters routeParameters) {
+        setPath(view, routeParameters);
+        setLabel(label);
+    }
+
+    /**
      * Creates a new menu item using the given label and prefix component (like
      * an icon) that links to the given path.
      *
@@ -139,12 +149,14 @@ public class SideNavItem extends SideNavItemContainer
      *            the label for the item
      * @param view
      *            the view to link to
+     * @param routeParameters
+     *            the route parameters
      * @param prefixComponent
      *            the prefixComponent for the item (usually an icon)
      */
     public SideNavItem(String label, Class<? extends Component> view,
-            Component prefixComponent) {
-        setPath(view);
+                       RouteParameters routeParameters, Component prefixComponent) {
+        setPath(view, routeParameters);
         setLabel(label);
         setPrefixComponent(prefixComponent);
     }
@@ -207,17 +219,19 @@ public class SideNavItem extends SideNavItemContainer
      * @see SideNavItem#setPath(Class)
      */
     public void setPath(String path) {
-        this.view = null;
-        this.customPath = path;
-        doSetPath(path);
+        if (path == null) {
+            getElement().removeAttribute("path");
+        } else {
+            getElement().setAttribute("path",
+                    sanitizePath(updateQueryParameters(path)));
+        }
     }
 
     /**
      * Retrieves {@link com.vaadin.flow.router.Route} and
      * {@link com.vaadin.flow.router.RouteAlias} annotations from the specified
      * view, and then sets the corresponding path and path aliases for this
-     * item. Aliases act as secondary paths when determining the active state of
-     * an item.
+     * item.
      * <p>
      * Note: Vaadin Router will be used to determine the URL path of the view
      * and this URL will be then set to this navigation item using
@@ -229,28 +243,41 @@ public class SideNavItem extends SideNavItemContainer
      *            to disable navigation for this item.
      *
      * @see SideNavItem#setPath(String)
-     * @see SideNavItem#addPathAliases(String...)
      */
     public void setPath(Class<? extends Component> view) {
-        this.view = view;
-        this.customPath = null;
-        if (view != null) {
-            RouteConfiguration routeConfiguration = RouteConfiguration
-                    .forRegistry(ComponentUtil.getRouter(this).getRegistry());
-            doSetPath(routeConfiguration.getUrl(view));
-            addPathAliases(view);
-        } else {
-            doSetPath(null);
-            clearPathAliases();
-        }
+        setPath(view, RouteParameters.empty());
     }
 
-    private void doSetPath(String path) {
-        if (path == null) {
-            getElement().removeAttribute("path");
+    /**
+     * Retrieves {@link com.vaadin.flow.router.Route} and
+     * {@link com.vaadin.flow.router.RouteAlias} annotations from the specified
+     * view, and then sets the corresponding path and path aliases for this
+     * item.
+     * <p>
+     * Note: Vaadin Router will be used to determine the URL path of the view
+     * and this URL will be then set to this navigation item using
+     * {@link SideNavItem#setPath(String)}.
+     *
+     * @param view
+     *            The view to link to. The view should be annotated with the
+     *            {@link com.vaadin.flow.router.Route} annotation. Set to null
+     *            to disable navigation for this item.
+     * @param routeParameters
+     *            the route parameters
+     *
+     * @see SideNavItem#setPath(String)
+     * @see SideNavItem#addPathAliases(String...)
+     */
+    public void setPath(Class<? extends Component> view,
+                        RouteParameters routeParameters) {
+        if (view == null) {
+            setPath((String) null);
+            clearPathAliases();
         } else {
-            getElement().setAttribute("path",
-                    sanitizePath(refreshPathParameters(path)));
+            RouteConfiguration routeConfiguration = RouteConfiguration
+                    .forRegistry(ComponentUtil.getRouter(this).getRegistry());
+            setPath(routeConfiguration.getUrl(view, routeParameters));
+            addPathAliases(view);
         }
     }
 
@@ -261,6 +288,22 @@ public class SideNavItem extends SideNavItemContainer
      */
     public String getPath() {
         return getElement().getAttribute("path");
+    }
+
+    /**
+     * Sets the {@link QueryParameters} of this item.
+     * <p>
+     * The query string will be generated from
+     * {@link QueryParameters#getQueryString()} and will be appended to the
+     * {@code path} attribute of this item.
+     *
+     * @param queryParameters
+     *            the query parameters object, or {@code null} to remove
+     *            existing query parameters
+     */
+    public void setQueryParameters(QueryParameters queryParameters) {
+        this.queryParameters = queryParameters;
+        refresh();
     }
 
     /**
@@ -276,8 +319,7 @@ public class SideNavItem extends SideNavItemContainer
                 .concat(getPathAliases().stream(),
                         Arrays.stream(aliases)
                                 .map(alias -> Objects.requireNonNull(alias,
-                                        "Alias to add cannot be null"))
-                                .peek(customPathAliases::add))
+                                        "Alias to add cannot be null")))
                 .collect(Collectors.toSet()));
     }
 
@@ -312,7 +354,7 @@ public class SideNavItem extends SideNavItemContainer
     }
 
     private String processPathAlias(Class<? extends Component> view,
-            RouteParameters routeParameters, String alias) {
+                                    RouteParameters routeParameters, String alias) {
         configuredAliases.clear();
         configuredAliases.setRoute(alias, getClass());
         return routeParameters == null
@@ -348,7 +390,6 @@ public class SideNavItem extends SideNavItemContainer
                 .collect(Collectors.toSet());
         Set<String> updatedAliases = getPathAliases();
         updatedAliases.removeAll(aliasesToRemove);
-        customPathAliases.removeAll(aliasesToRemove);
         setPathAliases(updatedAliases);
     }
 
@@ -357,7 +398,10 @@ public class SideNavItem extends SideNavItemContainer
             clearPathAliases();
         } else {
             getElement().setPropertyJson("pathAliases",
-                    JsonSerializer.toJson(pathAliases));
+                    JsonSerializer.toJson(pathAliases.stream()
+                            .map(this::updateQueryParameters)
+                            .map(this::sanitizePath)
+                            .collect(Collectors.toSet())));
         }
     }
 
@@ -387,7 +431,6 @@ public class SideNavItem extends SideNavItemContainer
      * Clears any previously set path aliases.
      */
     public void clearPathAliases() {
-        customPathAliases.clear();
         getElement().removeProperty("pathAliases");
     }
 
@@ -406,54 +449,12 @@ public class SideNavItem extends SideNavItemContainer
                 (JsonArray) pathAliasesRaw));
     }
 
-    /**
-     * Gets the {@link QueryParameters} of this item.
-     *
-     * @return an optional of {@link QueryParameters}, or an empty optional if
-     *         there are no query parameters set
-     * @see #setQueryParameters(QueryParameters)
-     */
-    public Optional<QueryParameters> getQueryParameters() {
-        return Optional.ofNullable(queryParameters);
-    }
-
-    /**
-     * Sets the {@link QueryParameters} of this item.
-     * <p>
-     * The query string will be generated from
-     * {@link QueryParameters#getQueryString()} and will be appended to the
-     * {@code path} attribute of this item.
-     *
-     * @param queryParameters
-     *            the query parameters object, or {@code null} to remove
-     *            existing query parameters
-     */
-    public void setQueryParameters(QueryParameters queryParameters) {
-        this.queryParameters = queryParameters;
-        refresh();
-    }
-
     private void refresh() {
-        if (view == null) {
-            setPath(customPath);
-        } else {
-            setPath(view);
-        }
-        Set<String> pathAliases = new HashSet<>(customPathAliases);
-        if (view != null) {
-            pathAliases.addAll(getPathAliasesFromView(view));
-        }
-        addPathAliases(pathAliases.toArray(String[]::new));
+        setPath(getPath());
+        setPathAliases(getPathAliases());
     }
 
-    private String sanitizePath(String path) {
-        if (path.startsWith("/")) {
-            path = path.substring(1);
-        }
-        return UrlUtil.encodeURI(path);
-    }
-
-    private String refreshPathParameters(String path) {
+    private String updateQueryParameters(String path) {
         int startOfQuery = path.indexOf('?');
         if (startOfQuery != -1) {
             path = path.substring(0, startOfQuery);
@@ -462,6 +463,13 @@ public class SideNavItem extends SideNavItemContainer
             path += '?' + queryParameters.getQueryString();
         }
         return path;
+    }
+
+    private String sanitizePath(String path) {
+        if (path.startsWith("/")) {
+            path = path.substring(1);
+        }
+        return UrlUtil.encodeURI(path);
     }
 
     /**
@@ -519,3 +527,4 @@ public class SideNavItem extends SideNavItemContainer
                 .get(UI.getCurrent().getSession().getService().getContext());
     }
 }
+
