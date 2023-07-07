@@ -41,11 +41,9 @@ import org.mockito.Mockito;
 public class SideNavItemTest {
 
     private SideNavItem sideNavItem;
-    private Router router;
 
     @Before
     public void setup() {
-        router = mockRouter(TestRoute.class);
         sideNavItem = new SideNavItem("Item", "/path");
     }
 
@@ -129,14 +127,10 @@ public class SideNavItemTest {
 
     @Test
     public void setPathAsComponent_pathUpdated() {
-        try (MockedStatic<ComponentUtil> mockComponentUtil = Mockito
-                .mockStatic(ComponentUtil.class)) {
-            mockComponentUtil.when(() -> ComponentUtil.getRouter(Mockito.any()))
-                    .thenReturn(router);
-
+        runWithMockRouter(TestRoute.class, () -> {
             sideNavItem.setPath(TestRoute.class);
             Assert.assertEquals("foo/bar", sideNavItem.getPath());
-        }
+        });
     }
 
     @Test
@@ -353,14 +347,10 @@ public class SideNavItemTest {
 
     @Test
     public void createFromComponent_pathIsSet() {
-        try (MockedStatic<ComponentUtil> mockComponentUtil = Mockito
-                .mockStatic(ComponentUtil.class)) {
-            mockComponentUtil.when(() -> ComponentUtil.getRouter(Mockito.any()))
-                    .thenReturn(router);
-
+        runWithMockRouter(TestRoute.class, () -> {
             SideNavItem item = new SideNavItem("test", TestRoute.class);
             Assert.assertEquals("foo/bar", item.getPath());
-        }
+        });
     }
 
     @Test
@@ -422,11 +412,7 @@ public class SideNavItemTest {
 
     @Test
     public void createFromComponent_setQueryParameters_pathContainsParameters() {
-        try (MockedStatic<ComponentUtil> mockComponentUtil = Mockito
-                .mockStatic(ComponentUtil.class)) {
-            mockComponentUtil.when(() -> ComponentUtil.getRouter(Mockito.any()))
-                    .thenReturn(router);
-
+        runWithMockRouter(TestRoute.class, () -> {
             SideNavItem item = new SideNavItem("test", TestRoute.class);
 
             QueryParameters queryParameters = new QueryParameters(Map.of("k1",
@@ -435,16 +421,12 @@ public class SideNavItemTest {
 
             Assert.assertEquals("foo/bar?" + queryParameters.getQueryString(),
                     item.getPath());
-        }
+        });
     }
 
     @Test
     public void createFromComponent_setQueryParameters_updateQueryParameters_pathIsUpdated() {
-        try (MockedStatic<ComponentUtil> mockComponentUtil = Mockito
-                .mockStatic(ComponentUtil.class)) {
-            mockComponentUtil.when(() -> ComponentUtil.getRouter(Mockito.any()))
-                    .thenReturn(router);
-
+        runWithMockRouter(TestRoute.class, () -> {
             SideNavItem item = new SideNavItem("test", TestRoute.class);
             item.setQueryParameters(
                     new QueryParameters(Map.of("k1", List.of("v11", "v12"))));
@@ -455,16 +437,12 @@ public class SideNavItemTest {
 
             Assert.assertEquals("foo/bar?" + queryParameters.getQueryString(),
                     item.getPath());
-        }
+        });
     }
 
     @Test
     public void createFromComponent_setQueryParameters_setQueryParametersNull_parametersRemovedFromPath() {
-        try (MockedStatic<ComponentUtil> mockComponentUtil = Mockito
-                .mockStatic(ComponentUtil.class)) {
-            mockComponentUtil.when(() -> ComponentUtil.getRouter(Mockito.any()))
-                    .thenReturn(router);
-
+        runWithMockRouter(TestRoute.class, () -> {
             SideNavItem item = new SideNavItem("test", TestRoute.class);
             item.setQueryParameters(
                     new QueryParameters(Map.of("k1", List.of("v11", "v12"))));
@@ -472,22 +450,28 @@ public class SideNavItemTest {
             item.setQueryParameters(null);
 
             Assert.assertEquals("foo/bar", item.getPath());
-        }
+        });
     }
 
     @Test
     public void createFromComponentAndRouteParameters_pathContainsParameters() {
-        Router router = mockRouter(TestRouteWithRouteParams.class);
-        try (MockedStatic<ComponentUtil> mockComponentUtil = Mockito
-                .mockStatic(ComponentUtil.class)) {
-            mockComponentUtil.when(() -> ComponentUtil.getRouter(Mockito.any()))
-                    .thenReturn(router);
-
+        runWithMockRouter(TestRouteWithRouteParams.class, () -> {
             SideNavItem item = new SideNavItem("test",
                     TestRouteWithRouteParams.class,
                     new RouteParameters(Map.of("k1", "v1", "k2", "v2")));
 
             Assert.assertEquals("foo/v1/v2/bar", item.getPath());
+        });
+    }
+
+    private void runWithMockRouter(Class<? extends Component> route,
+            Runnable test) {
+        Router router = mockRouter(route);
+        try (MockedStatic<ComponentUtil> mockComponentUtil = Mockito
+                .mockStatic(ComponentUtil.class)) {
+            mockComponentUtil.when(() -> ComponentUtil.getRouter(Mockito.any()))
+                    .thenReturn(router);
+            test.run();
         }
     }
 
