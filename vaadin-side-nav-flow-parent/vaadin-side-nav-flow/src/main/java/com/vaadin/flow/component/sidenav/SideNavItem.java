@@ -43,7 +43,6 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * A menu item for the {@link SideNav} component.
@@ -315,12 +314,7 @@ public class SideNavItem extends SideNavItemContainer
      */
     public void setPathAliases(String... aliases) {
         Objects.requireNonNull(aliases, "Aliases to set cannot be null");
-        setPathAliases(Stream
-                .concat(getPathAliases().stream(),
-                        Arrays.stream(aliases)
-                                .map(alias -> Objects.requireNonNull(alias,
-                                        "Alias to set cannot be null")))
-                .collect(Collectors.toSet()));
+        setPathAliases(Set.of(aliases));
     }
 
     /**
@@ -383,11 +377,12 @@ public class SideNavItem extends SideNavItemContainer
         if (pathAliases.isEmpty()) {
             clearPathAliases();
         } else {
-            getElement().setPropertyJson("pathAliases",
-                    JsonSerializer.toJson(pathAliases.stream()
-                            .map(this::updateQueryParameters)
-                            .map(this::sanitizePath)
-                            .collect(Collectors.toSet())));
+            JsonArray aliasesAsJson = JsonSerializer.toJson(pathAliases.stream()
+                    .map(alias -> Objects.requireNonNull(alias,
+                            "Alias to set cannot be null"))
+                    .map(this::updateQueryParameters).map(this::sanitizePath)
+                    .collect(Collectors.toSet()));
+            getElement().setPropertyJson("pathAliases", aliasesAsJson);
         }
     }
 
