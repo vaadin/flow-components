@@ -320,12 +320,15 @@ public class SideNavItem extends SideNavItemContainer
     /**
      * Sets the specified path aliases to this item. The aliases act as
      * secondary paths when determining the active state of the item.
+     * <p>
+     * Note that it is allowed to pass {@code null} as value to clear the
+     * selection.
      *
      * @param pathAliases
      *            the path aliases to set to this item
      */
     public void setPathAliases(Set<String> pathAliases) {
-        if (pathAliases.isEmpty()) {
+        if (pathAliases == null || pathAliases.isEmpty()) {
             getElement().removeProperty("pathAliases");
         } else {
             JsonArray aliasesAsJson = JsonSerializer.toJson(pathAliases.stream()

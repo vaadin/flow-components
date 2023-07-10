@@ -541,6 +541,16 @@ public class SideNavItemTest {
     }
 
     @Test
+    public void setMultiplePathAliases_setPathAliasesNull_pathAliasesEmpty() {
+        final SideNavItem item = new SideNavItem("Test");
+        item.setPathAliases(Set.of("alias1", "alias2"));
+        item.setPathAliases(null);
+
+        Assert.assertEquals(0, item.getPathAliases().size());
+        Assert.assertNull(item.getElement().getProperty("pathAliases"));
+    }
+
+    @Test
     public void setPathAsComponent_setNullAsComponent_pathAliasesEmpty() {
         runWithMockRouter(() -> {
             sideNavItem.setPath(TestRouteWithAliases.class);
