@@ -79,11 +79,13 @@ public class GridMultiSelectionColumnPageIT extends AbstractComponentIT {
                 selectAllCheckbox.getAttribute("indeterminate"));
 
         // Select single
+        // Note that in indeterminate state, the select all checkbox is also
+        // checked
         selectCheckbox.click();
         Assert.assertEquals("Selected item count: 1", message.getText());
-        Assert.assertNull(
-                "Select all checkbox is checked even though not all items selected",
-                selectAllCheckbox.getAttribute("checked"));
+        Assert.assertEquals(
+                "Select all checkbox is not checked even though an item is selected",
+                "true", selectAllCheckbox.getAttribute("checked"));
         Assert.assertEquals(
                 "Select all checkbox is not in indeterminate state even though an item is selected",
                 "true", selectAllCheckbox.getAttribute("indeterminate"));
@@ -102,14 +104,16 @@ public class GridMultiSelectionColumnPageIT extends AbstractComponentIT {
                 selectAllCheckbox.getAttribute("indeterminate"));
 
         // Deselect single
+        // Note that in indeterminate state, the select all checkbox is also
+        // checked
         selectCheckbox.click();
         Assert.assertEquals(
                 "Selected item count: "
                         + (GridMultiSelectionColumnPage.ITEM_COUNT - 1),
                 message.getText());
-        Assert.assertNull(
-                "Select all checkbox is checked even though not all items selected",
-                selectAllCheckbox.getAttribute("checked"));
+        Assert.assertEquals(
+                "Select all checkbox is not checked even though an item is selected",
+                "true", selectAllCheckbox.getAttribute("checked"));
         Assert.assertEquals(
                 "Select all checkbox is not in indeterminate state even though not all items selected",
                 "true", selectAllCheckbox.getAttribute("indeterminate"));
@@ -291,9 +295,16 @@ public class GridMultiSelectionColumnPageIT extends AbstractComponentIT {
                 .id("deSelectRow0");
         deSelectRow.click();
 
+        // Note that in indeterminate state, the select all checkbox is also
+        // checked
         WebElement selectAllCheckbox = grid
                 .findElement(By.id(SELECT_ALL_CHECKBOX_ID));
-        Assert.assertEquals(null, selectAllCheckbox.getAttribute("checked"));
+        Assert.assertEquals(
+                "Select all checkbox is not checked even though an item is selected",
+                "true", selectAllCheckbox.getAttribute("checked"));
+        Assert.assertEquals(
+                "Select all checkbox is not in indeterminate state even though not all items selected",
+                "true", selectAllCheckbox.getAttribute("indeterminate"));
     }
 
     @Test
