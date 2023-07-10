@@ -264,13 +264,13 @@ public class SideNavItem extends SideNavItemContainer
      *            the route parameters
      *
      * @see SideNavItem#setPath(String)
-     * @see SideNavItem#setPathAliases(String...)
+     * @see SideNavItem#setPathAliases(Set)
      */
     public void setPath(Class<? extends Component> view,
             RouteParameters routeParameters) {
         if (view == null) {
             setPath((String) null);
-            clearPathAliases();
+            setPathAliases(Collections.emptySet());
         } else {
             RouteConfiguration routeConfiguration = RouteConfiguration
                     .forRegistry(ComponentUtil.getRouter(this).getRegistry());
@@ -306,44 +306,6 @@ public class SideNavItem extends SideNavItemContainer
     }
 
     /**
-     * Sets the specified path aliases to this item. The aliases act as
-     * secondary paths when determining the active state of the item.
-     *
-     * @param aliases
-     *            the path aliases to set to this item
-     */
-    public void setPathAliases(String... aliases) {
-        Objects.requireNonNull(aliases, "Aliases to set cannot be null");
-        setPathAliases(Set.of(aliases));
-    }
-
-    /**
-     * Removes the specified path aliases from this item.
-     *
-     * @param aliases
-     *            the path aliases to remove from this item
-     *
-     * @see SideNavItem#setPathAliases(String...)
-     */
-    public void removePathAliases(String... aliases) {
-        Objects.requireNonNull(aliases, "Aliases to remove cannot be null");
-        Set<String> aliasesToRemove = Arrays.stream(aliases)
-                .map(alias -> Objects.requireNonNull(alias,
-                        "Alias to remove cannot be null"))
-                .collect(Collectors.toSet());
-        Set<String> updatedAliases = getPathAliases();
-        updatedAliases.removeAll(aliasesToRemove);
-        setPathAliases(updatedAliases);
-    }
-
-    /**
-     * Clears any previously set path aliases.
-     */
-    public void clearPathAliases() {
-        getElement().removeProperty("pathAliases");
-    }
-
-    /**
      * Gets the path aliases for this item.
      *
      * @return the path aliases for this item, empty if none
@@ -356,6 +318,26 @@ public class SideNavItem extends SideNavItemContainer
         }
         return new HashSet<>(JsonSerializer.toObjects(String.class,
                 (JsonArray) pathAliasesRaw));
+    }
+
+    /**
+     * Sets the specified path aliases to this item. The aliases act as
+     * secondary paths when determining the active state of the item.
+     *
+     * @param pathAliases
+     *            the path aliases to set to this item
+     */
+    public void setPathAliases(Set<String> pathAliases) {
+        if (pathAliases.isEmpty()) {
+            getElement().removeProperty("pathAliases");
+        } else {
+            JsonArray aliasesAsJson = JsonSerializer.toJson(pathAliases.stream()
+                    .map(alias -> Objects.requireNonNull(alias,
+                            "Alias to set cannot be null"))
+                    .map(this::updateQueryParameters).map(this::sanitizePath)
+                    .collect(Collectors.toSet()));
+            getElement().setPropertyJson("pathAliases", aliasesAsJson);
+        }
     }
 
     private Set<String> getPathAliasesFromView(Class<? extends Component> view,
@@ -371,19 +353,6 @@ public class SideNavItem extends SideNavItemContainer
         configuredAliases.clear();
         configuredAliases.setRoute(alias, getClass());
         return configuredAliases.getTargetUrl(getClass(), routeParameters);
-    }
-
-    private void setPathAliases(Set<String> pathAliases) {
-        if (pathAliases.isEmpty()) {
-            clearPathAliases();
-        } else {
-            JsonArray aliasesAsJson = JsonSerializer.toJson(pathAliases.stream()
-                    .map(alias -> Objects.requireNonNull(alias,
-                            "Alias to set cannot be null"))
-                    .map(this::updateQueryParameters).map(this::sanitizePath)
-                    .collect(Collectors.toSet()));
-            getElement().setPropertyJson("pathAliases", aliasesAsJson);
-        }
     }
 
     private String updateQueryParameters(String path) {

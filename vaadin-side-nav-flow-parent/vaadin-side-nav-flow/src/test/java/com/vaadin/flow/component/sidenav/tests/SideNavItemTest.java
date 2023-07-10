@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.sidenav.tests;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -509,9 +510,9 @@ public class SideNavItemTest {
     }
 
     @Test
-    public void setEmptyPathAlias_pathAliasAdded() {
+    public void setEmptyStringAsPathAlias_pathAliasAdded() {
         final SideNavItem item = new SideNavItem("Test");
-        item.setPathAliases("");
+        item.setPathAliases(Set.of(""));
 
         Assert.assertEquals(Set.of(""), item.getPathAliases());
         Assert.assertEquals("[\"\"]",
@@ -521,7 +522,7 @@ public class SideNavItemTest {
     @Test
     public void setMultiplePathAliases_pathAliasesAdded() {
         final SideNavItem item = new SideNavItem("Test");
-        item.setPathAliases("alias1", "alias2");
+        item.setPathAliases(Set.of("alias1", "alias2"));
 
         Assert.assertEquals(Set.of("alias1", "alias2"), item.getPathAliases());
         Assert.assertTrue(Set
@@ -530,20 +531,10 @@ public class SideNavItemTest {
     }
 
     @Test
-    public void setPathAlias_removePathAlias_pathAliasesEmpty() {
+    public void setMultiplePathAliases_setEmptyPathAliases_pathAliasesEmpty() {
         final SideNavItem item = new SideNavItem("Test");
-        item.setPathAliases("alias");
-        item.removePathAliases("alias");
-
-        Assert.assertEquals(0, item.getPathAliases().size());
-        Assert.assertNull(item.getElement().getProperty("pathAliases"));
-    }
-
-    @Test
-    public void setMultiplePathAliases_clearPathAliases_pathAliasesEmpty() {
-        final SideNavItem item = new SideNavItem("Test");
-        item.setPathAliases("alias1", "alias2");
-        item.clearPathAliases();
+        item.setPathAliases(Set.of("alias1", "alias2"));
+        item.setPathAliases(Collections.emptySet());
 
         Assert.assertEquals(0, item.getPathAliases().size());
         Assert.assertNull(item.getElement().getProperty("pathAliases"));
@@ -557,19 +548,6 @@ public class SideNavItemTest {
 
             Assert.assertEquals(0, sideNavItem.getPathAliases().size());
             Assert.assertNull(
-                    sideNavItem.getElement().getProperty("pathAliases"));
-        }, TestRouteWithAliases.class);
-    }
-
-    @Test
-    public void setPathAsComponent_removePathAlias_pathAliasRemoved() {
-        runWithMockRouter(() -> {
-            sideNavItem.setPath(TestRouteWithAliases.class);
-            sideNavItem.removePathAliases("foo/baz");
-
-            Assert.assertEquals(Set.of("foo/qux"),
-                    sideNavItem.getPathAliases());
-            Assert.assertEquals("[\"foo/qux\"]",
                     sideNavItem.getElement().getProperty("pathAliases"));
         }, TestRouteWithAliases.class);
     }
@@ -647,7 +625,7 @@ public class SideNavItemTest {
 
     @Test
     public void setPathAlias_setQueryParameters_pathAliasDoesNotContainParameters() {
-        sideNavItem.setPathAliases("pathAlias");
+        sideNavItem.setPathAliases(Set.of("pathAlias"));
 
         QueryParameters queryParameters = new QueryParameters(Map.of("k1",
                 List.of("v11", "v12"), "k2", List.of("v21", "v22")));
