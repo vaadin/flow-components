@@ -575,6 +575,27 @@ public class SideNavItemTest {
     }
 
     @Test
+    public void setPathAsComponent_setOtherPathAsComponent_pathUpdated() {
+        runWithMockRouter(TestRouteWithAliases.class, () -> {
+            sideNavItem.setPath(TestRouteWithAliases.class);
+            sideNavItem.setPath(OtherTestRouteWithAliases.class);
+
+            Assert.assertEquals("bar/foo", sideNavItem.getPath());
+        });
+    }
+
+    @Test
+    public void setPathAsComponent_setOtherPathAsComponent_pathAliasesUpdated() {
+        runWithMockRouter(TestRouteWithAliases.class, () -> {
+            sideNavItem.setPath(TestRouteWithAliases.class);
+            sideNavItem.setPath(OtherTestRouteWithAliases.class);
+
+            Assert.assertEquals(1, sideNavItem.getPathAliases().size());
+            Assert.assertNull(sideNavItem.getElement().getProperty("baz/foo"));
+        });
+    }
+
+    @Test
     public void setPathAsComponent_aliasWithMissingParameterNotAdded() {
         runWithMockRouter(TestRouteWithAliases.class, () -> {
             sideNavItem.setPath(TestRouteWithAliases.class);
@@ -726,6 +747,12 @@ public class SideNavItemTest {
     @RouteAlias("foo/qux")
     @RouteAlias("foo/:key/bar")
     private static class TestRouteWithAliases extends Component {
+
+    }
+
+    @Route("bar/foo")
+    @RouteAlias("baz/foo")
+    private static class OtherTestRouteWithAliases extends Component {
 
     }
 }
