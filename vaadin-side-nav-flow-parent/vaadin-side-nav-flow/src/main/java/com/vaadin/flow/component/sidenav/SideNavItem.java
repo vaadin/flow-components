@@ -36,7 +36,6 @@ import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.internal.ConfigureRoutes;
 import elemental.json.JsonArray;
 
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -309,13 +308,13 @@ public class SideNavItem extends SideNavItemContainer
      * @return the path aliases for this item, empty if none
      */
     public Set<String> getPathAliases() {
-        Serializable pathAliasesRaw = getElement()
+        JsonArray pathAliases = (JsonArray) getElement()
                 .getPropertyRaw("pathAliases");
-        if (pathAliasesRaw == null) {
+        if (pathAliases == null) {
             return Collections.emptySet();
         }
-        return new HashSet<>(JsonSerializer.toObjects(String.class,
-                (JsonArray) pathAliasesRaw));
+        return new HashSet<>(
+                JsonSerializer.toObjects(String.class, pathAliases));
     }
 
     /**
