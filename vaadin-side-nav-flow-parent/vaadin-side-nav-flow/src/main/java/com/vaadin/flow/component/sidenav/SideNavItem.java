@@ -55,7 +55,7 @@ import java.util.stream.Collectors;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-side-nav-item")
-@NpmPackage(value = "@vaadin/side-nav", version = "24.2.0-alpha2")
+@NpmPackage(value = "@vaadin/side-nav", version = "24.2.0-alpha4")
 @JsModule("@vaadin/side-nav/src/vaadin-side-nav-item.js")
 public class SideNavItem extends SideNavItemContainer
         implements HasPrefix, HasSuffix {
