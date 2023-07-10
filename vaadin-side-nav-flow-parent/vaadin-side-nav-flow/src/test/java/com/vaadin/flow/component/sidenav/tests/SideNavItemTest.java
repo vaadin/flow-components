@@ -553,7 +553,7 @@ public class SideNavItemTest {
     public void setPathAsComponent_setNullAsComponent_pathAliasesEmpty() {
         runWithMockRouter(TestRouteWithAliases.class, () -> {
             sideNavItem.setPath(TestRouteWithAliases.class);
-            sideNavItem.clearPathAliases();
+            sideNavItem.setPath((Class<Component>) null);
 
             Assert.assertEquals(0, sideNavItem.getPathAliases().size());
             Assert.assertNull(
