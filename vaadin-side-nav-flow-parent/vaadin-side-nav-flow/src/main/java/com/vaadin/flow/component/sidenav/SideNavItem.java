@@ -64,8 +64,6 @@ public class SideNavItem extends SideNavItemContainer
 
     private QueryParameters queryParameters;
 
-    private final ConfigureRoutes configuredAliases = new ConfigureRoutes();
-
     /**
      * Creates a menu item which does not link to any view but only shows the
      * given label.
@@ -350,7 +348,7 @@ public class SideNavItem extends SideNavItemContainer
 
     private String updateAliasWithRouteParameters(String alias,
             RouteParameters routeParameters) {
-        configuredAliases.clear();
+        ConfigureRoutes configuredAliases = new ConfigureRoutes();
         configuredAliases.setRoute(alias, getClass());
         return configuredAliases.getTargetUrl(getClass(), routeParameters);
     }
