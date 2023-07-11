@@ -310,7 +310,8 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         initConnector();
         requestI18nUpdate();
         if (isEnforcedFieldValidationEnabled()) {
-            ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
+            ClientValidationUtil
+                    .preventWebComponentFromModifyingInvalidState(this);
         } else {
             FieldValidationUtil.disableClientValidation(this);
         }
