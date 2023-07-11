@@ -11,7 +11,7 @@ class GridFlowSelectionColumn extends GridSelectionColumnBaseMixin(GridColumn) {
   static get properties() {
     return {
       /**
-       * Automatically sets the width of the column based on the column contents when this is set to `true`.
+       * Override property to enable auto-width
        */
       autoWidth: {
         type: Boolean,
@@ -19,7 +19,7 @@ class GridFlowSelectionColumn extends GridSelectionColumnBaseMixin(GridColumn) {
       },
 
       /**
-       * Width of the cells for this column.
+       * Override property to set custom width
        */
       width: {
         type: String,
@@ -29,7 +29,8 @@ class GridFlowSelectionColumn extends GridSelectionColumnBaseMixin(GridColumn) {
   }
 
   /**
-   * Renders the Select All checkbox to the header cell.
+   * Override method from `GridSelectionColumnBaseMixin` to add ID to select all
+   * checkbox
    *
    * @override
    */
@@ -37,7 +38,6 @@ class GridFlowSelectionColumn extends GridSelectionColumnBaseMixin(GridColumn) {
     super._defaultHeaderRenderer(root, _column);
     const checkbox = root.firstElementChild;
     if (checkbox) {
-      // TODO: Remove id and use CSS class selector in TestBench
       checkbox.id = 'selectAllCheckbox';
     }
   }
