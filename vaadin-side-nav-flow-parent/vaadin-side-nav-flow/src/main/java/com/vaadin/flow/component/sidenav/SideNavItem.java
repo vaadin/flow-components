@@ -144,6 +144,24 @@ public class SideNavItem extends SideNavItemContainer
      *            the label for the item
      * @param view
      *            the view to link to
+     * @param prefixComponent
+     *            the prefixComponent for the item (usually an icon)
+     */
+    public SideNavItem(String label, Class<? extends Component> view,
+            Component prefixComponent) {
+        setPath(view);
+        setLabel(label);
+        setPrefixComponent(prefixComponent);
+    }
+
+    /**
+     * Creates a new menu item using the given label and prefix component (like
+     * an icon) that links to the given view.
+     *
+     * @param label
+     *            the label for the item
+     * @param view
+     *            the view to link to
      * @param routeParameters
      *            the route parameters
      * @param prefixComponent
