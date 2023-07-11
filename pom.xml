@@ -48,7 +48,7 @@
         <osgi.vaadin.package.version>1</osgi.vaadin.package.version>
     </properties>
     <modules>
-        <module>vaadin-flow-components-shared</module>
+        <module>vaadin-flow-components-shared-parent</module>
         <module>vaadin-accordion-flow-parent</module>
         <module>vaadin-app-layout-flow-parent</module>
         <module>vaadin-avatar-flow-parent</module>
