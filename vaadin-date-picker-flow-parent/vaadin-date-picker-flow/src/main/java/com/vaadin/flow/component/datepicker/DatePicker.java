@@ -25,19 +25,12 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.HasHelper;
-import com.vaadin.flow.component.HasLabel;
-import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.HasValidation;
-import com.vaadin.flow.component.HasValue;
-import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.data.binder.HasValidator;
-import com.vaadin.flow.data.binder.ValidationResult;
-import com.vaadin.flow.data.binder.Validator;
+import com.vaadin.flow.component.shared.ClientValidationUtil;
+import com.vaadin.flow.component.shared.HasClientValidation;
+import com.vaadin.flow.data.binder.*;
 import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
@@ -64,7 +57,7 @@ import elemental.json.JsonType;
 @JavaScript("frontend://datepickerConnector.js")
 public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         implements HasSize, HasValidation, HasHelper, HasLabel,
-        HasValidator<LocalDate> {
+        HasValidator<LocalDate>, HasClientValidation {
 
     private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
@@ -108,6 +101,10 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         setInvalid(false);
 
         addValueChangeListener(e -> validate());
+
+        if(isEnforcedFieldValidationEnabled()) {
+            addClientValidatedEventListener(e -> validate());
+        }
     }
 
     /**
@@ -312,7 +309,12 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         super.onAttach(attachEvent);
         initConnector();
         requestI18nUpdate();
-        FieldValidationUtil.disableClientValidation(this);
+        if (isEnforcedFieldValidationEnabled()) {
+            ClientValidationUtil
+                    .preventWebComponentFromModifyingInvalidState(this);
+        } else {
+            FieldValidationUtil.disableClientValidation(this);
+        }
     }
 
     private void initConnector() {
@@ -451,6 +453,19 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     }
 
     @Override
+    public Registration addValidationStatusChangeListener(
+            ValidationStatusChangeListener<LocalDate> listener) {
+        if (isEnforcedFieldValidationEnabled()) {
+            return addClientValidatedEventListener(
+                    event -> listener.validationStatusChanged(
+                            new ValidationStatusChangeEvent<LocalDate>(this,
+                                    !isInvalid())));
+        }
+
+        return null;
+    }
+
+    @Override
     public void setInvalid(boolean invalid) {
         super.setInvalid(invalid);
     }
@@ -468,6 +483,14 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     }
 
     private ValidationResult checkValidity(LocalDate value) {
+        if (isEnforcedFieldValidationEnabled()) {
+            boolean hasNonParsableValue = value == getEmptyValue()
+                    && isInputValuePresent();
+            if (hasNonParsableValue) {
+                return ValidationResult.error("");
+            }
+        }
+
         ValidationResult greaterThanMax = checkGreaterThanMax(value, max);
         if (greaterThanMax.isError()) {
             return greaterThanMax;
@@ -522,6 +545,18 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
 
         return requiredValidation.isError() || checkValidity(value).isError();
     }
+
+    /**
+     * Returns whether the input element has a value or not.
+     *
+     * @return <code>true</code> if the input element's value is populated,
+     *         <code>false</code> otherwise
+     */
+    @Synchronize(property = "_hasInputValue", value = "has-input-value-changed")
+    private boolean isInputValuePresent() {
+        return getElement().getProperty("_hasInputValue", false);
+    }
+
 
     /**
      * Sets displaying a clear button in the datepicker when it has value.
