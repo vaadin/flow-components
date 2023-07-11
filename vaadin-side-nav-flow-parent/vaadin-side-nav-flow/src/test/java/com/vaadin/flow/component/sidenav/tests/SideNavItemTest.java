@@ -16,12 +16,16 @@
 package com.vaadin.flow.component.sidenav.tests;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.router.NotFoundException;
 import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.Router;
@@ -127,10 +131,10 @@ public class SideNavItemTest {
 
     @Test
     public void setPathAsComponent_pathUpdated() {
-        runWithMockRouter(TestRoute.class, () -> {
+        runWithMockRouter(() -> {
             sideNavItem.setPath(TestRoute.class);
             Assert.assertEquals("foo/bar", sideNavItem.getPath());
-        });
+        }, TestRoute.class);
     }
 
     @Test
@@ -347,10 +351,10 @@ public class SideNavItemTest {
 
     @Test
     public void createFromComponent_pathIsSet() {
-        runWithMockRouter(TestRoute.class, () -> {
+        runWithMockRouter(() -> {
             SideNavItem item = new SideNavItem("test", TestRoute.class);
             Assert.assertEquals("foo/bar", item.getPath());
-        });
+        }, TestRoute.class);
     }
 
     @Test
@@ -412,7 +416,7 @@ public class SideNavItemTest {
 
     @Test
     public void createFromComponent_setQueryParameters_pathContainsParameters() {
-        runWithMockRouter(TestRoute.class, () -> {
+        runWithMockRouter(() -> {
             SideNavItem item = new SideNavItem("test", TestRoute.class);
 
             QueryParameters queryParameters = new QueryParameters(Map.of("k1",
@@ -421,12 +425,12 @@ public class SideNavItemTest {
 
             Assert.assertEquals("foo/bar?" + queryParameters.getQueryString(),
                     item.getPath());
-        });
+        }, TestRoute.class);
     }
 
     @Test
     public void createFromComponent_setQueryParameters_updateQueryParameters_pathIsUpdated() {
-        runWithMockRouter(TestRoute.class, () -> {
+        runWithMockRouter(() -> {
             SideNavItem item = new SideNavItem("test", TestRoute.class);
             item.setQueryParameters(
                     new QueryParameters(Map.of("k1", List.of("v11", "v12"))));
@@ -437,12 +441,12 @@ public class SideNavItemTest {
 
             Assert.assertEquals("foo/bar?" + queryParameters.getQueryString(),
                     item.getPath());
-        });
+        }, TestRoute.class);
     }
 
     @Test
     public void createFromComponent_setQueryParameters_setQueryParametersNull_parametersRemovedFromPath() {
-        runWithMockRouter(TestRoute.class, () -> {
+        runWithMockRouter(() -> {
             SideNavItem item = new SideNavItem("test", TestRoute.class);
             item.setQueryParameters(
                     new QueryParameters(Map.of("k1", List.of("v11", "v12"))));
@@ -450,34 +454,220 @@ public class SideNavItemTest {
             item.setQueryParameters(null);
 
             Assert.assertEquals("foo/bar", item.getPath());
-        });
+        }, TestRoute.class);
     }
 
     @Test
-    public void createFromComponentAndRouteParameters_pathContainsParameters() {
-        runWithMockRouter(TestRouteWithRouteParams.class, () -> {
+    public void createFromComponentWithRouteParameters_pathContainsParameters() {
+        runWithMockRouter(() -> {
             SideNavItem item = new SideNavItem("test",
                     TestRouteWithRouteParams.class,
                     new RouteParameters(Map.of("k1", "v1", "k2", "v2")));
 
             Assert.assertEquals("foo/v1/v2/bar", item.getPath());
-        });
+        }, TestRouteWithRouteParams.class);
     }
 
     @Test
-    public void setPathFromComponentAndRouteParameters_pathContainsParameters() {
-        runWithMockRouter(TestRouteWithRouteParams.class, () -> {
+    public void setPathAndRouteParametersAsComponent_pathContainsParameters() {
+        runWithMockRouter(() -> {
             SideNavItem item = new SideNavItem("test");
             item.setPath(TestRouteWithRouteParams.class,
                     new RouteParameters(Map.of("k1", "v1", "k2", "v2")));
 
             Assert.assertEquals("foo/v1/v2/bar", item.getPath());
-        });
+        }, TestRouteWithRouteParams.class);
     }
 
-    private void runWithMockRouter(Class<? extends Component> route,
-            Runnable test) {
-        Router router = mockRouter(route);
+    @Test
+    public void createFromComponentWithRouteParameters_aliasContainsParameters() {
+        runWithMockRouter(() -> {
+            SideNavItem item = new SideNavItem("test",
+                    TestRouteWithAliases.class,
+                    new RouteParameters(Map.of("key", "value")));
+
+            Assert.assertTrue(item.getPathAliases().contains("foo/value/bar"));
+        }, TestRouteWithAliases.class);
+    }
+
+    @Test
+    public void setPathAndRouteParametersAsComponent_aliasContainsParameters() {
+        runWithMockRouter(() -> {
+            SideNavItem item = new SideNavItem("test");
+            item.setPath(TestRouteWithAliases.class,
+                    new RouteParameters(Map.of("key", "value")));
+
+            Assert.assertTrue(item.getPathAliases().contains("foo/value/bar"));
+        }, TestRouteWithAliases.class);
+    }
+
+    @Test
+    public void createWithNoPathAlias_pathAliasesEmpty() {
+        final SideNavItem item = new SideNavItem("Test");
+
+        Assert.assertEquals(0, item.getPathAliases().size());
+        Assert.assertNull(item.getElement().getProperty("pathAliases"));
+    }
+
+    @Test
+    public void setEmptyStringAsPathAlias_pathAliasAdded() {
+        final SideNavItem item = new SideNavItem("Test");
+        item.setPathAliases(Set.of(""));
+
+        Assert.assertEquals(Set.of(""), item.getPathAliases());
+        Assert.assertEquals("[\"\"]",
+                item.getElement().getProperty("pathAliases"));
+    }
+
+    @Test
+    public void setMultiplePathAliases_pathAliasesAdded() {
+        final SideNavItem item = new SideNavItem("Test");
+        item.setPathAliases(Set.of("alias1", "alias2"));
+
+        Assert.assertEquals(Set.of("alias1", "alias2"), item.getPathAliases());
+        Assert.assertTrue(Set
+                .of("[\"alias1\",\"alias2\"]", "[\"alias2\",\"alias1\"]")
+                .contains(item.getElement().getProperty("pathAliases")));
+    }
+
+    @Test
+    public void setMultiplePathAliases_setEmptyPathAliases_pathAliasesEmpty() {
+        final SideNavItem item = new SideNavItem("Test");
+        item.setPathAliases(Set.of("alias1", "alias2"));
+        item.setPathAliases(Collections.emptySet());
+
+        Assert.assertEquals(0, item.getPathAliases().size());
+        Assert.assertNull(item.getElement().getProperty("pathAliases"));
+    }
+
+    @Test
+    public void setMultiplePathAliases_setPathAliasesNull_pathAliasesEmpty() {
+        final SideNavItem item = new SideNavItem("Test");
+        item.setPathAliases(Set.of("alias1", "alias2"));
+        item.setPathAliases(null);
+
+        Assert.assertEquals(0, item.getPathAliases().size());
+        Assert.assertNull(item.getElement().getProperty("pathAliases"));
+    }
+
+    @Test
+    public void setPathAsComponent_setNullAsComponent_pathAliasesEmpty() {
+        runWithMockRouter(() -> {
+            sideNavItem.setPath(TestRouteWithAliases.class);
+            sideNavItem.setPath((Class<Component>) null);
+
+            Assert.assertEquals(0, sideNavItem.getPathAliases().size());
+            Assert.assertNull(
+                    sideNavItem.getElement().getProperty("pathAliases"));
+        }, TestRouteWithAliases.class);
+    }
+
+    @Test
+    public void setPathAsComponent_setOtherPathAsComponent_pathUpdated() {
+        runWithMockRouter(() -> {
+            sideNavItem.setPath(TestRouteWithAliases.class);
+            sideNavItem.setPath(OtherTestRouteWithAliases.class);
+
+            Assert.assertEquals("bar/foo", sideNavItem.getPath());
+        }, TestRouteWithAliases.class, OtherTestRouteWithAliases.class);
+    }
+
+    @Test
+    public void setPathAsComponent_setOtherPathAsComponent_pathAliasesUpdated() {
+        runWithMockRouter(() -> {
+            sideNavItem.setPath(TestRouteWithAliases.class);
+            sideNavItem.setPath(OtherTestRouteWithAliases.class);
+
+            Assert.assertEquals(1, sideNavItem.getPathAliases().size());
+            Assert.assertNull(sideNavItem.getElement().getProperty("baz/foo"));
+        }, TestRouteWithAliases.class, OtherTestRouteWithAliases.class);
+    }
+
+    @Test
+    public void setPathAsComponent_aliasWithMissingParameterNotAdded() {
+        runWithMockRouter(() -> {
+            sideNavItem.setPath(TestRouteWithAliases.class);
+
+            Assert.assertEquals(2, sideNavItem.getPathAliases().size());
+            Assert.assertEquals(Set.of("foo/baz", "foo/qux"),
+                    sideNavItem.getPathAliases());
+            Assert.assertTrue(Set
+                    .of("[\"foo/baz\",\"foo/qux\"]",
+                            "[\"foo/qux\",\"foo/baz\"]")
+                    .contains(sideNavItem.getElement()
+                            .getProperty("pathAliases")));
+        }, TestRouteWithAliases.class);
+    }
+
+    @Test(expected = NotFoundException.class)
+    public void setPathAsComponentWithMissingRouteParameter_throws() {
+        runWithMockRouter(() -> {
+            sideNavItem.setPath(TestRouteWithRouteParams.class,
+                    new RouteParameters(Map.of("k1", "v1")));
+        }, TestRouteWithRouteParams.class);
+    }
+
+    @Test
+    public void setPathAsComponent_setNullAsComponent_pathRemoved() {
+        runWithMockRouter(() -> {
+            sideNavItem.setPath(TestRoute.class);
+            sideNavItem.setPath((Class<Component>) null);
+
+            Assert.assertNull(sideNavItem.getPath());
+            Assert.assertFalse(sideNavItem.getElement().hasAttribute("path"));
+        }, TestRoute.class);
+    }
+
+    @Test
+    public void setPathAsComponent_setNullAsComponent_aliasesRemoved() {
+        runWithMockRouter(() -> {
+            sideNavItem.setPath(TestRouteWithAliases.class);
+            sideNavItem.setPath((Class<Component>) null);
+
+            Assert.assertEquals(0, sideNavItem.getPathAliases().size());
+            Assert.assertNull(
+                    sideNavItem.getElement().getProperty("pathAliases"));
+        }, TestRouteWithAliases.class);
+    }
+
+    @Test
+    public void setPathAlias_setQueryParameters_pathAliasDoesNotContainParameters() {
+        sideNavItem.setPathAliases(Set.of("pathAlias"));
+
+        QueryParameters queryParameters = new QueryParameters(Map.of("k1",
+                List.of("v11", "v12"), "k2", List.of("v21", "v22")));
+        sideNavItem.setQueryParameters(queryParameters);
+
+        Assert.assertEquals(1, sideNavItem.getPathAliases().size());
+        Assert.assertTrue(sideNavItem.getPathAliases().contains("pathAlias"));
+        Assert.assertEquals("[\"pathAlias\"]",
+                sideNavItem.getElement().getProperty("pathAliases"));
+    }
+
+    @Test
+    public void setPathAsComponent_setQueryParameters_pathAliasDoesNotContainParameters() {
+        runWithMockRouter(() -> {
+            sideNavItem.setPath(TestRouteWithAliases.class);
+
+            QueryParameters queryParameters = new QueryParameters(Map.of("k1",
+                    List.of("v11", "v12"), "k2", List.of("v21", "v22")));
+            sideNavItem.setQueryParameters(queryParameters);
+
+            Assert.assertEquals(2, sideNavItem.getPathAliases().size());
+            Assert.assertEquals(Set.of("foo/baz", "foo/qux"),
+                    sideNavItem.getPathAliases());
+            Assert.assertTrue(Set
+                    .of("[\"foo/baz\",\"foo/qux\"]",
+                            "[\"foo/qux\",\"foo/baz\"]")
+                    .contains(sideNavItem.getElement()
+                            .getProperty("pathAliases")));
+        }, TestRouteWithAliases.class);
+    }
+
+    @SafeVarargs
+    private void runWithMockRouter(Runnable test,
+            Class<? extends Component>... routes) {
+        Router router = mockRouter(routes);
         try (MockedStatic<ComponentUtil> mockComponentUtil = Mockito
                 .mockStatic(ComponentUtil.class)) {
             mockComponentUtil.when(() -> ComponentUtil.getRouter(Mockito.any()))
@@ -486,7 +676,8 @@ public class SideNavItemTest {
         }
     }
 
-    private Router mockRouter(Class<? extends Component> navigationTarget) {
+    @SafeVarargs
+    private Router mockRouter(Class<? extends Component>... navigationTargets) {
         VaadinContext mockContext = Mockito.mock(VaadinContext.class);
         ApplicationRouteRegistry routeRegistry = ApplicationRouteRegistry
                 .getInstance(mockContext);
@@ -494,7 +685,9 @@ public class SideNavItemTest {
 
         RouteConfiguration routeConfiguration = RouteConfiguration
                 .forRegistry(routeRegistry);
-        routeConfiguration.setAnnotatedRoute(navigationTarget);
+        for (Class<? extends Component> navigationTarget : navigationTargets) {
+            routeConfiguration.setAnnotatedRoute(navigationTarget);
+        }
         return router;
     }
 
@@ -535,6 +728,20 @@ public class SideNavItemTest {
 
     @Route("foo/:k1/:k2/bar")
     private static class TestRouteWithRouteParams extends Component {
+
+    }
+
+    @Route("foo/bar")
+    @RouteAlias("foo/baz")
+    @RouteAlias("foo/qux")
+    @RouteAlias("foo/:key/bar")
+    private static class TestRouteWithAliases extends Component {
+
+    }
+
+    @Route("bar/foo")
+    @RouteAlias("baz/foo")
+    private static class OtherTestRouteWithAliases extends Component {
 
     }
 }

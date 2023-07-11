@@ -27,10 +27,21 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasPrefix;
 import com.vaadin.flow.component.shared.HasSuffix;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.UrlUtil;
 import com.vaadin.flow.router.QueryParameters;
+import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.router.RouteParameters;
+import com.vaadin.flow.router.internal.ConfigureRoutes;
+import elemental.json.JsonArray;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * A menu item for the {@link SideNav} component.
@@ -230,8 +241,10 @@ public class SideNavItem extends SideNavItemContainer
     }
 
     /**
-     * Retrieves {@link com.vaadin.flow.router.Route} annotations from the
-     * specified view, and then sets the corresponding path for this item.
+     * Retrieves {@link com.vaadin.flow.router.Route} and
+     * {@link com.vaadin.flow.router.RouteAlias} annotations from the specified
+     * view, and then sets the corresponding path and path aliases for this
+     * item.
      * <p>
      * Note: Vaadin Router will be used to determine the URL path of the view
      * and this URL will be then set to this navigation item using
@@ -249,8 +262,10 @@ public class SideNavItem extends SideNavItemContainer
     }
 
     /**
-     * Retrieves {@link com.vaadin.flow.router.Route} annotations from the
-     * specified view, and then sets the corresponding path for this item.
+     * Retrieves {@link com.vaadin.flow.router.Route} and
+     * {@link com.vaadin.flow.router.RouteAlias} annotations from the specified
+     * view, and then sets the corresponding path and path aliases for this
+     * item.
      * <p>
      * Note: Vaadin Router will be used to determine the URL path of the view
      * and this URL will be then set to this navigation item using
@@ -264,15 +279,18 @@ public class SideNavItem extends SideNavItemContainer
      *            the route parameters
      *
      * @see SideNavItem#setPath(String)
+     * @see SideNavItem#setPathAliases(Set)
      */
     public void setPath(Class<? extends Component> view,
             RouteParameters routeParameters) {
         if (view == null) {
             setPath((String) null);
+            setPathAliases(Collections.emptySet());
         } else {
             RouteConfiguration routeConfiguration = RouteConfiguration
                     .forRegistry(ComponentUtil.getRouter(this).getRegistry());
             setPath(routeConfiguration.getUrl(view, routeParameters));
+            setPathAliases(getPathAliasesFromView(view, routeParameters));
         }
     }
 
@@ -298,11 +316,61 @@ public class SideNavItem extends SideNavItemContainer
      */
     public void setQueryParameters(QueryParameters queryParameters) {
         this.queryParameters = queryParameters;
-        refresh();
+        // Apply new query parameters to the path
+        setPath(getPath());
     }
 
-    private void refresh() {
-        setPath(getPath());
+    /**
+     * Gets the path aliases for this item.
+     *
+     * @return the path aliases for this item, empty if none
+     */
+    public Set<String> getPathAliases() {
+        JsonArray pathAliases = (JsonArray) getElement()
+                .getPropertyRaw("pathAliases");
+        if (pathAliases == null) {
+            return Collections.emptySet();
+        }
+        return new HashSet<>(
+                JsonSerializer.toObjects(String.class, pathAliases));
+    }
+
+    /**
+     * Sets the specified path aliases to this item. The aliases act as
+     * secondary paths when determining the active state of the item.
+     * <p>
+     * Note that it is allowed to pass {@code null} as value to clear the
+     * selection.
+     *
+     * @param pathAliases
+     *            the path aliases to set to this item
+     */
+    public void setPathAliases(Set<String> pathAliases) {
+        if (pathAliases == null || pathAliases.isEmpty()) {
+            getElement().removeProperty("pathAliases");
+        } else {
+            JsonArray aliasesAsJson = JsonSerializer.toJson(pathAliases.stream()
+                    .map(alias -> Objects.requireNonNull(alias,
+                            "Alias to set cannot be null"))
+                    .map(this::updateQueryParameters).map(this::sanitizePath)
+                    .collect(Collectors.toSet()));
+            getElement().setPropertyJson("pathAliases", aliasesAsJson);
+        }
+    }
+
+    private Set<String> getPathAliasesFromView(Class<? extends Component> view,
+            RouteParameters routeParameters) {
+        RouteAlias[] routeAliases = view.getAnnotationsByType(RouteAlias.class);
+        return Arrays.stream(routeAliases).map(RouteAlias::value).map(
+                alias -> updateAliasWithRouteParameters(alias, routeParameters))
+                .filter(Objects::nonNull).collect(Collectors.toSet());
+    }
+
+    private String updateAliasWithRouteParameters(String alias,
+            RouteParameters routeParameters) {
+        ConfigureRoutes configuredAliases = new ConfigureRoutes();
+        configuredAliases.setRoute(alias, getClass());
+        return configuredAliases.getTargetUrl(getClass(), routeParameters);
     }
 
     private String updateQueryParameters(String path) {
