@@ -102,7 +102,7 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-flow-components-shared</artifactId>
+            <artifactId>vaadin-flow-components-test-util</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
