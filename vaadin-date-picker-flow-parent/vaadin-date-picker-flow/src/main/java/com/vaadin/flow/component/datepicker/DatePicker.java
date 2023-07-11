@@ -102,7 +102,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
 
         addValueChangeListener(e -> validate());
 
-        if(isEnforcedFieldValidationEnabled()) {
+        if (isEnforcedFieldValidationEnabled()) {
             addClientValidatedEventListener(e -> validate());
         }
     }
@@ -556,7 +556,6 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     private boolean isInputValuePresent() {
         return getElement().getProperty("_hasInputValue", false);
     }
-
 
     /**
      * Sets displaying a clear button in the datepicker when it has value.
