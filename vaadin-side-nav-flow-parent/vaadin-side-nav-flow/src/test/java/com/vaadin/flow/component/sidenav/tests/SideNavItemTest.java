@@ -600,14 +600,11 @@ public class SideNavItemTest {
     }
 
     @Test(expected = NotFoundException.class)
-    public void setPathAsComponent_throws() {
+    public void setPathAsComponentWithMissingRouteParameter_throws() {
         runWithMockRouter(() -> {
             sideNavItem.setPath(TestRouteWithRouteParams.class,
                     new RouteParameters(Map.of("k1", "v1")));
-
-            Assert.assertNull(sideNavItem.getPath());
-            Assert.assertFalse(sideNavItem.getElement().hasAttribute("path"));
-        }, TestRouteWithAliases.class);
+        }, TestRouteWithRouteParams.class);
     }
 
     @Test
