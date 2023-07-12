@@ -1199,9 +1199,6 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
 
         grid.dragFilter = tryCatchWrapper((rowData) => rowData.item && !rowData.item.dragDisabled);
 
-        // grid.dropFilter = tryCatchWrapper((rowData) => !rowData.item.dropDisabled);
-        // grid.dragFilter = tryCatchWrapper((rowData) => !rowData.item.dragDisabled);
-
         grid.addEventListener(
           'grid-dragstart',
           tryCatchWrapper((e) => {
