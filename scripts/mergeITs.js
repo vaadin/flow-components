@@ -31,7 +31,7 @@ async function computeModules() {
   } else {
     // Read modules from the parent pom.xml
     const parentJs = await xml2js.parseStringPromise(fs.readFileSync(`pom.xml`, 'utf8'));
-    modules = parentJs.project.modules[0].module.filter(m => !/shared/.test(m));
+    modules = parentJs.project.modules[0].module.filter(m => !/shared-parent/.test(m)).filter(m => !/demo-helpers/.test(m));
   }
 }
 
@@ -43,7 +43,11 @@ function addDependency(arr, groupId, artifactId, version, scope, exclusions) {
       artifactId: [artifactId]
     }
     version && (obj.version = [version]);
-    scope && (obj.scope = [scope]);
+    // some components like TP are using this dependency under default scope instead of test scope
+    if (artifactId !== "vaadin-flow-components-test-util"){
+      scope && (obj.scope = [scope]);
+    }
+
     exclusions && (obj.exclusions = exclusions);
     arr.push(obj);
   }
@@ -68,13 +72,19 @@ async function createPom(pomFile, pomTemplateFile, artifactID, excludedTests) {
     }
     // Add component-flow and component-testbench dependencies
     const componentVersion = /^(14\.[3-4]|17\.0)/.test(version) ? `\$\{${id.replace(/-/g, '.')}.version\}` : '${project.version}'
-    addDependency(prev, 'com.vaadin', `${id}-flow`, `${componentVersion}`);
-    addDependency(prev, 'com.vaadin', `${id}-testbench`, `${componentVersion}`, 'test');
-    // Read original IT dependencies in master and add them
-    const js = await xml2js.parseStringPromise(fs.readFileSync(`${name}/${id}-flow-integration-tests/`+pomFileTemp, 'utf8'))
+
+    if (fs.existsSync(`${name}/${id}-flow/pom.xml`)) {
+      const js = await xml2js.parseStringPromise(fs.readFileSync(`${name}/${id}-flow/pom.xml`, 'utf8'));
+      addDependency(prev, 'com.vaadin', js.project.artifactId[0], `${componentVersion}`);
+    }
+    if (fs.existsSync(`${name}/${id}-testbench/pom.xml`)) {
+      addDependency(prev, 'com.vaadin', `${id}-testbench`, `${componentVersion}`, 'test');
+    }
+    const js = await xml2js.parseStringPromise(fs.readFileSync(`${name}/${id}-flow-integration-tests/pom.xml`, 'utf8'));
+    // Read original IT dependencies of module
     js.project.dependencies[0].dependency.forEach(dep => {
       addDependency(prev, dep.groupId[0], dep.artifactId[0], dep.version && dep.version[0], dep.scope && dep.scope[0], dep.exclusions);
-    });  
+    });
     return prev;
   }, Promise.resolve([
     // these dependencies should be always there
@@ -111,23 +121,33 @@ async function createPom(pomFile, pomTemplateFile, artifactID, excludedTests) {
 // copy a file
 function copyFileSync(source, target, replaceCall) {
   var targetFile = target;
-  //if target is a directory a new file with the same name will be created
+  // if target is a directory a new file with the same name will be created
   if (fs.existsSync(target)) {
     if (fs.lstatSync(target).isDirectory()) {
       targetFile = path.join(target, path.basename(source));
     }
   }
   if (fs.existsSync(targetFile)) {
+    // When file exists we can merge both or override depending on the type
+    if (/.properties$/.test(source)) {
+      let content = fs.readFileSync(source, 'utf8');
+      content += '\n' + fs.readFileSync(targetFile, 'utf8');
+      fs.writeFileSync(targetFile, content, 'utf8');
+      console.log(`Merging ${targetFile}`);
+      return;
+    }
     console.log(`Overriding ${targetFile}`);
   }
-  // fs.copyFileSync(source, targetFile);
-  let content = fs.readFileSync(source, 'utf8');
-  // remove CR in windows
-  if (/\.(java)$/.test(source)) {
+
+  if (/\.(java|html|js|ts)$/.test(source)) {
+    let content = fs.readFileSync(source, 'utf8');
+    // remove CR in windows
     content = content.replace('\r', '');
+    [targetFile, content] = replaceCall ? replaceCall(source, targetFile, content) : [targetFile, content];
+    targetFile && content && fs.writeFileSync(targetFile, content, 'utf8');
+  } else {
+    fs.copyFileSync(source, targetFile);
   }
-  [targetFile, content] = replaceCall ? replaceCall(source, targetFile, content) : [targetFile, content];
-  fs.writeFileSync(targetFile, content, 'utf8');
 }
 
 // copy recursively a folder without failing, and reusing already created folders in target
@@ -180,7 +200,7 @@ async function createInitListener() {
   copyFileSync(`${templateDir}/index.html`, `${targetFolder}/index.html`);
 }
 
-// Copy components sources from master to the merged integration-tests module
+// Copy components sources from main to the merged integration-tests module
 // At the same time does some source-code changes to adapt them to the new module
 async function copySources() {
   if (!fs.existsSync(itFolder)) {
