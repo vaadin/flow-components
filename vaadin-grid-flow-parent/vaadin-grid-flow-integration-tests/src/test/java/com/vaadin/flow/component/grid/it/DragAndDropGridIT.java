@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,6 +25,12 @@ import org.openqa.selenium.WebElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
+import org.openqa.selenium.logging.LogEntry;
+import org.openqa.selenium.logging.LogType;
+
+import java.util.List;
+import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 @TestPath("vaadin-grid/drag-and-drop")
 public class DragAndDropGridIT extends AbstractComponentIT {
@@ -34,6 +41,12 @@ public class DragAndDropGridIT extends AbstractComponentIT {
     public void init() {
         open();
         grid = $(GridElement.class).first();
+    }
+
+    @Test
+    public void dragAndDropDefined_gridLoaded_noErrors() {
+        List<LogEntry> logs = getLogEntries(Level.SEVERE);
+        Assert.assertTrue(logs.isEmpty());
     }
 
     @Test
@@ -57,6 +70,7 @@ public class DragAndDropGridIT extends AbstractComponentIT {
 
     @Test
     public void noDropMode_dropOnRow_dropEventNotFired() {
+        click("no-drop-mode");
         fireDrop(3, "on-top");
         assertMessages("", "", "");
     }
@@ -197,6 +211,7 @@ public class DragAndDropGridIT extends AbstractComponentIT {
 
     @Test
     public void setDropFilter_undroppable_noDropMode() {
+        click("no-drop-mode");
         click("set-filters");
         fireDrop(2, "on-top");
         assertMessages("", "", "");
