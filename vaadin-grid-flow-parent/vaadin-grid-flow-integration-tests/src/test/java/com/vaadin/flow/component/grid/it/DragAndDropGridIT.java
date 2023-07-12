@@ -37,6 +37,11 @@ public class DragAndDropGridIT extends AbstractComponentIT {
     }
 
     @Test
+    public void dragAndDropDefined_gridLoaded_noErrors() {
+        checkLogsForErrors();
+    }
+
+    @Test
     public void startDragging_dragStartFired() {
         fireDragStart(2);
         assertMessages("2", "", "");
@@ -57,6 +62,7 @@ public class DragAndDropGridIT extends AbstractComponentIT {
 
     @Test
     public void noDropMode_dropOnRow_dropEventNotFired() {
+        click("no-drop-mode");
         fireDrop(3, "on-top");
         assertMessages("", "", "");
     }
@@ -197,6 +203,7 @@ public class DragAndDropGridIT extends AbstractComponentIT {
 
     @Test
     public void setDropFilter_undroppable_noDropMode() {
+        click("no-drop-mode");
         click("set-filters");
         fireDrop(2, "on-top");
         assertMessages("", "", "");
