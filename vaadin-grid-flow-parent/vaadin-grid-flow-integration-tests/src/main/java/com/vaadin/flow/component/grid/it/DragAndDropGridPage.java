@@ -45,6 +45,7 @@ public class DragAndDropGridPage extends Div {
         grid.setItems(items);
         grid.setId("grid");
         grid.setSelectionMode(SelectionMode.MULTI);
+        grid.setDropMode(GridDropMode.BETWEEN);
 
         grid.setRowsDraggable(true);
 
@@ -106,6 +107,11 @@ public class DragAndDropGridPage extends Div {
             button.setId(mode.toString());
             add(button);
         });
+
+        NativeButton noDropMode = new NativeButton("No drop mode",
+                e -> grid.setDropMode(null));
+        noDropMode.setId("no-drop-mode");
+        add(noDropMode);
 
         NativeButton setGeneratorsButton = new NativeButton("set generators",
                 e -> {

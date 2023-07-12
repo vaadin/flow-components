@@ -1201,9 +1201,9 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           return (part.row || '') + ' ' + ((column && part[column._flowId]) || '');
         });
 
-        grid.dropFilter = tryCatchWrapper((rowData) => !rowData.item.dropDisabled);
+        grid.dropFilter = tryCatchWrapper((rowData) => rowData.item && !rowData.item.dropDisabled);
 
-        grid.dragFilter = tryCatchWrapper((rowData) => !rowData.item.dragDisabled);
+        grid.dragFilter = tryCatchWrapper((rowData) => rowData.item && !rowData.item.dragDisabled);
 
         grid.addEventListener(
           'grid-dragstart',
