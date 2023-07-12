@@ -379,7 +379,7 @@ public class SideNavItem extends SideNavItemContainer
                 getRouteParametersForAlias(alias, routeParameters));
     }
 
-    private static RouteParameters getRouteParametersForAlias(String alias,
+    private RouteParameters getRouteParametersForAlias(String alias,
             RouteParameters routeParameters) {
         Map<String, String> parametersMapForAlias = routeParameters
                 .getParameterNames().stream()
