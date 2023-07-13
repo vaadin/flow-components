@@ -15,15 +15,17 @@
  */
 package com.vaadin.flow.component.datepicker.testbench;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.openqa.selenium.Keys;
+
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasLabel;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * A TestBench element representing a <code>&lt;vaadin-date-picker&gt;</code>
@@ -152,14 +154,17 @@ public class DatePickerElement extends TestBenchElement
     }
 
     /**
-     * Opens the overlay, sets the value to the inner input element as a string
-     * and closes the overlay. This simulates the user typing into the input and
-     * triggering an update of the value property.
+     * Simulates the user selecting a date via the input element. This
+     * effectively clears the input element with a key shortcut, then types the
+     * given date string and finally presses {@code Enter} to commit the new
+     * date.
+     *
+     * @param value
+     *            the date string to enter.
      */
     public void setInputValue(String value) {
-        this.open();
-        setProperty("_inputElementValue", value);
-        this.close();
+        sendKeys(Keys.chord(Keys.SHIFT, Keys.HOME), Keys.BACK_SPACE);
+        sendKeys(value, Keys.ENTER);
     }
 
     /**
@@ -169,7 +174,8 @@ public class DatePickerElement extends TestBenchElement
      * @return
      */
     public String getInputValue() {
-        return getPropertyString("_inputElementValue");
+        TestBenchElement input = $("input").first();
+        return input.getPropertyString("value");
     }
 
     /**
