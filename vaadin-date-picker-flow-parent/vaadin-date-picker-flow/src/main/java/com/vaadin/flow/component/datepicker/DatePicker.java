@@ -556,6 +556,30 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     private boolean isInputValuePresent() {
         return getElement().getProperty("_hasInputValue", false);
     }
+    
+    @Override
+    public void setValue(LocalDate value) {
+        LocalDate oldValue = getValue();
+
+        super.setValue(value);
+
+        // Clear the input element from possible bad input.
+        if (Objects.equals(oldValue, getEmptyValue())
+                && Objects.equals(value, getEmptyValue())
+                && isInputValuePresent()) {
+            // The check for value presence guarantees that a non-empty value
+            // won't get cleared when setValue(null) and setValue(...) are
+            // subsequently called within one round-trip.
+            // Flow only sends the final component value to the client
+            // when you update the value multiple times during a round-trip
+            // and the final value is sent in place of the first one, so
+            // `executeJs` can end up invoked after a non-empty value is set.
+            getElement()
+                    .executeJs("if (!this.value) this._inputElementValue = ''");
+            getElement().setProperty("_hasInputValue", false);
+            fireEvent(new ClientValidatedEvent(this, false));
+        }
+    }
 
     /**
      * Sets displaying a clear button in the datepicker when it has value.
