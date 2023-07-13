@@ -102,6 +102,10 @@
                                     <name>vaadin.bowerMode</name>
                                     <value>true</value>
                                 </property>
+                                <property>
+                                    <name>vaadin.enforceFieldValidation</name>
+                                    <value>true</value>
+                                </property>
                             </properties>
                         </configuration>
                     </execution>
