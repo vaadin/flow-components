@@ -174,8 +174,7 @@ public class DatePickerElement extends TestBenchElement
      * @return
      */
     public String getInputValue() {
-        TestBenchElement input = $("input").first();
-        return input.getPropertyString("value");
+        return getPropertyString("_inputElementValue");
     }
 
     /**
