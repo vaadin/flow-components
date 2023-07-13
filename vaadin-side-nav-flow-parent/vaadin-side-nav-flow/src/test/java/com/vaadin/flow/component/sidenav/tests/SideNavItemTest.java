@@ -542,22 +542,47 @@ public class SideNavItemTest {
     }
 
     @Test
-    public void createFromComponentWithRouteParameters_aliasContainsParameters() {
+    public void setPathAndRouteParametersAsComponent_aliasesWithMatchingParamsUpdated() {
         runWithMockRouter(() -> {
-            sideNavItem = new SideNavItem("test", TestRouteWithAliases.class,
-                    new RouteParameters(Map.of("key", "value")));
+            sideNavItem.setPath(TestRouteWithAliases.class, new RouteParameters(
+                    Map.of("key1", "value1", "key2", "value2")));
 
-            assertPathAliases(Set.of("foo/value/bar"));
+            assertPathAliases(Set.of("foo/baz", "foo/qux", "foo/value1/bar",
+                    "foo/value1/value1/bar", "foo/value1/value2/bar"));
         }, TestRouteWithAliases.class);
     }
 
     @Test
-    public void setPathAndRouteParametersAsComponent_aliasContainsParameters() {
+    public void createFromComponentWithRouteParameters_aliasesWithMatchingParamsUpdated() {
+        runWithMockRouter(() -> {
+            sideNavItem = new SideNavItem("test", TestRouteWithAliases.class,
+                    new RouteParameters(
+                            Map.of("key1", "value1", "key2", "value2")));
+
+            assertPathAliases(Set.of("foo/baz", "foo/qux", "foo/value1/bar",
+                    "foo/value1/value1/bar", "foo/value1/value2/bar"));
+        }, TestRouteWithAliases.class);
+    }
+
+    @Test
+    public void setPathAndRouteParametersAsComponent_aliasWithMissingParamNotAdded() {
         runWithMockRouter(() -> {
             sideNavItem.setPath(TestRouteWithAliases.class,
-                    new RouteParameters(Map.of("key", "value")));
+                    new RouteParameters(Map.of("key1", "value1")));
 
-            assertPathAliases(Set.of("foo/value/bar"));
+            assertPathAliases(Set.of("foo/baz", "foo/qux", "foo/value1/bar",
+                    "foo/value1/value1/bar"));
+        }, TestRouteWithAliases.class);
+    }
+
+    @Test
+    public void createFromComponentWithRouteParameters_aliasWithMissingParamNotAdded() {
+        runWithMockRouter(() -> {
+            sideNavItem = new SideNavItem("test", TestRouteWithAliases.class,
+                    new RouteParameters(Map.of("key1", "value1")));
+
+            assertPathAliases(Set.of("foo/baz", "foo/qux", "foo/value1/bar",
+                    "foo/value1/value1/bar"));
         }, TestRouteWithAliases.class);
     }
 
@@ -687,7 +712,9 @@ public class SideNavItemTest {
     @Route("foo/bar")
     @RouteAlias("foo/baz")
     @RouteAlias("foo/qux")
-    @RouteAlias("foo/:key/bar")
+    @RouteAlias("foo/:key1/bar")
+    @RouteAlias("foo/:key1/:key1/bar")
+    @RouteAlias("foo/:key1/:key2/bar")
     private static class TestRouteWithAliases extends Component {
 
     }

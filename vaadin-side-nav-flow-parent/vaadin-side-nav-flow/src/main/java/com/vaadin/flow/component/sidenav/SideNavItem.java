@@ -39,8 +39,10 @@ import elemental.json.JsonArray;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -368,9 +370,23 @@ public class SideNavItem extends SideNavItemContainer
 
     private String updateAliasWithRouteParameters(String alias,
             RouteParameters routeParameters) {
+        if (!alias.contains(":")) {
+            return alias;
+        }
         ConfigureRoutes configuredAliases = new ConfigureRoutes();
         configuredAliases.setRoute(alias, getClass());
-        return configuredAliases.getTargetUrl(getClass(), routeParameters);
+        return configuredAliases.getTargetUrl(getClass(),
+                getRouteParametersForAlias(alias, routeParameters));
+    }
+
+    private RouteParameters getRouteParametersForAlias(String alias,
+            RouteParameters routeParameters) {
+        Map<String, String> parametersMapForAlias = routeParameters
+                .getParameterNames().stream()
+                .filter(paramName -> alias.contains(":" + paramName))
+                .collect(Collectors.toMap(Function.identity(),
+                        paramName -> routeParameters.get(paramName).get()));
+        return new RouteParameters(parametersMapForAlias);
     }
 
     private String updateQueryParameters(String path) {
