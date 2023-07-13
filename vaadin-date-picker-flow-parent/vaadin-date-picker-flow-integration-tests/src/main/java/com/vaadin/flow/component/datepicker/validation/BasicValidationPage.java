@@ -15,7 +15,6 @@ public class BasicValidationPage extends AbstractValidationPage<DatePicker> {
 
     public BasicValidationPage() {
         super();
-        System.setProperty("vaadin.enforceFieldValidation", "true");
 
         add(createButton(REQUIRED_BUTTON, "Enable required", event -> {
             testField.setRequiredIndicatorVisible(true);

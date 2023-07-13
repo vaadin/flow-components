@@ -36,8 +36,6 @@ public class BinderValidationPage extends AbstractValidationPage<DatePicker> {
     public BinderValidationPage() {
         super();
 
-        System.setProperty("vaadin.enforceFieldValidation", "true");
-
         binder = new Binder<>(Bean.class);
         binder.forField(testField).asRequired(REQUIRED_ERROR_MESSAGE)
                 .withValidator(value -> value.equals(expectedValue),
