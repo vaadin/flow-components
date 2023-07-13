@@ -556,7 +556,7 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
     private boolean isInputValuePresent() {
         return getElement().getProperty("_hasInputValue", false);
     }
-    
+
     @Override
     public void setValue(LocalDate value) {
         LocalDate oldValue = getValue();
