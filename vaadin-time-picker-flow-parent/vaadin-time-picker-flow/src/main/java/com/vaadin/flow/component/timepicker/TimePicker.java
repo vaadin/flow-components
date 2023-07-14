@@ -325,7 +325,7 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
 
         return requiredValidation.isError() || checkValidity(value).isError();
     }
-    
+
     /**
      * Returns whether the input element has a value or not.
      *

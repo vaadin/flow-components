@@ -226,7 +226,8 @@ public class TimePickerElement extends TestBenchElement
         Objects.requireNonNull(timeInput, "null input not accepted");
 
         TimePickerTextFieldElement timePickerTextFieldElement = getTimePickerTextFieldElement();
-        timePickerTextFieldElement.sendKeys(Keys.chord(Keys.SHIFT, Keys.HOME),Keys.BACK_SPACE);
+        timePickerTextFieldElement.sendKeys(Keys.chord(Keys.SHIFT, Keys.HOME),
+                Keys.BACK_SPACE);
         timePickerTextFieldElement.sendKeys(timeInput, Keys.ENTER);
     }
 
