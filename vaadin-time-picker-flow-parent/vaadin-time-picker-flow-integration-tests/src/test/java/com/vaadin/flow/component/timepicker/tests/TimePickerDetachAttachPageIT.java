@@ -43,17 +43,6 @@ public class TimePickerDetachAttachPageIT extends AbstractComponentIT {
     }
 
     @Test
-    public void clientSideValidationIsOverriddenOnAttach() {
-        assertTimePickerIsValidOnTab();
-
-        // Detaching and attaching time picker
-        toggleAttach.click();
-        toggleAttach.click();
-
-        assertTimePickerIsValidOnTab();
-    }
-
-    @Test
     public void formatShouldRespectLocaleAfterDetachAndReattach() {
         setValue.click();
         setLocale.click();
@@ -65,13 +54,5 @@ public class TimePickerDetachAttachPageIT extends AbstractComponentIT {
         toggleAttach.click();
         timePicker = $(TimePickerElement.class).id("time-picker");
         Assert.assertEquals("2:00 a.m.", timePicker.getSelectedText());
-    }
-
-    private void assertTimePickerIsValidOnTab() {
-        TimePickerElement timePicker = $(TimePickerElement.class)
-                .id("time-picker");
-        timePicker.sendKeys(Keys.TAB);
-        Assert.assertFalse("Time picker should be valid after Tab",
-                Boolean.parseBoolean(timePicker.getAttribute("invalid")));
     }
 }

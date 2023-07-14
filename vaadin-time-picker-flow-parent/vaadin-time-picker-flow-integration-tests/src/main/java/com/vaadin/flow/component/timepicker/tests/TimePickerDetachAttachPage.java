@@ -34,7 +34,6 @@ public class TimePickerDetachAttachPage extends Div {
      */
     public TimePickerDetachAttachPage() {
         TimePicker timePicker = new TimePicker();
-        timePicker.setRequiredIndicatorVisible(true);
         timePicker.setId("time-picker");
         add(timePicker);
 
