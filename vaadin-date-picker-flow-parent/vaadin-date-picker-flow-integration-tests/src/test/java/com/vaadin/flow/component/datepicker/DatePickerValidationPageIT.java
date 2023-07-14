@@ -177,58 +177,6 @@ public class DatePickerValidationPageIT extends AbstractComponentIT {
                         displayText));
     }
 
-    @Test
-    public void assertInvalidAfterClientChangeMax() {
-        // max is 2018-6-7
-        final LocalDate invalidDate = LocalDate.of(2018, 6, 8);
-        final LocalDate validDate = LocalDate.of(2018, 6, 7);
-        assertInvalidAfterClientChange("max", invalidDate, validDate);
-    }
-
-    @Test
-    public void assertInvalidAfterClientChangeMin() {
-        // min is 2017-4-5
-        final LocalDate invalidDate = LocalDate.of(2017, 4, 1);
-        final LocalDate validDate = LocalDate.of(2017, 12, 31);
-        assertInvalidAfterClientChange("min", invalidDate, validDate);
-    }
-
-    private void assertInvalidAfterClientChange(String clientPropertyUnderTest,
-            LocalDate invalidValue, LocalDate validValue) {
-
-        final boolean valid = true;
-        final DatePickerElement element = $(DatePickerElement.class)
-                .id("picker-with-valid-range");
-        assertValidStateOfPickerWithValidRange(valid);
-
-        element.setDate(invalidValue);
-        assertValidStateOfPickerWithValidRange(!valid);
-
-        // Forcing max to invalid value on the client does not make the field
-        // valid
-        element.setProperty(clientPropertyUnderTest, invalidValue.toString());
-        getCommandExecutor().waitForVaadin();
-        assertValidStateOfPickerWithValidRange(!valid);
-
-        // Forcing the field to be valid does not work
-        element.setProperty("invalid", false);
-        getCommandExecutor().waitForVaadin();
-        assertValidStateOfPickerWithValidRange(!valid);
-
-        // Setting a valid value makes the field return to valid mode
-        element.setDate(validValue);
-        getCommandExecutor().waitForVaadin();
-        assertValidStateOfPickerWithValidRange(valid);
-    }
-
-    private void assertValidStateOfPickerWithValidRange(boolean valid) {
-        final WebElement checkIsInvalid = $("button").id("check-is-invalid");
-        checkIsInvalid.click();
-
-        final String expectedValue = !valid ? "invalid" : "valid";
-        Assert.assertEquals(expectedValue, $("div").id("is-invalid").getText());
-    }
-
     private void assertInvalid() {
         String invalid = field.getAttribute("invalid");
         Assert.assertTrue("The element should be in invalid state",
