@@ -37,6 +37,7 @@ public class SideNavIT extends AbstractComponentIT {
     private SideNavElement sideNav;
     private SideNavItemElement nonNavigableParent;
     private SideNavItemElement navigableParent;
+    private SideNavItemElement currentItem;
 
     @Before
     public void init() {
@@ -47,6 +48,7 @@ public class SideNavIT extends AbstractComponentIT {
                 .id("non-navigable-parent");
         navigableParent = sideNav.$(SideNavItemElement.class)
                 .id("navigable-parent");
+        currentItem = sideNav.$(SideNavItemElement.class).id("current-item");
     }
 
     @Test
@@ -128,6 +130,24 @@ public class SideNavIT extends AbstractComponentIT {
 
         Assert.assertTrue(
                 $(SideNavItemElement.class).id("current-item").isCurrent());
+    }
+
+    @Test
+    public void itemWithNoPathSet_routerIgnoreIsNotApplied() {
+        Assert.assertNull(
+                nonNavigableParent.getAnchor().getAttribute("router-ignore"));
+    }
+
+    @Test
+    public void itemWithPathSetAsComponent_routerIgnoreIsNotApplied() {
+        Assert.assertNull(
+                navigableParent.getAnchor().getAttribute("router-ignore"));
+    }
+
+    @Test
+    public void itemWithPathSetAsString_routerIgnoreIsApplied() {
+        Assert.assertNotNull(
+                currentItem.getAnchor().getAttribute("router-ignore"));
     }
 
     private void assertExpandedStateOnServer(String buttonToClick,

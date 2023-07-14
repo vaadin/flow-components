@@ -231,12 +231,9 @@ public class SideNavItem extends SideNavItemContainer
      * @see SideNavItem#setPath(Class)
      */
     public void setPath(String path) {
-        if (path == null) {
-            getElement().removeAttribute("path");
-        } else {
-            getElement().setAttribute("path",
-                    sanitizePath(updateQueryParameters(path)));
-        }
+        getElement().executeJs(
+                "queueMicrotask(() => this.shadowRoot.querySelector('a').setAttribute('router-ignore', true));");
+        doSetPath(path);
     }
 
     /**
@@ -282,14 +279,25 @@ public class SideNavItem extends SideNavItemContainer
      */
     public void setPath(Class<? extends Component> view,
             RouteParameters routeParameters) {
+        getElement().executeJs(
+                "queueMicrotask(() => this.shadowRoot.querySelector('a').removeAttribute('router-ignore'));");
         if (view == null) {
-            setPath((String) null);
+            doSetPath(null);
             setPathAliases(Collections.emptySet());
         } else {
             RouteConfiguration routeConfiguration = RouteConfiguration
                     .forRegistry(ComponentUtil.getRouter(this).getRegistry());
-            setPath(routeConfiguration.getUrl(view, routeParameters));
+            doSetPath(routeConfiguration.getUrl(view, routeParameters));
             setPathAliases(getPathAliasesFromView(view, routeParameters));
+        }
+    }
+
+    private void doSetPath(String path) {
+        if (path == null) {
+            getElement().removeAttribute("path");
+        } else {
+            getElement().setAttribute("path",
+                    sanitizePath(updateQueryParameters(path)));
         }
     }
 
