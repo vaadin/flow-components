@@ -111,7 +111,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
         getElement().getNode().addAttachListener(this::attachComponentRenderer);
 
         // Workaround for: https://github.com/vaadin/flow/issues/3496
-        setOpened(false);
+        getElement().setProperty("opened", false);
 
         getElement().addPropertyChangeListener("opened", event -> {
             // Only handle client-side changes, server-side changes are already

@@ -79,7 +79,7 @@ public class DialogTestPage extends Div {
         dialog.addOpenedChangeListener(event -> {
             message.setText(
                     "The open state of the dialog is " + dialog.isOpened());
-            eventCounterMessage.setText("Number of event is " + eventCounter++);
+            eventCounterMessage.setText("Number of event is " + ++eventCounter);
             eventSourceMessage.setText("The event came from "
                     + (event.isFromClient() ? "client" : "server"));
         });
