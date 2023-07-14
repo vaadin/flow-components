@@ -797,8 +797,8 @@ public class Dialog extends Component implements HasComponents, HasSize,
     private void registerClientCloseHandler() {
         //@formatter:off
         getElement().executeJs("const listener = (e) => {"
-                + "  if (e.type == 'vaadin-overlay-escape-press' && !$0.noCloseOnEsc ||"
-                + "      e.type == 'vaadin-overlay-outside-click' && !$0.noCloseOnOutsideClick) {"
+                + "  if (e.type == 'vaadin-overlay-escape-press' && !this.noCloseOnEsc ||"
+                + "      e.type == 'vaadin-overlay-outside-click' && !this.noCloseOnOutsideClick) {"
                 + "    e.preventDefault();"
                 + "    this.$server.handleClientClose();"
                 + "  }"
