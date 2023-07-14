@@ -15,8 +15,8 @@
  */
 package com.vaadin.flow.component.dialog;
 
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.shared.Registration;
 import org.junit.After;
@@ -25,12 +25,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import java.util.List;
-
 public class DialogCloseActionListenerTest {
 
-    private UI ui = new UI();
+    private final UI ui = new UI();
+    private Dialog dialog;
+    private ComponentEventListener<Dialog.DialogCloseActionEvent> mockListener;
 
+    @SuppressWarnings({ "unchecked" })
     @Before
     public void setup() {
         UI.setCurrent(ui);
@@ -38,6 +39,9 @@ public class DialogCloseActionListenerTest {
         VaadinSession session = Mockito.mock(VaadinSession.class);
         Mockito.when(session.hasLock()).thenReturn(true);
         ui.getInternals().setSession(session);
+
+        dialog = new Dialog();
+        mockListener = Mockito.mock(ComponentEventListener.class);
     }
 
     @After
@@ -46,165 +50,113 @@ public class DialogCloseActionListenerTest {
     }
 
     @Test
-    public void addDialogCloseActionListener_onCloseNotConfigured() {
-        Dialog dialog = new Dialog();
-
-        dialog.addDialogCloseActionListener(event -> {
-        });
-
-        assertOnCloseConfigured(false);
-    }
-
-    @Test
-    public void openDialog_onCloseNotConfigured() {
-        Dialog dialog = new Dialog();
-
+    public void addListener_open_closeFromClient_staysOpen() {
+        dialog.addDialogCloseActionListener(mockListener);
         dialog.open();
+        dialog.handleClientClose();
 
-        assertOnCloseConfigured(false);
+        Assert.assertTrue(dialog.isOpened());
+        assertListenerCalls(1);
     }
 
     @Test
-    public void addDialogCloseActionListener_openDialog_onCloseConfigured() {
-        Dialog dialog = new Dialog();
-
-        dialog.addDialogCloseActionListener(event -> {
-        });
-
+    public void open_addListener_closeFromClient_staysOpen() {
         dialog.open();
+        dialog.addDialogCloseActionListener(mockListener);
+        dialog.handleClientClose();
 
-        assertOnCloseConfigured(true);
+        Assert.assertTrue(dialog.isOpened());
+        assertListenerCalls(1);
     }
 
     @Test
-    public void openDialog_addDialogCloseActionListener_onCloseConfigured() {
-        Dialog dialog = new Dialog();
-
-        dialog.open();
-
-        dialog.addDialogCloseActionListener(event -> {
-        });
-
-        assertOnCloseConfigured(true);
-    }
-
-    @Test
-    public void addDialogCloseActionListener_openDialog_removeListener_onCloseNotConfigured() {
-        Dialog dialog = new Dialog();
-
+    public void addListener_open_removeListener_closeFromClient_closes() {
         Registration registration = dialog
-                .addDialogCloseActionListener(event -> {
-                });
-
+                .addDialogCloseActionListener(mockListener);
         dialog.open();
-
         registration.remove();
+        dialog.handleClientClose();
 
-        assertOnCloseConfigured(false);
+        Assert.assertFalse(dialog.isOpened());
+        assertListenerCalls(0);
     }
 
     @Test
-    public void addDialogCloseActionListener_removeListener_openDialog_onCloseNotConfigured() {
-        Dialog dialog = new Dialog();
-
-        Registration registration = dialog
-                .addDialogCloseActionListener(event -> {
-                });
-
-        registration.remove();
-
+    public void addListener_open_closeFromServer_closes() {
+        dialog.addDialogCloseActionListener(mockListener);
         dialog.open();
-
-        assertOnCloseConfigured(false);
-    }
-
-    @Test
-    public void addDialogCloseActionListener_openDialog_closeAndReopen_onCloseConfigured() {
-        Dialog dialog = new Dialog();
-
-        dialog.addDialogCloseActionListener(event -> {
-        });
-
-        dialog.open();
-
-        flushInvocations();
-
         dialog.close();
 
-        dialog.open();
-
-        assertOnCloseConfigured(true);
+        Assert.assertFalse(dialog.isOpened());
+        assertListenerCalls(0);
     }
 
     @Test
-    public void addTwoDialogCloseActionListeners_openDialog_onCloseConfigured() {
-        Dialog dialog = new Dialog();
-
-        dialog.addDialogCloseActionListener(event -> {
-        });
-
-        dialog.addDialogCloseActionListener(event -> {
-        });
-
-        dialog.open();
-
-        assertOnCloseConfigured(true);
-    }
-
-    @Test
-    public void addTwoDialogCloseActionListeners_openDialog_removeOneListener_onCloseConfigured() {
-        Dialog dialog = new Dialog();
-
-        dialog.addDialogCloseActionListener(event -> {
-        });
-
+    public void addMultipleListeners_open_removeOneListener_closeFromClient_staysOpen() {
         Registration registration = dialog
-                .addDialogCloseActionListener(event -> {
-                });
-
+                .addDialogCloseActionListener(mockListener);
+        dialog.addDialogCloseActionListener(mockListener);
         dialog.open();
-
         registration.remove();
 
-        assertOnCloseConfigured(true);
+        dialog.handleClientClose();
+
+        Assert.assertTrue(dialog.isOpened());
+        assertListenerCalls(1);
     }
 
     @Test
-    public void addTwoDialogCloseActionListeners_openDialog_closeDialog_removeOneListener_reopenDialog_onCloseConfigured() {
-        Dialog dialog = new Dialog();
-
-        dialog.addDialogCloseActionListener(event -> {
-        });
-
-        Registration registration = dialog
-                .addDialogCloseActionListener(event -> {
-                });
-
+    public void addMultipleListeners_open_removeAllListeners_closeFromClient_closes() {
+        Registration registration1 = dialog
+                .addDialogCloseActionListener(mockListener);
+        Registration registration2 = dialog
+                .addDialogCloseActionListener(mockListener);
         dialog.open();
+        registration1.remove();
+        registration2.remove();
+        dialog.handleClientClose();
 
-        flushInvocations();
+        Assert.assertFalse(dialog.isOpened());
+        assertListenerCalls(0);
+    }
 
+    @Test
+    public void addListener_openAndCloseMultipleTimes() {
+        Registration registration = dialog
+                .addDialogCloseActionListener(mockListener);
+        dialog.open();
+        dialog.handleClientClose();
+
+        // Should not close automatically
+        Assert.assertTrue(dialog.isOpened());
+        assertListenerCalls(1);
+
+        // Close manually
         dialog.close();
 
+        // Open and close again
+        dialog.open();
+        dialog.handleClientClose();
+
+        // Should still stay open
+        Assert.assertTrue(dialog.isOpened());
+        assertListenerCalls(2);
+
+        // Close manually and remove listener
+        dialog.close();
         registration.remove();
 
+        // Open and close again
         dialog.open();
+        dialog.handleClientClose();
 
-        assertOnCloseConfigured(true);
+        // Should close
+        Assert.assertFalse(dialog.isOpened());
+        assertListenerCalls(2);
     }
 
-    private List<PendingJavaScriptInvocation> flushInvocations() {
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        return ui.getInternals().dumpPendingJavaScriptInvocations();
-    }
-
-    private void assertOnCloseConfigured(boolean configured) {
-        List<PendingJavaScriptInvocation> invocations = flushInvocations();
-        long onCloseConfiguredCount = invocations
-                .stream().filter(invocation -> invocation.getInvocation()
-                        .getExpression().startsWith("var f = function(e)"))
-                .count();
-        int expectedCount = configured ? 1 : 0;
-        Assert.assertEquals(expectedCount, onCloseConfiguredCount);
+    private void assertListenerCalls(int expectedCount) {
+        Mockito.verify(mockListener, Mockito.times(expectedCount))
+                .onComponentEvent(Mockito.any());
     }
 }
