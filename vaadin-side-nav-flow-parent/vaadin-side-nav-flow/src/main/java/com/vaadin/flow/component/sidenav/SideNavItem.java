@@ -33,6 +33,8 @@ import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.internal.ConfigureRoutes;
 import elemental.json.JsonArray;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -231,8 +233,7 @@ public class SideNavItem extends SideNavItemContainer
      * @see SideNavItem#setPath(Class)
      */
     public void setPath(String path) {
-        getElement().executeJs(
-                "queueMicrotask(() => this.shadowRoot.querySelector('a').setAttribute('router-ignore', true));");
+        setRouterIgnore(isPathComplete(path));
         doSetPath(path);
     }
 
@@ -279,8 +280,7 @@ public class SideNavItem extends SideNavItemContainer
      */
     public void setPath(Class<? extends Component> view,
             RouteParameters routeParameters) {
-        getElement().executeJs(
-                "queueMicrotask(() => this.shadowRoot.querySelector('a').removeAttribute('router-ignore'));");
+        setRouterIgnore(false);
         if (view == null) {
             doSetPath(null);
             setPathAliases(Collections.emptySet());
@@ -362,6 +362,28 @@ public class SideNavItem extends SideNavItemContainer
                     .map(this::updateQueryParameters).map(this::sanitizePath)
                     .collect(Collectors.toSet()));
             getElement().setPropertyJson("pathAliases", aliasesAsJson);
+        }
+    }
+
+    private void setRouterIgnore(boolean routerIgnore) {
+        String jsExpression;
+        if (routerIgnore) {
+            jsExpression = "queueMicrotask(() => this.shadowRoot.querySelector('a').setAttribute('router-ignore', true));";
+        } else {
+            jsExpression = "queueMicrotask(() => this.shadowRoot.querySelector('a').removeAttribute('router-ignore'));";
+        }
+        getElement().executeJs(jsExpression);
+    }
+
+    private boolean isPathComplete(String path) {
+        if (path == null) {
+            return false;
+        }
+        try {
+            new URL(path);
+            return true;
+        } catch (MalformedURLException e) {
+            return false;
         }
     }
 

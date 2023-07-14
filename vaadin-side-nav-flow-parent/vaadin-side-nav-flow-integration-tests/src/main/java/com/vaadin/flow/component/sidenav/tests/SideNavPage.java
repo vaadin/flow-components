@@ -44,7 +44,7 @@ public class SideNavPage extends Div {
         sideNav.addItem(nonNavigableParent);
 
         SideNavItem navigableParent = new SideNavItem("Navigable parent",
-                SideNavTargetView.class);
+                "vaadin-side-nav/side-nav-test-target-view");
         navigableParent.setId("navigable-parent");
         navigableParent.addItem(new SideNavItem("Item 1",
                 "vaadin-side-nav/side-nav-test-target-view"));
