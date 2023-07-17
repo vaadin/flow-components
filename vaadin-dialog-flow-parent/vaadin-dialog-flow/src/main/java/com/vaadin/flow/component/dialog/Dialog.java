@@ -23,6 +23,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -87,7 +88,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
     private static final String OVERLAY_LOCATOR_JS = "this.$.overlay";
 
     private boolean autoAddedToTheUi;
-    private int onCloseConfigured;
+    private int configuredCloseActionListeners;
     private String width;
     private String minWidth;
     private String maxWidth;
@@ -110,18 +111,13 @@ public class Dialog extends Component implements HasComponents, HasSize,
         getElement().getNode().addAttachListener(this::attachComponentRenderer);
 
         // Workaround for: https://github.com/vaadin/flow/issues/3496
-        setOpened(false);
+        getElement().setProperty("opened", false);
 
-        getElement().addPropertyChangeListener("opened", event -> fireEvent(
-                new OpenedChangeEvent(this, event.isUserOriginated())));
-
-        addOpenedChangeListener(event -> {
-            if (!isOpened()) {
-                setModality(false);
-            }
-            if (autoAddedToTheUi && !isOpened()) {
-                getElement().removeFromParent();
-                autoAddedToTheUi = false;
+        getElement().addPropertyChangeListener("opened", event -> {
+            // Only handle client-side changes, server-side changes are already
+            // handled by setOpened
+            if (event.isUserOriginated()) {
+                doSetOpened(this.isOpened(), event.isUserOriginated());
             }
         });
 
@@ -284,14 +280,14 @@ public class Dialog extends Component implements HasComponents, HasSize,
     public Registration addDialogCloseActionListener(
             ComponentEventListener<DialogCloseActionEvent> listener) {
         if (isOpened()) {
-            ensureOnCloseConfigured();
+            configuredCloseActionListeners++;
         }
 
         Registration openedRegistration = addOpenedChangeListener(event -> {
             if (event.isOpened()) {
-                ensureOnCloseConfigured();
+                configuredCloseActionListeners++;
             } else {
-                onCloseConfigured = 0;
+                configuredCloseActionListeners = 0;
             }
         });
 
@@ -301,7 +297,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
             if (isOpened()) {
                 // the count is decremented if the dialog is closed. So we
                 // should decrement is explicitly if listener is deregistered
-                onCloseConfigured--;
+                configuredCloseActionListeners--;
             }
             openedRegistration.remove();
             registration.remove();
@@ -785,30 +781,43 @@ public class Dialog extends Component implements HasComponents, HasSize,
         }
     }
 
-    private void ensureOnCloseConfigured() {
-        if (onCloseConfigured == 0) {
-            getElement().getNode()
-                    .runWhenAttached(ui -> ui.beforeClientResponse(this,
-                            context -> doEnsureOnCloseConfigured(ui)));
-        }
-        onCloseConfigured++;
+    /**
+     * Registers event listeners on the dialog's overlay that prevent it from
+     * closing itself on outside click and escape press. Instead, the event
+     * listeners delegate to the server-side {@link #handleClientClose()}
+     * method. This serves two purposes:
+     * <ul>
+     * <li>Prevent the client overlay from closing if a custom close action
+     * listener is registered</li>
+     * <li>Prevent the client overlay from closing if the server-side dialog has
+     * become inert in the meantime, in which case the @ClientCallable call to
+     * {@link #handleClientClose()} will never be processed</li>
+     * </ul>
+     */
+    private void registerClientCloseHandler() {
+        //@formatter:off
+        getElement().executeJs("const listener = (e) => {"
+                + "  if (e.type == 'vaadin-overlay-escape-press' && !this.noCloseOnEsc ||"
+                + "      e.type == 'vaadin-overlay-outside-click' && !this.noCloseOnOutsideClick) {"
+                + "    e.preventDefault();"
+                + "    this.$server.handleClientClose();"
+                + "  }"
+                + "};"
+                + "this.$.overlay.addEventListener('vaadin-overlay-outside-click', listener);"
+                + "this.$.overlay.addEventListener('vaadin-overlay-escape-press', listener);");
+        //@formatter:on
     }
 
-    private void doEnsureOnCloseConfigured(UI ui) {
-        if (onCloseConfigured > 0) {
-            ui.getPage().executeJs("var f = function(e) {"
-                    + "  if (e.type == 'vaadin-overlay-escape-press' && !$0.noCloseOnEsc ||"
-                    + "      e.type == 'vaadin-overlay-outside-click' && !$0.noCloseOnOutsideClick) {"
-                    + "    e.preventDefault();"
-                    + "    $0.dispatchEvent(new CustomEvent('vaadin-dialog-close-action'));"
-                    + "  }" + "};"
-                    + "$0.$.overlay.addEventListener('vaadin-overlay-outside-click', f);"
-                    + "$0.$.overlay.addEventListener('vaadin-overlay-escape-press', f);"
-                    + "$0.addEventListener('opened-changed', function(){"
-                    + " if (!$0.opened) {"
-                    + " $0.$.overlay.removeEventListener('vaadin-overlay-outside-click',f);"
-                    + "$0.$.overlay.removeEventListener('vaadin-overlay-escape-press', f);"
-                    + "} });", getElement());
+    @ClientCallable
+    void handleClientClose() {
+        if (!isOpened()) {
+            return;
+        }
+
+        if (configuredCloseActionListeners > 0) {
+            fireEvent(new DialogCloseActionEvent(this, true));
+        } else {
+            doSetOpened(false, true);
         }
     }
 
@@ -824,11 +833,21 @@ public class Dialog extends Component implements HasComponents, HasSize,
      *            {@code true} to open the dialog, {@code false} to close it
      */
     public void setOpened(boolean opened) {
+        if (opened != isOpened()) {
+            doSetOpened(opened, false);
+        }
+    }
+
+    private void doSetOpened(boolean opened, boolean fromClient) {
         if (opened) {
             ensureAttached();
+        } else if (autoAddedToTheUi) {
+            getElement().removeFromParent();
+            autoAddedToTheUi = false;
         }
         setModality(opened && isModal());
         getElement().setProperty("opened", opened);
+        fireEvent(new OpenedChangeEvent(this, fromClient));
     }
 
     /**
@@ -936,6 +955,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
         Shortcuts.setShortcutListenOnElement(OVERLAY_LOCATOR_JS, this);
         initHeaderFooterRenderer();
         updateVirtualChildNodeIds();
+        registerClientCloseHandler();
     }
 
     /**
