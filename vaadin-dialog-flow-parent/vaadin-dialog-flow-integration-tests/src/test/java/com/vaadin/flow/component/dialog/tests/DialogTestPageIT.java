@@ -64,7 +64,7 @@ public class DialogTestPageIT extends AbstractComponentIT {
         Assert.assertEquals("The open state of the dialog is true",
                 message.getText());
         Assert.assertEquals("There should one event from opening the dialog",
-                "Number of event is 1", eventCounterMessage.getText());
+                "Number of events is 1", eventCounterMessage.getText());
         Assert.assertEquals("The event came from server",
                 eventSourceMessage.getText());
 
@@ -75,7 +75,7 @@ public class DialogTestPageIT extends AbstractComponentIT {
         checkDialogIsClosed();
         Assert.assertEquals("The open state of the dialog is false",
                 message.getText());
-        Assert.assertEquals("Number of event is 2",
+        Assert.assertEquals("Number of events is 2",
                 eventCounterMessage.getText());
         Assert.assertEquals("The event came from server",
                 eventSourceMessage.getText());
