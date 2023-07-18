@@ -54,7 +54,7 @@ public class CellSet {
      *
      * @return number of cells
      */
-    public int getCellCount() {
+    public int size() {
         return cells.size();
     }
 
@@ -68,7 +68,7 @@ public class CellSet {
      * @return {@code true} if set contains the specified cell, {@code false}
      *         otherwise
      */
-    public boolean containsCell(CellReference cellReference) {
+    public boolean contains(CellReference cellReference) {
         if (cells.isEmpty()) {
             return false;
         }
@@ -94,8 +94,8 @@ public class CellSet {
      * @return {@code true} if set contains the specified cell, {@code false}
      *         otherwise
      */
-    public boolean containsCell(int row, int col) {
-        return containsCell(new CellReference(row, col));
+    public boolean contains(int row, int col) {
+        return contains(new CellReference(row, col));
     }
 
     /**
@@ -110,9 +110,8 @@ public class CellSet {
      * @return {@code true} if set contains the specified cell, {@code false}
      *         otherwise
      */
-    public boolean containsCell(int row, int col, String sheetName) {
+    public boolean contains(int row, int col, String sheetName) {
         Objects.requireNonNull(sheetName, "The sheet name cannot be null");
-        return containsCell(
-                new CellReference(sheetName, row, col, false, false));
+        return contains(new CellReference(sheetName, row, col, false, false));
     }
 }
