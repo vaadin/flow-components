@@ -62,25 +62,23 @@ public class CellValueChangeEventOnFormulaChangeTest {
         spreadsheet.getCellValueManager().onCellValueChange(3, 1, "=A1+2*B1");
 
         assertEquals("There should be one changed cell", 1,
-                changedCells.get().getCellCount());
+                changedCells.get().size());
         assertTrue("The changed cells should include C1 with sheet name",
-                changedCells.get()
-                        .containsCell(new CellReference("Sheet0!C1")));
+                changedCells.get().contains(new CellReference("Sheet0!C1")));
         assertFalse(
                 "The changed cells should not include C1 with a wrong sheet name",
-                changedCells.get()
-                        .containsCell(new CellReference("Sheet1!C1")));
+                changedCells.get().contains(new CellReference("Sheet1!C1")));
         assertTrue("The changed cells should include C1 without sheet name",
-                changedCells.get().containsCell(new CellReference("C1")));
+                changedCells.get().contains(new CellReference("C1")));
         assertTrue(
                 "The changed cells should include a cell with correct indexes without a sheet name",
-                changedCells.get().containsCell(0, 2));
+                changedCells.get().contains(0, 2));
         assertTrue(
                 "The changed cells should include a cell with correct indexes and sheet name",
-                changedCells.get().containsCell(0, 2, "Sheet0"));
+                changedCells.get().contains(0, 2, "Sheet0"));
         assertFalse(
                 "The changed cells should not include a cell with correct indexes and a wrong sheet name",
-                changedCells.get().containsCell(0, 2, "Sheet1"));
+                changedCells.get().contains(0, 2, "Sheet1"));
 
     }
 
