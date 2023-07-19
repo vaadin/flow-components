@@ -270,12 +270,11 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         });
 
         addValueChangeListener(e -> validate());
-        
-        if(isEnforcedFieldValidationEnabled()) {
-        addClientValidatedEventListener(e -> validate());
+
+        if (isEnforcedFieldValidationEnabled()) {
+            addClientValidatedEventListener(e -> validate());
         }
-        
-        
+
     }
 
     /**
@@ -601,9 +600,10 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         if (dataProvider != null && dataProviderListener == null) {
             setupDataProviderListener(dataProvider);
         }
-        if(isEnforcedFieldValidationEnabled()) {
-        	ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
-        }else {
+        if (isEnforcedFieldValidationEnabled()) {
+            ClientValidationUtil
+                    .preventWebComponentFromModifyingInvalidState(this);
+        } else {
             FieldValidationUtil.disableClientValidation(this);
         }
     }
@@ -1101,7 +1101,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
 
         setInvalid(isInvalid);
     }
-    
+
     @Override
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<T> listener) {
@@ -1213,7 +1213,7 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
                 // JavaScript is called before initializing the connector.
                 "if($0.$connector) $0.$connector.reset();", getElement()));
     }
-    
+
     protected boolean isEnforcedFieldValidationEnabled() {
         VaadinSession session = VaadinSession.getCurrent();
         if (session == null) {
