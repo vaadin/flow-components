@@ -254,10 +254,14 @@ public class TimePicker extends GeneratedVaadinTimePicker<TimePicker, LocalTime>
     @Override
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<LocalTime> listener) {
-        return addClientValidatedEventListener(
-                event -> listener.validationStatusChanged(
-                        new ValidationStatusChangeEvent<LocalTime>(this,
-                                !isInvalid())));
+        if (isEnforcedFieldValidationEnabled()) {
+            return addClientValidatedEventListener(
+                    event -> listener.validationStatusChanged(
+                            new ValidationStatusChangeEvent<LocalTime>(this,
+                                    !isInvalid())));
+        }
+
+        return null;
     }
 
     private ValidationResult checkValidity(LocalTime value) {
