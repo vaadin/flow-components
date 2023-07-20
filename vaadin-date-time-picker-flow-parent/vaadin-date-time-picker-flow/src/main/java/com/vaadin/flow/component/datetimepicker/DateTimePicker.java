@@ -668,9 +668,14 @@ public class DateTimePicker extends
     @Override
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<LocalDateTime> listener) {
-        return addClientValidatedEventListener(event -> listener
-                .validationStatusChanged(new ValidationStatusChangeEvent<>(this,
-                        event.isValid())));
+        if (isEnforcedFieldValidationEnabled()) {
+            return addClientValidatedEventListener(
+                    event -> listener.validationStatusChanged(
+                            new ValidationStatusChangeEvent<>(this,
+                                    event.isValid())));
+        }
+
+        return null;
     }
 
     private ValidationResult checkValidity(LocalDateTime value) {
