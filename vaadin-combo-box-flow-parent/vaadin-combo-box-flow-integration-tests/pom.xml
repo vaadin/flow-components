@@ -86,7 +86,6 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-server</artifactId>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
     <build>
