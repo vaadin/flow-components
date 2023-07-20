@@ -47,7 +47,6 @@ public class CheckboxGroupDemoPage extends DemoView {
     @Override
     protected void initView() {
         addBasicFeatures();
-        addComponentWithLabelAndErrorMessage();
         addItemLabelGenerator();
         addDisabled();
         addDisabledItems();
@@ -77,22 +76,6 @@ public class CheckboxGroupDemoPage extends DemoView {
         message.setId("checkbox-group-value");
 
         addCard("Basic checkbox group", group, message);
-    }
-
-    private void addComponentWithLabelAndErrorMessage() {
-        // begin-source-example
-        // source-example-heading: Group with label and error message
-        CheckboxGroup<String> group = new CheckboxGroup<>();
-        group.setItems("foo", "bar", "baz");
-        group.setLabel("Group label");
-        group.setErrorMessage("Field has been set to invalid from server side");
-        NativeButton button = new NativeButton("Switch validity state",
-                event -> group.setInvalid(!group.isInvalid()));
-
-        // end-source-example
-        group.setId("group-with-label-and-error-message");
-        button.setId("group-with-label-button");
-        addCard("Group with label and error message", group, button);
     }
 
     private void addItemLabelGenerator() {

@@ -29,9 +29,14 @@ import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.ItemLabelGenerator;
+import com.vaadin.flow.component.shared.ClientValidationUtil;
+import com.vaadin.flow.component.shared.HasClientValidation;
+import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasDataProvider;
 import com.vaadin.flow.data.binder.HasItemsAndComponents;
 import com.vaadin.flow.data.binder.HasValidator;
+import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
+import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.KeyMapper;
@@ -41,7 +46,9 @@ import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
 import com.vaadin.flow.dom.PropertyChangeEvent;
 import com.vaadin.flow.dom.PropertyChangeListener;
+import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.function.SerializablePredicate;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.Json;
@@ -59,7 +66,7 @@ public class CheckboxGroup<T>
         extends GeneratedVaadinCheckboxGroup<CheckboxGroup<T>, Set<T>>
         implements HasItemsAndComponents<T>, HasSize, HasValidation,
         MultiSelect<CheckboxGroup<T>, T>, HasDataProvider<T>, HasHelper,
-        HasLabel, HasValidator<T> {
+        HasLabel, HasValidator<Set<T>>, HasClientValidation {
 
     private static final String VALUE = "value";
 
@@ -99,13 +106,23 @@ public class CheckboxGroup<T>
                 CheckboxGroup::presentationToModel,
                 CheckboxGroup::modelToPresentation);
         registerValidation();
+        
+        addValueChangeListener(e -> validate());
+        
+        if(isEnforcedFieldValidationEnabled()) {
+        	addClientValidatedEventListener(e -> validate());
+        }
     }
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
 
-        FieldValidationUtil.disableClientValidation(this);
+        if(isEnforcedFieldValidationEnabled()) {
+        	ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
+        }else {
+        	FieldValidationUtil.disableClientValidation(this);
+        }
     }
 
     @Override
@@ -461,5 +478,38 @@ public class CheckboxGroup<T>
             return item;
         }
         return getDataProvider().getId(item);
+    }
+    
+    protected void validate() {
+            boolean isRequired = isRequiredIndicatorVisible();
+            boolean isInvalid = ValidationUtil
+                    .checkRequired(isRequired, getValue(), getEmptyValue())
+                    .isError();
+
+            setInvalid(isInvalid);
+    }
+
+    @Override
+    public Registration addValidationStatusChangeListener(
+            ValidationStatusChangeListener<Set<T>> listener) {
+    	if(isEnforcedFieldValidationEnabled()) {
+    		return addClientValidatedEventListener(
+                    event -> listener.validationStatusChanged(
+                            new ValidationStatusChangeEvent<>(this, !isInvalid())));
+    	}
+        
+    	return null;
+    }
+    
+    protected boolean isEnforcedFieldValidationEnabled() {
+        VaadinSession session = VaadinSession.getCurrent();
+        if (session == null) {
+            return false;
+        }
+        DeploymentConfiguration configuration = session.getConfiguration();
+        if (configuration == null) {
+            return false;
+        }
+        return configuration.isEnforcedFieldValidationEnabled();
     }
 }
