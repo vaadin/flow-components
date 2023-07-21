@@ -28,9 +28,9 @@ import com.vaadin.flow.theme.AbstractTheme;
 /**
  * Material component theme class implementation.
  */
-@NpmPackage(value = "@vaadin/vaadin-themable-mixin", version = "24.2.0-alpha4")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha4")
-@NpmPackage(value = "@vaadin/vaadin-material-styles", version = "24.2.0-alpha4")
+@NpmPackage(value = "@vaadin/vaadin-themable-mixin", version = "24.2.0-alpha5")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha5")
+@NpmPackage(value = "@vaadin/vaadin-material-styles", version = "24.2.0-alpha5")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/vaadin-material-styles/color-global.js")
 @JsModule("@vaadin/vaadin-material-styles/typography-global.js")
