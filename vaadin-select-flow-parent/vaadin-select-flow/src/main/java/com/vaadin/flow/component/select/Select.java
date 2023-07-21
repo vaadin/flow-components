@@ -33,8 +33,14 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.select.generated.GeneratedVaadinSelect;
+import com.vaadin.flow.component.shared.ClientValidationUtil;
+import com.vaadin.flow.component.shared.HasClientValidation;
+import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasDataProvider;
 import com.vaadin.flow.data.binder.HasItemsAndComponents;
+import com.vaadin.flow.data.binder.HasValidator;
+import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
+import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.KeyMapper;
@@ -44,8 +50,10 @@ import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.data.selection.SingleSelect;
 import com.vaadin.flow.dom.PropertyChangeEvent;
 import com.vaadin.flow.dom.PropertyChangeListener;
+import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -65,7 +73,7 @@ import com.vaadin.flow.shared.Registration;
 @JavaScript("frontend://selectConnector.js")
 public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         implements HasDataProvider<T>, HasItemsAndComponents<T>, HasSize,
-        HasValidation, SingleSelect<Select<T>, T>, HasHelper, HasLabel {
+        HasValidation, SingleSelect<Select<T>, T>, HasHelper, HasLabel, HasValidator<T>, HasClientValidation{
 
     public static final String LABEL_ATTRIBUTE = "label";
 
@@ -167,6 +175,12 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         getElement().appendChild(listBox.getElement());
 
         registerValidation();
+        
+        addValueChangeListener(e -> validate());
+        
+        if(isEnforcedFieldValidationEnabled()) {
+        	addValueChangeListener(e -> validate());
+        }
     }
 
     /**
@@ -653,7 +667,11 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         initConnector();
-        FieldValidationUtil.disableClientValidation(this);
+        if(isEnforcedFieldValidationEnabled()) {
+        	ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
+        }else {
+        	FieldValidationUtil.disableClientValidation(this);
+        }
     }
 
     private void initConnector() {
@@ -823,5 +841,38 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
     private void runBeforeClientResponse(SerializableConsumer<UI> command) {
         getElement().getNode().runWhenAttached(ui -> ui
                 .beforeClientResponse(this, context -> command.accept(ui)));
+    }
+    
+    protected void validate() {
+            boolean isRequired = this.isRequiredIndicatorVisible();
+            boolean isInvalid = ValidationUtil
+                    .checkRequired(isRequired, getValue(), getEmptyValue())
+                    .isError();
+
+            setInvalid(isInvalid);
+    }
+
+    @Override
+    public Registration addValidationStatusChangeListener(
+            ValidationStatusChangeListener<T> listener) {
+    	if(isEnforcedFieldValidationEnabled()) {
+    		return addClientValidatedEventListener(
+                    event -> listener.validationStatusChanged(
+                            new ValidationStatusChangeEvent<>(this, !isInvalid())));
+    	}
+    	
+        return null;
+    }
+    
+    protected boolean isEnforcedFieldValidationEnabled() {
+        VaadinSession session = VaadinSession.getCurrent();
+        if (session == null) {
+            return false;
+        }
+        DeploymentConfiguration configuration = session.getConfiguration();
+        if (configuration == null) {
+            return false;
+        }
+        return configuration.isEnforcedFieldValidationEnabled();
     }
 }
