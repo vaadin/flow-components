@@ -1,10 +1,10 @@
 package com.vaadin.flow.component.checkbox.tests.validation;
 
+import java.util.Arrays;
+
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.router.Route;
 import com.vaadin.tests.validation.AbstractValidationPage;
-
-import java.util.List;
 
 @Route("vaadin-checkbox-group/validation/basic")
 public class BasicValidationPage
@@ -20,7 +20,7 @@ public class BasicValidationPage
     @Override
     protected CheckboxGroup<String> createTestField() {
         CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
-        checkboxGroup.setItems(List.of("foo", "bar", "baz"));
+        checkboxGroup.setItems(Arrays.asList("foo", "bar", "baz"));
 
         return checkboxGroup;
     }
