@@ -1105,9 +1105,13 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
     @Override
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<T> listener) {
-        return addClientValidatedEventListener(
-                event -> listener.validationStatusChanged(
-                        new ValidationStatusChangeEvent<>(this, !isInvalid())));
+        if(isEnforcedFieldValidationEnabled()) {
+        	return addClientValidatedEventListener(
+                    event -> listener.validationStatusChanged(
+                            new ValidationStatusChangeEvent<>(this, !isInvalid())));
+        }
+        
+        return null;
     }
 
     CompositeDataGenerator<T> getDataGenerator() {
