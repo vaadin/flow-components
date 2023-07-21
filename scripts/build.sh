@@ -33,14 +33,14 @@ args="$args -B $quiet"
 ## compute modules that were modified in this PR
 if [ -z "$modules" -a -n "$PR" ]
 then
-  ## need to check whether changes in the root or not 
+  ## need to check whether changes in the root or not
   modifiedAll=`curl -s https://api.github.com/repos/vaadin/flow-components/pulls/$PR/files \
     | jq -r '.[] | .filename' | sort -u | tr -d '[:space:]'`
   modifiedComponent=`curl -s https://api.github.com/repos/vaadin/flow-components/pulls/$PR/files \
-    | jq -r '.[] | .filename' | grep 'vaadin.*parent' | sort -u | tr -d '[:space:]'`
+    | jq -r '.[] | .filename' | grep 'vaadin.*flow-parent' | sort -u | tr -d '[:space:]'`
   modified=`curl -s https://api.github.com/repos/vaadin/flow-components/pulls/$PR/files \
-    | jq -r '.[] | .filename' | grep 'vaadin.*parent' | perl -pe 's,^vaadin-(.*)-flow-parent.*,$1,g' | sort -u`
-  
+    | jq -r '.[] | .filename' | grep 'vaadin.*flow-parent' | perl -pe 's,^vaadin-(.*)-flow-parent.*,$1,g' | sort -u`
+
   if [ `echo "$modified" | wc -w` -lt 5 ] && [ `echo ${#modifiedAll}` = `echo ${#modifiedComponent}` ]
   then
     for i in $modified
@@ -186,7 +186,7 @@ elif [ "$testMode" = "npm-it" ]
 then
   pomFile="pom.xml"
 fi
-	
+
 if [ -n "$modules" ] && [ -z "$USE_MERGED_MODULE" ]
 then
   ### Run IT's in original modules
