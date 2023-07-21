@@ -34,18 +34,24 @@ import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.ClientValidationUtil;
+import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.timepicker.StepsUtil;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
+import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
+import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.shared.Registration;
 
 @Tag("vaadin-date-time-picker-date-picker")
 class DateTimePickerDatePicker
@@ -57,6 +63,18 @@ class DateTimePickerDatePicker
 
     void passThroughPresentationValue(LocalDate newPresentationValue) {
         super.setPresentationValue(newPresentationValue);
+
+        if (Objects.equals(newPresentationValue, getEmptyValue())
+                && isInputValuePresent()) {
+            // Clear the input element from possible bad input.
+            getElement().executeJs("this._inputElementValue = ''");
+            getElement().setProperty("_hasInputValue", false);
+        }
+    }
+
+    @Synchronize(property = "_hasInputValue", value = "has-input-value-changed")
+    protected boolean isInputValuePresent() {
+        return getElement().getProperty("_hasInputValue", false);
     }
 }
 
@@ -70,6 +88,18 @@ class DateTimePickerTimePicker
 
     void passThroughPresentationValue(LocalTime newPresentationValue) {
         super.setPresentationValue(newPresentationValue);
+
+        if (Objects.equals(newPresentationValue, getEmptyValue())
+                && isInputValuePresent()) {
+            // Clear the input element from possible bad input.
+            getElement().executeJs("this.__inputElement.value = ''");
+            getElement().setProperty("_hasInputValue", false);
+        }
+    }
+
+    @Synchronize(property = "_hasInputValue", value = "has-input-value-changed")
+    protected boolean isInputValuePresent() {
+        return getElement().getProperty("_hasInputValue", false);
     }
 }
 
@@ -85,7 +115,7 @@ class DateTimePickerTimePicker
 public class DateTimePicker extends
         AbstractSinglePropertyField<DateTimePicker, LocalDateTime> implements
         HasStyle, HasSize, HasTheme, HasValidation, Focusable<DateTimePicker>,
-        HasHelper, HasLabel, HasValidator<LocalDateTime> {
+        HasHelper, HasLabel, HasValidator<LocalDateTime>, HasClientValidation {
 
     private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
 
@@ -163,6 +193,10 @@ public class DateTimePicker extends
         setInvalid(false);
 
         addValueChangeListener(e -> validate());
+
+        if (isEnforcedFieldValidationEnabled()) {
+            addClientValidatedEventListener(e -> validate());
+        }
     }
 
     /**
@@ -266,9 +300,22 @@ public class DateTimePicker extends
      */
     @Override
     public void setValue(LocalDateTime value) {
+        LocalDateTime oldValue = getValue();
+
         value = sanitizeValue(value);
         super.setValue(value);
-        synchronizeChildComponentValues(value);
+
+        boolean isInputValuePresent = timePicker.isInputValuePresent()
+                || datePicker.isInputValuePresent();
+        boolean isValueRemainedEmpty = Objects.equals(oldValue, getEmptyValue())
+                && Objects.equals(value, getEmptyValue());
+        if (isValueRemainedEmpty && isInputValuePresent) {
+            // Clear the input elements from possible bad input.
+            synchronizeChildComponentValues(value);
+            fireEvent(new ClientValidatedEvent(this, false));
+        } else {
+            synchronizeChildComponentValues(value);
+        }
     }
 
     /**
@@ -618,7 +665,35 @@ public class DateTimePicker extends
         return Validator.alwaysPass();
     }
 
+    @Override
+    public Registration addValidationStatusChangeListener(
+            ValidationStatusChangeListener<LocalDateTime> listener) {
+        if (isEnforcedFieldValidationEnabled()) {
+            return addClientValidatedEventListener(
+                    event -> listener.validationStatusChanged(
+                            new ValidationStatusChangeEvent<>(this,
+                                    event.isValid())));
+        }
+
+        return null;
+    }
+
     private ValidationResult checkValidity(LocalDateTime value) {
+        if (isEnforcedFieldValidationEnabled()) {
+            boolean hasNonParsableDatePickerValue = datePicker
+                    .getValue() == datePicker.getEmptyValue()
+                    && datePicker.isInputValuePresent();
+
+            boolean hasNonParsableTimePickerValue = timePicker
+                    .getValue() == timePicker.getEmptyValue()
+                    && timePicker.isInputValuePresent();
+
+            if (hasNonParsableDatePickerValue
+                    || hasNonParsableTimePickerValue) {
+                return ValidationResult.error("");
+            }
+        }
+
         ValidationResult greaterThanMax = checkGreaterThanMax(value, max);
         if (greaterThanMax.isError()) {
             return greaterThanMax;
@@ -798,7 +873,12 @@ public class DateTimePicker extends
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        FieldValidationUtil.disableClientValidation(this);
+        if (isEnforcedFieldValidationEnabled()) {
+            ClientValidationUtil
+                    .preventWebComponentFromModifyingInvalidState(this);
+        } else {
+            FieldValidationUtil.disableClientValidation(this);
+        }
 
     }
 
