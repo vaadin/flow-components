@@ -17,7 +17,7 @@ public class BinderValidationIT
     public void fieldIsInitiallyValid() {
         assertClientValid();
         assertServerValid();
-        assertErrorMessage(null);
+        assertErrorMessage("");
     }
 
     @Test
