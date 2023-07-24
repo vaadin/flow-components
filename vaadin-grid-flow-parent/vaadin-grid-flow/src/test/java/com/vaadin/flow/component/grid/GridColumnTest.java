@@ -248,15 +248,6 @@ public class GridColumnTest {
     }
 
     @Test
-    public void setColumnRowHeader_updatedPropertyValue() {
-        Grid<Person> grid = new Grid<>();
-
-        Column<Person> rowHeaderColumn = grid.addColumn(Person::getName);
-        rowHeaderColumn.setRowHeader(true);
-        Assert.assertTrue(rowHeaderColumn.isRowHeader());
-    }
-
-    @Test
     public void addColumn_extendedColumnTypeByOverridingCreateMethod() {
         Grid<Person> extendedGrid = new Grid<Person>() {
             @Override
@@ -320,6 +311,16 @@ public class GridColumnTest {
         assertEqualColumnClasses(regularColumn.getClass(), Column.class);
         assertEqualColumnClasses(extendedColumn.getClass(),
                 ExtendedColumn.class);
+    }
+
+    @Test
+    public void setColumnRowHeader_updatedPropertyValue() {
+        Grid<Person> grid = new Grid<>();
+
+        Column<Person> rowHeaderColumn = grid.addColumn(Person::getName);
+        rowHeaderColumn.setRowHeader(true);
+        Assert.assertTrue(rowHeaderColumn.getElement().getProperty("rowHeader", false));
+        Assert.assertTrue(rowHeaderColumn.isRowHeader());
     }
 
     private void assertEqualColumnClasses(Class columnClass, Class compareTo) {
