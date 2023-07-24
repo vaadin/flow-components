@@ -101,11 +101,11 @@ public class RadioButtonGroup<T>
                 RadioButtonGroup::modelToPresentation);
 
         registerValidation();
-        
+
         addValueChangeListener(e -> validate());
-        
-        if(isEnforcedFieldValidationEnabled()) {
-        	addClientValidatedEventListener(e -> validate());
+
+        if (isEnforcedFieldValidationEnabled()) {
+            addClientValidatedEventListener(e -> validate());
         }
 
     }
@@ -155,10 +155,11 @@ public class RadioButtonGroup<T>
                 && dataProviderListenerRegistration == null) {
             setupDataProviderListener(getDataProvider());
         }
-        if(isEnforcedFieldValidationEnabled()) {
-        	ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
-        }else {
-        	FieldValidationUtil.disableClientValidation(this);
+        if (isEnforcedFieldValidationEnabled()) {
+            ClientValidationUtil
+                    .preventWebComponentFromModifyingInvalidState(this);
+        } else {
+            FieldValidationUtil.disableClientValidation(this);
         }
     }
 
@@ -402,27 +403,28 @@ public class RadioButtonGroup<T>
         // Enforce the Web Component state using JS.
         button.getElement().executeJs("this.disabled = $0", disabled);
     }
-    
-    protected void validate() {
-            boolean isRequired = isRequiredIndicatorVisible();
-            boolean isInvalid = ValidationUtil
-                    .checkRequired(isRequired, getValue(), getEmptyValue())
-                    .isError();
 
-            setInvalid(isInvalid);
+    protected void validate() {
+        boolean isRequired = isRequiredIndicatorVisible();
+        boolean isInvalid = ValidationUtil
+                .checkRequired(isRequired, getValue(), getEmptyValue())
+                .isError();
+
+        setInvalid(isInvalid);
     }
 
     @Override
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<T> listener) {
-    	if(isEnforcedFieldValidationEnabled()) {
-    		return addClientValidatedEventListener(
+        if (isEnforcedFieldValidationEnabled()) {
+            return addClientValidatedEventListener(
                     event -> listener.validationStatusChanged(
-                            new ValidationStatusChangeEvent<>(this, !isInvalid())));
-    	}
-    	
-    	return null;
-    	}
+                            new ValidationStatusChangeEvent<>(this,
+                                    !isInvalid())));
+        }
+
+        return null;
+    }
 
     private T getValue(Serializable key) {
         if (key == null) {
@@ -438,7 +440,7 @@ public class RadioButtonGroup<T>
         validationRegistration = getElement().addPropertyChangeListener("value",
                 validationListener);
     }
-    
+
     protected boolean isEnforcedFieldValidationEnabled() {
         VaadinSession session = VaadinSession.getCurrent();
         if (session == null) {
