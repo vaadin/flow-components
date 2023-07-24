@@ -1129,6 +1129,35 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             return tooltipGenerator;
         }
 
+        /**
+         * Gets whether cells in this column should be announced as row headers.
+         *
+         * @return whether cells in this column should be announced as row
+         *         headers.
+         */
+        public boolean isRowHeader() {
+            return getElement().getProperty("rowHeader", false);
+        }
+
+        /**
+         * Sets whether cells in this column should be announced as row headers.
+         * When {@code true}, the cells for this column will be rendered with
+         * the {@code role} attribute set as {@code rowheader}, instead of the
+         * {@code gridcell} role value used by default.
+         * <p>
+         * When a column is set as row header, its cells will be announced by
+         * screen readers while navigating to help user identify the current row
+         * as uniquely as possible.
+         *
+         * @param rowHeader
+         *            whether cells in this column should be announced as row
+         *            headers
+         */
+        public Column<T> setRowHeader(boolean rowHeader) {
+            getElement().setProperty("rowHeader", rowHeader);
+            return this;
+        }
+
         @Override
         protected Column<?> getBottomLevelColumn() {
             return this;

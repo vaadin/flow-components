@@ -313,6 +313,17 @@ public class GridColumnTest {
                 ExtendedColumn.class);
     }
 
+    @Test
+    public void setColumnRowHeader_updatedPropertyValue() {
+        Grid<Person> grid = new Grid<>();
+
+        Column<Person> rowHeaderColumn = grid.addColumn(Person::getName);
+        rowHeaderColumn.setRowHeader(true);
+        Assert.assertTrue(
+                rowHeaderColumn.getElement().getProperty("rowHeader", false));
+        Assert.assertTrue(rowHeaderColumn.isRowHeader());
+    }
+
     private void assertEqualColumnClasses(Class columnClass, Class compareTo) {
         assertNotNull(columnClass);
         Assert.assertEquals(compareTo, columnClass);
