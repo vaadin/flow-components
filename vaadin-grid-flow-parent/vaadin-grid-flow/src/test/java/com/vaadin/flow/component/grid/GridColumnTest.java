@@ -319,7 +319,8 @@ public class GridColumnTest {
 
         Column<Person> rowHeaderColumn = grid.addColumn(Person::getName);
         rowHeaderColumn.setRowHeader(true);
-        Assert.assertTrue(rowHeaderColumn.getElement().getProperty("rowHeader", false));
+        Assert.assertTrue(
+                rowHeaderColumn.getElement().getProperty("rowHeader", false));
         Assert.assertTrue(rowHeaderColumn.isRowHeader());
     }
 
