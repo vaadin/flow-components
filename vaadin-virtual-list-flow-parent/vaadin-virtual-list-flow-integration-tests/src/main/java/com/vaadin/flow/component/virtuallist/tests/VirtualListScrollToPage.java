@@ -13,11 +13,13 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Route("vaadin-virtual-list/scroll-to")
-public class VirtualListScrollToPage extends Div implements BeforeEnterObserver {
+public class VirtualListScrollToPage extends Div
+        implements BeforeEnterObserver {
     VirtualList<String> virtualList;
 
     public VirtualListScrollToPage() {
-        List<String> items = IntStream.rangeClosed(1, 1000).mapToObj(String::valueOf).collect(Collectors.toList());
+        List<String> items = IntStream.rangeClosed(1, 1000)
+                .mapToObj(String::valueOf).collect(Collectors.toList());
 
         virtualList = new VirtualList<>();
         virtualList.setItems(items);
@@ -34,28 +36,32 @@ public class VirtualListScrollToPage extends Div implements BeforeEnterObserver 
                 e -> virtualList.scrollToIndex(500));
         scrollToRow500.setId("scroll-to-row-500");
 
-        NativeButton addItemsAndScrollToItem = new NativeButton("Add 1000 items and scroll to new item",
-                e -> {
-                    IntStream.rangeClosed(items.size() + 1, items.size() + 1000).mapToObj(String::valueOf).forEach(items::add);
+        NativeButton addItemsAndScrollToItem = new NativeButton(
+                "Add 1000 items and scroll to new item", e -> {
+                    IntStream.rangeClosed(items.size() + 1, items.size() + 1000)
+                            .mapToObj(String::valueOf).forEach(items::add);
                     virtualList.getDataProvider().refreshAll();
                     virtualList.scrollToIndex(1500);
                 });
         addItemsAndScrollToItem.setId("add-items-and-scroll-to-item");
 
-        NativeButton addItemsAndScrollToEnd = new NativeButton("Add 1000 items and scroll to end",
-                e -> {
-                    IntStream.rangeClosed(items.size() + 1, items.size() + 1000).mapToObj(String::valueOf).forEach(items::add);
+        NativeButton addItemsAndScrollToEnd = new NativeButton(
+                "Add 1000 items and scroll to end", e -> {
+                    IntStream.rangeClosed(items.size() + 1, items.size() + 1000)
+                            .mapToObj(String::valueOf).forEach(items::add);
                     virtualList.getDataProvider().refreshAll();
                     virtualList.scrollToEnd();
                 });
         addItemsAndScrollToEnd.setId("add-items-and-scroll-to-end");
 
-        add(virtualList, scrollToStart, scrollToEnd, scrollToRow500, addItemsAndScrollToItem, addItemsAndScrollToEnd);
+        add(virtualList, scrollToStart, scrollToEnd, scrollToRow500,
+                addItemsAndScrollToItem, addItemsAndScrollToEnd);
     }
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        Optional<String> scrollTo = event.getLocation().getQueryParameters().getSingleParameter("initialPosition");
+        Optional<String> scrollTo = event.getLocation().getQueryParameters()
+                .getSingleParameter("initialPosition");
 
         if (scrollTo.isPresent() && scrollTo.get().equals("middle")) {
             virtualList.scrollToIndex(500);
