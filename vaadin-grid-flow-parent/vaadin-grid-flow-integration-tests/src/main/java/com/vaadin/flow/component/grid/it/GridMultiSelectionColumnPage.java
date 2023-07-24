@@ -50,6 +50,9 @@ public class GridMultiSelectionColumnPage extends Div {
      * Constructor.
      */
     public GridMultiSelectionColumnPage() {
+        // Add a padding, so we can actually scroll past the grids
+        getStyle().set("padding", "20px");
+
         message = new Div();
         message.setId("selected-item-count");
 

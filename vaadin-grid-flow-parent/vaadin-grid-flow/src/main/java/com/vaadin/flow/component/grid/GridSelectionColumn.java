@@ -71,7 +71,7 @@ public class GridSelectionColumn extends Component {
      *            the new indeterminate state of the select all checkbox
      */
     public void setSelectAllCheckboxIndeterminateState(boolean indeterminate) {
-        getElement().setProperty("indeterminate", indeterminate);
+        getElement().setProperty("_indeterminate", indeterminate);
     }
 
     /**
@@ -81,7 +81,7 @@ public class GridSelectionColumn extends Component {
      *            whether to display the select all checkbox or hide it
      */
     public void setSelectAllCheckBoxVisibility(boolean visible) {
-        getElement().setProperty("selectAllHidden", !visible);
+        getElement().setProperty("_selectAllHidden", !visible);
     }
 
     /**
