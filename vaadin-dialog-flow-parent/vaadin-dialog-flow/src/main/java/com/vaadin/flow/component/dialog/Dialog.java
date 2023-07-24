@@ -693,7 +693,9 @@ public class Dialog extends Component implements HasComponents, HasSize,
             if (root.getChildCount() == 0) {
                 return;
             }
-            dialog.getElement().appendChild(root);
+            if (!dialog.getElement().equals(root.getParent())) {
+                dialog.getElement().appendVirtualChild(root);
+            }
             dialog.getElement().executeJs("this." + rendererFunction
                     + " = (root) => {" + "if (root.firstChild) { "
                     + "   return;" + "}" + "root.appendChild($0);" + "}", root);

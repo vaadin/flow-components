@@ -175,6 +175,31 @@ public class DialogChildrenTest {
                 dialog.getElement().getProperty("virtualChildNodeIds"), "[-1]");
     }
 
+    @Test
+    public void headerAndFooterAddedAsVirtualChildren() {
+        dialog.getHeader().add(new Div());
+        dialog.getFooter().add(new Div());
+
+        Assert.assertEquals(0, dialog.getElement().getChildCount());
+        Assert.assertEquals(dialog.getElement(),
+                dialog.getHeader().root.getParent());
+        Assert.assertEquals(dialog.getElement(),
+                dialog.getFooter().root.getParent());
+    }
+
+    @Test
+    public void removeAll_doesNotRemoveHeaderOrFooter() {
+        dialog.getHeader().add(new Div());
+        dialog.getFooter().add(new Div());
+
+        dialog.removeAll();
+
+        Assert.assertEquals(dialog.getElement(),
+                dialog.getHeader().root.getParent());
+        Assert.assertEquals(dialog.getElement(),
+                dialog.getFooter().root.getParent());
+    }
+
     private void assertVirtualChildren(Component... components) {
         // Get a List of the node ids
         var childIds = Arrays.stream(components)
