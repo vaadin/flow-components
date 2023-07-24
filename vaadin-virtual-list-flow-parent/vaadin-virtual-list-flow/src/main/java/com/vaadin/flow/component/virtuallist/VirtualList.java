@@ -298,7 +298,7 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
     /**
      * Scrolls to the given row index. Scrolls so that the element is shown at
      * the start of the visible area whenever possible.
-     *
+     * <p>
      * If the index parameter exceeds current item set size the grid will scroll
      * to the end.
      *
@@ -306,7 +306,9 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
      *            zero based index of the item to scroll to in the current view.
      */
     public void scrollToIndex(int rowIndex) {
-        getElement().callJsFunction("scrollToIndex", rowIndex);
+        getElement().getNode().runWhenAttached(ui -> ui.beforeClientResponse(this,
+                ctx -> getElement().executeJs(
+                        "this.$connector.scrollToIndex($0)", rowIndex)));
     }
 
     /**
@@ -320,8 +322,8 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
      * Scrolls to the last element of the list.
      */
     public void scrollToEnd() {
-        getUI().ifPresent(ui -> ui.beforeClientResponse(this,
+        getElement().getNode().runWhenAttached(ui -> ui.beforeClientResponse(this,
                 ctx -> getElement().executeJs(
-                        "this.scrollToIndex(this.items.length - 1)")));
+                        "this.$connector.scrollToIndex(this.items.length - 1)")));
     }
 }

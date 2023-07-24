@@ -11,6 +11,9 @@ window.Vaadin.Flow.virtualListConnector = {
     const extraItemsBuffer = 20;
 
     let lastRequestedRange = [0, 0];
+    let pendingScrollIndex = null;
+    let pendingScrollFrame = null;
+    let hasRenderedActualItems = false;
 
     list.$connector = {};
     list.$connector.placeholderItem = { __placeholder: true };
@@ -45,6 +48,17 @@ window.Vaadin.Flow.virtualListConnector = {
 
     requestAnimationFrame(() => updateRequestedItem);
 
+    const scrollToPendingIndex = () => {
+      if (pendingScrollFrame || pendingScrollIndex === null) {
+        return;
+      }
+      pendingScrollFrame = requestAnimationFrame(() => {
+        list.scrollToIndex(pendingScrollIndex);
+        pendingScrollFrame = null;
+        pendingScrollIndex = null;
+      });
+    }
+
     // Add an observer function that will invoke on virtualList.renderer property
     // change and then patches it with a wrapper renderer
     list.patchVirtualListRenderer = function () {
@@ -53,6 +67,7 @@ window.Vaadin.Flow.virtualListConnector = {
         return;
       }
 
+      hasRenderedActualItems = false;
       const originalRenderer = list.renderer;
 
       const renderer = (root, list, model) => {
@@ -83,6 +98,8 @@ window.Vaadin.Flow.virtualListConnector = {
           }
 
           originalRenderer.call(list, root, list, model);
+          hasRenderedActualItems = true;
+          scrollToPendingIndex();
         }
 
         /*
@@ -139,6 +156,14 @@ window.Vaadin.Flow.virtualListConnector = {
         list.items = list.items.slice(0, newSize);
       }
     };
+
+    list.$connector.scrollToIndex = function (index) {
+      if (!hasRenderedActualItems) {
+        pendingScrollIndex = index;
+      } else {
+        list.scrollToIndex(index);
+      }
+    }
 
     list.$connector.setPlaceholderItem = function (placeholderItem = {}, appId) {
       placeholderItem.__placeholder = true;
