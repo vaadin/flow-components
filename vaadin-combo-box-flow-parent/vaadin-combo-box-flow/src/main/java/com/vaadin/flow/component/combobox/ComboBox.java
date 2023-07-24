@@ -36,8 +36,12 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.shared.ClientValidationUtil;
+import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.data.binder.HasFilterableDataProvider;
 import com.vaadin.flow.data.binder.HasValidator;
+import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
+import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.provider.ArrayUpdater;
 import com.vaadin.flow.data.provider.ArrayUpdater.Update;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
@@ -51,10 +55,12 @@ import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.Rendering;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.function.SerializableBiPredicate;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.JsonUtils;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.Json;
@@ -93,7 +99,7 @@ import elemental.json.JsonValue;
 @JsModule("./comboBoxConnector-es6.js")
 public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         implements HasSize, HasValidation, HasFilterableDataProvider<T, String>,
-        HasHelper, HasLabel, HasValidator<T> {
+        HasHelper, HasLabel, HasValidator<T>, HasClientValidation {
 
     private static final String PROP_SELECTED_ITEM = "selectedItem";
     private static final String PROP_VALUE = "value";
@@ -264,6 +270,11 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         });
 
         addValueChangeListener(e -> validate());
+
+        if (isEnforcedFieldValidationEnabled()) {
+            addClientValidatedEventListener(e -> validate());
+        }
+
     }
 
     /**
@@ -589,7 +600,12 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         if (dataProvider != null && dataProviderListener == null) {
             setupDataProviderListener(dataProvider);
         }
-        FieldValidationUtil.disableClientValidation(this);
+        if (isEnforcedFieldValidationEnabled()) {
+            ClientValidationUtil
+                    .preventWebComponentFromModifyingInvalidState(this);
+        } else {
+            FieldValidationUtil.disableClientValidation(this);
+        }
     }
 
     @Override
@@ -1086,6 +1102,19 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
         setInvalid(isInvalid);
     }
 
+    @Override
+    public Registration addValidationStatusChangeListener(
+            ValidationStatusChangeListener<T> listener) {
+        if (isEnforcedFieldValidationEnabled()) {
+            return addClientValidatedEventListener(
+                    event -> listener.validationStatusChanged(
+                            new ValidationStatusChangeEvent<>(this,
+                                    !isInvalid())));
+        }
+
+        return null;
+    }
+
     CompositeDataGenerator<T> getDataGenerator() {
         return dataGenerator;
     }
@@ -1188,6 +1217,18 @@ public class ComboBox<T> extends GeneratedVaadinComboBox<ComboBox<T>, T>
                 // If-statement is needed because on the first attach this
                 // JavaScript is called before initializing the connector.
                 "if($0.$connector) $0.$connector.reset();", getElement()));
+    }
+
+    protected boolean isEnforcedFieldValidationEnabled() {
+        VaadinSession session = VaadinSession.getCurrent();
+        if (session == null) {
+            return false;
+        }
+        DeploymentConfiguration configuration = session.getConfiguration();
+        if (configuration == null) {
+            return false;
+        }
+        return configuration.isEnforcedFieldValidationEnabled();
     }
 
 }
