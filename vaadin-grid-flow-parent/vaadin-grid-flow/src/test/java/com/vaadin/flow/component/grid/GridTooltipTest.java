@@ -36,7 +36,7 @@ public class GridTooltipTest {
 
     @Before
     public void setup() {
-        grid = new Grid<>();
+        grid = new Grid<String>();
         grid.addColumn(item -> item);
     }
 

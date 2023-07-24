@@ -492,9 +492,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             Optional<DataGenerator<T>> dataGenerator = rendering
                     .getDataGenerator();
 
-            dataGenerator.ifPresent(
-                    tDataGenerator -> columnDataGeneratorRegistration = grid
-                            .addDataGenerator(tDataGenerator));
+            if (dataGenerator.isPresent()) {
+                columnDataGeneratorRegistration = grid
+                        .addDataGenerator(dataGenerator.get());
+            }
         }
 
         protected void destroyDataGenerators() {
