@@ -16,7 +16,7 @@ public class BinderValidationIT extends AbstractValidationIT<SelectElement> {
     public void fieldIsInitiallyValid() {
         assertClientValid();
         assertServerValid();
-        assertErrorMessage(null);
+        assertErrorMessage("");
     }
 
     @Test

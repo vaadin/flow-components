@@ -73,7 +73,8 @@ import com.vaadin.flow.shared.Registration;
 @JavaScript("frontend://selectConnector.js")
 public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         implements HasDataProvider<T>, HasItemsAndComponents<T>, HasSize,
-        HasValidation, SingleSelect<Select<T>, T>, HasHelper, HasLabel, HasValidator<T>, HasClientValidation{
+        HasValidation, SingleSelect<Select<T>, T>, HasHelper, HasLabel,
+        HasValidator<T>, HasClientValidation {
 
     public static final String LABEL_ATTRIBUTE = "label";
 
@@ -175,11 +176,11 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         getElement().appendChild(listBox.getElement());
 
         registerValidation();
-        
+
         addValueChangeListener(e -> validate());
-        
-        if(isEnforcedFieldValidationEnabled()) {
-        	addValueChangeListener(e -> validate());
+
+        if (isEnforcedFieldValidationEnabled()) {
+            addClientValidatedEventListener(e -> validate());
         }
     }
 
@@ -667,10 +668,11 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         initConnector();
-        if(isEnforcedFieldValidationEnabled()) {
-        	ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
-        }else {
-        	FieldValidationUtil.disableClientValidation(this);
+        if (isEnforcedFieldValidationEnabled()) {
+            ClientValidationUtil
+                    .preventWebComponentFromModifyingInvalidState(this);
+        } else {
+            FieldValidationUtil.disableClientValidation(this);
         }
     }
 
@@ -842,28 +844,29 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         getElement().getNode().runWhenAttached(ui -> ui
                 .beforeClientResponse(this, context -> command.accept(ui)));
     }
-    
-    protected void validate() {
-            boolean isRequired = this.isRequiredIndicatorVisible();
-            boolean isInvalid = ValidationUtil
-                    .checkRequired(isRequired, getValue(), getEmptyValue())
-                    .isError();
 
-            setInvalid(isInvalid);
+    protected void validate() {
+        boolean isRequired = this.isRequiredIndicatorVisible();
+        boolean isInvalid = ValidationUtil
+                .checkRequired(isRequired, getValue(), getEmptyValue())
+                .isError();
+
+        setInvalid(isInvalid);
     }
 
     @Override
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<T> listener) {
-    	if(isEnforcedFieldValidationEnabled()) {
-    		return addClientValidatedEventListener(
+        if (isEnforcedFieldValidationEnabled()) {
+            return addClientValidatedEventListener(
                     event -> listener.validationStatusChanged(
-                            new ValidationStatusChangeEvent<>(this, !isInvalid())));
-    	}
-    	
+                            new ValidationStatusChangeEvent<>(this,
+                                    !isInvalid())));
+        }
+
         return null;
     }
-    
+
     protected boolean isEnforcedFieldValidationEnabled() {
         VaadinSession session = VaadinSession.getCurrent();
         if (session == null) {

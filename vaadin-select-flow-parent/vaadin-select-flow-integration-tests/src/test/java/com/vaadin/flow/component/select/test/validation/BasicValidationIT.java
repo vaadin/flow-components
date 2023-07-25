@@ -31,7 +31,7 @@ public class BasicValidationIT extends AbstractValidationIT<SelectElement> {
         testField.sendKeys(Keys.TAB);
         assertClientInvalid();
         assertServerInvalid();
-        
+
     }
 
     @Test

@@ -23,7 +23,7 @@ public class BasicValidationPage
         Select<String> select = new Select<>();
         select.setItems(Arrays.asList("foo", "bar", "baz"));
         select.setEmptySelectionAllowed(true);
-        
+
         return select;
     }
 }
