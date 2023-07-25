@@ -84,9 +84,10 @@
             <version>${project.version}</version>
         </dependency>
          <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>flow-server</artifactId>
-            <version>${flow.version}</version>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+            <version>3.1</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
     <build>
