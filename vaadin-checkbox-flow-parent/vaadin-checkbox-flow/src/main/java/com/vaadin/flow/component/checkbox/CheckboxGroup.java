@@ -107,9 +107,8 @@ public class CheckboxGroup<T>
                 CheckboxGroup::modelToPresentation);
         registerValidation();
 
-        addValueChangeListener(e -> validate());
-
         if (isEnforcedFieldValidationEnabled()) {
+            addValueChangeListener(e -> validate());
             addClientValidatedEventListener(e -> validate());
         }
     }

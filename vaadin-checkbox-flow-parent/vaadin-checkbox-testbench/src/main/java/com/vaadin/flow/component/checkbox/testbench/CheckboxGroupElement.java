@@ -30,16 +30,6 @@ public class CheckboxGroupElement extends TestBenchElement
         implements HasHelper {
 
     /**
-     * Gets the labels of checkboxes that are part of this group.
-     *
-     * @return a list of the labels
-     */
-    public List<String> getOptions() {
-        return getCheckboxes().stream().map(CheckboxElement::getLabel)
-                .collect(Collectors.toList());
-    }
-
-    /**
      * Gets all checkboxes that are part of this group.
      *
      * @return a list of the checkboxes
@@ -87,26 +77,6 @@ public class CheckboxGroupElement extends TestBenchElement
     }
 
     /**
-     * Gets the labels of the currently selected checkboxes.
-     *
-     * @return the labels of the currently selected checkboxes
-     */
-    public List<String> getSelectedTexts() {
-        Stream<CheckboxElement> button = getSelectedCheckboxes();
-        return button.map(CheckboxElement::getLabel)
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Gets the selected checkboxes.
-     *
-     * @return a stream with the selected checkboxes elements
-     */
-    private Stream<CheckboxElement> getSelectedCheckboxes() {
-        return getCheckboxByChecked(true);
-    }
-
-    /**
      * Gets the checkbox which is part of this group and has the given label.
      *
      * @param label
@@ -123,25 +93,4 @@ public class CheckboxGroupElement extends TestBenchElement
                 .findFirst();
     }
 
-    /**
-     * Gets the stream of checkboxes which are part of this group and has the
-     * checked state.
-     *
-     * @param value
-     *            the value to search for
-     * @return a stream with the checkbox elements
-     */
-    private Stream<CheckboxElement> getCheckboxByChecked(boolean value) {
-        return getCheckboxes().stream()
-                .filter(checkbox -> checkbox.isChecked() == value);
-    }
-
-    /**
-     * Gets the slotted error message component for the element.
-     *
-     * @return the slotted component or {@code null} if there is no component
-     */
-    public TestBenchElement getErrorMessageComponent() {
-        return $("div").attributeContains("slot", "error-message").first();
-    }
 }
