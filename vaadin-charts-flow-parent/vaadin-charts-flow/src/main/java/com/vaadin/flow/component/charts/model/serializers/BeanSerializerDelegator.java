@@ -20,6 +20,7 @@ package com.vaadin.flow.component.charts.model.serializers;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.ser.BeanPropertyWriter;
 import com.fasterxml.jackson.databind.ser.impl.BeanAsArraySerializer;
 import com.fasterxml.jackson.databind.ser.impl.ObjectIdWriter;
 import com.fasterxml.jackson.databind.ser.std.BeanSerializerBase;
@@ -75,8 +76,18 @@ public class BeanSerializerDelegator<T> extends BeanSerializerBase {
     }
 
     @Override
+    protected BeanSerializerBase withByNameInclusion(Set<String> set, Set<String> set1) {
+        return null;
+    }
+
+    @Override
     public BeanSerializerBase withFilterId(Object filterId) {
         return new BeanSerializerDelegator(this, filterId);
+    }
+
+    @Override
+    protected BeanSerializerBase withProperties(BeanPropertyWriter[] beanPropertyWriters, BeanPropertyWriter[] beanPropertyWriters1) {
+        return null;
     }
 
     @Override
