@@ -13,27 +13,4 @@
     <module>vaadin-flow-components-base</module>
     <module>vaadin-flow-components-test-util</module>
   </modules>
-  <dependencies>
-    <dependency>
-      <groupId>com.vaadin</groupId>
-      <artifactId>vaadin-testbench-core</artifactId>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.vaadin</groupId>
-      <artifactId>flow-test-util</artifactId>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.vaadin</groupId>
-      <artifactId>flow-component-demo-helpers</artifactId>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>io.github.bonigarcia</groupId>
-      <artifactId>webdrivermanager</artifactId>
-      <version>4.4.3</version>
-      <scope>provided</scope>
-    </dependency>
-  </dependencies>
 </project>
