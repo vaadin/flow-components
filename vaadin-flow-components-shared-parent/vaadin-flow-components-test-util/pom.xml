@@ -17,6 +17,10 @@
     </dependency>
     <dependency>
       <groupId>com.vaadin</groupId>
+      <artifactId>flow-component-demo-helpers</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.vaadin</groupId>
       <artifactId>flow-test-util</artifactId>
       <scope>compile</scope>
     </dependency>

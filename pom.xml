@@ -31,7 +31,7 @@
         <failIfNoTests>false</failIfNoTests>
         <vaadin.pnpm.enable>false</vaadin.pnpm.enable>
         <powermock.version>1.7.1</powermock.version>
-        <jackson.version>2.9.10.4</jackson.version>
+        <jackson.version>2.13.4.2</jackson.version>
         <sauce-connect.version>2.1.25</sauce-connect.version>
         <ci-sauce.version>1.149</ci-sauce.version>
         <sauce.options>--tunnel-identifier ${maven.build.timestamp}</sauce.options>
@@ -623,7 +623,7 @@
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
-                <version>3.0</version>
+                <version>3.12.0</version>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
@@ -653,7 +653,6 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-testbench-core</artifactId>
                 <version>${testbench.version}</version>
-                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
