@@ -23,13 +23,18 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.InputNotifier;
 import com.vaadin.flow.component.KeyNotifier;
+import com.vaadin.flow.component.shared.ClientValidationUtil;
+import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.HasValidator;
+import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
+import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * Server-side component for the {@code vaadin-text-field} element.
@@ -40,7 +45,7 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
         implements HasSize, HasValidation, HasValueChangeMode,
         HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
         HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper, HasLabel,
-        HasValidator<String> {
+        HasValidator<String>, HasClientValidation {
     private ValueChangeMode currentMode;
 
     private boolean isConnectorAttached;
@@ -61,6 +66,10 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
         setValueChangeMode(ValueChangeMode.ON_CHANGE);
 
         addValueChangeListener(e -> validate());
+
+        if (isEnforcedFieldValidationEnabled()) {
+            addClientValidatedEventListener(e -> validate());
+        }
     }
 
     /**
@@ -481,6 +490,19 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
         return Validator.alwaysPass();
     }
 
+    @Override
+    public Registration addValidationStatusChangeListener(
+            ValidationStatusChangeListener<String> listener) {
+        if (isEnforcedFieldValidationEnabled()) {
+            return addClientValidatedEventListener(
+                    event -> listener.validationStatusChanged(
+                            new ValidationStatusChangeEvent<String>(this,
+                                    !isInvalid())));
+        }
+
+        return null;
+    }
+
     /**
      * Performs server-side validation of the current value and the validation
      * constraints of the field, such as {@link #setPattern(String)}. This is
@@ -495,7 +517,12 @@ public class TextField extends GeneratedVaadinTextField<TextField, String>
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        FieldValidationUtil.disableClientValidation(this);
+        if (isEnforcedFieldValidationEnabled()) {
+            ClientValidationUtil
+                    .preventWebComponentFromModifyingInvalidState(this);
+        } else {
+            FieldValidationUtil.disableClientValidation(this);
+        }
     }
 
     /**
