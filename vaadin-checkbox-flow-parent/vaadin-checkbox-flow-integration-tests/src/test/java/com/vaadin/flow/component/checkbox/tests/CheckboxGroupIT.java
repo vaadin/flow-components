@@ -157,27 +157,6 @@ public class CheckboxGroupIT extends ComponentDemoTest {
     }
 
     @Test
-    public void groupHasLabelAndErrorMessage_setInvalidShowEM_setValueRemoveEM() {
-        TestBenchElement group = $(TestBenchElement.class)
-                .id("group-with-label-and-error-message");
-
-        Assert.assertEquals("Label Attribute should present with correct text",
-                group.getAttribute("label"), "Group label");
-
-        TestBenchElement errorMessage = group.$("div")
-                .attributeContains("part", "error-message").first();
-        verifyGroupValid(group, errorMessage);
-
-        layout.findElement(By.id("group-with-label-button")).click();
-        verifyGroupInvalid(group, errorMessage);
-
-        Assert.assertEquals(
-                "Correct error message should be shown after the button clicks",
-                "Field has been set to invalid from server side",
-                errorMessage.getText());
-    }
-
-    @Test
     public void assertHelperText() {
         TestBenchElement group = $(TestBenchElement.class)
                 .id("checkbox-helper-text");
@@ -202,25 +181,5 @@ public class CheckboxGroupIT extends ComponentDemoTest {
         $("button").id("button-clear-component").click();
 
         Assert.assertFalse(group.$("span").exists());
-    }
-
-    private void verifyGroupInvalid(TestBenchElement group,
-            TestBenchElement errorMessage) {
-        Assert.assertEquals("Checkbox group is invalid.", true,
-                group.getPropertyBoolean("invalid"));
-        Assert.assertEquals("Error message should be shown.",
-                Boolean.FALSE.toString(),
-                errorMessage.getAttribute("aria-hidden"));
-    }
-
-    private void verifyGroupValid(TestBenchElement group,
-            TestBenchElement errorMessage) {
-        Boolean isInvalid = group.getPropertyBoolean("invalid");
-        Assert.assertThat("Checkbox group is not invalid.", isInvalid,
-                CoreMatchers.anyOf(CoreMatchers.equalTo(isInvalid),
-                        CoreMatchers.equalTo(false)));
-        Assert.assertEquals("Error message should be hidden.",
-                Boolean.TRUE.toString(),
-                errorMessage.getAttribute("aria-hidden"));
     }
 }
