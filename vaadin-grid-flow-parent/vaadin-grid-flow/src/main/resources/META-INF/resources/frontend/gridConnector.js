@@ -54,12 +54,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           ItemCache.prototype.doEnsureSubCacheForScaledIndex = tryCatchWrapper(function (scaledIndex) {
             if (!this.itemCaches[scaledIndex]) {
               const subCache = new ItemCache.prototype.constructor(this.grid, this, this.items[scaledIndex]);
-              subCache.itemkeyCaches = {};
-              if (!this.itemkeyCaches) {
-                this.itemkeyCaches = {};
-              }
               this.itemCaches[scaledIndex] = subCache;
-              this.itemkeyCaches[this.grid.getItemId(subCache.parentItem)] = subCache;
               this.grid._loadPage(0, subCache);
             }
           });
@@ -766,12 +761,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           const endIndex = index + updatedPageCount * grid.pageSize;
           for (let itemIndex = index; itemIndex < endIndex; itemIndex++) {
             delete cacheToClear.items[itemIndex];
-            const subcacheToClear = cacheToClear.itemCaches[itemIndex];
             delete cacheToClear.itemCaches[itemIndex];
-            const itemKeyToRemove = subcacheToClear && subcacheToClear.parentItem.key;
-            if (itemKeyToRemove) {
-              delete cacheToClear.itemkeyCaches[itemKeyToRemove];
-            }
           }
           updateGridEffectiveSize();
         });
@@ -931,7 +921,6 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           deleteObjectContents(lastRequestedRanges);
 
           grid._cache.itemCaches = {};
-          grid._cache.itemkeyCaches = {};
 
           updateAllGridRowsInDomBasedOnCache();
         });
