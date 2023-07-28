@@ -64,19 +64,18 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             }
           });
 
-          ItemCache.prototype.getCacheAndIndexByKey = tryCatchWrapper(function (key) {
+          ItemCache.prototype.getCacheByKey = tryCatchWrapper(function (key) {
+            // Start looking in this cache
             for (let index in this.items) {
               if (this.grid.getItemId(this.items[index]) === key) {
-                return { cache: this, scaledIndex: index };
+                return this.itemCaches[index];
               }
             }
-            const keys = Object.keys(this.itemkeyCaches);
-            for (let i = 0; i < keys.length; i++) {
-              const expandedKey = keys[i];
-              const subCache = this.itemkeyCaches[expandedKey];
-              let cacheAndIndex = subCache.getCacheAndIndexByKey(key);
-              if (cacheAndIndex) {
-                return cacheAndIndex;
+            // Look through sub-caches
+            for (let index of Object.keys(this.itemCaches)) {
+              const cache = this.itemCaches[index].getCacheByKey(key);
+              if (cache) {
+                return cache;
               }
             }
             return undefined;
@@ -249,14 +248,6 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           return this._getSameLevelPage(parentKey, parentCache, parentCacheItemIndex);
         });
 
-        grid.$connector.getCacheByKey = tryCatchWrapper(function (key) {
-          let cacheAndIndex = grid._cache.getCacheAndIndexByKey(key);
-          if (cacheAndIndex) {
-            return cacheAndIndex.cache;
-          }
-          return undefined;
-        });
-
         grid.$connector.flushEnsureSubCache = tryCatchWrapper(function () {
           const pendingFetch = ensureSubCacheQueue.shift();
           if (pendingFetch) {
@@ -353,9 +344,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
               treePageCallbacks[parentUniqueKey] = {};
             }
 
-            let parentCache = grid.$connector.getCacheByKey(parentUniqueKey);
-            let itemCache =
-              parentCache && parentCache.itemkeyCaches ? parentCache.itemkeyCaches[parentUniqueKey] : undefined;
+            let itemCache = grid._cache.getCacheByKey(parentUniqueKey);
             if (cache[parentUniqueKey] && cache[parentUniqueKey][page] && itemCache) {
               // workaround: sometimes grid-element gives page index that overflows
               page = Math.min(page, Math.floor(cache[parentUniqueKey].size / grid.pageSize));
@@ -565,12 +554,11 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           let items;
           if ((parentKey || root) !== root) {
             items = cache[parentKey][page];
-            let parentCache = grid.$connector.getCacheByKey(parentKey);
-            if (parentCache && parentCache.itemkeyCaches) {
-              let _cache = parentCache.itemkeyCaches[parentKey];
+            let itemCache = grid._cache.getCacheByKey(parentKey);
+            if (itemCache) {
               const callbacksForParentKey = treePageCallbacks[parentKey];
               const callback = callbacksForParentKey && callbacksForParentKey[page];
-              _updateGridCache(page, items, callback, _cache);
+              _updateGridCache(page, items, callback, itemCache);
             }
           } else {
             items = cache[root][page];
@@ -773,8 +761,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           }
           let cacheToClear = grid._cache;
           if (parentKey) {
-            const cacheAndIndex = grid._cache.getCacheAndIndexByKey(pkey);
-            cacheToClear = cacheAndIndex.cache.itemCaches[cacheAndIndex.scaledIndex];
+            cacheToClear = grid._cache.getCacheByKey(pkey);
           }
           const endIndex = index + updatedPageCount * grid.pageSize;
           for (let itemIndex = index; itemIndex < endIndex; itemIndex++) {
