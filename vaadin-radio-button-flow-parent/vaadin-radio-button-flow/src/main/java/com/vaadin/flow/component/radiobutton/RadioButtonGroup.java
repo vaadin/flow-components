@@ -102,9 +102,8 @@ public class RadioButtonGroup<T>
 
         registerValidation();
 
-        addValueChangeListener(e -> validate());
-
         if (isEnforcedFieldValidationEnabled()) {
+            addValueChangeListener(e -> validate());
             addClientValidatedEventListener(e -> validate());
         }
 
