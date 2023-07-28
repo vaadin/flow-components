@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.textfield.testbench;
 
-import java.util.Collections;
-
 import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasLabel;
 import com.vaadin.testbench.HasPlaceholder;
@@ -34,9 +32,12 @@ public class IntegerFieldElement extends TestBenchElement
 
     @Override
     public void setValue(String string) {
-        HasStringValueProperty.super.setValue(string);
-        dispatchEvent("change", Collections.singletonMap("bubbles", true));
-        dispatchEvent("blur");
+        TestBenchElement input = $("input").first();
+        TextFieldElementHelper.setValue(input, string);
     }
 
+    @Override
+    public void sendKeys(CharSequence... keysToSend) {
+        $("input").first().sendKeys(keysToSend);
+    }
 }

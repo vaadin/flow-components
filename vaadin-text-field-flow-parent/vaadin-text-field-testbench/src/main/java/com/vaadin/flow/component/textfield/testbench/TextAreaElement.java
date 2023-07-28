@@ -22,8 +22,6 @@ import com.vaadin.testbench.HasStringValueProperty;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
-import java.util.Collections;
-
 /**
  * A TestBench element representing a <code>&lt;vaadin-text-area&gt;</code>
  * element.
@@ -33,9 +31,13 @@ public class TextAreaElement extends TestBenchElement
         implements HasStringValueProperty, HasLabel, HasPlaceholder, HasHelper {
     @Override
     public void setValue(String string) {
-        HasStringValueProperty.super.setValue(string);
-        dispatchEvent("change", Collections.singletonMap("bubbles", true));
-        dispatchEvent("blur");
+        TestBenchElement textarea = $("textarea").first();
+        TextFieldElementHelper.setValue(textarea, string);
+    }
+
+    @Override
+    public void sendKeys(CharSequence... keysToSend) {
+        $("textarea").first().sendKeys(keysToSend);
     }
 
 }
