@@ -23,8 +23,6 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
         // a server grid is initialized
         if (!isItemCacheInitialized) {
           isItemCacheInitialized = true;
-          // Storing original implementation of the method to be used for client
-          // side only grids
           ItemCache.prototype.ensureSubCacheForScaledIndexOriginal = ItemCache.prototype.ensureSubCacheForScaledIndex;
           ItemCache.prototype.ensureSubCacheForScaledIndex = tryCatchWrapper(function (scaledIndex) {
             if (!this.grid.$connector) {
@@ -35,7 +33,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             const isCached = this.grid.$connector.hasCacheForParentKey(this.grid.getItemId(this.items[scaledIndex]));
             if (isCached) {
               // The sub-cache items are already in the connector's cache. Skip the debouncing process.
-              this.doEnsureSubCacheForScaledIndex(scaledIndex);
+              this.ensureSubCacheForScaledIndexOriginal(scaledIndex);
             } else if (!this.itemCaches[scaledIndex]) {
               // The items need to be fetched from the server.
               this.grid.$connector.beforeEnsureSubCacheForScaledIndex(this, scaledIndex);
@@ -238,7 +236,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
         grid.$connector.flushEnsureSubCache = tryCatchWrapper(function () {
           const pendingFetch = ensureSubCacheQueue.shift();
           if (pendingFetch) {
-            pendingFetch.cache.doEnsureSubCacheForScaledIndex(pendingFetch.scaledIndex);
+            pendingFetch.cache.ensureSubCacheForScaledIndexOriginal(pendingFetch.scaledIndex);
             return true;
           }
           return false;
