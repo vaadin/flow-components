@@ -177,9 +177,8 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
 
         registerValidation();
 
-        addValueChangeListener(e -> validate());
-
         if (isEnforcedFieldValidationEnabled()) {
+            addValueChangeListener(e -> validate());
             addClientValidatedEventListener(e -> validate());
         }
     }
