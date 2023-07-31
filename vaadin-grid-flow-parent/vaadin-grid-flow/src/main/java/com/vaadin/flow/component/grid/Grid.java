@@ -4663,7 +4663,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         updateInMemorySorting(sortComparator);
         updateInMemoryFiltering(filter);
 
-        dataCommunicator.reset();
+        // Call refreshAll as data may have changed due filter change
+        getDataProvider().refreshAll();
     }
 
     private void updateInMemoryFiltering(
