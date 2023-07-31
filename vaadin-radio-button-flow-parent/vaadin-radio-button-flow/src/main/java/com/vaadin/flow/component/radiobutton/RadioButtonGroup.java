@@ -27,9 +27,14 @@ import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.ClientValidationUtil;
+import com.vaadin.flow.component.shared.HasClientValidation;
+import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasDataProvider;
 import com.vaadin.flow.data.binder.HasItemsAndComponents;
 import com.vaadin.flow.data.binder.HasValidator;
+import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
+import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.KeyMapper;
@@ -39,7 +44,9 @@ import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.data.selection.SingleSelect;
 import com.vaadin.flow.dom.PropertyChangeEvent;
 import com.vaadin.flow.dom.PropertyChangeListener;
+import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.function.SerializablePredicate;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -59,7 +66,7 @@ public class RadioButtonGroup<T>
         extends GeneratedVaadinRadioGroup<RadioButtonGroup<T>, T>
         implements HasItemsAndComponents<T>,
         SingleSelect<RadioButtonGroup<T>, T>, HasDataProvider<T>, HasValidation,
-        HasHelper, HasLabel, HasValidator<T> {
+        HasHelper, HasLabel, HasValidator<T>, HasClientValidation {
 
     private final KeyMapper<T> keyMapper = new KeyMapper<>();
 
@@ -94,6 +101,12 @@ public class RadioButtonGroup<T>
                 RadioButtonGroup::modelToPresentation);
 
         registerValidation();
+
+        if (isEnforcedFieldValidationEnabled()) {
+            addValueChangeListener(e -> validate());
+            addClientValidatedEventListener(e -> validate());
+        }
+
     }
 
     @Override
@@ -141,7 +154,12 @@ public class RadioButtonGroup<T>
                 && dataProviderListenerRegistration == null) {
             setupDataProviderListener(getDataProvider());
         }
-        FieldValidationUtil.disableClientValidation(this);
+        if (isEnforcedFieldValidationEnabled()) {
+            ClientValidationUtil
+                    .preventWebComponentFromModifyingInvalidState(this);
+        } else {
+            FieldValidationUtil.disableClientValidation(this);
+        }
     }
 
     @Override
@@ -385,6 +403,28 @@ public class RadioButtonGroup<T>
         button.getElement().executeJs("this.disabled = $0", disabled);
     }
 
+    protected void validate() {
+        boolean isRequired = isRequiredIndicatorVisible();
+        boolean isInvalid = ValidationUtil
+                .checkRequired(isRequired, getValue(), getEmptyValue())
+                .isError();
+
+        setInvalid(isInvalid);
+    }
+
+    @Override
+    public Registration addValidationStatusChangeListener(
+            ValidationStatusChangeListener<T> listener) {
+        if (isEnforcedFieldValidationEnabled()) {
+            return addClientValidatedEventListener(
+                    event -> listener.validationStatusChanged(
+                            new ValidationStatusChangeEvent<>(this,
+                                    !isInvalid())));
+        }
+
+        return null;
+    }
+
     private T getValue(Serializable key) {
         if (key == null) {
             return null;
@@ -398,5 +438,17 @@ public class RadioButtonGroup<T>
         }
         validationRegistration = getElement().addPropertyChangeListener("value",
                 validationListener);
+    }
+
+    protected boolean isEnforcedFieldValidationEnabled() {
+        VaadinSession session = VaadinSession.getCurrent();
+        if (session == null) {
+            return false;
+        }
+        DeploymentConfiguration configuration = session.getConfiguration();
+        if (configuration == null) {
+            return false;
+        }
+        return configuration.isEnforcedFieldValidationEnabled();
     }
 }
