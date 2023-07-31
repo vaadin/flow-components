@@ -96,6 +96,11 @@
             <artifactId>slf4j-simple</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+        	<groupId>com.vaadin</groupId>
+        	<artifactId>vaadin-flow-components-base</artifactId>
+        	<version>${project.version}</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins/>
