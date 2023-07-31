@@ -46,10 +46,6 @@ public class BinderValidationPage extends Div {
         addComponent(textField, Bean::getString, Bean::setString,
                 value -> value.length() > 2, field -> field.setMinLength(1));
 
-        PasswordField passwordField = new PasswordField();
-        addComponent(passwordField, Bean::getString, Bean::setString,
-                value -> value.length() > 2, field -> field.setMinLength(1));
-
         EmailField emailField = new EmailField();
         addComponent(emailField, Bean::getString, Bean::setString,
                 value -> value.length() > 20, field -> field.setMinLength(1));
