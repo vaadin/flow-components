@@ -17,6 +17,7 @@
 package com.vaadin.flow.component.grid.dataview;
 
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.grid.Grid;
@@ -111,11 +112,17 @@ public class GridListDataViewTest extends AbstractListDataViewListenerTest {
 
     @Test
     public void dataView_setFilter_methodsUseFilteredData() {
+        AtomicInteger refreshed = new AtomicInteger(0);
         String[] items = new String[] { "item1", "item2", "item3", "item4" };
         Grid<String> grid = new Grid<>();
         GridListDataView<String> dataView = grid.setItems(items);
+        grid.getDataProvider().addDataProviderListener(e -> {
+            refreshed.incrementAndGet();
+        });
 
         dataView.setFilter(s -> s.endsWith("4"));
+        Assert.assertEquals("Filter change did not fire DataChangeEvent", 1,
+                refreshed.get());
 
         Assert.assertEquals("Filter was not applied to data size", 1,
                 dataView.getItemCount());
@@ -129,6 +136,7 @@ public class GridListDataViewTest extends AbstractListDataViewListenerTest {
         Assert.assertEquals("Wrong item on row for filtered data.", items[3],
                 dataView.getItem(0));
     }
+
 
     @Test
     public void dataViewWithItems_contains_returnsCorrectItems() {
