@@ -50,14 +50,6 @@ public class BinderValidationPage extends Div {
                         && value.compareTo(new BigDecimal(2)) > 0,
                 field -> field.setRequiredIndicatorVisible(true));
 
-        NumberField numberField = new NumberField();
-        addComponent(numberField, Bean::getNumber, Bean::setNumber,
-                value -> value != null && value > 2, field -> field.setMin(1));
-
-        IntegerField integerField = new IntegerField();
-        addComponent(integerField, Bean::getInteger, Bean::setInteger,
-                value -> value != null && value > 2, field -> field.setMin(1));
-
         binder.setBean(new Bean());
     }
 
@@ -94,22 +86,6 @@ public class BinderValidationPage extends Div {
 
         public void setString(String string) {
             this.string = string;
-        }
-
-        public Double getNumber() {
-            return number;
-        }
-
-        public void setNumber(Double number) {
-            this.number = number;
-        }
-
-        public Integer getInteger() {
-            return integer;
-        }
-
-        public void setInteger(Integer integer) {
-            this.integer = integer;
         }
 
         public BigDecimal getBigDecimal() {

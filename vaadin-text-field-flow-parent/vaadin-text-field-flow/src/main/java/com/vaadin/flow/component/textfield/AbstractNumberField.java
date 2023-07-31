@@ -17,6 +17,7 @@
 package com.vaadin.flow.component.textfield;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.CompositionNotifier;
@@ -26,14 +27,21 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.InputNotifier;
 import com.vaadin.flow.component.KeyNotifier;
+import com.vaadin.flow.component.Synchronize;
+import com.vaadin.flow.component.shared.ClientValidationUtil;
+import com.vaadin.flow.component.shared.HasClientValidation;
+import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
+import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
+import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * Abstract base class for components based on {@code vaadin-number-field}
@@ -42,10 +50,11 @@ import com.vaadin.flow.server.VaadinSession;
  * @author Vaadin Ltd.
  */
 public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T extends Number>
-        extends GeneratedVaadinNumberField<C, T> implements HasSize,
-        HasValidation, HasValueChangeMode, HasPrefixAndSuffix, InputNotifier,
-        KeyNotifier, CompositionNotifier, HasAutocomplete, HasAutocapitalize,
-        HasAutocorrect, HasHelper, HasLabel, HasValidator<T> {
+        extends GeneratedVaadinNumberField<C, T>
+        implements HasSize, HasValidation, HasValueChangeMode,
+        HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
+        HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper, HasLabel,
+        HasValidator<T>, HasClientValidation {
 
     private ValueChangeMode currentMode;
 
@@ -101,6 +110,10 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         setValueChangeMode(ValueChangeMode.ON_CHANGE);
 
         addValueChangeListener(e -> validate());
+
+        if (isEnforcedFieldValidationEnabled()) {
+            addClientValidatedEventListener(e -> validate());
+        }
     }
 
     /**
@@ -302,7 +315,26 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
      */
     @Override
     public void setValue(T value) {
+    	T oldValue = getValue();
+
         super.setValue(value);
+
+        // Clear the input element from possible bad input.
+        if (Objects.equals(oldValue, getEmptyValue())
+                && Objects.equals(value, getEmptyValue())
+                && isInputValuePresent()) {
+            // The check for value presence guarantees that a non-empty value
+            // won't get cleared when setValue(null) and setValue(...) are
+            // subsequently called within one round-trip.
+            // Flow only sends the final component value to the client
+            // when you update the value multiple times during a round-trip
+            // and the final value is sent in place of the first one, so
+            // `executeJs` can end up invoked after a non-empty value is set.
+            getElement()
+                    .executeJs("if (!this.value) this._inputElementValue = ''");
+            getElement().setProperty("_hasInputValue", false);
+            fireEvent(new ClientValidatedEvent(this, false));
+        }
     }
 
     /**
@@ -361,6 +393,11 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         return isInvalidBoolean();
     }
 
+    @Synchronize(property = "_hasInputValue", value = "has-input-value-changed")
+    private boolean isInputValuePresent() {
+        return getElement().getProperty("_hasInputValue", false);
+    }
+
     @Override
     public Validator<T> getDefaultValidator() {
         if (isEnforcedFieldValidationEnabled()) {
@@ -370,17 +407,38 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         return Validator.alwaysPass();
     }
 
+    @Override
+    public Registration addValidationStatusChangeListener(
+            ValidationStatusChangeListener<T> listener) {
+        if (isEnforcedFieldValidationEnabled()) {
+            return addClientValidatedEventListener(
+                    event -> listener.validationStatusChanged(
+                            new ValidationStatusChangeEvent<T>(this,
+                                    !isInvalid())));
+        }
+
+        return null;
+    }
+
     private ValidationResult checkValidity(T value) {
-        final boolean isGreaterThanMax = value != null
-                && value.doubleValue() > max;
-        if (isGreaterThanMax) {
+        boolean hasNonParsableValue = Objects.equals(value, getEmptyValue())
+                && isInputValuePresent();
+        if (hasNonParsableValue) {
             return ValidationResult.error("");
         }
 
-        final boolean isSmallerThanMin = value != null
-                && value.doubleValue() < min;
-        if (isSmallerThanMin) {
-            return ValidationResult.error("");
+        Double doubleValue = value != null ? value.doubleValue() : null;
+
+        ValidationResult greaterThanMax = ValidationUtil
+                .checkGreaterThanMax(doubleValue, max);
+        if (greaterThanMax.isError()) {
+            return greaterThanMax;
+        }
+
+        ValidationResult smallerThanMin = ValidationUtil
+                .checkSmallerThanMin(doubleValue, min);
+        if (smallerThanMin.isError()) {
+            return smallerThanMin;
         }
 
         if (!isValidByStep(value)) {
@@ -435,7 +493,12 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        FieldValidationUtil.disableClientValidation(this);
+        if (isEnforcedFieldValidationEnabled()) {
+            ClientValidationUtil
+                    .preventWebComponentFromModifyingInvalidState(this);
+        } else {
+            FieldValidationUtil.disableClientValidation(this);
+        }
     }
 
     /**
