@@ -22,10 +22,8 @@ import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.textfield.BigDecimalField;
-import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.NumberField;
-import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.Setter;
@@ -45,10 +43,6 @@ public class BinderValidationPage extends Div {
         TextField textField = new TextField();
         addComponent(textField, Bean::getString, Bean::setString,
                 value -> value.length() > 2, field -> field.setMinLength(1));
-
-        EmailField emailField = new EmailField();
-        addComponent(emailField, Bean::getString, Bean::setString,
-                value -> value.length() > 20, field -> field.setMinLength(1));
 
         BigDecimalField bigDecimalField = new BigDecimalField();
         addComponent(bigDecimalField, Bean::getBigDecimal, Bean::setBigDecimal,
