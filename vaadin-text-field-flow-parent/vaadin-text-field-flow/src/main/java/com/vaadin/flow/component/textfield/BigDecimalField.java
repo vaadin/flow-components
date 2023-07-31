@@ -29,15 +29,25 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.InputNotifier;
 import com.vaadin.flow.component.KeyNotifier;
+import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.shared.ClientValidationUtil;
+import com.vaadin.flow.component.shared.HasClientValidation;
+import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
+import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
+import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
+import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.function.SerializableBiFunction;
+import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * Server-side component for the {@code vaadin-big-decimal-field} element. This
@@ -60,7 +70,7 @@ public class BigDecimalField
         implements HasSize, HasValidation, HasValueChangeMode,
         HasPrefixAndSuffix, InputNotifier, KeyNotifier, CompositionNotifier,
         HasAutocomplete, HasAutocapitalize, HasAutocorrect, HasHelper, HasLabel,
-        HasValidator<BigDecimal> {
+        HasValidator<BigDecimal>, HasClientValidation {
     private ValueChangeMode currentMode;
 
     private boolean isConnectorAttached;
@@ -104,6 +114,10 @@ public class BigDecimalField
         setValueChangeMode(ValueChangeMode.ON_CHANGE);
 
         addValueChangeListener(e -> validate());
+        
+        if(isEnforcedFieldValidationEnabled()) {
+        	addClientValidatedEventListener(e -> validate());
+        }
     }
 
     /**
@@ -390,7 +404,24 @@ public class BigDecimalField
      */
     @Override
     public void setValue(BigDecimal value) {
-        super.setValue(value);
+    	 BigDecimal oldValue = getValue();
+
+         super.setValue(value);
+
+         if (Objects.equals(oldValue, getEmptyValue())
+                 && Objects.equals(value, getEmptyValue())
+                 && isInputValuePresent()) {
+             // Clear the input element from possible bad input.
+             getElement().executeJs("this._inputElementValue = ''");
+             getElement().setProperty("_hasInputValue", false);
+             fireEvent(new ClientValidatedEvent(this, false));
+         } else {
+             // Restore the input element's value in case it was cleared
+             // in the above branch. That can happen when setValue(null)
+             // and setValue(...) are subsequently called within one round-trip
+             // and there was bad input.
+             getElement().executeJs("this._inputElementValue = this.value");
+         }
     }
 
     /**
@@ -411,16 +442,56 @@ public class BigDecimalField
      */
     @Override
     protected void validate() {
-        ValidationResult requiredValidation = TextFieldValidationSupport
-                .checkRequired(required, getValue(), getEmptyValue());
-        setInvalid(requiredValidation.isError());
+        BigDecimal value = getValue();
+
+        boolean isRequired = isRequiredIndicatorVisible();
+        ValidationResult requiredValidation = ValidationUtil
+                .checkRequired(isRequired, value, getEmptyValue());
+
+        setInvalid(requiredValidation.isError()
+                || checkValidity(value).isError());
+    }
+    
+    private ValidationResult checkValidity(BigDecimal value) {
+        boolean hasNonParsableValue = Objects.equals(value, getEmptyValue())
+                && isInputValuePresent();
+        if (hasNonParsableValue) {
+            return ValidationResult.error("");
+        }
+
+        return ValidationResult.ok();
+    }
+
+    
+    @Override
+    public Validator<BigDecimal> getDefaultValidator() {
+        return (value, context) -> checkValidity(value);
     }
 
     @Override
-    public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
-        super.setRequiredIndicatorVisible(requiredIndicatorVisible);
-        this.required = requiredIndicatorVisible;
+    public Registration addValidationStatusChangeListener(
+            ValidationStatusChangeListener<BigDecimal> listener) {
+    	if(isEnforcedFieldValidationEnabled()) {
+    		return addClientValidatedEventListener(
+                    event -> listener.validationStatusChanged(
+                            new ValidationStatusChangeEvent<BigDecimal>(this,
+                                    !isInvalid())));
+    	}
+    	
+    	return null;
     }
+
+    /**
+     * Returns whether the input element has a value or not.
+     *
+     * @return <code>true</code> if the input element's value is populated,
+     *         <code>false</code> otherwise
+     */
+    @Synchronize(property = "_hasInputValue", value = "has-input-value-changed")
+    private boolean isInputValuePresent() {
+        return getElement().getProperty("_hasInputValue", false);
+    }
+    
 
     /**
      * Sets the locale for this BigDecimalField. It is used to determine which
@@ -464,6 +535,33 @@ public class BigDecimalField
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        FieldValidationUtil.disableClientValidation(this);
+        if(isEnforcedFieldValidationEnabled()) {
+        	ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
+        }else {
+        	FieldValidationUtil.disableClientValidation(this);
+        }
+    }
+    
+    /**
+     * Whether the full experience validation is enforced for the component.
+     * <p>
+     * Exposed with protected visibility to support mocking
+     * <p>
+     * The method requires the {@code VaadinSession} instance to obtain the
+     * application configuration properties, otherwise, the feature is
+     * considered disabled.
+     *
+     * @return {@code true} if enabled, {@code false} otherwise.
+     */
+    protected boolean isEnforcedFieldValidationEnabled() {
+        VaadinSession session = VaadinSession.getCurrent();
+        if (session == null) {
+            return false;
+        }
+        DeploymentConfiguration configuration = session.getConfiguration();
+        if (configuration == null) {
+            return false;
+        }
+        return configuration.isEnforcedFieldValidationEnabled();
     }
 }
