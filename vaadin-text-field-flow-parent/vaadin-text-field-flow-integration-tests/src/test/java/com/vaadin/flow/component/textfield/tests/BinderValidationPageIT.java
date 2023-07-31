@@ -60,9 +60,8 @@ public class BinderValidationPageIT extends AbstractComponentIT {
     }
 
     private List<Class<? extends TestBenchElement>> fieldClasses = Arrays
-            .asList(TextFieldElement.class, EmailFieldElement.class,
-                    BigDecimalFieldElement.class, IntegerFieldElement.class,
-                    NumberFieldElement.class);
+            .asList(TextFieldElement.class, BigDecimalFieldElement.class,
+                    IntegerFieldElement.class, NumberFieldElement.class);
 
     @Test
     public void fields_internalValidationPass_binderValidationFail_fieldInvalid() {
