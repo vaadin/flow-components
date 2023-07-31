@@ -26,7 +26,6 @@ import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.PasswordField;
-import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.Setter;
@@ -45,10 +44,6 @@ public class BinderValidationPage extends Div {
     public BinderValidationPage() {
         TextField textField = new TextField();
         addComponent(textField, Bean::getString, Bean::setString,
-                value -> value.length() > 2, field -> field.setMinLength(1));
-
-        TextArea textArea = new TextArea();
-        addComponent(textArea, Bean::getString, Bean::setString,
                 value -> value.length() > 2, field -> field.setMinLength(1));
 
         PasswordField passwordField = new PasswordField();
