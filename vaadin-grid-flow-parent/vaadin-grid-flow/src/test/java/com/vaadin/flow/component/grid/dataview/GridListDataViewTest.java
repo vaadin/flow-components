@@ -137,7 +137,6 @@ public class GridListDataViewTest extends AbstractListDataViewListenerTest {
                 dataView.getItem(0));
     }
 
-
     @Test
     public void dataViewWithItems_contains_returnsCorrectItems() {
         Grid<String> grid = new Grid<>();
