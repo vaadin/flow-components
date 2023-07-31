@@ -315,7 +315,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
      */
     @Override
     public void setValue(T value) {
-    	T oldValue = getValue();
+        T oldValue = getValue();
 
         super.setValue(value);
 

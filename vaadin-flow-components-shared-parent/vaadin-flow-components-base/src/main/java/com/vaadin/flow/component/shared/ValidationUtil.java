@@ -50,7 +50,7 @@ public class ValidationUtil {
         }
         return ValidationResult.ok();
     }
-    
+
     /**
      * Checks if the value being set to the component is greater than the max
      * value defined
