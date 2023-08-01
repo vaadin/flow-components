@@ -24,7 +24,9 @@ import com.vaadin.flow.component.Tag;
 
 public class HasDirtyStateTest {
     @Tag("test-component")
-    private static class TestComponent extends Component implements HasDirtyState {}
+    private static class TestComponent extends Component
+            implements HasDirtyState {
+    }
 
     private TestComponent component;
 

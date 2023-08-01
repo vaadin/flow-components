@@ -33,6 +33,7 @@ import com.vaadin.flow.component.HasValue;
  * <li>{@link HasTooltip}</li>
  * <li>{@link HasSize}</li>
  * <li>{@link HasValue}</li>
+ * <li>{@link HasDirtyState}</li>
  * </ul>
  *
  * @param <E>
@@ -44,6 +45,6 @@ import com.vaadin.flow.component.HasValue;
  * @since 24.1
  */
 public interface InputField<E extends HasValue.ValueChangeEvent<V>, V> extends
-        HasEnabled, HasLabel, HasSize, HasStyle, HasTooltip, HasValue<E, V> {
+        HasEnabled, HasLabel, HasSize, HasStyle, HasTooltip, HasValue<E, V>, HasDirtyState {
 
 }

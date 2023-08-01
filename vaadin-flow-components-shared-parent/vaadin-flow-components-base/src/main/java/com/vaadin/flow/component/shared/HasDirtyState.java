@@ -28,7 +28,7 @@ public interface HasDirtyState extends HasElement {
      * Sets the dirty state for the component.
      *
      * @param dirty
-     *              whether the field is dirty.
+     *            whether the field is dirty.
      */
     default void setDirty(boolean dirty) {
         getElement().setProperty("dirty", dirty);
