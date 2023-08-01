@@ -32,8 +32,7 @@ public class EmailFieldElement extends TestBenchElement
 
     @Override
     public void setValue(String string) {
-        TestBenchElement input = $("input").first();
-        TextFieldElementHelper.setValue(input, string);
+        TextFieldElementHelper.setValue(this, string);
     }
 
     @Override
