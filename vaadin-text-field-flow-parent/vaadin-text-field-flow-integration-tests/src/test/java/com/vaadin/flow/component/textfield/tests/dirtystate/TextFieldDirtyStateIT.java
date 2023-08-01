@@ -5,7 +5,8 @@ import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.dirtystate.AbstractDirtyStateIT;
 
 @TestPath("vaadin-text-field/dirty-state")
-public class TextFieldDirtyStateIT extends AbstractDirtyStateIT<TextFieldElement> {
+public class TextFieldDirtyStateIT
+        extends AbstractDirtyStateIT<TextFieldElement> {
     @Override
     protected TextFieldElement getTestField() {
         return $(TextFieldElement.class).first();

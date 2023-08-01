@@ -44,7 +44,8 @@ import com.vaadin.flow.component.HasValue;
  * @author Vaadin Ltd
  * @since 24.1
  */
-public interface InputField<E extends HasValue.ValueChangeEvent<V>, V> extends
-        HasEnabled, HasLabel, HasSize, HasStyle, HasTooltip, HasValue<E, V>, HasDirtyState {
+public interface InputField<E extends HasValue.ValueChangeEvent<V>, V>
+        extends HasEnabled, HasLabel, HasSize, HasStyle, HasTooltip,
+        HasValue<E, V>, HasDirtyState {
 
 }
