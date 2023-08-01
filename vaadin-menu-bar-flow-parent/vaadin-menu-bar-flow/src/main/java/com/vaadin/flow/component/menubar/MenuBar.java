@@ -207,7 +207,7 @@ public class MenuBar extends Component
      */
     public MenuItem addItem(String text, String tooltipText) {
         var item = addItem(text);
-        setTooltip(item, tooltipText);
+        setTooltipText(item, tooltipText);
         return item;
     }
 
@@ -232,7 +232,7 @@ public class MenuBar extends Component
      */
     public MenuItem addItem(Component component, String tooltipText) {
         var item = addItem(component);
-        setTooltip(item, tooltipText);
+        setTooltipText(item, tooltipText);
         return item;
     }
 
@@ -261,7 +261,7 @@ public class MenuBar extends Component
     public MenuItem addItem(String text, String tooltipText,
             ComponentEventListener<ClickEvent<MenuItem>> clickListener) {
         var item = addItem(text, clickListener);
-        setTooltip(item, tooltipText);
+        setTooltipText(item, tooltipText);
         return item;
     }
 
@@ -290,7 +290,7 @@ public class MenuBar extends Component
     public MenuItem addItem(Component component, String tooltipText,
             ComponentEventListener<ClickEvent<MenuItem>> clickListener) {
         var item = addItem(component, clickListener);
-        setTooltip(item, tooltipText);
+        setTooltipText(item, tooltipText);
         return item;
     }
 
@@ -513,11 +513,14 @@ public class MenuBar extends Component
     }
 
     /**
-     * Sets the tooltip property for the given menu item. A vaadin-tooltip
-     * element with a custom generator is created and added inside the menu bar
-     * in case it doesn't exist.
+     * Sets the tooltip text for the given {@link MenuItem}.
+     *
+     * @param item
+     *            the menu item to set the tooltip for
+     * @param tooltipText
+     *            the tooltip text to set for the item
      */
-    private void setTooltip(MenuItem item, String tooltipText) {
+    public void setTooltipText(MenuItem item, String tooltipText) {
         if (!getElement().getChildren().anyMatch(
                 child -> "tooltip".equals(child.getAttribute("slot")))) {
             // No <vaadin-tooltip> yet added, add one
