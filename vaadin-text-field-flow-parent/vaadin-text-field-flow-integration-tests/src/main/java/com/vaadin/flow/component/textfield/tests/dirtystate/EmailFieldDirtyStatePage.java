@@ -5,7 +5,8 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.tests.dirtystate.AbstractDirtyStatePage;
 
 @Route("vaadin-email-field/dirty-state")
-public class EmailFieldDirtyStatePage extends AbstractDirtyStatePage<EmailField> {
+public class EmailFieldDirtyStatePage
+        extends AbstractDirtyStatePage<EmailField> {
     @Override
     protected EmailField createTestField() {
         return new EmailField();

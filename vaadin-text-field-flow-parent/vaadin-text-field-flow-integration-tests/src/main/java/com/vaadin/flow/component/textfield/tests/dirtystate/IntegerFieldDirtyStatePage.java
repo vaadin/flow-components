@@ -5,7 +5,8 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.tests.dirtystate.AbstractDirtyStatePage;
 
 @Route("vaadin-integer-field/dirty-state")
-public class IntegerFieldDirtyStatePage extends AbstractDirtyStatePage<IntegerField> {
+public class IntegerFieldDirtyStatePage
+        extends AbstractDirtyStatePage<IntegerField> {
     @Override
     protected IntegerField createTestField() {
         return new IntegerField();
