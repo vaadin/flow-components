@@ -33,7 +33,7 @@ public class MenuBarTooltipPage extends Div {
 
         MenuBar menuBar = new MenuBar();
         // Use each add API with tooltip parameter to add menu items
-        menuBar.addItem("Edit", "Edit tooltip");
+        var editMenuItem = menuBar.addItem("Edit", "Edit tooltip");
         menuBar.addItem(new Span("Share"), "Share tooltip");
         menuBar.addItem("Move", "Move tooltip", (e) -> {
         });
@@ -50,6 +50,14 @@ public class MenuBarTooltipPage extends Div {
                 });
         toggleAttachedButton.setId("toggle-attached-button");
 
-        add(toggleAttachedButton, menuBar);
+        // Add a button for updating an item's tooltip
+        var updateItemTooltipButton = new NativeButton("Update item tooltip",
+                event -> {
+                    menuBar.setTooltipText(editMenuItem,
+                            "Updated Edit tooltip");
+                });
+        updateItemTooltipButton.setId("update-item-tooltip-button");
+
+        add(toggleAttachedButton, updateItemTooltipButton, menuBar);
     }
 }
