@@ -21,9 +21,9 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 
 import com.vaadin.flow.component.menubar.testbench.MenuBarElement;
-import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-menu-bar/tooltip")
 public class MenuBarTooltipIT extends AbstractComponentIT {
@@ -60,6 +60,17 @@ public class MenuBarTooltipIT extends AbstractComponentIT {
         var menuBar = $(MenuBarElement.class).first();
         showTooltip(menuBar.getButtons().get(0));
         Assert.assertEquals("Edit tooltip", getActiveTooltipText());
+    }
+
+    @Test
+    public void updateTooltipText_showUpdatedTooltip() {
+        var menuBar = $(MenuBarElement.class).first();
+
+        // Udpate tooltip text
+        clickElementWithJs("update-item-tooltip-button");
+
+        showTooltip(menuBar.getButtons().get(0));
+        Assert.assertEquals("Updated Edit tooltip", getActiveTooltipText());
     }
 
     private void showTooltip(TestBenchElement button) {
