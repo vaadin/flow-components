@@ -55,12 +55,16 @@ public class PasswordFieldElement extends TestBenchElement
 
     @Override
     public void setValue(String string) {
-        TextFieldElementHelper.setValue(this, string);
+        TextFieldElementHelper.setValue(getInputElement(), string);
     }
 
     @Override
     public void sendKeys(CharSequence... keysToSend) {
-        $("input").first().sendKeys(keysToSend);
+        getInputElement().sendKeys(keysToSend);
+    }
+
+    private TestBenchElement getInputElement() {
+        return (TestBenchElement) getProperty("inputElement");
     }
 
 }
