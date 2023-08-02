@@ -2556,6 +2556,22 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             model.setSelectAllCheckboxVisibility(
                     model.getSelectAllCheckboxVisibility());
         }
+
+        fireEvent(new DataProviderChangeEvent<>(this, false));
+    }
+
+    /**
+     * Adds a data provider change listener to this component.
+     *
+     * @param listener
+     *            the listener to add, not <code>null</code>
+     * @return a handle that can be used for removing the listener
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public Registration addDataProviderChangeListener(
+            ComponentEventListener<DataProviderChangeEvent<T>> listener) {
+        return addListener(DataProviderChangeEvent.class,
+                (ComponentEventListener) listener);
     }
 
     /**
