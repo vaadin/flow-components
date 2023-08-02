@@ -31,12 +31,16 @@ public class TextAreaElement extends TestBenchElement
         implements HasStringValueProperty, HasLabel, HasPlaceholder, HasHelper {
     @Override
     public void setValue(String string) {
-        TextFieldElementHelper.setValue(this, string);
+        TextFieldElementHelper.setValue(getInputElement(), string);
     }
 
     @Override
     public void sendKeys(CharSequence... keysToSend) {
-        $("textarea").first().sendKeys(keysToSend);
+        getInputElement().sendKeys(keysToSend);
+    }
+
+    private TestBenchElement getInputElement() {
+        return (TestBenchElement) getProperty("inputElement");
     }
 
 }
