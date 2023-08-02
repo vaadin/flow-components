@@ -1,5 +1,7 @@
 package com.vaadin.flow.component.textfield.testbench;
 
+import java.util.Collections;
+
 import com.vaadin.testbench.TestBenchElement;
 
 class TextFieldElementHelper {
