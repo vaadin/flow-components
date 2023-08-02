@@ -5,8 +5,7 @@ import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.dirtystate.AbstractDirtyStateIT;
 
 @TestPath("vaadin-date-time-picker/dirty-state")
-public class DirtyStateIT
-        extends AbstractDirtyStateIT<DateTimePickerElement> {
+public class DirtyStateIT extends AbstractDirtyStateIT<DateTimePickerElement> {
     @Override
     protected DateTimePickerElement getTestField() {
         return $(DateTimePickerElement.class).first();
