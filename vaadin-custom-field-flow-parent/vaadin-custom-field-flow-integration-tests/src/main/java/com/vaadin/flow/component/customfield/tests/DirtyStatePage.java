@@ -5,7 +5,8 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.tests.dirtystate.AbstractDirtyStatePage;
 
 @Route("vaadin-custom-field/dirty-state")
-public class DirtyStatePage extends AbstractDirtyStatePage<CustomField<String>> {
+public class DirtyStatePage
+        extends AbstractDirtyStatePage<CustomField<String>> {
     private class NameField extends CustomField<String> {
         @Override
         protected String generateModelValue() {
@@ -13,7 +14,8 @@ public class DirtyStatePage extends AbstractDirtyStatePage<CustomField<String>> 
         }
 
         @Override
-        protected void setPresentationValue(String newPresentationValue) {}
+        protected void setPresentationValue(String newPresentationValue) {
+        }
     };
 
     @Override
