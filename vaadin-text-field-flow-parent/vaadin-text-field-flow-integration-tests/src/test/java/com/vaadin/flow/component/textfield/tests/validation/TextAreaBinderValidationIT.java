@@ -39,7 +39,8 @@ public class TextAreaBinderValidationIT
     }
 
     @Test
-    public void required_triggerBlur_assertValidity() {
+    public void required_markAsDirty_triggerBlur_assertValidity() {
+        markAsDirty();
         testField.sendKeys(Keys.TAB);
         assertServerInvalid();
         assertClientInvalid();

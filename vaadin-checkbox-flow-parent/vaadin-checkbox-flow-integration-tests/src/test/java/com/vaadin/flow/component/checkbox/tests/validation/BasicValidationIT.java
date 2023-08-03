@@ -31,6 +31,16 @@ public class BasicValidationIT
         $("button").id(REQUIRED_BUTTON).click();
 
         testField.$(CheckboxElement.class).last().sendKeys(Keys.TAB);
+        assertServerValid();
+        assertClientValid();
+    }
+
+    @Test
+    public void required_markAsDirty_triggerBlur_assertValidity() {
+        $("button").id(REQUIRED_BUTTON).click();
+        markAsDirty();
+
+        testField.$(CheckboxElement.class).last().sendKeys(Keys.TAB);
         assertServerInvalid();
         assertClientInvalid();
     }

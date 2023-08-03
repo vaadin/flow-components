@@ -24,14 +24,17 @@ import com.vaadin.flow.component.HasValue.ValueChangeListener;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Input;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.shared.HasDirtyState;
 
-public abstract class AbstractValidationPage<T extends Component & HasValidation>
+public abstract class AbstractValidationPage<T extends Component & HasValidation & HasDirtyState>
         extends Div {
     public static final String SERVER_VALIDITY_STATE = "server-validity-state";
     public static final String SERVER_VALIDITY_STATE_BUTTON = "server-validity-state-button";
 
     public static final String ATTACH_FIELD_BUTTON = "attach-field-button";
     public static final String DETACH_FIELD_BUTTON = "detach-field-button";
+
+    public static final String MARK_AS_DIRTY_BUTTON = "mark-as-dirty-button";
 
     protected T testField;
 
@@ -41,6 +44,7 @@ public abstract class AbstractValidationPage<T extends Component & HasValidation
 
         addServerValidityStateControls();
         addAttachDetachControls();
+        addDirtyStateControl();
     }
 
     private void addServerValidityStateControls() {
@@ -64,6 +68,13 @@ public abstract class AbstractValidationPage<T extends Component & HasValidation
                 "Detach field", event -> remove(testField));
 
         add(new Div(attachButton, detachButton));
+    }
+
+    private void addDirtyStateControl() {
+        NativeButton markAsDirtyButton = createButton(MARK_AS_DIRTY_BUTTON, "Mark as dirty", event -> {
+            testField.setDirty(true);
+        });
+        add(markAsDirtyButton);
     }
 
     /**

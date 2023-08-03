@@ -31,6 +31,16 @@ public class MultiSelectComboBoxBasicValidationIT
         $("button").id(REQUIRED_BUTTON).click();
 
         testField.sendKeys(Keys.TAB);
+        assertServerValid();
+        assertClientValid();
+    }
+
+    @Test
+    public void required_markAsDirty_triggerBlur_assertValidity() {
+        $("button").id(REQUIRED_BUTTON).click();
+        markAsDirty();
+
+        testField.sendKeys(Keys.TAB);
         assertServerInvalid();
         assertClientInvalid();
     }

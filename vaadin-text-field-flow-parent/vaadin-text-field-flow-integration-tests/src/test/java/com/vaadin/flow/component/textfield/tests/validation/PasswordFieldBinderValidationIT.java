@@ -40,7 +40,8 @@ public class PasswordFieldBinderValidationIT
     }
 
     @Test
-    public void required_triggerBlur_assertValidity() {
+    public void required_markAsDirty_triggerBlur_assertValidity() {
+        markAsDirty();
         // Tab to the show button
         testField.sendKeys(Keys.TAB);
         // Tab out of the field

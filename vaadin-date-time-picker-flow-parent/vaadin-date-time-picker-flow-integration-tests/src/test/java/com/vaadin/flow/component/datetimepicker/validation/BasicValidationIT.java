@@ -47,6 +47,17 @@ public class BasicValidationIT
 
         dateInput.sendKeys(Keys.TAB);
         timeInput.sendKeys(Keys.TAB);
+        assertServerValid();
+        assertClientValid();
+    }
+
+    @Test
+    public void required_markAsDirty_triggerBlur_assertValidity() {
+        $("button").id(REQUIRED_BUTTON).click();
+        markAsDirty();
+
+        dateInput.sendKeys(Keys.TAB);
+        timeInput.sendKeys(Keys.TAB);
         assertServerInvalid();
         assertClientInvalid();
     }

@@ -26,6 +26,7 @@ import static com.vaadin.tests.validation.AbstractValidationPage.ATTACH_FIELD_BU
 import static com.vaadin.tests.validation.AbstractValidationPage.DETACH_FIELD_BUTTON;
 import static com.vaadin.tests.validation.AbstractValidationPage.SERVER_VALIDITY_STATE;
 import static com.vaadin.tests.validation.AbstractValidationPage.SERVER_VALIDITY_STATE_BUTTON;
+import static com.vaadin.tests.validation.AbstractValidationPage.MARK_AS_DIRTY_BUTTON;
 
 public abstract class AbstractValidationIT<T extends TestBenchElement>
         extends AbstractComponentIT {
@@ -90,6 +91,10 @@ public abstract class AbstractValidationIT<T extends TestBenchElement>
         return (Boolean) getCommandExecutor().executeScript(
                 "const field = arguments[0]; const invalid = arguments[1]; return field._shouldSetInvalid(invalid)",
                 testField, invalid);
+    }
+
+    protected void markAsDirty() {
+        $("button").id(MARK_AS_DIRTY_BUTTON).click();
     }
 
     protected void detachAndReattachField() {

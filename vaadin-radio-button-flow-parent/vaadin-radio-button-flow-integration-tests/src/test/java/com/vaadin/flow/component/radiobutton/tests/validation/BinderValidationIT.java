@@ -21,7 +21,8 @@ public class BinderValidationIT
     }
 
     @Test
-    public void required_triggerBlur_assertValidity() {
+    public void required_markAsDirty_triggerBlur_assertValidity() {
+        markAsDirty();
         testField.$(RadioButtonElement.class).last().sendKeys(Keys.TAB);
         assertServerInvalid();
         assertClientInvalid();

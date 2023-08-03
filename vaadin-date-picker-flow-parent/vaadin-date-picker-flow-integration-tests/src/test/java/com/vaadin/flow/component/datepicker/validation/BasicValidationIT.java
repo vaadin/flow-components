@@ -32,6 +32,16 @@ public class BasicValidationIT extends AbstractValidationIT<DatePickerElement> {
         $("button").id(REQUIRED_BUTTON).click();
 
         testField.sendKeys(Keys.TAB);
+        assertServerValid();
+        assertClientValid();
+    }
+
+    @Test
+    public void required_markAsDirty_triggerBlur_assertValidity() {
+        markAsDirty();
+        $("button").id(REQUIRED_BUTTON).click();
+
+        testField.sendKeys(Keys.TAB);
         assertServerInvalid();
         assertClientInvalid();
     }

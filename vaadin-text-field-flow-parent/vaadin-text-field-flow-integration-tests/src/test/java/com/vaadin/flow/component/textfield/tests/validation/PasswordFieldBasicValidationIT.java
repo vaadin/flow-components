@@ -54,6 +54,19 @@ public class PasswordFieldBasicValidationIT
         testField.sendKeys(Keys.TAB);
         // Tab out of the field
         testField.sendKeys(Keys.TAB);
+        assertServerValid();
+        assertClientValid();
+    }
+
+    @Test
+    public void required_markAsDirty_triggerBlur_assertValidity() {
+        $("button").id(REQUIRED_BUTTON).click();
+        markAsDirty();
+
+        // Tab to the show button
+        testField.sendKeys(Keys.TAB);
+        // Tab out of the field
+        testField.sendKeys(Keys.TAB);
         assertServerInvalid();
         assertClientInvalid();
     }
@@ -72,8 +85,9 @@ public class PasswordFieldBasicValidationIT
     }
 
     @Test
-    public void minLength_triggerBlur_assertValidity() {
+    public void minLength_markAsDirty_triggerBlur_assertValidity() {
         $("input").id(MIN_LENGTH_INPUT).sendKeys("2", Keys.ENTER);
+        markAsDirty();
 
         // Tab to the show button
         testField.sendKeys(Keys.TAB);
@@ -118,8 +132,9 @@ public class PasswordFieldBasicValidationIT
     }
 
     @Test
-    public void pattern_triggerBlur_assertValidity() {
+    public void pattern_markAsDirty_triggerBlur_assertValidity() {
         $("input").id(PATTERN_INPUT).sendKeys("^\\d+$", Keys.ENTER);
+        markAsDirty();
 
         // Tab to the show button
         testField.sendKeys(Keys.TAB);
