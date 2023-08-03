@@ -8,7 +8,7 @@ import com.vaadin.tests.dirtystate.AbstractDirtyStatePage;
 @Route("vaadin-custom-field/dirty-state")
 public class DirtyStatePage
         extends AbstractDirtyStatePage<CustomField<String>> {
-    private class TestCustomField extends CustomField<String> {
+    private static class TestCustomField extends CustomField<String> {
         private TextField field1 = new TextField();
         private TextField field2 = new TextField();
 
