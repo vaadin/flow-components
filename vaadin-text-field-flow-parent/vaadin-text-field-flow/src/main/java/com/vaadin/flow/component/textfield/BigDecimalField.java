@@ -114,9 +114,9 @@ public class BigDecimalField
         setValueChangeMode(ValueChangeMode.ON_CHANGE);
 
         addValueChangeListener(e -> validate());
-        
-        if(isEnforcedFieldValidationEnabled()) {
-        	addClientValidatedEventListener(e -> validate());
+
+        if (isEnforcedFieldValidationEnabled()) {
+            addClientValidatedEventListener(e -> validate());
         }
     }
 
@@ -404,24 +404,24 @@ public class BigDecimalField
      */
     @Override
     public void setValue(BigDecimal value) {
-    	 BigDecimal oldValue = getValue();
+        BigDecimal oldValue = getValue();
 
-         super.setValue(value);
+        super.setValue(value);
 
-         if (Objects.equals(oldValue, getEmptyValue())
-                 && Objects.equals(value, getEmptyValue())
-                 && isInputValuePresent()) {
-             // Clear the input element from possible bad input.
-             getElement().executeJs("this._inputElementValue = ''");
-             getElement().setProperty("_hasInputValue", false);
-             fireEvent(new ClientValidatedEvent(this, false));
-         } else {
-             // Restore the input element's value in case it was cleared
-             // in the above branch. That can happen when setValue(null)
-             // and setValue(...) are subsequently called within one round-trip
-             // and there was bad input.
-             getElement().executeJs("this._inputElementValue = this.value");
-         }
+        if (Objects.equals(oldValue, getEmptyValue())
+                && Objects.equals(value, getEmptyValue())
+                && isInputValuePresent()) {
+            // Clear the input element from possible bad input.
+            getElement().executeJs("this._inputElementValue = ''");
+            getElement().setProperty("_hasInputValue", false);
+            fireEvent(new ClientValidatedEvent(this, false));
+        } else {
+            // Restore the input element's value in case it was cleared
+            // in the above branch. That can happen when setValue(null)
+            // and setValue(...) are subsequently called within one round-trip
+            // and there was bad input.
+            getElement().executeJs("this._inputElementValue = this.value");
+        }
     }
 
     /**
@@ -448,10 +448,10 @@ public class BigDecimalField
         ValidationResult requiredValidation = ValidationUtil
                 .checkRequired(isRequired, value, getEmptyValue());
 
-        setInvalid(requiredValidation.isError()
-                || checkValidity(value).isError());
+        setInvalid(
+                requiredValidation.isError() || checkValidity(value).isError());
     }
-    
+
     private ValidationResult checkValidity(BigDecimal value) {
         boolean hasNonParsableValue = Objects.equals(value, getEmptyValue())
                 && isInputValuePresent();
@@ -462,7 +462,6 @@ public class BigDecimalField
         return ValidationResult.ok();
     }
 
-    
     @Override
     public Validator<BigDecimal> getDefaultValidator() {
         return (value, context) -> checkValidity(value);
@@ -471,14 +470,14 @@ public class BigDecimalField
     @Override
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<BigDecimal> listener) {
-    	if(isEnforcedFieldValidationEnabled()) {
-    		return addClientValidatedEventListener(
+        if (isEnforcedFieldValidationEnabled()) {
+            return addClientValidatedEventListener(
                     event -> listener.validationStatusChanged(
                             new ValidationStatusChangeEvent<BigDecimal>(this,
                                     !isInvalid())));
-    	}
-    	
-    	return null;
+        }
+
+        return null;
     }
 
     /**
@@ -491,7 +490,6 @@ public class BigDecimalField
     private boolean isInputValuePresent() {
         return getElement().getProperty("_hasInputValue", false);
     }
-    
 
     /**
      * Sets the locale for this BigDecimalField. It is used to determine which
@@ -535,13 +533,14 @@ public class BigDecimalField
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        if(isEnforcedFieldValidationEnabled()) {
-        	ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
-        }else {
-        	FieldValidationUtil.disableClientValidation(this);
+        if (isEnforcedFieldValidationEnabled()) {
+            ClientValidationUtil
+                    .preventWebComponentFromModifyingInvalidState(this);
+        } else {
+            FieldValidationUtil.disableClientValidation(this);
         }
     }
-    
+
     /**
      * Whether the full experience validation is enforced for the component.
      * <p>
