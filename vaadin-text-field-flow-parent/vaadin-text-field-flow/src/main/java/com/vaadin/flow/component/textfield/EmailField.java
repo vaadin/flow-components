@@ -27,6 +27,7 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
 import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.binder.Validator;
+import com.vaadin.flow.data.validator.EmailValidator;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.shared.Registration;
 
@@ -49,10 +50,6 @@ import com.vaadin.flow.shared.Registration;
 @JsModule("@vaadin/email-field/src/vaadin-email-field.js")
 public class EmailField extends TextFieldBase<EmailField, String>
         implements HasAllowedCharPattern, HasThemeVariant<TextFieldVariant> {
-    private static final String EMAIL_PATTERN = "^" + "([a-zA-Z0-9_\\.\\-+])+" // local
-            + "@" + "[a-zA-Z0-9-.]+" // domain
-            + "\\." + "[a-zA-Z0-9-]{2,}" // tld
-            + "$";
 
     private boolean isConnectorAttached;
 
@@ -158,7 +155,7 @@ public class EmailField extends TextFieldBase<EmailField, String>
     private TextFieldValidationSupport getValidationSupport() {
         if (validationSupport == null) {
             validationSupport = new TextFieldValidationSupport(this);
-            validationSupport.setPattern(EMAIL_PATTERN);
+            validationSupport.setPattern(EmailValidator.PATTERN);
         }
         return validationSupport;
     }
