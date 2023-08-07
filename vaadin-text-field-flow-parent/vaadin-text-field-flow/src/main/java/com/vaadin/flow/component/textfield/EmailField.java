@@ -33,6 +33,7 @@ import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.Validator;
+import com.vaadin.flow.data.validator.EmailValidator;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.server.VaadinService;
@@ -165,7 +166,7 @@ public class EmailField extends GeneratedVaadinEmailField<EmailField, String>
     private TextFieldValidationSupport getValidationSupport() {
         if (validationSupport == null) {
             validationSupport = new TextFieldValidationSupport(this);
-            validationSupport.setPattern(EMAIL_PATTERN);
+            validationSupport.setPattern(EmailValidator.PATTERN);
         }
         return validationSupport;
     }
