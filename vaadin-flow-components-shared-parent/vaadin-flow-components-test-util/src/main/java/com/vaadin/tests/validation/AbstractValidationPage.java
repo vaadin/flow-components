@@ -71,9 +71,10 @@ public abstract class AbstractValidationPage<T extends Component & HasValidation
     }
 
     private void addDirtyStateControl() {
-        NativeButton markAsDirtyButton = createButton(MARK_AS_DIRTY_BUTTON, "Mark as dirty", event -> {
-            testField.setDirty(true);
-        });
+        NativeButton markAsDirtyButton = createButton(MARK_AS_DIRTY_BUTTON,
+                "Mark as dirty", event -> {
+                    testField.setDirty(true);
+                });
         add(markAsDirtyButton);
     }
 
