@@ -861,11 +861,10 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           // is no loading request from the grid itself. In that case, if
           // children were added or removed, the grid will not be aware of it
           // unless we manually update the size.
-          if (hasSizeChanged) {
-            const gridParentCache = grid.$connector.getCacheByKey(parentKey);
-            const gridItemCache = gridParentCache && gridParentCache.itemkeyCaches[parentKey];
-            if (gridItemCache) {
-              gridItemCache.size = levelSize;
+          if (hasSizeChanged && outstandingRequests.length === 0) {
+            const itemCache = grid._cache.getCacheByKey(parentKey);
+            if (itemCache) {
+              itemCache.size = levelSize;
             }
             updateGridEffectiveSize();
           }
