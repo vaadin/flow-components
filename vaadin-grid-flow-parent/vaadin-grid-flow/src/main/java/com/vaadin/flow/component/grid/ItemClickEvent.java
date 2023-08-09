@@ -111,7 +111,8 @@ public class ItemClickEvent<T> extends ClickEvent<Grid<T>> {
     /**
      * Gets the column that was clicked.
      *
-     * @return the clicked column, not {@code null}
+     * @return the clicked column, {@code null} if clicked column was the multi
+     *         select column.
      */
     public Grid.Column<T> getColumn() {
         return column;
