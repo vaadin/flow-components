@@ -138,6 +138,23 @@ public class TreeGridChangingHierarchyIT extends AbstractComponentIT {
         Assert.assertEquals("b", grid.getCell(0, 0).getText());
     }
 
+    @Test
+    public void addChildrenToExpandedNode_childrenDisplayed() {
+        // add children to A, expand A
+        addItemsToABtn.click();
+        grid.expandWithClick(0);
+
+        // remove children from A
+        removeChildrenOfABtn.click();
+
+        // add children to A again while it is expanded
+        addItemsToABtn.click();
+
+        // verify that the children are added to the expanded node
+        Assert.assertEquals("a/a", grid.getCell(1, 0).getText());
+        Assert.assertEquals("a/b", grid.getCell(2, 0).getText());
+    }
+
     private void runRemovalOfDeeplyNestedItems() {
         addItemsToABtn.click();
         addItemsToAABtn.click();
