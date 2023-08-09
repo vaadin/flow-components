@@ -41,7 +41,7 @@ public class TreeGridChangingHierarchyPage extends Div {
         NativeButton btn2 = new NativeButton("add items to a/a and refresh");
         btn2.addClickListener(event -> {
             data.addItems("a/a", "a/a/a", "a/a/c").addItem("a/a/a", "a/a/a/a");
-            grid.getDataProvider().refreshItem("a/a");
+            grid.getDataProvider().refreshItem("a/a", true);
         });
         NativeButton btn3 = new NativeButton("remove a/a");
         btn3.addClickListener(event -> {
