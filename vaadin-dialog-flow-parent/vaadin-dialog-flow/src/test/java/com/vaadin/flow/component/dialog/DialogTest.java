@@ -325,4 +325,29 @@ public class DialogTest {
         Assert.assertEquals(thirdContent,
                 dialogWithComponents.getChildren().toList().get(2));
     }
+
+    @Test
+    public void open_autoAttachedInBeforeClientResponse() {
+        Dialog dialog = new Dialog();
+        dialog.open();
+
+        fakeClientResponse();
+        Assert.assertNotNull(dialog.getElement().getParent());
+    }
+
+    @Test
+    public void open_close_notAutoAttachedInBeforeClientResponse() {
+        Dialog dialog = new Dialog();
+        dialog.open();
+        dialog.close();
+
+        fakeClientResponse();
+        Assert.assertNull(dialog.getElement().getParent());
+    }
+
+    private void fakeClientResponse() {
+        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
+        ui.getInternals().getStateTree().collectChanges(ignore -> {
+        });
+    }
 }
