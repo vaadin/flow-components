@@ -819,14 +819,19 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
         });
 
         grid.$connector.confirmParent = tryCatchWrapper(function (id, parentKey, levelSize) {
+          // Create connector cache if it doesn't exist
           if (!cache[parentKey]) {
             cache[parentKey] = {};
           }
+          // Update connector cache size
+          const hasSizeChanged = cache[parentKey].size !== levelSize;
           cache[parentKey].size = levelSize;
           if (levelSize === 0) {
             cache[parentKey][0] = [];
           }
 
+          // If grid has outstanding requests for this parent, then resolve them
+          // and let grid update the effective size and re-render.
           let outstandingRequests = Object.getOwnPropertyNames(treePageCallbacks[parentKey] || {});
           for (let i = 0; i < outstandingRequests.length; i++) {
             let page = outstandingRequests[i];
@@ -848,6 +853,22 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
               callback([], levelSize);
             }
           }
+
+          // If size has changed, and there are no outstanding requests, then
+          // manually update the size of the grid cache and update the effective
+          // size, effectively re-rendering the grid. This is necessary when
+          // individual items are refreshed on the server, in which case there
+          // is no loading request from the grid itself. In that case, if
+          // children were added or removed, the grid will not be aware of it
+          // unless we manually update the size.
+          if (hasSizeChanged && outstandingRequests.length === 0) {
+            const itemCache = grid._cache.getCacheByKey(parentKey);
+            if (itemCache) {
+              itemCache.size = levelSize;
+            }
+            updateGridEffectiveSize();
+          }
+
           // Let server know we're done
           grid.$server.confirmParentUpdate(id, parentKey);
 
