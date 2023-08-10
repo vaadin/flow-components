@@ -356,6 +356,16 @@ public abstract class AbstractGridMultiSelectionModel<T>
         return selectionColumn.isFrozen();
     }
 
+    @Override
+    public void setDragSelect(boolean dragSelect) {
+        selectionColumn.setDragSelect(dragSelect);
+    }
+
+    @Override
+    public boolean isDragSelect() {
+        return selectionColumn.isDragSelect();
+    }
+
     /**
      * Method for handling the firing of selection events.
      *
