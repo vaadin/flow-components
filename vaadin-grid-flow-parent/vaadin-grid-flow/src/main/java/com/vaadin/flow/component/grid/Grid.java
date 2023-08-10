@@ -4538,7 +4538,23 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            zero based index of the item to scroll to in the current view.
      */
     public void scrollToIndex(int rowIndex) {
+        int pageSize = getPageSize();
+        int firstRootIndex = rowIndex - rowIndex % pageSize;
+
+        // Preload the target page
+        // Add a test that proves this approach invalid
+        // setRequestedRange(firstRootIndex, pageSize);
+
+        // Preload from one page before to one page after the target page
+        // Add a test that proves this approach invalid
+        // setRequestedRange(firstRootIndex - pageSize, pageSize * 3);
+
+        // Preload from one page before to one page after the target page
+        setRequestedRange(firstRootIndex - pageSize, pageSize * 3);
+        
         getElement().callJsFunction("scrollToIndex", rowIndex);
+        // clear the lastRequestedRanges from connector
+        getElement().executeJs("this.$connector.clearLastRequestedRanges()");
     }
 
     /**

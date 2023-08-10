@@ -50,7 +50,13 @@ public class GridScrollToPage extends Div {
                 });
         addRowAndScrollToIndex.setId("add-row-and-scroll-to-index");
 
+        NativeButton setSmallPageSize = new NativeButton(
+                "Set small page size (5)", e -> {
+                    grid.setPageSize(5);
+                });
+        setSmallPageSize.setId("set-small-page-size");
+
         add(grid, scrollToStart, scrollToEnd, scrollToRow500,
-                addRowsAndScrollToEnd, addRowAndScrollToIndex);
+                addRowsAndScrollToEnd, addRowAndScrollToIndex, setSmallPageSize);
     }
 }

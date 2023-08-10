@@ -89,4 +89,34 @@ public class GridScrollToIT extends AbstractComponentIT {
                 grid.getCell(grid.getLastVisibleRowIndex(), 0).getText());
     }
 
+    @Test
+    public void grid_addItem_scrollToIndex_twice() {
+        $("button").id("add-row-and-scroll-to-index").click();
+        // Wait until finished loading
+        waitUntil(e -> !grid.getRow(grid.getFirstVisibleRowIndex()).hasAttribute("loading"));
+
+        $("button").id("add-row-and-scroll-to-index").click();
+        waitUntil(e -> !grid.getRow(grid.getFirstVisibleRowIndex()).hasAttribute("loading"));
+
+        // Find the content element of the first visible row cell
+        var slot = grid.getCell(grid.getFirstVisibleRowIndex(), 0).findElement(By.tagName("slot"));
+        var content = grid.findElement(By.cssSelector(
+                "vaadin-grid-cell-content[slot='" + slot.getPropertyString("name") + "']"));
+        // Expect the content element to be displayed
+        Assert.assertTrue(content.isDisplayed());
+    }
+
+    @Test
+    public void grid_smallPageSize_addItem_scrollToIndex_twice() {
+        // Set page size to 5
+        $("button").id("set-small-page-size").click();
+
+        $("button").id("add-row-and-scroll-to-index").click();
+        // Wait until finished loading
+        waitUntil(e -> !grid.getRow(grid.getFirstVisibleRowIndex()).hasAttribute("loading"));
+
+        $("button").id("add-row-and-scroll-to-index").click();
+        waitUntil(e -> !grid.getRow(grid.getFirstVisibleRowIndex()).hasAttribute("loading"));
+    }
+
 }

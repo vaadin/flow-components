@@ -923,6 +923,12 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           grid.$server.confirmUpdate(id);
         });
 
+        // This is only a prototype to try out https://github.com/vaadin/flow-components/issues/5229#issuecomment-1655188669
+        // Needs a cleaner solution for the final implementation
+        grid.$connector.clearLastRequestedRanges = () => {
+          deleteObjectContents(lastRequestedRanges);
+        }
+
         grid.$connector.ensureHierarchy = tryCatchWrapper(function () {
           for (let parentKey in cache) {
             if (parentKey !== root) {
