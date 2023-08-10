@@ -760,7 +760,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
         UI ui = getCurrentUI();
         StateTree.ExecutionRegistration addToUiRegistration = ui
                 .beforeClientResponse(ui, context -> {
-                    if (getElement().getNode().getParent() == null) {
+                    if (getElement().getNode().getParent() == null && isOpened()) {
                         ui.addToModalComponent(this);
                         ui.setChildComponentModal(this, isModal());
                         autoAddedToTheUi = true;
