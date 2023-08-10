@@ -431,6 +431,22 @@ public class AbstractGridMultiSelectionModelTest {
     }
 
     @Test
+    public void dragSelect_updatesColumnAttribute() {
+        grid.setSelectionMode(SelectionMode.MULTI);
+        Element columnElement = getGridSelectionColumn(grid).getElement();
+
+        Assert.assertFalse(columnElement.getProperty("dragSelect", false));
+
+        ((GridMultiSelectionModel<String>) grid.getSelectionModel())
+                .setDragSelect(true);
+        Assert.assertTrue(columnElement.getProperty("dragSelect", false));
+
+        ((GridMultiSelectionModel<String>) grid.getSelectionModel())
+                .setDragSelect(false);
+        Assert.assertFalse(columnElement.getProperty("dragSelect", false));
+    }
+
+    @Test
     public void setFilterUsingDataView_serverSelectAll_selectionEventContainsFilteredValues() {
         grid.setSelectionMode(SelectionMode.MULTI);
         List<String> items = List.of("foo", "bar");
