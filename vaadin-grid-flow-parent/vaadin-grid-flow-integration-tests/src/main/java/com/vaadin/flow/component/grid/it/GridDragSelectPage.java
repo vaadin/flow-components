@@ -22,43 +22,33 @@ import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridMultiSelectionModel;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 
-/**
- * Test view for grid's select rows by dragging feature.
- */
 @Route("vaadin-grid/grid-drag-select")
 public class GridDragSelectPage extends VerticalLayout {
-
-    public static final int ITEM_COUNT = 100;
-
-    static final String DRAG_SELECT_GRID_ID = "drag-select-grid";
-    static final String TOGGLE_DRAG_SELECT_CHECKBOX = "toggle-drag-select-checkbox";
-
     public GridDragSelectPage() {
-        createGridMultiRowSelectionByDragging();
-    }
-
-    private void createGridMultiRowSelectionByDragging() {
         Grid<String> grid = new Grid<>();
-        grid.setId(DRAG_SELECT_GRID_ID);
-        grid.setItems(IntStream.range(0, ITEM_COUNT).mapToObj(Integer::toString)
+        grid.setItems(IntStream.range(0, 100).mapToObj(Integer::toString)
                 .collect(Collectors.toList()));
         grid.addColumn(i -> i).setHeader("text");
         grid.addColumn(i -> String.valueOf(i.length())).setHeader("length");
         grid.setSelectionMode(Grid.SelectionMode.MULTI);
 
-        Checkbox toggleDragSelect = new Checkbox(
-                "Drag select rows");
-        toggleDragSelect
-                .setId(TOGGLE_DRAG_SELECT_CHECKBOX);
+        Checkbox toggleDragSelect = new Checkbox("Drag select rows");
+        toggleDragSelect.setId("toggle-drag-select");
         toggleDragSelect.setValue(false);
         toggleDragSelect.addValueChangeListener(
                 e -> ((GridMultiSelectionModel<String>) grid
                         .getSelectionModel()).setDragSelect(e.getValue()));
 
+        Span selectedItemsCount = new Span("Selected items: 0");
+        selectedItemsCount.setId("selected-items-count");
+        grid.addSelectionListener(e -> selectedItemsCount
+                .setText("Selected items: " + e.getAllSelectedItems().size()));
+
         add(new H2("Grid with rows drag select support"), grid,
-                toggleDragSelect);
+                toggleDragSelect, selectedItemsCount);
     }
 }

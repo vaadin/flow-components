@@ -20,7 +20,6 @@ import java.util.stream.IntStream;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
@@ -30,46 +29,23 @@ import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
-/**
- * Integration tests for the GridSelectRowsByDragging view.
- */
 @TestPath("vaadin-grid/grid-drag-select")
 public class GridDragSelectIT extends AbstractComponentIT {
-
     private GridElement grid;
+    private CheckboxElement toggleDragSelect;
+    private WebElement selectedItemsCount;
 
     @Before
     public void init() {
         open();
-        grid = $(GridElement.class).id(
-                GridDragSelectPage.DRAG_SELECT_GRID_ID);
-    }
-
-    private WebElement selectionColumn(WebElement grid) {
-        return grid
-                .findElement(By.tagName("vaadin-grid-flow-selection-column"));
-    }
-
-    @Test
-    public void toggle_enabled_selectRowsByDragging() {
-        WebElement gridSelectionMode = selectionColumn(grid);
-        String selectRowsByDragging = gridSelectionMode
-                .getAttribute("dragSelect");
-        Assert.assertFalse("dragSelect should be false",
-                Boolean.parseBoolean(selectRowsByDragging));
-
-        enableSelectRowsByDragging();
-
-        selectRowsByDragging = gridSelectionMode
-                .getAttribute("dragSelect");
-
-        Assert.assertTrue("dragSelect should be true",
-                Boolean.parseBoolean(selectRowsByDragging));
+        grid = $(GridElement.class).waitForFirst();
+        toggleDragSelect = $(CheckboxElement.class).id("toggle-drag-select");
+        selectedItemsCount = $("span").id("selected-items-count");
     }
 
     @Test
     public void selectRowsByDragging_enabled_selectDeselectRows() {
-        enableSelectRowsByDragging();
+        toggleDragSelect.click();
 
         int firstRow = 0;
         int lastRow = 6;
@@ -78,9 +54,11 @@ public class GridDragSelectIT extends AbstractComponentIT {
 
         selectRowsByDragging(sourceCell, targetCell);
         assertRowsSelected(grid, firstRow, lastRow);
+        Assert.assertEquals("Selected items: 7", selectedItemsCount.getText());
 
         selectRowsByDragging(sourceCell, targetCell);
         assertRowsUnselected(grid, lastRow, firstRow);
+        Assert.assertEquals("Selected items: 0", selectedItemsCount.getText());
     }
 
     @Test
@@ -92,19 +70,13 @@ public class GridDragSelectIT extends AbstractComponentIT {
 
         selectRowsByDragging(sourceCell, targetCell);
         assertRowsUnselected(grid, lastRow, firstRow);
+        Assert.assertEquals("Selected items: 0", selectedItemsCount.getText());
     }
 
-    private void selectRowsByDragging(WebElement sourceCell, WebElement targetCell) {
-        new Actions(getDriver())
-                .dragAndDrop(sourceCell, targetCell)
-                .release()
+    private void selectRowsByDragging(WebElement sourceCell,
+            WebElement targetCell) {
+        new Actions(getDriver()).dragAndDrop(sourceCell, targetCell).release()
                 .build().perform();
-    }
-
-    private void enableSelectRowsByDragging() {
-        CheckboxElement checkbox = $(CheckboxElement.class).id(
-                GridDragSelectPage.TOGGLE_DRAG_SELECT_CHECKBOX);
-        checkbox.click();
     }
 
     private void assertRowsSelected(GridElement grid, int first, int last) {
@@ -116,5 +88,4 @@ public class GridDragSelectIT extends AbstractComponentIT {
         IntStream.range(first, last).forEach(rowIndex -> Assert
                 .assertFalse(grid.getRow(rowIndex).isSelected()));
     }
-
 }
