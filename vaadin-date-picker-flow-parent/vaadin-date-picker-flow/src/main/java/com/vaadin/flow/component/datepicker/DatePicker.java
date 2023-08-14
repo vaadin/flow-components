@@ -166,7 +166,7 @@ public class DatePicker
 
         addValueChangeListener(e -> validate());
 
-        addClientValidatedEventListener(e -> validate());
+        addBadInputChangeListener(e -> validate());
 
         getElement().addPropertyChangeListener("opened", event -> fireEvent(
                 new OpenedChangeEvent(this, event.isUserOriginated())));
@@ -589,7 +589,7 @@ public class DatePicker
             getElement()
                     .executeJs("if (!this.value) this._inputElementValue = ''");
             getElement().setProperty("_hasInputValue", false);
-            fireEvent(new ClientValidatedEvent(this, false));
+            fireEvent(new BadInputChangeEvent(this, false));
         }
     }
 

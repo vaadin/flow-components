@@ -141,7 +141,7 @@ public class TimePicker
 
         addValueChangeListener(e -> validate());
 
-        addClientValidatedEventListener(event -> validate());
+        addBadInputChangeListener(event -> validate());
 
         getElement().addPropertyChangeListener("invalid", event -> fireEvent(
                 new InvalidChangeEvent(this, event.isUserOriginated())));
@@ -272,7 +272,7 @@ public class TimePicker
             getElement()
                     .executeJs("if (!this.value) this._inputElementValue = ''");
             getElement().setProperty("_hasInputValue", false);
-            fireEvent(new ClientValidatedEvent(this, false));
+            fireEvent(new BadInputChangeEvent(this, false));
         }
     }
 

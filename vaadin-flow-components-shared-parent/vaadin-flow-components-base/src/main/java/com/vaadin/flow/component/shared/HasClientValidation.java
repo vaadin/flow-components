@@ -44,6 +44,12 @@ public interface HasClientValidation extends Serializable {
                 ClientValidatedEvent.class, listener);
     }
 
+    default Registration addBadInputChangeListener(
+            ComponentEventListener<BadInputChangeEvent> listener) {
+        return ComponentUtil.addListener((Component) this,
+                BadInputChangeEvent.class, listener);
+    }
+
     /**
      * An event fired by the web component whenever it is validated on the
      * client-side.
@@ -99,6 +105,13 @@ public interface HasClientValidation extends Serializable {
          */
         public Boolean isValid() {
             return valid;
+        }
+    }
+
+    @DomEvent("bad-input-change")
+    public static class BadInputChangeEvent extends ComponentEvent<Component> {
+        public BadInputChangeEvent(Component source, boolean fromClient) {
+            super(source, fromClient);
         }
     }
 }

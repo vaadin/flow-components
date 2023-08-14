@@ -213,7 +213,7 @@ public class DateTimePicker extends
 
         addValueChangeListener(e -> validate());
 
-        addClientValidatedEventListener(e -> validate());
+        addBadInputChangeListener(e -> validate());
     }
 
     /**
@@ -329,7 +329,7 @@ public class DateTimePicker extends
         if (isValueRemainedEmpty && isInputValuePresent) {
             // Clear the input elements from possible bad input.
             synchronizeChildComponentValues(value);
-            fireEvent(new ClientValidatedEvent(this, false));
+            fireEvent(new BadInputChangeEvent(this, false));
         } else {
             synchronizeChildComponentValues(value);
         }

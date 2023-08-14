@@ -91,7 +91,11 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
 
         addValueChangeListener(e -> validate());
 
-        addClientValidatedEventListener(e -> validate());
+        addBadInputChangeListener(e -> {
+            if (Objects.equals(getValue(), null)) {
+                validate();
+            }
+        });
     }
 
     /**
@@ -289,6 +293,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
      * constraints using browser development tools.
      */
     protected void validate() {
+        System.out.println("validate");
         if (!this.manualValidationEnabled) {
             T value = getValue();
 
