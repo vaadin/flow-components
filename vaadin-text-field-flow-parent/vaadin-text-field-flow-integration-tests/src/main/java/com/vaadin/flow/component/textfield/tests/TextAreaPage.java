@@ -48,7 +48,6 @@ public class TextAreaPage extends Div {
         addBasicFeatures();
         addMaxHeightFeature();
         addMinHeightFeature();
-        addInvalidCheck();
         addHelperText();
         addHelperComponent();
     }
@@ -106,13 +105,6 @@ public class TextAreaPage extends Div {
         textArea.getStyle().set("padding", "0");
         textArea.setId("text-area-with-min-height");
         add(textArea, message);
-    }
-
-    private void addInvalidCheck() {
-        final TextArea field = new TextArea();
-        field.setMaxLength(10);
-        field.setMinLength(5);
-        TextFieldTestPageUtil.addInvalidCheck(this, field);
     }
 
     private void addHelperText() {

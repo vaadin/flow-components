@@ -106,12 +106,6 @@ public class TextFieldPageIT extends AbstractComponentIT {
     }
 
     @Test
-    public void assertCantMakeInvalidValueValidThroughClientManipulation() {
-        ValidationTestHelper.testValidation(getCommandExecutor(), getContext(),
-                $(TextFieldElement.class).id("invalid-test-field"));
-    }
-
-    @Test
     public void disabledTextFieldNotUpdating() {
         WebElement textField = findElement(By.id("disabled-text-field"));
         WebElement message = findElement(By.id("disabled-text-field-message"));

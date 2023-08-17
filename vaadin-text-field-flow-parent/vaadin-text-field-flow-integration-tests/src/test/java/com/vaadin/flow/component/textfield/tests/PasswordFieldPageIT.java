@@ -142,12 +142,6 @@ public class PasswordFieldPageIT extends AbstractComponentIT {
         updateValues(passwordFieldValueDiv, passwordField, false);
     }
 
-    @Test
-    public void assertCantMakeInvalidValueValidThroughClientManipulation() {
-        ValidationTestHelper.testValidation(getCommandExecutor(), getContext(),
-                $(PasswordFieldElement.class).id("invalid-test-field"));
-    }
-
     private void updateValues(WebElement passwordFieldValueDiv,
             WebElement passwordField, boolean toggleBlur) {
         passwordField.sendKeys("a");

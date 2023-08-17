@@ -72,11 +72,6 @@ public class LoginFormIT extends BasicIT {
     }
 
     private void sendKeys(TestBenchElement textField, CharSequence... keys) {
-        if (BrowserUtil.isEdge(getDesiredCapabilities())
-                || BrowserUtil.isFirefox(getDesiredCapabilities())) {
-            // Firefox and Edge don't send keys to the slotted input
-            textField = textField.$("input").attribute("slot", "input").first();
-        }
         textField.sendKeys(keys);
     }
 

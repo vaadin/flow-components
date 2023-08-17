@@ -32,12 +32,15 @@ public class IntegerFieldElement extends TestBenchElement
 
     @Override
     public void setValue(String string) {
-        TestBenchElement input = $("input").first();
-        TextFieldElementHelper.setValue(input, string);
+        TextFieldElementHelper.setValue(getInputElement(), string);
     }
 
     @Override
     public void sendKeys(CharSequence... keysToSend) {
-        $("input").first().sendKeys(keysToSend);
+        getInputElement().sendKeys(keysToSend);
+    }
+
+    private TestBenchElement getInputElement() {
+        return (TestBenchElement) getProperty("inputElement");
     }
 }

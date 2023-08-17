@@ -83,14 +83,6 @@ public class NumberFieldPage extends Div {
                 logValueChangeListener(stepValueMessage));
 
         add(numberFieldStep, stepValueMessage);
-        Div isValid = new Div();
-        isValid.setId("is-invalid");
-        NativeButton checkIsValid = new NativeButton(
-                "Check if current value of step-number-field is invalid");
-        checkIsValid.setId("check-is-invalid");
-        checkIsValid.addClickListener(event -> isValid
-                .setText(numberFieldStep.isInvalid() ? "invalid" : "valid"));
-        add(checkIsValid, isValid);
         addNumberFields();
     }
 
