@@ -888,7 +888,7 @@ public class SelectTest {
     }
 
     @Test
-    public void getItemPosition_ShouldGetTheActualIndexOftheItemIfItExists() {
+    public void getItemPosition_shouldReturnItemIndexIfItemExists() {
         select.setItems("foo", "bar", "buzz");
         Assert.assertEquals(0, select.getItemPosition("foo"));
         Assert.assertEquals(1, select.getItemPosition("bar"));
