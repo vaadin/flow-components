@@ -91,6 +91,8 @@ doc.createElementNS = (ns, tagName) => {
                 }
                 return true;
             })
+            // title tags aren't rendered on screen, so shouldn't contribute to sizing calculations
+            .filter(child => child.tagName !== 'title')
             .forEach(child => {
                 let fontSize = child.style.fontSize || elem.style.fontSize,
                     lineHeight,
@@ -138,6 +140,69 @@ doc.createElementNS = (ns, tagName) => {
             height: retHeight
         };
     };
+    /**
+     * Estimate the rendered length of a substring of text. Uses a similar strategy to getBBox,
+     * above.
+     *
+     * @param {integer} charnum Starting character position
+     * @param {integer} numchars Number of characters to count
+     * @returns Rendered length of the substring (estimated)
+     */
+    elem.getSubStringLength = (charnum, numchars) => {
+        let offset = charnum,
+            remaining = numchars,
+            textLength = 0;
+
+        let children = [].slice.call(
+            elem.children.length ? elem.children : [elem]
+        );
+
+        children
+            .filter(child => {
+                if (child.getAttribute('class') === 'highcharts-text-outline') {
+                    child.parentNode.removeChild(child);
+                    return false;
+                }
+                return true;
+            })
+            // title tags aren't rendered on screen, so shouldn't contribute to sizing calculations
+            .filter(child => child.tagName !== 'title')
+            .forEach(child => {
+                if (remaining <= 0) {
+                    return;
+                }
+                let childLength = child.textContent.length;
+
+                if (childLength <= offset) {
+                    offset -= childLength;
+                } else {
+                    let usedLength = Math.min(childLength - offset, remaining);
+                    remaining -= usedLength;
+
+                    let fontSize = child.style.fontSize || elem.style.fontSize;
+
+                    // The font size is based on empirical values,
+                    // copied from the SVGRenderer.fontMetrics function in
+                    // Highcharts.
+                    if (/px/.test(fontSize)) {
+                        fontSize = parseInt(fontSize, 10);
+                    } else {
+                        fontSize = /em/.test(fontSize) ?
+                            parseFloat(fontSize) * 12 :
+                            12;
+                    }
+                    // Estimate length by multiplying font size by a constant. I presume
+                    // this is intended to be an aspect ratio - or width of the average
+                    // character as a percentage of character height. 0.55 is used in
+                    // getBBox above, but, emperically, 0.7 seems to provide better results
+                    // here.
+                    textLength += usedLength * fontSize * 0.7;
+                }
+
+            });
+
+        return textLength;
+    }
     return elem;
 };
 
