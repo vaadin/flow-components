@@ -555,6 +555,11 @@ public class Select<T> extends GeneratedVaadinSelect<Select<T>, T>
         listBox.prependComponents(beforeItem, components);
     }
 
+    @Override
+    public int getItemPosition(T item) {
+        return listBox.getItemPosition(item);
+    }
+
     /**
      * {@inheritDoc}
      * <p>
