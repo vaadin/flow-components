@@ -81,7 +81,7 @@ public class PasswordField extends TextFieldBase<PasswordField, String>
 
         addValueChangeListener(e -> validate());
 
-        addClientValidatedEventListener(e -> validate());
+        addUnparseableChangeListener(e -> validate());
     }
 
     /**
@@ -319,7 +319,7 @@ public class PasswordField extends TextFieldBase<PasswordField, String>
     @Override
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<String> listener) {
-        return addClientValidatedEventListener(
+        return addUnparseableChangeListener(
                 event -> listener.validationStatusChanged(
                         new ValidationStatusChangeEvent<String>(this,
                                 !isInvalid())));

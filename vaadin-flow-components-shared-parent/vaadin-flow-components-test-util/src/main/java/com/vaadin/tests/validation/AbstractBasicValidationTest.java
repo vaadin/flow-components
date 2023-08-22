@@ -23,7 +23,7 @@ import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
-import com.vaadin.flow.component.shared.HasClientValidation.ClientValidatedEvent;
+import com.vaadin.flow.component.shared.HasClientValidation.UnparseableChangeEvent;
 
 /**
  * An abstract class that provides tests verifying that a component correctly
@@ -48,12 +48,12 @@ public abstract class AbstractBasicValidationTest<C extends AbstractField<C, V> 
     }
 
     @Test
-    public void setRequired_setManualValidation_fireClientValidatedEvent_noValidation() {
+    public void setRequired_setManualValidation_fireUnparseableChangeEvent_noValidation() {
         testField.setRequiredIndicatorVisible(true);
         testField.setManualValidation(true);
 
         ComponentUtil.fireEvent(testField,
-                new ClientValidatedEvent(testField, false));
+                new UnparseableChangeEvent(testField, false));
         Assert.assertFalse(testField.isInvalid());
     }
 

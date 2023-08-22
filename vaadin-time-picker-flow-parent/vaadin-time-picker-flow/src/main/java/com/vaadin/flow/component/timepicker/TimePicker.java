@@ -141,7 +141,7 @@ public class TimePicker
 
         addValueChangeListener(e -> validate());
 
-        addClientValidatedEventListener(event -> validate());
+        addUnparseableChangeListener(event -> validate());
 
         getElement().addPropertyChangeListener("invalid", event -> fireEvent(
                 new InvalidChangeEvent(this, event.isUserOriginated())));
@@ -272,7 +272,7 @@ public class TimePicker
             getElement()
                     .executeJs("if (!this.value) this._inputElementValue = ''");
             getElement().setProperty("_hasInputValue", false);
-            fireEvent(new ClientValidatedEvent(this, false));
+            fireEvent(new UnparseableChangeEvent(this, false));
         }
     }
 
@@ -314,7 +314,7 @@ public class TimePicker
     @Override
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<LocalTime> listener) {
-        return addClientValidatedEventListener(
+        return addUnparseableChangeListener(
                 event -> listener.validationStatusChanged(
                         new ValidationStatusChangeEvent<LocalTime>(this,
                                 !isInvalid())));

@@ -70,7 +70,7 @@ public class EmailField extends TextFieldBase<EmailField, String>
 
         addValueChangeListener(e -> validate());
 
-        addClientValidatedEventListener(e -> validate());
+        addUnparseableChangeListener(e -> validate());
     }
 
     /**
@@ -296,7 +296,7 @@ public class EmailField extends TextFieldBase<EmailField, String>
     @Override
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<String> listener) {
-        return addClientValidatedEventListener(
+        return addUnparseableChangeListener(
                 event -> listener.validationStatusChanged(
                         new ValidationStatusChangeEvent<String>(this,
                                 !isInvalid())));

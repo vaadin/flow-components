@@ -79,7 +79,7 @@ public class TextField extends TextFieldBase<TextField, String>
 
         addValueChangeListener(e -> validate());
 
-        addClientValidatedEventListener(e -> validate());
+        addUnparseableChangeListener(e -> validate());
     }
 
     /**
@@ -323,7 +323,7 @@ public class TextField extends TextFieldBase<TextField, String>
     @Override
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<String> listener) {
-        return addClientValidatedEventListener(
+        return addUnparseableChangeListener(
                 event -> listener.validationStatusChanged(
                         new ValidationStatusChangeEvent<String>(this,
                                 !isInvalid())));

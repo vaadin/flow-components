@@ -31,7 +31,6 @@ import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
-import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.html.Input;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.NativeLabel;
@@ -398,15 +397,6 @@ public class AllFieldsBasicValidationPage extends Div {
             ComponentEventListener<ClickEvent<NativeButton>> listener) {
         NativeButton button = new NativeButton(title, listener);
         return button;
-    }
-
-    /**
-     * A helper to create a native button element.
-     */
-    protected Select<String> createSelect(String title,
-            ValueChangeListener<ComponentValueChangeEvent<Select<String>, String>> listener, String... options) {
-        Select<String> select = new Select<>(title, listener, options);
-        return select;
     }
 
     protected NativeLabel createCheckbox(String title, DomEventListener listener) {

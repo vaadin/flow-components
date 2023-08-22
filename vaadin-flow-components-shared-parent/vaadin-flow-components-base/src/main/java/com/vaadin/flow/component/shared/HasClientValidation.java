@@ -30,75 +30,42 @@ import com.vaadin.flow.shared.Registration;
  * component.
  */
 public interface HasClientValidation extends Serializable {
-    /**
-     * Adds a listener for the {@code validated} event fired by the web
-     * component whenever it is validated on the client-side.
-     *
-     * @param listener
-     *            the listener, not null.
-     * @return a {@link Registration} for removing the event listener.
-     */
-    default Registration addClientValidatedEventListener(
-            ComponentEventListener<ClientValidatedEvent> listener) {
+    default Registration addUnparseableChangeListener(
+            ComponentEventListener<UnparseableChangeEvent> listener) {
         return ComponentUtil.addListener((Component) this,
-                ClientValidatedEvent.class, listener);
+                UnparseableChangeEvent.class, listener);
     }
 
-    /**
-     * An event fired by the web component whenever it is validated on the
-     * client-side.
-     */
-    @DomEvent("validated")
-    public static class ClientValidatedEvent extends ComponentEvent<Component> {
+    default Registration addIncompleteChangeListener(
+            ComponentEventListener<IncompleteChangeEvent> listener) {
+        return ComponentUtil.addListener((Component) this,
+                IncompleteChangeEvent.class, listener);
+    }
 
-        private final boolean valid;
+    default Registration addHasInputValueChangedListener(
+            ComponentEventListener<HasInputValueChangedEvent> listener) {
+        return ComponentUtil.addListener((Component) this,
+                HasInputValueChangedEvent.class, listener);
+    }
 
-        /**
-         * Creates a new event using the given source.
-         *
-         * @param source
-         *            the source component.
-         * @param fromClient
-         *            <code>true</code> if the event originated from the client
-         *            side, <code>false</code> otherwise
-         * @param valid
-         *            whether the client-side validation succeeded.
-         */
-        public ClientValidatedEvent(Component source, boolean fromClient,
-                @EventData("event.detail.valid") boolean valid) {
+    @DomEvent("unparseable-change")
+    public static class UnparseableChangeEvent extends ComponentEvent<Component> {
+        public UnparseableChangeEvent(Component source, boolean fromClient) {
             super(source, fromClient);
-            this.valid = valid;
         }
+    }
 
-        /**
-         * Creates a new event using the given source.
-         *
-         * This constructor should be used when creating the event on the
-         * server-side.
-         *
-         * @param source
-         *            the source component.
-         * @param fromClient
-         *            <code>true</code> if the event originated from the client
-         *            side, <code>false</code> otherwise
-         */
-        public ClientValidatedEvent(Component source, boolean fromClient) {
+    @DomEvent("incomplete-change")
+    public static class IncompleteChangeEvent extends ComponentEvent<Component> {
+        public IncompleteChangeEvent(Component source, boolean fromClient) {
             super(source, fromClient);
-            this.valid = true;
         }
+    }
 
-        /**
-         * Returns true if the client-side validation succeeded and false
-         * otherwise.
-         *
-         * <p>
-         * Note, this method will always return true if the event originated
-         * from the server-side i.e. {@link #isFromClient()} returns false.
-         *
-         * @return whether the client-side validation succeeded.
-         */
-        public Boolean isValid() {
-            return valid;
+    @DomEvent("has-input-value-changed")
+    public static class HasInputValueChangedEvent extends ComponentEvent<Component> {
+        public HasInputValueChangedEvent(Component source, boolean fromClient) {
+            super(source, fromClient);
         }
     }
 }
