@@ -149,7 +149,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
 
         addValueChangeListener(e -> validate());
 
-        addClientValidatedEventListener(e -> validate());
+        addUnparseableChangeListener(e -> validate());
 
         getElement().addPropertyChangeListener("opened", event -> fireEvent(
                 new OpenedChangeEvent(this, event.isUserOriginated())));
@@ -1053,7 +1053,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
     @Override
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<T> listener) {
-        return addClientValidatedEventListener(
+        return addUnparseableChangeListener(
                 event -> listener.validationStatusChanged(
                         new ValidationStatusChangeEvent<>(this, !isInvalid())));
     }

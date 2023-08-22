@@ -181,7 +181,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
 
         addValueChangeListener(e -> validate());
 
-        addClientValidatedEventListener(e -> validate());
+        addUnparseableChangeListener(e -> validate());
     }
 
     /**
@@ -1176,7 +1176,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     @Override
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<TValue> listener) {
-        return addClientValidatedEventListener(
+        return addUnparseableChangeListener(
                 event -> listener.validationStatusChanged(
                         new ValidationStatusChangeEvent<>(this, !isInvalid())));
     }

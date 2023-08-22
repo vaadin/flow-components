@@ -98,7 +98,7 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
 
         addValueChangeListener(e -> validate());
 
-        addClientValidatedEventListener(e -> validate());
+        addUnparseableChangeListener(e -> validate());
     }
 
     /**
@@ -230,7 +230,7 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
             // Clear the input element from possible bad input.
             getElement().executeJs("this._inputElementValue = ''");
             getElement().setProperty("_hasInputValue", false);
-            fireEvent(new ClientValidatedEvent(this, false));
+            fireEvent(new UnparseableChangeEvent(this, false));
         } else {
             // Restore the input element's value in case it was cleared
             // in the above branch. That can happen when setValue(null)
@@ -292,7 +292,7 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
     @Override
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<BigDecimal> listener) {
-        return addClientValidatedEventListener(
+        return addUnparseableChangeListener(
                 event -> listener.validationStatusChanged(
                         new ValidationStatusChangeEvent<BigDecimal>(this,
                                 !isInvalid())));

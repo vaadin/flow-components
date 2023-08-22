@@ -132,7 +132,7 @@ public class CheckboxGroup<T>
 
         addValueChangeListener(e -> validate());
 
-        addClientValidatedEventListener(e -> validate());
+        addUnparseableChangeListener(e -> validate());
     }
 
     /**
@@ -810,7 +810,7 @@ public class CheckboxGroup<T>
     @Override
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<Set<T>> listener) {
-        return addClientValidatedEventListener(
+        return addUnparseableChangeListener(
                 event -> listener.validationStatusChanged(
                         new ValidationStatusChangeEvent<>(this, !isInvalid())));
     }

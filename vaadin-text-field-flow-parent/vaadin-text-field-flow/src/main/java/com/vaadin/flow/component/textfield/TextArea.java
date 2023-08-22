@@ -80,7 +80,7 @@ public class TextArea extends TextFieldBase<TextArea, String>
 
         addValueChangeListener(e -> validate());
 
-        addClientValidatedEventListener(e -> validate());
+        addUnparseableChangeListener(e -> validate());
     }
 
     /**
@@ -324,7 +324,7 @@ public class TextArea extends TextFieldBase<TextArea, String>
     @Override
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<String> listener) {
-        return addClientValidatedEventListener(
+        return addUnparseableChangeListener(
                 event -> listener.validationStatusChanged(
                         new ValidationStatusChangeEvent<>(this, !isInvalid())));
     }
