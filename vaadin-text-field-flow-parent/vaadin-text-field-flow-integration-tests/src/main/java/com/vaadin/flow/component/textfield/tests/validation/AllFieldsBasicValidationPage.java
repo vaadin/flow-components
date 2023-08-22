@@ -135,7 +135,8 @@ public class AllFieldsBasicValidationPage extends Div {
         AtomicInteger validationCounter = new AtomicInteger(0);
         Binder<Bean> binder = new Binder<>(Bean.class);
         binder.addStatusChangeListener(event -> {
-            field.setHelperText("Validation count: " + validationCounter.incrementAndGet());
+            field.setHelperText(
+                    "Validation count: " + validationCounter.incrementAndGet());
         });
         binder.forField(field).bind("number");
 
@@ -181,7 +182,8 @@ public class AllFieldsBasicValidationPage extends Div {
         AtomicInteger validationCounter = new AtomicInteger(0);
         Binder<Bean> binder = new Binder<>(Bean.class);
         binder.addStatusChangeListener(event -> {
-            field.setHelperText("Validation count: " + validationCounter.incrementAndGet());
+            field.setHelperText(
+                    "Validation count: " + validationCounter.incrementAndGet());
         });
         binder.forField(field).bind("integer");
 
@@ -227,7 +229,8 @@ public class AllFieldsBasicValidationPage extends Div {
         AtomicInteger validationCounter = new AtomicInteger(0);
         Binder<Bean> binder = new Binder<>(Bean.class);
         binder.addStatusChangeListener(event -> {
-            field.setHelperText("Validation count: " + validationCounter.incrementAndGet());
+            field.setHelperText(
+                    "Validation count: " + validationCounter.incrementAndGet());
         });
         binder.forField(field).bind("bigDecimal");
 
@@ -258,7 +261,8 @@ public class AllFieldsBasicValidationPage extends Div {
         AtomicInteger validationCounter = new AtomicInteger(0);
         Binder<Bean> binder = new Binder<>(Bean.class);
         binder.addStatusChangeListener(event -> {
-            field.setHelperText("Validation count: " + validationCounter.incrementAndGet());
+            field.setHelperText(
+                    "Validation count: " + validationCounter.incrementAndGet());
         });
         binder.forField(field).bind("string");
 
@@ -303,7 +307,8 @@ public class AllFieldsBasicValidationPage extends Div {
         AtomicInteger validationCounter = new AtomicInteger(0);
         Binder<Bean> binder = new Binder<>(Bean.class);
         binder.addStatusChangeListener(event -> {
-            field.setHelperText("Validation count: " + validationCounter.incrementAndGet());
+            field.setHelperText(
+                    "Validation count: " + validationCounter.incrementAndGet());
         });
         binder.forField(field).bind("date");
 
@@ -336,7 +341,8 @@ public class AllFieldsBasicValidationPage extends Div {
         AtomicInteger validationCounter = new AtomicInteger(0);
         Binder<Bean> binder = new Binder<>(Bean.class);
         binder.addStatusChangeListener(event -> {
-            field.setHelperText("Validation count: " + validationCounter.incrementAndGet());
+            field.setHelperText(
+                    "Validation count: " + validationCounter.incrementAndGet());
         });
         binder.forField(field).bind("time");
 
@@ -369,7 +375,8 @@ public class AllFieldsBasicValidationPage extends Div {
         AtomicInteger validationCounter = new AtomicInteger(0);
         Binder<Bean> binder = new Binder<>(Bean.class);
         binder.addStatusChangeListener(event -> {
-            field.setHelperText("Validation count: " + validationCounter.incrementAndGet());
+            field.setHelperText(
+                    "Validation count: " + validationCounter.incrementAndGet());
         });
         binder.forField(field).bind("dateTime");
 
@@ -399,7 +406,8 @@ public class AllFieldsBasicValidationPage extends Div {
         return button;
     }
 
-    protected NativeLabel createCheckbox(String title, DomEventListener listener) {
+    protected NativeLabel createCheckbox(String title,
+            DomEventListener listener) {
         NativeLabel label = new NativeLabel();
         Input input = new Input();
         input.setType("checkbox");
