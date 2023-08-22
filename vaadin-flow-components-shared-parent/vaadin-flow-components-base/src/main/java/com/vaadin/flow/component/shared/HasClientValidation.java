@@ -49,21 +49,24 @@ public interface HasClientValidation extends Serializable {
     }
 
     @DomEvent("unparseable-change")
-    public static class UnparseableChangeEvent extends ComponentEvent<Component> {
+    public static class UnparseableChangeEvent
+            extends ComponentEvent<Component> {
         public UnparseableChangeEvent(Component source, boolean fromClient) {
             super(source, fromClient);
         }
     }
 
     @DomEvent("incomplete-change")
-    public static class IncompleteChangeEvent extends ComponentEvent<Component> {
+    public static class IncompleteChangeEvent
+            extends ComponentEvent<Component> {
         public IncompleteChangeEvent(Component source, boolean fromClient) {
             super(source, fromClient);
         }
     }
 
     @DomEvent("has-input-value-changed")
-    public static class HasInputValueChangedEvent extends ComponentEvent<Component> {
+    public static class HasInputValueChangedEvent
+            extends ComponentEvent<Component> {
         public HasInputValueChangedEvent(Component source, boolean fromClient) {
             super(source, fromClient);
         }
