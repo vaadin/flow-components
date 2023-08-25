@@ -41,6 +41,17 @@ public class GridScrollToIT extends AbstractComponentIT {
     }
 
     @Test
+    public void scrollToIndexBeforeAttach_scrolledCorrectly() {
+        $("button").id("add-already-scrolled-grid-button").click();
+
+        GridElement grid = $(GridElement.class).id("already-scrolled-grid");
+
+        Assert.assertEquals(
+                "First visible index did not equal scrollToIndex parameter.",
+                300L, grid.getFirstVisibleRowIndex());
+    }
+
+    @Test
     public void grid_scrollToEnd() {
         $("button").id("scroll-to-end").click();
 
