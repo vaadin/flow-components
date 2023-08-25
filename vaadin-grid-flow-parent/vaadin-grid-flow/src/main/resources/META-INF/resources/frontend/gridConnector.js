@@ -1193,10 +1193,6 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             }
           })
         );
-
-        grid.scrollToIndex = tryCatchWrapper(function (index) {
-          queueMicrotask(() => Grid.prototype.scrollToIndex.call(grid, index));
-        });
       })(grid)
   };
 })();
