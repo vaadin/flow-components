@@ -25,11 +25,9 @@ import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.dom.ElementConstants;
 
 /**
- * Component for displaying an icon from the
- * <a href="https://vaadin.com/icons">Vaadin Icons</a> collection.
+ * Abstract base class for icon components
  *
  * @author Vaadin Ltd
- * @see VaadinIcon
  */
 @Tag("vaadin-icon")
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha11")
