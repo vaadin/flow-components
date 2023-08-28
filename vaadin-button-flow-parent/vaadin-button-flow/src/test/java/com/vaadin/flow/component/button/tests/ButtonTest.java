@@ -232,6 +232,26 @@ public class ButtonTest {
     }
 
     @Test
+    public void testFireClickDisabled() {
+        button = new Button();
+        button.setEnabled(false);
+        AtomicBoolean clicked = new AtomicBoolean(false);
+        AtomicBoolean thrown = new AtomicBoolean(false);
+        button.addClickListener(e -> {
+            clicked.set(true);
+        });
+
+        Assert.assertFalse(clicked.get());
+        try {
+            button.click();
+        } catch (IllegalStateException e) {
+            thrown.set(true);
+        }
+        Assert.assertFalse(clicked.get());
+        Assert.assertTrue(thrown.get());
+    }
+
+    @Test
     public void addThemeVariant_themeNamesContainsThemeVariant() {
         button = new Button();
         button.addThemeVariants(ButtonVariant.LUMO_SMALL);
