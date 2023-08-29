@@ -15,6 +15,9 @@
  */
 package com.vaadin.flow.component.login;
 
+import java.io.Serializable;
+import java.util.Objects;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Synchronize;
@@ -25,6 +28,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.dom.ClassList;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.router.NavigationTrigger;
@@ -50,6 +54,8 @@ import com.vaadin.flow.shared.Registration;
 public class LoginOverlay extends AbstractLogin implements HasStyle {
 
     private Component title;
+    private LoginOverlayFooter footer;
+    private LoginOverlayCustomFields fields;
 
     private boolean autoAddedToTheUi;
 
@@ -229,6 +235,130 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
     @Synchronize(property = "description", value = "description-changed")
     public String getDescription() {
         return getElement().getProperty("description");
+    }
+
+    /**
+     * Gets the object from which components can be added or removed from the
+     * overlay custom fields area. This area is displayed only if there's at
+     * least one component added with
+     * {@link LoginOverlayContent#add(Component...)}.
+     *
+     * @since 24.2
+     * @return the custom fields object
+     */
+    public LoginOverlayCustomFields getCustomFields() {
+        if (this.fields == null) {
+            this.fields = new LoginOverlayCustomFields(this);
+        }
+        return this.fields;
+    }
+
+    /**
+     * Gets the object from which components can be added or removed from the
+     * overlay footer area. This area is displayed only if there's at least one
+     * component added with {@link LoginOverlayContent#add(Component...)}.
+     *
+     * @since 24.2
+     * @return the footer object
+     */
+    public LoginOverlayFooter getFooter() {
+        if (this.footer == null) {
+            this.footer = new LoginOverlayFooter(this);
+        }
+        return this.footer;
+    }
+
+    /**
+     * Class for adding and removing components to the custom fields area of the
+     * overlay.
+     */
+    final public static class LoginOverlayCustomFields
+            extends LoginOverlayContent {
+        private LoginOverlayCustomFields(LoginOverlay overlay) {
+            super("custom-fields", overlay);
+        }
+    }
+
+    /**
+     * Class for adding and removing components to the footer area of the
+     * overlay.
+     */
+    final public static class LoginOverlayFooter extends LoginOverlayContent {
+        private LoginOverlayFooter(LoginOverlay overlay) {
+            super("footer", overlay);
+        }
+    }
+
+    /**
+     * This class defines the common behavior for adding/removing components to
+     * the custom fields and footer parts.
+     */
+    abstract static class LoginOverlayContent implements Serializable {
+        private final LoginOverlay overlay;
+        private final String slot;
+
+        protected LoginOverlayContent(String slot, LoginOverlay overlay) {
+            this.slot = slot;
+            this.overlay = overlay;
+        }
+
+        /**
+         * Adds the given components to the container. Note: components have to
+         * be added when the overlay is closed.
+         *
+         * @param components
+         *            the components to be added.
+         */
+        public void add(Component... components) {
+            if (overlay.isOpened()) {
+                return;
+            }
+
+            Objects.requireNonNull(components, "Components should not be null");
+            for (Component component : components) {
+                Objects.requireNonNull(component,
+                        "Component to add cannot be null");
+                SlotUtils.addToSlot(overlay, slot, component);
+            }
+        }
+
+        /**
+         * Removes the given components from the container. Note: components
+         * have to be removed when the overlay is closed.
+         *
+         * @param components
+         *            the components to be removed.
+         */
+        public void remove(Component... components) {
+            if (overlay.isOpened()) {
+                return;
+            }
+
+            Objects.requireNonNull(components, "Components should not be null");
+            for (Component component : components) {
+                Objects.requireNonNull(component,
+                        "Component to remove cannot be null");
+                Element element = component.getElement();
+
+                if (overlay.getElement().equals(element.getParent())
+                        && Objects.equals(element.getAttribute("slot"), slot)) {
+                    element.removeAttribute("slot");
+                    overlay.getElement().removeChild(element);
+                }
+            }
+        }
+
+        /**
+         * Removes all components from the container. Note: components have to
+         * be removed when the overlay is closed.
+         */
+        public void removeAll() {
+            if (overlay.isOpened()) {
+                return;
+            }
+
+            SlotUtils.clearSlot(overlay, slot);
+        }
     }
 
     /**
