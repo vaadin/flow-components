@@ -70,6 +70,12 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
         getElement().addEventListener("click", e -> {
             if (checkable) {
                 setChecked(!isChecked());
+
+                if (isKeepOpen()) {
+                    getElement().executeJs(
+                            "this.toggleAttribute('menu-item-checked', $0)",
+                            isChecked());
+                }
             }
         });
 
@@ -184,6 +190,37 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
      */
     public boolean isChecked() {
         return getElement().getProperty("_checked", false);
+    }
+
+    /**
+     * Sets the keep open state of this menu item. An item that marked as keep
+     * open prevents menu from closing when clicked.
+     *
+     * @param keepOpen
+     *            {@code true} to enable keeping the menu open when toggle this
+     *            item selection, {@code false} to disable it.
+     */
+    public void setKeepOpen(boolean keepOpen) {
+        if (keepOpen && isParentItem()) {
+            throw new IllegalStateException(
+                    "A keepOpen item cannot have a sub menu");
+        }
+
+        getElement().setProperty("_keepOpen", keepOpen);
+
+        executeJsWhenAttached(
+                "window.Vaadin.Flow.contextMenuConnector.setKeepOpen($0, $1)",
+                getElement(), keepOpen);
+    }
+
+    /**
+     * Gets whether clicking this item keeps the menu open.
+     *
+     * @return the keep open state of the item
+     * @see #setKeepOpen(boolean)
+     */
+    public boolean isKeepOpen() {
+        return getElement().getProperty("_keepOpen", false);
     }
 
     /**

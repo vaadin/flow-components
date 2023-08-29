@@ -57,6 +57,7 @@
       const item = {
         component: child,
         checked: child._checked,
+        keepOpen: child._keepOpen,
         theme: child.__theme
       };
       // Do not hardcode tag name to allow `vaadin-menu-bar-item`
@@ -80,6 +81,18 @@
   function setChecked(component, checked) {
     if (component._item) {
       component._item.checked = checked;
+    }
+  }
+
+  /**
+   * Sets the keep open state for a context menu item.
+   *
+   * @param {HTMLElement} component
+   * @param {boolean} keepOpen
+   */
+  function setKeepOpen(component, keepOpen) {
+    if (component._item) {
+      component._item.keepOpen = keepOpen;
     }
   }
 
@@ -109,6 +122,10 @@
 
     setChecked(...args) {
       return tryCatchWrapper(setChecked)(...args);
+    },
+
+    setKeepOpen(...args) {
+      return tryCatchWrapper(setKeepOpen)(...args);
     },
 
     setTheme(...args) {
