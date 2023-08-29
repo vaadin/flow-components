@@ -24,7 +24,7 @@ import com.vaadin.flow.dom.ElementConstants;
  *
  * @author Vaadin Ltd
  */
-public class FontIcon extends AbstractIcon {
+public class FontIcon extends AbstractIcon<FontIcon> {
 
     /**
      * Default constructor. Creates an empty font icon.
