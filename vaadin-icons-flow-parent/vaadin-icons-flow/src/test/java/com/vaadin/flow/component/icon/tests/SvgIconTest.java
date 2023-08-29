@@ -15,16 +15,21 @@
  */
 package com.vaadin.flow.component.icon.tests;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.icon.SvgIcon;
+import com.vaadin.flow.server.StreamResource;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 
 public class SvgIconTest {
     @Test
     public void emptyConstructor_hasNoSrc() {
         var icon = new SvgIcon();
         Assert.assertNull(icon.getSrc());
-        Assert.assertNull(icon.getElement().getProperty("src"));
+        Assert.assertNull(icon.getElement().getAttribute("src"));
     }
 
     @Test
@@ -32,7 +37,19 @@ public class SvgIconTest {
         var path = "path/to/file.svg";
         var icon = new SvgIcon(path);
         Assert.assertEquals(path, icon.getSrc());
-        Assert.assertEquals(path, icon.getElement().getProperty("src"));
+        Assert.assertEquals(path, icon.getElement().getAttribute("src"));
+    }
+
+    @Test
+    public void streamResourceConstructor_hasSrc() {
+        UI.setCurrent(new UI());
+        var resource = new StreamResource("image.svg",
+                () -> new ByteArrayInputStream(
+                        "<svg></svg>".getBytes(StandardCharsets.UTF_8)));
+        var icon = new SvgIcon(resource);
+        Assert.assertTrue(icon.getSrc().contains("image.svg"));
+        Assert.assertTrue(
+                icon.getElement().getAttribute("src").contains("image.svg"));
     }
 
     @Test
@@ -41,7 +58,7 @@ public class SvgIconTest {
         var path = "path/to/file.svg";
         icon.setSrc(path);
         Assert.assertEquals(path, icon.getSrc());
-        Assert.assertEquals(path, icon.getElement().getProperty("src"));
+        Assert.assertEquals(path, icon.getElement().getAttribute("src"));
     }
 
     @Test
@@ -51,7 +68,18 @@ public class SvgIconTest {
         icon.setSrc(newPath);
 
         Assert.assertEquals(newPath, icon.getSrc());
-        Assert.assertEquals(newPath, icon.getElement().getProperty("src"));
+        Assert.assertEquals(newPath, icon.getElement().getAttribute("src"));
+    }
+
+    @Test
+    public void withStreamResource_setSrc_hasSrc() {
+        UI.setCurrent(new UI());
+        var icon = new SvgIcon();
+        var resource = new StreamResource("image.svg",
+                () -> new ByteArrayInputStream(
+                        "<svg></svg>".getBytes(StandardCharsets.UTF_8)));
+        icon.setSrc(resource);
+        Assert.assertTrue(icon.getSrc().contains("image.svg"));
     }
 
     @Test
