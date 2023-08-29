@@ -108,4 +108,13 @@ public class FontIconTest {
         Assert.assertEquals("red", icon.getColor());
         Assert.assertEquals("red", icon.getElement().getStyle().get("color"));
     }
+
+    @Test
+    public void clearColor_hasNoColor() {
+        var icon = new FontIcon();
+        icon.setColor("red");
+        icon.setColor(null);
+        Assert.assertNull(icon.getColor());
+        Assert.assertNull(icon.getStyle().get("fill"));
+    }
 }
