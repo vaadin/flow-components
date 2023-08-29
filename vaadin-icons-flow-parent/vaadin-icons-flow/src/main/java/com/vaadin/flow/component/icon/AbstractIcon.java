@@ -35,7 +35,7 @@ import com.vaadin.flow.dom.ElementConstants;
 @NpmPackage(value = "@vaadin/icon", version = "24.2.0-alpha11")
 @JsModule("@vaadin/icon/src/vaadin-icon.js")
 public abstract class AbstractIcon extends Component
-        implements ClickNotifier<Icon>, HasTooltip {
+        implements ClickNotifier<AbstractIcon>, HasTooltip {
 
     /**
      * Sets the width and the height of the icon.
