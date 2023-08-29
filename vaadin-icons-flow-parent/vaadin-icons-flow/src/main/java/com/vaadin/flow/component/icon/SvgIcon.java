@@ -15,6 +15,9 @@
  */
 package com.vaadin.flow.component.icon;
 
+import com.vaadin.flow.server.AbstractStreamResource;
+import com.vaadin.flow.server.StreamResource;
+
 /**
  * Component for displaying an icon from a SVG file.
  */
@@ -39,8 +42,18 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
     }
 
     /**
-     * Defines the path of the SVG file to be used as the icon. The value can
-     * be:
+     * Creates an SVG icon with the given resource
+     *
+     * @param src
+     *            the resource value
+     * @see #setSrc(AbstractStreamResource)
+     */
+    public SvgIcon(AbstractStreamResource src) {
+        setSrc(src);
+    }
+
+    /**
+     * Sets the URL of the SVG file to be used as the icon. The value can be:
      * <ul>
      *
      * <li>A path to a standalone SVG file</li>
@@ -62,7 +75,18 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
      *            the source file of the icon
      */
     public void setSrc(String src) {
-        getElement().setProperty("src", src);
+        getElement().setAttribute("src", src);
+    }
+
+    /**
+     * Defines the source of the icon from the given {@link StreamResource} The
+     * resource must contain a valid SVG element.
+     *
+     * @param src
+     *            the source value, not null
+     */
+    public void setSrc(AbstractStreamResource src) {
+        getElement().setAttribute("src", src);
     }
 
     /**
@@ -71,7 +95,7 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
      * @return the source defined or {@code null}
      */
     public String getSrc() {
-        return getElement().getProperty("src");
+        return getElement().getAttribute("src");
     }
 
     @Override
