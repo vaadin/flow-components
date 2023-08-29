@@ -18,7 +18,7 @@ package com.vaadin.flow.component.icon;
 /**
  * Component for displaying an icon from a SVG file.
  */
-public class SvgIcon extends AbstractIcon {
+public class SvgIcon extends AbstractIcon<SvgIcon> {
     private static final String STYLE_FILL = "fill";
 
     /**
