@@ -32,9 +32,9 @@ public class FontIconIT extends AbstractComponentIT {
     }
 
     @Test
-    public void fontAwesomeIcon() {
-        var icon = findElement(By.tagName("vaadin-icon"));
-        // Get the pseudo element's width and height separated by a space
+    public void fontIconUsingFont() {
+        var icon = findElement(By.className("fa-user"));
+        // Get the ::before element's width and height separated by a space
         var beforeBounds = executeScript(
                 """
                         const { width, height } = window.getComputedStyle(arguments[0], '::before');
@@ -42,6 +42,7 @@ public class FontIconIT extends AbstractComponentIT {
                         """,
                 icon);
 
+        // Expect the icon size to match FontAwesome "user" icon's size
         Assert.assertEquals("21px 24px", beforeBounds);
     }
 }
