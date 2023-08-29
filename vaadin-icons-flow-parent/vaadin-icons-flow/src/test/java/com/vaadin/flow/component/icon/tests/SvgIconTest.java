@@ -21,36 +21,36 @@ import org.junit.Test;
 
 public class SvgIconTest {
     @Test
-    public void emptyConstructor_hasNoSource() {
+    public void emptyConstructor_hasNoSrc() {
         var icon = new SvgIcon();
-        Assert.assertNull(icon.getSource());
+        Assert.assertNull(icon.getSrc());
         Assert.assertNull(icon.getElement().getProperty("src"));
     }
 
     @Test
-    public void sourceConstructor_hasSource() {
+    public void sourceConstructor_hasSrc() {
         var path = "path/to/file.svg";
         var icon = new SvgIcon(path);
-        Assert.assertEquals(path, icon.getSource());
+        Assert.assertEquals(path, icon.getSrc());
         Assert.assertEquals(path, icon.getElement().getProperty("src"));
     }
 
     @Test
-    public void setSource_hasSource() {
+    public void setSrc_hasSrc() {
         var icon = new SvgIcon();
         var path = "path/to/file.svg";
-        icon.setSource(path);
-        Assert.assertEquals(path, icon.getSource());
+        icon.setSrc(path);
+        Assert.assertEquals(path, icon.getSrc());
         Assert.assertEquals(path, icon.getElement().getProperty("src"));
     }
 
     @Test
-    public void modifySource_hasModifiedSource() {
+    public void modifySrc_hasModifiedSrc() {
         var icon = new SvgIcon("path/to/file.svg");
         var newPath = "path/to/new/file.svg";
-        icon.setSource(newPath);
+        icon.setSrc(newPath);
 
-        Assert.assertEquals(newPath, icon.getSource());
+        Assert.assertEquals(newPath, icon.getSrc());
         Assert.assertEquals(newPath, icon.getElement().getProperty("src"));
     }
 

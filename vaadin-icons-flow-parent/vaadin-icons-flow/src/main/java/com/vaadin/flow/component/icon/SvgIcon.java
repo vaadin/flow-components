@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.icon;
 
-import com.vaadin.flow.dom.ElementConstants;
-
 /**
  * Component for displaying an icon from a SVG file.
  */
@@ -32,12 +30,12 @@ public class SvgIcon extends AbstractIcon {
     /**
      * Creates an SVG icon with the given source
      *
-     * @param source
+     * @param src
      *            the SVG file path
-     * @see #setSource(String)
+     * @see #setSrc(String)
      */
-    public SvgIcon(String source) {
-        setSource(source);
+    public SvgIcon(String src) {
+        setSrc(src);
     }
 
     /**
@@ -60,11 +58,11 @@ public class SvgIcon extends AbstractIcon {
      * `"data:image/svg+xml,<svg>...</svg>`</li>
      * </ul>
      *
-     * @param source
+     * @param src
      *            the source file of the icon
      */
-    public void setSource(String source) {
-        getElement().setProperty("src", source);
+    public void setSrc(String src) {
+        getElement().setProperty("src", src);
     }
 
     /**
@@ -72,7 +70,7 @@ public class SvgIcon extends AbstractIcon {
      *
      * @return the source defined or {@code null}
      */
-    public String getSource() {
+    public String getSrc() {
         return getElement().getProperty("src");
     }
 
