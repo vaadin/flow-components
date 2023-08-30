@@ -138,7 +138,7 @@ public class AllFieldsBasicValidationPage extends Div {
             field.setHelperText(
                     "Validation count: " + validationCounter.incrementAndGet());
         });
-        binder.forField(field).bind("number");
+        binder.forField(field).asRequired("Required").bind("number");
 
         wrapper.add(createCheckbox("Eager mode", event -> {
             if (field.getValueChangeMode() == ValueChangeMode.ON_CHANGE) {
@@ -185,7 +185,7 @@ public class AllFieldsBasicValidationPage extends Div {
             field.setHelperText(
                     "Validation count: " + validationCounter.incrementAndGet());
         });
-        binder.forField(field).bind("integer");
+        binder.forField(field).asRequired("Required").bind("integer");
 
         wrapper.add(createCheckbox("Eager mode", event -> {
             if (field.getValueChangeMode() == ValueChangeMode.ON_CHANGE) {
@@ -232,7 +232,7 @@ public class AllFieldsBasicValidationPage extends Div {
             field.setHelperText(
                     "Validation count: " + validationCounter.incrementAndGet());
         });
-        binder.forField(field).bind("bigDecimal");
+        binder.forField(field).asRequired("Required").bind("bigDecimal");
 
         wrapper.add(createCheckbox("Eager mode", event -> {
             if (field.getValueChangeMode() == ValueChangeMode.ON_CHANGE) {
@@ -264,7 +264,7 @@ public class AllFieldsBasicValidationPage extends Div {
             field.setHelperText(
                     "Validation count: " + validationCounter.incrementAndGet());
         });
-        binder.forField(field).bind("string");
+        binder.forField(field).asRequired("Required").bind("string");
 
         wrapper.add(createCheckbox("Eager mode", event -> {
             if (field.getValueChangeMode() == ValueChangeMode.ON_CHANGE) {
@@ -310,7 +310,7 @@ public class AllFieldsBasicValidationPage extends Div {
             field.setHelperText(
                     "Validation count: " + validationCounter.incrementAndGet());
         });
-        binder.forField(field).bind("date");
+        binder.forField(field).asRequired("Required").bind("date");
 
         wrapper.add(createInput("Set min", event -> {
             LocalDate value = LocalDate.parse(event.getValue());
@@ -344,7 +344,7 @@ public class AllFieldsBasicValidationPage extends Div {
             field.setHelperText(
                     "Validation count: " + validationCounter.incrementAndGet());
         });
-        binder.forField(field).bind("time");
+        binder.forField(field).asRequired("Required").bind("time");
 
         wrapper.add(createInput("Set min", event -> {
             LocalTime value = LocalTime.parse(event.getValue());
@@ -378,7 +378,7 @@ public class AllFieldsBasicValidationPage extends Div {
             field.setHelperText(
                     "Validation count: " + validationCounter.incrementAndGet());
         });
-        binder.forField(field).bind("dateTime");
+        binder.forField(field).asRequired("Required").bind("dateTime");
 
         wrapper.add(createInput("Set min", event -> {
             LocalDateTime value = LocalDateTime.parse(event.getValue());
