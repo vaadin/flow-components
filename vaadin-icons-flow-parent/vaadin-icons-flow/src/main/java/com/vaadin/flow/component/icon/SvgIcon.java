@@ -20,6 +20,8 @@ import com.vaadin.flow.server.StreamResource;
 
 /**
  * Component for displaying an icon from a SVG file.
+ *
+ * @author Vaadin Ltd
  */
 public class SvgIcon extends AbstractIcon<SvgIcon> {
     private static final String STYLE_FILL = "fill";
