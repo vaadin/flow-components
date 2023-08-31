@@ -485,4 +485,15 @@ public class TabSheetTest {
 
         tabSheet.getComponent(null);
     }
+
+    @Test
+    public void getTabs_returnsTabs() {
+        tabSheet.add("Tab 0", new Span("Content 0"));
+        tabSheet.add("Tab 1", new Span("Content 1"));
+
+        var tabsInSheet = tabSheet.getTabs();
+        Assert.assertNotNull(tabsInSheet);
+        Assert.assertEquals(2, tabsInSheet.getComponentCount());
+        Assert.assertEquals(tabs, tabsInSheet);
+    }
 }

@@ -282,6 +282,15 @@ public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
     }
 
     /**
+     * Returns the {@link Tabs} in this tab sheet.
+     *
+     * @return the tabs
+     */
+    public Tabs getTabs() {
+        return tabs;
+    }
+
+    /**
      * Returns the {@link Component} instance associated with the given tab.
      *
      * @param tab
