@@ -168,8 +168,9 @@ public class DatePicker
 
         addClientValidatedEventListener(e -> validate());
 
-        getElement().addPropertyChangeListener("opened", event -> fireEvent(
-                new OpenedChangeEvent(this, event.isUserOriginated())));
+        getElement().addPropertyChangeListener("opened", "opened-changed",
+                event -> fireEvent(
+                        new OpenedChangeEvent(this, event.isUserOriginated())));
 
         getElement().addPropertyChangeListener("invalid", event -> fireEvent(
                 new InvalidChangeEvent(this, event.isUserOriginated())));
