@@ -754,7 +754,7 @@ public class DatePicker
      *
      * @return {@code true} if the drop-down is opened, {@code false} otherwise
      */
-    @Synchronize(property = "opened", value = { "opened-changed" })
+    @Synchronize(property = "opened", value = "opened-changed")
     public boolean isOpened() {
         return getElement().getProperty("opened", false);
     }
