@@ -49,11 +49,17 @@ public class MainView extends VerticalLayout {
 
         grid.addColumn(Person::getAge).setHeader("Age");
 
-        grid.addEditColumn(Person::getName, "name").text((item, newValue) -> {
-            item.setName(newValue);
-            itemDisplayPanel.setText(item.toString());
-            subPropertyDisplayPanel.setText(newValue);
-        }).setHeader("Name").setWidth("300px");
+        grid.addEditColumn(Person::getName, "name").setBackendUpdateMode()
+                .text((item, newValue) -> {
+                    // Update the person in the underlying data and refresh
+                    personList.stream()
+                            .filter(person -> person.getId() == item.getId())
+                            .findAny()
+                            .ifPresent(person -> person.setName(newValue));
+                    grid.getDataProvider().refreshAll();
+                    itemDisplayPanel.setText(item.toString());
+                    subPropertyDisplayPanel.setText(newValue);
+                }).setHeader("Name").setWidth("300px");
 
         ComboBox<Department> cb = new ComboBox<>();
         cb.setItems(Department.values());

@@ -278,6 +278,23 @@ public class BasicIT extends AbstractParallelTest {
         Assert.assertEquals("2019", selectedText);
     }
 
+    @Test
+    public void columnWithBackendUpdateMode_updateProperty_propertyUpdatedCorrectly() {
+        Assert.assertEquals("Person 1", grid.getCell(0, 1).getInnerHTML());
+
+        assertCellEnterEditModeOnDoubleClick(0, 1,
+                "vaadin-grid-pro-edit-text-field");
+
+        var textField = grid.getCell(0, 1).$("vaadin-grid-pro-edit-text-field")
+                .first();
+
+        textField.setProperty("value", "Updated Person 1");
+        textField.dispatchEvent("focusout");
+
+        Assert.assertEquals("Updated Person 1",
+                grid.getCell(0, 1).getInnerHTML());
+    }
+
     private void assertCellEnterEditModeOnDoubleClick(Integer rowIndex,
             Integer colIndex, String editorTag) {
         assertCellEnterEditModeOnDoubleClick(rowIndex, colIndex, editorTag,

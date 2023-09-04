@@ -122,17 +122,18 @@ public class GridPro<E> extends Grid<E> {
                 column.getItemUpdater().accept(e.getItem(),
                         e.getSourceItem().get(e.getPath()).asString());
             }
-            Object idAfterUpdate = getItemId(e.getItem());
 
-            if (!Objects.equals(idBeforeUpdate, idAfterUpdate)) {
-                LoggerFactory.getLogger(GridPro.class).warn(
-                        "An item updater modified the data provider ID of the edited item, which is not allowed. "
-                                + "This can happen with classes that implement hashCode using fields that can be edited. "
-                                + "Either change the hashCode implementation so that it does not rely on editable fields, or "
-                                + "override DataProvider.getId() to generate a stable ID that does not change when editing fields.");
+            if (!column.isBackendUpdateMode()) {
+                Object idAfterUpdate = getItemId(e.getItem());
+                if (!Objects.equals(idBeforeUpdate, idAfterUpdate)) {
+                    LoggerFactory.getLogger(GridPro.class).warn(
+                            "An item updater modified the data provider ID of the edited item, which is not allowed. "
+                                    + "This can happen with classes that implement hashCode using fields that can be edited. "
+                                    + "Either change the hashCode implementation so that it does not rely on editable fields, or "
+                                    + "override DataProvider.getId() to generate a stable ID that does not change when editing fields.");
+                }
+                getDataProvider().refreshItem(e.getItem());
             }
-
-            getDataProvider().refreshItem(e.getItem());
         });
 
         addCellEditStartedListener(e -> {
@@ -191,6 +192,7 @@ public class GridPro<E> extends Grid<E> {
         private ItemUpdater<T, String> itemUpdater;
         private HasValueAndElement editorField;
         private ValueProvider<T, ?> valueProvider;
+        private boolean isBackendUpdateMode = false;
 
         /**
          * Constructs a new Column for use inside a Grid.
@@ -294,6 +296,14 @@ public class GridPro<E> extends Grid<E> {
 
         public void setValueProvider(ValueProvider<T, ?> valueProvider) {
             this.valueProvider = valueProvider;
+        }
+
+        protected boolean isBackendUpdateMode() {
+            return isBackendUpdateMode;
+        }
+
+        protected void setBackendUpdateMode() {
+            isBackendUpdateMode = true;
         }
     }
 

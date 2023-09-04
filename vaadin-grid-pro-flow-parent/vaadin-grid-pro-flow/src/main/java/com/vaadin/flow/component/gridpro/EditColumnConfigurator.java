@@ -286,4 +286,16 @@ public class EditColumnConfigurator<T> implements Serializable {
             Class<E> enumType) {
         return select(itemUpdater, enumType, Object::toString);
     }
+
+    /**
+     * Configures the column to not refresh the item automatically when a
+     * property is updated. The required update and refresh operations should be
+     * performed in the provided item updater manually.
+     *
+     * @return the configurator
+     */
+    public EditColumnConfigurator<T> setBackendUpdateMode() {
+        column.setBackendUpdateMode();
+        return this;
+    }
 }
