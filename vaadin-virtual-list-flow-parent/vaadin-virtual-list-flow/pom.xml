@@ -9,6 +9,7 @@
     <artifactId>vaadin-virtual-list-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Virtual List</name>
+    <description>Vaadin Virtual List</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

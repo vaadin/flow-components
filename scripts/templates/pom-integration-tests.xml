@@ -12,7 +12,7 @@
     <packaging>war</packaging>
 
     <name>component Integration Tests</name>
-
+    <description>component Integration Tests</description>
     <dependencies>
     </dependencies>
 

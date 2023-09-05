@@ -9,6 +9,7 @@
     <artifactId>vaadin-board-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Board</name>
+    <description>Vaadin Board</description>
     <properties>
         <osgi.bundle.license>https://vaadin.com/commercial-license-and-service-terms</osgi.bundle.license>
     </properties>

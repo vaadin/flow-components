@@ -81,9 +81,9 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-date-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha13")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha14")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/date-picker", version = "24.2.0-alpha13")
+@NpmPackage(value = "@vaadin/date-picker", version = "24.2.0-alpha14")
 @JsModule("@vaadin/date-picker/src/vaadin-date-picker.js")
 @JsModule("./datepickerConnector.js")
 @NpmPackage(value = "date-fns", version = "2.29.3")
@@ -748,9 +748,13 @@ public class DatePicker
 
     /**
      * Gets the states of the drop-down for the datepicker
+     * <p>
+     * This property is synchronized automatically from client side when an
+     * {@code opened-changed} event happens.
      *
      * @return {@code true} if the drop-down is opened, {@code false} otherwise
      */
+    @Synchronize(property = "opened", value = "opened-changed")
     public boolean isOpened() {
         return getElement().getProperty("opened", false);
     }

@@ -9,6 +9,7 @@
     <artifactId>vaadin-text-field-integration-tests</artifactId>
     <packaging>war</packaging>
     <name>Vaadin Text Field Integration Tests</name>
+    <description>Vaadin Text Field Integration Tests</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -166,6 +167,5 @@
                 </plugins>
             </build>
         </profile>
-
     </profiles>
 </project>

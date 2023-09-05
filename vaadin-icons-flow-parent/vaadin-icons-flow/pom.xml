@@ -9,6 +9,7 @@
     <artifactId>vaadin-icons-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Icons</name>
+    <description>Vaadin Icons</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

@@ -9,6 +9,7 @@
     <artifactId>vaadin-details-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Details</name>
+    <description>Vaadin Details</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>
