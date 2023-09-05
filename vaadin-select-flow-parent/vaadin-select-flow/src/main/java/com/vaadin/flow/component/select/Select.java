@@ -666,6 +666,11 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
         listBox.prependComponents(beforeItem, components);
     }
 
+    @Override
+    public int getItemPosition(T item) {
+        return listBox.getItemPosition(item);
+    }
+
     /**
      * {@inheritDoc}
      * <p>
