@@ -9,6 +9,7 @@
     <artifactId>vaadin-messages-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>Vaadin Messages Parent</name>
+    <description>Vaadin Messages Parent</description>
     <modules>
         <module>vaadin-messages-flow</module>
         <module>vaadin-messages-testbench</module>

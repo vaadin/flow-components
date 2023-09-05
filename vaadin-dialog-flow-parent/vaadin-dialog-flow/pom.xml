@@ -9,6 +9,7 @@
     <artifactId>vaadin-dialog-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Dialog</name>
+    <description>Vaadin Dialog</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

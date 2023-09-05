@@ -9,6 +9,7 @@
     <artifactId>vaadin-text-field-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Text Field</name>
+    <description>Vaadin Text Field</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

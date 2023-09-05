@@ -9,6 +9,7 @@
     <artifactId>vaadin-button-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Button</name>
+    <description>Vaadin Button</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

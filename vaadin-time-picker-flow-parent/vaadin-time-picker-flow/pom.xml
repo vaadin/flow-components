@@ -9,6 +9,7 @@
     <artifactId>vaadin-time-picker-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Time Picker</name>
+    <description>Vaadin Time Picker</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

@@ -13,6 +13,7 @@
     <artifactId>component-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>component Parent</name>
+    <description>component Parent</description>
 
     <licenses>
         <license>

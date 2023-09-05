@@ -9,6 +9,7 @@
     <artifactId>vaadin-side-nav-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Side Nav</name>
+    <description>Vaadin Side Nav</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>
