@@ -9,6 +9,7 @@
     <artifactId>vaadin-ordered-layout-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Ordered Layout</name>
+    <description>Vaadin Ordered Layout</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

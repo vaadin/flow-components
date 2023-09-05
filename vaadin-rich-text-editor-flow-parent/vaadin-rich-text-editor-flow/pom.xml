@@ -9,6 +9,7 @@
     <artifactId>vaadin-rich-text-editor-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Rich Text Editor</name>
+    <description>Vaadin Rich Text Editor</description>
     <properties>
         <osgi.bundle.license>https://vaadin.com/commercial-license-and-service-terms</osgi.bundle.license>
     </properties>
@@ -69,8 +70,8 @@
                 <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
                     <archive>
-                        <manifestFile>
-                            ${project.build.outputDirectory}/META-INF/MANIFEST.MF
+                        <manifestFile>&#xD;
+                            ${project.build.outputDirectory}/META-INF/MANIFEST.MF&#xD;
                         </manifestFile>
                     </archive>
                 </configuration>

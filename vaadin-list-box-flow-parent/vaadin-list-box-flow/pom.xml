@@ -9,6 +9,7 @@
     <artifactId>vaadin-list-box-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin List Box</name>
+    <description>Vaadin List Box</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

@@ -9,9 +9,9 @@
     <artifactId>vaadin-spreadsheet-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Spreadsheet</name>
+    <description>Vaadin Spreadsheet</description>
     <properties>
         <osgi.bundle.license>https://vaadin.com/commercial-license-and-service-terms</osgi.bundle.license>
-        <cvdlName>vaadin-spreadsheet-flow</cvdlName>
     </properties>
     <dependencies>
         <dependency>
@@ -109,11 +109,8 @@
                 <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
                     <archive>
-                        <manifest>
-                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                        </manifest>
-                        <manifestFile>
-                            ${project.build.outputDirectory}/META-INF/MANIFEST.MF
+                        <manifestFile>&#xD;
+                            ${project.build.outputDirectory}/META-INF/MANIFEST.MF&#xD;
                         </manifestFile>
                     </archive>
                 </configuration>

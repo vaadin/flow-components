@@ -9,6 +9,7 @@
     <artifactId>vaadin-renderer-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Renderer</name>
+    <description>Vaadin Renderer</description>
     <properties>
         <osgi.export.package>com.vaadin.flow.data.renderer</osgi.export.package>
     </properties>
@@ -49,8 +50,8 @@
                 <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
                     <archive>
-                        <manifestFile>
-                            ${project.build.outputDirectory}/META-INF/MANIFEST.MF
+                        <manifestFile>&#xD;
+                            ${project.build.outputDirectory}/META-INF/MANIFEST.MF&#xD;
                         </manifestFile>
                     </archive>
                 </configuration>

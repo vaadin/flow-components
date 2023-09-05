@@ -9,6 +9,7 @@
     <artifactId>vaadin-details-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>Vaadin Details Parent</name>
+    <description>Vaadin Details Parent</description>
     <modules>
         <module>vaadin-details-flow</module>
         <module>vaadin-details-testbench</module>

@@ -9,6 +9,7 @@
     <artifactId>vaadin-time-picker-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>Vaadin Time Picker Parent</name>
+    <description>Vaadin Time Picker Parent</description>
     <modules>
         <module>vaadin-time-picker-flow</module>
         <module>vaadin-time-picker-testbench</module>

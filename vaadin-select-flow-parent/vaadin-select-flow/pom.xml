@@ -9,6 +9,7 @@
     <artifactId>vaadin-select-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Select</name>
+    <description>Vaadin Select</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -85,7 +86,7 @@
                 <configuration>
                     <archive>
                         <manifestFile>
-                            ${project.build.outputDirectory}/META-INF/MANIFEST.MF
+                            ${project.build.outputDirectory}/META-INF/MANIFEST.MF&#xD;
                         </manifestFile>
                     </archive>
                 </configuration>

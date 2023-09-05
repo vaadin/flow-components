@@ -9,6 +9,7 @@
     <artifactId>vaadin-virtual-list-testbench</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Virtual List Testbench API</name>
+    <description>Vaadin Virtual List Testbench API</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -17,7 +18,7 @@
         </dependency>
     </dependencies>
     <build>
-        <plugins>
+        <plugins>&#xD;
         </plugins>
     </build>
     <profiles>
