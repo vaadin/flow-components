@@ -2,6 +2,7 @@ package com.vaadin.flow.component.grid.it;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.grid.Grid;
@@ -47,7 +48,23 @@ public class GridScrollToPage extends Div {
                 });
         addRowsAndScrollToEnd.setId("add-row-and-scroll-to-end");
 
+        NativeButton addAlreadyScrolledGridButton = new NativeButton(
+                "Add already scrolled grid", e -> {
+                    Grid<String> alreadyScrolledGrid = new Grid<>();
+                    alreadyScrolledGrid.setId("already-scrolled-grid");
+                    alreadyScrolledGrid.addColumn(item -> item);
+
+                    alreadyScrolledGrid.setItems(IntStream.rangeClosed(0, 1000)
+                            .mapToObj(String::valueOf)
+                            .collect(Collectors.toList()));
+                    alreadyScrolledGrid.scrollToIndex(300);
+                    add(alreadyScrolledGrid);
+
+                    e.getSource().setVisible(false);
+                });
+        addAlreadyScrolledGridButton.setId("add-already-scrolled-grid-button");
+
         add(grid, scrollToStart, scrollToEnd, scrollToRow500, grid2,
-                addRowsAndScrollToEnd);
+                addRowsAndScrollToEnd, addAlreadyScrolledGridButton);
     }
 }

@@ -4486,7 +4486,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            zero based index of the item to scroll to in the current view.
      */
     public void scrollToIndex(int rowIndex) {
-        getElement().callJsFunction("scrollToIndex", rowIndex);
+        getElement().executeJs(
+                "queueMicrotask(() => this.scrollToIndex(" + rowIndex + "))");
     }
 
     /**
@@ -4500,9 +4501,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * Scrolls to the last data row of the grid.
      */
     public void scrollToEnd() {
-        getUI().ifPresent(
-                ui -> ui.beforeClientResponse(this, ctx -> getElement()
-                        .executeJs("this.scrollToIndex(this._effectiveSize)")));
+        getUI().ifPresent(ui -> ui.beforeClientResponse(this,
+                ctx -> getElement().executeJs(
+                        "queueMicrotask(() => this.scrollToIndex(this._effectiveSize))")));
     }
 
     private void onDragStart(GridDragStartEvent<T> event) {
