@@ -9,7 +9,6 @@
     <artifactId>vaadin-map-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Map</name>
-    <description>Vaadin Map</description>
     <properties>
         <osgi.bundle.license>https://vaadin.com/commercial-license-and-service-terms</osgi.bundle.license>
     </properties>
@@ -64,8 +63,8 @@
                 <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
                     <archive>
-                        <manifestFile>&#xD;
-                            ${project.build.outputDirectory}/META-INF/MANIFEST.MF&#xD;
+                        <manifestFile>
+                            ${project.build.outputDirectory}/META-INF/MANIFEST.MF
                         </manifestFile>
                     </archive>
                 </configuration>

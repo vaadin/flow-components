@@ -9,7 +9,6 @@
     <artifactId>vaadin-virtual-list-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>Vaadin Virtual List Parent</name>
-    <description>Vaadin Virtual List Parent</description>
     <modules>
         <module>vaadin-virtual-list-flow</module>
         <module>vaadin-virtual-list-testbench</module>

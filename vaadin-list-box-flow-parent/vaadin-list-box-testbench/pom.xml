@@ -9,7 +9,6 @@
     <artifactId>vaadin-list-box-testbench</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin List Box Testbench API</name>
-    <description>Vaadin List Box Testbench API</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

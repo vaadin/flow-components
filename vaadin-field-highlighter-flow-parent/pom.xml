@@ -9,7 +9,6 @@
     <artifactId>vaadin-field-highlighter-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>Vaadin Field Highlighter Parent</name>
-    <description>Vaadin Field Highlighter Parent</description>
     <modules>
         <module>vaadin-field-highlighter-flow</module>
     </modules>

@@ -9,7 +9,6 @@
     <artifactId>vaadin-material-theme-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>Vaadin Material Theme Parent</name>
-    <description>Vaadin Material Theme Parent</description>
     <modules>
         <module>vaadin-material-theme-flow</module>
     </modules>

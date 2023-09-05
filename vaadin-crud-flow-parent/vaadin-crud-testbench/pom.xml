@@ -9,7 +9,6 @@
     <artifactId>vaadin-crud-testbench</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Crud Testbench API</name>
-    <description>Vaadin Crud Testbench API</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

@@ -9,7 +9,6 @@
     <artifactId>vaadin-custom-field-integration-tests</artifactId>
     <packaging>war</packaging>
     <name>Vaadin Custom Field Integration Tests</name>
-    <description>Vaadin Custom Field Integration Tests</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -162,5 +161,6 @@
                 </plugins>
             </build>
         </profile>
+
     </profiles>
 </project>

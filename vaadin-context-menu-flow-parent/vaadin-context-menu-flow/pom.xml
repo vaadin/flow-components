@@ -9,7 +9,6 @@
     <artifactId>vaadin-context-menu-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Context Menu</name>
-    <description>Vaadin Context Menu</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

@@ -9,7 +9,6 @@
     <artifactId>vaadin-confirm-dialog-testbench</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Confirm Dialog Testbench API</name>
-    <description>Vaadin Confirm Dialog Testbench API</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

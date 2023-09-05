@@ -9,7 +9,6 @@
     <artifactId>vaadin-accordion-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>Vaadin Accordion Parent</name>
-    <description>Vaadin Accordion Parent</description>
     <modules>
         <module>vaadin-accordion-flow</module>
         <module>vaadin-accordion-testbench</module>

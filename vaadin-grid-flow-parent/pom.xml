@@ -9,7 +9,6 @@
     <artifactId>vaadin-grid-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>Vaadin Grid Parent</name>
-    <description>Vaadin Grid Parent</description>
     <modules>
         <module>vaadin-grid-flow</module>
         <module>vaadin-grid-testbench</module>

@@ -9,7 +9,6 @@
     <artifactId>vaadin-cookie-consent-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Cookie Consent</name>
-    <description>Vaadin Cookie Consent</description>
     <properties>
         <osgi.bundle.license>https://vaadin.com/commercial-license-and-service-terms</osgi.bundle.license>
     </properties>

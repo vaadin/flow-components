@@ -9,7 +9,6 @@
     <artifactId>vaadin-date-picker-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>Vaadin Date Picker Parent</name>
-    <description>Vaadin Date Picker Parent</description>
     <modules>
         <module>vaadin-date-picker-flow</module>
         <module>vaadin-date-picker-testbench</module>

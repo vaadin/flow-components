@@ -9,7 +9,6 @@
     <artifactId>vaadin-app-layout-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin App Layout</name>
-    <description>Vaadin App Layout</description>
     <dependencies>
         <dependency>
             <groupId>jakarta.servlet</groupId>

@@ -9,7 +9,6 @@
     <artifactId>vaadin-text-field-testbench</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Text Field Testbench API</name>
-    <description>Vaadin Text Field Testbench API</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

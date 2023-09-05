@@ -9,7 +9,6 @@
     <artifactId>vaadin-rich-text-editor-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>Vaadin Rich Text Editor Parent</name>
-    <description>Vaadin Rich Text Editor Parent</description>
     <licenses>
         <license>
             <name>Vaadin Commercial License and Service Terms</name>

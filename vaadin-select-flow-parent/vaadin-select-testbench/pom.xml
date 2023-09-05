@@ -9,7 +9,6 @@
     <artifactId>vaadin-select-testbench</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Select Testbench API</name>
-    <description>Vaadin Select Testbench API</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

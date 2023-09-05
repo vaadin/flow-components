@@ -9,7 +9,6 @@
     <artifactId>vaadin-tabs-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Tabs</name>
-    <description>Vaadin Tabs</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

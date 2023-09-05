@@ -9,7 +9,6 @@
     <artifactId>vaadin-radio-button-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Radio Button</name>
-    <description>Vaadin Radio Button</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

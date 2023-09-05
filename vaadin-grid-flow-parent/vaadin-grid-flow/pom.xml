@@ -9,7 +9,6 @@
     <artifactId>vaadin-grid-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Grid</name>
-    <description>Vaadin Grid</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

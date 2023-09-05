@@ -9,7 +9,6 @@
     <artifactId>vaadin-virtual-list-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Virtual List</name>
-    <description>Vaadin Virtual List</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -52,8 +51,8 @@
                 <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
                     <archive>
-                        <manifestFile>&#xD;
-                            ${project.build.outputDirectory}/META-INF/MANIFEST.MF&#xD;
+                        <manifestFile>
+                            ${project.build.outputDirectory}/META-INF/MANIFEST.MF
                         </manifestFile>
                     </archive>
                 </configuration>

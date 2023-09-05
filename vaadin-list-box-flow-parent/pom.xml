@@ -9,7 +9,6 @@
     <artifactId>vaadin-list-box-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>Vaadin List Box Parent</name>
-    <description>Vaadin List Box Parent</description>
     <modules>
         <module>vaadin-list-box-flow</module>
         <module>vaadin-list-box-testbench</module>

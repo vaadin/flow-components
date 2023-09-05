@@ -9,7 +9,6 @@
     <artifactId>vaadin-cookie-consent-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>Vaadin Cookie Consent Parent</name>
-    <description>Vaadin Cookie Consent Parent</description>
     <licenses>
         <license>
             <name>Vaadin Commercial License and Service Terms</name>

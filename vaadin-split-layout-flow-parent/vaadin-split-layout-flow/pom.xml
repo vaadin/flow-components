@@ -9,7 +9,6 @@
     <artifactId>vaadin-split-layout-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Split Layout</name>
-    <description>Vaadin Split Layout</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

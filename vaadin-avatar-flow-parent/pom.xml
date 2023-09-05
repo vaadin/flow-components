@@ -9,7 +9,6 @@
     <artifactId>vaadin-avatar-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>Vaadin Avatar Parent</name>
-    <description>Vaadin Avatar Parent</description>
     <modules>
         <module>vaadin-avatar-flow</module>
         <module>vaadin-avatar-testbench</module>

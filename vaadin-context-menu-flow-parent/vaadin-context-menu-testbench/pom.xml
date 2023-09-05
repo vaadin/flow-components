@@ -9,7 +9,6 @@
     <artifactId>vaadin-context-menu-testbench</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Context Menu Testbench API</name>
-    <description>Vaadin Context Menu Testbench API</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

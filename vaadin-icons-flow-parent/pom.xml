@@ -9,7 +9,6 @@
     <artifactId>vaadin-icons-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>Vaadin Icons Parent</name>
-    <description>Vaadin Icons Parent</description>
     <modules>
         <module>vaadin-icons-flow</module>
         <module>vaadin-icons-testbench</module>

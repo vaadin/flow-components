@@ -9,7 +9,6 @@
     <artifactId>vaadin-side-nav-testbench</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Side Nav Testbench API</name>
-    <description>Vaadin Side Nav Testbench API</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -17,8 +16,9 @@
             <scope>provided</scope>
         </dependency>
     </dependencies>
+
     <build>
-        <plugins>&#xD;
+        <plugins>
         </plugins>
     </build>
     <profiles>

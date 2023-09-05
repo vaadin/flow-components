@@ -9,7 +9,6 @@
     <artifactId>vaadin-upload-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Upload</name>
-    <description>Vaadin Upload</description>
     <dependencies>
         <dependency>
             <groupId>jakarta.servlet</groupId>

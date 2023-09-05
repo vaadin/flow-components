@@ -9,7 +9,6 @@
     <artifactId>vaadin-spreadsheet-testbench</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Spreadsheet Testbench API</name>
-    <description>Vaadin Spreadsheet Testbench API</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -18,7 +17,7 @@
         </dependency>
     </dependencies>
     <build>
-        <plugins>&#xD;
+        <plugins>
         </plugins>
     </build>
     <profiles>

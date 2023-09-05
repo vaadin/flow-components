@@ -9,7 +9,6 @@
     <artifactId>vaadin-list-box-integration-tests</artifactId>
     <packaging>war</packaging>
     <name>Vaadin List Box Integration Tests</name>
-    <description>Vaadin List Box Integration Tests</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -168,5 +167,6 @@
                 </plugins>
             </build>
         </profile>
+
     </profiles>
 </project>

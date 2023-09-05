@@ -9,7 +9,6 @@
     <artifactId>vaadin-messages-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Messages</name>
-    <description>Vaadin Messages</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

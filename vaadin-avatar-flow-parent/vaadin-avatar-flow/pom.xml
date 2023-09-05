@@ -9,7 +9,6 @@
     <artifactId>vaadin-avatar-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Avatar</name>
-    <description>Vaadin Avatar</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

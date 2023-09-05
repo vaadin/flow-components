@@ -9,7 +9,6 @@
     <artifactId>vaadin-charts-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Charts</name>
-    <description>Vaadin Charts</description>
     <properties>
         <osgi.bundle.license>https://vaadin.com/commercial-license-and-service-terms</osgi.bundle.license>
     </properties>

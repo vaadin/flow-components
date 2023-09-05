@@ -9,7 +9,6 @@
     <artifactId>vaadin-form-layout-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Form Layout</name>
-    <description>Vaadin Form Layout</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

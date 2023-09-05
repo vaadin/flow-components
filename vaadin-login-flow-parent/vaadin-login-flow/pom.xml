@@ -9,7 +9,6 @@
     <artifactId>vaadin-login-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Login</name>
-    <description>Vaadin Login</description>
     <dependencies>
         <dependency>
             <groupId>jakarta.servlet</groupId>

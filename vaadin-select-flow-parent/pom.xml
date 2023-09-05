@@ -9,7 +9,6 @@
     <artifactId>vaadin-select-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>Vaadin Select Parent</name>
-    <description>Vaadin Select Parent</description>
     <modules>
         <module>vaadin-select-flow</module>
         <module>vaadin-select-testbench</module>

@@ -9,7 +9,6 @@
     <artifactId>vaadin-icons-integration-tests</artifactId>
     <packaging>war</packaging>
     <name>Vaadin Icons Integration Tests</name>
-    <description>Vaadin Icons Integration Tests</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -152,5 +151,6 @@
                 </plugins>
             </build>
         </profile>
+
     </profiles>
 </project>

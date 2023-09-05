@@ -9,7 +9,6 @@
     <artifactId>vaadin-accordion-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Accordion</name>
-    <description>Vaadin Accordion</description>
     <dependencies>
         <dependency>
             <groupId>jakarta.servlet</groupId>

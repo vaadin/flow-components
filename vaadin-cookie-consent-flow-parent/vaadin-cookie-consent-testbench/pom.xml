@@ -9,7 +9,6 @@
     <artifactId>vaadin-cookie-consent-testbench</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Cookie Consent Testbench API</name>
-    <description>Vaadin Cookie Consent Testbench API</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

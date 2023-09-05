@@ -9,7 +9,6 @@
     <artifactId>vaadin-grid-pro-testbench</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Grid Pro Testbench API</name>
-    <description>Vaadin Grid Pro Testbench API</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -18,7 +17,7 @@
         </dependency>
     </dependencies>
     <build>
-        <plugins>&#xD;
+        <plugins>
         </plugins>
     </build>
     <profiles>

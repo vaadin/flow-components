@@ -9,7 +9,6 @@
     <artifactId>vaadin-details-testbench</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Details Testbench API</name>
-    <description>Vaadin Details Testbench API</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

@@ -9,7 +9,6 @@
     <artifactId>vaadin-custom-field-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Custom Field</name>
-    <description>Vaadin Custom Field</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

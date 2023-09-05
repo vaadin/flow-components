@@ -9,7 +9,6 @@
     <artifactId>vaadin-progress-bar-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Progress Bar</name>
-    <description>Vaadin Progress Bar</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

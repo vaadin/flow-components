@@ -9,7 +9,6 @@
     <artifactId>vaadin-notification-testbench</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Notification Testbench API</name>
-    <description>Vaadin Notification Testbench API</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

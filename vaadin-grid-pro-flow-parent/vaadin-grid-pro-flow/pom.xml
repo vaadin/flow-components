@@ -9,7 +9,6 @@
     <artifactId>vaadin-grid-pro-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Grid Pro</name>
-    <description>Vaadin Grid Pro</description>
     <properties>
         <osgi.bundle.license>https://vaadin.com/commercial-license-and-service-terms</osgi.bundle.license>
     </properties>
@@ -75,8 +74,8 @@
                 <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
                     <archive>
-                        <manifestFile>&#xD;
-                            ${project.build.outputDirectory}/META-INF/MANIFEST.MF&#xD;
+                        <manifestFile>
+                            ${project.build.outputDirectory}/META-INF/MANIFEST.MF
                         </manifestFile>
                     </archive>
                 </configuration>
