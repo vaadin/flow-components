@@ -53,16 +53,13 @@ public class LoginOverlaySlotsTest {
                 "custom-fields");
     }
 
-    @Test
-    public void customFields_addAfterOpened_componentsAreNotAdded() {
+    @Test(expected = UnsupportedOperationException.class)
+    public void customFields_addAfterOpened_throwsUnsupportedOperationException() {
         TestComponent foo = new TestComponent();
         TestComponent bar = new TestComponent();
 
         overlay.setOpened(true);
         overlay.getCustomFields().add(foo, bar);
-
-        Assert.assertEquals(foo.getElement().getParent(), null);
-        Assert.assertEquals(bar.getElement().getParent(), null);
     }
 
     @Test
@@ -83,8 +80,8 @@ public class LoginOverlaySlotsTest {
                 "custom-fields");
     }
 
-    @Test
-    public void customFields_removeAfterOpened_componentsAreNotRemoved() {
+    @Test(expected = UnsupportedOperationException.class)
+    public void customFields_removeAfterOpened_throwsUnsupportedOperationException() {
         TestComponent foo = new TestComponent();
         TestComponent bar = new TestComponent();
 
@@ -92,10 +89,6 @@ public class LoginOverlaySlotsTest {
         overlay.setOpened(true);
 
         overlay.getCustomFields().remove(foo);
-        overlay.getCustomFields().remove(bar);
-
-        Assert.assertEquals(foo.getElement().getParent(), overlay.getElement());
-        Assert.assertEquals(bar.getElement().getParent(), overlay.getElement());
     }
 
     @Test
@@ -111,8 +104,8 @@ public class LoginOverlaySlotsTest {
         Assert.assertEquals(bar.getElement().getParent(), null);
     }
 
-    @Test
-    public void customFields_removeAllAfterOpened_componentsAreRemoved() {
+    @Test(expected = UnsupportedOperationException.class)
+    public void customFields_removeAllAfterOpened_throwsUnsupportedOperationException() {
         TestComponent foo = new TestComponent();
         TestComponent bar = new TestComponent();
 
@@ -120,9 +113,6 @@ public class LoginOverlaySlotsTest {
         overlay.setOpened(true);
 
         overlay.getCustomFields().removeAll();
-
-        Assert.assertEquals(foo.getElement().getParent(), overlay.getElement());
-        Assert.assertEquals(bar.getElement().getParent(), overlay.getElement());
     }
 
     @Test
@@ -138,16 +128,13 @@ public class LoginOverlaySlotsTest {
         Assert.assertEquals(bar.getElement().getAttribute("slot"), "footer");
     }
 
-    @Test
-    public void footer_addAfterOpened_componentsAreNotAdded() {
+    @Test(expected = UnsupportedOperationException.class)
+    public void footer_addAfterOpened_throwsUnsupportedOperationException() {
         TestComponent foo = new TestComponent();
         TestComponent bar = new TestComponent();
 
         overlay.setOpened(true);
         overlay.getFooter().add(foo, bar);
-
-        Assert.assertEquals(foo.getElement().getParent(), null);
-        Assert.assertEquals(bar.getElement().getParent(), null);
     }
 
     @Test
@@ -165,8 +152,8 @@ public class LoginOverlaySlotsTest {
         Assert.assertEquals(bar.getElement().getParent(), null);
     }
 
-    @Test
-    public void footer_removeAfterOpened_componentsAreNotRemoved() {
+    @Test(expected = UnsupportedOperationException.class)
+    public void footer_removeAfterOpened_throwsUnsupportedOperationException() {
         TestComponent foo = new TestComponent();
         TestComponent bar = new TestComponent();
 
@@ -174,10 +161,6 @@ public class LoginOverlaySlotsTest {
         overlay.setOpened(true);
 
         overlay.getFooter().remove(foo);
-        overlay.getFooter().remove(bar);
-
-        Assert.assertEquals(foo.getElement().getParent(), overlay.getElement());
-        Assert.assertEquals(bar.getElement().getParent(), overlay.getElement());
     }
 
     @Test
@@ -193,8 +176,8 @@ public class LoginOverlaySlotsTest {
         Assert.assertEquals(bar.getElement().getParent(), null);
     }
 
-    @Test
-    public void footer_removeAllAfterOpened_componentsAreRemoved() {
+    @Test(expected = UnsupportedOperationException.class)
+    public void footer_removeAllAfterOpened_throwsUnsupportedOperationException() {
         TestComponent foo = new TestComponent();
         TestComponent bar = new TestComponent();
 
@@ -202,8 +185,5 @@ public class LoginOverlaySlotsTest {
         overlay.setOpened(true);
 
         overlay.getFooter().removeAll();
-
-        Assert.assertEquals(foo.getElement().getParent(), overlay.getElement());
-        Assert.assertEquals(bar.getElement().getParent(), overlay.getElement());
     }
 }

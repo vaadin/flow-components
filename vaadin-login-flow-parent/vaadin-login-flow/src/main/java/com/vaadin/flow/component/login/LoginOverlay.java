@@ -308,10 +308,14 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
          *
          * @param components
          *            the components to be added.
+         *
+         * @throws UnsupportedOperationException
+         *             when using this method while overlay is opened
          */
         public void add(Component... components) {
             if (overlay.isOpened()) {
-                return;
+                throw new UnsupportedOperationException(
+                        "LoginOverlay does not support adding content when opened");
             }
 
             Objects.requireNonNull(components, "Components should not be null");
@@ -328,10 +332,14 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
          *
          * @param components
          *            the components to be removed.
+         *
+         * @throws UnsupportedOperationException
+         *             when using this method while overlay is opened
          */
         public void remove(Component... components) {
             if (overlay.isOpened()) {
-                return;
+                throw new UnsupportedOperationException(
+                        "LoginOverlay does not support removing content when opened");
             }
 
             Objects.requireNonNull(components, "Components should not be null");
@@ -351,10 +359,14 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
         /**
          * Removes all components from the container. Note: components have to
          * be removed when the overlay is closed.
+         *
+         * @throws UnsupportedOperationException
+         *             when using this method while overlay is opened
          */
         public void removeAll() {
             if (overlay.isOpened()) {
-                return;
+                throw new UnsupportedOperationException(
+                        "LoginOverlay does not support removing content when opened");
             }
 
             SlotUtils.clearSlot(overlay, slot);
