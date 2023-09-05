@@ -748,9 +748,13 @@ public class DatePicker
 
     /**
      * Gets the states of the drop-down for the datepicker
+     * <p>
+     * This property is synchronized automatically from client side when an
+     * {@code opened-changed} event happens.
      *
      * @return {@code true} if the drop-down is opened, {@code false} otherwise
      */
+    @Synchronize(property = "opened", value = "opened-changed")
     public boolean isOpened() {
         return getElement().getProperty("opened", false);
     }
