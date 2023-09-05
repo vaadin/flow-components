@@ -45,6 +45,7 @@ public class DatePickerViewDemoPage extends Div {
         createStartAndEndDatePickers();
         createLocaleChangeDatePicker();
         createDatePickerInsideDisabledParent();
+        createDatePickerWithOpenedChangeListener();
         addCard("Additional code used in the demo",
                 new Label("These methods are used in the demo."));
     }
@@ -252,6 +253,22 @@ public class DatePickerViewDemoPage extends Div {
 
         addCard("DatePicker inside a disabled parent div", parent,
                 enableParent);
+    }
+
+    private void createDatePickerWithOpenedChangeListener() {
+        Div message = createMessageDiv("picker-with-opened-change-message");
+
+        DatePicker datePicker = new DatePicker();
+        datePicker.setId("picker-with-opened-change");
+
+        datePicker.addOpenedChangeListener(event -> {
+            var text = event.isOpened() ? "date picker was opened"
+                    : "date picker was closed";
+            message.setText(text);
+        });
+
+        addCard("DatePicker with a opened change listener", datePicker,
+                message);
     }
 
     /**
