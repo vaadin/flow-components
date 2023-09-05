@@ -9,6 +9,7 @@
     <artifactId>vaadin-messages-integration-tests</artifactId>
     <packaging>war</packaging>
     <name>Vaadin Messages Integration Tests</name>
+    <description>Vaadin Messages Integration Tests</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -163,6 +164,5 @@
                 </plugins>
             </build>
         </profile>
-
     </profiles>
 </project>

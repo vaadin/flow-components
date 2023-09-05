@@ -9,6 +9,7 @@
     <artifactId>vaadin-menu-bar-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>Vaadin Menu Bar Parent</name>
+    <description>Vaadin Menu Bar Parent</description>
     <modules>
         <module>vaadin-menu-bar-flow</module>
         <module>vaadin-menu-bar-testbench</module>
