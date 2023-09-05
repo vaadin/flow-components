@@ -846,6 +846,15 @@ public class SelectTest {
         Assert.assertEquals(1, listenerInvokedCount.get());
     }
 
+    @Test
+    public void getItemPosition_shouldReturnItemIndexIfItemExists() {
+        select.setItems("foo", "bar", "buzz");
+        Assert.assertEquals(0, select.getItemPosition("foo"));
+        Assert.assertEquals(1, select.getItemPosition("bar"));
+        Assert.assertEquals(2, select.getItemPosition("buzz"));
+        Assert.assertEquals(-1, select.getItemPosition("does not exist"));
+    }
+
     private void validateItem(int index, String textContent, String label,
             boolean enabled) {
         Element item = getListBoxChild(index);
