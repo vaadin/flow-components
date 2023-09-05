@@ -9,6 +9,7 @@
     <artifactId>vaadin-menu-bar-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Menu Bar</name>
+    <description>Vaadin Menu Bar</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

@@ -9,6 +9,7 @@
     <artifactId>vaadin-crud-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Crud</name>
+    <description>Vaadin Crud</description>
     <properties>
         <osgi.bundle.license>https://vaadin.com/commercial-license-and-service-terms</osgi.bundle.license>
     </properties>

@@ -9,6 +9,7 @@
     <artifactId>vaadin-checkbox-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Checkbox</name>
+    <description>Vaadin Checkbox</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

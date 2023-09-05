@@ -9,6 +9,7 @@
     <artifactId>vaadin-spreadsheet-testbench</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Spreadsheet Testbench API</name>
+    <description>Vaadin Spreadsheet Testbench API</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

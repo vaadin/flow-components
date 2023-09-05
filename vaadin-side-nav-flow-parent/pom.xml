@@ -9,6 +9,7 @@
     <artifactId>vaadin-side-nav-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>Vaadin Side Nav Parent</name>
+    <description>Vaadin Side Nav Parent</description>
     <modules>
         <module>vaadin-side-nav-flow</module>
         <module>vaadin-side-nav-testbench</module>

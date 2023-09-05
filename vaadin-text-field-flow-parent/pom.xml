@@ -9,6 +9,7 @@
     <artifactId>vaadin-text-field-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>Vaadin Text Field Parent</name>
+    <description>Vaadin Text Field Parent</description>
     <modules>
         <module>vaadin-text-field-flow</module>
         <module>vaadin-text-field-testbench</module>

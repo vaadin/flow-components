@@ -9,6 +9,7 @@
     <artifactId>vaadin-split-layout-testbench</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Split Layout Testbench API</name>
+    <description>Vaadin Split Layout Testbench API</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

@@ -13,6 +13,7 @@
     <artifactId>component-flow-demo</artifactId>
     <packaging>${packaging.type}</packaging>
     <name>component Flow Demo</name>
+    <description>component Flow Demo</description>
 
     <dependencies>
     </dependencies>
