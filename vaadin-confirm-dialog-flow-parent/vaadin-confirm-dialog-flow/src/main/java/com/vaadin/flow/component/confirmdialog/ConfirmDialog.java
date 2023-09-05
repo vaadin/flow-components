@@ -24,6 +24,7 @@ import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.HasOrderedComponents;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.Shortcuts;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
@@ -162,6 +163,8 @@ public class ConfirmDialog extends Component
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         initConnector();
+        // Same as https://github.com/vaadin/flow-components/pull/725
+        Shortcuts.setShortcutListenOnElement("this._overlayElement", this);
     }
 
     private void initConnector() {
