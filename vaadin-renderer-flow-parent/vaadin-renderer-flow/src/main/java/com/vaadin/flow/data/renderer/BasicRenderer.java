@@ -17,6 +17,7 @@ package com.vaadin.flow.data.renderer;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementFactory;
@@ -98,7 +99,7 @@ public abstract class BasicRenderer<SOURCE, TARGET>
     public Component createComponent(SOURCE item) {
         Element span = ElementFactory
                 .createSpan(getFormattedValue(valueProvider.apply(item)));
-        return ComponentUtil.componentFromElement(span, Component.class, true);
+        return ComponentUtil.componentFromElement(span, Span.class, true);
     }
 
     /**
