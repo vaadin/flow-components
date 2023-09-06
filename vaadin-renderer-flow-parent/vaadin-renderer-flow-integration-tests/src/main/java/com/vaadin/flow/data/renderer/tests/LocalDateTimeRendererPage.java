@@ -27,7 +27,7 @@ public class LocalDateTimeRendererPage extends Div {
         var renderer = new LocalDateTimeRenderer<>(localDateTimeProvider,
                 () -> DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 
-        var component = renderer.createComponent(2023 );
+        var component = renderer.createComponent(2023);
         component.setId("local-date-time");
 
         add(component);
