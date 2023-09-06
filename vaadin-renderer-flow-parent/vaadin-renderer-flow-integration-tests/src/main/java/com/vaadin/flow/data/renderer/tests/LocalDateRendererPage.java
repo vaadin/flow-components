@@ -10,14 +10,11 @@
 package com.vaadin.flow.data.renderer.tests;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.format.DateTimeFormatter;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.data.renderer.LocalDateRenderer;
-import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
-import com.vaadin.flow.data.renderer.NativeButtonRenderer;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.Route;
 
