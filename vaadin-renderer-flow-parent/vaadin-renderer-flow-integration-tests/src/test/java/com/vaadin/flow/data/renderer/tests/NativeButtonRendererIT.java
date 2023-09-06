@@ -27,7 +27,7 @@ public class NativeButtonRendererIT extends AbstractComponentIT {
     }
 
     @Test
-    public void shouldRenderAllNativeButtons() {
+    public void shouldRender_NativeButtonRenderer() {
         WebElement element = findElement(By.id("nativeBtn"));
         Assert.assertNotNull(element);
         Assert.assertEquals("button", element.getTagName());
