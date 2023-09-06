@@ -27,7 +27,7 @@ public class LocalDateTimeRendererIT extends AbstractComponentIT {
     }
 
     @Test
-    public void shouldRenderAllNativeButtons() {
+    public void shouldRender_LocalDateTimeRenderer() {
         WebElement element = findElement(By.id("local-date-time"));
         Assert.assertNotNull(element);
         Assert.assertEquals("span", element.getTagName());
