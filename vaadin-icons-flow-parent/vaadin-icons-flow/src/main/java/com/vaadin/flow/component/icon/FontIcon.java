@@ -87,9 +87,9 @@ public class FontIcon extends AbstractIcon<FontIcon> {
 
     /**
      * Sets the hexadecimal code point that specifies a glyph from an icon font.
-     * 
+     *
      * Example: <code>"e001"</code>
-     * 
+     *
      * @param charCode
      *            the character code to use
      */
@@ -107,10 +107,11 @@ public class FontIcon extends AbstractIcon<FontIcon> {
     }
 
     /**
-     * Sets the ligature name that specifies an icon from an icon font with support for ligatures.
-     * 
+     * Sets the ligature name that specifies an icon from an icon font with
+     * support for ligatures.
+     *
      * Example: <code>"home"</code>
-     * 
+     *
      * @param ligature
      *            the ligature to use
      */
