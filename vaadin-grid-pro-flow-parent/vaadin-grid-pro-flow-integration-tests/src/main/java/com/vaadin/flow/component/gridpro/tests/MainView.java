@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -51,11 +52,21 @@ public class MainView extends VerticalLayout {
 
         grid.addEditColumn(Person::getName, "name").setBackendUpdateMode()
                 .text((item, newValue) -> {
-                    // Update the person in the underlying data and refresh
-                    personList.stream()
-                            .filter(person -> person.getId() == item.getId())
-                            .findAny()
-                            .ifPresent(person -> person.setName(newValue));
+                    // Update the items in the underlying data to mimic back-end
+                    // update and refresh all
+                    AtomicReference<Person> updatedPerson = new AtomicReference<>();
+                    personList.replaceAll(person -> {
+                        if (person.getId() != item.getId()) {
+                            person.setName("Updated - " + person.getName());
+                            return person;
+                        }
+                        updatedPerson.set(new Person(newValue,
+                                item.isSubscriber(), item.getEmail(),
+                                item.getAge(), item.getDepartment(),
+                                item.getCity(), item.getEmploymentYear()));
+                        updatedPerson.get().setId(item.getId());
+                        return updatedPerson.get();
+                    });
                     grid.getDataProvider().refreshAll();
                     itemDisplayPanel.setText(item.toString());
                     subPropertyDisplayPanel.setText(newValue);
