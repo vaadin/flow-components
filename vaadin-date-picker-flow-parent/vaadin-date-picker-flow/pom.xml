@@ -9,6 +9,7 @@
     <artifactId>vaadin-date-picker-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Date Picker</name>
+    <description>Vaadin Date Picker</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

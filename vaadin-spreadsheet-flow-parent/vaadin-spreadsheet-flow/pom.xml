@@ -9,6 +9,7 @@
     <artifactId>vaadin-spreadsheet-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Spreadsheet</name>
+    <description>Vaadin Spreadsheet</description>
     <properties>
         <osgi.bundle.license>https://vaadin.com/commercial-license-and-service-terms</osgi.bundle.license>
         <cvdlName>vaadin-spreadsheet-flow</cvdlName>

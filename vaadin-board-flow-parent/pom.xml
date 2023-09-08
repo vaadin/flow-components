@@ -9,6 +9,7 @@
     <artifactId>vaadin-board-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>Vaadin Board Parent</name>
+    <description>Vaadin Board Parent</description>
     <licenses>
         <license>
             <name>Vaadin Commercial License and Service Terms</name>

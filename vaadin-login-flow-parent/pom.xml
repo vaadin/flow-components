@@ -9,6 +9,7 @@
     <artifactId>vaadin-login-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>Vaadin Login Parent</name>
+    <description>Vaadin Login Parent</description>
     <modules>
         <module>vaadin-login-flow</module>
         <module>vaadin-login-testbench</module>

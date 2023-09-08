@@ -9,6 +9,7 @@
     <artifactId>vaadin-crud-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>Vaadin Crud Parent</name>
+    <description>Vaadin Crud Parent</description>
     <licenses>
         <license>
             <name>Vaadin Commercial License and Service Terms</name>

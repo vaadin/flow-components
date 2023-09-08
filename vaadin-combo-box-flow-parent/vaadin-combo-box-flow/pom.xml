@@ -9,6 +9,7 @@
     <artifactId>vaadin-combo-box-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Combo Box</name>
+    <description>Vaadin Combo Box</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

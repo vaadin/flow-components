@@ -9,6 +9,7 @@
     <artifactId>vaadin-grid-pro-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Grid Pro</name>
+    <description>Vaadin Grid Pro</description>
     <properties>
         <osgi.bundle.license>https://vaadin.com/commercial-license-and-service-terms</osgi.bundle.license>
     </properties>

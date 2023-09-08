@@ -9,6 +9,7 @@
     <artifactId>vaadin-material-theme</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Material Theme</name>
+    <description>Vaadin Material Theme</description>
     <properties>
         <osgi.export.package>com.vaadin.flow.theme.material</osgi.export.package>
     </properties>

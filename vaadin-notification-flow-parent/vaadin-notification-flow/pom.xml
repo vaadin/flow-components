@@ -9,6 +9,7 @@
     <artifactId>vaadin-notification-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Notification</name>
+    <description>Vaadin Notification</description>
     <dependencies>
         <dependency>
             <groupId>jakarta.servlet</groupId>

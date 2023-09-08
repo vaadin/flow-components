@@ -9,6 +9,7 @@
     <artifactId>vaadin-app-layout-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>Vaadin App Layout Parent</name>
+    <description>Vaadin App Layout Parent</description>
     <modules>
         <module>vaadin-app-layout-flow</module>
         <module>vaadin-app-layout-testbench</module>

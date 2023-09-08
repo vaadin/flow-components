@@ -82,9 +82,9 @@ import java.util.stream.Stream;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-select")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha6")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha14")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/select", version = "24.2.0-alpha6")
+@NpmPackage(value = "@vaadin/select", version = "24.2.0-alpha14")
 @JsModule("@vaadin/select/src/vaadin-select.js")
 @JsModule("./selectConnector.js")
 public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
@@ -252,7 +252,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      * even though that is not visible from the component level.
      */
     @Tag("vaadin-select-list-box")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha6")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha14")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     private class InternalListBox extends Component
             implements HasItemComponents<T> {
@@ -679,6 +679,11 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
     @Override
     public void prependComponents(T beforeItem, Component... components) {
         listBox.prependComponents(beforeItem, components);
+    }
+
+    @Override
+    public int getItemPosition(T item) {
+        return listBox.getItemPosition(item);
     }
 
     /**

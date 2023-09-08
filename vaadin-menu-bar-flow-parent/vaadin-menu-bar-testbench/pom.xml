@@ -9,6 +9,7 @@
     <artifactId>vaadin-menu-bar-testbench</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Menu Bar Testbench API</name>
+    <description>Vaadin Menu Bar Testbench API</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

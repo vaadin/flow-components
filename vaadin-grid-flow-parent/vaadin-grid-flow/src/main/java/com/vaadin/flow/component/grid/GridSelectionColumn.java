@@ -29,7 +29,7 @@ import com.vaadin.flow.function.SerializableRunnable;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-grid-flow-selection-column")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha6")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha14")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("./vaadin-grid-flow-selection-column.js")
 public class GridSelectionColumn extends Component {
@@ -102,6 +102,29 @@ public class GridSelectionColumn extends Component {
     @Synchronize("frozen-changed")
     public boolean isFrozen() {
         return getElement().getProperty("frozen", false);
+    }
+
+    /**
+     * If <code>true</code>, grid rows can be selected or deselected by dragging
+     * the mouse cursor over grid's selection column.
+     *
+     * @param dragSelect
+     *            <code>true</code> to enable drag select feature,
+     *            <code>false</code> for disabling it
+     */
+    public void setDragSelect(boolean dragSelect) {
+        getElement().setProperty("dragSelect", dragSelect);
+    }
+
+    /**
+     * Gets whether grid drag select is enabled or not.
+     *
+     * @return <code>true</code> if drag select feature is enabled,
+     *         <code>false</code> otherwise
+     */
+    @Synchronize("drag-select-changed")
+    public boolean isDragSelect() {
+        return getElement().getProperty("dragSelect", false);
     }
 
     @ClientCallable
