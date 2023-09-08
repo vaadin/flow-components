@@ -55,7 +55,7 @@ import com.vaadin.flow.function.SerializableBiFunction;
  */
 @SuppressWarnings("deprecation")
 @Tag("vaadin-big-decimal-field")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.21")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.22")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("./vaadin-big-decimal-field.js")
 public class BigDecimalField
