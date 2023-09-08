@@ -57,7 +57,6 @@ public class MainView extends VerticalLayout {
                     AtomicReference<Person> updatedPerson = new AtomicReference<>();
                     personList.replaceAll(person -> {
                         if (person.getId() != item.getId()) {
-                            person.setName("Updated - " + person.getName());
                             return person;
                         }
                         updatedPerson.set(new Person(newValue,
