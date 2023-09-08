@@ -62,11 +62,11 @@ import java.util.stream.Stream;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-avatar-group")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.21")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.22")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/avatar-group/src/vaadin-avatar-group.js")
-@NpmPackage(value = "@vaadin/avatar-group", version = "23.3.21")
-@NpmPackage(value = "@vaadin/vaadin-avatar", version = "23.3.21")
+@NpmPackage(value = "@vaadin/avatar-group", version = "23.3.22")
+@NpmPackage(value = "@vaadin/vaadin-avatar", version = "23.3.22")
 public class AvatarGroup extends Component
         implements HasStyle, HasSize, HasThemeVariant<AvatarGroupVariant> {
 
