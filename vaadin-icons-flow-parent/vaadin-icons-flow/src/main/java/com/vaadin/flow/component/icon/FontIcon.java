@@ -17,6 +17,9 @@ package com.vaadin.flow.component.icon;
 
 import java.util.Optional;
 
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.ElementConstants;
 
 /**
@@ -24,6 +27,11 @@ import com.vaadin.flow.dom.ElementConstants;
  *
  * @author Vaadin Ltd
  */
+@Tag("vaadin-icon")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha15")
+@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@NpmPackage(value = "@vaadin/icon", version = "24.2.0-alpha15")
+@JsModule("@vaadin/icon/src/vaadin-icon.js")
 public class FontIcon extends AbstractIcon<FontIcon> {
 
     /**

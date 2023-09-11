@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.icon.tests;
 
+import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.icon.AbstractIcon;
 import com.vaadin.flow.dom.ElementConstants;
 import org.junit.Assert;
@@ -22,21 +23,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class AbstractIconTest {
-    private AbstractIcon abstractIcon;
+    private AbstractIcon<TestIcon> abstractIcon;
 
     @Before
     public void init() {
-        abstractIcon = new AbstractIcon() {
-            @Override
-            public void setColor(String color) {
-                this.getStyle().setColor(color);
-            }
-
-            @Override
-            public String getColor() {
-                return this.getStyle().get("color");
-            }
-        };
+        abstractIcon = new TestIcon();
     }
 
     @Test
@@ -54,5 +45,18 @@ public class AbstractIconTest {
                 abstractIcon.getStyle().get(ElementConstants.STYLE_HEIGHT));
         Assert.assertNull(
                 abstractIcon.getStyle().get(ElementConstants.STYLE_WIDTH));
+    }
+
+    @Tag("vaadin-icon")
+    public class TestIcon extends AbstractIcon<TestIcon> {
+        @Override
+        public void setColor(String color) {
+            this.getStyle().setColor(color);
+        }
+
+        @Override
+        public String getColor() {
+            return this.getStyle().get("color");
+        }
     }
 }
