@@ -59,7 +59,7 @@ public class OverlayCustomContentIT extends AbstractComponentIT {
     }
 
     @Test
-    public void addCustomField_openOverlay_contentIsRendered() {
+    public void addCustomFormArea_openOverlay_contentIsRendered() {
         addCustomFormArea.click();
         openOverlay.click();
         verifyOverlayOpened();
