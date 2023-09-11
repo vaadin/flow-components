@@ -27,9 +27,9 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * <p>
  */
 @Tag("vaadin-board")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha14")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha15")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/board", version = "24.2.0-alpha14")
+@NpmPackage(value = "@vaadin/board", version = "24.2.0-alpha15")
 @JsModule("@vaadin/board/src/vaadin-board.js")
 public class Board extends Component
         implements HasSize, HasStyle, HasOrderedComponents {

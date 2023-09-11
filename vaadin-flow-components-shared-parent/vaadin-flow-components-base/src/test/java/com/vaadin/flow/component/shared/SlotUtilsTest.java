@@ -15,15 +15,15 @@
  */
 package com.vaadin.flow.component.shared;
 
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.dom.Element;
-
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * Tests for the {@link SlotUtils}.
@@ -151,5 +151,21 @@ public class SlotUtilsTest {
     @Test
     public void setSlot_nullAsElement_doesNotThrow() {
         SlotUtils.setSlot(parent, TEST_SLOT, new Element("div"), null);
+    }
+
+    @Test
+    public void addToSlot_slotAttributeAddedInChild() {
+        var slotComponent = new TestComponent();
+        SlotUtils.addToSlot(parent, TEST_SLOT, slotComponent);
+        Assert.assertEquals(TEST_SLOT,
+                slotComponent.getElement().getAttribute("slot"));
+    }
+
+    @Test
+    public void clearSlot_slotAttributeRemovedFromChild() {
+        var slotComponent = new TestComponent();
+        SlotUtils.addToSlot(parent, TEST_SLOT, slotComponent);
+        SlotUtils.clearSlot(parent, TEST_SLOT);
+        Assert.assertNull(slotComponent.getElement().getAttribute("slot"));
     }
 }

@@ -15,15 +15,14 @@
  */
 package com.vaadin.flow.component.shared;
 
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Stream;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.dom.Element;
-
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Util methods for handling child elements inside slots.
@@ -56,8 +55,10 @@ public class SlotUtils {
      *            the name of the slot to clear
      */
     public static void clearSlot(HasElement parent, String slot) {
-        getElementsInSlot(parent, slot).collect(Collectors.toList())
-                .forEach(parent.getElement()::removeChild);
+        getElementsInSlot(parent, slot).toList().forEach(element -> {
+            element.removeAttribute("slot");
+            parent.getElement().removeChild(element);
+        });
     }
 
     /**
