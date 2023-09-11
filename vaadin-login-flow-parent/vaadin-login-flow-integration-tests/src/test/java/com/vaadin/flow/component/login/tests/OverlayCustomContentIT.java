@@ -18,8 +18,8 @@ public class OverlayCustomContentIT extends AbstractComponentIT {
     private NativeButtonElement openOverlay;
     private NativeButtonElement addFooter;
     private NativeButtonElement removeFooter;
-    private NativeButtonElement addCustomField;
-    private NativeButtonElement removeCustomField;
+    private NativeButtonElement addCustomFormArea;
+    private NativeButtonElement removeCustomFormArea;
 
     @Before
     public void init() {
@@ -27,10 +27,10 @@ public class OverlayCustomContentIT extends AbstractComponentIT {
         openOverlay = $(NativeButtonElement.class).id("open-overlay-btn");
         addFooter = $(NativeButtonElement.class).id("add-footer-btn");
         removeFooter = $(NativeButtonElement.class).id("remove-footer-btn");
-        addCustomField = $(NativeButtonElement.class)
-                .id("add-custom-field-btn");
-        removeCustomField = $(NativeButtonElement.class)
-                .id("remove-custom-field-btn");
+        addCustomFormArea = $(NativeButtonElement.class)
+                .id("add-custom-form-btn");
+        removeCustomFormArea = $(NativeButtonElement.class)
+                .id("remove-custom-form-btn");
     }
 
     @Test
@@ -60,27 +60,27 @@ public class OverlayCustomContentIT extends AbstractComponentIT {
 
     @Test
     public void addCustomField_openOverlay_contentIsRendered() {
-        addCustomField.click();
+        addCustomFormArea.click();
         openOverlay.click();
         verifyOverlayOpened();
-        assertOverlayContains(OverlayCustomContentPage.CUSTOM_FIELD_CONTENT);
+        assertOverlayContains(OverlayCustomContentPage.CUSTOM_FORM_CONTENT);
     }
 
     @Test
-    public void openOverlay_addCustomField_contentIsNotRendered() {
+    public void openOverlay_addCustomFormArea_contentIsNotRendered() {
         openOverlay.click();
-        addCustomField.click();
+        addCustomFormArea.click();
         verifyOverlayOpened();
-        assertOverlayNotContains(OverlayCustomContentPage.CUSTOM_FIELD_CONTENT);
+        assertOverlayNotContains(OverlayCustomContentPage.CUSTOM_FORM_CONTENT);
     }
 
     @Test
-    public void addAndRemoveCustomField_openOverlay_contentIsNotRendered() {
-        addCustomField.click();
-        removeCustomField.click();
+    public void addAndRemoveCustomFormArea_openOverlay_contentIsNotRendered() {
+        addCustomFormArea.click();
+        removeCustomFormArea.click();
         openOverlay.click();
         verifyOverlayOpened();
-        assertOverlayNotContains(OverlayCustomContentPage.CUSTOM_FIELD_CONTENT);
+        assertOverlayNotContains(OverlayCustomContentPage.CUSTOM_FORM_CONTENT);
     }
 
     private void assertOverlayContains(String text) {

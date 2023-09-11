@@ -39,80 +39,80 @@ public class LoginOverlaySlotsTest {
     }
 
     @Test
-    public void customFields_addBeforeOpened_componentsAreAdded() {
+    public void customFormArea_addBeforeOpened_componentsAreAdded() {
         TestComponent foo = new TestComponent();
         TestComponent bar = new TestComponent();
 
-        overlay.getCustomFields().add(foo, bar);
+        overlay.getCustomFormArea().add(foo, bar);
 
         Assert.assertEquals(foo.getElement().getParent(), overlay.getElement());
         Assert.assertEquals(bar.getElement().getParent(), overlay.getElement());
         Assert.assertEquals(foo.getElement().getAttribute("slot"),
-                "custom-fields");
+                "custom-form-area");
         Assert.assertEquals(bar.getElement().getAttribute("slot"),
-                "custom-fields");
+                "custom-form-area");
     }
 
     @Test(expected = UnsupportedOperationException.class)
-    public void customFields_addAfterOpened_throwsUnsupportedOperationException() {
+    public void customFormArea_addAfterOpened_throwsUnsupportedOperationException() {
         TestComponent foo = new TestComponent();
         TestComponent bar = new TestComponent();
 
         overlay.setOpened(true);
-        overlay.getCustomFields().add(foo, bar);
+        overlay.getCustomFormArea().add(foo, bar);
     }
 
     @Test
-    public void customFields_removeBeforeOpened_componentsAreRemoved() {
+    public void customFormArea_removeBeforeOpened_componentsAreRemoved() {
         TestComponent foo = new TestComponent();
         TestComponent bar = new TestComponent();
 
-        overlay.getCustomFields().add(foo, bar);
+        overlay.getCustomFormArea().add(foo, bar);
 
-        overlay.getCustomFields().remove(foo);
+        overlay.getCustomFormArea().remove(foo);
         Assert.assertEquals(foo.getElement().getParent(), null);
         Assert.assertNotEquals(foo.getElement().getAttribute("slot"),
-                "custom-fields");
+                "custom-form-area");
 
-        overlay.getCustomFields().remove(bar);
+        overlay.getCustomFormArea().remove(bar);
         Assert.assertEquals(bar.getElement().getParent(), null);
         Assert.assertNotEquals(bar.getElement().getAttribute("slot"),
-                "custom-fields");
+                "custom-form-area");
     }
 
     @Test(expected = UnsupportedOperationException.class)
-    public void customFields_removeAfterOpened_throwsUnsupportedOperationException() {
+    public void customFormArea_removeAfterOpened_throwsUnsupportedOperationException() {
         TestComponent foo = new TestComponent();
         TestComponent bar = new TestComponent();
 
-        overlay.getCustomFields().add(foo, bar);
+        overlay.getCustomFormArea().add(foo, bar);
         overlay.setOpened(true);
 
-        overlay.getCustomFields().remove(foo);
+        overlay.getCustomFormArea().remove(foo);
     }
 
     @Test
-    public void customFields_removeAllBeforeOpened_componentsAreRemoved() {
+    public void customFormArea_removeAllBeforeOpened_componentsAreRemoved() {
         TestComponent foo = new TestComponent();
         TestComponent bar = new TestComponent();
 
-        overlay.getCustomFields().add(foo, bar);
+        overlay.getCustomFormArea().add(foo, bar);
 
-        overlay.getCustomFields().removeAll();
+        overlay.getCustomFormArea().removeAll();
 
         Assert.assertEquals(foo.getElement().getParent(), null);
         Assert.assertEquals(bar.getElement().getParent(), null);
     }
 
     @Test(expected = UnsupportedOperationException.class)
-    public void customFields_removeAllAfterOpened_throwsUnsupportedOperationException() {
+    public void customFormArea_removeAllAfterOpened_throwsUnsupportedOperationException() {
         TestComponent foo = new TestComponent();
         TestComponent bar = new TestComponent();
 
-        overlay.getCustomFields().add(foo, bar);
+        overlay.getCustomFormArea().add(foo, bar);
         overlay.setOpened(true);
 
-        overlay.getCustomFields().removeAll();
+        overlay.getCustomFormArea().removeAll();
     }
 
     @Test

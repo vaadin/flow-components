@@ -8,7 +8,7 @@ import com.vaadin.flow.router.Route;
 
 @Route("vaadin-login/custom-content")
 public class OverlayCustomContentPage extends Div {
-    public static String CUSTOM_FIELD_CONTENT = "__CUSTOM_FIELD_CONTENT__";
+    public static String CUSTOM_FORM_CONTENT = "__CUSTOM_FORM_CONTENT__";
     public static String FOOTER_CONTENT = "__FOOTER_CONTENT__";
 
     public OverlayCustomContentPage() {
@@ -28,19 +28,20 @@ public class OverlayCustomContentPage extends Div {
         removeFooter.setId("remove-footer-btn");
         removeFooter.addClickListener(e -> login.getFooter().removeAll());
 
-        Span customFieldContent = new Span(CUSTOM_FIELD_CONTENT);
+        Span customFormContent = new Span(CUSTOM_FORM_CONTENT);
 
-        NativeButton addCustomField = new NativeButton("Add custom field");
-        addCustomField.setId("add-custom-field-btn");
-        addCustomField.addClickListener(
-                e -> login.getCustomFields().add(customFieldContent));
+        NativeButton addCustomForm = new NativeButton(
+                "Add custom form content");
+        addCustomForm.setId("add-custom-form-btn");
+        addCustomForm.addClickListener(
+                e -> login.getCustomFormArea().add(customFormContent));
 
-        NativeButton removeCustomField = new NativeButton(
-                "Remove custom field");
-        removeCustomField.setId("remove-custom-field-btn");
-        removeCustomField
-                .addClickListener(e -> login.getCustomFields().removeAll());
+        NativeButton removeCustomForm = new NativeButton(
+                "Remove custom form content");
+        removeCustomForm.setId("remove-custom-form-btn");
+        removeCustomForm
+                .addClickListener(e -> login.getCustomFormArea().removeAll());
 
-        add(open, addFooter, removeFooter, addCustomField, removeCustomField);
+        add(open, addFooter, removeFooter, addCustomForm, removeCustomForm);
     }
 }

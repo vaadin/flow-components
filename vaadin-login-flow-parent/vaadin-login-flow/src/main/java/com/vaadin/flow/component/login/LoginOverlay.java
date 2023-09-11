@@ -55,7 +55,7 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
 
     private Component title;
     private LoginOverlayFooter footer;
-    private LoginOverlayCustomFields fields;
+    private LoginOverlayCustomFormArea customFormArea;
 
     private boolean autoAddedToTheUi;
 
@@ -239,18 +239,17 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
 
     /**
      * Gets the object from which components can be added or removed from the
-     * overlay custom fields area. This area is displayed only if there's at
-     * least one component added with
-     * {@link LoginOverlayContent#add(Component...)}.
+     * overlay custom form area. This area is displayed only if there's at least
+     * one component added with {@link LoginOverlayContent#add(Component...)}.
      *
      * @since 24.2
-     * @return the custom fields object
+     * @return the custom form area object
      */
-    public LoginOverlayCustomFields getCustomFields() {
-        if (this.fields == null) {
-            this.fields = new LoginOverlayCustomFields(this);
+    public LoginOverlayCustomFormArea getCustomFormArea() {
+        if (this.customFormArea == null) {
+            this.customFormArea = new LoginOverlayCustomFormArea(this);
         }
-        return this.fields;
+        return this.customFormArea;
     }
 
     /**
@@ -269,13 +268,13 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
     }
 
     /**
-     * Class for adding and removing components to the custom fields area of the
+     * Class for adding and removing components to the custom form area of the
      * overlay.
      */
-    final public static class LoginOverlayCustomFields
+    final public static class LoginOverlayCustomFormArea
             extends LoginOverlayContent {
-        private LoginOverlayCustomFields(LoginOverlay overlay) {
-            super("custom-fields", overlay);
+        private LoginOverlayCustomFormArea(LoginOverlay overlay) {
+            super("custom-form-area", overlay);
         }
     }
 
@@ -291,7 +290,7 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
 
     /**
      * This class defines the common behavior for adding/removing components to
-     * the custom fields and footer parts.
+     * the custom form area and footer parts.
      */
     abstract static class LoginOverlayContent implements Serializable {
         private final LoginOverlay overlay;
