@@ -20,7 +20,9 @@ import java.util.Optional;
 import com.vaadin.flow.dom.ElementConstants;
 
 /**
- * Component for displaying an icon from a font icon collection.
+ * Component for displaying an icon from a font icon collection. Note that the
+ * icon font must be loaded separately. One way to do this is by including it in
+ * the application's theme.
  *
  * @author Vaadin Ltd
  */
@@ -33,36 +35,40 @@ public class FontIcon extends AbstractIcon<FontIcon> {
     }
 
     /**
-     * Creates a font icon component with the given font class names.
+     * Creates a font icon component with the given icon class names.
      *
-     * @param font
-     *            The font class names, not null
-     * @see #setFont(String...)
+     * Example: <code>new FontIcon("fa-solid", "fa-user")</code>.
+     *
+     * @param iconClassNames
+     *            The icon class names, not null
+     * @see #setIconClassNames(String...)
      */
-    public FontIcon(String... font) {
-        setFont(font);
+    public FontIcon(String... iconClassNames) {
+        setIconClassNames(iconClassNames);
     }
 
     /**
-     * Sets the font class names defining an icon font and/or a specific glyph
+     * Sets the icon class names defining an icon font and/or a specific glyph
      * inside an icon font.
      *
-     * @param font
-     *            The font class names, not null
+     * Example: <code>setIconClassNames("fa-solid", "fa-user")</code>.
+     *
+     * @param iconClassNames
+     *            The icon class names, not null
      */
-    public void setFont(String... font) {
-        getElement().setProperty("font",
-                font.length == 0 ? null : String.join(" ", font));
+    public void setIconClassNames(String... iconClassNames) {
+        getElement().setProperty("icon-class", iconClassNames.length == 0 ? null
+                : String.join(" ", iconClassNames));
     }
 
     /**
-     * Gets the font class names defining an icon font and/or a specific glyph
+     * Gets the icon class names defining an icon font and/or a specific glyph
      * inside an icon font.
      *
-     * @return The font class names
+     * @return The icon class names
      */
-    public String[] getFont() {
-        return Optional.ofNullable(getElement().getProperty("font"))
+    public String[] getIconClassNames() {
+        return Optional.ofNullable(getElement().getProperty("icon-class"))
                 .map(f -> f.split(" ")).orElse(new String[0]);
     }
 
