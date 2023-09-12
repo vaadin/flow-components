@@ -57,6 +57,7 @@ public class GridScrollToPage extends Div {
         setSmallPageSize.setId("set-small-page-size");
 
         add(grid, scrollToStart, scrollToEnd, scrollToRow500,
-                addRowsAndScrollToEnd, addRowAndScrollToIndex, setSmallPageSize);
+                addRowsAndScrollToEnd, addRowAndScrollToIndex,
+                setSmallPageSize);
     }
 }

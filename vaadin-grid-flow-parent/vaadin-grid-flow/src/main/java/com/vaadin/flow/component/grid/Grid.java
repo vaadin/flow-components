@@ -4543,7 +4543,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         // Preload from one page before to one page after the target page
         setRequestedRange(firstRootIndex - pageSize, pageSize * 3);
-        // Scroll to the requested index        
+        // Scroll to the requested index
         getElement().callJsFunction("scrollToIndex", rowIndex);
     }
 
