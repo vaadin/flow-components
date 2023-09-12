@@ -64,6 +64,8 @@ public class Notification extends Component implements HasComponents, HasStyle,
 
     private static final int DEFAULT_DURATION = 5000;
     private static final Position DEFAULT_POSITION = Position.BOTTOM_START;
+    private static final String OPENED_PROPERTY = "opened";
+    private static final String OPENED_CHANGED_PROPERTY = "opened-changed";
 
     private boolean autoAddedToTheUi = false;
 
@@ -212,10 +214,11 @@ public class Notification extends Component implements HasComponents, HasStyle,
     }
 
     private void initBaseElementsAndListeners() {
-        getElement().addPropertyChangeListener("opened", event -> fireEvent(
-                new OpenedChangeEvent(this, event.isUserOriginated())));
+        getElement().addPropertyChangeListener(OPENED_PROPERTY,
+                event -> fireEvent(
+                        new OpenedChangeEvent(this, event.isUserOriginated())));
 
-        getElement().addEventListener("opened-changed",
+        getElement().addEventListener(OPENED_CHANGED_PROPERTY,
                 event -> removeAutoAdded());
     }
 
@@ -427,7 +430,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
                         }
                     });
         }
-        getElement().setProperty("opened", opened);
+        getElement().setProperty(OPENED_PROPERTY, opened);
     }
 
     /**
@@ -440,7 +443,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
      */
     @Synchronize(property = "opened", value = "opened-changed")
     public boolean isOpened() {
-        return getElement().getProperty("opened", false);
+        return getElement().getProperty(OPENED_PROPERTY, false);
     }
 
     /**
