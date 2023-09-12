@@ -65,7 +65,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
     private static final int DEFAULT_DURATION = 5000;
     private static final Position DEFAULT_POSITION = Position.BOTTOM_START;
     private static final String OPENED_PROPERTY = "opened";
-    private static final String OPENED_CHANGED_PROPERTY = "opened-changed";
+    private static final String OPENED_CHANGED_EVENT = "opened-changed";
 
     private boolean autoAddedToTheUi = false;
 
@@ -218,7 +218,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
                 event -> fireEvent(
                         new OpenedChangeEvent(this, event.isUserOriginated())));
 
-        getElement().addEventListener(OPENED_CHANGED_PROPERTY,
+        getElement().addEventListener(OPENED_CHANGED_EVENT,
                 event -> removeAutoAdded());
     }
 
