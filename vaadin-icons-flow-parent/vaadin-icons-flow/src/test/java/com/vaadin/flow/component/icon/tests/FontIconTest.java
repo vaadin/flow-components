@@ -89,18 +89,35 @@ public class FontIconTest {
     @Test
     public void setCharCode_hasCharCode() {
         var icon = new FontIcon();
-        icon.setCharCode("\uea0e");
-        Assert.assertEquals("\uea0e", icon.getCharCode());
-        Assert.assertEquals("\uea0e", icon.getElement().getProperty("char"));
+        icon.setCharCode("ea0e");
+        Assert.assertEquals("ea0e", icon.getCharCode());
+        Assert.assertEquals("ea0e", icon.getElement().getProperty("char"));
     }
 
     @Test
     public void clearCharCode_hasNoCharCode() {
         var icon = new FontIcon();
-        icon.setCharCode("\uea0e");
+        icon.setCharCode("ea0e");
         icon.setCharCode(null);
         Assert.assertNull(icon.getCharCode());
         Assert.assertNull(icon.getElement().getProperty("char"));
+    }
+
+    @Test
+    public void setLigature_hasLigature() {
+        var icon = new FontIcon();
+        icon.setLigature("home");
+        Assert.assertEquals("home", icon.getLigature());
+        Assert.assertEquals("home", icon.getElement().getProperty("ligature"));
+    }
+
+    @Test
+    public void clearLigature_hasNoLigature() {
+        var icon = new FontIcon();
+        icon.setLigature("home");
+        icon.setLigature(null);
+        Assert.assertNull(icon.getLigature());
+        Assert.assertNull(icon.getElement().getProperty("ligature"));
     }
 
     @Test

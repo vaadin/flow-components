@@ -92,8 +92,9 @@ public class FontIcon extends AbstractIcon<FontIcon> {
     }
 
     /**
-     * Sets the specific glyph from a font to use as an icon. Can be a code
-     * point or a ligature name.
+     * Sets the hexadecimal code point that specifies a glyph from an icon font.
+     *
+     * Example: <code>setCharCode("e001")</code>
      *
      * @param charCode
      *            the character code to use
@@ -103,13 +104,35 @@ public class FontIcon extends AbstractIcon<FontIcon> {
     }
 
     /**
-     * Gets the specific glyph from a font to use as an icon. Can be a code
-     * point or a ligature name.
+     * Gets the hexadecimal code point that specifies a glyph from an icon font.
      *
      * @return the character code to use
      */
     public String getCharCode() {
         return getElement().getProperty("char");
+    }
+
+    /**
+     * Sets the ligature name that specifies an icon from an icon font with
+     * support for ligatures.
+     *
+     * Example: <code>setLigature("home")</code>
+     *
+     * @param ligature
+     *            the ligature to use
+     */
+    public void setLigature(String ligature) {
+        getElement().setProperty("ligature", ligature);
+    }
+
+    /**
+     * Gets the ligature name that specifies an icon from an icon font with
+     * support for ligatures.
+     *
+     * @return the ligature to use
+     */
+    public String getLigature() {
+        return getElement().getProperty("ligature");
     }
 
     @Override
