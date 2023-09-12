@@ -738,6 +738,14 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             grid.$connector.doDeselection(items.filter((item) => selectedKeys[item.key]));
             items.forEach((item) => grid.closeItemDetails(item));
             delete cache[pkey][page];
+
+            const lastRequestedRange = lastRequestedRanges[pkey];
+            if (lastRequestedRange && page >= lastRequestedRange[0] && page <= lastRequestedRange[1]) {
+              // A cached page inside the lastRequestedRange was cleared so the lastRequestedRange is no longer valid.
+              // Delete the range to unblock any possible data requests for the same range in fetchPage.
+              delete lastRequestedRanges[pkey];
+            }
+
             const updatedItems = updateGridCache(page, parentKey);
             if (updatedItems) {
               itemsUpdated(updatedItems);
@@ -922,12 +930,6 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           // Let server know we're done
           grid.$server.confirmUpdate(id);
         });
-
-        // This is only a prototype to try out https://github.com/vaadin/flow-components/issues/5229#issuecomment-1655188669
-        // Needs a cleaner solution for the final implementation
-        grid.$connector.clearLastRequestedRanges = () => {
-          deleteObjectContents(lastRequestedRanges);
-        }
 
         grid.$connector.ensureHierarchy = tryCatchWrapper(function () {
           for (let parentKey in cache) {

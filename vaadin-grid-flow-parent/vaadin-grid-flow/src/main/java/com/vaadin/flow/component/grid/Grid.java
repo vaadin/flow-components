@@ -4541,20 +4541,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         int pageSize = getPageSize();
         int firstRootIndex = rowIndex - rowIndex % pageSize;
 
-        // Preload the target page
-        // Add a test that proves this approach invalid
-        // setRequestedRange(firstRootIndex, pageSize);
-
-        // Preload from one page before to one page after the target page
-        // Add a test that proves this approach invalid
-        // setRequestedRange(firstRootIndex - pageSize, pageSize * 3);
-
         // Preload from one page before to one page after the target page
         setRequestedRange(firstRootIndex - pageSize, pageSize * 3);
-        
+        // Scroll to the requested index        
         getElement().callJsFunction("scrollToIndex", rowIndex);
-        // clear the lastRequestedRanges from connector
-        getElement().executeJs("this.$connector.clearLastRequestedRanges()");
     }
 
     /**
