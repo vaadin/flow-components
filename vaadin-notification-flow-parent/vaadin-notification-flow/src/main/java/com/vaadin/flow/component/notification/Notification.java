@@ -145,8 +145,6 @@ public class Notification extends Component implements HasComponents, HasStyle,
         initBaseElementsAndListeners();
         setPosition(DEFAULT_POSITION);
         setDuration(0);
-        getElement().addPropertyChangeListener("opened", event -> fireEvent(
-                new OpenedChangeEvent(this, event.isUserOriginated())));
     }
 
     /**
@@ -214,6 +212,9 @@ public class Notification extends Component implements HasComponents, HasStyle,
     }
 
     private void initBaseElementsAndListeners() {
+        getElement().addPropertyChangeListener("opened", event -> fireEvent(
+                new OpenedChangeEvent(this, event.isUserOriginated())));
+
         getElement().addEventListener("opened-changed",
                 event -> removeAutoAdded());
     }
