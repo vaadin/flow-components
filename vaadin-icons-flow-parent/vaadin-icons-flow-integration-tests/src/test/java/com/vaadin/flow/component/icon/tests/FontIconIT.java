@@ -17,7 +17,6 @@ package com.vaadin.flow.component.icon.tests;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
@@ -32,7 +31,6 @@ public class FontIconIT extends AbstractComponentIT {
         open();
     }
 
-    @Ignore("Re-enable once the FontIcon API is stable")
     @Test
     public void fontIconUsingFont() {
         var icon = findElement(By.className("fa-user"));
