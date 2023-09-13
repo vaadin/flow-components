@@ -739,13 +739,6 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             items.forEach((item) => grid.closeItemDetails(item));
             delete cache[pkey][page];
 
-            const lastRequestedRange = lastRequestedRanges[pkey];
-            if (lastRequestedRange && page >= lastRequestedRange[0] && page <= lastRequestedRange[1]) {
-              // A cached page inside the lastRequestedRange was cleared so the lastRequestedRange is no longer valid.
-              // Delete the range to unblock any possible data requests for the same range in fetchPage.
-              delete lastRequestedRanges[pkey];
-            }
-
             const updatedItems = updateGridCache(page, parentKey);
             if (updatedItems) {
               itemsUpdated(updatedItems);
@@ -925,6 +918,13 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
               delete rootPageCallbacks[page];
               callback([]);
             }
+          }
+
+          const hasLoadingRows = grid._getRenderedRows().some((row) => row.hasAttribute('loading'));
+          if (hasLoadingRows) {
+            // TODO: Describe better!
+            // The grid is still loading, make sure any requests will not be blocked due to unchanged lastRequestedRanges
+            delete lastRequestedRanges[root];
           }
 
           // Let server know we're done

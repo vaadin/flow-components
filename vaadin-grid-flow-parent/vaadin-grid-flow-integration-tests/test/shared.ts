@@ -21,6 +21,7 @@ export type GridConnector = {
   reset: () => void;
   doSelection: (items: Item[] | [null], userOriginated: boolean) => void;
   doDeselection: (items: Item[], userOriginated: boolean) => void;
+  clear: (index: number, length: number, parentKey?: string) => void;
 };
 
 export type GridServer = {
@@ -70,6 +71,7 @@ const Vaadin = window.Vaadin as Vaadin;
 export const gridConnector = Vaadin.Flow.gridConnector;
 
 export const GRID_CONNECTOR_PARENT_REQUEST_DELAY = 50;
+export const GRID_CONNECTOR_ROOT_REQUEST_DELAY = 150;
 
 /**
  * Initializes the grid connector and the grid server mock.
@@ -170,4 +172,12 @@ export function setChildItems(gridConnector: GridConnector, parent: Item, items:
 export function expandItems(gridConnector: GridConnector, items: Item[]): void {
   gridConnector.ensureHierarchy();
   gridConnector.expandItems(items);
+}
+
+
+/**
+ * Clears the given range of the given parent's children.
+ */
+export function clear(gridConnector: GridConnector, index: number, length: number, parent?: Item): void {
+  gridConnector.clear(index, length, parent?.key);
 }
