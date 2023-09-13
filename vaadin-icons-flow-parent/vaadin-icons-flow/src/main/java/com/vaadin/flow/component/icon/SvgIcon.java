@@ -54,7 +54,7 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
      * @see #setSymbol(String)
      */
     public SvgIcon(String src, String symbol) {
-        setSrc(src);
+        this(src);
         setSymbol(symbol);
     }
 
@@ -80,7 +80,7 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
      * @see #setSymbol(String)
      */
     public SvgIcon(AbstractStreamResource src, String symbol) {
-        setSrc(src);
+        this(src);
         setSymbol(symbol);
     }
 

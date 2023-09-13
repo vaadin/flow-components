@@ -88,6 +88,36 @@ public class SvgIconTest {
     }
 
     @Test
+    public void setSrcWithSymbol_hasSrcAndSymbol() {
+        var icon = new SvgIcon();
+        var path = "path/to/file.svg";
+        var symbol = "symbol";
+        icon.setSrc(path, symbol);
+
+        Assert.assertEquals(path, icon.getSrc());
+        Assert.assertEquals(path, icon.getElement().getAttribute("src"));
+        Assert.assertEquals(symbol, icon.getSymbol());
+        Assert.assertEquals(symbol, icon.getElement().getProperty("symbol"));
+    }
+
+    @Test
+    public void hasStreamResource_setSrcWithSymbol_hasSrcAndSymbol() {
+        UI.setCurrent(new UI());
+        var resource = new StreamResource("image.svg",
+            () -> new ByteArrayInputStream(
+                "<svg></svg>".getBytes(StandardCharsets.UTF_8)));
+        var symbol = "symbol";
+        var icon = new SvgIcon();
+        icon.setSrc(resource, symbol);
+
+        Assert.assertTrue(icon.getSrc().contains("image.svg"));
+        Assert.assertTrue(
+            icon.getElement().getAttribute("src").contains("image.svg"));
+        Assert.assertEquals(symbol, icon.getSymbol());
+        Assert.assertEquals(symbol, icon.getElement().getProperty("symbol"));
+    }
+
+    @Test
     public void setSymbol_hasSymbol() {
         var icon = new SvgIcon();
         var symbol = "symbol";
