@@ -48,6 +48,8 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
      *
      * @param src
      *            the SVG file path
+     * @param symbol
+     *            the symbol reference of the icon
      * @see #setSrc(String)
      * @see #setSymbol(String)
      */
@@ -72,6 +74,8 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
      *
      * @param src
      *            the resource value
+     * @param symbol
+     *            the symbol reference of the icon
      * @see #setSrc(AbstractStreamResource)
      * @see #setSymbol(String)
      */
