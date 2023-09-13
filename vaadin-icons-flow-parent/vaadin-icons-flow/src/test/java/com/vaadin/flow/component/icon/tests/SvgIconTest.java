@@ -104,15 +104,15 @@ public class SvgIconTest {
     public void hasStreamResource_setSrcWithSymbol_hasSrcAndSymbol() {
         UI.setCurrent(new UI());
         var resource = new StreamResource("image.svg",
-            () -> new ByteArrayInputStream(
-                "<svg></svg>".getBytes(StandardCharsets.UTF_8)));
+                () -> new ByteArrayInputStream(
+                        "<svg></svg>".getBytes(StandardCharsets.UTF_8)));
         var symbol = "symbol";
         var icon = new SvgIcon();
         icon.setSrc(resource, symbol);
 
         Assert.assertTrue(icon.getSrc().contains("image.svg"));
         Assert.assertTrue(
-            icon.getElement().getAttribute("src").contains("image.svg"));
+                icon.getElement().getAttribute("src").contains("image.svg"));
         Assert.assertEquals(symbol, icon.getSymbol());
         Assert.assertEquals(symbol, icon.getElement().getProperty("symbol"));
     }
