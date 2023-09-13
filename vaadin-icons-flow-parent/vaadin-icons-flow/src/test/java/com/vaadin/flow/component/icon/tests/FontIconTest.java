@@ -28,14 +28,14 @@ public class FontIconTest {
         Assert.assertEquals("fa-solid fa-user",
                 String.join(" ", icon.getIconClassNames()));
         Assert.assertEquals("fa-solid fa-user",
-                icon.getElement().getProperty("icon-class"));
+                icon.getElement().getProperty("iconClass"));
     }
 
     @Test
     public void emptyConstructorArgs_hasNoIconClassNames() {
         var icon = new FontIcon();
         Assert.assertArrayEquals(new String[0], icon.getIconClassNames());
-        Assert.assertNull(icon.getElement().getProperty("icon-class"));
+        Assert.assertNull(icon.getElement().getProperty("iconClass"));
     }
 
     @Test
@@ -45,7 +45,7 @@ public class FontIconTest {
         Assert.assertEquals("fa-solid fa-user",
                 String.join(" ", icon.getIconClassNames()));
         Assert.assertEquals("fa-solid fa-user",
-                icon.getElement().getProperty("icon-class"));
+                icon.getElement().getProperty("iconClass"));
     }
 
     @Test
@@ -56,7 +56,7 @@ public class FontIconTest {
         Assert.assertEquals("fa-solid",
                 String.join(" ", icon.getIconClassNames()));
         Assert.assertEquals("fa-solid",
-                icon.getElement().getProperty("icon-class"));
+                icon.getElement().getProperty("iconClass"));
     }
 
     @Test
@@ -65,7 +65,7 @@ public class FontIconTest {
         icon.setIconClassNames("fa-solid", "fa-user");
         icon.setIconClassNames();
         Assert.assertArrayEquals(new String[0], icon.getIconClassNames());
-        Assert.assertNull(icon.getElement().getProperty("icon-class"));
+        Assert.assertNull(icon.getElement().getProperty("iconClass"));
     }
 
     @Test

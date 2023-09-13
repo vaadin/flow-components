@@ -57,7 +57,7 @@ public class FontIcon extends AbstractIcon<FontIcon> {
      *            The icon class names, not null
      */
     public void setIconClassNames(String... iconClassNames) {
-        getElement().setProperty("icon-class", iconClassNames.length == 0 ? null
+        getElement().setProperty("iconClass", iconClassNames.length == 0 ? null
                 : String.join(" ", iconClassNames));
     }
 
@@ -68,7 +68,7 @@ public class FontIcon extends AbstractIcon<FontIcon> {
      * @return The icon class names
      */
     public String[] getIconClassNames() {
-        return Optional.ofNullable(getElement().getProperty("icon-class"))
+        return Optional.ofNullable(getElement().getProperty("iconClass"))
                 .map(f -> f.split(" ")).orElse(new String[0]);
     }
 
