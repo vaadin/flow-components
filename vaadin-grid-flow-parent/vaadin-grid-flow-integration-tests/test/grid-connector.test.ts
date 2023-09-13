@@ -38,37 +38,38 @@ describe('grid connector', () => {
   });
 
   it('should request new items on clear', async () => {
-    // Add two root items
-    setRootItems(grid.$connector, [
-      { key: '0', name: 'foo' },
-      { key: '1', name: 'bar' }
-    ]);
+    // Use a smaller page size for testing
+    const pageSize = 5;
+    grid.pageSize = pageSize;
+    grid.$connector.reset();
+
+    // Add 10 root items
+    setRootItems(grid.$connector, Array.from({ length: 10 }, (_, i) => ({ key: `${i}`, name: `foo${i}` })));
+
     await nextFrame();
     grid.$server.setRequestedRange.resetHistory();
 
     // Clear the items
-    clear(grid.$connector, 0, 2);
+    clear(grid.$connector, 0, 10);
     await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
 
     // Grid should have requested new items
     expect(grid.$server.setRequestedRange.calledOnce).to.be.true;
 
     // Add the requested items
-    setRootItems(grid.$connector, [
-      { key: '0', name: 'foo' },
-      { key: '1', name: 'bar' }
-    ]);
+    setRootItems(grid.$connector, Array.from({ length: 10 }, (_, i) => ({ key: `${i}`, name: `foo${i}` })));
+
     grid.$server.setRequestedRange.resetHistory();
 
     // Clear the items again
-    clear(grid.$connector, 0, 2);
+    clear(grid.$connector, 0, 10);
 
-    // Add the first item back before the request timeout
-    grid.$connector.set(0, [{ key: '0', name: 'foo' }]);
+    // Add the first page items back before the request timeout
+    grid.$connector.set(0, Array.from({ length: 5 }, (_, i) => ({ key: `${i}`, name: `foo${i}` })));
     grid.$connector.confirm(-1);
     await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
 
-    // Grid should have again requested for the second item
+    // Grid should have requested for the missing items
     expect(grid.$server.setRequestedRange.calledOnce).to.be.true;
   });
 

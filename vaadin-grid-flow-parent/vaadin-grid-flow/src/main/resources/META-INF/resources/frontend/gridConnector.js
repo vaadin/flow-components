@@ -738,7 +738,6 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             grid.$connector.doDeselection(items.filter((item) => selectedKeys[item.key]));
             items.forEach((item) => grid.closeItemDetails(item));
             delete cache[pkey][page];
-
             const updatedItems = updateGridCache(page, parentKey);
             if (updatedItems) {
               itemsUpdated(updatedItems);
@@ -870,6 +869,11 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             updateGridEffectiveSize();
           }
 
+          // TODO: Document and test
+          if (treePageCallbacks[parentKey] && Object.keys(treePageCallbacks[parentKey]).length) {
+            delete lastRequestedRanges[parentKey];
+          }
+
           // Let server know we're done
           grid.$server.confirmParentUpdate(id, parentKey);
 
@@ -920,10 +924,8 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             }
           }
 
-          const hasLoadingRows = grid._getRenderedRows().some((row) => row.hasAttribute('loading'));
-          if (hasLoadingRows) {
-            // TODO: Describe better!
-            // The grid is still loading, make sure any requests will not be blocked due to unchanged lastRequestedRanges
+          // TODO: Document
+          if (Object.keys(rootPageCallbacks).length) {
             delete lastRequestedRanges[root];
           }
 
