@@ -4538,11 +4538,30 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            zero based index of the item to scroll to in the current view.
      */
     public void scrollToIndex(int rowIndex) {
+        // Grid's page size
         int pageSize = getPageSize();
-        int firstRootIndex = rowIndex - rowIndex % pageSize;
+        // A rough approximation of the viewport size in rows. This affects the
+        // count of preloaded rows.
+        int viewportSizeEstimate = 40;
 
-        // Preload from one page before to one page after the target page
-        setRequestedRange(firstRootIndex - pageSize, pageSize * 3);
+        // Get the index of the first item on the page that contains the
+        // requested index
+        int targetPageStartIndex = rowIndex - rowIndex % pageSize;
+
+        // The last index we want to include in the preloaded range
+        int lastIndex = rowIndex + viewportSizeEstimate;
+
+        // Get the index of the last item on the page that contains the last
+        // index we want to preload
+        int lastIndexPageStartIndex = lastIndex - lastIndex % pageSize;
+        int lastIndexPageEndIndex = lastIndexPageStartIndex + pageSize - 1;
+
+        // Preloaded items count
+        int preloadedItemsCount = lastIndexPageEndIndex - targetPageStartIndex
+                + 1;
+        // Preload the items
+        setRequestedRange(targetPageStartIndex, preloadedItemsCount);
+
         // Scroll to the requested index
         getElement().callJsFunction("scrollToIndex", rowIndex);
     }
