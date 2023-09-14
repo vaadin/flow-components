@@ -174,7 +174,6 @@ export function expandItems(gridConnector: GridConnector, items: Item[]): void {
   gridConnector.expandItems(items);
 }
 
-
 /**
  * Clears the given range of the given parent's children.
  */

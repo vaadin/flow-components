@@ -869,11 +869,6 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             updateGridEffectiveSize();
           }
 
-          // TODO: Document and test
-          if (treePageCallbacks[parentKey] && Object.keys(treePageCallbacks[parentKey]).length) {
-            delete lastRequestedRanges[parentKey];
-          }
-
           // Let server know we're done
           grid.$server.confirmParentUpdate(id, parentKey);
 
@@ -924,8 +919,15 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             }
           }
 
-          // TODO: Document
           if (Object.keys(rootPageCallbacks).length) {
+            // There are still unresolved callbacks waiting for data to the root level,
+            // which means that the range grid requested items for was only partially filled.
+            //
+            // This can happen for example if you preload some items without knowing exactly
+            // how many items the grid web component is going to request.
+            //
+            // Clear the last requested range for the root level to unblock
+            // any possible data requests for the same range in fetchPage.
             delete lastRequestedRanges[root];
           }
 

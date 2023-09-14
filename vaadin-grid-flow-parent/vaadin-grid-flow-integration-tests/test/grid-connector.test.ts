@@ -37,79 +37,6 @@ describe('grid connector', () => {
     expect(getBodyCellText(grid, 0, 0)).to.equal('foo');
   });
 
-  // TODO: Move the new tests under a shared describe block
-  it('should request new items after incomplete confirm', async () => {
-    // Use a smaller page size for testing
-    const pageSize = 5;
-    grid.pageSize = pageSize;
-    grid.$connector.reset();
-
-    // Add 10 root items
-    setRootItems(grid.$connector, Array.from({ length: 10 }, (_, i) => ({ key: `${i}`, name: `foo${i}` })));
-
-    await nextFrame();
-    grid.$server.setRequestedRange.resetHistory();
-
-    // Clear the items
-    clear(grid.$connector, 0, 10);
-    await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-
-    // Grid should have requested new items
-    expect(grid.$server.setRequestedRange.calledOnce).to.be.true;
-
-    // Add the requested items
-    setRootItems(grid.$connector, Array.from({ length: 10 }, (_, i) => ({ key: `${i}`, name: `foo${i}` })));
-
-    grid.$server.setRequestedRange.resetHistory();
-
-    // Clear the items again
-    clear(grid.$connector, 0, 10);
-
-    // Add the first page items back before the request timeout (partial/incomplete preload)
-    grid.$connector.set(0, Array.from({ length: 5 }, (_, i) => ({ key: `${i}`, name: `foo${i}` })));
-    grid.$connector.confirm(-1);
-    await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-
-    // Grid should have requested for the missing items
-    expect(grid.$server.setRequestedRange.calledOnce).to.be.true;
-  });
-
-  it('should not request for new items after complete confirm', async () => {
-    // Use a smaller page size for testing
-    const pageSize = 5;
-    grid.pageSize = pageSize;
-    grid.$connector.reset();
-
-    // Add 10 root items
-    setRootItems(grid.$connector, Array.from({ length: 10 }, (_, i) => ({ key: `${i}`, name: `foo${i}` })));
-
-    await nextFrame();
-    grid.$server.setRequestedRange.resetHistory();
-
-    // Clear the items
-    clear(grid.$connector, 0, 10);
-    await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-
-    // Grid should have requested new items
-    expect(grid.$server.setRequestedRange.calledOnce).to.be.true;
-
-    // Add the requested items
-    setRootItems(grid.$connector, Array.from({ length: 10 }, (_, i) => ({ key: `${i}`, name: `foo${i}` })));
-
-    grid.$server.setRequestedRange.resetHistory();
-
-    // Clear the items again
-    clear(grid.$connector, 0, 10);
-
-    // Add all the items back before the request timeout
-    grid.$connector.set(0, Array.from({ length: 10 }, (_, i) => ({ key: `${i}`, name: `foo${i}` })));
-    grid.$connector.confirm(-1);
-    await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-
-    // Grid should have requested for the missing items
-    expect(grid.$server.setRequestedRange.calledOnce).to.be.false;
-  });
-
   describe('empty grid', () => {
     it('should not have loading state when refreshing grid', async () => {
       setRootItems(grid.$connector, []);
@@ -130,6 +57,64 @@ describe('grid connector', () => {
       grid.clearCache();
       await nextFrame();
 
+      expect(grid.$server.setRequestedRange.called).to.be.false;
+    });
+  });
+
+  // A setup where the grid has requested items, and the server has successfully
+  // responded with a full item set.
+  describe('grid with a requested data range', () => {
+    const items = Array.from({ length: 10 }, (_, i) => ({ key: `${i}`, name: `foo${i}` }));
+
+    beforeEach(async () => {
+      // Use a smaller page size for testing
+      grid.pageSize = 5;
+      grid.$connector.reset();
+
+      // Add 10 root items
+      setRootItems(grid.$connector, items);
+
+      await nextFrame();
+      grid.$server.setRequestedRange.resetHistory();
+
+      // Clear the items
+      clear(grid.$connector, 0, 10);
+      await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
+
+      // Grid should have requested new items
+      expect(grid.$server.setRequestedRange.calledOnce).to.be.true;
+
+      // Add the requested items
+      setRootItems(grid.$connector, items);
+
+      grid.$server.setRequestedRange.resetHistory();
+    });
+
+    it('should request new items after incomplete confirm', async () => {
+      // Clear the items again
+      clear(grid.$connector, 0, 10);
+
+      // Add the first page items back before the request timeout (partial/incomplete preload)
+      grid.$connector.set(0, items.slice(0, grid.pageSize));
+      grid.$connector.confirm(-1);
+
+      await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
+
+      // Grid should have requested for the missing items
+      expect(grid.$server.setRequestedRange.calledOnce).to.be.true;
+    });
+
+    it('should not request for new items after complete confirm', async () => {
+      // Clear the items again
+      clear(grid.$connector, 0, 10);
+
+      // Add all the items back before the request timeout
+      grid.$connector.set(0, items);
+      grid.$connector.confirm(-1);
+
+      await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
+
+      // Grid should not have request for items
       expect(grid.$server.setRequestedRange.called).to.be.false;
     });
   });

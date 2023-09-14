@@ -29,7 +29,6 @@ public class GridScrollTest {
     public void setUp() {
         grid = new Grid<>();
         grid.setPageSize(50);
-        grid.getElement().setProperty("size", 1000);
     }
 
     @Test
