@@ -9,6 +9,7 @@
     <artifactId>vaadin-map-testbench</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Map Testbench API</name>
+    <description>Vaadin Map Testbench API</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

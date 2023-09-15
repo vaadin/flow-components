@@ -9,6 +9,7 @@
     <artifactId>vaadin-icons-testbench</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Icons Testbench API</name>
+    <description>Vaadin Icons Testbench API</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

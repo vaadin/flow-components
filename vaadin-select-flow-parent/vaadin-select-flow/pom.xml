@@ -9,6 +9,7 @@
     <artifactId>vaadin-select-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Select</name>
+    <description>Vaadin Select</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

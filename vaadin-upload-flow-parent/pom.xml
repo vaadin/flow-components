@@ -9,6 +9,7 @@
     <artifactId>vaadin-upload-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>Vaadin Upload Parent</name>
+    <description>Vaadin Upload Parent</description>
     <modules>
         <module>vaadin-upload-flow</module>
         <module>vaadin-upload-testbench</module>

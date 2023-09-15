@@ -15,13 +15,10 @@
  */
 package com.vaadin.flow.component.sidenav;
 
-import com.vaadin.experimental.FeatureFlags;
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.Element;
@@ -40,7 +37,7 @@ import java.util.Objects;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-side-nav")
-@NpmPackage(value = "@vaadin/side-nav", version = "24.2.0-alpha10")
+@NpmPackage(value = "@vaadin/side-nav", version = "24.2.0-alpha16")
 @JsModule("@vaadin/side-nav/src/vaadin-side-nav.js")
 public class SideNav extends SideNavItemContainer implements HasSize, HasStyle {
 
@@ -151,12 +148,6 @@ public class SideNav extends SideNavItemContainer implements HasSize, HasStyle {
         getElement().setProperty("collapsed", !expanded);
     }
 
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-        checkFeatureFlag();
-    }
-
     /**
      * Gets the internationalization object previously set for this component.
      * <p>
@@ -184,35 +175,6 @@ public class SideNav extends SideNavItemContainer implements HasSize, HasStyle {
                 "The i18N properties object should not be null");
         this.i18n = i18n;
         getElement().setPropertyJson("i18n", JsonSerializer.toJson(i18n));
-    }
-
-    /**
-     * Checks whether the SideNav component feature flag is active. Succeeds if
-     * the flag is enabled, and throws otherwise.
-     *
-     * @throws ExperimentalFeatureException
-     *             when the {@link FeatureFlags#SIDE_NAV_COMPONENT} feature is
-     *             not enabled
-     */
-    private void checkFeatureFlag() {
-        boolean enabled = getFeatureFlags()
-                .isEnabled(FeatureFlags.SIDE_NAV_COMPONENT);
-
-        if (!enabled) {
-            throw new ExperimentalFeatureException();
-        }
-    }
-
-    /**
-     * Gets the feature flags for the current UI.
-     * <p>
-     * Extracted with protected visibility to support mocking
-     *
-     * @return the current set of feature flags
-     */
-    protected FeatureFlags getFeatureFlags() {
-        return FeatureFlags
-                .get(UI.getCurrent().getSession().getService().getContext());
     }
 
     /**

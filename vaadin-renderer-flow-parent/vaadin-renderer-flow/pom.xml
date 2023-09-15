@@ -9,6 +9,7 @@
     <artifactId>vaadin-renderer-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Renderer</name>
+    <description>Vaadin Renderer</description>
     <properties>
         <osgi.export.package>com.vaadin.flow.data.renderer</osgi.export.package>
     </properties>
@@ -16,6 +17,11 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-data</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-html-components</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>

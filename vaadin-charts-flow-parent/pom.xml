@@ -9,6 +9,7 @@
     <artifactId>vaadin-charts-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>Vaadin Charts Parent</name>
+    <description>Vaadin Charts Parent</description>
     <licenses>
         <license>
             <name>Vaadin Commercial License and Service Terms</name>

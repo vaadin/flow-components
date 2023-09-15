@@ -9,6 +9,7 @@
     <artifactId>vaadin-confirm-dialog-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Confirm Dialog</name>
+    <description>Vaadin Confirm Dialog</description>
     <dependencies>
         <dependency>
             <groupId>jakarta.servlet</groupId>

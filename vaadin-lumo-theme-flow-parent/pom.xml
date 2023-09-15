@@ -9,6 +9,7 @@
     <artifactId>vaadin-lumo-theme-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>Vaadin Lumo Theme Parent</name>
+    <description>Vaadin Lumo Theme Parent</description>
     <modules>
         <module>vaadin-lumo-theme-flow</module>
     </modules>
