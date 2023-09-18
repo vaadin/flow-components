@@ -87,10 +87,20 @@ public class Tooltip implements Serializable {
         // Create a new Tooltip handle instance
         var tooltip = new Tooltip();
 
+        // Hold the reference to the UI
+        final UI[] ui = { UI.getCurrent() };
+
         // Handle target attach
         SerializableRunnable onTargetAttach = () -> {
+            // Remove from tree only if UI has changed
+            var uiOnAttach = UI.getCurrent();
+            if (!ui[0].equals(uiOnAttach)) {
+                tooltip.tooltipElement.removeFromTree();
+            }
+            ui[0] = uiOnAttach;
+
             // The host under which the <vaadin-tooltip> element is auto-attached
-            var tooltipHost = UI.getCurrent().getElement();
+            var tooltipHost = uiOnAttach.getElement();
             tooltipHost.appendChild(tooltip.tooltipElement);
             tooltip.tooltipElement.executeJs("this.target = $0;", element);
         };
