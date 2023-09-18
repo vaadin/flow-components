@@ -41,7 +41,7 @@ import com.vaadin.flow.router.Router;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-side-nav-item")
-@NpmPackage(value = "@vaadin/side-nav", version = "24.1.7")
+@NpmPackage(value = "@vaadin/side-nav", version = "24.1.8")
 @JsModule("@vaadin/side-nav/src/vaadin-side-nav-item.js")
 public class SideNavItem extends SideNavItemContainer
         implements HasPrefix, HasSuffix {
