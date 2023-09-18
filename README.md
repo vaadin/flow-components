@@ -100,7 +100,7 @@ Move to the integration tests module of the component
 
 Start the test runner in watch mode
 
-- `npx web-test-runner test/**/*.test.ts --node-resolve --watch`
+- `npx web-test-runner --playwright test/**/*.test.ts --node-resolve --watch`
 
 NOTE: The tests actually import the client module under test from `..integration-tests/frontend/generated/jar-resources`.
 For faster feedback loop you can work on the generated file directly. Just be careful not to lose your changes to it since it's not under version control.
