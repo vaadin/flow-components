@@ -116,7 +116,7 @@ describe('grid connector', () => {
       await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
 
       // Grid should not have request for items
-      expect(grid.$server.setRequestedRange.called).to.be.false;
+      expect(grid.$server.setRequestedRange).to.be.not.called;
     });
   });
 });
