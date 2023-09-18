@@ -75,7 +75,8 @@ describe('grid connector', () => {
       setRootItems(grid.$connector, items);
 
       await nextFrame();
-      grid.$server.setRequestedRange.resetHistory();
+      // Grid should not have requested for items yet (all the 10 items were preloaded)
+      expect(grid.$server.setRequestedRange.called).to.be.false;
 
       // Clear the items
       clear(grid.$connector, 0, 10);
