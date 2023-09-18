@@ -164,15 +164,37 @@ public class DatePicker
         // workaround for https://github.com/vaadin/flow/issues/3496
         setInvalid(false);
 
-        addValueChangeListener(e -> validate());
+        addValueChangeListener(e -> {
+            String unparsableValue = getUnparsableValue();
+            if (!unparsableValue.isEmpty()) {
+                this.setValue(handleUnparsableDateString(unparsableValue));
+            }
 
-        addUnparseableChangeListener(e -> validate());
+            validate();
+        });
+
+        addUnparseableChangeListener(e -> {
+            String unparsableValue = getUnparsableValue();
+            if (!unparsableValue.isEmpty()) {
+                this.setValue(handleUnparsableDateString(unparsableValue));
+            }
+
+            validate();
+        });
 
         getElement().addPropertyChangeListener("opened", event -> fireEvent(
                 new OpenedChangeEvent(this, event.isUserOriginated())));
 
         getElement().addPropertyChangeListener("invalid", event -> fireEvent(
                 new InvalidChangeEvent(this, event.isUserOriginated())));
+    }
+
+    public LocalDate handleUnparsableDateString(String dateString) {
+        if (Objects.equals(dateString, "tomorrow")) {
+            return LocalDate.now().plusDays(1);
+        }
+
+        return getEmptyValue();
     }
 
     /**
@@ -526,7 +548,7 @@ public class DatePicker
 
     private ValidationResult checkValidity(LocalDate value) {
         boolean hasNonParsableValue = Objects.equals(value, getEmptyValue())
-                && isInputValuePresent();
+                && !getUnparsableValue().isEmpty();
         if (hasNonParsableValue) {
             return ValidationResult.error("");
         }
@@ -569,6 +591,12 @@ public class DatePicker
         return getElement().getProperty("_hasInputValue", false);
     }
 
+    @Synchronize(property = "_unparsableValue", value = { "value-changed",
+            "unparseable-change" })
+    protected String getUnparsableValue() {
+        return getElement().getProperty("_unparsableValue", "");
+    }
+
     @Override
     public void setValue(LocalDate value) {
         LocalDate oldValue = getValue();
@@ -578,7 +606,7 @@ public class DatePicker
         // Clear the input element from possible bad input.
         if (Objects.equals(oldValue, getEmptyValue())
                 && Objects.equals(value, getEmptyValue())
-                && isInputValuePresent()) {
+                && !Objects.equals(getUnparsableValue(), "")) {
             // The check for value presence guarantees that a non-empty value
             // won't get cleared when setValue(null) and setValue(...) are
             // subsequently called within one round-trip.
@@ -588,7 +616,7 @@ public class DatePicker
             // `executeJs` can end up invoked after a non-empty value is set.
             getElement()
                     .executeJs("if (!this.value) this._inputElementValue = ''");
-            getElement().setProperty("_hasInputValue", false);
+            getElement().setProperty("_unparsableValue", "");
             fireEvent(new UnparseableChangeEvent(this, false));
         }
     }
