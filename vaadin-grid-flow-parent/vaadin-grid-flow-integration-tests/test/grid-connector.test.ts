@@ -102,7 +102,7 @@ describe('grid connector', () => {
       await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
 
       // Grid should have requested for the missing items
-      expect(grid.$server.setRequestedRange.calledOnce).to.be.true;
+      expect(grid.$server.setRequestedRange).to.be.calledOnce;
     });
 
     it('should not request for new items after complete confirm', async () => {
