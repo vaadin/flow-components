@@ -16,9 +16,15 @@ public class RichTextEditorDetachReattachIT extends AbstractComponentIT {
 
     @Test
     public void detach_reattach_htmlValueInitialized() {
+        assertHtmlValue();
+
         $("button").id("detach").click();
         $("button").id("attach").click();
 
+        assertHtmlValue();
+    }
+
+    private void assertHtmlValue() {
         RichTextEditorElement editor = $(RichTextEditorElement.class).first();
 
         Assert.assertEquals("<h1>foo</h1>",
