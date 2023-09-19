@@ -20,7 +20,9 @@ import java.util.Optional;
 import com.vaadin.flow.dom.ElementConstants;
 
 /**
- * Component for displaying an icon from a font icon collection.
+ * Component for displaying an icon from a font icon collection. Note that the
+ * icon font must be loaded separately. One way to do this is by including it in
+ * the application's theme.
  *
  * @author Vaadin Ltd
  */
@@ -33,36 +35,40 @@ public class FontIcon extends AbstractIcon<FontIcon> {
     }
 
     /**
-     * Creates a font icon component with the given font class names.
+     * Creates a font icon component with the given icon class names.
      *
-     * @param font
-     *            The font class names, not null
-     * @see #setFont(String...)
+     * Example: <code>new FontIcon("fa-solid", "fa-user")</code>.
+     *
+     * @param iconClassNames
+     *            The icon class names, not null
+     * @see #setIconClassNames(String...)
      */
-    public FontIcon(String... font) {
-        setFont(font);
+    public FontIcon(String... iconClassNames) {
+        setIconClassNames(iconClassNames);
     }
 
     /**
-     * Sets the font class names defining an icon font and/or a specific glyph
+     * Sets the icon class names defining an icon font and/or a specific glyph
      * inside an icon font.
      *
-     * @param font
-     *            The font class names, not null
+     * Example: <code>setIconClassNames("fa-solid", "fa-user")</code>.
+     *
+     * @param iconClassNames
+     *            The icon class names, not null
      */
-    public void setFont(String... font) {
-        getElement().setProperty("font",
-                font.length == 0 ? null : String.join(" ", font));
+    public void setIconClassNames(String... iconClassNames) {
+        getElement().setProperty("iconClass", iconClassNames.length == 0 ? null
+                : String.join(" ", iconClassNames));
     }
 
     /**
-     * Gets the font class names defining an icon font and/or a specific glyph
+     * Gets the icon class names defining an icon font and/or a specific glyph
      * inside an icon font.
      *
-     * @return The font class names
+     * @return The icon class names
      */
-    public String[] getFont() {
-        return Optional.ofNullable(getElement().getProperty("font"))
+    public String[] getIconClassNames() {
+        return Optional.ofNullable(getElement().getProperty("iconClass"))
                 .map(f -> f.split(" ")).orElse(new String[0]);
     }
 
@@ -86,8 +92,9 @@ public class FontIcon extends AbstractIcon<FontIcon> {
     }
 
     /**
-     * Sets the specific glyph from a font to use as an icon. Can be a code
-     * point or a ligature name.
+     * Sets the hexadecimal code point that specifies a glyph from an icon font.
+     *
+     * Example: <code>setCharCode("e001")</code>
      *
      * @param charCode
      *            the character code to use
@@ -97,13 +104,35 @@ public class FontIcon extends AbstractIcon<FontIcon> {
     }
 
     /**
-     * Gets the specific glyph from a font to use as an icon. Can be a code
-     * point or a ligature name.
+     * Gets the hexadecimal code point that specifies a glyph from an icon font.
      *
      * @return the character code to use
      */
     public String getCharCode() {
         return getElement().getProperty("char");
+    }
+
+    /**
+     * Sets the ligature name that specifies an icon from an icon font with
+     * support for ligatures.
+     *
+     * Example: <code>setLigature("home")</code>
+     *
+     * @param ligature
+     *            the ligature to use
+     */
+    public void setLigature(String ligature) {
+        getElement().setProperty("ligature", ligature);
+    }
+
+    /**
+     * Gets the ligature name that specifies an icon from an icon font with
+     * support for ligatures.
+     *
+     * @return the ligature to use
+     */
+    public String getLigature() {
+        return getElement().getProperty("ligature");
     }
 
     @Override

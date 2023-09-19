@@ -23,51 +23,53 @@ import org.junit.Test;
 public class FontIconTest {
 
     @Test
-    public void constructor_hasFont() {
+    public void constructor_hasIconClassNames() {
         var icon = new FontIcon("fa-solid", "fa-user");
         Assert.assertEquals("fa-solid fa-user",
-                String.join(" ", icon.getFont()));
+                String.join(" ", icon.getIconClassNames()));
         Assert.assertEquals("fa-solid fa-user",
-                icon.getElement().getProperty("font"));
+                icon.getElement().getProperty("iconClass"));
     }
 
     @Test
-    public void emptyConstructorArgs_hasNoFont() {
+    public void emptyConstructorArgs_hasNoIconClassNames() {
         var icon = new FontIcon();
-        Assert.assertArrayEquals(new String[0], icon.getFont());
-        Assert.assertNull(icon.getElement().getProperty("font"));
+        Assert.assertArrayEquals(new String[0], icon.getIconClassNames());
+        Assert.assertNull(icon.getElement().getProperty("iconClass"));
     }
 
     @Test
-    public void setFont_hasFont() {
+    public void setIconClassNames_hasIconClassNames() {
         var icon = new FontIcon();
-        icon.setFont("fa-solid", "fa-user");
+        icon.setIconClassNames("fa-solid", "fa-user");
         Assert.assertEquals("fa-solid fa-user",
-                String.join(" ", icon.getFont()));
+                String.join(" ", icon.getIconClassNames()));
         Assert.assertEquals("fa-solid fa-user",
-                icon.getElement().getProperty("font"));
+                icon.getElement().getProperty("iconClass"));
     }
 
     @Test
-    public void modifyFont_hasModifiedFont() {
+    public void modifyIconClassName_hasModifiedIconClassName() {
         var icon = new FontIcon();
-        icon.setFont("fa-solid", "fa-user");
-        icon.setFont("fa-solid");
-        Assert.assertEquals("fa-solid", String.join(" ", icon.getFont()));
-        Assert.assertEquals("fa-solid", icon.getElement().getProperty("font"));
+        icon.setIconClassNames("fa-solid", "fa-user");
+        icon.setIconClassNames("fa-solid");
+        Assert.assertEquals("fa-solid",
+                String.join(" ", icon.getIconClassNames()));
+        Assert.assertEquals("fa-solid",
+                icon.getElement().getProperty("iconClass"));
     }
 
     @Test
-    public void clearFont_hasNoFont() {
+    public void clearIconClassNames_hasNoIconClassNames() {
         var icon = new FontIcon();
-        icon.setFont("fa-solid", "fa-user");
-        icon.setFont();
-        Assert.assertArrayEquals(new String[0], icon.getFont());
-        Assert.assertNull(icon.getElement().getProperty("font"));
+        icon.setIconClassNames("fa-solid", "fa-user");
+        icon.setIconClassNames();
+        Assert.assertArrayEquals(new String[0], icon.getIconClassNames());
+        Assert.assertNull(icon.getElement().getProperty("iconClass"));
     }
 
     @Test
-    public void setFontFamily_hasFontFamily() {
+    public void setFontFamily_hasIconClassNamesFamily() {
         var icon = new FontIcon();
         icon.setFontFamily("lumo-icons");
         Assert.assertEquals("lumo-icons", icon.getFontFamily());
@@ -87,18 +89,35 @@ public class FontIconTest {
     @Test
     public void setCharCode_hasCharCode() {
         var icon = new FontIcon();
-        icon.setCharCode("\uea0e");
-        Assert.assertEquals("\uea0e", icon.getCharCode());
-        Assert.assertEquals("\uea0e", icon.getElement().getProperty("char"));
+        icon.setCharCode("ea0e");
+        Assert.assertEquals("ea0e", icon.getCharCode());
+        Assert.assertEquals("ea0e", icon.getElement().getProperty("char"));
     }
 
     @Test
     public void clearCharCode_hasNoCharCode() {
         var icon = new FontIcon();
-        icon.setCharCode("\uea0e");
+        icon.setCharCode("ea0e");
         icon.setCharCode(null);
         Assert.assertNull(icon.getCharCode());
         Assert.assertNull(icon.getElement().getProperty("char"));
+    }
+
+    @Test
+    public void setLigature_hasLigature() {
+        var icon = new FontIcon();
+        icon.setLigature("home");
+        Assert.assertEquals("home", icon.getLigature());
+        Assert.assertEquals("home", icon.getElement().getProperty("ligature"));
+    }
+
+    @Test
+    public void clearLigature_hasNoLigature() {
+        var icon = new FontIcon();
+        icon.setLigature("home");
+        icon.setLigature(null);
+        Assert.assertNull(icon.getLigature());
+        Assert.assertNull(icon.getElement().getProperty("ligature"));
     }
 
     @Test

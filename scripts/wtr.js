@@ -58,6 +58,12 @@ function runTests() {
         stdio: 'inherit'
       });
 
+      // Install Playwright Chromium
+      execSync(`npx playwright install chromium`, {
+        cwd: itFolder,
+        stdio: 'inherit'
+      });
+
       // Run the tests
       console.log(`Running tests in ${itFolder}`);
       execSync(`npx web-test-runner --playwright ${wtrTestsFolderName}/**/*.test.ts --node-resolve`, {

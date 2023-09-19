@@ -44,6 +44,21 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
     }
 
     /**
+     * Creates an SVG icon with the given source and symbol
+     *
+     * @param src
+     *            the SVG file path
+     * @param symbol
+     *            the symbol reference of the icon
+     * @see #setSrc(String)
+     * @see #setSymbol(String)
+     */
+    public SvgIcon(String src, String symbol) {
+        this(src);
+        setSymbol(symbol);
+    }
+
+    /**
      * Creates an SVG icon with the given resource
      *
      * @param src
@@ -52,6 +67,21 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
      */
     public SvgIcon(AbstractStreamResource src) {
         setSrc(src);
+    }
+
+    /**
+     * Creates an SVG icon with the given resource
+     *
+     * @param src
+     *            the resource value
+     * @param symbol
+     *            the symbol reference of the icon
+     * @see #setSrc(AbstractStreamResource)
+     * @see #setSymbol(String)
+     */
+    public SvgIcon(AbstractStreamResource src, String symbol) {
+        this(src);
+        setSymbol(symbol);
     }
 
     /**
@@ -81,6 +111,21 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
     }
 
     /**
+     * Defines the src and the symbol to be used in the icon.
+     *
+     * @param src
+     *            the path of the icon sprite file
+     * @param symbol
+     *            the symbol reference of the icon
+     * @see #setSrc(String)
+     * @see #setSymbol(String)
+     */
+    public void setSrc(String src, String symbol) {
+        setSrc(src);
+        setSymbol(symbol);
+    }
+
+    /**
      * Defines the source of the icon from the given {@link StreamResource} The
      * resource must contain a valid SVG element.
      *
@@ -92,12 +137,55 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
     }
 
     /**
-     * Gets the source defined in the icon
+     * Defines the src and the symbol to be used in the icon.
+     *
+     * @param src
+     *            the source of the icon sprite file, not null
+     * @param symbol
+     *            the symbol reference of the icon
+     * @see #setSrc(AbstractStreamResource)
+     * @see #setSymbol(String)
+     */
+    public void setSrc(AbstractStreamResource src, String symbol) {
+        setSrc(src);
+        setSymbol(symbol);
+    }
+
+    /**
+     * Gets the source defined in the icon.
      *
      * @return the source defined or {@code null}
      */
     public String getSrc() {
         return getElement().getAttribute("src");
+    }
+
+    /**
+     * <p>
+     * Defines the symbol identifier that references an ID of an element
+     * contained in the SVG element assigned to the {@link #setSrc(String)}
+     * property.
+     * </p>
+     * <p>
+     * If there's an identifier in the path defined in {@link #setSrc(String)}
+     * in the moment this method is called, the value passed to
+     * {@link #setSymbol(String)} will be used.
+     * </p>
+     *
+     * @param symbol
+     *            the symbol identifier of the icon to be shown
+     */
+    public void setSymbol(String symbol) {
+        getElement().setProperty("symbol", symbol);
+    }
+
+    /**
+     * Gets the symbol defined in the icon.
+     *
+     * @return the symbol defined or {@code null}
+     */
+    public String getSymbol() {
+        return getElement().getProperty("symbol");
     }
 
     @Override
