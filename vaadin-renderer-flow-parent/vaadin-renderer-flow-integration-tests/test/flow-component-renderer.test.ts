@@ -173,8 +173,8 @@ describe('flow-component-renderer', () => {
     await nextFrame();
 
     // Disconnect
-    component.remove();
     getByNodeId.resetHistory();
+    component.remove();
     await nextFrame();
 
     expect(getByNodeId).to.not.have.been.called;
