@@ -24,7 +24,6 @@
         <jetty.stop.port>9999</jetty.stop.port>
         <maven.failsafe.plugin.version>2.22.1</maven.failsafe.plugin.version>
         <maven.resources.plugin.version>3.0.2</maven.resources.plugin.version>
-        <maven.deploy.plugin.version>2.8.2</maven.deploy.plugin.version>
         <failsafe.forkCount>4</failsafe.forkCount>
         <com.vaadin.tests.SharedBrowser.reuseBrowser>true</com.vaadin.tests.SharedBrowser.reuseBrowser>
         <com.vaadin.testbench.Parameters.testsInParallel>1</com.vaadin.testbench.Parameters.testsInParallel>
