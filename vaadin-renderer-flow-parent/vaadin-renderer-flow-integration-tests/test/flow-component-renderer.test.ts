@@ -138,7 +138,7 @@ describe('flow-component-renderer', () => {
     component.nodeId = 1;
     await nextFrame();
 
-    // getByNodeId should only have been called for node id 1 only
+    // getByNodeId should only have been called for node id 1
     getByNodeId.getCalls().forEach((call) => expect(call.args[0]).to.equal(1));
     expect(component.firstElementChild).to.equal(elements[1]);
   });
