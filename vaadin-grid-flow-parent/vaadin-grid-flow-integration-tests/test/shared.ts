@@ -23,7 +23,6 @@ export type GridConnector = {
   doSelection: (items: Item[] | [null], userOriginated: boolean) => void;
   doDeselection: (items: Item[], userOriginated: boolean) => void;
   clear: (index: number, length: number, parentKey?: string) => void;
-  removeFromArray: (array: any[], removeTest: (item: any) => boolean) => void;
 };
 
 export type GridServer = {

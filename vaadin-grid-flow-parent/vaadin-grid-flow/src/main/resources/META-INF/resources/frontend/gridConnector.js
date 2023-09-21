@@ -808,16 +808,8 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           Object.values(treePageCallbacks[itemId] || {}).forEach((callback) => callback([]));
           
           delete treePageCallbacks[itemId];
-          grid.$connector.removeFromArray(ensureSubCacheQueue, (item) => item.itemkey === itemId);
-          grid.$connector.removeFromArray(parentRequestQueue, (item) => item.parentKey === itemId);
-        });
-
-        /*
-         * Removes array items that match the given test
-         */
-        grid.$connector.removeFromArray = tryCatchWrapper(function (array, removeTest) {
-          const filteredArray = array.filter((item) => !removeTest(item));
-          array.splice(0, array.length, ...filteredArray);
+          ensureSubCacheQueue = ensureSubCacheQueue.filter((item) => item.itemkey !== itemId);
+          parentRequestQueue = parentRequestQueue.filter((item) => item.parentKey !== itemId);
         });
 
         grid.$connector.confirmParent = tryCatchWrapper(function (id, parentKey, levelSize) {
