@@ -17,11 +17,13 @@ export type GridConnector = {
   confirmParent: (index: number, parentKey: string, levelSize: number) => void;
   setSelectionMode: (mode: 'SINGLE' | 'NONE' | 'MULTI') => void;
   expandItems: (items: Item[]) => void;
+  collapseItems: (items: Item[]) => void;
   ensureHierarchy: () => void;
   reset: () => void;
   doSelection: (items: Item[] | [null], userOriginated: boolean) => void;
   doDeselection: (items: Item[], userOriginated: boolean) => void;
   clear: (index: number, length: number, parentKey?: string) => void;
+  removeFromArray: (array: any[], removeTest: (item: any) => boolean) => void;
 };
 
 export type GridServer = {
@@ -172,6 +174,13 @@ export function setChildItems(gridConnector: GridConnector, parent: Item, items:
 export function expandItems(gridConnector: GridConnector, items: Item[]): void {
   gridConnector.ensureHierarchy();
   gridConnector.expandItems(items);
+}
+
+/**
+ * Collapse the given items.
+ */
+export function collapseItems(gridConnector: GridConnector, items: Item[]): void {
+  gridConnector.collapseItems(items);
 }
 
 /**
