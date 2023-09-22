@@ -17,8 +17,7 @@ public class FeaturesDiy extends Features {
         ConfirmDialog dialog = new ConfirmDialog();
         dialog.setId(sample);
         dialog.setHeader(new H2("Meeting starting"));
-        dialog.setText(
-                new Span("Your next meeting starts in 5 minutes"));
+        dialog.setText(new Span("Your next meeting starts in 5 minutes"));
 
         // This button will get discarded by the new confirm button added below.
         dialog.setConfirmButton(new Button("Discarded confirm button"));
@@ -41,8 +40,7 @@ public class FeaturesDiy extends Features {
         dialog.setId(sample);
         dialog.setHeader("Delete product");
         dialog.setText(new Html(
-                "<span>Are you sure you want to delete? This operation <b>can not be undone</b></span>")
-                );
+                "<span>Are you sure you want to delete? This operation <b>can not be undone</b></span>"));
         Button deleteButton = new Button("Delete");
         deleteButton.setId("confirmDiy");
         deleteButton.setIconAfterText(true);
@@ -63,8 +61,7 @@ public class FeaturesDiy extends Features {
         ConfirmDialog dialog = new ConfirmDialog();
         dialog.setId(sample);
         dialog.setHeader("Ready to publish?");
-        dialog.setText(
-                new Label("Do you want to publish this post?"));
+        dialog.setText(new Label("Do you want to publish this post?"));
         Button publishButton = new Button("Publish");
         publishButton.setId("confirmDiy");
         publishButton.getElement().setAttribute("theme", "primary");
@@ -91,8 +88,7 @@ public class FeaturesDiy extends Features {
         dialog.setId(sample);
         dialog.setHeader("Unsaved changes");
         dialog.setText(new Html(
-                "<span>Do you want to <b>save</b> or <b>discard</b> your changes before navigating away?</span>")
-                );
+                "<span>Do you want to <b>save</b> or <b>discard</b> your changes before navigating away?</span>"));
 
         Button saveButton = new Button("Save");
         saveButton.setId("confirmDiy");
