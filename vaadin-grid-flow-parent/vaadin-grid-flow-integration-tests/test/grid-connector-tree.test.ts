@@ -216,11 +216,8 @@ describe('grid connector - tree', () => {
     expect(isGridInLoadingState(grid)).to.be.true;
     // Immediately collapse the root item
     collapseItems(grid.$connector, [rootItem]);
-
-    // Wait for two GRID_CONNECTOR_PARENT_REQUEST_DELAY intervals
-    // to not rely on animation frame timing which could cause false
-    // positives in case the internal timings are later changed
-    await aTimeout(GRID_CONNECTOR_PARENT_REQUEST_DELAY);
+    await nextFrame();
+    
     await aTimeout(GRID_CONNECTOR_PARENT_REQUEST_DELAY);
 
     expect(isGridInLoadingState(grid)).to.be.false;
@@ -239,10 +236,6 @@ describe('grid connector - tree', () => {
     await nextFrame();
     collapseItems(grid.$connector, [rootItem]);
 
-    // Wait for two GRID_CONNECTOR_PARENT_REQUEST_DELAY intervals
-    // to not rely on animation frame timing which could cause false
-    // positives in case the internal timings are later changed
-    await aTimeout(GRID_CONNECTOR_PARENT_REQUEST_DELAY);
     await aTimeout(GRID_CONNECTOR_PARENT_REQUEST_DELAY);
 
     expect(isGridInLoadingState(grid)).to.be.false;
