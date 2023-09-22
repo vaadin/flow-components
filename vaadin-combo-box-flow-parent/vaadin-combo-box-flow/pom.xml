@@ -13,7 +13,7 @@
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-combo-box</artifactId>
-            <version>5.4.12</version>
+            <version>5.4.13</version>
         </dependency>
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
