@@ -61,7 +61,7 @@ public class FeaturesDiy extends Features {
         ConfirmDialog dialog = new ConfirmDialog();
         dialog.setId(sample);
         dialog.setHeader("Ready to publish?");
-        dialog.setText(new Label("Do you want to publish this post?"));
+        dialog.setText(new Paragraph("Do you want to publish this post?"));
         Button publishButton = new Button("Publish");
         publishButton.setId("confirmDiy");
         publishButton.getElement().setAttribute("theme", "primary");
