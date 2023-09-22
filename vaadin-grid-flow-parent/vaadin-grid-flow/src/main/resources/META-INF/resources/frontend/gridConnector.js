@@ -803,19 +803,13 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
 
         grid.$connector.removeFromQueue = tryCatchWrapper(function (item) {
           let itemId = grid.getItemId(item);
+          // The treePageCallbacks for the itemId are about to be discarded ->
+          // Resolve the callbacks with an empty array to not leave grid in loading state
+          Object.values(treePageCallbacks[itemId] || {}).forEach((callback) => callback([]));
+          
           delete treePageCallbacks[itemId];
-          grid.$connector.removeFromArray(ensureSubCacheQueue, (item) => item.itemkey === itemId);
-          grid.$connector.removeFromArray(parentRequestQueue, (item) => item.parentKey === itemId);
-        });
-
-        grid.$connector.removeFromArray = tryCatchWrapper(function (array, removeTest) {
-          if (array.length) {
-            for (let index = array.length - 1; index--; ) {
-              if (removeTest(array[index])) {
-                array.splice(index, 1);
-              }
-            }
-          }
+          ensureSubCacheQueue = ensureSubCacheQueue.filter((item) => item.itemkey !== itemId);
+          parentRequestQueue = parentRequestQueue.filter((item) => item.parentKey !== itemId);
         });
 
         grid.$connector.confirmParent = tryCatchWrapper(function (id, parentKey, levelSize) {
@@ -907,11 +901,6 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
                 grid.requestContentUpdate();
               }
 
-              // Makes sure to push all new rows before this stack execution is done so any timeout expiration called after will be applied on a fully updated grid
-              //Resolves https://github.com/vaadin/vaadin-grid-flow/issues/511
-              if (grid._debounceIncreasePool) {
-                grid._debounceIncreasePool.flush();
-              }
             } else if (callback && grid.size === 0) {
               // The grid has 0 items => resolve the callback with an empty array
               delete rootPageCallbacks[page];
