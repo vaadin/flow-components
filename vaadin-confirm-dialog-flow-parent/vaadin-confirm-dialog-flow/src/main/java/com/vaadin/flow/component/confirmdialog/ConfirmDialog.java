@@ -33,7 +33,6 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.dom.ClassList;
-import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.router.NavigationTrigger;
@@ -375,17 +374,7 @@ public class ConfirmDialog extends Component
      *            the component to display instead of default Reject button
      */
     public void setRejectButton(Component component) {
-        setRejectButton(component.getElement());
-    }
-
-    /**
-     * Sets custom Reject button
-     *
-     * @param element
-     *            the element to display instead of default Reject button
-     */
-    public void setRejectButton(Element element) {
-        SlotUtils.setSlot(this, "reject-button", element);
+        SlotUtils.setSlot(this, "reject-button", component.getElement());
     }
 
     /**
@@ -428,17 +417,7 @@ public class ConfirmDialog extends Component
      *            the component to display instead of default Cancel button
      */
     public void setCancelButton(Component component) {
-        setCancelButton(component.getElement());
-    }
-
-    /**
-     * Sets custom cancel button
-     *
-     * @param element
-     *            the element to display instead of default Cancel button
-     */
-    public void setCancelButton(Element element) {
-        SlotUtils.setSlot(this, "cancel-button", element);
+        SlotUtils.setSlot(this, "cancel-button", component.getElement());
     }
 
     /**
@@ -477,20 +456,10 @@ public class ConfirmDialog extends Component
      * Sets custom confirm button
      *
      * @param component
-     *            the element to display instead of default Confirm button
+     *            the component to display instead of default Confirm button
      */
     public void setConfirmButton(Component component) {
-        setConfirmButton(component.getElement());
-    }
-
-    /**
-     * Sets custom confirm button
-     *
-     * @param element
-     *            the element to display instead of default Confirm button
-     */
-    public void setConfirmButton(Element element) {
-        SlotUtils.setSlot(this, "confirm-button", element);
+        SlotUtils.setSlot(this, "confirm-button", component.getElement());
     }
 
     /**
@@ -501,25 +470,14 @@ public class ConfirmDialog extends Component
     }
 
     /**
-     * Sets custom confirmation message element
+     * Sets custom confirmation message
      *
      * @param component
      *            the component to display instead of default confirmation text
      *            node
      */
     public void setText(Component component) {
-        setText(component.getElement());
-    }
-
-    /**
-     * Sets custom confirmation message element
-     *
-     * @param element
-     *            the element to display instead of default confirmation text
-     *            node
-     */
-    public void setText(Element element) {
-        getElement().appendChild(element);
+        getElement().appendChild(component.getElement());
     }
 
     /**
@@ -597,23 +555,13 @@ public class ConfirmDialog extends Component
     }
 
     /**
-     * Sets confirmation dialog custom header element
+     * Sets confirmation dialog custom header
      *
      * @param component
      *            the component to display instead of default header text
      */
     public void setHeader(Component component) {
-        setHeader(component.getElement());
-    }
-
-    /**
-     * Sets confirmation dialog custom header element
-     *
-     * @param element
-     *            the element to display instead of default header text
-     */
-    public void setHeader(Element element) {
-        SlotUtils.setSlot(this, "header", element);
+        SlotUtils.setSlot(this, "header", component.getElement());
     }
 
     /**
