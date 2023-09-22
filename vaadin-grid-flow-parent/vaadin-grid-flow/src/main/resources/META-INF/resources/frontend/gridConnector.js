@@ -901,11 +901,6 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
                 grid.requestContentUpdate();
               }
 
-              // Makes sure to push all new rows before this stack execution is done so any timeout expiration called after will be applied on a fully updated grid
-              //Resolves https://github.com/vaadin/vaadin-grid-flow/issues/511
-              if (grid._debounceIncreasePool) {
-                grid._debounceIncreasePool.flush();
-              }
             } else if (callback && grid.size === 0) {
               // The grid has 0 items => resolve the callback with an empty array
               delete rootPageCallbacks[page];
