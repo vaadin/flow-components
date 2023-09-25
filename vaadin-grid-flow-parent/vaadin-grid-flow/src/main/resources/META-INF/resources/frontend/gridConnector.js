@@ -207,15 +207,11 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
         });
         grid._createPropertyObserver('activeItem', '__activeItemChangedDetails', true);
 
-        grid.$connector._getPageForIndex = tryCatchWrapper(function (index) {
-          return Math.floor(index / grid.pageSize);
-        });
-
         grid.$connector._getSameLevelPage = tryCatchWrapper(function (parentKey, currentCache, currentCacheItemIndex) {
           const currentParentKey = currentCache.parentItem ? grid.getItemId(currentCache.parentItem) : root;
           if (currentParentKey === parentKey) {
-            // Level match found
-            return grid.$connector._getPageForIndex(currentCacheItemIndex);
+            // Level match found, return the page number.
+            return Math.floor(currentCacheItemIndex / grid.pageSize);
           }
           const { parentCache, parentCacheIndex } = currentCache;
           if (!parentCache) {
