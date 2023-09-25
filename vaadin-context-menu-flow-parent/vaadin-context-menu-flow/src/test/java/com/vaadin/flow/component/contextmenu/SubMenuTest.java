@@ -165,6 +165,12 @@ public class SubMenuTest {
         parentItem.setCheckable(true);
     }
 
+    @Test(expected = IllegalStateException.class)
+    public void setParentItemKeepOpen_throws() {
+        subMenu.addItem("foo");
+        parentItem.setKeepOpen(true);
+    }
+
     @Test
     public void addToCheckableItemSubMenu_throws() {
         parentItem.setCheckable(true);
