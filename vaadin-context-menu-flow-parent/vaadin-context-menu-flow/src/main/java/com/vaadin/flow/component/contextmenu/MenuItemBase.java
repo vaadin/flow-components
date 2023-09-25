@@ -70,12 +70,6 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
         getElement().addEventListener("click", e -> {
             if (checkable) {
                 setChecked(!isChecked());
-
-                if (isKeepOpen()) {
-                    getElement().executeJs(
-                            "this.toggleAttribute('menu-item-checked', $0)",
-                            isChecked());
-                }
             }
         });
 

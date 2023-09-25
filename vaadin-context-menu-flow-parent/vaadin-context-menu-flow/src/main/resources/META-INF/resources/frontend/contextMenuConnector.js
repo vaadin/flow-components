@@ -81,6 +81,12 @@
   function setChecked(component, checked) {
     if (component._item) {
       component._item.checked = checked;
+
+      // Set the attribute in the connector to show the checkmark
+      // without having to re-render the whole menu while opened.
+      if (component._item.keepOpen) {
+        component.toggleAttribute('menu-item-checked', checked);
+      }
     }
   }
 
