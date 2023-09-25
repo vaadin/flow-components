@@ -15,15 +15,18 @@
  */
 package com.vaadin.flow.component.treegrid.it;
 
+import java.util.List;
+
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
+import com.vaadin.flow.component.grid.testbench.GridTRElement;
 import com.vaadin.flow.component.grid.testbench.TreeGridElement;
-import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
 /**
  * Tests for dynamically adding new columns with different renderers after the
@@ -100,18 +103,15 @@ public class TreeComponentColumnsIT extends AbstractComponentIT {
         compThenGrid.expandWithClick(0);
         compThenGrid.expandWithClick(1);
         compThenGrid.scrollToRow(104);
-        for (int i = compThenGrid.getFirstVisibleRowIndex()
-                + 1; i < compThenGrid.getLastVisibleRowIndex(); i++) {
-            Assert.assertEquals(
-                    compThenGrid.getRow(i - 1).getRect().y + rowHeight,
-                    compThenGrid.getRow(i).getRect().y, 1);
-            Assert.assertEquals(rowHeight,
-                    compThenGrid.getRow(i).getSize().getHeight());
+        List<GridTRElement> visibleRows = compThenGrid.getVisibleRows();
+        for (int i = 1; i < visibleRows.size(); i++) {
+            Assert.assertEquals(visibleRows.get(i - 1).getRect().y + rowHeight, visibleRows.get(i).getRect().y, 1);
+            Assert.assertEquals(rowHeight, visibleRows.get(i).getSize().getHeight());
         }
     }
 
     private void assertCellContains(GridElement grid, int rowIndex,
-            int colIndex, String expected) {
+                                    int colIndex, String expected) {
         Assert.assertThat(grid.getCell(rowIndex, colIndex).getInnerHTML(),
                 CoreMatchers.containsString(expected));
     }

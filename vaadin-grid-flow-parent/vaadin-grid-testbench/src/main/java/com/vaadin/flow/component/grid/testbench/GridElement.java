@@ -15,10 +15,10 @@
  */
 package com.vaadin.flow.component.grid.testbench;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
@@ -430,4 +430,63 @@ public class GridElement extends TestBenchElement {
                 .id("selectAllCheckbox");
         selectAllCheckbox.click();
     }
+
+    /**
+     * Gets the rows specified by the lower and upper row indexes.
+     *
+     * @param firstRowIndex
+     *            the lower row index to be retrieved (inclusive)
+     * @param lastRowIndex
+     *            the upper row index to be retrieved (inclusive)
+     * @return a {@link GridTRElement} list with the rows contained between the given coordinates.
+     */
+    public List<GridTRElement> getRows(int firstRowIndex, int lastRowIndex) {
+        List<GridTRElement> rows = new ArrayList<>();
+        for (int i = firstRowIndex; i < lastRowIndex; i++) {
+            rows.add(getRow(i));
+        }
+        return rows;
+    }
+
+    /**
+     * Gets all the currently visible rows.
+     *
+     * @return a {@link GridTRElement} list representing the currently visible rows.
+     */
+    public List<GridTRElement> getVisibleRows() {
+        return getRows(getFirstVisibleRowIndex(), getLastVisibleRowIndex());
+    }
+
+    /**
+     * Gets the grid cells for the given row and column elements.
+     *
+     * @param rowIndex
+     *            the row index
+     * @param columnElements
+     *            the column elements
+     * @return a {@link GridTHTDElement} list with the cells for the given coordinates.
+     */
+    public List<GridTHTDElement> getCells(int rowIndex, GridColumnElement... columnElements) {
+        List<GridTHTDElement> cells = new ArrayList<>();
+        for (GridColumnElement column : columnElements) {
+            cells.add(getCell(rowIndex, column));
+        }
+        return cells;
+    }
+
+    /**
+     * Gets the grid cells for the given row.
+     *
+     * @param rowIndex
+     *            the row index
+     * @return a {@link GridTHTDElement} list with the cells for the given coordinates.
+     */
+    public List<GridTHTDElement> getCells(int rowIndex) {
+        List<GridTHTDElement> cells = new ArrayList<>();
+        for (GridColumnElement column : getAllColumns()) {
+            cells.add(getCell(rowIndex, column));
+        }
+        return cells;
+    }
+
 }
