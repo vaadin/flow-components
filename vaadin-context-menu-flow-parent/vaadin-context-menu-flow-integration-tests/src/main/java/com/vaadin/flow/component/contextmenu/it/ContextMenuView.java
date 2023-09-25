@@ -122,6 +122,17 @@ public class ContextMenuView extends Div {
         item2.setCheckable(true);
         item2.setChecked(true);
 
+        MenuItem item3 = contextMenu.addItem("Option 3", event -> {
+            if (event.getSource().isChecked()) {
+                message.setText("Selected option 3");
+            } else {
+                message.setText("Unselected option 3");
+            }
+        });
+        item3.setCheckable(true);
+        item3.setChecked(true);
+        item3.setKeepOpen(true);
+
         addCard("Checkable Menu Items", target, message);
         target.setId("checkable-menu-items-target");
         message.setId("checkable-menu-items-message");
