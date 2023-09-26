@@ -45,9 +45,9 @@ import elemental.json.JsonObject;
 import org.slf4j.LoggerFactory;
 
 @Tag("vaadin-grid-pro")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-beta1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/grid-pro", version = "24.2.0-beta1")
+@NpmPackage(value = "@vaadin/grid-pro", version = "24.3.0-alpha1")
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro.js")
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro-edit-column.js")
 @JsModule("./gridProConnector.js")
@@ -184,7 +184,7 @@ public class GridPro<E> extends Grid<E> {
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-pro-edit-column")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-beta1")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha1")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class EditColumn<T> extends Column<T> {
 
