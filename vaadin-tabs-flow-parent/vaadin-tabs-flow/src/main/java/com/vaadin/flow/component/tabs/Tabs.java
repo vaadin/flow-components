@@ -484,7 +484,8 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
             return;
         }
 
-        if (currentlySelected == null || currentlySelected.isEnabled()) {
+        if (currentlySelected == null
+                || currentlySelected.getElement().getNode().isEnabledSelf()) {
             selectedTab = currentlySelected;
             getChildren().filter(Tab.class::isInstance).map(Tab.class::cast)
                     .forEach(tab -> tab.setSelected(false));
@@ -502,7 +503,7 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
     }
 
     private void updateEnabled(Tab tab) {
-        boolean enabled = tab.isEnabled();
+        boolean enabled = tab.getElement().getNode().isEnabledSelf();
         Serializable rawValue = tab.getElement().getPropertyRaw("disabled");
         if (rawValue instanceof Boolean) {
             // convert the boolean value to a String to force update the
