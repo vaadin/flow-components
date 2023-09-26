@@ -438,7 +438,8 @@ public class GridElement extends TestBenchElement {
      *            the lower row index to be retrieved (inclusive)
      * @param lastRowIndex
      *            the upper row index to be retrieved (inclusive)
-     * @return a {@link GridTRElement} list with the rows contained between the given coordinates.
+     * @return a {@link GridTRElement} list with the rows contained between the
+     *         given coordinates.
      */
     public List<GridTRElement> getRows(int firstRowIndex, int lastRowIndex) {
         List<GridTRElement> rows = new ArrayList<>();
@@ -451,7 +452,8 @@ public class GridElement extends TestBenchElement {
     /**
      * Gets all the currently visible rows.
      *
-     * @return a {@link GridTRElement} list representing the currently visible rows.
+     * @return a {@link GridTRElement} list representing the currently visible
+     *         rows.
      */
     public List<GridTRElement> getVisibleRows() {
         return getRows(getFirstVisibleRowIndex(), getLastVisibleRowIndex());
@@ -464,9 +466,11 @@ public class GridElement extends TestBenchElement {
      *            the row index
      * @param columnElements
      *            the column elements
-     * @return a {@link GridTHTDElement} list with the cells for the given coordinates.
+     * @return a {@link GridTHTDElement} list with the cells for the given
+     *         coordinates.
      */
-    public List<GridTHTDElement> getCells(int rowIndex, GridColumnElement... columnElements) {
+    public List<GridTHTDElement> getCells(int rowIndex,
+            GridColumnElement... columnElements) {
         List<GridTHTDElement> cells = new ArrayList<>();
         for (GridColumnElement column : columnElements) {
             cells.add(getCell(rowIndex, column));
@@ -479,7 +483,8 @@ public class GridElement extends TestBenchElement {
      *
      * @param rowIndex
      *            the row index
-     * @return a {@link GridTHTDElement} list with the cells for the given coordinates.
+     * @return a {@link GridTHTDElement} list with the cells for the given
+     *         coordinates.
      */
     public List<GridTHTDElement> getCells(int rowIndex) {
         List<GridTHTDElement> cells = new ArrayList<>();

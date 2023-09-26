@@ -15,19 +15,21 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import java.util.List;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
 import com.vaadin.flow.component.grid.testbench.GridColumnElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-
-import java.util.List;
 
 /**
- * Tests for ensuring utility methods to fetch cells from specific rows and columns work as expected.
+ * Tests for ensuring utility methods to fetch cells from specific rows and
+ * columns work as expected.
  */
 @TestPath("vaadin-grid-it-demo/all-rows-visible")
 public class GridCellsUtilIT extends AbstractComponentIT {
@@ -45,7 +47,8 @@ public class GridCellsUtilIT extends AbstractComponentIT {
         List<GridColumnElement> columns = grid.getAllColumns();
         for (int i = 0; i < columns.size(); i++) {
             for (GridTHTDElement cell : grid.getCells(i)) {
-                Assert.assertEquals(grid.getCell(cell.getRow(), cell.getColumn()), cell);
+                Assert.assertEquals(
+                        grid.getCell(cell.getRow(), cell.getColumn()), cell);
             }
         }
     }
@@ -55,7 +58,8 @@ public class GridCellsUtilIT extends AbstractComponentIT {
         List<GridColumnElement> columns = grid.getAllColumns();
         for (int i = 0; i < columns.size(); i++) {
             for (GridTHTDElement cell : grid.getCells(i, columns.get(i))) {
-                Assert.assertEquals(grid.getCell(cell.getRow(), cell.getColumn()), cell);
+                Assert.assertEquals(
+                        grid.getCell(cell.getRow(), cell.getColumn()), cell);
             }
         }
     }

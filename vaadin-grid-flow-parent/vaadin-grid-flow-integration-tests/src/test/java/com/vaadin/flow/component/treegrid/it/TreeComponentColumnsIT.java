@@ -105,13 +105,15 @@ public class TreeComponentColumnsIT extends AbstractComponentIT {
         compThenGrid.scrollToRow(104);
         List<GridTRElement> visibleRows = compThenGrid.getVisibleRows();
         for (int i = 1; i < visibleRows.size(); i++) {
-            Assert.assertEquals(visibleRows.get(i - 1).getRect().y + rowHeight, visibleRows.get(i).getRect().y, 1);
-            Assert.assertEquals(rowHeight, visibleRows.get(i).getSize().getHeight());
+            Assert.assertEquals(visibleRows.get(i - 1).getRect().y + rowHeight,
+                    visibleRows.get(i).getRect().y, 1);
+            Assert.assertEquals(rowHeight,
+                    visibleRows.get(i).getSize().getHeight());
         }
     }
 
     private void assertCellContains(GridElement grid, int rowIndex,
-                                    int colIndex, String expected) {
+            int colIndex, String expected) {
         Assert.assertThat(grid.getCell(rowIndex, colIndex).getInnerHTML(),
                 CoreMatchers.containsString(expected));
     }

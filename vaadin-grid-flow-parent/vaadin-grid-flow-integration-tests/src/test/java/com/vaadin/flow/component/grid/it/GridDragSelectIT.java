@@ -78,10 +78,12 @@ public class GridDragSelectIT extends AbstractComponentIT {
     }
 
     private void assertRowsSelected(GridElement grid, int first, int last) {
-        grid.getRows(first, last).forEach(row -> Assert.assertTrue(row.isSelected()));
+        grid.getRows(first, last)
+                .forEach(row -> Assert.assertTrue(row.isSelected()));
     }
 
     private void assertRowsUnselected(GridElement grid, int first, int last) {
-        grid.getRows(first, last).forEach(row -> Assert.assertFalse(row.isSelected()));
+        grid.getRows(first, last)
+                .forEach(row -> Assert.assertFalse(row.isSelected()));
     }
 }
