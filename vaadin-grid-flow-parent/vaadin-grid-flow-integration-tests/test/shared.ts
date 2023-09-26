@@ -17,6 +17,7 @@ export type GridConnector = {
   confirmParent: (index: number, parentKey: string, levelSize: number) => void;
   setSelectionMode: (mode: 'SINGLE' | 'NONE' | 'MULTI') => void;
   expandItems: (items: Item[]) => void;
+  collapseItems: (items: Item[]) => void;
   ensureHierarchy: () => void;
   reset: () => void;
   doSelection: (items: Item[] | [null], userOriginated: boolean) => void;
@@ -172,6 +173,13 @@ export function setChildItems(gridConnector: GridConnector, parent: Item, items:
 export function expandItems(gridConnector: GridConnector, items: Item[]): void {
   gridConnector.ensureHierarchy();
   gridConnector.expandItems(items);
+}
+
+/**
+ * Collapse the given items.
+ */
+export function collapseItems(gridConnector: GridConnector, items: Item[]): void {
+  gridConnector.collapseItems(items);
 }
 
 /**
