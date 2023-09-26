@@ -147,6 +147,14 @@ public class ContextMenuDemoIT extends AbstractComponentIT {
         items = getMenuItems();
         ContextMenuPageIT.assertCheckedInClientSide(items.get(0), true);
         ContextMenuPageIT.assertCheckedInClientSide(items.get(1), false);
+
+        items.get(2).click();
+        verifyOpened();
+        ContextMenuPageIT.assertCheckedInClientSide(items.get(2), false);
+
+        items.get(2).click();
+        verifyOpened();
+        ContextMenuPageIT.assertCheckedInClientSide(items.get(2), true);
     }
 
     @Test
