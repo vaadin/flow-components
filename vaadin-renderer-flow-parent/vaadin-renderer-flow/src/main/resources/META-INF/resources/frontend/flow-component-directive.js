@@ -1,7 +1,8 @@
 import { noChange } from 'lit';
-import { directive, Directive, PartType } from 'lit/directive.js';
+import { directive, PartType } from 'lit/directive.js';
+import { AsyncDirective } from 'lit/async-directive.js';
 
-class FlowComponentDirective extends Directive {
+class FlowComponentDirective extends AsyncDirective {
   constructor(partInfo) {
     super(partInfo);
     if (partInfo.type !== PartType.CHILD) {
@@ -21,9 +22,11 @@ class FlowComponentDirective extends Directive {
     const newNode = hasNewNodeId ? this.getNewNode(appid, nodeid) : null;
     const oldNode = this.getOldNode(part);
 
+    clearTimeout(this.__nodeRetryTimeout);
+
     if (hasNewNodeId && !newNode) {
       // If the node is not found, try again later.
-      setTimeout(() => this.updateContent(part, appid, nodeid));
+      this.__nodeRetryTimeout = setTimeout(() => this.updateContent(part, appid, nodeid));
     } else if (oldNode === newNode) {
       return;
     } else if (oldNode && newNode) {
@@ -45,6 +48,10 @@ class FlowComponentDirective extends Directive {
       return;
     }
     return startNode.nextSibling;
+  }
+
+  disconnected() {
+    clearTimeout(this.__nodeRetryTimeout);
   }
 }
 

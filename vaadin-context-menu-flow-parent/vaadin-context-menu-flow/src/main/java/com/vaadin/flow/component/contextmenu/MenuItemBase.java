@@ -44,7 +44,7 @@ import java.util.stream.Collectors;
  */
 @SuppressWarnings("serial")
 @Tag("vaadin-context-menu-item")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha16")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends MenuItemBase<C, I, S>, S extends SubMenuBase<C, I, S>>
         extends Component
@@ -184,6 +184,37 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
      */
     public boolean isChecked() {
         return getElement().getProperty("_checked", false);
+    }
+
+    /**
+     * Sets the keep open state of this menu item. An item that marked as keep
+     * open prevents menu from closing when clicked.
+     *
+     * @param keepOpen
+     *            {@code true} to enable keeping the menu open when toggle this
+     *            item selection, {@code false} to disable it.
+     */
+    public void setKeepOpen(boolean keepOpen) {
+        if (keepOpen && isParentItem()) {
+            throw new IllegalStateException(
+                    "A keepOpen item cannot have a sub menu");
+        }
+
+        getElement().setProperty("_keepOpen", keepOpen);
+
+        executeJsWhenAttached(
+                "window.Vaadin.Flow.contextMenuConnector.setKeepOpen($0, $1)",
+                getElement(), keepOpen);
+    }
+
+    /**
+     * Gets whether clicking this item keeps the menu open.
+     *
+     * @return the keep open state of the item
+     * @see #setKeepOpen(boolean)
+     */
+    public boolean isKeepOpen() {
+        return getElement().getProperty("_keepOpen", false);
     }
 
     /**
