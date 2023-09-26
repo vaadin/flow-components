@@ -77,9 +77,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-dialog")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha4")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/dialog", version = "24.2.0-alpha4")
+@NpmPackage(value = "@vaadin/dialog", version = "24.3.0-alpha1")
 @JsModule("@vaadin/dialog/src/vaadin-dialog.js")
 @JsModule("./flow-component-renderer.js")
 public class Dialog extends Component implements HasComponents, HasSize,
@@ -693,7 +693,9 @@ public class Dialog extends Component implements HasComponents, HasSize,
             if (root.getChildCount() == 0) {
                 return;
             }
-            dialog.getElement().appendChild(root);
+            if (!dialog.getElement().equals(root.getParent())) {
+                dialog.getElement().appendVirtualChild(root);
+            }
             dialog.getElement().executeJs("this." + rendererFunction
                     + " = (root) => {" + "if (root.firstChild) { "
                     + "   return;" + "}" + "root.appendChild($0);" + "}", root);
@@ -758,7 +760,8 @@ public class Dialog extends Component implements HasComponents, HasSize,
         UI ui = getCurrentUI();
         StateTree.ExecutionRegistration addToUiRegistration = ui
                 .beforeClientResponse(ui, context -> {
-                    if (getElement().getNode().getParent() == null) {
+                    if (getElement().getNode().getParent() == null
+                            && isOpened()) {
                         ui.addToModalComponent(this);
                         ui.setChildComponentModal(this, isModal());
                         autoAddedToTheUi = true;

@@ -4,11 +4,12 @@
     <parent>
         <artifactId>vaadin-list-box-flow-parent</artifactId>
         <groupId>com.vaadin</groupId>
-        <version>24.2-SNAPSHOT</version>
+        <version>24.3-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-list-box-testbench</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin List Box Testbench API</name>
+    <description>Vaadin List Box Testbench API</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

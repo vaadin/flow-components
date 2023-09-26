@@ -7,11 +7,16 @@ import {
   getBodyCellText,
   getBodyCellContent,
   GRID_CONNECTOR_PARENT_REQUEST_DELAY,
-  getHeaderCellContent
+  getHeaderCellContent,
+  collapseItems
 } from './shared.js';
 import sinon from 'sinon';
 import type { FlowGrid } from './shared.js';
 import type { GridColumn } from '@vaadin/grid';
+
+function isGridInLoadingState(grid: FlowGrid) {
+  return (grid as any)._dataProviderController.isLoading();
+}
 
 describe('grid connector - tree', () => {
   let grid: FlowGrid;
@@ -198,6 +203,42 @@ describe('grid connector - tree', () => {
     await aTimeout(GRID_CONNECTOR_PARENT_REQUEST_DELAY);
     // The children of the first root item were preloaded and the second (expanded)
     // root item is outside the DOM so no requests should have been sent
+    expect(grid.$server.setParentRequestedRanges).to.not.be.called;
+  });
+
+  it('should not request items for expanded and immediately collapsed parent', async () => {
+    // Add expandable root item
+    const rootItem = { key: '0', name: 'foo', children: true };
+    setRootItems(grid.$connector, [rootItem]);
+
+    // Expand the root item
+    expandItems(grid.$connector, [rootItem]);
+    expect(isGridInLoadingState(grid)).to.be.true;
+    // Immediately collapse the root item
+    collapseItems(grid.$connector, [rootItem]);
+    await nextFrame();
+
+    await aTimeout(GRID_CONNECTOR_PARENT_REQUEST_DELAY);
+
+    expect(isGridInLoadingState(grid)).to.be.false;
+    expect(grid.$server.setParentRequestedRanges).to.not.be.called;
+  });
+
+  it('should not request items for expanded and shortly collapsed parent', async () => {
+    // Add expandable root item
+    const rootItem = { key: '0', name: 'foo', children: true };
+    setRootItems(grid.$connector, [rootItem]);
+
+    // Expand the root item
+    expandItems(grid.$connector, [rootItem]);
+    expect(isGridInLoadingState(grid)).to.be.true;
+    // Collapse the root item after a short delay
+    await nextFrame();
+    collapseItems(grid.$connector, [rootItem]);
+
+    await aTimeout(GRID_CONNECTOR_PARENT_REQUEST_DELAY);
+
+    expect(isGridInLoadingState(grid)).to.be.false;
     expect(grid.$server.setParentRequestedRanges).to.not.be.called;
   });
 });

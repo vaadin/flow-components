@@ -4,11 +4,12 @@
     <parent>
         <artifactId>vaadin-spreadsheet-flow-parent</artifactId>
         <groupId>com.vaadin</groupId>
-        <version>24.2-SNAPSHOT</version>
+        <version>24.3-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-spreadsheet-testbench</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Spreadsheet Testbench API</name>
+    <description>Vaadin Spreadsheet Testbench API</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

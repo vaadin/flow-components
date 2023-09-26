@@ -4,11 +4,12 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-context-menu-flow-parent</artifactId>
-        <version>24.2-SNAPSHOT</version>
+        <version>24.3-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-context-menu-integration-tests</artifactId>
     <packaging>war</packaging>
     <name>Vaadin Context Menu Integration Tests</name>
+    <description>Vaadin Context Menu Integration Tests</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -166,6 +167,5 @@
                 </plugins>
             </build>
         </profile>
-
     </profiles>
 </project>

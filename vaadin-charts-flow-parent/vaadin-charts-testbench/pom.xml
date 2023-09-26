@@ -4,11 +4,12 @@
     <parent>
         <artifactId>vaadin-charts-flow-parent</artifactId>
         <groupId>com.vaadin</groupId>
-        <version>24.2-SNAPSHOT</version>
+        <version>24.3-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-charts-testbench</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Charts Testbench API</name>
+    <description>Vaadin Charts Testbench API</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

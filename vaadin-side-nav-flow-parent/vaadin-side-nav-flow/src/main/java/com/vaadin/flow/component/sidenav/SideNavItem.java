@@ -15,13 +15,10 @@
  */
 package com.vaadin.flow.component.sidenav;
 
-import com.vaadin.experimental.FeatureFlags;
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasPrefix;
@@ -56,7 +53,7 @@ import java.util.stream.Collectors;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-side-nav-item")
-@NpmPackage(value = "@vaadin/side-nav", version = "24.2.0-alpha4")
+@NpmPackage(value = "@vaadin/side-nav", version = "24.3.0-alpha1")
 @JsModule("@vaadin/side-nav/src/vaadin-side-nav-item.js")
 public class SideNavItem extends SideNavItemContainer
         implements HasPrefix, HasSuffix {
@@ -425,40 +422,5 @@ public class SideNavItem extends SideNavItemContainer
     @Synchronize(property = "expanded", value = "expanded-changed")
     public boolean isExpanded() {
         return getElement().getProperty("expanded", false);
-    }
-
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-        checkFeatureFlag();
-    }
-
-    /**
-     * Checks whether the SideNavItem component feature flag is active. Succeeds
-     * if the flag is enabled, and throws otherwise.
-     *
-     * @throws ExperimentalFeatureException
-     *             when the {@link FeatureFlags#SIDE_NAV_COMPONENT} feature is
-     *             not enabled
-     */
-    private void checkFeatureFlag() {
-        boolean enabled = getFeatureFlags()
-                .isEnabled(FeatureFlags.SIDE_NAV_COMPONENT);
-
-        if (!enabled) {
-            throw new ExperimentalFeatureException();
-        }
-    }
-
-    /**
-     * Gets the feature flags for the current UI.
-     * <p>
-     * Extracted with protected visibility to support mocking
-     *
-     * @return the current set of feature flags
-     */
-    protected FeatureFlags getFeatureFlags() {
-        return FeatureFlags
-                .get(UI.getCurrent().getSession().getService().getContext());
     }
 }

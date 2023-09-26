@@ -4,11 +4,12 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-flow-components</artifactId>
-        <version>24.2-SNAPSHOT</version>
+        <version>24.3-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-text-field-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>Vaadin Text Field Parent</name>
+    <description>Vaadin Text Field Parent</description>
     <modules>
         <module>vaadin-text-field-flow</module>
         <module>vaadin-text-field-testbench</module>

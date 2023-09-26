@@ -4,11 +4,12 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-renderer-flow-parent</artifactId>
-        <version>24.2-SNAPSHOT</version>
+        <version>24.3-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-renderer-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Renderer</name>
+    <description>Vaadin Renderer</description>
     <properties>
         <osgi.export.package>com.vaadin.flow.data.renderer</osgi.export.package>
     </properties>
@@ -16,6 +17,11 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-data</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-html-components</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>

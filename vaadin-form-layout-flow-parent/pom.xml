@@ -4,11 +4,12 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-flow-components</artifactId>
-        <version>24.2-SNAPSHOT</version>
+        <version>24.3-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-form-layout-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>Vaadin Form Layout Parent</name>
+    <description>Vaadin Form Layout Parent</description>
     <modules>
         <module>vaadin-form-layout-flow</module>
         <module>vaadin-form-layout-testbench</module>

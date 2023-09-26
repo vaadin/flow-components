@@ -16,14 +16,8 @@
 package com.vaadin.flow.component.icon;
 
 import java.util.Locale;
-import com.vaadin.flow.component.ClickNotifier;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.shared.HasTooltip;
-import com.vaadin.flow.dom.ElementConstants;
 
 /**
  * Component for displaying an icon from the
@@ -32,15 +26,9 @@ import com.vaadin.flow.dom.ElementConstants;
  * @author Vaadin Ltd
  * @see VaadinIcon
  */
-@Tag("vaadin-icon")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha4")
-@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/icons", version = "24.2.0-alpha4")
+@NpmPackage(value = "@vaadin/icons", version = "24.3.0-alpha1")
 @JsModule("@vaadin/icons/vaadin-iconset.js")
-@NpmPackage(value = "@vaadin/icon", version = "24.2.0-alpha4")
-@JsModule("@vaadin/icon/src/vaadin-icon.js")
-public class Icon extends Component
-        implements HasStyle, ClickNotifier<Icon>, HasTooltip {
+public class Icon extends AbstractIcon<Icon> {
 
     private static final String ICON_ATTRIBUTE_NAME = "icon";
     private static final String ICON_COLLECTION_NAME = "vaadin";
@@ -100,35 +88,7 @@ public class Icon extends Component
         getElement().setAttribute(ICON_ATTRIBUTE_NAME, collection + ':' + icon);
     }
 
-    /**
-     * Sets the width and the height of the icon.
-     * <p>
-     * The size should be in a format understood by the browser, e.g. "100px" or
-     * "2.5em".
-     *
-     * @param size
-     *            the size to set, may be <code>null</code> to clear the value
-     */
-    public void setSize(String size) {
-        if (size == null) {
-            getStyle().remove(ElementConstants.STYLE_WIDTH);
-            getStyle().remove(ElementConstants.STYLE_HEIGHT);
-        } else {
-            getStyle().set(ElementConstants.STYLE_WIDTH, size);
-            getStyle().set(ElementConstants.STYLE_HEIGHT, size);
-        }
-    }
-
-    /**
-     * Sets the fill color of the icon.
-     * <p>
-     * The color should be in a format understood by the browser, e.g. "orange",
-     * "#FF9E2C" or "rgb(255, 158, 44)".
-     *
-     * @param color
-     *            the fill color to set, may be <code>null</code> to clear the
-     *            value
-     */
+    @Override
     public void setColor(String color) {
         if (color == null) {
             getStyle().remove(STYLE_FILL);
@@ -137,12 +97,7 @@ public class Icon extends Component
         }
     }
 
-    /**
-     * Gets the fill color of this icon as a String.
-     *
-     * @return the fill color of the icon, or <code>null</code> if the color has
-     *         not been set
-     */
+    @Override
     public String getColor() {
         return getStyle().get(STYLE_FILL);
     }

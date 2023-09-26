@@ -4,11 +4,12 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-split-layout-flow-parent</artifactId>
-        <version>24.2-SNAPSHOT</version>
+        <version>24.3-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-split-layout-integration-tests</artifactId>
     <packaging>war</packaging>
     <name>Vaadin Split Layout Integration Tests</name>
+    <description>Vaadin Split Layout Integration Tests</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -69,7 +70,7 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
-            <version>2.0.7</version>
+            <version>2.0.9</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -175,6 +176,5 @@
                 </plugins>
             </build>
         </profile>
-
     </profiles>
 </project>

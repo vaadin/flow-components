@@ -4,11 +4,12 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-flow-components</artifactId>
-        <version>24.2-SNAPSHOT</version>
+        <version>24.3-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-charts-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>Vaadin Charts Parent</name>
+    <description>Vaadin Charts Parent</description>
     <licenses>
         <license>
             <name>Vaadin Commercial License and Service Terms</name>

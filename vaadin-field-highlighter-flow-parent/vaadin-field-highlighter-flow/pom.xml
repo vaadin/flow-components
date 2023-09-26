@@ -4,11 +4,12 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-field-highlighter-flow-parent</artifactId>
-        <version>24.2-SNAPSHOT</version>
+        <version>24.3-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-field-highlighter-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Field Highlighter</name>
+    <description>Vaadin Field Highlighter</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

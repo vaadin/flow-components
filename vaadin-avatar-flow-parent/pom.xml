@@ -4,11 +4,12 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-flow-components</artifactId>
-        <version>24.2-SNAPSHOT</version>
+        <version>24.3-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-avatar-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>Vaadin Avatar Parent</name>
+    <description>Vaadin Avatar Parent</description>
     <modules>
         <module>vaadin-avatar-flow</module>
         <module>vaadin-avatar-testbench</module>

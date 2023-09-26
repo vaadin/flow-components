@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.confirmdialog;
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -23,6 +24,7 @@ import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.HasOrderedComponents;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.Shortcuts;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
@@ -61,9 +63,9 @@ import java.util.Optional;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-confirm-dialog")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha4")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/confirm-dialog", version = "24.2.0-alpha4")
+@NpmPackage(value = "@vaadin/confirm-dialog", version = "24.3.0-alpha1")
 @JsModule("@vaadin/confirm-dialog/src/vaadin-confirm-dialog.js")
 public class ConfirmDialog extends Component
         implements HasSize, HasStyle, HasOrderedComponents {
@@ -681,6 +683,14 @@ public class ConfirmDialog extends Component
      */
     public void setCloseOnEsc(boolean closeOnEsc) {
         getElement().setProperty("noCloseOnEsc", !closeOnEsc);
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+
+        // Same as https://github.com/vaadin/flow-components/pull/725
+        Shortcuts.setShortcutListenOnElement("this._overlayElement", this);
     }
 
     private void setModality(boolean modal) {
