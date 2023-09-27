@@ -90,7 +90,7 @@ public class Tooltip implements Serializable {
         // Handle target attach
         SerializableRunnable onTargetAttach = () -> {
             // Remove the tooltip from its current state tree
-            tooltip.tooltipElement.removeFromTree();
+            tooltip.tooltipElement.removeFromTree(false);
 
             // The host under which the <vaadin-tooltip> element is auto-attached
             var tooltipHost = UI.getCurrent().getElement();
