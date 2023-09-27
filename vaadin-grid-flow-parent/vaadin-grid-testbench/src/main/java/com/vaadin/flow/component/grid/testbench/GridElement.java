@@ -18,6 +18,7 @@ package com.vaadin.flow.component.grid.testbench;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -442,11 +443,8 @@ public class GridElement extends TestBenchElement {
      *         given coordinates.
      */
     public List<GridTRElement> getRows(int firstRowIndex, int lastRowIndex) {
-        List<GridTRElement> rows = new ArrayList<>();
-        for (int i = firstRowIndex; i < lastRowIndex; i++) {
-            rows.add(getRow(i));
-        }
-        return rows;
+        return IntStream.rangeClosed(firstRowIndex, lastRowIndex)
+                .mapToObj(this::getRow).toList();
     }
 
     /**

@@ -24,15 +24,16 @@ import org.junit.Test;
 import com.vaadin.flow.component.grid.testbench.GridColumnElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
+import com.vaadin.flow.component.grid.testbench.GridTRElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
 /**
- * Tests for ensuring utility methods to fetch cells from specific rows and
- * columns work as expected.
+ * Tests for ensuring utility methods to fetch rows, and cells from specific
+ * rows and columns work as expected.
  */
 @TestPath("vaadin-grid-it-demo/all-rows-visible")
-public class GridCellsUtilIT extends AbstractComponentIT {
+public class GridTestbenchUtilIT extends AbstractComponentIT {
 
     private GridElement grid;
 
@@ -61,6 +62,21 @@ public class GridCellsUtilIT extends AbstractComponentIT {
                 Assert.assertEquals(
                         grid.getCell(cell.getRow(), cell.getColumn()), cell);
             }
+        }
+    }
+
+    @Test
+    public void indexesBasedRowsFetchingMethod_returnsExpectedRows() {
+        int expectedRowAmount = grid.getRowCount();
+        int actualRowAmount = grid.getRows(0, expectedRowAmount - 1).size();
+        Assert.assertEquals(expectedRowAmount, actualRowAmount);
+    }
+
+    @Test
+    public void indexesBasedRowsFetchingMethod_returnsSameElementAsSingularRowFetchingMethod() {
+        List<GridTRElement> rows = grid.getRows(0, grid.getRowCount() - 1);
+        for (int i = 0; i < rows.size(); i++) {
+            Assert.assertEquals(grid.getRow(i), rows.get(i));
         }
     }
 
