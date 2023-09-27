@@ -15,7 +15,7 @@ import type { FlowGrid } from './shared.js';
 import type { GridColumn } from '@vaadin/grid';
 
 function isGridInLoadingState(grid: FlowGrid) {
-  return (grid as any)._cache.isLoading();
+  return (grid as any)._dataProviderController.isLoading();
 }
 
 describe('grid connector - tree', () => {
@@ -217,7 +217,7 @@ describe('grid connector - tree', () => {
     // Immediately collapse the root item
     collapseItems(grid.$connector, [rootItem]);
     await nextFrame();
-    
+
     await aTimeout(GRID_CONNECTOR_PARENT_REQUEST_DELAY);
 
     expect(isGridInLoadingState(grid)).to.be.false;
