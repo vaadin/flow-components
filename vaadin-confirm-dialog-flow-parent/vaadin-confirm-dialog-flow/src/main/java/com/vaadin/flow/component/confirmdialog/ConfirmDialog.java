@@ -21,6 +21,7 @@ import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DomEvent;
+import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasOrderedComponents;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
@@ -39,6 +40,7 @@ import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.router.NavigationTrigger;
 import com.vaadin.flow.shared.Registration;
 
+import java.util.Collection;
 import java.util.Optional;
 
 /**
@@ -693,6 +695,70 @@ public class ConfirmDialog extends Component
      */
     public void setCloseOnEsc(boolean closeOnEsc) {
         getElement().setProperty("noCloseOnEsc", !closeOnEsc);
+    }
+
+    /**
+     * Confirm dialog does not support replacing content.
+     * <p>
+     * This method is inherited from {@link HasOrderedComponents} and has been
+     * marked as deprecated to indicate that it is not supported. This method
+     * will throw an {@link UnsupportedOperationException}.
+     *
+     * @deprecated not supported
+     */
+    @Deprecated
+    @Override
+    public void replace(Component oldComponent, Component newComponent) {
+        throw new UnsupportedOperationException(
+                "Confirm dialog does not support replacing content.");
+    }
+
+    /**
+     * Confirm dialog does not support removing content.
+     * <p>
+     * This method is inherited from {@link HasComponents} and has been marked
+     * as deprecated to indicate that it is not supported. This method will
+     * throw an {@link UnsupportedOperationException}.
+     *
+     * @deprecated not supported
+     */
+    @Deprecated
+    @Override
+    public void remove(Component... components) {
+        throw new UnsupportedOperationException(
+                "Confirm dialog does not support removing content.");
+    }
+
+    /**
+     * Confirm dialog does not support removing content.
+     * <p>
+     * This method is inherited from {@link HasComponents} and has been marked
+     * as deprecated to indicate that it is not supported. This method will
+     * throw an {@link UnsupportedOperationException}.
+     *
+     * @deprecated not supported
+     */
+    @Deprecated
+    @Override
+    public void remove(Collection<Component> components) {
+        throw new UnsupportedOperationException(
+                "Confirm dialog does not support removing content.");
+    }
+
+    /**
+     * Confirm dialog does not support removing content.
+     * <p>
+     * This method is inherited from {@link HasComponents} and has been marked
+     * as deprecated to indicate that it is not supported. This method will
+     * throw an {@link UnsupportedOperationException}.
+     *
+     * @deprecated not supported
+     */
+    @Deprecated
+    @Override
+    public void removeAll() {
+        throw new UnsupportedOperationException(
+                "Confirm dialog does not support removing content.");
     }
 
     @Override
