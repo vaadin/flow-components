@@ -294,8 +294,8 @@ public class EditColumnConfigurator<T> implements Serializable {
      *
      * @return the configurator
      */
-    public EditColumnConfigurator<T> setBackendUpdateMode() {
-        column.setBackendUpdateMode();
+    public EditColumnConfigurator<T> setManualItemUpdateMode() {
+        column.setManualItemUpdateMode();
         return this;
     }
 }

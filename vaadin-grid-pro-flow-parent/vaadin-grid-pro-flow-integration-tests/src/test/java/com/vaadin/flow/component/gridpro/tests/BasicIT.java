@@ -279,7 +279,7 @@ public class BasicIT extends AbstractParallelTest {
     }
 
     @Test
-    public void columnWithBackendUpdateMode_updateProperty_propertyUpdatedCorrectly() {
+    public void columnWithManualItemUpdateMode_updateProperty_propertyUpdatedCorrectly() {
         Assert.assertEquals("Person 1", grid.getCell(0, 1).getInnerHTML());
 
         assertCellEnterEditModeOnDoubleClick(0, 1,
