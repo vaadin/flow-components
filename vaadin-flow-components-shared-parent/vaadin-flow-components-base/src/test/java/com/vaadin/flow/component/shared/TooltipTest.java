@@ -60,7 +60,7 @@ public class TooltipTest {
         // Create a new UI and move the component to it (@PreserveOnRefresh)
         ui = new UI();
         UI.setCurrent(ui);
-        component.getElement().removeFromTree();
+        component.getElement().removeFromTree(false);
         ui.add(component);
 
         Assert.assertTrue(getTooltipElement().isPresent());
