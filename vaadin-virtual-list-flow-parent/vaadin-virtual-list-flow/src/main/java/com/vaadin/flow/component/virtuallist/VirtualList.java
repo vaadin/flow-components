@@ -306,11 +306,9 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
      *            zero based index of the item to scroll to in the current view.
      */
     public void scrollToIndex(int rowIndex) {
-        getElement().getNode()
-                .runWhenAttached(ui -> ui.beforeClientResponse(this,
-                        ctx -> getElement().executeJs(
-                                "this.scrollToIndex($0)",
-                                rowIndex)));
+        getElement().getNode().runWhenAttached(
+                ui -> ui.beforeClientResponse(this, ctx -> getElement()
+                        .executeJs("this.scrollToIndex($0)", rowIndex)));
     }
 
     /**
