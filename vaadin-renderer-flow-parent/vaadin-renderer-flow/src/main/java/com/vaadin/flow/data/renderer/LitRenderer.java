@@ -223,8 +223,10 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
                     returnChannel, clientCallablesArray, propertyNamespace);
         }));
         // Call once initially
-        setElementRenderer(container, rendererName, getTemplateExpression(),
-                returnChannel, clientCallablesArray, propertyNamespace);
+        if (container.getNode().isAttached()) {
+            setElementRenderer(container, rendererName, getTemplateExpression(),
+                    returnChannel, clientCallablesArray, propertyNamespace);
+        }
 
         // Get the renderer function cleared when the LitRenderer is
         // unregistered
