@@ -69,13 +69,6 @@ import './contextMenuConnector.js';
         // Propagate disabled state from items to parent buttons
         items.forEach((item) => (item.disabled = item.component.disabled));
 
-        // Remove hidden items entirely from the array. Just hiding them
-        // could cause the overflow button to be rendered without items.
-        //
-        // The items-prop needs to be set even when all items are visible
-        // to update the disabled state and re-render buttons.
-        items = items.filter((item) => !item.component.hidden);
-
         // Observe for hidden and disabled attributes in case they are changed by Flow.
         // When a change occurs, the observer will re-generate items on top of the existing tree
         // to sync the new attribute values with the corresponding properties in the items array.
@@ -85,6 +78,13 @@ import './contextMenuConnector.js';
             attributeOldValue: true
           });
         });
+
+        // Remove hidden items entirely from the array. Just hiding them
+        // could cause the overflow button to be rendered without items.
+        //
+        // The items-prop needs to be set even when all items are visible
+        // to update the disabled state and re-render buttons.
+        items = items.filter((item) => !item.component.hidden);
 
         menubar.items = items;
 
