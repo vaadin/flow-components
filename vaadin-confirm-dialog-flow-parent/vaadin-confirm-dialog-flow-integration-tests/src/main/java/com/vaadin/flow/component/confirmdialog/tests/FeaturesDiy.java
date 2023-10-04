@@ -4,9 +4,7 @@ import com.vaadin.flow.component.Html;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-confirm-dialog/FeaturesDiy")
@@ -61,7 +59,7 @@ public class FeaturesDiy extends Features {
         ConfirmDialog dialog = new ConfirmDialog();
         dialog.setId(sample);
         dialog.setHeader("Ready to publish?");
-        dialog.setText(new Span("Do you want to publish this post?"));
+        dialog.setText("Do you want to publish this post?");
         Button publishButton = new Button("Publish");
         publishButton.setId("confirmDiy");
         publishButton.getElement().setAttribute("theme", "primary");

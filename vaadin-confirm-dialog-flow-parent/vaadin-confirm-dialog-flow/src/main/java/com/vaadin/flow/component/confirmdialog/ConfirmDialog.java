@@ -375,7 +375,7 @@ public class ConfirmDialog extends Component
      *            the component to display instead of default Reject button
      */
     public void setRejectButton(Component component) {
-        SlotUtils.setSlot(this, "reject-button", component.getElement());
+        SlotUtils.setSlot(this, "reject-button", component);
     }
 
     /**
