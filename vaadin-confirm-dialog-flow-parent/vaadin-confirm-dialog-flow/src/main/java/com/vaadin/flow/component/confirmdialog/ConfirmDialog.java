@@ -430,7 +430,7 @@ public class ConfirmDialog extends Component
      *            the component to display instead of default Cancel button
      */
     public void setCancelButton(Component component) {
-        SlotUtils.setSlot(this, "cancel-button", component.getElement());
+        SlotUtils.setSlot(this, "cancel-button", component);
     }
 
     /**
@@ -484,7 +484,7 @@ public class ConfirmDialog extends Component
      *            the component to display instead of default Confirm button
      */
     public void setConfirmButton(Component component) {
-        SlotUtils.setSlot(this, "confirm-button", component.getElement());
+        SlotUtils.setSlot(this, "confirm-button", component);
     }
 
     /**
