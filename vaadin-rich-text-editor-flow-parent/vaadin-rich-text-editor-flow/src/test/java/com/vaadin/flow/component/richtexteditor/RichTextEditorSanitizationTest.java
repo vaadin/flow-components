@@ -4,6 +4,9 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class RichTextEditorSanitizationTest {
+
+    private static final String TESTHTML = "<p><strong>Line 1</strong></p><p>        Indent 1</p><p>         Indent 2</p><p>Last line with extra     spaces and a    tab</p>";
+
     // Decoration group sanitization
 
     @Test
@@ -150,5 +153,11 @@ public class RichTextEditorSanitizationTest {
     public void sanitizePreTag_preTagPersist() {
         Assert.assertEquals("<pre>Foo</pre>",
                 RichTextEditor.sanitize("<pre>Foo</pre>"));
+    }
+
+    @Test
+    public void testSanitize() {
+        String html = TESTHTML;
+        Assert.assertEquals(TESTHTML, RichTextEditor.sanitize(html));
     }
 }
