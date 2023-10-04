@@ -611,7 +611,7 @@ public class ConfirmDialog extends Component
      *            the component to display instead of default header text
      */
     public void setHeader(Component component) {
-        SlotUtils.setSlot(this, "header", component.getElement());
+        SlotUtils.setSlot(this, "header", component);
     }
 
     /**
