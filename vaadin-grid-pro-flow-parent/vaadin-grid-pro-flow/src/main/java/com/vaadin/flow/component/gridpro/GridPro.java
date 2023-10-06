@@ -123,7 +123,7 @@ public class GridPro<E> extends Grid<E> {
                         e.getSourceItem().get(e.getPath()).asString());
             }
 
-            if (!column.isManualItemUpdateMode()) {
+            if (!column.isManualRefresh()) {
                 Object idAfterUpdate = getItemId(e.getItem());
                 if (!Objects.equals(idBeforeUpdate, idAfterUpdate)) {
                     LoggerFactory.getLogger(GridPro.class).warn(
@@ -192,7 +192,7 @@ public class GridPro<E> extends Grid<E> {
         private ItemUpdater<T, String> itemUpdater;
         private HasValueAndElement editorField;
         private ValueProvider<T, ?> valueProvider;
-        private boolean isManualItemUpdateMode = false;
+        private boolean manualRefresh = false;
 
         /**
          * Constructs a new Column for use inside a Grid.
@@ -298,12 +298,12 @@ public class GridPro<E> extends Grid<E> {
             this.valueProvider = valueProvider;
         }
 
-        protected boolean isManualItemUpdateMode() {
-            return isManualItemUpdateMode;
+        boolean isManualRefresh() {
+            return manualRefresh;
         }
 
-        protected void setManualItemUpdateMode() {
-            isManualItemUpdateMode = true;
+        void setManualRefresh() {
+            this.manualRefresh = true;
         }
     }
 

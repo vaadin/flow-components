@@ -50,7 +50,7 @@ public class MainView extends VerticalLayout {
 
         grid.addColumn(Person::getAge).setHeader("Age");
 
-        grid.addEditColumn(Person::getName, "name").setManualItemUpdateMode()
+        grid.addEditColumn(Person::getName, "name").withManualRefresh()
                 .text((item, newValue) -> {
                     // Update the items in the underlying data to mimic back-end
                     // update and refresh all
