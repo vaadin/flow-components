@@ -45,8 +45,10 @@ public class MainView extends VerticalLayout {
         mapLists(personList, cityList);
         grid.setItems(personList);
 
-        grid.addCellEditStartedListener(
-                e -> eventsPanel.add(e.getItem().toString()));
+        grid.addCellEditStartedListener(e -> eventsPanel
+                .add("CellEditStarted - " + e.getItem().toString()));
+        grid.addItemPropertyChangedListener(e -> eventsPanel
+                .add("ItemPropertyChanged - " + e.getItem().toString()));
 
         grid.addColumn(Person::getAge).setHeader("Age");
 

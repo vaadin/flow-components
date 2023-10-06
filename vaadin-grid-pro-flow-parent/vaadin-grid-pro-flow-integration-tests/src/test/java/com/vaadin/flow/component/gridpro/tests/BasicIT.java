@@ -136,10 +136,13 @@ public class BasicIT extends AbstractParallelTest {
     @Test
     public void cellEditStartedListenerCalledOnce() {
         assertCellEnterEditModeOnDoubleClick(0, 2, "vaadin-combo-box");
-        Assert.assertEquals("Person{id=1, age=23, name='Person 1', "
-                + "isSubscriber=false, email='person1@vaadin.com', "
-                + "department=sales, city='City 1', employmentYear=2019}",
-                getPanelText("events" + "-panel"));
+        String eventsPanelText = getPanelText("events-panel");
+        Assert.assertEquals(1,
+                eventsPanelText.split("CellEditStarted").length - 1);
+        Assert.assertTrue(eventsPanelText
+                .contains("Person{id=1, age=23, name='Person 1', "
+                        + "isSubscriber=false, email='person1@vaadin.com', "
+                        + "department=sales, city='City 1', employmentYear=2019}"));
     }
 
     @Test
@@ -276,6 +279,19 @@ public class BasicIT extends AbstractParallelTest {
         selectedText = (String) getCommandExecutor()
                 .executeScript("return document.getSelection().toString()");
         Assert.assertEquals("2019", selectedText);
+    }
+
+    @Test
+    public void customField_startEditing_doNotChangeValue_itemPropertyChangeListenerNotCalled() {
+        GridTHTDElement cell = grid.getCell(0, 6);
+        assertCellEnterEditModeOnDoubleClick(0, 6, "vaadin-text-field", grid,
+                true);
+
+        TestBenchElement input = cell.$("input").first();
+        input.sendKeys(Keys.ENTER);
+
+        Assert.assertFalse(
+                getPanelText("events-panel").contains("ItemPropertyChanged"));
     }
 
     @Test
