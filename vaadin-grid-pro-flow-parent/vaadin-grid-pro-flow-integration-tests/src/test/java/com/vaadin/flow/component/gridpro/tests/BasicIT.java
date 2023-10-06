@@ -136,9 +136,13 @@ public class BasicIT extends AbstractParallelTest {
     @Test
     public void cellEditStartedListenerCalledOnce() {
         assertCellEnterEditModeOnDoubleClick(0, 2, "vaadin-combo-box");
+        String eventsPanelText = getPanelText("events-panel");
         Assert.assertEquals(1,
-                getPanelText("events-panel").split("CellEditStarted").length
-                        - 1);
+                eventsPanelText.split("CellEditStarted").length - 1);
+        Assert.assertTrue(eventsPanelText
+                .contains("Person{id=1, age=23, name='Person 1', "
+                        + "isSubscriber=false, email='person1@vaadin.com', "
+                        + "department=sales, city='City 1', employmentYear=2019}"));
     }
 
     @Test
