@@ -302,8 +302,8 @@ public class GridPro<E> extends Grid<E> {
             return manualRefresh;
         }
 
-        void setManualRefresh() {
-            this.manualRefresh = true;
+        void setManualRefresh(boolean manualRefresh) {
+            this.manualRefresh = manualRefresh;
         }
     }
 
