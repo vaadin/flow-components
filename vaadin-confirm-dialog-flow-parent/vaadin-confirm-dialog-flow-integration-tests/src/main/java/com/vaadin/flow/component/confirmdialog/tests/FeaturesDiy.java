@@ -4,7 +4,6 @@ import com.vaadin.flow.component.Html;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.router.Route;
@@ -16,9 +15,8 @@ public class FeaturesDiy extends Features {
     protected ConfirmDialog createConfirmDialog(String sample) {
         ConfirmDialog dialog = new ConfirmDialog();
         dialog.setId(sample);
-        dialog.setHeader(new H2("Meeting starting").getElement());
-        dialog.setText(
-                new Span("Your next meeting starts in 5 minutes").getElement());
+        dialog.setHeader(new H2("Meeting starting"));
+        dialog.setText(new Span("Your next meeting starts in 5 minutes"));
 
         // This button will get discarded by the new confirm button added below.
         dialog.setConfirmButton(new Button("Discarded confirm button"));
@@ -30,7 +28,7 @@ public class FeaturesDiy extends Features {
             this.onOK(new ConfirmDialog.ConfirmEvent(dialog, false));
             dialog.close();
         });
-        dialog.setConfirmButton(confirmButton.getElement());
+        dialog.setConfirmButton(confirmButton);
 
         return dialog;
     }
@@ -41,8 +39,7 @@ public class FeaturesDiy extends Features {
         dialog.setId(sample);
         dialog.setHeader("Delete product");
         dialog.setText(new Html(
-                "<span>Are you sure you want to delete? This operation <b>can not be undone</b></span>")
-                .getElement());
+                "<span>Are you sure you want to delete? This operation <b>can not be undone</b></span>"));
         Button deleteButton = new Button("Delete");
         deleteButton.setId("confirmDiy");
         deleteButton.setIconAfterText(true);
@@ -52,7 +49,7 @@ public class FeaturesDiy extends Features {
             dialog.close();
         });
         deleteButton.getElement().setAttribute("theme", "error primary");
-        dialog.setConfirmButton(deleteButton.getElement());
+        dialog.setConfirmButton(deleteButton);
         dialog.setCancelButton("Cancel", this::onCancel);
 
         return dialog;
@@ -63,8 +60,7 @@ public class FeaturesDiy extends Features {
         ConfirmDialog dialog = new ConfirmDialog();
         dialog.setId(sample);
         dialog.setHeader("Ready to publish?");
-        dialog.setText(
-                new Label("Do you want to publish this post?").getElement());
+        dialog.setText("Do you want to publish this post?");
         Button publishButton = new Button("Publish");
         publishButton.setId("confirmDiy");
         publishButton.getElement().setAttribute("theme", "primary");
@@ -72,7 +68,7 @@ public class FeaturesDiy extends Features {
             this.onPublish(new ConfirmDialog.ConfirmEvent(dialog, false));
             dialog.close();
         });
-        dialog.setConfirmButton(publishButton.getElement());
+        dialog.setConfirmButton(publishButton);
         Button cancelButton = new Button("Cancel");
         cancelButton.setId("cancelDiy");
         cancelButton.addClickListener(e -> {
@@ -80,7 +76,7 @@ public class FeaturesDiy extends Features {
             dialog.close();
         });
         cancelButton.getElement().setAttribute("theme", "tertiary");
-        dialog.setCancelButton(cancelButton.getElement());
+        dialog.setCancelButton(cancelButton);
 
         return dialog;
     }
@@ -91,8 +87,7 @@ public class FeaturesDiy extends Features {
         dialog.setId(sample);
         dialog.setHeader("Unsaved changes");
         dialog.setText(new Html(
-                "<span>Do you want to <b>save</b> or <b>discard</b> your changes before navigating away?</span>")
-                .getElement());
+                "<span>Do you want to <b>save</b> or <b>discard</b> your changes before navigating away?</span>"));
 
         Button saveButton = new Button("Save");
         saveButton.setId("confirmDiy");
@@ -101,7 +96,7 @@ public class FeaturesDiy extends Features {
             dialog.close();
         });
         saveButton.getElement().setAttribute("theme", "primary");
-        dialog.setConfirmButton(saveButton.getElement());
+        dialog.setConfirmButton(saveButton);
 
         Button discardButton = new Button("Discard");
         discardButton.setId("rejectDiy");
@@ -110,7 +105,7 @@ public class FeaturesDiy extends Features {
             dialog.close();
         });
         discardButton.getElement().setAttribute("theme", "error tertiary");
-        dialog.setRejectButton(discardButton.getElement());
+        dialog.setRejectButton(discardButton);
 
         Button cancelButton = new Button("Cancel");
         cancelButton.setId("cancelDiy");
@@ -119,7 +114,7 @@ public class FeaturesDiy extends Features {
             dialog.close();
         });
         cancelButton.getElement().setAttribute("theme", "tertiary");
-        dialog.setCancelButton(cancelButton.getElement());
+        dialog.setCancelButton(cancelButton);
 
         return dialog;
     }
