@@ -48,7 +48,8 @@ public class GridTRElement extends TestBenchElement {
      * 
      * @param columns
      *            the column elements
-     * @return the cells for the given columns
+     * @return a {@link GridTHTDElement} list with the cells for the given
+     *         columns
      */
     public List<GridTHTDElement> getCells(GridColumnElement... columns) {
         return ((ArrayList<TestBenchElement>) executeScript(
