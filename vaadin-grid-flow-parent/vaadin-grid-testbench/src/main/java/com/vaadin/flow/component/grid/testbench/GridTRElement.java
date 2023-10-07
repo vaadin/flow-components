@@ -45,7 +45,7 @@ public class GridTRElement extends TestBenchElement {
 
     /**
      * Gets the cells for the given columns in this row.
-     * 
+     *
      * @param columns
      *            the column elements
      * @return a {@link GridTHTDElement} list with the cells for the given
