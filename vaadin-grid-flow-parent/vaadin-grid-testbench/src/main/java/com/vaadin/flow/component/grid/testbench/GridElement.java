@@ -18,7 +18,6 @@ package com.vaadin.flow.component.grid.testbench;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -433,7 +432,8 @@ public class GridElement extends TestBenchElement {
     }
 
     /**
-     * Gets the rows specified by the lower and upper row indexes.
+     * Gets the rows (present in the DOM) specified by the lower and upper row
+     * indexes.
      *
      * @param firstRowIndex
      *            the lower row index to be retrieved (inclusive)
@@ -442,9 +442,24 @@ public class GridElement extends TestBenchElement {
      * @return a {@link GridTRElement} list with the rows contained between the
      *         given coordinates.
      */
-    public List<GridTRElement> getRows(int firstRowIndex, int lastRowIndex) {
-        return IntStream.rangeClosed(firstRowIndex, lastRowIndex)
-                .mapToObj(this::getRow).toList();
+    public List<GridTRElement> getRows(int firstRowIndex, int lastRowIndex)
+            throws IndexOutOfBoundsException {
+        int rowCount = getRowCount();
+        if (firstRowIndex < 0 || lastRowIndex < 0 || firstRowIndex >= rowCount
+                || lastRowIndex >= rowCount) {
+            throw new IndexOutOfBoundsException(
+                    "firstRowIndex and lastRowIndex: expected to be 0.."
+                            + (rowCount - 1) + " but were " + firstRowIndex
+                            + " and " + lastRowIndex);
+        }
+        String script = "var grid = arguments[0];"
+                + "var firstRowIndex = arguments[1];"
+                + "var lastRowIndex = arguments[2];"
+                + "var rowsInDom = grid.$.items.children;"
+                + "return Array.from(rowsInDom).filter((row) => { return row.index >= firstRowIndex && row.index <= lastRowIndex;});";
+        return ((ArrayList<TestBenchElement>) executeScript(script, this,
+                firstRowIndex, lastRowIndex)).stream()
+                .map(elem -> elem.wrap(GridTRElement.class)).toList();
     }
 
     /**
@@ -469,11 +484,8 @@ public class GridElement extends TestBenchElement {
      */
     public List<GridTHTDElement> getCells(int rowIndex,
             GridColumnElement... columnElements) {
-        List<GridTHTDElement> cells = new ArrayList<>();
-        for (GridColumnElement column : columnElements) {
-            cells.add(getCell(rowIndex, column));
-        }
-        return cells;
+        GridTRElement row = getRow(rowIndex);
+        return row.getCells(columnElements);
     }
 
     /**
@@ -485,11 +497,8 @@ public class GridElement extends TestBenchElement {
      *         coordinates.
      */
     public List<GridTHTDElement> getCells(int rowIndex) {
-        List<GridTHTDElement> cells = new ArrayList<>();
-        for (GridColumnElement column : getAllColumns()) {
-            cells.add(getCell(rowIndex, column));
-        }
-        return cells;
+        GridTRElement row = getRow(rowIndex);
+        return row.getCells(getAllColumns().toArray(new GridColumnElement[0]));
     }
 
 }

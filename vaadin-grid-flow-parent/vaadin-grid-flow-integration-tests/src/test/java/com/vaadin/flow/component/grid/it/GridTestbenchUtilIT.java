@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.grid.it;
 
 import java.util.List;
+import java.util.stream.IntStream;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -45,24 +46,29 @@ public class GridTestbenchUtilIT extends AbstractComponentIT {
 
     @Test
     public void cellsRowIndexUtilMethod_returnsExpectedCells() {
-        List<GridColumnElement> columns = grid.getAllColumns();
-        for (int i = 0; i < columns.size(); i++) {
-            for (GridTHTDElement cell : grid.getCells(i)) {
-                Assert.assertEquals(
-                        grid.getCell(cell.getRow(), cell.getColumn()), cell);
-            }
-        }
+        IntStream.rangeClosed(grid.getFirstVisibleRowIndex(),
+                grid.getLastVisibleRowIndex()).forEach(row -> {
+                    for (GridTHTDElement cell : grid.getCells(row)) {
+                        Assert.assertEquals(
+                                grid.getCell(cell.getRow(), cell.getColumn()),
+                                cell);
+                    }
+                });
     }
 
     @Test
     public void cellsColumnElementsUtilMethod_returnsExpectedCells() {
         List<GridColumnElement> columns = grid.getAllColumns();
-        for (int i = 0; i < columns.size(); i++) {
-            for (GridTHTDElement cell : grid.getCells(i, columns.get(i))) {
-                Assert.assertEquals(
-                        grid.getCell(cell.getRow(), cell.getColumn()), cell);
-            }
-        }
+        IntStream.rangeClosed(grid.getFirstVisibleRowIndex(),
+                grid.getLastVisibleRowIndex()).forEach(row -> {
+                    for (int col = 0; col < columns.size(); col++) {
+                        for (GridTHTDElement cell : grid.getCells(row,
+                                columns.get(col))) {
+                            Assert.assertEquals(grid.getCell(cell.getRow(),
+                                    cell.getColumn()), cell);
+                        }
+                    }
+                });
     }
 
     @Test

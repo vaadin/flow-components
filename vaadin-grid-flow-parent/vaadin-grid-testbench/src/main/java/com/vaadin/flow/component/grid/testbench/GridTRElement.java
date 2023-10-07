@@ -15,6 +15,10 @@
  */
 package com.vaadin.flow.component.grid.testbench;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import com.vaadin.testbench.TestBenchElement;
 
 /**
@@ -31,12 +35,32 @@ public class GridTRElement extends TestBenchElement {
      */
     public GridTHTDElement getCell(GridColumnElement column) {
         TestBenchElement e = (TestBenchElement) executeScript(
-                "const grid = arguments[0];" //
+                "const row = arguments[0];" //
                         + "const columnId = arguments[1];" //
-                        + "return Array.from(grid.children)."
+                        + "return Array.from(row.children)."
                         + "filter(function(cell) { return cell._column && cell._column.__generatedTbId == columnId;})[0]",
                 this, column.get__generatedId());
         return e == null ? null : e.wrap(GridTHTDElement.class);
+    }
+
+    /**
+     * Gets the cells for the given columns in this row.
+     * 
+     * @param columns
+     *            the column elements
+     * @return the cells for the given columns
+     */
+    public List<GridTHTDElement> getCells(GridColumnElement... columns) {
+        return ((ArrayList<TestBenchElement>) executeScript(
+                "const row = arguments[0];" //
+                        + "const columnIds = arguments[1];"
+                        + "return Array.from(row.children)."
+                        + "filter(function(cell) { return cell._column && columnIds.includes(cell._column.__generatedTbId);})",
+                this,
+                Arrays.stream(columns).map(GridColumnElement::get__generatedId)
+                        .toArray()))
+                .stream().map(elem -> elem.wrap(GridTHTDElement.class))
+                .toList();
     }
 
     /**
