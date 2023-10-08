@@ -441,6 +441,8 @@ public class GridElement extends TestBenchElement {
      *            the upper row index to be retrieved (inclusive)
      * @return a {@link GridTRElement} list with the rows contained between the
      *         given coordinates.
+     * @throws IndexOutOfBoundsException
+     *             if either of the provided row indexes do not exist
      */
     public List<GridTRElement> getRows(int firstRowIndex, int lastRowIndex)
             throws IndexOutOfBoundsException {
