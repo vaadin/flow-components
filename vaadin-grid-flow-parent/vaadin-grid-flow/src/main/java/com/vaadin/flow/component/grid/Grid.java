@@ -4579,7 +4579,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     public void scrollToEnd() {
         getUI().ifPresent(
                 ui -> ui.beforeClientResponse(this, ctx -> getElement()
-                        .executeJs("this.scrollToIndex(this._effectiveSize)")));
+                        .executeJs("this.scrollToIndex(this._flatSize)")));
     }
 
     private void onDragStart(GridDragStartEvent<T> event) {
