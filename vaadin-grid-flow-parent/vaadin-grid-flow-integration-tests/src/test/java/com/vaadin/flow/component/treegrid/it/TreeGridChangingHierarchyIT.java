@@ -42,6 +42,9 @@ public class TreeGridChangingHierarchyIT extends AbstractComponentIT {
     private WebElement removeChildrenOfABtn;
     private WebElement removeChildrenOfAAABtn;
 
+    private WebElement moveCUnderABtn;
+    private WebElement checkKeyOfCBtn;
+
     @Before
     public void before() {
         open();
@@ -54,6 +57,8 @@ public class TreeGridChangingHierarchyIT extends AbstractComponentIT {
         removeABtn = buttons.get(4);
         removeChildrenOfABtn = buttons.get(5);
         removeChildrenOfAAABtn = buttons.get(6);
+        moveCUnderABtn = buttons.get(7);
+        checkKeyOfCBtn = buttons.get(8);
     }
 
     @After
@@ -136,6 +141,15 @@ public class TreeGridChangingHierarchyIT extends AbstractComponentIT {
         removeABtn.click();
         grid.expandWithClick(0);
         Assert.assertEquals("b", grid.getCell(0, 0).getText());
+    }
+
+    @Test
+    public void moveRootItemAsChild_keyShouldBeInKeyMapper() {
+        moveCUnderABtn.click();
+        checkKeyOfCBtn.click();
+        Assert.assertEquals(
+                "Key of C was expected to be in KeyMapper after moving it, but was not.",
+                "true", moveCUnderABtn.getText());
     }
 
     private void runRemovalOfDeeplyNestedItems() {
