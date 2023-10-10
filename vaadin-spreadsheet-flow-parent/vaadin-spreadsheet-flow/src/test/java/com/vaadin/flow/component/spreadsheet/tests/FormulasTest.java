@@ -43,7 +43,11 @@ public class FormulasTest {
 
         spreadsheet.createFormulaCell(0, 0, "1+1");
 
-        Assert.assertNotEquals("foo", cell.getStringCellValue());
+        spreadsheet.refreshCells(cell);
+
+        Assert.assertThrows(IllegalStateException.class,
+                cell::getStringCellValue);
+        Assert.assertEquals(2, cell.getNumericCellValue(), 0);
         Assert.assertEquals("1+1", cell.getCellFormula());
     }
 
