@@ -66,6 +66,16 @@ public class AvatarGroupTest {
     }
 
     @Test
+    public void addClassNames_removeClassNames_getClassNames() {
+        avatarGroupItem1.addClassNames("foo", "bar");
+        Assert.assertEquals(avatarGroupItem1.getClassNames(),
+                Set.of("foo", "bar"));
+
+        avatarGroupItem1.removeClassNames("foo");
+        Assert.assertEquals(avatarGroupItem1.getClassNames(), Set.of("bar"));
+    }
+
+    @Test
     public void setCreatedItems_getCreatedItems() {
         List<AvatarGroupItem> items = List.of(avatarGroupItem1,
                 avatarGroupItem2);
