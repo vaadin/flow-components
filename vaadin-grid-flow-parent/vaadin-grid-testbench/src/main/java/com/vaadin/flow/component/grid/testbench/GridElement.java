@@ -405,6 +405,7 @@ public class GridElement extends TestBenchElement {
      * @return the multi-select column, or null
      */
     private GridColumnElement getMultiSelectColumn() {
+        generatedColumnIdsIfNeeded();
         List<Long> columnIds = (List<Long>) executeScript(
                 "return arguments[0]._getColumns().filter(function(col) { return typeof col.selectAll != 'undefined';}).map(function(column) { return column.__generatedTbId;});",
                 this);
