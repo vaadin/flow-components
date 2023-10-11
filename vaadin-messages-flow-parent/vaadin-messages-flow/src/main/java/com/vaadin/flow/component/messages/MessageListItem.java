@@ -64,6 +64,7 @@ public class MessageListItem implements Serializable {
     private AbstractStreamResource imageResource;
 
     private Set<String> themeNames = new LinkedHashSet<>();
+    private Set<String> classNames = new LinkedHashSet<>();
 
     /**
      * Creates an empty message list item. Use the setter methods to configure
@@ -340,6 +341,39 @@ public class MessageListItem implements Serializable {
         } else {
             return themeNames.stream().collect(Collectors.joining(" "));
         }
+    }
+
+    /**
+     * Adds one or more class names to this item. Multiple class names can be
+     * specified by using multiple parameters.
+     *
+     * @param classNames
+     *            the class name or class names to be added to the item
+     */
+    public void addClassNames(String... classNames) {
+        this.classNames.addAll(Arrays.asList(classNames));
+        propsChanged();
+    }
+
+    /**
+     * Removes one or more class names from this item. Multiple class names can
+     * be specified by using multiple parameters.
+     *
+     * @param classNames
+     *            the class name or class names to be removed from the item
+     */
+    public void removeClassNames(String... classNames) {
+        this.classNames.removeAll(Arrays.asList(classNames));
+        propsChanged();
+    }
+
+    /**
+     * Gets the set of CSS class names set on this item.
+     *
+     * @return a list of class names
+     */
+    public Set<String> getClassNames() {
+        return this.classNames;
     }
 
     /**

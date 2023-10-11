@@ -20,6 +20,7 @@ import static org.hamcrest.CoreMatchers.startsWith;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Set;
 
 import org.hamcrest.MatcherAssert;
 import org.junit.Assert;
@@ -65,6 +66,15 @@ public class MessageListTest {
         messageList.setItems(item1, item2);
         Assert.assertEquals(Arrays.asList(item1, item2),
                 messageList.getItems());
+    }
+
+    @Test
+    public void addClassNames_removeClassNames_getClassNames() {
+        item1.addClassNames("foo", "bar");
+        Assert.assertEquals(item1.getClassNames(), Set.of("foo", "bar"));
+
+        item1.removeClassNames("foo");
+        Assert.assertEquals(item1.getClassNames(), Set.of("bar"));
     }
 
     @Test(expected = NullPointerException.class)

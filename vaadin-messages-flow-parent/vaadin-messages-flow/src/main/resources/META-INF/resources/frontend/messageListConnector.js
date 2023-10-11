@@ -29,13 +29,16 @@
           hour: 'numeric',
           minute: 'numeric'
         });
-        list.items = items.map((item) =>
-          item.time
-            ? Object.assign(item, {
-                time: formatter.format(new Date(item.time))
-              })
-            : item
-        );
+        list.items = items.map((item) => {
+          if (item.time) {
+            item.time = formatter.format(new Date(item.time));
+          }
+          if (item.classNames) {
+            item.className = item.classNames.join(' ');
+            delete item.classNames;
+          }
+          return item;
+        });
       })(list, items, locale)
   };
 })();
