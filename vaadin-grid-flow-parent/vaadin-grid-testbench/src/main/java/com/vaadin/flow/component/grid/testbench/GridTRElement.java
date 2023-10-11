@@ -18,6 +18,7 @@ package com.vaadin.flow.component.grid.testbench;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import com.vaadin.testbench.TestBenchElement;
 
@@ -34,13 +35,8 @@ public class GridTRElement extends TestBenchElement {
      * @return the cell for the given column
      */
     public GridTHTDElement getCell(GridColumnElement column) {
-        TestBenchElement e = (TestBenchElement) executeScript(
-                "const row = arguments[0];" //
-                        + "const columnId = arguments[1];" //
-                        + "return Array.from(row.children)."
-                        + "filter(function(cell) { return cell._column && cell._column.__generatedTbId == columnId;})[0]",
-                this, column.get__generatedId());
-        return e == null ? null : e.wrap(GridTHTDElement.class);
+        List<GridTHTDElement> cells = getCells(column);
+        return cells.size() == 1 ? cells.get(0) : null;
     }
 
     /**
@@ -52,16 +48,20 @@ public class GridTRElement extends TestBenchElement {
      *         columns
      */
     public List<GridTHTDElement> getCells(GridColumnElement... columns) {
-        return ((ArrayList<TestBenchElement>) executeScript(
-                "const row = arguments[0];" //
-                        + "const columnIds = arguments[1];"
-                        + "return Array.from(row.children)."
-                        + "filter(function(cell) { return cell._column && columnIds.includes(cell._column.__generatedTbId);})",
-                this,
-                Arrays.stream(columns).map(GridColumnElement::get__generatedId)
-                        .toArray()))
-                .stream().map(elem -> elem.wrap(GridTHTDElement.class))
-                .toList();
+        Object cells = executeScript("const row = arguments[0];" //
+                + "const columnIds = arguments[1];"
+                + "return Array.from(row.children)."
+                + "filter(function(cell) { return cell._column && columnIds.includes(cell._column.__generatedTbId);})",
+                this, Arrays.stream(columns)
+                        .map(GridColumnElement::get__generatedId).toArray());
+        if (Objects.nonNull(cells)) {
+            return ((ArrayList<?>) cells).stream()
+                    .map(elem -> ((TestBenchElement) elem)
+                            .wrap(GridTHTDElement.class))
+                    .toList();
+        } else {
+            return new ArrayList<>();
+        }
     }
 
     /**

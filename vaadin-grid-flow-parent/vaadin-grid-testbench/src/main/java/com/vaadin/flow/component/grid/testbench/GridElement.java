@@ -17,6 +17,7 @@ package com.vaadin.flow.component.grid.testbench;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.openqa.selenium.By;
@@ -205,18 +206,8 @@ public class GridElement extends TestBenchElement {
      *             if no row with given index exists
      */
     public GridTRElement getRow(int rowIndex) throws IndexOutOfBoundsException {
-        int rowCount = getRowCount();
-        if (rowIndex < 0 || rowIndex >= rowCount) {
-            throw new IndexOutOfBoundsException("rowIndex: expected to be 0.."
-                    + (rowCount - 1) + " but was " + rowIndex);
-        }
-        String script = "var grid = arguments[0];"
-                + "var rowIndex = arguments[1];"
-                + "var rowsInDom = grid.$.items.children;"
-                + "var rowInDom = Array.from(rowsInDom).filter(function(row) { return !row.hidden && row.index == rowIndex;})[0];"
-                + "return rowInDom;";
-        return ((TestBenchElement) executeScript(script, this, rowIndex))
-                .wrap(GridTRElement.class);
+        List<GridTRElement> rows = getRows(rowIndex, rowIndex);
+        return rows.size() == 1 ? rows.get(0) : null;
     }
 
     /**
@@ -457,11 +448,16 @@ public class GridElement extends TestBenchElement {
         String script = "var grid = arguments[0];"
                 + "var firstRowIndex = arguments[1];"
                 + "var lastRowIndex = arguments[2];"
-                + "var rowsInDom = grid.$.items.children;"
+                + "var rowsInDom = grid._getRenderedRows();"
                 + "return Array.from(rowsInDom).filter((row) => { return row.index >= firstRowIndex && row.index <= lastRowIndex;});";
-        return ((ArrayList<TestBenchElement>) executeScript(script, this,
-                firstRowIndex, lastRowIndex)).stream()
-                .map(elem -> elem.wrap(GridTRElement.class)).toList();
+        Object rows = executeScript(script, this, firstRowIndex, lastRowIndex);
+        if (Objects.nonNull(rows)) {
+            return ((ArrayList<?>) rows).stream().map(
+                    elem -> ((TestBenchElement) elem).wrap(GridTRElement.class))
+                    .toList();
+        } else {
+            return new ArrayList<>();
+        }
     }
 
     /**
@@ -487,7 +483,8 @@ public class GridElement extends TestBenchElement {
     public List<GridTHTDElement> getCells(int rowIndex,
             GridColumnElement... columnElements) {
         GridTRElement row = getRow(rowIndex);
-        return row.getCells(columnElements);
+        return Objects.nonNull(row) ? row.getCells(columnElements)
+                : new ArrayList<>();
     }
 
     /**
