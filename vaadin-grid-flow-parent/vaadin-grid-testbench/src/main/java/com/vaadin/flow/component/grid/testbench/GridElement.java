@@ -498,7 +498,10 @@ public class GridElement extends TestBenchElement {
      */
     public List<GridTHTDElement> getCells(int rowIndex) {
         GridTRElement row = getRow(rowIndex);
-        return row.getCells(getAllColumns().toArray(new GridColumnElement[0]));
+        return Objects.nonNull(row)
+                ? row.getCells(
+                        getAllColumns().toArray(new GridColumnElement[0]))
+                : new ArrayList<>();
     }
 
 }
