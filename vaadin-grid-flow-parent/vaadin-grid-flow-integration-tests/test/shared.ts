@@ -52,7 +52,7 @@ export type FlowGrid = Grid<Item> & {
   $server: GridServer;
   __deselectDisallowed: boolean;
   __disallowDetailsOnClick: boolean;
-  _effectiveSize: number;
+  _flatSize: number;
   __updateVisibleRows: () => void;
   _updateItem: (index: number, item: Item) => void;
 };
@@ -106,7 +106,7 @@ export function initSelectionColumn(grid: FlowGrid, column: FlowGridSelectionCol
  * Returns the number of rows in the grid body.
  */
 export function getBodyRowCount(grid: FlowGrid): number {
-  return grid._effectiveSize;
+  return grid._flatSize;
 }
 
 /**

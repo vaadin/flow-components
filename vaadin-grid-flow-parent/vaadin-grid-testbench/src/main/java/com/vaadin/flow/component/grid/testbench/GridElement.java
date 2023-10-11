@@ -97,7 +97,7 @@ public class GridElement extends TestBenchElement {
      */
     public int getRowCount() {
         waitUntilLoadingFinished();
-        return getPropertyDouble("_effectiveSize").intValue();
+        return getPropertyDouble("_flatSize").intValue();
     }
 
     /**
