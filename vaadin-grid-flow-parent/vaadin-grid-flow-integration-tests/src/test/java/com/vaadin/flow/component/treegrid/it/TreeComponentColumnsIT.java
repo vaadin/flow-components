@@ -104,6 +104,7 @@ public class TreeComponentColumnsIT extends AbstractComponentIT {
         compThenGrid.expandWithClick(1);
         compThenGrid.scrollToRow(104);
         List<GridTRElement> visibleRows = compThenGrid.getVisibleRows();
+        Assert.assertFalse(visibleRows.isEmpty());
         for (int i = 1; i < visibleRows.size(); i++) {
             Assert.assertEquals(visibleRows.get(i - 1).getRect().y + rowHeight,
                     visibleRows.get(i).getRect().y, 1);
