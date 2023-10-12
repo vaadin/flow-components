@@ -18,7 +18,6 @@ package com.vaadin.flow.component.grid.testbench;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 import com.vaadin.testbench.TestBenchElement;
 
@@ -54,7 +53,7 @@ public class GridTRElement extends TestBenchElement {
                 + "filter(function(cell) { return cell._column && columnIds.includes(cell._column.__generatedTbId);})",
                 this, Arrays.stream(columns)
                         .map(GridColumnElement::get__generatedId).toArray());
-        if (Objects.nonNull(cells)) {
+        if (cells != null) {
             return ((ArrayList<?>) cells).stream()
                     .map(elem -> ((TestBenchElement) elem)
                             .wrap(GridTHTDElement.class))

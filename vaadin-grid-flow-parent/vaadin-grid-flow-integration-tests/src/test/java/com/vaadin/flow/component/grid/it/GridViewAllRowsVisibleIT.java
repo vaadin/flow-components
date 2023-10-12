@@ -15,23 +15,14 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import java.util.List;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.vaadin.flow.component.grid.testbench.GridColumnElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
-import com.vaadin.flow.component.grid.testbench.GridTRElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
-/**
- * Tests for ensuring Grid's row visibility configuration and utility methods to
- * fetch rows, and cells from specific rows and columns work as expected.
- */
 @TestPath("vaadin-grid-it-demo/all-rows-visible")
 public class GridViewAllRowsVisibleIT extends AbstractComponentIT {
 
@@ -53,8 +44,7 @@ public class GridViewAllRowsVisibleIT extends AbstractComponentIT {
 
     @Test
     public void cellsRowIndexUtilMethod_returnsExpectedCells() {
-        int firstVisibleRowIndex = grid.getFirstVisibleRowIndex();
-        for (GridTHTDElement cell : grid.getCells(firstVisibleRowIndex)) {
+        for (var cell : grid.getCells(0)) {
             Assert.assertEquals(grid.getCell(cell.getRow(), cell.getColumn()),
                     cell);
         }
@@ -62,11 +52,8 @@ public class GridViewAllRowsVisibleIT extends AbstractComponentIT {
 
     @Test
     public void cellsColumnElementsUtilMethod_returnsExpectedCells() {
-        List<GridColumnElement> columns = grid.getAllColumns();
-        int firstVisibleRowIndex = grid.getFirstVisibleRowIndex();
-        for (int col = 0; col < columns.size(); col++) {
-            for (GridTHTDElement cell : grid.getCells(firstVisibleRowIndex,
-                    columns.get(col))) {
+        for (var col : grid.getAllColumns()) {
+            for (var cell : grid.getCells(0, col)) {
                 Assert.assertEquals(
                         grid.getCell(cell.getRow(), cell.getColumn()), cell);
             }
@@ -82,7 +69,7 @@ public class GridViewAllRowsVisibleIT extends AbstractComponentIT {
 
     @Test
     public void indexesBasedRowsFetchingMethod_returnsSameElementAsSingularRowFetchingMethod() {
-        List<GridTRElement> rows = grid.getRows(0, grid.getRowCount() - 1);
+        var rows = grid.getRows(0, grid.getRowCount() - 1);
         for (int i = 0; i < rows.size(); i++) {
             Assert.assertEquals(grid.getRow(i), rows.get(i));
         }
