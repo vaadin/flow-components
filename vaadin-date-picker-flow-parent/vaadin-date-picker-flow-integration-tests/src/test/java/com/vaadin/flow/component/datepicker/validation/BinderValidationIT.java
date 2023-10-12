@@ -13,6 +13,7 @@ import static com.vaadin.flow.component.datepicker.validation.BinderValidationPa
 import static com.vaadin.flow.component.datepicker.validation.BinderValidationPage.REQUIRED_ERROR_MESSAGE;
 import static com.vaadin.flow.component.datepicker.validation.BinderValidationPage.UNEXPECTED_VALUE_ERROR_MESSAGE;
 import static com.vaadin.flow.component.datepicker.validation.BinderValidationPage.CLEAR_VALUE_BUTTON;
+import static com.vaadin.flow.component.datepicker.validation.BinderValidationPage.RESET_BEAN_BUTTON;
 
 @TestPath("vaadin-date-picker/validation/binder")
 public class BinderValidationIT
@@ -27,9 +28,9 @@ public class BinderValidationIT
     @Test
     public void required_triggerBlur_assertValidity() {
         testField.sendKeys(Keys.TAB);
-        assertServerInvalid();
-        assertClientInvalid();
-        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
+        assertValidationCount(0);
+        assertServerValid();
+        assertClientValid();
     }
 
     @Test
@@ -37,13 +38,30 @@ public class BinderValidationIT
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("2022-01-01", Keys.ENTER);
 
         testField.setInputValue("1/1/2022");
+        assertValidationCount(1);
         assertServerValid();
         assertClientValid();
 
+        resetValidationCount();
+
         testField.setInputValue("");
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage(REQUIRED_ERROR_MESSAGE);
+    }
+
+    @Test
+    public void required_setValue_resetBean_assertValidity() {
+        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("2022-01-01", Keys.ENTER);
+
+        testField.setInputValue("1/1/2022");
+        assertServerValid();
+        assertClientValid();
+
+        $("button").id(RESET_BEAN_BUTTON).click();
+        assertServerValid();
+        assertClientValid();
     }
 
     @Test
@@ -53,20 +71,36 @@ public class BinderValidationIT
 
         // Constraint validation fails:
         testField.setInputValue("2/1/2022");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage("");
 
+        resetValidationCount();
+
         // Binder validation fails:
         testField.setInputValue("3/1/2022");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
 
+        resetValidationCount();
+
         // Both validations pass:
         testField.setInputValue("4/1/2022");
+        assertValidationCount(1);
         assertClientValid();
         assertServerValid();
+
+        resetValidationCount();
+
+        // Binder validation fails:
+        testField.setInputValue("");
+        assertValidationCount(1);
+        assertClientInvalid();
+        assertServerInvalid();
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
     @Test
@@ -76,20 +110,36 @@ public class BinderValidationIT
 
         // Constraint validation fails:
         testField.setInputValue("4/1/2022");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage("");
 
+        resetValidationCount();
+
         // Binder validation fails:
         testField.setInputValue("3/1/2022");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
 
+        resetValidationCount();
+
         // Both validations pass:
         testField.setInputValue("2/1/2022");
+        assertValidationCount(1);
         assertClientValid();
         assertServerValid();
+
+        resetValidationCount();
+
+        // Binder validation fails:
+        testField.setInputValue("");
+        assertValidationCount(1);
+        assertClientInvalid();
+        assertServerInvalid();
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
     @Test
@@ -97,18 +147,33 @@ public class BinderValidationIT
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("2022-01-01", Keys.ENTER);
 
         testField.setInputValue("INVALID");
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage("");
 
+        resetValidationCount();
+
         testField.setInputValue("1/1/2022");
+        assertValidationCount(1);
         assertServerValid();
         assertClientValid();
 
+        resetValidationCount();
+
         testField.setInputValue("INVALID");
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage("");
+
+        resetValidationCount();
+
+        testField.setInputValue("");
+        assertValidationCount(1);
+        assertClientInvalid();
+        assertServerInvalid();
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
     @Test
@@ -128,11 +193,15 @@ public class BinderValidationIT
     @Test
     public void badInput_setValue_clearValue_assertValidity() {
         testField.setInputValue("INVALID");
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage("");
 
+        resetValidationCount();
+
         $("button").id(CLEAR_VALUE_BUTTON).click();
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage(REQUIRED_ERROR_MESSAGE);
