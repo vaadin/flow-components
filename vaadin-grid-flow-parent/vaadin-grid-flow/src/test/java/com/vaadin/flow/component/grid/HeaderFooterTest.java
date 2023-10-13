@@ -1035,6 +1035,12 @@ public class HeaderFooterTest {
     }
 
     @Test
+    public void setHeaderPartName_setFooterPartName_isChainable() {
+        firstColumn.setHeaderPartName("foo").setFrozen(true);
+        firstColumn.setFooterPartName("foo").setFrozen(true);
+    }
+
+    @Test
     public void columnGroupHasNoHeaderPartName() {
         grid.appendHeaderRow();
         var headerCell = grid.prependHeaderRow().join(firstColumn,

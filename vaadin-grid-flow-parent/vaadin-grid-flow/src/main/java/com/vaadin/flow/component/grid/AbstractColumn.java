@@ -342,42 +342,4 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
                         .collect(Collectors.toList()));
         return columnChildren;
     }
-
-    /**
-     * Sets a custom part name for the header cell.
-     *
-     * @param headerPartName
-     *            the part name to set
-     */
-    public void setHeaderPartName(String headerPartName) {
-        getElement().setProperty("headerPartName", headerPartName);
-    }
-
-    /**
-     * Gets the custom part name of the header cell.
-     *
-     * @return the part name
-     */
-    public String getHeaderPartName() {
-        return getElement().getProperty("headerPartName");
-    }
-
-    /**
-     * Sets a custom part name for the footer cell.
-     *
-     * @param footerPartName
-     *            the part name to set
-     */
-    public void setFooterPartName(String footerPartName) {
-        getElement().setProperty("footerPartName", footerPartName);
-    }
-
-    /**
-     * Gets the custom part name of the footer cell.
-     *
-     * @return the part name
-     */
-    public String getFooterPartName() {
-        return getElement().getProperty("footerPartName");
-    }
 }
