@@ -113,6 +113,8 @@ public class BinderValidationIT
 
     @Test
     public void setValue_clearValue_assertValidity() {
+        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("2022-01-01", Keys.ENTER);
+
         testField.setInputValue("1/1/2022");
         assertServerValid();
         assertClientValid();

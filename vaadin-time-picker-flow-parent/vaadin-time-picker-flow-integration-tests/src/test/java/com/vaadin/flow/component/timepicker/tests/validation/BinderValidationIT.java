@@ -113,6 +113,8 @@ public class BinderValidationIT
 
     @Test
     public void setValue_clearValue_assertValidity() {
+        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("10:00", Keys.ENTER);
+
         testField.selectByText("10:00");
         assertServerValid();
         assertClientValid();

@@ -152,6 +152,8 @@ public class IntegerFieldBinderValidationIT
 
     @Test
     public void setValue_clearValue_assertValidity() {
+        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("2", Keys.ENTER);
+
         testField.setValue("2");
         assertServerValid();
         assertClientValid();
