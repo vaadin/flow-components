@@ -68,11 +68,10 @@ public class AvatarGroupTest {
     @Test
     public void addClassNames_removeClassNames_getClassNames() {
         avatarGroupItem1.addClassNames("foo", "bar");
-        Assert.assertEquals(avatarGroupItem1.getClassNames(),
-                Set.of("foo", "bar"));
+        Assert.assertEquals(avatarGroupItem1.getClassName(), "foo bar");
 
         avatarGroupItem1.removeClassNames("foo");
-        Assert.assertEquals(avatarGroupItem1.getClassNames(), Set.of("bar"));
+        Assert.assertEquals(avatarGroupItem1.getClassName(), "bar");
     }
 
     @Test

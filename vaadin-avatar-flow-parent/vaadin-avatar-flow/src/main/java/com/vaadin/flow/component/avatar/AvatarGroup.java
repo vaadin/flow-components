@@ -394,12 +394,16 @@ public class AvatarGroup extends Component implements HasOverlayClassName,
         }
 
         /**
-         * Gets the set of CSS class names set on this item.
+         * Gets the CSS class name set on this item.
          *
-         * @return a list of class names
+         * @return a space-delimited list of CSS class names
          */
-        public Set<String> getClassNames() {
-            return this.classNames;
+        public String getClassName() {
+            if (classNames.isEmpty()) {
+                return null;
+            } else {
+                return classNames.stream().collect(Collectors.joining(" "));
+            }
         }
 
         private AvatarGroup getHost() {
@@ -592,10 +596,8 @@ public class AvatarGroup extends Component implements HasOverlayClassName,
                 jsonItem.put("colorIndex", item.getColorIndex());
             }
 
-            String className = item.getClassNames().stream()
-                    .collect(Collectors.joining(" "));
-            if (!className.equals("")) {
-                jsonItem.put("className", className);
+            if (item.getClassName() != null) {
+                jsonItem.put("className", item.getClassName());
             }
 
             jsonItems.set(jsonItems.length(), jsonItem);
