@@ -594,7 +594,7 @@ public class AvatarGroup extends Component implements HasOverlayClassName,
 
             String className = item.getClassNames().stream()
                     .collect(Collectors.joining(" "));
-            if (className != "") {
+            if (!className.equals("")) {
                 jsonItem.put("className", className);
             }
 
