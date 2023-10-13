@@ -368,12 +368,25 @@ public class MessageListItem implements Serializable {
     }
 
     /**
-     * Gets the set of CSS class names set on this item.
+     * Checks if the message has the given class name.
      *
-     * @return a list of class names
+     * @param className
+     *            the class name to check for
+     * @return <code>true</code> if the message has the given class name,
+     *         <code>false</code> otherwise
      */
-    public Set<String> getClassNames() {
-        return this.classNames;
+    public boolean hasClassName(String className) {
+        return classNames.contains(className);
+    }
+
+    // Used only for Jackson serialization
+    @JsonGetter
+    private String getClassName() {
+        if (classNames.isEmpty()) {
+            return null;
+        } else {
+            return classNames.stream().collect(Collectors.joining(" "));
+        }
     }
 
     /**

@@ -20,7 +20,6 @@ import static org.hamcrest.CoreMatchers.startsWith;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Set;
 
 import org.hamcrest.MatcherAssert;
 import org.junit.Assert;
@@ -69,12 +68,13 @@ public class MessageListTest {
     }
 
     @Test
-    public void addClassNames_removeClassNames_getClassNames() {
+    public void addClassNames_removeClassNames_hasClassName() {
         item1.addClassNames("foo", "bar");
-        Assert.assertEquals(item1.getClassNames(), Set.of("foo", "bar"));
+        Assert.assertTrue(item1.hasClassName("foo"));
+        Assert.assertTrue(item1.hasClassName("bar"));
 
         item1.removeClassNames("foo");
-        Assert.assertEquals(item1.getClassNames(), Set.of("bar"));
+        Assert.assertFalse(item1.hasClassName("foo"));
     }
 
     @Test(expected = NullPointerException.class)
