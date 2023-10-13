@@ -53,6 +53,8 @@ public class MessageListPage extends Div {
         addButton("setUserColorIndex", () -> foo.setUserColorIndex(2));
         addButton("addThemeNames", () -> foo.addThemeNames("foo", "bar"));
         addButton("removeThemeNames", () -> foo.removeThemeNames("foo", "bar"));
+        addButton("addClassNames", () -> foo.addClassNames("urgent", "pinned"));
+        addButton("removeClassNames", () -> foo.removeClassNames("urgent"));
 
         addButton("setItems", () -> messageList
                 .setItems(new MessageListItem(null, null, "sender3")));
