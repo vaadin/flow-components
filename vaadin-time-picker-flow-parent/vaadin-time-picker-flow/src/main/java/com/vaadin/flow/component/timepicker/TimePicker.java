@@ -18,6 +18,8 @@ package com.vaadin.flow.component.timepicker;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
@@ -98,6 +100,8 @@ public class TimePicker
 
     private boolean manualValidationEnabled = false;
 
+    private final Collection<ValidationStatusChangeListener<LocalTime>> validationStatusChangeListeners = new ArrayList<>();
+
     /**
      * Default constructor.
      */
@@ -141,7 +145,10 @@ public class TimePicker
 
         addValueChangeListener(e -> validate());
 
-        addClientValidatedEventListener(event -> validate());
+        getElement().addEventListener("unparsable-change", event -> {
+            validate();
+            fireValidationStatusChangeEvent();
+        });
 
         getElement().addPropertyChangeListener("invalid", event -> fireEvent(
                 new InvalidChangeEvent(this, event.isUserOriginated())));
@@ -279,7 +286,8 @@ public class TimePicker
             // `executeJs` can end up invoked after a non-empty value is set.
             getElement()
                     .executeJs("if (!this.value) this._inputElementValue = ''");
-            fireEvent(new ClientValidatedEvent(this, false));
+            validate();
+            fireValidationStatusChangeEvent();
         }
     }
 
@@ -321,10 +329,21 @@ public class TimePicker
     @Override
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<LocalTime> listener) {
-        return addClientValidatedEventListener(
-                event -> listener.validationStatusChanged(
-                        new ValidationStatusChangeEvent<LocalTime>(this,
-                                !isInvalid())));
+        validationStatusChangeListeners.add(listener);
+        return () -> validationStatusChangeListeners.remove(listener);
+    }
+
+    /**
+     * Notifies Binder that it needs to revalidate the component since the
+     * component's validity state may have changed. Note, there is no need to
+     * notify Binder separately in the case of a ValueChangeEvent, as Binder
+     * already listens to this event and revalidates automatically.
+     */
+    private void fireValidationStatusChangeEvent() {
+        ValidationStatusChangeEvent<LocalTime> event = new ValidationStatusChangeEvent<>(
+                this, !isInvalid());
+        validationStatusChangeListeners
+                .forEach(listener -> listener.validationStatusChanged(event));
     }
 
     private ValidationResult checkValidity(LocalTime value) {
