@@ -109,7 +109,7 @@ public class TimePicker
      * Convenience constructor to create a time picker with a pre-selected time.
      *
      * @param time
-     *             the pre-selected time in the picker
+     *            the pre-selected time in the picker
      */
     public TimePicker(LocalTime time) {
         this(time, false);
@@ -119,15 +119,12 @@ public class TimePicker
      * Convenience constructor to create a time picker with a pre-selected time.
      *
      * @param time
-     *                               the pre-selected time in the picker
+     *            the pre-selected time in the picker
      * @param isInitialValueOptional
-     *                               If {@code isInitialValueOptional} is
-     *                               {@code true} then the
-     *                               initial value is used only if element has no
-     *                               {@code "value"}
-     *                               property value, otherwise element
-     *                               {@code "value"} property is
-     *                               ignored and the initial value is set
+     *            If {@code isInitialValueOptional} is {@code true} then the
+     *            initial value is used only if element has no {@code "value"}
+     *            property value, otherwise element {@code "value"} property is
+     *            ignored and the initial value is set
      */
     private TimePicker(LocalTime time, boolean isInitialValueOptional) {
         super("value", time, String.class, PARSER, FORMATTER);
@@ -154,7 +151,7 @@ public class TimePicker
      * Convenience constructor to create a time picker with a label.
      *
      * @param label
-     *              the label describing the time picker
+     *            the label describing the time picker
      * @see #setLabel(String)
      */
     public TimePicker(String label) {
@@ -167,9 +164,9 @@ public class TimePicker
      * and a label.
      *
      * @param label
-     *              the label describing the time picker
+     *            the label describing the time picker
      * @param time
-     *              the pre-selected time in the picker
+     *            the pre-selected time in the picker
      */
     public TimePicker(String label, LocalTime time) {
         this(time);
@@ -181,7 +178,7 @@ public class TimePicker
      * {@link ValueChangeListener}.
      *
      * @param listener
-     *                 the listener to receive value change events
+     *            the listener to receive value change events
      * @see #addValueChangeListener(HasValue.ValueChangeListener)
      */
     public TimePicker(
@@ -195,9 +192,9 @@ public class TimePicker
      * and {@link ValueChangeListener}.
      *
      * @param time
-     *                 the pre-selected time in the picker
+     *            the pre-selected time in the picker
      * @param listener
-     *                 the listener to receive value change events
+     *            the listener to receive value change events
      * @see #addValueChangeListener(HasValue.ValueChangeListener)
      */
     public TimePicker(LocalTime time,
@@ -211,11 +208,11 @@ public class TimePicker
      * pre-selected time and a {@link ValueChangeListener}.
      *
      * @param label
-     *                 the label describing the time picker
+     *            the label describing the time picker
      * @param time
-     *                 the pre-selected time in the picker
+     *            the pre-selected time in the picker
      * @param listener
-     *                 the listener to receive value change events
+     *            the listener to receive value change events
      * @see #setLabel(String)
      * @see #addValueChangeListener(HasValue.ValueChangeListener)
      */
@@ -230,7 +227,7 @@ public class TimePicker
      * Sets the label for the time picker.
      *
      * @param label
-     *              value for the {@code label} property in the time picker
+     *            value for the {@code label} property in the time picker
      */
     public void setLabel(String label) {
         getElement().setProperty("label", label == null ? "" : label);
@@ -247,7 +244,7 @@ public class TimePicker
      * in.
      *
      * @param value
-     *              the LocalTime instance representing the selected time, or null
+     *            the LocalTime instance representing the selected time, or null
      */
     @Override
     public void setValue(LocalTime value) {
@@ -379,7 +376,7 @@ public class TimePicker
      * when the user has not entered a value.
      *
      * @param placeholder
-     *                    the placeholder text
+     *            the placeholder text
      */
     public void setPlaceholder(String placeholder) {
         getElement().setProperty("placeholder",
@@ -400,7 +397,7 @@ public class TimePicker
      * Sets whether the time picker is marked as input required.
      *
      * @param required
-     *                 the boolean value to set
+     *            the boolean value to set
      */
     public void setRequired(boolean required) {
         getElement().setProperty("required", required);
@@ -446,8 +443,8 @@ public class TimePicker
      * if some parts (eg. seconds) is discarded from the value.</em>
      *
      * @param step
-     *             the step to set, not {@code null} and should divide a day or
-     *             an hour evenly
+     *            the step to set, not {@code null} and should divide a day or
+     *            an hour evenly
      */
     public void setStep(Duration step) {
         Objects.requireNonNull(step, "Step cannot be null");
@@ -496,7 +493,7 @@ public class TimePicker
      * webcomponent.
      *
      * @param listener
-     *                 the listener
+     *            the listener
      * @return a {@link Registration} for removing the event listener
      */
     public Registration addInvalidChangeListener(
@@ -559,7 +556,7 @@ public class TimePicker
      * fired.</em>
      *
      * @param locale
-     *               the locale set to the time picker, cannot be [@code null}
+     *            the locale set to the time picker, cannot be [@code null}
      */
     public void setLocale(Locale locale) {
         Objects.requireNonNull(locale, "Locale must not be null.");
