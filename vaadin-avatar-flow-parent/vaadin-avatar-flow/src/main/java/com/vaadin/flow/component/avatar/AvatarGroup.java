@@ -44,9 +44,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -80,6 +82,7 @@ public class AvatarGroup extends Component implements HasOverlayClassName,
         private String abbr;
         private String img;
         private Integer colorIndex;
+        private Set<String> classNames = new LinkedHashSet<>();
 
         private AvatarGroup host;
         private StreamRegistration resourceRegistration;
@@ -362,6 +365,47 @@ public class AvatarGroup extends Component implements HasOverlayClassName,
             }
         }
 
+        /**
+         * Adds one or more class names to this item. Multiple class names can
+         * be specified by using multiple parameters.
+         *
+         * @param classNames
+         *            the class name or class names to be added to the item
+         */
+        public void addClassNames(String... classNames) {
+            this.classNames.addAll(Arrays.asList(classNames));
+            if (getHost() != null) {
+                getHost().setClientItems();
+            }
+        }
+
+        /**
+         * Removes one or more class names from this item. Multiple class names
+         * can be specified by using multiple parameters.
+         *
+         * @param classNames
+         *            the class name or class names to be removed from the item
+         */
+        public void removeClassNames(String... classNames) {
+            this.classNames.removeAll(Arrays.asList(classNames));
+            if (getHost() != null) {
+                getHost().setClientItems();
+            }
+        }
+
+        /**
+         * Gets the CSS class name set on this item.
+         *
+         * @return a space-delimited list of CSS class names
+         */
+        public String getClassName() {
+            if (classNames.isEmpty()) {
+                return null;
+            } else {
+                return classNames.stream().collect(Collectors.joining(" "));
+            }
+        }
+
         private AvatarGroup getHost() {
             return host;
         }
@@ -550,6 +594,10 @@ public class AvatarGroup extends Component implements HasOverlayClassName,
 
             if (item.getColorIndex() != null) {
                 jsonItem.put("colorIndex", item.getColorIndex());
+            }
+
+            if (item.getClassName() != null) {
+                jsonItem.put("className", item.getClassName());
             }
 
             jsonItems.set(jsonItems.length(), jsonItem);
