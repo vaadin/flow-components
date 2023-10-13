@@ -225,7 +225,8 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
         boolean isValueRemainedEmpty = valueEquals(oldValue, getEmptyValue())
                 && valueEquals(value, getEmptyValue());
 
-        // Reset hasInputValue when the value is cleared programmatically.
+        // When the value is cleared programmatically, reset hasInputValue
+        // so that the following validation doesn't treat this as bad input.
         if (Objects.equals(value, getEmptyValue())) {
             getElement().setProperty("_hasInputValue", false);
         }
