@@ -63,8 +63,22 @@ public class AvatarGroupIT extends AbstractComponentIT {
         checkLogsForErrors(); // would fail if the image wasn't hosted
     }
 
+    @Test
+    public void addClassNames_removeClassNames_avatarsUpdated() {
+        findElement(By.id("add-class-names")).click();
+        Assert.assertEquals("red", getAvatarClassName(0));
+
+        findElement(By.id("remove-class-names")).click();
+        Assert.assertEquals("", getAvatarClassName(0));
+    }
+
     private String getAvatarAbbr(int index) {
         return $(AvatarGroupElement.class).waitForFirst()
                 .getAvatarElement(index).getAbbr();
+    }
+
+    private String getAvatarClassName(int index) {
+        return $(AvatarGroupElement.class).waitForFirst()
+                .getAvatarElement(index).getAttribute("class");
     }
 }

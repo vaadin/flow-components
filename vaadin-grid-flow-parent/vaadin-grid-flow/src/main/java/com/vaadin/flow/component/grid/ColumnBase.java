@@ -145,6 +145,50 @@ interface ColumnBase<T extends ColumnBase<T>> extends HasElement {
     }
 
     /**
+     * Sets a custom part name for the header cell.
+     *
+     * @param headerPartName
+     *            the part name to set
+     * @return this column, for method chaining
+     */
+    @SuppressWarnings("unchecked")
+    default T setHeaderPartName(String headerPartName) {
+        getElement().setProperty("headerPartName", headerPartName);
+        return (T) this;
+    }
+
+    /**
+     * Gets the custom part name of the header cell.
+     *
+     * @return the part name
+     */
+    default String getHeaderPartName() {
+        return getElement().getProperty("headerPartName");
+    }
+
+    /**
+     * Sets a custom part name for the footer cell.
+     *
+     * @param footerPartName
+     *            the part name to set
+     * @return this column, for method chaining
+     */
+    @SuppressWarnings("unchecked")
+    default T setFooterPartName(String footerPartName) {
+        getElement().setProperty("footerPartName", footerPartName);
+        return (T) this;
+    }
+
+    /**
+     * Gets the custom part name of the footer cell.
+     *
+     * @return the part name
+     */
+    default String getFooterPartName() {
+        return getElement().getProperty("footerPartName");
+    }
+
+    /**
      * Gets the underlying column element.
      * <p>
      * <strong>It is highly discouraged to directly use the API exposed by the

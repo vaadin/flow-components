@@ -1004,6 +1004,82 @@ public class HeaderFooterTest {
                 joinedCell.getColumn().getTextAlign());
     }
 
+    @Test
+    public void columnHasNoHeaderPartName() {
+        Assert.assertEquals(null, firstColumn.getHeaderPartName());
+        Assert.assertEquals(null,
+                firstColumn.getElement().getProperty("headerPartName"));
+    }
+
+    @Test
+    public void setHeaderPartName_columnHasHeaderPartName() {
+        firstColumn.setHeaderPartName("foo");
+        Assert.assertEquals("foo", firstColumn.getHeaderPartName());
+        Assert.assertEquals("foo",
+                firstColumn.getElement().getProperty("headerPartName"));
+    }
+
+    @Test
+    public void columnHasNoFooterPartName() {
+        Assert.assertEquals(null, firstColumn.getFooterPartName());
+        Assert.assertEquals(null,
+                firstColumn.getElement().getProperty("footerPartName"));
+    }
+
+    @Test
+    public void setFooterPartName_columnHasFooterPartName() {
+        firstColumn.setFooterPartName("foo");
+        Assert.assertEquals("foo", firstColumn.getFooterPartName());
+        Assert.assertEquals("foo",
+                firstColumn.getElement().getProperty("footerPartName"));
+    }
+
+    @Test
+    public void setHeaderPartName_setFooterPartName_isChainable() {
+        firstColumn.setHeaderPartName("foo").setFrozen(true);
+        firstColumn.setFooterPartName("foo").setFrozen(true);
+    }
+
+    @Test
+    public void columnGroupHasNoHeaderPartName() {
+        grid.appendHeaderRow();
+        var headerCell = grid.prependHeaderRow().join(firstColumn,
+                secondColumn);
+        Assert.assertEquals(null, headerCell.getPartName());
+        Assert.assertEquals(null, headerCell.getColumn().getElement()
+                .getProperty("headerPartName"));
+    }
+
+    @Test
+    public void setHeaderPartName_columnGroupHasHeaderPartName() {
+        grid.appendHeaderRow();
+        var headerCell = grid.prependHeaderRow().join(firstColumn,
+                secondColumn);
+        headerCell.setPartName("foo");
+        Assert.assertEquals("foo", headerCell.getPartName());
+        Assert.assertEquals("foo", headerCell.getColumn().getElement()
+                .getProperty("headerPartName"));
+    }
+
+    @Test
+    public void columnGroupHasNoFooterPartName() {
+        grid.appendFooterRow();
+        var footerCell = grid.appendFooterRow().join(firstColumn, secondColumn);
+        Assert.assertEquals(null, footerCell.getPartName());
+        Assert.assertEquals(null, footerCell.getColumn().getElement()
+                .getProperty("footerPartName"));
+    }
+
+    @Test
+    public void setFooterPartName_columnGroupHasFooterPartName() {
+        grid.appendFooterRow();
+        var footerCell = grid.appendFooterRow().join(firstColumn, secondColumn);
+        footerCell.setPartName("foo");
+        Assert.assertEquals("foo", footerCell.getPartName());
+        Assert.assertEquals("foo", footerCell.getColumn().getElement()
+                .getProperty("footerPartName"));
+    }
+
     private void assertHeaderRowOrder(HeaderRow... rows) {
         Assert.assertEquals("Grid returned unexpected amount of header rows",
                 rows.length, grid.getHeaderRows().size());
