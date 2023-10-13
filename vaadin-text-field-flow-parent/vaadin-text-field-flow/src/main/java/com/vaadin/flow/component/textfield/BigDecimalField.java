@@ -17,6 +17,8 @@ package com.vaadin.flow.component.textfield;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormatSymbols;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
@@ -82,6 +84,8 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
 
     private boolean manualValidationEnabled = false;
 
+    private final Collection<ValidationStatusChangeListener<BigDecimal>> validationStatusChangeListeners = new ArrayList<>();
+
     /**
      * Constructs an empty {@code BigDecimalField}.
      */
@@ -97,8 +101,6 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
         setValueChangeMode(ValueChangeMode.ON_CHANGE);
 
         addValueChangeListener(e -> validate());
-
-        addClientValidatedEventListener(e -> validate());
     }
 
     /**
@@ -237,13 +239,27 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
         if (isValueRemainedEmpty && isInputValuePresent) {
             // Clear the input element from possible bad input.
             getElement().executeJs("this._inputElementValue = ''");
-            fireEvent(new ClientValidatedEvent(this, false));
+            validate();
+            fireValidationStatusChangeEvent();
         } else {
             // Restore the input element's value in case it was cleared
             // in the above branch. That can happen when setValue(null)
             // and setValue(...) are subsequently called within one round-trip
             // and there was bad input.
             getElement().executeJs("this._inputElementValue = this.value");
+        }
+    }
+
+    @Override
+    protected void setModelValue(BigDecimal newModelValue, boolean fromClient) {
+        BigDecimal oldModelValue = getValue();
+
+        super.setModelValue(newModelValue, fromClient);
+
+        if (fromClient && valueEquals(oldModelValue, getEmptyValue())
+                && valueEquals(newModelValue, getEmptyValue())) {
+            validate();
+            fireValidationStatusChangeEvent();
         }
     }
 
@@ -299,10 +315,21 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
     @Override
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<BigDecimal> listener) {
-        return addClientValidatedEventListener(
-                event -> listener.validationStatusChanged(
-                        new ValidationStatusChangeEvent<BigDecimal>(this,
-                                !isInvalid())));
+        validationStatusChangeListeners.add(listener);
+        return () -> validationStatusChangeListeners.remove(listener);
+    }
+
+    /**
+     * Notifies Binder that it needs to revalidate the component since the
+     * component's validity state may have changed. Note, there is no need to
+     * notify Binder separately in the case of a ValueChangeEvent, as Binder
+     * already listens to this event and revalidates automatically.
+     */
+    private void fireValidationStatusChangeEvent() {
+        ValidationStatusChangeEvent<BigDecimal> event = new ValidationStatusChangeEvent<>(
+                this, !isInvalid());
+        validationStatusChangeListeners
+                .forEach(listener -> listener.validationStatusChanged(event));
     }
 
     /**

@@ -27,6 +27,7 @@ public class BigDecimalFieldBinderValidationPage
         extends AbstractValidationPage<BigDecimalField> {
     public static final String REQUIRED_ERROR_MESSAGE = "The field is required";
     public static final String CLEAR_VALUE_BUTTON = "clear-value-button";
+    public static final String RESET_BEAN_BUTTON = "reset-bean-button";
 
     public static class Bean {
         private BigDecimal property;
@@ -48,9 +49,16 @@ public class BigDecimalFieldBinderValidationPage
         binder = new Binder<>(Bean.class);
         binder.forField(testField).asRequired(REQUIRED_ERROR_MESSAGE)
                 .bind("property");
+        binder.addStatusChangeListener(event -> {
+            incrementServerValidationCounter();
+        });
 
         add(createButton(CLEAR_VALUE_BUTTON, "Clear value", event -> {
             testField.clear();
+        }));
+
+        add(createButton(RESET_BEAN_BUTTON, "Reset bean", event -> {
+            binder.setBean(new Bean());
         }));
     }
 

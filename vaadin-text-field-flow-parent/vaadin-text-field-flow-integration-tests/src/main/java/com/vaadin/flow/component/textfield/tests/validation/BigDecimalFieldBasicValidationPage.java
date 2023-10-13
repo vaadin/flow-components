@@ -38,6 +38,12 @@ public class BigDecimalFieldBasicValidationPage
     }
 
     protected BigDecimalField createTestField() {
-        return new BigDecimalField();
+        return new BigDecimalField() {
+            @Override
+            protected void validate() {
+                super.validate();
+                incrementServerValidationCounter();
+            }
+        };
     }
 }
