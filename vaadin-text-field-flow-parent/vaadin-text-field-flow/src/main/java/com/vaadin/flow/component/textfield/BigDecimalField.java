@@ -225,12 +225,16 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
         boolean isValueRemainedEmpty = valueEquals(oldValue, getEmptyValue())
                 && valueEquals(value, getEmptyValue());
 
+        // Reset hasInputValue when the value is cleared programmatically.
+        if (Objects.equals(value, getEmptyValue())) {
+            getElement().setProperty("_hasInputValue", false);
+        }
+
         super.setValue(value);
 
         if (isValueRemainedEmpty && isInputValuePresent) {
             // Clear the input element from possible bad input.
             getElement().executeJs("this._inputElementValue = ''");
-            getElement().setProperty("_hasInputValue", false);
             fireEvent(new ClientValidatedEvent(this, false));
         } else {
             // Restore the input element's value in case it was cleared

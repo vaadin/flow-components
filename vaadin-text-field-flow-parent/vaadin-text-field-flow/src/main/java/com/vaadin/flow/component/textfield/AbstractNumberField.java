@@ -61,17 +61,19 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
      * Sets up the common logic for number fields.
      *
      * @param parser
-     *            function to parse the client-side value string into
-     *            server-side value
+     *                    function to parse the client-side value string into
+     *                    server-side value
      * @param formatter
-     *            function to format the server-side value into client-side
-     *            value string
+     *                    function to format the server-side value into client-side
+     *                    value string
      * @param absoluteMin
-     *            the smallest possible value of the number type of the field,
-     *            will be used as the default min value at server-side
+     *                    the smallest possible value of the number type of the
+     *                    field,
+     *                    will be used as the default min value at server-side
      * @param absoluteMax
-     *            the largest possible value of the number type of the field,
-     *            will be used as the default max value at server-side
+     *                    the largest possible value of the number type of the
+     *                    field,
+     *                    will be used as the default max value at server-side
      */
     public AbstractNumberField(SerializableFunction<String, T> parser,
             SerializableFunction<T, String> formatter, double absoluteMin,
@@ -101,8 +103,8 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
      * @see #setStep(double)
      *
      * @param stepButtonsVisible
-     *            {@code true} if control buttons should be visible;
-     *            {@code false} if those should be hidden
+     *                           {@code true} if control buttons should be visible;
+     *                           {@code false} if those should be hidden
      */
     public void setStepButtonsVisible(boolean stepButtonsVisible) {
         getElement().setProperty("stepButtonsVisible", stepButtonsVisible);
@@ -132,7 +134,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
      * {@code getValue()}, fires a value change event.
      *
      * @param value
-     *            the new value
+     *              the new value
      */
     @Override
     public void setValue(T value) {
@@ -140,6 +142,11 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         boolean isInputValuePresent = isInputValuePresent();
         boolean isValueRemainedEmpty = valueEquals(oldValue, getEmptyValue())
                 && valueEquals(value, getEmptyValue());
+
+        // Reset hasInputValue when the value is cleared programmatically.
+        if (Objects.equals(value, getEmptyValue())) {
+            getElement().setProperty("_hasInputValue", false);
+        }
 
         super.setValue(value);
 
@@ -154,7 +161,6 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
             // `executeJs` can end up invoked after a non-empty value is set.
             getElement()
                     .executeJs("if (!this.value) this._inputElementValue = ''");
-            getElement().setProperty("_hasInputValue", false);
             fireEvent(new ClientValidatedEvent(this, false));
         }
     }
@@ -211,7 +217,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
      * Sets the allowed number intervals of the field.
      *
      * @param step
-     *            the double value to set
+     *             the double value to set
      */
     protected void setStep(double step) {
         getElement().setProperty("step", step);

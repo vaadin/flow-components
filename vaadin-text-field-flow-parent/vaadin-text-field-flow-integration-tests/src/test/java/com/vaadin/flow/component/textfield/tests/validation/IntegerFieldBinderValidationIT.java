@@ -151,6 +151,18 @@ public class IntegerFieldBinderValidationIT
     }
 
     @Test
+    public void setValue_clearValue_assertValidity() {
+        testField.setValue("2");
+        assertServerValid();
+        assertClientValid();
+
+        $("button").id(CLEAR_VALUE_BUTTON).click();
+        assertServerInvalid();
+        assertClientInvalid();
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
+    }
+
+    @Test
     public void badInput_setValue_clearValue_assertValidity() {
         testField.sendKeys("--2", Keys.TAB);
         assertServerInvalid();
