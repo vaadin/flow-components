@@ -66,7 +66,7 @@ import java.util.Objects;
  */
 @Tag("vaadin-map")
 @NpmPackage(value = "@vaadin/map", version = "24.3.0-alpha4")
-@NpmPackage(value = "proj4", version = "2.9.0")
+@NpmPackage(value = "proj4", version = "2.9.1")
 @JsModule("@vaadin/map/src/vaadin-map.js")
 @JsModule("./vaadin-map/mapConnector.js")
 public class Map extends MapBase {
