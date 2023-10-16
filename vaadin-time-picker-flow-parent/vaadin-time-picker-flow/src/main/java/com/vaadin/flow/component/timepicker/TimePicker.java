@@ -255,13 +255,14 @@ public class TimePicker
         }
 
         LocalTime oldValue = getValue();
+        boolean isOldValueEmpty = valueEquals(oldValue, getEmptyValue());
+        boolean isNewValueEmpty = valueEquals(value, getEmptyValue());
+        boolean isValueRemainedEmpty = isOldValueEmpty && isNewValueEmpty;
         boolean isInputValuePresent = isInputValuePresent();
-        boolean isValueRemainedEmpty = valueEquals(oldValue, getEmptyValue())
-                && valueEquals(value, getEmptyValue());
 
         // When the value is cleared programmatically, reset hasInputValue
         // so that the following validation doesn't treat this as bad input.
-        if (valueEquals(value, getEmptyValue())) {
+        if (isNewValueEmpty) {
             getElement().setProperty("_hasInputValue", false);
         }
 
