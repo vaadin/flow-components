@@ -1012,7 +1012,7 @@ public class RichTextEditor
         public void setValue(String value) {
             Objects.requireNonNull(value, "Delta value must not be null");
 
-            if (!Objects.equals(value, getValue())) {
+            if (!valueEquals(value, getValue())) {
                 RichTextEditor.this.getElement().setProperty("value", value);
                 // After setting delta value, manually sync back the updated
                 // HTML value, which will eventually trigger a server-side value

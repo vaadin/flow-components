@@ -525,7 +525,7 @@ public class DatePicker
     }
 
     private ValidationResult checkValidity(LocalDate value) {
-        boolean hasNonParsableValue = Objects.equals(value, getEmptyValue())
+        boolean hasNonParsableValue = valueEquals(value, getEmptyValue())
                 && isInputValuePresent();
         if (hasNonParsableValue) {
             return ValidationResult.error("");
@@ -576,8 +576,8 @@ public class DatePicker
         super.setValue(value);
 
         // Clear the input element from possible bad input.
-        if (Objects.equals(oldValue, getEmptyValue())
-                && Objects.equals(value, getEmptyValue())
+        if (valueEquals(oldValue, getEmptyValue())
+                && valueEquals(value, getEmptyValue())
                 && isInputValuePresent()) {
             // The check for value presence guarantees that a non-empty value
             // won't get cleared when setValue(null) and setValue(...) are
