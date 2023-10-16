@@ -65,8 +65,7 @@ public class TextFieldTest {
     public void initialValueIsNotSpecified_valuePropertyHasEmptyString() {
         TextField textField = new TextField();
         Assert.assertEquals("", textField.getValue());
-        Assert.assertEquals("",
-                textField.getElement().getProperty("value"));
+        Assert.assertEquals("", textField.getElement().getProperty("value"));
     }
 
     @Test

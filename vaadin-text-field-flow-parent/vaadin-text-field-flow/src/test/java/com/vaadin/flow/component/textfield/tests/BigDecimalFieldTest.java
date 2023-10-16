@@ -69,7 +69,8 @@ public class BigDecimalFieldTest extends TextFieldTest {
 
     @Override
     @Test
-    public void initialValueIsNull_valuePropertyHasEmptyString() {}
+    public void initialValueIsNull_valuePropertyHasEmptyString() {
+    }
 
     @Override
     @Test
@@ -90,7 +91,8 @@ public class BigDecimalFieldTest extends TextFieldTest {
         Mockito.when(instantiator.createComponent(BigDecimalField.class))
                 .thenAnswer(invocation -> new BigDecimalField());
 
-        BigDecimalField bigDecimalField = Component.from(element, BigDecimalField.class);
+        BigDecimalField bigDecimalField = Component.from(element,
+                BigDecimalField.class);
         Assert.assertEquals("1",
                 bigDecimalField.getElement().getProperty("value"));
     }

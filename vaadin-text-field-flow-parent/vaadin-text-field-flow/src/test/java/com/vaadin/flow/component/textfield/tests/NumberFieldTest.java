@@ -62,13 +62,13 @@ public class NumberFieldTest extends TextFieldTest {
     public void initialValueIsNotSpecified_valuePropertyHasEmptyString() {
         NumberField numberField = new NumberField();
         Assert.assertNull(numberField.getValue());
-        Assert.assertEquals("",
-                numberField.getElement().getProperty("value"));
+        Assert.assertEquals("", numberField.getElement().getProperty("value"));
     }
 
     @Override
     @Test
-    public void initialValueIsNull_valuePropertyHasEmptyString() {}
+    public void initialValueIsNull_valuePropertyHasEmptyString() {
+    }
 
     @Override
     @Test
@@ -90,8 +90,7 @@ public class NumberFieldTest extends TextFieldTest {
                 .thenAnswer(invocation -> new NumberField());
 
         NumberField numberField = Component.from(element, NumberField.class);
-        Assert.assertEquals("1",
-                numberField.getElement().getProperty("value"));
+        Assert.assertEquals("1", numberField.getElement().getProperty("value"));
     }
 
     @Test(expected = IllegalArgumentException.class)

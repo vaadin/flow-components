@@ -63,8 +63,7 @@ public class TextAreaTest {
     public void initialValueIsNotSpecified_valuePropertyHasEmptyString() {
         TextArea textArea = new TextArea();
         Assert.assertEquals("", textArea.getValue());
-        Assert.assertEquals("",
-                textArea.getElement().getProperty("value"));
+        Assert.assertEquals("", textArea.getElement().getProperty("value"));
     }
 
     @Test
@@ -93,8 +92,7 @@ public class TextAreaTest {
                 .thenAnswer(invocation -> new TextArea());
 
         TextArea textArea = Component.from(element, TextArea.class);
-        Assert.assertEquals("test",
-                textArea.getElement().getProperty("value"));
+        Assert.assertEquals("test", textArea.getElement().getProperty("value"));
     }
 
     @Test

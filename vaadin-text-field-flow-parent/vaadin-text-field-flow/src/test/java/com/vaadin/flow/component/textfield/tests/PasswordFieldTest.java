@@ -70,7 +70,8 @@ public class PasswordFieldTest {
     public void initialValueIsNull_valuePropertyHasEmptyString() {
         PasswordField passwordField = new PasswordField((String) null);
         Assert.assertEquals("", passwordField.getValue());
-        Assert.assertEquals("", passwordField.getElement().getProperty("value"));
+        Assert.assertEquals("",
+                passwordField.getElement().getProperty("value"));
     }
 
     @Test
@@ -91,7 +92,8 @@ public class PasswordFieldTest {
         Mockito.when(instantiator.createComponent(PasswordField.class))
                 .thenAnswer(invocation -> new PasswordField());
 
-        PasswordField passwordField = Component.from(element, PasswordField.class);
+        PasswordField passwordField = Component.from(element,
+                PasswordField.class);
         Assert.assertEquals("test",
                 passwordField.getElement().getProperty("value"));
     }

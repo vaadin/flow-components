@@ -63,8 +63,7 @@ public class EmailFieldTest {
     public void initialValueIsNotSpecified_valuePropertyHasEmptyString() {
         EmailField emailField = new EmailField();
         Assert.assertEquals("", emailField.getValue());
-        Assert.assertEquals("",
-                emailField.getElement().getProperty("value"));
+        Assert.assertEquals("", emailField.getElement().getProperty("value"));
     }
 
     @Test

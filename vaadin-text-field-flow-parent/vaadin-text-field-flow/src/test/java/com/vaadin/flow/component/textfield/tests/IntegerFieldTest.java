@@ -69,13 +69,13 @@ public class IntegerFieldTest extends TextFieldTest {
     public void initialValueIsNotSpecified_valuePropertyHasEmptyString() {
         IntegerField integerField = new IntegerField();
         Assert.assertNull(integerField.getValue());
-        Assert.assertEquals("",
-                integerField.getElement().getProperty("value"));
+        Assert.assertEquals("", integerField.getElement().getProperty("value"));
     }
 
     @Override
     @Test
-    public void initialValueIsNull_valuePropertyHasEmptyString() {}
+    public void initialValueIsNull_valuePropertyHasEmptyString() {
+    }
 
     @Override
     @Test
