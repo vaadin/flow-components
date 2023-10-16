@@ -64,7 +64,7 @@ class DateTimePickerDatePicker
     void passThroughPresentationValue(LocalDate newPresentationValue) {
         super.setPresentationValue(newPresentationValue);
 
-        if (Objects.equals(newPresentationValue, getEmptyValue())
+        if (valueEquals(newPresentationValue, getEmptyValue())
                 && isInputValuePresent()) {
             // Clear the input element from possible bad input.
             getElement().executeJs("this.inputElement.value = ''");
@@ -89,7 +89,7 @@ class DateTimePickerTimePicker
     void passThroughPresentationValue(LocalTime newPresentationValue) {
         super.setPresentationValue(newPresentationValue);
 
-        if (Objects.equals(newPresentationValue, getEmptyValue())
+        if (valueEquals(newPresentationValue, getEmptyValue())
                 && isInputValuePresent()) {
             // Clear the input element from possible bad input.
             getElement().executeJs("this.inputElement.value = ''");
@@ -324,8 +324,8 @@ public class DateTimePicker extends
 
         boolean isInputValuePresent = timePicker.isInputValuePresent()
                 || datePicker.isInputValuePresent();
-        boolean isValueRemainedEmpty = Objects.equals(oldValue, getEmptyValue())
-                && Objects.equals(value, getEmptyValue());
+        boolean isValueRemainedEmpty = valueEquals(oldValue, getEmptyValue())
+                && valueEquals(value, getEmptyValue());
         if (isValueRemainedEmpty && isInputValuePresent) {
             // Clear the input elements from possible bad input.
             synchronizeChildComponentValues(value);

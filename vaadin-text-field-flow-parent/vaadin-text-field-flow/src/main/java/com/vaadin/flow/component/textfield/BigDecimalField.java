@@ -221,12 +221,13 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
     @Override
     public void setValue(BigDecimal value) {
         BigDecimal oldValue = getValue();
+        boolean isInputValuePresent = isInputValuePresent();
+        boolean isValueRemainedEmpty = valueEquals(oldValue, getEmptyValue())
+                && valueEquals(value, getEmptyValue());
 
         super.setValue(value);
 
-        if (Objects.equals(oldValue, getEmptyValue())
-                && Objects.equals(value, getEmptyValue())
-                && isInputValuePresent()) {
+        if (isValueRemainedEmpty && isInputValuePresent) {
             // Clear the input element from possible bad input.
             getElement().executeJs("this._inputElementValue = ''");
             getElement().setProperty("_hasInputValue", false);
@@ -275,7 +276,7 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
     }
 
     private ValidationResult checkValidity(BigDecimal value) {
-        boolean hasNonParsableValue = Objects.equals(value, getEmptyValue())
+        boolean hasNonParsableValue = valueEquals(value, getEmptyValue())
                 && isInputValuePresent();
         if (hasNonParsableValue) {
             return ValidationResult.error("");
