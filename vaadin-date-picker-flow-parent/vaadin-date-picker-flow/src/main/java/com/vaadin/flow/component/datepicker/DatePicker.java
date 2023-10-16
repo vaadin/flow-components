@@ -573,6 +573,8 @@ public class DatePicker
     public void setValue(LocalDate value) {
         LocalDate oldValue = getValue();
         boolean isInputValuePresent = isInputValuePresent();
+        boolean isValueRemainedEmpty = valueEquals(oldValue, getEmptyValue())
+                && valueEquals(value, getEmptyValue());
 
         // When the value is cleared programmatically, reset hasInputValue
         // so that the following validation doesn't treat this as bad input.
@@ -583,9 +585,7 @@ public class DatePicker
         super.setValue(value);
 
         // Clear the input element from possible bad input.
-        if (valueEquals(oldValue, getEmptyValue())
-                && valueEquals(value, getEmptyValue())
-                && isInputValuePresent) {
+        if (isValueRemainedEmpty && isInputValuePresent) {
             // The check for value presence guarantees that a non-empty value
             // won't get cleared when setValue(null) and setValue(...) are
             // subsequently called within one round-trip.
