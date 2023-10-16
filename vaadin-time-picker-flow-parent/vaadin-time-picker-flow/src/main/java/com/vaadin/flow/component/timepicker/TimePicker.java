@@ -255,13 +255,14 @@ public class TimePicker
         }
 
         LocalTime oldValue = getValue();
+        boolean isInputValuePresent = isInputValuePresent();
+        boolean isValueRemainedEmpty = valueEquals(oldValue, getEmptyValue())
+                && valueEquals(value, getEmptyValue());
 
         super.setValue(value);
 
         // Clear the input element from possible bad input.
-        if (Objects.equals(oldValue, getEmptyValue())
-                && Objects.equals(value, getEmptyValue())
-                && isInputValuePresent()) {
+        if (isValueRemainedEmpty && isInputValuePresent) {
             // The check for value presence guarantees that a non-empty value
             // won't get cleared when setValue(null) and setValue(...) are
             // subsequently called within one round-trip.
