@@ -269,7 +269,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           let buffer = end - start;
 
           let firstNeededIndex = Math.max(0, start - buffer);
-          let lastNeededIndex = Math.min(end + buffer, grid._effectiveSize);
+          let lastNeededIndex = Math.min(end + buffer, grid._flatSize);
 
           let firstNeededPage = page;
           let lastNeededPage = page;
@@ -568,16 +568,16 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
          * Updates all visible grid rows in DOM.
          */
         const updateAllGridRowsInDomBasedOnCache = function () {
-          updateGridEffectiveSize();
+          updateGridFlatSize();
           grid.__updateVisibleRows();
         };
 
         /**
-         * Updates the <vaadin-grid>'s internal cache size and effective size.
+         * Updates the <vaadin-grid>'s internal cache size and flat size.
          */
-        const updateGridEffectiveSize = function () {
-          dataProviderController.recalculateEffectiveSize();
-          grid._effectiveSize = dataProviderController.effectiveSize;
+        const updateGridFlatSize = function () {
+          dataProviderController.recalculateFlatSize();
+          grid._flatSize = dataProviderController.flatSize;
         };
 
         /**
@@ -743,7 +743,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             delete cacheToClear.items[itemIndex];
             cacheToClear.removeSubCache(itemIndex);
           }
-          updateGridEffectiveSize();
+          updateGridFlatSize();
         });
 
         grid.$connector.reset = tryCatchWrapper(function () {
@@ -815,7 +815,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           }
 
           // If grid has outstanding requests for this parent, then resolve them
-          // and let grid update the effective size and re-render.
+          // and let grid update the flat size and re-render.
           let outstandingRequests = Object.getOwnPropertyNames(treePageCallbacks[parentKey] || {});
           for (let i = 0; i < outstandingRequests.length; i++) {
             let page = outstandingRequests[i];
@@ -850,7 +850,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             if (itemCache) {
               itemCache.size = levelSize;
             }
-            updateGridEffectiveSize();
+            updateGridFlatSize();
           }
 
           // Let server know we're done

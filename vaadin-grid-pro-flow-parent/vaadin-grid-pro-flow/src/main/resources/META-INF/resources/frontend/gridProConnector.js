@@ -44,9 +44,6 @@
         // Not needed in case of custom editor as value is set on server-side.
         // Overridden in order to avoid blinking of the cell content.
         column._setEditorValue = function (editor, value) {};
-        column._getEditorValue = function (editor) {
-          return;
-        };
       })(column, component),
 
     patchEditModeRenderer: (column) =>

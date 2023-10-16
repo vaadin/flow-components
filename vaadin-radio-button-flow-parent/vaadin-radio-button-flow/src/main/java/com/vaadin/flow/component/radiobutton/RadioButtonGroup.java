@@ -72,9 +72,9 @@ import java.util.stream.Stream;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-radio-group")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha5")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/radio-group", version = "24.3.0-alpha1")
+@NpmPackage(value = "@vaadin/radio-group", version = "24.3.0-alpha5")
 @JsModule("@vaadin/radio-group/src/vaadin-radio-group.js")
 public class RadioButtonGroup<T>
         extends AbstractSinglePropertyField<RadioButtonGroup<T>, T>
@@ -373,8 +373,8 @@ public class RadioButtonGroup<T>
     @Override
     public void setValue(T value) {
         super.setValue(value);
-        getRadioButtons().forEach(
-                rb -> rb.setChecked(Objects.equals(rb.getItem(), value)));
+        getRadioButtons()
+                .forEach(rb -> rb.setChecked(valueEquals(rb.getItem(), value)));
         refreshButtons();
     }
 

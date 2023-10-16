@@ -81,9 +81,9 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-date-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha5")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/date-picker", version = "24.3.0-alpha1")
+@NpmPackage(value = "@vaadin/date-picker", version = "24.3.0-alpha5")
 @JsModule("@vaadin/date-picker/src/vaadin-date-picker.js")
 @JsModule("./datepickerConnector.js")
 @NpmPackage(value = "date-fns", version = "2.29.3")
@@ -525,7 +525,7 @@ public class DatePicker
     }
 
     private ValidationResult checkValidity(LocalDate value) {
-        boolean hasNonParsableValue = Objects.equals(value, getEmptyValue())
+        boolean hasNonParsableValue = valueEquals(value, getEmptyValue())
                 && isInputValuePresent();
         if (hasNonParsableValue) {
             return ValidationResult.error("");
@@ -576,8 +576,8 @@ public class DatePicker
         super.setValue(value);
 
         // Clear the input element from possible bad input.
-        if (Objects.equals(oldValue, getEmptyValue())
-                && Objects.equals(value, getEmptyValue())
+        if (valueEquals(oldValue, getEmptyValue())
+                && valueEquals(value, getEmptyValue())
                 && isInputValuePresent()) {
             // The check for value presence guarantees that a non-empty value
             // won't get cleared when setValue(null) and setValue(...) are

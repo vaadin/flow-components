@@ -67,9 +67,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-time-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha5")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/time-picker", version = "24.3.0-alpha1")
+@NpmPackage(value = "@vaadin/time-picker", version = "24.3.0-alpha5")
 @JsModule("@vaadin/time-picker/src/vaadin-time-picker.js")
 @JsModule("./vaadin-time-picker/timepickerConnector.js")
 public class TimePicker
@@ -255,13 +255,14 @@ public class TimePicker
         }
 
         LocalTime oldValue = getValue();
+        boolean isInputValuePresent = isInputValuePresent();
+        boolean isValueRemainedEmpty = valueEquals(oldValue, getEmptyValue())
+                && valueEquals(value, getEmptyValue());
 
         super.setValue(value);
 
         // Clear the input element from possible bad input.
-        if (Objects.equals(oldValue, getEmptyValue())
-                && Objects.equals(value, getEmptyValue())
-                && isInputValuePresent()) {
+        if (isValueRemainedEmpty && isInputValuePresent) {
             // The check for value presence guarantees that a non-empty value
             // won't get cleared when setValue(null) and setValue(...) are
             // subsequently called within one round-trip.

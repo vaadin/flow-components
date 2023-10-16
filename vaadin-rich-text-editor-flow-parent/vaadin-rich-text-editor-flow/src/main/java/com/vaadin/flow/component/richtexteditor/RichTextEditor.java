@@ -54,9 +54,9 @@ import elemental.json.JsonObject;
  *
  */
 @Tag("vaadin-rich-text-editor")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha5")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/rich-text-editor", version = "24.3.0-alpha1")
+@NpmPackage(value = "@vaadin/rich-text-editor", version = "24.3.0-alpha5")
 @JsModule("@vaadin/rich-text-editor/src/vaadin-rich-text-editor.js")
 public class RichTextEditor
         extends AbstractSinglePropertyField<RichTextEditor, String>
@@ -1016,7 +1016,7 @@ public class RichTextEditor
         public void setValue(String value) {
             Objects.requireNonNull(value, "Delta value must not be null");
 
-            if (!Objects.equals(value, getValue())) {
+            if (!valueEquals(value, getValue())) {
                 RichTextEditor.this.getElement().setProperty("value", value);
                 // After setting delta value, manually sync back the updated
                 // HTML value, which will eventually trigger a server-side value

@@ -64,7 +64,7 @@ class DateTimePickerDatePicker
     void passThroughPresentationValue(LocalDate newPresentationValue) {
         super.setPresentationValue(newPresentationValue);
 
-        if (Objects.equals(newPresentationValue, getEmptyValue())
+        if (valueEquals(newPresentationValue, getEmptyValue())
                 && isInputValuePresent()) {
             // Clear the input element from possible bad input.
             getElement().executeJs("this.inputElement.value = ''");
@@ -89,7 +89,7 @@ class DateTimePickerTimePicker
     void passThroughPresentationValue(LocalTime newPresentationValue) {
         super.setPresentationValue(newPresentationValue);
 
-        if (Objects.equals(newPresentationValue, getEmptyValue())
+        if (valueEquals(newPresentationValue, getEmptyValue())
                 && isInputValuePresent()) {
             // Clear the input element from possible bad input.
             getElement().executeJs("this.inputElement.value = ''");
@@ -113,9 +113,9 @@ class DateTimePickerTimePicker
  * @author Vaadin Ltd
  */
 @Tag("vaadin-date-time-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha5")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/date-time-picker", version = "24.3.0-alpha1")
+@NpmPackage(value = "@vaadin/date-time-picker", version = "24.3.0-alpha5")
 @JsModule("@vaadin/date-time-picker/src/vaadin-date-time-picker.js")
 public class DateTimePicker extends
         AbstractSinglePropertyField<DateTimePicker, LocalDateTime> implements
@@ -324,8 +324,8 @@ public class DateTimePicker extends
 
         boolean isInputValuePresent = timePicker.isInputValuePresent()
                 || datePicker.isInputValuePresent();
-        boolean isValueRemainedEmpty = Objects.equals(oldValue, getEmptyValue())
-                && Objects.equals(value, getEmptyValue());
+        boolean isValueRemainedEmpty = valueEquals(oldValue, getEmptyValue())
+                && valueEquals(value, getEmptyValue());
         if (isValueRemainedEmpty && isInputValuePresent) {
             // Clear the input elements from possible bad input.
             synchronizeChildComponentValues(value);

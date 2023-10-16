@@ -45,9 +45,9 @@ import elemental.json.JsonObject;
 import org.slf4j.LoggerFactory;
 
 @Tag("vaadin-grid-pro")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha5")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/grid-pro", version = "24.3.0-alpha1")
+@NpmPackage(value = "@vaadin/grid-pro", version = "24.3.0-alpha5")
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro.js")
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro-edit-column.js")
 @JsModule("./gridProConnector.js")
@@ -122,17 +122,18 @@ public class GridPro<E> extends Grid<E> {
                 column.getItemUpdater().accept(e.getItem(),
                         e.getSourceItem().get(e.getPath()).asString());
             }
-            Object idAfterUpdate = getItemId(e.getItem());
 
-            if (!Objects.equals(idBeforeUpdate, idAfterUpdate)) {
-                LoggerFactory.getLogger(GridPro.class).warn(
-                        "An item updater modified the data provider ID of the edited item, which is not allowed. "
-                                + "This can happen with classes that implement hashCode using fields that can be edited. "
-                                + "Either change the hashCode implementation so that it does not rely on editable fields, or "
-                                + "override DataProvider.getId() to generate a stable ID that does not change when editing fields.");
+            if (!column.isManualRefresh()) {
+                Object idAfterUpdate = getItemId(e.getItem());
+                if (!Objects.equals(idBeforeUpdate, idAfterUpdate)) {
+                    LoggerFactory.getLogger(GridPro.class).warn(
+                            "An item updater modified the data provider ID of the edited item, which is not allowed. "
+                                    + "This can happen with classes that implement hashCode using fields that can be edited. "
+                                    + "Either change the hashCode implementation so that it does not rely on editable fields, or "
+                                    + "override DataProvider.getId() to generate a stable ID that does not change when editing fields.");
+                }
+                getDataProvider().refreshItem(e.getItem());
             }
-
-            getDataProvider().refreshItem(e.getItem());
         });
 
         addCellEditStartedListener(e -> {
@@ -184,13 +185,14 @@ public class GridPro<E> extends Grid<E> {
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-pro-edit-column")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha1")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha5")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class EditColumn<T> extends Column<T> {
 
         private ItemUpdater<T, String> itemUpdater;
         private HasValueAndElement editorField;
         private ValueProvider<T, ?> valueProvider;
+        private boolean manualRefresh = false;
 
         /**
          * Constructs a new Column for use inside a Grid.
@@ -294,6 +296,14 @@ public class GridPro<E> extends Grid<E> {
 
         public void setValueProvider(ValueProvider<T, ?> valueProvider) {
             this.valueProvider = valueProvider;
+        }
+
+        boolean isManualRefresh() {
+            return manualRefresh;
+        }
+
+        void setManualRefresh(boolean manualRefresh) {
+            this.manualRefresh = manualRefresh;
         }
     }
 
