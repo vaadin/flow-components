@@ -143,7 +143,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
 
         // When the value is cleared programmatically, reset hasInputValue
         // so that the following validation doesn't treat this as bad input.
-        if (Objects.equals(value, getEmptyValue())) {
+        if (valueEquals(value, getEmptyValue())) {
             getElement().setProperty("_hasInputValue", false);
         }
 
