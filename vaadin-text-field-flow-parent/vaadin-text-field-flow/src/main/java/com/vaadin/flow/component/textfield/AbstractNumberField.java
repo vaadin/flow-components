@@ -137,9 +137,16 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     @Override
     public void setValue(T value) {
         T oldValue = getValue();
+        boolean isOldValueEmpty = valueEquals(oldValue, getEmptyValue());
+        boolean isNewValueEmpty = valueEquals(value, getEmptyValue());
+        boolean isValueRemainedEmpty = isOldValueEmpty && isNewValueEmpty;
         boolean isInputValuePresent = isInputValuePresent();
-        boolean isValueRemainedEmpty = valueEquals(oldValue, getEmptyValue())
-                && valueEquals(value, getEmptyValue());
+
+        // When the value is cleared programmatically, reset hasInputValue
+        // so that the following validation doesn't treat this as bad input.
+        if (isNewValueEmpty) {
+            getElement().setProperty("_hasInputValue", false);
+        }
 
         super.setValue(value);
 
@@ -154,7 +161,6 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
             // `executeJs` can end up invoked after a non-empty value is set.
             getElement()
                     .executeJs("if (!this.value) this._inputElementValue = ''");
-            getElement().setProperty("_hasInputValue", false);
             fireEvent(new ClientValidatedEvent(this, false));
         }
     }

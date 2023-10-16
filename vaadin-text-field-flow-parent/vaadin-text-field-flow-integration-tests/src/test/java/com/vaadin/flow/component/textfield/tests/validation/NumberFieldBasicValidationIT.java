@@ -160,6 +160,17 @@ public class NumberFieldBasicValidationIT
     }
 
     @Test
+    public void setValue_clearValue_assertValidity() {
+        testField.setValue("2");
+        assertServerValid();
+        assertClientValid();
+
+        $("button").id(CLEAR_VALUE_BUTTON).click();
+        assertServerValid();
+        assertClientValid();
+    }
+
+    @Test
     public void badInput_setValue_clearValue_assertValidity() {
         testField.sendKeys("--2", Keys.TAB);
         assertServerInvalid();

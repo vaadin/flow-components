@@ -99,6 +99,17 @@ public class BasicValidationIT extends AbstractValidationIT<DatePickerElement> {
     }
 
     @Test
+    public void setValue_clearValue_assertValidity() {
+        testField.setInputValue("1/1/2022");
+        assertServerValid();
+        assertClientValid();
+
+        $("button").id(CLEAR_VALUE_BUTTON).click();
+        assertServerValid();
+        assertClientValid();
+    }
+
+    @Test
     public void badInput_setValue_clearValue_assertValidity() {
         testField.setInputValue("INVALID");
         assertServerInvalid();

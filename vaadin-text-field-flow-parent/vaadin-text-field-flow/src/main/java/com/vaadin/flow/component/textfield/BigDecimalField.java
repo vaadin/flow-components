@@ -221,16 +221,22 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
     @Override
     public void setValue(BigDecimal value) {
         BigDecimal oldValue = getValue();
+        boolean isOldValueEmpty = valueEquals(oldValue, getEmptyValue());
+        boolean isNewValueEmpty = valueEquals(value, getEmptyValue());
+        boolean isValueRemainedEmpty = isOldValueEmpty && isNewValueEmpty;
         boolean isInputValuePresent = isInputValuePresent();
-        boolean isValueRemainedEmpty = valueEquals(oldValue, getEmptyValue())
-                && valueEquals(value, getEmptyValue());
+
+        // When the value is cleared programmatically, reset hasInputValue
+        // so that the following validation doesn't treat this as bad input.
+        if (isNewValueEmpty) {
+            getElement().setProperty("_hasInputValue", false);
+        }
 
         super.setValue(value);
 
         if (isValueRemainedEmpty && isInputValuePresent) {
             // Clear the input element from possible bad input.
             getElement().executeJs("this._inputElementValue = ''");
-            getElement().setProperty("_hasInputValue", false);
             fireEvent(new ClientValidatedEvent(this, false));
         } else {
             // Restore the input element's value in case it was cleared
