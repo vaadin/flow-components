@@ -309,7 +309,7 @@ public abstract class TextFieldBase<TComponent extends TextFieldBase<TComponent,
         super("value", defaultValue, elementPropertyType, presentationToModel,
                 modelToPresentation);
         if ((getElement().getProperty("value") == null
-                || !isInitialValueOptional) && initialValue != null) {
+                || !isInitialValueOptional)) {
             setPresentationValue(initialValue);
         }
     }
@@ -349,7 +349,7 @@ public abstract class TextFieldBase<TComponent extends TextFieldBase<TComponent,
         super("value", defaultValue, elementPropertyType, presentationToModel,
                 modelToPresentation);
         if ((getElement().getProperty("value") == null
-                || !isInitialValueOptional) && initialValue != null) {
+                || !isInitialValueOptional)) {
             setPresentationValue(initialValue);
         }
     }
@@ -377,7 +377,7 @@ public abstract class TextFieldBase<TComponent extends TextFieldBase<TComponent,
             boolean acceptNullValues, boolean isInitialValueOptional) {
         super("value", defaultValue, acceptNullValues);
         if ((getElement().getProperty("value") == null
-                || !isInitialValueOptional) && initialValue != null) {
+                || !isInitialValueOptional)) {
             setPresentationValue(initialValue);
         }
     }

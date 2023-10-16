@@ -16,17 +16,25 @@
 package com.vaadin.flow.component.textfield.tests;
 
 import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasAriaLabel;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextFieldVariant;
+import com.vaadin.flow.di.Instantiator;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ThemeList;
+import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.VaadinSession;
+
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.mockito.Mockito;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -52,9 +60,40 @@ public class EmailFieldTest {
     }
 
     @Test
-    public void initialValuePropertyValue() {
+    public void initialValueIsNotSpecified_valuePropertyHasEmptyString() {
         EmailField emailField = new EmailField();
-        assertEquals(emailField.getEmptyValue(),
+        Assert.assertEquals("", emailField.getValue());
+        Assert.assertEquals("",
+                emailField.getElement().getProperty("value"));
+    }
+
+    @Test
+    public void initialValueIsNull_valuePropertyHasEmptyString() {
+        EmailField emailField = new EmailField((String) null);
+        Assert.assertEquals("", emailField.getValue());
+        Assert.assertEquals("", emailField.getElement().getProperty("value"));
+    }
+
+    @Test
+    public void createElementWithValue_createComponentInstanceFromElement_valuePropertyMatchesValue() {
+        Element element = new Element("vaadin-email-field");
+        element.setProperty("value", "foo@example.com");
+        UI ui = new UI();
+        UI.setCurrent(ui);
+        VaadinSession session = Mockito.mock(VaadinSession.class);
+        ui.getInternals().setSession(session);
+        VaadinService service = Mockito.mock(VaadinService.class);
+        Mockito.when(session.getService()).thenReturn(service);
+
+        Instantiator instantiator = Mockito.mock(Instantiator.class);
+
+        Mockito.when(service.getInstantiator()).thenReturn(instantiator);
+
+        Mockito.when(instantiator.createComponent(EmailField.class))
+                .thenAnswer(invocation -> new EmailField());
+
+        EmailField emailField = Component.from(element, EmailField.class);
+        Assert.assertEquals("foo@example.com",
                 emailField.getElement().getProperty("value"));
     }
 

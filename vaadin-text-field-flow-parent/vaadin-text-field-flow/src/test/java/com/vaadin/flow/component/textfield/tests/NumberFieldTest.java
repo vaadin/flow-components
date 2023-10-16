@@ -15,15 +15,23 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasAriaLabel;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextFieldVariant;
+import com.vaadin.flow.di.Instantiator;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ThemeList;
+import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.VaadinSession;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import java.util.Arrays;
 
@@ -51,9 +59,39 @@ public class NumberFieldTest extends TextFieldTest {
 
     @Override
     @Test
-    public void initialValuePropertyValue() {
-        assertEquals(field.getEmptyValue(),
-                field.getElement().getProperty("value"));
+    public void initialValueIsNotSpecified_valuePropertyHasEmptyString() {
+        NumberField numberField = new NumberField();
+        Assert.assertNull(numberField.getValue());
+        Assert.assertEquals("",
+                numberField.getElement().getProperty("value"));
+    }
+
+    @Override
+    @Test
+    public void initialValueIsNull_valuePropertyHasEmptyString() {}
+
+    @Override
+    @Test
+    public void createElementWithValue_createComponentInstanceFromElement_valuePropertyMatchesValue() {
+        Element element = new Element("vaadin-number-field");
+        element.setProperty("value", "1");
+        UI ui = new UI();
+        UI.setCurrent(ui);
+        VaadinSession session = Mockito.mock(VaadinSession.class);
+        ui.getInternals().setSession(session);
+        VaadinService service = Mockito.mock(VaadinService.class);
+        Mockito.when(session.getService()).thenReturn(service);
+
+        Instantiator instantiator = Mockito.mock(Instantiator.class);
+
+        Mockito.when(service.getInstantiator()).thenReturn(instantiator);
+
+        Mockito.when(instantiator.createComponent(NumberField.class))
+                .thenAnswer(invocation -> new NumberField());
+
+        NumberField numberField = Component.from(element, NumberField.class);
+        Assert.assertEquals("1",
+                numberField.getElement().getProperty("value"));
     }
 
     @Test(expected = IllegalArgumentException.class)
