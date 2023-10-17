@@ -32,6 +32,9 @@ public class MenuBarTestPage extends Div {
     public static final String MENU_ITEM_THEME = "menu-item-theme";
     public static final String SUB_ITEM_THEME = "sub-item-theme";
 
+    public static final String MENU_ITEM_CLASSNAME = "menu-item-class-name";
+    public static final String MENU_ITEM_CLASSNAME_SET = "item1-class-name-set";
+
     public MenuBarTestPage() {
         MenuBar menuBar = new MenuBar();
         add(menuBar);
@@ -146,12 +149,28 @@ public class MenuBarTestPage extends Div {
                 });
         toggleSubItemThemeButton.setId("toggle-sub-theme");
 
+        NativeButton toggleClassNameButton = new NativeButton(
+            "toggle item class", e -> {
+            if (item1.hasClassName(MENU_ITEM_CLASSNAME)) {
+                item1.removeClassName(MENU_ITEM_CLASSNAME);
+            } else {
+                item1.addClassName(MENU_ITEM_CLASSNAME);
+            }
+        });
+        toggleClassNameButton.setId("toggle-item1-class-name");
+
+        NativeButton setItemClassNameButton = new NativeButton(
+            "set item class", e -> {
+            item1.setClassName(MENU_ITEM_CLASSNAME_SET);
+        });
+        setItemClassNameButton.setId("set-item1-class-name");
+
         add(new Hr(), addRootItemButton, addSubItemButton, removeItemButton,
                 openOnHoverButton, setWidthButton, resetWidthButton,
                 disableItemButton, toggleItem1VisibilityButton,
                 toggleItem2VisibilityButton, checkedButton,
                 toggleAttachedButton, setI18nButton, toggleAttachedButton,
                 toggleMenuBarThemeButton, toggleItem1ThemeButton,
-                toggleSubItemThemeButton);
+                toggleSubItemThemeButton, toggleClassNameButton, setItemClassNameButton);
     }
 }

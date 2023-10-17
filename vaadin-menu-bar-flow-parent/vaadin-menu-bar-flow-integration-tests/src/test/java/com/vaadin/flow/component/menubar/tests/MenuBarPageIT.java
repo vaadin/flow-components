@@ -442,6 +442,33 @@ public class MenuBarPageIT extends AbstractComponentIT {
     }
 
     @Test
+    public void toggleMenuItemClassName_classNameIsToggled() {
+        TestBenchElement menuButton1 = menuBar.getButtons().get(0);
+        Assert.assertFalse(menuButton1.hasAttribute("class"));
+        click("toggle-item1-class-name");
+        menuButton1 = menuBar.getButtons().get(0);
+        Assert.assertEquals(menuButton1.getAttribute("class"),
+            MenuBarTestPage.MENU_ITEM_CLASSNAME);
+        click("toggle-item1-class-name");
+        menuButton1 = menuBar.getButtons().get(0);
+        Assert.assertFalse(menuButton1.hasAttribute("class"));
+    }
+
+    @Test
+    public void setMenuItemClassName_classNameIsSet() {
+        TestBenchElement menuButton1 = menuBar.getButtons().get(0);
+        Assert.assertFalse(menuButton1.hasAttribute("class"));
+        click("toggle-item1-class-name");
+        menuButton1 = menuBar.getButtons().get(0);
+        Assert.assertEquals(menuButton1.getAttribute("class"),
+            MenuBarTestPage.MENU_ITEM_CLASSNAME);
+        click("set-item1-class-name");
+        menuButton1 = menuBar.getButtons().get(0);
+        Assert.assertEquals(menuButton1.getAttribute("class"),
+            MenuBarTestPage.MENU_ITEM_CLASSNAME_SET);
+    }
+
+    @Test
     public void setMenuItemTheme_toggleVisibility_themeIsPreserved() {
         click("toggle-item-1-theme");
         click("toggle-item-1-visibility");
