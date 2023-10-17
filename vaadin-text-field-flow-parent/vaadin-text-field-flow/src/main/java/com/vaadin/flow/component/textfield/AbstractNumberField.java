@@ -97,6 +97,14 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
             validate();
             fireValidationStatusChangeEvent();
         });
+
+        getElement().addEventListener("has-input-value-changed", e -> {
+            if (getValueChangeMode().equals(ValueChangeMode.EAGER)
+                    && valueEquals(getValue(), getEmptyValue())) {
+                validate();
+                fireValidationStatusChangeEvent();
+            }
+        });
     }
 
     /**
