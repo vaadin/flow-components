@@ -60,6 +60,18 @@ public class AvatarGroupPage extends Div {
                 });
         setItemsWithResource.setId("set-items-with-resource");
 
-        add(avatarGroup, updateItems, setItemsWithResource);
+        NativeButton addClassNames = new NativeButton("Add class name", e -> {
+            items.get(0).addClassNames("red");
+        });
+        addClassNames.setId("add-class-names");
+
+        NativeButton removeClassNames = new NativeButton("Remove class name",
+                e -> {
+                    items.get(0).removeClassNames("red");
+                });
+        removeClassNames.setId("remove-class-names");
+
+        add(avatarGroup, updateItems, setItemsWithResource, addClassNames,
+                removeClassNames);
     }
 }

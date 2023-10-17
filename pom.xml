@@ -13,7 +13,7 @@
     <url>https://vaadin.com/components</url>
     <properties>
         <flow.version>24.2-SNAPSHOT</flow.version>
-        <testbench.version>9.1.0.beta2</testbench.version>
+        <testbench.version>9.1.0</testbench.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -38,7 +38,7 @@
         <jakarta.web.api.version>10.0.0</jakarta.web.api.version>
 
         <!-- spreadsheet -->
-        <poi.version>5.2.3</poi.version>
+        <poi.version>5.2.4</poi.version>
         <javaparser.version>3.25.3</javaparser.version>
     </properties>
     <modules>

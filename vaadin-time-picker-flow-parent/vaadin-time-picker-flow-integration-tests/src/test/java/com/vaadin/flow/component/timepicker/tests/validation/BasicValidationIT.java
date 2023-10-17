@@ -99,6 +99,17 @@ public class BasicValidationIT extends AbstractValidationIT<TimePickerElement> {
     }
 
     @Test
+    public void setValue_clearValue_assertValidity() {
+        testField.selectByText("10:00");
+        assertServerValid();
+        assertClientValid();
+
+        $("button").id(CLEAR_VALUE_BUTTON).click();
+        assertServerValid();
+        assertClientValid();
+    }
+
+    @Test
     public void badInput_setValue_clearValue_assertValidity() {
         testField.selectByText("INVALID");
         assertServerInvalid();

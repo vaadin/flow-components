@@ -51,7 +51,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-big-decimal-field")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha5")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("./vaadin-big-decimal-field.js")
 @Uses(TextField.class)
@@ -221,15 +221,22 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
     @Override
     public void setValue(BigDecimal value) {
         BigDecimal oldValue = getValue();
+        boolean isOldValueEmpty = valueEquals(oldValue, getEmptyValue());
+        boolean isNewValueEmpty = valueEquals(value, getEmptyValue());
+        boolean isValueRemainedEmpty = isOldValueEmpty && isNewValueEmpty;
+        boolean isInputValuePresent = isInputValuePresent();
+
+        // When the value is cleared programmatically, reset hasInputValue
+        // so that the following validation doesn't treat this as bad input.
+        if (isNewValueEmpty) {
+            getElement().setProperty("_hasInputValue", false);
+        }
 
         super.setValue(value);
 
-        if (Objects.equals(oldValue, getEmptyValue())
-                && Objects.equals(value, getEmptyValue())
-                && isInputValuePresent()) {
+        if (isValueRemainedEmpty && isInputValuePresent) {
             // Clear the input element from possible bad input.
             getElement().executeJs("this._inputElementValue = ''");
-            getElement().setProperty("_hasInputValue", false);
             fireEvent(new ClientValidatedEvent(this, false));
         } else {
             // Restore the input element's value in case it was cleared
@@ -275,7 +282,7 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
     }
 
     private ValidationResult checkValidity(BigDecimal value) {
-        boolean hasNonParsableValue = Objects.equals(value, getEmptyValue())
+        boolean hasNonParsableValue = valueEquals(value, getEmptyValue())
                 && isInputValuePresent();
         if (hasNonParsableValue) {
             return ValidationResult.error("");

@@ -64,6 +64,16 @@ public class FooterRow extends AbstractRow<FooterCell> {
             getColumn().setFooterComponent(component);
         }
 
+        @Override
+        public void setPartName(String partName) {
+            getColumn().setFooterPartName(partName);
+        }
+
+        @Override
+        public String getPartName() {
+            return getColumn().getFooterPartName();
+        }
+
     }
 
     /**

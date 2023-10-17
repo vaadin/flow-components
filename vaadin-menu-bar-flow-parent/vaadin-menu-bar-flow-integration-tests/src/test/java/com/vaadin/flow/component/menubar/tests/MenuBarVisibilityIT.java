@@ -14,6 +14,7 @@ public class MenuBarVisibilityIT extends AbstractComponentIT {
     private MenuBarElement menuBar;
     private TestBenchElement toggleMenuBarVisibility;
     private TestBenchElement toggleMenuItemVisibility;
+    private TestBenchElement toggleOtherItemVisibility;
     private TestBenchElement toggleMenuItemEnabled;
 
     @Before
@@ -23,6 +24,8 @@ public class MenuBarVisibilityIT extends AbstractComponentIT {
         toggleMenuBarVisibility = $("button").id("toggle-menu-bar-visibility");
         toggleMenuItemVisibility = $("button")
                 .id("toggle-menu-item-visibility");
+        toggleOtherItemVisibility = $("button")
+                .id("toggle-other-item-visibility");
         toggleMenuItemEnabled = $("button").id("toggle-menu-item-enabled");
     }
 
@@ -62,6 +65,17 @@ public class MenuBarVisibilityIT extends AbstractComponentIT {
         Assert.assertTrue(menuBar.isDisplayed());
 
         // Check that the menu item is visible.
+        Assert.assertFalse(menuBar.getButtons().isEmpty());
+    }
+
+    @Test
+    public void hideMenuItem_showOtherMenuItem_buttonIsVisible() {
+        // Hide the menu item.
+        toggleMenuItemVisibility.click();
+        Assert.assertTrue(menuBar.getButtons().isEmpty());
+
+        // Show other menu item.
+        toggleOtherItemVisibility.click();
         Assert.assertFalse(menuBar.getButtons().isEmpty());
     }
 }

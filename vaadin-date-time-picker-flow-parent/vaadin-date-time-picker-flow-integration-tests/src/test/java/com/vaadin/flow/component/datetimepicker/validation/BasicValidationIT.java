@@ -130,6 +130,18 @@ public class BasicValidationIT
     }
 
     @Test
+    public void setValue_clearValue_assertValidity() {
+        setInputValue(dateInput, "1/1/2000");
+        setInputValue(timeInput, "10:00");
+        assertServerValid();
+        assertClientValid();
+
+        $("button").id(CLEAR_VALUE_BUTTON).click();
+        assertServerValid();
+        assertClientValid();
+    }
+
+    @Test
     public void badInput_changeValue_assertValidity() {
         setInputValue(dateInput, "INVALID");
         setInputValue(timeInput, "INVALID");
