@@ -227,8 +227,9 @@ public class IntegerFieldBinderValidationIT
 
         testField.setValue("");
         assertValidationCount(1);
-        assertServerValid();
-        assertClientValid();
+        assertClientInvalid();
+        assertServerInvalid();
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
     @Test
