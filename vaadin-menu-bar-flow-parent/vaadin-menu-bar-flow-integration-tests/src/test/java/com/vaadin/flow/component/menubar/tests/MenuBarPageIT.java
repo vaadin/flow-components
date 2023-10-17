@@ -448,7 +448,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
         click("toggle-item1-class-name");
         menuButton1 = menuBar.getButtons().get(0);
         Assert.assertEquals(menuButton1.getAttribute("class"),
-            MenuBarTestPage.MENU_ITEM_CLASSNAME);
+                MenuBarTestPage.MENU_ITEM_CLASSNAME);
         click("toggle-item1-class-name");
         menuButton1 = menuBar.getButtons().get(0);
         Assert.assertFalse(menuButton1.hasAttribute("class"));
@@ -461,11 +461,11 @@ public class MenuBarPageIT extends AbstractComponentIT {
         click("toggle-item1-class-name");
         menuButton1 = menuBar.getButtons().get(0);
         Assert.assertEquals(menuButton1.getAttribute("class"),
-            MenuBarTestPage.MENU_ITEM_CLASSNAME);
+                MenuBarTestPage.MENU_ITEM_CLASSNAME);
         click("set-item1-class-name");
         menuButton1 = menuBar.getButtons().get(0);
         Assert.assertEquals(menuButton1.getAttribute("class"),
-            MenuBarTestPage.MENU_ITEM_CLASSNAME_SET);
+                MenuBarTestPage.MENU_ITEM_CLASSNAME_SET);
     }
 
     @Test
