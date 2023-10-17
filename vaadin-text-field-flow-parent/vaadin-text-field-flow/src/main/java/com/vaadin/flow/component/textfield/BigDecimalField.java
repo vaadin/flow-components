@@ -101,6 +101,14 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
         setValueChangeMode(ValueChangeMode.ON_CHANGE);
 
         addValueChangeListener(e -> validate());
+
+        getElement().addEventListener("has-input-value-changed", e -> {
+            if (getValueChangeMode().equals(ValueChangeMode.EAGER)
+                    && valueEquals(getValue(), getEmptyValue())) {
+                validate();
+                fireValidationStatusChangeEvent();
+            }
+        });
     }
 
     /**
