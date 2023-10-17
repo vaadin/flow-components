@@ -17,6 +17,8 @@
 package com.vaadin.flow.component.textfield;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Objects;
 
 import com.vaadin.flow.component.AttachEvent;
@@ -57,6 +59,8 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
 
     private boolean manualValidationEnabled = false;
 
+    private final Collection<ValidationStatusChangeListener<T>> validationStatusChangeListeners = new ArrayList<>();
+
     /**
      * Sets up the common logic for number fields.
      *
@@ -91,7 +95,18 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
 
         addValueChangeListener(e -> validate());
 
-        addClientValidatedEventListener(e -> validate());
+        getElement().addEventListener("unparsable-change", e -> {
+            validate();
+            fireValidationStatusChangeEvent();
+        });
+
+        getElement().addEventListener("has-input-value-changed", e -> {
+            if (getValueChangeMode().equals(ValueChangeMode.EAGER)
+                    && Objects.equals(getValue(), getEmptyValue())) {
+                validate();
+                fireValidationStatusChangeEvent();
+            }
+        });
     }
 
     /**
@@ -161,7 +176,26 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
             // `executeJs` can end up invoked after a non-empty value is set.
             getElement()
                     .executeJs("if (!this.value) this._inputElementValue = ''");
-            fireEvent(new ClientValidatedEvent(this, false));
+            validate();
+            fireValidationStatusChangeEvent();
+        }
+    }
+
+    @Override
+    protected void setModelValue(T newModelValue, boolean fromClient) {
+        T oldModelValue = getValue();
+
+        super.setModelValue(newModelValue, fromClient);
+
+        // Triggers validation when an unparsable or empty value changes to a
+        // value that is parsable on the client but still unparsable on the
+        // server, which can happen for example due to the difference in Integer
+        // limit in Java and JavaScript. In this case, there is no
+        // ValueChangeEvent and no unparsable-change event.
+        if (fromClient && valueEquals(oldModelValue, getEmptyValue())
+                && valueEquals(newModelValue, getEmptyValue())) {
+            validate();
+            fireValidationStatusChangeEvent();
         }
     }
 
@@ -251,10 +285,8 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     @Override
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<T> listener) {
-        return addClientValidatedEventListener(
-                event -> listener.validationStatusChanged(
-                        new ValidationStatusChangeEvent<T>(this,
-                                !isInvalid())));
+        validationStatusChangeListeners.add(listener);
+        return () -> validationStatusChangeListeners.remove(listener);
     }
 
     private ValidationResult checkValidity(T value) {
@@ -305,6 +337,19 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
             setInvalid(requiredValidation.isError()
                     || checkValidity(value).isError());
         }
+    }
+
+    /**
+     * Notifies Binder that it needs to revalidate the component since the
+     * component's validity state may have changed. Note, there is no need to
+     * notify Binder separately in the case of a ValueChangeEvent, as Binder
+     * already listens to this event and revalidates automatically.
+     */
+    private void fireValidationStatusChangeEvent() {
+        ValidationStatusChangeEvent<T> event = new ValidationStatusChangeEvent<>(
+                this, !isInvalid());
+        validationStatusChangeListeners
+                .forEach(listener -> listener.validationStatusChanged(event));
     }
 
     private boolean isValidByStep(T value) {
