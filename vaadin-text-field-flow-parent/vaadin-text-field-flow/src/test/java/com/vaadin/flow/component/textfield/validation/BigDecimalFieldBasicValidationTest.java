@@ -27,7 +27,8 @@ public class BigDecimalFieldBasicValidationTest
     @Test
     public void addValidationStatusChangeListener_addAnotherListenerOnInvocation_noExceptions() {
         testField.addValidationStatusChangeListener(event1 -> {
-            testField.addValidationStatusChangeListener(event2 -> {});
+            testField.addValidationStatusChangeListener(event2 -> {
+            });
         });
 
         // Trigger ValidationStatusChangeEvent

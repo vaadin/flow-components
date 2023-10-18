@@ -322,7 +322,8 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
     @Override
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<BigDecimal> listener) {
-        return Registration.addAndRemove(validationStatusChangeListeners, listener);
+        return Registration.addAndRemove(validationStatusChangeListeners,
+                listener);
     }
 
     /**
@@ -334,7 +335,8 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
     private void fireValidationStatusChangeEvent() {
         ValidationStatusChangeEvent<BigDecimal> event = new ValidationStatusChangeEvent<>(
                 this, !isInvalid());
-        validationStatusChangeListeners.forEach(listener -> listener.validationStatusChanged(event));
+        validationStatusChangeListeners
+                .forEach(listener -> listener.validationStatusChanged(event));
     }
 
     /**
