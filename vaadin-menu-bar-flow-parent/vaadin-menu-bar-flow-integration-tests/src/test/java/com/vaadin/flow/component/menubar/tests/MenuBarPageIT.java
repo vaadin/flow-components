@@ -448,7 +448,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
         click("toggle-item1-class-name");
         menuButton1 = menuBar.getButtons().get(0);
         Assert.assertEquals(menuButton1.getAttribute("class"),
-                MenuBarTestPage.MENU_ITEM_CLASSNAME);
+                MenuBarTestPage.MENU_ITEM_FIRST_CLASS_NAME);
         click("toggle-item1-class-name");
         menuButton1 = menuBar.getButtons().get(0);
         Assert.assertFalse(menuButton1.hasAttribute("class"));
@@ -461,11 +461,42 @@ public class MenuBarPageIT extends AbstractComponentIT {
         click("toggle-item1-class-name");
         menuButton1 = menuBar.getButtons().get(0);
         Assert.assertEquals(menuButton1.getAttribute("class"),
-                MenuBarTestPage.MENU_ITEM_CLASSNAME);
+                MenuBarTestPage.MENU_ITEM_FIRST_CLASS_NAME);
         click("set-item1-class-name");
         menuButton1 = menuBar.getButtons().get(0);
         Assert.assertEquals(menuButton1.getAttribute("class"),
-                MenuBarTestPage.MENU_ITEM_CLASSNAME_SET);
+                MenuBarTestPage.MENU_ITEM_SECOND_CLASS_NAME);
+    }
+
+    @Test
+    public void toggleMenuItemClassNameWithSetClassName_classNameIsToggled() {
+        TestBenchElement menuButton1 = menuBar.getButtons().get(0);
+        Assert.assertFalse(menuButton1.hasAttribute("class"));
+        click("set-unset-item1-class-name");
+        menuButton1 = menuBar.getButtons().get(0);
+        Assert.assertEquals(menuButton1.getAttribute("class"),
+                MenuBarTestPage.MENU_ITEM_FIRST_CLASS_NAME);
+        click("set-unset-item1-class-name");
+        menuButton1 = menuBar.getButtons().get(0);
+        Assert.assertFalse(menuButton1.hasAttribute("class"));
+    }
+
+    @Test
+    public void toggleMultipleItemClassName_classNamesAreToggled() {
+        TestBenchElement menuButton1 = menuBar.getButtons().get(0);
+        Assert.assertFalse(menuButton1.hasAttribute("class"));
+        click("add-remove-multiple-classes");
+        menuButton1 = menuBar.getButtons().get(0);
+        Assert.assertTrue(menuButton1.getAttribute("class")
+                .contains(MenuBarTestPage.MENU_ITEM_FIRST_CLASS_NAME));
+        Assert.assertTrue(menuButton1.getAttribute("class")
+                .contains(MenuBarTestPage.MENU_ITEM_SECOND_CLASS_NAME));
+        click("add-remove-multiple-classes");
+        menuButton1 = menuBar.getButtons().get(0);
+        Assert.assertFalse(menuButton1.getAttribute("class")
+                .contains(MenuBarTestPage.MENU_ITEM_FIRST_CLASS_NAME));
+        Assert.assertFalse(menuButton1.getAttribute("class")
+                .contains(MenuBarTestPage.MENU_ITEM_SECOND_CLASS_NAME));
     }
 
     @Test
