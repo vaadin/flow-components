@@ -17,11 +17,25 @@ package com.vaadin.flow.component.textfield.validation;
 
 import java.math.BigDecimal;
 
+import org.junit.Test;
+
 import com.vaadin.flow.component.textfield.BigDecimalField;
 import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
 public class BigDecimalFieldBasicValidationTest
         extends AbstractBasicValidationTest<BigDecimalField, BigDecimal> {
+    @Test
+    public void addValidationStatusChangeListener_addAnotherListenerOnInvocation_noExceptions() {
+        testField.addValidationStatusChangeListener(event1 -> {
+            testField.addValidationStatusChangeListener(event2 -> {
+            });
+        });
+
+        // Trigger ValidationStatusChangeEvent
+        testField.getElement().setProperty("_hasInputValue", true);
+        testField.clear();
+    }
+
     protected BigDecimalField createTestField() {
         return new BigDecimalField();
     }
