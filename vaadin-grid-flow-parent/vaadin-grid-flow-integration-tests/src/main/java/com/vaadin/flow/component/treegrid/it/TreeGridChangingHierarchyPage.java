@@ -111,6 +111,19 @@ public class TreeGridChangingHierarchyPage extends Div {
             grid.getDataProvider().refreshAll();
         });
 
-        add(grid, btn, btn2, btn3, btn4, btn5, btn6, btn7);
+        NativeButton btn8 = new NativeButton("move c under a");
+        btn8.addClickListener(event -> {
+            data.setParent("c", "a");
+            grid.getDataProvider().refreshAll();
+            grid.expand("a");
+        });
+
+        NativeButton btn9 = new NativeButton("check key of c");
+        btn9.addClickListener(event -> {
+            btn8.setText(String.valueOf(
+                    grid.getDataCommunicator().getKeyMapper().has("c")));
+        });
+
+        add(grid, btn, btn2, btn3, btn4, btn5, btn6, btn7, btn8, btn9);
     }
 }
