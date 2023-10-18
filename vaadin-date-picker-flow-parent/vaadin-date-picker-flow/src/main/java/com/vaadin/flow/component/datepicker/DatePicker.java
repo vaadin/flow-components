@@ -19,11 +19,11 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -116,7 +116,7 @@ public class DatePicker
 
     private boolean manualValidationEnabled = false;
 
-    private final Collection<ValidationStatusChangeListener<LocalDate>> validationStatusChangeListeners = new ArrayList<>();
+    private final CopyOnWriteArrayList<ValidationStatusChangeListener<LocalDate>> validationStatusChangeListeners = new CopyOnWriteArrayList<>();
 
     /**
      * Default constructor.
@@ -524,8 +524,8 @@ public class DatePicker
     @Override
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<LocalDate> listener) {
-        validationStatusChangeListeners.add(listener);
-        return () -> validationStatusChangeListeners.remove(listener);
+        return Registration.addAndRemove(validationStatusChangeListeners,
+                listener);
     }
 
     /**
