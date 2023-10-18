@@ -27,6 +27,23 @@ public class BigDecimalFieldEagerValidationIT
         extends AbstractValidationIT<BigDecimalFieldElement> {
     @Test
     public void enterChars_fieldValidatesOnEveryChar() {
+        // Entered: 2
+        testField.sendKeys("2");
+        assertValidationCount(1);
+        assertServerValid();
+        assertClientValid();
+
+        resetValidationCount();
+
+        // Entered:
+        testField.sendKeys(Keys.BACK_SPACE);
+        assertValidationCount(1);
+        assertServerValid();
+        assertClientValid();
+    }
+
+    @Test
+    public void badInput_enterChars_fieldValidatesOnEveryChar() {
         // Entered: -
         testField.sendKeys("-");
         assertValidationCount(1);
