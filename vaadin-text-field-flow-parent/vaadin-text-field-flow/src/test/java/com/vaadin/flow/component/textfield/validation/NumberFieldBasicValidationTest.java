@@ -15,11 +15,25 @@
  */
 package com.vaadin.flow.component.textfield.validation;
 
+import org.junit.Test;
+
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
 public class NumberFieldBasicValidationTest
         extends AbstractBasicValidationTest<NumberField, Double> {
+    @Test
+    public void addValidationStatusChangeListener_addAnotherListenerOnInvocation_noExceptions() {
+        testField.addValidationStatusChangeListener(event1 -> {
+            testField.addValidationStatusChangeListener(event2 -> {
+            });
+        });
+
+        // Trigger ValidationStatusChangeEvent
+        testField.getElement().setProperty("_hasInputValue", true);
+        testField.clear();
+    }
+
     protected NumberField createTestField() {
         return new NumberField();
     }
