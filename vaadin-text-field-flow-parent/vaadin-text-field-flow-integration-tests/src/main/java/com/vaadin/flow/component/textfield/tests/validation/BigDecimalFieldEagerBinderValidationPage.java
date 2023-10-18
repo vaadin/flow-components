@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.textfield.tests.validation;
 
+import java.math.BigDecimal;
+
 import com.vaadin.flow.component.textfield.BigDecimalField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.value.ValueChangeMode;
@@ -25,13 +27,13 @@ import com.vaadin.tests.validation.AbstractValidationPage;
 public class BigDecimalFieldEagerBinderValidationPage
         extends AbstractValidationPage<BigDecimalField> {
     public static class Bean {
-        private Integer property;
+        private BigDecimal property;
 
-        public Integer getProperty() {
+        public BigDecimal getProperty() {
             return property;
         }
 
-        public void setProperty(Integer property) {
+        public void setProperty(BigDecimal property) {
             this.property = property;
         }
     }
