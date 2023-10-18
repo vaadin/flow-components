@@ -18,11 +18,10 @@ package com.vaadin.flow.component.timepicker;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.AbstractField;
@@ -100,7 +99,7 @@ public class TimePicker
 
     private boolean manualValidationEnabled = false;
 
-    private final Collection<ValidationStatusChangeListener<LocalTime>> validationStatusChangeListeners = new ArrayList<>();
+    private final CopyOnWriteArrayList<ValidationStatusChangeListener<LocalTime>> validationStatusChangeListeners = new CopyOnWriteArrayList<>();
 
     /**
      * Default constructor.
@@ -329,8 +328,8 @@ public class TimePicker
     @Override
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<LocalTime> listener) {
-        validationStatusChangeListeners.add(listener);
-        return () -> validationStatusChangeListeners.remove(listener);
+        return Registration.addAndRemove(validationStatusChangeListeners,
+                listener);
     }
 
     /**
