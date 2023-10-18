@@ -36,6 +36,12 @@ public class BasicValidationPage extends AbstractValidationPage<TimePicker> {
     }
 
     protected TimePicker createTestField() {
-        return new TimePicker();
+        return new TimePicker() {
+            @Override
+            protected void validate() {
+                super.validate();
+                incrementServerValidationCounter();
+            }
+        };
     }
 }

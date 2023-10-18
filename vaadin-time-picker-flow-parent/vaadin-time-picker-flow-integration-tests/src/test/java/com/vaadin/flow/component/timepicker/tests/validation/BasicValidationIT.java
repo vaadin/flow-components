@@ -23,6 +23,7 @@ public class BasicValidationIT extends AbstractValidationIT<TimePickerElement> {
     @Test
     public void triggerBlur_assertValidity() {
         testField.sendKeys(Keys.TAB);
+        assertValidationCount(0);
         assertServerValid();
         assertClientValid();
     }
@@ -32,8 +33,9 @@ public class BasicValidationIT extends AbstractValidationIT<TimePickerElement> {
         $("button").id(REQUIRED_BUTTON).click();
 
         testField.sendKeys(Keys.TAB);
-        assertServerInvalid();
-        assertClientInvalid();
+        assertValidationCount(0);
+        assertServerValid();
+        assertClientValid();
     }
 
     @Test
@@ -41,10 +43,14 @@ public class BasicValidationIT extends AbstractValidationIT<TimePickerElement> {
         $("button").id(REQUIRED_BUTTON).click();
 
         testField.selectByText("12:00");
+        assertValidationCount(1);
         assertServerValid();
         assertClientValid();
 
+        resetValidationCount();
+
         testField.selectByText("");
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
     }
@@ -54,14 +60,28 @@ public class BasicValidationIT extends AbstractValidationIT<TimePickerElement> {
         $("input").id(MIN_INPUT).sendKeys("11:00", Keys.ENTER);
 
         testField.selectByText("10:00");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
 
+        resetValidationCount();
+
         testField.selectByText("11:00");
+        assertValidationCount(1);
         assertClientValid();
         assertServerValid();
 
+        resetValidationCount();
+
         testField.selectByText("12:00");
+        assertValidationCount(1);
+        assertClientValid();
+        assertServerValid();
+
+        resetValidationCount();
+
+        testField.selectByText("");
+        assertValidationCount(1);
         assertClientValid();
         assertServerValid();
     }
@@ -71,14 +91,28 @@ public class BasicValidationIT extends AbstractValidationIT<TimePickerElement> {
         $("input").id(MAX_INPUT).sendKeys("11:00", Keys.ENTER);
 
         testField.selectByText("12:00");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
 
+        resetValidationCount();
+
         testField.selectByText("11:00");
+        assertValidationCount(1);
         assertClientValid();
         assertServerValid();
 
+        resetValidationCount();
+
         testField.selectByText("10:00");
+        assertValidationCount(1);
+        assertClientValid();
+        assertServerValid();
+
+        resetValidationCount();
+
+        testField.selectByText("");
+        assertValidationCount(1);
         assertClientValid();
         assertServerValid();
     }
@@ -86,16 +120,30 @@ public class BasicValidationIT extends AbstractValidationIT<TimePickerElement> {
     @Test
     public void badInput_changeValue_assertValidity() {
         testField.selectByText("INVALID");
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
 
+        resetValidationCount();
+
         testField.selectByText("10:00");
+        assertValidationCount(1);
         assertServerValid();
         assertClientValid();
 
+        resetValidationCount();
+
         testField.selectByText("INVALID");
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
+
+        resetValidationCount();
+
+        testField.selectByText("");
+        assertValidationCount(1);
+        assertClientValid();
+        assertServerValid();
     }
 
     @Test
@@ -112,10 +160,14 @@ public class BasicValidationIT extends AbstractValidationIT<TimePickerElement> {
     @Test
     public void badInput_setValue_clearValue_assertValidity() {
         testField.selectByText("INVALID");
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
 
+        resetValidationCount();
+
         $("button").id(CLEAR_VALUE_BUTTON).click();
+        assertValidationCount(1);
         assertServerValid();
         assertClientValid();
     }
@@ -124,7 +176,8 @@ public class BasicValidationIT extends AbstractValidationIT<TimePickerElement> {
     public void detach_attach_preservesInvalidState() {
         // Make field invalid
         $("button").id(REQUIRED_BUTTON).click();
-        testField.sendKeys(Keys.TAB);
+        testField.selectByText("10:00");
+        testField.selectByText("");
 
         detachAndReattachField();
 
@@ -145,7 +198,8 @@ public class BasicValidationIT extends AbstractValidationIT<TimePickerElement> {
     public void clientSideInvalidStateIsNotPropagatedToServer() {
         // Make the field invalid
         $("button").id(REQUIRED_BUTTON).click();
-        testField.sendKeys(Keys.TAB);
+        testField.selectByText("10:00");
+        testField.selectByText("");
 
         executeScript("arguments[0].invalid = false", testField);
 
