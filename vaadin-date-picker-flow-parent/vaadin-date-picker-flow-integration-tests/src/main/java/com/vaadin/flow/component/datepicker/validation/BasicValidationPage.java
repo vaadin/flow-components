@@ -36,6 +36,12 @@ public class BasicValidationPage extends AbstractValidationPage<DatePicker> {
     }
 
     protected DatePicker createTestField() {
-        return new DatePicker();
+        return new DatePicker() {
+            @Override
+            protected void validate() {
+                super.validate();
+                incrementServerValidationCounter();
+            }
+        };
     }
 }

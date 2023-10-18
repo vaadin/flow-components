@@ -62,4 +62,65 @@ class MenuBarRootItem extends MenuBarItem {
         super.removeThemeNames(themeNames);
         menuBar.updateButtons();
     }
+
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public void addClassName(String className) {
+        super.addClassName(className);
+        updateClassName();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public void addClassNames(String... classNames) {
+        super.addClassNames(classNames);
+        updateClassName();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public void setClassName(String className) {
+        super.setClassName(className);
+        updateClassName();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public void setClassName(String className, boolean set) {
+        super.setClassName(className, set);
+        updateClassName();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public boolean removeClassName(String className) {
+        var result = super.removeClassName(className);
+        updateClassName();
+        return result;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public void removeClassNames(String... classNames) {
+        super.removeClassNames(classNames);
+        updateClassName();
+    }
+
+    private void updateClassName() {
+        getElement().executeJs(
+                "window.Vaadin.Flow.menubarConnector.setClassName(this)");
+        menuBar.updateButtons();
+    }
 }

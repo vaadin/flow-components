@@ -56,6 +56,12 @@ public class NumberFieldBasicValidationPage
     }
 
     protected NumberField createTestField() {
-        return new NumberField();
+        return new NumberField() {
+            @Override
+            protected void validate() {
+                super.validate();
+                incrementServerValidationCounter();
+            }
+        };
     }
 }

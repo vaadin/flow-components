@@ -15,9 +15,9 @@
  */
 package com.vaadin.flow.data.renderer;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
@@ -42,7 +42,7 @@ import com.vaadin.flow.shared.Registration;
 public class NativeButtonRenderer<SOURCE> extends BasicRenderer<SOURCE, String>
         implements ClickableRenderer<SOURCE> {
 
-    private List<ItemClickListener<SOURCE>> listeners = new ArrayList<>(1);
+    private List<ItemClickListener<SOURCE>> listeners = new CopyOnWriteArrayList<>();
 
     /**
      * Creates a new button renderer with the specified label. The label is the
