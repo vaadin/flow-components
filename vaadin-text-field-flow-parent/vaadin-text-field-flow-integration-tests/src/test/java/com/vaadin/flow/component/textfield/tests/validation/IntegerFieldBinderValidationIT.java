@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.textfield.tests.validation;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
@@ -22,13 +23,14 @@ import com.vaadin.flow.component.textfield.testbench.IntegerFieldElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.validation.AbstractValidationIT;
 
-import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldValidationBinderPage.STEP_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldValidationBinderPage.MIN_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldValidationBinderPage.MAX_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldValidationBinderPage.EXPECTED_VALUE_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldValidationBinderPage.CLEAR_VALUE_BUTTON;
-import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldValidationBinderPage.REQUIRED_ERROR_MESSAGE;
-import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldValidationBinderPage.UNEXPECTED_VALUE_ERROR_MESSAGE;
+import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldBinderValidationPage.STEP_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldBinderValidationPage.MIN_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldBinderValidationPage.MAX_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldBinderValidationPage.EXPECTED_VALUE_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldBinderValidationPage.CLEAR_VALUE_BUTTON;
+import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldBinderValidationPage.RESET_BEAN_BUTTON;
+import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldBinderValidationPage.REQUIRED_ERROR_MESSAGE;
+import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldBinderValidationPage.UNEXPECTED_VALUE_ERROR_MESSAGE;
 
 @TestPath("vaadin-integer-field/validation/binder")
 public class IntegerFieldBinderValidationIT
@@ -43,9 +45,9 @@ public class IntegerFieldBinderValidationIT
     @Test
     public void required_triggerBlur_assertValidity() {
         testField.sendKeys(Keys.TAB);
-        assertServerInvalid();
-        assertClientInvalid();
-        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
+        assertValidationCount(0);
+        assertServerValid();
+        assertClientValid();
     }
 
     @Test
@@ -53,13 +55,30 @@ public class IntegerFieldBinderValidationIT
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("1234", Keys.ENTER);
 
         testField.setValue("1234");
+        assertValidationCount(1);
         assertServerValid();
         assertClientValid();
 
+        resetValidationCount();
+
         testField.setValue("");
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage(REQUIRED_ERROR_MESSAGE);
+    }
+
+    @Test
+    public void required_setValue_resetBean_assertValidity() {
+        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("1234", Keys.ENTER);
+
+        testField.setValue("1234");
+        assertServerValid();
+        assertClientValid();
+
+        $("button").id(RESET_BEAN_BUTTON).click();
+        assertServerValid();
+        assertClientValid();
     }
 
     @Test
@@ -69,20 +88,36 @@ public class IntegerFieldBinderValidationIT
 
         // Constraint validation fails:
         testField.setValue("1");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage("");
 
+        resetValidationCount();
+
         // Binder validation fails:
         testField.setValue("2");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
 
+        resetValidationCount();
+
         // Both validations pass:
         testField.setValue("3");
+        assertValidationCount(1);
         assertClientValid();
         assertServerValid();
+
+        resetValidationCount();
+
+        // Binder validation fails:
+        testField.setValue("");
+        assertValidationCount(1);
+        assertClientInvalid();
+        assertServerInvalid();
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
     @Test
@@ -92,20 +127,36 @@ public class IntegerFieldBinderValidationIT
 
         // Constraint validation fails:
         testField.setValue("3");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage("");
 
+        resetValidationCount();
+
         // Binder validation fails:
         testField.setValue("2");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
 
+        resetValidationCount();
+
         // Both validations pass:
         testField.setValue("1");
+        assertValidationCount(1);
         assertClientValid();
         assertServerValid();
+
+        resetValidationCount();
+
+        // Binder validation fails:
+        testField.setValue("");
+        assertValidationCount(1);
+        assertClientInvalid();
+        assertServerInvalid();
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
     @Test
@@ -115,39 +166,70 @@ public class IntegerFieldBinderValidationIT
 
         // Constraint validation fails:
         testField.setValue("1");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage("");
 
+        resetValidationCount();
+
         // Binder validation fails:
         testField.setValue("2");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
 
+        resetValidationCount();
+
         // Both validations pass:
         testField.setValue("4");
+        assertValidationCount(1);
         assertClientValid();
         assertServerValid();
+
+        resetValidationCount();
+
+        // Binder validation fails:
+        testField.setValue("");
+        assertValidationCount(1);
+        assertClientInvalid();
+        assertServerInvalid();
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
     @Test
     public void badInput_changeValue_assertValidity() {
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("2", Keys.ENTER);
 
-        testField.sendKeys("--2", Keys.TAB);
+        testField.sendKeys("--2", Keys.ENTER);
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage("");
 
+        resetValidationCount();
+
         testField.setValue("2");
+        assertValidationCount(1);
         assertServerValid();
         assertClientValid();
 
-        testField.sendKeys("--2", Keys.TAB);
+        resetValidationCount();
+
+        testField.sendKeys("--2", Keys.ENTER);
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage("");
+
+        resetValidationCount();
+
+        testField.setValue("");
+        assertValidationCount(1);
+        assertClientInvalid();
+        assertServerInvalid();
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
     @Test
@@ -166,31 +248,53 @@ public class IntegerFieldBinderValidationIT
 
     @Test
     public void badInput_setValue_clearValue_assertValidity() {
-        testField.sendKeys("--2", Keys.TAB);
+        testField.sendKeys("--2", Keys.ENTER);
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage("");
 
+        resetValidationCount();
+
         $("button").id(CLEAR_VALUE_BUTTON).click();
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
     @Test
-    public void integerOverflow_setValueExceedingMaxInteger_assertValidity() {
-        testField.sendKeys("999999999999", Keys.TAB);
+    public void maxIntegerOverflow_changeValue_assertValidity() {
+        testField.setValue("999999999999");
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage("");
+
+        resetValidationCount();
+
+        testField.setValue("");
+        assertValidationCount(1);
+        assertServerInvalid();
+        assertClientInvalid();
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
     @Test
-    public void integerOverflow_setValueExceedingMinInteger_assertValidity() {
-        testField.sendKeys("-999999999999", Keys.TAB);
+    public void minIntegerOverflow_changeValue_assertValidity() {
+        testField.setValue("-999999999999");
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage("");
+
+        resetValidationCount();
+
+        testField.setValue("");
+        assertValidationCount(1);
+        assertServerInvalid();
+        assertClientInvalid();
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
     protected IntegerFieldElement getTestField() {
