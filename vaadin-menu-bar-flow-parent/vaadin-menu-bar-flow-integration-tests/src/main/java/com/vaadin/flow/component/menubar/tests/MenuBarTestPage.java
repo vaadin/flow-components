@@ -32,6 +32,9 @@ public class MenuBarTestPage extends Div {
     public static final String MENU_ITEM_THEME = "menu-item-theme";
     public static final String SUB_ITEM_THEME = "sub-item-theme";
 
+    public static final String MENU_ITEM_FIRST_CLASS_NAME = "menu-item-first-class-name";
+    public static final String MENU_ITEM_SECOND_CLASS_NAME = "menu-item-second-class-name";
+
     public MenuBarTestPage() {
         MenuBar menuBar = new MenuBar();
         add(menuBar);
@@ -146,12 +149,49 @@ public class MenuBarTestPage extends Div {
                 });
         toggleSubItemThemeButton.setId("toggle-sub-theme");
 
+        NativeButton toggleClassNameButton = new NativeButton(
+                "toggle item class", e -> {
+                    if (item1.hasClassName(MENU_ITEM_FIRST_CLASS_NAME)) {
+                        item1.removeClassName(MENU_ITEM_FIRST_CLASS_NAME);
+                    } else {
+                        item1.addClassName(MENU_ITEM_FIRST_CLASS_NAME);
+                    }
+                });
+        toggleClassNameButton.setId("toggle-item1-class-name");
+
+        NativeButton setItemClassNameButton = new NativeButton("set item class",
+                e -> {
+                    item1.setClassName(MENU_ITEM_SECOND_CLASS_NAME);
+                });
+        setItemClassNameButton.setId("set-item1-class-name");
+
+        NativeButton setUnsetClassNameButton = new NativeButton(
+                "set/unset item class", e -> {
+                    item1.setClassName(MENU_ITEM_FIRST_CLASS_NAME,
+                            !item1.hasClassName(MENU_ITEM_FIRST_CLASS_NAME));
+                });
+        setUnsetClassNameButton.setId("set-unset-item1-class-name");
+
+        NativeButton addRemoveMultipleClassNames = new NativeButton(
+                "toggle multiple classes", e -> {
+                    if (item1.hasClassName(MENU_ITEM_FIRST_CLASS_NAME)) {
+                        item1.removeClassNames(MENU_ITEM_FIRST_CLASS_NAME,
+                                MENU_ITEM_SECOND_CLASS_NAME);
+                    } else {
+                        item1.addClassNames(MENU_ITEM_FIRST_CLASS_NAME,
+                                MENU_ITEM_SECOND_CLASS_NAME);
+                    }
+                });
+        addRemoveMultipleClassNames.setId("add-remove-multiple-classes");
+
         add(new Hr(), addRootItemButton, addSubItemButton, removeItemButton,
                 openOnHoverButton, setWidthButton, resetWidthButton,
                 disableItemButton, toggleItem1VisibilityButton,
                 toggleItem2VisibilityButton, checkedButton,
                 toggleAttachedButton, setI18nButton, toggleAttachedButton,
                 toggleMenuBarThemeButton, toggleItem1ThemeButton,
-                toggleSubItemThemeButton);
+                toggleSubItemThemeButton, toggleClassNameButton,
+                setItemClassNameButton, setUnsetClassNameButton,
+                addRemoveMultipleClassNames);
     }
 }
