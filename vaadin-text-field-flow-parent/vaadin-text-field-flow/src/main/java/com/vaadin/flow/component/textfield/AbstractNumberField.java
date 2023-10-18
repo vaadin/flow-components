@@ -17,9 +17,7 @@
 package com.vaadin.flow.component.textfield;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Synchronize;
@@ -59,7 +57,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
 
     private boolean manualValidationEnabled = false;
 
-    private final Collection<ValidationStatusChangeListener<T>> validationStatusChangeListeners = new ArrayList<>();
+    private final CopyOnWriteArrayList<ValidationStatusChangeListener<T>> validationStatusChangeListeners = new CopyOnWriteArrayList<>();
 
     /**
      * Sets up the common logic for number fields.
@@ -277,8 +275,21 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     @Override
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<T> listener) {
-        validationStatusChangeListeners.add(listener);
-        return () -> validationStatusChangeListeners.remove(listener);
+        return Registration.addAndRemove(validationStatusChangeListeners,
+                listener);
+    }
+
+    /**
+     * Notifies Binder that it needs to revalidate the component since the
+     * component's validity state may have changed. Note, there is no need to
+     * notify Binder separately in the case of a ValueChangeEvent, as Binder
+     * already listens to this event and revalidates automatically.
+     */
+    private void fireValidationStatusChangeEvent() {
+        ValidationStatusChangeEvent<T> event = new ValidationStatusChangeEvent<>(
+                this, !isInvalid());
+        validationStatusChangeListeners
+                .forEach(listener -> listener.validationStatusChanged(event));
     }
 
     private ValidationResult checkValidity(T value) {
@@ -329,19 +340,6 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
             setInvalid(requiredValidation.isError()
                     || checkValidity(value).isError());
         }
-    }
-
-    /**
-     * Notifies Binder that it needs to revalidate the component since the
-     * component's validity state may have changed. Note, there is no need to
-     * notify Binder separately in the case of a ValueChangeEvent, as Binder
-     * already listens to this event and revalidates automatically.
-     */
-    private void fireValidationStatusChangeEvent() {
-        ValidationStatusChangeEvent<T> event = new ValidationStatusChangeEvent<>(
-                this, !isInvalid());
-        validationStatusChangeListeners
-                .forEach(listener -> listener.validationStatusChanged(event));
     }
 
     private boolean isValidByStep(T value) {
