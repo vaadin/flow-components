@@ -17,11 +17,10 @@ package com.vaadin.flow.component.textfield;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormatSymbols;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Synchronize;
@@ -84,7 +83,7 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
 
     private boolean manualValidationEnabled = false;
 
-    private final Collection<ValidationStatusChangeListener<BigDecimal>> validationStatusChangeListeners = new ArrayList<>();
+    private final CopyOnWriteArrayList<ValidationStatusChangeListener<BigDecimal>> validationStatusChangeListeners = new CopyOnWriteArrayList<>();
 
     /**
      * Constructs an empty {@code BigDecimalField}.
@@ -323,8 +322,7 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
     @Override
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<BigDecimal> listener) {
-        validationStatusChangeListeners.add(listener);
-        return () -> validationStatusChangeListeners.remove(listener);
+        return Registration.addAndRemove(validationStatusChangeListeners, listener);
     }
 
     /**
@@ -336,8 +334,7 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
     private void fireValidationStatusChangeEvent() {
         ValidationStatusChangeEvent<BigDecimal> event = new ValidationStatusChangeEvent<>(
                 this, !isInvalid());
-        validationStatusChangeListeners
-                .forEach(listener -> listener.validationStatusChanged(event));
+        validationStatusChangeListeners.forEach(listener -> listener.validationStatusChanged(event));
     }
 
     /**
