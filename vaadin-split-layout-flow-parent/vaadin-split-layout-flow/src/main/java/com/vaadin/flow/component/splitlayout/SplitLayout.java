@@ -79,10 +79,10 @@ public class SplitLayout extends Component
     public SplitLayout(Orientation orientation) {
         setOrientation(orientation);
         addAttachListener(
-            e -> this.requestStylesUpdatesForSplitterPosition(e.getUI()));
+                e -> this.requestStylesUpdatesForSplitterPosition(e.getUI()));
         addSplitterDragendListener(
-            e -> this.splitterPosition = calcNewSplitterPosition(
-                e.primaryComponentWidth, e.secondaryComponentWidth));
+                e -> this.splitterPosition = calcNewSplitterPosition(
+                        e.primaryComponentWidth, e.secondaryComponentWidth));
     }
 
     /**

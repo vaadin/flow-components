@@ -85,54 +85,65 @@ public class SplitLayoutUnitTest {
     public void constructorDefault() {
         SplitLayout splitLayout = new SplitLayout();
 
-        Assert.assertEquals(SplitLayout.Orientation.HORIZONTAL, splitLayout.getOrientation());
+        Assert.assertEquals(SplitLayout.Orientation.HORIZONTAL,
+                splitLayout.getOrientation());
     }
 
     @Test
     public void constructorWithOrientation() {
-        SplitLayout splitLayout = new SplitLayout(SplitLayout.Orientation.VERTICAL);
+        SplitLayout splitLayout = new SplitLayout(
+                SplitLayout.Orientation.VERTICAL);
         double splitterPosition = 45.66;
         splitLayout.setSplitterPosition(splitterPosition);
 
         ComponentUtil.fireEvent(splitLayout, new SplitterDragendEvent(
-            splitLayout, true, "58.23%", "41.77%"));
+                splitLayout, true, "58.23%", "41.77%"));
 
         Assert.assertEquals(58.23, splitLayout.getSplitterPosition(), 0);
-        Assert.assertEquals(SplitLayout.Orientation.VERTICAL, splitLayout.getOrientation());
+        Assert.assertEquals(SplitLayout.Orientation.VERTICAL,
+                splitLayout.getOrientation());
     }
 
     @Test
     public void constructorWithComponents() {
-        var primaryComponent= new Div();
+        var primaryComponent = new Div();
         var secondaryComponent = new Div();
-        SplitLayout splitLayout = new SplitLayout(primaryComponent, secondaryComponent);
+        SplitLayout splitLayout = new SplitLayout(primaryComponent,
+                secondaryComponent);
         double splitterPosition = 45.66;
         splitLayout.setSplitterPosition(splitterPosition);
 
         ComponentUtil.fireEvent(splitLayout, new SplitterDragendEvent(
-            splitLayout, true, "58.23%", "41.77%"));
+                splitLayout, true, "58.23%", "41.77%"));
 
         Assert.assertEquals(58.23, splitLayout.getSplitterPosition(), 0);
-        Assert.assertEquals(primaryComponent, splitLayout.getPrimaryComponent());
-        Assert.assertEquals(secondaryComponent, splitLayout.getSecondaryComponent());
-        Assert.assertEquals(SplitLayout.Orientation.HORIZONTAL, splitLayout.getOrientation());
+        Assert.assertEquals(primaryComponent,
+                splitLayout.getPrimaryComponent());
+        Assert.assertEquals(secondaryComponent,
+                splitLayout.getSecondaryComponent());
+        Assert.assertEquals(SplitLayout.Orientation.HORIZONTAL,
+                splitLayout.getOrientation());
     }
 
     @Test
     public void constructorWithComponentsAndOrientation() {
-        var primaryComponent= new Div();
+        var primaryComponent = new Div();
         var secondaryComponent = new Div();
-        SplitLayout splitLayout = new SplitLayout(primaryComponent,secondaryComponent, SplitLayout.Orientation.VERTICAL);
+        SplitLayout splitLayout = new SplitLayout(primaryComponent,
+                secondaryComponent, SplitLayout.Orientation.VERTICAL);
         double splitterPosition = 45.66;
         splitLayout.setSplitterPosition(splitterPosition);
 
         ComponentUtil.fireEvent(splitLayout, new SplitterDragendEvent(
-            splitLayout, true, "58.23%", "41.77%"));
+                splitLayout, true, "58.23%", "41.77%"));
 
         Assert.assertEquals(58.23, splitLayout.getSplitterPosition(), 0);
-        Assert.assertEquals(primaryComponent, splitLayout.getPrimaryComponent());
-        Assert.assertEquals(secondaryComponent, splitLayout.getSecondaryComponent());
-        Assert.assertEquals(SplitLayout.Orientation.VERTICAL, splitLayout.getOrientation());
+        Assert.assertEquals(primaryComponent,
+                splitLayout.getPrimaryComponent());
+        Assert.assertEquals(secondaryComponent,
+                splitLayout.getSecondaryComponent());
+        Assert.assertEquals(SplitLayout.Orientation.VERTICAL,
+                splitLayout.getOrientation());
     }
 
     @Test
