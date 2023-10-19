@@ -67,12 +67,22 @@ public class SplitLayout extends Component
      * Constructs an empty SplitLayout.
      */
     public SplitLayout() {
-        setOrientation(Orientation.HORIZONTAL);
+        this(Orientation.HORIZONTAL);
+    }
+
+    /**
+     * Constructs a SplitLayout with the orientation.
+     *
+     * @param orientation
+     *            the orientation set to the layout
+     */
+    public SplitLayout(Orientation orientation) {
+        setOrientation(orientation);
         addAttachListener(
-                e -> this.requestStylesUpdatesForSplitterPosition(e.getUI()));
+            e -> this.requestStylesUpdatesForSplitterPosition(e.getUI()));
         addSplitterDragendListener(
-                e -> this.splitterPosition = calcNewSplitterPosition(
-                        e.primaryComponentWidth, e.secondaryComponentWidth));
+            e -> this.splitterPosition = calcNewSplitterPosition(
+                e.primaryComponentWidth, e.secondaryComponentWidth));
     }
 
     /**
@@ -86,21 +96,7 @@ public class SplitLayout extends Component
      */
     public SplitLayout(Component primaryComponent,
             Component secondaryComponent) {
-        this();
-        addToPrimary(primaryComponent);
-        addToSecondary(secondaryComponent);
-    }
-
-    /**
-     * Constructs a SplitLayout with the orientation.
-     *
-     * @param orientation
-     *            the orientation set to the layout
-     */
-    public SplitLayout(Orientation orientation) {
-        setOrientation(orientation);
-        addAttachListener(
-                e -> this.requestStylesUpdatesForSplitterPosition(e.getUI()));
+        this(primaryComponent, secondaryComponent, Orientation.HORIZONTAL);
     }
 
     /**
@@ -116,8 +112,9 @@ public class SplitLayout extends Component
      */
     public SplitLayout(Component primaryComponent, Component secondaryComponent,
             Orientation orientation) {
-        this(primaryComponent, secondaryComponent);
-        setOrientation(orientation);
+        this(orientation);
+        addToPrimary(primaryComponent);
+        addToSecondary(secondaryComponent);
     }
 
     /**
