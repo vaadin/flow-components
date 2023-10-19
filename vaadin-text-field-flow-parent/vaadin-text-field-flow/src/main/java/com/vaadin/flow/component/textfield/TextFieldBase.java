@@ -88,7 +88,7 @@ public abstract class TextFieldBase<TComponent extends TextFieldBase<TComponent,
         return valueChangeTimeout;
     }
 
-    private void applyChangeTimeout() {
+    protected void applyChangeTimeout() {
         ValueChangeMode.applyChangeTimeout(getValueChangeMode(),
                 getValueChangeTimeout(), getSynchronizationRegistration());
     }

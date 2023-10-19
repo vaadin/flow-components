@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.flow.component.textfield;
 
 import java.math.BigDecimal;
@@ -28,6 +27,7 @@ import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
 import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.dom.DomListenerRegistration;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.shared.Registration;
 
@@ -56,6 +56,8 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     private boolean minSetByUser;
 
     private boolean manualValidationEnabled = false;
+
+    private DomListenerRegistration inputListenerRegistration;
 
     private final CopyOnWriteArrayList<ValidationStatusChangeListener<T>> validationStatusChangeListeners = new CopyOnWriteArrayList<>();
 
@@ -97,14 +99,35 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
             validate();
             fireValidationStatusChangeEvent();
         });
+    }
 
-        getElement().addEventListener("has-input-value-changed", e -> {
-            if (getValueChangeMode().equals(ValueChangeMode.EAGER)
-                    && valueEquals(getValue(), getEmptyValue())) {
-                validate();
-                fireValidationStatusChangeEvent();
-            }
-        });
+    @Override
+    public void setValueChangeMode(ValueChangeMode valueChangeMode) {
+        super.setValueChangeMode(valueChangeMode);
+
+        if (inputListenerRegistration != null) {
+            inputListenerRegistration.remove();
+            inputListenerRegistration = null;
+        }
+
+        if (valueChangeMode.equals(ValueChangeMode.EAGER)
+                || valueChangeMode.equals(ValueChangeMode.LAZY)
+                || valueChangeMode.equals(ValueChangeMode.TIMEOUT)) {
+            inputListenerRegistration = getElement().addEventListener("input",
+                    event -> {
+                        if (valueEquals(getValue(), getEmptyValue())) {
+                            validate();
+                            fireValidationStatusChangeEvent();
+                        }
+                    });
+        }
+    }
+
+    @Override
+    protected void applyChangeTimeout() {
+        super.applyChangeTimeout();
+        ValueChangeMode.applyChangeTimeout(getValueChangeMode(),
+                getValueChangeTimeout(), inputListenerRegistration);
     }
 
     /**

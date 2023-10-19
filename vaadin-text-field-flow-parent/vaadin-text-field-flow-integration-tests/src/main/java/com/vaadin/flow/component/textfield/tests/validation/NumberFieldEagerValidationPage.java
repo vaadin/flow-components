@@ -23,9 +23,24 @@ import com.vaadin.tests.validation.AbstractValidationPage;
 @Route("vaadin-number-field/validation/eager")
 public class NumberFieldEagerValidationPage
         extends AbstractValidationPage<NumberField> {
+    public static final String SET_EAGER_MODE_BUTTON = "set-eager-mode-button";
+    public static final String SET_LAZY_MODE_BUTTON = "set-lazy-mode-button";
+    public static final String SET_TIMEOUT_MODE_BUTTON = "set-timeout-mode-button";
+
     public NumberFieldEagerValidationPage() {
         super();
-        testField.setValueChangeMode(ValueChangeMode.EAGER);
+
+        add(createButton(SET_EAGER_MODE_BUTTON, "Set eager mode", event -> {
+            testField.setValueChangeMode(ValueChangeMode.EAGER);
+        }));
+
+        add(createButton(SET_LAZY_MODE_BUTTON, "Set lazy mode", event -> {
+            testField.setValueChangeMode(ValueChangeMode.LAZY);
+        }));
+
+        add(createButton(SET_TIMEOUT_MODE_BUTTON, "Set timeout mode", event -> {
+            testField.setValueChangeMode(ValueChangeMode.TIMEOUT);
+        }));
     }
 
     protected NumberField createTestField() {
