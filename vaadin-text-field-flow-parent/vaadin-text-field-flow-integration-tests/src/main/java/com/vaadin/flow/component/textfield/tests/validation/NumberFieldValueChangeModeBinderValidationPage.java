@@ -21,8 +21,8 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
 import com.vaadin.tests.validation.AbstractValidationPage;
 
-@Route("vaadin-number-field/validation/eager-binder")
-public class NumberFieldEagerBinderValidationPage
+@Route("vaadin-number-field/validation/value-change-mode/binder")
+public class NumberFieldValueChangeModeBinderValidationPage
         extends AbstractValidationPage<NumberField> {
     public static class Bean {
         private Double property;
@@ -36,7 +36,7 @@ public class NumberFieldEagerBinderValidationPage
         }
     }
 
-    public NumberFieldEagerBinderValidationPage() {
+    public NumberFieldValueChangeModeBinderValidationPage() {
         super();
 
         testField.setValueChangeMode(ValueChangeMode.EAGER);

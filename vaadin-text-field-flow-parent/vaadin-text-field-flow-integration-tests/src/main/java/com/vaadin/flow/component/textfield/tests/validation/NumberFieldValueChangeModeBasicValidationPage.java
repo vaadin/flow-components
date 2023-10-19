@@ -20,14 +20,14 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
 import com.vaadin.tests.validation.AbstractValidationPage;
 
-@Route("vaadin-number-field/validation/eager")
-public class NumberFieldEagerValidationPage
+@Route("vaadin-number-field/validation/value-change-mode/basic")
+public class NumberFieldValueChangeModeBasicValidationPage
         extends AbstractValidationPage<NumberField> {
     public static final String SET_EAGER_MODE_BUTTON = "set-eager-mode-button";
     public static final String SET_LAZY_MODE_BUTTON = "set-lazy-mode-button";
     public static final String SET_TIMEOUT_MODE_BUTTON = "set-timeout-mode-button";
 
-    public NumberFieldEagerValidationPage() {
+    public NumberFieldValueChangeModeBasicValidationPage() {
         super();
 
         add(createButton(SET_EAGER_MODE_BUTTON, "Set eager mode", event -> {
