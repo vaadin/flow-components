@@ -20,6 +20,7 @@ import java.util.function.Consumer;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.flow.component.html.testbench.DivElement;
@@ -77,6 +78,28 @@ public class SplitterPositionIT extends AbstractComponentIT {
                 .id("mainContentInLayoutComponent")
                 .getPropertyString("style", "width");
         Assert.assertEquals("100%", width);
+    }
+
+    @Test
+    public void nestedSplitLayouts_moveParentSplitter_getSplitterPosition() {
+        $(NativeButtonElement.class).id("nested-split-layout-button").click();
+        var split = $(SplitLayoutElement.class).id("parent-layout");
+        WebElement splitter = (WebElement) executeScript(
+                "return arguments[0].$.splitter", split);
+
+        // Move splitter by 150px
+        Actions resizeAction = new Actions(getDriver());
+        resizeAction.dragAndDropBy(splitter, 0, 150);
+        resizeAction.perform();
+
+        $(NativeButtonElement.class).id("splitter-position-button").click();
+        var splitPosition = Double.parseDouble(
+                $(TestBenchElement.class).id("splitter-position").getText());
+
+        // The split layout has 500px height, so the splitter is about at 250px
+        // Moving it 150px down, it would be at 400px (around 80% of the layout)
+        Assert.assertTrue(splitPosition > 80);
+        Assert.assertTrue(splitPosition < 81);
     }
 
     private void testSplitterPosition(String testId) {
