@@ -38,7 +38,11 @@ public class SplitterPositionView extends Div {
         NativeButton buttonLayoutComponent = new NativeButton(
                 "Create layout component", e -> add(new LayoutComponent()));
         buttonLayoutComponent.setId("createLayoutComponent");
-        add(buttonJava, buttonElement, buttonLayoutComponent);
+        NativeButton nestedSplitLayoutButton = new NativeButton(
+                "nested split layout", e -> createNestedSplitLayout());
+        nestedSplitLayoutButton.setId("nested-split-layout-button");
+        add(buttonJava, buttonElement, buttonLayoutComponent,
+                nestedSplitLayoutButton);
     }
 
     private void createLayoutJavaApi() {
@@ -82,5 +86,28 @@ public class SplitterPositionView extends Div {
         layout.addSplitterDragendListener(e -> showSplitterPosition
                 .setText(String.valueOf(e.getSource().getSplitterPosition())));
         add(setSplitterPosition, layout, showSplitterPosition);
+    }
+
+    private void createNestedSplitLayout() {
+        Span childPrimary = new Span("child-primary");
+        Span childSecondary = new Span("child-secondary");
+        Div parentSecondary = new Div();
+
+        SplitLayout childLayout = new SplitLayout(childPrimary, childSecondary);
+        childLayout.setId("child-layout");
+        SplitLayout parentLayout = new SplitLayout(childLayout, parentSecondary,
+                SplitLayout.Orientation.VERTICAL);
+        parentLayout.setId("parent-layout");
+        parentLayout.setHeight("500px");
+
+        Span splitterPosition = new Span();
+        splitterPosition.setId("splitter-position");
+        NativeButton parentSplitterPositionButton = new NativeButton(
+                "parent splitter position", e -> splitterPosition
+                        .setText("" + parentLayout.getSplitterPosition()));
+        parentSplitterPositionButton.setId("splitter-position-button");
+        parentSecondary.add(parentSplitterPositionButton, splitterPosition);
+
+        add(parentLayout);
     }
 }
