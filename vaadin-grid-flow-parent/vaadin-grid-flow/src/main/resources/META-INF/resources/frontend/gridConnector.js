@@ -39,27 +39,6 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           return grid.$connector.hasEnsureSubCacheQueue() || this.isLoadingOriginal();
         });
 
-        dataProviderController.getCacheByKey = tryCatchWrapper(function (key) {
-          function getCacheByKey(cache) {
-            // Start looking in this cache
-            for (let index in cache.items) {
-              if (grid.getItemId(cache.items[index]) === key) {
-                return cache.getSubCache(index);
-              }
-            }
-            // Look through sub-caches
-            for (let subCache of cache.subCaches) {
-              const result = getCacheByKey(subCache);
-              if (result) {
-                return result;
-              }
-            }
-            return undefined;
-          }
-
-          return getCacheByKey(this.rootCache);
-        });
-
         const rootPageCallbacks = {};
         const treePageCallbacks = {};
         const cache = {};
@@ -91,6 +70,10 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
 
         grid.size = 0; // To avoid NaN here and there before we get proper data
         grid.itemIdPath = 'key';
+
+        function createEmptyItemFromKey(key) {
+          return { [grid.itemIdPath]: key };
+        }
 
         grid.$connector = {};
 
@@ -318,8 +301,8 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
               treePageCallbacks[parentUniqueKey] = {};
             }
 
-            let itemCache = dataProviderController.getCacheByKey(parentUniqueKey);
-            if (cache[parentUniqueKey] && cache[parentUniqueKey][page] && itemCache) {
+            const parentItemContext = dataProviderController.getItemContext(params.parentItem);
+            if (cache[parentUniqueKey] && cache[parentUniqueKey][page] && parentItemContext.subCache) {
               // workaround: sometimes grid-element gives page index that overflows
               page = Math.min(page, Math.floor(cache[parentUniqueKey].size / grid.pageSize));
 
@@ -528,11 +511,12 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           let items;
           if ((parentKey || root) !== root) {
             items = cache[parentKey][page];
-            let itemCache = dataProviderController.getCacheByKey(parentKey);
-            if (itemCache) {
+            const parentItem = createEmptyItemFromKey(parentKey);
+            const parentItemContext = dataProviderController.getItemContext(parentItem);
+            if (parentItemContext && parentItemContext.subCache) {
               const callbacksForParentKey = treePageCallbacks[parentKey];
               const callback = callbacksForParentKey && callbacksForParentKey[page];
-              _updateGridCache(page, items, callback, itemCache);
+              _updateGridCache(page, items, callback, parentItemContext.subCache);
             }
           } else {
             items = cache[root][page];
@@ -736,7 +720,9 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           }
           let cacheToClear = dataProviderController.rootCache;
           if (parentKey) {
-            cacheToClear = dataProviderController.getCacheByKey(pkey);
+            const parentItem = createEmptyItemFromKey(pkey);
+            const parentItemContext = dataProviderController.getItemContext(parentItem);
+            cacheToClear = parentItemContext.subCache;
           }
           const endIndex = index + updatedPageCount * grid.pageSize;
           for (let itemIndex = index; itemIndex < endIndex; itemIndex++) {
@@ -846,9 +832,10 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           // children were added or removed, the grid will not be aware of it
           // unless we manually update the size.
           if (hasSizeChanged && outstandingRequests.length === 0) {
-            const itemCache = dataProviderController.getCacheByKey(parentKey);
-            if (itemCache) {
-              itemCache.size = levelSize;
+            const parentItem = createEmptyItemFromKey(parentKey);
+            const parentItemContext = dataProviderController.getItemContext(parentItem);
+            if (parentItemContext && parentItemContext.subCache) {
+              parentItemContext.subCache.size = levelSize;
             }
             updateGridFlatSize();
           }
