@@ -48,6 +48,7 @@ public class NumberFieldValueChangeModeBinderValidationPage
         });
     }
 
+    @Override
     protected NumberField createTestField() {
         return new NumberField();
     }

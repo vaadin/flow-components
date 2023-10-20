@@ -22,28 +22,16 @@ import com.vaadin.flow.component.textfield.testbench.NumberFieldElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.validation.AbstractValidationIT;
 
-@TestPath("vaadin-number-field/validation/eager-binder")
-public class NumberFieldEagerBinderValidationIT
+import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldValueChangeModeBasicValidationPage.SET_EAGER_MODE_BUTTON;
+import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldValueChangeModeBasicValidationPage.SET_LAZY_MODE_BUTTON;
+
+@TestPath("vaadin-number-field/validation/value-change-mode/binder")
+public class NumberFieldValueChangeModeBinderValidationIT
         extends AbstractValidationIT<NumberFieldElement> {
     @Test
-    public void enterChars_fieldValidatesOnEveryChar() {
-        // Entered: 2
-        testField.sendKeys("2");
-        assertValidationCount(1);
-        assertServerValid();
-        assertClientValid();
+    public void eagerMode_enterChars_assertValidity() {
+        $("button").id(SET_EAGER_MODE_BUTTON).click();
 
-        resetValidationCount();
-
-        // Entered:
-        testField.sendKeys(Keys.BACK_SPACE);
-        assertValidationCount(2);
-        assertServerValid();
-        assertClientValid();
-    }
-
-    @Test
-    public void badInput_enterChars_fieldValidatesOnEveryChar() {
         // Entered: -
         testField.sendKeys("-");
         assertValidationCount(1);
@@ -73,6 +61,27 @@ public class NumberFieldEagerBinderValidationIT
         assertValidationCount(1);
         assertServerValid();
         assertClientValid();
+
+        // Entered: 2
+        testField.sendKeys("2");
+        assertValidationCount(1);
+        assertServerValid();
+        assertClientValid();
+
+        resetValidationCount();
+
+        // Entered:
+        testField.sendKeys(Keys.BACK_SPACE);
+        assertValidationCount(2);
+        assertServerValid();
+        assertClientValid();
+
+        resetValidationCount();
+    }
+
+    @Test
+    public void lazyMode_enterChars() {
+        $("button").id(SET_LAZY_MODE_BUTTON).click();
     }
 
     protected NumberFieldElement getTestField() {
