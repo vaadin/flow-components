@@ -513,7 +513,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             items = cache[parentKey][page];
             const parentItem = createEmptyItemFromKey(parentKey);
             const parentItemContext = dataProviderController.getItemContext(parentItem);
-            if (parentItemContext.subCache) {
+            if (parentItemContext && parentItemContext.subCache) {
               const callbacksForParentKey = treePageCallbacks[parentKey];
               const callback = callbacksForParentKey && callbacksForParentKey[page];
               _updateGridCache(page, items, callback, parentItemContext.subCache);
@@ -834,7 +834,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           if (hasSizeChanged && outstandingRequests.length === 0) {
             const parentItem = createEmptyItemFromKey(parentKey);
             const parentItemContext = dataProviderController.getItemContext(parentItem);
-            if (parentItemContext.subCache) {
+            if (parentItemContext && parentItemContext.subCache) {
               parentItemContext.subCache.size = levelSize;
             }
             updateGridFlatSize();
