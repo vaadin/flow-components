@@ -82,7 +82,8 @@ public class SplitLayout extends Component
                 e -> this.requestStylesUpdatesForSplitterPosition(e.getUI()));
         addSplitterDragendListener(
                 e -> this.splitterPosition = calcNewSplitterPosition(
-                        e.primaryComponentWidth, e.secondaryComponentWidth));
+                        e.primaryComponentFlexBasis,
+                        e.secondaryComponentFlexBasis));
     }
 
     /**
@@ -337,18 +338,18 @@ public class SplitLayout extends Component
     public static class SplitterDragendEvent
             extends ComponentEvent<SplitLayout> {
 
-        private static final String PRIMARY_FLEX_BASIS = "element.querySelector('[slot=\"primary\"]').style.flexBasis";
-        private static final String SECONDARY_FLEX_BASIS = "element.querySelector('[slot=\"secondary\"]').style.flexBasis";
+        private static final String PRIMARY_FLEX_BASIS = "element.querySelector(':scope > [slot=\"primary\"]').style.flexBasis";
+        private static final String SECONDARY_FLEX_BASIS = "element.querySelector(':scope > [slot=\"secondary\"]').style.flexBasis";
 
-        String primaryComponentWidth;
-        String secondaryComponentWidth;
+        String primaryComponentFlexBasis;
+        String secondaryComponentFlexBasis;
 
         public SplitterDragendEvent(SplitLayout source, boolean fromClient,
-                @EventData(PRIMARY_FLEX_BASIS) String primaryComponentWidth,
-                @EventData(SECONDARY_FLEX_BASIS) String secondaryComponentWidth) {
+                @EventData(PRIMARY_FLEX_BASIS) String primaryComponentFlexBasis,
+                @EventData(SECONDARY_FLEX_BASIS) String secondaryComponentFlexBasis) {
             super(source, fromClient);
-            this.primaryComponentWidth = primaryComponentWidth;
-            this.secondaryComponentWidth = secondaryComponentWidth;
+            this.primaryComponentFlexBasis = primaryComponentFlexBasis;
+            this.secondaryComponentFlexBasis = secondaryComponentFlexBasis;
         }
 
     }
@@ -380,31 +381,33 @@ public class SplitLayout extends Component
         }
     }
 
-    private Double calcNewSplitterPosition(String primaryWidth,
-            String secondaryWidth) {
+    private Double calcNewSplitterPosition(String primaryFlexBasis,
+            String secondaryFlexBasis) {
         // set current splitter position value
         Double splitterPositionValue = this.splitterPosition;
 
-        if (primaryWidth == null || secondaryWidth == null) {
+        if (primaryFlexBasis == null || secondaryFlexBasis == null) {
             return splitterPositionValue;
         }
 
-        if (primaryWidth.endsWith("px")) {
+        if (primaryFlexBasis.endsWith("px")) {
             // When moving the splitter, the client side sets pixel values.
-            double pWidth = Double.parseDouble(primaryWidth.replace("px", ""));
-            double sWidth = Double
-                    .parseDouble(secondaryWidth.replace("px", ""));
+            double pFlexBasis = Double
+                    .parseDouble(primaryFlexBasis.replace("px", ""));
+            double sFlexBasis = Double
+                    .parseDouble(secondaryFlexBasis.replace("px", ""));
 
-            splitterPositionValue = (pWidth * 100) / (pWidth + sWidth);
+            splitterPositionValue = (pFlexBasis * 100)
+                    / (pFlexBasis + sFlexBasis);
             splitterPositionValue = round(splitterPositionValue);
-        } else if (primaryWidth.endsWith("%")) {
+        } else if (primaryFlexBasis.endsWith("%")) {
             splitterPositionValue = Double
-                    .parseDouble(primaryWidth.replace("%", ""));
+                    .parseDouble(primaryFlexBasis.replace("%", ""));
             splitterPositionValue = round(splitterPositionValue);
         } else {
             throw new IllegalArgumentException(
-                    "Given width values are not supported: " + primaryWidth
-                            + " / " + secondaryWidth);
+                    "Given flex basis values are not supported: "
+                            + primaryFlexBasis + " / " + secondaryFlexBasis);
         }
 
         return splitterPositionValue;
