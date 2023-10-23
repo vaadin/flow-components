@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.textfield.tests.validation;
 
-import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.textfield.NumberField;
@@ -26,15 +25,16 @@ import com.vaadin.tests.validation.AbstractValidationPage;
 @Route("vaadin-number-field/validation/value-change-mode/basic")
 public class NumberFieldValueChangeModeBasicValidationPage
         extends AbstractValidationPage<NumberField> {
-
     public static final String SET_EAGER_MODE_BUTTON = "set-eager-mode-button";
     public static final String SET_LAZY_MODE_BUTTON = "set-lazy-mode-button";
     public static final String SET_TIMEOUT_MODE_BUTTON = "set-timeout-mode-button";
 
-    public static final String SERVER_VALIDITY_STATE_LOG = "server-validity-state-log";
-    public static final String RESET_SERVER_VALIDITY_STATE_LOG_BUTTON = "reset-server-validity-state-log-button";
+    public static final String VALIDATION_LOG = "validation-log";
+    public static final String RESET_VALIDATION_LOG_BUTTON = "reset-validation-log-button";
 
-    private Div serverValidityStateLog;
+    public static final int TIMEOUT = 700;
+
+    private Div validationLog;
 
     public NumberFieldValueChangeModeBasicValidationPage() {
         super();
@@ -45,34 +45,36 @@ public class NumberFieldValueChangeModeBasicValidationPage
 
         add(createButton(SET_LAZY_MODE_BUTTON, "Set lazy mode", event -> {
             testField.setValueChangeMode(ValueChangeMode.LAZY);
+            testField.setValueChangeTimeout(TIMEOUT);
         }));
 
         add(createButton(SET_TIMEOUT_MODE_BUTTON, "Set timeout mode", event -> {
             testField.setValueChangeMode(ValueChangeMode.TIMEOUT);
+            testField.setValueChangeTimeout(TIMEOUT);
         }));
 
-        addServerValidityLog();
+        addValidationLog();
     }
 
-    private void addServerValidityLog() {
-        serverValidityStateLog = new Div();
-        serverValidityStateLog.setId(SERVER_VALIDITY_STATE_LOG);
+    private void addValidationLog() {
+        validationLog = new Div();
+        validationLog.setId(VALIDATION_LOG);
 
-        NativeButton resetServerValidityStateLogButton = createButton(RESET_SERVER_VALIDITY_STATE_LOG_BUTTON, "Reset server validity log", event -> {
-            resetServerValidityLog();
+        NativeButton resetValidationLogButton = createButton(RESET_VALIDATION_LOG_BUTTON, "Reset validation log", event -> {
+            resetValidationLog();
         });
 
-        add(new Div(serverValidityStateLog, resetServerValidityStateLogButton));
+        add(new Div(validationLog, resetValidationLogButton));
     }
 
-    private void logServerValidityStateChange(boolean isInvalid) {
+    private void logValidation(boolean isInvalid) {
         Div record = new Div();
         record.setText(isInvalid ? "invalid" : "valid");
-        serverValidityStateLog.add(record);
+        validationLog.add(record);
     }
 
-    private void resetServerValidityLog() {
-        serverValidityStateLog.removeAll();
+    private void resetValidationLog() {
+        validationLog.removeAll();
     }
 
     @Override
@@ -81,7 +83,7 @@ public class NumberFieldValueChangeModeBasicValidationPage
             @Override
             protected void validate() {
                 super.validate();
-                logServerValidityStateChange(isInvalid());
+                logValidation(isInvalid());
             }
         };
     }

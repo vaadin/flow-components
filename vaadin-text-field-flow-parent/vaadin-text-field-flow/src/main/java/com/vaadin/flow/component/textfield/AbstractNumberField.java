@@ -99,36 +99,43 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
             validate();
             fireValidationStatusChangeEvent();
         });
+
+        getElement().addEventListener("has-input-value-changed", e -> {
+            if (valueEquals(getValue(), getEmptyValue())) {
+                validate();
+                fireValidationStatusChangeEvent();
+            }
+        });
     }
 
-    @Override
-    public void setValueChangeMode(ValueChangeMode valueChangeMode) {
-        super.setValueChangeMode(valueChangeMode);
+    // @Override
+    // public void setValueChangeMode(ValueChangeMode valueChangeMode) {
+    //     super.setValueChangeMode(valueChangeMode);
 
-        if (inputListenerRegistration != null) {
-            inputListenerRegistration.remove();
-            inputListenerRegistration = null;
-        }
+    //     if (inputListenerRegistration != null) {
+    //         inputListenerRegistration.remove();
+    //         inputListenerRegistration = null;
+    //     }
 
-        if (valueChangeMode.equals(ValueChangeMode.EAGER)
-                || valueChangeMode.equals(ValueChangeMode.LAZY)
-                || valueChangeMode.equals(ValueChangeMode.TIMEOUT)) {
-            inputListenerRegistration = getElement().addEventListener("input",
-                    event -> {
-                        if (valueEquals(getValue(), getEmptyValue())) {
-                            validate();
-                            fireValidationStatusChangeEvent();
-                        }
-                    });
-        }
-    }
+    //     if (valueChangeMode.equals(ValueChangeMode.EAGER)
+    //             || valueChangeMode.equals(ValueChangeMode.LAZY)
+    //             || valueChangeMode.equals(ValueChangeMode.TIMEOUT)) {
+    //         inputListenerRegistration = getElement().addEventListener("input",
+    //                 event -> {
+    //                     if (valueEquals(getValue(), getEmptyValue())) {
+    //                         validate();
+    //                         fireValidationStatusChangeEvent();
+    //                     }
+    //                 });
+    //     }
+    // }
 
-    @Override
-    protected void applyChangeTimeout() {
-        super.applyChangeTimeout();
-        ValueChangeMode.applyChangeTimeout(getValueChangeMode(),
-                getValueChangeTimeout(), inputListenerRegistration);
-    }
+    // @Override
+    // protected void applyChangeTimeout() {
+    //     super.applyChangeTimeout();
+    //     ValueChangeMode.applyChangeTimeout(getValueChangeMode(),
+    //             getValueChangeTimeout(), inputListenerRegistration);
+    // }
 
     /**
      * Sets the visibility of the buttons for increasing/decreasing the value
