@@ -237,9 +237,8 @@ public class NumberFieldValueChangeModeBasicValidationIT
 
         long actual = System.currentTimeMillis() - start;
 
-        Assert.assertTrue(
-                "The validation was triggered in " + actual + "ms (expected " + expected + "ms)",
-                actual >= expected);
+        Assert.assertTrue("The validation was triggered in " + actual
+                + "ms (expected " + expected + "ms)", actual >= expected);
     }
 
     protected void assertValidationResults(String... expectedResults) {
