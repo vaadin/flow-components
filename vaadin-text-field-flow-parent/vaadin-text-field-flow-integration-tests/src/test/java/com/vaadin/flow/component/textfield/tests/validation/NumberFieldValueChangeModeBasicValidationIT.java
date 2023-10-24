@@ -19,7 +19,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
@@ -37,9 +36,18 @@ import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldVa
 @TestPath("vaadin-number-field/validation/value-change-mode/basic")
 public class NumberFieldValueChangeModeBasicValidationIT
         extends AbstractValidationIT<NumberFieldElement> {
+
     @Test
     public void eagerMode_enterChars_assertValidity() {
         $("button").id(SET_EAGER_MODE_BUTTON).click();
+
+        // Entered: 2
+        testField.sendKeys("2");
+        assertValidationResults("valid");
+
+        // Entered:
+        testField.sendKeys(Keys.BACK_SPACE);
+        assertValidationResults("valid", "valid");
 
         // Entered: -
         testField.sendKeys("-");
@@ -51,15 +59,7 @@ public class NumberFieldValueChangeModeBasicValidationIT
 
         // Entered: -
         testField.sendKeys(Keys.BACK_SPACE);
-        assertValidationResults("invalid");
-
-        // Entered:
-        testField.sendKeys(Keys.BACK_SPACE);
-        assertValidationResults("valid");
-
-        // Entered: 2
-        testField.sendKeys("2");
-        assertValidationResults("valid");
+        assertValidationResults("invalid", "invalid");
 
         // Entered:
         testField.sendKeys(Keys.BACK_SPACE);
@@ -78,7 +78,7 @@ public class NumberFieldValueChangeModeBasicValidationIT
         // Entered:
         testField.sendKeys(Keys.BACK_SPACE);
         assertValidationTimeout(TIMEOUT);
-        assertValidationResults("valid");
+        assertValidationResults("valid", "valid");
 
         // Entered: -
         testField.sendKeys("-");
@@ -93,7 +93,7 @@ public class NumberFieldValueChangeModeBasicValidationIT
         // Entered: -
         testField.sendKeys(Keys.BACK_SPACE);
         assertValidationTimeout(TIMEOUT);
-        assertValidationResults("invalid");
+        assertValidationResults("invalid", "invalid");
 
         // Entered:
         testField.sendKeys(Keys.BACK_SPACE);
@@ -113,7 +113,7 @@ public class NumberFieldValueChangeModeBasicValidationIT
         // Entered:
         testField.sendKeys(Keys.BACK_SPACE, Keys.BACK_SPACE);
         assertValidationTimeout(TIMEOUT);
-        assertValidationResults("valid");
+        assertValidationResults("valid", "valid");
 
         // Entered: --
         testField.sendKeys("--");
@@ -128,7 +128,7 @@ public class NumberFieldValueChangeModeBasicValidationIT
         // Entered: --
         testField.sendKeys(Keys.BACK_SPACE, "-");
         assertValidationTimeout(TIMEOUT);
-        assertValidationResults("invalid");
+        assertValidationResults("invalid", "invalid");
 
         // Entered:
         testField.sendKeys(Keys.BACK_SPACE, Keys.BACK_SPACE);
@@ -140,6 +140,18 @@ public class NumberFieldValueChangeModeBasicValidationIT
     public void timeoutMode_enterOneChar_assertValidity()
             throws InterruptedException {
         $("button").id(SET_TIMEOUT_MODE_BUTTON).click();
+
+        // Entered: 2
+        testField.sendKeys("2");
+        assertValidationResults("valid");
+
+        Thread.sleep(TIMEOUT);
+
+        // Entered:
+        testField.sendKeys(Keys.BACK_SPACE);
+        assertValidationResults("valid", "valid");
+
+        Thread.sleep(TIMEOUT);
 
         // Entered: -
         testField.sendKeys("-");
@@ -155,19 +167,7 @@ public class NumberFieldValueChangeModeBasicValidationIT
 
         // Entered: -
         testField.sendKeys(Keys.BACK_SPACE);
-        assertValidationResults("invalid");
-
-        Thread.sleep(TIMEOUT);
-
-        // Entered:
-        testField.sendKeys(Keys.BACK_SPACE);
-        assertValidationResults("valid");
-
-        Thread.sleep(TIMEOUT);
-
-        // Entered: 2
-        testField.sendKeys("2");
-        assertValidationResults("valid");
+        assertValidationResults("invalid", "invalid");
 
         Thread.sleep(TIMEOUT);
 
@@ -181,39 +181,45 @@ public class NumberFieldValueChangeModeBasicValidationIT
             throws InterruptedException {
         $("button").id(SET_TIMEOUT_MODE_BUTTON).click();
 
-        // Entered: --
-        testField.sendKeys("--");
-        assertValidationResults("invalid");
-        Thread.sleep(TIMEOUT);
-        assertValidationResults();
-
         // Entered: -2
-        testField.sendKeys(Keys.BACK_SPACE, "2");
+        testField.sendKeys("-");
         assertValidationResults("invalid");
-        assertValidationTimeout(TIMEOUT);
-        assertValidationResults("valid");
-
-        // Entered: --
-        testField.sendKeys(Keys.BACK_SPACE, "-");
-        assertValidationResults("invalid");
-        Thread.sleep(TIMEOUT);
-        assertValidationResults();
-
-        // Entered:
-        testField.sendKeys(Keys.BACK_SPACE, Keys.BACK_SPACE);
-        assertValidationResults("invalid");
-        assertValidationTimeout(TIMEOUT);
-        assertValidationResults("valid");
-
-        // Entered: -2
-        testField.sendKeys("-2");
-        assertValidationResults("invalid");
+        testField.sendKeys("2");
         assertValidationTimeout(TIMEOUT);
         assertValidationResults("valid");
 
         // Entered:
-        testField.sendKeys(Keys.BACK_SPACE, Keys.BACK_SPACE);
+        testField.sendKeys(Keys.BACK_SPACE);
+        assertValidationResults("invalid", "invalid");
+        testField.sendKeys(Keys.BACK_SPACE);
+        assertValidationTimeout(TIMEOUT);
+        assertValidationResults("valid");
+
+        // Entered: --
+        testField.sendKeys("-");
         assertValidationResults("invalid");
+        testField.sendKeys("-");
+        assertValidationTimeout(TIMEOUT);
+        assertValidationResults("invalid");
+
+        // Entered: -2
+        testField.sendKeys(Keys.BACK_SPACE);
+        assertValidationResults("invalid");
+        testField.sendKeys("2");
+        assertValidationTimeout(TIMEOUT);
+        assertValidationResults("valid");
+
+        // Entered: --
+        testField.sendKeys(Keys.BACK_SPACE);
+        assertValidationResults("invalid", "invalid");
+        testField.sendKeys("-");
+        assertValidationTimeout(TIMEOUT);
+        assertValidationResults("invalid");
+
+        // Entered:
+        testField.sendKeys(Keys.BACK_SPACE);
+        assertValidationResults("invalid");
+        testField.sendKeys(Keys.BACK_SPACE);
         assertValidationTimeout(TIMEOUT);
         assertValidationResults("valid");
     }
@@ -223,14 +229,17 @@ public class NumberFieldValueChangeModeBasicValidationIT
                 .map(record -> record.getText()).toList();
     }
 
-    protected void assertValidationTimeout(int timeout) {
-        long last = System.currentTimeMillis();
+    protected void assertValidationTimeout(int expected) {
+        long start = System.currentTimeMillis();
 
+        // Wait for validation
         waitUntil(e -> !getValidationResults().isEmpty());
 
+        long actual = System.currentTimeMillis() - start;
+
         Assert.assertTrue(
-                "The validation was triggered earlier than " + timeout + "ms",
-                System.currentTimeMillis() >= last + timeout);
+                "The validation was triggered in " + actual + "ms (expected " + expected + "ms)",
+                actual >= expected);
     }
 
     protected void assertValidationResults(String... expectedResults) {

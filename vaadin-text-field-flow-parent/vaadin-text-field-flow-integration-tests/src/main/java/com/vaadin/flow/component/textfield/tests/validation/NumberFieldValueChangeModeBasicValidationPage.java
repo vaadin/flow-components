@@ -32,7 +32,7 @@ public class NumberFieldValueChangeModeBasicValidationPage
     public static final String VALIDATION_LOG = "validation-log";
     public static final String RESET_VALIDATION_LOG_BUTTON = "reset-validation-log-button";
 
-    public static final int TIMEOUT = 700;
+    public static final int TIMEOUT = 600;
 
     private Div validationLog;
 
