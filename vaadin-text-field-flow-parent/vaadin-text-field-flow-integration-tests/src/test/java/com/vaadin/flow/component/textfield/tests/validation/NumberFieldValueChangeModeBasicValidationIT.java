@@ -70,9 +70,19 @@ public class NumberFieldValueChangeModeBasicValidationIT
     public void lazyMode_enterOneChar_assertValidityAndTimeout() {
         $("button").id(SET_LAZY_MODE_BUTTON).click();
 
+        // Entered: 2
+        testField.sendKeys("2");
+        assertValidationTimeout(TIMEOUT);
+        assertValidationResults("valid");
+
+        // Entered:
+        testField.sendKeys(Keys.BACK_SPACE);
+        assertValidationTimeout(TIMEOUT);
+        assertValidationResults("valid");
+
         // Entered: -
         testField.sendKeys("-");
-        // assertValidationTimeout(TIMEOUT);
+        assertValidationTimeout(TIMEOUT);
         assertValidationResults("invalid");
 
         // Entered: -2
@@ -87,16 +97,6 @@ public class NumberFieldValueChangeModeBasicValidationIT
 
         // Entered:
         testField.sendKeys(Keys.BACK_SPACE);
-        // assertValidationTimeout(TIMEOUT);
-        assertValidationResults("valid");
-
-        // Entered: 2
-        testField.sendKeys("2");
-        assertValidationTimeout(TIMEOUT);
-        assertValidationResults("valid");
-
-        // Entered:
-        testField.sendKeys(Keys.BACK_SPACE);
         assertValidationTimeout(TIMEOUT);
         assertValidationResults("valid");
     }
@@ -105,9 +105,19 @@ public class NumberFieldValueChangeModeBasicValidationIT
     public void lazyMode_enterMultipleChars_assertValidityAndTimeout() {
         $("button").id(SET_LAZY_MODE_BUTTON).click();
 
+        // Entered: -2
+        testField.sendKeys("-2");
+        assertValidationTimeout(TIMEOUT);
+        assertValidationResults("valid");
+
+        // Entered:
+        testField.sendKeys(Keys.BACK_SPACE, Keys.BACK_SPACE);
+        assertValidationTimeout(TIMEOUT);
+        assertValidationResults("valid");
+
         // Entered: --
         testField.sendKeys("--");
-        // assertValidationTimeout(TIMEOUT);
+        assertValidationTimeout(TIMEOUT);
         assertValidationResults("invalid");
 
         // Entered: -2
@@ -122,22 +132,13 @@ public class NumberFieldValueChangeModeBasicValidationIT
 
         // Entered:
         testField.sendKeys(Keys.BACK_SPACE, Keys.BACK_SPACE);
-        // assertValidationTimeout(TIMEOUT);
-        assertValidationResults("valid");
-
-        // Entered: -2
-        testField.sendKeys("-2");
-        assertValidationTimeout(TIMEOUT);
-        assertValidationResults("valid");
-
-        // Entered:
-        testField.sendKeys(Keys.BACK_SPACE, Keys.BACK_SPACE);
         assertValidationTimeout(TIMEOUT);
         assertValidationResults("valid");
     }
 
     @Test
-    public void timeoutMode_enterOneChar_assertValidity() throws InterruptedException {
+    public void timeoutMode_enterOneChar_assertValidity()
+            throws InterruptedException {
         $("button").id(SET_TIMEOUT_MODE_BUTTON).click();
 
         // Entered: -
@@ -172,12 +173,13 @@ public class NumberFieldValueChangeModeBasicValidationIT
 
         // Entered:
         testField.sendKeys(Keys.BACK_SPACE);
-        assertValidationResults("valid", "valid");
+        assertValidationResults("valid");
     }
 
     @Test
     @Ignore
-    public void timeoutMode_enterMultipleChars_assertValidityAndTimeout() throws InterruptedException {
+    public void timeoutMode_enterMultipleChars_assertValidityAndTimeout()
+            throws InterruptedException {
         $("button").id(SET_TIMEOUT_MODE_BUTTON).click();
 
         // Entered: --
@@ -216,7 +218,8 @@ public class NumberFieldValueChangeModeBasicValidationIT
     }
 
     protected List<String> getValidationResults() {
-        return $("div").id(VALIDATION_LOG).$("div").all().stream().map(record -> record.getText()).toList();
+        return $("div").id(VALIDATION_LOG).$("div").all().stream()
+                .map(record -> record.getText()).toList();
     }
 
     protected void assertValidationTimeout(int timeout) {
@@ -224,11 +227,14 @@ public class NumberFieldValueChangeModeBasicValidationIT
 
         waitUntil(e -> !getValidationResults().isEmpty());
 
-        Assert.assertTrue("The validation was triggered earlier than " + timeout + "ms", System.currentTimeMillis() >= last + timeout);
+        Assert.assertTrue(
+                "The validation was triggered earlier than " + timeout + "ms",
+                System.currentTimeMillis() >= last + timeout);
     }
 
     protected void assertValidationResults(String... expectedResults) {
-        Assert.assertEquals(Arrays.asList(expectedResults), getValidationResults());
+        Assert.assertEquals(Arrays.asList(expectedResults),
+                getValidationResults());
         resetValidationLog();
     }
 

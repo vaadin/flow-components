@@ -101,7 +101,11 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         });
 
         getElement().addEventListener("has-input-value-changed", e -> {
-            if (valueEquals(getValue(), getEmptyValue())) {
+            ValueChangeMode valueChangeMode = getValueChangeMode();
+            if ((valueChangeMode.equals(ValueChangeMode.EAGER)
+                    || valueChangeMode.equals(ValueChangeMode.LAZY)
+                    || valueChangeMode.equals(ValueChangeMode.TIMEOUT))
+                    && valueEquals(getValue(), getEmptyValue())) {
                 validate();
                 fireValidationStatusChangeEvent();
             }
@@ -110,31 +114,29 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
 
     // @Override
     // public void setValueChangeMode(ValueChangeMode valueChangeMode) {
-    //     super.setValueChangeMode(valueChangeMode);
+    // super.setValueChangeMode(valueChangeMode);
 
-    //     if (inputListenerRegistration != null) {
-    //         inputListenerRegistration.remove();
-    //         inputListenerRegistration = null;
-    //     }
+    // if (inputListenerRegistration != null) {
+    // inputListenerRegistration.remove();
+    // inputListenerRegistration = null;
+    // }
 
-    //     if (valueChangeMode.equals(ValueChangeMode.EAGER)
-    //             || valueChangeMode.equals(ValueChangeMode.LAZY)
-    //             || valueChangeMode.equals(ValueChangeMode.TIMEOUT)) {
-    //         inputListenerRegistration = getElement().addEventListener("input",
-    //                 event -> {
-    //                     if (valueEquals(getValue(), getEmptyValue())) {
-    //                         validate();
-    //                         fireValidationStatusChangeEvent();
-    //                     }
-    //                 });
-    //     }
+    // if (valueChangeMode.equals(ValueChangeMode.EAGER)
+    // || valueChangeMode.equals(ValueChangeMode.LAZY)
+    // || valueChangeMode.equals(ValueChangeMode.TIMEOUT)) {
+    // inputListenerRegistration = getElement().addEventListener("input",
+    // event -> {
+    // validate();
+    // fireValidationStatusChangeEvent();
+    // });
+    // }
     // }
 
     // @Override
     // protected void applyChangeTimeout() {
-    //     super.applyChangeTimeout();
-    //     ValueChangeMode.applyChangeTimeout(getValueChangeMode(),
-    //             getValueChangeTimeout(), inputListenerRegistration);
+    // super.applyChangeTimeout();
+    // ValueChangeMode.applyChangeTimeout(getValueChangeMode(),
+    // getValueChangeTimeout(), inputListenerRegistration);
     // }
 
     /**

@@ -60,9 +60,10 @@ public class NumberFieldValueChangeModeBasicValidationPage
         validationLog = new Div();
         validationLog.setId(VALIDATION_LOG);
 
-        NativeButton resetValidationLogButton = createButton(RESET_VALIDATION_LOG_BUTTON, "Reset validation log", event -> {
-            resetValidationLog();
-        });
+        NativeButton resetValidationLogButton = createButton(
+                RESET_VALIDATION_LOG_BUTTON, "Reset validation log", event -> {
+                    resetValidationLog();
+                });
 
         add(new Div(validationLog, resetValidationLogButton));
     }
