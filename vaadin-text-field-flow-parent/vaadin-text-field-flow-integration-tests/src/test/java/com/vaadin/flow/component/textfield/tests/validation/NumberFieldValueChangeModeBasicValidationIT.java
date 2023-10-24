@@ -63,7 +63,7 @@ public class NumberFieldValueChangeModeBasicValidationIT
 
         // Entered:
         testField.sendKeys(Keys.BACK_SPACE);
-        assertValidationResults("valid", "valid");
+        assertValidationResults("valid");
     }
 
     @Test
@@ -177,7 +177,6 @@ public class NumberFieldValueChangeModeBasicValidationIT
     }
 
     @Test
-    @Ignore
     public void timeoutMode_enterMultipleChars_assertValidityAndTimeout()
             throws InterruptedException {
         $("button").id(SET_TIMEOUT_MODE_BUTTON).click();
@@ -202,19 +201,21 @@ public class NumberFieldValueChangeModeBasicValidationIT
 
         // Entered:
         testField.sendKeys(Keys.BACK_SPACE, Keys.BACK_SPACE);
+        assertValidationResults("invalid");
+        assertValidationTimeout(TIMEOUT);
         assertValidationResults("valid");
-        Thread.sleep(TIMEOUT);
-        assertValidationResults();
 
         // Entered: -2
-        // testField.sendKeys("-2");
-        // assertValidationTimeout(TIMEOUT);
-        // assertValidationResults("valid");
+        testField.sendKeys("-2");
+        assertValidationResults("invalid");
+        assertValidationTimeout(TIMEOUT);
+        assertValidationResults("valid");
 
         // Entered:
-        // testField.sendKeys(Keys.BACK_SPACE, Keys.BACK_SPACE);
-        // assertValidationTimeout(TIMEOUT);
-        // assertValidationResults("valid");
+        testField.sendKeys(Keys.BACK_SPACE, Keys.BACK_SPACE);
+        assertValidationResults("invalid");
+        assertValidationTimeout(TIMEOUT);
+        assertValidationResults("valid");
     }
 
     protected List<String> getValidationResults() {
