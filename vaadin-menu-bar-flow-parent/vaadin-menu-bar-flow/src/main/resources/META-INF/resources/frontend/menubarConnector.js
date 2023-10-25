@@ -103,9 +103,18 @@ import './contextMenuConnector.js';
     };
   }
 
+  function setClassName (component) {
+    if (component._item) {
+      component._item.className = component.className;
+    }
+  }
+
   window.Vaadin.Flow.menubarConnector = {
     initLazy(...args) {
       return tryCatchWrapper(initLazy)(...args);
+    },
+    setClassName(...args) {
+      return tryCatchWrapper(setClassName)(...args);
     }
   };
 })();

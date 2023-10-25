@@ -23,6 +23,7 @@ public class BasicValidationIT extends AbstractValidationIT<DatePickerElement> {
     @Test
     public void triggerBlur_assertValidity() {
         testField.sendKeys(Keys.TAB);
+        assertValidationCount(0);
         assertServerValid();
         assertClientValid();
     }
@@ -32,8 +33,9 @@ public class BasicValidationIT extends AbstractValidationIT<DatePickerElement> {
         $("button").id(REQUIRED_BUTTON).click();
 
         testField.sendKeys(Keys.TAB);
-        assertServerInvalid();
-        assertClientInvalid();
+        assertValidationCount(0);
+        assertServerValid();
+        assertClientValid();
     }
 
     @Test
@@ -41,10 +43,14 @@ public class BasicValidationIT extends AbstractValidationIT<DatePickerElement> {
         $("button").id(REQUIRED_BUTTON).click();
 
         testField.setInputValue("1/1/2022");
+        assertValidationCount(1);
         assertServerValid();
         assertClientValid();
 
+        resetValidationCount();
+
         testField.setInputValue("");
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
     }
@@ -54,14 +60,28 @@ public class BasicValidationIT extends AbstractValidationIT<DatePickerElement> {
         $("input").id(MIN_INPUT).sendKeys("2022-03-01", Keys.ENTER);
 
         testField.setInputValue("2/1/2022");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
 
+        resetValidationCount();
+
         testField.setInputValue("3/1/2022");
+        assertValidationCount(1);
         assertClientValid();
         assertServerValid();
 
+        resetValidationCount();
+
         testField.setInputValue("4/1/2022");
+        assertValidationCount(1);
+        assertClientValid();
+        assertServerValid();
+
+        resetValidationCount();
+
+        testField.setInputValue("");
+        assertValidationCount(1);
         assertClientValid();
         assertServerValid();
     }
@@ -71,14 +91,28 @@ public class BasicValidationIT extends AbstractValidationIT<DatePickerElement> {
         $("input").id(MAX_INPUT).sendKeys("2022-03-01", Keys.ENTER);
 
         testField.setInputValue("4/1/2022");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
 
+        resetValidationCount();
+
         testField.setInputValue("3/1/2022");
+        assertValidationCount(1);
         assertClientValid();
         assertServerValid();
 
+        resetValidationCount();
+
         testField.setInputValue("2/1/2022");
+        assertValidationCount(1);
+        assertClientValid();
+        assertServerValid();
+
+        resetValidationCount();
+
+        testField.setInputValue("");
+        assertValidationCount(1);
         assertClientValid();
         assertServerValid();
     }
@@ -86,25 +120,54 @@ public class BasicValidationIT extends AbstractValidationIT<DatePickerElement> {
     @Test
     public void badInput_changeValue_assertValidity() {
         testField.setInputValue("INVALID");
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
 
+        resetValidationCount();
+
+        testField.setInputValue("1/1/2022");
+        assertValidationCount(1);
+        assertServerValid();
+        assertClientValid();
+
+        resetValidationCount();
+
+        testField.setInputValue("INVALID");
+        assertValidationCount(1);
+        assertServerInvalid();
+        assertClientInvalid();
+
+        resetValidationCount();
+
+        testField.setInputValue("");
+        assertValidationCount(1);
+        assertClientValid();
+        assertServerValid();
+    }
+
+    @Test
+    public void setValue_clearValue_assertValidity() {
         testField.setInputValue("1/1/2022");
         assertServerValid();
         assertClientValid();
 
-        testField.setInputValue("INVALID");
-        assertServerInvalid();
-        assertClientInvalid();
+        $("button").id(CLEAR_VALUE_BUTTON).click();
+        assertServerValid();
+        assertClientValid();
     }
 
     @Test
     public void badInput_setValue_clearValue_assertValidity() {
         testField.setInputValue("INVALID");
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
 
+        resetValidationCount();
+
         $("button").id(CLEAR_VALUE_BUTTON).click();
+        assertValidationCount(1);
         assertServerValid();
         assertClientValid();
     }
@@ -113,7 +176,8 @@ public class BasicValidationIT extends AbstractValidationIT<DatePickerElement> {
     public void detach_attach_preservesInvalidState() {
         // Make field invalid
         $("button").id(REQUIRED_BUTTON).click();
-        testField.sendKeys(Keys.TAB);
+        testField.setInputValue("1/1/2022");
+        testField.setInputValue("");
 
         detachAndReattachField();
 
@@ -134,7 +198,8 @@ public class BasicValidationIT extends AbstractValidationIT<DatePickerElement> {
     public void clientSideInvalidStateIsNotPropagatedToServer() {
         // Make the field invalid
         $("button").id(REQUIRED_BUTTON).click();
-        testField.sendKeys(Keys.TAB);
+        testField.setInputValue("1/1/2022");
+        testField.setInputValue("");
 
         executeScript("arguments[0].invalid = false", testField);
 

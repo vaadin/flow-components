@@ -27,6 +27,7 @@ import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBi
 import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBinderValidationPage.MAX_INPUT;
 import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBinderValidationPage.EXPECTED_VALUE_INPUT;
 import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBinderValidationPage.CLEAR_VALUE_BUTTON;
+import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBinderValidationPage.RESET_BEAN_BUTTON;
 import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBinderValidationPage.REQUIRED_ERROR_MESSAGE;
 import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBinderValidationPage.UNEXPECTED_VALUE_ERROR_MESSAGE;
 
@@ -43,9 +44,9 @@ public class NumberFieldBinderValidationIT
     @Test
     public void required_triggerBlur_assertValidity() {
         testField.sendKeys(Keys.TAB);
-        assertServerInvalid();
-        assertClientInvalid();
-        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
+        assertValidationCount(0);
+        assertServerValid();
+        assertClientValid();
     }
 
     @Test
@@ -53,13 +54,30 @@ public class NumberFieldBinderValidationIT
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("1234", Keys.ENTER);
 
         testField.setValue("1234");
+        assertValidationCount(1);
         assertServerValid();
         assertClientValid();
 
+        resetValidationCount();
+
         testField.setValue("");
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage(REQUIRED_ERROR_MESSAGE);
+    }
+
+    @Test
+    public void required_setValue_resetBean_assertValidity() {
+        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("1234", Keys.ENTER);
+
+        testField.setValue("1234");
+        assertServerValid();
+        assertClientValid();
+
+        $("button").id(RESET_BEAN_BUTTON).click();
+        assertServerValid();
+        assertClientValid();
     }
 
     @Test
@@ -69,20 +87,36 @@ public class NumberFieldBinderValidationIT
 
         // Constraint validation fails:
         testField.setValue("1.8");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage("");
 
+        resetValidationCount();
+
         // Binder validation fails:
         testField.setValue("2");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
 
+        resetValidationCount();
+
         // Both validations pass:
         testField.setValue("2.2");
+        assertValidationCount(1);
         assertClientValid();
         assertServerValid();
+
+        resetValidationCount();
+
+        // Binder validation fails:
+        testField.setValue("");
+        assertValidationCount(1);
+        assertClientInvalid();
+        assertServerInvalid();
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
     @Test
@@ -92,20 +126,36 @@ public class NumberFieldBinderValidationIT
 
         // Constraint validation fails:
         testField.setValue("2.2");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage("");
 
+        resetValidationCount();
+
         // Binder validation fails:
         testField.setValue("2");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
 
+        resetValidationCount();
+
         // Both validations pass:
         testField.setValue("1.8");
+        assertValidationCount(1);
         assertClientValid();
         assertServerValid();
+
+        resetValidationCount();
+
+        // Binder validation fails:
+        testField.setValue("");
+        assertValidationCount(1);
+        assertClientInvalid();
+        assertServerInvalid();
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
     @Test
@@ -115,49 +165,98 @@ public class NumberFieldBinderValidationIT
 
         // Constraint validation fails:
         testField.setValue("1");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage("");
 
+        resetValidationCount();
+
         // Binder validation fails:
         testField.setValue("1.5");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
 
+        resetValidationCount();
+
         // Both validations pass:
         testField.setValue("3");
+        assertValidationCount(1);
         assertClientValid();
         assertServerValid();
+
+        resetValidationCount();
+
+        // Binder validation fails:
+        testField.setValue("");
+        assertValidationCount(1);
+        assertClientInvalid();
+        assertServerInvalid();
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
     @Test
     public void badInput_changeValue_assertValidity() {
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("2", Keys.ENTER);
 
-        testField.sendKeys("--2", Keys.TAB);
+        testField.sendKeys("--2", Keys.ENTER);
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage("");
+
+        resetValidationCount();
+
+        testField.setValue("2");
+        assertValidationCount(1);
+        assertServerValid();
+        assertClientValid();
+
+        resetValidationCount();
+
+        testField.sendKeys("--2", Keys.ENTER);
+        assertValidationCount(1);
+        assertServerInvalid();
+        assertClientInvalid();
+        assertErrorMessage("");
+
+        resetValidationCount();
+
+        testField.setValue("");
+        assertValidationCount(1);
+        assertServerInvalid();
+        assertClientInvalid();
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
+    }
+
+    @Test
+    public void setValue_clearValue_assertValidity() {
+        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("2", Keys.ENTER);
 
         testField.setValue("2");
         assertServerValid();
         assertClientValid();
 
-        testField.sendKeys("--2", Keys.TAB);
+        $("button").id(CLEAR_VALUE_BUTTON).click();
         assertServerInvalid();
         assertClientInvalid();
-        assertErrorMessage("");
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
     @Test
     public void badInput_setValue_clearValue_assertValidity() {
-        testField.sendKeys("--2", Keys.TAB);
+        testField.sendKeys("--2", Keys.ENTER);
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage("");
 
+        resetValidationCount();
+
         $("button").id(CLEAR_VALUE_BUTTON).click();
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage(REQUIRED_ERROR_MESSAGE);

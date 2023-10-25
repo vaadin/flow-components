@@ -19,16 +19,13 @@ import java.math.BigDecimal;
 
 import com.vaadin.flow.component.textfield.BigDecimalField;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
 import com.vaadin.tests.validation.AbstractValidationPage;
 
-@Route("vaadin-big-decimal-field/validation/binder")
-public class BigDecimalFieldBinderValidationPage
+@Route("vaadin-big-decimal-field/validation/eager-binder")
+public class BigDecimalFieldEagerBinderValidationPage
         extends AbstractValidationPage<BigDecimalField> {
-    public static final String REQUIRED_ERROR_MESSAGE = "The field is required";
-    public static final String CLEAR_VALUE_BUTTON = "clear-value-button";
-    public static final String RESET_BEAN_BUTTON = "reset-bean-button";
-
     public static class Bean {
         private BigDecimal property;
 
@@ -41,25 +38,16 @@ public class BigDecimalFieldBinderValidationPage
         }
     }
 
-    protected Binder<Bean> binder;
-
-    public BigDecimalFieldBinderValidationPage() {
+    public BigDecimalFieldEagerBinderValidationPage() {
         super();
 
-        binder = new Binder<>(Bean.class);
-        binder.forField(testField).asRequired(REQUIRED_ERROR_MESSAGE)
-                .bind("property");
+        testField.setValueChangeMode(ValueChangeMode.EAGER);
+
+        Binder<Bean> binder = new Binder<>(Bean.class);
+        binder.forField(testField).bind("property");
         binder.addStatusChangeListener(event -> {
             incrementServerValidationCounter();
         });
-
-        add(createButton(CLEAR_VALUE_BUTTON, "Clear value", event -> {
-            testField.clear();
-        }));
-
-        add(createButton(RESET_BEAN_BUTTON, "Reset bean", event -> {
-            binder.setBean(new Bean());
-        }));
     }
 
     protected BigDecimalField createTestField() {

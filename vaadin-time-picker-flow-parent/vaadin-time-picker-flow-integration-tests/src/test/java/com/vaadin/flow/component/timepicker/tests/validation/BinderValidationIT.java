@@ -13,6 +13,7 @@ import static com.vaadin.flow.component.timepicker.tests.validation.BinderValida
 import static com.vaadin.flow.component.timepicker.tests.validation.BinderValidationPage.REQUIRED_ERROR_MESSAGE;
 import static com.vaadin.flow.component.timepicker.tests.validation.BinderValidationPage.UNEXPECTED_VALUE_ERROR_MESSAGE;
 import static com.vaadin.flow.component.timepicker.tests.validation.BinderValidationPage.CLEAR_VALUE_BUTTON;
+import static com.vaadin.flow.component.timepicker.tests.validation.BinderValidationPage.RESET_BEAN_BUTTON;
 
 @TestPath("vaadin-time-picker/validation/binder")
 public class BinderValidationIT
@@ -27,9 +28,9 @@ public class BinderValidationIT
     @Test
     public void required_triggerBlur_assertValidity() {
         testField.sendKeys(Keys.TAB);
-        assertServerInvalid();
-        assertClientInvalid();
-        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
+        assertValidationCount(0);
+        assertServerValid();
+        assertClientValid();
     }
 
     @Test
@@ -37,13 +38,30 @@ public class BinderValidationIT
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("10:00", Keys.ENTER);
 
         testField.selectByText("10:00");
+        assertValidationCount(1);
         assertServerValid();
         assertClientValid();
 
+        resetValidationCount();
+
         testField.selectByText("");
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage(REQUIRED_ERROR_MESSAGE);
+    }
+
+    @Test
+    public void required_setValue_resetBean_assertValidity() {
+        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("10:00", Keys.ENTER);
+
+        testField.selectByText("10:00");
+        assertServerValid();
+        assertClientValid();
+
+        $("button").id(RESET_BEAN_BUTTON).click();
+        assertServerValid();
+        assertClientValid();
     }
 
     @Test
@@ -53,20 +71,36 @@ public class BinderValidationIT
 
         // Constraint validation fails:
         testField.selectByText("10:00");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage("");
 
+        resetValidationCount();
+
         // Binder validation fails:
         testField.selectByText("11:00");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
 
+        resetValidationCount();
+
         // Both validations pass:
         testField.selectByText("12:00");
+        assertValidationCount(1);
         assertClientValid();
         assertServerValid();
+
+        resetValidationCount();
+
+        // Binder validation fails:
+        testField.selectByText("");
+        assertValidationCount(1);
+        assertClientInvalid();
+        assertServerInvalid();
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
     @Test
@@ -76,20 +110,36 @@ public class BinderValidationIT
 
         // Constraint validation fails:
         testField.selectByText("12:00");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage("");
 
+        resetValidationCount();
+
         // Binder validation fails:
         testField.selectByText("11:00");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
 
+        resetValidationCount();
+
         // Both validations pass:
         testField.selectByText("10:00");
+        assertValidationCount(1);
         assertClientValid();
         assertServerValid();
+
+        resetValidationCount();
+
+        // Binder validation fails:
+        testField.selectByText("");
+        assertValidationCount(1);
+        assertClientInvalid();
+        assertServerInvalid();
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
     @Test
@@ -97,28 +147,61 @@ public class BinderValidationIT
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("10:00", Keys.ENTER);
 
         testField.selectByText("INVALID");
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage("");
+
+        resetValidationCount();
+
+        testField.selectByText("10:00");
+        assertValidationCount(1);
+        assertServerValid();
+        assertClientValid();
+
+        resetValidationCount();
+
+        testField.selectByText("INVALID");
+        assertValidationCount(1);
+        assertServerInvalid();
+        assertClientInvalid();
+        assertErrorMessage("");
+
+        resetValidationCount();
+
+        testField.selectByText("");
+        assertValidationCount(1);
+        assertClientInvalid();
+        assertServerInvalid();
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
+    }
+
+    @Test
+    public void setValue_clearValue_assertValidity() {
+        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("10:00", Keys.ENTER);
 
         testField.selectByText("10:00");
         assertServerValid();
         assertClientValid();
 
-        testField.selectByText("INVALID");
+        $("button").id(CLEAR_VALUE_BUTTON).click();
         assertServerInvalid();
         assertClientInvalid();
-        assertErrorMessage("");
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
     @Test
     public void badInput_setValue_clearValue_assertValidity() {
         testField.selectByText("INVALID");
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage("");
 
+        resetValidationCount();
+
         $("button").id(CLEAR_VALUE_BUTTON).click();
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage(REQUIRED_ERROR_MESSAGE);
