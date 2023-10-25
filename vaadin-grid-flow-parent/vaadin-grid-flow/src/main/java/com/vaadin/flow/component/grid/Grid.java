@@ -128,6 +128,7 @@ import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 import elemental.json.JsonType;
 import elemental.json.JsonValue;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -4564,6 +4565,27 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         // Scroll to the requested index
         getElement().callJsFunction("scrollToIndex", rowIndex);
+    }
+
+    /**
+     * Scrolls to the row presenting the given item.
+     * <p>
+     * Note, with lazy loaded content, calling this method may cause performance
+     * issues, as Grid might need to seek through multiple pages and this way
+     * make a number of backend requests. Consider overriding this method with a
+     * solution making a more optimal backend query and then calling the more
+     * lower level scrollToIndex variant.
+     *
+     * @param item
+     *            the item to scroll to
+     */
+    public void scrollToItem(T item) {
+        int index;
+        Stream<T> items = getGenericDataView().getItems();
+        AtomicInteger i = new AtomicInteger();
+        index = items.peek(v -> i.incrementAndGet())
+                .anyMatch(itm -> itm.equals(item)) ? i.get() - 1 : -1;
+        scrollToIndex(index);
     }
 
     /**
