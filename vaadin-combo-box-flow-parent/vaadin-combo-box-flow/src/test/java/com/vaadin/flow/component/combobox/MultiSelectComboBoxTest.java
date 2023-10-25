@@ -269,4 +269,19 @@ public class MultiSelectComboBoxTest extends ComboBoxBaseTest {
         Assert.assertTrue(
                 comboBox instanceof InputField<AbstractField.ComponentValueChangeEvent<MultiSelectComboBox<String>, Set<String>>, Set<String>>);
     }
+
+    @Test
+    public void setGroupSelectedItems() {
+        MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
+
+        Assert.assertFalse(comboBox.isGroupSelectedItems());
+        Assert.assertFalse(
+                comboBox.getElement().getProperty("groupSelectedItems", false));
+
+        comboBox.setGroupSelectedItems(true);
+
+        Assert.assertTrue(comboBox.isGroupSelectedItems());
+        Assert.assertTrue(
+                comboBox.getElement().getProperty("groupSelectedItems", true));
+    }
 }
