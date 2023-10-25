@@ -94,14 +94,14 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           });
           
           const recalculateColumnWidthsOriginal = Grid.prototype._recalculateColumnWidths;
-          Grid.prototype._recalculateColumnWidths = function (cols) {
+          Grid.prototype._recalculateColumnWidths = function(cols) {
             // Flush until row count stabilizes
             // Temporary fix for https://github.com/vaadin/flow-components/issues/5595
             let previousRowCount;
             while (previousRowCount !== this.$.items.childElementCount) {
               previousRowCount = this.$.items.childElementCount;
               
-              // Flush the debouncer
+              // Flush the virtualizer
               this.__virtualizer.flush();
               if (ensureSubCacheDebouncer) {
                 // Flush pending ensureSubCache calls
