@@ -395,6 +395,28 @@ public class MultiSelectComboBox<TItem>
     }
 
     /**
+     * Gets whether displaying of all selected item labels as chips is enabled.
+     *
+     * @since 24.3
+     * @return {@code true} if enabled, {@code false} otherwise
+     */
+    public boolean isAllChipsVisible() {
+        return getElement().getProperty("allChipsVisible", false);
+    }
+
+    /**
+     * Enables or disables displaying of all selected item labels as chips. When
+     * set to {@code false}, chips that do not fit are collapsed.
+     *
+     * @since 24.3
+     * @param autoOpen
+     *            {@code true} to always show all chips
+     */
+    public void setAllChipsVisible(boolean allChipsVisible) {
+        getElement().setProperty("allChipsVisible", allChipsVisible);
+    }
+
+    /**
      * Gets whether selected items are grouped at the top of the overlay.
      *
      * @since 24.3

@@ -271,6 +271,21 @@ public class MultiSelectComboBoxTest extends ComboBoxBaseTest {
     }
 
     @Test
+    public void setAllChipsVisible() {
+        MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
+
+        Assert.assertFalse(comboBox.isAllChipsVisible());
+        Assert.assertFalse(
+                comboBox.getElement().getProperty("allChipsVisible", false));
+
+        comboBox.setAllChipsVisible(true);
+
+        Assert.assertTrue(comboBox.isAllChipsVisible());
+        Assert.assertTrue(
+                comboBox.getElement().getProperty("allChipsVisible", true));
+    }
+
+    @Test
     public void setGroupSelectedItems() {
         MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
 
