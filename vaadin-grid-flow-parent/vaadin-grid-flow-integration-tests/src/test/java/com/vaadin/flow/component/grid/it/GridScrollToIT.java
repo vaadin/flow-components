@@ -90,6 +90,15 @@ public class GridScrollToIT extends AbstractComponentIT {
     }
 
     @Test
+    public void grid_scrollToItem() {
+        $("button").id("scroll-to-item").click();
+        checkLogsForErrors();
+        Assert.assertEquals(555, grid.getFirstVisibleRowIndex());
+        Assert.assertEquals("555",
+                grid.getCell(grid.getFirstVisibleRowIndex(), 0).getText());
+    }
+
+    @Test
     public void grid_addItem_scrollToIndex_twice() {
         $("button").id("add-row-and-scroll-to-index").click();
         // Wait until finished loading
