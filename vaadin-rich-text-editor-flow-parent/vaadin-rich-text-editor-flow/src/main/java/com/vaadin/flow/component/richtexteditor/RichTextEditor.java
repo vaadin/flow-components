@@ -54,9 +54,9 @@ import elemental.json.JsonObject;
  *
  */
 @Tag("vaadin-rich-text-editor")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha6")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/rich-text-editor", version = "24.3.0-alpha6")
+@NpmPackage(value = "@vaadin/rich-text-editor", version = "24.3.0-alpha7")
 @JsModule("@vaadin/rich-text-editor/src/vaadin-rich-text-editor.js")
 public class RichTextEditor
         extends AbstractSinglePropertyField<RichTextEditor, String>
@@ -270,13 +270,17 @@ public class RichTextEditor
     }
 
     static String sanitize(String html) {
-        return org.jsoup.Jsoup.clean(html,
+        var settings = new org.jsoup.nodes.Document.OutputSettings();
+        settings.prettyPrint(false);
+        var safeHtml = org.jsoup.Jsoup.clean(html, "",
                 org.jsoup.safety.Safelist.basic()
                         .addTags("img", "h1", "h2", "h3", "s")
                         .addAttributes("img", "align", "alt", "height", "src",
                                 "title", "width")
                         .addAttributes(":all", "style")
-                        .addProtocols("img", "src", "data"));
+                        .addProtocols("img", "src", "data"),
+                settings);
+        return safeHtml;
     }
 
     /**

@@ -76,13 +76,13 @@ public class RichTextEditorSanitizationTest {
     @Test
     public void sanitizeOrderedListTag_OrderedListTagPersist() {
         Assert.assertEquals("<ol>\n Foo\n</ol>",
-                RichTextEditor.sanitize("<ol>Foo</ol>"));
+                RichTextEditor.sanitize("<ol>\n Foo\n</ol>"));
     }
 
     @Test
     public void sanitizeBulletListTag_BulletListTagPersist() {
         Assert.assertEquals("<ul>\n Foo\n</ul>",
-                RichTextEditor.sanitize("<ul>Foo</ul>"));
+                RichTextEditor.sanitize("<ul>\n Foo\n</ul>"));
     }
 
     @Test
@@ -141,7 +141,7 @@ public class RichTextEditorSanitizationTest {
     @Test
     public void sanitizeBlockquoteTag_blockquoteTagPersist() {
         Assert.assertEquals("<blockquote>\n Foo\n</blockquote>",
-                RichTextEditor.sanitize("<blockquote>Foo</blockquote>"));
+                RichTextEditor.sanitize("<blockquote>\n Foo\n</blockquote>"));
     }
 
     // Code block sanitization
@@ -150,5 +150,11 @@ public class RichTextEditorSanitizationTest {
     public void sanitizePreTag_preTagPersist() {
         Assert.assertEquals("<pre>Foo</pre>",
                 RichTextEditor.sanitize("<pre>Foo</pre>"));
+    }
+
+    @Test
+    public void sanitizeWhiteSpacesNotRemoved() {
+        var testHtml = "<p><strong>Line 1</strong></p>\n<p>        Indent 1</p>\n<p>         Indent 2</p>\n<p>Last line with extra     spaces and a\ttab</p>";
+        Assert.assertEquals(testHtml, RichTextEditor.sanitize(testHtml));
     }
 }
