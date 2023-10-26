@@ -25,9 +25,9 @@ public class MultiSelectComboBoxBinderValidationIT
     @Test
     public void required_triggerBlur_assertValidity() {
         testField.sendKeys(Keys.TAB);
-        assertServerInvalid();
-        assertClientInvalid();
-        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
+        assertValidationCount(0);
+        assertServerValid();
+        assertClientValid();
     }
 
     @Test
@@ -36,49 +36,60 @@ public class MultiSelectComboBoxBinderValidationIT
 
         // Binder validation fails
         testField.selectByText("bar");
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
 
         // Binder validation passes
         testField.deselectAll();
+        assertValidationCount(1);
         testField.selectByText("foo");
+        assertValidationCount(1);
         assertServerValid();
         assertClientValid();
 
         // Required fails
         testField.deselectAll();
-        assertServerInvalid();
-        assertClientInvalid();
-        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
-
-        // Try enter custom value, required fails
-        testField.deselectAll();
-        testField.sendKeys("custom", Keys.TAB);
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
     @Test
-    public void required_customValuesAllowed_changeValue_assertValidity() {
+    public void required_enterCustomValue_assertValidity() {
+        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("foo", Keys.ENTER);
+
+        testField.sendKeys("custom", Keys.TAB);
+        assertValidationCount(0);
+        assertServerValid();
+        assertClientValid();
+    }
+
+    @Test
+    public void required_customValuesAllowed_enterCustomValue_assertValidity() {
         $("button").id(ENABLE_CUSTOM_VALUE_BUTTON).click();
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("custom", Keys.ENTER);
 
         // Binder validation fails
         testField.sendKeys("invalid", Keys.TAB);
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
 
         // Binder validation passes
         testField.deselectAll();
+        assertValidationCount(1);
         testField.sendKeys("custom", Keys.TAB);
+        assertValidationCount(1);
         assertServerValid();
         assertClientValid();
 
         // Required fails
         testField.deselectAll();
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage(REQUIRED_ERROR_MESSAGE);

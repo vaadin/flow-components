@@ -22,6 +22,7 @@ public class ComboBoxBasicValidationIT
     @Test
     public void triggerBlur_assertValidity() {
         testField.sendKeys(Keys.TAB);
+        assertValidationCount(0);
         assertServerValid();
         assertClientValid();
     }
@@ -31,8 +32,9 @@ public class ComboBoxBasicValidationIT
         $("button").id(REQUIRED_BUTTON).click();
 
         testField.sendKeys(Keys.TAB);
-        assertServerInvalid();
-        assertClientInvalid();
+        assertValidationCount(0);
+        assertServerValid();
+        assertClientValid();
     }
 
     @Test
@@ -40,29 +42,33 @@ public class ComboBoxBasicValidationIT
         $("button").id(REQUIRED_BUTTON).click();
 
         testField.selectByText("foo");
+        assertValidationCount(1);
         assertServerValid();
         assertClientValid();
 
         testField.clear();
-        assertServerInvalid();
-        assertClientInvalid();
-
-        // Try enter custom value
-        testField.sendKeys("custom", Keys.TAB);
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
     }
 
     @Test
-    public void required_customValuesAllowed_assertValidity() {
+    public void required_enterCustomValue_assertValidity() {
+        $("button").id(REQUIRED_BUTTON).click();
+
+        testField.sendKeys("custom", Keys.TAB);
+        assertValidationCount(0);
+        assertServerValid();
+        assertClientValid();
+    }
+
+    @Test
+    public void required_customValuesAllowed_enterCustomValue_assertValidity() {
         $("button").id(REQUIRED_BUTTON).click();
         $("button").id(ENABLE_CUSTOM_VALUE_BUTTON).click();
 
-        testField.sendKeys(Keys.TAB);
-        assertServerInvalid();
-        assertClientInvalid();
-
         testField.sendKeys("custom", Keys.TAB);
+        assertValidationCount(1);
         assertServerValid();
         assertClientValid();
     }
@@ -71,7 +77,8 @@ public class ComboBoxBasicValidationIT
     public void detach_attach_preservesInvalidState() {
         // Make field invalid
         $("button").id(REQUIRED_BUTTON).click();
-        testField.sendKeys(Keys.TAB);
+        testField.selectByText("foo");
+        testField.clear();
 
         detachAndReattachField();
 
@@ -92,7 +99,8 @@ public class ComboBoxBasicValidationIT
     public void clientSideInvalidStateIsNotPropagatedToServer() {
         // Make the field invalid
         $("button").id(REQUIRED_BUTTON).click();
-        testField.sendKeys(Keys.TAB);
+        testField.selectByText("foo");
+        testField.clear();
 
         executeScript("arguments[0].invalid = false", testField);
 

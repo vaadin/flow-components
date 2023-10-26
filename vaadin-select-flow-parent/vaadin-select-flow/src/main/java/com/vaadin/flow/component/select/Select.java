@@ -149,8 +149,6 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
 
         addValueChangeListener(e -> validate());
 
-        addClientValidatedEventListener(e -> validate());
-
         getElement().addPropertyChangeListener("opened", event -> fireEvent(
                 new OpenedChangeEvent(this, event.isUserOriginated())));
 
@@ -1048,14 +1046,6 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
 
             setInvalid(isInvalid);
         }
-    }
-
-    @Override
-    public Registration addValidationStatusChangeListener(
-            ValidationStatusChangeListener<T> listener) {
-        return addClientValidatedEventListener(
-                event -> listener.validationStatusChanged(
-                        new ValidationStatusChangeEvent<>(this, !isInvalid())));
     }
 
     /**
