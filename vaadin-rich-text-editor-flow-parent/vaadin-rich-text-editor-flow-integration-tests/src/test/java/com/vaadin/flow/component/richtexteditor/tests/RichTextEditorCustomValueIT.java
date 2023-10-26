@@ -54,7 +54,7 @@ public class RichTextEditorCustomValueIT extends AbstractComponentIT {
         // editor content.
         waitUntil(driver -> {
             return editor.getCommandExecutor().executeScript(
-                    "return !arguments[0].__debounceSetValue || !arguments[0].__debounceSetValue.isActive()",
+                    "return arguments[0].__debounceSetValue && !arguments[0].__debounceSetValue.isActive()",
                     editor);
         });
     }
