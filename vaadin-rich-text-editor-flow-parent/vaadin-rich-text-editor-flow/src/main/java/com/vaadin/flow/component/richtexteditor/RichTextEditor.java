@@ -270,9 +270,9 @@ public class RichTextEditor
     }
 
     static String sanitize(String html) {
-        org.jsoup.nodes.Document.OutputSettings settings = new org.jsoup.nodes.Document.OutputSettings();
+        var settings = new org.jsoup.nodes.Document.OutputSettings();
         settings.prettyPrint(false);
-        String safeHtml = org.jsoup.Jsoup.clean(html, "",
+        var safeHtml = org.jsoup.Jsoup.clean(html, "",
                 org.jsoup.safety.Safelist.basic()
                         .addTags("img", "h1", "h2", "h3", "s")
                         .addAttributes("img", "align", "alt", "height", "src",

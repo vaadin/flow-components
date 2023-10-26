@@ -4,7 +4,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class RichTextEditorSanitizationTest {
-
     // Decoration group sanitization
 
     @Test
