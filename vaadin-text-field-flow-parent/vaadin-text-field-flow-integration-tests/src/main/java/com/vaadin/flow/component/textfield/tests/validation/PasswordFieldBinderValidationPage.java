@@ -56,7 +56,7 @@ public class PasswordFieldBinderValidationPage
                         UNEXPECTED_VALUE_ERROR_MESSAGE)
                 .bind("property");
         binder.addStatusChangeListener(event -> {
-             incrementServerValidationCounter();
+            incrementServerValidationCounter();
         });
 
         add(createInput(EXPECTED_VALUE_INPUT, "Set expected value", event -> {
@@ -80,6 +80,6 @@ public class PasswordFieldBinderValidationPage
 
     @Override
     protected PasswordField createTestField() {
-        return new PasswordField() ;
+        return new PasswordField();
     }
 }
