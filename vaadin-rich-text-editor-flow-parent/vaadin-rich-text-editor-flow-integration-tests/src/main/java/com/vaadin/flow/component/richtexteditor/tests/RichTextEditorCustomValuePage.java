@@ -23,8 +23,6 @@ public class RichTextEditorCustomValuePage extends Div {
         setAsDeltaValue.setDisableOnClick(true);
         setAsDeltaValue.setId("set-as-delta-value");
 
-        add(editor);
-        add(new Div(customValueInput));
-        add(new Div(setAsDeltaValue));
+        add(editor, new Div(customValueInput), new Div(setAsDeltaValue)); // NOSONAR
     }
 }
