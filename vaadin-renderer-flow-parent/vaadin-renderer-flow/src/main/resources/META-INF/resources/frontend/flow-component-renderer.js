@@ -4,6 +4,7 @@ import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
 import { idlePeriod } from '@polymer/polymer/lib/utils/async.js';
 import { PolymerElement } from '@polymer/polymer/polymer-element.js';
 import { flowComponentDirective } from './flow-component-directive.js';
+import { render, html as litHtml } from 'lit';
 
 /**
  * Returns the requested node from the Flow client.
@@ -33,8 +34,7 @@ function getNode(appid, nodeid) {
  * @param {Element} root
  */
 function setChildNodes(appid, nodeIds, root) {
-  root.textContent = '';
-  root.append(...nodeIds.map(id => getNodeInternal(appid, id)));
+  render(litHtml`${nodeIds.map(id => getNodeInternal(appid, id))}`, root);
 }
 
 /**
