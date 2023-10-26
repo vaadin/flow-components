@@ -5,8 +5,6 @@ import org.junit.Test;
 
 public class RichTextEditorSanitizationTest {
 
-    private static final String TESTHTML = "<p><strong>Line 1</strong></p>\n<p>        Indent 1</p>\n<p>         Indent 2</p>\n<p>Last line with extra     spaces and a\ttab</p>";
-
     // Decoration group sanitization
 
     @Test
@@ -157,7 +155,7 @@ public class RichTextEditorSanitizationTest {
 
     @Test
     public void sanitizeWhiteSpacesNotRemoved() {
-        String html = TESTHTML;
-        Assert.assertEquals(TESTHTML, RichTextEditor.sanitize(html));
+        var testHtml = "<p><strong>Line 1</strong></p>\n<p>        Indent 1</p>\n<p>         Indent 2</p>\n<p>Last line with extra     spaces and a\ttab</p>";
+        Assert.assertEquals(testHtml, RichTextEditor.sanitize(testHtml));
     }
 }
