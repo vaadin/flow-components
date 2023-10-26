@@ -133,6 +133,7 @@ public class TreeGrid<T> extends Grid<T>
     }
 
     private class TreeGridArrayUpdaterImpl implements TreeGridArrayUpdater {
+
         // Approximated size of the viewport. Used for eager fetching.
         private static final int EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE = 40;
 
@@ -1095,4 +1096,23 @@ public class TreeGrid<T> extends Grid<T>
                 ctx -> getElement().executeJs(
                         "this.scrollToIndex(...Array(10).fill(Infinity))")));
     }
+
+    /**
+     * TreeGrid does not support scrolling to a given item. Use
+     * {@link #scrollToIndex(int...)} instead.
+     * <p>
+     * This method is inherited from Grid and has been marked as deprecated to
+     * indicate that it is not supported. This method will throw an
+     * {@link UnsupportedOperationException}.
+     *
+     * @param item
+     * @deprecated
+     */
+    @Deprecated(forRemoval = false)
+    @Override
+    public void scrollToItem(T item) {
+        throw new UnsupportedOperationException(
+                "scrollToItem method is not supported in TreeGrid");
+    }
+
 }
