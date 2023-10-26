@@ -50,12 +50,10 @@ public class GridScrollToPage extends Div {
                 });
         addRowAndScrollToIndex.setId("add-row-and-scroll-to-index");
 
-        
-        NativeButton scrollToItem = new NativeButton(
-                "Scroll to item", e -> {
-                    var item555 = items.get(555);
-                    grid.scrollToItem(item555);
-                });
+        NativeButton scrollToItem = new NativeButton("Scroll to item", e -> {
+            var item555 = items.get(555);
+            grid.scrollToItem(item555);
+        });
         scrollToItem.setId("scroll-to-item");
 
         NativeButton setSmallPageSize = new NativeButton(

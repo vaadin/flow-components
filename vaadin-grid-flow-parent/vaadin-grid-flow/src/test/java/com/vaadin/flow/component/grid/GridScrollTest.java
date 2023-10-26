@@ -69,19 +69,20 @@ public class GridScrollTest {
         grid.scrollToIndex(499);
         Assert.assertEquals("495-540", getRequestedRange(grid));
     }
-    
+
     @Test
     public void scrollToItem() {
-        
-        List<String> items = IntStream.range(0, 1000).mapToObj(i -> ""+i).toList();
+
+        List<String> items = IntStream.range(0, 1000).mapToObj(i -> "" + i)
+                .toList();
 
         grid.setItems(q -> {
             return items.stream().skip(q.getOffset()).limit(q.getLimit());
         });
-        
+
         grid.scrollToItem(items.get(500));
         Assert.assertEquals("500-550", getRequestedRange(grid));
-        
+
     }
 
     private String getRequestedRange(Grid<String> grid) {
