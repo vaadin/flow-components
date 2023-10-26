@@ -69,8 +69,6 @@ public class EmailField extends TextFieldBase<EmailField, String>
         setValueChangeMode(ValueChangeMode.ON_CHANGE);
 
         addValueChangeListener(e -> validate());
-
-        addClientValidatedEventListener(e -> validate());
     }
 
     /**
@@ -291,15 +289,6 @@ public class EmailField extends TextFieldBase<EmailField, String>
     @Override
     public Validator<String> getDefaultValidator() {
         return (value, context) -> getValidationSupport().checkValidity(value);
-    }
-
-    @Override
-    public Registration addValidationStatusChangeListener(
-            ValidationStatusChangeListener<String> listener) {
-        return addClientValidatedEventListener(
-                event -> listener.validationStatusChanged(
-                        new ValidationStatusChangeEvent<String>(this,
-                                !isInvalid())));
     }
 
     @Override
