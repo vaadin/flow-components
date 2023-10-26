@@ -49,7 +49,14 @@ public class EmailFieldBasicValidationPage
         }));
     }
 
+    @Override
     protected EmailField createTestField() {
-        return new EmailField();
+        return new EmailField() {
+            @Override
+            protected void validate() {
+                super.validate();
+                incrementServerValidationCounter();
+            }
+        };
     }
 }

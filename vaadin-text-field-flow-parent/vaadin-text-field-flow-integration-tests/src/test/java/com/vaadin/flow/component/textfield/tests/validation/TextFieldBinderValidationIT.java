@@ -42,9 +42,9 @@ public class TextFieldBinderValidationIT
     @Test
     public void required_triggerBlur_assertValidity() {
         testField.sendKeys(Keys.TAB);
-        assertServerInvalid();
-        assertClientInvalid();
-        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
+        assertValidationCount(0);
+        assertServerValid();
+        assertClientValid();
     }
 
     @Test
@@ -52,10 +52,12 @@ public class TextFieldBinderValidationIT
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("Value", Keys.ENTER);
 
         testField.setValue("Value");
+        assertValidationCount(1);
         assertServerValid();
         assertClientValid();
 
         testField.setValue("");
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage(REQUIRED_ERROR_MESSAGE);
@@ -68,18 +70,21 @@ public class TextFieldBinderValidationIT
 
         // Constraint validation fails:
         testField.setValue("A");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage("");
 
         // Binder validation fails:
         testField.setValue("AA");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
 
         // Both validations pass:
         testField.setValue("AAA");
+        assertValidationCount(1);
         assertClientValid();
         assertServerValid();
     }
@@ -91,18 +96,21 @@ public class TextFieldBinderValidationIT
 
         // Constraint validation fails:
         testField.setValue("AAA");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage("");
 
         // Binder validation fails:
         testField.setValue("AA");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
 
         // Both validations pass:
         testField.setValue("A");
+        assertValidationCount(1);
         assertClientValid();
         assertServerValid();
     }
@@ -114,22 +122,26 @@ public class TextFieldBinderValidationIT
 
         // Constraint validation fails:
         testField.setValue("Word");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage("");
 
         // Binder validation fails:
         testField.setValue("12");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
 
         // Both validations pass:
         testField.setValue("1234");
+        assertValidationCount(1);
         assertClientValid();
         assertServerValid();
     }
 
+    @Override
     protected TextFieldElement getTestField() {
         return $(TextFieldElement.class).first();
     }
