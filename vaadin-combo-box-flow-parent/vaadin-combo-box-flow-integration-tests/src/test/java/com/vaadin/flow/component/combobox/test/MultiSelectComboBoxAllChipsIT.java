@@ -71,9 +71,9 @@ public class MultiSelectComboBoxAllChipsIT extends AbstractComponentIT {
     public void selectItems_dontShowAllChips_chipsCollapsed() {
         showAllChips.click();
 
-        comboBox.selectByText("Item 1");
-        comboBox.selectByText("Item 2");
-        comboBox.selectByText("Item 3");
+        comboBox.selectByText("Item 10");
+        comboBox.selectByText("Item 20");
+        comboBox.selectByText("Item 30");
 
         dontShowAllChips.click();
 
