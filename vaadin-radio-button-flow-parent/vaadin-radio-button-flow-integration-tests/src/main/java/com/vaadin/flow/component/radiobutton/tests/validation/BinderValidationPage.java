@@ -33,6 +33,9 @@ public class BinderValidationPage
         binder = new Binder<>(Bean.class);
         binder.forField(testField).asRequired(REQUIRED_ERROR_MESSAGE)
                 .bind("property");
+        binder.addStatusChangeListener(event -> {
+            incrementServerValidationCounter();
+        });
     }
 
     @Override

@@ -8,6 +8,7 @@ import org.junit.Test;
 import org.openqa.selenium.Keys;
 
 import static com.vaadin.flow.component.radiobutton.tests.validation.BasicValidationPage.REQUIRED_BUTTON;
+import static com.vaadin.flow.component.radiobutton.tests.validation.BasicValidationPage.SET_INVALID_BUTTON;
 
 @TestPath("vaadin-radio-button-group/validation/basic")
 public class BasicValidationIT
@@ -22,6 +23,7 @@ public class BasicValidationIT
     @Test
     public void triggerBlur_assertValidity() {
         testField.$(RadioButtonElement.class).last().sendKeys(Keys.TAB);
+        assertValidationCount(0);
         assertServerValid();
         assertClientValid();
     }
@@ -31,8 +33,9 @@ public class BasicValidationIT
         $("button").id(REQUIRED_BUTTON).click();
 
         testField.$(RadioButtonElement.class).last().sendKeys(Keys.TAB);
-        assertServerInvalid();
-        assertClientInvalid();
+        assertValidationCount(0);
+        assertServerValid();
+        assertClientValid();
     }
 
     @Test
@@ -40,6 +43,7 @@ public class BasicValidationIT
         $("button").id(REQUIRED_BUTTON).click();
 
         testField.selectByText("foo");
+        assertValidationCount(1);
         assertServerValid();
         assertClientValid();
     }
@@ -47,8 +51,7 @@ public class BasicValidationIT
     @Test
     public void detach_attach_preservesInvalidState() {
         // Make field invalid
-        $("button").id(REQUIRED_BUTTON).click();
-        testField.$(RadioButtonElement.class).last().sendKeys(Keys.TAB);
+        $("button").id(SET_INVALID_BUTTON).click();
 
         detachAndReattachField();
 
@@ -67,9 +70,8 @@ public class BasicValidationIT
 
     @Test
     public void clientSideInvalidStateIsNotPropagatedToServer() {
-        // Make the field invalid
-        $("button").id(REQUIRED_BUTTON).click();
-        testField.$(RadioButtonElement.class).last().sendKeys(Keys.TAB);
+        // Make field invalid
+        $("button").id(SET_INVALID_BUTTON).click();
 
         executeScript("arguments[0].invalid = false", testField);
 
