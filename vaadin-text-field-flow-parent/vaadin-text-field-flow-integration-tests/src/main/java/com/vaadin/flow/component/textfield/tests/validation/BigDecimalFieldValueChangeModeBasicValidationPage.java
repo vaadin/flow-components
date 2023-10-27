@@ -16,25 +16,18 @@
 package com.vaadin.flow.component.textfield.tests.validation;
 
 import com.vaadin.flow.component.textfield.BigDecimalField;
-import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
-import com.vaadin.tests.validation.AbstractValidationPage;
 
-@Route("vaadin-big-decimal-field/validation/eager")
-public class BigDecimalFieldEagerValidationPage
-        extends AbstractValidationPage<BigDecimalField> {
-    public BigDecimalFieldEagerValidationPage() {
-        super();
-        testField.setValueChangeMode(ValueChangeMode.EAGER);
-    }
-
+@Route("vaadin-big-decimal-field/validation/value-change-mode/basic")
+public class BigDecimalFieldValueChangeModeBasicValidationPage
+        extends AbstractValueChangeModeValidationPage<BigDecimalField> {
     @Override
     protected BigDecimalField createTestField() {
         return new BigDecimalField() {
             @Override
             protected void validate() {
                 super.validate();
-                incrementServerValidationCounter();
+                logValidationResult(!isInvalid());
             }
         };
     }

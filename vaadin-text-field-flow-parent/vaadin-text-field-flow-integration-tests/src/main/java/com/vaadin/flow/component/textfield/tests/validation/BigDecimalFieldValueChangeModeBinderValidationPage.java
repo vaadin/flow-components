@@ -19,13 +19,11 @@ import java.math.BigDecimal;
 
 import com.vaadin.flow.component.textfield.BigDecimalField;
 import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
-import com.vaadin.tests.validation.AbstractValidationPage;
 
-@Route("vaadin-big-decimal-field/validation/eager-binder")
-public class BigDecimalFieldEagerBinderValidationPage
-        extends AbstractValidationPage<BigDecimalField> {
+@Route("vaadin-big-decimal-field/validation/value-change-mode/binder")
+public class BigDecimalFieldValueChangeModeBinderValidationPage
+        extends AbstractValueChangeModeValidationPage<BigDecimalField> {
     public static class Bean {
         private BigDecimal property;
 
@@ -38,15 +36,13 @@ public class BigDecimalFieldEagerBinderValidationPage
         }
     }
 
-    public BigDecimalFieldEagerBinderValidationPage() {
+    public BigDecimalFieldValueChangeModeBinderValidationPage() {
         super();
-
-        testField.setValueChangeMode(ValueChangeMode.EAGER);
 
         Binder<Bean> binder = new Binder<>(Bean.class);
         binder.forField(testField).bind("property");
         binder.addStatusChangeListener(event -> {
-            incrementServerValidationCounter();
+            logValidationResult(binder.isValid());
         });
     }
 
