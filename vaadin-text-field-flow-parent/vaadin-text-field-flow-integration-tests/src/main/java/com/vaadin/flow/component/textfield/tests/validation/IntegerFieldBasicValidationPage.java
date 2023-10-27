@@ -55,6 +55,7 @@ public class IntegerFieldBasicValidationPage
         }));
     }
 
+    @Override
     protected IntegerField createTestField() {
         return new IntegerField() {
             @Override

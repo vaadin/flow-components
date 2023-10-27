@@ -33,8 +33,6 @@ public class BigDecimalFieldEagerValidationIT
         assertServerValid();
         assertClientValid();
 
-        resetValidationCount();
-
         // Entered:
         testField.sendKeys(Keys.BACK_SPACE);
         assertValidationCount(1);
@@ -50,23 +48,17 @@ public class BigDecimalFieldEagerValidationIT
         assertServerInvalid();
         assertClientInvalid();
 
-        resetValidationCount();
-
         // Entered: -2
         testField.sendKeys("2");
         assertValidationCount(1);
         assertServerValid();
         assertClientValid();
 
-        resetValidationCount();
-
         // Entered: -
         testField.sendKeys(Keys.BACK_SPACE);
         assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
-
-        resetValidationCount();
 
         // Entered:
         testField.sendKeys(Keys.BACK_SPACE);
@@ -75,6 +67,7 @@ public class BigDecimalFieldEagerValidationIT
         assertClientValid();
     }
 
+    @Override
     protected BigDecimalFieldElement getTestField() {
         return $(BigDecimalFieldElement.class).first();
     }

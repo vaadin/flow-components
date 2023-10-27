@@ -42,8 +42,6 @@ public class BinderValidationIT
         assertServerValid();
         assertClientValid();
 
-        resetValidationCount();
-
         testField.selectByText("");
         assertValidationCount(1);
         assertServerInvalid();
@@ -76,8 +74,6 @@ public class BinderValidationIT
         assertServerInvalid();
         assertErrorMessage("");
 
-        resetValidationCount();
-
         // Binder validation fails:
         testField.selectByText("11:00");
         assertValidationCount(1);
@@ -85,15 +81,11 @@ public class BinderValidationIT
         assertServerInvalid();
         assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
 
-        resetValidationCount();
-
         // Both validations pass:
         testField.selectByText("12:00");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
-
-        resetValidationCount();
 
         // Binder validation fails:
         testField.selectByText("");
@@ -115,8 +107,6 @@ public class BinderValidationIT
         assertServerInvalid();
         assertErrorMessage("");
 
-        resetValidationCount();
-
         // Binder validation fails:
         testField.selectByText("11:00");
         assertValidationCount(1);
@@ -124,15 +114,11 @@ public class BinderValidationIT
         assertServerInvalid();
         assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
 
-        resetValidationCount();
-
         // Both validations pass:
         testField.selectByText("10:00");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
-
-        resetValidationCount();
 
         // Binder validation fails:
         testField.selectByText("");
@@ -152,22 +138,16 @@ public class BinderValidationIT
         assertClientInvalid();
         assertErrorMessage("");
 
-        resetValidationCount();
-
         testField.selectByText("10:00");
         assertValidationCount(1);
         assertServerValid();
         assertClientValid();
-
-        resetValidationCount();
 
         testField.selectByText("INVALID");
         assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage("");
-
-        resetValidationCount();
 
         testField.selectByText("");
         assertValidationCount(1);
@@ -198,8 +178,6 @@ public class BinderValidationIT
         assertClientInvalid();
         assertErrorMessage("");
 
-        resetValidationCount();
-
         $("button").id(CLEAR_VALUE_BUTTON).click();
         assertValidationCount(1);
         assertServerInvalid();
@@ -207,6 +185,7 @@ public class BinderValidationIT
         assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
+    @Override
     protected TimePickerElement getTestField() {
         return $(TimePickerElement.class).first();
     }

@@ -47,8 +47,6 @@ public class BasicValidationIT extends AbstractValidationIT<TimePickerElement> {
         assertServerValid();
         assertClientValid();
 
-        resetValidationCount();
-
         testField.selectByText("");
         assertValidationCount(1);
         assertServerInvalid();
@@ -64,21 +62,15 @@ public class BasicValidationIT extends AbstractValidationIT<TimePickerElement> {
         assertClientInvalid();
         assertServerInvalid();
 
-        resetValidationCount();
-
         testField.selectByText("11:00");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
 
-        resetValidationCount();
-
         testField.selectByText("12:00");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
-
-        resetValidationCount();
 
         testField.selectByText("");
         assertValidationCount(1);
@@ -95,21 +87,15 @@ public class BasicValidationIT extends AbstractValidationIT<TimePickerElement> {
         assertClientInvalid();
         assertServerInvalid();
 
-        resetValidationCount();
-
         testField.selectByText("11:00");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
 
-        resetValidationCount();
-
         testField.selectByText("10:00");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
-
-        resetValidationCount();
 
         testField.selectByText("");
         assertValidationCount(1);
@@ -124,21 +110,15 @@ public class BasicValidationIT extends AbstractValidationIT<TimePickerElement> {
         assertServerInvalid();
         assertClientInvalid();
 
-        resetValidationCount();
-
         testField.selectByText("10:00");
         assertValidationCount(1);
         assertServerValid();
         assertClientValid();
 
-        resetValidationCount();
-
         testField.selectByText("INVALID");
         assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
-
-        resetValidationCount();
 
         testField.selectByText("");
         assertValidationCount(1);
@@ -163,8 +143,6 @@ public class BasicValidationIT extends AbstractValidationIT<TimePickerElement> {
         assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
-
-        resetValidationCount();
 
         $("button").id(CLEAR_VALUE_BUTTON).click();
         assertValidationCount(1);
@@ -206,6 +184,7 @@ public class BasicValidationIT extends AbstractValidationIT<TimePickerElement> {
         assertServerInvalid();
     }
 
+    @Override
     protected TimePickerElement getTestField() {
         return $(TimePickerElement.class).first();
     }

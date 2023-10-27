@@ -62,6 +62,7 @@ public class BigDecimalFieldBinderValidationPage
         }));
     }
 
+    @Override
     protected BigDecimalField createTestField() {
         return new BigDecimalField();
     }

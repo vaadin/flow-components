@@ -89,6 +89,7 @@ public class IntegerFieldBinderValidationPage
         }));
     }
 
+    @Override
     protected IntegerField createTestField() {
         return new IntegerField();
     }

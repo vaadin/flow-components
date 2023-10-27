@@ -37,6 +37,7 @@ public class BigDecimalFieldBasicValidationPage
         }));
     }
 
+    @Override
     protected BigDecimalField createTestField() {
         return new BigDecimalField() {
             @Override
