@@ -46,6 +46,7 @@ public abstract class AbstractValidationIT<T extends TestBenchElement>
                 .parseInt($("div").id(SERVER_VALIDATION_COUNTER).getText());
         Assert.assertEquals("The field should have validated " + expected
                 + " times on the server-side", expected, actual);
+        resetValidationCount();
     }
 
     protected void resetValidationCount() {

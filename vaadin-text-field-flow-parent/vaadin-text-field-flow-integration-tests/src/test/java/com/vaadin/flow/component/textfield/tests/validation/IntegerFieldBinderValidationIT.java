@@ -59,8 +59,6 @@ public class IntegerFieldBinderValidationIT
         assertServerValid();
         assertClientValid();
 
-        resetValidationCount();
-
         testField.setValue("");
         assertValidationCount(1);
         assertServerInvalid();
@@ -93,8 +91,6 @@ public class IntegerFieldBinderValidationIT
         assertServerInvalid();
         assertErrorMessage("");
 
-        resetValidationCount();
-
         // Binder validation fails:
         testField.setValue("2");
         assertValidationCount(1);
@@ -102,15 +98,11 @@ public class IntegerFieldBinderValidationIT
         assertServerInvalid();
         assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
 
-        resetValidationCount();
-
         // Both validations pass:
         testField.setValue("3");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
-
-        resetValidationCount();
 
         // Binder validation fails:
         testField.setValue("");
@@ -132,8 +124,6 @@ public class IntegerFieldBinderValidationIT
         assertServerInvalid();
         assertErrorMessage("");
 
-        resetValidationCount();
-
         // Binder validation fails:
         testField.setValue("2");
         assertValidationCount(1);
@@ -141,15 +131,11 @@ public class IntegerFieldBinderValidationIT
         assertServerInvalid();
         assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
 
-        resetValidationCount();
-
         // Both validations pass:
         testField.setValue("1");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
-
-        resetValidationCount();
 
         // Binder validation fails:
         testField.setValue("");
@@ -171,8 +157,6 @@ public class IntegerFieldBinderValidationIT
         assertServerInvalid();
         assertErrorMessage("");
 
-        resetValidationCount();
-
         // Binder validation fails:
         testField.setValue("2");
         assertValidationCount(1);
@@ -180,15 +164,11 @@ public class IntegerFieldBinderValidationIT
         assertServerInvalid();
         assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
 
-        resetValidationCount();
-
         // Both validations pass:
         testField.setValue("4");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
-
-        resetValidationCount();
 
         // Binder validation fails:
         testField.setValue("");
@@ -208,22 +188,16 @@ public class IntegerFieldBinderValidationIT
         assertClientInvalid();
         assertErrorMessage("");
 
-        resetValidationCount();
-
         testField.setValue("2");
         assertValidationCount(1);
         assertServerValid();
         assertClientValid();
-
-        resetValidationCount();
 
         testField.sendKeys("--2", Keys.ENTER);
         assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage("");
-
-        resetValidationCount();
 
         testField.setValue("");
         assertValidationCount(1);
@@ -254,8 +228,6 @@ public class IntegerFieldBinderValidationIT
         assertClientInvalid();
         assertErrorMessage("");
 
-        resetValidationCount();
-
         $("button").id(CLEAR_VALUE_BUTTON).click();
         assertValidationCount(1);
         assertServerInvalid();
@@ -270,8 +242,6 @@ public class IntegerFieldBinderValidationIT
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage("");
-
-        resetValidationCount();
 
         testField.setValue("");
         assertValidationCount(1);
@@ -288,8 +258,6 @@ public class IntegerFieldBinderValidationIT
         assertClientInvalid();
         assertErrorMessage("");
 
-        resetValidationCount();
-
         testField.setValue("");
         assertValidationCount(1);
         assertServerInvalid();
@@ -297,6 +265,7 @@ public class IntegerFieldBinderValidationIT
         assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
+    @Override
     protected IntegerFieldElement getTestField() {
         return $(IntegerFieldElement.class).first();
     }

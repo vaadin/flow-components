@@ -47,8 +47,6 @@ public class BasicValidationIT extends AbstractValidationIT<DatePickerElement> {
         assertServerValid();
         assertClientValid();
 
-        resetValidationCount();
-
         testField.setInputValue("");
         assertValidationCount(1);
         assertServerInvalid();
@@ -64,21 +62,15 @@ public class BasicValidationIT extends AbstractValidationIT<DatePickerElement> {
         assertClientInvalid();
         assertServerInvalid();
 
-        resetValidationCount();
-
         testField.setInputValue("3/1/2022");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
 
-        resetValidationCount();
-
         testField.setInputValue("4/1/2022");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
-
-        resetValidationCount();
 
         testField.setInputValue("");
         assertValidationCount(1);
@@ -95,21 +87,15 @@ public class BasicValidationIT extends AbstractValidationIT<DatePickerElement> {
         assertClientInvalid();
         assertServerInvalid();
 
-        resetValidationCount();
-
         testField.setInputValue("3/1/2022");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
 
-        resetValidationCount();
-
         testField.setInputValue("2/1/2022");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
-
-        resetValidationCount();
 
         testField.setInputValue("");
         assertValidationCount(1);
@@ -124,21 +110,15 @@ public class BasicValidationIT extends AbstractValidationIT<DatePickerElement> {
         assertServerInvalid();
         assertClientInvalid();
 
-        resetValidationCount();
-
         testField.setInputValue("1/1/2022");
         assertValidationCount(1);
         assertServerValid();
         assertClientValid();
 
-        resetValidationCount();
-
         testField.setInputValue("INVALID");
         assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
-
-        resetValidationCount();
 
         testField.setInputValue("");
         assertValidationCount(1);
@@ -163,8 +143,6 @@ public class BasicValidationIT extends AbstractValidationIT<DatePickerElement> {
         assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
-
-        resetValidationCount();
 
         $("button").id(CLEAR_VALUE_BUTTON).click();
         assertValidationCount(1);
@@ -206,6 +184,7 @@ public class BasicValidationIT extends AbstractValidationIT<DatePickerElement> {
         assertServerInvalid();
     }
 
+    @Override
     protected DatePickerElement getTestField() {
         return $(DatePickerElement.class).first();
     }

@@ -38,6 +38,7 @@ public class TextAreaBasicValidationIT
     @Test
     public void triggerBlur_assertValidity() {
         testField.sendKeys(Keys.TAB);
+        assertValidationCount(0);
         assertServerValid();
         assertClientValid();
     }
@@ -47,8 +48,9 @@ public class TextAreaBasicValidationIT
         $("button").id(REQUIRED_BUTTON).click();
 
         testField.sendKeys(Keys.TAB);
-        assertServerInvalid();
-        assertClientInvalid();
+        assertValidationCount(0);
+        assertServerValid();
+        assertClientValid();
     }
 
     @Test
@@ -56,21 +58,14 @@ public class TextAreaBasicValidationIT
         $("button").id(REQUIRED_BUTTON).click();
 
         testField.setValue("Value");
+        assertValidationCount(1);
         assertServerValid();
         assertClientValid();
 
         testField.setValue("");
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
-    }
-
-    @Test
-    public void minLength_triggerBlur_assertValidity() {
-        $("input").id(MIN_LENGTH_INPUT).sendKeys("2", Keys.ENTER);
-
-        testField.sendKeys(Keys.TAB);
-        assertServerValid();
-        assertClientValid();
     }
 
     @Test
@@ -78,14 +73,17 @@ public class TextAreaBasicValidationIT
         $("input").id(MIN_LENGTH_INPUT).sendKeys("2", Keys.ENTER);
 
         testField.setValue("A");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
 
         testField.setValue("AA");
+        assertValidationCount(1);
         assertClientValid();
         assertServerValid();
 
         testField.setValue("AAA");
+        assertValidationCount(1);
         assertClientValid();
         assertServerValid();
     }
@@ -95,25 +93,19 @@ public class TextAreaBasicValidationIT
         $("input").id(MAX_LENGTH_INPUT).sendKeys("2", Keys.ENTER);
 
         testField.setValue("AAA");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
 
         testField.setValue("AA");
+        assertValidationCount(1);
         assertClientValid();
         assertServerValid();
 
         testField.setValue("A");
+        assertValidationCount(1);
         assertClientValid();
         assertServerValid();
-    }
-
-    @Test
-    public void pattern_triggerBlur_assertValidity() {
-        $("input").id(PATTERN_INPUT).sendKeys("^\\d+$", Keys.ENTER);
-
-        testField.sendKeys(Keys.TAB);
-        assertServerValid();
-        assertClientValid();
     }
 
     @Test
@@ -121,10 +113,12 @@ public class TextAreaBasicValidationIT
         $("input").id(PATTERN_INPUT).sendKeys("^\\d+$", Keys.ENTER);
 
         testField.setValue("Word");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
 
         testField.setValue("1234");
+        assertValidationCount(1);
         assertClientValid();
         assertServerValid();
     }
@@ -133,7 +127,8 @@ public class TextAreaBasicValidationIT
     public void detach_attach_preservesInvalidState() {
         // Make field invalid
         $("button").id(REQUIRED_BUTTON).click();
-        testField.sendKeys(Keys.TAB);
+        testField.setValue("Value");
+        testField.setValue("");
 
         detachAndReattachField();
 
@@ -154,13 +149,15 @@ public class TextAreaBasicValidationIT
     public void clientSideInvalidStateIsNotPropagatedToServer() {
         // Make the field invalid
         $("button").id(REQUIRED_BUTTON).click();
-        testField.sendKeys(Keys.TAB);
+        testField.setValue("Value");
+        testField.setValue("");
 
         executeScript("arguments[0].invalid = false", testField);
 
         assertServerInvalid();
     }
 
+    @Override
     protected TextAreaElement getTestField() {
         return $(TextAreaElement.class).first();
     }

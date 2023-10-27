@@ -35,6 +35,7 @@ public class BasicValidationPage extends AbstractValidationPage<DatePicker> {
         }));
     }
 
+    @Override
     protected DatePicker createTestField() {
         return new DatePicker() {
             @Override

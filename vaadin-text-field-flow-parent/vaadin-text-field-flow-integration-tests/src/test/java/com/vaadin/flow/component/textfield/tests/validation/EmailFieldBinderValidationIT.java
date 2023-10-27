@@ -42,9 +42,9 @@ public class EmailFieldBinderValidationIT
     @Test
     public void required_triggerBlur_assertValidity() {
         testField.sendKeys(Keys.TAB);
-        assertServerInvalid();
-        assertClientInvalid();
-        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
+        assertValidationCount(0);
+        assertServerValid();
+        assertClientValid();
     }
 
     @Test
@@ -53,10 +53,12 @@ public class EmailFieldBinderValidationIT
                 Keys.ENTER);
 
         testField.setValue("john@vaadin.com");
+        assertValidationCount(1);
         assertServerValid();
         assertClientValid();
 
         testField.setValue("");
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage(REQUIRED_ERROR_MESSAGE);
@@ -70,18 +72,21 @@ public class EmailFieldBinderValidationIT
 
         // Constraint validation fails:
         testField.setValue("a@vaadin.com");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage("");
 
         // Binder validation fails:
         testField.setValue("aa@vaadin.com");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
 
         // Both validations pass:
         testField.setValue("aaa@vaadin.com");
+        assertValidationCount(1);
         assertClientValid();
         assertServerValid();
     }
@@ -94,18 +99,21 @@ public class EmailFieldBinderValidationIT
 
         // Constraint validation fails:
         testField.setValue("aaa@vaadin.com");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage("");
 
         // Binder validation fails:
         testField.setValue("aa@vaadin.com");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
 
         // Both validations pass:
         testField.setValue("a@vaadin.com");
+        assertValidationCount(1);
         assertClientValid();
         assertServerValid();
     }
@@ -116,11 +124,13 @@ public class EmailFieldBinderValidationIT
                 Keys.ENTER);
 
         testField.setValue("arbitrary string");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage("");
 
         testField.setValue("john@vaadin.com");
+        assertValidationCount(1);
         assertClientValid();
         assertServerValid();
     }
@@ -134,22 +144,26 @@ public class EmailFieldBinderValidationIT
 
         // Constraint validation fails:
         testField.setValue("2222@vaadin.com");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage("");
 
         // Binder validation fails:
         testField.setValue("oliver@vaadin.com");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
 
         // Both validations pass:
         testField.setValue("john@vaadin.com");
+        assertValidationCount(1);
         assertClientValid();
         assertServerValid();
     }
 
+    @Override
     protected EmailFieldElement getTestField() {
         return $(EmailFieldElement.class).first();
     }

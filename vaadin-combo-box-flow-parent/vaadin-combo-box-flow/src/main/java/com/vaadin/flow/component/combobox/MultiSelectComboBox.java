@@ -72,9 +72,9 @@ import java.util.Set;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-multi-select-combo-box")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha5")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/multi-select-combo-box", version = "24.3.0-alpha5")
+@NpmPackage(value = "@vaadin/multi-select-combo-box", version = "24.3.0-alpha7")
 @JsModule("@vaadin/multi-select-combo-box/src/vaadin-multi-select-combo-box.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./comboBoxConnector.js")
@@ -392,6 +392,50 @@ public class MultiSelectComboBox<TItem>
             // actually changed
             super.setValue(selectionModel.getSelectedItems());
         }
+    }
+
+    /**
+     * Gets whether displaying of all selected item labels as chips is enabled.
+     *
+     * @since 24.3
+     * @return {@code true} if enabled, {@code false} otherwise
+     */
+    public boolean isAllChipsVisible() {
+        return getElement().getProperty("allChipsVisible", false);
+    }
+
+    /**
+     * Enables or disables displaying of all selected item labels as chips. When
+     * set to {@code false}, chips that do not fit are collapsed.
+     *
+     * @since 24.3
+     * @param autoOpen
+     *            {@code true} to always show all chips
+     */
+    public void setAllChipsVisible(boolean allChipsVisible) {
+        getElement().setProperty("allChipsVisible", allChipsVisible);
+    }
+
+    /**
+     * Gets whether selected items are grouped at the top of the overlay.
+     *
+     * @since 24.3
+     * @return {@code true} if enabled, {@code false} otherwise
+     */
+    public boolean isGroupSelectedItems() {
+        return getElement().getProperty("groupSelectedItems", false);
+    }
+
+    /**
+     * Enables or disables grouping of the selected items at the top of the
+     * overlay.
+     *
+     * @since 24.3
+     * @param autoOpen
+     *            {@code true} to group selected items
+     */
+    public void setGroupSelectedItems(boolean groupSelectedItems) {
+        getElement().setProperty("groupSelectedItems", groupSelectedItems);
     }
 
     /**

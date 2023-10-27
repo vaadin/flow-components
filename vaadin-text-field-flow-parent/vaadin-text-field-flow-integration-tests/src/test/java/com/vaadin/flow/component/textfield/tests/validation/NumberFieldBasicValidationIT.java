@@ -64,8 +64,6 @@ public class NumberFieldBasicValidationIT
         assertServerValid();
         assertClientValid();
 
-        resetValidationCount();
-
         testField.setValue("");
         assertValidationCount(1);
         assertServerInvalid();
@@ -81,21 +79,15 @@ public class NumberFieldBasicValidationIT
         assertClientInvalid();
         assertServerInvalid();
 
-        resetValidationCount();
-
         testField.setValue("2");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
 
-        resetValidationCount();
-
         testField.setValue("2.2");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
-
-        resetValidationCount();
 
         testField.setValue("");
         assertValidationCount(1);
@@ -112,21 +104,15 @@ public class NumberFieldBasicValidationIT
         assertClientInvalid();
         assertServerInvalid();
 
-        resetValidationCount();
-
         testField.setValue("2");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
 
-        resetValidationCount();
-
         testField.setValue("1.8");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
-
-        resetValidationCount();
 
         testField.setValue("");
         assertValidationCount(1);
@@ -143,21 +129,15 @@ public class NumberFieldBasicValidationIT
         assertClientInvalid();
         assertServerInvalid();
 
-        resetValidationCount();
-
         testField.setValue("1.5");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
 
-        resetValidationCount();
-
         testField.setValue("2");
         assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
-
-        resetValidationCount();
 
         testField.setValue("");
         assertValidationCount(1);
@@ -172,21 +152,15 @@ public class NumberFieldBasicValidationIT
         assertServerInvalid();
         assertClientInvalid();
 
-        resetValidationCount();
-
         testField.setValue("2");
         assertValidationCount(1);
         assertServerValid();
         assertClientValid();
 
-        resetValidationCount();
-
         testField.sendKeys("--2", Keys.ENTER);
         assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
-
-        resetValidationCount();
 
         testField.setValue("");
         assertValidationCount(1);
@@ -211,8 +185,6 @@ public class NumberFieldBasicValidationIT
         assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
-
-        resetValidationCount();
 
         $("button").id(CLEAR_VALUE_BUTTON).click();
         assertValidationCount(1);
@@ -254,6 +226,7 @@ public class NumberFieldBasicValidationIT
         assertServerInvalid();
     }
 
+    @Override
     protected NumberFieldElement getTestField() {
         return $(NumberFieldElement.class).first();
     }

@@ -58,8 +58,6 @@ public class NumberFieldBinderValidationIT
         assertServerValid();
         assertClientValid();
 
-        resetValidationCount();
-
         testField.setValue("");
         assertValidationCount(1);
         assertServerInvalid();
@@ -92,8 +90,6 @@ public class NumberFieldBinderValidationIT
         assertServerInvalid();
         assertErrorMessage("");
 
-        resetValidationCount();
-
         // Binder validation fails:
         testField.setValue("2");
         assertValidationCount(1);
@@ -101,15 +97,11 @@ public class NumberFieldBinderValidationIT
         assertServerInvalid();
         assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
 
-        resetValidationCount();
-
         // Both validations pass:
         testField.setValue("2.2");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
-
-        resetValidationCount();
 
         // Binder validation fails:
         testField.setValue("");
@@ -131,8 +123,6 @@ public class NumberFieldBinderValidationIT
         assertServerInvalid();
         assertErrorMessage("");
 
-        resetValidationCount();
-
         // Binder validation fails:
         testField.setValue("2");
         assertValidationCount(1);
@@ -140,15 +130,11 @@ public class NumberFieldBinderValidationIT
         assertServerInvalid();
         assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
 
-        resetValidationCount();
-
         // Both validations pass:
         testField.setValue("1.8");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
-
-        resetValidationCount();
 
         // Binder validation fails:
         testField.setValue("");
@@ -170,8 +156,6 @@ public class NumberFieldBinderValidationIT
         assertServerInvalid();
         assertErrorMessage("");
 
-        resetValidationCount();
-
         // Binder validation fails:
         testField.setValue("1.5");
         assertValidationCount(1);
@@ -179,15 +163,11 @@ public class NumberFieldBinderValidationIT
         assertServerInvalid();
         assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
 
-        resetValidationCount();
-
         // Both validations pass:
         testField.setValue("3");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
-
-        resetValidationCount();
 
         // Binder validation fails:
         testField.setValue("");
@@ -207,22 +187,16 @@ public class NumberFieldBinderValidationIT
         assertClientInvalid();
         assertErrorMessage("");
 
-        resetValidationCount();
-
         testField.setValue("2");
         assertValidationCount(1);
         assertServerValid();
         assertClientValid();
-
-        resetValidationCount();
 
         testField.sendKeys("--2", Keys.ENTER);
         assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage("");
-
-        resetValidationCount();
 
         testField.setValue("");
         assertValidationCount(1);
@@ -253,8 +227,6 @@ public class NumberFieldBinderValidationIT
         assertClientInvalid();
         assertErrorMessage("");
 
-        resetValidationCount();
-
         $("button").id(CLEAR_VALUE_BUTTON).click();
         assertValidationCount(1);
         assertServerInvalid();
@@ -262,6 +234,7 @@ public class NumberFieldBinderValidationIT
         assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
+    @Override
     protected NumberFieldElement getTestField() {
         return $(NumberFieldElement.class).first();
     }
