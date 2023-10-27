@@ -55,6 +55,7 @@ public class NumberFieldBasicValidationPage
         }));
     }
 
+    @Override
     protected NumberField createTestField() {
         return new NumberField() {
             @Override

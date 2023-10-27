@@ -42,8 +42,6 @@ public class BinderValidationIT
         assertServerValid();
         assertClientValid();
 
-        resetValidationCount();
-
         testField.setInputValue("");
         assertValidationCount(1);
         assertServerInvalid();
@@ -76,8 +74,6 @@ public class BinderValidationIT
         assertServerInvalid();
         assertErrorMessage("");
 
-        resetValidationCount();
-
         // Binder validation fails:
         testField.setInputValue("3/1/2022");
         assertValidationCount(1);
@@ -85,15 +81,11 @@ public class BinderValidationIT
         assertServerInvalid();
         assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
 
-        resetValidationCount();
-
         // Both validations pass:
         testField.setInputValue("4/1/2022");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
-
-        resetValidationCount();
 
         // Binder validation fails:
         testField.setInputValue("");
@@ -115,8 +107,6 @@ public class BinderValidationIT
         assertServerInvalid();
         assertErrorMessage("");
 
-        resetValidationCount();
-
         // Binder validation fails:
         testField.setInputValue("3/1/2022");
         assertValidationCount(1);
@@ -124,15 +114,11 @@ public class BinderValidationIT
         assertServerInvalid();
         assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
 
-        resetValidationCount();
-
         // Both validations pass:
         testField.setInputValue("2/1/2022");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
-
-        resetValidationCount();
 
         // Binder validation fails:
         testField.setInputValue("");
@@ -152,22 +138,16 @@ public class BinderValidationIT
         assertClientInvalid();
         assertErrorMessage("");
 
-        resetValidationCount();
-
         testField.setInputValue("1/1/2022");
         assertValidationCount(1);
         assertServerValid();
         assertClientValid();
-
-        resetValidationCount();
 
         testField.setInputValue("INVALID");
         assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage("");
-
-        resetValidationCount();
 
         testField.setInputValue("");
         assertValidationCount(1);
@@ -198,8 +178,6 @@ public class BinderValidationIT
         assertClientInvalid();
         assertErrorMessage("");
 
-        resetValidationCount();
-
         $("button").id(CLEAR_VALUE_BUTTON).click();
         assertValidationCount(1);
         assertServerInvalid();
@@ -207,6 +185,7 @@ public class BinderValidationIT
         assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
+    @Override
     protected DatePickerElement getTestField() {
         return $(DatePickerElement.class).first();
     }

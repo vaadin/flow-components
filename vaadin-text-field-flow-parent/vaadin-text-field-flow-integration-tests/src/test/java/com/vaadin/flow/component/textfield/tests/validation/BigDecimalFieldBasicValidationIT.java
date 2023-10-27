@@ -61,8 +61,6 @@ public class BigDecimalFieldBasicValidationIT
         assertServerValid();
         assertClientValid();
 
-        resetValidationCount();
-
         testField.setValue("");
         assertValidationCount(1);
         assertServerInvalid();
@@ -76,21 +74,15 @@ public class BigDecimalFieldBasicValidationIT
         assertServerInvalid();
         assertClientInvalid();
 
-        resetValidationCount();
-
         testField.setValue("2");
         assertValidationCount(1);
         assertServerValid();
         assertClientValid();
 
-        resetValidationCount();
-
         testField.sendKeys("--2", Keys.ENTER);
         assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
-
-        resetValidationCount();
 
         testField.setValue("");
         assertValidationCount(1);
@@ -115,8 +107,6 @@ public class BigDecimalFieldBasicValidationIT
         assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
-
-        resetValidationCount();
 
         $("button").id(CLEAR_VALUE_BUTTON).click();
         assertValidationCount(1);
@@ -158,6 +148,7 @@ public class BigDecimalFieldBasicValidationIT
         assertServerInvalid();
     }
 
+    @Override
     protected BigDecimalFieldElement getTestField() {
         return $(BigDecimalFieldElement.class).first();
     }

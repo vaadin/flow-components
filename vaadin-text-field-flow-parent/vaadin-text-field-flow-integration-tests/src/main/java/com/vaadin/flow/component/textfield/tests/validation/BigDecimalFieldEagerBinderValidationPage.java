@@ -50,6 +50,7 @@ public class BigDecimalFieldEagerBinderValidationPage
         });
     }
 
+    @Override
     protected BigDecimalField createTestField() {
         return new BigDecimalField();
     }

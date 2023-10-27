@@ -89,6 +89,7 @@ public class NumberFieldBinderValidationPage
         }));
     }
 
+    @Override
     protected NumberField createTestField() {
         return new NumberField();
     }
