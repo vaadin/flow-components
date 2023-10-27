@@ -13,7 +13,7 @@
     <url>https://vaadin.com/components</url>
     <properties>
         <flow.version>9.1-SNAPSHOT</flow.version>
-        <testbench.version>7.1.0</testbench.version>
+        <testbench.version>7.1.1</testbench.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
