@@ -23,18 +23,20 @@ public class BinderValidationIT
     @Test
     public void required_triggerBlur_assertValidity() {
         testField.$(CheckboxElement.class).last().sendKeys(Keys.TAB);
-        assertServerInvalid();
-        assertClientInvalid();
-        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
+        assertValidationCount(0);
+        assertServerValid();
+        assertClientValid();
     }
 
     @Test
     public void required_changeValue_assertValidity() {
         testField.selectByText("foo");
+        assertValidationCount(1);
         assertServerValid();
         assertClientValid();
 
         testField.deselectByText("foo");
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage(REQUIRED_ERROR_MESSAGE);
