@@ -28,7 +28,13 @@ public class ComboBoxBasicValidationPage
 
     @Override
     protected ComboBox<String> createTestField() {
-        ComboBox<String> comboBox = new ComboBox<>();
+        ComboBox<String> comboBox = new ComboBox<>() {
+            @Override
+            protected void validate() {
+                super.validate();
+                incrementServerValidationCounter();
+            }
+        };
         comboBox.setItems(List.of("foo", "bar", "baz"));
 
         return comboBox;

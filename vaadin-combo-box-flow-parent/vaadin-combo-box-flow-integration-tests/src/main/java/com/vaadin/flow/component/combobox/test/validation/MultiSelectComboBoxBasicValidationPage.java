@@ -28,7 +28,13 @@ public class MultiSelectComboBoxBasicValidationPage
 
     @Override
     protected MultiSelectComboBox<String> createTestField() {
-        MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
+        MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>() {
+            @Override
+            protected void validate() {
+                super.validate();
+                incrementServerValidationCounter();
+            }
+        };
         comboBox.setItems(List.of("foo", "bar", "baz"));
 
         return comboBox;

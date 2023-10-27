@@ -20,6 +20,7 @@ public class BasicValidationIT extends AbstractValidationIT<SelectElement> {
     @Test
     public void triggerBlur_assertValidity() {
         testField.sendKeys(Keys.TAB);
+        assertValidationCount(0);
         assertServerValid();
         assertClientValid();
     }
@@ -29,8 +30,9 @@ public class BasicValidationIT extends AbstractValidationIT<SelectElement> {
         $("button").id(REQUIRED_BUTTON).click();
 
         testField.sendKeys(Keys.TAB);
-        assertServerInvalid();
-        assertClientInvalid();
+        assertValidationCount(0);
+        assertServerValid();
+        assertClientValid();
     }
 
     @Test
@@ -38,10 +40,12 @@ public class BasicValidationIT extends AbstractValidationIT<SelectElement> {
         $("button").id(REQUIRED_BUTTON).click();
 
         testField.selectByText("foo");
+        assertValidationCount(1);
         assertServerValid();
         assertClientValid();
 
         testField.selectByText("");
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
     }
@@ -50,7 +54,8 @@ public class BasicValidationIT extends AbstractValidationIT<SelectElement> {
     public void detach_attach_preservesInvalidState() {
         // Make field invalid
         $("button").id(REQUIRED_BUTTON).click();
-        testField.sendKeys(Keys.TAB);
+        testField.selectByText("foo");
+        testField.selectByText("");
 
         detachAndReattachField();
 
@@ -71,7 +76,8 @@ public class BasicValidationIT extends AbstractValidationIT<SelectElement> {
     public void clientSideInvalidStateIsNotPropagatedToServer() {
         // Make the field invalid
         $("button").id(REQUIRED_BUTTON).click();
-        testField.sendKeys(Keys.TAB);
+        testField.selectByText("foo");
+        testField.selectByText("");
 
         executeScript("arguments[0].invalid = false", testField);
 
