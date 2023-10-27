@@ -278,12 +278,10 @@ public class Button extends Component
      * @see #clickInClient()
      */
     public void click() {
-        if (!isEnabled()) {
-            throw new IllegalStateException(
-                    "Disabled button cannot be clicked!");
+        if (isEnabled()) {
+            fireEvent(new ClickEvent<>(this, false, 0, 0, 0, 0, 0, 0, false, false,
+                    false, false));
         }
-        fireEvent(new ClickEvent<>(this, false, 0, 0, 0, 0, 0, 0, false, false,
-                false, false));
     }
 
     /**

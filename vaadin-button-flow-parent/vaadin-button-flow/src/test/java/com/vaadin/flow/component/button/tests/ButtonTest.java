@@ -236,19 +236,13 @@ public class ButtonTest {
         button = new Button();
         button.setEnabled(false);
         AtomicBoolean clicked = new AtomicBoolean(false);
-        AtomicBoolean thrown = new AtomicBoolean(false);
         button.addClickListener(e -> {
             clicked.set(true);
         });
 
         Assert.assertFalse(clicked.get());
-        try {
-            button.click();
-        } catch (IllegalStateException e) {
-            thrown.set(true);
-        }
+        button.click();
         Assert.assertFalse(clicked.get());
-        Assert.assertTrue(thrown.get());
     }
 
     @Test
