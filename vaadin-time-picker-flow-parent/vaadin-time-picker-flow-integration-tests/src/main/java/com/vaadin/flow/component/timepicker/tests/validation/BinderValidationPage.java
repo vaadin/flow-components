@@ -70,6 +70,7 @@ public class BinderValidationPage extends AbstractValidationPage<TimePicker> {
         }));
     }
 
+    @Override
     protected TimePicker createTestField() {
         return new TimePicker();
     }

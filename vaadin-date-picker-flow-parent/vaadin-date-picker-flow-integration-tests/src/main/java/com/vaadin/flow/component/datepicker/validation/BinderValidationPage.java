@@ -70,6 +70,7 @@ public class BinderValidationPage extends AbstractValidationPage<DatePicker> {
         }));
     }
 
+    @Override
     protected DatePicker createTestField() {
         return new DatePicker();
     }

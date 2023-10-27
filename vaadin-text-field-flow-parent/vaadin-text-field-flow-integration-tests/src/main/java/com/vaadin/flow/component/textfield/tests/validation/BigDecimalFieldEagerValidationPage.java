@@ -28,6 +28,7 @@ public class BigDecimalFieldEagerValidationPage
         testField.setValueChangeMode(ValueChangeMode.EAGER);
     }
 
+    @Override
     protected BigDecimalField createTestField() {
         return new BigDecimalField() {
             @Override
