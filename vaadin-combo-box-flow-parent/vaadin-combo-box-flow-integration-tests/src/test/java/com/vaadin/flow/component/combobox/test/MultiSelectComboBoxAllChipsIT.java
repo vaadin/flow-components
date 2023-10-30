@@ -80,7 +80,7 @@ public class MultiSelectComboBoxAllChipsIT extends AbstractComponentIT {
         ElementQuery<TestBenchElement> chips = comboBox
                 .$("vaadin-multi-select-combo-box-chip");
 
-        Assert.assertEquals("Only overflow chip is shown", 1,
+        Assert.assertEquals("Overflow chip + lasts selected shown", 2,
                 chips.all().size());
     }
 }
