@@ -57,6 +57,8 @@ import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
 import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.binder.Validator;
+import com.vaadin.flow.data.binder.ValueContext;
+import com.vaadin.flow.data.validator.AbstractValidator;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.JsonSerializer;
@@ -117,6 +119,20 @@ public class DatePicker
     private boolean manualValidationEnabled = false;
 
     private final CopyOnWriteArrayList<ValidationStatusChangeListener<LocalDate>> validationStatusChangeListeners = new CopyOnWriteArrayList<>();
+
+    public static class BadInputValidator extends AbstractValidator<LocalDate> {
+        public BadInputValidator(String errorMessage) {
+            super(errorMessage);
+        }
+
+        @Override
+        public ValidationResult apply(LocalDate value, ValueContext context) {
+            DatePicker datePicker = (DatePicker) context.getComponent().get();
+            boolean isInvalid = datePicker.valueEquals(value, datePicker.getEmptyValue())
+                    && datePicker.isInputValuePresent();
+            return toResult(value, !isInvalid);
+        }
+    }
 
     /**
      * Default constructor.
@@ -516,10 +532,10 @@ public class DatePicker
                 .beforeClientResponse(this, context -> command.accept(ui)));
     }
 
-    @Override
-    public Validator<LocalDate> getDefaultValidator() {
-        return (value, context) -> checkValidity(value);
-    }
+    // @Override
+    // public Validator<LocalDate> getDefaultValidator() {
+    //     return (value, context) -> checkValidity(value);
+    // }
 
     @Override
     public Registration addValidationStatusChangeListener(
