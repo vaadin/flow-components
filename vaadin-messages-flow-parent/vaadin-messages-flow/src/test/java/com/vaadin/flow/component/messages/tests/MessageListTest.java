@@ -67,6 +67,16 @@ public class MessageListTest {
                 messageList.getItems());
     }
 
+    @Test
+    public void addClassNames_removeClassNames_hasClassName() {
+        item1.addClassNames("foo", "bar");
+        Assert.assertTrue(item1.hasClassName("foo"));
+        Assert.assertTrue(item1.hasClassName("bar"));
+
+        item1.removeClassNames("foo");
+        Assert.assertFalse(item1.hasClassName("foo"));
+    }
+
     @Test(expected = NullPointerException.class)
     public void setItems_nullCollection_throws() {
         messageList.setItems((Collection<MessageListItem>) null);

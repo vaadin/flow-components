@@ -11,5 +11,7 @@ class TextFieldElementHelper {
                 Collections.singletonMap("bubbles", true));
         element.dispatchEvent("change",
                 Collections.singletonMap("bubbles", true));
+        element.dispatchEvent("focusout",
+                Collections.singletonMap("bubbles", true));
     }
 }

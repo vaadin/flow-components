@@ -55,6 +55,9 @@ public class TextFieldBinderValidationPage
                 .withValidator(value -> value.equals(expectedValue),
                         UNEXPECTED_VALUE_ERROR_MESSAGE)
                 .bind("property");
+        binder.addStatusChangeListener(event -> {
+            incrementServerValidationCounter();
+        });
 
         add(createInput(EXPECTED_VALUE_INPUT, "Set expected value", event -> {
             expectedValue = event.getValue();
@@ -75,6 +78,7 @@ public class TextFieldBinderValidationPage
         }));
     }
 
+    @Override
     protected TextField createTestField() {
         return new TextField();
     }

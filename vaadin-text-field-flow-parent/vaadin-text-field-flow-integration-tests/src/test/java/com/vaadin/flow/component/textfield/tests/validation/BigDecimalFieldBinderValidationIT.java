@@ -24,6 +24,7 @@ import com.vaadin.tests.validation.AbstractValidationIT;
 
 import static com.vaadin.flow.component.textfield.tests.validation.BigDecimalFieldBinderValidationPage.REQUIRED_ERROR_MESSAGE;
 import static com.vaadin.flow.component.textfield.tests.validation.BigDecimalFieldBinderValidationPage.CLEAR_VALUE_BUTTON;
+import static com.vaadin.flow.component.textfield.tests.validation.BigDecimalFieldBinderValidationPage.RESET_BEAN_BUTTON;
 
 @TestPath("vaadin-big-decimal-field/validation/binder")
 public class BigDecimalFieldBinderValidationIT
@@ -38,43 +39,77 @@ public class BigDecimalFieldBinderValidationIT
     @Test
     public void required_triggerBlur_assertValidity() {
         testField.sendKeys(Keys.TAB);
-        assertServerInvalid();
-        assertClientInvalid();
-        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
+        assertValidationCount(0);
+        assertServerValid();
+        assertClientValid();
     }
 
     @Test
     public void required_changeValue_assertValidity() {
         testField.setValue("1234");
+        assertValidationCount(1);
         assertServerValid();
         assertClientValid();
 
         testField.setValue("");
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
     @Test
+    public void required_setValue_resetBean_assertValidity() {
+        testField.setValue("1234");
+        assertServerValid();
+        assertClientValid();
+
+        $("button").id(RESET_BEAN_BUTTON).click();
+        assertServerValid();
+        assertClientValid();
+    }
+
+    @Test
     public void badInput_changeValue_assertValidity() {
-        testField.sendKeys("--2", Keys.TAB);
+        testField.sendKeys("--2", Keys.ENTER);
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage("");
 
         testField.setValue("2");
+        assertValidationCount(1);
         assertServerValid();
         assertClientValid();
 
-        testField.sendKeys("--2", Keys.TAB);
+        testField.sendKeys("--2", Keys.ENTER);
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage("");
+
+        testField.setValue("");
+        assertValidationCount(1);
+        assertServerInvalid();
+        assertClientInvalid();
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
+    }
+
+    @Test
+    public void setValue_clearValue_assertValidity() {
+        testField.setValue("2");
+        assertServerValid();
+        assertClientValid();
+
+        $("button").id(CLEAR_VALUE_BUTTON).click();
+        assertServerInvalid();
+        assertClientInvalid();
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
     @Test
     public void badInput_setValue_clearValue_assertValidity() {
-        testField.sendKeys("--2", Keys.TAB);
+        testField.sendKeys("--2", Keys.ENTER);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage("");
@@ -85,6 +120,7 @@ public class BigDecimalFieldBinderValidationIT
         assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
+    @Override
     protected BigDecimalFieldElement getTestField() {
         return $(BigDecimalFieldElement.class).first();
     }

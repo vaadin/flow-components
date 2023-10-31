@@ -66,9 +66,9 @@ import elemental.json.JsonValue;
  *            the type of the items supported by the list
  */
 @Tag("vaadin-virtual-list")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha11")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/virtual-list", version = "24.2.0-alpha11")
+@NpmPackage(value = "@vaadin/virtual-list", version = "24.3.0-alpha8")
 @JsModule("@vaadin/virtual-list/src/vaadin-virtual-list.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./virtualListConnector.js")
@@ -293,5 +293,35 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
     @ClientCallable(DisabledUpdateMode.ALWAYS)
     private void setRequestedRange(int start, int length) {
         getDataCommunicator().setRequestedRange(start, length);
+    }
+
+    /**
+     * Scrolls to the given row index. Scrolls so that the element is shown at
+     * the start of the visible area whenever possible.
+     * <p>
+     * If the index parameter exceeds current item set size the grid will scroll
+     * to the end.
+     *
+     * @param rowIndex
+     *            zero based index of the item to scroll to in the current view.
+     */
+    public void scrollToIndex(int rowIndex) {
+        getElement().getNode().runWhenAttached(
+                ui -> ui.beforeClientResponse(this, ctx -> getElement()
+                        .executeJs("this.scrollToIndex($0)", rowIndex)));
+    }
+
+    /**
+     * Scrolls to the first element.
+     */
+    public void scrollToStart() {
+        scrollToIndex(0);
+    }
+
+    /**
+     * Scrolls to the last element of the list.
+     */
+    public void scrollToEnd() {
+        scrollToIndex(Integer.MAX_VALUE);
     }
 }

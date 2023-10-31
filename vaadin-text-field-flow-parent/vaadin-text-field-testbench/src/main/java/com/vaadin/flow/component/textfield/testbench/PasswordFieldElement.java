@@ -58,7 +58,7 @@ public class PasswordFieldElement extends TestBenchElement
     /**
      * Emulates the user changing the value, which in practice means setting
      * {@code value} of the {@code input} element to the given value and then
-     * triggering {@code input} and {@code change} DOM events.
+     * triggering {@code input}, {@code change} and {@code focusout} DOM events.
      *
      * @param string
      *            the value to set

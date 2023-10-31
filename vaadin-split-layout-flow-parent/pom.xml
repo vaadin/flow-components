@@ -4,11 +4,12 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-flow-components</artifactId>
-        <version>24.2-SNAPSHOT</version>
+        <version>24.3-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-split-layout-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>Vaadin Split Layout Parent</name>
+    <description>Vaadin Split Layout Parent</description>
     <modules>
         <module>vaadin-split-layout-flow</module>
         <module>vaadin-split-layout-testbench</module>

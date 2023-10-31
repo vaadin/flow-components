@@ -17,7 +17,7 @@
 package com.vaadin.flow.component.textfield;
 
 import java.math.BigDecimal;
-import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Synchronize;
@@ -57,6 +57,8 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
 
     private boolean manualValidationEnabled = false;
 
+    private final CopyOnWriteArrayList<ValidationStatusChangeListener<T>> validationStatusChangeListeners = new CopyOnWriteArrayList<>();
+
     /**
      * Sets up the common logic for number fields.
      *
@@ -91,7 +93,10 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
 
         addValueChangeListener(e -> validate());
 
-        addClientValidatedEventListener(e -> validate());
+        getElement().addEventListener("unparsable-change", e -> {
+            validate();
+            fireValidationStatusChangeEvent();
+        });
     }
 
     /**
@@ -137,13 +142,21 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     @Override
     public void setValue(T value) {
         T oldValue = getValue();
+        boolean isOldValueEmpty = valueEquals(oldValue, getEmptyValue());
+        boolean isNewValueEmpty = valueEquals(value, getEmptyValue());
+        boolean isValueRemainedEmpty = isOldValueEmpty && isNewValueEmpty;
+        boolean isInputValuePresent = isInputValuePresent();
+
+        // When the value is cleared programmatically, reset hasInputValue
+        // so that the following validation doesn't treat this as bad input.
+        if (isNewValueEmpty) {
+            getElement().setProperty("_hasInputValue", false);
+        }
 
         super.setValue(value);
 
         // Clear the input element from possible bad input.
-        if (Objects.equals(oldValue, getEmptyValue())
-                && Objects.equals(value, getEmptyValue())
-                && isInputValuePresent()) {
+        if (isValueRemainedEmpty && isInputValuePresent) {
             // The check for value presence guarantees that a non-empty value
             // won't get cleared when setValue(null) and setValue(...) are
             // subsequently called within one round-trip.
@@ -153,8 +166,26 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
             // `executeJs` can end up invoked after a non-empty value is set.
             getElement()
                     .executeJs("if (!this.value) this._inputElementValue = ''");
-            getElement().setProperty("_hasInputValue", false);
-            fireEvent(new ClientValidatedEvent(this, false));
+            validate();
+            fireValidationStatusChangeEvent();
+        }
+    }
+
+    @Override
+    protected void setModelValue(T newModelValue, boolean fromClient) {
+        T oldModelValue = getValue();
+
+        super.setModelValue(newModelValue, fromClient);
+
+        // Triggers validation when an unparsable or empty value changes to a
+        // value that is parsable on the client but still unparsable on the
+        // server, which can happen for example due to the difference in Integer
+        // limit in Java and JavaScript. In this case, there is no
+        // ValueChangeEvent and no unparsable-change event.
+        if (fromClient && valueEquals(oldModelValue, getEmptyValue())
+                && valueEquals(newModelValue, getEmptyValue())) {
+            validate();
+            fireValidationStatusChangeEvent();
         }
     }
 
@@ -244,14 +275,25 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     @Override
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<T> listener) {
-        return addClientValidatedEventListener(
-                event -> listener.validationStatusChanged(
-                        new ValidationStatusChangeEvent<T>(this,
-                                !isInvalid())));
+        return Registration.addAndRemove(validationStatusChangeListeners,
+                listener);
+    }
+
+    /**
+     * Notifies Binder that it needs to revalidate the component since the
+     * component's validity state may have changed. Note, there is no need to
+     * notify Binder separately in the case of a ValueChangeEvent, as Binder
+     * already listens to this event and revalidates automatically.
+     */
+    private void fireValidationStatusChangeEvent() {
+        ValidationStatusChangeEvent<T> event = new ValidationStatusChangeEvent<>(
+                this, !isInvalid());
+        validationStatusChangeListeners
+                .forEach(listener -> listener.validationStatusChanged(event));
     }
 
     private ValidationResult checkValidity(T value) {
-        boolean hasNonParsableValue = Objects.equals(value, getEmptyValue())
+        boolean hasNonParsableValue = valueEquals(value, getEmptyValue())
                 && isInputValuePresent();
         if (hasNonParsableValue) {
             return ValidationResult.error("");

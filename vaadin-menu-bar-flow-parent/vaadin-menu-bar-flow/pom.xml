@@ -4,11 +4,12 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-menu-bar-flow-parent</artifactId>
-        <version>24.2-SNAPSHOT</version>
+        <version>24.3-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-menu-bar-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Menu Bar</name>
+    <description>Vaadin Menu Bar</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

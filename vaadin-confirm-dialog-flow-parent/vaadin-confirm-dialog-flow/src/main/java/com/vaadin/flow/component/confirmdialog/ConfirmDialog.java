@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.confirmdialog;
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -23,6 +24,7 @@ import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.HasOrderedComponents;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.Shortcuts;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
@@ -61,9 +63,9 @@ import java.util.Optional;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-confirm-dialog")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha11")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/confirm-dialog", version = "24.2.0-alpha11")
+@NpmPackage(value = "@vaadin/confirm-dialog", version = "24.3.0-alpha8")
 @JsModule("@vaadin/confirm-dialog/src/vaadin-confirm-dialog.js")
 public class ConfirmDialog extends Component
         implements HasSize, HasStyle, HasOrderedComponents {
@@ -373,7 +375,7 @@ public class ConfirmDialog extends Component
      *            the component to display instead of default Reject button
      */
     public void setRejectButton(Component component) {
-        setRejectButton(component.getElement());
+        SlotUtils.setSlot(this, "reject-button", component);
     }
 
     /**
@@ -381,7 +383,9 @@ public class ConfirmDialog extends Component
      *
      * @param element
      *            the element to display instead of default Reject button
+     * @deprecated Usage of Element API at Component level should be avoided
      */
+    @Deprecated(forRemoval = true)
     public void setRejectButton(Element element) {
         SlotUtils.setSlot(this, "reject-button", element);
     }
@@ -426,7 +430,7 @@ public class ConfirmDialog extends Component
      *            the component to display instead of default Cancel button
      */
     public void setCancelButton(Component component) {
-        setCancelButton(component.getElement());
+        SlotUtils.setSlot(this, "cancel-button", component);
     }
 
     /**
@@ -434,7 +438,9 @@ public class ConfirmDialog extends Component
      *
      * @param element
      *            the element to display instead of default Cancel button
+     * @deprecated Usage of Element API at Component level should be avoided
      */
+    @Deprecated(forRemoval = true)
     public void setCancelButton(Element element) {
         SlotUtils.setSlot(this, "cancel-button", element);
     }
@@ -475,10 +481,10 @@ public class ConfirmDialog extends Component
      * Sets custom confirm button
      *
      * @param component
-     *            the element to display instead of default Confirm button
+     *            the component to display instead of default Confirm button
      */
     public void setConfirmButton(Component component) {
-        setConfirmButton(component.getElement());
+        SlotUtils.setSlot(this, "confirm-button", component);
     }
 
     /**
@@ -486,7 +492,9 @@ public class ConfirmDialog extends Component
      *
      * @param element
      *            the element to display instead of default Confirm button
+     * @deprecated Usage of Element API at Component level should be avoided
      */
+    @Deprecated(forRemoval = true)
     public void setConfirmButton(Element element) {
         SlotUtils.setSlot(this, "confirm-button", element);
     }
@@ -499,14 +507,14 @@ public class ConfirmDialog extends Component
     }
 
     /**
-     * Sets custom confirmation message element
+     * Sets custom confirmation message
      *
      * @param component
      *            the component to display instead of default confirmation text
      *            node
      */
     public void setText(Component component) {
-        setText(component.getElement());
+        getElement().appendChild(component.getElement());
     }
 
     /**
@@ -515,7 +523,9 @@ public class ConfirmDialog extends Component
      * @param element
      *            the element to display instead of default confirmation text
      *            node
+     * @deprecated Usage of Element API at Component level should be avoided
      */
+    @Deprecated(forRemoval = true)
     public void setText(Element element) {
         getElement().appendChild(element);
     }
@@ -595,13 +605,13 @@ public class ConfirmDialog extends Component
     }
 
     /**
-     * Sets confirmation dialog custom header element
+     * Sets confirmation dialog custom header
      *
      * @param component
      *            the component to display instead of default header text
      */
     public void setHeader(Component component) {
-        setHeader(component.getElement());
+        SlotUtils.setSlot(this, "header", component);
     }
 
     /**
@@ -609,7 +619,9 @@ public class ConfirmDialog extends Component
      *
      * @param element
      *            the element to display instead of default header text
+     * @deprecated Usage of Element API at Component level should be avoided
      */
+    @Deprecated(forRemoval = true)
     public void setHeader(Element element) {
         SlotUtils.setSlot(this, "header", element);
     }
@@ -681,6 +693,14 @@ public class ConfirmDialog extends Component
      */
     public void setCloseOnEsc(boolean closeOnEsc) {
         getElement().setProperty("noCloseOnEsc", !closeOnEsc);
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+
+        // Same as https://github.com/vaadin/flow-components/pull/725
+        Shortcuts.setShortcutListenOnElement("this._overlayElement", this);
     }
 
     private void setModality(boolean modal) {

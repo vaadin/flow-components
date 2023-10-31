@@ -17,10 +17,12 @@ export type GridConnector = {
   confirmParent: (index: number, parentKey: string, levelSize: number) => void;
   setSelectionMode: (mode: 'SINGLE' | 'NONE' | 'MULTI') => void;
   expandItems: (items: Item[]) => void;
+  collapseItems: (items: Item[]) => void;
   ensureHierarchy: () => void;
   reset: () => void;
   doSelection: (items: Item[] | [null], userOriginated: boolean) => void;
   doDeselection: (items: Item[], userOriginated: boolean) => void;
+  clear: (index: number, length: number, parentKey?: string) => void;
 };
 
 export type GridServer = {
@@ -50,7 +52,7 @@ export type FlowGrid = Grid<Item> & {
   $server: GridServer;
   __deselectDisallowed: boolean;
   __disallowDetailsOnClick: boolean;
-  _effectiveSize: number;
+  _flatSize: number;
   __updateVisibleRows: () => void;
   _updateItem: (index: number, item: Item) => void;
 };
@@ -70,6 +72,7 @@ const Vaadin = window.Vaadin as Vaadin;
 export const gridConnector = Vaadin.Flow.gridConnector;
 
 export const GRID_CONNECTOR_PARENT_REQUEST_DELAY = 50;
+export const GRID_CONNECTOR_ROOT_REQUEST_DELAY = 150;
 
 /**
  * Initializes the grid connector and the grid server mock.
@@ -103,7 +106,7 @@ export function initSelectionColumn(grid: FlowGrid, column: FlowGridSelectionCol
  * Returns the number of rows in the grid body.
  */
 export function getBodyRowCount(grid: FlowGrid): number {
-  return grid._effectiveSize;
+  return grid._flatSize;
 }
 
 /**
@@ -170,4 +173,18 @@ export function setChildItems(gridConnector: GridConnector, parent: Item, items:
 export function expandItems(gridConnector: GridConnector, items: Item[]): void {
   gridConnector.ensureHierarchy();
   gridConnector.expandItems(items);
+}
+
+/**
+ * Collapse the given items.
+ */
+export function collapseItems(gridConnector: GridConnector, items: Item[]): void {
+  gridConnector.collapseItems(items);
+}
+
+/**
+ * Clears the given range of the given parent's children.
+ */
+export function clear(gridConnector: GridConnector, index: number, length: number, parent?: Item): void {
+  gridConnector.clear(index, length, parent?.key);
 }

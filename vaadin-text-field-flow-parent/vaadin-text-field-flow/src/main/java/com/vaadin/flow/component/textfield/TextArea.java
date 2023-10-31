@@ -37,9 +37,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-text-area")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha11")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/text-area", version = "24.2.0-alpha11")
+@NpmPackage(value = "@vaadin/text-area", version = "24.3.0-alpha8")
 @JsModule("@vaadin/text-area/src/vaadin-text-area.js")
 public class TextArea extends TextFieldBase<TextArea, String>
         implements HasAllowedCharPattern, HasThemeVariant<TextAreaVariant> {
@@ -79,8 +79,6 @@ public class TextArea extends TextFieldBase<TextArea, String>
         setValueChangeMode(ValueChangeMode.ON_CHANGE);
 
         addValueChangeListener(e -> validate());
-
-        addClientValidatedEventListener(e -> validate());
     }
 
     /**
@@ -319,14 +317,6 @@ public class TextArea extends TextFieldBase<TextArea, String>
     @Override
     public Validator<String> getDefaultValidator() {
         return (value, context) -> getValidationSupport().checkValidity(value);
-    }
-
-    @Override
-    public Registration addValidationStatusChangeListener(
-            ValidationStatusChangeListener<String> listener) {
-        return addClientValidatedEventListener(
-                event -> listener.validationStatusChanged(
-                        new ValidationStatusChangeEvent<>(this, !isInvalid())));
     }
 
     @Override

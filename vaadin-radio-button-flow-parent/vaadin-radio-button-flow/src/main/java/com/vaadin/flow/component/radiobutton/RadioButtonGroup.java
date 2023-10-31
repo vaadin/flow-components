@@ -72,9 +72,9 @@ import java.util.stream.Stream;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-radio-group")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha11")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/radio-group", version = "24.2.0-alpha11")
+@NpmPackage(value = "@vaadin/radio-group", version = "24.3.0-alpha8")
 @JsModule("@vaadin/radio-group/src/vaadin-radio-group.js")
 public class RadioButtonGroup<T>
         extends AbstractSinglePropertyField<RadioButtonGroup<T>, T>
@@ -135,8 +135,6 @@ public class RadioButtonGroup<T>
                 RadioButtonGroup::modelToPresentation);
 
         addValueChangeListener(e -> validate());
-
-        addClientValidatedEventListener(e -> validate());
     }
 
     /**
@@ -373,8 +371,8 @@ public class RadioButtonGroup<T>
     @Override
     public void setValue(T value) {
         super.setValue(value);
-        getRadioButtons().forEach(
-                rb -> rb.setChecked(Objects.equals(rb.getItem(), value)));
+        getRadioButtons()
+                .forEach(rb -> rb.setChecked(valueEquals(rb.getItem(), value)));
         refreshButtons();
     }
 
@@ -733,13 +731,5 @@ public class RadioButtonGroup<T>
 
             setInvalid(isInvalid);
         }
-    }
-
-    @Override
-    public Registration addValidationStatusChangeListener(
-            ValidationStatusChangeListener<T> listener) {
-        return addClientValidatedEventListener(
-                event -> listener.validationStatusChanged(
-                        new ValidationStatusChangeEvent<>(this, !isInvalid())));
     }
 }

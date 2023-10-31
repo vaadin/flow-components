@@ -100,6 +100,15 @@ public class MessageListIT extends AbstractComponentIT {
         clickElementWithJs("removeThemeNames");
         Assert.assertEquals("Unexpected theme prop after removing theme names",
                 null, getFirstMessage(messageList).getTheme());
+
+        clickElementWithJs("addClassNames");
+        Assert.assertEquals("Unexpected class name after adding class names",
+                "urgent pinned",
+                getFirstMessage(messageList).getAttribute("class"));
+
+        clickElementWithJs("removeClassNames");
+        Assert.assertEquals("Unexpected class name after removing class names",
+                "pinned", getFirstMessage(messageList).getAttribute("class"));
     }
 
     @Test

@@ -55,7 +55,14 @@ public class NumberFieldBasicValidationPage
         }));
     }
 
+    @Override
     protected NumberField createTestField() {
-        return new NumberField();
+        return new NumberField() {
+            @Override
+            protected void validate() {
+                super.validate();
+                incrementServerValidationCounter();
+            }
+        };
     }
 }

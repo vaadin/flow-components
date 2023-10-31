@@ -4,11 +4,12 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-flow-components</artifactId>
-        <version>24.2-SNAPSHOT</version>
+        <version>24.3-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-menu-bar-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>Vaadin Menu Bar Parent</name>
+    <description>Vaadin Menu Bar Parent</description>
     <modules>
         <module>vaadin-menu-bar-flow</module>
         <module>vaadin-menu-bar-testbench</module>

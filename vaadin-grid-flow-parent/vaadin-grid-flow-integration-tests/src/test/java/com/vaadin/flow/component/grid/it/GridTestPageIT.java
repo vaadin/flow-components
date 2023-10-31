@@ -485,7 +485,7 @@ public class GridTestPageIT extends AbstractComponentIT {
     public static Map<String, Map<String, ?>> getItems(WebDriver driver,
             WebElement element) {
         Object result = ((JavascriptExecutor) driver).executeScript(
-                "const items = arguments[0]._cache.items;"
+                "const items = arguments[0]._dataProviderController.rootCache.items;"
                         + "return items.reduce((obj, item, i) => ({ ...obj, [i]: item }), {});",
                 element);
 

@@ -54,9 +54,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-notification")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha11")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/notification", version = "24.2.0-alpha11")
+@NpmPackage(value = "@vaadin/notification", version = "24.3.0-alpha8")
 @JsModule("@vaadin/notification/src/vaadin-notification.js")
 @JsModule("./flow-component-renderer.js")
 public class Notification extends Component implements HasComponents, HasStyle,
@@ -64,6 +64,8 @@ public class Notification extends Component implements HasComponents, HasStyle,
 
     private static final int DEFAULT_DURATION = 5000;
     private static final Position DEFAULT_POSITION = Position.BOTTOM_START;
+    private static final String OPENED_PROPERTY = "opened";
+    private static final String OPENED_CHANGED_EVENT = "opened-changed";
 
     private boolean autoAddedToTheUi = false;
 
@@ -145,8 +147,6 @@ public class Notification extends Component implements HasComponents, HasStyle,
         initBaseElementsAndListeners();
         setPosition(DEFAULT_POSITION);
         setDuration(0);
-        getElement().addPropertyChangeListener("opened", event -> fireEvent(
-                new OpenedChangeEvent(this, event.isUserOriginated())));
     }
 
     /**
@@ -214,7 +214,11 @@ public class Notification extends Component implements HasComponents, HasStyle,
     }
 
     private void initBaseElementsAndListeners() {
-        getElement().addEventListener("opened-changed",
+        getElement().addPropertyChangeListener(OPENED_PROPERTY,
+                event -> fireEvent(
+                        new OpenedChangeEvent(this, event.isUserOriginated())));
+
+        getElement().addEventListener(OPENED_CHANGED_EVENT,
                 event -> removeAutoAdded());
     }
 
@@ -426,7 +430,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
                         }
                     });
         }
-        getElement().setProperty("opened", opened);
+        getElement().setProperty(OPENED_PROPERTY, opened);
     }
 
     /**
@@ -439,7 +443,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
      */
     @Synchronize(property = "opened", value = "opened-changed")
     public boolean isOpened() {
-        return getElement().getProperty("opened", false);
+        return getElement().getProperty(OPENED_PROPERTY, false);
     }
 
     /**

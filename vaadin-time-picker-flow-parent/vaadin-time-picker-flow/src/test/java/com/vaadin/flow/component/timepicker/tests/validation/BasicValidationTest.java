@@ -17,11 +17,25 @@ package com.vaadin.flow.component.timepicker.tests.validation;
 
 import java.time.LocalTime;
 
+import org.junit.Test;
+
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
 public class BasicValidationTest
         extends AbstractBasicValidationTest<TimePicker, LocalTime> {
+    @Test
+    public void addValidationStatusChangeListener_addAnotherListenerOnInvocation_noExceptions() {
+        testField.addValidationStatusChangeListener(event1 -> {
+            testField.addValidationStatusChangeListener(event2 -> {
+            });
+        });
+
+        // Trigger ValidationStatusChangeEvent
+        testField.getElement().setProperty("_hasInputValue", true);
+        testField.clear();
+    }
+
     protected TimePicker createTestField() {
         return new TimePicker();
     }

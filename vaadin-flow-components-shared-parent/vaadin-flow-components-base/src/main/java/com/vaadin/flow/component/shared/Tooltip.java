@@ -31,7 +31,7 @@ import com.vaadin.flow.function.SerializableRunnable;
  *
  * @author Vaadin Ltd
  */
-@NpmPackage(value = "@vaadin/tooltip", version = "24.2.0-alpha11")
+@NpmPackage(value = "@vaadin/tooltip", version = "24.3.0-alpha8")
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
 public class Tooltip implements Serializable {
 
@@ -90,7 +90,7 @@ public class Tooltip implements Serializable {
         // Handle target attach
         SerializableRunnable onTargetAttach = () -> {
             // Remove the tooltip from its current state tree
-            tooltip.tooltipElement.removeFromTree();
+            tooltip.tooltipElement.removeFromTree(false);
 
             // The host under which the <vaadin-tooltip> element is auto-attached
             var tooltipHost = UI.getCurrent().getElement();

@@ -46,7 +46,7 @@ public class RichTextEditorSanitizationIT extends AbstractComponentIT {
 
         editor.dispatchEvent("change");
 
-        String expectedValue = "<p><img src=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIW2P4v5ThPwAG7wKklwQ/bwAAAABJRU5ErkJggg==\"></p> <p><br></p>";
+        String expectedValue = "<p><img src=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIW2P4v5ThPwAG7wKklwQ/bwAAAABJRU5ErkJggg==\"></p><p><br></p>";
         Assert.assertEquals(expectedValue, valueOutput.getText());
     }
 }

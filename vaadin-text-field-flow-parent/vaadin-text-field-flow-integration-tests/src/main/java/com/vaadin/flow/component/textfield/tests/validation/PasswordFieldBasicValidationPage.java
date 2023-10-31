@@ -49,7 +49,14 @@ public class PasswordFieldBasicValidationPage
         }));
     }
 
+    @Override
     protected PasswordField createTestField() {
-        return new PasswordField();
+        return new PasswordField() {
+            @Override
+            protected void validate() {
+                super.validate();
+                incrementServerValidationCounter();
+            }
+        };
     }
 }

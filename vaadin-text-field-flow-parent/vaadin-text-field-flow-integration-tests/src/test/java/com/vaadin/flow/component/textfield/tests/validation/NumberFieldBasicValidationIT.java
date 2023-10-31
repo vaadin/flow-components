@@ -40,6 +40,7 @@ public class NumberFieldBasicValidationIT
     @Test
     public void triggerBlur_assertValidity() {
         testField.sendKeys(Keys.TAB);
+        assertValidationCount(0);
         assertServerValid();
         assertClientValid();
     }
@@ -49,8 +50,9 @@ public class NumberFieldBasicValidationIT
         $("button").id(REQUIRED_BUTTON).click();
 
         testField.sendKeys(Keys.TAB);
-        assertServerInvalid();
-        assertClientInvalid();
+        assertValidationCount(0);
+        assertServerValid();
+        assertClientValid();
     }
 
     @Test
@@ -58,21 +60,14 @@ public class NumberFieldBasicValidationIT
         $("button").id(REQUIRED_BUTTON).click();
 
         testField.setValue("1234");
+        assertValidationCount(1);
         assertServerValid();
         assertClientValid();
 
         testField.setValue("");
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
-    }
-
-    @Test
-    public void min_triggerBlur_assertValidity() {
-        $("input").id(MIN_INPUT).sendKeys("2", Keys.ENTER);
-
-        testField.sendKeys(Keys.TAB);
-        assertServerValid();
-        assertClientValid();
     }
 
     @Test
@@ -80,25 +75,24 @@ public class NumberFieldBasicValidationIT
         $("input").id(MIN_INPUT).sendKeys("2", Keys.ENTER);
 
         testField.setValue("1.8");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
 
         testField.setValue("2");
+        assertValidationCount(1);
         assertClientValid();
         assertServerValid();
 
         testField.setValue("2.2");
+        assertValidationCount(1);
         assertClientValid();
         assertServerValid();
-    }
 
-    @Test
-    public void max_triggerBlur_assertValidity() {
-        $("input").id(MAX_INPUT).sendKeys("2", Keys.ENTER);
-
-        testField.sendKeys(Keys.TAB);
-        assertServerValid();
+        testField.setValue("");
+        assertValidationCount(1);
         assertClientValid();
+        assertServerValid();
     }
 
     @Test
@@ -106,25 +100,24 @@ public class NumberFieldBasicValidationIT
         $("input").id(MAX_INPUT).sendKeys("2", Keys.ENTER);
 
         testField.setValue("2.2");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
 
         testField.setValue("2");
+        assertValidationCount(1);
         assertClientValid();
         assertServerValid();
 
         testField.setValue("1.8");
+        assertValidationCount(1);
         assertClientValid();
         assertServerValid();
-    }
 
-    @Test
-    public void step_triggerBlur_assertValidity() {
-        $("input").id(STEP_INPUT).sendKeys("2", Keys.ENTER);
-
-        testField.sendKeys(Keys.TAB);
-        assertServerValid();
+        testField.setValue("");
+        assertValidationCount(1);
         assertClientValid();
+        assertServerValid();
     }
 
     @Test
@@ -132,40 +125,69 @@ public class NumberFieldBasicValidationIT
         $("input").id(STEP_INPUT).sendKeys("1.5", Keys.ENTER);
 
         testField.setValue("1");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
 
         testField.setValue("1.5");
+        assertValidationCount(1);
         assertClientValid();
         assertServerValid();
 
         testField.setValue("2");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
+
+        testField.setValue("");
+        assertValidationCount(1);
+        assertClientValid();
+        assertServerValid();
     }
 
     @Test
     public void badInput_changeValue_assertValidity() {
-        testField.sendKeys("--2", Keys.TAB);
+        testField.sendKeys("--2", Keys.ENTER);
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
 
         testField.setValue("2");
+        assertValidationCount(1);
         assertServerValid();
         assertClientValid();
 
-        testField.sendKeys("--2", Keys.TAB);
+        testField.sendKeys("--2", Keys.ENTER);
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
+
+        testField.setValue("");
+        assertValidationCount(1);
+        assertServerValid();
+        assertClientValid();
+    }
+
+    @Test
+    public void setValue_clearValue_assertValidity() {
+        testField.setValue("2");
+        assertServerValid();
+        assertClientValid();
+
+        $("button").id(CLEAR_VALUE_BUTTON).click();
+        assertServerValid();
+        assertClientValid();
     }
 
     @Test
     public void badInput_setValue_clearValue_assertValidity() {
-        testField.sendKeys("--2", Keys.TAB);
+        testField.sendKeys("--2", Keys.ENTER);
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
 
         $("button").id(CLEAR_VALUE_BUTTON).click();
+        assertValidationCount(1);
         assertServerValid();
         assertClientValid();
     }
@@ -174,7 +196,8 @@ public class NumberFieldBasicValidationIT
     public void detach_attach_preservesInvalidState() {
         // Make field invalid
         $("button").id(REQUIRED_BUTTON).click();
-        testField.sendKeys(Keys.TAB);
+        testField.setValue("2");
+        testField.setValue("");
 
         detachAndReattachField();
 
@@ -195,13 +218,15 @@ public class NumberFieldBasicValidationIT
     public void clientSideInvalidStateIsNotPropagatedToServer() {
         // Make the field invalid
         $("button").id(REQUIRED_BUTTON).click();
-        testField.sendKeys(Keys.TAB);
+        testField.setValue("2");
+        testField.setValue("");
 
         executeScript("arguments[0].invalid = false", testField);
 
         assertServerInvalid();
     }
 
+    @Override
     protected NumberFieldElement getTestField() {
         return $(NumberFieldElement.class).first();
     }

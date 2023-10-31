@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-flow-components-shared-parent</artifactId>
-    <version>24.2-SNAPSHOT</version>
+    <version>24.3-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-flow-components-test-util</artifactId>
   <packaging>jar</packaging>
@@ -27,4 +27,30 @@
       <scope>compile</scope>
     </dependency>
   </dependencies>
+  <profiles>
+    <profile>
+      <id>attach-docs</id>
+      <activation>
+        <property>
+          <name>with-docs</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+          </plugin>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>build-helper-maven-plugin</artifactId>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>

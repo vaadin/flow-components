@@ -48,8 +48,6 @@ import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.binder.HasValidator;
-import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
-import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderWrapper;
@@ -83,9 +81,9 @@ import elemental.json.JsonArray;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-checkbox-group")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha11")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/checkbox-group", version = "24.2.0-alpha11")
+@NpmPackage(value = "@vaadin/checkbox-group", version = "24.3.0-alpha8")
 @JsModule("@vaadin/checkbox-group/src/vaadin-checkbox-group.js")
 public class CheckboxGroup<T>
         extends AbstractSinglePropertyField<CheckboxGroup<T>, Set<T>>
@@ -131,8 +129,6 @@ public class CheckboxGroup<T>
                 CheckboxGroup::modelToPresentation);
 
         addValueChangeListener(e -> validate());
-
-        addClientValidatedEventListener(e -> validate());
     }
 
     /**
@@ -805,13 +801,5 @@ public class CheckboxGroup<T>
 
             setInvalid(isInvalid);
         }
-    }
-
-    @Override
-    public Registration addValidationStatusChangeListener(
-            ValidationStatusChangeListener<Set<T>> listener) {
-        return addClientValidatedEventListener(
-                event -> listener.validationStatusChanged(
-                        new ValidationStatusChangeEvent<>(this, !isInvalid())));
     }
 }

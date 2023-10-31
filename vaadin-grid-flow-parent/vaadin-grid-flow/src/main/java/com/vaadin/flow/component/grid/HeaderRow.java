@@ -73,6 +73,16 @@ public class HeaderRow extends AbstractRow<HeaderCell> {
             getColumn().setHeaderComponent(component);
         }
 
+        @Override
+        public void setPartName(String partName) {
+            getColumn().setHeaderPartName(partName);
+        }
+
+        @Override
+        public String getPartName() {
+            return getColumn().getHeaderPartName();
+        }
+
     }
 
     /**

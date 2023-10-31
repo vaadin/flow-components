@@ -4,11 +4,12 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-side-nav-flow-parent</artifactId>
-        <version>24.2-SNAPSHOT</version>
+        <version>24.3-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-side-nav-flow-integration-tests</artifactId>
     <packaging>war</packaging>
     <name>Vaadin Side Nav Integration Tests</name>
+    <description>Vaadin Side Nav Integration Tests</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -62,7 +63,6 @@
             <artifactId>flow-lit-template</artifactId>
         </dependency>
     </dependencies>
-
     <build>
         <plugins>
             <plugin>
@@ -106,12 +106,11 @@
             <plugin>
                 <artifactId>maven-install-plugin</artifactId>
                 <configuration>
-                        <skip>true</skip>
+                    <skip>true</skip>
                 </configuration>
-        </plugin>
+            </plugin>
         </plugins>
     </build>
-
     <profiles>
         <profile>
             <id>build-frontend</id>

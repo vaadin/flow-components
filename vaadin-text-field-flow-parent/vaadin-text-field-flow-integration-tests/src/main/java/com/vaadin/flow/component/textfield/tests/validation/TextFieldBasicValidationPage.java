@@ -49,7 +49,14 @@ public class TextFieldBasicValidationPage
         }));
     }
 
+    @Override
     protected TextField createTestField() {
-        return new TextField();
+        return new TextField() {
+            @Override
+            protected void validate() {
+                super.validate();
+                incrementServerValidationCounter();
+            }
+        };
     }
 }

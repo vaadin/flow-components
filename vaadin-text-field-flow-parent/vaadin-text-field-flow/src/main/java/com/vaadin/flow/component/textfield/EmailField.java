@@ -44,9 +44,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-email-field")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha11")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/email-field", version = "24.2.0-alpha11")
+@NpmPackage(value = "@vaadin/email-field", version = "24.3.0-alpha8")
 @JsModule("@vaadin/email-field/src/vaadin-email-field.js")
 public class EmailField extends TextFieldBase<EmailField, String>
         implements HasAllowedCharPattern, HasThemeVariant<TextFieldVariant> {
@@ -69,8 +69,6 @@ public class EmailField extends TextFieldBase<EmailField, String>
         setValueChangeMode(ValueChangeMode.ON_CHANGE);
 
         addValueChangeListener(e -> validate());
-
-        addClientValidatedEventListener(e -> validate());
     }
 
     /**
@@ -291,15 +289,6 @@ public class EmailField extends TextFieldBase<EmailField, String>
     @Override
     public Validator<String> getDefaultValidator() {
         return (value, context) -> getValidationSupport().checkValidity(value);
-    }
-
-    @Override
-    public Registration addValidationStatusChangeListener(
-            ValidationStatusChangeListener<String> listener) {
-        return addClientValidatedEventListener(
-                event -> listener.validationStatusChanged(
-                        new ValidationStatusChangeEvent<String>(this,
-                                !isInvalid())));
     }
 
     @Override

@@ -19,7 +19,13 @@ public class BasicValidationPage
 
     @Override
     protected Select<String> createTestField() {
-        Select<String> select = new Select<>();
+        Select<String> select = new Select<>() {
+            @Override
+            protected void validate() {
+                super.validate();
+                incrementServerValidationCounter();
+            }
+        };
         select.setItems(List.of("foo", "bar", "baz"));
         select.setEmptySelectionAllowed(true);
 

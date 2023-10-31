@@ -30,8 +30,13 @@ public abstract class AbstractValidationPage<T extends Component & HasValidation
     public static final String SERVER_VALIDITY_STATE = "server-validity-state";
     public static final String SERVER_VALIDITY_STATE_BUTTON = "server-validity-state-button";
 
+    public static final String SERVER_VALIDATION_COUNTER = "server-validation-counter";
+    public static final String SERVER_VALIDATION_COUNTER_RESET_BUTTON = "server-validation-counter-reset-button";
+
     public static final String ATTACH_FIELD_BUTTON = "attach-field-button";
     public static final String DETACH_FIELD_BUTTON = "detach-field-button";
+
+    private Div serverValidationCounter;
 
     protected T testField;
 
@@ -40,6 +45,7 @@ public abstract class AbstractValidationPage<T extends Component & HasValidation
         add(testField);
 
         addServerValidityStateControls();
+        addServerValidationCounter();
         addAttachDetachControls();
     }
 
@@ -55,6 +61,25 @@ public abstract class AbstractValidationPage<T extends Component & HasValidation
                 });
 
         add(new Div(validityState, validityStateButton));
+    }
+
+    private void addServerValidationCounter() {
+        serverValidationCounter = new Div();
+        serverValidationCounter.setId(SERVER_VALIDATION_COUNTER);
+        serverValidationCounter.setText("0");
+
+        NativeButton serverValidationCounterResetButton = createButton(
+                SERVER_VALIDATION_COUNTER_RESET_BUTTON,
+                "Reset server validation counter",
+                event -> serverValidationCounter.setText("0"));
+
+        add(new Div(serverValidationCounter,
+                serverValidationCounterResetButton));
+    }
+
+    protected void incrementServerValidationCounter() {
+        int count = Integer.parseInt(serverValidationCounter.getText());
+        serverValidationCounter.setText(String.valueOf(count + 1));
     }
 
     private void addAttachDetachControls() {

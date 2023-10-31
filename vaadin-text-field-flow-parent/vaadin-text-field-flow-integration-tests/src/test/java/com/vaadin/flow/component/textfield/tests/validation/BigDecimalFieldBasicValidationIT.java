@@ -37,6 +37,7 @@ public class BigDecimalFieldBasicValidationIT
     @Test
     public void triggerBlur_assertValidity() {
         testField.sendKeys(Keys.TAB);
+        assertValidationCount(0);
         assertServerValid();
         assertClientValid();
     }
@@ -46,8 +47,9 @@ public class BigDecimalFieldBasicValidationIT
         $("button").id(REQUIRED_BUTTON).click();
 
         testField.sendKeys(Keys.TAB);
-        assertServerInvalid();
-        assertClientInvalid();
+        assertValidationCount(0);
+        assertServerValid();
+        assertClientValid();
     }
 
     @Test
@@ -55,36 +57,59 @@ public class BigDecimalFieldBasicValidationIT
         $("button").id(REQUIRED_BUTTON).click();
 
         testField.setValue("1234");
+        assertValidationCount(1);
         assertServerValid();
         assertClientValid();
 
         testField.setValue("");
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
     }
 
     @Test
     public void badInput_changeValue_assertValidity() {
-        testField.sendKeys("--2", Keys.TAB);
+        testField.sendKeys("--2", Keys.ENTER);
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
 
         testField.setValue("2");
+        assertValidationCount(1);
         assertServerValid();
         assertClientValid();
 
-        testField.sendKeys("--2", Keys.TAB);
+        testField.sendKeys("--2", Keys.ENTER);
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
+
+        testField.setValue("");
+        assertValidationCount(1);
+        assertServerValid();
+        assertClientValid();
+    }
+
+    @Test
+    public void setValue_clearValue_assertValidity() {
+        testField.setValue("2");
+        assertServerValid();
+        assertClientValid();
+
+        $("button").id(CLEAR_VALUE_BUTTON).click();
+        assertServerValid();
+        assertClientValid();
     }
 
     @Test
     public void badInput_setValue_clearValue_assertValidity() {
-        testField.sendKeys("--2", Keys.TAB);
+        testField.sendKeys("--2", Keys.ENTER);
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
 
         $("button").id(CLEAR_VALUE_BUTTON).click();
+        assertValidationCount(1);
         assertServerValid();
         assertClientValid();
     }
@@ -93,7 +118,8 @@ public class BigDecimalFieldBasicValidationIT
     public void detach_attach_preservesInvalidState() {
         // Make field invalid
         $("button").id(REQUIRED_BUTTON).click();
-        testField.sendKeys(Keys.TAB);
+        testField.setValue("1234");
+        testField.setValue("");
 
         detachAndReattachField();
 
@@ -114,13 +140,15 @@ public class BigDecimalFieldBasicValidationIT
     public void clientSideInvalidStateIsNotPropagatedToServer() {
         // Make the field invalid
         $("button").id(REQUIRED_BUTTON).click();
-        testField.sendKeys(Keys.TAB);
+        testField.setValue("1234");
+        testField.setValue("");
 
         executeScript("arguments[0].invalid = false", testField);
 
         assertServerInvalid();
     }
 
+    @Override
     protected BigDecimalFieldElement getTestField() {
         return $(BigDecimalFieldElement.class).first();
     }

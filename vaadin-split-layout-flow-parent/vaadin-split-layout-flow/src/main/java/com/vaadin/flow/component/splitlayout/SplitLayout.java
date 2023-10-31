@@ -43,9 +43,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-split-layout")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha11")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/split-layout", version = "24.2.0-alpha11")
+@NpmPackage(value = "@vaadin/split-layout", version = "24.3.0-alpha8")
 @JsModule("@vaadin/split-layout/src/vaadin-split-layout.js")
 public class SplitLayout extends Component
         implements ClickNotifier<SplitLayout>, HasSize, HasStyle,
@@ -67,12 +67,23 @@ public class SplitLayout extends Component
      * Constructs an empty SplitLayout.
      */
     public SplitLayout() {
-        setOrientation(Orientation.HORIZONTAL);
+        this(Orientation.HORIZONTAL);
+    }
+
+    /**
+     * Constructs a SplitLayout with the orientation.
+     *
+     * @param orientation
+     *            the orientation set to the layout
+     */
+    public SplitLayout(Orientation orientation) {
+        setOrientation(orientation);
         addAttachListener(
                 e -> this.requestStylesUpdatesForSplitterPosition(e.getUI()));
         addSplitterDragendListener(
                 e -> this.splitterPosition = calcNewSplitterPosition(
-                        e.primaryComponentWidth, e.secondaryComponentWidth));
+                        e.primaryComponentFlexBasis,
+                        e.secondaryComponentFlexBasis));
     }
 
     /**
@@ -86,21 +97,7 @@ public class SplitLayout extends Component
      */
     public SplitLayout(Component primaryComponent,
             Component secondaryComponent) {
-        this();
-        addToPrimary(primaryComponent);
-        addToSecondary(secondaryComponent);
-    }
-
-    /**
-     * Constructs a SplitLayout with the orientation.
-     *
-     * @param orientation
-     *            the orientation set to the layout
-     */
-    public SplitLayout(Orientation orientation) {
-        setOrientation(orientation);
-        addAttachListener(
-                e -> this.requestStylesUpdatesForSplitterPosition(e.getUI()));
+        this(primaryComponent, secondaryComponent, Orientation.HORIZONTAL);
     }
 
     /**
@@ -116,8 +113,9 @@ public class SplitLayout extends Component
      */
     public SplitLayout(Component primaryComponent, Component secondaryComponent,
             Orientation orientation) {
-        this(primaryComponent, secondaryComponent);
-        setOrientation(orientation);
+        this(orientation);
+        addToPrimary(primaryComponent);
+        addToSecondary(secondaryComponent);
     }
 
     /**
@@ -340,18 +338,18 @@ public class SplitLayout extends Component
     public static class SplitterDragendEvent
             extends ComponentEvent<SplitLayout> {
 
-        private static final String PRIMARY_FLEX_BASIS = "element.querySelector('[slot=\"primary\"]').style.flexBasis";
-        private static final String SECONDARY_FLEX_BASIS = "element.querySelector('[slot=\"secondary\"]').style.flexBasis";
+        private static final String PRIMARY_FLEX_BASIS = "element.querySelector(':scope > [slot=\"primary\"]').style.flexBasis";
+        private static final String SECONDARY_FLEX_BASIS = "element.querySelector(':scope > [slot=\"secondary\"]').style.flexBasis";
 
-        String primaryComponentWidth;
-        String secondaryComponentWidth;
+        String primaryComponentFlexBasis;
+        String secondaryComponentFlexBasis;
 
         public SplitterDragendEvent(SplitLayout source, boolean fromClient,
-                @EventData(PRIMARY_FLEX_BASIS) String primaryComponentWidth,
-                @EventData(SECONDARY_FLEX_BASIS) String secondaryComponentWidth) {
+                @EventData(PRIMARY_FLEX_BASIS) String primaryComponentFlexBasis,
+                @EventData(SECONDARY_FLEX_BASIS) String secondaryComponentFlexBasis) {
             super(source, fromClient);
-            this.primaryComponentWidth = primaryComponentWidth;
-            this.secondaryComponentWidth = secondaryComponentWidth;
+            this.primaryComponentFlexBasis = primaryComponentFlexBasis;
+            this.secondaryComponentFlexBasis = secondaryComponentFlexBasis;
         }
 
     }
@@ -383,31 +381,33 @@ public class SplitLayout extends Component
         }
     }
 
-    private Double calcNewSplitterPosition(String primaryWidth,
-            String secondaryWidth) {
+    private Double calcNewSplitterPosition(String primaryFlexBasis,
+            String secondaryFlexBasis) {
         // set current splitter position value
         Double splitterPositionValue = this.splitterPosition;
 
-        if (primaryWidth == null || secondaryWidth == null) {
+        if (primaryFlexBasis == null || secondaryFlexBasis == null) {
             return splitterPositionValue;
         }
 
-        if (primaryWidth.endsWith("px")) {
+        if (primaryFlexBasis.endsWith("px")) {
             // When moving the splitter, the client side sets pixel values.
-            double pWidth = Double.parseDouble(primaryWidth.replace("px", ""));
-            double sWidth = Double
-                    .parseDouble(secondaryWidth.replace("px", ""));
+            double pFlexBasis = Double
+                    .parseDouble(primaryFlexBasis.replace("px", ""));
+            double sFlexBasis = Double
+                    .parseDouble(secondaryFlexBasis.replace("px", ""));
 
-            splitterPositionValue = (pWidth * 100) / (pWidth + sWidth);
+            splitterPositionValue = (pFlexBasis * 100)
+                    / (pFlexBasis + sFlexBasis);
             splitterPositionValue = round(splitterPositionValue);
-        } else if (primaryWidth.endsWith("%")) {
+        } else if (primaryFlexBasis.endsWith("%")) {
             splitterPositionValue = Double
-                    .parseDouble(primaryWidth.replace("%", ""));
+                    .parseDouble(primaryFlexBasis.replace("%", ""));
             splitterPositionValue = round(splitterPositionValue);
         } else {
             throw new IllegalArgumentException(
-                    "Given width values are not supported: " + primaryWidth
-                            + " / " + secondaryWidth);
+                    "Given flex basis values are not supported: "
+                            + primaryFlexBasis + " / " + secondaryFlexBasis);
         }
 
         return splitterPositionValue;
