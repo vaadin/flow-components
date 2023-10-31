@@ -127,9 +127,9 @@ public class DatePicker
 
         @Override
         public ValidationResult apply(LocalDate value, ValueContext context) {
-            DatePicker datePicker = (DatePicker) context.getComponent().get();
-            boolean isInvalid = datePicker.valueEquals(value, datePicker.getEmptyValue())
-                    && datePicker.isInputValuePresent();
+            DatePicker component = (DatePicker) context.getComponent().get();
+            boolean isInvalid = component.valueEquals(value, component.getEmptyValue())
+                    && component.isInputValuePresent();
             return toResult(value, !isInvalid);
         }
     }

@@ -27,6 +27,8 @@ import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
 import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.binder.Validator;
+import com.vaadin.flow.data.binder.ValueContext;
+import com.vaadin.flow.data.validator.AbstractValidator;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.shared.Registration;
@@ -58,6 +60,20 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     private boolean manualValidationEnabled = false;
 
     private final CopyOnWriteArrayList<ValidationStatusChangeListener<T>> validationStatusChangeListeners = new CopyOnWriteArrayList<>();
+
+    public static class BadInputValidator<T extends Number> extends AbstractValidator<T> {
+        public BadInputValidator(String errorMessage) {
+            super(errorMessage);
+        }
+
+        @Override
+        public ValidationResult apply(T value, ValueContext context) {
+            AbstractNumberField component = (AbstractNumberField) context.getComponent().get();
+            boolean isInvalid = component.valueEquals(value, component.getEmptyValue())
+                    && component.isInputValuePresent();
+            return toResult(value, !isInvalid);
+        }
+    }
 
     /**
      * Sets up the common logic for number fields.
