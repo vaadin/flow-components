@@ -668,19 +668,17 @@ public class Spreadsheet extends Component
         }
     }
 
-    protected void buildWorksheetAutoFilterTable(XSSFSheet sheet, CTAutoFilter autoFilter) {
+    protected void buildWorksheetAutoFilterTable(XSSFSheet sheet,
+            CTAutoFilter autoFilter) {
         WorksheetAutoFilterTable sheetFilterTable = new WorksheetAutoFilterTable(
-                this,
-                sheet,
-                autoFilter,
+                this, sheet, autoFilter,
                 CellRangeAddress.valueOf(autoFilter.getRef()));
 
         registerTable(sheetFilterTable);
     }
 
     protected void buildFilterTable(XSSFTable table) {
-        SpreadsheetTable spreadsheetTable = new SpreadsheetFilterTable(
-                this,
+        SpreadsheetTable spreadsheetTable = new SpreadsheetFilterTable(this,
                 table.getXSSFSheet(),
                 CellRangeAddress.valueOf(table.getCTTable().getRef()));
 
@@ -4877,7 +4875,8 @@ public class Spreadsheet extends Component
      */
     public void registerTable(SpreadsheetTable table) {
         tables.add(table);
-        table.reload(); // initialize the popup buttons now if sheet, where the table is, is currently active
+        table.reload(); // initialize the popup buttons now if sheet, where the
+                        // table is, is currently active
         if (table instanceof SpreadsheetFilterTable) {
             updateAutofittedColumns((SpreadsheetFilterTable) table);
         }
