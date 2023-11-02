@@ -21,8 +21,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Stack;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import org.apache.poi.hssf.usermodel.HSSFClientAnchor;
 import org.apache.poi.hssf.usermodel.HSSFPatriarch;
 import org.apache.poi.hssf.usermodel.HSSFPicture;
@@ -60,10 +59,11 @@ import org.openxmlformats.schemas.drawingml.x2006.spreadsheetDrawing.CTTwoCellAn
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTAutoFilter;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTCol;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTCols;
-import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTFilterColumn;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTOutlinePr;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTSheetProtection;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTWorksheet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.spreadsheet.client.MergedRegion;
 import com.vaadin.flow.component.spreadsheet.shared.GroupingData;
@@ -390,7 +390,6 @@ public class SpreadsheetFactory implements Serializable {
             setDefaultColumnWidth(spreadsheet, sheet);
             calculateSheetSizes(spreadsheet, sheet);
             loadSheetOverlays(spreadsheet);
-            loadSheetTables(spreadsheet);
             loadMergedRegions(spreadsheet);
             loadFreezePane(spreadsheet);
             loadGrouping(spreadsheet);
@@ -443,45 +442,39 @@ public class SpreadsheetFactory implements Serializable {
     }
 
     /**
-     * Load the sheet filter and tables in the given sheet
+     * Registers all the sheet filters and tables in the given workbook
      *
      * @param spreadsheet
      *            Target Spreadsheet
      */
-    private static void loadSheetTables(Spreadsheet spreadsheet) {
-        if (spreadsheet.getActiveSheet() instanceof HSSFSheet)
-            return;
+    static void loadWorkbookTables(Spreadsheet spreadsheet) {
+        var numOfSheets = spreadsheet.getWorkbook().getNumberOfSheets();
+        for (int i = 0; i < numOfSheets; i++) {
+            var sheet = spreadsheet.getWorkbook().getSheetAt(i);
+            if (sheet instanceof HSSFSheet)
+                continue;
 
-        XSSFSheet sheet = (XSSFSheet) spreadsheet.getActiveSheet();
-        CTAutoFilter autoFilter = sheet.getCTWorksheet().getAutoFilter();
-
-        if (autoFilter != null) {
-            SpreadsheetTable sheetFilterTable = new SpreadsheetFilterTable(
-                    spreadsheet, CellRangeAddress.valueOf(autoFilter.getRef()));
-
-            spreadsheet.registerTable(sheetFilterTable);
-
-            markActiveButtons(sheetFilterTable, autoFilter);
-        }
-
-        for (XSSFTable table : sheet.getTables()) {
-            SpreadsheetTable spreadsheetTable = new SpreadsheetFilterTable(
-                    spreadsheet,
-                    CellRangeAddress.valueOf(table.getCTTable().getRef()));
-
-            spreadsheet.registerTable(spreadsheetTable);
+            loadSheetTables(spreadsheet, (XSSFSheet) sheet);
         }
     }
 
-    private static void markActiveButtons(SpreadsheetTable sheetFilterTable,
-            CTAutoFilter autoFilter) {
+    /**
+     * Load the sheet filter and tables in the given sheet
+     *
+     * @param spreadsheet
+     *            Target Spreadsheet
+     * @param sheet
+     *            Target sheet
+     */
+    private static void loadSheetTables(Spreadsheet spreadsheet,
+            XSSFSheet sheet) {
+        CTAutoFilter ctAutoFilter = sheet.getCTWorksheet().getAutoFilter();
+        if (ctAutoFilter != null) {
+            spreadsheet.buildWorksheetAutoFilterTable(sheet, ctAutoFilter);
+        }
 
-        final int offset = sheetFilterTable.getFullTableRegion()
-                .getFirstColumn();
-
-        for (CTFilterColumn column : autoFilter.getFilterColumnList()) {
-            final int colId = offset + (int) column.getColId();
-            sheetFilterTable.getPopupButton(colId).markActive(true);
+        for (XSSFTable xssfTable : sheet.getTables()) {
+            spreadsheet.buildFilterTable(xssfTable);
         }
     }
 

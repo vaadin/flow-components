@@ -81,11 +81,6 @@ public class SpreadsheetFilterTable extends SpreadsheetTable {
                 fullTableRegion.getFirstRow() + 1, fullTableRegion.getLastRow(),
                 fullTableRegion.getFirstColumn(),
                 fullTableRegion.getLastColumn());
-
-        if (isTableSheetCurrentlyActive()) {
-            initFilters();
-            initClearAllButtons();
-        }
     }
 
     /**

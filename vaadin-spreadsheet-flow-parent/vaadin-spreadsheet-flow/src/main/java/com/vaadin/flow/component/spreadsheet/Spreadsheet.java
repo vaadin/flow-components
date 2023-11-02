@@ -8,6 +8,8 @@
  */
 package com.vaadin.flow.component.spreadsheet;
 
+import static com.vaadin.flow.component.spreadsheet.SpreadsheetFactory.loadWorkbookTables;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -26,22 +28,21 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 import java.util.WeakHashMap;
 
-import com.vaadin.flow.component.charts.Chart;
-import com.vaadin.flow.component.dependency.Uses;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.formula.BaseFormulaEvaluator;
 import org.apache.poi.ss.formula.ConditionalFormattingEvaluator;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.ClientAnchor.AnchorType;
 import org.apache.poi.ss.usermodel.Comment;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
@@ -50,7 +51,6 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.SheetVisibility;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.ClientAnchor.AnchorType;
 import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellRangeUtil;
@@ -62,8 +62,10 @@ import org.apache.poi.xssf.usermodel.XSSFClientAnchor;
 import org.apache.poi.xssf.usermodel.XSSFHyperlink;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFTable;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.xmlbeans.impl.values.XmlValueDisconnectedException;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTAutoFilter;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTCol;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTCols;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTWorksheet;
@@ -79,7 +81,9 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.spreadsheet.SheetOverlayWrapper.OverlayChangeListener;
 import com.vaadin.flow.component.spreadsheet.action.SpreadsheetDefaultActionHandler;
 import com.vaadin.flow.component.spreadsheet.client.CellData;
@@ -662,6 +666,25 @@ public class Spreadsheet extends Component
         if (popup != null) {
             popup.closePopup();
         }
+    }
+
+    protected void buildWorksheetAutoFilterTable(XSSFSheet sheet, CTAutoFilter autoFilter) {
+        WorksheetAutoFilterTable sheetFilterTable = new WorksheetAutoFilterTable(
+                this,
+                sheet,
+                autoFilter,
+                CellRangeAddress.valueOf(autoFilter.getRef()));
+
+        registerTable(sheetFilterTable);
+    }
+
+    protected void buildFilterTable(XSSFTable table) {
+        SpreadsheetTable spreadsheetTable = new SpreadsheetFilterTable(
+                this,
+                table.getXSSFSheet(),
+                CellRangeAddress.valueOf(table.getCTTable().getRef()));
+
+        registerTable(spreadsheetTable);
     }
 
     /*
@@ -3572,8 +3595,7 @@ public class Spreadsheet extends Component
         } else if (workbook instanceof XSSFWorkbook) {
             setWorkbookProtected(((XSSFWorkbook) workbook).isStructureLocked());
         }
-        // clear all tables from memory
-        tables.clear();
+        reloadTablesFromWorkbook();
 
         setVerticalScrollPositions(new int[getSheetNames().length]);
         setHorizontalScrollPositions(new int[getSheetNames().length]);
@@ -3581,6 +3603,11 @@ public class Spreadsheet extends Component
         conditionalFormatter = createConditionalFormatter();
 
         setWorkbookChangeToggle(!isWorkbookChangeToggle());
+    }
+
+    protected void reloadTablesFromWorkbook() {
+        tables.clear();
+        loadWorkbookTables(this);
     }
 
     /**
@@ -4850,6 +4877,7 @@ public class Spreadsheet extends Component
      */
     public void registerTable(SpreadsheetTable table) {
         tables.add(table);
+        table.reload(); // initialize the popup buttons now if sheet, where the table is, is currently active
         if (table instanceof SpreadsheetFilterTable) {
             updateAutofittedColumns((SpreadsheetFilterTable) table);
         }

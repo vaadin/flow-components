@@ -68,10 +68,6 @@ public class SpreadsheetTable implements Serializable {
         this.sheet = sheet;
         this.fullTableRegion = fullTableRegion;
         popupButtons = new HashMap<CellReference, PopupButton>();
-
-        if (isTableSheetCurrentlyActive()) {
-            initPopupButtons();
-        }
     }
 
     /**
@@ -119,7 +115,7 @@ public class SpreadsheetTable implements Serializable {
      * Initializes the pop-up buttons of this table.
      */
     protected void initPopupButtons() {
-        if (sheet.equals(spreadsheet.getActiveSheet())) {
+        if (isTableSheetCurrentlyActive()) {
             for (int c = fullTableRegion.getFirstColumn(); c <= fullTableRegion
                     .getLastColumn(); c++) {
                 CellReference popupButtonCellReference = new CellReference(

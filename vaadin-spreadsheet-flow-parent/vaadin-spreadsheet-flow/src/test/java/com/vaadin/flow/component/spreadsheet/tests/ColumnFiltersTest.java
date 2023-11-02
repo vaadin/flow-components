@@ -1,5 +1,6 @@
 package com.vaadin.flow.component.spreadsheet.tests;
 
+import java.util.HashSet;
 import java.util.Iterator;
 
 import org.apache.poi.ss.usermodel.Row;
@@ -95,4 +96,31 @@ public class ColumnFiltersTest {
         Assert.assertFalse(table.getPopupButton(2).isActive());
     }
 
+    @Test
+    public void loadFile_switchSheets_tablesRegisteredOnce() {
+        Spreadsheet spreadsheet = TestHelper
+                .createSpreadsheet("tables_on_multiple_sheets.xlsx");
+
+        // Go to Sheet2 and back to Sheet1
+        spreadsheet.setActiveSheetIndex(1);
+        spreadsheet.setActiveSheetIndex(0);
+
+        Assert.assertEquals(2, spreadsheet.getTables().size()); // just 2 tables, one table per sheet
+    }
+
+    @Test
+    public void loadFile_deleteTables_switchSheets_tablesStillDeleted() {
+        Spreadsheet spreadsheet = TestHelper
+                .createSpreadsheet("tables_on_multiple_sheets.xlsx");
+
+        // delete all tables
+        var tables = new HashSet<>(spreadsheet.getTables());
+        tables.forEach(spreadsheet::deleteTable);
+
+        // Go to Sheet2 and back to Sheet1
+        spreadsheet.setActiveSheetIndex(1);
+        spreadsheet.setActiveSheetIndex(0);
+
+        Assert.assertTrue( spreadsheet.getTables().isEmpty()); // still no tables
+    }
 }
