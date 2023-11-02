@@ -271,15 +271,17 @@ public class Button extends Component
     }
 
     /**
-     * Simulates a click on this button on the server side. Calling this method
-     * executes all registered click listeners on the server side, but does not
-     * execute possible client side registered listeners.
+     * Simulates a click on this button on the server side if it is enabled.
+     * Calling this method executes all registered click listeners on the server
+     * side, but does not execute possible client side registered listeners.
      *
      * @see #clickInClient()
      */
     public void click() {
-        fireEvent(new ClickEvent<>(this, false, 0, 0, 0, 0, 0, 0, false, false,
-                false, false));
+        if (isEnabled()) {
+            fireEvent(new ClickEvent<>(this, false, 0, 0, 0, 0, 0, 0, false,
+                    false, false, false));
+        }
     }
 
     /**
