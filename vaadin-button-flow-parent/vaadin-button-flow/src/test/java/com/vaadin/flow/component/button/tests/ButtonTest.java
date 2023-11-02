@@ -232,6 +232,20 @@ public class ButtonTest {
     }
 
     @Test
+    public void testFireClickDisabled() {
+        button = new Button();
+        button.setEnabled(false);
+        AtomicBoolean clicked = new AtomicBoolean(false);
+        button.addClickListener(e -> {
+            clicked.set(true);
+        });
+
+        Assert.assertFalse(clicked.get());
+        button.click();
+        Assert.assertFalse(clicked.get());
+    }
+
+    @Test
     public void addThemeVariant_themeNamesContainsThemeVariant() {
         button = new Button();
         button.addThemeVariants(ButtonVariant.LUMO_SMALL);
@@ -289,7 +303,7 @@ public class ButtonTest {
     }
 
     @Test
-    public void disableOnClick_click_disablesComponent() {
+    public void disableOnClick_click_componentIsDisabled() {
         AtomicBoolean buttonIsEnabled = new AtomicBoolean(true);
 
         button = new Button("foo",
@@ -300,29 +314,19 @@ public class ButtonTest {
         Assert.assertFalse(
                 "Button should have been disabled when event has been fired",
                 buttonIsEnabled.get());
-    }
-
-    @Test
-    public void disableOnClick_serverRevertsDisabled_stateChangesAdded() {
-        button = new Button();
-        button.setDisableOnClick(true);
-
-        button.click();
 
         StateNode node = button.getElement().getNode();
         HashMap<String, Serializable> changeTracker = node.getChangeTracker(
                 node.getFeature(ElementAttributeMap.class), () -> null);
-        Assert.assertEquals(
-                "Change should have been set for disabled attribute", "true",
+        Assert.assertEquals("Disabled attribute should be set to true", "true",
                 changeTracker.get("disabled"));
-        Assert.assertFalse("Button should be disabled", button.isEnabled());
+    }
 
-        changeTracker.clear();
-
-        button.addClickListener(event -> event.getSource().setEnabled(true));
-
+    @Test
+    public void disableOnClick_clickRevertsDisabled_componentIsEnabled() {
+        button = new Button("foo", event -> event.getSource().setEnabled(true));
+        button.setDisableOnClick(true);
         button.click();
-
         Assert.assertTrue("Button should be enabled", button.isEnabled());
     }
 
