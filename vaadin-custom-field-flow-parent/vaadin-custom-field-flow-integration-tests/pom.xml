@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-custom-field-flow-parent</artifactId>
-        <version>23.3-SNAPSHOT</version>
+        <version>23.4-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-custom-field-integration-tests</artifactId>
     <packaging>war</packaging>
