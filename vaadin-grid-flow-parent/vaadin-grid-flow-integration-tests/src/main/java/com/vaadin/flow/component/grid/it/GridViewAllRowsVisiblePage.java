@@ -15,16 +15,24 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import java.util.List;
-
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.data.bean.PeopleGenerator;
 import com.vaadin.flow.data.bean.Person;
 import com.vaadin.flow.router.Route;
 
-@Route("vaadin-grid-it-demo/all-rows-visible")
-public class GridViewAllRowsVisiblePage extends LegacyTestView {
+import java.util.List;
 
+/**
+ * Simple test view with all rows set to visible.
+ */
+@Route("vaadin-grid-it-demo/all-rows-visible")
+public class GridViewAllRowsVisiblePage extends Div {
+
+    /**
+     * Sets up the test view.
+     */
     public GridViewAllRowsVisiblePage() {
         Grid<Person> grid = new Grid<>();
 
@@ -32,7 +40,7 @@ public class GridViewAllRowsVisiblePage extends LegacyTestView {
         // Grid uses all the space needed to render everything.
         grid.setAllRowsVisible(true);
 
-        List<Person> people = createItems(50);
+        List<Person> people = new PeopleGenerator().generatePeople(50);
         grid.setItems(people);
 
         grid.addColumn(Person::getFirstName).setHeader("Name");
