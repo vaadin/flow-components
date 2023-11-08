@@ -110,7 +110,7 @@ public class Tooltip implements Serializable {
     }
 
     /**
-     * Creates a tooltip to the given {@code Component}.
+     * Creates a tooltip to the given {@code Component} if one hasn't already been created.
      *
      * @param component
      *            the component to attach the tooltip to
