@@ -45,6 +45,9 @@ public class GridMultiSelectionColumnPageIT extends AbstractComponentIT {
         Assert.assertNull(
                 "in-memory grid selectAllCheckbox should be visible by default",
                 selectAllCheckbox.getAttribute("hidden"));
+        Assert.assertNotNull(
+                "selectAllCheckbox should have focus-target attribute",
+                selectAllCheckbox.getAttribute("focus-target"));
     }
 
     @Test

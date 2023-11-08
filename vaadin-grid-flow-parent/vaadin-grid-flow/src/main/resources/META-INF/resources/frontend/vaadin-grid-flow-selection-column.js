@@ -12,8 +12,15 @@ import { GridColumnElement } from '@vaadin/vaadin-grid/src/vaadin-grid-column.js
           font-size: var(--lumo-font-size-m);
         }
       </style>
-      <vaadin-checkbox id="selectAllCheckbox" aria-label="Select All" hidden\$="[[selectAllHidden]]" on-click="_onSelectAllClick" checked="[[selectAll]]" indeterminate="[[indeterminate]]">
-      </vaadin-checkbox>
+      <vaadin-checkbox
+        id="selectAllCheckbox"
+        aria-label="Select All"
+        hidden$="[[selectAllHidden]]"
+        on-click="_onSelectAllClick"
+        checked="[[selectAll]]"
+        indeterminate="[[indeterminate]]"
+        focus-target
+      ></vaadin-checkbox>
     </template>
     <template id="defaultBodyTemplate">
       <vaadin-checkbox aria-label="Select Row" checked="[[selected]]" on-click="_onSelectClick">
