@@ -117,7 +117,12 @@ public class Tooltip implements Serializable {
      * @return the tooltip handle
      */
     public static Tooltip forComponent(Component component) {
-        return forElement(component.getElement());
+        var tooltip = getForElement(component.getElement());
+        if (tooltip == null) {
+            tooltip = forElement(component.getElement());
+            ComponentUtil.setData(component, TOOLTIP_DATA_KEY, tooltip);
+        }
+        return tooltip;
     }
 
     /**
