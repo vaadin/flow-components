@@ -110,14 +110,19 @@ public class Tooltip implements Serializable {
     }
 
     /**
-     * Creates a tooltip to the given {@code Component}.
+     * Creates a tooltip to the given {@code Component} if one hasn't already been created.
      *
      * @param component
      *            the component to attach the tooltip to
      * @return the tooltip handle
      */
     public static Tooltip forComponent(Component component) {
-        return forElement(component.getElement());
+        var tooltip = getForElement(component.getElement());
+        if (tooltip == null) {
+            tooltip = forElement(component.getElement());
+            ComponentUtil.setData(component, TOOLTIP_DATA_KEY, tooltip);
+        }
+        return tooltip;
     }
 
     /**
