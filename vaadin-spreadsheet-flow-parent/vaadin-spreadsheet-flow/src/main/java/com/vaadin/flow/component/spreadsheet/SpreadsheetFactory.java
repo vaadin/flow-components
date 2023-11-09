@@ -455,9 +455,10 @@ public class SpreadsheetFactory implements Serializable {
         XSSFSheet sheet = (XSSFSheet) spreadsheet.getActiveSheet();
         CTAutoFilter autoFilter = sheet.getCTWorksheet().getAutoFilter();
 
-        if (autoFilter != null) {
+        if (autoFilter != null && !tableForCTAutoFilterAlreadyLoaded(spreadsheet, autoFilter)) {
             SpreadsheetTable sheetFilterTable = new SpreadsheetFilterTable(
                     spreadsheet, CellRangeAddress.valueOf(autoFilter.getRef()));
+            sheetFilterTable.setCtWorksheetAutoFilter(autoFilter);
 
             spreadsheet.registerTable(sheetFilterTable);
 
@@ -465,12 +466,23 @@ public class SpreadsheetFactory implements Serializable {
         }
 
         for (XSSFTable table : sheet.getTables()) {
-            SpreadsheetTable spreadsheetTable = new SpreadsheetFilterTable(
-                    spreadsheet,
-                    CellRangeAddress.valueOf(table.getCTTable().getRef()));
+            if (!tableForXSSFTableAlreadyLoaded(spreadsheet, table)) {
+                SpreadsheetTable spreadsheetTable = new SpreadsheetFilterTable(
+                        spreadsheet,
+                        CellRangeAddress.valueOf(table.getCTTable().getRef()));
+                spreadsheetTable.setXssfTable(table);
 
-            spreadsheet.registerTable(spreadsheetTable);
+                spreadsheet.registerTable(spreadsheetTable);
+            }
         }
+    }
+
+    private static boolean tableForXSSFTableAlreadyLoaded(Spreadsheet spreadsheet, XSSFTable table) {
+        return spreadsheet.getTables().stream().anyMatch( it -> it.getXssfTable() == table);
+    }
+
+    private static boolean tableForCTAutoFilterAlreadyLoaded(Spreadsheet spreadsheet, CTAutoFilter autoFilter) {
+        return spreadsheet.getTables().stream().anyMatch( it -> it.getCtWorksheetAutoFilter() == autoFilter);
     }
 
     private static void markActiveButtons(SpreadsheetTable sheetFilterTable,
