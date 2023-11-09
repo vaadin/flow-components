@@ -145,11 +145,12 @@ public class DragAndDropGridPage extends Div {
         multiSelectButton.setId("multiselect");
         add(multiSelectButton);
 
-        NativeButton removeOnItemClick = new NativeButton("remove on item click", e -> {
-                grid.addItemClickListener(event -> {
+        NativeButton removeOnItemClick = new NativeButton(
+                "remove on item click", e -> {
+                    grid.addItemClickListener(event -> {
                         grid.removeFromParent();
+                    });
                 });
-        });
         removeOnItemClick.setId("remove-on-item-click");
         add(removeOnItemClick);
     }
