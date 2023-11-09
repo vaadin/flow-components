@@ -119,7 +119,7 @@ import com.vaadin.flow.shared.Registration;
  * </p>
  */
 @Tag("vaadin-checkbox-group")
-@NpmPackage(value = "@vaadin/vaadin-checkbox", version = "2.5.1")
+@NpmPackage(value = "@vaadin/vaadin-checkbox", version = "2.5.2")
 @JsModule("@vaadin/vaadin-checkbox/src/vaadin-checkbox-group.js")
 @HtmlImport("frontend://bower_components/vaadin-checkbox/src/vaadin-checkbox-group.html")
 public abstract class GeneratedVaadinCheckboxGroup<R extends GeneratedVaadinCheckboxGroup<R, T>, T>
