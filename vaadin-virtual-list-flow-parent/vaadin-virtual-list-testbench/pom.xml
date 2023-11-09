@@ -4,7 +4,7 @@
     <parent>
         <artifactId>vaadin-virtual-list-flow-parent</artifactId>
         <groupId>com.vaadin</groupId>
-        <version>23.3-SNAPSHOT</version>
+        <version>23.4-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-virtual-list-testbench</artifactId>
     <packaging>jar</packaging>
