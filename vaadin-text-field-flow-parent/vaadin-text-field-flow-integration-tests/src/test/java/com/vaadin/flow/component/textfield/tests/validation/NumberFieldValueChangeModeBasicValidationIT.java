@@ -132,13 +132,13 @@ public class NumberFieldValueChangeModeBasicValidationIT
         startValidationTimeout();
         testField.sendKeys(Keys.BACK_SPACE, "-");
         assertValidationTimeout(VALUE_CHANGE_TIMEOUT);
-        assertValidationResults("invalid");
+        assertValidationResults("invalid", "invalid");
 
         // Entered:
         startValidationTimeout();
         testField.sendKeys(Keys.BACK_SPACE, Keys.BACK_SPACE);
         assertValidationTimeout(VALUE_CHANGE_TIMEOUT);
-        assertValidationResults("valid", "valid");
+        assertValidationResults("valid");
     }
 
     @Test
@@ -154,7 +154,7 @@ public class NumberFieldValueChangeModeBasicValidationIT
 
         // Entered:
         testField.sendKeys(Keys.BACK_SPACE);
-        assertValidationResults("valid");
+        assertValidationResults("valid", "valid");
 
         Thread.sleep(VALUE_CHANGE_TIMEOUT);
 
@@ -172,7 +172,7 @@ public class NumberFieldValueChangeModeBasicValidationIT
 
         // Entered: -
         testField.sendKeys(Keys.BACK_SPACE);
-        assertValidationResults("invalid");
+        assertValidationResults("invalid", "invalid");
 
         Thread.sleep(VALUE_CHANGE_TIMEOUT);
 
@@ -197,7 +197,7 @@ public class NumberFieldValueChangeModeBasicValidationIT
         // Entered:
         startValidationTimeout();
         testField.sendKeys(Keys.BACK_SPACE);
-        assertValidationResults("invalid");
+        assertValidationResults("invalid", "invalid");
         testField.sendKeys(Keys.BACK_SPACE);
         assertValidationTimeout(VALUE_CHANGE_TIMEOUT);
         assertValidationResults("valid");
@@ -221,7 +221,7 @@ public class NumberFieldValueChangeModeBasicValidationIT
         // Entered: --
         startValidationTimeout();
         testField.sendKeys(Keys.BACK_SPACE);
-        assertValidationResults("invalid");
+        assertValidationResults("invalid", "invalid");
         testField.sendKeys("-");
         assertValidationTimeout(VALUE_CHANGE_TIMEOUT);
         assertValidationResults("invalid");
