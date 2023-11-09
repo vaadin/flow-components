@@ -4234,11 +4234,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @see GridDropEvent#getDropLocation()
      */
     public void setDropMode(GridDropMode dropMode) {
-        // We need to add DnD mobile polyfill here by invoking
-        // DndUtil.addMobileDndPolyfillIfNeeded. But, since DndUtil is in a Flow
-        // internal package, DropTarget.create is called to invoke
-        // addMobileDndPolyfillIfNeeded indirectly.
-        DropTarget.create(this).setActive(false);
         getElement().setProperty("dropMode",
                 dropMode == null ? null : dropMode.getClientName());
     }
@@ -4264,11 +4259,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            {@code false} if not
      */
     public void setRowsDraggable(boolean rowsDraggable) {
-        // We need to add DnD mobile polyfill here by invoking
-        // DndUtil.addMobileDndPolyfillIfNeeded. But, since DndUtil is in a Flow
-        // internal package, DragSource.create is called to invoke
-        // addMobileDndPolyfillIfNeeded indirectly.
-        DragSource.create(this).setDraggable(false);
         getElement().setProperty("rowsDraggable", rowsDraggable);
     }
 
