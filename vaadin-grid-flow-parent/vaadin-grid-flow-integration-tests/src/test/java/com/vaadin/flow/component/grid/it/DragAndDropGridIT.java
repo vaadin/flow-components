@@ -209,6 +209,13 @@ public class DragAndDropGridIT extends AbstractComponentIT {
         assertMessages("", "", "");
     }
 
+    @Test
+    public void removeOnItemClick_noError() {
+        click("remove-on-item-click");
+        grid.getCell("0").click();
+        checkLogsForErrors();
+    }
+
     private void assertMessages(String expectedStartMessage,
             String expectedEndMessage, String expectedDropMessage) {
         Assert.assertEquals(expectedStartMessage,
