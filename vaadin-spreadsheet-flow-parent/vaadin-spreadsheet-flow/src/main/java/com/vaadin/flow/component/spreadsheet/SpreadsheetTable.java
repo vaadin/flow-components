@@ -36,8 +36,8 @@ public class SpreadsheetTable implements Serializable {
     private final Sheet sheet;
     private final Spreadsheet spreadsheet;
     protected final Map<CellReference, PopupButton> popupButtons;
-    private CTAutoFilter ctWorksheetAutoFilter;
-    private XSSFTable xssfTable;
+    private transient CTAutoFilter ctWorksheetAutoFilter;
+    private transient XSSFTable xssfTable;
 
     /**
      * Creates a new table for the given spreadsheet component, its active sheet
