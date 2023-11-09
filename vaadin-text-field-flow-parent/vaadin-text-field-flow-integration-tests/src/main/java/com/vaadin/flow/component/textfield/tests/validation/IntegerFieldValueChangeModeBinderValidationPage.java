@@ -19,11 +19,10 @@ import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
-import com.vaadin.tests.validation.AbstractValidationPage;
 
-@Route("vaadin-integer-field/validation/eager-binder")
-public class IntegerFieldEagerBinderValidationPage
-        extends AbstractValidationPage<IntegerField> {
+@Route("vaadin-integer-field/validation/value-change-mode/binder")
+public class IntegerFieldValueChangeModeBinderValidationPage
+        extends AbstractValueChangeModeValidationPage<IntegerField> {
     public static class Bean {
         private Integer property;
 
@@ -36,7 +35,7 @@ public class IntegerFieldEagerBinderValidationPage
         }
     }
 
-    public IntegerFieldEagerBinderValidationPage() {
+    public IntegerFieldValueChangeModeBinderValidationPage() {
         super();
 
         testField.setValueChangeMode(ValueChangeMode.EAGER);
@@ -44,10 +43,11 @@ public class IntegerFieldEagerBinderValidationPage
         Binder<Bean> binder = new Binder<>(Bean.class);
         binder.forField(testField).bind("property");
         binder.addStatusChangeListener(event -> {
-            incrementServerValidationCounter();
+            logValidationResult(binder.isValid());
         });
     }
 
+    @Override
     protected IntegerField createTestField() {
         return new IntegerField();
     }

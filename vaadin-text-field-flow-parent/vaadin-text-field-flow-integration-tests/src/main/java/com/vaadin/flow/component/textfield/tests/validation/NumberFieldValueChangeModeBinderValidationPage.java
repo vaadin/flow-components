@@ -19,19 +19,18 @@ import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
-import com.vaadin.tests.validation.AbstractValidationPage;
 
 @Route("vaadin-number-field/validation/value-change-mode/binder")
 public class NumberFieldValueChangeModeBinderValidationPage
-        extends AbstractValidationPage<NumberField> {
+        extends AbstractValueChangeModeValidationPage<NumberField> {
     public static class Bean {
-        private Double property;
+        private Number property;
 
-        public Double getProperty() {
+        public Number getProperty() {
             return property;
         }
 
-        public void setProperty(Double property) {
+        public void setProperty(Number property) {
             this.property = property;
         }
     }
@@ -44,7 +43,7 @@ public class NumberFieldValueChangeModeBinderValidationPage
         Binder<Bean> binder = new Binder<>(Bean.class);
         binder.forField(testField).bind("property");
         binder.addStatusChangeListener(event -> {
-            incrementServerValidationCounter();
+            logValidationResult(binder.isValid());
         });
     }
 

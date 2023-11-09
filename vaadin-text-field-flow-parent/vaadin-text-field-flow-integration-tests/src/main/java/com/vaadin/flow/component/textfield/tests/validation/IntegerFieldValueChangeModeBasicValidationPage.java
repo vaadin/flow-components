@@ -16,24 +16,18 @@
 package com.vaadin.flow.component.textfield.tests.validation;
 
 import com.vaadin.flow.component.textfield.IntegerField;
-import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
-import com.vaadin.tests.validation.AbstractValidationPage;
 
-@Route("vaadin-integer-field/validation/eager")
-public class IntegerFieldEagerValidationPage
-        extends AbstractValidationPage<IntegerField> {
-    public IntegerFieldEagerValidationPage() {
-        super();
-        testField.setValueChangeMode(ValueChangeMode.EAGER);
-    }
-
+@Route("vaadin-integer-field/validation/value-change-mode/basic")
+public class IntegerFieldValueChangeModeBasicValidationPage
+        extends AbstractValueChangeModeValidationPage<IntegerField> {
+    @Override
     protected IntegerField createTestField() {
         return new IntegerField() {
             @Override
             protected void validate() {
                 super.validate();
-                incrementServerValidationCounter();
+                logValidationResult(!isInvalid());
             }
         };
     }

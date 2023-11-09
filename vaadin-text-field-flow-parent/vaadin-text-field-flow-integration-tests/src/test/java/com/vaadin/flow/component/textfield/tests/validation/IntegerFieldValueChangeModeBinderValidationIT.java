@@ -18,17 +18,17 @@ package com.vaadin.flow.component.textfield.tests.validation;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
-import com.vaadin.flow.component.textfield.testbench.NumberFieldElement;
+import com.vaadin.flow.component.textfield.testbench.IntegerFieldElement;
 import com.vaadin.flow.testutil.TestPath;
 
-import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldValueChangeModeBinderValidationPage.VALUE_CHANGE_TIMEOUT;
-import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldValueChangeModeBinderValidationPage.SET_EAGER_MODE_BUTTON;
-import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldValueChangeModeBinderValidationPage.SET_LAZY_MODE_BUTTON;
-import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldValueChangeModeBinderValidationPage.SET_TIMEOUT_MODE_BUTTON;
+import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldValueChangeModeBinderValidationPage.VALUE_CHANGE_TIMEOUT;
+import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldValueChangeModeBinderValidationPage.SET_EAGER_MODE_BUTTON;
+import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldValueChangeModeBinderValidationPage.SET_LAZY_MODE_BUTTON;
+import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldValueChangeModeBinderValidationPage.SET_TIMEOUT_MODE_BUTTON;
 
-@TestPath("vaadin-number-field/validation/value-change-mode/binder")
-public class NumberFieldValueChangeModeBinderValidationIT
-        extends AbstractValueChangeModeValidationIT<NumberFieldElement> {
+@TestPath("vaadin-integer-field/validation/value-change-mode/binder")
+public class IntegerFieldValueChangeModeBinderValidationIT
+        extends AbstractValueChangeModeValidationIT<IntegerFieldElement> {
     @Test
     public void eagerMode_enterChars_assertValidity() {
         $("button").id(SET_EAGER_MODE_BUTTON).click();
@@ -235,7 +235,7 @@ public class NumberFieldValueChangeModeBinderValidationIT
     }
 
     @Override
-    protected NumberFieldElement getTestField() {
-        return $(NumberFieldElement.class).first();
+    protected IntegerFieldElement getTestField() {
+        return $(IntegerFieldElement.class).first();
     }
 }
