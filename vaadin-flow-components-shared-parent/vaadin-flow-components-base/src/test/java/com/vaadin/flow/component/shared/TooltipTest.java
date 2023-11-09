@@ -143,6 +143,13 @@ public class TooltipTest {
     }
 
     @Test
+    public void tooltipForCompopnentTwice_sameReference() {
+        var tooltip = Tooltip.forComponent(component);
+        var tooltip2 = Tooltip.forComponent(component);
+        Assert.assertSame(tooltip, tooltip2);
+    }
+
+    @Test
     public void createTooltip_fluentAPI() {
         ui.add(component);
 
