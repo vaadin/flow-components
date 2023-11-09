@@ -104,7 +104,8 @@ public class ColumnFiltersTest {
         spreadsheet.setActiveSheetIndex(1);
         spreadsheet.setActiveSheetIndex(0);
 
-        Assert.assertEquals(2, spreadsheet.getTables().size()); // just 2 tables, one table per sheet
+        // just 2 tables, one table per sheet
+        Assert.assertEquals(2, spreadsheet.getTables().size());
     }
 
 }

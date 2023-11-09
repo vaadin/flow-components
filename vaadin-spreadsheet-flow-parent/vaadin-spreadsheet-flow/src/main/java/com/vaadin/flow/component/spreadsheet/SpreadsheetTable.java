@@ -208,7 +208,7 @@ public class SpreadsheetTable implements Serializable {
     /**
      * Sets the CTAutoFilter object that represents this table in the underlying
      * POI model.
-     * 
+     *
      * @param ctWorksheetAutoFilter
      *            Referenced autofilter.
      */
@@ -228,7 +228,7 @@ public class SpreadsheetTable implements Serializable {
     /**
      * Sets the XSSFTable object that represents this table in the underlying
      * POI model.
-     * 
+     *
      * @param xssfTable
      *            Referenced table.
      */
