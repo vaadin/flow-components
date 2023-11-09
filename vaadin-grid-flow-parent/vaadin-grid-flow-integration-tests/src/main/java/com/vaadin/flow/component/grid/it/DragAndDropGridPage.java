@@ -148,7 +148,7 @@ public class DragAndDropGridPage extends Div {
         NativeButton removeOnItemClick = new NativeButton(
                 "remove on item click", e -> {
                     grid.addItemClickListener(event -> {
-                        grid.removeFromParent();
+                        remove(grid);
                     });
                 });
         removeOnItemClick.setId("remove-on-item-click");
