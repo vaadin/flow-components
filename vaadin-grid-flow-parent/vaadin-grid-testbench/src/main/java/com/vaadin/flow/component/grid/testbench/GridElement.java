@@ -202,7 +202,7 @@ public class GridElement extends TestBenchElement {
                 + "var firstRowIndex = arguments[1];"
                 + "var lastRowIndex = arguments[2];"
                 + "var rowsInDom = grid.$.items.children;"
-                + "return Array.from(rowsInDom).filter((row) => { return row.index >= firstRowIndex && row.index <= lastRowIndex;});";
+                + "return Array.from(rowsInDom).filter((row) => { return !row.hidden && row.index >= firstRowIndex && row.index <= lastRowIndex;});";
         Object rows = executeScript(script, this, firstRowIndex, lastRowIndex);
         if (rows != null) {
             return ((ArrayList<?>) rows).stream().map(
