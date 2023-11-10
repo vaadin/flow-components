@@ -14,6 +14,9 @@
         <module>vaadin-menu-bar-flow</module>
         <module>vaadin-menu-bar-testbench</module>
     </modules>
+    <properties>
+        <flow.version>24.3-SNAPSHOT</flow.version>
+    </properties>
     <profiles>
         <profile>
             <id>default</id>
