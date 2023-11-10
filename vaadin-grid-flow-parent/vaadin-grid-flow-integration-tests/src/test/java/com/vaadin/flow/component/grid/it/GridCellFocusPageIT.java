@@ -37,6 +37,8 @@ public class GridCellFocusPageIT extends AbstractComponentIT {
     public void focusBodyCell() {
         open();
 
+        checkLogsForErrors();
+
         getGrid().getCell(0, 0).click(0, 0);
         assertTextResult(GridCellFocusPage.ID_ITEM_RESULT, "A");
         assertTextResult(GridCellFocusPage.ID_COLUMN_RESULT,
