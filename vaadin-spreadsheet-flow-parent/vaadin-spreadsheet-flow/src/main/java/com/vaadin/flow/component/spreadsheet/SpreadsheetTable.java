@@ -212,7 +212,8 @@ public class SpreadsheetTable implements Serializable {
      * @param ctWorksheetAutoFilter
      *            Referenced autofilter.
      */
-    public void setCtWorksheetAutoFilter(CTAutoFilter ctWorksheetAutoFilter) {
+    protected void setCtWorksheetAutoFilter(
+            CTAutoFilter ctWorksheetAutoFilter) {
         this.ctWorksheetAutoFilter = ctWorksheetAutoFilter;
     }
 
@@ -232,7 +233,7 @@ public class SpreadsheetTable implements Serializable {
      * @param xssfTable
      *            Referenced table.
      */
-    public void setXssfTable(XSSFTable xssfTable) {
+    protected void setXssfTable(XSSFTable xssfTable) {
         this.xssfTable = xssfTable;
     }
 
