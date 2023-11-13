@@ -85,6 +85,7 @@ public class MultiSelectComboBox<TItem>
 
     private final MultiSelectComboBoxSelectionModel<TItem> selectionModel;
     private MultiSelectComboBoxI18n i18n;
+    private AutoExpandMode autoExpand;
 
     /**
      * Default constructor. Creates an empty combo box.
@@ -133,6 +134,8 @@ public class MultiSelectComboBox<TItem>
         // Initialize page size and data provider
         setPageSize(pageSize);
         setItems(new DataCommunicator.EmptyDataProvider<>());
+
+        setAutoExpand(AutoExpandMode.NONE);
     }
 
     /**
@@ -395,25 +398,77 @@ public class MultiSelectComboBox<TItem>
     }
 
     /**
-     * Gets whether displaying of all selected item labels as chips is enabled.
-     *
-     * @since 24.3
-     * @return {@code true} if enabled, {@code false} otherwise
+     * Defines possible behavior of the component when not all selected items
+     * can be displayed as chips within the current field width.
      */
-    public boolean isAllChipsVisible() {
-        return getElement().getProperty("allChipsVisible", false);
+    public enum AutoExpandMode {
+        /**
+         * Field expands vertically and chips wrap.
+         */
+        VERTICAL,
+
+        /**
+         * Field expands horizontally until max-width is reached, then collapses
+         * to overflow chip.
+         */
+        HORIZONTAL,
+
+        /**
+         * Field expands horizontally until max-width is reached, then expands
+         * vertically and chips wrap.
+         */
+        BOTH,
+
+        /**
+         * Field does not expand and collapses to overflow chip.
+         */
+        NONE,
     }
 
     /**
-     * Enables or disables displaying of all selected item labels as chips. When
-     * set to {@code false}, chips that do not fit are collapsed.
+     * Gets the behavior of the component when not all selected items can be
+     * displayed as chips within the current field width.
      *
      * @since 24.3
-     * @param autoOpen
-     *            {@code true} to always show all chips
+     * @return {AutoExpandMode}
      */
-    public void setAllChipsVisible(boolean allChipsVisible) {
-        getElement().setProperty("allChipsVisible", allChipsVisible);
+    public AutoExpandMode getAutoExpand() {
+        return autoExpand;
+    }
+
+    /**
+     * Sets the behavior of the component when not all selected items can be
+     * displayed as chips within the current field width.
+     *
+     * Expansion only works with undefined size in the desired direction (i.e.
+     * setting `max-width` limits the component's width).
+     *
+     * @param {AutoExpandMode}
+     *            autoExpandMode
+     * @since 24.3
+     */
+    public void setAutoExpand(AutoExpandMode autoExpandMode) {
+        autoExpand = autoExpandMode;
+
+        if (autoExpandMode == AutoExpandMode.VERTICAL) {
+            getElement().setProperty("autoExpandHorizontally", false);
+            getElement().setProperty("autoExpandVertically", true);
+        }
+
+        if (autoExpandMode == AutoExpandMode.HORIZONTAL) {
+            getElement().setProperty("autoExpandHorizontally", true);
+            getElement().setProperty("autoExpandVertically", false);
+        }
+
+        if (autoExpandMode == AutoExpandMode.BOTH) {
+            getElement().setProperty("autoExpandHorizontally", true);
+            getElement().setProperty("autoExpandVertically", true);
+        }
+
+        if (autoExpandMode == AutoExpandMode.NONE) {
+            getElement().setProperty("autoExpandHorizontally", false);
+            getElement().setProperty("autoExpandVertically", false);
+        }
     }
 
     /**
@@ -422,8 +477,8 @@ public class MultiSelectComboBox<TItem>
      * @since 24.3
      * @return {@code true} if enabled, {@code false} otherwise
      */
-    public boolean isGroupSelectedItems() {
-        return getElement().getProperty("groupSelectedItems", false);
+    public boolean isSelectedItemsOnTop() {
+        return getElement().getProperty("selectedItemsOnTop", false);
     }
 
     /**
@@ -431,11 +486,11 @@ public class MultiSelectComboBox<TItem>
      * overlay.
      *
      * @since 24.3
-     * @param autoOpen
-     *            {@code true} to group selected items
+     * @param selectedItemsOnTop
+     *            {@code true} to group selected items at the top
      */
-    public void setGroupSelectedItems(boolean groupSelectedItems) {
-        getElement().setProperty("groupSelectedItems", groupSelectedItems);
+    public void setSelectedItemsOnTop(boolean selectedItemsOnTop) {
+        getElement().setProperty("selectedItemsOnTop", selectedItemsOnTop);
     }
 
     /**

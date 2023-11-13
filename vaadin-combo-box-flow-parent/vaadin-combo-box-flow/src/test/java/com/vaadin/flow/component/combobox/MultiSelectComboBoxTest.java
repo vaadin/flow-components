@@ -271,32 +271,54 @@ public class MultiSelectComboBoxTest extends ComboBoxBaseTest {
     }
 
     @Test
-    public void setAllChipsVisible() {
+    public void setAutoExpand_propertiesAreSet() {
         MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
 
-        Assert.assertFalse(comboBox.isAllChipsVisible());
-        Assert.assertFalse(
-                comboBox.getElement().getProperty("allChipsVisible", false));
+        // NONE
+        Assert.assertEquals(MultiSelectComboBox.AutoExpandMode.NONE,
+                comboBox.getAutoExpand());
+        Assert.assertFalse(comboBox.getElement()
+                .getProperty("autoExpandHorizontally", false));
+        Assert.assertFalse(comboBox.getElement()
+                .getProperty("autoExpandVertically", false));
 
-        comboBox.setAllChipsVisible(true);
+        // HORIZONTAL
+        comboBox.setAutoExpand(MultiSelectComboBox.AutoExpandMode.HORIZONTAL);
 
-        Assert.assertTrue(comboBox.isAllChipsVisible());
-        Assert.assertTrue(
-                comboBox.getElement().getProperty("allChipsVisible", true));
+        Assert.assertTrue(comboBox.getElement()
+                .getProperty("autoExpandHorizontally", true));
+        Assert.assertFalse(comboBox.getElement()
+                .getProperty("autoExpandVertically", false));
+
+        // VERTICAL
+        comboBox.setAutoExpand(MultiSelectComboBox.AutoExpandMode.VERTICAL);
+
+        Assert.assertFalse(comboBox.getElement()
+                .getProperty("autoExpandHorizontally", false));
+        Assert.assertTrue(comboBox.getElement()
+                .getProperty("autoExpandVertically", true));
+
+        // BOTH
+        comboBox.setAutoExpand(MultiSelectComboBox.AutoExpandMode.BOTH);
+
+        Assert.assertTrue(comboBox.getElement()
+                .getProperty("autoExpandHorizontally", true));
+        Assert.assertTrue(comboBox.getElement()
+                .getProperty("autoExpandVertically", true));
     }
 
     @Test
-    public void setGroupSelectedItems() {
+    public void setSelectedItemsOnTop() {
         MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
 
-        Assert.assertFalse(comboBox.isGroupSelectedItems());
+        Assert.assertFalse(comboBox.isSelectedItemsOnTop());
         Assert.assertFalse(
-                comboBox.getElement().getProperty("groupSelectedItems", false));
+                comboBox.getElement().getProperty("selectedItemsOnTop", false));
 
-        comboBox.setGroupSelectedItems(true);
+        comboBox.setSelectedItemsOnTop(true);
 
-        Assert.assertTrue(comboBox.isGroupSelectedItems());
+        Assert.assertTrue(comboBox.isSelectedItemsOnTop());
         Assert.assertTrue(
-                comboBox.getElement().getProperty("groupSelectedItems", true));
+                comboBox.getElement().getProperty("selectedItemsOnTop", true));
     }
 }
