@@ -209,7 +209,7 @@ public class GridElement extends TestBenchElement {
         Object rows = executeScript(script, this, firstRowIndex, lastRowIndex);
         if (rows != null) {
             return ((ArrayList<?>) rows).stream().map(
-                            elem -> ((TestBenchElement) elem).wrap(GridTRElement.class))
+                    elem -> ((TestBenchElement) elem).wrap(GridTRElement.class))
                     .collect(Collectors.toList());
         } else {
             return new ArrayList<>();
@@ -408,7 +408,7 @@ public class GridElement extends TestBenchElement {
     /**
      * Deselects the row with the given index.
      *
-     * @param rowIndex
+     * @param row
      *            the row to deselect
      */
     void deselect(GridTRElement row) {
@@ -463,7 +463,7 @@ public class GridElement extends TestBenchElement {
      *         coordinates.
      */
     public List<GridTHTDElement> getCells(int rowIndex,
-                                          GridColumnElement... columnElements) {
+            GridColumnElement... columnElements) {
         GridTRElement row = getRow(rowIndex);
         return row != null ? row.getCells(columnElements) : new ArrayList<>();
     }

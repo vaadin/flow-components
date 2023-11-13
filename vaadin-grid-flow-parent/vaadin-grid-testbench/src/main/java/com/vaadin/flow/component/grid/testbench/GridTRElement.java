@@ -49,9 +49,9 @@ public class GridTRElement extends TestBenchElement {
      */
     public List<GridTHTDElement> getCells(GridColumnElement... columns) {
         Object cells = executeScript("const row = arguments[0];" //
-                        + "const columnIds = arguments[1];"
-                        + "return Array.from(row.children)."
-                        + "filter(function(cell) { return cell._column && columnIds.includes(cell._column.__generatedTbId);})",
+                + "const columnIds = arguments[1];"
+                + "return Array.from(row.children)."
+                + "filter(function(cell) { return cell._column && columnIds.includes(cell._column.__generatedTbId);})",
                 this, Arrays.stream(columns)
                         .map(GridColumnElement::get__generatedId).toArray());
         if (cells != null) {
