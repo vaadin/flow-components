@@ -448,6 +448,8 @@ public class MultiSelectComboBox<TItem>
      * @since 24.3
      */
     public void setAutoExpand(AutoExpandMode autoExpandMode) {
+        Objects.requireNonNull(autoExpandMode,
+                "The mode to be set cannot be null");
         autoExpand = autoExpandMode;
 
         if (autoExpandMode == AutoExpandMode.VERTICAL) {
