@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.treegrid.it;
 
+import com.vaadin.flow.component.grid.testbench.GridTRElement;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
@@ -24,6 +25,8 @@ import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.grid.testbench.TreeGridElement;
 import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
+
+import java.util.List;
 
 /**
  * Tests for dynamically adding new columns with different renderers after the
@@ -81,6 +84,35 @@ public class TreeComponentColumnsIT extends AbstractComponentIT {
         assertCellContains(compThenGrid, 2, 2, "Dad 1/0");
         assertCellContains(compThenGrid, 3, 2, "Dad 1/1");
         assertCellContains(compThenGrid, 4, 2, "Dad 1/2");
+    }
+
+    @Test
+    public void treegridComponentRenderer_expandCollapseExpand_componentsVisible() {
+        compThenGrid.expandWithClick(0);
+        compThenGrid.collapseWithClick(0);
+        compThenGrid.expandWithClick(0);
+
+        assertCellContains(compThenGrid, 4, 0, "vaadin-text-field");
+        assertCellContains(compThenGrid, 4, 1, "vaadin-text-field");
+        assertCellContains(compThenGrid, 4, 2, "Granddad 1");
+    }
+
+    @Test
+    public void treegridComponentRenderer_expandScrollExpand_expectedRowHeights() {
+        int rowHeight = compThenGrid.getRow(1).getSize().getHeight();
+        compThenGrid.expandWithClick(0);
+        compThenGrid.expandWithClick(1);
+        compThenGrid.scrollToRow(104);
+
+        List<GridTRElement> visibleRows = compThenGrid.getVisibleRows();
+        Assert.assertFalse(visibleRows.isEmpty());
+
+        for (int i = 1; i < visibleRows.size(); i++) {
+            Assert.assertEquals(visibleRows.get(i - 1).getRect().y + rowHeight,
+                    visibleRows.get(i).getRect().y, 1);
+            Assert.assertEquals(rowHeight,
+                    visibleRows.get(i).getSize().getHeight());
+        }
     }
 
     private void assertCellContains(GridElement grid, int rowIndex,
