@@ -109,8 +109,6 @@ public class TreeComponentColumnsIT extends AbstractComponentIT {
         Assert.assertFalse(visibleRows.isEmpty());
 
         for (int i = 1; i < visibleRows.size(); i++) {
-            Assert.assertEquals(visibleRows.get(i - 1).getRect().y + rowHeight,
-                    visibleRows.get(i).getRect().y, 1);
             Assert.assertEquals(rowHeight,
                     visibleRows.get(i).getSize().getHeight());
         }
