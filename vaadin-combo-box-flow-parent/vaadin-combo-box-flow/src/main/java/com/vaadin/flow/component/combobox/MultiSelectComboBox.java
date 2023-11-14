@@ -405,24 +405,50 @@ public class MultiSelectComboBox<TItem>
         /**
          * Field expands vertically and chips wrap.
          */
-        VERTICAL,
+        VERTICAL(false, true),
 
         /**
          * Field expands horizontally until max-width is reached, then collapses
          * to overflow chip.
          */
-        HORIZONTAL,
+        HORIZONTAL(true, false),
 
         /**
          * Field expands horizontally until max-width is reached, then expands
          * vertically and chips wrap.
          */
-        BOTH,
+        BOTH(true, true),
 
         /**
          * Field does not expand and collapses to overflow chip.
          */
-        NONE,
+        NONE(false, false);
+
+        private final boolean expandHorizontally;
+        private final boolean expandVertically;
+
+        AutoExpandMode(boolean expandHorizontally, boolean expandVertically) {
+            this.expandHorizontally = expandHorizontally;
+            this.expandVertically = expandVertically;
+        }
+
+        /**
+         * Gets whether to expand horizontally.
+         *
+         * @return Whether to expand horizontally
+         */
+        public boolean getExpandHorizontally() {
+            return expandHorizontally;
+        }
+
+        /**
+         * Gets whether to expand vertically.
+         *
+         * @return Whether to expand vertically
+         */
+        public boolean getExpandVertically() {
+            return expandVertically;
+        }
     }
 
     /**
@@ -452,25 +478,10 @@ public class MultiSelectComboBox<TItem>
                 "The mode to be set cannot be null");
         autoExpand = autoExpandMode;
 
-        if (autoExpandMode == AutoExpandMode.VERTICAL) {
-            getElement().setProperty("autoExpandHorizontally", false);
-            getElement().setProperty("autoExpandVertically", true);
-        }
-
-        if (autoExpandMode == AutoExpandMode.HORIZONTAL) {
-            getElement().setProperty("autoExpandHorizontally", true);
-            getElement().setProperty("autoExpandVertically", false);
-        }
-
-        if (autoExpandMode == AutoExpandMode.BOTH) {
-            getElement().setProperty("autoExpandHorizontally", true);
-            getElement().setProperty("autoExpandVertically", true);
-        }
-
-        if (autoExpandMode == AutoExpandMode.NONE) {
-            getElement().setProperty("autoExpandHorizontally", false);
-            getElement().setProperty("autoExpandVertically", false);
-        }
+        getElement().setProperty("autoExpandHorizontally",
+                autoExpandMode.getExpandHorizontally());
+        getElement().setProperty("autoExpandVertically",
+                autoExpandMode.getExpandVertically());
     }
 
     /**
