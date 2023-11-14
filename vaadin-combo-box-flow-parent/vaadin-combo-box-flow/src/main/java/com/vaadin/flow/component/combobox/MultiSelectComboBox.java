@@ -430,7 +430,7 @@ public class MultiSelectComboBox<TItem>
      * displayed as chips within the current field width.
      *
      * @since 24.3
-     * @return {AutoExpandMode}
+     * @return The current {@link AutoExpandMode}
      */
     public AutoExpandMode getAutoExpand() {
         return autoExpand;
