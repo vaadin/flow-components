@@ -9,23 +9,27 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-@TestPath("vaadin-multi-select-combo-box/all-chips")
-public class MultiSelectComboBoxAllChipsIT extends AbstractComponentIT {
+@TestPath("vaadin-multi-select-combo-box/auto-expand")
+public class MultiSelectComboBoxAutoExpandIT extends AbstractComponentIT {
     private MultiSelectComboBoxElement comboBox;
-    private TestBenchElement showAllChips;
-    private TestBenchElement dontShowAllChips;
+    private TestBenchElement expandHorizontal;
+    private TestBenchElement expandVertical;
+    private TestBenchElement expandBoth;
+    private TestBenchElement expandNone;
 
     @Before
     public void init() {
         open();
         comboBox = $(MultiSelectComboBoxElement.class).waitForFirst();
-        showAllChips = $("button").id("show-all-chips");
-        dontShowAllChips = $("button").id("dont-show-all-chips");
+        expandHorizontal = $("button").id("expand-horizontal");
+        expandVertical = $("button").id("expand-vertical");
+        expandBoth = $("button").id("expand-both");
+        expandNone = $("button").id("expand-none");
     }
 
     @Test
-    public void showAllChips_selectItems_allChipsVisible() {
-        showAllChips.click();
+    public void expandHorizontal_selectItems_allChipsVisible() {
+        expandHorizontal.click();
 
         comboBox.selectByText("Item 1");
         comboBox.selectByText("Item 2");
@@ -45,12 +49,12 @@ public class MultiSelectComboBoxAllChipsIT extends AbstractComponentIT {
     }
 
     @Test
-    public void selectItems_showAllChips_allChipsVisible() {
+    public void selectItems_expandHorizontal_allChipsVisible() {
         comboBox.selectByText("Item 1");
         comboBox.selectByText("Item 2");
         comboBox.selectByText("Item 3");
 
-        showAllChips.click();
+        expandHorizontal.click();
 
         ElementQuery<TestBenchElement> chips = comboBox
                 .$("vaadin-multi-select-combo-box-chip");
@@ -68,14 +72,56 @@ public class MultiSelectComboBoxAllChipsIT extends AbstractComponentIT {
     }
 
     @Test
-    public void selectItems_dontShowAllChips_chipsCollapsed() {
-        showAllChips.click();
+    public void expandVertical_selectItems_allChipsVisible() {
+        expandVertical.click();
+
+        comboBox.selectByText("Item 1");
+        comboBox.selectByText("Item 2");
+        comboBox.selectByText("Item 3");
+
+        ElementQuery<TestBenchElement> chips = comboBox
+                .$("vaadin-multi-select-combo-box-chip");
+
+        Assert.assertEquals("All chips plus overflow chips", 4,
+                chips.all().size());
+
+        TestBenchElement chip1 = chips.get(1);
+        TestBenchElement chip2 = chips.get(2);
+
+        Assert.assertEquals("Item 1", chip1.getText());
+        Assert.assertEquals("Item 2", chip2.getText());
+    }
+
+    @Test
+    public void expandBoth_selectItems_allChipsVisible() {
+        expandBoth.click();
+
+        comboBox.selectByText("Item 1");
+        comboBox.selectByText("Item 2");
+        comboBox.selectByText("Item 3");
+
+        ElementQuery<TestBenchElement> chips = comboBox
+                .$("vaadin-multi-select-combo-box-chip");
+
+        Assert.assertEquals("All chips plus overflow chips", 4,
+                chips.all().size());
+
+        TestBenchElement chip1 = chips.get(1);
+        TestBenchElement chip2 = chips.get(2);
+
+        Assert.assertEquals("Item 1", chip1.getText());
+        Assert.assertEquals("Item 2", chip2.getText());
+    }
+
+    @Test
+    public void selectItems_expandNone_chipsCollapsed() {
+        expandHorizontal.click();
 
         comboBox.selectByText("Item 10");
         comboBox.selectByText("Item 20");
         comboBox.selectByText("Item 30");
 
-        dontShowAllChips.click();
+        expandNone.click();
 
         ElementQuery<TestBenchElement> chips = comboBox
                 .$("vaadin-multi-select-combo-box-chip");
