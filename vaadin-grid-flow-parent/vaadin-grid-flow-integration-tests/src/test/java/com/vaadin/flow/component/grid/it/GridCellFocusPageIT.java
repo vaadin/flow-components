@@ -34,7 +34,6 @@ import com.vaadin.tests.AbstractComponentIT;
 @TestPath("vaadin-grid/grid-cell-focus-page")
 public class GridCellFocusPageIT extends AbstractComponentIT {
 
-    @Ignore("Test ignored since it always passes locally but never on CI")
     @Test
     public void focusBodyCell() {
         open();
@@ -61,7 +60,6 @@ public class GridCellFocusPageIT extends AbstractComponentIT {
                 CellFocusEvent.GridSection.BODY.getClientSideName());
     }
 
-    @Ignore("Test ignored since it always passes locally but never on CI")
     @Test
     public void focusHeaderCell() {
         open();
@@ -83,7 +81,6 @@ public class GridCellFocusPageIT extends AbstractComponentIT {
                 CellFocusEvent.GridSection.HEADER.getClientSideName());
     }
 
-    @Ignore("Test ignored since it always passes locally but never on CI")
     @Test
     public void focusFooterCell() {
         open();
