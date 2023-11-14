@@ -19,6 +19,8 @@ import java.util.Map;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
+import org.apache.poi.xssf.usermodel.XSSFTable;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTAutoFilter;
 
 /**
  * Represents a "table" inside a spreadsheet.
@@ -36,6 +38,8 @@ public class SpreadsheetTable implements Serializable {
     private final Sheet sheet;
     private final Spreadsheet spreadsheet;
     protected final Map<CellReference, PopupButton> popupButtons;
+    private transient CTAutoFilter ctWorksheetAutoFilter;
+    private transient XSSFTable xssfTable;
 
     /**
      * Creates a new table for the given spreadsheet component, its active sheet
@@ -203,4 +207,44 @@ public class SpreadsheetTable implements Serializable {
         return Collections.unmodifiableCollection(popupButtons.values());
     }
 
+    /**
+     * Sets the CTAutoFilter object that represents this table in the underlying
+     * POI model.
+     *
+     * @param ctWorksheetAutoFilter
+     *            Referenced autofilter.
+     */
+    protected void setCtWorksheetAutoFilter(
+            CTAutoFilter ctWorksheetAutoFilter) {
+        this.ctWorksheetAutoFilter = ctWorksheetAutoFilter;
+    }
+
+    /**
+     * @return Returns the CTAutoFilter object that represents this table in the
+     *         underlying POI model. Can be null if this table is not backed by
+     *         a Worksheet CTAutoFilter.
+     */
+    public CTAutoFilter getCtWorksheetAutoFilter() {
+        return ctWorksheetAutoFilter;
+    }
+
+    /**
+     * Sets the XSSFTable object that represents this table in the underlying
+     * POI model.
+     *
+     * @param xssfTable
+     *            Referenced table.
+     */
+    protected void setXssfTable(XSSFTable xssfTable) {
+        this.xssfTable = xssfTable;
+    }
+
+    /**
+     * @return Returns the XSSFTable object that represents this table in the
+     *         underlying POI model. Can be null if this table is not backed by
+     *         a XSSFTable.
+     */
+    public XSSFTable getXssfTable() {
+        return xssfTable;
+    }
 }

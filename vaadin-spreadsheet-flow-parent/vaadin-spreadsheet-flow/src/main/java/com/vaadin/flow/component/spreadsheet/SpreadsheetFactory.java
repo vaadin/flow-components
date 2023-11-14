@@ -23,8 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Stack;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import org.apache.poi.hssf.usermodel.HSSFClientAnchor;
 import org.apache.poi.hssf.usermodel.HSSFPatriarch;
 import org.apache.poi.hssf.usermodel.HSSFPicture;
@@ -66,6 +65,8 @@ import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTFilterColumn;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTOutlinePr;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTSheetProtection;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTWorksheet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.spreadsheet.client.MergedRegion;
 import com.vaadin.flow.component.spreadsheet.shared.GroupingData;
@@ -457,9 +458,12 @@ public class SpreadsheetFactory implements Serializable {
         XSSFSheet sheet = (XSSFSheet) spreadsheet.getActiveSheet();
         CTAutoFilter autoFilter = sheet.getCTWorksheet().getAutoFilter();
 
-        if (autoFilter != null) {
+        if (autoFilter != null
+                && !tableForCTAutoFilterAlreadyLoaded(spreadsheet,
+                        autoFilter)) {
             SpreadsheetTable sheetFilterTable = new SpreadsheetFilterTable(
                     spreadsheet, CellRangeAddress.valueOf(autoFilter.getRef()));
+            sheetFilterTable.setCtWorksheetAutoFilter(autoFilter);
 
             spreadsheet.registerTable(sheetFilterTable);
 
@@ -467,12 +471,27 @@ public class SpreadsheetFactory implements Serializable {
         }
 
         for (XSSFTable table : sheet.getTables()) {
-            SpreadsheetTable spreadsheetTable = new SpreadsheetFilterTable(
-                    spreadsheet,
-                    CellRangeAddress.valueOf(table.getCTTable().getRef()));
+            if (!tableForXSSFTableAlreadyLoaded(spreadsheet, table)) {
+                SpreadsheetTable spreadsheetTable = new SpreadsheetFilterTable(
+                        spreadsheet,
+                        CellRangeAddress.valueOf(table.getCTTable().getRef()));
+                spreadsheetTable.setXssfTable(table);
 
-            spreadsheet.registerTable(spreadsheetTable);
+                spreadsheet.registerTable(spreadsheetTable);
+            }
         }
+    }
+
+    private static boolean tableForXSSFTableAlreadyLoaded(
+            Spreadsheet spreadsheet, XSSFTable table) {
+        return spreadsheet.getTables().stream()
+                .anyMatch(it -> it.getXssfTable() == table);
+    }
+
+    private static boolean tableForCTAutoFilterAlreadyLoaded(
+            Spreadsheet spreadsheet, CTAutoFilter autoFilter) {
+        return spreadsheet.getTables().stream()
+                .anyMatch(it -> it.getCtWorksheetAutoFilter() == autoFilter);
     }
 
     private static void markActiveButtons(SpreadsheetTable sheetFilterTable,
