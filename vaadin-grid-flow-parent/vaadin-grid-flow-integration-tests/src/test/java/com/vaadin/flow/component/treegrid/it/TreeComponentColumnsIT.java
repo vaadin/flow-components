@@ -40,6 +40,7 @@ public class TreeComponentColumnsIT extends AbstractComponentIT {
 
     @Before
     public void init() {
+        System.out.println("Init method...");
         open();
         clickElementWithJs("btn-add-comp-then-grid");
         clickElementWithJs("btn-add-grid-then-comp");
@@ -102,7 +103,7 @@ public class TreeComponentColumnsIT extends AbstractComponentIT {
         int rowHeight = compThenGrid.getRow(1).getSize().getHeight();
         compThenGrid.expandWithClick(0);
         compThenGrid.expandWithClick(1);
-        compThenGrid.scrollToRow(104);
+        compThenGrid.scrollToRowAndWait(104);
 
         List<GridTRElement> visibleRows = compThenGrid.getVisibleRows();
         Assert.assertFalse(visibleRows.isEmpty());
