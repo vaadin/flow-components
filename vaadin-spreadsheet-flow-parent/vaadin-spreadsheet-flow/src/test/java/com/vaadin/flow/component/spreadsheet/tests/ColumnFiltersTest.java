@@ -95,4 +95,17 @@ public class ColumnFiltersTest {
         Assert.assertFalse(table.getPopupButton(2).isActive());
     }
 
+    @Test
+    public void loadFile_switchSheets_tablesRegisteredOnce() {
+        Spreadsheet spreadsheet = TestHelper
+                .createSpreadsheet("tables_on_multiple_sheets.xlsx");
+
+        // Go to Sheet2 and back to Sheet1
+        spreadsheet.setActiveSheetIndex(1);
+        spreadsheet.setActiveSheetIndex(0);
+
+        // just 2 tables, one table per sheet
+        Assert.assertEquals(2, spreadsheet.getTables().size());
+    }
+
 }

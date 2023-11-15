@@ -44,6 +44,7 @@ import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
 import com.vaadin.flow.dom.ClassList;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementConstants;
+import com.vaadin.flow.dom.ElementDetachEvent;
 import com.vaadin.flow.dom.ElementDetachListener;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.internal.StateTree;
@@ -77,9 +78,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-dialog")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha9")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha10")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/dialog", version = "24.3.0-alpha9")
+@NpmPackage(value = "@vaadin/dialog", version = "24.3.0-alpha10")
 @JsModule("@vaadin/dialog/src/vaadin-dialog.js")
 @JsModule("./flow-component-renderer.js")
 public class Dialog extends Component implements HasComponents, HasSize,
@@ -907,19 +908,25 @@ public class Dialog extends Component implements HasComponents, HasSize,
     }
 
     private Map<Element, Registration> childDetachListenerMap = new HashMap<>();
-    private ElementDetachListener childDetachListener = e -> {
-        var child = e.getSource();
-        var childDetachedFromContainer = !getElement().getChildren().anyMatch(
-                containerChild -> Objects.equals(child, containerChild));
+    // Must not use lambda here as that would break serialization. See
+    // https://github.com/vaadin/flow-components/issues/5597
+    private ElementDetachListener childDetachListener = new ElementDetachListener() {
+        @Override
+        public void onDetach(ElementDetachEvent e) {
+            var child = e.getSource();
+            var childDetachedFromContainer = !getElement().getChildren()
+                    .anyMatch(containerChild -> Objects.equals(child,
+                            containerChild));
 
-        if (childDetachedFromContainer) {
-            // The child was removed from the dialog
+            if (childDetachedFromContainer) {
+                // The child was removed from the dialog
 
-            // Remove the registration for the child detach listener
-            childDetachListenerMap.get(child).remove();
-            childDetachListenerMap.remove(child);
+                // Remove the registration for the child detach listener
+                childDetachListenerMap.get(child).remove();
+                childDetachListenerMap.remove(child);
 
-            this.updateVirtualChildNodeIds();
+                updateVirtualChildNodeIds();
+            }
         }
     };
 
