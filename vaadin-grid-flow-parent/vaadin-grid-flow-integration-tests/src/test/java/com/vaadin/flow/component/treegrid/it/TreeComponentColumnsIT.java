@@ -15,16 +15,15 @@
  */
 package com.vaadin.flow.component.treegrid.it;
 
+import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.grid.testbench.GridTRElement;
+import com.vaadin.flow.component.grid.testbench.TreeGridElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.flow.component.grid.testbench.TreeGridElement;
-import com.vaadin.tests.AbstractComponentIT;
-import com.vaadin.flow.testutil.TestPath;
 
 import java.util.List;
 
@@ -108,10 +107,8 @@ public class TreeComponentColumnsIT extends AbstractComponentIT {
         List<GridTRElement> visibleRows = compThenGrid.getVisibleRows();
         Assert.assertFalse(visibleRows.isEmpty());
 
-        for (int i = 1; i < visibleRows.size(); i++) {
-            Assert.assertEquals(rowHeight,
-                    visibleRows.get(i).getSize().getHeight());
-        }
+        visibleRows.forEach(row -> Assert.assertEquals(rowHeight,
+                row.getSize().getHeight()));
     }
 
     private void assertCellContains(GridElement grid, int rowIndex,
