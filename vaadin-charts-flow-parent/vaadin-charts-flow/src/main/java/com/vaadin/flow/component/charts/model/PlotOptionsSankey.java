@@ -21,6 +21,8 @@ import java.util.stream.Stream;
  */
 public class PlotOptionsSankey extends AbstractPlotOptions {
 
+    private Boolean allowPointSelect;
+    private Boolean animation;
     private Color borderColor;
     private Number borderRadius;
     private Number borderWidth;
@@ -38,6 +40,7 @@ public class PlotOptionsSankey extends AbstractPlotOptions {
     private String description;
     private Boolean enableMouseTracking;
     private Boolean getExtremesFromAll;
+    private Boolean inactiveOtherPoints;
     private Label label;
     private List<Level> levels;
     private String linkedTo;
@@ -55,6 +58,40 @@ public class PlotOptionsSankey extends AbstractPlotOptions {
     private Tooltip tooltip;
     private Number turboThreshold;
     private Boolean visible;
+
+    /**
+     * @see #setAllowPointSelect(Boolean)
+     */
+    public Boolean getAllowPointSelect() {
+        return allowPointSelect;
+    }
+
+    /**
+     * Allow this series' points to be selected by clicking on the markers, bars
+     * or pie slices.
+     * <p>
+     * Defaults to: false
+     */
+    public void setAllowPointSelect(Boolean allowPointSelect) {
+        this.allowPointSelect = allowPointSelect;
+    }
+
+    /**
+     * @see #setAnimation(Boolean)
+     */
+    public Boolean getAnimation() {
+        return animation;
+    }
+
+    /**
+     * Enable or disable the initial animation when a series is displayed.
+     * Please note that this option only applies to the initial animation of the
+     * series itself. For other animations, see
+     * {@link ChartModel#setAnimation(Boolean)}
+     */
+    public void setAnimation(Boolean animation) {
+        this.animation = animation;
+    }
 
     /**
      * @see #setBorderColor(Color)
@@ -399,6 +436,21 @@ public class PlotOptionsSankey extends AbstractPlotOptions {
      */
     public void setGetExtremesFromAll(Boolean getExtremesFromAll) {
         this.getExtremesFromAll = getExtremesFromAll;
+    }
+
+    /**
+     * @see #setInactiveOtherPoints(Boolean)
+     */
+    public Boolean getInactiveOtherPoints() {
+        return inactiveOtherPoints;
+    }
+
+    /**
+     * Highlight only the hovered point and fade the remaining points. Defaults
+     * to true.
+     */
+    public void setInactiveOtherPoints(Boolean inactiveOtherPoints) {
+        this.inactiveOtherPoints = inactiveOtherPoints;
     }
 
     /**
