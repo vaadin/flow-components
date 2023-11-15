@@ -7,16 +7,6 @@ import { flowComponentDirective } from './flow-component-directive.js';
 import { render, html as litHtml } from 'lit';
 
 /**
- * Returns the requested node from the Flow client.
- * @param {string} appid
- * @param {number} nodeid
- * @returns {Element | null} The element if found, null otherwise.
- */
-function getNodeInternal(appid, nodeid) {
-  return window.Vaadin.Flow.clients[appid].getByNodeId(nodeid);
-}
-
-/**
  * Returns the requested node in a form suitable for Lit template interpolation.
  * @param {string} appid
  * @param {number} nodeid
@@ -34,7 +24,7 @@ function getNode(appid, nodeid) {
  * @param {Element} root
  */
 function setChildNodes(appid, nodeIds, root) {
-  render(litHtml`${nodeIds.map(id => getNodeInternal(appid, id))}`, root);
+  render(litHtml`${nodeIds.map(id => flowComponentDirective(appid, id))}`, root);
 }
 
 /**
