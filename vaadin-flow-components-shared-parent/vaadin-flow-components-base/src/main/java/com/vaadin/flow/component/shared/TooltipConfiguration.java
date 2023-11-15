@@ -90,32 +90,31 @@ public class TooltipConfiguration implements Serializable {
     }
 
     private static void applyConfigurationForUI(UI ui) {
-        ui.getElement().executeJs("window.Vaadin = window.Vaadin || {};"
-                + "window.Vaadin.Flow = window.Vaadin.Flow || {};"
-                + "window.Vaadin.Flow.tooltip = window.Vaadin.Flow.tooltip || {}");
+        ui.getElement().executeJs(
+                "((window.Vaadin ||= {}).Flow ||= {}).tooltip ||= {}");
 
         if (defaultHideDelay != null) {
-            ui.getElement()
-                    .executeJs("const tooltip = window.Vaadin.Flow.tooltip;"
+            ui.getElement().executeJs(
+                    "const tooltip = window.Vaadin.Flow.tooltip;"
                             + "tooltip.defaultHideDelay = $0;"
-                            + "tooltip.setDefaultHideDelay && tooltip.setDefaultHideDelay($0)",
-                            defaultHideDelay);
+                            + "tooltip.setDefaultHideDelay?.($0)",
+                    defaultHideDelay);
         }
 
         if (defaultFocusDelay != null) {
-            ui.getElement()
-                    .executeJs("const tooltip = window.Vaadin.Flow.tooltip;"
+            ui.getElement().executeJs(
+                    "const tooltip = window.Vaadin.Flow.tooltip;"
                             + "tooltip.defaultFocusDelay = $0;"
-                            + "tooltip.setDefaultFocusDelay && tooltip.setDefaultFocusDelay($0)",
-                            defaultFocusDelay);
+                            + "tooltip.setDefaultFocusDelay?.($0)",
+                    defaultFocusDelay);
         }
 
         if (defaultHoverDelay != null) {
-            ui.getElement()
-                    .executeJs("const tooltip = window.Vaadin.Flow.tooltip;"
+            ui.getElement().executeJs(
+                    "const tooltip = window.Vaadin.Flow.tooltip;"
                             + "tooltip.defaultHoverDelay = $0;"
-                            + "tooltip.setDefaultHoverDelay && tooltip.setDefaultHoverDelay($0)",
-                            defaultHoverDelay);
+                            + "tooltip.setDefaultHoverDelay?.($0)",
+                    defaultHoverDelay);
         }
     }
 
