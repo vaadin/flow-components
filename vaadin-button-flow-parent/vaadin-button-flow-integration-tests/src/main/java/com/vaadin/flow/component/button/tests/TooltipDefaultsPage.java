@@ -24,19 +24,15 @@ import com.vaadin.flow.router.Route;
 @PreserveOnRefresh
 @Route("vaadin-button/tooltip-defaults")
 public class TooltipDefaultsPage extends Div {
-
     public TooltipDefaultsPage() {
-        // Default values for focus & hover delay
-        TooltipConfiguration.setDefaultFocusDelay(500);
-        TooltipConfiguration.setDefaultHoverDelay(500);
-
-        Button button = new Button("Set tooltip default hide delay to 1000");
-        // Use component-specific delay to override the default
-        button.setTooltipText("Tooltip").setHoverDelay(100);
-
-        // Dynamically change the default hide delay
+        Button button = new Button("Set tooltip default delays to 5000");
+        button.setTooltipText("Tooltip");
         button.addClickListener(
-                e -> TooltipConfiguration.setDefaultHideDelay(1000));
+                e -> {
+                    TooltipConfiguration.setDefaultFocusDelay(5000);
+                    TooltipConfiguration.setDefaultHoverDelay(5000);
+                    TooltipConfiguration.setDefaultHideDelay(5000);
+                });
 
         add(button);
     }

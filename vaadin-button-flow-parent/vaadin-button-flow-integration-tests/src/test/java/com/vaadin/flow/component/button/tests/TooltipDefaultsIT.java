@@ -35,23 +35,21 @@ public class TooltipDefaultsIT extends AbstractComponentIT {
     }
 
     @Test
-    public void checkTooltipConfig() {
-        Assert.assertEquals(500, getActiveFocusDelay(button));
-        Assert.assertEquals(100, getActiveHoverDelay(button));
-    }
-
-    @Test
-    public void dynamicallyChangeDefaults_checkTooltipConfig() {
+    public void changeDefaults_checkTooltipConfig() {
         button.click();
-        Assert.assertEquals(1000, getActiveHideDelay(button));
+        Assert.assertEquals(5000, getActiveHideDelay(button));
+        Assert.assertEquals(5000, getActiveFocusDelay(button));
+        Assert.assertEquals(5000, getActiveHoverDelay(button));
     }
 
     @Test
-    public void refreshBrowser_checkTooltipConfig() {
+    public void changeDefaults_refreshPage_checkTooltipConfig() {
+        button.click();
         getDriver().navigate().refresh();
         button = $(ButtonElement.class).first();
-        Assert.assertEquals(500, getActiveFocusDelay(button));
-        Assert.assertEquals(100, getActiveHoverDelay(button));
+        Assert.assertEquals(5000, getActiveHideDelay(button));
+        Assert.assertEquals(5000, getActiveFocusDelay(button));
+        Assert.assertEquals(5000, getActiveHoverDelay(button));
     }
 
     private int getActiveFocusDelay(ButtonElement button) {
