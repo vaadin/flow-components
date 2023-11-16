@@ -20,6 +20,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.html.Hr;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -70,6 +71,16 @@ public class SubMenuTest {
     public void addItem_getChildren_returnsMenuItem() {
         MenuItem foo = subMenu.addItem("foo");
         verifyChildren(subMenu, foo);
+    }
+
+    @Test
+    public void addSeparatorAddsHr() {
+        MenuItem foo = subMenu.addItem("foo");
+        subMenu.addSeparator();
+        Hr separator = (Hr) subMenu.getChildren().skip(1).findFirst()
+                .orElse(null);
+        MenuItem bar = subMenu.addItem("foo");
+        verifyChildren(subMenu, foo, separator, bar);
     }
 
     @Test
