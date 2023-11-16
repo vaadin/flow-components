@@ -143,6 +143,11 @@ public class ChartType implements ChartEnum {
     public static final ChartType ORGANIZATION = new ChartType("organization");
 
     /**
+     * @see PlotOptionsSankey
+     */
+    public static final ChartType SANKEY = new ChartType("sankey");
+
+    /**
      * @see PlotOptionsXrange
      */
     public static final ChartType XRANGE = new ChartType("xrange");

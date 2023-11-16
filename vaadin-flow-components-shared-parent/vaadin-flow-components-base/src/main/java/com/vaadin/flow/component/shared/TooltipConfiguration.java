@@ -27,7 +27,7 @@ import com.vaadin.flow.server.VaadinService;
  *
  * @author Vaadin Ltd
  */
-@NpmPackage(value = "@vaadin/tooltip", version = "24.3.0-alpha9")
+@NpmPackage(value = "@vaadin/tooltip", version = "24.3.0-alpha10")
 @JsModule("./tooltip.ts")
 public class TooltipConfiguration implements Serializable {
 
@@ -90,21 +90,30 @@ public class TooltipConfiguration implements Serializable {
     }
 
     private static void applyConfigurationForUI(UI ui) {
+        ui.getElement().executeJs(
+                "((window.Vaadin ||= {}).Flow ||= {}).tooltip ||= {}");
+
         if (defaultHideDelay != null) {
             ui.getElement().executeJs(
-                    "window.Vaadin.Flow.tooltip.setDefaultHideDelay($0)",
+                    "const tooltip = window.Vaadin.Flow.tooltip;"
+                            + "tooltip.defaultHideDelay = $0;"
+                            + "tooltip.setDefaultHideDelay?.($0)",
                     defaultHideDelay);
         }
 
         if (defaultFocusDelay != null) {
             ui.getElement().executeJs(
-                    "window.Vaadin.Flow.tooltip.setDefaultFocusDelay($0)",
+                    "const tooltip = window.Vaadin.Flow.tooltip;"
+                            + "tooltip.defaultFocusDelay = $0;"
+                            + "tooltip.setDefaultFocusDelay?.($0)",
                     defaultFocusDelay);
         }
 
         if (defaultHoverDelay != null) {
             ui.getElement().executeJs(
-                    "window.Vaadin.Flow.tooltip.setDefaultHoverDelay($0)",
+                    "const tooltip = window.Vaadin.Flow.tooltip;"
+                            + "tooltip.defaultHoverDelay = $0;"
+                            + "tooltip.setDefaultHoverDelay?.($0)",
                     defaultHoverDelay);
         }
     }
