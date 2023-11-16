@@ -22,6 +22,8 @@ import org.junit.Test;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.Scroller.ScrollDirection;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
 
 public class ScrollerTest {
 
@@ -84,4 +86,14 @@ public class ScrollerTest {
         scroller.setScrollDirection(null);
     }
 
+    @Test
+    public void setEnabled_disableChildren() {
+        TextField textField = new TextField();
+
+        scroller.setContent(new VerticalLayout(textField));
+        Assert.assertTrue(textField.isEnabled());
+
+        scroller.setEnabled(false);
+        Assert.assertFalse(textField.isEnabled());
+    }
 }
