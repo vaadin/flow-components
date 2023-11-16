@@ -77,8 +77,7 @@ public class SubMenuTest {
     public void addSeparatorAddsHr() {
         MenuItem foo = subMenu.addItem("foo");
         subMenu.addSeparator();
-        Hr separator = (Hr) subMenu.getChildren().skip(1).findFirst()
-                .orElse(null);
+        Hr separator = (Hr) subMenu.getChildren().skip(1).findFirst().get();
         MenuItem bar = subMenu.addItem("foo");
         verifyChildren(subMenu, foo, separator, bar);
     }
