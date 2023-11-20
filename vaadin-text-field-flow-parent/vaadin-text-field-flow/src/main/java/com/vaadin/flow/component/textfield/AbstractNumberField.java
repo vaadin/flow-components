@@ -103,8 +103,6 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
 
     @Override
     public void setValueChangeMode(ValueChangeMode valueChangeMode) {
-        super.setValueChangeMode(valueChangeMode);
-
         if (inputListenerRegistration != null) {
             inputListenerRegistration.remove();
             inputListenerRegistration = null;
@@ -121,6 +119,8 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
                         }
                     });
         }
+
+        super.setValueChangeMode(valueChangeMode);
     }
 
     @Override
