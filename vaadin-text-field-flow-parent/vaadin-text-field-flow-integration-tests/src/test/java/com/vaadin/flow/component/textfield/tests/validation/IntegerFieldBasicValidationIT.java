@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.textfield.tests.validation;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
