@@ -9,23 +9,24 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-@TestPath("vaadin-multi-select-combo-box/group-items")
-public class MultiSelectComboBoxGroupItemsIT extends AbstractComponentIT {
+@TestPath("vaadin-multi-select-combo-box/selected-items-on-top")
+public class MultiSelectComboBoxSelectedItemsOnTopIT
+        extends AbstractComponentIT {
     private MultiSelectComboBoxElement comboBox;
-    private TestBenchElement groupSelected;
-    private TestBenchElement ungroupSelected;
+    private TestBenchElement setSelectedOnTop;
+    private TestBenchElement unsetSelectedOnTop;
 
     @Before
     public void init() {
         open();
         comboBox = $(MultiSelectComboBoxElement.class).waitForFirst();
-        groupSelected = $("button").id("group-selected");
-        ungroupSelected = $("button").id("ungroup-selected");
+        setSelectedOnTop = $("button").id("set-selected-on-top");
+        unsetSelectedOnTop = $("button").id("unset-selected-on-top");
     }
 
     @Test
-    public void groupSelectedItems_selectItems_itemsGrouped() {
-        groupSelected.click();
+    public void setSelectedItemsOnTop_selectItems_itemsGrouped() {
+        setSelectedOnTop.click();
 
         comboBox.selectByText("Item 2");
         comboBox.selectByText("Item 3");
@@ -49,11 +50,11 @@ public class MultiSelectComboBoxGroupItemsIT extends AbstractComponentIT {
     }
 
     @Test
-    public void selectItems_groupSelectedItems_itemsGrouped() {
+    public void selectItems_setSelectedItemsOnTop_itemsGrouped() {
         comboBox.selectByText("Item 2");
         comboBox.selectByText("Item 3");
 
-        groupSelected.click();
+        setSelectedOnTop.click();
 
         comboBox.openPopup();
         comboBox.waitForLoadingFinished();
@@ -74,8 +75,8 @@ public class MultiSelectComboBoxGroupItemsIT extends AbstractComponentIT {
     }
 
     @Test
-    public void groupSelectedItems_ungroupItems_itemsNotGrouped() {
-        groupSelected.click();
+    public void setSelectedItemsOnTop_unset_itemsNotGrouped() {
+        setSelectedOnTop.click();
 
         comboBox.selectByText("Item 2");
         comboBox.selectByText("Item 3");
@@ -85,7 +86,7 @@ public class MultiSelectComboBoxGroupItemsIT extends AbstractComponentIT {
 
         comboBox.closePopup();
 
-        ungroupSelected.click();
+        unsetSelectedOnTop.click();
 
         comboBox.openPopup();
         comboBox.waitForLoadingFinished();

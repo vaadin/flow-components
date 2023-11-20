@@ -52,8 +52,6 @@ import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.dnd.DragSource;
-import com.vaadin.flow.component.dnd.DropTarget;
 import com.vaadin.flow.component.grid.GridArrayUpdater.UpdateQueueData;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.grid.dataview.GridDataView;
@@ -205,10 +203,10 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha9")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha10")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/grid", version = "24.3.0-alpha9")
-@NpmPackage(value = "@vaadin/tooltip", version = "24.3.0-alpha9")
+@NpmPackage(value = "@vaadin/grid", version = "24.3.0-alpha10")
+@NpmPackage(value = "@vaadin/tooltip", version = "24.3.0-alpha10")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -433,7 +431,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-column")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha9")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha10")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class Column<T> extends AbstractColumn<Column<T>> {
 
@@ -4234,11 +4232,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @see GridDropEvent#getDropLocation()
      */
     public void setDropMode(GridDropMode dropMode) {
-        // We need to add DnD mobile polyfill here by invoking
-        // DndUtil.addMobileDndPolyfillIfNeeded. But, since DndUtil is in a Flow
-        // internal package, DropTarget.create is called to invoke
-        // addMobileDndPolyfillIfNeeded indirectly.
-        DropTarget.create(this).setActive(false);
         getElement().setProperty("dropMode",
                 dropMode == null ? null : dropMode.getClientName());
     }
@@ -4264,11 +4257,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            {@code false} if not
      */
     public void setRowsDraggable(boolean rowsDraggable) {
-        // We need to add DnD mobile polyfill here by invoking
-        // DndUtil.addMobileDndPolyfillIfNeeded. But, since DndUtil is in a Flow
-        // internal package, DragSource.create is called to invoke
-        // addMobileDndPolyfillIfNeeded indirectly.
-        DragSource.create(this).setDraggable(false);
         getElement().setProperty("rowsDraggable", rowsDraggable);
     }
 

@@ -12,7 +12,7 @@
     </parent>
     <url>https://vaadin.com/components</url>
     <properties>
-        <flow.version>24.2-SNAPSHOT</flow.version>
+        <flow.version>24.3-SNAPSHOT</flow.version>
         <testbench.version>9.2.0.alpha1</testbench.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
@@ -24,7 +24,7 @@
         <jetty.stop.port>9999</jetty.stop.port>
         <karaf-maven-plugin.version>4.4.4</karaf-maven-plugin.version>
         <maven.surefire.plugin.version>3.2.2</maven.surefire.plugin.version>
-        <maven.failsafe.plugin.version>3.2.1</maven.failsafe.plugin.version>
+        <maven.failsafe.plugin.version>3.2.2</maven.failsafe.plugin.version>
         <maven.resources.plugin.version>3.3.1</maven.resources.plugin.version>
         <failsafe.forkCount>4</failsafe.forkCount>
         <com.vaadin.tests.SharedBrowser.reuseBrowser>true</com.vaadin.tests.SharedBrowser.reuseBrowser>
