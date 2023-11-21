@@ -108,9 +108,9 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
             inputListenerRegistration = null;
         }
 
-        if (valueChangeMode.equals(ValueChangeMode.EAGER)
-                || valueChangeMode.equals(ValueChangeMode.LAZY)
-                || valueChangeMode.equals(ValueChangeMode.TIMEOUT)) {
+        if (ValueChangeMode.EAGER.equals(valueChangeMode)
+                || ValueChangeMode.LAZY.equals(valueChangeMode)
+                || ValueChangeMode.TIMEOUT.equals(valueChangeMode)) {
             inputListenerRegistration = getElement().addEventListener("input",
                     event -> {
                         if (valueEquals(getValue(), getEmptyValue())) {
