@@ -283,10 +283,11 @@ public class SplitLayout extends Component
     }
 
     /**
-     * Returns the component if the given components array contains only one
-     * or a wrapper div with the given components if the array contains more.
+     * Returns the component if the given components array contains only one or
+     * a wrapper div with the given components if the array contains more.
      *
-     * @param components the components to wrap
+     * @param components
+     *            the components to wrap
      * @return the component or a wrapper div
      */
     private Component getComponentOrWrap(Component... components) {
@@ -323,6 +324,15 @@ public class SplitLayout extends Component
                         + component + ") is not a child of this component");
             }
         }
+    }
+
+    /**
+     * Removes the primary and the secondary components.
+     */
+    public void removeAll() {
+        getElement().getChildren()
+                .forEach(child -> child.removeAttribute("slot"));
+        getElement().removeAllChildren();
     }
 
     @DomEvent("splitter-dragend")
