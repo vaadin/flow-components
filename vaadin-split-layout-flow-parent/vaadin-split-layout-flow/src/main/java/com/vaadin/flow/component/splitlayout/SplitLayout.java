@@ -165,14 +165,8 @@ public class SplitLayout extends Component
      * @see #setOrientation(Orientation)
      */
     public void addToPrimary(Component... components) {
-        if (components.length == 1) {
-            primaryComponent = components[0];
-        } else {
-            Div container = new Div();
-            container.add(components);
-            primaryComponent = container;
-        }
-        setComponents();
+        primaryComponent = getComponentOrWrap(components);
+        setComponent(primaryComponent, "primary");
     }
 
     /**
@@ -195,14 +189,8 @@ public class SplitLayout extends Component
      * @see #setOrientation(Orientation)
      */
     public void addToSecondary(Component... components) {
-        if (components.length == 1) {
-            secondaryComponent = components[0];
-        } else {
-            Div container = new Div();
-            container.add(components);
-            secondaryComponent = container;
-        }
-        setComponents();
+        secondaryComponent = getComponentOrWrap(components);
+        setComponent(secondaryComponent, "secondary");
     }
 
     /**
@@ -294,15 +282,27 @@ public class SplitLayout extends Component
         setInnerComponentStyle(styleName, value, false);
     }
 
-    private void setComponent(Component component, String slot) {
-        Component child = component == null ? new Div() : component;
-        SlotUtils.addToSlot(this, slot, child);
+    /**
+     * Returns the component if the given components array contains only one
+     * or a wrapper div with the given components if the array contains more.
+     *
+     * @param components the components to wrap
+     * @return the component or a wrapper div
+     */
+    private Component getComponentOrWrap(Component... components) {
+        if (components.length == 1) {
+            return components[0];
+        } else {
+            Div container = new Div();
+            container.add(components);
+            return container;
+        }
     }
 
-    private void setComponents() {
-        removeAll();
-        setComponent(primaryComponent, "primary");
-        setComponent(secondaryComponent, "secondary");
+    private void setComponent(Component component, String slot) {
+        Component child = component == null ? new Div() : component;
+        SlotUtils.clearSlot(this, slot);
+        SlotUtils.addToSlot(this, slot, child);
     }
 
     /**
@@ -323,15 +323,6 @@ public class SplitLayout extends Component
                         + component + ") is not a child of this component");
             }
         }
-    }
-
-    /**
-     * Removes the primary and the secondary components.
-     */
-    public void removeAll() {
-        getElement().getChildren()
-                .forEach(child -> child.removeAttribute("slot"));
-        getElement().removeAllChildren();
     }
 
     @DomEvent("splitter-dragend")
