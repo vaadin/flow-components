@@ -239,7 +239,7 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
     }
 
     /**
-     * Shows an error message and sets {@link #setError(boolean)} to true.
+     * Shows given error message and sets {@link #setError(boolean)} to true.
      *
      * @param title
      *            the {@link LoginI18n.ErrorMessage#getTitle() error message
