@@ -49,10 +49,10 @@ import java.util.stream.Collectors;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-crud")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.26")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.27")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/crud", version = "23.3.26")
-@NpmPackage(value = "@vaadin/vaadin-crud", version = "23.3.26")
+@NpmPackage(value = "@vaadin/crud", version = "23.3.27")
+@NpmPackage(value = "@vaadin/vaadin-crud", version = "23.3.27")
 @JsModule("@vaadin/crud/src/vaadin-crud.js")
 @JsModule("@vaadin/crud/src/vaadin-crud-edit-column.js")
 public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {

@@ -56,10 +56,10 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-app-layout")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.26")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.27")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/app-layout", version = "23.3.26")
-@NpmPackage(value = "@vaadin/vaadin-app-layout", version = "23.3.26")
+@NpmPackage(value = "@vaadin/app-layout", version = "23.3.27")
+@NpmPackage(value = "@vaadin/vaadin-app-layout", version = "23.3.27")
 @JsModule("@vaadin/app-layout/src/vaadin-app-layout.js")
 public class AppLayout extends Component implements RouterLayout, HasStyle {
     private static final PropertyDescriptor<String, String> primarySectionProperty = PropertyDescriptors
