@@ -57,7 +57,8 @@ public class SplitLayoutUnitTest {
 
         var primaryComponent = new Div();
         var detachCounter = new AtomicInteger();
-        primaryComponent.addDetachListener(event -> detachCounter.incrementAndGet());
+        primaryComponent
+                .addDetachListener(event -> detachCounter.incrementAndGet());
 
         splitLayout.addToPrimary(primaryComponent);
         splitLayout.addToSecondary(new Div());
@@ -72,7 +73,8 @@ public class SplitLayoutUnitTest {
 
         var secondaryComponent = new Div();
         var detachCounter = new AtomicInteger();
-        secondaryComponent.addDetachListener(event -> detachCounter.incrementAndGet());
+        secondaryComponent
+                .addDetachListener(event -> detachCounter.incrementAndGet());
 
         splitLayout.addToSecondary(secondaryComponent);
         splitLayout.addToPrimary(new Div());
