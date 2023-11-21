@@ -21,6 +21,7 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.di.Instantiator;
@@ -208,6 +209,23 @@ public class ComboBoxTest extends ComboBoxBaseTest {
         ComboBox<String> comboBox = new ComboBox<>();
         Assert.assertTrue(
                 comboBox instanceof InputField<AbstractField.ComponentValueChangeEvent<ComboBox<String>, String>, String>);
+    }
+
+    @Test
+    public void setDropdownWidth_smokeTests() {
+        ComboBox<String> comboBox = new ComboBox<>();
+        comboBox.setDropdownWidth(null);
+        Assert.assertNull(
+                comboBox.getStyle().get("--vaadin-combo-box-overlay-width"));
+        comboBox.setDropdownWidth("30em");
+        Assert.assertEquals("30em",
+                comboBox.getStyle().get("--vaadin-combo-box-overlay-width"));
+        comboBox.setDropdownWidth(-1, Unit.EM);
+        Assert.assertNull(
+                comboBox.getStyle().get("--vaadin-combo-box-overlay-width"));
+        comboBox.setDropdownWidth(100, Unit.PIXELS);
+        Assert.assertEquals("100.0px",
+                comboBox.getStyle().get("--vaadin-combo-box-overlay-width"));
     }
 
     @Tag("div")

@@ -17,6 +17,7 @@ package com.vaadin.flow.component.combobox;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.shared.InputField;
 import elemental.json.JsonArray;
 import org.junit.Assert;
@@ -320,5 +321,22 @@ public class MultiSelectComboBoxTest extends ComboBoxBaseTest {
         Assert.assertTrue(comboBox.isSelectedItemsOnTop());
         Assert.assertTrue(
                 comboBox.getElement().getProperty("selectedItemsOnTop", true));
+    }
+
+    @Test
+    public void setDropdownWidth_smokeTests() {
+        MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
+        comboBox.setDropdownWidth(null);
+        Assert.assertNull(comboBox.getStyle()
+                .get("--vaadin-multi-select-combo-box-overlay-width"));
+        comboBox.setDropdownWidth("30em");
+        Assert.assertEquals("30em", comboBox.getStyle()
+                .get("--vaadin-multi-select-combo-box-overlay-width"));
+        comboBox.setDropdownWidth(-1, Unit.EM);
+        Assert.assertNull(comboBox.getStyle()
+                .get("--vaadin-multi-select-combo-box-overlay-width"));
+        comboBox.setDropdownWidth(100, Unit.PIXELS);
+        Assert.assertEquals("100.0px", comboBox.getStyle()
+                .get("--vaadin-multi-select-combo-box-overlay-width"));
     }
 }

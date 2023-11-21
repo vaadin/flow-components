@@ -15,11 +15,12 @@
  */
 package com.vaadin.flow.component.combobox;
 
-import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
@@ -558,5 +559,30 @@ public class MultiSelectComboBox<TItem>
                 jsonObject.remove(key);
             }
         }
+    }
+
+    /**
+     * Sets the dropdown width.
+     *
+     * @param width
+     *            the new dropdown width. Pass in null to set the dropdown width
+     *            back to the default value.
+     */
+    public void setDropdownWidth(String width) {
+        getStyle().set("--vaadin-multi-select-combo-box-overlay-width", width);
+    }
+
+    /**
+     * Sets the dropdown width. Negative number implies unspecified size (the
+     * dropdown width is reverted back to the default value).
+     *
+     * @param width
+     *            the width of the dropdown.
+     * @param unit
+     *            the unit used for the dropdown.
+     */
+    public void setDropdownWidth(float width, Unit unit) {
+        Objects.requireNonNull(unit, "Unit can not be null");
+        setDropdownWidth(HasSize.getCssSize(width, unit));
     }
 }
