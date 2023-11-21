@@ -124,7 +124,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     }
 
     @Override
-    protected void applyChangeTimeout() {
+    void applyChangeTimeout() {
         super.applyChangeTimeout();
         ValueChangeMode.applyChangeTimeout(getValueChangeMode(),
                 getValueChangeTimeout(), inputListenerRegistration);
