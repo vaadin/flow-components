@@ -27,6 +27,8 @@ import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.PropertyChangeListener;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
+import elemental.json.JsonNull;
+import elemental.json.JsonValue;
 
 /**
  * Abstract component for the {@code <vaadin-login-overlay>} and
@@ -221,5 +223,42 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
     @Override
     public void onEnabledStateChanged(boolean enabled) {
         getElement().setProperty(PROP_DISABLED, !enabled);
+    }
+
+    /**
+     * Returns {@link LoginI18n} set earlier via {@link #setI18n(LoginI18n)}.
+     *
+     * @return current {@link LoginI18n} or null if none was set.
+     */
+    protected LoginI18n getI18n() {
+        final JsonValue json = (JsonValue) getElement().getPropertyRaw("i18n");
+        if (json == null || json instanceof JsonNull) {
+            return null;
+        }
+        return JsonSerializer.toObject(LoginI18n.class, json);
+    }
+
+    /**
+     * Shows an error message and sets {@link #setError(boolean)} to true.
+     *
+     * @param title
+     *            the {@link LoginI18n.ErrorMessage#getTitle() error message
+     *            title}, may be null.
+     * @param message
+     *            the {@link LoginI18n.ErrorMessage#getMessage() error message},
+     *            may be null.
+     */
+    public void setErrorMessage(String title, String message) {
+        var loginI18n = getI18n();
+        if (loginI18n == null) {
+            loginI18n = LoginI18n.createDefault();
+        }
+        if (loginI18n.getErrorMessage() == null) {
+            loginI18n.setErrorMessage(new LoginI18n.ErrorMessage());
+        }
+        loginI18n.getErrorMessage().setTitle(title);
+        loginI18n.getErrorMessage().setMessage(message);
+        setI18n(loginI18n);
+        setError(true);
     }
 }
