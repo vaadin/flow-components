@@ -114,4 +114,15 @@ public class DetachReattachIT extends AbstractComponentIT {
         // after re-attaching the grid when sorting is reset
         checkLogsForErrors();
     }
+
+    @Test
+    public void selectAndDetach_reAttach_noErrorIsThrown() {
+        open();
+
+        clickElementWithJs("select-and-detach-button");
+
+        clickElementWithJs("attach-button");
+
+        checkLogsForErrors();
+    }
 }
