@@ -100,4 +100,9 @@ public class MenuBarTest {
         menuItems = menuBar.getItems().toArray();
         Assert.assertArrayEquals(expected, menuItems);
     }
+
+    @Test
+    public void close_smoke() {
+        menuBar.close();
+    }
 }

@@ -514,4 +514,11 @@ public class MenuBar extends Component
 
         item.getElement().setProperty("tooltip", tooltipText);
     }
+
+    /**
+     * Closes any open submenus.
+     */
+    public void close() {
+        getElement().executeJs("this._subMenu.close()");
+    }
 }
