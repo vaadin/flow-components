@@ -27,6 +27,8 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.logging.Level;
 
 @TestPath("vaadin-date-picker/date-picker-custom-format")
@@ -270,6 +272,23 @@ public class DatePickerCustomFormatIT extends AbstractComponentIT {
         submitValue(id, "foobar");
 
         Assert.assertEquals("", output.getText());
+    }
+
+    @Test
+    public void renameTest() {
+        String id = DatePickerCustomFormatPage.RENAME_DATE_PICKER;
+        TestBenchElement output = $("span").id(
+                DatePickerCustomFormatPage.RENAME_OUTPUT);
+
+        String todayString = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE);
+        Assert.assertEquals(todayString, output.getText());
+
+        $(DatePickerElement.class).id(id).click();
+        waitForElementPresent(By.tagName("vaadin-date-picker-overlay"));
+        $(DatePickerElement.class).id(id).sendKeys(Keys.ESCAPE);
+        waitForElementNotPresent(By.tagName("vaadin-date-picker-overlay"));
+
+        Assert.assertEquals(todayString, output.getText());
     }
 
     private void submitValue(String id, String value) {

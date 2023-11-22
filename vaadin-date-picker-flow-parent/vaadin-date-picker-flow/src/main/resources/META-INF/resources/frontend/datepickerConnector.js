@@ -75,6 +75,18 @@ import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/s
             return false;
           }
 
+          function correctFullYear(date) {
+            // The last parsed year check handles the case where a four-digit year is parsed, then formatted
+            // as a two-digit year, and then parsed again. In this case we want to keep the century of the
+            // originally parsed year, instead of using the century of the reference date.
+            let yearValue = date.getFullYear();
+            if (
+              datepicker._selectedDate && datepicker._selectedDate.getFullYear() &&
+              yearValue % 100 === datepicker._selectedDate.getFullYear() % 100) {
+              date.setFullYear(datepicker._selectedDate.getFullYear());
+            }
+          }
+
           function formatDate(dateParts) {
             const format = formats[0];
             const date = _parseDate(`${dateParts.year}-${dateParts.month + 1}-${dateParts.day}`);
@@ -85,49 +97,32 @@ import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/s
           function parseDate(dateString) {
             const referenceDate = _getReferenceDate();
             for (let format of formats) {
+              const isShortFormat = isShortYearFormat(format);
               // We first try to match the date with the shorter version.
-              const shortYearFormat = getShortYearFormat(format);
-              if (shortYearFormat) {
+              if (!isShortFormat) {
+                const shortYearFormat = getShortYearFormat(format);
                 const shortYearFormatDate = dateFnsParse(dateString, shortYearFormat, referenceDate);
                 if (dateFnsIsValid(shortYearFormatDate)) {
-                  let yearValue = shortYearFormatDate.getFullYear();
-                  // The last parsed year check handles the case where a four-digit year is parsed, then formatted
-                  // as a two-digit year, and then parsed again. In this case we want to keep the century of the
-                  // originally parsed year, instead of using the century of the reference date.
-                  if (
-                    datepicker.$connector._lastParsedYear &&
-                    yearValue === datepicker.$connector._lastParsedYear % 100
-                  ) {
-                    yearValue = datepicker.$connector._lastParsedYear;
-                  }
+                  correctFullYear(shortYearFormatDate);
                   return {
                     day: shortYearFormatDate.getDate(),
                     month: shortYearFormatDate.getMonth(),
-                    year: yearValue
+                    year: shortYearFormatDate.getFullYear()
                   };
                 }
               }
               const date = dateFnsParse(dateString, format, referenceDate);
-
               if (dateFnsIsValid(date)) {
-                let yearValue = date.getFullYear();
-                if (
-                  datepicker.$connector._lastParsedYear &&
-                  yearValue % 100 === datepicker.$connector._lastParsedYear % 100 &&
-                  isShortYearFormat(format)
-                ) {
-                  yearValue = datepicker.$connector._lastParsedYear;
-                } else {
-                  datepicker.$connector._lastParsedYear = yearValue;
+                if (isShortFormat) {
+                  correctFullYear(date);
                 }
                 return {
                   day: date.getDate(),
                   month: date.getMonth(),
-                  year: yearValue
+                  year: date.getFullYear()
                 };
               }
             }
-            datepicker.$connector._lastParsedYear = undefined;
             return false;
           }
 
