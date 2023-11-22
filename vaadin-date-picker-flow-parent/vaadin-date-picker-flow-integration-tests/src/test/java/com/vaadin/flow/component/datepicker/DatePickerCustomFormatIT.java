@@ -277,10 +277,11 @@ public class DatePickerCustomFormatIT extends AbstractComponentIT {
     @Test
     public void renameTest() {
         String id = DatePickerCustomFormatPage.RENAME_DATE_PICKER;
-        TestBenchElement output = $("span").id(
-                DatePickerCustomFormatPage.RENAME_OUTPUT);
+        TestBenchElement output = $("span")
+                .id(DatePickerCustomFormatPage.RENAME_OUTPUT);
 
-        String todayString = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE);
+        String todayString = LocalDate.now()
+                .format(DateTimeFormatter.ISO_LOCAL_DATE);
         Assert.assertEquals(todayString, output.getText());
 
         $(DatePickerElement.class).id(id).click();
