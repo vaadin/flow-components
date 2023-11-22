@@ -19,11 +19,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Input;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.Scroller.ScrollDirection;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.textfield.TextField;
 
 public class ScrollerTest {
 
@@ -87,13 +88,19 @@ public class ScrollerTest {
     }
 
     @Test
-    public void setEnabled_disableChildren() {
-        TextField textField = new TextField();
+    public void implementsFocusable() {
+        Assert.assertTrue("Scroller should be focusable",
+                Focusable.class.isAssignableFrom(scroller.getClass()));
+    }
 
-        scroller.setContent(new VerticalLayout(textField));
-        Assert.assertTrue(textField.isEnabled());
+    @Test
+    public void setEnabled_disableChildren() {
+        Input input = new Input();
+
+        scroller.setContent(new VerticalLayout(input));
+        Assert.assertTrue(input.isEnabled());
 
         scroller.setEnabled(false);
-        Assert.assertFalse(textField.isEnabled());
+        Assert.assertFalse(input.isEnabled());
     }
 }
