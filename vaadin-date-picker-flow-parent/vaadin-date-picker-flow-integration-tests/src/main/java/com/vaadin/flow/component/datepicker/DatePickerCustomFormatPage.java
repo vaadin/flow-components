@@ -49,8 +49,8 @@ public class DatePickerCustomFormatPage extends VerticalLayout {
     public static final String SERVER_SIDE_VALUE_CHANGE_BUTTON = "SERVER_SIDE_VALUE_CHANGE_BUTTON";
     public static final String CUSTOM_REFERENCE_DATE_AND_FORMAT_OPTIONS_DATE_PICKER = "CUSTOM_REFERENCE_DATE_AND_FORMAT_OPTIONS_DATE_PICKER";
     public static final String CUSTOM_REFERENCE_DATE_AND_FORMAT_OPTIONS_OUTPUT = "CUSTOM_REFERENCE_DATE_AND_FORMAT_OPTIONS_OUTPUT";
-    public static final String RENAME_DATE_PICKER = "RENAME_DATE_PICKER";
-    public static final String RENAME_OUTPUT = "RENAME_OUTPUT";
+    public static final String OLD_REFERENCE_DATE_WITH_SHORT_FORMAT_DATE_PICKER = "OLD_REFERENCE_DATE_WITH_SHORT_FORMAT_DATE_PICKER";
+    public static final String OLD_REFERENCE_DATE_WITH_SHORT_FORMAT_OUTPUT = "OLD_REFERENCE_DATE_WITH_SHORT_FORMAT_OUTPUT";
 
     public static final LocalDate may13 = LocalDate.of(2018, Month.MAY, 13);
 
@@ -63,7 +63,7 @@ public class DatePickerCustomFormatPage extends VerticalLayout {
         setupSetFormatAfterLocale();
         setupServerSideValueChange();
         setupCustomReferenceDateAndFormatOptions();
-        setupRename();
+        setupOldReferenceDateWithShortFormat();
     }
 
     public void setupPrimaryFormat() {
@@ -208,11 +208,11 @@ public class DatePickerCustomFormatPage extends VerticalLayout {
                 output);
     }
 
-    private void setupRename() {
+    private void setupOldReferenceDateWithShortFormat() {
         LocalDate today = LocalDate.now();
 
         DatePicker datePicker = new DatePicker(today);
-        datePicker.setId(RENAME_DATE_PICKER);
+        datePicker.setId(OLD_REFERENCE_DATE_WITH_SHORT_FORMAT_DATE_PICKER);
         DatePickerI18n i18n = new DatePickerI18n();
         i18n.setReferenceDate(today.minusYears(100));
         i18n.setDateFormat("yy-MM-dd");
@@ -227,7 +227,7 @@ public class DatePickerCustomFormatPage extends VerticalLayout {
                 output.setText("");
             }
         });
-        output.setId(RENAME_OUTPUT);
+        output.setId(OLD_REFERENCE_DATE_WITH_SHORT_FORMAT_OUTPUT);
 
         add(datePicker, output);
     }
