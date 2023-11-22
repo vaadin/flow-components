@@ -85,7 +85,7 @@ import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/s
               currentDate.getMonth() === date.getMonth() &&
               currentDate.getFullYear() % 100 === date.getFullYear() % 100
             ) {
-              date.setFullYear(currentDate.getFullYear);
+              date.setFullYear(currentDate.getFullYear());
             }
           }
 
