@@ -288,7 +288,6 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
     }
 
     @Override
-
     public void remove(Component... components) {
         super.remove(components);
     }
