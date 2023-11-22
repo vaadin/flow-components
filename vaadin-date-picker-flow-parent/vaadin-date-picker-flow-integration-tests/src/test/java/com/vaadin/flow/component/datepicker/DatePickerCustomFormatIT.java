@@ -277,8 +277,8 @@ public class DatePickerCustomFormatIT extends AbstractComponentIT {
     @Test
     public void pickerWithOldReferenceDateAndShortFormat_yearIsRetainedOnOverlayOpenClose() {
         String id = DatePickerCustomFormatPage.OLD_REFERENCE_DATE_WITH_SHORT_FORMAT_DATE_PICKER;
-        TestBenchElement output = $("span")
-                .id(DatePickerCustomFormatPage.OLD_REFERENCE_DATE_WITH_SHORT_FORMAT_OUTPUT);
+        TestBenchElement output = $("span").id(
+                DatePickerCustomFormatPage.OLD_REFERENCE_DATE_WITH_SHORT_FORMAT_OUTPUT);
 
         String todayString = LocalDate.now()
                 .format(DateTimeFormatter.ISO_LOCAL_DATE);
