@@ -227,8 +227,13 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
 
     /**
      * Returns {@link LoginI18n} set earlier via {@link #setI18n(LoginI18n)}.
+     * <p>
+     * </p>
+     * Note that a copy of the original object is returned: changes done to the
+     * copy will not be reflected back until the object is set via
+     * {@link #setI18n(LoginI18n)}.
      *
-     * @return current {@link LoginI18n} or null if none was set.
+     * @return currently set {@link LoginI18n} or null if none was set.
      */
     protected LoginI18n getI18n() {
         final JsonValue json = (JsonValue) getElement().getPropertyRaw("i18n");
