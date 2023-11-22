@@ -43,9 +43,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-split-layout")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha10")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha11")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/split-layout", version = "24.3.0-alpha10")
+@NpmPackage(value = "@vaadin/split-layout", version = "24.3.0-alpha11")
 @JsModule("@vaadin/split-layout/src/vaadin-split-layout.js")
 public class SplitLayout extends Component
         implements ClickNotifier<SplitLayout>, HasSize, HasStyle,
@@ -165,14 +165,8 @@ public class SplitLayout extends Component
      * @see #setOrientation(Orientation)
      */
     public void addToPrimary(Component... components) {
-        if (components.length == 1) {
-            primaryComponent = components[0];
-        } else {
-            Div container = new Div();
-            container.add(components);
-            primaryComponent = container;
-        }
-        setComponents();
+        primaryComponent = getComponentOrWrap(components);
+        setComponent(primaryComponent, "primary");
     }
 
     /**
@@ -195,14 +189,8 @@ public class SplitLayout extends Component
      * @see #setOrientation(Orientation)
      */
     public void addToSecondary(Component... components) {
-        if (components.length == 1) {
-            secondaryComponent = components[0];
-        } else {
-            Div container = new Div();
-            container.add(components);
-            secondaryComponent = container;
-        }
-        setComponents();
+        secondaryComponent = getComponentOrWrap(components);
+        setComponent(secondaryComponent, "secondary");
     }
 
     /**
@@ -294,15 +282,21 @@ public class SplitLayout extends Component
         setInnerComponentStyle(styleName, value, false);
     }
 
-    private void setComponent(Component component, String slot) {
-        Component child = component == null ? new Div() : component;
-        SlotUtils.addToSlot(this, slot, child);
+    /**
+     * Returns the component if the given components array contains only one or
+     * a wrapper div with the given components if the array contains more.
+     *
+     * @param components
+     *            the components to wrap
+     * @return the component or a wrapper div
+     */
+    private Component getComponentOrWrap(Component... components) {
+        return components.length == 1 ? components[0] : new Div(components);
     }
 
-    private void setComponents() {
-        removeAll();
-        setComponent(primaryComponent, "primary");
-        setComponent(secondaryComponent, "secondary");
+    private void setComponent(Component component, String slot) {
+        Component child = component == null ? new Div() : component;
+        SlotUtils.setSlot(this, slot, child);
     }
 
     /**

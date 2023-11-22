@@ -73,7 +73,7 @@ public abstract class TextFieldBase<TComponent extends TextFieldBase<TComponent,
     public void setValueChangeMode(ValueChangeMode valueChangeMode) {
         currentMode = valueChangeMode;
         setSynchronizedEvent(
-                ValueChangeMode.eventForMode(valueChangeMode, "value-changed"));
+                ValueChangeMode.eventForMode(valueChangeMode, "input"));
         applyChangeTimeout();
     }
 
@@ -88,7 +88,7 @@ public abstract class TextFieldBase<TComponent extends TextFieldBase<TComponent,
         return valueChangeTimeout;
     }
 
-    private void applyChangeTimeout() {
+    void applyChangeTimeout() {
         ValueChangeMode.applyChangeTimeout(getValueChangeMode(),
                 getValueChangeTimeout(), getSynchronizationRegistration());
     }
