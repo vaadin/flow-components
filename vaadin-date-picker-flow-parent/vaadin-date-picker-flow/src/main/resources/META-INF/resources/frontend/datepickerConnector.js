@@ -65,28 +65,6 @@ import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/s
             return undefined;
           }
 
-          function isShortYearFormat(format) {
-            if (format.includes('y')) {
-              return !format.includes('yyy');
-            }
-            if (format.includes('Y')) {
-              return !format.includes('YYY');
-            }
-            return false;
-          }
-
-          function correctFullYear(date) {
-            // The last parsed year check handles the case where a four-digit year is parsed, then formatted
-            // as a two-digit year, and then parsed again. In this case we want to keep the century of the
-            // originally parsed year, instead of using the century of the reference date.
-            let yearValue = date.getFullYear();
-            if (
-              datepicker._selectedDate && datepicker._selectedDate.getFullYear() &&
-              yearValue % 100 === datepicker._selectedDate.getFullYear() % 100) {
-              date.setFullYear(datepicker._selectedDate.getFullYear());
-            }
-          }
-
           function formatDate(dateParts) {
             const format = formats[0];
             const date = _parseDate(`${dateParts.year}-${dateParts.month + 1}-${dateParts.day}`);
@@ -94,33 +72,32 @@ import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/s
             return dateFnsFormat(date, format);
           }
 
+          function doParseDate(dateString, format, referenceDate) {
+            const date = dateFnsParse(dateString, format, referenceDate);
+            if (!dateFnsIsValid(date)) {
+              return null;
+            }
+            return {
+              day: date.getDate(),
+              month: date.getMonth(),
+              year: date.getFullYear()
+            };
+          }
+
           function parseDate(dateString) {
             const referenceDate = _getReferenceDate();
             for (let format of formats) {
-              const isShortFormat = isShortYearFormat(format);
               // We first try to match the date with the shorter version.
-              if (!isShortFormat) {
-                const shortYearFormat = getShortYearFormat(format);
-                const shortYearFormatDate = dateFnsParse(dateString, shortYearFormat, referenceDate);
-                if (dateFnsIsValid(shortYearFormatDate)) {
-                  correctFullYear(shortYearFormatDate);
-                  return {
-                    day: shortYearFormatDate.getDate(),
-                    month: shortYearFormatDate.getMonth(),
-                    year: shortYearFormatDate.getFullYear()
-                  };
+              const shortYearFormat = getShortYearFormat(format);
+              if (shortYearFormat) {
+                const parsedDate = doParseDate(dateString, shortYearFormat, referenceDate);
+                if (parsedDate) {
+                  return parsedDate;
                 }
               }
-              const date = dateFnsParse(dateString, format, referenceDate);
-              if (dateFnsIsValid(date)) {
-                if (isShortFormat) {
-                  correctFullYear(date);
-                }
-                return {
-                  day: date.getDate(),
-                  month: date.getMonth(),
-                  year: date.getFullYear()
-                };
+              const parsedDate = doParseDate(dateString, format, referenceDate);
+              if (parsedDate) {
+                return parsedDate;
               }
             }
             return false;
