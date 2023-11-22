@@ -76,14 +76,16 @@ import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/s
           }
 
           function correctFullYear(date) {
-            // The last parsed year check handles the case where a four-digit year is parsed, then formatted
+            // The current year check handles the case where a four-digit year is parsed, then formatted
             // as a two-digit year, and then parsed again. In this case we want to keep the century of the
             // originally parsed year, instead of using the century of the reference date.
-            let yearValue = date.getFullYear();
+            const currentDate = _parseDate(datepicker.value);
             if (
-              datepicker._selectedDate && datepicker._selectedDate.getFullYear() &&
-              yearValue % 100 === datepicker._selectedDate.getFullYear() % 100) {
-              date.setFullYear(datepicker._selectedDate.getFullYear());
+              currentDate.getDate() === date.getDate() &&
+              currentDate.getMonth() === date.getMonth() &&
+              currentDate.getFullYear() % 100 === date.getFullYear() % 100
+            ) {
+              date.setFullYear(currentDate.getFullYear);
             }
           }
 
