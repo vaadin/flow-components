@@ -291,19 +291,12 @@ public class SplitLayout extends Component
      * @return the component or a wrapper div
      */
     private Component getComponentOrWrap(Component... components) {
-        if (components.length == 1) {
-            return components[0];
-        } else {
-            Div container = new Div();
-            container.add(components);
-            return container;
-        }
+        return components.length == 1 ? components[0] : new Div(components);
     }
 
     private void setComponent(Component component, String slot) {
         Component child = component == null ? new Div() : component;
-        SlotUtils.clearSlot(this, slot);
-        SlotUtils.addToSlot(this, slot, child);
+        SlotUtils.setSlot(this, slot, child);
     }
 
     /**
