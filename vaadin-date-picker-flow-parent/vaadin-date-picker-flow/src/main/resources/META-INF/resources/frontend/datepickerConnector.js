@@ -2,6 +2,7 @@ import dateFnsFormat from 'date-fns/format';
 import dateFnsParse from 'date-fns/parse';
 import dateFnsIsValid from 'date-fns/isValid';
 import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/src/vaadin-date-picker-helper.js';
+import { DatePicker } from '@vaadin/date-picker/src/vaadin-date-picker.js';
 
 (function () {
   const tryCatchWrapper = function (callback) {
@@ -75,24 +76,26 @@ import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/s
             return false;
           }
 
-          function matchDates(lastParsedDate, date) {
-            return dateFnsIsValid(lastParsedDate) &&
-              lastParsedDate.getDate() === date.getDate() &&
-              lastParsedDate.getMonth() === date.getMonth() &&
-              lastParsedDate.getFullYear() % 100 === date.getFullYear() % 100;
-          }
-
           function correctFullYear(date) {
             // The last parsed date check handles the case where a four-digit year is parsed, then formatted
             // as a two-digit year, and then parsed again. In this case we want to keep the century of the
             // originally parsed year, instead of using the century of the reference date.
-            const lastParsedDate = datepicker.$connector._lastParsedDate;
-            if (matchDates(lastParsedDate, date)) {
-              date.setFullYear(lastParsedDate.getFullYear());
+            if (datepicker.$connector._lastParseStatus === 'error') {
+              return;
+            }
+            if (datepicker.$connector._lastParseStatus === 'successful') {
+              if (datepicker.$connector._lastParsedDate.day === date.getDate() &&
+                datepicker.$connector._lastParsedDate.month === date.getMonth() &&
+                datepicker.$connector._lastParsedDate.year % 100 === date.getFullYear() % 100) {
+                date.setFullYear(datepicker.$connector._lastParsedDate.year);
+              }
               return;
             }
             const currentValue = _parseDate(datepicker.value);
-            if (matchDates(currentValue, date)) {
+            if (dateFnsIsValid(currentValue) &&
+              currentValue.getDate() === date.getDate() &&
+              currentValue.getMonth() === date.getMonth() &&
+              currentValue.getFullYear() % 100 === date.getFullYear() % 100) {
               date.setFullYear(currentValue.getFullYear());
             }
           }
@@ -126,17 +129,19 @@ import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/s
               if (!isShortFormat) {
                 const parsedDate = doParseDate(dateString, getShortYearFormat(format), referenceDate);
                 if (parsedDate) {
+                  datepicker.$connector._lastParseStatus = 'successful';
                   datepicker.$connector._lastParsedDate = parsedDate;
                   return parsedDate;
                 }
               }
               const parsedDate = doParseDate(dateString, format, referenceDate);
               if (parsedDate) {
+                datepicker.$connector._lastParseStatus = 'successful';
                 datepicker.$connector._lastParsedDate = parsedDate;
                 return parsedDate;
               }
             }
-            datepicker.$connector._lastParsedDate = null;
+            datepicker.$connector._lastParseStatus = 'error';
             return false;
           }
 
@@ -163,6 +168,8 @@ import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/s
           // Merge current web component I18N settings with new I18N settings and the formatting and parsing functions
           datepicker.i18n = Object.assign({}, datepicker.i18n, i18n, formatterAndParser);
         });
+
+        datepicker.addEventListener('opened-changed', () => datepicker.$connector._lastParseStatus = undefined);
       })(datepicker)
   };
 })();
