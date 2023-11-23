@@ -116,7 +116,7 @@ public class LoginOverlayHasStyleTest {
     @Test
     public void setErrorMessage_fromNullI18n() {
         overlay = new LoginOverlay(null);
-        overlay.setErrorMessage("title", "message");
+        overlay.showErrorMessage("title", "message");
         Assert.assertTrue(overlay.isError());
         Assert.assertEquals("title",
                 overlay.getI18n().getErrorMessage().getTitle());
@@ -126,7 +126,7 @@ public class LoginOverlayHasStyleTest {
 
     @Test
     public void setErrorMessage_fromDefaultI18n() {
-        overlay.setErrorMessage("title", "message");
+        overlay.showErrorMessage("title", "message");
         Assert.assertTrue(overlay.isError());
         Assert.assertEquals("title",
                 overlay.getI18n().getErrorMessage().getTitle());

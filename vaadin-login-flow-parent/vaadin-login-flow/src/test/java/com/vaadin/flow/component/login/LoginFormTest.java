@@ -50,9 +50,9 @@ public class LoginFormTest {
     }
 
     @Test
-    public void setErrorMessage_fromNullI18n() {
+    public void showErrorMessage_fromNullI18n() {
         final LoginForm form = new LoginForm(null);
-        form.setErrorMessage("title", "message");
+        form.showErrorMessage("title", "message");
         Assert.assertTrue(form.isError());
         Assert.assertEquals("title",
                 form.getI18n().getErrorMessage().getTitle());
@@ -61,9 +61,9 @@ public class LoginFormTest {
     }
 
     @Test
-    public void setErrorMessage_fromDefaultI18n() {
+    public void showErrorMessage_fromDefaultI18n() {
         final LoginForm form = new LoginForm();
-        form.setErrorMessage("title", "message");
+        form.showErrorMessage("title", "message");
         Assert.assertTrue(form.isError());
         Assert.assertEquals("title",
                 form.getI18n().getErrorMessage().getTitle());

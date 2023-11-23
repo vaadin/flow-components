@@ -253,7 +253,7 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
      *            the {@link LoginI18n.ErrorMessage#getMessage() error message},
      *            may be null.
      */
-    public void setErrorMessage(String title, String message) {
+    public void showErrorMessage(String title, String message) {
         var loginI18n = getI18n();
         if (loginI18n == null) {
             loginI18n = LoginI18n.createDefault();
