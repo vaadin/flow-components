@@ -142,11 +142,11 @@ public class DatePickerCustomFormatIT extends AbstractComponentIT {
 
         $("button").id("set-long-format").click();
 
-        submitValue(id, "31-02-27");
-        Assert.assertEquals("1931-02-27", output.getText());
-
         submitValue(id, "2031-02-27");
         Assert.assertEquals("2031-02-27", output.getText());
+
+        submitValue(id, "31-02-27");
+        Assert.assertEquals("1931-02-27", output.getText());
 
         submitValue(id, "29-02-27");
         Assert.assertEquals("2029-02-27", output.getText());
@@ -163,11 +163,11 @@ public class DatePickerCustomFormatIT extends AbstractComponentIT {
 
         $("button").id("set-multiple-formats").click();
 
-        submitValue(id, "31-02-27");
-        Assert.assertEquals("1931-02-27", output.getText());
-
         submitValue(id, "2031-02-27");
         Assert.assertEquals("2031-02-27", output.getText());
+
+        submitValue(id, "31-02-27");
+        Assert.assertEquals("1931-02-27", output.getText());
 
         submitValue(id, "29-02-27");
         Assert.assertEquals("2029-02-27", output.getText());

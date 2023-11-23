@@ -76,19 +76,16 @@ import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/s
           }
 
           function correctFullYear(date) {
-            // The current year check handles the case where a four-digit year is parsed, then formatted
+            // The last parsed date check handles the case where a four-digit year is parsed, then formatted
             // as a two-digit year, and then parsed again. In this case we want to keep the century of the
             // originally parsed year, instead of using the century of the reference date.
-            if (!datepicker.value) {
-              return;
-            }
-            const currentDate = _parseDate(datepicker.value);
-            if (dateFnsIsValid(currentDate) &&
-              currentDate.getDate() === date.getDate() &&
-              currentDate.getMonth() === date.getMonth() &&
-              currentDate.getFullYear() % 100 === date.getFullYear() % 100
+            const dateWithCorrectYear = datepicker.$connector._lastParsedDate || _parseDate(datepicker.value);
+            if (dateFnsIsValid(dateWithCorrectYear) &&
+              dateWithCorrectYear.getDate() === date.getDate() &&
+              dateWithCorrectYear.getMonth() === date.getMonth() &&
+              dateWithCorrectYear.getFullYear() % 100 === date.getFullYear() % 100
             ) {
-              date.setFullYear(currentDate.getFullYear());
+              date.setFullYear(dateWithCorrectYear.getFullYear());
             }
           }
 
@@ -109,6 +106,7 @@ import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/s
                 const shortYearFormatDate = dateFnsParse(dateString, shortYearFormat, referenceDate);
                 if (dateFnsIsValid(shortYearFormatDate)) {
                   correctFullYear(shortYearFormatDate);
+                  datepicker.$connector._lastParsedDate = shortYearFormatDate;
                   return {
                     day: shortYearFormatDate.getDate(),
                     month: shortYearFormatDate.getMonth(),
@@ -121,6 +119,7 @@ import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/s
                 if (isShortFormat) {
                   correctFullYear(date);
                 }
+                datepicker.$connector._lastParsedDate = date;
                 return {
                   day: date.getDate(),
                   month: date.getMonth(),
@@ -128,6 +127,7 @@ import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/s
                 };
               }
             }
+            datepicker.$connector._lastParsedDate = null;
             return false;
           }
 
