@@ -275,7 +275,7 @@ public class DatePickerCustomFormatIT extends AbstractComponentIT {
     }
 
     @Test
-    public void pickerWithOldReferenceDateAndShortFormat_yearIsRetainedOnOverlayOpenClose() {
+    public void pickerWithOldReferenceDateAndShortFormat_openAndCloseOverlay_yearIsRetained() {
         String id = DatePickerCustomFormatPage.OLD_REFERENCE_DATE_WITH_SHORT_FORMAT_DATE_PICKER;
         TestBenchElement output = $("span").id(
                 DatePickerCustomFormatPage.OLD_REFERENCE_DATE_WITH_SHORT_FORMAT_OUTPUT);
