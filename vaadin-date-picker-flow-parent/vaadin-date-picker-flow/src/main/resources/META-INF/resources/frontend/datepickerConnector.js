@@ -79,8 +79,11 @@ import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/s
             // The current year check handles the case where a four-digit year is parsed, then formatted
             // as a two-digit year, and then parsed again. In this case we want to keep the century of the
             // originally parsed year, instead of using the century of the reference date.
+            if (!datepicker.value) {
+              return;
+            }
             const currentDate = _parseDate(datepicker.value);
-            if (
+            if (dateFnsIsValid(currentDate) &&
               currentDate.getDate() === date.getDate() &&
               currentDate.getMonth() === date.getMonth() &&
               currentDate.getFullYear() % 100 === date.getFullYear() % 100
