@@ -80,9 +80,13 @@ import { DatePicker } from '@vaadin/date-picker/src/vaadin-date-picker.js';
             // The last parsed date check handles the case where a four-digit year is parsed, then formatted
             // as a two-digit year, and then parsed again. In this case we want to keep the century of the
             // originally parsed year, instead of using the century of the reference date.
+
+            // Do not apply any correction if the previous parse attempt was failed.
             if (datepicker.$connector._lastParseStatus === 'error') {
               return;
             }
+
+            // Update century if the last parsed date is the same except the century.
             if (datepicker.$connector._lastParseStatus === 'successful') {
               if (datepicker.$connector._lastParsedDate.day === date.getDate() &&
                 datepicker.$connector._lastParsedDate.month === date.getMonth() &&
@@ -91,6 +95,8 @@ import { DatePicker } from '@vaadin/date-picker/src/vaadin-date-picker.js';
               }
               return;
             }
+
+            // Update century if this is the first parse after overlay open.
             const currentValue = _parseDate(datepicker.value);
             if (dateFnsIsValid(currentValue) &&
               currentValue.getDate() === date.getDate() &&
