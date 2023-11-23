@@ -1,11 +1,11 @@
 package com.vaadin.flow.component.spreadsheet.test;
 
-import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
-import com.vaadin.flow.testutil.TestPath;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
+import com.vaadin.flow.testutil.TestPath;
 
 @TestPath("vaadin-spreadsheet")
 public class ConditionalFormatterIT extends AbstractSpreadsheetIT {
@@ -54,5 +54,13 @@ public class ConditionalFormatterIT extends AbstractSpreadsheetIT {
         // after formula is updated the background is red
         Assert.assertEquals("rgba(255, 199, 206, 1)",
                 targetCell.getCssValue("background-color"));
+    }
+
+    @Test
+    public void conditionalFormattingForNumberCell_formattingMatches() {
+        SheetCellElement targetCell = getSpreadsheet().getCellAt("B8");
+        // target cell has conditional formatting: when value > 10 then display
+        // four decimal places
+        Assert.assertEquals("12.0000", targetCell.getValue());
     }
 }
