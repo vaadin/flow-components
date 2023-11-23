@@ -75,17 +75,25 @@ import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/s
             return false;
           }
 
+          function matchDates(lastParsedDate, date) {
+            return dateFnsIsValid(lastParsedDate) &&
+              lastParsedDate.getDate() === date.getDate() &&
+              lastParsedDate.getMonth() === date.getMonth() &&
+              lastParsedDate.getFullYear() % 100 === date.getFullYear() % 100;
+          }
+
           function correctFullYear(date) {
             // The last parsed date check handles the case where a four-digit year is parsed, then formatted
             // as a two-digit year, and then parsed again. In this case we want to keep the century of the
             // originally parsed year, instead of using the century of the reference date.
-            const dateWithCorrectYear = datepicker.$connector._lastParsedDate || _parseDate(datepicker.value);
-            if (dateFnsIsValid(dateWithCorrectYear) &&
-              dateWithCorrectYear.getDate() === date.getDate() &&
-              dateWithCorrectYear.getMonth() === date.getMonth() &&
-              dateWithCorrectYear.getFullYear() % 100 === date.getFullYear() % 100
-            ) {
-              date.setFullYear(dateWithCorrectYear.getFullYear());
+            const lastParsedDate = datepicker.$connector._lastParsedDate;
+            if (matchDates(lastParsedDate, date)) {
+              date.setFullYear(lastParsedDate.getFullYear());
+              return;
+            }
+            const currentValue = _parseDate(datepicker.value);
+            if (matchDates(currentValue, date)) {
+              date.setFullYear(currentValue.getFullYear());
             }
           }
 
