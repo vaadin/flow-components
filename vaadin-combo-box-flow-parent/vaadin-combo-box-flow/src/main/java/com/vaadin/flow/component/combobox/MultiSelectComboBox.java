@@ -85,6 +85,7 @@ public class MultiSelectComboBox<TItem>
 
     private final MultiSelectComboBoxSelectionModel<TItem> selectionModel;
     private MultiSelectComboBoxI18n i18n;
+    private AutoExpandMode autoExpand;
 
     /**
      * Default constructor. Creates an empty combo box.
@@ -133,6 +134,8 @@ public class MultiSelectComboBox<TItem>
         // Initialize page size and data provider
         setPageSize(pageSize);
         setItems(new DataCommunicator.EmptyDataProvider<>());
+
+        setAutoExpand(AutoExpandMode.NONE);
     }
 
     /**
@@ -414,6 +417,93 @@ public class MultiSelectComboBox<TItem>
      */
     public void setSelectedItemsOnTop(boolean selectedItemsOnTop) {
         getElement().setProperty("selectedItemsOnTop", selectedItemsOnTop);
+    }
+
+    /**
+     * Defines possible behavior of the component when not all selected items
+     * can be displayed as chips within the current field width.
+     */
+    public enum AutoExpandMode {
+        /**
+         * Field expands vertically and chips wrap.
+         */
+        VERTICAL(false, true),
+
+        /**
+         * Field expands horizontally until max-width is reached, then collapses
+         * to overflow chip.
+         */
+        HORIZONTAL(true, false),
+
+        /**
+         * Field expands horizontally until max-width is reached, then expands
+         * vertically and chips wrap.
+         */
+        BOTH(true, true),
+
+        /**
+         * Field does not expand and collapses to overflow chip.
+         */
+        NONE(false, false);
+
+        private final boolean expandHorizontally;
+        private final boolean expandVertically;
+
+        AutoExpandMode(boolean expandHorizontally, boolean expandVertically) {
+            this.expandHorizontally = expandHorizontally;
+            this.expandVertically = expandVertically;
+        }
+
+        /**
+         * Gets whether to expand horizontally.
+         *
+         * @return Whether to expand horizontally
+         */
+        public boolean getExpandHorizontally() {
+            return expandHorizontally;
+        }
+
+        /**
+         * Gets whether to expand vertically.
+         *
+         * @return Whether to expand vertically
+         */
+        public boolean getExpandVertically() {
+            return expandVertically;
+        }
+    }
+
+    /**
+     * Gets the behavior of the component when not all selected items can be
+     * displayed as chips within the current field width.
+     *
+     * @since 23.4
+     * @return The current {@link AutoExpandMode}
+     */
+    public AutoExpandMode getAutoExpand() {
+        return autoExpand;
+    }
+
+    /**
+     * Sets the behavior of the component when not all selected items can be
+     * displayed as chips within the current field width.
+     *
+     * Expansion only works with undefined size in the desired direction (i.e.
+     * setting `max-width` limits the component's width).
+     *
+     * @param {AutoExpandMode}
+     *            autoExpandMode
+     * @since 23.4
+     */
+    public void setAutoExpand(AutoExpandMode autoExpandMode) {
+        Objects.requireNonNull(autoExpandMode,
+                "The mode to be set cannot be null");
+        autoExpand = autoExpandMode;
+
+        getElement().setProperty("autoExpandHorizontally",
+                autoExpandMode.getExpandHorizontally());
+        getElement().setProperty("autoExpandVertically",
+                autoExpandMode.getExpandVertically());
     }
 
     /**
