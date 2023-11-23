@@ -395,6 +395,28 @@ public class MultiSelectComboBox<TItem>
     }
 
     /**
+     * Gets whether selected items are grouped at the top of the overlay.
+     *
+     * @since 23.4
+     * @return {@code true} if enabled, {@code false} otherwise
+     */
+    public boolean isSelectedItemsOnTop() {
+        return getElement().getProperty("selectedItemsOnTop", false);
+    }
+
+    /**
+     * Enables or disables grouping of the selected items at the top of the
+     * overlay.
+     *
+     * @since 23.4
+     * @param selectedItemsOnTop
+     *            {@code true} to group selected items at the top
+     */
+    public void setSelectedItemsOnTop(boolean selectedItemsOnTop) {
+        getElement().setProperty("selectedItemsOnTop", selectedItemsOnTop);
+    }
+
+    /**
      * Gets the internationalization object previously set for this component.
      * <p>
      * Note: updating the i18n object that is returned from this method will not
