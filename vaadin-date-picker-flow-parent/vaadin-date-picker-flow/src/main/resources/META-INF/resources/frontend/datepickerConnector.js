@@ -96,35 +96,36 @@ import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/s
             return dateFnsFormat(date, format);
           }
 
+          function doParseDate(dateString, format, referenceDate) {
+            const date = dateFnsParse(dateString, format, referenceDate);
+            if (dateFnsIsValid(date)) {
+              if (isShortYearFormat(format)) {
+                correctFullYear(date);
+              }
+              return {
+                day: date.getDate(),
+                month: date.getMonth(),
+                year: date.getFullYear()
+              };
+            }
+          }
+
           function parseDate(dateString) {
             const referenceDate = _getReferenceDate();
             for (let format of formats) {
               const isShortFormat = isShortYearFormat(format);
               // We first try to match the date with the shorter version.
               if (!isShortFormat) {
-                const shortYearFormat = getShortYearFormat(format);
-                const shortYearFormatDate = dateFnsParse(dateString, shortYearFormat, referenceDate);
-                if (dateFnsIsValid(shortYearFormatDate)) {
-                  correctFullYear(shortYearFormatDate);
-                  datepicker.$connector._lastParsedDate = shortYearFormatDate;
-                  return {
-                    day: shortYearFormatDate.getDate(),
-                    month: shortYearFormatDate.getMonth(),
-                    year: shortYearFormatDate.getFullYear()
-                  };
+                const parsedDate = doParseDate(dateString, getShortYearFormat(format), referenceDate);
+                if (parsedDate) {
+                  datepicker.$connector._lastParsedDate = parsedDate;
+                  return parsedDate;
                 }
               }
-              const date = dateFnsParse(dateString, format, referenceDate);
-              if (dateFnsIsValid(date)) {
-                if (isShortFormat) {
-                  correctFullYear(date);
-                }
-                datepicker.$connector._lastParsedDate = date;
-                return {
-                  day: date.getDate(),
-                  month: date.getMonth(),
-                  year: date.getFullYear()
-                };
+              const parsedDate = doParseDate(dateString, format, referenceDate);
+              if (parsedDate) {
+                datepicker.$connector._lastParsedDate = parsedDate;
+                return parsedDate;
               }
             }
             datepicker.$connector._lastParsedDate = null;
