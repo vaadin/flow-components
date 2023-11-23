@@ -163,7 +163,8 @@ public class MarkerFeature extends PointBasedFeature {
         }
 
         @Override
-        protected void addPropertyChangeListener(PropertyChangeListener listener) {
+        protected void addPropertyChangeListener(
+                PropertyChangeListener listener) {
             // NO-OP
         }
 
@@ -184,55 +185,66 @@ public class MarkerFeature extends PointBasedFeature {
         }
 
         @Override
-        protected void addChild(AbstractConfigurationObject configurationObject) {
-            throw new UnsupportedOperationException("Default marker icons do not support customization.");
+        protected void addChild(
+                AbstractConfigurationObject configurationObject) {
+            throw new UnsupportedOperationException(
+                    "Default marker icons do not support customization.");
         }
 
         @Override
         protected void addNullableChild(
                 AbstractConfigurationObject configurationObject) {
-            throw new UnsupportedOperationException("Default marker icons do not support customization.");
+            throw new UnsupportedOperationException(
+                    "Default marker icons do not support customization.");
         }
 
         @Override
         protected void removeChild(
                 AbstractConfigurationObject configurationObject) {
-            throw new UnsupportedOperationException("Default marker icons do not support customization.");
+            throw new UnsupportedOperationException(
+                    "Default marker icons do not support customization.");
         }
 
         @Override
         protected void notifyChange() {
-            throw new UnsupportedOperationException("Default marker icons do not support customization.");
+            throw new UnsupportedOperationException(
+                    "Default marker icons do not support customization.");
         }
 
         @Override
         protected void notifyChange(PropertyChangeEvent event) {
-            throw new UnsupportedOperationException("Default marker icons do not support customization.");
+            throw new UnsupportedOperationException(
+                    "Default marker icons do not support customization.");
         }
 
         @Override
         public void setOpacity(double opacity) {
-            throw new UnsupportedOperationException("Default marker icons do not support customization.");
+            throw new UnsupportedOperationException(
+                    "Default marker icons do not support customization.");
         }
 
         @Override
         public void setRotateWithView(boolean rotateWithView) {
-            throw new UnsupportedOperationException("Default marker icons do not support customization.");
+            throw new UnsupportedOperationException(
+                    "Default marker icons do not support customization.");
         }
 
         @Override
         public void setRotation(double rotation) {
-            throw new UnsupportedOperationException("Default marker icons do not support customization.");
+            throw new UnsupportedOperationException(
+                    "Default marker icons do not support customization.");
         }
 
         @Override
         public void setScale(double scale) {
-            throw new UnsupportedOperationException("Default marker icons do not support customization.");
+            throw new UnsupportedOperationException(
+                    "Default marker icons do not support customization.");
         }
 
         @Override
         public void setAnchor(Anchor anchor) {
-            throw new UnsupportedOperationException("Default marker icons do not support customization.");
+            throw new UnsupportedOperationException(
+                    "Default marker icons do not support customization.");
         }
     }
 }
