@@ -85,8 +85,9 @@ public class MarkerFeatureTest {
         markerFeature.setIcon(icon);
 
         Assert.assertEquals(icon, markerFeature.getIcon());
-        // One event each for removing old icon, and adding new one
-        Mockito.verify(propertyChangeListenerMock, Mockito.times(2))
+        // One event for removing old icon, none for adding the new icon since
+        // the marker is not connected
+        Mockito.verify(propertyChangeListenerMock, Mockito.times(1))
                 .propertyChange(Mockito.any());
     }
 

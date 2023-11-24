@@ -32,7 +32,9 @@ public class FeatureLayerTest {
 
         Assert.assertEquals(1, featureLayer.getFeatures().size());
         Assert.assertTrue(featureLayer.getFeatures().contains(markerFeature));
-        Mockito.verify(propertyChangeListenerMock, Mockito.times(1))
+        // One event for adding marker, one event for attaching the icon after
+        // connecting the marker
+        Mockito.verify(propertyChangeListenerMock, Mockito.times(2))
                 .propertyChange(Mockito.any());
     }
 
