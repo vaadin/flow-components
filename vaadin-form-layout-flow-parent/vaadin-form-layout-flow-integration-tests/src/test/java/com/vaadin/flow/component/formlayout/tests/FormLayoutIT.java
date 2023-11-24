@@ -99,7 +99,7 @@ public class FormLayoutIT extends AbstractComponentIT {
         setChecked("binder-do-not-call", true);
         forceClick(save);
 
-        // waitUntil(driver -> info.getText().startsWith("Saved bean values"));
+        waitUntil(driver -> info.getText().startsWith("Saved bean values"));
 
         Assert.assertTrue(info.getText().contains("foo bar"));
         Assert.assertTrue(info.getText()
