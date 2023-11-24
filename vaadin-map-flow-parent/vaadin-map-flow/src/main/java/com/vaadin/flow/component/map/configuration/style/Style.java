@@ -40,7 +40,6 @@ public class Style extends AbstractConfigurationObject {
     public void setImage(ImageStyle image) {
         removeChild(this.image);
         this.image = image;
-        addChild(image);
     }
 
     @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
@@ -93,5 +92,17 @@ public class Style extends AbstractConfigurationObject {
         removeChild(this.textStyle);
         this.textStyle = textStyle;
         addNullableChild(textStyle);
+    }
+
+    public void attachImage() {
+        if (this.image != null) {
+            addChild(this.image);
+        }
+    }
+
+    public void detachImage() {
+        if (this.image != null) {
+            removeChild(this.image);
+        }
     }
 }
