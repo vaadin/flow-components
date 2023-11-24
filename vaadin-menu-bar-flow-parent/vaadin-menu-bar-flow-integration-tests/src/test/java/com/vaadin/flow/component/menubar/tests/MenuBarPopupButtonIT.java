@@ -35,12 +35,8 @@ public class MenuBarPopupButtonIT extends AbstractComponentIT {
         var menuBar = $(MenuBarElement.class).first();
         menuBar.getButtons().get(0).click();
         verifyOpened();
-        click("close-button");
+        clickElementWithJs("close-button");
         verifyClosed();
-    }
-
-    private void click(String id) {
-        findElement(By.id(id)).click();
     }
 
     private void verifyOpened() {
