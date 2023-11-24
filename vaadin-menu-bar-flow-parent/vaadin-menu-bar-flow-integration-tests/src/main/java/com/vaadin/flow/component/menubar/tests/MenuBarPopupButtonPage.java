@@ -20,7 +20,6 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.menubar.MenuBar;
-import com.vaadin.flow.component.shared.TooltipConfiguration;
 import com.vaadin.flow.router.Route;
 
 /**
