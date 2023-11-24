@@ -261,4 +261,18 @@ public class MultiSelectComboBoxTest extends ComboBoxBaseTest {
         Assert.assertEquals("Four", valueAsList.get(2));
     }
 
+    @Test
+    public void setSelectedItemsOnTop() {
+        MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
+
+        Assert.assertFalse(comboBox.isSelectedItemsOnTop());
+        Assert.assertFalse(
+                comboBox.getElement().getProperty("selectedItemsOnTop", false));
+
+        comboBox.setSelectedItemsOnTop(true);
+
+        Assert.assertTrue(comboBox.isSelectedItemsOnTop());
+        Assert.assertTrue(
+                comboBox.getElement().getProperty("selectedItemsOnTop", true));
+    }
 }
