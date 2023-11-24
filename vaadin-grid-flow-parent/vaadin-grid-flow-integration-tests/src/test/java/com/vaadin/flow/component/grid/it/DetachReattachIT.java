@@ -119,6 +119,7 @@ public class DetachReattachIT extends AbstractComponentIT {
     public void hideGridAndChangeMode_detachAndReattach_noErrorIsThrown() {
         open();
 
+        $("button").id("set-custom-error-handler-button").click();
         $("button").id("hide-grid-button").click();
         $("button").id("selection-mode-none-button").click();
         $("button").id("detach-and-reattach-button").click();

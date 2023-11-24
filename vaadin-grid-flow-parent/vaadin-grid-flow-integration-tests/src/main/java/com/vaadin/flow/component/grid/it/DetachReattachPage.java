@@ -92,14 +92,19 @@ public class DetachReattachPage extends Div {
         Span errorMessage = new Span();
         errorMessage.setId("error-message");
 
-        // Set error handler to show errors in the UI
-        VaadinSession.getCurrent().setErrorHandler(event -> {
-            errorMessage.setText("Error: " + event.getThrowable().getMessage());
-        });
+        NativeButton btnSetCustomErrorHandler = new NativeButton(
+                "Set custom error handler", e -> {
+                    // Set error handler to show errors in the UI
+                    VaadinSession.getCurrent().setErrorHandler(event -> {
+                        errorMessage.setText(
+                                "Error: " + event.getThrowable().getMessage());
+                    });
+                });
+        btnSetCustomErrorHandler.setId("set-custom-error-handler-button");
 
         add(btnAttach, btnDetach, btnDisallowDeselect, addItemDetailsButton,
                 toggleDetailsVisibleOnClick, resetSortingButton, btnHideGrid,
-                btnSelectionModeNone, btnDetachAndReattach, btnShowGrid, grid,
-                errorMessage);
+                btnSelectionModeNone, btnDetachAndReattach, btnShowGrid,
+                btnSetCustomErrorHandler, grid, errorMessage);
     }
 }
