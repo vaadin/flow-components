@@ -65,6 +65,8 @@ public class MarkerFeature extends PointBasedFeature {
         POINT_ICON = new Icon(pointIconOptions);
     }
 
+    private boolean isConnected = false;
+
     /**
      * Creates a new marker feature displaying a default marker icon.
      */
@@ -145,15 +147,20 @@ public class MarkerFeature extends PointBasedFeature {
     public void setIcon(Icon icon) {
         Objects.requireNonNull(icon);
         getStyle().setImage(icon);
+        if (isConnected) {
+            getStyle().attachImage();
+        }
     }
 
     @Override
     protected void handleAddToParent(AbstractConfigurationObject parent) {
+        isConnected = true;
         getStyle().attachImage();
     }
 
     @Override
     protected void handleRemoveFromParent(AbstractConfigurationObject parent) {
+        isConnected = false;
         getStyle().detachImage();
     }
 }
