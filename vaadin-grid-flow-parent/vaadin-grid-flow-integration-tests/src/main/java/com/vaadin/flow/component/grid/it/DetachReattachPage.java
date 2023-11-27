@@ -68,7 +68,15 @@ public class DetachReattachPage extends Div {
                 });
         resetSortingButton.setId("reset-sorting-button");
 
+        NativeButton selectAndDetachButton = new NativeButton(
+                "Select and detach", e -> {
+                    grid.select("A");
+                    remove(grid);
+                });
+        selectAndDetachButton.setId("select-and-detach-button");
+
         add(btnAttach, btnDetach, btnDisallowDeselect, addItemDetailsButton,
-                toggleDetailsVisibleOnClick, resetSortingButton, grid);
+                toggleDetailsVisibleOnClick, resetSortingButton,
+                selectAndDetachButton, grid);
     }
 }

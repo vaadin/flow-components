@@ -114,6 +114,17 @@ public class DetachReattachIt extends AbstractComponentIT {
         checkLogsForErrors();
     }
 
+    @Test
+    public void selectAndDetach_reAttach_noErrorIsThrown() {
+        open();
+
+        clickElementWithJs("select-and-detach-button");
+
+        clickElementWithJs("attach-button");
+
+        checkLogsForErrors();
+    }
+
     private WebElement getRow(GridElement grid, int row) {
         return grid.$("*").id("items").findElements(By.cssSelector("tr"))
                 .get(row);
