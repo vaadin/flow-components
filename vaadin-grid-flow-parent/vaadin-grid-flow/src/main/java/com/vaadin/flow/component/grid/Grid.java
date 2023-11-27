@@ -2902,13 +2902,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
         final SerializableRunnable jsFunctionCall = () -> getElement()
                 .callJsFunction("$connector." + function, jsonArray, false);
-        if (getElement().getNode().isAttached()) {
-            jsFunctionCall.run();
-        } else {
-            getElement().getNode()
-                    .runWhenAttached(ui -> ui.beforeClientResponse(this,
-                            context -> jsFunctionCall.run()));
-        }
+
+        getElement().getNode().runWhenAttached(ui -> ui
+                .beforeClientResponse(this, context -> jsFunctionCall.run()));
     }
 
     private JsonObject generateJsonForSelection(T item) {

@@ -38,7 +38,7 @@ public class FormLayoutIT extends AbstractComponentIT {
         Assert.assertTrue(isElementPresent(By.tagName("vaadin-form-layout")));
     }
 
-    //@Test
+    @Test
     /*
      * The test works locally but fails on TC. Disabling it for now.
      *
