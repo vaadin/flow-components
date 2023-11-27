@@ -91,10 +91,10 @@ public class FormLayoutIT extends AbstractComponentIT {
                         .equals(info.getText()));
 
         // Fill form: there shouldn't be an error
-        setValue("binder-first-name", "foo");
-        setValue("binder-last-name", "bar");
-        setValue("binder-phone", "123-456-789");
-        setValue("binder-email", "example@foo.bar");
+        $("vaadin-text-field").id("binder-first-name").sendKeys("foo");
+        $("vaadin-text-field").id("binder-last-name").sendKeys("bar");
+        $("vaadin-text-field").id("binder-phone").sendKeys("123-456-789");
+        $("vaadin-text-field").id("binder-email").sendKeys("example@foo.bar");
         setValue("binder-birth-date", "2003-01-02");
         setChecked("binder-do-not-call", true);
         forceClick(save);
