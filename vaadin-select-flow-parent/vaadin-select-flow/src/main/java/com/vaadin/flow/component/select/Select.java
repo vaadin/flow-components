@@ -26,6 +26,7 @@ import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasHelper;
+import com.vaadin.flow.component.HasPlaceholder;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
@@ -44,8 +45,6 @@ import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.binder.HasValidator;
-import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
-import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderWrapper;
@@ -82,9 +81,9 @@ import java.util.stream.Stream;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-select")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha11")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-beta1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/select", version = "24.3.0-alpha11")
+@NpmPackage(value = "@vaadin/select", version = "24.3.0-beta1")
 @JsModule("@vaadin/select/src/vaadin-select.js")
 @JsModule("./selectConnector.js")
 public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
@@ -94,7 +93,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
         InputField<AbstractField.ComponentValueChangeEvent<Select<T>, T>, T>,
         HasListDataView<T, SelectListDataView<T>>, HasOverlayClassName,
         HasPrefix, HasThemeVariant<SelectVariant>, HasValidationProperties,
-        HasValidator<T>, SingleSelect<Select<T>, T> {
+        HasValidator<T>, SingleSelect<Select<T>, T>, HasPlaceholder {
 
     public static final String LABEL_ATTRIBUTE = "label";
 
@@ -250,7 +249,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      * even though that is not visible from the component level.
      */
     @Tag("vaadin-select-list-box")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha11")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-beta1")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     private class InternalListBox extends Component
             implements HasItemComponents<T> {
@@ -433,15 +432,6 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
     }
 
     /**
-     * Gets the placeholder hint set for the user.
-     *
-     * @return the placeholder or {@code null} if none set
-     */
-    public String getPlaceholder() {
-        return getElement().getProperty("placeholder");
-    }
-
-    /**
      * Sets the placeholder hint for the user.
      * <p>
      * The placeholder will be displayed in the case that there is no item
@@ -454,8 +444,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      *            the placeholder to set, or {@code null} to remove
      */
     public void setPlaceholder(String placeholder) {
-        getElement().setProperty("placeholder",
-                placeholder == null ? "" : placeholder);
+        HasPlaceholder.super.setPlaceholder(placeholder);
     }
 
     /**
