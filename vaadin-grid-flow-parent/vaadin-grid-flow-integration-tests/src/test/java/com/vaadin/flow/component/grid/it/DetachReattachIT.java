@@ -125,4 +125,20 @@ public class DetachReattachIT extends AbstractComponentIT {
 
         checkLogsForErrors();
     }
+
+    @Test
+    public void hideGridAndChangeMode_detachAndReattach_noErrorIsThrown() {
+        open();
+
+        $("button").id("hide-grid-button").click();
+        $("button").id("selection-mode-none-button").click();
+        $("button").id("detach-and-reattach-button").click();
+        $("button").id("show-grid-button").click();
+
+        GridElement grid = $(GridElement.class).first();
+        // Click on the first cell on the first row
+        grid.getCell(0, 0).click();
+
+        checkLogsForErrors();
+    }
 }
