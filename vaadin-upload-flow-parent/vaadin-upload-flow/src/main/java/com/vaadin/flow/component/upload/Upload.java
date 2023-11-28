@@ -22,14 +22,11 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
@@ -40,7 +37,6 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.dom.DomEventListener;
-import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.server.NoInputStreamException;
@@ -113,6 +109,13 @@ public class Upload extends Component implements HasSize, HasStyle {
                     .getString(eventDetailError);
             fireEvent(new FileRejectedEvent(this, detailError));
         }).addEventData(eventDetailError);
+
+        final String eventDetailFileName = "event.detail.file.name";
+        getElement().addEventListener("file-remove", event -> {
+            String detailFileName = event.getEventData()
+                    .getString(eventDetailFileName);
+            fireEvent(new FileRemovedEvent(this, detailFileName));
+        }).addEventData(eventDetailFileName);
 
         // If client aborts upload mark upload as interrupted on server also
         getElement().addEventListener("upload-abort",
@@ -563,6 +566,19 @@ public class Upload extends Component implements HasSize, HasStyle {
     public Registration addFileRejectedListener(
             ComponentEventListener<FileRejectedEvent> listener) {
         return addListener(FileRejectedEvent.class, listener);
+    }
+
+    /**
+     * Adds a listener for {@code file-remove} events fired when a file is
+     * removed.
+     *
+     * @param listener
+     *            the listener
+     * @return a {@link Registration} for removing the event listener
+     */
+    public Registration addFileRemovedListener(
+            ComponentEventListener<FileRemovedEvent> listener) {
+        return addListener(FileRemovedEvent.class, listener);
     }
 
     /**

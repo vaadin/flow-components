@@ -67,16 +67,16 @@ public class UploadIT extends AbstractUploadIT {
         getUpload().upload(tempFile);
         getUpload().upload(tempFile);
 
-        $("button").id("print-file-list").click();
+        $("button").id("print-file-count").click();
 
-        Assert.assertNotEquals("File list should contain files", "[]",
-                $("div").id("file-list").getText());
+        Assert.assertEquals("File list should contain 3 files", 3,
+                getFileCount());
 
         $("button").id("clear-file-list").click();
-        $("button").id("print-file-list").click();
+        $("button").id("print-file-count").click();
 
-        Assert.assertEquals("File list should not contain files", "[]",
-                $("div").id("file-list").getText());
+        Assert.assertEquals("File list should not contain files", 0,
+                getFileCount());
     }
 
     @Test
@@ -120,6 +120,30 @@ public class UploadIT extends AbstractUploadIT {
     }
 
     @Test
+    public void uploadFile_removeFile_fileIsRemoved() throws Exception {
+        File tempFile = createTempFile("txt");
+
+        getUpload().upload(tempFile);
+
+        $("button").id("print-file-count").click();
+
+        Assert.assertEquals("File list should contain one file", 1,
+                getFileCount());
+
+        getUpload().removeFile(0);
+
+        $("button").id("print-file-count").click();
+
+        Assert.assertEquals("File list should not contain files", 0,
+                getFileCount());
+
+        WebElement eventsOutput = getDriver()
+                .findElement(By.id("test-events-output"));
+        Assert.assertEquals("File was not properly removed",
+                "-succeeded-finished-removed", eventsOutput.getText());
+    }
+
+    @Test
     public void uploadFileAndNoErrorThrown() throws Exception {
         File tempFile = createTempFile("txt");
         getUpload().upload(tempFile);
@@ -133,6 +157,10 @@ public class UploadIT extends AbstractUploadIT {
         List<LogEntry> logList2 = getLogEntries(Level.SEVERE);
         assertThat("There should have no severe message in the console",
                 logList2.size(), CoreMatchers.is(0));
+    }
+
+    private int getFileCount() {
+        return Integer.parseInt($("div").id("file-count").getText());
     }
 
     private UploadElement getUpload() {
