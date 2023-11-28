@@ -11,15 +11,12 @@ package com.vaadin.flow.component.map.configuration.feature;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vaadin.flow.component.map.Assets;
 import com.vaadin.flow.component.map.Map;
-import com.vaadin.flow.component.map.configuration.AbstractConfigurationObject;
 import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.Feature;
 import com.vaadin.flow.component.map.configuration.geometry.Point;
 import com.vaadin.flow.component.map.configuration.style.Icon;
 import com.vaadin.flow.component.map.configuration.style.Style;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.Objects;
 
 /**
@@ -44,15 +41,34 @@ public class MarkerFeature extends PointBasedFeature {
     public static final Icon POINT_ICON;
 
     static {
-        PIN_ICON = new StaticIcon(getPinIconOptions());
-        POINT_ICON = new StaticIcon(getPointIconOptions());
+        Icon.ImageSize pinImageSize = new Icon.ImageSize(Assets.PIN.getWidth(),
+                Assets.PIN.getHeight());
+        Icon.Options pinIconOptions = new Icon.Options();
+        pinIconOptions.setImg(Assets.PIN.getResource());
+        pinIconOptions.setImgSize(pinImageSize);
+        pinIconOptions.setScale(0.5f);
+        pinIconOptions.setAnchorOrigin(Icon.AnchorOrigin.BOTTOM_LEFT);
+        // Move image slightly downwards to compensate for whitespace at
+        // the bottom of the image
+        pinIconOptions.setAnchor(new Icon.Anchor(0.5f, 0.12f));
+        PIN_ICON = new Icon(pinIconOptions);
+
+        Icon.ImageSize pointImageSize = new Icon.ImageSize(
+                Assets.POINT.getWidth(), Assets.POINT.getHeight());
+        Icon.Options pointIconOptions = new Icon.Options();
+        pointIconOptions.setImg(Assets.POINT.getResource());
+        pointIconOptions.setImgSize(pointImageSize);
+        pointIconOptions.setScale(0.25f);
+        pointIconOptions.setAnchorOrigin(Icon.AnchorOrigin.TOP_LEFT);
+        pointIconOptions.setAnchor(new Icon.Anchor(0.5f, 0.5f));
+        POINT_ICON = new Icon(pointIconOptions);
     }
 
     /**
      * Creates a new marker feature displaying a default marker icon.
      */
     public MarkerFeature() {
-        this(new Coordinate(0, 0), new Icon(getPinIconOptions()));
+        this(new Coordinate(0, 0), PIN_ICON);
     }
 
     /**
@@ -67,7 +83,7 @@ public class MarkerFeature extends PointBasedFeature {
      *            the coordinates that locate the feature
      */
     public MarkerFeature(Coordinate coordinates) {
-        this(coordinates, new Icon(getPinIconOptions()));
+        this(coordinates, PIN_ICON);
     }
 
     /**
@@ -128,111 +144,5 @@ public class MarkerFeature extends PointBasedFeature {
     public void setIcon(Icon icon) {
         Objects.requireNonNull(icon);
         getStyle().setImage(icon);
-    }
-
-    private static Icon.Options getPointIconOptions() {
-        Icon.ImageSize pointImageSize = new Icon.ImageSize(
-                Assets.POINT.getWidth(), Assets.POINT.getHeight());
-        Icon.Options pointIconOptions = new Icon.Options();
-        pointIconOptions.setImg(Assets.POINT.getResource());
-        pointIconOptions.setImgSize(pointImageSize);
-        pointIconOptions.setScale(0.25f);
-        pointIconOptions.setAnchorOrigin(Icon.AnchorOrigin.TOP_LEFT);
-        pointIconOptions.setAnchor(new Icon.Anchor(0.5f, 0.5f));
-        return pointIconOptions;
-    }
-
-    private static Icon.Options getPinIconOptions() {
-        Icon.ImageSize pinImageSize = new Icon.ImageSize(Assets.PIN.getWidth(),
-                Assets.PIN.getHeight());
-        Icon.Options pinIconOptions = new Icon.Options();
-        pinIconOptions.setImg(Assets.PIN.getResource());
-        pinIconOptions.setImgSize(pinImageSize);
-        pinIconOptions.setScale(0.5f);
-        pinIconOptions.setAnchorOrigin(Icon.AnchorOrigin.BOTTOM_LEFT);
-        // Move image slightly downwards to compensate for whitespace at
-        // the bottom of the image
-        pinIconOptions.setAnchor(new Icon.Anchor(0.5f, 0.12f));
-        return pinIconOptions;
-    }
-
-    private static class StaticIcon extends Icon {
-
-        public StaticIcon(Options options) {
-            super(options);
-        }
-
-        @Override
-        protected void addPropertyChangeListener(PropertyChangeListener listener) {
-            // NO-OP
-        }
-
-        @Override
-        protected void removePropertyChangeListener(
-                PropertyChangeListener listener) {
-            // NO-OP
-        }
-
-        @Override
-        protected void markAsDirty() {
-            // NO-OP
-        }
-
-        @Override
-        protected void deepMarkAsDirty() {
-            // NO-OP
-        }
-
-        @Override
-        protected void addChild(AbstractConfigurationObject configurationObject) {
-            throw new UnsupportedOperationException("Default marker icons do not support customization.");
-        }
-
-        @Override
-        protected void addNullableChild(
-                AbstractConfigurationObject configurationObject) {
-            throw new UnsupportedOperationException("Default marker icons do not support customization.");
-        }
-
-        @Override
-        protected void removeChild(
-                AbstractConfigurationObject configurationObject) {
-            throw new UnsupportedOperationException("Default marker icons do not support customization.");
-        }
-
-        @Override
-        protected void notifyChange() {
-            throw new UnsupportedOperationException("Default marker icons do not support customization.");
-        }
-
-        @Override
-        protected void notifyChange(PropertyChangeEvent event) {
-            throw new UnsupportedOperationException("Default marker icons do not support customization.");
-        }
-
-        @Override
-        public void setOpacity(double opacity) {
-            throw new UnsupportedOperationException("Default marker icons do not support customization.");
-        }
-
-        @Override
-        public void setRotateWithView(boolean rotateWithView) {
-            throw new UnsupportedOperationException("Default marker icons do not support customization.");
-        }
-
-        @Override
-        public void setRotation(double rotation) {
-            throw new UnsupportedOperationException("Default marker icons do not support customization.");
-        }
-
-        @Override
-        public void setScale(double scale) {
-            throw new UnsupportedOperationException("Default marker icons do not support customization.");
-        }
-
-        @Override
-        public void setAnchor(Anchor anchor) {
-            throw new UnsupportedOperationException("Default marker icons do not support customization.");
-        }
     }
 }
