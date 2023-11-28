@@ -330,27 +330,27 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
     }
 
     /**
-     * Sets the dropdown width.
+     * Sets the dropdown overlay width.
      *
      * @param width
      *            the new dropdown width. Pass in null to set the dropdown width
      *            back to the default value.
      */
-    public void setDropdownWidth(String width) {
+    public void setOverlayWidth(String width) {
         getStyle().set("--vaadin-combo-box-overlay-width", width);
     }
 
     /**
-     * Sets the dropdown width. Negative number implies unspecified size (the
-     * dropdown width is reverted back to the default value).
+     * Sets the dropdown overlay width. Negative number implies unspecified size
+     * (the dropdown width is reverted back to the default value).
      *
      * @param width
      *            the width of the dropdown.
      * @param unit
      *            the unit used for the dropdown.
      */
-    public void setDropdownWidth(float width, Unit unit) {
+    public void setOverlayWidth(float width, Unit unit) {
         Objects.requireNonNull(unit, "Unit can not be null");
-        setDropdownWidth(HasSize.getCssSize(width, unit));
+        setOverlayWidth(HasSize.getCssSize(width, unit));
     }
 }

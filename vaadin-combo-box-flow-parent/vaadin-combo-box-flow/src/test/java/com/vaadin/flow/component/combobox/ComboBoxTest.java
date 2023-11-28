@@ -212,18 +212,18 @@ public class ComboBoxTest extends ComboBoxBaseTest {
     }
 
     @Test
-    public void setDropdownWidth_smokeTests() {
+    public void setOverlayWidth_smokeTests() {
         ComboBox<String> comboBox = new ComboBox<>();
-        comboBox.setDropdownWidth(null);
+        comboBox.setOverlayWidth(null);
         Assert.assertNull(
                 comboBox.getStyle().get("--vaadin-combo-box-overlay-width"));
-        comboBox.setDropdownWidth("30em");
+        comboBox.setOverlayWidth("30em");
         Assert.assertEquals("30em",
                 comboBox.getStyle().get("--vaadin-combo-box-overlay-width"));
-        comboBox.setDropdownWidth(-1, Unit.EM);
+        comboBox.setOverlayWidth(-1, Unit.EM);
         Assert.assertNull(
                 comboBox.getStyle().get("--vaadin-combo-box-overlay-width"));
-        comboBox.setDropdownWidth(100, Unit.PIXELS);
+        comboBox.setOverlayWidth(100, Unit.PIXELS);
         Assert.assertEquals("100.0px",
                 comboBox.getStyle().get("--vaadin-combo-box-overlay-width"));
     }
