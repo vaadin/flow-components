@@ -35,11 +35,11 @@ public class MarkerFeature extends PointBasedFeature {
 
     /**
      * The default icon used for markers, which is a pin pointing at a location
-     * on the map. Does not support customization.
+     * on the map
      */
     public static final Icon PIN_ICON;
     /**
-     * An alternative icon that displays a point. Does not support customization.
+     * An alternative icon that displays a point
      */
     public static final Icon POINT_ICON;
 
