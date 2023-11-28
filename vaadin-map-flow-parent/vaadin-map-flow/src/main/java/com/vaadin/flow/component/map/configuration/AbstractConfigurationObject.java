@@ -94,8 +94,6 @@ public abstract class AbstractConfigurationObject implements Serializable {
     protected final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(
             this);
 
-    private final transient PropertyChangeListener propertyChangeListener = event -> notifyChange();
-
     public AbstractConfigurationObject() {
         this.id = UUID.randomUUID().toString();
         this.dirty = true;
@@ -167,7 +165,7 @@ public abstract class AbstractConfigurationObject implements Serializable {
         Objects.requireNonNull(configurationObject,
                 "Child configuration object must not be null");
         children.add(configurationObject);
-        configurationObject.addPropertyChangeListener(propertyChangeListener);
+        configurationObject.addPropertyChangeListener(this::notifyChange);
         markAsDirty();
         // When adding a sub-hierarchy, we need to make sure that the client
         // receives the whole hierarchy. Otherwise objects that have been synced
@@ -175,11 +173,6 @@ public abstract class AbstractConfigurationObject implements Serializable {
         // client-side reference lookup anymore, due to the client removing
         // references from the lookup during garbage collection.
         configurationObject.deepMarkAsDirty();
-        configurationObject.handleAddToParent(this);
-    }
-
-    protected void handleAddToParent(AbstractConfigurationObject parent) {
-        // NO-OP by default
     }
 
     /**
@@ -205,14 +198,8 @@ public abstract class AbstractConfigurationObject implements Serializable {
         if (configurationObject == null)
             return;
         children.remove(configurationObject);
-        configurationObject
-                .removePropertyChangeListener(propertyChangeListener);
+        configurationObject.removePropertyChangeListener(this::notifyChange);
         markAsDirty();
-        configurationObject.handleRemoveFromParent(this);
-    }
-
-    protected void handleRemoveFromParent(AbstractConfigurationObject parent) {
-        // NO-OP by default
     }
 
     /**
