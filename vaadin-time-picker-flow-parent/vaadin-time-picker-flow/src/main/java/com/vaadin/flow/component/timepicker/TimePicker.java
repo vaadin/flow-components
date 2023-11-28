@@ -32,6 +32,7 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasHelper;
+import com.vaadin.flow.component.HasPlaceholder;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
@@ -68,9 +69,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-time-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha11")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-beta1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/time-picker", version = "24.3.0-alpha11")
+@NpmPackage(value = "@vaadin/time-picker", version = "24.3.0-beta1")
 @JsModule("@vaadin/time-picker/src/vaadin-time-picker.js")
 @JsModule("./vaadin-time-picker/timepickerConnector.js")
 public class TimePicker
@@ -79,7 +80,7 @@ public class TimePicker
         HasAutoOpen, HasClearButton, HasClientValidation, HasHelper,
         InputField<AbstractField.ComponentValueChangeEvent<TimePicker, LocalTime>, LocalTime>,
         HasPrefix, HasOverlayClassName, HasThemeVariant<TimePickerVariant>,
-        HasValidationProperties, HasValidator<LocalTime> {
+        HasValidationProperties, HasValidator<LocalTime>, HasPlaceholder {
 
     private static final SerializableFunction<String, LocalTime> PARSER = valueFromClient -> {
         return valueFromClient == null || valueFromClient.isEmpty() ? null
@@ -388,28 +389,6 @@ public class TimePicker
     @Synchronize(property = "_hasInputValue", value = "has-input-value-changed")
     protected boolean isInputValuePresent() {
         return getElement().getProperty("_hasInputValue", false);
-    }
-
-    /**
-     * Sets the placeholder text that should be displayed in the input element,
-     * when the user has not entered a value.
-     *
-     * @param placeholder
-     *            the placeholder text
-     */
-    public void setPlaceholder(String placeholder) {
-        getElement().setProperty("placeholder",
-                placeholder == null ? "" : placeholder);
-    }
-
-    /**
-     * The placeholder text that should be displayed in the input element, when
-     * the user has not entered a value.
-     *
-     * @return the {@code placeholder} property of the time picker
-     */
-    public String getPlaceholder() {
-        return getElement().getProperty("placeholder");
     }
 
     /**

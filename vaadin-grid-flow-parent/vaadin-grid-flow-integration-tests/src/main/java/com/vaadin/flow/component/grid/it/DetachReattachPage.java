@@ -22,6 +22,7 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.VaadinSession;
 
 @Route(value = "vaadin-grid/detach-reattach-page")
 public class DetachReattachPage extends Div {
@@ -68,7 +69,36 @@ public class DetachReattachPage extends Div {
                 });
         resetSortingButton.setId("reset-sorting-button");
 
+        NativeButton selectAndDetachButton = new NativeButton(
+                "Select and detach", e -> {
+                    grid.select("A");
+                    remove(grid);
+                });
+        selectAndDetachButton.setId("select-and-detach-button");
+
+        NativeButton btnSelectionModeNone = new NativeButton(
+                "Change to selection none",
+                e -> grid.setSelectionMode(Grid.SelectionMode.NONE));
+        btnSelectionModeNone.setId("selection-mode-none-button");
+
+        NativeButton btnHideGrid = new NativeButton("Hide grid",
+                e -> grid.setVisible(false));
+        btnHideGrid.setId("hide-grid-button");
+
+        NativeButton btnShowGrid = new NativeButton("Show grid",
+                e -> grid.setVisible(true));
+        btnShowGrid.setId("show-grid-button");
+
+        NativeButton btnDetachAndReattach = new NativeButton(
+                "Detach and reattach", e -> {
+                    remove(grid);
+                    add(grid);
+                });
+        btnDetachAndReattach.setId("detach-and-reattach-button");
+
         add(btnAttach, btnDetach, btnDisallowDeselect, addItemDetailsButton,
-                toggleDetailsVisibleOnClick, resetSortingButton, grid);
+                toggleDetailsVisibleOnClick, resetSortingButton,
+                selectAndDetachButton, btnHideGrid, btnSelectionModeNone,
+                btnDetachAndReattach, btnShowGrid, grid);
     }
 }
