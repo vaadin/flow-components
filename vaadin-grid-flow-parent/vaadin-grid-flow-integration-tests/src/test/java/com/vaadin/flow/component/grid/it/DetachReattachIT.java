@@ -127,6 +127,39 @@ public class DetachReattachIT extends AbstractComponentIT {
     }
 
     @Test
+    public void setPageSizeAndDetach_reAttach_noErrorIsThrown() {
+        open();
+
+        clickElementWithJs("set-page-size-and-detach-button");
+
+        clickElementWithJs("attach-button");
+
+        checkLogsForErrors();
+    }
+
+    @Test
+    public void setSelectionModeAndDetach_reAttach_noErrorIsThrown() {
+        open();
+
+        clickElementWithJs("set-selection-mode-and-detach-button");
+
+        clickElementWithJs("attach-button");
+
+        checkLogsForErrors();
+    }
+
+    @Test
+    public void sortAndDetach_reAttach_noErrorIsThrown() {
+        open();
+
+        clickElementWithJs("sort-and-detach-button");
+
+        clickElementWithJs("attach-button");
+
+        checkLogsForErrors();
+    }
+
+    @Test
     public void hideGridAndChangeMode_detachAndReattach_noErrorIsThrown() {
         open();
 
