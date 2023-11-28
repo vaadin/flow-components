@@ -96,6 +96,7 @@ import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.Rendering;
 import com.vaadin.flow.data.selection.MultiSelect;
@@ -2705,14 +2706,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                             + pageSize);
         }
         getElement().setProperty("pageSize", pageSize);
-        callJsFunctionBeforeClientResponse("$connector.reset");
-        getElement().getNode().runWhenAttached(
-                ui -> ui.beforeClientResponse(this, context -> {
-                    getDataCommunicator().setPageSize(pageSize);
-                    setRequestedRange(0, pageSize);
-                    getDataCommunicator().reset();
-                }));
-
+        getElement()
+                .executeJs("if (this.$connector) { this.$connector.reset() }");
+        getDataCommunicator().setPageSize(pageSize);
+        setRequestedRange(0, pageSize);
+        getDataCommunicator().reset();
     }
 
     /**
