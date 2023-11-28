@@ -154,17 +154,13 @@ public class MarkerFeature extends PointBasedFeature {
 
     @Override
     protected void handleAddToParent(AbstractConfigurationObject parent) {
-        if (!isConnected) {
-            isConnected = true;
-            getStyle().attachImage();
-        }
+        isConnected = true;
+        getStyle().attachImage();
     }
 
     @Override
     protected void handleRemoveFromParent(AbstractConfigurationObject parent) {
-        if (isConnected) {
-            isConnected = false;
-            getStyle().detachImage();
-        }
+        isConnected = false;
+        getStyle().detachImage();
     }
 }
