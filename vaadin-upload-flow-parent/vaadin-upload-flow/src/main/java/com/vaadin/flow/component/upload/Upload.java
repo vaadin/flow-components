@@ -569,8 +569,7 @@ public class Upload extends Component implements HasSize, HasStyle {
     }
 
     /**
-     * Adds a listener for {@code file-remove} events fired when a file is
-     * removed.
+     * Adds a listener for events fired when a file is removed.
      *
      * @param listener
      *            the listener
