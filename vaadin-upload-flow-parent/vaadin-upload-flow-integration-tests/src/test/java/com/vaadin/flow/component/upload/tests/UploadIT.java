@@ -38,18 +38,22 @@ import static org.junit.Assert.assertThat;
 @TestPath("vaadin-upload")
 public class UploadIT extends AbstractUploadIT {
 
+    private WebElement uploadOutput;
+
+    private WebElement eventsOutput;
+
     @Before
     public void init() {
         open();
         waitUntil(driver -> getUpload().isDisplayed());
+        uploadOutput = getDriver().findElement(By.id("test-output"));
+        eventsOutput = getDriver().findElement(By.id("test-events-output"));
     }
 
     @Test
     public void testUploadAnyFile() throws Exception {
         File tempFile = createTempFile("txt");
         getUpload().upload(tempFile);
-
-        WebElement uploadOutput = getDriver().findElement(By.id("test-output"));
 
         String content = uploadOutput.getText();
 
@@ -85,9 +89,6 @@ public class UploadIT extends AbstractUploadIT {
 
         getUpload().uploadMultiple(List.of(tempFile, tempFile, tempFile), 10);
 
-        WebElement eventsOutput = getDriver()
-                .findElement(By.id("test-events-output"));
-
         Assert.assertEquals("Upload event order does not match expected",
                 "-succeeded-succeeded-succeeded-finished",
                 eventsOutput.getText());
@@ -99,9 +100,6 @@ public class UploadIT extends AbstractUploadIT {
 
         getUpload().upload(tempFile);
 
-        WebElement eventsOutput = getDriver()
-                .findElement(By.id("test-events-output"));
-
         Assert.assertEquals("Upload event order does not match expected",
                 "-succeeded-finished", eventsOutput.getText());
     }
@@ -111,9 +109,6 @@ public class UploadIT extends AbstractUploadIT {
         File invalidFile = createTempFile("pdf");
 
         getUpload().upload(invalidFile);
-
-        WebElement eventsOutput = getDriver()
-                .findElement(By.id("test-events-output"));
 
         Assert.assertEquals("Invalid file was not rejected", "-rejected",
                 eventsOutput.getText());
@@ -137,10 +132,11 @@ public class UploadIT extends AbstractUploadIT {
         Assert.assertEquals("File list should not contain files", 0,
                 getFileCount());
 
-        WebElement eventsOutput = getDriver()
-                .findElement(By.id("test-events-output"));
         Assert.assertEquals("File was not properly removed",
                 "-succeeded-finished-removed", eventsOutput.getText());
+
+        Assert.assertTrue("Removed file name was incorrect", uploadOutput
+                .getText().contains("REMOVED:" + tempFile.getName()));
     }
 
     @Test
