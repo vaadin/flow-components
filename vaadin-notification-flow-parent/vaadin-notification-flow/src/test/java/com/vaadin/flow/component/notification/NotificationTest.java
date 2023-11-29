@@ -359,4 +359,13 @@ public class NotificationTest {
         Assert.assertEquals(expectedInvocationsCount,
                 listenerInvokedCount.get());
     }
+
+    @Test
+    public void setText_notificationHasUnmodifiedText() {
+        Notification notification = new Notification();
+        notification.setText("foo > bar");
+    
+        Assert.assertEquals("foo > bar",
+            notification.getElement().getProperty("text"));
+    }
 }
