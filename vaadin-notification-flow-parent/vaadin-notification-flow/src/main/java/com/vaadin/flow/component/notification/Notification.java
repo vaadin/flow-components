@@ -282,8 +282,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
      */
     public void setText(String text) {
         removeAll();
-        this.getElement().setProperty("text",
-                text != null ? HtmlUtils.escape(text) : null);
+        this.getElement().setProperty("text", text);
         this.getElement().callJsFunction("requestContentUpdate");
     }
 
