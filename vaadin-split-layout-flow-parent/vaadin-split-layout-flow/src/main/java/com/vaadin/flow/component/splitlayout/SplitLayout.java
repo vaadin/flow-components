@@ -81,9 +81,13 @@ public class SplitLayout extends Component
         addAttachListener(
                 e -> this.requestStylesUpdatesForSplitterPosition(e.getUI()));
         addSplitterDragendListener(
-                e -> this.splitterPosition = calcNewSplitterPosition(
+                e -> {
+                 var splitterPosition = calcNewSplitterPosition(
                         e.primaryComponentFlexBasis,
-                        e.secondaryComponentFlexBasis));
+                        e.secondaryComponentFlexBasis);
+                 setSplitterPosition(splitterPosition);
+                });
+
     }
 
     /**
