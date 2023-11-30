@@ -87,7 +87,7 @@ public class ProgressUpdateEvent extends ComponentEvent<Upload> {
     }
 
     /**
-     * Get file name.
+     * Get the file name.
      *
      * @return file name
      */
