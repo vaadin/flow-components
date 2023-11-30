@@ -366,6 +366,6 @@ public class NotificationTest {
         notification.setText("foo > bar");
     
         Assert.assertEquals("foo > bar",
-            notification.getElement().getProperty("text"));
+                notification.getElement().getProperty("text"));
     }
 }
