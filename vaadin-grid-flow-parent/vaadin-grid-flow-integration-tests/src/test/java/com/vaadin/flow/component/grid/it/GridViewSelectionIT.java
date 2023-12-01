@@ -72,18 +72,23 @@ public class GridViewSelectionIT extends AbstractComponentIT {
         Assert.assertFalse(isRowSelected(grid, 6));
 
         // test the select all button
-        grid.findElement(By.id("selectAllCheckbox")).click();
+        TestBenchElement selectAllCheckbox = grid
+                .findElement(By.id("selectAllCheckbox"));
+        selectAllCheckbox.click();
+
         // deselect 1
         getCellContent(grid.getCell(0, 0)).click();
-        Assert.assertEquals("Select all should have been deselected", false,
-                grid.findElement(By.id("selectAllCheckbox"))
-                        .getPropertyBoolean("checked"));
+        Assert.assertEquals("Select all should be checked", "true",
+                selectAllCheckbox.getAttribute("checked"));
+        Assert.assertEquals("Select all should be indeterminate", "true",
+                selectAllCheckbox.getAttribute("indeterminate"));
 
+        // reselect 1
         getCellContent(grid.getCell(0, 0)).click();
-        Assert.assertEquals("Select all should have been reselected", true,
-                grid.findElement(By.id("selectAllCheckbox"))
-                        .getPropertyBoolean("checked"));
-
+        Assert.assertEquals("Select all should be checked", "true",
+                selectAllCheckbox.getAttribute("checked"));
+        Assert.assertNull("Select all should not be indeterminate",
+                selectAllCheckbox.getAttribute("indeterminate"));
     }
 
     /**
