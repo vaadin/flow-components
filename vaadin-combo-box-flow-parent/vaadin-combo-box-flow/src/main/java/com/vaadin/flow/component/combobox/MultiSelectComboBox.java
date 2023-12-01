@@ -71,9 +71,9 @@ import java.util.Set;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-multi-select-combo-box")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.4.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.4.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/multi-select-combo-box", version = "23.4.0-alpha1")
+@NpmPackage(value = "@vaadin/multi-select-combo-box", version = "23.4.0-alpha2")
 @JsModule("@vaadin/multi-select-combo-box/src/vaadin-multi-select-combo-box.js")
 @JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 @JsModule("./flow-component-renderer.js")
@@ -392,6 +392,28 @@ public class MultiSelectComboBox<TItem>
             // actually changed
             super.setValue(selectionModel.getSelectedItems());
         }
+    }
+
+    /**
+     * Gets whether selected items are grouped at the top of the overlay.
+     *
+     * @since 23.4
+     * @return {@code true} if enabled, {@code false} otherwise
+     */
+    public boolean isSelectedItemsOnTop() {
+        return getElement().getProperty("selectedItemsOnTop", false);
+    }
+
+    /**
+     * Enables or disables grouping of the selected items at the top of the
+     * overlay.
+     *
+     * @since 23.4
+     * @param selectedItemsOnTop
+     *            {@code true} to group selected items at the top
+     */
+    public void setSelectedItemsOnTop(boolean selectedItemsOnTop) {
+        getElement().setProperty("selectedItemsOnTop", selectedItemsOnTop);
     }
 
     /**
