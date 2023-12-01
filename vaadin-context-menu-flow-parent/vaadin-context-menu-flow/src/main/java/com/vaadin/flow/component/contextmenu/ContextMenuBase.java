@@ -52,9 +52,9 @@ import elemental.json.JsonObject;
  */
 @SuppressWarnings("serial")
 @Tag("vaadin-context-menu")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.4")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.5")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/context-menu", version = "24.2.4")
+@NpmPackage(value = "@vaadin/context-menu", version = "24.2.5")
 @JsModule("@vaadin/context-menu/src/vaadin-context-menu.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./contextMenuConnector.js")
