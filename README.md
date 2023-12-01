@@ -14,15 +14,15 @@ NOTE: a valid unix terminal with a regular shell is needed for running the utili
 
 ## Compiling all modules but excluding ITs
 
-- `mvn clean compile -Drelease -T C2`
+- `mvn clean compile -Drelease -T 2C`
 
 ## Compiling all the components and their modules including ITs
 
-- `mvn clean test-compile -DskipFrontend -T C2`
+- `mvn clean test-compile -DskipFrontend -T 2C`
 
 ## Installing all modules
 
-- `mvn clean install -DskipTests -Drelease -T C2`
+- `mvn clean install -DskipTests -Drelease -T 2C`
 
 ## Serving the IT pages of a component
 
@@ -38,7 +38,7 @@ Then navigate to `http://localhost:8080/vaadin-checkbox/checkbox-test` to see th
 
 NOTE: this takes a long while and consumes a lot of resources in your computer, it's better to run tests in the merged repo as it is indicated in the following sections
 
-- `mvn clean verify -T C2`
+- `mvn clean verify -T 2C`
 
 ## Merging ITs of all components in one module
 

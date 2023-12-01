@@ -43,7 +43,6 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementDetachEvent;
 import com.vaadin.flow.dom.ElementDetachListener;
 import com.vaadin.flow.dom.Style;
-import com.vaadin.flow.internal.HtmlUtils;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.router.NavigationTrigger;
 import com.vaadin.flow.shared.Registration;
@@ -55,9 +54,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-notification")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-beta1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-beta2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/notification", version = "24.3.0-beta1")
+@NpmPackage(value = "@vaadin/notification", version = "24.3.0-beta2")
 @JsModule("@vaadin/notification/src/vaadin-notification.js")
 @JsModule("./flow-component-renderer.js")
 public class Notification extends Component implements HasComponents, HasStyle,
@@ -282,8 +281,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
      */
     public void setText(String text) {
         removeAll();
-        this.getElement().setProperty("text",
-                text != null ? HtmlUtils.escape(text) : null);
+        this.getElement().setProperty("text", text);
         this.getElement().callJsFunction("requestContentUpdate");
     }
 
