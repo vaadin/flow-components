@@ -53,14 +53,14 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-menu-bar")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.4.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.4.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("./menubarConnector.js")
 @JsModule("@vaadin/menu-bar/src/vaadin-menu-bar.js")
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
-@NpmPackage(value = "@vaadin/menu-bar", version = "23.4.0-alpha1")
-@NpmPackage(value = "@vaadin/vaadin-menu-bar", version = "23.4.0-alpha1")
-@NpmPackage(value = "@vaadin/tooltip", version = "23.4.0-alpha1")
+@NpmPackage(value = "@vaadin/menu-bar", version = "23.4.0-alpha2")
+@NpmPackage(value = "@vaadin/vaadin-menu-bar", version = "23.4.0-alpha2")
+@NpmPackage(value = "@vaadin/tooltip", version = "23.4.0-alpha2")
 public class MenuBar extends Component
         implements HasMenuItems, HasSize, HasStyle, HasTheme, HasEnabled {
 

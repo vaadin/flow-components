@@ -26,10 +26,10 @@ import com.vaadin.flow.component.details.Details;
  * An accordion panel which could be opened or closed.
  */
 @Tag("vaadin-accordion-panel")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.4.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.4.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/accordion", version = "23.4.0-alpha1")
-@NpmPackage(value = "@vaadin/vaadin-accordion", version = "23.4.0-alpha1")
+@NpmPackage(value = "@vaadin/accordion", version = "23.4.0-alpha2")
+@NpmPackage(value = "@vaadin/vaadin-accordion", version = "23.4.0-alpha2")
 @JsModule("@vaadin/accordion/src/vaadin-accordion-panel.js")
 public class AccordionPanel extends Details {
 

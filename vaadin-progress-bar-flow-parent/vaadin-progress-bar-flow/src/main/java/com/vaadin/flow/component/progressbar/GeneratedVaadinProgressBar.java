@@ -103,7 +103,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  */
 @Deprecated
 @Tag("vaadin-progress-bar")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.4.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.4.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/progress-bar/src/vaadin-progress-bar.js")
 public abstract class GeneratedVaadinProgressBar<R extends GeneratedVaadinProgressBar<R>>
