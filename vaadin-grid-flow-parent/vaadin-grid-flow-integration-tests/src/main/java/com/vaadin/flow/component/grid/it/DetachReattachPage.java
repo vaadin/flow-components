@@ -17,12 +17,13 @@ package com.vaadin.flow.component.grid.it;
 
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridSingleSelectionModel;
+import com.vaadin.flow.component.grid.GridSortOrderBuilder;
+import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.server.VaadinSession;
 
 @Route(value = "vaadin-grid/detach-reattach-page")
 public class DetachReattachPage extends Div {
@@ -76,6 +77,29 @@ public class DetachReattachPage extends Div {
                 });
         selectAndDetachButton.setId("select-and-detach-button");
 
+        NativeButton setPageSizeAndDetachButton = new NativeButton(
+                "Set page size and detach", e -> {
+                    grid.setPageSize(40);
+                    remove(grid);
+                });
+        setPageSizeAndDetachButton.setId("set-page-size-and-detach-button");
+
+        NativeButton setSelectionModeAndDetachButton = new NativeButton(
+                "Set selection mode and detach", e -> {
+                    grid.setSelectionMode(SelectionMode.NONE);
+                    remove(grid);
+                });
+        setSelectionModeAndDetachButton
+                .setId("set-selection-mode-and-detach-button");
+
+        NativeButton sortAndDetachButton = new NativeButton("Sort and detach",
+                e -> {
+                    grid.sort(new GridSortOrderBuilder<String>()
+                            .thenDesc(grid.getColumns().get(0)).build());
+                    remove(grid);
+                });
+        sortAndDetachButton.setId("sort-and-detach-button");
+
         NativeButton btnSelectionModeNone = new NativeButton(
                 "Change to selection none",
                 e -> grid.setSelectionMode(Grid.SelectionMode.NONE));
@@ -98,7 +122,9 @@ public class DetachReattachPage extends Div {
 
         add(btnAttach, btnDetach, btnDisallowDeselect, addItemDetailsButton,
                 toggleDetailsVisibleOnClick, resetSortingButton,
-                selectAndDetachButton, btnHideGrid, btnSelectionModeNone,
-                btnDetachAndReattach, btnShowGrid, grid);
+                selectAndDetachButton, setPageSizeAndDetachButton,
+                setSelectionModeAndDetachButton, sortAndDetachButton,
+                btnHideGrid, btnSelectionModeNone, btnDetachAndReattach,
+                btnShowGrid, grid);
     }
 }

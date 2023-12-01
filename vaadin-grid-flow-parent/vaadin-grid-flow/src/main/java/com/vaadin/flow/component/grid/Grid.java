@@ -96,6 +96,7 @@ import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.Rendering;
 import com.vaadin.flow.data.selection.MultiSelect;
@@ -2705,7 +2706,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                             + pageSize);
         }
         getElement().setProperty("pageSize", pageSize);
-        getElement().callJsFunction("$connector.reset");
+        getElement()
+                .executeJs("if (this.$connector) { this.$connector.reset() }");
         getDataCommunicator().setPageSize(pageSize);
         setRequestedRange(0, pageSize);
         getDataCommunicator().reset();
@@ -2756,7 +2758,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     protected void updateSelectionModeOnClient() {
-        getElement().callJsFunction("$connector.setSelectionMode",
+        callJsFunctionBeforeClientResponse("$connector.setSelectionMode",
                 selectionMode.name());
     }
 
@@ -2900,17 +2902,22 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                     : null;
             jsonArray.set(jsonArray.length(), jsonObject);
         }
-        final SerializableRunnable jsFunctionCall = () -> getElement()
-                .callJsFunction("$connector." + function, jsonArray, false);
 
-        getElement().getNode().runWhenAttached(ui -> ui
-                .beforeClientResponse(this, context -> jsFunctionCall.run()));
+        callJsFunctionBeforeClientResponse("$connector." + function, jsonArray,
+                false);
     }
 
     private JsonObject generateJsonForSelection(T item) {
         JsonObject json = Json.createObject();
         json.put("key", getDataCommunicator().getKeyMapper().key(item));
         return json;
+    }
+
+    private void callJsFunctionBeforeClientResponse(String functionName,
+            Serializable... arguments) {
+        getElement().getNode().runWhenAttached(
+                ui -> ui.beforeClientResponse(this, context -> getElement()
+                        .callJsFunction(functionName, arguments)));
     }
 
     /**
@@ -3549,7 +3556,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
 
         if (getElement().getNode().isAttached()) {
-            getElement().callJsFunction("$connector.setSorterDirections",
+            callJsFunctionBeforeClientResponse("$connector.setSorterDirections",
                     directions);
         }
     }
