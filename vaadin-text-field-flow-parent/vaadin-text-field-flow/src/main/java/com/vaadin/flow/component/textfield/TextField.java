@@ -36,9 +36,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-text-field")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-beta2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-rc1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/text-field", version = "24.3.0-beta2")
+@NpmPackage(value = "@vaadin/text-field", version = "24.3.0-rc1")
 @JsModule("@vaadin/text-field/src/vaadin-text-field.js")
 public class TextField extends TextFieldBase<TextField, String>
         implements HasAllowedCharPattern, HasThemeVariant<TextFieldVariant> {
