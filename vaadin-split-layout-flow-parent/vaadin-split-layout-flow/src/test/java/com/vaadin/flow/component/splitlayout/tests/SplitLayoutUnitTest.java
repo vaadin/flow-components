@@ -214,4 +214,15 @@ public class SplitLayoutUnitTest {
 
         Assert.assertEquals(61.81, splitLayout.getSplitterPosition(), 0.01);
     }
+
+    @Test
+    public void testOrderOfAdding() {
+        SplitLayout splitLayout = new SplitLayout();
+        splitLayout.addToSecondary(new Span("secondary"));
+        splitLayout.addToPrimary(new Span("primary"));
+        Assert.assertEquals(splitLayout.getElement().getChild(0).getText(),
+                splitLayout.getElement().getChild(0).getAttribute("slot"));
+        Assert.assertEquals(splitLayout.getElement().getChild(1).getText(),
+                splitLayout.getElement().getChild(1).getAttribute("slot"));
+    }
 }
