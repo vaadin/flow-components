@@ -93,19 +93,40 @@ describe('grid connector - sorting', () => {
       expect(grid.$server.sortersChanged.args[0][0]).to.eql([]);
     });
 
-    it('should notify server when joining sorters', () => {
-      sorters[0].click();
-      expect(grid.$server.sortersChanged).to.be.calledOnce;
-      expect(grid.$server.sortersChanged.args[0][0]).to.eql([{ path: 'name', direction: 'asc' }]);
+    describe('multi-sort-priority=append', () => {
+      beforeEach(() => {
+        grid.multiSortPriority = 'append';
+      });
 
-      grid.$server.sortersChanged.resetHistory();
+      it('should notify server when joining sorters', () => {
+        sorters[0].click();
+        grid.$server.sortersChanged.resetHistory();
 
-      sorters[1].click();
-      expect(grid.$server.sortersChanged).to.be.calledOnce;
-      expect(grid.$server.sortersChanged.args[0][0]).to.eql([
-        { path: 'age', direction: 'asc' },
-        { path: 'name', direction: 'asc' }
-      ]);
+        sorters[1].click();
+        expect(grid.$server.sortersChanged).to.be.calledOnce;
+        expect(grid.$server.sortersChanged.args[0][0]).to.eql([
+          { path: 'name', direction: 'asc' },
+          { path: 'age', direction: 'asc' }
+        ]);
+      });
+    });
+
+    describe('multi-sort-priority=prepend', () => {
+      beforeEach(() => {
+        grid.multiSortPriority = 'prepend';
+      });
+
+      it('should notify server when joining sorters', () => {
+        sorters[0].click();
+        grid.$server.sortersChanged.resetHistory();
+
+        sorters[1].click();
+        expect(grid.$server.sortersChanged).to.be.calledOnce;
+        expect(grid.$server.sortersChanged.args[0][0]).to.eql([
+          { path: 'age', direction: 'asc' },
+          { path: 'name', direction: 'asc' },
+        ]);
+      });
     });
   });
 });
