@@ -319,7 +319,8 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
         Component innerComponent = primary ? primaryComponent
                 : secondaryComponent;
         if (innerComponent != null) {
-            innerComponent.getElement().getStyle().set(styleName, value);
+            innerComponent.getElement().executeJs("this.style[$0]=$1",
+                    styleName, value);
         } else {
             getElement().executeJs(
                     "var element = this.children[$0]; if (element) { element.style[$1]=$2; }",

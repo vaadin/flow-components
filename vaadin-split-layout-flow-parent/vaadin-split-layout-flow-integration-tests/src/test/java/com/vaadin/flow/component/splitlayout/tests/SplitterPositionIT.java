@@ -80,6 +80,35 @@ public class SplitterPositionIT extends AbstractComponentIT {
         Assert.assertEquals("100%", width);
     }
 
+    @Test
+    public void setSplitterPositionFromServer_moveOnClient_resetToOriginal() {
+        // Add split layout with 30% splitter position
+        $(NativeButtonElement.class).id("createLayoutJavaApi").click();
+        $(NativeButtonElement.class).id("setSplitPositionJavaApi").click();
+
+        var split = $(SplitLayoutElement.class).id("splitLayoutJavaApi");
+        var primaryComponent = split.getPrimaryComponent();
+
+        var flexBasisInitial = primaryComponent.getCssValue("flex-basis");
+
+        // Move splitter by 150px
+        var splitter = split.getSplitter();
+        Actions resizeAction = new Actions(getDriver());
+        resizeAction.dragAndDropBy(splitter, 150, 0);
+        resizeAction.perform();
+
+        // Check that the splitter position is not 30% anymore
+        var flexBasisAfterDrag = primaryComponent.getCssValue("flex-basis");
+        Assert.assertNotEquals(flexBasisInitial, flexBasisAfterDrag);
+
+        // Reset splitter position to 30%
+        $(NativeButtonElement.class).id("setSplitPositionJavaApi").click();
+
+        // Check that the splitter is at 30%
+        var flexBasisFinal = primaryComponent.getCssValue("flex-basis");
+        Assert.assertEquals(flexBasisInitial, flexBasisFinal);
+    }
+
     private void testSplitterPosition(String testId) {
         testSplitterPosition(testId, splitLayoutElement -> {
         });
