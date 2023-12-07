@@ -14,7 +14,7 @@ describe('grid connector - sorting', () => {
     grid = fixtureSync(`
       <vaadin-grid>
         <vaadin-grid-column path="name"></vaadin-grid-column>
-        <vaadin-grid-column path="age"></vaadin-grid-column>
+        <vaadin-grid-column path="price"></vaadin-grid-column>
       </vaadin-grid>
     `);
 
@@ -23,11 +23,11 @@ describe('grid connector - sorting', () => {
     columns = [...grid.querySelectorAll('vaadin-grid-column')] as GridColumn<Item>[];
 
     grid.$connector.setHeaderRenderer(columns[0], { content: 'Name', showSorter: true, sorterPath: 'name' });
-    grid.$connector.setHeaderRenderer(columns[1], { content: 'Age', showSorter: true, sorterPath: 'age' });
+    grid.$connector.setHeaderRenderer(columns[1], { content: 'Price', showSorter: true, sorterPath: 'price' });
 
     setRootItems(grid.$connector, [
-      { key: '0', name: 'Andrew', age: 25 },
-      { key: '1', name: 'Bob', age: 30 }
+      { key: '0', name: 'Macbook', price: 2500 },
+      { key: '1', name: 'iPad', price: 1000 }
     ]);
     await nextFrame();
 
@@ -66,7 +66,7 @@ describe('grid connector - sorting', () => {
 
       sorters[1].click();
       expect(grid.$server.sortersChanged).to.be.calledOnce;
-      expect(grid.$server.sortersChanged.args[0][0]).to.eql([{ path: 'age', direction: 'asc' }]);
+      expect(grid.$server.sortersChanged.args[0][0]).to.eql([{ path: 'price', direction: 'asc' }]);
     });
   });
 
@@ -106,7 +106,7 @@ describe('grid connector - sorting', () => {
         expect(grid.$server.sortersChanged).to.be.calledOnce;
         expect(grid.$server.sortersChanged.args[0][0]).to.eql([
           { path: 'name', direction: 'asc' },
-          { path: 'age', direction: 'asc' }
+          { path: 'price', direction: 'asc' }
         ]);
       });
     });
@@ -123,7 +123,7 @@ describe('grid connector - sorting', () => {
         sorters[1].click();
         expect(grid.$server.sortersChanged).to.be.calledOnce;
         expect(grid.$server.sortersChanged.args[0][0]).to.eql([
-          { path: 'age', direction: 'asc' },
+          { path: 'price', direction: 'asc' },
           { path: 'name', direction: 'asc' },
         ]);
       });

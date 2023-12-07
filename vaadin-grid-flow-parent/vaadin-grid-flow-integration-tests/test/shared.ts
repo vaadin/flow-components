@@ -44,7 +44,7 @@ export type GridServer = {
 export type Item = {
   key: string;
   name?: string;
-  age?: number,
+  price?: number,
   selected?: boolean;
   detailsOpened?: boolean;
   style?: Record<string, string>;
