@@ -23,6 +23,8 @@ export type GridConnector = {
   doSelection: (items: Item[] | [null], userOriginated: boolean) => void;
   doDeselection: (items: Item[], userOriginated: boolean) => void;
   clear: (index: number, length: number, parentKey?: string) => void;
+  setSorterDirections: (sorters: { path: string, direction: string }[]) => void;
+  setHeaderRenderer: (column: GridColumn, options: { content: Node | string, showSorter: boolean, sorterPath?: string }) => void;
 };
 
 export type GridServer = {
@@ -36,11 +38,13 @@ export type GridServer = {
   setRequestedRange: ((firstIndex: number, size: number) => void) & sinon.SinonSpy;
   setParentRequestedRanges: ((ranges: { firstIndex: number; size: number; parentKey: string }[]) => void) &
     sinon.SinonSpy;
+  sortersChanged: ((sorters: { path: string, direction: string }[]) => void) & sinon.SinonSpy;
 };
 
 export type Item = {
   key: string;
   name?: string;
+  price?: number,
   selected?: boolean;
   detailsOpened?: boolean;
   style?: Record<string, string>;
@@ -87,7 +91,8 @@ export function init(grid: FlowGrid): void {
     deselectAll: sinon.spy(),
     setDetailsVisible: sinon.spy(),
     setRequestedRange: sinon.spy(),
-    setParentRequestedRanges: sinon.spy()
+    setParentRequestedRanges: sinon.spy(),
+    sortersChanged: sinon.spy()
   };
 
   gridConnector.initLazy(grid);
