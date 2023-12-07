@@ -1,7 +1,6 @@
 import { expect, fixtureSync, nextFrame } from '@open-wc/testing';
-import { init, getBodyCellContent, setRootItems } from './shared.js';
+import { init, setRootItems } from './shared.js';
 import type { FlowGrid, Item } from './shared.js';
-import sinon from 'sinon';
 import { GridColumn } from '@vaadin/grid';
 import { GridSorter } from '@vaadin/grid/vaadin-grid-sorter.js';
 
@@ -20,7 +19,7 @@ describe('grid connector - sorting', () => {
 
     init(grid);
 
-    columns = [...grid.querySelectorAll('vaadin-grid-column')] as GridColumn<Item>[];
+    columns = [...grid.querySelectorAll<GridColumn<Item>>('vaadin-grid-column')];
 
     grid.$connector.setHeaderRenderer(columns[0], { content: 'Name', showSorter: true, sorterPath: 'name' });
     grid.$connector.setHeaderRenderer(columns[1], { content: 'Price', showSorter: true, sorterPath: 'price' });
@@ -31,7 +30,7 @@ describe('grid connector - sorting', () => {
     ]);
     await nextFrame();
 
-    sorters = [...grid.querySelectorAll('vaadin-grid-sorter')] as GridSorter[];
+    sorters = [...grid.querySelectorAll<GridSorter>('vaadin-grid-sorter')];
   });
 
   it('should not make requests to server by default', () => {
