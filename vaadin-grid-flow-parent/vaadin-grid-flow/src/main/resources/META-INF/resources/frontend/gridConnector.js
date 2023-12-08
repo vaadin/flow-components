@@ -371,9 +371,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
                 });
 
                 sorters.forEach((sorter) => {
-                  if (!directions.filter((d) => d.column === sorter.getAttribute('path'))[0]) {
-                    sorter.direction = null;
-                  }
+                  sorter.direction = null;
                 });
 
                 // Apply directions in correct order, depending on configured multi-sort priority.
@@ -385,7 +383,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
                 }
                 directions.forEach(({ column, direction }) => {
                   sorters.forEach((sorter) => {
-                    if (sorter.getAttribute('path') === column && sorter.direction !== direction) {
+                    if (sorter.getAttribute('path') === column) {
                       sorter.direction = direction;
                     }
                   });
