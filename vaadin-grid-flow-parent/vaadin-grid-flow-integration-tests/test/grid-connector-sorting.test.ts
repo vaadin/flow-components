@@ -1,5 +1,5 @@
 import { aTimeout, expect, fixtureSync, nextFrame } from '@open-wc/testing';
-import { getBodyCellContent, getHeaderCellContent, init, setRootItems } from './shared.js';
+import { getHeaderCellContent, init, setRootItems } from './shared.js';
 import type { FlowGrid, Item } from './shared.js';
 import { GridColumn } from '@vaadin/grid';
 import { GridSorter } from '@vaadin/grid/vaadin-grid-sorter.js';
