@@ -64,9 +64,9 @@ class FlowComponentDirective extends AsyncDirective {
       this.__onRetry = 2;
       function retry() {
         doRetry();
-        this.removeEventListener('animationend', retry);
+        window.removeEventListener('animationend', retry);
       }
-      this.addEventListener('animationend', retry);
+      window.addEventListener('animationend', retry);
       return;
     }
     // On first retry
