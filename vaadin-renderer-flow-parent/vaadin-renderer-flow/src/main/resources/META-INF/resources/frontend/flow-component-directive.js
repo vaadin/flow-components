@@ -23,8 +23,13 @@ class FlowComponentDirective extends AsyncDirective {
     const oldNode = this.getOldNode(part);
 
     if (hasNewNodeId && !newNode) {
-      // If the node is not found, try again later twice.
-      this.__handleRetry(part, appid, nodeid);
+      // If the node is not found, try again later once.
+      if (this.__onRetry) {
+        this.__onRetry = undefined;
+        return;
+      }
+      this.__onRetry = true;
+      queueMicrotask(() => this.updateContent(part, appid, nodeid));
     } else if (oldNode === newNode) {
       return;
     } else if (oldNode && newNode) {
@@ -50,28 +55,6 @@ class FlowComponentDirective extends AsyncDirective {
 
   disconnected() {
     this.__onRetry = undefined;
-  }
-
-  __handleRetry(part, appid, nodeid) {
-    // Retry limit achieved
-    if (this.__onRetry === 2) {
-      this.__onRetry = undefined;
-      return;
-    }
-    const doRetry = () => queueMicrotask(() => this.updateContent(part, appid, nodeid));
-    // On second retry
-    if (this.__onRetry === 1) {
-      this.__onRetry = 2;
-      function retry() {
-        doRetry();
-        this.removeEventListener('animationend', retry);
-      }
-      this.addEventListener('animationend', retry);
-      return;
-    }
-    // On first retry
-    this.__onRetry = 1;
-    doRetry();
   }
 }
 
