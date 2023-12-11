@@ -389,9 +389,9 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
                   });
                 });
 
-                // Manually trigger a re-render of the sorter order indicators in case
-                // some of the sorters were hidden while being updated above and
-                // therefore didn't notify the grid about their direction change.
+                // Manually trigger a re-render of the sorter priority indicators
+                // in case some of the sorters were hidden while being updated above
+                // and therefore didn't notify the grid about their direction change.
                 grid.__applySorters();
               } finally {
                 sorterDirectionsSetFromServer = false;
