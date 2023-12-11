@@ -984,7 +984,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
         // This method is overridden to prevent the grid web component from
         // automatically excluding columns from sorting when they get hidden.
         // In Flow, it's the developer's responsibility to remove the column
-        // from the sort order on the backend when hiding this column.
+        // from the backend sort order when the column gets hidden.
         grid._getActiveSorters = function() {
           return this._sorters.filter((sorter) => sorter.direction);
         }
