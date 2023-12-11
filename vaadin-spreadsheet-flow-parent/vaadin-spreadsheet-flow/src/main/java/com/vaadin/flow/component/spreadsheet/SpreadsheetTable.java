@@ -55,8 +55,7 @@ public class SpreadsheetTable implements Serializable {
      */
     public SpreadsheetTable(Spreadsheet spreadsheet,
             CellRangeAddress tableRegion) {
-        this(spreadsheet, spreadsheet.getActiveSheet(), tableRegion, null,
-                null);
+        this(spreadsheet, spreadsheet.getActiveSheet(), tableRegion);
     }
 
     /**
@@ -70,6 +69,29 @@ public class SpreadsheetTable implements Serializable {
      *            Target sheet within the spreadsheet
      * @param fullTableRegion
      *            Cell range to build the table in
+     */
+    public SpreadsheetTable(Spreadsheet spreadsheet, Sheet sheet,
+            CellRangeAddress fullTableRegion) {
+        this(spreadsheet, sheet, fullTableRegion, null, null);
+    }
+
+    /**
+     * Creates a new table for the given spreadsheet component, sheet and region
+     * while referencing the backing xssfTable or ctWorksheetAutoFilter. If the
+     * component is currently displaying the sheet that the table belongs to,
+     * pop-up buttons are added to table headers (first row cells).
+     *
+     * @param spreadsheet
+     *            Target spreadsheet
+     * @param sheet
+     *            Target sheet within the spreadsheet
+     * @param fullTableRegion
+     *            Cell range to build the table in
+     * @param ctWorksheetAutoFilter
+     *            Set this to not-null if this table is backed by a
+     *            XSSFSheet.getCTWorksheet().getAutoFilter()
+     * @param xssfTable
+     *            Set this to not-null if this table is backed by a XSSFTable
      */
     public SpreadsheetTable(Spreadsheet spreadsheet, Sheet sheet,
             CellRangeAddress fullTableRegion,
