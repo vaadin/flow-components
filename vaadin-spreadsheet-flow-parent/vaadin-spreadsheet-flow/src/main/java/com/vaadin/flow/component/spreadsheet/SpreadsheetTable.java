@@ -166,8 +166,7 @@ public class SpreadsheetTable implements Serializable {
     private List<CellReference> resolveCellsForPopupButtonCreation() {
         if (xssfTable != null) {
             // if this SpreadsheetTable is backed by XssfTable consider content
-            // of
-            // it's CTAutoFilter
+            // of its CTAutoFilter
             return resolveCellsForPopupButtonCreation(xssfTable.getCTTable());
         } else {
             return getAllHeaderRowCells();
