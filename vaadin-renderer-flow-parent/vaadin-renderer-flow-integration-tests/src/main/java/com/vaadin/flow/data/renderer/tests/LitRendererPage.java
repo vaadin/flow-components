@@ -55,6 +55,18 @@ public class LitRendererPage extends Div {
         removeRendererButton.setId("removeRendererButton");
         add(removeRendererButton);
 
+        NativeButton longRefreshButton = new NativeButton("Long data refresh",
+                e -> {
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                    component.setItems(Arrays.asList("0", "1", "2", "3", "4"));
+                });
+        longRefreshButton.setId("longRefreshButton");
+        add(longRefreshButton);
+
         add(new Div(new Text("Details:")));
 
         NativeButton setDetailsLitRendererButton = new NativeButton(

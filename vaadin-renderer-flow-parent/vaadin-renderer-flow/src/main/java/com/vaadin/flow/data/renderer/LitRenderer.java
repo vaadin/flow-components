@@ -201,8 +201,9 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
                     SerializableBiConsumer<SOURCE, JsonArray> handler = clientCallables
                             .get(handlerName);
                     SOURCE item = keyMapper.get(itemKey);
-
-                    handler.accept(item, args);
+                    if (item != null) {
+                        handler.accept(item, args);
+                    }
                 });
 
         JsonArray clientCallablesArray = JsonUtils
