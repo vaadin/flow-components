@@ -355,19 +355,6 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           }
         });
 
-        const sorterChangeListener = tryCatchWrapper(function (_, oldValue) {
-          if (oldValue !== undefined && !sorterDirectionsSetFromServer) {
-            grid.$server.sortersChanged(
-              grid._sorters.map(function (sorter) {
-                return {
-                  path: sorter.path,
-                  direction: sorter.direction
-                };
-              })
-            );
-          }
-        });
-
         grid.$connector.setSorterDirections = tryCatchWrapper(function (directions) {
           sorterDirectionsSetFromServer = true;
           setTimeout(
@@ -409,7 +396,6 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             })
           );
         });
-        grid._createPropertyObserver('_previousSorters', sorterChangeListener);
 
         grid._updateItem = tryCatchWrapper(function (row, item) {
           Grid.prototype._updateItem.call(grid, row, item);
@@ -993,6 +979,9 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
         });
 
         grid.__applySorters = () => {
+          const sorters = grid._mapSorters();
+          const sortersChanged = JSON.stringify(grid._previousSorters) !== JSON.stringify(sorters);
+
           // Update the _previousSorters in vaadin-grid-sort-mixin so that the __applySorters
           // method in the mixin will skip calling clearCache().
           //
@@ -1005,10 +994,14 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           // 2. Sorted programmatically on the server: The items in the new sort order have already
           // been fetched and applied to the grid. The sorter element states are updated programmatically
           // to reflect the new sort order, but there's no need to re-render the grid rows.
-          grid._previousSorters = grid._mapSorters();
+          grid._previousSorters = sorters;
 
           // Call the original __applySorters method in vaadin-grid-sort-mixin
           Grid.prototype.__applySorters.call(grid);
+
+          if (sortersChanged && !sorterDirectionsSetFromServer) {
+            grid.$server.sortersChanged(sorters);
+          }
         };
 
         grid.$connector.setFooterRenderer = tryCatchWrapper(function (column, options) {
