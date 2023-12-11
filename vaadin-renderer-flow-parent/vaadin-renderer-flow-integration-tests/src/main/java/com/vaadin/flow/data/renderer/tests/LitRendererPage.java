@@ -58,9 +58,9 @@ public class LitRendererPage extends Div {
         NativeButton longRefreshButton = new NativeButton("Long data refresh",
                 e -> {
                     try {
+                        // Simulate heavy work
                         Thread.sleep(2000);
-                    } catch (InterruptedException ex) {
-                        throw new RuntimeException(ex);
+                    } catch (InterruptedException ignored) { // NOSONAR
                     }
                     component.setItems(Arrays.asList("0", "1", "2", "3", "4"));
                 });
