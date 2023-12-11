@@ -392,7 +392,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
                 // Manually trigger a re-render of the sorter order indicators in case
                 // some of the sorters were hidden while being updated above and
                 // therefore didn't notify the grid about their direction change.
-                grid._applySorters();
+                grid.__applySorters();
               } finally {
                 sorterDirectionsSetFromServer = false;
               }
@@ -989,11 +989,11 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           return this._sorters.filter((sorter) => sorter.direction);
         }
 
-        grid._applySorters = () => {
+        grid.__applySorters = () => {
           const sorters = grid._mapSorters();
           const sortersChanged = JSON.stringify(grid._previousSorters) !== JSON.stringify(sorters);
 
-          // Update the _previousSorters in vaadin-grid-sort-mixin so that the _applySorters
+          // Update the _previousSorters in vaadin-grid-sort-mixin so that the __applySorters
           // method in the mixin will skip calling clearCache().
           //
           // In Flow Grid's case, we never want to clear the cache eagerly when the sorter elements
@@ -1007,8 +1007,8 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           // to reflect the new sort order, but there's no need to re-render the grid rows.
           grid._previousSorters = sorters;
 
-          // Call the original _applySorters method in vaadin-grid-sort-mixin
-          Grid.prototype._applySorters.call(grid);
+          // Call the original __applySorters method in vaadin-grid-sort-mixin
+          Grid.prototype.__applySorters.call(grid);
 
           if (sortersChanged && !sorterDirectionsSetFromServer) {
             grid.$server.sortersChanged(sorters);

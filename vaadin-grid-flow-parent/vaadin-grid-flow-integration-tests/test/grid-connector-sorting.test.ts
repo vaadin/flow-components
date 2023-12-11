@@ -1,13 +1,13 @@
 import { aTimeout, expect, fixtureSync, nextFrame } from '@open-wc/testing';
 import { getHeaderCellContent, init, setRootItems } from './shared.js';
-import type { FlowGrid, Item } from './shared.js';
+import type { FlowGrid, FlowGridSorter, Item } from './shared.js';
 import { GridColumn } from '@vaadin/grid';
 import { GridSorter } from '@vaadin/grid/vaadin-grid-sorter.js';
 
 describe('grid connector - sorting', () => {
   let grid: FlowGrid;
   let columns: GridColumn<Item>[];
-  let sorters: Array<GridSorter & { _order?: number | null }>;
+  let sorters: FlowGridSorter[];
 
   beforeEach(async () => {
     grid = fixtureSync(`
@@ -34,6 +34,12 @@ describe('grid connector - sorting', () => {
   });
 
   it('should not make sort requests by default', () => {
+    expect(grid.$server.sortersChanged).to.not.be.called;
+  });
+
+  it('should not make sort requests when a column gets hidden', async () => {
+    columns[0].hidden = true;
+    await nextFrame();
     expect(grid.$server.sortersChanged).to.not.be.called;
   });
 
@@ -82,7 +88,7 @@ describe('grid connector - sorting', () => {
         expect(grid.$server.sortersChanged).to.be.calledOnce;
       });
 
-      it('should update direction on sorters', async () => {
+      it('should update direction property on sorters', async () => {
         grid.$connector.setSorterDirections([{ column: 'name', direction: 'asc' }]);
         await aTimeout(0);
         expect(sorters[0].direction).to.equal('asc');
@@ -104,7 +110,7 @@ describe('grid connector - sorting', () => {
         expect(sorters[1].direction).to.be.null;
       });
 
-      it('should update direction on hidden sorters', async () => {
+      it('should update direction property on hidden sorters', async () => {
         grid.$connector.setSorterDirections([{ column: 'name', direction: 'asc' }]);
         await aTimeout(0);
         columns[0].hidden = true;
@@ -173,7 +179,7 @@ describe('grid connector - sorting', () => {
             grid.multiSortPriority = multiSortPriority;
           });
 
-          it('should update direction on sorters', async () => {
+          it('should update direction property on sorters', async () => {
             grid.$connector.setSorterDirections([{ column: 'name', direction: 'asc' }]);
             await aTimeout(0);
             expect(sorters[0].direction).to.equal('asc');
@@ -206,7 +212,7 @@ describe('grid connector - sorting', () => {
             expect(sorters[1].direction).to.be.null;
           });
 
-          it('should update sorters order', async () => {
+          it('should update _order property on sorters', async () => {
             grid.$connector.setSorterDirections([{ column: 'name', direction: 'asc' }]);
             await aTimeout(0);
             expect(sorters[0]._order).to.be.null;
@@ -233,6 +239,21 @@ describe('grid connector - sorting', () => {
             expect(sorters[0]._order).to.be.null;
             expect(sorters[1]._order).to.be.null;
           });
+        });
+
+        it('should update _order property on hidden sorters', async () => {
+          grid.$connector.setSorterDirections([
+            { column: 'name', direction: 'asc' },
+            { column: 'price', direction: 'asc' }
+          ]);
+          await aTimeout(0);
+          columns[0].hidden = true;
+          await nextFrame();
+
+          grid.$connector.setSorterDirections([{ column: 'price', direction: 'asc' }]);
+          await aTimeout(0);
+          expect(sorters[0]._order).to.be.null;
+          expect(sorters[1]._order).to.be.null;
         });
       });
     });
