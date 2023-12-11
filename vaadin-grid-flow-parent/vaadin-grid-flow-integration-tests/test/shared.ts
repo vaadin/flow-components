@@ -23,7 +23,7 @@ export type GridConnector = {
   doSelection: (items: Item[] | [null], userOriginated: boolean) => void;
   doDeselection: (items: Item[], userOriginated: boolean) => void;
   clear: (index: number, length: number, parentKey?: string) => void;
-  setSorterDirections: (sorters: { path: string, direction: string }[]) => void;
+  setSorterDirections: (sorters: { column: string, direction: string }[]) => void;
   setHeaderRenderer: (column: GridColumn, options: { content: Node | string, showSorter: boolean, sorterPath?: string }) => void;
 };
 
