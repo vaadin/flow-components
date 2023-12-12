@@ -68,11 +68,11 @@ import elemental.json.JsonValue;
  *            the type of the items supported by the list
  */
 @Tag("vaadin-virtual-list")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.4.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.4.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
-@NpmPackage(value = "@vaadin/virtual-list", version = "23.4.0-alpha1")
-@NpmPackage(value = "@vaadin/vaadin-virtual-list", version = "23.4.0-alpha1")
+@NpmPackage(value = "@vaadin/virtual-list", version = "23.4.0-alpha2")
+@NpmPackage(value = "@vaadin/vaadin-virtual-list", version = "23.4.0-alpha2")
 @JsModule("@vaadin/virtual-list/src/vaadin-virtual-list.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./virtualListConnector.js")

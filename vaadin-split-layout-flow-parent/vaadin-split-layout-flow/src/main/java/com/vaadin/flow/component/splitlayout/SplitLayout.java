@@ -34,8 +34,8 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @SuppressWarnings("deprecation")
-@NpmPackage(value = "@vaadin/split-layout", version = "23.4.0-alpha1")
-@NpmPackage(value = "@vaadin/vaadin-split-layout", version = "23.4.0-alpha1")
+@NpmPackage(value = "@vaadin/split-layout", version = "23.4.0-alpha2")
+@NpmPackage(value = "@vaadin/vaadin-split-layout", version = "23.4.0-alpha2")
 public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
         implements HasSize {
 
@@ -319,7 +319,8 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
         Component innerComponent = primary ? primaryComponent
                 : secondaryComponent;
         if (innerComponent != null) {
-            innerComponent.getElement().getStyle().set(styleName, value);
+            innerComponent.getElement().executeJs("this.style[$0]=$1",
+                    styleName, value);
         } else {
             getElement().executeJs(
                     "var element = this.children[$0]; if (element) { element.style[$1]=$2; }",

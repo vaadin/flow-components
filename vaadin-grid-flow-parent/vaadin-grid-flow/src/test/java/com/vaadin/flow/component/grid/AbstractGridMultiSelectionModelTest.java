@@ -234,13 +234,13 @@ public class AbstractGridMultiSelectionModelTest {
         grid.getSelectionModel().select("foo");
         Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
         Assert.assertTrue(
-                (boolean) columnElement.getPropertyRaw("indeterminate"));
+                (boolean) columnElement.getPropertyRaw("_indeterminate"));
 
         // select second, which equals all selected
         grid.getSelectionModel().select("bar");
         Assert.assertTrue((boolean) columnElement.getPropertyRaw("selectAll"));
         Assert.assertFalse(
-                (boolean) columnElement.getPropertyRaw("indeterminate"));
+                (boolean) columnElement.getPropertyRaw("_indeterminate"));
     }
 
     @Test
@@ -253,13 +253,13 @@ public class AbstractGridMultiSelectionModelTest {
         grid.getSelectionModel().selectFromClient("foo");
         Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
         Assert.assertTrue(
-                (boolean) columnElement.getPropertyRaw("indeterminate"));
+                (boolean) columnElement.getPropertyRaw("_indeterminate"));
 
         // select second, which equals all selected
         grid.getSelectionModel().selectFromClient("bar");
         Assert.assertTrue((boolean) columnElement.getPropertyRaw("selectAll"));
         Assert.assertFalse(
-                (boolean) columnElement.getPropertyRaw("indeterminate"));
+                (boolean) columnElement.getPropertyRaw("_indeterminate"));
     }
 
     @Test
@@ -273,19 +273,19 @@ public class AbstractGridMultiSelectionModelTest {
                 .selectAll();
         Assert.assertTrue((boolean) columnElement.getPropertyRaw("selectAll"));
         Assert.assertFalse(
-                (boolean) columnElement.getPropertyRaw("indeterminate"));
+                (boolean) columnElement.getPropertyRaw("_indeterminate"));
 
         // deselect first
         grid.getSelectionModel().deselect("foo");
         Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
         Assert.assertTrue(
-                (boolean) columnElement.getPropertyRaw("indeterminate"));
+                (boolean) columnElement.getPropertyRaw("_indeterminate"));
 
         // deselect second, which equals none selected
         grid.getSelectionModel().deselect("bar");
         Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
         Assert.assertFalse(
-                (boolean) columnElement.getPropertyRaw("indeterminate"));
+                (boolean) columnElement.getPropertyRaw("_indeterminate"));
     }
 
     @Test
@@ -299,19 +299,19 @@ public class AbstractGridMultiSelectionModelTest {
                 .selectAll();
         Assert.assertTrue((boolean) columnElement.getPropertyRaw("selectAll"));
         Assert.assertFalse(
-                (boolean) columnElement.getPropertyRaw("indeterminate"));
+                (boolean) columnElement.getPropertyRaw("_indeterminate"));
 
         // deselect first
         grid.getSelectionModel().deselectFromClient("foo");
         Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
         Assert.assertTrue(
-                (boolean) columnElement.getPropertyRaw("indeterminate"));
+                (boolean) columnElement.getPropertyRaw("_indeterminate"));
 
         // deselect second, which equals none selected
         grid.getSelectionModel().deselectFromClient("bar");
         Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
         Assert.assertFalse(
-                (boolean) columnElement.getPropertyRaw("indeterminate"));
+                (boolean) columnElement.getPropertyRaw("_indeterminate"));
     }
 
     @Test
@@ -324,7 +324,7 @@ public class AbstractGridMultiSelectionModelTest {
                 .selectAll();
         Assert.assertTrue((boolean) columnElement.getPropertyRaw("selectAll"));
         Assert.assertFalse(
-                (boolean) columnElement.getPropertyRaw("indeterminate"));
+                (boolean) columnElement.getPropertyRaw("_indeterminate"));
     }
 
     @Test
@@ -337,7 +337,7 @@ public class AbstractGridMultiSelectionModelTest {
                 .clientSelectAll();
         Assert.assertTrue((boolean) columnElement.getPropertyRaw("selectAll"));
         Assert.assertFalse(
-                (boolean) columnElement.getPropertyRaw("indeterminate"));
+                (boolean) columnElement.getPropertyRaw("_indeterminate"));
     }
 
     @Test
@@ -351,12 +351,12 @@ public class AbstractGridMultiSelectionModelTest {
                 .selectAll();
         Assert.assertTrue((boolean) columnElement.getPropertyRaw("selectAll"));
         Assert.assertFalse(
-                (boolean) columnElement.getPropertyRaw("indeterminate"));
+                (boolean) columnElement.getPropertyRaw("_indeterminate"));
 
         grid.getSelectionModel().deselectAll();
         Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
         Assert.assertFalse(
-                (boolean) columnElement.getPropertyRaw("indeterminate"));
+                (boolean) columnElement.getPropertyRaw("_indeterminate"));
     }
 
     @Test
@@ -370,13 +370,13 @@ public class AbstractGridMultiSelectionModelTest {
                 .selectAll();
         Assert.assertTrue((boolean) columnElement.getPropertyRaw("selectAll"));
         Assert.assertFalse(
-                (boolean) columnElement.getPropertyRaw("indeterminate"));
+                (boolean) columnElement.getPropertyRaw("_indeterminate"));
 
         ((AbstractGridMultiSelectionModel<String>) grid.getSelectionModel())
                 .clientDeselectAll();
         Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
         Assert.assertFalse(
-                (boolean) columnElement.getPropertyRaw("indeterminate"));
+                (boolean) columnElement.getPropertyRaw("_indeterminate"));
     }
 
     @Test
@@ -389,19 +389,19 @@ public class AbstractGridMultiSelectionModelTest {
         grid.asMultiSelect().updateSelection(Set.of("foo", "bar"), Set.of());
         Assert.assertTrue((boolean) columnElement.getPropertyRaw("selectAll"));
         Assert.assertFalse(
-                (boolean) columnElement.getPropertyRaw("indeterminate"));
+                (boolean) columnElement.getPropertyRaw("_indeterminate"));
 
         // Deselect single
         grid.asMultiSelect().updateSelection(Set.of(), Set.of("foo"));
         Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
         Assert.assertTrue(
-                (boolean) columnElement.getPropertyRaw("indeterminate"));
+                (boolean) columnElement.getPropertyRaw("_indeterminate"));
 
         // Deselect all
         grid.asMultiSelect().updateSelection(Set.of(), Set.of("bar"));
         Assert.assertFalse((boolean) columnElement.getPropertyRaw("selectAll"));
         Assert.assertFalse(
-                (boolean) columnElement.getPropertyRaw("indeterminate"));
+                (boolean) columnElement.getPropertyRaw("_indeterminate"));
     }
 
     @Test
@@ -428,6 +428,22 @@ public class AbstractGridMultiSelectionModelTest {
                 dataView.getItems().count(), grid.getSelectedItems().size());
         Assert.assertTrue("Selected items do not contain filtered item",
                 grid.getSelectedItems().contains(items.get(0)));
+    }
+
+    @Test
+    public void dragSelect_updatesColumnAttribute() {
+        grid.setSelectionMode(SelectionMode.MULTI);
+        Element columnElement = getGridSelectionColumn(grid).getElement();
+
+        Assert.assertFalse(columnElement.getProperty("dragSelect", false));
+
+        ((GridMultiSelectionModel<String>) grid.getSelectionModel())
+                .setDragSelect(true);
+        Assert.assertTrue(columnElement.getProperty("dragSelect", false));
+
+        ((GridMultiSelectionModel<String>) grid.getSelectionModel())
+                .setDragSelect(false);
+        Assert.assertFalse(columnElement.getProperty("dragSelect", false));
     }
 
     @Test
