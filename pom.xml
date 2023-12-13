@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>vaadin-flow-components</artifactId>
-    <version>24.3-SNAPSHOT</version>
+    <version>24.4-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Vaadin Flow Components Root Project</name>
     <parent>
@@ -12,7 +12,7 @@
     </parent>
     <url>https://vaadin.com/components</url>
     <properties>
-        <flow.version>24.3-SNAPSHOT</flow.version>
+        <flow.version>24.4-SNAPSHOT</flow.version>
         <testbench.version>9.2.0</testbench.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
