@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-form-layout-flow-parent</artifactId>
-        <version>24.3-SNAPSHOT</version>
+        <version>24.4-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-form-layout-integration-tests</artifactId>
     <packaging>war</packaging>
