@@ -15,13 +15,13 @@
  */
 package com.vaadin.flow.component.combobox;
 
-import com.vaadin.flow.data.renderer.Renderer;
-import com.vaadin.flow.shared.Registration;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import com.vaadin.flow.data.renderer.Renderer;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * Internal class for managing rendering related logic for combo box components
@@ -80,5 +80,8 @@ class ComboBoxRenderManager<TItem> implements Serializable {
         renderingRegistrations.add(rendering.getRegistration());
 
         comboBox.getDataController().reset();
+        if (comboBox.getValue() != null) {
+            comboBox.refreshValue();
+        }
     }
 }
