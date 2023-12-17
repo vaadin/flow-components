@@ -2763,6 +2763,17 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
+     * Returns the selection mode for this grid.
+     *
+     * @return the selection mode, not null
+     */
+    public SelectionMode getSelectionMode() {
+        assert selectionMode != null : "No selection mode set by "
+                + getClass().getName() + " constructor";
+        return selectionMode;
+    }
+
+    /**
      * Sets the grid's selection mode.
      * <p>
      * To use your custom selection model, you can use
@@ -4466,7 +4477,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * function fails cleanly with {@link IllegalArgumentException} without
      * doing any work.
      *
-     * @see #setColumnOrder(List)
      * @param columns
      *            the new ordering of the columns, not {@code null}.
      * @throws NullPointerException
