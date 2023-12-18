@@ -59,7 +59,7 @@ describe('grid connector - sorting', () => {
 
       sorters[0].click();
       expect(grid.$server.sortersChanged).to.be.calledOnce;
-      expect(grid.$server.sortersChanged.args[0][0]).to.eql([{ path: 'name', direction: null }]);
+      expect(grid.$server.sortersChanged.args[0][0]).to.eql([]);
     });
 
     it('should make a sort request when switching sorters', () => {
