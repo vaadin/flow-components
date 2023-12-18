@@ -9,16 +9,20 @@
 package com.vaadin.flow.component.spreadsheet;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFTable;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTAutoFilter;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTTable;
 
 /**
  * Represents a "table" inside a spreadsheet.
@@ -68,9 +72,35 @@ public class SpreadsheetTable implements Serializable {
      */
     public SpreadsheetTable(Spreadsheet spreadsheet, Sheet sheet,
             CellRangeAddress fullTableRegion) {
+        this(spreadsheet, sheet, fullTableRegion, null, null);
+    }
+
+    /**
+     * Creates a new table for the given spreadsheet component, sheet and region
+     * while referencing the backing xssfTable or ctWorksheetAutoFilter. If the
+     * component is currently displaying the sheet that the table belongs to,
+     * pop-up buttons are added to table headers (first row cells).
+     *
+     * @param spreadsheet
+     *            Target spreadsheet
+     * @param sheet
+     *            Target sheet within the spreadsheet
+     * @param fullTableRegion
+     *            Cell range to build the table in
+     * @param ctWorksheetAutoFilter
+     *            Set this to not-null if this table is backed by a
+     *            XSSFSheet.getCTWorksheet().getAutoFilter()
+     * @param xssfTable
+     *            Set this to not-null if this table is backed by a XSSFTable
+     */
+    public SpreadsheetTable(Spreadsheet spreadsheet, Sheet sheet,
+            CellRangeAddress fullTableRegion,
+            CTAutoFilter ctWorksheetAutoFilter, XSSFTable xssfTable) {
         this.spreadsheet = spreadsheet;
         this.sheet = sheet;
         this.fullTableRegion = fullTableRegion;
+        this.xssfTable = xssfTable;
+        this.ctWorksheetAutoFilter = ctWorksheetAutoFilter;
         popupButtons = new HashMap<CellReference, PopupButton>();
 
         if (isTableSheetCurrentlyActive()) {
@@ -123,17 +153,68 @@ public class SpreadsheetTable implements Serializable {
      * Initializes the pop-up buttons of this table.
      */
     protected void initPopupButtons() {
-        if (sheet.equals(spreadsheet.getActiveSheet())) {
-            for (int c = fullTableRegion.getFirstColumn(); c <= fullTableRegion
-                    .getLastColumn(); c++) {
-                CellReference popupButtonCellReference = new CellReference(
-                        sheet.getSheetName(), fullTableRegion.getFirstRow(), c,
-                        true, true);
+        if (isActiveSheet(sheet)) {
+            var targetCells = resolveCellsForPopupButtonCreation();
+            for (CellReference popupButtonTargetCell : targetCells) {
                 PopupButton popupButton = new PopupButton();
-                popupButtons.put(popupButtonCellReference, popupButton);
-                spreadsheet.setPopup(popupButtonCellReference, popupButton);
+                popupButtons.put(popupButtonTargetCell, popupButton);
+                spreadsheet.setPopup(popupButtonTargetCell, popupButton);
             }
         }
+    }
+
+    private List<CellReference> resolveCellsForPopupButtonCreation() {
+        if (xssfTable != null) {
+            // if this SpreadsheetTable is backed by XssfTable consider content
+            // of its CTAutoFilter
+            return resolveCellsForPopupButtonCreation(xssfTable.getCTTable());
+        } else {
+            return getAllHeaderRowCells();
+        }
+    }
+
+    private List<CellReference> resolveCellsForPopupButtonCreation(
+            CTTable table) {
+        if (table.isSetAutoFilter()) {
+            return getVisibleAutoFilterPopupButtonsCells(table);
+        } else {
+            // if AutoFilter is not set, then don't display any popup buttons
+            return Collections.emptyList();
+        }
+    }
+
+    private List<CellReference> getVisibleAutoFilterPopupButtonsCells(
+            CTTable table) {
+        if (table.getAutoFilter().getFilterColumnList().isEmpty()) {
+            // if there are no filter columns in this list, then display
+            // filter popup buttons for all columns (strange, I know)
+            return getAllHeaderRowCells();
+        } else {
+            // otherwise display filter popup buttons only for columns where the
+            // popup buttons are not hidden
+            return table.getAutoFilter().getFilterColumnList().stream()
+                    .filter(filterColumn -> !filterColumn.isSetHiddenButton())
+                    .map(filterColumn -> new CellReference(sheet.getSheetName(),
+                            fullTableRegion.getFirstRow(),
+                            (int) filterColumn.getColId(), true, true))
+                    .collect(Collectors.toList());
+        }
+    }
+
+    private List<CellReference> getAllHeaderRowCells() {
+        var result = new ArrayList<CellReference>();
+        for (int c = fullTableRegion.getFirstColumn(); c <= fullTableRegion
+                .getLastColumn(); c++) {
+            CellReference popupButtonCellReference = new CellReference(
+                    sheet.getSheetName(), fullTableRegion.getFirstRow(), c,
+                    true, true);
+            result.add(popupButtonCellReference);
+        }
+        return result;
+    }
+
+    private boolean isActiveSheet(Sheet sheet) {
+        return sheet.equals(spreadsheet.getActiveSheet());
     }
 
     /**

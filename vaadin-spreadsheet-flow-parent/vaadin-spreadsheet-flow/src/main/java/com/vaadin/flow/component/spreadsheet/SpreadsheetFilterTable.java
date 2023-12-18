@@ -16,6 +16,9 @@ import java.util.Set;
 
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFTable;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTAutoFilter;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
@@ -73,7 +76,15 @@ public class SpreadsheetFilterTable extends SpreadsheetTable {
      */
     public SpreadsheetFilterTable(Spreadsheet spreadsheet, Sheet sheet,
             CellRangeAddress fullTableRegion) {
-        super(spreadsheet, sheet, fullTableRegion);
+        this(spreadsheet, spreadsheet.getActiveSheet(), fullTableRegion, null,
+                null);
+    }
+
+    public SpreadsheetFilterTable(Spreadsheet spreadsheet, Sheet sheet,
+            CellRangeAddress fullTableRegion,
+            CTAutoFilter ctWorksheetAutoFilter, XSSFTable xssfTable) {
+        super(spreadsheet, sheet, fullTableRegion, ctWorksheetAutoFilter,
+                xssfTable);
 
         popupButtonToFiltersMap = new HashMap<>();
         popupButtonToClearButtonMap = new HashMap<>();
