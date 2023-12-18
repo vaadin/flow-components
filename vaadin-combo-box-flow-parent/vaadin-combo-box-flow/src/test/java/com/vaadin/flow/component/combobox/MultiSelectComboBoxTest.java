@@ -275,4 +275,41 @@ public class MultiSelectComboBoxTest extends ComboBoxBaseTest {
         Assert.assertTrue(
                 comboBox.getElement().getProperty("selectedItemsOnTop", true));
     }
+
+    @Test
+    public void setAutoExpand_propertiesAreSet() {
+        MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
+
+        // NONE
+        Assert.assertEquals(MultiSelectComboBox.AutoExpandMode.NONE,
+                comboBox.getAutoExpand());
+        Assert.assertFalse(comboBox.getElement()
+                .getProperty("autoExpandHorizontally", false));
+        Assert.assertFalse(comboBox.getElement()
+                .getProperty("autoExpandVertically", false));
+
+        // HORIZONTAL
+        comboBox.setAutoExpand(MultiSelectComboBox.AutoExpandMode.HORIZONTAL);
+
+        Assert.assertTrue(comboBox.getElement()
+                .getProperty("autoExpandHorizontally", true));
+        Assert.assertFalse(comboBox.getElement()
+                .getProperty("autoExpandVertically", false));
+
+        // VERTICAL
+        comboBox.setAutoExpand(MultiSelectComboBox.AutoExpandMode.VERTICAL);
+
+        Assert.assertFalse(comboBox.getElement()
+                .getProperty("autoExpandHorizontally", false));
+        Assert.assertTrue(comboBox.getElement()
+                .getProperty("autoExpandVertically", true));
+
+        // BOTH
+        comboBox.setAutoExpand(MultiSelectComboBox.AutoExpandMode.BOTH);
+
+        Assert.assertTrue(comboBox.getElement()
+                .getProperty("autoExpandHorizontally", true));
+        Assert.assertTrue(comboBox.getElement()
+                .getProperty("autoExpandVertically", true));
+    }
 }
