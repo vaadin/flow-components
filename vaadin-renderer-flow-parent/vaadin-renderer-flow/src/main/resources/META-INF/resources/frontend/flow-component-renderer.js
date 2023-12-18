@@ -108,7 +108,9 @@ class FlowComponentRenderer extends PolymerElement {
       return;
     }
     if (this.nodeid == null) {
-      this.remove(this.firstChild);
+      if (this.firstChild) {
+        this.removeChild(this.firstChild);
+      }
       return;
     }
     const renderedComponent = this._getRenderedComponent();
