@@ -140,7 +140,7 @@ public class TreeGrid<T> extends Grid<T>
         private SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueFactory;
         private int viewportRemaining = 0;
         private final List<JsonValue> queuedParents = new ArrayList<>();
-        private VaadinRequest previousRequest;
+        private transient VaadinRequest previousRequest;
 
         public TreeGridArrayUpdaterImpl(
                 SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueFactory) {
