@@ -81,6 +81,8 @@ class ComboBoxRenderManager<TItem> implements Serializable {
 
         comboBox.getDataController().reset();
         if (comboBox.getValue() != null) {
+            // renderer might added new dataGenerator -> refresh getValue() JSON
+            // data so it also contains the new dataGenerator data
             comboBox.refreshValue();
         }
     }
