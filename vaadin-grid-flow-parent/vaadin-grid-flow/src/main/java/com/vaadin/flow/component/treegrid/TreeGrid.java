@@ -141,7 +141,7 @@ public class TreeGrid<T> extends Grid<T>
         private final int EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE = 40;
         private int viewportRemaining = 0;
         private final List<JsonValue> queuedParents = new ArrayList<>();
-        private VaadinRequest previousRequest;
+        private transient VaadinRequest previousRequest;
 
         public TreeGridArrayUpdaterImpl(
                 SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueFactory) {
