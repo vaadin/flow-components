@@ -37,12 +37,6 @@ describe('grid connector - sorting', () => {
     expect(grid.$server.sortersChanged).to.not.be.called;
   });
 
-  it('should not make sort requests when a column gets hidden', async () => {
-    columns[0].hidden = true;
-    await nextFrame();
-    expect(grid.$server.sortersChanged).to.not.be.called;
-  });
-
   describe('single column sorting', () => {
     it('should make a sort request on sorter click', () => {
       sorters[0].click();
@@ -72,6 +66,15 @@ describe('grid connector - sorting', () => {
       sorters[1].click();
       expect(grid.$server.sortersChanged).to.be.calledOnce;
       expect(grid.$server.sortersChanged.args[0][0]).to.eql([{ path: 'price', direction: 'asc' }]);
+    });
+
+    it('should not make sort requests when hiding a sorted column', async () => {
+      sorters[0].click();
+      grid.$server.sortersChanged.resetHistory();
+
+      columns[0].hidden = true;
+      await nextFrame();
+      expect(grid.$server.sortersChanged).to.not.be.called;
     });
 
     describe('setSorterDirections', () => {
@@ -248,9 +251,10 @@ describe('grid connector - sorting', () => {
           ]);
           await aTimeout(0);
           columns[0].hidden = true;
+          columns[1].hidden = true;
           await nextFrame();
 
-          grid.$connector.setSorterDirections([{ column: 'price', direction: 'asc' }]);
+          grid.$connector.setSorterDirections([]);
           await aTimeout(0);
           expect(sorters[0]._order).to.be.null;
           expect(sorters[1]._order).to.be.null;
