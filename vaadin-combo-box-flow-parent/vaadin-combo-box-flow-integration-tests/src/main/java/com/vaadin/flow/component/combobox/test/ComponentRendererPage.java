@@ -17,12 +17,16 @@ package com.vaadin.flow.component.combobox.test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.dom.ElementConstants;
 import com.vaadin.flow.router.Route;
@@ -34,6 +38,7 @@ public class ComponentRendererPage extends Div {
         itemsAfterRenderer();
         dataProviderBeforeRenderer();
         dataProviderAfterRenderer();
+        throttledDataProvider();
     }
 
     private ComponentRenderer<VerticalLayout, ComboBoxDemoPage.Song> renderer = new ComponentRenderer<>(
@@ -102,6 +107,34 @@ public class ComponentRendererPage extends Div {
         comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, "250px");
         comboBox.setId("dp-after-renderer");
         add(comboBox);
+    }
+
+    private void throttledDataProvider() {
+        ComboBox<ComboBoxDemoPage.Song> comboBox = new ComboBox<>();
+        comboBox.setRenderer(
+                new ComponentRenderer<>(item -> new Span(item.getName())));
+
+        comboBox.setItems(ComponentRendererPage::getThrottledItems,
+                query -> Math.toIntExact(getThrottledItems(query).count()));
+
+        comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, "250px");
+        comboBox.setId("throttled-data-provider");
+        add(comboBox);
+    }
+
+    private static Stream<ComboBoxDemoPage.Song> getThrottledItems(
+            Query<ComboBoxDemoPage.Song, String> query) {
+        if (query.getOffset() == 0) {
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return IntStream.range(0, 1000)
+                .mapToObj(i -> new ComboBoxDemoPage.Song("Song " + i,
+                        "Artist " + i, "Album " + i))
+                .skip(query.getOffset()).limit(query.getLimit());
     }
 
     private List<ComboBoxDemoPage.Song> createListOfSongs() {
