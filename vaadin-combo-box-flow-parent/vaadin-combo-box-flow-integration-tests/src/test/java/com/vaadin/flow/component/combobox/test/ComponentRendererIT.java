@@ -68,28 +68,24 @@ public class ComponentRendererIT extends AbstractComboBoxIT {
     }
 
     @Test
-    public void throttledDataProvider_scrollDown_close_noItemsWhenReopened()
-            throws InterruptedException {
+    public void multiplePagesOfItems_scrollDown_close_noItemsWhenReopened() {
         ComboBoxElement comboBox = $(ComboBoxElement.class)
-                .id("throttled-data-provider");
+                .id("multiple-pages-of-items");
 
         comboBox.openPopup();
         waitUntilTextInContent("Song");
 
-        int pageSize = 50;
-        int pageCount = 12;
-        for (int i = 0; i < pageCount * pageSize; i += pageSize) {
+        for (int i = 0; i < 600; i += 50) {
             scrollToItem(comboBox, i);
         }
 
         comboBox.closePopup();
 
-        String text = (String) executeScript("arguments[0].open();"
+        String firstItemText = (String) executeScript("arguments[0].open();"
                 + "const item = document.querySelector('vaadin-combo-box-item');"
                 + "const spanInItem = item.querySelector('span');"
                 + "return spanInItem ? spanInItem.innerText : '';", comboBox);
-
-        Assert.assertEquals("", text);
+        Assert.assertEquals("", firstItemText);
     }
 
     private void testItems(TestBenchElement comboBox) {
