@@ -388,6 +388,11 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
                     }
                   });
                 });
+
+                // Manually trigger a re-render of the sorter priority indicators
+                // in case some of the sorters were hidden while being updated above
+                // and therefore didn't notify the grid about their direction change.
+                grid.__applySorters();
               } finally {
                 sorterDirectionsSetFromServer = false;
               }
@@ -975,6 +980,14 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             }
           });
         });
+
+        // This method is overridden to prevent the grid web component from
+        // automatically excluding columns from sorting when they get hidden.
+        // In Flow, it's the developer's responsibility to remove the column
+        // from the backend sort order when the column gets hidden.
+        grid._getActiveSorters = function() {
+          return this._sorters.filter((sorter) => sorter.direction);
+        }
 
         grid.__applySorters = () => {
           const sorters = grid._mapSorters();
