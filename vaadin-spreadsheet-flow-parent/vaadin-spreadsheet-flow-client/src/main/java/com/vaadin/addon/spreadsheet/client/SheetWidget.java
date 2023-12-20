@@ -28,6 +28,7 @@ import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
@@ -1141,7 +1142,8 @@ public class SheetWidget extends Panel {
 
         if (isEventInCustomEditorCell(event)) {
             // allow sheet context menu on top of custom editors
-            if (event.getButton() == NativeEvent.BUTTON_RIGHT) {
+            if (event.getButton() == NativeEvent.BUTTON_RIGHT
+                    || event.getType() == BrowserEvents.CONTEXTMENU) {
                 actionHandler.onCellRightClick(event, selectedCellCol,
                         selectedCellRow);
             } else if (selectingCells) { // this is probably unnecessary
@@ -1185,7 +1187,8 @@ public class SheetWidget extends Panel {
 
             event.stopPropagation();
             event.preventDefault();
-            if (event.getButton() == NativeEvent.BUTTON_RIGHT) {
+            if (event.getButton() == NativeEvent.BUTTON_RIGHT
+                    || event.getType() == BrowserEvents.CONTEXTMENU) {
                 Event.releaseCapture(sheet);
                 actionHandler.onCellRightClick(event, targetCol, targetRow);
             } else {
