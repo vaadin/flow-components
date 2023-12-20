@@ -104,13 +104,16 @@ public class Upload extends Component implements HasSize, HasStyle {
      */
     public Upload() {
         final String eventDetailError = "event.detail.error";
+        final String eventDetailFileName = "event.detail.file.name";
+
         getElement().addEventListener("file-reject", event -> {
             String detailError = event.getEventData()
                     .getString(eventDetailError);
-            fireEvent(new FileRejectedEvent(this, detailError));
-        }).addEventData(eventDetailError);
+            String detailFileName = event.getEventData()
+                    .getString(eventDetailFileName);
+            fireEvent(new FileRejectedEvent(this, detailError, detailFileName));
+        }).addEventData(eventDetailError).addEventData(eventDetailFileName);
 
-        final String eventDetailFileName = "event.detail.file.name";
         getElement().addEventListener("file-remove", event -> {
             String detailFileName = event.getEventData()
                     .getString(eventDetailFileName);
@@ -489,9 +492,13 @@ public class Upload extends Component implements HasSize, HasStyle {
      *            bytes received so far
      * @param contentLength
      *            actual size of the file being uploaded, if known
+     * @param contentLength
+     *            name of the file being uploaded
      */
-    protected void fireUpdateProgress(long totalBytes, long contentLength) {
-        fireEvent(new ProgressUpdateEvent(this, totalBytes, contentLength));
+    protected void fireUpdateProgress(long totalBytes, long contentLength,
+            String fileName) {
+        fireEvent(new ProgressUpdateEvent(this, totalBytes, contentLength,
+                fileName));
     }
 
     /**
@@ -744,7 +751,7 @@ public class Upload extends Component implements HasSize, HasStyle {
         @Override
         public void onProgress(StreamVariable.StreamingProgressEvent event) {
             upload.fireUpdateProgress(event.getBytesReceived(),
-                    event.getContentLength());
+                    event.getContentLength(), event.getFileName());
         }
 
         @Override

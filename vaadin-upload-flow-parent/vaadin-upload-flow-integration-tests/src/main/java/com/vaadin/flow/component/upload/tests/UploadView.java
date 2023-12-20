@@ -61,11 +61,16 @@ public class UploadView extends Div {
             eventsOutput.add("-succeeded");
         });
         upload.addAllFinishedListener(event -> eventsOutput.add("-finished"));
-        upload.addFileRejectedListener(event -> eventsOutput.add("-rejected"));
+        upload.addFileRejectedListener(event -> {
+            eventsOutput.add("-rejected");
+            output.add("REJECTED:" + event.getFileName());
+        });
         upload.addFileRemovedListener(event -> {
             eventsOutput.add("-removed");
             output.add("REMOVED:" + event.getFileName());
         });
+        upload.addProgressListener(
+                event -> output.add("PROGRESS:" + event.getFileName()));
 
         NativeButton clearFileListBtn = new NativeButton("Clear file list",
                 e -> upload.clearFileList());

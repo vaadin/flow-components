@@ -57,10 +57,10 @@ public class UploadIT extends AbstractUploadIT {
 
         String content = uploadOutput.getText();
 
-        String expectedContent = tempFile.getName() + getTempFileContents();
-
-        Assert.assertEquals("Upload content does not match expected",
-                expectedContent, content);
+        Assert.assertTrue("Upload content does not contain file details",
+                content.contains(tempFile.getName() + getTempFileContents()));
+        Assert.assertTrue("Progress update event was not fired properly",
+                content.contains("PROGRESS:" + tempFile.getName()));
     }
 
     @Test
@@ -110,8 +110,14 @@ public class UploadIT extends AbstractUploadIT {
 
         getUpload().upload(invalidFile);
 
+        WebElement eventsOutput = getDriver()
+                .findElement(By.id("test-events-output"));
         Assert.assertEquals("Invalid file was not rejected", "-rejected",
                 eventsOutput.getText());
+
+        WebElement uploadOutput = getDriver().findElement(By.id("test-output"));
+        Assert.assertTrue("Rejected file name was incorrect", uploadOutput
+                .getText().contains("REJECTED:" + invalidFile.getName()));
     }
 
     @Test
