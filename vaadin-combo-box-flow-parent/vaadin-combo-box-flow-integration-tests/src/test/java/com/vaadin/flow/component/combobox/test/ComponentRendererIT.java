@@ -82,7 +82,8 @@ public class ComponentRendererIT extends AbstractComboBoxIT {
         comboBox.closePopup();
 
         String firstItemText = (String) executeScript("arguments[0].open();"
-                + "return document.querySelector('vaadin-combo-box-item')?.textContent;", comboBox);
+                + "return document.querySelector('vaadin-combo-box-item')?.textContent;",
+                comboBox);
         Assert.assertEquals("", firstItemText);
     }
 
