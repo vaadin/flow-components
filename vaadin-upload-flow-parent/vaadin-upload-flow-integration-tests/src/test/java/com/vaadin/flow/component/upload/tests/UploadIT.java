@@ -38,18 +38,22 @@ import static org.junit.Assert.assertThat;
 @TestPath("vaadin-upload")
 public class UploadIT extends AbstractUploadIT {
 
+    private WebElement uploadOutput;
+
+    private WebElement eventsOutput;
+
     @Before
     public void init() {
         open();
         waitUntil(driver -> getUpload().isDisplayed());
+        uploadOutput = getDriver().findElement(By.id("test-output"));
+        eventsOutput = getDriver().findElement(By.id("test-events-output"));
     }
 
     @Test
     public void testUploadAnyFile() throws Exception {
         File tempFile = createTempFile("txt");
         getUpload().upload(tempFile);
-
-        WebElement uploadOutput = getDriver().findElement(By.id("test-output"));
 
         String content = uploadOutput.getText();
 
@@ -67,16 +71,16 @@ public class UploadIT extends AbstractUploadIT {
         getUpload().upload(tempFile);
         getUpload().upload(tempFile);
 
-        $("button").id("print-file-list").click();
+        $("button").id("print-file-count").click();
 
-        Assert.assertNotEquals("File list should contain files", "[]",
-                $("div").id("file-list").getText());
+        Assert.assertEquals("File list should contain 3 files", 3,
+                getFileCount());
 
         $("button").id("clear-file-list").click();
-        $("button").id("print-file-list").click();
+        $("button").id("print-file-count").click();
 
-        Assert.assertEquals("File list should not contain files", "[]",
-                $("div").id("file-list").getText());
+        Assert.assertEquals("File list should not contain files", 0,
+                getFileCount());
     }
 
     @Test
@@ -84,9 +88,6 @@ public class UploadIT extends AbstractUploadIT {
         File tempFile = createTempFile("txt");
 
         getUpload().uploadMultiple(List.of(tempFile, tempFile, tempFile), 10);
-
-        WebElement eventsOutput = getDriver()
-                .findElement(By.id("test-events-output"));
 
         Assert.assertEquals("Upload event order does not match expected",
                 "-succeeded-succeeded-succeeded-finished",
@@ -99,9 +100,6 @@ public class UploadIT extends AbstractUploadIT {
 
         getUpload().upload(tempFile);
 
-        WebElement eventsOutput = getDriver()
-                .findElement(By.id("test-events-output"));
-
         Assert.assertEquals("Upload event order does not match expected",
                 "-succeeded-finished", eventsOutput.getText());
     }
@@ -112,11 +110,33 @@ public class UploadIT extends AbstractUploadIT {
 
         getUpload().upload(invalidFile);
 
-        WebElement eventsOutput = getDriver()
-                .findElement(By.id("test-events-output"));
-
         Assert.assertEquals("Invalid file was not rejected", "-rejected",
                 eventsOutput.getText());
+    }
+
+    @Test
+    public void uploadFile_removeFile_fileIsRemoved() throws Exception {
+        File tempFile = createTempFile("txt");
+
+        getUpload().upload(tempFile);
+
+        $("button").id("print-file-count").click();
+
+        Assert.assertEquals("File list should contain one file", 1,
+                getFileCount());
+
+        getUpload().removeFile(0);
+
+        $("button").id("print-file-count").click();
+
+        Assert.assertEquals("File list should not contain files", 0,
+                getFileCount());
+
+        Assert.assertEquals("File was not properly removed",
+                "-succeeded-finished-removed", eventsOutput.getText());
+
+        Assert.assertTrue("Removed file name was incorrect", uploadOutput
+                .getText().contains("REMOVED:" + tempFile.getName()));
     }
 
     @Test
@@ -133,6 +153,10 @@ public class UploadIT extends AbstractUploadIT {
         List<LogEntry> logList2 = getLogEntries(Level.SEVERE);
         assertThat("There should have no severe message in the console",
                 logList2.size(), CoreMatchers.is(0));
+    }
+
+    private int getFileCount() {
+        return Integer.parseInt($("div").id("file-count").getText());
     }
 
     private UploadElement getUpload() {

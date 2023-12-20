@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.openqa.selenium.WebDriver.Timeouts;
-import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chromium.ChromiumDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.WebDriver;
@@ -129,6 +128,19 @@ public class UploadElement extends TestBenchElement {
     }
 
     /**
+     * Removes the file with the given index. Does nothing if there is no file
+     * with the given index.
+     *
+     * @param index
+     *            the index of the file to remove
+     */
+    public void removeFile(int index) {
+        executeScript(
+                "arguments[0]._removeFile(arguments[0].files[arguments[1]])",
+                this, index);
+    }
+
+    /**
      * Wait for the given number of seconds for all uploads to finish.
      *
      * @param maxSeconds
@@ -146,12 +158,6 @@ public class UploadElement extends TestBenchElement {
                 + "}, 500);";
         getCommandExecutor().getDriver().executeAsyncScript(script, this);
 
-    }
-
-    private void removeFile(int i) {
-        executeScript(
-                "arguments[0]._removeFile(arguments[0].files[arguments[1]])",
-                this, i);
     }
 
     private void startUpload() {

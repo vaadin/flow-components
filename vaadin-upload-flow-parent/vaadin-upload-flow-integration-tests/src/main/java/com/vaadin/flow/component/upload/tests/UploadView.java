@@ -19,6 +19,7 @@ package com.vaadin.flow.component.upload.tests;
 import java.io.IOException;
 
 import com.vaadin.flow.component.html.NativeButton;
+import elemental.json.JsonArray;
 import org.apache.commons.io.IOUtils;
 
 import com.vaadin.flow.component.Component;
@@ -43,7 +44,7 @@ public class UploadView extends Div {
     private void createSimpleUpload() {
         Div output = new Div();
         Div eventsOutput = new Div();
-        Div fileList = new Div();
+        Div fileCount = new Div();
 
         MultiFileMemoryBuffer buffer = new MultiFileMemoryBuffer();
         Upload upload = new Upload(buffer);
@@ -61,24 +62,33 @@ public class UploadView extends Div {
         });
         upload.addAllFinishedListener(event -> eventsOutput.add("-finished"));
         upload.addFileRejectedListener(event -> eventsOutput.add("-rejected"));
+        upload.addFileRemovedListener(event -> {
+            eventsOutput.add("-removed");
+            output.add("REMOVED:" + event.getFileName());
+        });
 
         NativeButton clearFileListBtn = new NativeButton("Clear file list",
                 e -> upload.clearFileList());
 
-        NativeButton printFileListBtn = new NativeButton("Print file list",
-                e -> fileList
-                        .setText(upload.getElement().getProperty("files")));
+        NativeButton printFileCountBtn = new NativeButton("Print file count",
+                e -> {
+                    upload.getElement().executeJs("return this.files")
+                            .then(jsonValue -> {
+                                fileCount.setText(String.valueOf(
+                                        ((JsonArray) jsonValue).length()));
+                            });
+                });
 
         upload.setMaxFileSize(500 * 1024);
         upload.setId("test-upload");
         clearFileListBtn.setId("clear-file-list");
-        printFileListBtn.setId("print-file-list");
-        fileList.setId("file-list");
+        printFileCountBtn.setId("print-file-count");
+        fileCount.setId("file-count");
         output.setId("test-output");
         eventsOutput.setId("test-events-output");
 
         addCard("Simple in memory receiver", upload, output, eventsOutput,
-                fileList, clearFileListBtn, printFileListBtn);
+                fileCount, clearFileListBtn, printFileCountBtn);
     }
 
     private void addCard(String title, Component... components) {
