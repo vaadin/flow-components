@@ -105,6 +105,7 @@ public class Upload extends Component implements HasSize, HasStyle {
     public Upload() {
         final String eventDetailError = "event.detail.error";
         final String eventDetailFileName = "event.detail.file.name";
+
         getElement().addEventListener("file-reject", event -> {
             String detailError = event.getEventData()
                     .getString(eventDetailError);
@@ -113,7 +114,6 @@ public class Upload extends Component implements HasSize, HasStyle {
             fireEvent(new FileRejectedEvent(this, detailError, detailFileName));
         }).addEventData(eventDetailError).addEventData(eventDetailFileName);
 
-        final String eventDetailFileName = "event.detail.file.name";
         getElement().addEventListener("file-remove", event -> {
             String detailFileName = event.getEventData()
                     .getString(eventDetailFileName);
