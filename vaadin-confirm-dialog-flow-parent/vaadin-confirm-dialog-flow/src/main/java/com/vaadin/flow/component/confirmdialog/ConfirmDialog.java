@@ -701,64 +701,56 @@ public class ConfirmDialog extends Component
      * Confirm dialog does not support replacing content.
      * <p>
      * This method is inherited from {@link HasOrderedComponents} and has been
-     * marked as deprecated to indicate that it is not supported. This method
-     * will throw an {@link UnsupportedOperationException}.
+     * marked as deprecated to indicate that it is not supported.
      *
      * @deprecated not supported
      */
     @Deprecated
     @Override
     public void replace(Component oldComponent, Component newComponent) {
-        throw new UnsupportedOperationException(
-                "Confirm dialog does not support replacing content.");
+        // NO-OP
     }
 
     /**
      * Confirm dialog does not support removing content.
      * <p>
      * This method is inherited from {@link HasComponents} and has been marked
-     * as deprecated to indicate that it is not supported. This method will
-     * throw an {@link UnsupportedOperationException}.
+     * as deprecated to indicate that it is not supported.
      *
      * @deprecated not supported
      */
     @Deprecated
     @Override
     public void remove(Component... components) {
-        throw new UnsupportedOperationException(
-                "Confirm dialog does not support removing content.");
+        // NO-OP
     }
 
     /**
      * Confirm dialog does not support removing content.
      * <p>
      * This method is inherited from {@link HasComponents} and has been marked
-     * as deprecated to indicate that it is not supported. This method will
-     * throw an {@link UnsupportedOperationException}.
+     * as deprecated to indicate that it is not supported.
      *
      * @deprecated not supported
      */
     @Deprecated
     @Override
     public void remove(Collection<Component> components) {
-        throw new UnsupportedOperationException(
-                "Confirm dialog does not support removing content.");
+        // NO-OP
     }
 
     /**
      * Confirm dialog does not support removing content.
      * <p>
      * This method is inherited from {@link HasComponents} and has been marked
-     * as deprecated to indicate that it is not supported. This method will
-     * throw an {@link UnsupportedOperationException}.
+     * as deprecated to indicate that it is not supported.
      *
      * @deprecated not supported
      */
     @Deprecated
     @Override
     public void removeAll() {
-        throw new UnsupportedOperationException(
-                "Confirm dialog does not support removing content.");
+        // NO-OP
     }
 
     @Override
