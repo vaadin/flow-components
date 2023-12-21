@@ -703,7 +703,7 @@ public class ConfirmDialog extends Component
      * This method is inherited from {@link HasOrderedComponents} and has been
      * marked as deprecated to indicate that it is not supported.
      *
-     * @deprecated not supported
+     * @deprecated since v24.4, not supported
      */
     @Deprecated
     @Override
@@ -717,7 +717,7 @@ public class ConfirmDialog extends Component
      * This method is inherited from {@link HasComponents} and has been marked
      * as deprecated to indicate that it is not supported.
      *
-     * @deprecated not supported
+     * @deprecated since v24.4, not supported
      */
     @Deprecated
     @Override
@@ -731,7 +731,7 @@ public class ConfirmDialog extends Component
      * This method is inherited from {@link HasComponents} and has been marked
      * as deprecated to indicate that it is not supported.
      *
-     * @deprecated not supported
+     * @deprecated since v24.4, not supported
      */
     @Deprecated
     @Override
@@ -745,7 +745,7 @@ public class ConfirmDialog extends Component
      * This method is inherited from {@link HasComponents} and has been marked
      * as deprecated to indicate that it is not supported.
      *
-     * @deprecated not supported
+     * @deprecated since v24.4, not supported
      */
     @Deprecated
     @Override
