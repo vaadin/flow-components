@@ -1151,8 +1151,7 @@ public class SheetWidget extends Panel {
 
         if (isEventInCustomEditorCell(event) || touchedOnSelectedCell) {
             // allow sheet context menu on top of custom editors
-            if (event.getButton() == NativeEvent.BUTTON_RIGHT
-                    || event.getType() == BrowserEvents.CONTEXTMENU) {
+            if (BrowserEvents.CONTEXTMENU.equals(event.getType())) {
                 actionHandler.onCellRightClick(event, selectedCellCol,
                         selectedCellRow);
             } else if (selectingCells) { // this is probably unnecessary
@@ -1196,8 +1195,7 @@ public class SheetWidget extends Panel {
 
             event.stopPropagation();
             event.preventDefault();
-            if (event.getButton() == NativeEvent.BUTTON_RIGHT
-                    || event.getType() == BrowserEvents.CONTEXTMENU) {
+            if (BrowserEvents.CONTEXTMENU.equals(event.getType())) {
                 Event.releaseCapture(sheet);
                 actionHandler.onCellRightClick(event, targetCol, targetRow);
             } else {
