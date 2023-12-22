@@ -708,7 +708,7 @@ public class ConfirmDialog extends Component
     @Deprecated
     @Override
     public void replace(Component oldComponent, Component newComponent) {
-        // NO-OP
+        HasOrderedComponents.super.replace(oldComponent, newComponent);
     }
 
     /**
@@ -722,7 +722,7 @@ public class ConfirmDialog extends Component
     @Deprecated
     @Override
     public void remove(Component... components) {
-        // NO-OP
+        HasOrderedComponents.super.remove(components);
     }
 
     /**
@@ -736,7 +736,7 @@ public class ConfirmDialog extends Component
     @Deprecated
     @Override
     public void remove(Collection<Component> components) {
-        // NO-OP
+        HasOrderedComponents.super.remove(components);
     }
 
     /**
@@ -750,7 +750,7 @@ public class ConfirmDialog extends Component
     @Deprecated
     @Override
     public void removeAll() {
-        // NO-OP
+        HasOrderedComponents.super.removeAll();
     }
 
     @Override
