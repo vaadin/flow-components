@@ -14,13 +14,8 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Node;
-import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.TouchCancelEvent;
-import com.google.gwt.event.dom.client.TouchEndEvent;
 import com.google.gwt.event.dom.client.TouchEvent;
-import com.google.gwt.event.dom.client.TouchMoveEvent;
-import com.google.gwt.event.dom.client.TouchStartEvent;
 import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
@@ -30,7 +25,6 @@ import com.vaadin.addon.spreadsheet.client.MergedRegionUtil.MergedRegionContaine
 import com.vaadin.addon.spreadsheet.client.SheetTabSheet.SheetTabSheetHandler;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetConnector.CommsTrigger;
 import com.vaadin.addon.spreadsheet.shared.GroupingData;
-import com.vaadin.client.BrowserInfo;
 import com.vaadin.client.Focusable;
 import com.vaadin.client.ServerConnector;
 import com.vaadin.client.Util;
@@ -226,24 +220,6 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
 
             }
         });
-
-        if (isTouchMode() && !BrowserInfo.get().isAndroid()) {
-            final var longPressHandler = new SpreadsheetContextMenuPolyfill(
-                    this);
-            sheetWidget.addDomHandler(longPressHandler,
-                    TouchStartEvent.getType());
-            sheetWidget.addDomHandler(longPressHandler,
-                    TouchEndEvent.getType());
-            sheetWidget.addDomHandler(longPressHandler,
-                    TouchMoveEvent.getType());
-            sheetWidget.addDomHandler(longPressHandler,
-                    TouchCancelEvent.getType());
-
-            sheetWidget.addDomHandler(
-                    event -> sheetWidget
-                            .onSheetMouseDown((Event) event.getNativeEvent()),
-                    ContextMenuEvent.getType());
-        }
     }
 
     @Override

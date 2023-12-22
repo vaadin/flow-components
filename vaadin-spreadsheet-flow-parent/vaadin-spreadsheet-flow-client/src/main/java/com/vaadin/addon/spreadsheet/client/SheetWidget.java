@@ -44,6 +44,10 @@ import com.google.gwt.dom.client.StyleElement;
 import com.google.gwt.dom.client.Touch;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
+import com.google.gwt.event.dom.client.TouchCancelEvent;
+import com.google.gwt.event.dom.client.TouchEndEvent;
+import com.google.gwt.event.dom.client.TouchMoveEvent;
+import com.google.gwt.event.dom.client.TouchStartEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.DOM;
@@ -1140,7 +1144,12 @@ public class SheetWidget extends Panel {
             return; // event target is one of the panes or input
         }
 
-        if (isEventInCustomEditorCell(event)) {
+        boolean touchedOnSelectedCell = isTouchMode()
+                && ("s-top".equals(className) || "s-left".equals(className)
+                        || "s-bottom".equals(className)
+                        || "s-right".equals(className));
+
+        if (isEventInCustomEditorCell(event) || touchedOnSelectedCell) {
             // allow sheet context menu on top of custom editors
             if (event.getButton() == NativeEvent.BUTTON_RIGHT
                     || event.getType() == BrowserEvents.CONTEXTMENU) {
@@ -1514,6 +1523,16 @@ public class SheetWidget extends Panel {
         listener.setSheetWidget(this);
         listener.setSheetPaneElement(topLeftPane, topRightPane, bottomLeftPane,
                 sheet);
+
+        // Add the context-menu polyfill for iOS devices
+        if (isTouchMode() && BrowserInfo.get().isIOS()) {
+            final var longPressHandler = new SpreadsheetContextMenuPolyfill(
+                    this);
+            addDomHandler(longPressHandler, TouchStartEvent.getType());
+            addDomHandler(longPressHandler, TouchEndEvent.getType());
+            addDomHandler(longPressHandler, TouchMoveEvent.getType());
+            addDomHandler(longPressHandler, TouchCancelEvent.getType());
+        }
         // for some reason the click event is not fired normally for headers
         previewHandlerRegistration = Event
                 .addNativePreviewHandler(new NativePreviewHandler() {

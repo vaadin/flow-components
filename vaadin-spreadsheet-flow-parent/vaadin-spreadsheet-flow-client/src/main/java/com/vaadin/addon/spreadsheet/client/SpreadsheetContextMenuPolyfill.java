@@ -42,14 +42,14 @@ import com.google.gwt.user.client.Timer;
  */
 final class SpreadsheetContextMenuPolyfill implements TouchStartHandler,
         TouchCancelHandler, TouchEndHandler, TouchMoveHandler {
-    final SpreadsheetWidget spreadsheetWidget;
-    /* default */ Timer timer;
+    private final SheetWidget sheetWidget;
+    /* default */ private Timer timer;
 
     /**
      * @param widget
      */
-    public SpreadsheetContextMenuPolyfill(SpreadsheetWidget widget) {
-        this.spreadsheetWidget = widget;
+    public SpreadsheetContextMenuPolyfill(SheetWidget widget) {
+        this.sheetWidget = widget;
     }
 
     /**
@@ -91,7 +91,7 @@ final class SpreadsheetContextMenuPolyfill implements TouchStartHandler,
         Element target = nativeEvent.getEventTarget().cast();
 
         if (target == null) {
-            target = spreadsheetWidget.getSheetWidget().getElement();
+            target = sheetWidget.getElement();
         }
 
         final Element finalTarget = target;
