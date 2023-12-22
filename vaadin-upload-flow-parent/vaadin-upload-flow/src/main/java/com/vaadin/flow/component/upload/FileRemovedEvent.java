@@ -18,48 +18,31 @@ package com.vaadin.flow.component.upload;
 import com.vaadin.flow.component.ComponentEvent;
 
 /**
- * Sent when the file selected for upload doesn't meet the constraints specified
- * on {@link Upload}
+ * Sent when a file selected for upload is removed.
  *
  * @author Vaadin Ltd.
  */
-public class FileRejectedEvent extends ComponentEvent<Upload> {
+public class FileRemovedEvent extends ComponentEvent<Upload> {
 
     private final String fileName;
 
-    private final String errorMessage;
-
     /**
-     * Creates a new event using the given source and indicator whether the
-     * event originated from the client side or the server side.
+     * Creates a new event using the given source and the removed file name.
      *
      * @param source
      *            the source component
-     * @param errorMessage
-     *            the error message
      * @param fileName
-     *            the rejected file name
+     *            the removed file name
      */
-    public FileRejectedEvent(Upload source, String errorMessage,
-            String fileName) {
+    public FileRemovedEvent(Upload source, String fileName) {
         super(source, true);
-        this.errorMessage = errorMessage;
         this.fileName = fileName;
     }
 
     /**
-     * Get the error message
+     * Get the removed file name.
      *
-     * @return errorMessage
-     */
-    public String getErrorMessage() {
-        return errorMessage;
-    }
-
-    /**
-     * Get the file name.
-     *
-     * @return file name
+     * @return the removed file name
      */
     public String getFileName() {
         return fileName;
