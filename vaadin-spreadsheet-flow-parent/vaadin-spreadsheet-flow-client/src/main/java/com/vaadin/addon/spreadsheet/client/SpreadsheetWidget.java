@@ -8,6 +8,15 @@
  */
 package com.vaadin.addon.spreadsheet.client;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Document;
@@ -30,15 +39,6 @@ import com.vaadin.client.ServerConnector;
 import com.vaadin.client.Util;
 import com.vaadin.client.WidgetUtil;
 import com.vaadin.client.communication.RpcProxy;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 public class SpreadsheetWidget extends Composite implements SheetHandler,
         FormulaBarHandler, SheetTabSheetHandler, Focusable {
@@ -2078,5 +2078,4 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     public void setHost(Element host, Node renderRoot) {
         sheetWidget.setHost(host, renderRoot);
     }
-
 }
