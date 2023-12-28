@@ -7,6 +7,7 @@ import '@vaadin/checkbox';
 import sinon from 'sinon';
 import type { Grid, GridColumn } from '@vaadin/grid';
 import type {} from '@web/test-runner-mocha';
+import { GridSorter } from '@vaadin/grid/all-imports.js';
 
 export type GridConnector = {
   updateFlatData: (updatedItems: Item[]) => void;
@@ -59,6 +60,10 @@ export type FlowGrid = Grid<Item> & {
   _flatSize: number;
   __updateVisibleRows: () => void;
   _updateItem: (index: number, item: Item) => void;
+};
+
+export type FlowGridSorter = GridSorter & {
+  _order?: number | null;
 };
 
 export type FlowGridSelectionColumn = GridColumn & {
