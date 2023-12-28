@@ -276,13 +276,9 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           let firstPage = Math.max(0, firstNeededPage);
           let lastPage =
             parentKey !== root ? lastNeededPage : Math.min(lastNeededPage, Math.floor(grid.size / grid.pageSize));
-          let lastRequestedRange = lastRequestedRanges[parentKey];
-          if (!lastRequestedRange) {
-            lastRequestedRange = [-1, -1];
-          }
+          let lastRequestedRange = lastRequestedRanges[parentKey] || [-1, -1];
           if (lastRequestedRange[0] != firstPage || lastRequestedRange[1] != lastPage) {
-            lastRequestedRange = [firstPage, lastPage];
-            lastRequestedRanges[parentKey] = lastRequestedRange;
+            lastRequestedRanges[parentKey] = [firstPage, lastPage];
             let count = lastPage - firstPage + 1;
             fetch(firstPage * grid.pageSize, count * grid.pageSize);
           }
