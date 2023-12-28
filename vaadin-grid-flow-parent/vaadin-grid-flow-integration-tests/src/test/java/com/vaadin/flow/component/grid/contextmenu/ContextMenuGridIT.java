@@ -239,7 +239,7 @@ public class ContextMenuGridIT extends AbstractComponentIT {
     }
 
     private void assertMessage(String expected) {
-        Assert.assertEquals(expected, $("label").id("message").getText());
+        Assert.assertEquals(expected, $("span").id("message").getText());
     }
 
     private void openSubMenu(TestBenchElement parentItem) {
