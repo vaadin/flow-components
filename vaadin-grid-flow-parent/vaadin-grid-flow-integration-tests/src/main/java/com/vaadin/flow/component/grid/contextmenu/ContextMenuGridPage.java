@@ -85,7 +85,8 @@ public class ContextMenuGridPage extends Div {
                 event -> grid.setSelectionMode(Grid.SelectionMode.MULTI));
         setMultiSelect.setId("set-multi-select");
 
-        add(grid, toggleOpenOnClick, addSubMenu, removeContextMenu, setMultiSelect);
+        add(grid, toggleOpenOnClick, addSubMenu, removeContextMenu,
+                setMultiSelect);
         grid.setId("grid-with-context-menu");
     }
 
