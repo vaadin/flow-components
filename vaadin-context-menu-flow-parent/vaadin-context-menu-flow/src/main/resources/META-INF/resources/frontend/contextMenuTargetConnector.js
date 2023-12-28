@@ -12,6 +12,9 @@ import * as Gestures from '@vaadin/component-base/src/gestures.js';
 
     target.$contextMenuTargetConnector = {
       openOnHandler: tryCatchWrapper(function (e) {
+        if (target.preventContextMenu && target.preventContextMenu(e)) {
+          return;
+        }
         e.preventDefault();
         e.stopPropagation();
         this.$contextMenuTargetConnector.openEvent = e;

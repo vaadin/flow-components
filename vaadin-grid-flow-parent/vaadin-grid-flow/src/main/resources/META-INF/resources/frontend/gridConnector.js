@@ -1040,6 +1040,15 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           return { key, columnId };
         });
 
+        grid.preventContextMenu =  tryCatchWrapper(function (event) {
+            const isLeftClick = event.type === 'click';
+            const firstColumnClicked = grid.getEventContext(event).column === grid._getColumns()[0]
+            const isMultiSelectGrid = selectionMode === validSelectionModes[2];
+            const selectionColumnClicked = isMultiSelectGrid && firstColumnClicked;
+
+            return isLeftClick && selectionColumnClicked;
+        });
+
         grid.addEventListener(
           'click',
           tryCatchWrapper((e) => _fireClickEvent(e, 'item-click'))

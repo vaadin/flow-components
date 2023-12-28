@@ -81,7 +81,11 @@ public class ContextMenuGridPage extends Div {
                 event -> contextMenu.setTarget(null));
         removeContextMenu.setId("remove-context-menu");
 
-        add(grid, toggleOpenOnClick, addSubMenu, removeContextMenu);
+        NativeButton setMultiSelect = new NativeButton("Multi select grid",
+                event -> grid.setSelectionMode(Grid.SelectionMode.MULTI));
+        setMultiSelect.setId("set-multi-select");
+
+        add(grid, toggleOpenOnClick, addSubMenu, removeContextMenu, setMultiSelect);
         grid.setId("grid-with-context-menu");
     }
 
