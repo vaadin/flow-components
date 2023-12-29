@@ -2,6 +2,7 @@ import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
 import { timeOut, animationFrame } from '@polymer/polymer/lib/utils/async.js';
 import { Grid } from '@vaadin/grid/src/vaadin-grid.js';
 import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
+import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js";
 
 (function () {
   const tryCatchWrapper = function (callback) {
@@ -1047,6 +1048,13 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           const key = (eventContext.item && eventContext.item.key) || '';
           const columnId = (eventContext.column && eventContext.column.id) || '';
           return { key, columnId };
+        });
+
+        grid.preventContextMenu = tryCatchWrapper(function (event) {
+            const isLeftClick = event.type === 'click';
+            const { column } = grid.getEventContext(event);
+
+            return isLeftClick && column instanceof GridFlowSelectionColumn;
         });
 
         grid.addEventListener(
