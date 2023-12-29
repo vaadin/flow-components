@@ -17,11 +17,13 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
 
         comboBox.$connector = {};
 
+        const dataProviderController = comboBox._dataProviderController;
+
         // holds pageIndex -> callback pairs of subsequent indexes (current active range)
         const pageCallbacks = {};
         let cache = {};
         let lastFilter = '';
-        const placeHolder = new window.Vaadin.ComboBoxPlaceholder();
+        const placeHolder = dataProviderController.placeholder;
 
         const serverFacade = (() => {
           // Private variables
