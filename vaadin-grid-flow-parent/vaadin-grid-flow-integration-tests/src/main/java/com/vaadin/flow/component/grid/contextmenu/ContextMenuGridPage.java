@@ -24,8 +24,8 @@ import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Hr;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.bean.Person;
 import com.vaadin.flow.router.Route;
 
@@ -34,10 +34,10 @@ public class ContextMenuGridPage extends Div {
 
     private static final String NO_TARGET_ITEM = "no target item";
 
-    private Label message;
+    private Span message;
 
     public ContextMenuGridPage() {
-        message = new Label("-");
+        message = new Span("-");
         message.setId("message");
         add(message);
 
@@ -81,7 +81,12 @@ public class ContextMenuGridPage extends Div {
                 event -> contextMenu.setTarget(null));
         removeContextMenu.setId("remove-context-menu");
 
-        add(grid, toggleOpenOnClick, addSubMenu, removeContextMenu);
+        NativeButton setMultiSelect = new NativeButton("Multi select grid",
+                event -> grid.setSelectionMode(Grid.SelectionMode.MULTI));
+        setMultiSelect.setId("set-multi-select");
+
+        add(grid, toggleOpenOnClick, addSubMenu, removeContextMenu,
+                setMultiSelect);
         grid.setId("grid-with-context-menu");
     }
 
