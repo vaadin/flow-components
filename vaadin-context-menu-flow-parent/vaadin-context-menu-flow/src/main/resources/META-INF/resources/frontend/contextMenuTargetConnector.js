@@ -12,6 +12,7 @@ import * as Gestures from '@vaadin/component-base/src/gestures.js';
 
     target.$contextMenuTargetConnector = {
       openOnHandler: tryCatchWrapper(function (e) {
+        // used by Grid to prevent context menu on selection column click
         if (target.preventContextMenu && target.preventContextMenu(e)) {
           return;
         }
