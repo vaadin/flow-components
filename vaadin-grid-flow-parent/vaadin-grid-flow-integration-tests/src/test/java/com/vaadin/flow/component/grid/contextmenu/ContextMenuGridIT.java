@@ -98,6 +98,24 @@ public class ContextMenuGridIT extends AbstractComponentIT {
     }
 
     @Test
+    public void setOpenOnClickAndMultiSelect_clickOnRow_itemClickGetsTargetItem() {
+        $("button").id("toggle-open-on-click").click();
+        $("button").id("set-multi-select").click();
+        grid.getCell(14, 1).click();
+        $("vaadin-context-menu-item").first().click();
+        assertMessage("Person 14");
+        verifyClosed();
+    }
+
+    @Test
+    public void setOpenOnClickAndMultiSelect_clickOnSelectionColum_noContextMenuOpen() {
+        $("button").id("toggle-open-on-click").click();
+        $("button").id("set-multi-select").click();
+        grid.getCell(14, 0).click();
+        verifyClosed();
+    }
+
+    @Test
     public void setOpenOnClick_contextClickOnRow_noContextMenuOpen() {
         $("button").id("toggle-open-on-click").click();
         grid.getCell(22, 0).contextClick();
@@ -239,7 +257,7 @@ public class ContextMenuGridIT extends AbstractComponentIT {
     }
 
     private void assertMessage(String expected) {
-        Assert.assertEquals(expected, $("label").id("message").getText());
+        Assert.assertEquals(expected, $("span").id("message").getText());
     }
 
     private void openSubMenu(TestBenchElement parentItem) {
