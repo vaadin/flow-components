@@ -29,6 +29,7 @@ import java.util.stream.Stream;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.shared.InputField;
+import com.vaadin.flow.component.shared.SelectionOnDataChange;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import org.hamcrest.collection.IsEmptyCollection;
 import org.junit.Assert;
@@ -653,6 +654,107 @@ public class CheckboxGroupTest {
         CheckboxGroup<String> field = new CheckboxGroup<String>();
         Assert.assertTrue(
                 field instanceof InputField<AbstractField.ComponentValueChangeEvent<CheckboxGroup<String>, Set<String>>, Set<String>>);
+    }
+
+    @Test
+    public void discard_changeEvent() {
+        CheckboxGroup<String> group = new CheckboxGroup<>();
+        List<HasValue.ValueChangeEvent<Set<String>>> events = new ArrayList<>();
+        group.addValueChangeListener(events::add);
+
+        List<String> items = new ArrayList<>(
+                Arrays.asList("Item 1", "Item 2", "Item 3"));
+        group.setItems(items);
+
+        group.setSelectionOnDataChange(SelectionOnDataChange.DISCARD);
+
+        group.getDataProvider().refreshAll();
+        Assert.assertTrue(group.getSelectedItems().isEmpty());
+        Assert.assertTrue(events.isEmpty());
+
+        String selectedItem = items.get(0);
+        group.select(selectedItem);
+        Assert.assertEquals(Set.of(selectedItem), group.getValue());
+        Assert.assertEquals(1, events.size());
+        events.clear();
+
+        group.getDataProvider().refreshAll();
+        Assert.assertTrue(group.getSelectedItems().isEmpty());
+        Assert.assertEquals(1, events.size());
+    }
+
+    @Test
+    public void preserveExistent_changeEvent() {
+        CheckboxGroup<String> group = new CheckboxGroup<>();
+        List<HasValue.ValueChangeEvent<Set<String>>> events = new ArrayList<>();
+        group.addValueChangeListener(events::add);
+
+        List<String> items = new ArrayList<>(
+                Arrays.asList("Item 1", "Item 2", "Item 3"));
+        group.setItems(items);
+
+        group.setSelectionOnDataChange(SelectionOnDataChange.PRESERVE_EXISTENT);
+
+        group.getDataProvider().refreshAll();
+        Assert.assertTrue(group.getSelectedItems().isEmpty());
+        Assert.assertTrue(events.isEmpty());
+
+        String selectedItem = items.get(0);
+        group.select(selectedItem);
+        Assert.assertEquals(Set.of(selectedItem), group.getValue());
+        Assert.assertEquals(1, events.size());
+        events.clear();
+
+        group.getDataProvider().refreshAll();
+        Assert.assertEquals(Set.of(selectedItem), group.getValue());
+        Assert.assertTrue(events.isEmpty());
+
+        items.remove(items.get(1));
+        group.getDataProvider().refreshAll();
+        Assert.assertEquals(Set.of(selectedItem), group.getValue());
+        Assert.assertTrue(events.isEmpty());
+
+        items.remove(selectedItem);
+        group.getDataProvider().refreshAll();
+        Assert.assertTrue(group.getSelectedItems().isEmpty());
+        Assert.assertEquals(1, events.size());
+    }
+
+    @Test
+    public void preserveAll_changeEvent() {
+        CheckboxGroup<String> group = new CheckboxGroup<>();
+        List<HasValue.ValueChangeEvent<Set<String>>> events = new ArrayList<>();
+        group.addValueChangeListener(events::add);
+
+        List<String> items = new ArrayList<>(
+                Arrays.asList("Item 1", "Item 2", "Item 3"));
+        group.setItems(items);
+
+        group.setSelectionOnDataChange(SelectionOnDataChange.PRESERVE_ALL);
+
+        group.getDataProvider().refreshAll();
+        Assert.assertTrue(group.getSelectedItems().isEmpty());
+        Assert.assertTrue(events.isEmpty());
+
+        String selectedItem = items.get(0);
+        group.select(selectedItem);
+        Assert.assertEquals(Set.of(selectedItem), group.getValue());
+        Assert.assertEquals(1, events.size());
+        events.clear();
+
+        group.getDataProvider().refreshAll();
+        Assert.assertEquals(Set.of(selectedItem), group.getValue());
+        Assert.assertTrue(events.isEmpty());
+
+        items.remove(items.get(1));
+        group.getDataProvider().refreshAll();
+        Assert.assertEquals(Set.of(selectedItem), group.getValue());
+        Assert.assertTrue(events.isEmpty());
+
+        items.remove(selectedItem);
+        group.getDataProvider().refreshAll();
+        Assert.assertEquals(Set.of(selectedItem), group.getValue());
+        Assert.assertTrue(events.isEmpty());
     }
 
     /**

@@ -247,9 +247,13 @@ public abstract class AbstractGridMultiSelectionModel<T>
                     ValueChangeListener<? super ComponentValueChangeEvent<Grid<T>, Set<T>>> listener) {
                 Objects.requireNonNull(listener, "listener cannot be null");
 
-                ComponentEventListener componentEventListener = event -> listener
-                        .valueChanged(
-                                (ComponentValueChangeEvent<Grid<T>, Set<T>>) event);
+                ComponentEventListener componentEventListener = event -> {
+                    if (suppressValueChangeEvents()) {
+                        return;
+                    }
+                    listener.valueChanged(
+                            (ComponentValueChangeEvent<Grid<T>, Set<T>>) event);
+                };
 
                 return ComponentUtil.addListener(getGrid(),
                         MultiSelectionEvent.class, componentEventListener);
@@ -285,14 +289,22 @@ public abstract class AbstractGridMultiSelectionModel<T>
         };
     }
 
+    boolean suppressValueChangeEvents() {
+        return false;
+    }
+
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public Registration addSelectionListener(
             SelectionListener<Grid<T>, T> listener) {
         Objects.requireNonNull(listener, "listener cannot be null");
         return ComponentUtil.addListener(getGrid(), MultiSelectionEvent.class,
-                (ComponentEventListener) (event -> listener
-                        .selectionChange((SelectionEvent) event)));
+                (ComponentEventListener) (event -> {
+                    if (suppressValueChangeEvents()) {
+                        return;
+                    }
+                    listener.selectionChange((SelectionEvent) event);
+                }));
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -301,8 +313,12 @@ public abstract class AbstractGridMultiSelectionModel<T>
             MultiSelectionListener<Grid<T>, T> listener) {
         Objects.requireNonNull(listener, "listener cannot be null");
         return ComponentUtil.addListener(getGrid(), MultiSelectionEvent.class,
-                (ComponentEventListener) (event -> listener
-                        .selectionChange((MultiSelectionEvent) event)));
+                (ComponentEventListener) (event -> {
+                    if (suppressValueChangeEvents()) {
+                        return;
+                    }
+                    listener.selectionChange((MultiSelectionEvent) event);
+                }));
     }
 
     @Override

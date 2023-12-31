@@ -41,10 +41,12 @@ import com.vaadin.flow.component.checkbox.dataview.CheckboxGroupListDataView;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.ClientValidationUtil;
+import com.vaadin.flow.component.shared.DataChangeHandler;
 import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
+import com.vaadin.flow.component.shared.SelectionOnDataChange;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.binder.HasValidator;
@@ -120,6 +122,10 @@ public class CheckboxGroup<T>
 
     private boolean manualValidationEnabled = false;
 
+    private DataChangeHandler<T> dataChangeHandler;
+
+    private boolean suppressValueChangeEvents = false;
+
     /**
      * Creates an empty checkbox group
      */
@@ -129,6 +135,8 @@ public class CheckboxGroup<T>
                 CheckboxGroup::modelToPresentation);
 
         addValueChangeListener(e -> validate());
+
+        initDataChangeHandler();
     }
 
     /**
@@ -303,6 +311,74 @@ public class CheckboxGroup<T>
                 this::identifierProviderChanged);
     }
 
+    private void initDataChangeHandler() {
+        dataChangeHandler = new DataChangeHandler<>(
+                SelectionOnDataChange.DISCARD) {
+
+            @Override
+            public void onPreserveAll(DataChangeEvent<T> dataChangeEvent) {
+                Set<T> initialValue = getValue();
+                suppressValueChangeEvents = true;
+                try {
+                    doHandleDataChange(dataChangeEvent);
+                    setValue(initialValue);
+                } finally {
+                    suppressValueChangeEvents = false;
+                }
+                if (!valueEquals(getValue(), initialValue)) {
+                    fireValueChangeEvent(initialValue);
+                }
+            }
+
+            @Override
+            public void onPreserveExisting(DataChangeEvent<T> dataChangeEvent) {
+                Set<T> initialValue = getValue();
+                suppressValueChangeEvents = true;
+                try {
+                    doHandleDataChange(dataChangeEvent);
+                    if (!initialValue.isEmpty()) {
+                        Set<Object> currentItemIds = getCheckboxItems()
+                                .map(item -> getItemId(item.getItem()))
+                                .collect(Collectors.toSet());
+                        Set<T> existingValueSet = initialValue.stream()
+                                .filter(item -> currentItemIds
+                                        .contains(getItemId(item)))
+                                .collect(Collectors.toSet());
+                        setValue(existingValueSet);
+                    }
+                } finally {
+                    suppressValueChangeEvents = false;
+                }
+                if (!valueEquals(getValue(), initialValue)) {
+                    fireValueChangeEvent(initialValue);
+                }
+            }
+
+            @Override
+            public void onDiscard(DataChangeEvent<T> dataChangeEvent) {
+                doHandleDataChange(dataChangeEvent);
+                deselectAll();
+            }
+        };
+    }
+
+    private void fireValueChangeEvent(Set<T> oldValue) {
+        fireEvent(new ComponentValueChangeEvent<>(this, this, oldValue, false));
+    }
+
+    private void doHandleDataChange(DataChangeEvent<T> dataChangeEvent) {
+        if (dataChangeEvent instanceof DataChangeEvent.DataRefreshEvent) {
+            T otherItem = ((DataChangeEvent.DataRefreshEvent<T>) dataChangeEvent)
+                    .getItem();
+            Object otherItemId = getItemId(otherItem);
+            getCheckboxItems().filter(
+                    item -> Objects.equals(getItemId(item.item), otherItemId))
+                    .findFirst().ifPresent(this::updateCheckbox);
+        } else {
+            reset();
+        }
+    }
+
     private static class CheckBoxItem<T> extends Checkbox
             implements HasItemComponents.ItemComponent<T> {
 
@@ -338,19 +414,7 @@ public class CheckboxGroup<T>
             dataProviderListenerRegistration.remove();
         }
         dataProviderListenerRegistration = dataProvider
-                .addDataProviderListener(event -> {
-                    if (event instanceof DataChangeEvent.DataRefreshEvent) {
-                        T otherItem = ((DataChangeEvent.DataRefreshEvent<T>) event)
-                                .getItem();
-                        this.getCheckboxItems()
-                                .filter(item -> Objects.equals(
-                                        getItemId(item.item),
-                                        getItemId(otherItem)))
-                                .findFirst().ifPresent(this::updateCheckbox);
-                    } else {
-                        reset();
-                    }
-                });
+                .addDataProviderListener(dataChangeHandler::handleDataChange);
     }
 
     @Override
@@ -381,6 +445,17 @@ public class CheckboxGroup<T>
                         + "Use the clear-method to reset the component's value to an empty set.");
         super.setValue(value);
         refreshCheckboxes();
+    }
+
+    @Override
+    public Registration addValueChangeListener(
+            ValueChangeListener<? super ComponentValueChangeEvent<CheckboxGroup<T>, Set<T>>> listener) {
+        return super.addValueChangeListener(event -> {
+            if (suppressValueChangeEvents) {
+                return;
+            }
+            listener.valueChanged(event);
+        });
     }
 
     @Override
@@ -634,6 +709,15 @@ public class CheckboxGroup<T>
             ComponentRenderer<? extends Component, T> renderer) {
         this.itemRenderer = Objects.requireNonNull(renderer);
         refreshCheckboxItems();
+    }
+
+    public void setSelectionOnDataChange(
+            SelectionOnDataChange selectionOnDataChange) {
+        dataChangeHandler.setSelectionOnDataChange(selectionOnDataChange);
+    }
+
+    public SelectionOnDataChange getSelectionOnDataChange() {
+        return dataChangeHandler.getSelectionOnDataChange();
     }
 
     @SuppressWarnings("unchecked")

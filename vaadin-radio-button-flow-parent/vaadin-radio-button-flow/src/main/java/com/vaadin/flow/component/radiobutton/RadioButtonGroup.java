@@ -31,14 +31,14 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupDataView;
 import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupListDataView;
 import com.vaadin.flow.component.shared.ClientValidationUtil;
+import com.vaadin.flow.component.shared.DataChangeHandler;
 import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
+import com.vaadin.flow.component.shared.SelectionOnDataChange;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasValidator;
-import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
-import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderWrapper;
@@ -107,6 +107,10 @@ public class RadioButtonGroup<T>
 
     private boolean manualValidationEnabled = false;
 
+    private DataChangeHandler<T> dataChangeHandler;
+
+    private boolean suppressValueChangeEvents = false;
+
     private static <T> T presentationToModel(
             RadioButtonGroup<T> radioButtonGroup, String presentation) {
         if (radioButtonGroup.keyMapper == null) {
@@ -135,6 +139,8 @@ public class RadioButtonGroup<T>
                 RadioButtonGroup::modelToPresentation);
 
         addValueChangeListener(e -> validate());
+
+        initDataChangeHandler();
     }
 
     /**
@@ -329,15 +335,7 @@ public class RadioButtonGroup<T>
             dataProviderListenerRegistration.remove();
         }
         dataProviderListenerRegistration = dataProvider
-                .addDataProviderListener(event -> {
-                    if (event instanceof DataChangeEvent.DataRefreshEvent) {
-                        resetRadioButton(
-                                ((DataChangeEvent.DataRefreshEvent<T>) event)
-                                        .getItem());
-                    } else {
-                        reset();
-                    }
-                });
+                .addDataProviderListener(dataChangeHandler::handleDataChange);
     }
 
     /**
@@ -371,9 +369,24 @@ public class RadioButtonGroup<T>
     @Override
     public void setValue(T value) {
         super.setValue(value);
-        getRadioButtons()
-                .forEach(rb -> rb.setChecked(valueEquals(rb.getItem(), value)));
+        if (value == null) {
+            getRadioButtons().forEach(rb -> rb.setChecked(false));
+        } else {
+            getRadioButtons().forEach(
+                    rb -> rb.setChecked(valueEquals(rb.getItem(), value)));
+        }
         refreshButtons();
+    }
+
+    @Override
+    public Registration addValueChangeListener(
+            ValueChangeListener<? super ComponentValueChangeEvent<RadioButtonGroup<T>, T>> listener) {
+        return super.addValueChangeListener(event -> {
+            if (suppressValueChangeEvents) {
+                return;
+            }
+            listener.valueChanged(event);
+        });
     }
 
     @Override
@@ -522,6 +535,15 @@ public class RadioButtonGroup<T>
      */
     public String getLabel() {
         return getElement().getProperty("label");
+    }
+
+    public void setSelectionOnDataChange(
+            SelectionOnDataChange selectionOnDataChange) {
+        dataChangeHandler.setSelectionOnDataChange(selectionOnDataChange);
+    }
+
+    public SelectionOnDataChange getSelectionOnDataChange() {
+        return dataChangeHandler.getSelectionOnDataChange();
     }
 
     @Override
@@ -715,6 +737,72 @@ public class RadioButtonGroup<T>
     private void identifierProviderChanged(
             IdentifierProvider<T> identifierProvider) {
         keyMapper.setIdentifierGetter(identifierProvider);
+    }
+
+    private void initDataChangeHandler() {
+        dataChangeHandler = new DataChangeHandler<>(
+                SelectionOnDataChange.PRESERVE_EXISTENT) {
+
+            @Override
+            public void onPreserveAll(DataChangeEvent<T> dataChangeEvent) {
+                T initialValue = getValue();
+                suppressValueChangeEvents = true;
+                try {
+                    doHandleDataChange(dataChangeEvent);
+                    if (!valueEquals(getValue(), initialValue)) {
+                        setValue(initialValue);
+                    }
+                } finally {
+                    suppressValueChangeEvents = false;
+                }
+                if (!valueEquals(getValue(), initialValue)) {
+                    fireValueChangeEvent(initialValue);
+                }
+            }
+
+            @Override
+            public void onPreserveExisting(DataChangeEvent<T> dataChangeEvent) {
+                T initialValue = getValue();
+                suppressValueChangeEvents = true;
+                try {
+                    doHandleDataChange(dataChangeEvent);
+                    if (!valueEquals(getValue(), initialValue)
+                            && getRadioButtons()
+                                    .anyMatch(radioButton -> valueEquals(
+                                            radioButton.getItem(),
+                                            initialValue))) {
+                        setValue(initialValue);
+                    }
+                } finally {
+                    suppressValueChangeEvents = false;
+                }
+                if (!valueEquals(getValue(), initialValue)) {
+                    fireValueChangeEvent(initialValue);
+                }
+            }
+
+            @Override
+            public void onDiscard(DataChangeEvent<T> dataChangeEvent) {
+                doHandleDataChange(dataChangeEvent);
+                if (getValue() != null) {
+                    setValue(null);
+                }
+            }
+        };
+    }
+
+    private void fireValueChangeEvent(T oldValue) {
+        fireEvent(new ComponentValueChangeEvent<>(this, this, oldValue, false));
+    }
+
+    private void doHandleDataChange(DataChangeEvent<T> dataChangeEvent) {
+        if (dataChangeEvent instanceof DataChangeEvent.DataRefreshEvent) {
+            resetRadioButton(
+                    ((DataChangeEvent.DataRefreshEvent<T>) dataChangeEvent)
+                            .getItem());
+        } else {
+            reset();
+        }
     }
 
     @Override

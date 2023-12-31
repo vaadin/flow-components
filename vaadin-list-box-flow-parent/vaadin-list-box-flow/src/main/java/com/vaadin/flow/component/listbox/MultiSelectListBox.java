@@ -23,6 +23,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import com.vaadin.flow.component.shared.DataChangeHandler;
+import com.vaadin.flow.component.shared.SelectionOnDataChange;
+import com.vaadin.flow.data.provider.DataChangeEvent;
+import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
@@ -45,6 +49,10 @@ public class MultiSelectListBox<T>
         extends ListBoxBase<MultiSelectListBox<T>, T, Set<T>>
         implements MultiSelect<MultiSelectListBox<T>, T> {
 
+    private DataChangeHandler<T> dataChangeHandler;
+
+    private boolean suppressValueChangeEvents = false;
+
     /**
      * Creates a new list box component with multi-selection.
      */
@@ -53,6 +61,63 @@ public class MultiSelectListBox<T>
                 MultiSelectListBox::presentationToModel,
                 MultiSelectListBox::modelToPresentation);
         getElement().setProperty("multiple", true);
+        initDataChangeHandler();
+    }
+
+    private void initDataChangeHandler() {
+        dataChangeHandler = new DataChangeHandler<>(
+                SelectionOnDataChange.DISCARD) {
+
+            @Override
+            public void onPreserveAll(DataChangeEvent<T> dataChangeEvent) {
+                Set<T> initialSelectedItems = getSelectedItems();
+                suppressValueChangeEvents = true;
+                try {
+                    MultiSelectListBox.super.handleDataChange(dataChangeEvent);
+                    setValue(initialSelectedItems);
+                } finally {
+                    suppressValueChangeEvents = false;
+                }
+                if (!valueEquals(getValue(), initialSelectedItems)) {
+                    fireEvent(new ComponentValueChangeEvent<>(
+                            MultiSelectListBox.this, MultiSelectListBox.this,
+                            initialSelectedItems, false));
+                }
+            }
+
+            @Override
+            public void onPreserveExisting(DataChangeEvent<T> dataChangeEvent) {
+                Set<T> initialSelectedItems = getSelectedItems();
+                suppressValueChangeEvents = true;
+                try {
+                    MultiSelectListBox.super.handleDataChange(dataChangeEvent);
+                    if (!initialSelectedItems.isEmpty()) {
+                        Set<Object> allItemIds = getDataProvider()
+                                .fetch(new Query<>())
+                                .map(getDataProvider()::getId)
+                                .collect(Collectors.toSet());
+                        Set<T> existingItems = initialSelectedItems.stream()
+                                .filter(item -> allItemIds.contains(
+                                        getDataProvider().getId(item)))
+                                .collect(Collectors.toSet());
+                        setValue(existingItems);
+                    }
+                } finally {
+                    suppressValueChangeEvents = false;
+                }
+                if (!valueEquals(getValue(), initialSelectedItems)) {
+                    fireEvent(new ComponentValueChangeEvent<>(
+                            MultiSelectListBox.this, MultiSelectListBox.this,
+                            initialSelectedItems, false));
+                }
+            }
+
+            @Override
+            public void onDiscard(DataChangeEvent<T> dataChangeEvent) {
+                MultiSelectListBox.super.handleDataChange(dataChangeEvent);
+                deselectAll();
+            }
+        };
     }
 
     private static <T> Set<T> presentationToModel(MultiSelectListBox<T> listBox,
@@ -104,6 +169,17 @@ public class MultiSelectListBox<T>
     }
 
     @Override
+    public Registration addValueChangeListener(
+            ValueChangeListener<? super ComponentValueChangeEvent<MultiSelectListBox<T>, Set<T>>> listener) {
+        return super.addValueChangeListener(event -> {
+            if (suppressValueChangeEvents) {
+                return;
+            }
+            listener.valueChanged(event);
+        });
+    }
+
+    @Override
     public void updateSelection(Set<T> addedItems, Set<T> removedItems) {
         Set<T> value = new HashSet<>(getValue());
         value.addAll(addedItems);
@@ -128,9 +204,27 @@ public class MultiSelectListBox<T>
     @Override
     public Registration addSelectionListener(
             MultiSelectionListener<MultiSelectListBox<T>, T> listener) {
-        return addValueChangeListener(event -> listener
-                .selectionChange(new MultiSelectionEvent<>(this, this,
-                        event.getOldValue(), event.isFromClient())));
+        return addValueChangeListener(event -> {
+            if (suppressValueChangeEvents) {
+                return;
+            }
+            listener.selectionChange(new MultiSelectionEvent<>(this, this,
+                    event.getOldValue(), event.isFromClient()));
+        });
+    }
+
+    public void setSelectionOnDataChange(
+            SelectionOnDataChange selectionOnDataChange) {
+        dataChangeHandler.setSelectionOnDataChange(selectionOnDataChange);
+    }
+
+    public SelectionOnDataChange getSelectionOnDataChange() {
+        return dataChangeHandler.getSelectionOnDataChange();
+    }
+
+    @Override
+    void handleDataChange(DataChangeEvent<T> dataChangeEvent) {
+        dataChangeHandler.handleDataChange(dataChangeEvent);
     }
 
     /**

@@ -25,9 +25,11 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.HasAriaLabel;
+import com.vaadin.flow.component.shared.SelectionOnDataChange;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -361,6 +363,94 @@ public class MultiSelectListBoxTest {
         listBox.setAriaLabelledBy(null);
 
         Assert.assertTrue(listBox.getAriaLabelledBy().isEmpty());
+    }
+
+    @Test
+    public void discard_changeEvent() {
+        listBox.setSelectionOnDataChange(SelectionOnDataChange.DISCARD);
+
+        Assert.assertTrue(listBox.getSelectedItems().isEmpty());
+        Assert.assertNull(selectionEvent);
+
+        listBox.getDataProvider().refreshAll();
+        Assert.assertTrue(listBox.getSelectedItems().isEmpty());
+        Assert.assertNull(selectionEvent);
+
+        Item selectedItem = items.get(0);
+        listBox.select(selectedItem);
+        Assert.assertEquals(Set.of(selectedItem), listBox.getSelectedItems());
+        Assert.assertNotNull(selectionEvent);
+        selectionEvent = null;
+
+        listBox.getDataProvider().refreshAll();
+        Assert.assertTrue(listBox.getSelectedItems().isEmpty());
+        Assert.assertNotNull(selectionEvent);
+    }
+
+    @Test
+    public void preserveExistent_changeEvent() {
+        listBox.setSelectionOnDataChange(
+                SelectionOnDataChange.PRESERVE_EXISTENT);
+
+        Assert.assertTrue(listBox.getSelectedItems().isEmpty());
+        Assert.assertNull(selectionEvent);
+
+        listBox.getDataProvider().refreshAll();
+        Assert.assertTrue(listBox.getSelectedItems().isEmpty());
+        Assert.assertNull(selectionEvent);
+
+        Item selectedItem = items.get(0);
+        listBox.select(selectedItem);
+        Assert.assertEquals(Set.of(selectedItem), listBox.getSelectedItems());
+        Assert.assertNotNull(selectionEvent);
+        selectionEvent = null;
+
+        listBox.getDataProvider().refreshAll();
+        Assert.assertEquals(Set.of(selectedItem), listBox.getSelectedItems());
+        Assert.assertNull(selectionEvent);
+
+        items.remove(items.get(1));
+        listBox.getDataProvider().refreshAll();
+        Assert.assertEquals(Set.of(selectedItem), listBox.getSelectedItems());
+        Assert.assertNull(selectionEvent);
+
+        items.remove(selectedItem);
+        listBox.getDataProvider().refreshAll();
+        Assert.assertTrue(listBox.getSelectedItems().isEmpty());
+        Assert.assertNotNull(selectionEvent);
+    }
+
+    @Test
+    @Ignore("Indexes are used for value presentation")
+    public void preserveAll_changeEvent() {
+        listBox.setSelectionOnDataChange(SelectionOnDataChange.PRESERVE_ALL);
+
+        Assert.assertTrue(listBox.getSelectedItems().isEmpty());
+        Assert.assertNull(selectionEvent);
+
+        listBox.getDataProvider().refreshAll();
+        Assert.assertTrue(listBox.getSelectedItems().isEmpty());
+        Assert.assertNull(selectionEvent);
+
+        Item selectedItem = items.get(0);
+        listBox.select(selectedItem);
+        Assert.assertEquals(Set.of(selectedItem), listBox.getSelectedItems());
+        Assert.assertNotNull(selectionEvent);
+        selectionEvent = null;
+
+        listBox.getDataProvider().refreshAll();
+        Assert.assertEquals(Set.of(selectedItem), listBox.getSelectedItems());
+        Assert.assertNull(selectionEvent);
+
+        items.remove(items.get(1));
+        listBox.getDataProvider().refreshAll();
+        Assert.assertEquals(Set.of(selectedItem), listBox.getSelectedItems());
+        Assert.assertNull(selectionEvent);
+
+        items.remove(selectedItem);
+        listBox.getDataProvider().refreshAll();
+        Assert.assertEquals(Set.of(selectedItem), listBox.getSelectedItems());
+        Assert.assertNull(selectionEvent);
     }
 
     private void assertValueChangeEvents(Set<Item>... expectedValues) {

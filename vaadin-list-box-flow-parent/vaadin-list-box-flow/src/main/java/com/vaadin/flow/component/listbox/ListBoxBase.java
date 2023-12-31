@@ -22,7 +22,6 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
@@ -42,6 +41,7 @@ import com.vaadin.flow.component.listbox.dataview.ListBoxListDataView;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
+import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataChangeEvent.DataRefreshEvent;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderWrapper;
@@ -121,14 +121,16 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
             dataProviderListenerRegistration.remove();
         }
         dataProviderListenerRegistration = dataProvider
-                .addDataProviderListener(event -> {
-                    if (event instanceof DataRefreshEvent) {
-                        refresh(((DataRefreshEvent<ITEM>) event).getItem());
-                    } else {
-                        clear();
-                        rebuild();
-                    }
-                });
+                .addDataProviderListener(this::handleDataChange);
+    }
+
+    void handleDataChange(DataChangeEvent<ITEM> event) {
+        if (event instanceof DataRefreshEvent) {
+            refresh(((DataRefreshEvent<ITEM>) event).getItem());
+        } else {
+            clear();
+            rebuild();
+        }
     }
 
     @Override
