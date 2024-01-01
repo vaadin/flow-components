@@ -51,7 +51,8 @@ public class GridEditorIT extends AbstractComponentIT {
 
     private void assertEditorOpenedOnRow(int rowIndex) {
         final GridTHTDElement nameCell = getNameCellForRow(rowIndex);
-        final ElementQuery<TestBenchElement> editor = nameCell.$("vaadin-text-field");
+        final ElementQuery<TestBenchElement> editor = nameCell
+                .$("vaadin-text-field");
         Assert.assertTrue(editor.exists());
     }
 

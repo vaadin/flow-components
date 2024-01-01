@@ -135,8 +135,8 @@ public class EditorImpl<T> extends AbstractGridExtension<T>
             if (this.editItemRequestRegistration != null) {
                 editItemRequestRegistration.remove();
             }
-            this.editItemRequestRegistration = ui.beforeClientResponse(getGrid(),
-                    context -> {
+            this.editItemRequestRegistration = ui
+                    .beforeClientResponse(getGrid(), context -> {
                         requestEditItem(it);
                         this.editItemRequestRegistration = null;
                     });

@@ -53,8 +53,8 @@ public class GridEditorPage extends Div {
         grid.addItemDoubleClickListener(
                 event -> grid.getEditor().editItem(event.getItem()));
 
-        NativeButton subsequentEditRequests = new NativeButton("Subsequent edits",
-                event -> {
+        NativeButton subsequentEditRequests = new NativeButton(
+                "Subsequent edits", event -> {
                     editor.editItem(items.get(0));
                     editor.editItem(items.get(1));
                 });
