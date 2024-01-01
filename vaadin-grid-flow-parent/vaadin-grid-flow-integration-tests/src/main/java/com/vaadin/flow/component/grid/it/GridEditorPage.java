@@ -25,33 +25,23 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.bean.Person;
 import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-grid/editor")
 public class GridEditorPage extends Div {
 
+    private final Binder<Person> binder = new Binder<>(Person.class);
+
     public GridEditorPage() {
         Grid<Person> grid = new Grid<>();
 
         final List<Person> items = createGridData();
+        grid.setItems(items);
 
-        ListDataProvider<Person> dataProvider = new ListDataProvider<>(items);
-        grid.setItems(dataProvider);
-
-        Grid.Column<Person> nameColumn = grid.addColumn(Person::getFirstName)
-                .setHeader("Name");
-
-        Binder<Person> binder = new Binder<>(Person.class);
         Editor<Person> editor = grid.getEditor();
         editor.setBinder(binder);
 
-        TextField field = new TextField();
-        binder.bind(field, "firstName");
-        nameColumn.setEditorComponent(field);
-        editor.addOpenListener(event -> field.focus());
-        grid.addItemDoubleClickListener(
-                event -> grid.getEditor().editItem(event.getItem()));
+        createColumnWithEditor(grid);
 
         NativeButton subsequentEditRequests = new NativeButton(
                 "Subsequent edits", event -> {
@@ -61,6 +51,15 @@ public class GridEditorPage extends Div {
         subsequentEditRequests.setId("subsequent-edit-requests");
 
         add(grid, subsequentEditRequests);
+    }
+
+    private void createColumnWithEditor(Grid<Person> grid) {
+        Grid.Column<Person> nameColumn = grid.addColumn(Person::getFirstName)
+                .setHeader("Name");
+
+        TextField field = new TextField();
+        binder.bind(field, "firstName");
+        nameColumn.setEditorComponent(field);
     }
 
     private List<Person> createGridData() {
