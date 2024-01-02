@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.grid.editor;
 
-import com.vaadin.flow.function.SerializableConsumer;
-import com.vaadin.flow.internal.ExecutionContext;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -32,6 +30,7 @@ import com.vaadin.flow.component.grid.ItemClickEvent;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.PropertySet;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.JsonObject;
@@ -52,7 +51,7 @@ public class EditorImpl<T> extends AbstractGridExtension<T>
     private static final String EDITING = "_editing";
 
     private final Map<Class<?>, List<?>> listeners = new HashMap<>();
-    private SerializableConsumer<ExecutionContext> editItemRequest;
+    private StateTree.ExecutionRegistration editItemRequestRegistration;
     private Binder<T> binder;
     private T edited;
     private boolean isBuffered;
@@ -132,15 +131,16 @@ public class EditorImpl<T> extends AbstractGridExtension<T>
         Objects.requireNonNull(item, "Editor can't edit null");
 
         final T it = item;
-        if (editItemRequest == null) {
-            editItemRequest = context -> {
-                requestEditItem(it);
-                editItemRequest = null;
-            };
-            getGrid().getElement().getNode().runWhenAttached(
-                    ui -> ui.getInternals().getStateTree().beforeClientResponse(
-                            getGrid().getElement().getNode(), editItemRequest));
-        }
+        getGrid().getElement().getNode().runWhenAttached(ui -> {
+            if (this.editItemRequestRegistration != null) {
+                editItemRequestRegistration.remove();
+            }
+            this.editItemRequestRegistration = ui
+                    .beforeClientResponse(getGrid(), context -> {
+                        requestEditItem(it);
+                        this.editItemRequestRegistration = null;
+                    });
+        });
     }
 
     private void requestEditItem(T item) {
