@@ -485,8 +485,9 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
             items = cache[parentKey][page];
             const parentItem = createEmptyItemFromKey(parentKey);
             const parentItemContext = dataProviderController.getItemContext(parentItem);
-            if (parentItemContext && parentItemContext.subCache) {
-              _updateGridCache(page, items, parentItemContext.subCache);
+            const parentItemSubCache = parentItemContext?.subCache;
+            if (parentItemSubCache) {
+              _updateGridCache(page, items, parentItemSubCache);
             }
           } else {
             items = cache[root][page];
@@ -751,7 +752,7 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
           // The page callbacks for the given item are about to be discarded ->
           // Resolve the callbacks with an empty array to not leave grid in loading state
           const itemContext = dataProviderController.getItemContext(item);
-          const itemSubCache = itemContext && itemContext.subCache;
+          const itemSubCache = itemContext?.subCache;
           if (itemSubCache) {
             Object.values(itemSubCache.pendingRequests).forEach((callback) => callback([]));
           }
@@ -775,7 +776,7 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
 
           const parentItem = createEmptyItemFromKey(parentKey);
           const parentItemContext = dataProviderController.getItemContext(parentItem);
-          const parentItemSubCache = parentItemContext && parentItemContext.subCache;
+          const parentItemSubCache = parentItemContext?.subCache;
           if (parentItemSubCache) {
             // If grid has outstanding requests for this parent, then resolve them
             // and let grid update the flat size and re-render.
