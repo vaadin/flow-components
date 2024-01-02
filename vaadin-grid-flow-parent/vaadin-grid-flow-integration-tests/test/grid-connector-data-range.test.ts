@@ -5,14 +5,15 @@ import {
 } from './shared.js';
 import type { FlowGrid } from './shared.js';
 
+const SIZE = 200;
+const PAGE_SIZE = 50;
+
 describe('grid connector - data range', () => {
   let grid: FlowGrid;
-  let size = 500;
-
   let lastRange: [number, number] | null = null;
 
   function setItemsRange(start: number, count: number) {
-    const items = Array.from({ length: size }, (_, i) => ({ key: `${i}`, name: `Item ${i}` }));
+    const items = Array.from({ length: SIZE }, (_, i) => ({ key: `${i}`, name: `Item ${i}` }));
 
     if (lastRange) {
       grid.$connector.clear(lastRange[0], lastRange[1]);
@@ -34,45 +35,58 @@ describe('grid connector - data range', () => {
     init(grid);
     await nextFrame();
 
-    grid.$connector.updateSize(size);
+    grid.pageSize = PAGE_SIZE;
+    grid.$connector.updateSize(SIZE);
+
     await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-  });
-
-  it('should request initial data range', () => {
     expect(grid.$server.setRequestedRange).to.be.calledOnce;
-    expect(grid.$server.setRequestedRange.args[0]).to.eql([0, 50]);
+    expect(grid.$server.setRequestedRange.args[0]).to.eql([0, PAGE_SIZE]);
+
+    setItemsRange(0, PAGE_SIZE);
+    grid.$server.setRequestedRange.resetHistory();
   });
 
-  describe('initial data range is loaded', () => {
-    beforeEach(async () => {
-      setItemsRange(0, 50);
+  it('should request data range after scrolling to end', async () => {
+    grid.scrollToIndex(SIZE - 1);
+    await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
+    expect(grid.$server.setRequestedRange).to.be.calledOnce;
+    expect(grid.$server.setRequestedRange.args[0]).to.eql([SIZE - PAGE_SIZE, PAGE_SIZE * 2]);
+  });
+
+  it('should request data range after scrolling to end and back to start', async () => {
+    grid.scrollToIndex(SIZE - 1);
+    await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
+    setItemsRange(SIZE - PAGE_SIZE, PAGE_SIZE * 2);
+    grid.$server.setRequestedRange.resetHistory();
+
+    grid.scrollToIndex(0);
+    await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
+    expect(grid.$server.setRequestedRange).to.be.calledOnce;
+    expect(grid.$server.setRequestedRange.args[0]).to.eql([0, PAGE_SIZE]);
+  });
+
+  it('should request data range while gradually scrolling from start to end', async () => {
+    for (let i = PAGE_SIZE; i < SIZE; i += PAGE_SIZE) {
+      grid.scrollToIndex(i - 1);
+      await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
+      expect(grid.$server.setRequestedRange).to.be.calledOnce;
+      expect(grid.$server.setRequestedRange.args[0]).to.eql([i - PAGE_SIZE, PAGE_SIZE * 2]);
       grid.$server.setRequestedRange.resetHistory();
-    });
+    }
+  });
 
-    it('should request data range after scrolling to middle', async () => {
-      grid.scrollToIndex(250);
+  it('should request data range while gradually scrolling from end to start', async () => {
+    grid.scrollToIndex(SIZE - 1);
+    await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
+    setItemsRange(SIZE - PAGE_SIZE, PAGE_SIZE);
+    grid.$server.setRequestedRange.resetHistory();
+
+    for (let i = SIZE - PAGE_SIZE; i > 0; i -= PAGE_SIZE) {
+      grid.scrollToIndex(i - 1);
       await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
       expect(grid.$server.setRequestedRange).to.be.calledOnce;
-      expect(grid.$server.setRequestedRange.args[0]).to.eql([200, 100]);
-    });
-
-    it('should request data range after scrolling to end', async () => {
-      grid.scrollToIndex(size - 1);
-      await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-      expect(grid.$server.setRequestedRange).to.be.calledOnce;
-      expect(grid.$server.setRequestedRange.args[0]).to.eql([450, 100]);
-    });
-
-    it('should request data range after scrolling to end and back to start', async () => {
-      grid.scrollToIndex(size - 1);
-      await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-      setItemsRange(450, 100);
+      expect(grid.$server.setRequestedRange.args[0]).to.eql([i - PAGE_SIZE, PAGE_SIZE * 2]);
       grid.$server.setRequestedRange.resetHistory();
-
-      grid.scrollToIndex(0);
-      await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-      expect(grid.$server.setRequestedRange).to.be.calledOnce;
-      expect(grid.$server.setRequestedRange.args[0]).to.eql([0, 50]);
-    });
+    }
   });
 });
