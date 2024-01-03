@@ -335,7 +335,7 @@ public class RadioButtonGroup<T>
             dataProviderListenerRegistration.remove();
         }
         dataProviderListenerRegistration = dataProvider
-                .addDataProviderListener(dataChangeHandler::handleDataChange);
+                .addDataProviderListener(this::handleDataChange);
     }
 
     /**
@@ -748,10 +748,8 @@ public class RadioButtonGroup<T>
                 T initialValue = getValue();
                 suppressValueChangeEvents = true;
                 try {
-                    doHandleDataChange(dataChangeEvent);
-                    if (!valueEquals(getValue(), initialValue)) {
-                        setValue(initialValue);
-                    }
+                    reset();
+                    setValue(initialValue);
                 } finally {
                     suppressValueChangeEvents = false;
                 }
@@ -765,13 +763,12 @@ public class RadioButtonGroup<T>
                 T initialValue = getValue();
                 suppressValueChangeEvents = true;
                 try {
-                    doHandleDataChange(dataChangeEvent);
-                    if (!valueEquals(getValue(), initialValue)
-                            && getRadioButtons()
-                                    .anyMatch(radioButton -> valueEquals(
-                                            radioButton.getItem(),
-                                            initialValue))) {
+                    reset();
+                    if (getRadioButtons().anyMatch(radioButton -> valueEquals(
+                            radioButton.getItem(), initialValue))) {
                         setValue(initialValue);
+                    } else {
+                        clear();
                     }
                 } finally {
                     suppressValueChangeEvents = false;
@@ -783,10 +780,8 @@ public class RadioButtonGroup<T>
 
             @Override
             public void onDiscard(DataChangeEvent<T> dataChangeEvent) {
-                doHandleDataChange(dataChangeEvent);
-                if (getValue() != null) {
-                    setValue(null);
-                }
+                reset();
+                clear();
             }
         };
     }
@@ -795,14 +790,14 @@ public class RadioButtonGroup<T>
         fireEvent(new ComponentValueChangeEvent<>(this, this, oldValue, false));
     }
 
-    private void doHandleDataChange(DataChangeEvent<T> dataChangeEvent) {
+    private void handleDataChange(DataChangeEvent<T> dataChangeEvent) {
         if (dataChangeEvent instanceof DataChangeEvent.DataRefreshEvent) {
             resetRadioButton(
                     ((DataChangeEvent.DataRefreshEvent<T>) dataChangeEvent)
                             .getItem());
-        } else {
-            reset();
+            return;
         }
+        dataChangeHandler.handleDataChange(dataChangeEvent);
     }
 
     @Override
