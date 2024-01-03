@@ -22,11 +22,12 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import com.vaadin.flow.component.shared.DataChangeHandler;
 import com.vaadin.flow.component.shared.SelectionOnDataChange;
 import com.vaadin.flow.data.provider.DataChangeEvent;
-import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.data.provider.DataViewUtils;
 import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
@@ -70,19 +71,7 @@ public class MultiSelectListBox<T>
 
             @Override
             public void onPreserveAll(DataChangeEvent<T> dataChangeEvent) {
-                Set<T> initialSelectedItems = getSelectedItems();
-                suppressValueChangeEvents = true;
-                try {
-                    setValue(initialSelectedItems);
-                } finally {
-                    suppressValueChangeEvents = false;
-                }
                 rebuild();
-                if (!valueEquals(getSelectedItems(), initialSelectedItems)) {
-                    fireEvent(new ComponentValueChangeEvent<>(
-                            MultiSelectListBox.this, MultiSelectListBox.this,
-                            initialSelectedItems, false));
-                }
             }
 
             @Override
@@ -90,17 +79,18 @@ public class MultiSelectListBox<T>
                 Set<T> initialSelectedItems = getSelectedItems();
                 suppressValueChangeEvents = true;
                 try {
-                    if (!initialSelectedItems.isEmpty()) {
-                        Set<Object> allItemIds = getDataProvider()
-                                .fetch(new Query<>())
-                                .map(getDataProvider()::getId)
-                                .collect(Collectors.toSet());
-                        Set<T> existingItems = initialSelectedItems.stream()
-                                .filter(item -> allItemIds.contains(
-                                        getDataProvider().getId(item)))
-                                .collect(Collectors.toSet());
-                        setValue(existingItems);
-                    }
+                    Set<Object> initialSelectedItemIds = initialSelectedItems
+                            .stream().map(getDataProvider()::getId)
+                            .collect(Collectors.toSet());
+                    @SuppressWarnings("unchecked")
+                    Stream<T> itemsStream = getDataProvider().fetch(
+                            DataViewUtils.getQuery(MultiSelectListBox.this));
+                    Set<T> existingItems = itemsStream
+                            .filter(item -> initialSelectedItemIds
+                                    .contains(getDataProvider().getId(item)))
+                            .limit(initialSelectedItemIds.size())
+                            .collect(Collectors.toSet());
+                    setValue(existingItems);
                 } finally {
                     suppressValueChangeEvents = false;
                 }

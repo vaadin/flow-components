@@ -1714,22 +1714,26 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 } finally {
                     suppressValueChangeEvents = false;
                 }
-                if (!valueEquals(getSelectedItems(), initialSelectedItems)) {
-                    fireSelectionEvent(initialSelectedItems);
-                }
             }
 
             @Override
             public void onPreserveExisting(DataChangeEvent<T> dataChangeEvent) {
                 Set<T> initialSelectedItems = getSelectedItems();
+                if (initialSelectedItems.isEmpty()) {
+                    onDataProviderChange();
+                    return;
+                }
                 suppressValueChangeEvents = true;
                 try {
                     onDataProviderChange();
                     Set<Object> initialSelectedItemIds = initialSelectedItems
                             .stream().map(getDataProvider()::getId)
-                            .collect(Collectors.toCollection(HashSet::new));
-                    Set<T> existingItems = getDataProvider()
-                            .fetch(new Query<>())
+                            .collect(Collectors.toSet());
+                    @SuppressWarnings("unchecked")
+                    Stream<T> itemsStream = getDataProvider()
+                            .fetch(getDataCommunicator().buildQuery(0,
+                                    Integer.MAX_VALUE));
+                    Set<T> existingItems = itemsStream
                             .filter(item -> initialSelectedItemIds
                                     .contains(getDataProvider().getId(item)))
                             .limit(initialSelectedItemIds.size())

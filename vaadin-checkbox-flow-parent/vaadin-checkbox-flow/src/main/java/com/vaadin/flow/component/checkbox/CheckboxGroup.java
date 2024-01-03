@@ -294,7 +294,8 @@ public class CheckboxGroup<T>
     @Override
     public CheckboxGroupListDataView<T> getListDataView() {
         return new CheckboxGroupListDataView<>(this::getDataProvider, this,
-                this::identifierProviderChanged, (filter, sorting) -> reset());
+                this::identifierProviderChanged,
+                (filter, sorting) -> rebuild());
     }
 
     /**
@@ -317,17 +318,7 @@ public class CheckboxGroup<T>
 
             @Override
             public void onPreserveAll(DataChangeEvent<T> dataChangeEvent) {
-                Set<T> initialValue = getValue();
-                suppressValueChangeEvents = true;
-                try {
-                    doHandleDataChange(dataChangeEvent);
-                    setValue(initialValue);
-                } finally {
-                    suppressValueChangeEvents = false;
-                }
-                if (!valueEquals(getValue(), initialValue)) {
-                    fireValueChangeEvent(initialValue);
-                }
+                rebuild();
             }
 
             @Override
@@ -335,20 +326,22 @@ public class CheckboxGroup<T>
                 Set<T> initialValue = getValue();
                 suppressValueChangeEvents = true;
                 try {
-                    doHandleDataChange(dataChangeEvent);
-                    if (!initialValue.isEmpty()) {
-                        Set<Object> currentItemIds = getCheckboxItems()
-                                .map(item -> getItemId(item.getItem()))
-                                .collect(Collectors.toSet());
-                        Set<T> existingValueSet = initialValue.stream()
-                                .filter(item -> currentItemIds
-                                        .contains(getItemId(item)))
-                                .collect(Collectors.toSet());
-                        setValue(existingValueSet);
-                    }
+                    Set<Object> initialSelectedItemIds = initialValue.stream()
+                            .map(item -> getItemId(item))
+                            .collect(Collectors.toSet());
+                    @SuppressWarnings("unchecked")
+                    Stream<T> itemsStream = getDataProvider()
+                            .fetch(DataViewUtils.getQuery(CheckboxGroup.this));
+                    Set<T> existingValueSet = itemsStream
+                            .filter(item -> initialSelectedItemIds
+                                    .contains(getItemId(item)))
+                            .limit(initialSelectedItemIds.size())
+                            .collect(Collectors.toSet());
+                    setValue(existingValueSet);
                 } finally {
                     suppressValueChangeEvents = false;
                 }
+                rebuild();
                 if (!valueEquals(getValue(), initialValue)) {
                     fireValueChangeEvent(initialValue);
                 }
@@ -356,8 +349,8 @@ public class CheckboxGroup<T>
 
             @Override
             public void onDiscard(DataChangeEvent<T> dataChangeEvent) {
-                doHandleDataChange(dataChangeEvent);
-                deselectAll();
+                clear();
+                rebuild();
             }
         };
     }
@@ -366,7 +359,7 @@ public class CheckboxGroup<T>
         fireEvent(new ComponentValueChangeEvent<>(this, this, oldValue, false));
     }
 
-    private void doHandleDataChange(DataChangeEvent<T> dataChangeEvent) {
+    private void handleDataChange(DataChangeEvent<T> dataChangeEvent) {
         if (dataChangeEvent instanceof DataChangeEvent.DataRefreshEvent) {
             T otherItem = ((DataChangeEvent.DataRefreshEvent<T>) dataChangeEvent)
                     .getItem();
@@ -375,7 +368,7 @@ public class CheckboxGroup<T>
                     item -> Objects.equals(getItemId(item.item), otherItemId))
                     .findFirst().ifPresent(this::updateCheckbox);
         } else {
-            reset();
+            dataChangeHandler.handleDataChange(dataChangeEvent);
         }
     }
 
@@ -408,13 +401,14 @@ public class CheckboxGroup<T>
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         this.dataProvider.set(dataProvider);
         DataViewUtils.removeComponentFilterAndSortComparator(this);
-        reset();
+        clear();
+        rebuild();
 
         if (dataProviderListenerRegistration != null) {
             dataProviderListenerRegistration.remove();
         }
         dataProviderListenerRegistration = dataProvider
-                .addDataProviderListener(dataChangeHandler::handleDataChange);
+                .addDataProviderListener(this::handleDataChange);
     }
 
     @Override
@@ -720,11 +714,14 @@ public class CheckboxGroup<T>
         return dataChangeHandler.getSelectionOnDataChange();
     }
 
-    @SuppressWarnings("unchecked")
-    private void reset() {
+    @Override
+    public void clear() {
         keyMapper.removeAll();
-        clear();
+        super.clear();
+    }
 
+    @SuppressWarnings("unchecked")
+    private void rebuild() {
         synchronized (dataProvider) {
             // Cache helper component before removal
             Component helperComponent = getHelperComponent();

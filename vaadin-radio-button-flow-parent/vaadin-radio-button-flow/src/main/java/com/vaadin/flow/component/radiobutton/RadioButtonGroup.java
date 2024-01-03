@@ -750,38 +750,25 @@ public class RadioButtonGroup<T>
 
             @Override
             public void onPreserveAll(DataChangeEvent<T> dataChangeEvent) {
-                T initialValue = getValue();
-                suppressValueChangeEvents = true;
-                try {
-                    setValue(initialValue);
-                    rebuild();
-                } finally {
-                    suppressValueChangeEvents = false;
-                }
-                if (!valueEquals(getValue(), initialValue)) {
-                    fireValueChangeEvent(initialValue);
-                }
+                rebuild();
             }
 
             @Override
-            @SuppressWarnings("unchecked")
             public void onPreserveExisting(DataChangeEvent<T> dataChangeEvent) {
                 T initialValue = getValue();
                 suppressValueChangeEvents = true;
                 try {
-                    if (getDataProvider()
-                            .fetch(DataViewUtils
-                                    .getQuery(RadioButtonGroup.this))
-                            .anyMatch(item -> valueEquals((T) item,
-                                    initialValue))) {
-                        setValue(initialValue);
-                    } else {
-                        clear();
-                    }
-                    rebuild();
+                    @SuppressWarnings("unchecked")
+                    Stream<T> itemsStream = getDataProvider().fetch(
+                            DataViewUtils.getQuery(RadioButtonGroup.this));
+                    itemsStream.filter(item -> valueEquals(item, initialValue))
+                            .findAny()
+                            .ifPresentOrElse(item -> setValue(initialValue),
+                                    () -> clear());
                 } finally {
                     suppressValueChangeEvents = false;
                 }
+                rebuild();
                 if (!valueEquals(getValue(), initialValue)) {
                     fireValueChangeEvent(initialValue);
                 }
