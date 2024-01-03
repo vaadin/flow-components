@@ -300,9 +300,6 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
 
             const parentItemContext = dataProviderController.getItemContext(params.parentItem);
             if (cache[parentUniqueKey] && cache[parentUniqueKey][page] && parentItemContext.subCache) {
-              // workaround: sometimes grid-element gives page index that overflows
-              page = Math.min(page, Math.floor(cache[parentUniqueKey].size / grid.pageSize));
-
               // Ensure grid isn't in loading state when the callback executes
               ensureSubCacheQueue = [];
               // Resolve the callback from cache
@@ -317,9 +314,6 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
               );
             }
           } else {
-            // workaround: sometimes grid-element gives page index that overflows
-            page = Math.min(page, Math.floor(grid.size / grid.pageSize));
-
             // size is controlled by the server (data communicator), so if the
             // size is zero, we know that there is no data to fetch.
             // This also prevents an empty grid getting stuck in a loading state.
