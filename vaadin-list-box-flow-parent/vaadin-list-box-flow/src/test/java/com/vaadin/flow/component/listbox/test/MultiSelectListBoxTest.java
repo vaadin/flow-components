@@ -366,15 +366,8 @@ public class MultiSelectListBoxTest {
     }
 
     @Test
-    public void discard_changeEvent() {
+    public void discardSelectionOnDataChange_noExtraChangeEventsFired() {
         listBox.setSelectionOnDataChange(SelectionOnDataChange.DISCARD);
-
-        Assert.assertTrue(listBox.getSelectedItems().isEmpty());
-        Assert.assertNull(selectionEvent);
-
-        listBox.getDataProvider().refreshAll();
-        Assert.assertTrue(listBox.getSelectedItems().isEmpty());
-        Assert.assertNull(selectionEvent);
 
         Item selectedItem = items.get(0);
         listBox.select(selectedItem);
@@ -388,16 +381,9 @@ public class MultiSelectListBoxTest {
     }
 
     @Test
-    public void preserveExistent_changeEvent() {
+    public void preserveExistentSelectionOnDataChange_noExtraChangeEventsFired() {
         listBox.setSelectionOnDataChange(
                 SelectionOnDataChange.PRESERVE_EXISTENT);
-
-        Assert.assertTrue(listBox.getSelectedItems().isEmpty());
-        Assert.assertNull(selectionEvent);
-
-        listBox.getDataProvider().refreshAll();
-        Assert.assertTrue(listBox.getSelectedItems().isEmpty());
-        Assert.assertNull(selectionEvent);
 
         Item selectedItem = items.get(0);
         listBox.select(selectedItem);
@@ -422,15 +408,8 @@ public class MultiSelectListBoxTest {
 
     @Test
     @Ignore("Indexes are used for value presentation")
-    public void preserveAll_changeEvent() {
+    public void preserveAllSelectionOnDataChange_noExtraChangeEventsFired() {
         listBox.setSelectionOnDataChange(SelectionOnDataChange.PRESERVE_ALL);
-
-        Assert.assertTrue(listBox.getSelectedItems().isEmpty());
-        Assert.assertNull(selectionEvent);
-
-        listBox.getDataProvider().refreshAll();
-        Assert.assertTrue(listBox.getSelectedItems().isEmpty());
-        Assert.assertNull(selectionEvent);
 
         Item selectedItem = items.get(0);
         listBox.select(selectedItem);

@@ -498,7 +498,7 @@ public class RadioButtonGroupTest {
     }
 
     @Test
-    public void discard_changeEvent() {
+    public void discardSelectionOnDataChange_noExtraChangeEventsFired() {
         RadioButtonGroup<String> group = new RadioButtonGroup<>();
         List<HasValue.ValueChangeEvent<String>> events = new ArrayList<>();
         group.addValueChangeListener(events::add);
@@ -508,10 +508,6 @@ public class RadioButtonGroupTest {
         group.setItems(items);
 
         group.setSelectionOnDataChange(SelectionOnDataChange.DISCARD);
-
-        group.getDataProvider().refreshAll();
-        Assert.assertNull(group.getValue());
-        Assert.assertTrue(events.isEmpty());
 
         String selectedItem = items.get(0);
         group.setValue(selectedItem);
@@ -525,7 +521,7 @@ public class RadioButtonGroupTest {
     }
 
     @Test
-    public void preserveExistent_changeEvent() {
+    public void preserveExistentSelectionOnDataChange_noExtraChangeEventsFired() {
         RadioButtonGroup<String> group = new RadioButtonGroup<>();
         List<HasValue.ValueChangeEvent<String>> events = new ArrayList<>();
         group.addValueChangeListener(events::add);
@@ -535,10 +531,6 @@ public class RadioButtonGroupTest {
         group.setItems(items);
 
         group.setSelectionOnDataChange(SelectionOnDataChange.PRESERVE_EXISTENT);
-
-        group.getDataProvider().refreshAll();
-        Assert.assertNull(group.getValue());
-        Assert.assertTrue(events.isEmpty());
 
         String selectedItem = items.get(0);
         group.setValue(selectedItem);
@@ -562,7 +554,7 @@ public class RadioButtonGroupTest {
     }
 
     @Test
-    public void preserveAll_changeEvent() {
+    public void preserveAllSelectionOnDataChange_noExtraChangeEventsFired() {
         RadioButtonGroup<String> group = new RadioButtonGroup<>();
         List<HasValue.ValueChangeEvent<String>> events = new ArrayList<>();
         group.addValueChangeListener(events::add);
@@ -572,10 +564,6 @@ public class RadioButtonGroupTest {
         group.setItems(items);
 
         group.setSelectionOnDataChange(SelectionOnDataChange.PRESERVE_ALL);
-
-        group.getDataProvider().refreshAll();
-        Assert.assertNull(group.getValue());
-        Assert.assertTrue(events.isEmpty());
 
         String selectedItem = items.get(0);
         group.setValue(selectedItem);

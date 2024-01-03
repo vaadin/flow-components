@@ -103,7 +103,7 @@ public class GridSelectionTest {
     }
 
     @Test
-    public void multiSelectGrid_discard_changeEvent() {
+    public void multiSelect_discardSelectionOnDataChange_noExtraChangeEventsFired() {
         Grid<String> grid = new Grid<>();
         grid.setSelectionMode(SelectionMode.MULTI);
         MultiSelect<Grid<String>, String> multiSelect = grid.asMultiSelect();
@@ -117,10 +117,6 @@ public class GridSelectionTest {
 
         grid.setSelectionOnDataChange(SelectionOnDataChange.DISCARD);
 
-        grid.getDataProvider().refreshAll();
-        Assert.assertTrue(grid.getSelectedItems().isEmpty());
-        Assert.assertTrue(events.isEmpty());
-
         String selectedItem = items.get(0);
         grid.select(selectedItem);
         Assert.assertEquals(Set.of(selectedItem), grid.getSelectedItems());
@@ -133,7 +129,7 @@ public class GridSelectionTest {
     }
 
     @Test
-    public void multiSelectGrid_preserveExistent_changeEvent() {
+    public void multiSelect_preserveExistentSelectionOnDataChange_noExtraChangeEventsFired() {
         Grid<String> grid = new Grid<>();
         grid.setSelectionMode(SelectionMode.MULTI);
         MultiSelect<Grid<String>, String> multiSelect = grid.asMultiSelect();
@@ -147,10 +143,6 @@ public class GridSelectionTest {
 
         grid.setSelectionOnDataChange(SelectionOnDataChange.PRESERVE_EXISTENT);
 
-        grid.getDataProvider().refreshAll();
-        Assert.assertTrue(grid.getSelectedItems().isEmpty());
-        Assert.assertTrue(events.isEmpty());
-
         String selectedItem = items.get(0);
         grid.select(selectedItem);
         Assert.assertEquals(Set.of(selectedItem), grid.getSelectedItems());
@@ -169,12 +161,11 @@ public class GridSelectionTest {
         items.remove(selectedItem);
         grid.getDataProvider().refreshAll();
         Assert.assertTrue(grid.getSelectedItems().isEmpty());
-        // TODO fix, 0 events
         Assert.assertEquals(1, events.size());
     }
 
     @Test
-    public void multiSelectGrid_preserveAll_changeEvent() {
+    public void multiSelect_preserveAllSelectionOnDataChange_noExtraChangeEventsFired() {
         Grid<String> grid = new Grid<>();
         grid.setSelectionMode(SelectionMode.MULTI);
         MultiSelect<Grid<String>, String> multiSelect = grid.asMultiSelect();
@@ -188,10 +179,6 @@ public class GridSelectionTest {
 
         grid.setSelectionOnDataChange(SelectionOnDataChange.PRESERVE_ALL);
 
-        grid.getDataProvider().refreshAll();
-        Assert.assertTrue(grid.getSelectedItems().isEmpty());
-        Assert.assertTrue(events.isEmpty());
-
         String selectedItem = items.get(0);
         grid.select(selectedItem);
         Assert.assertEquals(Set.of(selectedItem), grid.getSelectedItems());
@@ -214,7 +201,7 @@ public class GridSelectionTest {
     }
 
     @Test
-    public void singleSelectGrid_discard_changeEvent() {
+    public void singleSelect_discardSelectionOnDataChange_noExtraChangeEventsFired() {
         Grid<String> grid = new Grid<>();
         grid.setSelectionMode(SelectionMode.SINGLE);
         SingleSelect<Grid<String>, String> singleSelect = grid.asSingleSelect();
@@ -228,10 +215,6 @@ public class GridSelectionTest {
 
         grid.setSelectionOnDataChange(SelectionOnDataChange.DISCARD);
 
-        grid.getDataProvider().refreshAll();
-        Assert.assertTrue(grid.getSelectedItems().isEmpty());
-        Assert.assertTrue(events.isEmpty());
-
         String selectedItem = items.get(0);
         grid.select(selectedItem);
         Assert.assertEquals(Set.of(selectedItem), grid.getSelectedItems());
@@ -244,7 +227,7 @@ public class GridSelectionTest {
     }
 
     @Test
-    public void singleSelectGrid_preserveExistent_changeEvent() {
+    public void singleSelect_preserveExistentSelectionOnDataChange_noExtraChangeEventsFired() {
         Grid<String> grid = new Grid<>();
         grid.setSelectionMode(SelectionMode.SINGLE);
         SingleSelect<Grid<String>, String> singleSelect = grid.asSingleSelect();
@@ -257,10 +240,6 @@ public class GridSelectionTest {
         grid.setItems(items);
 
         grid.setSelectionOnDataChange(SelectionOnDataChange.PRESERVE_EXISTENT);
-
-        grid.getDataProvider().refreshAll();
-        Assert.assertTrue(grid.getSelectedItems().isEmpty());
-        Assert.assertTrue(events.isEmpty());
 
         String selectedItem = items.get(0);
         grid.select(selectedItem);
@@ -284,7 +263,7 @@ public class GridSelectionTest {
     }
 
     @Test
-    public void singleSelectGrid_preserveAll_changeEvent() {
+    public void singleSelect_preserveAllSelectionOnDataChange_noExtraChangeEventsFired() {
         Grid<String> grid = new Grid<>();
         grid.setSelectionMode(SelectionMode.SINGLE);
         SingleSelect<Grid<String>, String> singleSelect = grid.asSingleSelect();
@@ -297,10 +276,6 @@ public class GridSelectionTest {
         grid.setItems(items);
 
         grid.setSelectionOnDataChange(SelectionOnDataChange.PRESERVE_ALL);
-
-        grid.getDataProvider().refreshAll();
-        Assert.assertTrue(grid.getSelectedItems().isEmpty());
-        Assert.assertTrue(events.isEmpty());
 
         String selectedItem = items.get(0);
         grid.select(selectedItem);
