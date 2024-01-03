@@ -1710,75 +1710,36 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 suppressValueChangeEvents = true;
                 try {
                     onDataProviderChange();
-                    if (!initialSelectedItems.isEmpty()) {
-                        if (getSelectionModel() instanceof GridMultiSelectionModel) {
-                            asMultiSelect().setValue(initialSelectedItems);
-                        } else if (getSelectionModel() instanceof GridSingleSelectionModel) {
-                            select(initialSelectedItems.iterator().next());
-                        }
-                    }
+                    setValue(initialSelectedItems);
                 } finally {
                     suppressValueChangeEvents = false;
                 }
                 if (!valueEquals(getSelectedItems(), initialSelectedItems)) {
-                    if (getSelectionModel() instanceof GridMultiSelectionModel) {
-                        ((AbstractGridMultiSelectionModel<T>) getSelectionModel())
-                                .fireSelectionEvent(new MultiSelectionEvent<>(
-                                        Grid.this, asMultiSelect(),
-                                        initialSelectedItems, false));
-                    } else if (getSelectionModel() instanceof GridSingleSelectionModel) {
-                        ((AbstractGridSingleSelectionModel<T>) getSelectionModel())
-                                .fireSelectionEvent(new SingleSelectionEvent<>(
-                                        Grid.this, asSingleSelect(),
-                                        initialSelectedItems.iterator().next(),
-                                        false));
-                    }
+                    fireSelectionEvent(initialSelectedItems);
                 }
             }
 
             @Override
             public void onPreserveExisting(DataChangeEvent<T> dataChangeEvent) {
                 Set<T> initialSelectedItems = getSelectedItems();
-                if (initialSelectedItems.isEmpty()
-                        || getSelectionModel() instanceof GridNoneSelectionModel) {
-                    onDataProviderChange();
-                    return;
-                }
                 suppressValueChangeEvents = true;
                 try {
                     onDataProviderChange();
-                    Set<Object> allItemIds = getDataProvider()
-                            .fetch(new Query<>()).map(getDataProvider()::getId)
-                            .collect(Collectors.toSet());
-                    Set<T> existingItems = initialSelectedItems.stream()
-                            .filter(item -> allItemIds
+                    Set<Object> initialSelectedItemIds = initialSelectedItems
+                            .stream().map(getDataProvider()::getId)
+                            .collect(Collectors.toCollection(HashSet::new));
+                    Set<T> existingItems = getDataProvider()
+                            .fetch(new Query<>())
+                            .filter(item -> initialSelectedItemIds
                                     .contains(getDataProvider().getId(item)))
+                            .limit(initialSelectedItemIds.size())
                             .collect(Collectors.toSet());
-                    if (getSelectionModel() instanceof GridMultiSelectionModel) {
-                        asMultiSelect().setValue(existingItems);
-                    } else if (getSelectionModel() instanceof GridSingleSelectionModel) {
-                        if (existingItems.isEmpty()) {
-                            deselectAll();
-                        } else {
-                            select(existingItems.iterator().next());
-                        }
-                    }
+                    setValue(existingItems);
                 } finally {
                     suppressValueChangeEvents = false;
                 }
                 if (!valueEquals(getSelectedItems(), initialSelectedItems)) {
-                    if (getSelectionModel() instanceof GridMultiSelectionModel) {
-                        ((AbstractGridMultiSelectionModel<T>) getSelectionModel())
-                                .fireSelectionEvent(new MultiSelectionEvent<>(
-                                        Grid.this, asMultiSelect(),
-                                        initialSelectedItems, false));
-                    } else if (getSelectionModel() instanceof GridSingleSelectionModel) {
-                        ((AbstractGridSingleSelectionModel<T>) getSelectionModel())
-                                .fireSelectionEvent(new SingleSelectionEvent<>(
-                                        Grid.this, asSingleSelect(),
-                                        initialSelectedItems.iterator().next(),
-                                        false));
-                    }
+                    fireSelectionEvent(initialSelectedItems);
                 }
             }
 
@@ -1788,6 +1749,40 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 deselectAll();
             }
         };
+    }
+
+    private void setValue(Set<T> items) {
+        if (getSelectionModel() instanceof GridMultiSelectionModel) {
+            asMultiSelect().setValue(items);
+        } else if (getSelectionModel() instanceof GridSingleSelectionModel) {
+            if (items.isEmpty()) {
+                deselectAll();
+            } else {
+                select(items.iterator().next());
+            }
+        }
+    }
+
+    private void fireSelectionEvent(Set<T> oldSelection) {
+        if (getSelectionModel() instanceof GridMultiSelectionModel) {
+            ((AbstractGridMultiSelectionModel<T>) getSelectionModel())
+                    .fireSelectionEvent(new MultiSelectionEvent<>(this,
+                            asMultiSelect(), oldSelection, false));
+        } else if (getSelectionModel() instanceof GridSingleSelectionModel) {
+            ((AbstractGridSingleSelectionModel<T>) getSelectionModel())
+                    .fireSelectionEvent(
+                            new SingleSelectionEvent<>(this, asSingleSelect(),
+                                    oldSelection.iterator().next(), false));
+        }
+    }
+
+    private void handleDataChange(DataChangeEvent<T> dataChangeEvent) {
+        if (dataChangeEvent instanceof DataChangeEvent.DataRefreshEvent
+                || getSelectionModel() instanceof GridNoneSelectionModel) {
+            onDataProviderChange();
+            return;
+        }
+        dataChangeHandler.handleDataChange(dataChangeEvent);
     }
 
     private boolean valueEquals(Set<T> value1, Set<T> value2) {
@@ -4306,7 +4301,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
 
         dataProviderChangeRegistration = dataProvider
-                .addDataProviderListener(dataChangeHandler::handleDataChange);
+                .addDataProviderListener(this::handleDataChange);
     }
 
     /**
