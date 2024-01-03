@@ -255,7 +255,7 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
     }
 
     @SuppressWarnings("unchecked")
-    private void rebuild() {
+    void rebuild() {
         removeAll();
 
         synchronized (dataProvider) {

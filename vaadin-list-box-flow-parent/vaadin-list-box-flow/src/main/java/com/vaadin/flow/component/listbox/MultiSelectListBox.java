@@ -73,12 +73,12 @@ public class MultiSelectListBox<T>
                 Set<T> initialSelectedItems = getSelectedItems();
                 suppressValueChangeEvents = true;
                 try {
-                    MultiSelectListBox.super.handleDataChange(dataChangeEvent);
                     setValue(initialSelectedItems);
                 } finally {
                     suppressValueChangeEvents = false;
                 }
-                if (!valueEquals(getValue(), initialSelectedItems)) {
+                rebuild();
+                if (!valueEquals(getSelectedItems(), initialSelectedItems)) {
                     fireEvent(new ComponentValueChangeEvent<>(
                             MultiSelectListBox.this, MultiSelectListBox.this,
                             initialSelectedItems, false));
@@ -90,7 +90,6 @@ public class MultiSelectListBox<T>
                 Set<T> initialSelectedItems = getSelectedItems();
                 suppressValueChangeEvents = true;
                 try {
-                    MultiSelectListBox.super.handleDataChange(dataChangeEvent);
                     if (!initialSelectedItems.isEmpty()) {
                         Set<Object> allItemIds = getDataProvider()
                                 .fetch(new Query<>())
@@ -105,7 +104,8 @@ public class MultiSelectListBox<T>
                 } finally {
                     suppressValueChangeEvents = false;
                 }
-                if (!valueEquals(getValue(), initialSelectedItems)) {
+                rebuild();
+                if (!valueEquals(getSelectedItems(), initialSelectedItems)) {
                     fireEvent(new ComponentValueChangeEvent<>(
                             MultiSelectListBox.this, MultiSelectListBox.this,
                             initialSelectedItems, false));
@@ -114,8 +114,8 @@ public class MultiSelectListBox<T>
 
             @Override
             public void onDiscard(DataChangeEvent<T> dataChangeEvent) {
-                MultiSelectListBox.super.handleDataChange(dataChangeEvent);
-                deselectAll();
+                clear();
+                rebuild();
             }
         };
     }
@@ -224,6 +224,10 @@ public class MultiSelectListBox<T>
 
     @Override
     void handleDataChange(DataChangeEvent<T> dataChangeEvent) {
+        if (dataChangeEvent instanceof DataChangeEvent.DataRefreshEvent) {
+            super.handleDataChange(dataChangeEvent);
+            return;
+        }
         dataChangeHandler.handleDataChange(dataChangeEvent);
     }
 

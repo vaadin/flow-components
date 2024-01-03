@@ -29,7 +29,6 @@ import com.vaadin.flow.component.shared.SelectionOnDataChange;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -407,7 +406,6 @@ public class MultiSelectListBoxTest {
     }
 
     @Test
-    @Ignore("Indexes are used for value presentation")
     public void preserveAllSelectionOnDataChange_noExtraChangeEventsFired() {
         listBox.setSelectionOnDataChange(SelectionOnDataChange.PRESERVE_ALL);
 
