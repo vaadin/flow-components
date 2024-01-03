@@ -289,7 +289,8 @@ public class RadioButtonGroup<T>
     @Override
     public RadioButtonGroupListDataView<T> getListDataView() {
         return new RadioButtonGroupListDataView<>(this::getDataProvider, this,
-                this::identifierProviderChanged, (filter, sorting) -> reset());
+                this::identifierProviderChanged,
+                (filter, sorting) -> rebuild());
     }
 
     /**
@@ -325,7 +326,8 @@ public class RadioButtonGroup<T>
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         this.dataProvider.set(dataProvider);
         DataViewUtils.removeComponentFilterAndSortComparator(this);
-        reset();
+        clear();
+        rebuild();
 
         setupDataProviderListener(dataProvider);
     }
@@ -567,11 +569,14 @@ public class RadioButtonGroup<T>
                 .ofNullable(getElement().getProperty("accessibleNameRef"));
     }
 
-    @SuppressWarnings("unchecked")
-    private void reset() {
+    @Override
+    public void clear() {
         keyMapper.removeAll();
-        clear();
+        super.clear();
+    }
 
+    @SuppressWarnings("unchecked")
+    private void rebuild() {
         synchronized (dataProvider) {
             // Cache helper component before removal
             Component helperComponent = getHelperComponent();
@@ -748,8 +753,8 @@ public class RadioButtonGroup<T>
                 T initialValue = getValue();
                 suppressValueChangeEvents = true;
                 try {
-                    reset();
                     setValue(initialValue);
+                    rebuild();
                 } finally {
                     suppressValueChangeEvents = false;
                 }
@@ -759,17 +764,21 @@ public class RadioButtonGroup<T>
             }
 
             @Override
+            @SuppressWarnings("unchecked")
             public void onPreserveExisting(DataChangeEvent<T> dataChangeEvent) {
                 T initialValue = getValue();
                 suppressValueChangeEvents = true;
                 try {
-                    reset();
-                    if (getRadioButtons().anyMatch(radioButton -> valueEquals(
-                            radioButton.getItem(), initialValue))) {
+                    if (getDataProvider()
+                            .fetch(DataViewUtils
+                                    .getQuery(RadioButtonGroup.this))
+                            .anyMatch(item -> valueEquals((T) item,
+                                    initialValue))) {
                         setValue(initialValue);
                     } else {
                         clear();
                     }
+                    rebuild();
                 } finally {
                     suppressValueChangeEvents = false;
                 }
@@ -780,8 +789,8 @@ public class RadioButtonGroup<T>
 
             @Override
             public void onDiscard(DataChangeEvent<T> dataChangeEvent) {
-                reset();
                 clear();
+                rebuild();
             }
         };
     }
