@@ -22,13 +22,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.internal.UIInternals;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.TabSheet;
 import com.vaadin.flow.component.tabs.TabSheetVariant;
 import com.vaadin.flow.component.tabs.Tabs;
+import com.vaadin.flow.server.VaadinSession;
 
 /**
  * @author Vaadin Ltd.
@@ -38,10 +42,18 @@ public class TabSheetTest {
     private TabSheet tabSheet;
     private Tabs tabs;
 
+    private UI ui;
+
     @Before
     public void setup() {
+        VaadinSession session = Mockito.mock(VaadinSession.class);
+        ui = new UI();
+        ui.getInternals().setSession(session);
+
         tabSheet = new TabSheet();
         tabs = (Tabs) tabSheet.getChildren().findFirst().get();
+
+        ui.getElement().appendChild(tabSheet.getElement());
     }
 
     @Test
@@ -52,13 +64,26 @@ public class TabSheetTest {
     @Test
     public void addTab_assignsTabId() {
         var tab = tabSheet.add("Tab 0", new Span("Content 0"));
+        flushBeforeClientResponse();
         Assert.assertTrue(tab.getId().isPresent());
+    }
+
+    @Test
+    public void addTab_assignsCustomTabId() {
+        var content = new Span("Content 0");
+        var tab = tabSheet.add("Tab 0", content);
+        tab.setId("customId");
+
+        flushBeforeClientResponse();
+        Assert.assertEquals("customId",
+                content.getElement().getAttribute("tab"));
     }
 
     @Test
     public void addTab_assignsContentTab() {
         var content = new Span("Content 0");
         var tab = tabSheet.add("Tab 0", content);
+        flushBeforeClientResponse();
         Assert.assertEquals(tab.getId().get(),
                 content.getElement().getAttribute("tab"));
     }
@@ -484,5 +509,10 @@ public class TabSheetTest {
         tabSheet.add("Tab 0", new Span("Content 0"));
 
         tabSheet.getComponent(null);
+    }
+
+    private void flushBeforeClientResponse() {
+        UIInternals internals = ui.getInternals();
+        internals.getStateTree().runExecutionsBeforeClientResponse();
     }
 }
