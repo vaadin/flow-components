@@ -1717,7 +1717,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             }
 
             @Override
-            public void onPreserveExisting(DataChangeEvent<T> dataChangeEvent) {
+            public void onPreserveExistent(DataChangeEvent<T> dataChangeEvent) {
                 Set<T> initialSelectedItems = getSelectedItems();
                 if (initialSelectedItems.isEmpty()) {
                     onDataProviderChange();

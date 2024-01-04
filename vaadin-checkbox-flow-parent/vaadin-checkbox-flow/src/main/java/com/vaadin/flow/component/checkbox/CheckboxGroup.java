@@ -320,7 +320,7 @@ public class CheckboxGroup<T>
             }
 
             @Override
-            public void onPreserveExisting(DataChangeEvent<T> dataChangeEvent) {
+            public void onPreserveExistent(DataChangeEvent<T> dataChangeEvent) {
                 Set<Object> initialSelectedItemIds = getValue().stream()
                         .map(item -> getItemId(item))
                         .collect(Collectors.toSet());

@@ -742,7 +742,7 @@ public class RadioButtonGroup<T>
 
             @Override
             @SuppressWarnings("unchecked")
-            public void onPreserveExisting(DataChangeEvent<T> dataChangeEvent) {
+            public void onPreserveExistent(DataChangeEvent<T> dataChangeEvent) {
                 T initialValue = getValue();
                 if (getDataProvider()
                         .fetch(DataViewUtils.getQuery(RadioButtonGroup.this))

@@ -73,7 +73,7 @@ public class MultiSelectListBox<T>
             }
 
             @Override
-            public void onPreserveExisting(DataChangeEvent<T> dataChangeEvent) {
+            public void onPreserveExistent(DataChangeEvent<T> dataChangeEvent) {
                 Set<Object> initialSelectedItemIds = getSelectedItems().stream()
                         .map(getDataProvider()::getId)
                         .collect(Collectors.toSet());

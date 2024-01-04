@@ -27,14 +27,14 @@ public abstract class DataChangeHandler<T> implements Serializable {
     public final void handleDataChange(DataChangeEvent<T> dataChangeEvent) {
         switch (selectionOnDataChange) {
         case PRESERVE_ALL -> onPreserveAll(dataChangeEvent);
-        case PRESERVE_EXISTENT -> onPreserveExisting(dataChangeEvent);
+        case PRESERVE_EXISTENT -> onPreserveExistent(dataChangeEvent);
         case DISCARD -> onDiscard(dataChangeEvent);
         }
     }
 
     public abstract void onPreserveAll(DataChangeEvent<T> dataChangeEvent);
 
-    public abstract void onPreserveExisting(DataChangeEvent<T> dataChangeEvent);
+    public abstract void onPreserveExistent(DataChangeEvent<T> dataChangeEvent);
 
     public abstract void onDiscard(DataChangeEvent<T> dataChangeEvent);
 }
