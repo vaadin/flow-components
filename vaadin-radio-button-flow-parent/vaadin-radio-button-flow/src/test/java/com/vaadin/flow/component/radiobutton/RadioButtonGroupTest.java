@@ -25,7 +25,7 @@ import java.util.stream.Stream;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.shared.InputField;
-import com.vaadin.flow.component.shared.SelectionOnDataChange;
+import com.vaadin.flow.component.shared.SelectionPreservationStrategy;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -507,7 +507,8 @@ public class RadioButtonGroupTest {
                 Arrays.asList("Item 1", "Item 2", "Item 3"));
         group.setItems(items);
 
-        group.setSelectionOnDataChange(SelectionOnDataChange.DISCARD);
+        group.setSelectionPreservationStrategy(
+                SelectionPreservationStrategy.DISCARD);
 
         String selectedItem = items.get(0);
         group.setValue(selectedItem);
@@ -530,7 +531,8 @@ public class RadioButtonGroupTest {
                 Arrays.asList("Item 1", "Item 2", "Item 3"));
         group.setItems(items);
 
-        group.setSelectionOnDataChange(SelectionOnDataChange.PRESERVE_EXISTENT);
+        group.setSelectionPreservationStrategy(
+                SelectionPreservationStrategy.PRESERVE_EXISTENT);
 
         String selectedItem = items.get(0);
         group.setValue(selectedItem);
@@ -563,7 +565,8 @@ public class RadioButtonGroupTest {
                 Arrays.asList("Item 1", "Item 2", "Item 3"));
         group.setItems(items);
 
-        group.setSelectionOnDataChange(SelectionOnDataChange.PRESERVE_ALL);
+        group.setSelectionPreservationStrategy(
+                SelectionPreservationStrategy.PRESERVE_ALL);
 
         String selectedItem = items.get(0);
         group.setValue(selectedItem);

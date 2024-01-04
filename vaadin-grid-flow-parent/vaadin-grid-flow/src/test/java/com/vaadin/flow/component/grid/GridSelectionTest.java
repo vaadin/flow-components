@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.HasValue;
-import com.vaadin.flow.component.shared.SelectionOnDataChange;
+import com.vaadin.flow.component.shared.SelectionPreservationStrategy;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.selection.MultiSelect;
@@ -118,7 +118,8 @@ public class GridSelectionTest {
                 Arrays.asList("Item 1", "Item 2", "Item 3"));
         grid.setItems(items);
 
-        grid.setSelectionOnDataChange(SelectionOnDataChange.DISCARD);
+        grid.setSelectionPreservationStrategy(
+                SelectionPreservationStrategy.DISCARD);
 
         String selectedItem = items.get(0);
         grid.select(selectedItem);
@@ -144,7 +145,8 @@ public class GridSelectionTest {
                 Arrays.asList("Item 1", "Item 2", "Item 3"));
         grid.setItems(items);
 
-        grid.setSelectionOnDataChange(SelectionOnDataChange.PRESERVE_EXISTENT);
+        grid.setSelectionPreservationStrategy(
+                SelectionPreservationStrategy.PRESERVE_EXISTENT);
 
         String selectedItem = items.get(0);
         grid.select(selectedItem);
@@ -180,7 +182,8 @@ public class GridSelectionTest {
                 Arrays.asList("Item 1", "Item 2", "Item 3"));
         grid.setItems(items);
 
-        grid.setSelectionOnDataChange(SelectionOnDataChange.PRESERVE_ALL);
+        grid.setSelectionPreservationStrategy(
+                SelectionPreservationStrategy.PRESERVE_ALL);
 
         String selectedItem = items.get(0);
         grid.select(selectedItem);
@@ -216,7 +219,8 @@ public class GridSelectionTest {
                 Arrays.asList("Item 1", "Item 2", "Item 3"));
         grid.setItems(items);
 
-        grid.setSelectionOnDataChange(SelectionOnDataChange.DISCARD);
+        grid.setSelectionPreservationStrategy(
+                SelectionPreservationStrategy.DISCARD);
 
         String selectedItem = items.get(0);
         grid.select(selectedItem);
@@ -242,7 +246,8 @@ public class GridSelectionTest {
                 Arrays.asList("Item 1", "Item 2", "Item 3"));
         grid.setItems(items);
 
-        grid.setSelectionOnDataChange(SelectionOnDataChange.PRESERVE_EXISTENT);
+        grid.setSelectionPreservationStrategy(
+                SelectionPreservationStrategy.PRESERVE_EXISTENT);
 
         String selectedItem = items.get(0);
         grid.select(selectedItem);
@@ -278,7 +283,8 @@ public class GridSelectionTest {
                 Arrays.asList("Item 1", "Item 2", "Item 3"));
         grid.setItems(items);
 
-        grid.setSelectionOnDataChange(SelectionOnDataChange.PRESERVE_ALL);
+        grid.setSelectionPreservationStrategy(
+                SelectionPreservationStrategy.PRESERVE_ALL);
 
         String selectedItem = items.get(0);
         grid.select(selectedItem);
@@ -304,18 +310,20 @@ public class GridSelectionTest {
     @Test
     public void setLazyDataProvider_setPreserveExistent_throwsUnsupportedOperationException() {
         Grid<String> grid = new Grid<>();
-        // Set another selection strategy first
-        grid.setSelectionOnDataChange(SelectionOnDataChange.DISCARD);
+        // Set another selection preservation strategy first
+        grid.setSelectionPreservationStrategy(
+                SelectionPreservationStrategy.DISCARD);
         setLazyDataProvider(grid);
         Assert.assertThrows(UnsupportedOperationException.class,
-                () -> grid.setSelectionOnDataChange(
-                        SelectionOnDataChange.PRESERVE_EXISTENT));
+                () -> grid.setSelectionPreservationStrategy(
+                        SelectionPreservationStrategy.PRESERVE_EXISTENT));
     }
 
     @Test
     public void setPreserveExistent_setLazyDataProvider_throwsUnsupportedOperationException() {
         Grid<String> grid = new Grid<>();
-        grid.setSelectionOnDataChange(SelectionOnDataChange.PRESERVE_EXISTENT);
+        grid.setSelectionPreservationStrategy(
+                SelectionPreservationStrategy.PRESERVE_EXISTENT);
         Assert.assertThrows(UnsupportedOperationException.class,
                 () -> setLazyDataProvider(grid));
     }

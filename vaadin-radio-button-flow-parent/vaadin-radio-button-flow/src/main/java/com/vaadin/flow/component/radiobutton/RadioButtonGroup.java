@@ -36,7 +36,7 @@ import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
-import com.vaadin.flow.component.shared.SelectionOnDataChange;
+import com.vaadin.flow.component.shared.SelectionPreservationStrategy;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.provider.DataChangeEvent;
@@ -527,28 +527,30 @@ public class RadioButtonGroup<T>
     }
 
     /**
-     * Sets the selection strategy on data change. The default is
-     * {@link SelectionOnDataChange#PRESERVE_EXISTENT}.
+     * Sets the selection preservation strategy on data change. The default is
+     * {@link SelectionPreservationStrategy#PRESERVE_EXISTENT}.
      *
-     * @param selectionOnDataChange
-     *            the selection strategy to switch to, not {@code null}
+     * @param selectionPreservationStrategy
+     *            the selection preservation strategy to switch to, not
+     *            {@code null}
      *
-     * @see SelectionOnDataChange
+     * @see SelectionPreservationStrategy
      */
-    public void setSelectionOnDataChange(
-            SelectionOnDataChange selectionOnDataChange) {
-        dataChangeHandler.setSelectionOnDataChange(selectionOnDataChange);
+    public void setSelectionPreservationStrategy(
+            SelectionPreservationStrategy selectionPreservationStrategy) {
+        dataChangeHandler.setSelectionPreservationStrategy(
+                selectionPreservationStrategy);
     }
 
     /**
-     * Gets the selection strategy on data change.
+     * Gets the selection preservation strategy on data change.
      *
-     * @return the selection strategy
+     * @return the selection preservation strategy
      *
-     * @see #setSelectionOnDataChange(SelectionOnDataChange)
+     * @see #setSelectionPreservationStrategy(SelectionPreservationStrategy)
      */
-    public SelectionOnDataChange getSelectionOnDataChange() {
-        return dataChangeHandler.getSelectionOnDataChange();
+    public SelectionPreservationStrategy getSelectionPreservationStrategy() {
+        return dataChangeHandler.getSelectionPreservationStrategy();
     }
 
     @Override
@@ -749,7 +751,7 @@ public class RadioButtonGroup<T>
 
     private void initDataChangeHandler() {
         dataChangeHandler = new DataChangeHandler<>(
-                SelectionOnDataChange.PRESERVE_EXISTENT) {
+                SelectionPreservationStrategy.PRESERVE_EXISTENT) {
 
             @Override
             public void onPreserveAll(DataChangeEvent<T> dataChangeEvent) {

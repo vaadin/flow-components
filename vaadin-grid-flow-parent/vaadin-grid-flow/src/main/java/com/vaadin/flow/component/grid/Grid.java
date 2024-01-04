@@ -65,7 +65,7 @@ import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.grid.editor.EditorImpl;
 import com.vaadin.flow.component.grid.editor.EditorRenderer;
 import com.vaadin.flow.component.shared.DataChangeHandler;
-import com.vaadin.flow.component.shared.SelectionOnDataChange;
+import com.vaadin.flow.component.shared.SelectionPreservationStrategy;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.data.binder.BeanPropertySet;
 import com.vaadin.flow.data.binder.Binder;
@@ -1702,7 +1702,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     private void initDataChangeHandler() {
         dataChangeHandler = new DataChangeHandler<>(
-                SelectionOnDataChange.PRESERVE_ALL) {
+                SelectionPreservationStrategy.PRESERVE_ALL) {
 
             @Override
             public void onPreserveAll(DataChangeEvent<T> dataChangeEvent) {
@@ -2661,11 +2661,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         Objects.requireNonNull(dataProvider, "data provider cannot be null");
-        if (SelectionOnDataChange.PRESERVE_EXISTENT
-                .equals(getSelectionOnDataChange())
+        if (SelectionPreservationStrategy.PRESERVE_EXISTENT
+                .equals(getSelectionPreservationStrategy())
                 && dataProvider instanceof BackEndDataProvider) {
             throw new UnsupportedOperationException(
-                    "Lazy data providers do not support preserving only existent selection on data change.");
+                    "Lazy data providers do not support preserve existent selection strategy.");
         }
         handleDataProviderChange(dataProvider);
 
@@ -3018,35 +3018,37 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
-     * Sets the selection strategy on data change. The default is
-     * {@link SelectionOnDataChange#PRESERVE_ALL}. Lazy data providers do not
-     * support {@link SelectionOnDataChange#PRESERVE_EXISTENT}.
+     * Sets the selection preservation strategy on data change. The default is
+     * {@link SelectionPreservationStrategy#PRESERVE_ALL}. Lazy data providers
+     * do not support {@link SelectionPreservationStrategy#PRESERVE_EXISTENT}.
      *
-     * @param selectionOnDataChange
-     *            the selection strategy to switch to, not {@code null}
+     * @param selectionPreservationStrategy
+     *            the selection preservation strategy to switch to, not
+     *            {@code null}
      *
-     * @see SelectionOnDataChange
+     * @see SelectionPreservationStrategy
      */
-    public void setSelectionOnDataChange(
-            SelectionOnDataChange selectionOnDataChange) {
-        if (SelectionOnDataChange.PRESERVE_EXISTENT
-                .equals(selectionOnDataChange)
+    public void setSelectionPreservationStrategy(
+            SelectionPreservationStrategy selectionPreservationStrategy) {
+        if (SelectionPreservationStrategy.PRESERVE_EXISTENT
+                .equals(selectionPreservationStrategy)
                 && getDataProvider() instanceof BackEndDataProvider) {
             throw new UnsupportedOperationException(
-                    "Lazy data providers do not support preserving only existent selection on data change.");
+                    "Lazy data providers do not support preserve existent selection strategy.");
         }
-        dataChangeHandler.setSelectionOnDataChange(selectionOnDataChange);
+        dataChangeHandler.setSelectionPreservationStrategy(
+                selectionPreservationStrategy);
     }
 
     /**
-     * Gets the selection strategy on data change.
+     * Gets the selection preservation strategy on data change.
      *
-     * @return the selection strategy
+     * @return the selection preservation strategy
      *
-     * @see #setSelectionOnDataChange(SelectionOnDataChange)
+     * @see #setSelectionPreservationStrategy(SelectionPreservationStrategy)
      */
-    public SelectionOnDataChange getSelectionOnDataChange() {
-        return dataChangeHandler.getSelectionOnDataChange();
+    public SelectionPreservationStrategy getSelectionPreservationStrategy() {
+        return dataChangeHandler.getSelectionPreservationStrategy();
     }
 
     void doClientSideSelection(Set<T> items) {

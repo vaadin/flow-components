@@ -25,7 +25,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.shared.DataChangeHandler;
-import com.vaadin.flow.component.shared.SelectionOnDataChange;
+import com.vaadin.flow.component.shared.SelectionPreservationStrategy;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataViewUtils;
 import com.vaadin.flow.data.selection.MultiSelect;
@@ -65,7 +65,7 @@ public class MultiSelectListBox<T>
 
     private void initDataChangeHandler() {
         dataChangeHandler = new DataChangeHandler<>(
-                SelectionOnDataChange.DISCARD) {
+                SelectionPreservationStrategy.DISCARD) {
 
             @Override
             public void onPreserveAll(DataChangeEvent<T> dataChangeEvent) {
@@ -177,28 +177,30 @@ public class MultiSelectListBox<T>
     }
 
     /**
-     * Sets the selection strategy on data change. The default is
-     * {@link SelectionOnDataChange#DISCARD}.
+     * Sets the selection preservation strategy on data change. The default is
+     * {@link SelectionPreservationStrategy#DISCARD}.
      *
-     * @param selectionOnDataChange
-     *            the selection strategy to switch to, not {@code null}
+     * @param selectionPreservationStrategy
+     *            the selection preservation strategy to switch to, not
+     *            {@code null}
      *
-     * @see SelectionOnDataChange
+     * @see SelectionPreservationStrategy
      */
-    public void setSelectionOnDataChange(
-            SelectionOnDataChange selectionOnDataChange) {
-        dataChangeHandler.setSelectionOnDataChange(selectionOnDataChange);
+    public void setSelectionPreservationStrategy(
+            SelectionPreservationStrategy selectionPreservationStrategy) {
+        dataChangeHandler.setSelectionPreservationStrategy(
+                selectionPreservationStrategy);
     }
 
     /**
-     * Gets the selection strategy on data change.
+     * Gets the selection preservation strategy on data change.
      *
-     * @return the selection strategy
+     * @return the selection preservation strategy
      *
-     * @see #setSelectionOnDataChange(SelectionOnDataChange)
+     * @see #setSelectionPreservationStrategy(SelectionPreservationStrategy)
      */
-    public SelectionOnDataChange getSelectionOnDataChange() {
-        return dataChangeHandler.getSelectionOnDataChange();
+    public SelectionPreservationStrategy getSelectionPreservationStrategy() {
+        return dataChangeHandler.getSelectionPreservationStrategy();
     }
 
     @Override
