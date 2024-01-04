@@ -324,8 +324,7 @@ public class RadioButtonGroup<T>
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         this.dataProvider.set(dataProvider);
         DataViewUtils.removeComponentFilterAndSortComparator(this);
-        clear();
-        rebuild();
+        reset();
 
         setupDataProviderListener(dataProvider);
     }
@@ -574,10 +573,10 @@ public class RadioButtonGroup<T>
                 .ofNullable(getElement().getProperty("accessibleNameRef"));
     }
 
-    @Override
-    public void clear() {
+    private void reset() {
         keyMapper.removeAll();
-        super.clear();
+        clear();
+        rebuild();
     }
 
     @SuppressWarnings("unchecked")
@@ -766,15 +765,15 @@ public class RadioButtonGroup<T>
                         .fetch(DataViewUtils.getQuery(RadioButtonGroup.this))
                         .noneMatch(
                                 item -> valueEquals((T) item, initialValue))) {
-                    clear();
+                    reset();
+                } else {
+                    rebuild();
                 }
-                rebuild();
             }
 
             @Override
             public void onDiscard(DataChangeEvent<T> dataChangeEvent) {
-                clear();
-                rebuild();
+                reset();
             }
         };
     }

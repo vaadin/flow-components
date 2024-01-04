@@ -338,8 +338,7 @@ public class CheckboxGroup<T>
 
             @Override
             public void onDiscard(DataChangeEvent<T> dataChangeEvent) {
-                clear();
-                rebuild();
+                reset();
             }
         };
     }
@@ -386,8 +385,7 @@ public class CheckboxGroup<T>
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         this.dataProvider.set(dataProvider);
         DataViewUtils.removeComponentFilterAndSortComparator(this);
-        clear();
-        rebuild();
+        reset();
 
         if (dataProviderListenerRegistration != null) {
             dataProviderListenerRegistration.remove();
@@ -706,10 +704,10 @@ public class CheckboxGroup<T>
         return dataChangeHandler.getSelectionPreservationStrategy();
     }
 
-    @Override
-    public void clear() {
+    private void reset() {
         keyMapper.removeAll();
-        super.clear();
+        clear();
+        rebuild();
     }
 
     @SuppressWarnings("unchecked")
