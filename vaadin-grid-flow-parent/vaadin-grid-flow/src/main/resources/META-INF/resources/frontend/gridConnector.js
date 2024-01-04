@@ -778,7 +778,7 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
           const parentItemContext = dataProviderController.getItemContext(parentItem);
           const parentItemSubCache = parentItemContext?.subCache;
           if (parentItemSubCache) {
-            // If grid has outstanding requests for this parent, then resolve them
+            // If grid has pending requests for this parent, then resolve them
             // and let grid update the flat size and re-render.
             const { pendingRequests } = parentItemSubCache;
             Object.entries(pendingRequests).forEach(([page, callback]) => {
@@ -797,7 +797,7 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
               }
             });
 
-            // If size has changed, and there are no outstanding requests, then
+            // If size has changed, and there are no pending requests, then
             // manually update the size of the grid cache and update the effective
             // size, effectively re-rendering the grid. This is necessary when
             // individual items are refreshed on the server, in which case there
@@ -823,7 +823,7 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
         });
 
         grid.$connector.confirm = tryCatchWrapper(function (id) {
-          // We're done applying changes from this batch, resolve outstanding
+          // We're done applying changes from this batch, resolve pending
           // callbacks
           const { pendingRequests } = dataProviderController.rootCache;
           Object.entries(pendingRequests).forEach(([page, callback]) => {
