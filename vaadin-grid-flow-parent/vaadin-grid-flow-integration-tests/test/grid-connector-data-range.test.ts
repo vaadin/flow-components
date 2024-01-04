@@ -89,4 +89,27 @@ describe('grid connector - data range', () => {
       grid.$server.setRequestedRange.resetHistory();
     }
   });
+
+  it('should debounce data range requests when scrolling', async () => {
+    grid.scrollToIndex(SIZE / 2);
+    grid.scrollToIndex(SIZE - 1);
+    await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
+    expect(grid.$server.setRequestedRange).to.be.calledOnce;
+    expect(grid.$server.setRequestedRange.args[0]).to.eql([SIZE - PAGE_SIZE, PAGE_SIZE * 2]);
+  });
+
+  it('should request data range twice when scrolling to end and immediately back to start', async () => {
+    grid.scrollToIndex(SIZE - 1);
+    grid.scrollToIndex(0);
+    await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
+    expect(grid.$server.setRequestedRange).to.be.calledOnce;
+    expect(grid.$server.setRequestedRange.args[0]).to.eql([SIZE - PAGE_SIZE, PAGE_SIZE]);
+
+    grid.$server.setRequestedRange.resetHistory();
+
+    setItemsRange(SIZE - PAGE_SIZE, PAGE_SIZE);
+    await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
+    expect(grid.$server.setRequestedRange).to.be.calledOnce;
+    expect(grid.$server.setRequestedRange.args[0]).to.eql([0, PAGE_SIZE]);
+  });
 });

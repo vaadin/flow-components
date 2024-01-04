@@ -241,22 +241,26 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
         });
 
         grid.$connector.fetchPage = tryCatchWrapper(function (fetch, page, parentKey) {
+          // Adjust the requested page to be within the valid range in case
+          // the grid size has changed while fetchPage was debounced.
+          if (parentKey === root) {
+            page = Math.min(page, Math.floor(grid.size / grid.pageSize));
+          }
+
           // Determine what to fetch based on scroll position and not only
           // what grid asked for
+          const visibleRows = grid._getRenderedRows();
+          let start = visibleRows.length > 0 ? visibleRows[0].index : 0;
+          let end = visibleRows.length > 0 ? visibleRows[visibleRows.length - 1].index : 0;
 
           // The buffer size could be multiplied by some constant defined by the user,
           // if he needs to reduce the number of items sent to the Grid to improve performance
           // or to increase it to make Grid smoother when scrolling
-          const visibleRows = grid._getRenderedRows();
-          let start = visibleRows.length > 0 ? visibleRows[0].index : 0;
-          let end = visibleRows.length > 0 ? visibleRows[visibleRows.length - 1].index : 0;
           let buffer = end - start;
-
           let firstNeededIndex = Math.max(0, start - buffer);
           let lastNeededIndex = Math.min(end + buffer, grid._flatSize);
 
-          let firstNeededPage = page;
-          let lastNeededPage = page;
+          let pageRange = [null, null];
           for (let idx = firstNeededIndex; idx <= lastNeededIndex; idx++) {
             const { cache, index } = dataProviderController.getFlatIndexContext(idx);
             // Try to match level by going up in hierarchy. The page range should include
@@ -270,18 +274,26 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
             if (sameLevelPage === null) {
               continue;
             }
-            firstNeededPage = Math.min(firstNeededPage, sameLevelPage);
-            lastNeededPage = Math.max(lastNeededPage, sameLevelPage);
+            pageRange[0] = Math.min(pageRange[0] ?? sameLevelPage, sameLevelPage);
+            pageRange[1] = Math.max(pageRange[1] ?? sameLevelPage, sameLevelPage);
           }
 
-          let firstPage = Math.max(0, firstNeededPage);
-          let lastPage =
-            parentKey !== root ? lastNeededPage : Math.min(lastNeededPage, Math.floor(grid.size / grid.pageSize));
+          // When the viewport doesn't contain the requested page or it doesn't contain any items from
+          // the requested level at all, it means that the scroll position has changed while fetchPage
+          // was debounced. For example, it can happen if the user scrolls the grid to the bottom and
+          // then immediately back to the top. In this case, the request for the last page will be left
+          // hanging. To avoid this, as a workaround, we reset the range to only include the requested page
+          // to make sure all hanging requests are resolved. After that, the grid requests the first page
+          // or whatever in the viewport again.
+          if (pageRange.some((p) => p === null) || page < pageRange[0] || page > pageRange[1]) {
+            pageRange = [page, page];
+          }
+
           let lastRequestedRange = lastRequestedRanges[parentKey] || [-1, -1];
-          if (lastRequestedRange[0] != firstPage || lastRequestedRange[1] != lastPage) {
-            lastRequestedRanges[parentKey] = [firstPage, lastPage];
-            let count = lastPage - firstPage + 1;
-            fetch(firstPage * grid.pageSize, count * grid.pageSize);
+          if (lastRequestedRange[0] != pageRange[0] || lastRequestedRange[1] != pageRange[1]) {
+            lastRequestedRanges[parentKey] = pageRange;
+            let pageCount = pageRange[1] - pageRange[0] + 1;
+            fetch(pageRange[0] * grid.pageSize, pageCount * grid.pageSize);
           }
         });
 
