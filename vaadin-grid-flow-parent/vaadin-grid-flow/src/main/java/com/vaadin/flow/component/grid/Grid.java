@@ -2661,6 +2661,12 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         Objects.requireNonNull(dataProvider, "data provider cannot be null");
+        if (SelectionOnDataChange.PRESERVE_EXISTENT
+                .equals(getSelectionOnDataChange())
+                && dataProvider instanceof BackEndDataProvider) {
+            throw new UnsupportedOperationException(
+                    "Lazy data providers do not support preserving only existent selection on data change.");
+        }
         handleDataProviderChange(dataProvider);
 
         deselectAll();
@@ -3016,7 +3022,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         if (SelectionOnDataChange.PRESERVE_EXISTENT
                 .equals(selectionOnDataChange)
                 && getDataProvider() instanceof BackEndDataProvider) {
-            throw new UnsupportedOperationException("");
+            throw new UnsupportedOperationException(
+                    "Lazy data providers do not support preserving only existent selection on data change.");
         }
         dataChangeHandler.setSelectionOnDataChange(selectionOnDataChange);
     }

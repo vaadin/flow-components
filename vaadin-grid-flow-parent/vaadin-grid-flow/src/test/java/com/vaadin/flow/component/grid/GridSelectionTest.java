@@ -21,9 +21,12 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.shared.SelectionOnDataChange;
+import com.vaadin.flow.data.provider.BackEndDataProvider;
+import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.selection.MultiSelect;
 import org.junit.Assert;
 import org.junit.Test;
@@ -296,5 +299,34 @@ public class GridSelectionTest {
         grid.getDataProvider().refreshAll();
         Assert.assertEquals(Set.of(selectedItem), grid.getSelectedItems());
         Assert.assertTrue(events.isEmpty());
+    }
+
+    @Test
+    public void setLazyDataProvider_setPreserveExistent_throwsUnsupportedOperationException() {
+        Grid<String> grid = new Grid<>();
+        // Set another selection strategy first
+        grid.setSelectionOnDataChange(SelectionOnDataChange.DISCARD);
+        setLazyDataProvider(grid);
+        Assert.assertThrows(UnsupportedOperationException.class,
+                () -> grid.setSelectionOnDataChange(
+                        SelectionOnDataChange.PRESERVE_EXISTENT));
+    }
+
+    @Test
+    public void setPreserveExistent_setLazyDataProvider_throwsUnsupportedOperationException() {
+        Grid<String> grid = new Grid<>();
+        grid.setSelectionOnDataChange(SelectionOnDataChange.PRESERVE_EXISTENT);
+        Assert.assertThrows(UnsupportedOperationException.class,
+                () -> setLazyDataProvider(grid));
+    }
+
+    private static void setLazyDataProvider(Grid<String> grid) {
+        BackEndDataProvider<String, Void> dataProvider = DataProvider
+                .fromCallbacks(query -> {
+                    query.getOffset();
+                    query.getLimit();
+                    return Stream.of("foo", "bar", "baz");
+                }, query -> 3);
+        grid.setDataProvider(dataProvider);
     }
 }
