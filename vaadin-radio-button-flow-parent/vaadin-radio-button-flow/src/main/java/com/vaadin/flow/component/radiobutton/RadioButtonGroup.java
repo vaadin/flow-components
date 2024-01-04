@@ -750,7 +750,7 @@ public class RadioButtonGroup<T>
 
     private void initDataChangeHandler() {
         dataChangeHandler = new DataChangeHandler<>(
-                SelectionPreservationStrategy.PRESERVE_EXISTENT) {
+                SelectionPreservationStrategy.DISCARD) {
 
             @Override
             public void onPreserveAll(DataChangeEvent<T> dataChangeEvent) {
