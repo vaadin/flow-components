@@ -344,10 +344,6 @@ public class CheckboxGroup<T>
         };
     }
 
-    private void fireValueChangeEvent(Set<T> oldValue) {
-        fireEvent(new ComponentValueChangeEvent<>(this, this, oldValue, false));
-    }
-
     private void handleDataChange(DataChangeEvent<T> dataChangeEvent) {
         if (dataChangeEvent instanceof DataChangeEvent.DataRefreshEvent) {
             T otherItem = ((DataChangeEvent.DataRefreshEvent<T>) dataChangeEvent)
