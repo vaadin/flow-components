@@ -109,8 +109,6 @@ public class RadioButtonGroup<T>
 
     private DataChangeHandler<T> dataChangeHandler;
 
-    private boolean suppressValueChangeEvents = false;
-
     private static <T> T presentationToModel(
             RadioButtonGroup<T> radioButtonGroup, String presentation) {
         if (radioButtonGroup.keyMapper == null) {
@@ -378,17 +376,6 @@ public class RadioButtonGroup<T>
                     rb -> rb.setChecked(valueEquals(rb.getItem(), value)));
         }
         refreshButtons();
-    }
-
-    @Override
-    public Registration addValueChangeListener(
-            ValueChangeListener<? super ComponentValueChangeEvent<RadioButtonGroup<T>, T>> listener) {
-        return super.addValueChangeListener(event -> {
-            if (suppressValueChangeEvents) {
-                return;
-            }
-            listener.valueChanged(event);
-        });
     }
 
     @Override
@@ -754,24 +741,16 @@ public class RadioButtonGroup<T>
             }
 
             @Override
+            @SuppressWarnings("unchecked")
             public void onPreserveExisting(DataChangeEvent<T> dataChangeEvent) {
                 T initialValue = getValue();
-                suppressValueChangeEvents = true;
-                try {
-                    @SuppressWarnings("unchecked")
-                    Stream<T> itemsStream = getDataProvider().fetch(
-                            DataViewUtils.getQuery(RadioButtonGroup.this));
-                    itemsStream.filter(item -> valueEquals(item, initialValue))
-                            .findAny()
-                            .ifPresentOrElse(item -> setValue(initialValue),
-                                    () -> clear());
-                } finally {
-                    suppressValueChangeEvents = false;
+                if (getDataProvider()
+                        .fetch(DataViewUtils.getQuery(RadioButtonGroup.this))
+                        .noneMatch(
+                                item -> valueEquals((T) item, initialValue))) {
+                    clear();
                 }
                 rebuild();
-                if (!valueEquals(getValue(), initialValue)) {
-                    fireValueChangeEvent(initialValue);
-                }
             }
 
             @Override
@@ -780,10 +759,6 @@ public class RadioButtonGroup<T>
                 rebuild();
             }
         };
-    }
-
-    private void fireValueChangeEvent(T oldValue) {
-        fireEvent(new ComponentValueChangeEvent<>(this, this, oldValue, false));
     }
 
     private void handleDataChange(DataChangeEvent<T> dataChangeEvent) {

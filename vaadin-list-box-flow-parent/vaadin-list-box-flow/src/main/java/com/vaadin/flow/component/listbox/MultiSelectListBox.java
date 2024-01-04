@@ -52,8 +52,6 @@ public class MultiSelectListBox<T>
 
     private DataChangeHandler<T> dataChangeHandler;
 
-    private boolean suppressValueChangeEvents = false;
-
     /**
      * Creates a new list box component with multi-selection.
      */
@@ -76,30 +74,19 @@ public class MultiSelectListBox<T>
 
             @Override
             public void onPreserveExisting(DataChangeEvent<T> dataChangeEvent) {
-                Set<T> initialSelectedItems = getSelectedItems();
-                suppressValueChangeEvents = true;
-                try {
-                    Set<Object> initialSelectedItemIds = initialSelectedItems
-                            .stream().map(getDataProvider()::getId)
-                            .collect(Collectors.toSet());
-                    @SuppressWarnings("unchecked")
-                    Stream<T> itemsStream = getDataProvider().fetch(
-                            DataViewUtils.getQuery(MultiSelectListBox.this));
-                    Set<T> existingItems = itemsStream
-                            .filter(item -> initialSelectedItemIds
-                                    .contains(getDataProvider().getId(item)))
-                            .limit(initialSelectedItemIds.size())
-                            .collect(Collectors.toSet());
-                    setValue(existingItems);
-                } finally {
-                    suppressValueChangeEvents = false;
-                }
+                Set<Object> initialSelectedItemIds = getSelectedItems().stream()
+                        .map(getDataProvider()::getId)
+                        .collect(Collectors.toSet());
+                @SuppressWarnings("unchecked")
+                Stream<T> itemsStream = getDataProvider()
+                        .fetch(DataViewUtils.getQuery(MultiSelectListBox.this));
+                Set<T> existingItems = itemsStream
+                        .filter(item -> initialSelectedItemIds
+                                .contains(getDataProvider().getId(item)))
+                        .limit(initialSelectedItemIds.size())
+                        .collect(Collectors.toSet());
+                setValue(existingItems);
                 rebuild();
-                if (!valueEquals(getSelectedItems(), initialSelectedItems)) {
-                    fireEvent(new ComponentValueChangeEvent<>(
-                            MultiSelectListBox.this, MultiSelectListBox.this,
-                            initialSelectedItems, false));
-                }
             }
 
             @Override
@@ -159,17 +146,6 @@ public class MultiSelectListBox<T>
     }
 
     @Override
-    public Registration addValueChangeListener(
-            ValueChangeListener<? super ComponentValueChangeEvent<MultiSelectListBox<T>, Set<T>>> listener) {
-        return super.addValueChangeListener(event -> {
-            if (suppressValueChangeEvents) {
-                return;
-            }
-            listener.valueChanged(event);
-        });
-    }
-
-    @Override
     public void updateSelection(Set<T> addedItems, Set<T> removedItems) {
         Set<T> value = new HashSet<>(getValue());
         value.addAll(addedItems);
@@ -195,9 +171,6 @@ public class MultiSelectListBox<T>
     public Registration addSelectionListener(
             MultiSelectionListener<MultiSelectListBox<T>, T> listener) {
         return addValueChangeListener(event -> {
-            if (suppressValueChangeEvents) {
-                return;
-            }
             listener.selectionChange(new MultiSelectionEvent<>(this, this,
                     event.getOldValue(), event.isFromClient()));
         });

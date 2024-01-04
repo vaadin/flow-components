@@ -124,8 +124,6 @@ public class CheckboxGroup<T>
 
     private DataChangeHandler<T> dataChangeHandler;
 
-    private boolean suppressValueChangeEvents = false;
-
     /**
      * Creates an empty checkbox group
      */
@@ -323,28 +321,19 @@ public class CheckboxGroup<T>
 
             @Override
             public void onPreserveExisting(DataChangeEvent<T> dataChangeEvent) {
-                Set<T> initialValue = getValue();
-                suppressValueChangeEvents = true;
-                try {
-                    Set<Object> initialSelectedItemIds = initialValue.stream()
-                            .map(item -> getItemId(item))
-                            .collect(Collectors.toSet());
-                    @SuppressWarnings("unchecked")
-                    Stream<T> itemsStream = getDataProvider()
-                            .fetch(DataViewUtils.getQuery(CheckboxGroup.this));
-                    Set<T> existingValueSet = itemsStream
-                            .filter(item -> initialSelectedItemIds
-                                    .contains(getItemId(item)))
-                            .limit(initialSelectedItemIds.size())
-                            .collect(Collectors.toSet());
-                    setValue(existingValueSet);
-                } finally {
-                    suppressValueChangeEvents = false;
-                }
+                Set<Object> initialSelectedItemIds = getValue().stream()
+                        .map(item -> getItemId(item))
+                        .collect(Collectors.toSet());
+                @SuppressWarnings("unchecked")
+                Stream<T> itemsStream = getDataProvider()
+                        .fetch(DataViewUtils.getQuery(CheckboxGroup.this));
+                Set<T> existingValueSet = itemsStream
+                        .filter(item -> initialSelectedItemIds
+                                .contains(getItemId(item)))
+                        .limit(initialSelectedItemIds.size())
+                        .collect(Collectors.toSet());
+                setValue(existingValueSet);
                 rebuild();
-                if (!valueEquals(getValue(), initialValue)) {
-                    fireValueChangeEvent(initialValue);
-                }
             }
 
             @Override
@@ -439,17 +428,6 @@ public class CheckboxGroup<T>
                         + "Use the clear-method to reset the component's value to an empty set.");
         super.setValue(value);
         refreshCheckboxes();
-    }
-
-    @Override
-    public Registration addValueChangeListener(
-            ValueChangeListener<? super ComponentValueChangeEvent<CheckboxGroup<T>, Set<T>>> listener) {
-        return super.addValueChangeListener(event -> {
-            if (suppressValueChangeEvents) {
-                return;
-            }
-            listener.valueChanged(event);
-        });
     }
 
     @Override
