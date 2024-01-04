@@ -18,7 +18,6 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>flow-data</artifactId>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
