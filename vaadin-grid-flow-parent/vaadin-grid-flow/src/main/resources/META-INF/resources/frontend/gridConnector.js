@@ -752,10 +752,7 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
           // The page callbacks for the given item are about to be discarded ->
           // Resolve the callbacks with an empty array to not leave grid in loading state
           const itemContext = dataProviderController.getItemContext(item);
-          const itemSubCache = itemContext?.subCache;
-          if (itemSubCache) {
-            Object.values(itemSubCache.pendingRequests).forEach((callback) => callback([]));
-          }
+          Object.values(itemContext?.subCache?.pendingRequests || {}).forEach((callback) => callback([]));
 
           const itemId = grid.getItemId(item);
           ensureSubCacheQueue = ensureSubCacheQueue.filter((item) => item.itemkey !== itemId);
