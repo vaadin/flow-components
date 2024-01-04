@@ -3017,6 +3017,16 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         getSelectionModel().deselectAll();
     }
 
+    /**
+     * Sets the selection strategy on data change. The default is
+     * {@link SelectionOnDataChange#PRESERVE_ALL}. Lazy data providers do not
+     * support {@link SelectionOnDataChange#PRESERVE_EXISTENT}.
+     *
+     * @param selectionOnDataChange
+     *            the selection strategy to switch to, not {@code null}
+     *
+     * @see SelectionOnDataChange
+     */
     public void setSelectionOnDataChange(
             SelectionOnDataChange selectionOnDataChange) {
         if (SelectionOnDataChange.PRESERVE_EXISTENT
@@ -3028,6 +3038,13 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         dataChangeHandler.setSelectionOnDataChange(selectionOnDataChange);
     }
 
+    /**
+     * Gets the selection strategy on data change.
+     *
+     * @return the selection strategy
+     *
+     * @see #setSelectionOnDataChange(SelectionOnDataChange)
+     */
     public SelectionOnDataChange getSelectionOnDataChange() {
         return dataChangeHandler.getSelectionOnDataChange();
     }

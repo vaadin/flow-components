@@ -176,11 +176,27 @@ public class MultiSelectListBox<T>
         });
     }
 
+    /**
+     * Sets the selection strategy on data change. The default is
+     * {@link SelectionOnDataChange#DISCARD}.
+     *
+     * @param selectionOnDataChange
+     *            the selection strategy to switch to, not {@code null}
+     *
+     * @see SelectionOnDataChange
+     */
     public void setSelectionOnDataChange(
             SelectionOnDataChange selectionOnDataChange) {
         dataChangeHandler.setSelectionOnDataChange(selectionOnDataChange);
     }
 
+    /**
+     * Gets the selection strategy on data change.
+     *
+     * @return the selection strategy
+     *
+     * @see #setSelectionOnDataChange(SelectionOnDataChange)
+     */
     public SelectionOnDataChange getSelectionOnDataChange() {
         return dataChangeHandler.getSelectionOnDataChange();
     }
