@@ -244,7 +244,7 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
           // Adjust the requested page to be within the valid range in case
           // the grid size has changed while fetchPage was debounced.
           if (parentKey === root) {
-            page = Math.min(page, Math.floor(grid.size / grid.pageSize));
+            page = Math.min(page, Math.floor((grid.size - 1) / grid.pageSize));
           }
 
           // Determine what to fetch based on scroll position and not only

@@ -46,14 +46,23 @@ describe('grid connector - data range', () => {
     grid.$server.setRequestedRange.resetHistory();
   });
 
-  it('should request data range after scrolling to end', async () => {
+  it('should request correct data range when scrolling to end', async () => {
     grid.scrollToIndex(SIZE - 1);
     await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
     expect(grid.$server.setRequestedRange).to.be.calledOnce;
     expect(grid.$server.setRequestedRange.args[0]).to.eql([SIZE - PAGE_SIZE, PAGE_SIZE * 2]);
   });
 
-  it('should request data range after scrolling to end and back to start', async () => {
+  it('should request correct data range when size decreases after scrolling to end', async () => {
+    const newSize = SIZE / 2;
+    grid.scrollToIndex(SIZE - 1);
+    grid.$connector.updateSize(newSize);
+    await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
+    expect(grid.$server.setRequestedRange).to.be.calledOnce;
+    expect(grid.$server.setRequestedRange.args[0]).to.eql([newSize - PAGE_SIZE, PAGE_SIZE * 2]);
+  });
+
+  it('should request correct data range when scrolling from end to start', async () => {
     grid.scrollToIndex(SIZE - 1);
     await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
     setItemsRange(SIZE - PAGE_SIZE, PAGE_SIZE * 2);
@@ -65,7 +74,7 @@ describe('grid connector - data range', () => {
     expect(grid.$server.setRequestedRange.args[0]).to.eql([0, PAGE_SIZE]);
   });
 
-  it('should request data range while gradually scrolling from start to end', async () => {
+  it('should request correct data ranges when gradually scrolling to end', async () => {
     for (let i = PAGE_SIZE; i < SIZE; i += PAGE_SIZE) {
       grid.scrollToIndex(i - 1);
       await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
@@ -75,7 +84,7 @@ describe('grid connector - data range', () => {
     }
   });
 
-  it('should request data range while gradually scrolling from end to start', async () => {
+  it('should request correct data ranges when gradually scrolling from end to start', async () => {
     grid.scrollToIndex(SIZE - 1);
     await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
     setItemsRange(SIZE - PAGE_SIZE, PAGE_SIZE);
@@ -98,18 +107,31 @@ describe('grid connector - data range', () => {
     expect(grid.$server.setRequestedRange.args[0]).to.eql([SIZE - PAGE_SIZE, PAGE_SIZE * 2]);
   });
 
-  it('should request data range twice when scrolling to end and immediately back to start', async () => {
-    grid.scrollToIndex(SIZE - 1);
-    grid.scrollToIndex(0);
-    await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-    expect(grid.$server.setRequestedRange).to.be.calledOnce;
-    expect(grid.$server.setRequestedRange.args[0]).to.eql([SIZE - PAGE_SIZE, PAGE_SIZE]);
+  describe('scrolling to end and immediately back to start', () => {
+    beforeEach(() => {
+      grid.scrollToIndex(SIZE - 1);
+      grid.scrollToIndex(0);
+    });
 
-    grid.$server.setRequestedRange.resetHistory();
+    it('should request data range first for end and then for start', async () => {
+      await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
+      expect(grid.$server.setRequestedRange).to.be.calledOnce;
+      expect(grid.$server.setRequestedRange.args[0]).to.eql([SIZE - PAGE_SIZE, PAGE_SIZE]);
 
-    setItemsRange(SIZE - PAGE_SIZE, PAGE_SIZE);
-    await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-    expect(grid.$server.setRequestedRange).to.be.calledOnce;
-    expect(grid.$server.setRequestedRange.args[0]).to.eql([0, PAGE_SIZE]);
+      grid.$server.setRequestedRange.resetHistory();
+
+      setItemsRange(SIZE - PAGE_SIZE, PAGE_SIZE);
+      await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
+      expect(grid.$server.setRequestedRange).to.be.calledOnce;
+      expect(grid.$server.setRequestedRange.args[0]).to.eql([0, PAGE_SIZE]);
+    });
+
+    it('should request correct data range when size decreases after scrolling', async () => {
+      const newSize = SIZE / 2;
+      grid.$connector.updateSize(newSize);
+      await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
+      expect(grid.$server.setRequestedRange).to.be.calledOnce;
+      expect(grid.$server.setRequestedRange.args[0]).to.eql([newSize - PAGE_SIZE, PAGE_SIZE]);
+    });
   });
 });
