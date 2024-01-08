@@ -217,7 +217,6 @@ public class SelectionWidget extends Composite {
                                 onPaintEvent(event);
                             }
                         }
-                        event.preventDefault();
                         event.stopPropagation();
                     }
                 }
