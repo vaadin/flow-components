@@ -35,7 +35,7 @@ import com.vaadin.flow.dom.ElementConstants;
  */
 @Tag("iron-icon")
 @NpmPackage(value = "@polymer/iron-icon", version = "3.0.1")
-@NpmPackage(value = "@vaadin/vaadin-icons", version = "23.3.29")
+@NpmPackage(value = "@vaadin/vaadin-icons", version = "23.3.30")
 @JsModule("@polymer/iron-icon/iron-icon.js")
 @Deprecated
 public class IronIcon extends Component
