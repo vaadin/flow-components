@@ -240,40 +240,27 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
           });
         });
 
-        grid.$connector.cancelRootRequests = tryCatchWrapper(function (predicate) {
-          const { pendingRequests } = dataProviderController.rootCache;
-          Object.entries(pendingRequests)
-            .filter(([page, _callback]) => !predicate || predicate(+page))
-            .forEach(([_page, callback]) => callback([]));
-        });
-
-        grid.$connector.cancelRootRequestsOutOfRange = tryCatchWrapper(function () {
-          const lastRequestedRange = lastRequestedRanges[root];
-          // const lastPage = Math.floor((grid.size - 1) / grid.pageSize);
-
-          if (lastRequestedRange) {
-            grid.$connector.cancelRootRequests((page) => {
-              return page < lastRequestedRange[0] || page > lastRequestedRange[1];
-            });
+        grid.$connector.fetchPage = tryCatchWrapper(function (fetch, page, parentKey) {
+          // Adjust the requested page to be within the valid range in case
+          // the grid size has changed while fetchPage was debounced.
+          if (parentKey === root) {
+            page = Math.min(page, Math.floor(grid.size / grid.pageSize));
           }
-        });
 
-        grid.$connector.fetchVisibleRange = tryCatchWrapper(function (fetch, parentKey) {
           // Determine what to fetch based on scroll position and not only
           // what grid asked for
+          const visibleRows = grid._getRenderedRows();
+          let start = visibleRows.length > 0 ? visibleRows[0].index : 0;
+          let end = visibleRows.length > 0 ? visibleRows[visibleRows.length - 1].index : 0;
 
           // The buffer size could be multiplied by some constant defined by the user,
           // if he needs to reduce the number of items sent to the Grid to improve performance
           // or to increase it to make Grid smoother when scrolling
-          const visibleRows = grid._getRenderedRows();
-          let start = visibleRows.length > 0 ? visibleRows[0].index : 0;
-          let end = visibleRows.length > 0 ? visibleRows[visibleRows.length - 1].index : 0;
           let buffer = end - start;
-
           let firstNeededIndex = Math.max(0, start - buffer);
           let lastNeededIndex = Math.min(end + buffer, grid._flatSize);
 
-          let pageRange = [];
+          let pageRange = [null, null];
           for (let idx = firstNeededIndex; idx <= lastNeededIndex; idx++) {
             const { cache, index } = dataProviderController.getFlatIndexContext(idx);
             // Try to match level by going up in hierarchy. The page range should include
@@ -284,17 +271,26 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
             // items from the current level cache. This can lead to an infinite loop when using
             // scrollToIndex feature.
             const sameLevelPage = grid.$connector._getSameLevelPage(parentKey, cache, index);
-            if (sameLevelPage !== null) {
-              pageRange[0] = Math.min(pageRange[0] ?? sameLevelPage, sameLevelPage);
-              pageRange[1] = Math.max(pageRange[1] ?? sameLevelPage, sameLevelPage);
+            if (sameLevelPage === null) {
+              continue;
             }
+            pageRange[0] = Math.min(pageRange[0] ?? sameLevelPage, sameLevelPage);
+            pageRange[1] = Math.max(pageRange[1] ?? sameLevelPage, sameLevelPage);
           }
 
-          pageRange[0] ??= 0;
-          pageRange[1] ??= 0;
+          // When the viewport doesn't contain the requested page or it doesn't contain any items from
+          // the requested level at all, it means that the scroll position has changed while fetchPage
+          // was debounced. For example, it can happen if the user scrolls the grid to the bottom and
+          // then immediately back to the top. In this case, the request for the last page will be left
+          // hanging. To avoid this, as a workaround, we reset the range to only include the requested page
+          // to make sure all hanging requests are resolved. After that, the grid requests the first page
+          // or whatever in the viewport again.
+          if (pageRange.some((p) => p === null) || page < pageRange[0] || page > pageRange[1]) {
+            pageRange = [page, page];
+          }
 
           let lastRequestedRange = lastRequestedRanges[parentKey] || [-1, -1];
-          if (lastRequestedRange[0] !== pageRange[0] || lastRequestedRange[1] !== pageRange[1]) {
+          if (lastRequestedRange[0] != pageRange[0] || lastRequestedRange[1] != pageRange[1]) {
             lastRequestedRanges[parentKey] = pageRange;
             let pageCount = pageRange[1] - pageRange[0] + 1;
             fetch(pageRange[0] * grid.pageSize, pageCount * grid.pageSize);
@@ -318,8 +314,9 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
               // Resolve the callback from cache
               callback(cache[parentUniqueKey][page], cache[parentUniqueKey].size);
             } else {
-              grid.$connector.fetchVisibleRange(
-                (firstIndex, size) => grid.$connector.beforeParentRequest(firstIndex, size, parentUniqueKey),
+              grid.$connector.fetchPage(
+                (firstIndex, size) => grid.$connector.beforeParentRequest(firstIndex, size, params.parentItem.key),
+                page,
                 parentUniqueKey
               );
             }
@@ -343,12 +340,11 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
                 rootRequestDebouncer,
                 timeOut.after(grid._hasData ? rootRequestDelay : 0),
                 () => {
-                  grid.$connector.fetchVisibleRange(
+                  grid.$connector.fetchPage(
                     (firstIndex, size) => grid.$server.setRequestedRange(firstIndex, size),
+                    page,
                     root
                   );
-
-                  grid.$connector.cancelRootRequestsOutOfRange();
                 }
               );
             }
@@ -849,7 +845,7 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
               // No cached data, resolve the callback with an empty array
               callback(new Array(grid.pageSize));
               // Request grid for content update
-              // grid.requestContentUpdate();
+              grid.requestContentUpdate();
             } else if (callback && grid.size === 0) {
               // The grid has 0 items => resolve the callback with an empty array
               callback([]);
