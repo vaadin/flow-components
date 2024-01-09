@@ -70,17 +70,9 @@ public class GridSelectionModeTest {
     @Test
     public void testGetSelectionMode() {
         grid.setSelectionMode(SelectionMode.SINGLE);
-        Assert.assertTrue(
-                "Default SelectionMode should be "
-                        + SelectionMode.SINGLE.toString(),
-                SelectionMode.SINGLE.equals(grid.getSelectionMode())
-        );  
-        
+        Assert.assertEquals(SelectionMode.SINGLE, grid.getSelectionMode());
+
         grid.setSelectionMode(SelectionMode.MULTI);
-        Assert.assertTrue(
-                "New SelectionMode should be "
-                        + SelectionMode.MULTI.toString(),
-                SelectionMode.MULTI.equals(grid.getSelectionMode())
-        );
+        Assert.assertEquals(SelectionMode.MULTI, grid.getSelectionMode());
     }
 }
