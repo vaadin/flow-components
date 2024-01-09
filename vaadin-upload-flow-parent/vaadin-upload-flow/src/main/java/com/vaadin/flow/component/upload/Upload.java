@@ -229,13 +229,21 @@ public class Upload extends GeneratedVaadinUpload<Upload> implements HasSize {
     }
 
     /**
-     * Specify the types of files that the server accepts. Syntax: a MIME type
-     * pattern (wildcards are allowed) or file extensions. Notice that MIME
-     * types are widely supported, while file extensions are only implemented in
-     * certain browsers, so it should be avoided.
+     * Specify the types of files that the Upload web-component accepts. Syntax:
+     * a MIME type pattern (wildcards are allowed) or file extensions. Notice
+     * that MIME types are widely supported, while file extensions are only
+     * implemented in certain browsers, so it should be avoided.
      * <p>
      * Example: <code>"video/*","image/tiff"</code> or
      * <code>".pdf","audio/mp3"</code>
+     * <p>
+     * File format restrictions are checked only on the client side (browser).
+     * They indicate the hints for users as to what file types to upload. Using
+     * this method won’t restrict the uploaded file’s format on the server side.
+     * If required, it’s the responsibility of the application developer to
+     * implement application-specific restrictions on the server side in one or
+     * more of the Upload component’s event listeners (e.g., in
+     * {@link #addSucceededListener}).
      *
      * @param acceptedFileTypes
      *            the allowed file types to be uploaded, or <code>null</code> to
