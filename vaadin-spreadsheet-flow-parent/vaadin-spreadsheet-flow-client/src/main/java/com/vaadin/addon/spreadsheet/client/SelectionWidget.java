@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -217,7 +217,6 @@ public class SelectionWidget extends Composite {
                                 onPaintEvent(event);
                             }
                         }
-                        event.preventDefault();
                         event.stopPropagation();
                     }
                 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -28,9 +28,9 @@ import com.vaadin.flow.theme.AbstractTheme;
 /**
  * Material component theme class implementation.
  */
-@NpmPackage(value = "@vaadin/vaadin-themable-mixin", version = "24.4.0-alpha1")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-alpha1")
-@NpmPackage(value = "@vaadin/vaadin-material-styles", version = "24.4.0-alpha1")
+@NpmPackage(value = "@vaadin/vaadin-themable-mixin", version = "24.4.0-alpha2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-alpha2")
+@NpmPackage(value = "@vaadin/vaadin-material-styles", version = "24.4.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/vaadin-material-styles/color-global.js")
 @JsModule("@vaadin/vaadin-material-styles/typography-global.js")
