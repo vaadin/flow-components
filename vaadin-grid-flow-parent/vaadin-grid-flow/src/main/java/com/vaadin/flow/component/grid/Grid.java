@@ -2597,7 +2597,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         Objects.requireNonNull(dataProvider, "data provider cannot be null");
         if (SelectionPreservationStrategy.PRESERVE_EXISTING
                 .equals(getSelectionPreservationStrategy())
-                && dataProvider instanceof BackEndDataProvider) {
+                && !dataProvider.isInMemory()) {
             throw new UnsupportedOperationException(
                     "Lazy data providers do not support preserve existing selection strategy.");
         }
@@ -2966,7 +2966,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             SelectionPreservationStrategy selectionPreservationStrategy) {
         if (SelectionPreservationStrategy.PRESERVE_EXISTING
                 .equals(selectionPreservationStrategy)
-                && getDataProvider() instanceof BackEndDataProvider) {
+                && !getDataProvider().isInMemory()) {
             throw new UnsupportedOperationException(
                     "Lazy data providers do not support preserve existing selection strategy.");
         }
