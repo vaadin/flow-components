@@ -527,7 +527,7 @@ public class RadioButtonGroup<T>
 
     /**
      * Sets the selection preservation strategy on data change. The default is
-     * {@link SelectionPreservationStrategy#PRESERVE_EXISTENT}.
+     * {@link SelectionPreservationStrategy#PRESERVE_EXISTING}.
      *
      * @param selectionPreservationStrategy
      *            the selection preservation strategy to switch to, not
@@ -759,7 +759,7 @@ public class RadioButtonGroup<T>
 
             @Override
             @SuppressWarnings("unchecked")
-            public void onPreserveExistent(DataChangeEvent<T> dataChangeEvent) {
+            public void onPreserveExisting(DataChangeEvent<T> dataChangeEvent) {
                 T initialValue = getValue();
                 if (getDataProvider()
                         .fetch(DataViewUtils.getQuery(RadioButtonGroup.this))

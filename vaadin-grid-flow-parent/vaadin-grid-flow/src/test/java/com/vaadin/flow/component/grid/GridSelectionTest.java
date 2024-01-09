@@ -133,7 +133,7 @@ public class GridSelectionTest {
     }
 
     @Test
-    public void multiSelect_preserveExistentSelectionOnDataChange_noExtraChangeEventsFired() {
+    public void multiSelect_preserveExistingSelectionOnDataChange_noExtraChangeEventsFired() {
         Grid<String> grid = new Grid<>();
         grid.setSelectionMode(SelectionMode.MULTI);
         MultiSelect<Grid<String>, String> multiSelect = grid.asMultiSelect();
@@ -146,7 +146,7 @@ public class GridSelectionTest {
         grid.setItems(items);
 
         grid.setSelectionPreservationStrategy(
-                SelectionPreservationStrategy.PRESERVE_EXISTENT);
+                SelectionPreservationStrategy.PRESERVE_EXISTING);
 
         String selectedItem = items.get(0);
         grid.select(selectedItem);
@@ -234,7 +234,7 @@ public class GridSelectionTest {
     }
 
     @Test
-    public void singleSelect_preserveExistentSelectionOnDataChange_noExtraChangeEventsFired() {
+    public void singleSelect_preserveExistingSelectionOnDataChange_noExtraChangeEventsFired() {
         Grid<String> grid = new Grid<>();
         grid.setSelectionMode(SelectionMode.SINGLE);
         SingleSelect<Grid<String>, String> singleSelect = grid.asSingleSelect();
@@ -247,7 +247,7 @@ public class GridSelectionTest {
         grid.setItems(items);
 
         grid.setSelectionPreservationStrategy(
-                SelectionPreservationStrategy.PRESERVE_EXISTENT);
+                SelectionPreservationStrategy.PRESERVE_EXISTING);
 
         String selectedItem = items.get(0);
         grid.select(selectedItem);
@@ -308,7 +308,7 @@ public class GridSelectionTest {
     }
 
     @Test
-    public void setLazyDataProvider_setPreserveExistent_throwsUnsupportedOperationException() {
+    public void setLazyDataProvider_setPreserveExisting_throwsUnsupportedOperationException() {
         Grid<String> grid = new Grid<>();
         // Set another selection preservation strategy first
         grid.setSelectionPreservationStrategy(
@@ -316,14 +316,14 @@ public class GridSelectionTest {
         setLazyDataProvider(grid);
         Assert.assertThrows(UnsupportedOperationException.class,
                 () -> grid.setSelectionPreservationStrategy(
-                        SelectionPreservationStrategy.PRESERVE_EXISTENT));
+                        SelectionPreservationStrategy.PRESERVE_EXISTING));
     }
 
     @Test
-    public void setPreserveExistent_setLazyDataProvider_throwsUnsupportedOperationException() {
+    public void setPreserveExisting_setLazyDataProvider_throwsUnsupportedOperationException() {
         Grid<String> grid = new Grid<>();
         grid.setSelectionPreservationStrategy(
-                SelectionPreservationStrategy.PRESERVE_EXISTENT);
+                SelectionPreservationStrategy.PRESERVE_EXISTING);
         Assert.assertThrows(UnsupportedOperationException.class,
                 () -> setLazyDataProvider(grid));
     }

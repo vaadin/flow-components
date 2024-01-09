@@ -681,7 +681,7 @@ public class CheckboxGroupTest {
     }
 
     @Test
-    public void preserveExistentSelectionOnDataChange_noExtraChangeEventsFired() {
+    public void preserveExistingSelectionOnDataChange_noExtraChangeEventsFired() {
         CheckboxGroup<String> group = new CheckboxGroup<>();
         List<HasValue.ValueChangeEvent<Set<String>>> events = new ArrayList<>();
         group.addValueChangeListener(events::add);
@@ -691,7 +691,7 @@ public class CheckboxGroupTest {
         group.setItems(items);
 
         group.setSelectionPreservationStrategy(
-                SelectionPreservationStrategy.PRESERVE_EXISTENT);
+                SelectionPreservationStrategy.PRESERVE_EXISTING);
 
         String selectedItem = items.get(0);
         group.select(selectedItem);

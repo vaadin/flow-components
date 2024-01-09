@@ -1717,7 +1717,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             }
 
             @Override
-            public void onPreserveExistent(DataChangeEvent<T> dataChangeEvent) {
+            public void onPreserveExisting(DataChangeEvent<T> dataChangeEvent) {
                 Set<T> initialSelectedItems = getSelectedItems();
                 if (initialSelectedItems.isEmpty()) {
                     onDataProviderChange();
@@ -2661,11 +2661,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         Objects.requireNonNull(dataProvider, "data provider cannot be null");
-        if (SelectionPreservationStrategy.PRESERVE_EXISTENT
+        if (SelectionPreservationStrategy.PRESERVE_EXISTING
                 .equals(getSelectionPreservationStrategy())
                 && dataProvider instanceof BackEndDataProvider) {
             throw new UnsupportedOperationException(
-                    "Lazy data providers do not support preserve existent selection strategy.");
+                    "Lazy data providers do not support preserve existing selection strategy.");
         }
         handleDataProviderChange(dataProvider);
 
@@ -3020,7 +3020,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     /**
      * Sets the selection preservation strategy on data change. The default is
      * {@link SelectionPreservationStrategy#PRESERVE_ALL}. Lazy data providers
-     * do not support {@link SelectionPreservationStrategy#PRESERVE_EXISTENT}.
+     * do not support {@link SelectionPreservationStrategy#PRESERVE_EXISTING}.
      *
      * @param selectionPreservationStrategy
      *            the selection preservation strategy to switch to, not
@@ -3030,11 +3030,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public void setSelectionPreservationStrategy(
             SelectionPreservationStrategy selectionPreservationStrategy) {
-        if (SelectionPreservationStrategy.PRESERVE_EXISTENT
+        if (SelectionPreservationStrategy.PRESERVE_EXISTING
                 .equals(selectionPreservationStrategy)
                 && getDataProvider() instanceof BackEndDataProvider) {
             throw new UnsupportedOperationException(
-                    "Lazy data providers do not support preserve existent selection strategy.");
+                    "Lazy data providers do not support preserve existing selection strategy.");
         }
         selectionPreservationHandler.setSelectionPreservationStrategy(
                 selectionPreservationStrategy);

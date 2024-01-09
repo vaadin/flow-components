@@ -381,9 +381,9 @@ public class MultiSelectListBoxTest {
     }
 
     @Test
-    public void preserveExistentSelectionOnDataChange_noExtraChangeEventsFired() {
+    public void preserveExistingSelectionOnDataChange_noExtraChangeEventsFired() {
         listBox.setSelectionPreservationStrategy(
-                SelectionPreservationStrategy.PRESERVE_EXISTENT);
+                SelectionPreservationStrategy.PRESERVE_EXISTING);
 
         Item selectedItem = items.get(0);
         listBox.select(selectedItem);

@@ -522,7 +522,7 @@ public class RadioButtonGroupTest {
     }
 
     @Test
-    public void preserveExistentSelectionOnDataChange_noExtraChangeEventsFired() {
+    public void preserveExistingSelectionOnDataChange_noExtraChangeEventsFired() {
         RadioButtonGroup<String> group = new RadioButtonGroup<>();
         List<HasValue.ValueChangeEvent<String>> events = new ArrayList<>();
         group.addValueChangeListener(events::add);
@@ -532,7 +532,7 @@ public class RadioButtonGroupTest {
         group.setItems(items);
 
         group.setSelectionPreservationStrategy(
-                SelectionPreservationStrategy.PRESERVE_EXISTENT);
+                SelectionPreservationStrategy.PRESERVE_EXISTING);
 
         String selectedItem = items.get(0);
         group.setValue(selectedItem);

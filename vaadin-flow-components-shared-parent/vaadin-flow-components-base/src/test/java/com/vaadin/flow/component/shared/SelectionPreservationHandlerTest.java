@@ -42,9 +42,9 @@ public class SelectionPreservationHandlerTest {
             }
 
             @Override
-            public void onPreserveExistent(
+            public void onPreserveExisting(
                     DataChangeEvent<String> dataChangeEvent) {
-                selectionPreservationStrategy = SelectionPreservationStrategy.PRESERVE_EXISTENT;
+                selectionPreservationStrategy = SelectionPreservationStrategy.PRESERVE_EXISTING;
             }
 
             @Override
@@ -65,7 +65,7 @@ public class SelectionPreservationHandlerTest {
     @Test
     public void updateStrategy_runHandler_handlerUsesCorrectStrategy() {
         List.of(SelectionPreservationStrategy.PRESERVE_ALL,
-                SelectionPreservationStrategy.PRESERVE_EXISTENT)
+                SelectionPreservationStrategy.PRESERVE_EXISTING)
                 .forEach(strategyToSet -> {
                     selectionPreservationHandler
                             .setSelectionPreservationStrategy(strategyToSet);

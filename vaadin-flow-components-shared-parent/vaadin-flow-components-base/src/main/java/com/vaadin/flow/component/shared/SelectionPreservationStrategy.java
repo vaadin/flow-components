@@ -37,7 +37,7 @@ public enum SelectionPreservationStrategy {
      * Selection preservation strategy that only preserves the selected items
      * that still exist after data change.
      */
-    PRESERVE_EXISTENT,
+    PRESERVE_EXISTING,
 
     /**
      * Selection preservation strategy that clears selection on data change.

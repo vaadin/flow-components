@@ -81,7 +81,7 @@ public abstract class SelectionPreservationHandler<T> implements Serializable {
     public final void handleDataChange(DataChangeEvent<T> dataChangeEvent) {
         switch (selectionPreservationStrategy) {
         case PRESERVE_ALL -> onPreserveAll(dataChangeEvent);
-        case PRESERVE_EXISTENT -> onPreserveExistent(dataChangeEvent);
+        case PRESERVE_EXISTING -> onPreserveExisting(dataChangeEvent);
         case DISCARD -> onDiscard(dataChangeEvent);
         }
     }
@@ -100,7 +100,7 @@ public abstract class SelectionPreservationHandler<T> implements Serializable {
      * @param dataChangeEvent
      *            the data change event
      */
-    public abstract void onPreserveExistent(DataChangeEvent<T> dataChangeEvent);
+    public abstract void onPreserveExisting(DataChangeEvent<T> dataChangeEvent);
 
     /**
      * Clears selection on data change.
