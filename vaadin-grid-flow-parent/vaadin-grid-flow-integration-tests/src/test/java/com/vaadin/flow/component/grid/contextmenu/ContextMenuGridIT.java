@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -94,6 +94,24 @@ public class ContextMenuGridIT extends AbstractComponentIT {
         grid.getCell(14, 0).click();
         $("vaadin-context-menu-item").first().click();
         assertMessage("Person 14");
+        verifyClosed();
+    }
+
+    @Test
+    public void setOpenOnClickAndMultiSelect_clickOnRow_itemClickGetsTargetItem() {
+        $("button").id("toggle-open-on-click").click();
+        $("button").id("set-multi-select").click();
+        grid.getCell(14, 1).click();
+        $("vaadin-context-menu-item").first().click();
+        assertMessage("Person 14");
+        verifyClosed();
+    }
+
+    @Test
+    public void setOpenOnClickAndMultiSelect_clickOnSelectionColum_noContextMenuOpen() {
+        $("button").id("toggle-open-on-click").click();
+        $("button").id("set-multi-select").click();
+        grid.getCell(14, 0).click();
         verifyClosed();
     }
 
@@ -239,7 +257,7 @@ public class ContextMenuGridIT extends AbstractComponentIT {
     }
 
     private void assertMessage(String expected) {
-        Assert.assertEquals(expected, $("label").id("message").getText());
+        Assert.assertEquals(expected, $("span").id("message").getText());
     }
 
     private void openSubMenu(TestBenchElement parentItem) {
