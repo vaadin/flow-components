@@ -779,6 +779,7 @@ public class RadioButtonGroup<T>
                     ((DataChangeEvent.DataRefreshEvent<T>) dataChangeEvent)
                             .getItem());
         } else {
+            keyMapper.removeAll();
             selectionPreservationHandler.handleDataChange(dataChangeEvent);
             rebuild();
         }

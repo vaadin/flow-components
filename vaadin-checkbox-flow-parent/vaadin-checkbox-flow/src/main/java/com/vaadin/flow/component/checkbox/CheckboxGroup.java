@@ -353,6 +353,7 @@ public class CheckboxGroup<T>
                     item -> Objects.equals(getItemId(item.item), otherItemId))
                     .findFirst().ifPresent(this::updateCheckbox);
         } else {
+            keyMapper.removeAll();
             selectionPreservationHandler.handleDataChange(dataChangeEvent);
             rebuild();
         }
