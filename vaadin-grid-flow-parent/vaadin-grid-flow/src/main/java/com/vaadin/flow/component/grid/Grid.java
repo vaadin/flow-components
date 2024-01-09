@@ -2763,6 +2763,17 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
+     * Returns the selection mode for this grid.
+     *
+     * @return the selection mode, not null
+     */
+    public SelectionMode getSelectionMode() {
+        assert selectionMode != null : "No selection mode set by "
+                + getClass().getName() + " constructor";
+        return selectionMode;
+    }
+
+    /**
      * Sets the grid's selection mode.
      * <p>
      * To use your custom selection model, you can use

@@ -19,7 +19,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridMultiSelectionModel;
 import com.vaadin.flow.component.grid.GridNoneSelectionModel;
 import com.vaadin.flow.component.grid.GridSingleSelectionModel;
@@ -68,4 +67,14 @@ public class GridSelectionModeTest {
         grid.setSelectionMode(null);
     }
 
+    @Test
+    public void testGetSelectionMode() {
+        Assert.assertEquals(SelectionMode.SINGLE, grid.getSelectionMode());
+
+        grid.setSelectionMode(SelectionMode.MULTI);
+        Assert.assertEquals(SelectionMode.MULTI, grid.getSelectionMode());
+
+        grid.setSelectionMode(SelectionMode.NONE);
+        Assert.assertEquals(SelectionMode.NONE, grid.getSelectionMode());
+    }
 }
