@@ -57,6 +57,13 @@ public class GridProDetachAttachIT extends AbstractComponentIT {
         assertCellEnterEditModeOnDoubleClick(grid, 0, 1, "vaadin-text-field");
     }
 
+    @Test
+    public void attachAndDetach_noClientErrors() {
+        toggleAttachedButton.click();
+        $("button").id("attach-and-detach").click();
+        checkLogsForErrors();
+    }
+
     private void assertCellEnterEditModeOnDoubleClick(GridProElement grid,
             Integer rowIndex, Integer colIndex, String editorTag) {
         GridTHTDElement cell = grid.getCell(rowIndex, colIndex);
