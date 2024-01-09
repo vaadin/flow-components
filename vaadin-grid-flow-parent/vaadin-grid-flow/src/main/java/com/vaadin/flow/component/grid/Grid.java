@@ -102,14 +102,12 @@ import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.Rendering;
 import com.vaadin.flow.data.selection.MultiSelect;
-import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
 import com.vaadin.flow.data.selection.SelectionEvent;
 import com.vaadin.flow.data.selection.SelectionListener;
 import com.vaadin.flow.data.selection.SelectionModel;
 import com.vaadin.flow.data.selection.SelectionModel.Single;
 import com.vaadin.flow.data.selection.SingleSelect;
-import com.vaadin.flow.data.selection.SingleSelectionEvent;
 import com.vaadin.flow.data.selection.SingleSelectionListener;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
@@ -363,11 +361,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                     grid.getElement().setProperty("__deselectDisallowed",
                             !deselectAllowed);
                 }
-
-                @Override
-                boolean suppressValueChangeEvents() {
-                    return grid.suppressValueChangeEvents;
-                }
             };
             case MULTI -> new AbstractGridMultiSelectionModel<T>(grid) {
                 @SuppressWarnings("unchecked")
@@ -375,11 +368,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 protected void fireSelectionEvent(
                         SelectionEvent<Grid<T>, T> event) {
                     grid.fireEvent((ComponentEvent<Grid<?>>) event);
-                }
-
-                @Override
-                boolean suppressValueChangeEvents() {
-                    return grid.suppressValueChangeEvents;
                 }
             };
             case NONE -> new GridNoneSelectionModel<>();
@@ -1457,8 +1445,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     private SelectionPreservationHandler<T> selectionPreservationHandler;
 
-    private boolean suppressValueChangeEvents = false;
-
     /**
      * Creates a new instance, with page size of 50.
      */
@@ -1706,99 +1692,47 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
             @Override
             public void onPreserveAll(DataChangeEvent<T> dataChangeEvent) {
-                Set<T> initialSelectedItems = getSelectedItems();
-                suppressValueChangeEvents = true;
-                try {
-                    onDataProviderChange();
-                    setValue(initialSelectedItems);
-                } finally {
-                    suppressValueChangeEvents = false;
-                }
+                // NO-OP
             }
 
             @Override
             public void onPreserveExisting(DataChangeEvent<T> dataChangeEvent) {
-                Set<T> initialSelectedItems = getSelectedItems();
-                if (initialSelectedItems.isEmpty()) {
-                    onDataProviderChange();
+                Map<Object, T> deselectionCandidateIdsToItems = getSelectedItems()
+                        .stream().collect(Collectors
+                                .toMap(getDataProvider()::getId, item -> item));
+                if (deselectionCandidateIdsToItems.isEmpty()) {
                     return;
                 }
-                suppressValueChangeEvents = true;
-                try {
-                    onDataProviderChange();
-                    Set<Object> initialSelectedItemIds = initialSelectedItems
-                            .stream().map(getDataProvider()::getId)
-                            .collect(Collectors.toSet());
-                    @SuppressWarnings("unchecked")
-                    Stream<T> itemsStream = getDataProvider()
-                            .fetch(getDataCommunicator().buildQuery(0,
-                                    Integer.MAX_VALUE));
-                    Set<T> existingItems = itemsStream
-                            .filter(item -> initialSelectedItemIds
-                                    .contains(getDataProvider().getId(item)))
-                            .limit(initialSelectedItemIds.size())
-                            .collect(Collectors.toSet());
-                    setValue(existingItems);
-                } finally {
-                    suppressValueChangeEvents = false;
-                }
-                if (!valueEquals(getSelectedItems(), initialSelectedItems)) {
-                    fireSelectionEvent(initialSelectedItems);
+                @SuppressWarnings("unchecked")
+                Stream<T> itemsStream = getDataProvider().fetch(
+                        getDataCommunicator().buildQuery(0, Integer.MAX_VALUE));
+                Set<Object> existingItemIds = itemsStream
+                        .map(getDataProvider()::getId)
+                        .filter(deselectionCandidateIdsToItems::containsKey)
+                        .limit(deselectionCandidateIdsToItems.size())
+                        .collect(Collectors.toSet());
+                existingItemIds.forEach(deselectionCandidateIdsToItems::remove);
+                if (getSelectionModel() instanceof GridMultiSelectionModel) {
+                    asMultiSelect()
+                            .deselect(deselectionCandidateIdsToItems.values());
+                } else if (!deselectionCandidateIdsToItems.isEmpty()) {
+                    deselectAll();
                 }
             }
 
             @Override
             public void onDiscard(DataChangeEvent<T> dataChangeEvent) {
-                onDataProviderChange();
                 deselectAll();
             }
         };
     }
 
-    private void setValue(Set<T> items) {
-        if (getSelectionModel() instanceof GridMultiSelectionModel) {
-            asMultiSelect().setValue(items);
-        } else if (getSelectionModel() instanceof GridSingleSelectionModel) {
-            if (items.isEmpty()) {
-                deselectAll();
-            } else {
-                select(items.iterator().next());
-            }
-        }
-    }
-
-    private void fireSelectionEvent(Set<T> oldSelection) {
-        if (getSelectionModel() instanceof GridMultiSelectionModel) {
-            ((AbstractGridMultiSelectionModel<T>) getSelectionModel())
-                    .fireSelectionEvent(new MultiSelectionEvent<>(this,
-                            asMultiSelect(), oldSelection, false));
-        } else if (getSelectionModel() instanceof GridSingleSelectionModel) {
-            ((AbstractGridSingleSelectionModel<T>) getSelectionModel())
-                    .fireSelectionEvent(
-                            new SingleSelectionEvent<>(this, asSingleSelect(),
-                                    oldSelection.iterator().next(), false));
-        }
-    }
-
     private void handleDataChange(DataChangeEvent<T> dataChangeEvent) {
-        if (dataChangeEvent instanceof DataChangeEvent.DataRefreshEvent
-                || getSelectionModel() instanceof GridNoneSelectionModel) {
-            onDataProviderChange();
-            return;
+        onDataProviderChange();
+        if (!(dataChangeEvent instanceof DataChangeEvent.DataRefreshEvent)
+                && !(getSelectionModel() instanceof GridNoneSelectionModel)) {
+            selectionPreservationHandler.handleDataChange(dataChangeEvent);
         }
-        selectionPreservationHandler.handleDataChange(dataChangeEvent);
-    }
-
-    private boolean valueEquals(Set<T> value1, Set<T> value2) {
-        assert value1 != null && value2 != null;
-        if (value1.size() != value2.size()) {
-            return false;
-        }
-        Set<Object> ids1 = value1.stream().map(getDataProvider()::getId)
-                .collect(Collectors.toSet());
-        Set<Object> ids2 = value2.stream().map(getDataProvider()::getId)
-                .collect(Collectors.toSet());
-        return ids1.equals(ids2);
     }
 
     protected void initConnector() {

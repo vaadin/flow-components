@@ -17,6 +17,7 @@ package com.vaadin.flow.component.listbox;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -69,30 +70,29 @@ public class MultiSelectListBox<T>
 
             @Override
             public void onPreserveAll(DataChangeEvent<T> dataChangeEvent) {
-                rebuild();
+                // NO-OP
             }
 
             @Override
             public void onPreserveExisting(DataChangeEvent<T> dataChangeEvent) {
-                Set<Object> initialSelectedItemIds = getSelectedItems().stream()
-                        .map(getDataProvider()::getId)
-                        .collect(Collectors.toSet());
+                Map<Object, T> deselectionCandidateIdsToItems = getSelectedItems()
+                        .stream().collect(Collectors
+                                .toMap(item -> getItemId(item), item -> item));
                 @SuppressWarnings("unchecked")
                 Stream<T> itemsStream = getDataProvider()
                         .fetch(DataViewUtils.getQuery(MultiSelectListBox.this));
-                Set<T> existingItems = itemsStream
-                        .filter(item -> initialSelectedItemIds
-                                .contains(getDataProvider().getId(item)))
-                        .limit(initialSelectedItemIds.size())
+                Set<Object> existingItemIds = itemsStream
+                        .map(item -> getItemId(item))
+                        .filter(deselectionCandidateIdsToItems::containsKey)
+                        .limit(deselectionCandidateIdsToItems.size())
                         .collect(Collectors.toSet());
-                setValue(existingItems);
-                rebuild();
+                existingItemIds.forEach(deselectionCandidateIdsToItems::remove);
+                deselect(deselectionCandidateIdsToItems.values());
             }
 
             @Override
             public void onDiscard(DataChangeEvent<T> dataChangeEvent) {
                 clear();
-                rebuild();
             }
         };
     }
@@ -207,9 +207,10 @@ public class MultiSelectListBox<T>
     void handleDataChange(DataChangeEvent<T> dataChangeEvent) {
         if (dataChangeEvent instanceof DataChangeEvent.DataRefreshEvent) {
             super.handleDataChange(dataChangeEvent);
-            return;
+        } else {
+            selectionPreservationHandler.handleDataChange(dataChangeEvent);
+            rebuild();
         }
-        selectionPreservationHandler.handleDataChange(dataChangeEvent);
     }
 
     /**

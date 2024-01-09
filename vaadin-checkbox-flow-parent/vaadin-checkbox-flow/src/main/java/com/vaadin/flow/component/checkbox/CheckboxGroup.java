@@ -18,6 +18,7 @@ package com.vaadin.flow.component.checkbox;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -316,29 +317,29 @@ public class CheckboxGroup<T>
 
             @Override
             public void onPreserveAll(DataChangeEvent<T> dataChangeEvent) {
-                rebuild();
+                // NO-OP
             }
 
             @Override
             public void onPreserveExisting(DataChangeEvent<T> dataChangeEvent) {
-                Set<Object> initialSelectedItemIds = getValue().stream()
-                        .map(item -> getItemId(item))
-                        .collect(Collectors.toSet());
+                Map<Object, T> deselectionCandidateIdsToItems = getSelectedItems()
+                        .stream().collect(Collectors
+                                .toMap(item -> getItemId(item), item -> item));
                 @SuppressWarnings("unchecked")
                 Stream<T> itemsStream = getDataProvider()
                         .fetch(DataViewUtils.getQuery(CheckboxGroup.this));
-                Set<T> existingValueSet = itemsStream
-                        .filter(item -> initialSelectedItemIds
-                                .contains(getItemId(item)))
-                        .limit(initialSelectedItemIds.size())
+                Set<Object> existingItemIds = itemsStream
+                        .map(item -> getItemId(item))
+                        .filter(deselectionCandidateIdsToItems::containsKey)
+                        .limit(deselectionCandidateIdsToItems.size())
                         .collect(Collectors.toSet());
-                setValue(existingValueSet);
-                rebuild();
+                existingItemIds.forEach(deselectionCandidateIdsToItems::remove);
+                deselect(deselectionCandidateIdsToItems.values());
             }
 
             @Override
             public void onDiscard(DataChangeEvent<T> dataChangeEvent) {
-                reset();
+                clear();
             }
         };
     }
@@ -353,6 +354,7 @@ public class CheckboxGroup<T>
                     .findFirst().ifPresent(this::updateCheckbox);
         } else {
             selectionPreservationHandler.handleDataChange(dataChangeEvent);
+            rebuild();
         }
     }
 
@@ -385,7 +387,9 @@ public class CheckboxGroup<T>
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         this.dataProvider.set(dataProvider);
         DataViewUtils.removeComponentFilterAndSortComparator(this);
-        reset();
+        keyMapper.removeAll();
+        clear();
+        rebuild();
 
         if (dataProviderListenerRegistration != null) {
             dataProviderListenerRegistration.remove();
@@ -702,12 +706,6 @@ public class CheckboxGroup<T>
      */
     public SelectionPreservationStrategy getSelectionPreservationStrategy() {
         return selectionPreservationHandler.getSelectionPreservationStrategy();
-    }
-
-    private void reset() {
-        keyMapper.removeAll();
-        clear();
-        rebuild();
     }
 
     @SuppressWarnings("unchecked")
