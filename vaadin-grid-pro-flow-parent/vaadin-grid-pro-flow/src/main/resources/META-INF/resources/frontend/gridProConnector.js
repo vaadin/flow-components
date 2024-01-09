@@ -26,6 +26,9 @@
     },
     setEditModeRenderer: (column, component) =>
       tryCatchWrapper(function (column, component) {
+        if (!column || !component) {
+            return;
+        }
         column.editModeRenderer = tryCatchWrapper(function editModeRenderer(root, _, rowData) {
           if (!isEditedRow(this._grid, rowData)) {
             this._grid._stopEdit();
