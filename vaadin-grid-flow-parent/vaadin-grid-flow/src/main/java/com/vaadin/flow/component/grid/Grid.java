@@ -4477,6 +4477,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * function fails cleanly with {@link IllegalArgumentException} without
      * doing any work.
      *
+     * @see #setColumnOrder(List)
      * @param columns
      *            the new ordering of the columns, not {@code null}.
      * @throws NullPointerException
