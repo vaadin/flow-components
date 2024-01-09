@@ -1,6 +1,6 @@
 import './env-setup.js';
 import '@vaadin/grid/all-imports.js';
-import '../frontend/generated/jar-resources/gridConnector.js';
+import '../frontend/generated/jar-resources/gridConnector.ts';
 import '../frontend/generated/jar-resources/vaadin-grid-flow-selection-column.js';
 // For some reason vaadin-grid-flow-selection-column doesn't import vaadin-checkbox
 import '@vaadin/checkbox';

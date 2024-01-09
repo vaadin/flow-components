@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
 import { timeOut, animationFrame } from '@polymer/polymer/lib/utils/async.js';
 import { Grid } from '@vaadin/grid/src/vaadin-grid.js';
@@ -102,14 +103,14 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
 
         grid.$connector = {};
 
-        grid.$connector.hasCacheForParentKey = tryCatchWrapper((parentKey) => cache[parentKey] !== undefined && cache[parentKey].size !== undefined);
+        grid.$connector.hasCacheForParentKey = tryCatchWrapper((parentKey) => cache[parentKey]?.size !== undefined);
 
         grid.$connector.hasEnsureSubCacheQueue = tryCatchWrapper(() => ensureSubCacheQueue.length > 0);
 
         grid.$connector.hasParentRequestQueue = tryCatchWrapper(() => parentRequestQueue.length > 0);
 
         grid.$connector.hasRootRequestQueue = tryCatchWrapper(() => {
-          return Object.keys(rootPageCallbacks).length > 0 || (!!rootRequestDebouncer && rootRequestDebouncer.isActive());
+          return Object.keys(rootPageCallbacks).length > 0 || !!rootRequestDebouncer?.isActive();
         });
 
         grid.$connector.beforeEnsureSubCacheForScaledIndex = tryCatchWrapper(function (targetCache, scaledIndex) {
@@ -165,7 +166,7 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
             const itemToDeselect = items.shift();
             for (let i = 0; i < updatedSelectedItems.length; i++) {
               const selectedItem = updatedSelectedItems[i];
-              if (itemToDeselect && itemToDeselect.key === selectedItem.key) {
+              if (itemToDeselect?.key === selectedItem.key) {
                 updatedSelectedItems.splice(i, 1);
                 break;
               }
@@ -331,7 +332,7 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
             }
 
             let itemCache = grid._cache.getCacheByKey(parentUniqueKey);
-            if (cache[parentUniqueKey] && cache[parentUniqueKey][page] && itemCache) {
+            if (cache[parentUniqueKey]?.[page] && itemCache) {
               // workaround: sometimes grid-element gives page index that overflows
               page = Math.min(page, Math.floor(cache[parentUniqueKey].size / grid.pageSize));
 
@@ -364,7 +365,7 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
               return;
             }
 
-            if (cache[root] && cache[root][page]) {
+            if (cache[root]?.[page]) {
               callback(cache[root][page]);
             } else {
               rootPageCallbacks[page] = callback;
@@ -449,22 +450,18 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
           if (!row.hidden) {
             // make sure that component renderers are updated
             Array.from(row.children).forEach((cell) => {
-              if (cell._content && cell._content.__templateInstance && cell._content.__templateInstance.children) {
-                Array.from(cell._content.__templateInstance.children).forEach((content) => {
-                  if (content._attachRenderedComponentIfAble) {
-                    content._attachRenderedComponentIfAble();
-                  }
-                  // In hierarchy column of tree grid, the component renderer is inside its content,
-                  // this updates it renderer from innerContent
-                  if (content.children) {
-                    Array.from(content.children).forEach((innerContent) => {
-                      if (innerContent._attachRenderedComponentIfAble) {
-                        innerContent._attachRenderedComponentIfAble();
-                      }
-                    });
+              Array.from(cell?._content?.__templateInstance?.children || []).forEach((content) => {
+                if (content._attachRenderedComponentIfAble) {
+                  content._attachRenderedComponentIfAble();
+                }
+                // In hierarchy column of tree grid, the component renderer is inside its content,
+                // this updates it renderer from innerContent
+                Array.from(content?.children || []).forEach((innerContent) => {
+                  if (innerContent._attachRenderedComponentIfAble) {
+                    innerContent._attachRenderedComponentIfAble();
                   }
                 });
-              }
+              });
             });
           }
           // since no row can be selected when selection mode is NONE
@@ -807,7 +804,7 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
           // The treePageCallbacks for the itemId are about to be discarded ->
           // Resolve the callbacks with an empty array to not leave grid in loading state
           Object.values(treePageCallbacks[itemId] || {}).forEach((callback) => callback([]));
-          
+
           delete treePageCallbacks[itemId];
           ensureSubCacheQueue = ensureSubCacheQueue.filter((item) => item.itemkey !== itemId);
           parentRequestQueue = parentRequestQueue.filter((item) => item.parentKey !== itemId);
@@ -889,7 +886,7 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
             const lastRequestedRangeEnd = Math.min(lastRequestedRange[1], lastAvailablePage);
             // Resolve if we have data or if we don't expect to get data
             const callback = rootPageCallbacks[page];
-            if ((cache[root] && cache[root][page]) || page < lastRequestedRange[0] || +page > lastRequestedRangeEnd) {
+            if (cache[root]?.[page] || page < lastRequestedRange[0] || +page > lastRequestedRangeEnd) {
               delete rootPageCallbacks[page];
 
               if (cache[root][page]) {
@@ -1068,8 +1065,8 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
           // when using open on click we just use the click event itself
           const sourceEvent = event.detail.sourceEvent || event;
           const eventContext = grid.getEventContext(sourceEvent);
-          const key = (eventContext.item && eventContext.item.key) || '';
-          const columnId = (eventContext.column && eventContext.column.id) || '';
+          const key = eventContext.item?.key || '';
+          const columnId = eventContext.column?.id || '';
           return { key, columnId };
         });
 
