@@ -69,10 +69,12 @@ public class GridSelectionModeTest {
 
     @Test
     public void testGetSelectionMode() {
-        grid.setSelectionMode(SelectionMode.SINGLE);
         Assert.assertEquals(SelectionMode.SINGLE, grid.getSelectionMode());
 
         grid.setSelectionMode(SelectionMode.MULTI);
         Assert.assertEquals(SelectionMode.MULTI, grid.getSelectionMode());
+
+        grid.setSelectionMode(SelectionMode.NONE);
+        Assert.assertEquals(SelectionMode.NONE, grid.getSelectionMode());
     }
 }
