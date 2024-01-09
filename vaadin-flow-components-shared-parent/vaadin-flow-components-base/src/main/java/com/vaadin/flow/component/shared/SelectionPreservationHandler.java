@@ -29,7 +29,7 @@ import java.util.Objects;
  * @see SelectionPreservationStrategy
  * @author Vaadin Ltd.
  */
-public abstract class DataChangeHandler<T> implements Serializable {
+public abstract class SelectionPreservationHandler<T> implements Serializable {
 
     private SelectionPreservationStrategy selectionPreservationStrategy;
 
@@ -39,7 +39,7 @@ public abstract class DataChangeHandler<T> implements Serializable {
      * @param selectionPreservationStrategy
      *            the selection preservation strategy, not {@code null}
      */
-    public DataChangeHandler(
+    public SelectionPreservationHandler(
             SelectionPreservationStrategy selectionPreservationStrategy) {
         setSelectionPreservationStrategy(selectionPreservationStrategy);
     }

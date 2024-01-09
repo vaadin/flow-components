@@ -31,7 +31,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupDataView;
 import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupListDataView;
 import com.vaadin.flow.component.shared.ClientValidationUtil;
-import com.vaadin.flow.component.shared.DataChangeHandler;
+import com.vaadin.flow.component.shared.SelectionPreservationHandler;
 import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasValidationProperties;
@@ -107,7 +107,7 @@ public class RadioButtonGroup<T>
 
     private boolean manualValidationEnabled = false;
 
-    private DataChangeHandler<T> dataChangeHandler;
+    private SelectionPreservationHandler<T> selectionPreservationHandler;
 
     private static <T> T presentationToModel(
             RadioButtonGroup<T> radioButtonGroup, String presentation) {
@@ -138,7 +138,7 @@ public class RadioButtonGroup<T>
 
         addValueChangeListener(e -> validate());
 
-        initDataChangeHandler();
+        initSelectionPreservationHandler();
     }
 
     /**
@@ -537,7 +537,7 @@ public class RadioButtonGroup<T>
      */
     public void setSelectionPreservationStrategy(
             SelectionPreservationStrategy selectionPreservationStrategy) {
-        dataChangeHandler.setSelectionPreservationStrategy(
+        selectionPreservationHandler.setSelectionPreservationStrategy(
                 selectionPreservationStrategy);
     }
 
@@ -549,7 +549,7 @@ public class RadioButtonGroup<T>
      * @see #setSelectionPreservationStrategy(SelectionPreservationStrategy)
      */
     public SelectionPreservationStrategy getSelectionPreservationStrategy() {
-        return dataChangeHandler.getSelectionPreservationStrategy();
+        return selectionPreservationHandler.getSelectionPreservationStrategy();
     }
 
     @Override
@@ -748,8 +748,8 @@ public class RadioButtonGroup<T>
         keyMapper.setIdentifierGetter(identifierProvider);
     }
 
-    private void initDataChangeHandler() {
-        dataChangeHandler = new DataChangeHandler<>(
+    private void initSelectionPreservationHandler() {
+        selectionPreservationHandler = new SelectionPreservationHandler<>(
                 SelectionPreservationStrategy.DISCARD) {
 
             @Override
@@ -785,7 +785,7 @@ public class RadioButtonGroup<T>
                             .getItem());
             return;
         }
-        dataChangeHandler.handleDataChange(dataChangeEvent);
+        selectionPreservationHandler.handleDataChange(dataChangeEvent);
     }
 
     @Override

@@ -64,7 +64,7 @@ import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.grid.editor.EditorImpl;
 import com.vaadin.flow.component.grid.editor.EditorRenderer;
-import com.vaadin.flow.component.shared.DataChangeHandler;
+import com.vaadin.flow.component.shared.SelectionPreservationHandler;
 import com.vaadin.flow.component.shared.SelectionPreservationStrategy;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.data.binder.BeanPropertySet;
@@ -1455,7 +1455,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     private SerializableFunction<T, String> tooltipGenerator = item -> null;
 
-    private DataChangeHandler<T> dataChangeHandler;
+    private SelectionPreservationHandler<T> selectionPreservationHandler;
 
     private boolean suppressValueChangeEvents = false;
 
@@ -1688,7 +1688,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         updateMultiSortPriority(defaultMultiSortPriority);
 
-        initDataChangeHandler();
+        initSelectionPreservationHandler();
     }
 
     private void generateUniqueKeyData(T item, JsonObject jsonObject) {
@@ -1700,8 +1700,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
     }
 
-    private void initDataChangeHandler() {
-        dataChangeHandler = new DataChangeHandler<>(
+    private void initSelectionPreservationHandler() {
+        selectionPreservationHandler = new SelectionPreservationHandler<>(
                 SelectionPreservationStrategy.PRESERVE_ALL) {
 
             @Override
@@ -1786,7 +1786,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             onDataProviderChange();
             return;
         }
-        dataChangeHandler.handleDataChange(dataChangeEvent);
+        selectionPreservationHandler.handleDataChange(dataChangeEvent);
     }
 
     private boolean valueEquals(Set<T> value1, Set<T> value2) {
@@ -3036,7 +3036,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             throw new UnsupportedOperationException(
                     "Lazy data providers do not support preserve existent selection strategy.");
         }
-        dataChangeHandler.setSelectionPreservationStrategy(
+        selectionPreservationHandler.setSelectionPreservationStrategy(
                 selectionPreservationStrategy);
     }
 
@@ -3048,7 +3048,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @see #setSelectionPreservationStrategy(SelectionPreservationStrategy)
      */
     public SelectionPreservationStrategy getSelectionPreservationStrategy() {
-        return dataChangeHandler.getSelectionPreservationStrategy();
+        return selectionPreservationHandler.getSelectionPreservationStrategy();
     }
 
     void doClientSideSelection(Set<T> items) {

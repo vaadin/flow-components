@@ -24,17 +24,17 @@ import org.junit.Test;
 import java.util.List;
 
 /**
- * Tests for {@link DataChangeHandler}.
+ * Tests for {@link SelectionPreservationHandler}.
  */
-public class DataChangeHandlerTest {
+public class SelectionPreservationHandlerTest {
 
     private SelectionPreservationStrategy selectionPreservationStrategy;
 
-    private DataChangeHandler<String> dataChangeHandler;
+    private SelectionPreservationHandler<String> selectionPreservationHandler;
 
     @Before
     public void setup() {
-        dataChangeHandler = new DataChangeHandler<>(
+        selectionPreservationHandler = new SelectionPreservationHandler<>(
                 SelectionPreservationStrategy.DISCARD) {
             @Override
             public void onPreserveAll(DataChangeEvent<String> dataChangeEvent) {
@@ -56,7 +56,7 @@ public class DataChangeHandlerTest {
 
     @Test
     public void runHandler_handlerUsesDefaultStrategy() {
-        dataChangeHandler.handleDataChange(
+        selectionPreservationHandler.handleDataChange(
                 new DataChangeEvent<>(DataProvider.ofItems()));
         Assert.assertEquals(SelectionPreservationStrategy.DISCARD,
                 selectionPreservationStrategy);
@@ -67,9 +67,9 @@ public class DataChangeHandlerTest {
         List.of(SelectionPreservationStrategy.PRESERVE_ALL,
                 SelectionPreservationStrategy.PRESERVE_EXISTENT)
                 .forEach(strategyToSet -> {
-                    dataChangeHandler
+                    selectionPreservationHandler
                             .setSelectionPreservationStrategy(strategyToSet);
-                    dataChangeHandler.handleDataChange(
+                    selectionPreservationHandler.handleDataChange(
                             new DataChangeEvent<>(DataProvider.ofItems()));
                     Assert.assertEquals(strategyToSet,
                             selectionPreservationStrategy);
@@ -79,6 +79,7 @@ public class DataChangeHandlerTest {
     @Test
     public void setStrategyNull_throwsNullPointerException() {
         Assert.assertThrows(NullPointerException.class,
-                () -> dataChangeHandler.setSelectionPreservationStrategy(null));
+                () -> selectionPreservationHandler
+                        .setSelectionPreservationStrategy(null));
     }
 }

@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import com.vaadin.flow.component.shared.DataChangeHandler;
+import com.vaadin.flow.component.shared.SelectionPreservationHandler;
 import com.vaadin.flow.component.shared.SelectionPreservationStrategy;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataViewUtils;
@@ -50,7 +50,7 @@ public class MultiSelectListBox<T>
         extends ListBoxBase<MultiSelectListBox<T>, T, Set<T>>
         implements MultiSelect<MultiSelectListBox<T>, T> {
 
-    private DataChangeHandler<T> dataChangeHandler;
+    private SelectionPreservationHandler<T> selectionPreservationHandler;
 
     /**
      * Creates a new list box component with multi-selection.
@@ -60,11 +60,11 @@ public class MultiSelectListBox<T>
                 MultiSelectListBox::presentationToModel,
                 MultiSelectListBox::modelToPresentation);
         getElement().setProperty("multiple", true);
-        initDataChangeHandler();
+        initSelectionPreservationHandler();
     }
 
-    private void initDataChangeHandler() {
-        dataChangeHandler = new DataChangeHandler<>(
+    private void initSelectionPreservationHandler() {
+        selectionPreservationHandler = new SelectionPreservationHandler<>(
                 SelectionPreservationStrategy.DISCARD) {
 
             @Override
@@ -188,7 +188,7 @@ public class MultiSelectListBox<T>
      */
     public void setSelectionPreservationStrategy(
             SelectionPreservationStrategy selectionPreservationStrategy) {
-        dataChangeHandler.setSelectionPreservationStrategy(
+        selectionPreservationHandler.setSelectionPreservationStrategy(
                 selectionPreservationStrategy);
     }
 
@@ -200,7 +200,7 @@ public class MultiSelectListBox<T>
      * @see #setSelectionPreservationStrategy(SelectionPreservationStrategy)
      */
     public SelectionPreservationStrategy getSelectionPreservationStrategy() {
-        return dataChangeHandler.getSelectionPreservationStrategy();
+        return selectionPreservationHandler.getSelectionPreservationStrategy();
     }
 
     @Override
@@ -209,7 +209,7 @@ public class MultiSelectListBox<T>
             super.handleDataChange(dataChangeEvent);
             return;
         }
-        dataChangeHandler.handleDataChange(dataChangeEvent);
+        selectionPreservationHandler.handleDataChange(dataChangeEvent);
     }
 
     /**

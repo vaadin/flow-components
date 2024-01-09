@@ -41,7 +41,7 @@ import com.vaadin.flow.component.checkbox.dataview.CheckboxGroupListDataView;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.ClientValidationUtil;
-import com.vaadin.flow.component.shared.DataChangeHandler;
+import com.vaadin.flow.component.shared.SelectionPreservationHandler;
 import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasValidationProperties;
@@ -122,7 +122,7 @@ public class CheckboxGroup<T>
 
     private boolean manualValidationEnabled = false;
 
-    private DataChangeHandler<T> dataChangeHandler;
+    private SelectionPreservationHandler<T> selectionPreservationHandler;
 
     /**
      * Creates an empty checkbox group
@@ -134,7 +134,7 @@ public class CheckboxGroup<T>
 
         addValueChangeListener(e -> validate());
 
-        initDataChangeHandler();
+        initSelectionPreservationHandler();
     }
 
     /**
@@ -310,8 +310,8 @@ public class CheckboxGroup<T>
                 this::identifierProviderChanged);
     }
 
-    private void initDataChangeHandler() {
-        dataChangeHandler = new DataChangeHandler<>(
+    private void initSelectionPreservationHandler() {
+        selectionPreservationHandler = new SelectionPreservationHandler<>(
                 SelectionPreservationStrategy.DISCARD) {
 
             @Override
@@ -352,7 +352,7 @@ public class CheckboxGroup<T>
                     item -> Objects.equals(getItemId(item.item), otherItemId))
                     .findFirst().ifPresent(this::updateCheckbox);
         } else {
-            dataChangeHandler.handleDataChange(dataChangeEvent);
+            selectionPreservationHandler.handleDataChange(dataChangeEvent);
         }
     }
 
@@ -689,7 +689,7 @@ public class CheckboxGroup<T>
      */
     public void setSelectionPreservationStrategy(
             SelectionPreservationStrategy selectionPreservationStrategy) {
-        dataChangeHandler.setSelectionPreservationStrategy(
+        selectionPreservationHandler.setSelectionPreservationStrategy(
                 selectionPreservationStrategy);
     }
 
@@ -701,7 +701,7 @@ public class CheckboxGroup<T>
      * @see #setSelectionPreservationStrategy(SelectionPreservationStrategy)
      */
     public SelectionPreservationStrategy getSelectionPreservationStrategy() {
-        return dataChangeHandler.getSelectionPreservationStrategy();
+        return selectionPreservationHandler.getSelectionPreservationStrategy();
     }
 
     private void reset() {

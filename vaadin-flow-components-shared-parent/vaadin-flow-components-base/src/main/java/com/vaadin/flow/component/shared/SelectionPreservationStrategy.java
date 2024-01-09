@@ -19,10 +19,10 @@ package com.vaadin.flow.component.shared;
  * Represents selection preservation strategy on data change.
  * <p>
  * These enums should be used in
- * {@link DataChangeHandler#setSelectionPreservationStrategy(SelectionPreservationStrategy)}
+ * {@link SelectionPreservationHandler#setSelectionPreservationStrategy(SelectionPreservationStrategy)}
  * to switch between the implemented selection preservation strategies.
  *
- * @see DataChangeHandler
+ * @see SelectionPreservationHandler
  * @author Vaadin Ltd.
  */
 public enum SelectionPreservationStrategy {
