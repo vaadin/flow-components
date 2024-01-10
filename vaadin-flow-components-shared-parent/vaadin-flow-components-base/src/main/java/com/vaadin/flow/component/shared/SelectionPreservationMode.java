@@ -15,8 +15,11 @@
  */
 package com.vaadin.flow.component.shared;
 
+import com.vaadin.flow.data.provider.DataProvider;
+
 /**
- * Represents selection preservation mode on data change.
+ * Represents selection preservation mode. Determines what happens with the
+ * selection when {@link DataProvider#refreshAll} is called.
  * <p>
  * These enums should be used in
  * {@link SelectionPreservationHandler#setSelectionPreservationMode(SelectionPreservationMode)}
@@ -28,19 +31,20 @@ package com.vaadin.flow.component.shared;
 public enum SelectionPreservationMode {
 
     /**
-     * Selection preservation mode that preserves all selected items on data
-     * change.
+     * Selection preservation mode that preserves all selected items when
+     * {@link DataProvider#refreshAll} is called.
      */
     PRESERVE_ALL,
 
     /**
      * Selection preservation mode that only preserves the selected items that
-     * still exist after data change.
+     * still exist after {@link DataProvider#refreshAll} is called.
      */
     PRESERVE_EXISTING,
 
     /**
-     * Selection preservation mode that clears selection on data change.
+     * Selection preservation mode that clears selection when
+     * {@link DataProvider#refreshAll} is called.
      */
     DISCARD
 }

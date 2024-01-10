@@ -28,6 +28,7 @@ import java.util.stream.Stream;
 import com.vaadin.flow.component.shared.SelectionPreservationHandler;
 import com.vaadin.flow.component.shared.SelectionPreservationMode;
 import com.vaadin.flow.data.provider.DataChangeEvent;
+import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataViewUtils;
 import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
@@ -177,7 +178,8 @@ public class MultiSelectListBox<T>
     }
 
     /**
-     * Sets the selection preservation mode on data change. The default is
+     * Sets the selection preservation mode. Determines what happens with the
+     * selection when {@link DataProvider#refreshAll} is called. The default is
      * {@link SelectionPreservationMode#DISCARD}.
      *
      * @param selectionPreservationMode
@@ -192,7 +194,7 @@ public class MultiSelectListBox<T>
     }
 
     /**
-     * Gets the selection preservation mode on data change.
+     * Gets the selection preservation mode.
      *
      * @return the selection preservation mode
      *

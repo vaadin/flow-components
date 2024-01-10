@@ -683,7 +683,8 @@ public class CheckboxGroup<T>
     }
 
     /**
-     * Sets the selection preservation mode on data change. The default is
+     * Sets the selection preservation mode. Determines what happens with the
+     * selection when {@link DataProvider#refreshAll} is called. The default is
      * {@link SelectionPreservationMode#DISCARD}.
      *
      * @param selectionPreservationMode
@@ -698,7 +699,7 @@ public class CheckboxGroup<T>
     }
 
     /**
-     * Gets the selection preservation mode on data change.
+     * Gets the selection preservation mode.
      *
      * @return the selection preservation mode
      *

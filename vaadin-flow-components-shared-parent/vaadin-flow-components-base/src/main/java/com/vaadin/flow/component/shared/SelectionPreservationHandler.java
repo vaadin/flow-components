@@ -16,12 +16,14 @@
 package com.vaadin.flow.component.shared;
 
 import com.vaadin.flow.data.provider.DataChangeEvent;
+import com.vaadin.flow.data.provider.DataProvider;
 
 import java.io.Serializable;
 import java.util.Objects;
 
 /**
- * Abstract class that handles selection on data change.
+ * Abstract class that handles selection when {@link DataProvider#refreshAll} is
+ * called.
  * <p>
  * Uses {@link SelectionPreservationMode} to switch between the selection
  * preservation modes.
@@ -45,7 +47,8 @@ public abstract class SelectionPreservationHandler<T> implements Serializable {
     }
 
     /**
-     * Sets the selection preservation mode on data change.
+     * Sets the selection preservation mode. Determines what happens with the
+     * selection when {@link DataProvider#refreshAll} is called.
      *
      * @param selectionPreservationMode
      *            the selection preservation mode to switch to, not {@code null}
@@ -60,7 +63,7 @@ public abstract class SelectionPreservationHandler<T> implements Serializable {
     }
 
     /**
-     * Gets the selection preservation mode on data change.
+     * Gets the selection preservation mode.
      *
      * @return the selection preservation mode
      *
@@ -86,7 +89,8 @@ public abstract class SelectionPreservationHandler<T> implements Serializable {
     }
 
     /**
-     * Preserves all selected items on data change.
+     * Preserves all selected items when {@link DataProvider#refreshAll} is
+     * called.
      *
      * @param dataChangeEvent
      *            the data change event
@@ -94,7 +98,8 @@ public abstract class SelectionPreservationHandler<T> implements Serializable {
     public abstract void onPreserveAll(DataChangeEvent<T> dataChangeEvent);
 
     /**
-     * Preserves the selected items that still exist after data change.
+     * Preserves the selected items that still exist after
+     * {@link DataProvider#refreshAll} is called.
      *
      * @param dataChangeEvent
      *            the data change event
@@ -102,7 +107,7 @@ public abstract class SelectionPreservationHandler<T> implements Serializable {
     public abstract void onPreserveExisting(DataChangeEvent<T> dataChangeEvent);
 
     /**
-     * Clears selection on data change.
+     * Clears selection when {@link DataProvider#refreshAll} is called.
      *
      * @param dataChangeEvent
      *            the data change event
