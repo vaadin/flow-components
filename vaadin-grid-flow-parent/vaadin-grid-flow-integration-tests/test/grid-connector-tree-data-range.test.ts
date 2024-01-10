@@ -1,38 +1,53 @@
 import { aTimeout, expect, fixtureSync, nextFrame } from '@open-wc/testing';
 import {
   init,
-  GRID_CONNECTOR_ROOT_REQUEST_DELAY,
   setRootItems,
   expandItems,
   GRID_CONNECTOR_PARENT_REQUEST_DELAY
 } from './shared.js';
 import type { FlowGrid, Item } from './shared.js';
 
-const SIZE = 200;
+const CHILD_SIZE = 200;
 const PAGE_SIZE = 50;
 
 describe('grid connector - tree data range', () => {
   let grid: FlowGrid;
-  let lastRangeMap: Map<string, [number, number]>;
+  let lastRequestedRangeMap: Map<string, [number, number]>;
 
-  function setChildItemsRange(parentItem: Item, size: number, start: number, count: number) {
-    const items = Array.from({ length: size }, (_, i) => {
-      return { key: `${i}`, name: `${parentItem.name}-${i}` };
+  const rootItems = [
+    { key: 'Item-0', name: 'Item-0' },
+    { key: 'Item-1', name: 'Item-1' },
+  ];
+
+  function setChildItemsRange(parentKey: string, start: number, count: number) {
+    const items = Array.from({ length: CHILD_SIZE }, (_, i) => {
+      return { key: `${parentKey}-${i}`, name: `${parentKey}-${i}` };
     });
 
-    const lastRange = lastRangeMap.has(parentItem.key);
-    if (lastRange) {
-      grid.$connector.clear(lastRange[0], lastRange[1], parentItem.key);
+    const lastRequestedRange = lastRequestedRangeMap.get(parentKey);
+    if (lastRequestedRange) {
+      grid.$connector.clear(lastRequestedRange[0], lastRequestedRange[1], parentKey);
     }
 
-    grid.$connector.set(start, items.slice(start, start + count), parentItem.key);
-    grid.$connector.confirmParent(-1, parentItem.key, size);
+    grid.$connector.set(start, items.slice(start, start + count), parentKey);
+    grid.$connector.confirmParent(-1, parentKey, CHILD_SIZE);
+    lastRequestedRangeMap.set(parentKey, [start, count]);
+  }
 
-    lastRangeMap.set(parentItem.key, [start, count]);
+  function processParentRequestedRanges() {
+    grid.$server.setParentRequestedRanges.args[0][0].forEach(
+      ({ parentKey, firstIndex, size }) => setChildItemsRange(parentKey, firstIndex, size)
+    );
+    grid.$server.setParentRequestedRanges.resetHistory();
+  }
+
+  function expectParentRequestedRanges(ranges: Parameters<typeof grid.$server.setParentRequestedRanges>[0]) {
+    expect(grid.$server.setParentRequestedRanges).to.be.calledOnce;
+    expect(grid.$server.setParentRequestedRanges.args[0][0]).to.eql(ranges);
   }
 
   beforeEach(async () => {
-    lastRangeMap = new Map();
+    lastRequestedRangeMap = new Map();
 
     grid = fixtureSync(`
       <vaadin-grid>
@@ -44,109 +59,91 @@ describe('grid connector - tree data range', () => {
     init(grid);
     await nextFrame();
 
-    setRootItems(grid.$connector, [
-      { key: '0', name: 'Item 0' },
-      { key: '1', name: 'Item 1' },
+    setRootItems(grid.$connector, rootItems);
+    expandItems(grid.$connector, [rootItems[0]]);
+
+    await nextFrame();
+    await aTimeout(GRID_CONNECTOR_PARENT_REQUEST_DELAY);
+    expectParentRequestedRanges([
+      { parentKey: rootItems[0].key, firstIndex: 0, size: PAGE_SIZE }
     ]);
-    expandItems(grid.$connector, [
-      { key: '0', name: 'Item 0' },
-      { key: '1', name: 'Item 1' }
+    processParentRequestedRanges();
+  });
+
+  it('should request correct data range when scrolling gradually (start <-> end)', async () => {
+    grid.scrollToIndex(0, CHILD_SIZE - 1);
+    await aTimeout(GRID_CONNECTOR_PARENT_REQUEST_DELAY);
+    expectParentRequestedRanges([
+      { parentKey: rootItems[0].key, firstIndex: CHILD_SIZE - PAGE_SIZE, size: PAGE_SIZE }
     ]);
 
+    processParentRequestedRanges();
+
+    grid.scrollToIndex(0, 0);
     await aTimeout(GRID_CONNECTOR_PARENT_REQUEST_DELAY);
-    expect(grid.$server.setParentRequestedRanges).to.be.calledOnce;
-    expect(grid.$server.setParentRequestedRanges.args[0]).to.eql([
-      { start: 0, size: PAGE_SIZE, parentKey: '0' },
-      { start: 0, size: PAGE_SIZE, parentKey: '1' }
+    expectParentRequestedRanges([
+      { parentKey: rootItems[0].key, firstIndex: 0, size: PAGE_SIZE }
     ]);
   });
 
-  // it('should request correct data range when scrolling to end', async () => {
-  //   grid.scrollToIndex(SIZE - 1);
-  //   await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-  //   expect(grid.$server.setRequestedRange).to.be.calledOnce;
-  //   expect(grid.$server.setRequestedRange.args[0]).to.eql([SIZE - PAGE_SIZE, PAGE_SIZE * 2]);
-  // });
+  it('should request correct data range when scrolling gradually (start -> middle -> end)', async () => {
+    grid.scrollToIndex(0, CHILD_SIZE / 2);
+    await aTimeout(GRID_CONNECTOR_PARENT_REQUEST_DELAY);
+    expectParentRequestedRanges([
+      { parentKey: rootItems[0].key, firstIndex: CHILD_SIZE / 2 - PAGE_SIZE, size: PAGE_SIZE * 2 }
+    ]);
 
-  // it('should request correct data range when size decreases after scrolling to end', async () => {
-  //   const newSize = SIZE / 2;
-  //   grid.scrollToIndex(SIZE - 1);
-  //   grid.$connector.updateSize(newSize);
-  //   await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-  //   expect(grid.$server.setRequestedRange).to.be.calledOnce;
-  //   expect(grid.$server.setRequestedRange.args[0]).to.eql([newSize - PAGE_SIZE, PAGE_SIZE * 2]);
-  // });
+    processParentRequestedRanges();
 
-  // it('should request correct data range when scrolling from end to start', async () => {
-  //   grid.scrollToIndex(SIZE - 1);
-  //   await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-  //   setItemsRange(SIZE - PAGE_SIZE, PAGE_SIZE * 2);
-  //   grid.$server.setRequestedRange.resetHistory();
+    grid.scrollToIndex(0, CHILD_SIZE);
+    await aTimeout(GRID_CONNECTOR_PARENT_REQUEST_DELAY);
+    expectParentRequestedRanges([
+      { parentKey: rootItems[0].key, firstIndex: CHILD_SIZE - PAGE_SIZE, size: PAGE_SIZE }
+    ]);
+  });
 
-  //   grid.scrollToIndex(0);
-  //   await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-  //   expect(grid.$server.setRequestedRange).to.be.calledOnce;
-  //   expect(grid.$server.setRequestedRange.args[0]).to.eql([0, PAGE_SIZE]);
-  // });
+  it('should request correct data range when scrolling gradually (end -> middle -> start)', async () => {
+    grid.scrollToIndex(0, CHILD_SIZE - 1);
+    await aTimeout(GRID_CONNECTOR_PARENT_REQUEST_DELAY);
+    processParentRequestedRanges();
 
-  // it('should request correct data ranges when gradually scrolling to end', async () => {
-  //   for (let i = PAGE_SIZE; i < SIZE; i += PAGE_SIZE) {
-  //     grid.scrollToIndex(i - 1);
-  //     await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-  //     expect(grid.$server.setRequestedRange).to.be.calledOnce;
-  //     expect(grid.$server.setRequestedRange.args[0]).to.eql([i - PAGE_SIZE, PAGE_SIZE * 2]);
-  //     grid.$server.setRequestedRange.resetHistory();
-  //   }
-  // });
+    grid.scrollToIndex(0, CHILD_SIZE / 2);
+    await aTimeout(GRID_CONNECTOR_PARENT_REQUEST_DELAY);
+    expectParentRequestedRanges([
+      { parentKey: rootItems[0].key, firstIndex: CHILD_SIZE / 2 - PAGE_SIZE, size: PAGE_SIZE * 2 }
+    ]);
 
-  // it('should request correct data ranges when gradually scrolling from end to start', async () => {
-  //   grid.scrollToIndex(SIZE - 1);
-  //   await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-  //   setItemsRange(SIZE - PAGE_SIZE, PAGE_SIZE);
-  //   grid.$server.setRequestedRange.resetHistory();
+    processParentRequestedRanges();
 
-  //   for (let i = SIZE - PAGE_SIZE; i > 0; i -= PAGE_SIZE) {
-  //     grid.scrollToIndex(i - 1);
-  //     await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-  //     expect(grid.$server.setRequestedRange).to.be.calledOnce;
-  //     expect(grid.$server.setRequestedRange.args[0]).to.eql([i - PAGE_SIZE, PAGE_SIZE * 2]);
-  //     grid.$server.setRequestedRange.resetHistory();
-  //   }
-  // });
+    grid.scrollToIndex(0, 0);
+    await aTimeout(GRID_CONNECTOR_PARENT_REQUEST_DELAY);
+    expectParentRequestedRanges([
+      { parentKey: rootItems[0].key, firstIndex: 0, size: PAGE_SIZE }
+    ]);
+  });
 
-  // it('should debounce data range requests when scrolling', async () => {
-  //   grid.scrollToIndex(SIZE / 2);
-  //   grid.scrollToIndex(SIZE - 1);
-  //   await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-  //   expect(grid.$server.setRequestedRange).to.be.calledOnce;
-  //   expect(grid.$server.setRequestedRange.args[0]).to.eql([SIZE - PAGE_SIZE, PAGE_SIZE * 2]);
-  // });
+  it('should debounce data range requests when scrolling', async () => {
+    grid.scrollToIndex(0, CHILD_SIZE / 2);
+    grid.scrollToIndex(0, CHILD_SIZE - 1);
+    await aTimeout(GRID_CONNECTOR_PARENT_REQUEST_DELAY);
+    expectParentRequestedRanges([
+      { parentKey: rootItems[0].key, firstIndex: CHILD_SIZE - PAGE_SIZE, size: PAGE_SIZE }
+    ]);
+  });
 
-  // describe('scrolling to end and immediately back to start', () => {
-  //   beforeEach(() => {
-  //     grid.scrollToIndex(SIZE - 1);
-  //     grid.scrollToIndex(0);
-  //   });
+  it('should request correct data ranges when scrolling instantly (start <-> end)', async () => {
+    grid.scrollToIndex(0, CHILD_SIZE - 1);
+    grid.scrollToIndex(0, 0);
+    await aTimeout(GRID_CONNECTOR_PARENT_REQUEST_DELAY);
+    expectParentRequestedRanges([
+      { parentKey: rootItems[0].key, firstIndex: CHILD_SIZE - PAGE_SIZE, size: PAGE_SIZE }
+    ]);
 
-  //   it('should request data range first for end and then for start', async () => {
-  //     await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-  //     expect(grid.$server.setRequestedRange).to.be.calledOnce;
-  //     expect(grid.$server.setRequestedRange.args[0]).to.eql([SIZE - PAGE_SIZE, PAGE_SIZE]);
+    processParentRequestedRanges();
 
-  //     grid.$server.setRequestedRange.resetHistory();
-
-  //     setItemsRange(SIZE - PAGE_SIZE, PAGE_SIZE);
-  //     await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-  //     expect(grid.$server.setRequestedRange).to.be.calledOnce;
-  //     expect(grid.$server.setRequestedRange.args[0]).to.eql([0, PAGE_SIZE]);
-  //   });
-
-  //   it('should request correct data range when size decreases after scrolling', async () => {
-  //     const newSize = SIZE / 2;
-  //     grid.$connector.updateSize(newSize);
-  //     await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-  //     expect(grid.$server.setRequestedRange).to.be.calledOnce;
-  //     expect(grid.$server.setRequestedRange.args[0]).to.eql([newSize - PAGE_SIZE, PAGE_SIZE]);
-  //   });
-  // });
+    await aTimeout(GRID_CONNECTOR_PARENT_REQUEST_DELAY);
+    expectParentRequestedRanges([
+      { parentKey: rootItems[0].key, firstIndex: 0, size: PAGE_SIZE }
+    ]);
+  });
 });
