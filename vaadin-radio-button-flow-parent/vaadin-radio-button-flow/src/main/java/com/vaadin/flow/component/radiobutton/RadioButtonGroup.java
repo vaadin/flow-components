@@ -530,7 +530,7 @@ public class RadioButtonGroup<T>
 
     /**
      * Sets the selection preservation mode on data change. The default is
-     * {@link SelectionPreservationMode#PRESERVE_EXISTING}.
+     * {@link SelectionPreservationMode#DISCARD}.
      *
      * @param selectionPreservationMode
      *            the selection preservation mode to switch to, not {@code null}
