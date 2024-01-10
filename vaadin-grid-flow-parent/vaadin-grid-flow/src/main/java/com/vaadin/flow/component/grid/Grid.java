@@ -65,7 +65,7 @@ import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.grid.editor.EditorImpl;
 import com.vaadin.flow.component.grid.editor.EditorRenderer;
 import com.vaadin.flow.component.shared.SelectionPreservationHandler;
-import com.vaadin.flow.component.shared.SelectionPreservationStrategy;
+import com.vaadin.flow.component.shared.SelectionPreservationMode;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.data.binder.BeanPropertySet;
 import com.vaadin.flow.data.binder.Binder;
@@ -1688,7 +1688,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     private void initSelectionPreservationHandler() {
         selectionPreservationHandler = new SelectionPreservationHandler<>(
-                SelectionPreservationStrategy.PRESERVE_ALL) {
+                SelectionPreservationMode.PRESERVE_ALL) {
 
             @Override
             public void onPreserveAll(DataChangeEvent<T> dataChangeEvent) {
@@ -2595,11 +2595,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         Objects.requireNonNull(dataProvider, "data provider cannot be null");
-        if (SelectionPreservationStrategy.PRESERVE_EXISTING
-                .equals(getSelectionPreservationStrategy())
-                && !dataProvider.isInMemory()) {
+        if (SelectionPreservationMode.PRESERVE_EXISTING.equals(
+                getSelectionPreservationMode()) && !dataProvider.isInMemory()) {
             throw new UnsupportedOperationException(
-                    "Lazy data providers do not support preserve existing selection strategy.");
+                    "Lazy data providers do not support preserve existing selection mode.");
         }
         handleDataProviderChange(dataProvider);
 
@@ -2952,37 +2951,35 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
-     * Sets the selection preservation strategy on data change. The default is
-     * {@link SelectionPreservationStrategy#PRESERVE_ALL}. Lazy data providers
-     * do not support {@link SelectionPreservationStrategy#PRESERVE_EXISTING}.
+     * Sets the selection preservation mode on data change. The default is
+     * {@link SelectionPreservationMode#PRESERVE_ALL}. Lazy data providers do
+     * not support {@link SelectionPreservationMode#PRESERVE_EXISTING}.
      *
-     * @param selectionPreservationStrategy
-     *            the selection preservation strategy to switch to, not
-     *            {@code null}
+     * @param selectionPreservationMode
+     *            the selection preservation mode to switch to, not {@code null}
      *
-     * @see SelectionPreservationStrategy
+     * @see SelectionPreservationMode
      */
-    public void setSelectionPreservationStrategy(
-            SelectionPreservationStrategy selectionPreservationStrategy) {
-        if (SelectionPreservationStrategy.PRESERVE_EXISTING
-                .equals(selectionPreservationStrategy)
-                && !getDataProvider().isInMemory()) {
+    public void setSelectionPreservationMode(
+            SelectionPreservationMode selectionPreservationMode) {
+        if (SelectionPreservationMode.PRESERVE_EXISTING.equals(
+                selectionPreservationMode) && !getDataProvider().isInMemory()) {
             throw new UnsupportedOperationException(
-                    "Lazy data providers do not support preserve existing selection strategy.");
+                    "Lazy data providers do not support preserve existing selection mode.");
         }
-        selectionPreservationHandler.setSelectionPreservationStrategy(
-                selectionPreservationStrategy);
+        selectionPreservationHandler
+                .setSelectionPreservationMode(selectionPreservationMode);
     }
 
     /**
-     * Gets the selection preservation strategy on data change.
+     * Gets the selection preservation mode on data change.
      *
-     * @return the selection preservation strategy
+     * @return the selection preservation mode
      *
-     * @see #setSelectionPreservationStrategy(SelectionPreservationStrategy)
+     * @see #setSelectionPreservationMode(SelectionPreservationMode)
      */
-    public SelectionPreservationStrategy getSelectionPreservationStrategy() {
-        return selectionPreservationHandler.getSelectionPreservationStrategy();
+    public SelectionPreservationMode getSelectionPreservationMode() {
+        return selectionPreservationHandler.getSelectionPreservationMode();
     }
 
     void doClientSideSelection(Set<T> items) {

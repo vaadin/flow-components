@@ -25,7 +25,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.HasAriaLabel;
-import com.vaadin.flow.component.shared.SelectionPreservationStrategy;
+import com.vaadin.flow.component.shared.SelectionPreservationMode;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
@@ -366,8 +366,7 @@ public class MultiSelectListBoxTest {
 
     @Test
     public void discardSelectionOnDataChange_noExtraChangeEventsFired() {
-        listBox.setSelectionPreservationStrategy(
-                SelectionPreservationStrategy.DISCARD);
+        listBox.setSelectionPreservationMode(SelectionPreservationMode.DISCARD);
 
         Item selectedItem = items.get(0);
         listBox.select(selectedItem);
@@ -382,8 +381,8 @@ public class MultiSelectListBoxTest {
 
     @Test
     public void preserveExistingSelectionOnDataChange_noExtraChangeEventsFired() {
-        listBox.setSelectionPreservationStrategy(
-                SelectionPreservationStrategy.PRESERVE_EXISTING);
+        listBox.setSelectionPreservationMode(
+                SelectionPreservationMode.PRESERVE_EXISTING);
 
         Item selectedItem = items.get(0);
         listBox.select(selectedItem);
@@ -408,8 +407,8 @@ public class MultiSelectListBoxTest {
 
     @Test
     public void preserveAllSelectionOnDataChange_noExtraChangeEventsFired() {
-        listBox.setSelectionPreservationStrategy(
-                SelectionPreservationStrategy.PRESERVE_ALL);
+        listBox.setSelectionPreservationMode(
+                SelectionPreservationMode.PRESERVE_ALL);
 
         Item selectedItem = items.get(0);
         listBox.select(selectedItem);

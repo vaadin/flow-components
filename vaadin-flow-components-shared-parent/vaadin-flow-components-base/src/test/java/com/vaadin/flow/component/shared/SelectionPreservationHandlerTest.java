@@ -28,58 +28,57 @@ import java.util.List;
  */
 public class SelectionPreservationHandlerTest {
 
-    private SelectionPreservationStrategy selectionPreservationStrategy;
+    private SelectionPreservationMode selectionPreservationMode;
 
     private SelectionPreservationHandler<String> selectionPreservationHandler;
 
     @Before
     public void setup() {
         selectionPreservationHandler = new SelectionPreservationHandler<>(
-                SelectionPreservationStrategy.DISCARD) {
+                SelectionPreservationMode.DISCARD) {
             @Override
             public void onPreserveAll(DataChangeEvent<String> dataChangeEvent) {
-                selectionPreservationStrategy = SelectionPreservationStrategy.PRESERVE_ALL;
+                selectionPreservationMode = SelectionPreservationMode.PRESERVE_ALL;
             }
 
             @Override
             public void onPreserveExisting(
                     DataChangeEvent<String> dataChangeEvent) {
-                selectionPreservationStrategy = SelectionPreservationStrategy.PRESERVE_EXISTING;
+                selectionPreservationMode = SelectionPreservationMode.PRESERVE_EXISTING;
             }
 
             @Override
             public void onDiscard(DataChangeEvent<String> dataChangeEvent) {
-                selectionPreservationStrategy = SelectionPreservationStrategy.DISCARD;
+                selectionPreservationMode = SelectionPreservationMode.DISCARD;
             }
         };
     }
 
     @Test
-    public void runHandler_handlerUsesDefaultStrategy() {
+    public void runHandler_handlerUsesDefaultMode() {
         selectionPreservationHandler.handleDataChange(
                 new DataChangeEvent<>(DataProvider.ofItems()));
-        Assert.assertEquals(SelectionPreservationStrategy.DISCARD,
-                selectionPreservationStrategy);
+        Assert.assertEquals(SelectionPreservationMode.DISCARD,
+                selectionPreservationMode);
     }
 
     @Test
-    public void updateStrategy_runHandler_handlerUsesCorrectStrategy() {
-        List.of(SelectionPreservationStrategy.PRESERVE_ALL,
-                SelectionPreservationStrategy.PRESERVE_EXISTING)
-                .forEach(strategyToSet -> {
+    public void updateMode_runHandler_handlerUsesCorrectMode() {
+        List.of(SelectionPreservationMode.PRESERVE_ALL,
+                SelectionPreservationMode.PRESERVE_EXISTING)
+                .forEach(modeToSet -> {
                     selectionPreservationHandler
-                            .setSelectionPreservationStrategy(strategyToSet);
+                            .setSelectionPreservationMode(modeToSet);
                     selectionPreservationHandler.handleDataChange(
                             new DataChangeEvent<>(DataProvider.ofItems()));
-                    Assert.assertEquals(strategyToSet,
-                            selectionPreservationStrategy);
+                    Assert.assertEquals(modeToSet, selectionPreservationMode);
                 });
     }
 
     @Test
-    public void setStrategyNull_throwsNullPointerException() {
+    public void setModeNull_throwsNullPointerException() {
         Assert.assertThrows(NullPointerException.class,
                 () -> selectionPreservationHandler
-                        .setSelectionPreservationStrategy(null));
+                        .setSelectionPreservationMode(null));
     }
 }

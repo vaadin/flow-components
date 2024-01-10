@@ -16,31 +16,31 @@
 package com.vaadin.flow.component.shared;
 
 /**
- * Represents selection preservation strategy on data change.
+ * Represents selection preservation mode on data change.
  * <p>
  * These enums should be used in
- * {@link SelectionPreservationHandler#setSelectionPreservationStrategy(SelectionPreservationStrategy)}
- * to switch between the implemented selection preservation strategies.
+ * {@link SelectionPreservationHandler#setSelectionPreservationMode(SelectionPreservationMode)}
+ * to switch between the implemented selection preservation modes.
  *
  * @see SelectionPreservationHandler
  * @author Vaadin Ltd.
  */
-public enum SelectionPreservationStrategy {
+public enum SelectionPreservationMode {
 
     /**
-     * Selection preservation strategy that preserves all selected items on data
+     * Selection preservation mode that preserves all selected items on data
      * change.
      */
     PRESERVE_ALL,
 
     /**
-     * Selection preservation strategy that only preserves the selected items
-     * that still exist after data change.
+     * Selection preservation mode that only preserves the selected items that
+     * still exist after data change.
      */
     PRESERVE_EXISTING,
 
     /**
-     * Selection preservation strategy that clears selection on data change.
+     * Selection preservation mode that clears selection on data change.
      */
     DISCARD
 }

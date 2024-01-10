@@ -47,7 +47,7 @@ import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
-import com.vaadin.flow.component.shared.SelectionPreservationStrategy;
+import com.vaadin.flow.component.shared.SelectionPreservationMode;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.binder.HasValidator;
@@ -313,7 +313,7 @@ public class CheckboxGroup<T>
 
     private void initSelectionPreservationHandler() {
         selectionPreservationHandler = new SelectionPreservationHandler<>(
-                SelectionPreservationStrategy.DISCARD) {
+                SelectionPreservationMode.DISCARD) {
 
             @Override
             public void onPreserveAll(DataChangeEvent<T> dataChangeEvent) {
@@ -683,30 +683,29 @@ public class CheckboxGroup<T>
     }
 
     /**
-     * Sets the selection preservation strategy on data change. The default is
-     * {@link SelectionPreservationStrategy#DISCARD}.
+     * Sets the selection preservation mode on data change. The default is
+     * {@link SelectionPreservationMode#DISCARD}.
      *
-     * @param selectionPreservationStrategy
-     *            the selection preservation strategy to switch to, not
-     *            {@code null}
+     * @param selectionPreservationMode
+     *            the selection preservation mode to switch to, not {@code null}
      *
-     * @see SelectionPreservationStrategy
+     * @see SelectionPreservationMode
      */
-    public void setSelectionPreservationStrategy(
-            SelectionPreservationStrategy selectionPreservationStrategy) {
-        selectionPreservationHandler.setSelectionPreservationStrategy(
-                selectionPreservationStrategy);
+    public void setSelectionPreservationMode(
+            SelectionPreservationMode selectionPreservationMode) {
+        selectionPreservationHandler
+                .setSelectionPreservationMode(selectionPreservationMode);
     }
 
     /**
-     * Gets the selection preservation strategy on data change.
+     * Gets the selection preservation mode on data change.
      *
-     * @return the selection preservation strategy
+     * @return the selection preservation mode
      *
-     * @see #setSelectionPreservationStrategy(SelectionPreservationStrategy)
+     * @see #setSelectionPreservationMode(SelectionPreservationMode)
      */
-    public SelectionPreservationStrategy getSelectionPreservationStrategy() {
-        return selectionPreservationHandler.getSelectionPreservationStrategy();
+    public SelectionPreservationMode getSelectionPreservationMode() {
+        return selectionPreservationHandler.getSelectionPreservationMode();
     }
 
     @SuppressWarnings("unchecked")

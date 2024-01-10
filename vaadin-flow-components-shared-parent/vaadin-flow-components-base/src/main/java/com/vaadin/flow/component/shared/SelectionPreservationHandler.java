@@ -23,63 +23,62 @@ import java.util.Objects;
 /**
  * Abstract class that handles selection on data change.
  * <p>
- * Uses {@link SelectionPreservationStrategy} to switch between the selection
- * preservation strategies.
+ * Uses {@link SelectionPreservationMode} to switch between the selection
+ * preservation modes.
  *
- * @see SelectionPreservationStrategy
+ * @see SelectionPreservationMode
  * @author Vaadin Ltd.
  */
 public abstract class SelectionPreservationHandler<T> implements Serializable {
 
-    private SelectionPreservationStrategy selectionPreservationStrategy;
+    private SelectionPreservationMode selectionPreservationMode;
 
     /**
-     * Constructor taking in the initial selection preservation strategy.
+     * Constructor taking in the initial selection preservation mode.
      *
-     * @param selectionPreservationStrategy
-     *            the selection preservation strategy, not {@code null}
+     * @param selectionPreservationMode
+     *            the selection preservation mode, not {@code null}
      */
     public SelectionPreservationHandler(
-            SelectionPreservationStrategy selectionPreservationStrategy) {
-        setSelectionPreservationStrategy(selectionPreservationStrategy);
+            SelectionPreservationMode selectionPreservationMode) {
+        setSelectionPreservationMode(selectionPreservationMode);
     }
 
     /**
-     * Sets the selection preservation strategy on data change.
+     * Sets the selection preservation mode on data change.
      *
-     * @param selectionPreservationStrategy
-     *            the selection preservation strategy to switch to, not
-     *            {@code null}
+     * @param selectionPreservationMode
+     *            the selection preservation mode to switch to, not {@code null}
      *
-     * @see SelectionPreservationStrategy
+     * @see SelectionPreservationMode
      */
-    public final void setSelectionPreservationStrategy(
-            SelectionPreservationStrategy selectionPreservationStrategy) {
-        Objects.requireNonNull(selectionPreservationStrategy,
-                "Selection preservation strategy cannot be null.");
-        this.selectionPreservationStrategy = selectionPreservationStrategy;
+    public final void setSelectionPreservationMode(
+            SelectionPreservationMode selectionPreservationMode) {
+        Objects.requireNonNull(selectionPreservationMode,
+                "Selection preservation mode cannot be null.");
+        this.selectionPreservationMode = selectionPreservationMode;
     }
 
     /**
-     * Gets the selection preservation strategy on data change.
+     * Gets the selection preservation mode on data change.
      *
-     * @return the selection preservation strategy
+     * @return the selection preservation mode
      *
-     * @see #setSelectionPreservationStrategy(SelectionPreservationStrategy)
+     * @see #setSelectionPreservationMode(SelectionPreservationMode)
      */
-    public final SelectionPreservationStrategy getSelectionPreservationStrategy() {
-        return selectionPreservationStrategy;
+    public final SelectionPreservationMode getSelectionPreservationMode() {
+        return selectionPreservationMode;
     }
 
     /**
-     * Handles data change based on the current selection preservation strategy.
+     * Handles data change based on the current selection preservation mode.
      *
      * @param dataChangeEvent
      *            the data change event
-     * @see #setSelectionPreservationStrategy(SelectionPreservationStrategy)
+     * @see #setSelectionPreservationMode(SelectionPreservationMode)
      */
     public final void handleDataChange(DataChangeEvent<T> dataChangeEvent) {
-        switch (selectionPreservationStrategy) {
+        switch (selectionPreservationMode) {
         case PRESERVE_ALL -> onPreserveAll(dataChangeEvent);
         case PRESERVE_EXISTING -> onPreserveExisting(dataChangeEvent);
         case DISCARD -> onDiscard(dataChangeEvent);

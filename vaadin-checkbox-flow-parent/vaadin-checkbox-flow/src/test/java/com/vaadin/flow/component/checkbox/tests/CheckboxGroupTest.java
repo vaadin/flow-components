@@ -29,7 +29,7 @@ import java.util.stream.Stream;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.shared.InputField;
-import com.vaadin.flow.component.shared.SelectionPreservationStrategy;
+import com.vaadin.flow.component.shared.SelectionPreservationMode;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import org.hamcrest.collection.IsEmptyCollection;
 import org.junit.Assert;
@@ -666,8 +666,7 @@ public class CheckboxGroupTest {
                 Arrays.asList("Item 1", "Item 2", "Item 3"));
         group.setItems(items);
 
-        group.setSelectionPreservationStrategy(
-                SelectionPreservationStrategy.DISCARD);
+        group.setSelectionPreservationMode(SelectionPreservationMode.DISCARD);
 
         String selectedItem = items.get(0);
         group.select(selectedItem);
@@ -690,8 +689,8 @@ public class CheckboxGroupTest {
                 Arrays.asList("Item 1", "Item 2", "Item 3"));
         group.setItems(items);
 
-        group.setSelectionPreservationStrategy(
-                SelectionPreservationStrategy.PRESERVE_EXISTING);
+        group.setSelectionPreservationMode(
+                SelectionPreservationMode.PRESERVE_EXISTING);
 
         String selectedItem = items.get(0);
         group.select(selectedItem);
@@ -724,8 +723,8 @@ public class CheckboxGroupTest {
                 Arrays.asList("Item 1", "Item 2", "Item 3"));
         group.setItems(items);
 
-        group.setSelectionPreservationStrategy(
-                SelectionPreservationStrategy.PRESERVE_ALL);
+        group.setSelectionPreservationMode(
+                SelectionPreservationMode.PRESERVE_ALL);
 
         String selectedItem = items.get(0);
         group.select(selectedItem);

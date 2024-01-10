@@ -26,7 +26,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.shared.SelectionPreservationHandler;
-import com.vaadin.flow.component.shared.SelectionPreservationStrategy;
+import com.vaadin.flow.component.shared.SelectionPreservationMode;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataViewUtils;
 import com.vaadin.flow.data.selection.MultiSelect;
@@ -66,7 +66,7 @@ public class MultiSelectListBox<T>
 
     private void initSelectionPreservationHandler() {
         selectionPreservationHandler = new SelectionPreservationHandler<>(
-                SelectionPreservationStrategy.DISCARD) {
+                SelectionPreservationMode.DISCARD) {
 
             @Override
             public void onPreserveAll(DataChangeEvent<T> dataChangeEvent) {
@@ -177,30 +177,29 @@ public class MultiSelectListBox<T>
     }
 
     /**
-     * Sets the selection preservation strategy on data change. The default is
-     * {@link SelectionPreservationStrategy#DISCARD}.
+     * Sets the selection preservation mode on data change. The default is
+     * {@link SelectionPreservationMode#DISCARD}.
      *
-     * @param selectionPreservationStrategy
-     *            the selection preservation strategy to switch to, not
-     *            {@code null}
+     * @param selectionPreservationMode
+     *            the selection preservation mode to switch to, not {@code null}
      *
-     * @see SelectionPreservationStrategy
+     * @see SelectionPreservationMode
      */
-    public void setSelectionPreservationStrategy(
-            SelectionPreservationStrategy selectionPreservationStrategy) {
-        selectionPreservationHandler.setSelectionPreservationStrategy(
-                selectionPreservationStrategy);
+    public void setSelectionPreservationMode(
+            SelectionPreservationMode selectionPreservationMode) {
+        selectionPreservationHandler
+                .setSelectionPreservationMode(selectionPreservationMode);
     }
 
     /**
-     * Gets the selection preservation strategy on data change.
+     * Gets the selection preservation mode on data change.
      *
-     * @return the selection preservation strategy
+     * @return the selection preservation mode
      *
-     * @see #setSelectionPreservationStrategy(SelectionPreservationStrategy)
+     * @see #setSelectionPreservationMode(SelectionPreservationMode)
      */
-    public SelectionPreservationStrategy getSelectionPreservationStrategy() {
-        return selectionPreservationHandler.getSelectionPreservationStrategy();
+    public SelectionPreservationMode getSelectionPreservationMode() {
+        return selectionPreservationHandler.getSelectionPreservationMode();
     }
 
     @Override
