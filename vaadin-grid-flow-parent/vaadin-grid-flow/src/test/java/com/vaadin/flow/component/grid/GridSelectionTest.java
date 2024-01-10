@@ -301,7 +301,7 @@ public class GridSelectionTest {
 
         items.remove(selectedItem);
         grid.getDataProvider().refreshAll();
-        Assert.assertEquals(Set.of(selectedItem´), grid.getSelectedItems());
+        Assert.assertEquals(Set.of(selectedItem), grid.getSelectedItems());
         Assert.assertTrue(events.isEmpty());
     }
 
