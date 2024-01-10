@@ -179,7 +179,8 @@ public class MultiSelectListBox<T>
 
     /**
      * Sets the selection preservation mode. Determines what happens with the
-     * selection when {@link DataProvider#refreshAll} is called. The default is
+     * selection when {@link DataProvider#refreshAll} is called. The selection
+     * is discarded in any case when a new data provider is set. The default is
      * {@link SelectionPreservationMode#DISCARD}.
      *
      * @param selectionPreservationMode

@@ -2952,7 +2952,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     /**
      * Sets the selection preservation mode. Determines what happens with the
-     * selection when {@link DataProvider#refreshAll} is called. The default is
+     * selection when {@link DataProvider#refreshAll} is called. The selection
+     * is discarded in any case when a new data provider is set. The default is
      * {@link SelectionPreservationMode#PRESERVE_ALL}. Lazy data providers do
      * not support {@link SelectionPreservationMode#PRESERVE_EXISTING}.
      *
