@@ -150,7 +150,7 @@ describe('grid connector - tree data range', () => {
     ]);
   });
 
-  it('should batch range requests from different levels when scrolling fast', async () => {
+  it('should batch range requests from different sub-levels when scrolling fast', async () => {
     grid.$connector.expandItems([rootItems[1]]);
     await nextFrame();
     grid.scrollToIndex(1);
