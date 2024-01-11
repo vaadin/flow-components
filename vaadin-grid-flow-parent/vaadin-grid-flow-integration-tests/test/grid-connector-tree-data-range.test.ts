@@ -7,12 +7,12 @@ import {
 } from './shared.js';
 import type { FlowGrid, Item } from './shared.js';
 
-const CHILD_SIZE = 200;
 const PAGE_SIZE = 50;
 
 describe('grid connector - tree data range', () => {
   let grid: FlowGrid;
   let lastRequestedRangeMap: Map<string, [number, number]>;
+  let childSize;
 
   const rootItems = [
     { key: 'Item-0', name: 'Item-0' },
@@ -20,7 +20,7 @@ describe('grid connector - tree data range', () => {
   ];
 
   function setChildItemsRange(parentKey: string, start: number, count: number) {
-    const items = Array.from({ length: CHILD_SIZE }, (_, i) => {
+    const items = Array.from({ length: childSize }, (_, i) => {
       return { key: `${parentKey}-${i}`, name: `${parentKey}-${i}` };
     });
 
@@ -30,7 +30,7 @@ describe('grid connector - tree data range', () => {
     }
 
     grid.$connector.set(start, items.slice(start, start + count), parentKey);
-    grid.$connector.confirmParent(-1, parentKey, CHILD_SIZE);
+    grid.$connector.confirmParent(-1, parentKey, childSize);
     lastRequestedRangeMap.set(parentKey, [start, count]);
   }
 
@@ -48,6 +48,8 @@ describe('grid connector - tree data range', () => {
 
   beforeEach(async () => {
     lastRequestedRangeMap = new Map();
+
+    childSize = 400;
 
     grid = fixtureSync(`
       <vaadin-grid>
@@ -71,10 +73,10 @@ describe('grid connector - tree data range', () => {
   });
 
   it('should request correct data range when scrolling gradually (start <-> end)', async () => {
-    grid.scrollToIndex(0, CHILD_SIZE - 1);
+    grid.scrollToIndex(0, childSize - 1);
     await aTimeout(GRID_CONNECTOR_PARENT_REQUEST_DELAY);
     expectParentRequestedRanges([
-      { parentKey: rootItems[0].key, firstIndex: CHILD_SIZE - PAGE_SIZE, size: PAGE_SIZE }
+      { parentKey: rootItems[0].key, firstIndex: childSize - PAGE_SIZE, size: PAGE_SIZE }
     ]);
 
     processParentRequestedRanges();
@@ -87,35 +89,52 @@ describe('grid connector - tree data range', () => {
   });
 
   it('should request correct data range when scrolling gradually (start -> middle -> end)', async () => {
-    grid.scrollToIndex(0, CHILD_SIZE / 2);
+    grid.scrollToIndex(0, childSize / 2);
     await aTimeout(GRID_CONNECTOR_PARENT_REQUEST_DELAY);
     expectParentRequestedRanges([
-      { parentKey: rootItems[0].key, firstIndex: CHILD_SIZE / 2 - PAGE_SIZE, size: PAGE_SIZE * 2 }
+      { parentKey: rootItems[0].key, firstIndex: childSize / 2 - PAGE_SIZE, size: PAGE_SIZE * 2 }
     ]);
 
     processParentRequestedRanges();
 
-    grid.scrollToIndex(0, CHILD_SIZE);
+    grid.scrollToIndex(0, childSize);
     await aTimeout(GRID_CONNECTOR_PARENT_REQUEST_DELAY);
     expectParentRequestedRanges([
-      { parentKey: rootItems[0].key, firstIndex: CHILD_SIZE - PAGE_SIZE, size: PAGE_SIZE }
+      { parentKey: rootItems[0].key, firstIndex: childSize - PAGE_SIZE, size: PAGE_SIZE }
     ]);
   });
 
   it('should request correct data range when scrolling gradually (end -> middle -> start)', async () => {
-    grid.scrollToIndex(0, CHILD_SIZE - 1);
+    grid.scrollToIndex(0, childSize - 1);
     await aTimeout(GRID_CONNECTOR_PARENT_REQUEST_DELAY);
     processParentRequestedRanges();
 
-    grid.scrollToIndex(0, CHILD_SIZE / 2);
+    grid.scrollToIndex(0, childSize / 2);
     await aTimeout(GRID_CONNECTOR_PARENT_REQUEST_DELAY);
     expectParentRequestedRanges([
-      { parentKey: rootItems[0].key, firstIndex: CHILD_SIZE / 2 - PAGE_SIZE, size: PAGE_SIZE * 2 }
+      { parentKey: rootItems[0].key, firstIndex: childSize / 2 - PAGE_SIZE, size: PAGE_SIZE * 2 }
     ]);
 
     processParentRequestedRanges();
 
     grid.scrollToIndex(0, 0);
+    await aTimeout(GRID_CONNECTOR_PARENT_REQUEST_DELAY);
+    expectParentRequestedRanges([
+      { parentKey: rootItems[0].key, firstIndex: 0, size: PAGE_SIZE }
+    ]);
+  });
+
+  it('should request correct data ranges when scrolling instantly (start <-> end)', async () => {
+    grid.scrollToIndex(0, childSize - 1);
+    grid.scrollToIndex(0, 0);
+    await aTimeout(GRID_CONNECTOR_PARENT_REQUEST_DELAY);
+    expectParentRequestedRanges([
+      { parentKey: rootItems[0].key, firstIndex: childSize - PAGE_SIZE, size: PAGE_SIZE }
+    ]);
+
+    processParentRequestedRanges();
+
+    await nextFrame();
     await aTimeout(GRID_CONNECTOR_PARENT_REQUEST_DELAY);
     expectParentRequestedRanges([
       { parentKey: rootItems[0].key, firstIndex: 0, size: PAGE_SIZE }
@@ -123,27 +142,23 @@ describe('grid connector - tree data range', () => {
   });
 
   it('should debounce data range requests when scrolling', async () => {
-    grid.scrollToIndex(0, CHILD_SIZE / 2);
-    grid.scrollToIndex(0, CHILD_SIZE - 1);
+    grid.scrollToIndex(0, childSize / 2);
+    grid.scrollToIndex(0, childSize - 1);
     await aTimeout(GRID_CONNECTOR_PARENT_REQUEST_DELAY);
     expectParentRequestedRanges([
-      { parentKey: rootItems[0].key, firstIndex: CHILD_SIZE - PAGE_SIZE, size: PAGE_SIZE }
+      { parentKey: rootItems[0].key, firstIndex: childSize - PAGE_SIZE, size: PAGE_SIZE }
     ]);
   });
 
-  it('should request correct data ranges when scrolling instantly (start <-> end)', async () => {
-    grid.scrollToIndex(0, CHILD_SIZE - 1);
-    grid.scrollToIndex(0, 0);
+  it('should batch data range requests from different levels when scrolling', async () => {
+    grid.$connector.expandItems([rootItems[1]]);
+    await nextFrame();
+    grid.scrollToIndex(1);
+    await nextFrame();
     await aTimeout(GRID_CONNECTOR_PARENT_REQUEST_DELAY);
     expectParentRequestedRanges([
-      { parentKey: rootItems[0].key, firstIndex: CHILD_SIZE - PAGE_SIZE, size: PAGE_SIZE }
-    ]);
-
-    processParentRequestedRanges();
-
-    await aTimeout(GRID_CONNECTOR_PARENT_REQUEST_DELAY);
-    expectParentRequestedRanges([
-      { parentKey: rootItems[0].key, firstIndex: 0, size: PAGE_SIZE }
+      { parentKey: rootItems[0].key, firstIndex: childSize - PAGE_SIZE, size: PAGE_SIZE },
+      { parentKey: rootItems[1].key, firstIndex: 0, size: PAGE_SIZE }
     ]);
   });
 });
