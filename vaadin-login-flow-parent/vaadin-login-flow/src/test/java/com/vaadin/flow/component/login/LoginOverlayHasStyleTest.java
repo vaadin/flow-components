@@ -112,25 +112,4 @@ public class LoginOverlayHasStyleTest {
         Assert.assertTrue(
                 overlay.getClassNames() instanceof OverlayClassListProxy);
     }
-
-    @Test
-    public void setErrorMessage_fromNullI18n() {
-        overlay = new LoginOverlay(null);
-        overlay.showErrorMessage("title", "message");
-        Assert.assertTrue(overlay.isError());
-        Assert.assertEquals("title",
-                overlay.getI18n().getErrorMessage().getTitle());
-        Assert.assertEquals("message",
-                overlay.getI18n().getErrorMessage().getMessage());
-    }
-
-    @Test
-    public void setErrorMessage_fromDefaultI18n() {
-        overlay.showErrorMessage("title", "message");
-        Assert.assertTrue(overlay.isError());
-        Assert.assertEquals("title",
-                overlay.getI18n().getErrorMessage().getTitle());
-        Assert.assertEquals("message",
-                overlay.getI18n().getErrorMessage().getMessage());
-    }
 }

@@ -164,6 +164,48 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
     }
 
     /**
+     * Returns {@link LoginI18n} set earlier via {@link #setI18n(LoginI18n)}.
+     * <p>
+     * </p>
+     * Note that a copy of the original object is returned: changes done to the
+     * copy will not be reflected back until the object is set via
+     * {@link #setI18n(LoginI18n)}.
+     *
+     * @return currently set {@link LoginI18n} or null if none was set.
+     */
+    LoginI18n getI18n() {
+        final JsonValue json = (JsonValue) getElement().getPropertyRaw("i18n");
+        if (json == null || json instanceof JsonNull) {
+            return null;
+        }
+        return JsonSerializer.toObject(LoginI18n.class, json);
+    }
+
+    /**
+     * Shows given error message and sets {@link #setError(boolean)} to true.
+     *
+     * @param title
+     *            the {@link LoginI18n.ErrorMessage#getTitle() error message
+     *            title}, may be null.
+     * @param message
+     *            the {@link LoginI18n.ErrorMessage#getMessage() error message},
+     *            may be null.
+     */
+    public void showErrorMessage(String title, String message) {
+        var loginI18n = getI18n();
+        if (loginI18n == null) {
+            loginI18n = LoginI18n.createDefault();
+        }
+        if (loginI18n.getErrorMessage() == null) {
+            loginI18n.setErrorMessage(new LoginI18n.ErrorMessage());
+        }
+        loginI18n.getErrorMessage().setTitle(title);
+        loginI18n.getErrorMessage().setMessage(message);
+        setI18n(loginI18n);
+        setError(true);
+    }
+
+    /**
      * Adds `login` event listener
      */
     public Registration addLoginListener(
@@ -223,47 +265,5 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
     @Override
     public void onEnabledStateChanged(boolean enabled) {
         getElement().setProperty(PROP_DISABLED, !enabled);
-    }
-
-    /**
-     * Returns {@link LoginI18n} set earlier via {@link #setI18n(LoginI18n)}.
-     * <p>
-     * </p>
-     * Note that a copy of the original object is returned: changes done to the
-     * copy will not be reflected back until the object is set via
-     * {@link #setI18n(LoginI18n)}.
-     *
-     * @return currently set {@link LoginI18n} or null if none was set.
-     */
-    protected LoginI18n getI18n() {
-        final JsonValue json = (JsonValue) getElement().getPropertyRaw("i18n");
-        if (json == null || json instanceof JsonNull) {
-            return null;
-        }
-        return JsonSerializer.toObject(LoginI18n.class, json);
-    }
-
-    /**
-     * Shows given error message and sets {@link #setError(boolean)} to true.
-     *
-     * @param title
-     *            the {@link LoginI18n.ErrorMessage#getTitle() error message
-     *            title}, may be null.
-     * @param message
-     *            the {@link LoginI18n.ErrorMessage#getMessage() error message},
-     *            may be null.
-     */
-    public void showErrorMessage(String title, String message) {
-        var loginI18n = getI18n();
-        if (loginI18n == null) {
-            loginI18n = LoginI18n.createDefault();
-        }
-        if (loginI18n.getErrorMessage() == null) {
-            loginI18n.setErrorMessage(new LoginI18n.ErrorMessage());
-        }
-        loginI18n.getErrorMessage().setTitle(title);
-        loginI18n.getErrorMessage().setMessage(message);
-        setI18n(loginI18n);
-        setError(true);
     }
 }

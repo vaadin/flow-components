@@ -53,6 +53,7 @@ public class LoginFormTest {
     public void showErrorMessage_fromNullI18n() {
         final LoginForm form = new LoginForm(null);
         form.showErrorMessage("title", "message");
+
         Assert.assertTrue(form.isError());
         Assert.assertEquals("title",
                 form.getI18n().getErrorMessage().getTitle());
@@ -64,10 +65,26 @@ public class LoginFormTest {
     public void showErrorMessage_fromDefaultI18n() {
         final LoginForm form = new LoginForm();
         form.showErrorMessage("title", "message");
+
         Assert.assertTrue(form.isError());
         Assert.assertEquals("title",
                 form.getI18n().getErrorMessage().getTitle());
         Assert.assertEquals("message",
                 form.getI18n().getErrorMessage().getMessage());
+    }
+
+    @Test
+    public void showErrorMessage_preservesExistingI18n() {
+        LoginI18n i18n = LoginI18n.createDefault();
+        i18n.setHeader(new LoginI18n.Header());
+        i18n.getHeader().setTitle("Custom title");
+        i18n.getForm().setUsername("Custom username");
+        final LoginForm form = new LoginForm(i18n);
+        form.showErrorMessage("title", "message");
+
+        Assert.assertEquals("Custom title",
+                form.getI18n().getHeader().getTitle());
+        Assert.assertEquals("Custom username",
+                form.getI18n().getForm().getUsername());
     }
 }
