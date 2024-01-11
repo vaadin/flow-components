@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -91,15 +91,15 @@ public class FormLayoutIT extends AbstractComponentIT {
                         .equals(info.getText()));
 
         // Fill form: there shouldn't be an error
-        setValue("binder-first-name", "foo");
-        setValue("binder-last-name", "bar");
-        setValue("binder-phone", "123-456-789");
-        setValue("binder-email", "example@foo.bar");
+        $("vaadin-text-field").id("binder-first-name").sendKeys("foo");
+        $("vaadin-text-field").id("binder-last-name").sendKeys("bar");
+        $("vaadin-text-field").id("binder-phone").sendKeys("123-456-789");
+        $("vaadin-text-field").id("binder-email").sendKeys("example@foo.bar");
         setValue("binder-birth-date", "2003-01-02");
         setChecked("binder-do-not-call", true);
         forceClick(save);
 
-        // waitUntil(driver -> info.getText().startsWith("Saved bean values"));
+        waitUntil(driver -> info.getText().startsWith("Saved bean values"));
 
         Assert.assertTrue(info.getText().contains("foo bar"));
         Assert.assertTrue(info.getText()
@@ -108,7 +108,8 @@ public class FormLayoutIT extends AbstractComponentIT {
         Assert.assertTrue(info.getText().contains(", born on 2003-01-02"));
 
         // Make email address incorrect
-        setValue("binder-email", "abc");
+        setValue("binder-email", "");
+        $("vaadin-text-field").id("binder-email").sendKeys("abc");
         forceClick(save);
 
         waitUntil(driver -> info.getText().startsWith("There are errors"));

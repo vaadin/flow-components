@@ -1,7 +1,10 @@
 package com.vaadin.flow.component.charts.export;
 
-import com.vaadin.flow.server.frontend.FrontendToolsLocator;
-import com.vaadin.flow.server.frontend.FrontendUtils;
+import java.io.File;
+import java.nio.file.Path;
+import java.util.Optional;
+import java.util.regex.Pattern;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -9,9 +12,8 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-import java.io.File;
-import java.util.Optional;
-import java.util.regex.Pattern;
+import com.vaadin.flow.server.frontend.FrontendToolsLocator;
+import com.vaadin.flow.server.frontend.FrontendUtils;
 
 public class NodeRunnerTest {
 
@@ -20,10 +22,11 @@ public class NodeRunnerTest {
 
     @Before
     public void setup() {
-        String vaadinHome = FrontendUtils.getVaadinHomeDirectory()
-                .getAbsolutePath();
-        vaadinHomeNodeRegexp = Pattern
-                .compile(vaadinHome + "/node/node(.exe)?");
+        Path vaadinHome = FrontendUtils.getVaadinHomeDirectory().toPath();
+        var vaadinNodeHome = vaadinHome.resolve("node/node").toAbsolutePath();
+        var nodeExecutableRegex = Pattern.quote(vaadinNodeHome.toString())
+                + "(.exe)?";
+        vaadinHomeNodeRegexp = Pattern.compile(nodeExecutableRegex);
         matchesVaadinHomeNode = file -> vaadinHomeNodeRegexp
                 .matcher(file.getAbsolutePath()).matches();
     }
@@ -33,9 +36,11 @@ public class NodeRunnerTest {
         FrontendToolsLocator frontendToolsLocatorMock = Mockito
                 .mock(FrontendToolsLocator.class);
         // Mock being able to locate global node installation
+        Path mockNodeInstallationPath = Path.of("/usr/local/bin/node")
+                .toAbsolutePath();
         Mockito.when(frontendToolsLocatorMock
                 .tryLocateTool(Mockito.matches("node(.exe)?")))
-                .thenReturn(Optional.of(new File("/usr/local/bin/node")));
+                .thenReturn(Optional.of(mockNodeInstallationPath.toFile()));
         // Mock being able to locate node installation in Vaadin home
         Mockito.when(frontendToolsLocatorMock
                 .verifyTool(ArgumentMatchers.argThat(matchesVaadinHomeNode)))
@@ -44,7 +49,8 @@ public class NodeRunnerTest {
         NodeRunner nodeRunner = new NodeRunner(frontendToolsLocatorMock);
         String nodeExecutable = nodeRunner.findNodeExecutable();
 
-        Assert.assertEquals("/usr/local/bin/node", nodeExecutable);
+        Assert.assertEquals(mockNodeInstallationPath.toString(),
+                nodeExecutable);
     }
 
     @Test()

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -35,6 +35,7 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasHelper;
+import com.vaadin.flow.component.HasPlaceholder;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
@@ -82,9 +83,9 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-date-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha11")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-alpha3")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/date-picker", version = "24.3.0-alpha11")
+@NpmPackage(value = "@vaadin/date-picker", version = "24.4.0-alpha3")
 @JsModule("@vaadin/date-picker/src/vaadin-date-picker.js")
 @JsModule("./datepickerConnector.js")
 @NpmPackage(value = "date-fns", version = "2.29.3")
@@ -94,7 +95,7 @@ public class DatePicker
         HasAutoOpen, HasClearButton, HasClientValidation, HasHelper,
         InputField<AbstractField.ComponentValueChangeEvent<DatePicker, LocalDate>, LocalDate>,
         HasOverlayClassName, HasPrefix, HasThemeVariant<DatePickerVariant>,
-        HasValidationProperties, HasValidator<LocalDate> {
+        HasValidationProperties, HasValidator<LocalDate>, HasPlaceholder {
 
     private DatePickerI18n i18n;
 
@@ -635,28 +636,6 @@ public class DatePicker
      */
     public String getLabel() {
         return getElement().getProperty("label");
-    }
-
-    /**
-     * Sets the placeholder text that should be displayed in the input element,
-     * when the user has not entered a value.
-     *
-     * @param placeholder
-     *            the placeholder text
-     */
-    public void setPlaceholder(String placeholder) {
-        getElement().setProperty("placeholder",
-                placeholder == null ? "" : placeholder);
-    }
-
-    /**
-     * The placeholder text that should be displayed in the input element, when
-     * the user has not entered a value.
-     *
-     * @return the {@code placeholder} property of the datepicker
-     */
-    public String getPlaceholder() {
-        return getElement().getProperty("placeholder");
     }
 
     /**

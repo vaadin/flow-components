@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -96,6 +96,7 @@ import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.Rendering;
 import com.vaadin.flow.data.selection.MultiSelect;
@@ -203,16 +204,16 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha11")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-alpha3")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/grid", version = "24.3.0-alpha11")
-@NpmPackage(value = "@vaadin/tooltip", version = "24.3.0-alpha11")
+@NpmPackage(value = "@vaadin/grid", version = "24.4.0-alpha3")
+@NpmPackage(value = "@vaadin/tooltip", version = "24.4.0-alpha3")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
 @JsModule("@vaadin/checkbox/src/vaadin-checkbox.js")
 @JsModule("./flow-component-renderer.js")
-@JsModule("./gridConnector.js")
+@JsModule("./gridConnector.ts")
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
 public class Grid<T> extends Component implements HasStyle, HasSize,
         Focusable<Grid<T>>, SortNotifier<Grid<T>, GridSortOrder<T>>, HasTheme,
@@ -431,7 +432,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-column")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha11")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-alpha3")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class Column<T> extends AbstractColumn<Column<T>> {
 
@@ -2705,7 +2706,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                             + pageSize);
         }
         getElement().setProperty("pageSize", pageSize);
-        getElement().callJsFunction("$connector.reset");
+        getElement()
+                .executeJs("if (this.$connector) { this.$connector.reset() }");
         getDataCommunicator().setPageSize(pageSize);
         setRequestedRange(0, pageSize);
         getDataCommunicator().reset();
@@ -2756,8 +2758,19 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     protected void updateSelectionModeOnClient() {
-        getElement().callJsFunction("$connector.setSelectionMode",
+        callJsFunctionBeforeClientResponse("$connector.setSelectionMode",
                 selectionMode.name());
+    }
+
+    /**
+     * Returns the selection mode for this grid.
+     *
+     * @return the selection mode, not null
+     */
+    public SelectionMode getSelectionMode() {
+        assert selectionMode != null : "No selection mode set by "
+                + getClass().getName() + " constructor";
+        return selectionMode;
     }
 
     /**
@@ -2900,21 +2913,22 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                     : null;
             jsonArray.set(jsonArray.length(), jsonObject);
         }
-        final SerializableRunnable jsFunctionCall = () -> getElement()
-                .callJsFunction("$connector." + function, jsonArray, false);
-        if (getElement().getNode().isAttached()) {
-            jsFunctionCall.run();
-        } else {
-            getElement().getNode()
-                    .runWhenAttached(ui -> ui.beforeClientResponse(this,
-                            context -> jsFunctionCall.run()));
-        }
+
+        callJsFunctionBeforeClientResponse("$connector." + function, jsonArray,
+                false);
     }
 
     private JsonObject generateJsonForSelection(T item) {
         JsonObject json = Json.createObject();
         json.put("key", getDataCommunicator().getKeyMapper().key(item));
         return json;
+    }
+
+    private void callJsFunctionBeforeClientResponse(String functionName,
+            Serializable... arguments) {
+        getElement().getNode().runWhenAttached(
+                ui -> ui.beforeClientResponse(this, context -> getElement()
+                        .callJsFunction(functionName, arguments)));
     }
 
     /**
@@ -3455,6 +3469,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         updateClientSideSorterIndicators(sortOrder);
+        updateSelectionModeOnClient();
         if (getDataProvider() != null) {
             handleDataProviderChange(getDataProvider());
         }
@@ -3552,7 +3567,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
 
         if (getElement().getNode().isAttached()) {
-            getElement().callJsFunction("$connector.setSorterDirections",
+            callJsFunctionBeforeClientResponse("$connector.setSorterDirections",
                     directions);
         }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -27,6 +27,8 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.logging.Level;
 
 @TestPath("vaadin-date-picker/date-picker-custom-format")
@@ -270,6 +272,24 @@ public class DatePickerCustomFormatIT extends AbstractComponentIT {
         submitValue(id, "foobar");
 
         Assert.assertEquals("", output.getText());
+    }
+
+    @Test
+    public void pickerWithOldReferenceDateAndShortFormat_openAndCloseOverlay_yearIsRetained() {
+        String id = DatePickerCustomFormatPage.OLD_REFERENCE_DATE_WITH_SHORT_FORMAT_DATE_PICKER;
+        TestBenchElement output = $("span").id(
+                DatePickerCustomFormatPage.OLD_REFERENCE_DATE_WITH_SHORT_FORMAT_OUTPUT);
+
+        String todayString = LocalDate.now()
+                .format(DateTimeFormatter.ISO_LOCAL_DATE);
+        Assert.assertEquals(todayString, output.getText());
+
+        $(DatePickerElement.class).id(id).click();
+        waitForElementPresent(By.tagName("vaadin-date-picker-overlay"));
+        $(DatePickerElement.class).id(id).sendKeys(Keys.ESCAPE);
+        waitForElementNotPresent(By.tagName("vaadin-date-picker-overlay"));
+
+        Assert.assertEquals(todayString, output.getText());
     }
 
     private void submitValue(String id, String value) {

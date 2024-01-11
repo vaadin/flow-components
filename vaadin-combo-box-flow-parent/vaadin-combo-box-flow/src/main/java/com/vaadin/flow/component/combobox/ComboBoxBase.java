@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -26,6 +26,7 @@ import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasAriaLabel;
+import com.vaadin.flow.component.HasPlaceholder;
 import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasOverlayClassName;
@@ -44,8 +45,6 @@ import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasValidator;
-import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
-import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
@@ -91,7 +90,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
         InputField<AbstractField.ComponentValueChangeEvent<TComponent, TValue>, TValue>,
         HasLazyDataView<TItem, String, ComboBoxLazyDataView<TItem>>,
         HasListDataView<TItem, ComboBoxListDataView<TItem>>, HasTheme,
-        HasValidationProperties, HasValidator<TValue> {
+        HasValidationProperties, HasValidator<TValue>, HasPlaceholder {
 
     /**
      * Registration for custom value listeners that disallows entering custom
@@ -352,28 +351,6 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      */
     public void setRequired(boolean required) {
         super.setRequiredIndicatorVisible(required);
-    }
-
-    /**
-     * The placeholder text that should be displayed in the input element, when
-     * the user has not entered a value
-     *
-     * @return the placeholder text
-     */
-    public String getPlaceholder() {
-        return getElement().getProperty("placeholder");
-    }
-
-    /**
-     * Sets the placeholder text that should be displayed in the input element,
-     * when the user has not entered a value
-     *
-     * @param placeholder
-     *            the placeholder text
-     */
-    public void setPlaceholder(String placeholder) {
-        getElement().setProperty("placeholder",
-                placeholder == null ? "" : placeholder);
     }
 
     @Override

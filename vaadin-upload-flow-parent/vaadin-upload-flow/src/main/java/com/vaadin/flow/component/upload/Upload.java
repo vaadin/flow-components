@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -22,14 +22,11 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
@@ -40,7 +37,6 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.dom.DomEventListener;
-import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.server.NoInputStreamException;
@@ -63,9 +59,9 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-upload")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha11")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-alpha3")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/upload", version = "24.3.0-alpha11")
+@NpmPackage(value = "@vaadin/upload", version = "24.4.0-alpha3")
 @JsModule("@vaadin/upload/src/vaadin-upload.js")
 public class Upload extends Component implements HasSize, HasStyle {
 
@@ -108,11 +104,21 @@ public class Upload extends Component implements HasSize, HasStyle {
      */
     public Upload() {
         final String eventDetailError = "event.detail.error";
+        final String eventDetailFileName = "event.detail.file.name";
+
         getElement().addEventListener("file-reject", event -> {
             String detailError = event.getEventData()
                     .getString(eventDetailError);
-            fireEvent(new FileRejectedEvent(this, detailError));
-        }).addEventData(eventDetailError);
+            String detailFileName = event.getEventData()
+                    .getString(eventDetailFileName);
+            fireEvent(new FileRejectedEvent(this, detailError, detailFileName));
+        }).addEventData(eventDetailError).addEventData(eventDetailFileName);
+
+        getElement().addEventListener("file-remove", event -> {
+            String detailFileName = event.getEventData()
+                    .getString(eventDetailFileName);
+            fireEvent(new FileRemovedEvent(this, detailFileName));
+        }).addEventData(eventDetailFileName);
 
         // If client aborts upload mark upload as interrupted on server also
         getElement().addEventListener("upload-abort",
@@ -285,13 +291,21 @@ public class Upload extends Component implements HasSize, HasStyle {
     }
 
     /**
-     * Specify the types of files that the server accepts. Syntax: a MIME type
-     * pattern (wildcards are allowed) or file extensions. Notice that MIME
-     * types are widely supported, while file extensions are only implemented in
-     * certain browsers, so it should be avoided.
+     * Specify the types of files that the Upload web-component accepts. Syntax:
+     * a MIME type pattern (wildcards are allowed) or file extensions. Notice
+     * that MIME types are widely supported, while file extensions are only
+     * implemented in certain browsers, so it should be avoided.
      * <p>
      * Example: <code>"video/*","image/tiff"</code> or
      * <code>".pdf","audio/mp3"</code>
+     * <p>
+     * File format restrictions are checked only on the client side (browser).
+     * They indicate the hints for users as to what file types to upload. Using
+     * this method won’t restrict the uploaded file’s format on the server side.
+     * If required, it’s the responsibility of the application developer to
+     * implement application-specific restrictions on the server side in one or
+     * more of the Upload component’s event listeners (e.g., in
+     * {@link #addSucceededListener}).
      *
      * @param acceptedFileTypes
      *            the allowed file types to be uploaded, or <code>null</code> to
@@ -486,9 +500,13 @@ public class Upload extends Component implements HasSize, HasStyle {
      *            bytes received so far
      * @param contentLength
      *            actual size of the file being uploaded, if known
+     * @param contentLength
+     *            name of the file being uploaded
      */
-    protected void fireUpdateProgress(long totalBytes, long contentLength) {
-        fireEvent(new ProgressUpdateEvent(this, totalBytes, contentLength));
+    protected void fireUpdateProgress(long totalBytes, long contentLength,
+            String fileName) {
+        fireEvent(new ProgressUpdateEvent(this, totalBytes, contentLength,
+                fileName));
     }
 
     /**
@@ -563,6 +581,18 @@ public class Upload extends Component implements HasSize, HasStyle {
     public Registration addFileRejectedListener(
             ComponentEventListener<FileRejectedEvent> listener) {
         return addListener(FileRejectedEvent.class, listener);
+    }
+
+    /**
+     * Adds a listener for events fired when a file is removed.
+     *
+     * @param listener
+     *            the listener
+     * @return a {@link Registration} for removing the event listener
+     */
+    public Registration addFileRemovedListener(
+            ComponentEventListener<FileRemovedEvent> listener) {
+        return addListener(FileRemovedEvent.class, listener);
     }
 
     /**
@@ -729,7 +759,7 @@ public class Upload extends Component implements HasSize, HasStyle {
         @Override
         public void onProgress(StreamVariable.StreamingProgressEvent event) {
             upload.fireUpdateProgress(event.getBytesReceived(),
-                    event.getContentLength());
+                    event.getContentLength(), event.getFileName());
         }
 
         @Override
