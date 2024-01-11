@@ -177,28 +177,6 @@ export function setChildItems(gridConnector: GridConnector, parent: Item, items:
   gridConnector.confirmParent(0, parent.key, items.length);
 }
 
-const lastRootItemsRange = new WeakMap();
-
-// /**
-//  * Sets the given range of the root level items for the grid connector,
-//  * clearing out-of-range items from the cache.
-//  */
-// export function setRootItemsRange(gridConnector: GridConnector, items: Item[], start: number, count: number): void {
-//   gridConnector.updateSize(items.length);
-//   gridConnector.set(start, items.slice(start, start + count), undefined);
-//   gridConnector.confirm(start);
-// };
-
-// const lastChildItemsRange = new WeakMap();
-
-// /**
-//  * Sets the given range of the child items for the grid connector,
-//  * clearing out-of-range items from the cache.
-//  */
-// export function setChildItemsRange(gridConnector: GridConnector, parent: Item, items: Item[], start: number, count: number): {
-
-// }
-
 /**
  * Expands the given items.
  */
