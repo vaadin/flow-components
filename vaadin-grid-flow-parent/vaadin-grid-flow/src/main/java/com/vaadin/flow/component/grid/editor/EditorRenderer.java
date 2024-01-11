@@ -169,6 +169,7 @@ public class EditorRenderer<T> extends Renderer<T> implements DataGenerator<T> {
             // Patch the container's renderer function to handle the editor
             "this.renderer = (root, container, model) => {" +
                 "let editing = model.item._editing;" +
+
                 // In some cases such as filtering, multiple rows can have the same item.
                 // In order to prevent the editor to be rendered in one of the invisible rows,
                 // the cell is matched to the visible rows.
