@@ -72,7 +72,7 @@ describe('grid connector - tree data range', () => {
     processParentRequestedRanges();
   });
 
-  it('should request correct range when scrolling (start <-> end)', async () => {
+  it('should request correct range when scrolling (start -> end -> start)', async () => {
     grid.scrollToIndex(0, childSize - 1);
     await aTimeout(GRID_CONNECTOR_PARENT_REQUEST_DELAY);
     expectParentRequestedRanges([
@@ -124,7 +124,7 @@ describe('grid connector - tree data range', () => {
     ]);
   });
 
-  it('should request correct ranges when scrolling fast (start <-> end)', async () => {
+  it('should request correct ranges when scrolling fast (start -> end -> start)', async () => {
     grid.scrollToIndex(0, childSize - 1);
     grid.scrollToIndex(0, 0);
     await aTimeout(GRID_CONNECTOR_PARENT_REQUEST_DELAY);

@@ -56,7 +56,7 @@ describe('grid connector - data range', () => {
     processRequestedRange();
   });
 
-  it('should request correct ranges when scrolling (start <-> end)', async () => {
+  it('should request correct ranges when scrolling (start -> end -> start)', async () => {
     grid.scrollToIndex(ROOT_SIZE - 1);
     await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
     expectRequestedRange([ROOT_SIZE - PAGE_SIZE, PAGE_SIZE * 2]);
@@ -111,7 +111,7 @@ describe('grid connector - data range', () => {
     expectRequestedRange([ROOT_SIZE - PAGE_SIZE, PAGE_SIZE * 2]);
   });
 
-  it('should request correct ranges when scrolling fast (start <-> end)', async () => {
+  it('should request correct ranges when scrolling fast (start -> end -> start)', async () => {
     grid.scrollToIndex(ROOT_SIZE - 1);
     grid.scrollToIndex(0);
     await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
@@ -123,7 +123,7 @@ describe('grid connector - data range', () => {
     expectRequestedRange([0, PAGE_SIZE]);
   });
 
-  it('should request correct range when size descreases after scrolling fast (start <-> end)', async () => {
+  it('should request correct range when size descreases after scrolling fast (start -> end -> start)', async () => {
     grid.scrollToIndex(ROOT_SIZE - 1);
     grid.scrollToIndex(0);
     const newSize = ROOT_SIZE / 2;
