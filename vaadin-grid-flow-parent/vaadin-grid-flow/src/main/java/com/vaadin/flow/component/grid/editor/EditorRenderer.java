@@ -168,8 +168,19 @@ public class EditorRenderer<T> extends Renderer<T> implements DataGenerator<T> {
         container.executeJs("const originalRender = this.renderer;" +
             // Patch the container's renderer function to handle the editor
             "this.renderer = (root, container, model) => {" +
-                "const editingChanged = root.__editing !== model.item._editing;" +
-                "root.__editing = model.item._editing;" +
+                "let editing = model.item._editing;" +
+                // In some cases such as filtering, multiple rows can have the same item.
+                // In order to prevent the editor to be rendered in one of the invisible rows,
+                // the cell is matched to the visible rows.
+                "if (editing) {" +
+                    "const cellContentSlotName = root.getAttribute('slot');" +
+                    "const renderedRows = root.parentElement._getRenderedRows();" +
+                    "const isRowVisible = renderedRows.some((row) => [...row.children].some((cell) => cell.firstChild.name === cellContentSlotName));" +
+                    "editing = isRowVisible;" +
+                "}" +
+
+                "const editingChanged = root.__editing !== editing;" +
+                "root.__editing = editing;" +
 
                 // If the editing state changed, the root needs to be cleared
                 "if (editingChanged) {" +
