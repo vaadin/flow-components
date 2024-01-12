@@ -62,7 +62,14 @@ public class GridProDetachAttachPage extends Div {
                 });
         addColumnButton.setId("add-column");
 
-        add(grid, attachDetachButton, addColumnButton);
+        NativeButton attachAndDetachButton = new NativeButton(
+                "Attach and Detach", event -> {
+                    add(grid);
+                    remove(grid);
+                });
+        attachAndDetachButton.setId("attach-and-detach");
+
+        add(grid, attachDetachButton, addColumnButton, attachAndDetachButton);
     }
 
     public class SamplePerson {
