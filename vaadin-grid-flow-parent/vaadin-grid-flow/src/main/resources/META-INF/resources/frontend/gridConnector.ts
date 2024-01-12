@@ -215,24 +215,40 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
           return false;
         });
 
+        grid.$connector.debounceRootRequest = tryCatchWrapper(function (page) {
+          const delay = grid._hasData ? rootRequestDelay : 0;
+
+          rootRequestDebouncer = Debouncer.debounce(rootRequestDebouncer, timeOut.after(delay), () => {
+            grid.$connector.fetchPage(
+              (firstIndex, size) => grid.$server.setRequestedRange(firstIndex, size),
+              page,
+              root
+            );
+          });
+        });
+
         grid.$connector.flushParentRequests = tryCatchWrapper(function () {
-          let pendingFetches = parentRequestQueue.splice(0, parentRequestBatchMaxSize);
+          const pendingFetches = [];
+
+          parentRequestQueue.splice(0, parentRequestBatchMaxSize).forEach(({ parentKey, page }) => {
+            grid.$connector.fetchPage(
+              (firstIndex, size) => pendingFetches.push({ parentKey, firstIndex, size }),
+              page,
+              parentKey
+            );
+          });
 
           if (pendingFetches.length) {
             grid.$server.setParentRequestedRanges(pendingFetches);
-            return true;
           }
-          return false;
         });
 
-        grid.$connector.beforeParentRequest = tryCatchWrapper(function (firstIndex, size, parentKey) {
-          // add request in queue
-          parentRequestQueue.push({
-            firstIndex: firstIndex,
-            size: size,
-            parentKey: parentKey
-          });
-
+        grid.$connector.debounceParentRequest = tryCatchWrapper(function (parentKey, page) {
+          // Remove any pending requests for the same parentKey.
+          parentRequestQueue = parentRequestQueue.filter((request) => request.parentKey !== parentKey);
+          // Add the new request to the queue.
+          parentRequestQueue.push({ parentKey, page });
+          // Debounce the request to avoid sending multiple requests for the same parentKey.
           parentRequestDebouncer = Debouncer.debounce(parentRequestDebouncer, timeOut.after(parentRequestDelay), () => {
             while (parentRequestQueue.length) {
               grid.$connector.flushParentRequests();
@@ -314,11 +330,7 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
               // Resolve the callback from cache
               callback(cache[parentUniqueKey][page], cache[parentUniqueKey].size);
             } else {
-              grid.$connector.fetchPage(
-                (firstIndex, size) => grid.$connector.beforeParentRequest(firstIndex, size, params.parentItem.key),
-                page,
-                parentUniqueKey
-              );
+              grid.$connector.debounceParentRequest(parentUniqueKey, page);
             }
           } else {
             // size is controlled by the server (data communicator), so if the
@@ -336,17 +348,7 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
             if (cache[root]?.[page]) {
               callback(cache[root][page]);
             } else {
-              rootRequestDebouncer = Debouncer.debounce(
-                rootRequestDebouncer,
-                timeOut.after(grid._hasData ? rootRequestDelay : 0),
-                () => {
-                  grid.$connector.fetchPage(
-                    (firstIndex, size) => grid.$server.setRequestedRange(firstIndex, size),
-                    page,
-                    root
-                  );
-                }
-              );
+              grid.$connector.debounceRootRequest(page);
             }
           }
         });
