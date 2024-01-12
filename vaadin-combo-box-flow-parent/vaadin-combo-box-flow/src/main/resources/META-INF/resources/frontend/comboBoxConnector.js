@@ -17,7 +17,7 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
 
         comboBox.$connector = {};
 
-        const dataProviderController = comboBox._dataProviderController;
+        const dataProviderController = (comboBox.$.comboBox || comboBox)._dataProviderController;
 
         // holds pageIndex -> callback pairs of subsequent indexes (current active range)
         const pageCallbacks = {};
