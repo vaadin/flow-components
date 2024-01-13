@@ -456,7 +456,6 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
             throw 'Attempted to call itemsUpdated with an invalid value: ' + JSON.stringify(items);
           }
           let detailsOpenedItems = Array.from(grid.detailsOpenedItems);
-          let updatedSelectedItem = false;
           for (let i = 0; i < items.length; ++i) {
             const item = items[i];
             if (!item) {
@@ -469,18 +468,8 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
             } else if (grid._getItemIndexInArray(item, detailsOpenedItems) >= 0) {
               detailsOpenedItems.splice(grid._getItemIndexInArray(item, detailsOpenedItems), 1);
             }
-            if (selectedKeys[item.key]) {
-              selectedKeys[item.key] = item;
-              item.selected = true;
-              updatedSelectedItem = true;
-            }
           }
           grid.detailsOpenedItems = detailsOpenedItems;
-          if (updatedSelectedItem) {
-            // Replace the objects in the grid.selectedItems array without replacing the array
-            // itself in order to avoid an unnecessary re-render of the grid.
-            grid.selectedItems.splice(0, grid.selectedItems.length, ...Object.values(selectedKeys));
-          }
         };
 
         /**
