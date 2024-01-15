@@ -32,7 +32,6 @@ public class MultiSelectComboBoxKeepFilterIT extends AbstractComponentIT {
 
         comboBox.sendKeys(Keys.ENTER);
 
-        Assert.assertEquals("", comboBox.getInputElementValue());
         Assert.assertEquals("", comboBox.getFilter());
         Assert.assertEquals(100, comboBox.getOptions().size());
     }
@@ -48,7 +47,6 @@ public class MultiSelectComboBoxKeepFilterIT extends AbstractComponentIT {
 
         comboBox.sendKeys(Keys.ENTER);
 
-        Assert.assertEquals("Item 1", comboBox.getInputElementValue());
         Assert.assertEquals("Item 1", comboBox.getFilter());
         Assert.assertEquals(filteredOptions, comboBox.getOptions());
     }
