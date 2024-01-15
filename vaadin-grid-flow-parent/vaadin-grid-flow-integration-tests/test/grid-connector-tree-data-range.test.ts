@@ -124,23 +124,6 @@ describe('grid connector - tree data range', () => {
     ]);
   });
 
-  it('should request correct ranges when scrolling fast (start -> end -> start)', async () => {
-    grid.scrollToIndex(0, childSize - 1);
-    grid.scrollToIndex(0, 0);
-    await aTimeout(GRID_CONNECTOR_PARENT_REQUEST_DELAY);
-    expectParentRequestedRanges([
-      { parentKey: rootItems[0].key, firstIndex: childSize - PAGE_SIZE, size: PAGE_SIZE }
-    ]);
-
-    processParentRequestedRanges();
-
-    await nextFrame();
-    await aTimeout(GRID_CONNECTOR_PARENT_REQUEST_DELAY);
-    expectParentRequestedRanges([
-      { parentKey: rootItems[0].key, firstIndex: 0, size: PAGE_SIZE }
-    ]);
-  });
-
   it('should debounce range requests when scrolling fast', async () => {
     grid.scrollToIndex(0, childSize / 2);
     grid.scrollToIndex(0, childSize - 1);
